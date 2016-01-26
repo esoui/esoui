@@ -1,0 +1,53 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapInfoMenuBar" virtual="true" inherits="ZO_MenuBarTemplate">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local barData =
+                {
+                    buttonPadding = 20,
+                    normalSize = 51,
+                    downSize = 64,
+                    animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+                    buttonTemplate = "ZO_MenuBarTooltipButton",
+                }
+                ZO_MenuBar_SetData(self, barData)
+            </OnInitialized>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapInfoFootPrintBackground" layer="BACKGROUND" allowBringToTop="false" hidden="true" mouseEnabled="true">
+            <Dimensions x="350" y="750" />
+            <Anchor point="RIGHT" offsetY="20"/>
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds">
+                    <Dimensions x="1024" y="1024" />
+                    <Anchor point="TOPLEFT" offsetX="-75" offsetY="-75" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_WorldMapInfoContent" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_WorldMapInfo" relativePoint="TOPLEFT" offsetY="95"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMapInfo" relativePoint="BOTTOMRIGHT" offsetX="-20"/>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_WorldMapInfo" hidden="true">
+            <Dimensions x="350" y="690" />
+            <Anchor point="RIGHT" offsetY="-2" />
+            <Controls>
+                <Control name="$(parent)MenuBar" inherits="ZO_WorldMapInfoMenuBar">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider" excludeFromResizeToFitExtents="true">
+                            <Dimensions x="472"/>
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="14" />
+                        </Texture>
+                        <Label name="$(parent)Label" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetY="25" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

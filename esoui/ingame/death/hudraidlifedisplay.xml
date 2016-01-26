@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_HUDRaidLife" resizeToFitDescendents="true">
+            <OnInitialized>
+                ZO_HUDRaidLife_OnInitialized(self)
+            </OnInitialized>
+            <Anchor point="LEFT" relativeTo="ZO_ActionBar1" relativePoint="RIGHT" offsetX="5"/>
+            <Controls>
+                <Control name="$(parent)Display" inherits="ZO_RaidLifeDisplay">
+                    <Anchor point="LEFT" offsetX="20" offsetY="-10"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

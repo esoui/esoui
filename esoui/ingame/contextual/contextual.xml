@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ContextualActionBar" mouseEnabled="true" hidden="false">
+            <Anchor point="TOPLEFT" relativeTo="ZO_ActionBar1" offsetX="-155" offsetY="-25" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_ActionBar1" offsetX="40" />
+
+            <OnInitialized>
+                ZO_ContextualActionBar_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                ZO_ContextualActionBar_OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnUpdate>
+                ZO_ContextualActionBar_OnUpdate(self)
+            </OnUpdate>
+        </Control>
+    </Controls>
+</GuiXml>

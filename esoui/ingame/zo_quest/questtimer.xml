@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_QuestTimer_Keyboard_Template" virtual="true">
+            <Dimensions x="230" y="20" />
+            <Controls>
+                <Label name="$(parent)Time" maxLineCount="1" font="ZoFontGameOutline">
+                    <Anchor point="RIGHT" offsetX="-3"/>
+                </Label>
+
+                <Label name="$(parent)Label" maxLineCount="1" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" modifyTextType="NONE" font="ZoFontGameOutline">
+                    <Anchor point="LEFT" offsetX="3"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_QuestTimer_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" font="ZoFontGamepadBold27">
+                    <Dimensions x="450"/>
+                    <Anchor point="RIGHT" offsetX="-4"/>
+                </Label>
+
+                <Label name="$(parent)Time" maxLineCount="1" font="ZoFontGamepad42">
+                    <Dimensions y="60" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_QuestTimerTemplate" mouseEnabled="true" virtual="true">
+            <Dimensions x="230" y="20"/>
+            <OnMouseUp>
+                if upInside then
+                    ZO_QuestTimer_OnMouseUp(self)
+                end
+            </OnMouseUp>
+            
+            <OnUpdate>
+                ZO_QuestTimer_OnUpdate(self, time)
+            </OnUpdate>
+            
+            <Controls>
+                <Label name="$(parent)Time" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+                <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

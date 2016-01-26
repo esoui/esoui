@@ -1,0 +1,65 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_KeybindStripButtonTemplate" inherits="ZO_KeybindButtonBehavior" virtual="true">
+            <DimensionConstraints minY="55" maxY="55" />
+            <ResizeToFitPadding width="40"/>
+            <OnInitialized>
+                ZO_KeybindButtonTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Anchor point="RIGHT" offsetX="-20"/>
+                </Label>
+
+                <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" inherits="ZO_LargeKeyMarkupLabel">
+                    <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_KeybindStripRightScrollKeybind" inherits="ZO_KeybindButton" virtual="true"/>
+      
+        <Control name="ZO_KeybindStripLeftSlideKeybind" inherits="ZO_KeybindButton" virtual="true" />
+
+        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM">
+            <Dimensions y="55" />
+            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" />
+
+            <OnInitialized>
+                ZO_KeybindStrip_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)CenterParent" resizeToFitDescendents="true">
+                    <Anchor point="CENTER" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_KeybindStripMungeBackground" layer="BACKGROUND" hidden="true">
+            <Dimensions y="55" />
+            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" />
+            <Controls>
+                <Texture name="$(parent)Texture" inherits="ZO_BottomBarBG" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_KeybindStripGamepadBackground" hidden="true">
+            <Dimensions y="110" />
+            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" />
+            <Controls>
+                <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Windows/Gamepad/gp_hintbar.dds" >
+                    <Dimensions y="128" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+
+                    <TextureCoords left="0" right="0.9375" top="0" bottom="1" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

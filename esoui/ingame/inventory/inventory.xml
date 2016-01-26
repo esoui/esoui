@@ -1,0 +1,358 @@
+<GuiXml>
+    <Controls>
+        <EditBox name="ZO_InventorySearchBox" font="ZoFontWinT1" inherits="ZO_DefaultEdit ZO_EditDefaultText" virtual="true">
+            <OnInitialized>
+                ZO_EditDefaultText_Initialize(self, GetString(SI_ITEM_FILTER_BY_TEXT))
+            </OnInitialized>
+
+            <OnEscape>
+                ZO_PlayerInventory_EndSearch(self)
+            </OnEscape>
+
+            <OnMouseDown>
+                ZO_PlayerInventory_BeginSearch(self)
+            </OnMouseDown>
+
+            <OnTextChanged>
+                ZO_EditDefaultText_OnTextChanged(self)
+                ZO_PlayerInventory_OnSearchTextChanged(self)
+            </OnTextChanged>
+
+            <OnEnter>
+                ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
+            </OnEnter>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
+                    <AnchorFill />
+                </Backdrop>
+            </Controls>
+        </EditBox>  
+
+        <Control name="ZO_InventoryFilterTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_PlayerInventory_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PlayerInventory_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/Icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
+                </Texture>
+            </Controls>
+        </Control>
+       
+        <TopLevelControl name="ZO_PlayerInventory" mouseEnabled="true" hidden="true" allowBringToTop="false">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <Controls>
+                <!-- not dead, but dreaming... -->
+                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                    <Dimensions x="240"/>
+                    <Anchor point="TOPRIGHT" offsetX="-26" offsetY="68" />
+                </EditBox>
+
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
+                            <Dimensions x="16" y="32" />
+                            <Anchor point="LEFT" offsetX="8"/>
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeaderIcon(self, 
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds", 
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds", 
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds", 
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds", 
+                                    "age")
+
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="241" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)StatValue" inherits="ZO_SortHeader"> <!-- This header changes name depending on what filter is active (currently power/armor values) -->
+                            <Dimensions x="82" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")                                
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <!-- Item Lists -->
+                <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Controls>
+                        <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
+                            <OnInitialized>
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BACKPACK, 70)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quest" inherits="ZO_ScrollList" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backpack" />
+                </Control>
+                
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PlayerBankMenu" inherits="ZO_SceneMenu" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550"/>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_PlayerBank" hidden="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <Controls>
+                <!-- not dead, but dreaming... -->
+                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
+                    <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
+                </EditBox>
+
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="280" y="20" />
+                            <Anchor point="LEFT" offsetX="73" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)StatValue" inherits="ZO_SortHeader">
+                            <!-- This header changes name depending on what filter is active (currently power/armor values) -->
+                            <Dimensions x="82" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <!-- Item Lists -->
+                <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Controls>
+                        <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
+                            <OnInitialized>
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BANK, 70)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PlayerBankDepositWithdrawGold" inherits="ZO_CustomDialogBase">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" font="ZoFontGame"/>
+
+                <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
+                    <Dimensions x="115"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="18" />
+                </Backdrop>
+
+                <Label name="$(parent)CarriedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DepositWithdrawCurrency" relativePoint="BOTTOMRIGHT" offsetX="18" offsetY="28" />
+                </Label>
+
+                <Label name="$(parent)BankedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CarriedCurrency" relativePoint="BOTTOMRIGHT" offsetY="16" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)DepositWithdraw" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PlayerBankDepositWithdrawCurrency" inherits="ZO_CustomDialogBase">
+            <Controls>
+                <Button name="$(parent)GoldButton" mouseOverBlendMode="ADD" inherits="ZO_RadioButton">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="15"/>
+                    <Textures
+                        normal="EsoUI/Art/Bank/bank_tabIcon_gold_up.dds"
+                        pressed="EsoUI/Art/Bank/bank_tabIcon_gold_down.dds"
+                        mouseOver="EsoUI/Art/Bank/bank_tabIcon_gold_over.dds"
+                    />
+                </Button>
+                <Button name="$(parent)TelvarButton" mouseOverBlendMode="ADD" inherits="ZO_RadioButton">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)GoldButton" relativePoint="LEFT" offsetX="-5" />
+                    <Textures
+                        normal="EsoUI/Art/Bank/bank_tabIcon_telvar_up.dds"
+                        pressed="EsoUI/Art/Bank/bank_tabIcon_telvar_down.dds"
+                        mouseOver="EsoUI/Art/Bank/bank_tabIcon_telvar_over.dds"
+                    />
+                </Button>
+                <Label name="$(parent)Title" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)TelvarButton" relativePoint="LEFT" offsetX="-180" />
+                </Label>
+
+                <Texture name="$(parent)Divider" excludeFromResizeToFitExtents="false" override="true">
+                    <Dimensions x="550" y="8"/>
+                    <Anchor point="TOP" offsetY="72" />
+                    <TextureCoords left="0.1328125" right="0.8671875" top="0" bottom="1" />
+                </Texture>
+
+                <Label name="$(parent)CarriedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)BankedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Label>
+
+                <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
+                    <Dimensions x="180"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="75"/>
+                </Backdrop>
+
+                <Label name="$(parent)BankingFee" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DepositWithdrawCurrency" relativePoint="BOTTOMRIGHT" offsetX="18" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)MinDeposit" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BankingFee" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)DepositWithdraw" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GuildBankMenu" inherits="ZO_SceneMenu" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550"/>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_GuildBank" hidden="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+            
+            <OnInitialized>
+                ZO_PlayerInventory_Initialize()
+            </OnInitialized>
+            
+            <Controls>
+                <!-- not dead, but dreaming... -->
+                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
+                    <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
+                </EditBox>
+
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="280" y="20" />
+                            <Anchor point="LEFT" offsetX="73" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)StatValue" inherits="ZO_SortHeader">
+                            <!-- This header changes name depending on what filter is active (currently power/armor values) -->
+                            <Dimensions x="82" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <!-- Item Lists -->
+                <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Controls>
+                        <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
+                            <OnInitialized>
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_GUILDBANK, 70)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Loading" inherits="ZO_Loading">
+                            <Anchor point="CENTER"/>
+                            <OnInitialized>
+                                ZO_Loading_Initialize(self, GetString(SI_INVENTORY_RETRIEVING_ITEMS))
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_SelectGuildBankDialog" inherits="ZO_SelectGuildDialogTemplate">
+            <OnInitialized>
+                ZO_SelectGuildBankDialog_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

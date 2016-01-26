@@ -1,0 +1,168 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ProvisionerSlotRow" mouseEnabled="true" virtual="true">
+            <Dimensions x="445" y="54" />
+
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_RIGHT and upInside and self.recipeListIndex and IsChatSystemAvailableForCurrentPlatform() then
+                    ClearMenu()
+
+                    local function AddLink()
+                        local link = ZO_LinkHandler_CreateChatLink(GetRecipeIngredientItemLink, self.recipeListIndex, self.recipeIndex, self.ingredientIndex)
+                        ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
+                    end
+
+                    AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
+
+                    ShowMenu(self)
+                end
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_ThinListBgStrip"/>
+                
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="LEFT" offsetX="10" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontWinH3">
+                    <Anchor point="LEFT"  relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+
+                <Label name="$(parent)Count" font="ZoFontWinH4">
+                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="-25" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Label name="ZO_ProvisionerNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+            <OnInitialized>
+                ZO_SelectableLabel_OnInitialized(self, ZO_ProvisionerRow_GetTextColor)
+            </OnInitialized>
+            
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_SelectableLabel_OnMouseEnter(self)
+                if self.enabled and (not self.meetsLevelReq or not self.meetsQualityReq) then
+                    InitializeTooltip(InformationTooltip, self, RIGHT, -15, 0)
+                    if not self.meetsLevelReq then
+                        InformationTooltip:AddLine(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_IMPROVEMENT, self.data.provisionerLevelReq), "", ZO_ERROR_COLOR:UnpackRGBA())
+                    end
+                    if not self.meetsQualityReq then
+                        InformationTooltip:AddLine(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_QUALITY, self.data.qualityReq), "", ZO_ERROR_COLOR:UnpackRGBA())
+                    end
+                end
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                ZO_SelectableLabel_OnMouseExit(self)
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Label>
+        
+        <TopLevelControl name="ZO_ProvisionerTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Provisioner_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSkillHeader">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)Tabs" inherits="ZO_LabelButtonBar">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-33" offsetY="10" />
+                </Control>
+                    
+                <Control name="$(parent)MenuBarDivider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-10" offsetY="50" />
+                </Control>
+
+                <Button name="$(parent)HaveIngredients" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" offsetX="50" offsetY="16" />
+                </Button>
+
+                <Button name="$(parent)HaveSkills" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)HaveIngredients" relativePoint="RIGHT" offsetX="200" />
+                </Button>
+
+                <Control name="$(parent)NavigationDivider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" relativePoint="BOTTOMLEFT" offsetY="40" />
+                </Control>
+                
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="535" y="290" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationDivider" relativePoint="BOTTOMLEFT" offsetX="40"/>
+
+                    <Controls>
+                        <Label name="$(parent)NoRecipesLabel" font="ZoFontWinH4" horizontalAlignment="CENTER" text="SI_PROVISIONER_NO_MATCHING_RECIPES">
+                            <Anchor point="TOPLEFT" offsetY="25" />
+                            <Anchor point="TOPRIGHT" offsetY="25" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)DetailsDivider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="BOTTOMLEFT" offsetX="-40" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Details">
+                    <Dimensions x="535" y="310" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsDivider" relativePoint="BOTTOMLEFT" />
+
+                    <Controls>
+                        <Label name="$(parent)IngredientsLabel" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_PROVISIONER_INGREDIENTS_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetX="50"/>
+                        </Label>
+
+                        <Texture name="$(parent)InventoryIcon" textureFile="EsoUI/Art/Crafting/crafting_provisioner_inventoryColumn_icon.dds" mouseEnabled="true">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOPRIGHT" offsetX="-50"/>
+
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, RIGHT, 0, 0)
+                                SetTooltipText(InformationTooltip, GetString(SI_PROVISIONER_INGREDIENT_COUNT_TOOLTIP))
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Texture>
+
+                        <Button name="$(parent)IngredientSlot1" inherits="ZO_ProvisionerSlotRow">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)IngredientsLabel" relativePoint="BOTTOMLEFT" offsetY="8" />
+                        </Button>
+
+                        <Button name="$(parent)IngredientSlot2" inherits="ZO_ProvisionerSlotRow">
+                            <Anchor point="TOP" relativeTo="$(parent)IngredientSlot1" relativePoint="BOTTOM" offsetY="2" />
+                        </Button>
+
+                        <Button name="$(parent)IngredientSlot3" inherits="ZO_ProvisionerSlotRow">
+                            <Anchor point="TOP" relativeTo="$(parent)IngredientSlot2" relativePoint="BOTTOM" offsetY="2" />
+                        </Button>
+
+                        <Button name="$(parent)IngredientSlot4" inherits="ZO_ProvisionerSlotRow">
+                            <Anchor point="TOP" relativeTo="$(parent)IngredientSlot3" relativePoint="BOTTOM" offsetY="2" />
+                        </Button>
+
+                        <Button name="$(parent)IngredientSlot5" inherits="ZO_ProvisionerSlotRow">
+                            <Anchor point="TOP" relativeTo="$(parent)IngredientSlot4" relativePoint="BOTTOM" offsetY="2" />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Details" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Details" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

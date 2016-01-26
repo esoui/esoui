@@ -1,0 +1,104 @@
+<GuiXml>
+    <Controls>
+        <Control name="Options_Audio_GeneralSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_AUDIO, SI_AUDIO_OPTIONS_GENERAL)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_MasterVolume" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_GeneralSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_AUDIO_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_MusicEnabled" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_MasterVolume" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_MUSIC_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_MusicVolume" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_MusicEnabled" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_MUSIC_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Audio_SoundEnabled" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_MusicVolume" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_SOUND_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_AmbientVolume" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_SoundEnabled" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_AMBIENT_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Audio_SFXVolume" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_AmbientVolume" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_SFX_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_FootstepsVolume" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_SFXVolume" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_FOOTSTEPS_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Audio_VOVolume" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_FootstepsVolume" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_VO_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Audio_UISoundVolume" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_VOVolume" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_UI_VOLUME)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_OutputSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_UISoundVolume" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_AUDIO, SI_AUDIO_OPTIONS_OUTPUT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Audio_BackgroundAudio" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Audio_OutputSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, AUDIO_SETTING_BACKGROUND_AUDIO)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

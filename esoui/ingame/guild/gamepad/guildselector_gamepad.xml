@@ -1,0 +1,20 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadGuildSelectorTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+            </OnInitialized>
+            <Anchor point="TOPLEFT"/>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <OnInitialized>
+                        ZO_GuildSelector_Gamepad:New(self)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,41 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ConfirmFade">
+            <Animations>
+                <AlphaAnimation duration="600" startAlpha="0" endAlpha="1">
+                    <OnStop>
+                        if(animatingControl:GetAlpha() == 0) then
+                            OverlaySubtitle:SetHidden(false)
+                        end
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <TopLevelControl name="Overlay">
+            <AnchorFill />
+
+            <OnInitialized>
+                InitOverlay(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Subtitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                    <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-54" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-54" />
+                </Label>
+
+                <Label name="$(parent)ConfirmSkipInstruction" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" alpha="0">
+                    <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-54" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-54" />
+
+                    <OnInitialized>
+                        self.fadeTimeline = GetAnimationManager():CreateTimelineFromVirtual("ConfirmFade", self)
+                    </OnInitialized>
+            </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

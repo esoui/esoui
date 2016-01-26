@@ -1,0 +1,96 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_HUDInfamyMeterEasing">
+            <Animations>
+                <CustomAnimation duration="700">
+                    <UpdateFunction>
+                        ZO_HUDInfamyMeter_AnimateMeter(progress)
+                    </UpdateFunction>
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_HUDInfamyMeterKOSIconBounce">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0"   endAlpha="1"/>
+                <ScaleAnimation duration="400" startScale="2.5" endScale="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_HUDInfamyMeter_KeyboardTemplate" virtual="true" >
+            <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
+            <Anchor point="BOTTOMRIGHT" />
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/HUD/infamy_meter-back-grey_px_per.dds" level="1">
+                    <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
+                </Texture>
+                <Cooldown name="$(parent)InfamyBar" textureFile="EsoUI/Art/HUD/infamy_meter-heat_px_per.dds">
+                    <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
+                </Cooldown>
+                <Cooldown name="$(parent)BountyBar" textureFile="EsoUI/Art/HUD/infamy_meter-bounty_px_per.dds">
+                    <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
+                </Cooldown>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/infamy_meter-frame_px_per.dds" tier="MEDIUM" level="4">
+                    <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="RIGHT" />
+                </Texture>
+                <Texture name="$(parent)KOSIcon" textureFile="EsoUI/Art/HUD/infamy_KOS_icon.dds" tier="MEDIUM" level="4" alpha="0">
+                    <Dimensions x="51" y="51" />
+                    <Anchor point="CENTER" offsetX="80" offsetY="14" />
+                </Texture>
+                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="4">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="-25" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HUDInfamyMeter_GamepadTemplate" virtual="true" >
+            <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
+            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-back-grey_px_per.dds" level="1">
+                    <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
+                </Texture>
+                <Cooldown name="$(parent)InfamyBar" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-heat_px_per.dds">
+                    <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
+                </Cooldown>
+                <Cooldown name="$(parent)BountyBar" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-bounty_px_per.dds">
+                    <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
+                </Cooldown>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-frame_px_per.dds" tier="MEDIUM" level="4">
+                    <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
+                    <Anchor point="LEFT" offsetX="INFAMY_METER_WIDTH" />
+                    <Anchor point="RIGHT" offsetX="-INFAMY_METER_WIDTH" />
+                </Texture>
+                <Texture name="$(parent)KOSIcon" textureFile="EsoUI/Art/HUD/infamy_KOS_icon.dds" tier="MEDIUM" level="4" alpha="0">
+                    <Dimensions x="54" y="54" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Background" />
+                </Texture>
+                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="4">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-14" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HUDInfamyMeter" hidden="true" >
+            <OnInitialized>
+                ZO_HUDInfamyMeter_Initialize(self)
+            </OnInitialized>
+            <OnUpdate>
+                ZO_HUDInfamyMeter_Update(time)
+            </OnUpdate>
+        </TopLevelControl>
+        
+    </Controls>
+</GuiXml>

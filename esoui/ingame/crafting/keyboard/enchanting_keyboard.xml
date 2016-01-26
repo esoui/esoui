@@ -1,0 +1,72 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_EnchantingRuneCraftingSlot" inherits="ZO_CraftingSlot" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="185" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                </Label>
+            </Controls>
+        </Button>
+
+        <TopLevelControl name="ZO_EnchantingTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Enchanting_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSkillHeader">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)ModeMenu" inherits="ZO_SceneMenu">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+                    <Dimensions x="550"/>
+                </Control>
+
+                <Control name="$(parent)RuneSlotContainer" inherits="ZO_SharedEnchantingSlotContainer">
+                    <Controls>
+                        <Label name="$(parent)PhraseLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ENCHANTING_PHRASE_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="CENTER" offsetY="-44" />
+                        </Label>
+                        
+                        <Button name="$(parent)EssenceRune" inherits="ZO_EnchantingRuneCraftingSlot">
+                            <Anchor point="CENTER" offsetY="30" />
+                        </Button>
+
+                        <Button name="$(parent)PotencyRune" inherits="ZO_EnchantingRuneCraftingSlot">
+                            <Anchor point="RIGHT" relativeTo="$(parent)EssenceRune" relativePoint="LEFT" offsetX="-70" />
+                        </Button>
+
+                        <Button name="$(parent)AspectRune" inherits="ZO_EnchantingRuneCraftingSlot">
+                            <Anchor point="LEFT" relativeTo="$(parent)EssenceRune" relativePoint="RIGHT" offsetX="70" />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ExtractionSlotContainer" inherits="ZO_SharedExtractionEnchantingSlotContainer" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)ExtractionLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ENCHANTING_EXTRACT_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="CENTER" offsetY="-44" />
+                        </Label>
+                        <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="CENTER" relativeTo="$(parent)LandingArea" offsetY="-3" />
+                        </Button>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Controls>
+                        <Label name="$(parent)NoRunesLabel" inherits="ZO_CraftingInventoryNoItemLabel" />
+                    </Controls>
+                </Control>
+
+                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip">
+                    <Anchor point="BOTTOM" offsetY="-285"/>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SharedEnchantingSlotContainer" virtual="true">
+            <Dimensions x="512" y="256" />
+            <Anchor point="BOTTOM" offsetY="-64"/>
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_enchanting_slottingBG.dds">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SharedExtractionEnchantingSlotContainer" inherits="ZO_SharedEnchantingSlotContainer" virtual="true">
+            <Controls>
+                <Texture name="$(parent)LandingArea" textureFile="EsoUI/Art/Crafting/crafting_enchanting_extraction_landingArea_overlay.dds">
+                    <Dimensions x="236" y="236" />
+                    <Anchor point="CENTER" offsetY="50" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedEnchantingTopLevel" hidden="true" />
+    </Controls>
+</GuiXml>

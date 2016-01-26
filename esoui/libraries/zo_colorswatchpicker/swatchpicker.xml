@@ -1,0 +1,36 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_PaletteEntry" tier="MEDIUM" clickSound="Click" virtual="true">
+            <Dimensions x="16" y="16" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/swatchFrame_up.dds"
+                pressed="EsoUI/Art/Buttons/swatchFrame_down.dds"
+                mouseOver="EsoUI/Art/Buttons/swatchFrame_over.dds"
+                disabledPressed="EsoUI/Art/Buttons/swatchFrame_selected_disabled.dds"
+            />
+
+            <OnClicked>
+                ZO_ColorSwatchPicker_OnEntryClicked(self)
+            </OnClicked>
+
+            <Controls>
+                <Texture name="$(parent)Color" level="1">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_ColorSwatchPicker" virtual="true">
+            <Dimensions x="178" y="34" /> <!-- Width = (stride * width) + ((stride - 1) * padding) defaults see lua file -->
+
+            <OnInitialized>
+                ZO_ColorSwatchPicker_Create(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

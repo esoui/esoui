@@ -1,0 +1,298 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="UltimateReadyBurst">
+            <Animations>
+                <TextureAnimation cellsWide="16" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="UltimateReadyLoop" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation cellsWide="64" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="HotbarSwapAnimation">
+            <Animations>
+                <SizeAnimation duration="200">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+                <SizeAnimation duration="200" delay="200">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="UltimateAbilityButtonSlideLeft">
+            <Animations>
+                <TranslateAnimation startX="0" endX="15" startY="-18" endY="-18" duration="200" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="UltimateAbilityButtonSlideRight">
+            <Animations>
+                <TranslateAnimation startX="0" endX="-15" startY="-18" endY="-18" duration="200" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="UltimateBarFillLoopAnimation" playbackType="LOOP" loopCount="1">
+            <Animations>
+                <TextureAnimation cellsWide="8" cellsHigh="4" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ActionSlotBounceAnimation">
+            <Animations>
+                <!-- Shrink -->
+                <SizeAnimation duration="133" delay="33">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+
+                <!-- Overexpand -->
+                <SizeAnimation duration="167" delay="166">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+
+                <!-- Reset to proper size -->
+                <SizeAnimation duration="167" delay="333">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_ActionButton_FlipCardControl" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" />
+        </Control>
+
+        <Control name="ZO_ActionButton_Keyboard_Template" virtual="true">
+            <Dimensions x="50" y="50" />
+            <Controls>
+                <Control name="$(parent)FlipCard">
+                    <Dimensions x="47" y="47" />
+                </Control>
+
+                <Texture name="$(parent)Icon" inherits="ZO_ActionButton_FlipCardControl" />
+                <Texture name="$(parent)CooldownIcon" hidden="true" />
+
+                <Label name="$(parent)ButtonText" font="ZoFontGameSmall">
+                    <Dimensions x="70" y="18"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="1"/>
+                </Label>
+
+                <Texture name="$(parent)Glow" hidden="true" alpha="0" />
+                <Texture name="$(parent)BG" hidden="false" />
+                <Backdrop name="$(parent)Backdrop" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ActionButton_Gamepad_Template" virtual="true">
+            <Dimensions x="64" y="64" />
+            <Controls>
+                <Control name="$(parent)FlipCard">
+                    <Dimensions x="ZO_GAMEPAD_ACTION_BUTTON_SIZE" y="ZO_GAMEPAD_ACTION_BUTTON_SIZE" />
+                </Control>
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="ZO_GAMEPAD_ACTION_BUTTON_SIZE" y="ZO_GAMEPAD_ACTION_BUTTON_SIZE" />
+                    <Anchor point="CENTER" relativeTo="$(parent)FlipCard" />
+                </Texture>
+                        
+                <Texture name="$(parent)CooldownIcon" hidden="false" />
+
+                <Label name="$(parent)ButtonText" font="ZoFontGamepad18">
+                    <!-- Setting the width back to 0 makes it use the suggested width based on the text rendering -->
+                    <Dimensions x="0" y="25"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-6"/>
+                </Label>
+
+                <Texture name="$(parent)Glow" hidden="false" alpha="0" />
+                <Texture name="$(parent)BG" hidden="true" />
+                <Backdrop name="$(parent)Backdrop" hidden="false" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ActionButton" virtual="true" inherits="ZO_AbilitySlot">
+            <Controls>
+                <Control name="$(parent)FlipCard">
+                    <Anchor point="CENTER" />
+                </Control>
+
+                <Texture name="$(parent)Icon" inherits="ZO_ActionButton_FlipCardControl" level="1" />
+                <Texture name="$(parent)CooldownIcon" level="1">
+                    <TextureCoords left="0" right="1" top="0" bottom="0" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)BG" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/ActionBar/abilityInset.dds" level="0" />
+                <Texture name="$(parent)Status" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/ActionBar/ActionSlot_toggledon.dds" tier="HIGH" hidden="true" />
+                <Texture name="$(parent)ActivationHighlight" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/ActionBar/abilityHighlightAnimation.dds" blendMode="ADD" tier="HIGH" hidden="true" />
+              
+                <Texture name="$(parent)Glow" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/HUD/Gamepad/gp_skillGlow.dds" tier="HIGH" hidden="true" alpha="0">
+                    <TextureCoords left="0.1875" right ="0.8125" top="0.1875" bottom="0.8125" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="-12" offsetY="-12" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="12" offsetY="12" />
+                </Texture>
+
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown ZO_ActionButton_FlipCardControl" tier="HIGH" />
+                <Texture name="$(parent)CooldownCompleteAnimation" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/ActionBar/coolDown_completeEFX.dds" blendMode="ADD" tier="HIGH" hidden="true" />
+                <Texture name="$(parent)CooldownEdge" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_QuickslotFill.dds" level="2" hidden="true">
+                    <Dimensions y="8" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" />
+                </Texture>
+
+                <Label name="$(parent)ButtonText" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="TOP" />
+
+                <Label name="$(parent)CountText" tier="HIGH">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4"/>
+                </Label>
+
+                <Texture name="$(parent)DropCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
+                    <AnchorFill />
+                </Texture>
+
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop_Gamepad" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="-4" offsetY="-4" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="4" offsetY="4" />
+                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_edge_semiTrans_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_center_semiTrans_16.dds" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_UltimateActionButton_Keyboard_Template" virtual="true" inherits="ZO_ActionButton_Keyboard_Template" />
+
+        <Control name="ZO_UltimateActionButton_Gamepad_Template" virtual="true" inherits="ZO_ActionButton_Gamepad_Template">
+            <Dimensions x="70" y="70" />
+            <Controls>
+                <Control name="$(parent)FlipCard" override="true">
+                    <Dimensions x="ZO_GAMEPAD_ULTIMATE_BUTTON_SIZE" y="ZO_GAMEPAD_ULTIMATE_BUTTON_SIZE" />
+                </Control>
+
+                <Texture name="$(parent)Icon" override="true" inherits="ZO_ActionButton_FlipCardControl" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_UltimateActionButton" virtual="true" inherits="ZO_ActionButton">
+            <Controls>
+                <Texture name="$(parent)UltimateBar" hidden="true" color="000000" alpha="0.6" level="2">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)LeadingEdge" hidden="true" textureFile="EsoUI/Art/ActionBar/coolDown_leadingEdge.dds" level="2">
+                    <Dimensions y="16"/>
+                </Texture>
+
+                <Texture name="$(parent)Glow" override="true" textureFile="EsoUI/Art/HUD/Gamepad/gp_UltimateGlow.dds">
+                    <TextureCoords left="0.1171875" right ="0.8828125" top="0.1171875" bottom="0.8828125" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="-19" offsetY="-19" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="19" offsetY="19" />
+                </Texture>
+
+                <Backdrop name="$(parent)Frame" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="-12" offsetY="-12" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="12" offsetY="12" />
+
+                    <Edge file="EsoUI/Art/HUD/Gamepad/gp_UltimateFrame_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_center_16.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+
+                <Texture name="$(parent)FillAnimationLeft" level="2" textureFile="EsoUI/Art/HUD/Gamepad/gp_UltimateFill_512.dds">
+                    <Dimensions x="71" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="-37" offsetY="-36" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)FlipCard" offsetX="-37" offsetY="36" />
+                </Texture>
+
+                <Texture name="$(parent)FillAnimationRight" level="2" textureFile="EsoUI/Art/HUD/Gamepad/gp_UltimateFill_512.dds">
+                    <Dimensions x="71" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="33" offsetY="-36" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)FlipCard" offsetX="33" offsetY="36" />
+                </Texture>
+              
+                <Backdrop name="$(parent)Backdrop" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" offsetX="-12" offsetY="-12" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="12" offsetY="12" />
+                </Backdrop>
+
+                <Texture name="$(parent)LBkey" tier="HIGH">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMLEFT" offsetY="-18" />
+                    <OnInitialized>
+                        self:SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER))
+                    </OnInitialized>
+                </Texture>
+
+                <Texture name="$(parent)RBkey" tier="HIGH">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" offsetY="-18" />
+                    <OnInitialized>
+                        self:SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER))
+                    </OnInitialized>
+                </Texture>
+
+                <Texture name="$(parent)Decoration" textureFile="EsoUI/Art/ActionBar/ability_ultimate_frameDecoBG.dds" level="2">
+                    <Anchor point="TOPLEFT" offsetX="-25" offsetY="-25"/>
+                    <Dimensions x="100" y="100"/>
+                </Texture>
+
+                <Texture name="$(parent)ReadyBurst" inherits="ZO_ActionButton_FlipCardControl" blendMode="ADD" textureFile="EsoUI/Art/ActionBar/coolDown_completeEFX.dds" hidden="true" level="2" />
+                <Texture name="$(parent)ReadyLoop" inherits="ZO_ActionButton_FlipCardControl" blendMode="ADD" textureFile="EsoUI/Art/ActionBar/abilityHighlight_mage_med.dds" hidden="true" level="2" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ActionBar1_Keyboard_Template" virtual="true">
+            <Dimensions x="483" y="70" />
+            <Anchor point="BOTTOM" />
+        </Control>
+
+        <Control name="ZO_ActionBar1_Gamepad_Template" virtual="true">
+            <Dimensions x="606" y="70" />
+            <Anchor point="BOTTOM" offsetY="-70" />
+        </Control>
+
+        <TopLevelControl name="ZO_ActionBar1" hidden="true" allowBringToTop="false" layer="OVERLAY" level="1">
+            <OnInitialized>
+                ZO_ActionBar1_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)KeybindBG" textureFile="EsoUI/Art/ActionBar/ability_keybindBG.dds">
+                    <Dimensions x="512" y="64"/>
+                    <Anchor point="BOTTOM"/>
+                </Texture>
+                <Button name="$(parent)WeaponSwap" inherits="ZO_WeaponSwapRight">
+                    <!-- Anchors are set in Lua -->
+                    <OnInitialized>
+                        local HIDE_WHEN_UNEARNED = true
+                        ZO_WeaponSwap_OnInitialized(self, HIDE_WHEN_UNEARNED)
+                    </OnInitialized>
+
+                    <OnMouseEnter>
+                        ZO_WeaponSwap_OnMouseEnter(self, RIGHT, -5)
+                    </OnMouseEnter>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ClassActionBar">
+            <Dimensions x="166" y="40" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_ActionBar1" relativePoint="BOTTOMLEFT" offsetX="-6" />
+
+            <OnInitialized>
+                ZO_ActionBar_Initialize()
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

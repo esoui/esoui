@@ -1,0 +1,628 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="PlayerAttributeBarAnimation">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0.0" endAlpha="1.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Label name="ZO_PlayerAttributeBarText" font="ZoFontGameShadow" virtual="true">
+            <Anchor point="CENTER"/>
+        </Label>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBar" level="500" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_fill.dds">
+            <Dimensions y="17" />
+            <Anchor point="LEFT" />
+            <Anchor point="RIGHT" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+            
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_leadingEdge.dds" width="11" height="17" />
+            <LeadingEdgeTextureCoords left="0" right="0.6875" top="0" bottom="0.53125" />
+
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_fill.dds">
+            <Dimensions y="17" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_leadingEdge.dds" width="11" height="17" />
+            <LeadingEdgeTextureCoords left="0" right="0.6875" top="0" bottom="0.53125" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_fill.dds">
+            <Dimensions y="64" />
+            <TextureCoords left="0.34375" right="0.46875"  top="0" bottom="1"/>
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_leadingEdge.dds" width="10" height="64" />
+            <LeadingEdgeTextureCoords left="0" right="0.625"  top="0" bottom="1" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarSmall" inherits="ZO_PlayerAttributeStatusBar" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center.dds" tier="HIGH">
+            <Dimensions y="10" />
+            <Anchor point="LEFT" />
+            <Anchor point="RIGHT" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge.dds" width="8" height="6" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom=".75" />
+
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarSmall_Keyboard_Template" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center.dds">
+            <Dimensions y="10" />
+            <Anchor point="LEFT" />
+            <Anchor point="RIGHT" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge.dds" width="8" height="6" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom=".75" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarSmall_Gamepad_Template" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_fill_center.dds">
+            <Dimensions y="8" />
+            <TextureCoords left="0" right="1" top="0" bottom="1"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_fill_leadingEdge.dds" width="8" height="8" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="1" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarGloss" level="550" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_fill_gloss.dds" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_leadingEdge_gloss.dds" width="11" height="17" />
+            <LeadingEdgeTextureCoords left="0" right="0.6875" top="0" bottom="0.53125" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_fill_gloss.dds" virtual="true">
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_leadingEdge_gloss.dds" width="11" height="17" />
+            <LeadingEdgeTextureCoords left="0" right="0.6875" top="0" bottom="0.53125" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_fill_gloss.dds" virtual="true">
+            <TextureCoords left="0" right="1" top="0" bottom="1" />
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_leadingEdge_gloss.dds" width="6" height="64" />
+            <LeadingEdgeTextureCoords left="0" right="0.75" top="0" bottom="1" />
+        </StatusBar>
+
+        <StatusBar name="ZO_PlayerAttributeStatusBarGlossSmall" inherits="ZO_PlayerAttributeStatusBarGloss" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center_gloss.dds" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge_gloss.dds" width="8" height="6" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom=".75" />
+        </StatusBar>
+      
+        <StatusBar name="ZO_PlayerAttributeStatusBarGlossSmall_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center_gloss.dds" virtual="true">
+            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge_gloss.dds" width="8" height="6" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom=".75" />
+        </StatusBar>
+      
+        <StatusBar name="ZO_PlayerAttributeStatusBarGlossSmall_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center_gloss.dds" virtual="true">
+            <TextureCoords left="0" right="1" top="0" bottom="1"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge_gloss.dds" width="8" height="8" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="1" />
+        </StatusBar>
+
+        <Texture name="ZO_PlayerAttributeFrameLeftArrow" level="100" tier="HIGH" virtual="true">
+            <Anchor point="LEFT"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameLeftArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="13" y="23" />
+            <TextureCoords left="0.3671875" right="0.46875" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameLeftArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="16" y="64" />
+            <TextureCoords left="0.34375" right="0.46875" top="0" bottom="1" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameRightArrow" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" level="100" tier="HIGH" virtual="true">
+            <Dimensions x="13" y="23" />
+            <TextureCoords left="0.46875" right="0.3671875" top="0.328125" bottom="0.6875"/>
+            <Anchor point="RIGHT"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameRightArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="13" y="23" />
+            <TextureCoords left="0.46875" right="0.3671875" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameRightArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="16" y="64" />
+            <TextureCoords left="0.46875" right="0.34375" top="0" bottom="1" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameLeft" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" level="100" tier="HIGH" virtual="true">
+            <Dimensions x="4" y="23" />
+            <TextureCoords left="0.6171875" right="0.5859375" top="0.328125" bottom="0.6875"/>
+            <Anchor point="LEFT"/>
+        </Texture>
+
+         <Texture name="ZO_PlayerAttributeFrameLeft_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="4" y="23" />
+            <TextureCoords left="0.6171875" right="0.5859375" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameLeft_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="6" y="64" />
+            <TextureCoords left="0.640625" right="0.59375" top="0" bottom="1" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameRight" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" level="100" tier="HIGH" virtual="true">
+            <Dimensions x="4" y="23" />
+            <TextureCoords left="0.5859375" right="0.6171875" top="0.328125" bottom="0.6875"/>
+            <Anchor point="RIGHT"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameRight_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="4" y="23" />
+            <TextureCoords left="0.5859375" right="0.6171875" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameRight_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="6" y="64" />
+            <TextureCoords left="0.59375" right="0.640625" top="0" bottom="1" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameMunge" inherits="ZO_RandomizedMunge" tier="HIGH" level="200" virtual="true">
+            <Dimensions y="4" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameCenter" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" level="100" tier="HIGH" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0.328125" bottom="0.6875"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)FrameLeft" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FrameRight" relativePoint="BOTTOMLEFT"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="TOPLEFT" offsetX="-4" />
+                    <Anchor point="TOPRIGHT" offsetX="4" />
+                </Texture>
+                <Texture name="$(parent)BottomMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="BOTTOMLEFT" offsetX="-4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" />
+                </Texture>
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_frame.dds" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0.328125" bottom="0.6875"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="false" />
+                <Texture name="$(parent)BottomMunge" hidden="false" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_frame.dds" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0" bottom="1"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="true" />
+                <Texture name="$(parent)BottomMunge" hidden="true" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameSmallRight" level="90" tier="HIGH" layer="OVERLAY" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_frame.dds" virtual="true">
+          <Dimensions x="254" y="64" />
+          <Anchor point="CENTER"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameSmallRight_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_frame.dds" virtual="true">
+            <Dimensions x="254" y="64" />
+            <Anchor point="CENTER"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameSmallRight_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_frame.dds" virtual="true">
+            <Dimensions x="256" y="64" />
+            <Anchor point="CENTER" offsetX="-11" offsetY="-1"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameSmallLeft" inherits="ZO_PlayerAttributeFrameSmallRight" tier="HIGH" layer="OVERLAY" virtual="true">
+            <TextureCoords left="1" right="0" top="0" bottom="1"/>
+        </Texture>
+      
+        <Texture name="ZO_PlayerAttributeFrameSmallLeft_Keyboard_Template" inherits="ZO_PlayerAttributeFrameSmallRight_Keyboard_Template" virtual="true">
+            <TextureCoords left="1" right="0" top="0" bottom="1"/>
+            <Anchor point="CENTER"/>
+        </Texture>
+      
+        <Texture name="ZO_PlayerAttributeFrameSmallLeft_Gamepad_Template" inherits="ZO_PlayerAttributeFrameSmallRight_Gamepad_Template" virtual="true">
+            <TextureCoords left="1" right="0" top="0" bottom="1"/>
+            <Anchor point="CENTER" offsetX="11" offsetY="-1"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameSmallCenter" level="90" tier="HIGH" layer="OVERLAY" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_frame_center.dds" virtual="true">
+            <Dimensions x="250" y="64" />
+            <Anchor point="CENTER"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeFrameSmallCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_frame_center.dds" virtual="true" >
+            <Dimensions x="250" y="64" />
+        </Texture>
+        <Texture name="ZO_PlayerAttributeFrameSmallCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_frame_center.dds" virtual="true" >
+            <Dimensions x="256" y="64" />
+            <Anchor point="CENTER" offsetY="-1"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeBgLeftArrow" inherits="ZO_PlayerAttributeFrameLeftArrow" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds"  virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgLeftArrow_Keyboard_Template" inherits="ZO_PlayerAttributeFrameLeftArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgLeftArrow_Gamepad_Template" inherits="ZO_PlayerAttributeFrameLeftArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_bg.dds" virtual="true" />
+
+        <Texture name="ZO_PlayerAttributeBgLeft" inherits="ZO_PlayerAttributeFrameLeft" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgLeft_Keyboard_Template" inherits="ZO_PlayerAttributeFrameLeft_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgLeft_Gamepad_Template" inherits="ZO_PlayerAttributeFrameLeft_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_bg.dds" virtual="true" />
+        
+        <Texture name="ZO_PlayerAttributeBgRightArrow" inherits="ZO_PlayerAttributeFrameRightArrow" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgRightArrow_Keyboard_Template" inherits="ZO_PlayerAttributeFrameRightArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgRightArrow_Gamepad_Template" inherits="ZO_PlayerAttributeFrameRightArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_bg.dds" virtual="true" />
+        
+        <Texture name="ZO_PlayerAttributeBgRight" inherits="ZO_PlayerAttributeFrameRight" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgRight_Keyboard_Template" inherits="ZO_PlayerAttributeFrameRight_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgRight_Gamepad_Template" inherits="ZO_PlayerAttributeFrameRight_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_bg.dds" virtual="true" />
+
+        <Texture name="ZO_PlayerAttributeBgCenter" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0.328125" bottom="0.6875"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)BgLeft" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BgRight" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeBgCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_bg.dds" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeBgCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_bg.dds" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0" bottom="1"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeBgSmallRight" inherits="ZO_PlayerAttributeFrameSmallRight" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_base.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgSmallRight_Keyboard_Template" inherits="ZO_PlayerAttributeFrameSmallRight_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_base.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgSmallRight_Gamepad_Template" inherits="ZO_PlayerAttributeFrameSmallRight_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_base.dds" virtual="true" />
+
+        <Texture name="ZO_PlayerAttributeBgSmallLeft" inherits="ZO_PlayerAttributeFrameSmallLeft" tier="LOW" layer="CONTROLS" virtual="true"/>
+        <Texture name="ZO_PlayerAttributeBgSmallLeft_Keyboard_Template" inherits="ZO_PlayerAttributeFrameSmallLeft_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_base.dds" virtual="true"/>
+        <Texture name="ZO_PlayerAttributeBgSmallLeft_Gamepad_Template" inherits="ZO_PlayerAttributeFrameSmallLeft_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_base.dds" virtual="true"/>
+
+        <Texture name="ZO_PlayerAttributeBgSmallCenter" inherits="ZO_PlayerAttributeFrameSmallCenter" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_base_center.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgSmallCenter_Keyboard_Template" inherits="ZO_PlayerAttributeFrameSmallCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_base_center.dds" virtual="true" />
+        <Texture name="ZO_PlayerAttributeBgSmallCenter_Gamepad_Template" inherits="ZO_PlayerAttributeFrameSmallCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_small_base_center.dds" virtual="true" />
+
+        <Control name="ZO_PlayerAttributeWarner" virtual="true" alpha="0" layer="OVERLAY" tier="HIGH" level="500">
+            <Dimensions y="64" />
+            <Anchor point="LEFT" offsetX="-18" />
+            <Anchor point="RIGHT" offsetX="18"/>
+        </Control>
+
+        <Texture name="ZO_PlayerAttributeWarnerLeftArrow" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Dimensions x="37" y="64" />
+            <TextureCoords left="0.2265625" right="0.515625" top="0" bottom="1"/>
+            <Anchor point="LEFT" />
+        </Texture>
+      
+        <Texture name="ZO_PlayerAttributeWarnerLeftArrow_Keyboard_Template" virtual="true">
+            <Dimensions x="37" y="64" />
+            <TextureCoords left="0.2265625" right="0.515625" top="0" bottom="1"/>
+            <Anchor point="LEFT" />
+        </Texture>
+      
+        <Texture name="ZO_PlayerAttributeWarnerLeftArrow_Gamepad_Template" virtual="true">
+            <Dimensions x="30" y="64" />
+            <TextureCoords left="0.28125" right="0.515625" top="0" bottom="1"/>
+            <Anchor point="LEFT" offsetX="10" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerRightArrow" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Dimensions x="37" y="64" />
+            <TextureCoords left="0.515625" right="0.2265625" top="0" bottom="1"/>
+            <Anchor point="RIGHT" />
+        </Texture>
+      
+        <Texture name="ZO_PlayerAttributeWarnerRightArrow_Keyboard_Template" virtual="true">
+            <Dimensions x="37" y="64" />
+            <TextureCoords left="0.515625" right="0.2265625" top="0" bottom="1"/>
+            <Anchor point="RIGHT" />
+        </Texture>
+      
+        <Texture name="ZO_PlayerAttributeWarnerRightArrow_Gamepad_Template" virtual="true">
+            <Dimensions x="30" y="64" />
+            <TextureCoords left="0.515625" right="0.28125" top="0" bottom="1"/>
+            <Anchor point="RIGHT" offsetX="-11" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerLeft" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Dimensions x="30" y="64" />
+            <TextureCoords left="0.7578125" right="0.5234375" top="0" bottom="1"/>
+            <Anchor point="LEFT" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerLeft_Keyboard_Template" virtual="true">
+            <Dimensions x="30" y="64" />
+            <TextureCoords left="0.7578125" right="0.5234375" top="0" bottom="1"/>
+            <Anchor point="LEFT" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerLeft_Gamepad_Template" virtual="true">
+            <Dimensions x="22" y="64" />
+            <TextureCoords left="0.7344" right="0.5234" top="0" bottom="1" />
+            <Anchor point="LEFT" offsetX="9" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerRight" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Dimensions x="30" y="64" />
+            <TextureCoords left="0.5234" right="0.7344" top="0" bottom="1" />
+            <Anchor point="RIGHT" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerRight_Keyboard_Template" virtual="true">
+            <Dimensions x="30" y="64" />
+            <TextureCoords left="0.5234375" right="0.7578125" top="0" bottom="1"/>
+            <Anchor point="RIGHT" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerRight_Gamepad_Template" virtual="true">
+            <Dimensions x="22" y="64" />
+            <TextureCoords left="0.5" right="0.734375" top="0" bottom="1"/>
+            <Anchor point="RIGHT" offsetX="-10" />
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerCenter" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <TextureCoords left="0.515625" right="0.5234375" top="0" bottom="1"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerCenter_Keyboard_Template" virtual="true">
+            <TextureCoords left="0.515625" right="0.5234375" top="0" bottom="1"/>
+        </Texture>
+
+        <Texture name="ZO_PlayerAttributeWarnerCenter_Gamepad_Template" virtual="true">
+            <TextureCoords left="0.515625" right="0.5234375" top="0" bottom="1"/>
+        </Texture>
+
+        <!-- Keep this width in sync with the NORMAL_WIDTH constant in Lua. -->
+        <Control name="ZO_PlayerAttributeContainer" virtual="true">
+            <Dimensions x="237" y="23" />
+
+            <OnInitialized>
+                self.warnerContainer = self:GetNamedChild("Warner")
+                self.bgContainer = self:GetNamedChild("BgContainer")
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_PlayerAttributeContainerSmall" tier="HIGH" virtual="true">
+            <Dimensions x="228" y="12" />
+
+            <OnInitialized>
+                self.warnerContainer = self:GetNamedChild("Warner")
+                self.bgContainer = self:GetNamedChild("BgContainer")
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_PlayerAttributeBgContainer" level="100" virtual="true">
+            <Dimensions x="237" y="23" />
+        </Control>
+        
+        <!-- Target Bar -->
+
+        <StatusBar name="ZO_TargetAttributeStatusBar" level="500" virtual="true">
+            <Dimensions y="17" />
+            <Anchor point="LEFT" offsetX="7"/>
+            <Anchor point="RIGHT" offsetX="-7"/>
+
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+        </StatusBar>
+
+        <StatusBar name="ZO_TargetAttributeStatusBar_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_fill.dds" virtual="true">
+            <Dimensions y="17"/>
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125" />
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_leadingEdge.dds" width="14" height="17" />
+            <LeadingEdgeTextureCoords left="0.125" right="1" top="0" bottom="0.53125" />
+        </StatusBar>
+
+        <StatusBar name="ZO_TargetAttributeStatusBar_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_fill.dds" virtual="true">
+            <Dimensions y="64"/>
+            <TextureCoords left="0" right="1"  top="0" bottom="1"/>
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_leadingEdge.dds" width="16" height="64"/>
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="1"/>
+        </StatusBar>
+
+        <StatusBar name="ZO_TargetAttributeStatusBarGloss" level="550" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+        </StatusBar>
+
+        <StatusBar name="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_fill_gloss.dds" virtual="true">
+            <AnchorFill/>
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_leadingEdge_gloss.dds" width="14" height="17" />
+            <LeadingEdgeTextureCoords left="0.125" right="1" top="0" bottom="0.53125" />
+        </StatusBar>
+
+        <StatusBar name="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_fill_gloss.dds" virtual="true">
+            <AnchorFill/>
+            <TextureCoords left="0" right="1"  top="0" bottom="1" />
+            <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_leadingEdge_gloss.dds" width="16" height="64"/>
+            <LeadingEdgeTextureCoords left="0" right="1"  top="0" bottom="1" />
+        </StatusBar>
+
+        <Texture name="ZO_TargetAttributeFrameLeftAngle" level="100" tier="HIGH" virtual="true">
+            <Anchor point="LEFT"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameLeftAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="21" y="23" />
+            <TextureCoords left="0.2890625" right="0.453125" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameLeftAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="23" y="64" />
+            <TextureCoords left="0.265625" right="0.4453125"  top="0" bottom="1" />
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameRightAngle" level="100" tier="HIGH" virtual="true">
+            <Anchor point="RIGHT"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameRightAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="21" y="23" />
+            <TextureCoords left="0.5546875" right="0.71875" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameRightAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_frame.dds" virtual="true">
+            <Dimensions x="23" y="64" />
+            <TextureCoords left="0.5546875" right="0.734375" top="0" bottom="1" />
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameCenter" level="100" tier="HIGH" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)FrameLeft" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FrameRight" relativePoint="BOTTOMLEFT"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="TOPLEFT" offsetX="-4" />
+                    <Anchor point="TOPRIGHT" offsetX="4" />
+                </Texture>
+                <Texture name="$(parent)BottomMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="BOTTOMLEFT" offsetX="-4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" />
+                </Texture>
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_frame.dds" virtual="true">
+            <TextureCoords left="0.453125" right="0.5546875" top="0.328125" bottom="0.6875"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="false" />
+                <Texture name="$(parent)BottomMunge" hidden="false" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeFrameCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_frame.dds" virtual="true">
+            <TextureCoords left="0.453125" right="0.5546875" top="0" bottom="1" />
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="true" />
+                <Texture name="$(parent)BottomMunge" hidden="true" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeBgLeftAngle" inherits="ZO_TargetAttributeFrameLeftAngle" tier="LOW" layer="CONTROLS" virtual="true"/>
+        <Texture name="ZO_TargetAttributeBgLeftAngle_Keyboard_Template" inherits="ZO_TargetAttributeFrameLeftAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_bg.dds" virtual="true"/>
+        <Texture name="ZO_TargetAttributeBgLeftAngle_Gamepad_Template" inherits="ZO_TargetAttributeFrameLeftAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_bg.dds" virtual="true"/>
+
+        <Texture name="ZO_TargetAttributeBgRightAngle" inherits="ZO_TargetAttributeFrameRightAngle" tier="LOW" layer="CONTROLS" virtual="true"/>
+        <Texture name="ZO_TargetAttributeBgRightAngle_Keyboard_Template" inherits="ZO_TargetAttributeFrameRightAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_bg.dds" virtual="true"/>
+        <Texture name="ZO_TargetAttributeBgRightAngle_Gamepad_Template" inherits="ZO_TargetAttributeFrameRightAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_bg.dds" virtual="true"/>
+
+        <Texture name="ZO_TargetAttributeBgCenter" tier="LOW" layer="CONTROLS" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)BgLeft" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BgRight" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeBgCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_bg.dds" virtual="true">
+            <TextureCoords left="0.453125" right="0.5546875" top="0.328125" bottom="0.6875"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeBgCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_bg.dds" virtual="true">
+            <TextureCoords left="0.4453125" right="0.5546875" top="0" bottom="1" />
+        </Texture>
+
+        <Control name="ZO_TargetAttributeWarner" virtual="true" alpha="0" layer="OVERLAY" tier="HIGH" level="500"/>
+
+        <Control name="ZO_TargetAttributeWarner_Keyboard_Template" inherits="ZO_TargetAttributeWarner"  virtual="true" >
+            <Dimensions y="64" />
+            <Anchor point="LEFT" offsetX="-18" />
+            <Anchor point="RIGHT" offsetX="18"/>
+        </Control>
+
+        <Control name="ZO_TargetAttributeWarner_Gamepad_Template" inherits="ZO_TargetAttributeWarner" virtual="true">
+            <Dimensions y="64" />
+            <Anchor point="LEFT" offsetX="-16" />
+            <Anchor point="RIGHT" offsetX="16"/>
+        </Control>
+        
+        <Texture name="ZO_TargetAttributeWarnerLeftAngle" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Dimensions x="37" y="64" />
+            <Anchor point="LEFT" />
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerLeftAngle_Keyboard_Template" virtual="true">
+            <Dimensions x="37" y="64" />
+            <TextureCoords left="0.1484375" right="0.4375" top="0" bottom="1"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerLeftAngle_Gamepad_Template" virtual="true">
+            <Dimensions x="40" y="64" />
+            <TextureCoords left="0.1406" right="0.4531" top="0.0000" bottom="1.0000" />
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerRightAngle" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Dimensions x="37" y="64" />
+            <Anchor point="RIGHT" />
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerRightAngle_Keyboard_Template" virtual="true">
+            <Dimensions x="37" y="64" />
+            <TextureCoords left="0.5625" right="0.8515625" top="0" bottom="1"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerRightAngle_Gamepad_Template" virtual="true">
+            <Dimensions x="40" y="64" />
+            <TextureCoords left="0.5547" right="0.8672" top="0.0000" bottom="1.0000" />
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerCenter" level="500" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerCenter_Keyboard_Template" inherits="ZO_TargetAttributeWarnerCenter" virtual="true">
+            <TextureCoords left="0.4375" right="0.5625" top="0" bottom="1"/>
+        </Texture>
+
+        <Texture name="ZO_TargetAttributeWarnerCenter_Gamepad_Template" inherits="ZO_TargetAttributeWarnerCenter" virtual="true">
+            <TextureCoords left="0.4531" right="0.5547" top="0.0000" bottom="1.0000" />
+        </Texture>
+    </Controls>
+</GuiXml>

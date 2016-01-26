@@ -1,0 +1,386 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_DeathRecapAttackAnimation">
+            <Animations>
+                <AnimationTimeline>                    
+                    <Animations>
+                        <!-- Icon -->
+                        <AlphaAnimation duration="100" delay="166" startAlpha="0" endAlpha="1"/>
+                        <ScaleAnimation duration="266" startScale="0" endScale="1.3"/>
+                        <ScaleAnimation duration="400" delay="266" startScale="1.3" endScale="1"/>
+                        
+                        <!-- Label -->
+                        <AlphaAnimation duration="500" delay="166" startAlpha="0" endAlpha="1"/>
+                    </Animations>
+                    <Callbacks>
+                        <Callback delay="166">                            
+                            if(self.isKillingBlow) then
+                                PlaySound(SOUNDS.DEATH_RECAP_KILLING_BLOW_SHOWN)
+                            else
+                                PlaySound(SOUNDS.DEATH_RECAP_ATTACK_SHOWN)
+                            end
+                        </Callback>
+                    </Callbacks>
+                </AnimationTimeline>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_DeathRecapKillingBlowAnimation">
+            <Animations>
+                <AnimationTimeline>
+                    <Animations>
+                        <AlphaAnimation duration="566" delay="166" startAlpha="0" endAlpha="1"/>
+                        <ScaleAnimation duration="666" startScale="3" endScale="1"/>
+                    </Animations>
+                </AnimationTimeline>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_DeathRecapTelvarLossAnimation">
+            <Animations>
+                <AnimationTimeline>
+                    <Animations>
+                        <AlphaAnimation duration="366" delay="166" startAlpha="0" endAlpha="1"/>
+                        <ScaleAnimation duration="466" startScale="2" endScale="1"/>
+                    </Animations>
+                    <Callbacks>
+                        <Callback delay="166">
+                            PlaySound(SOUNDS.TELVAR_LOST)
+                        </Callback>
+                    </Callbacks>
+                </AnimationTimeline>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_DeathRecapHintAnimation">
+            <Animations>
+                <AnimationTimeline>
+                    <Animations>
+                        <AlphaAnimation duration="300" startAlpha="0" endAlpha="1"/>
+                    </Animations>
+                </AnimationTimeline>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_DeathRecapDivider" virtual="true">
+            <Dimensions x="768" y="4"/>
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/DeathRecap/deathRecap_divider_left.dds">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="512" y="4"/>
+                </Texture>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/DeathRecap/deathRecap_divider_right.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <Dimensions x="256" y="4"/>
+                </Texture>
+                <Texture name="$(parent)GamepadDivider" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDivider.dds" hidden="true" >
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="4"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_DeathRecapAttack" resizeToFitDescendents="true" virtual="true">
+            <DimensionConstraints minY="64"/>
+            <Controls>
+                <Texture name="$(parent)Icon" tier="MEDIUM" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="56" y="56"/>
+                    <Anchor point="CENTER" offsetX="110" offsetY="32" relativePoint="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Frame" tier="HIGH">
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Control name="$(parent)Text">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Label name="$(grandparent)AttackerName" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                        <Label name="$(grandparent)AttackName" font="ZoFontGameBold" modifyTextType="UPPERCASE"/>
+                        <Label name="$(grandparent)DamageLabel" font="ZoFontGameBold" modifyTextType="UPPERCASE" text="SI_DEATH_RECAP_DAMAGE_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="RIGHT" relativePoint="TOPLEFT" offsetX="623" offsetY="38"/>
+                        </Label>
+                        <Label name="$(grandparent)Damage" font="ZoFontAnnounceLarge">
+                            <AnchorToBaseline relativeToLabel="$(grandparent)DamageLabel" side="LEFT" offsetX="-5"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapHint" virtual="true" resizeToFitDescendents="true">
+            <Controls>
+                <Label name="$(parent)Bullet" text="SI_BULLET" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Texture name="$(parent)GamepadBullet" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_bullet.dds" hidden="true" >
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+                <Label name="$(parent)Text" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bullet" relativePoint="TOPRIGHT" offsetX="10"/>
+                    <Dimensions x="650"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapTelvarStoneLoss" virtual="true" resizeToFitDescendents="true">
+            <DimensionConstraints minY="32" />
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGameBold" text="SI_DEATH_RECAP_TELVAR_STONE_LOSS_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" />
+                </Label>
+                <Label name="$(parent)Value" font="ZoFontAnnounceLarge" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED">
+                    <Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="10" offsetY="-2" />
+                </Label>
+                <Texture name="$(parent)Icon" tier="MEDIUM" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Value" relativePoint="RIGHT" offsetX="5" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapAttack_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Text" >
+                    <Controls>
+                        <Label name="$(grandparent)AttackerName" font="ZoFontGameBold" />
+                        <Label name="$(grandparent)AttackName" font="ZoFontGameBold" />
+                        <Label name="$(grandparent)DamageLabel" font="ZoFontGameBold" />
+                        <Label name="$(grandparent)Damage" font="ZoFontAnnounceLarge" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapHint_Keyboard_Template" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Bullet" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="false"/>
+                <Texture name="$(parent)GamepadBullet" hidden="true" />
+                <Label name="$(parent)Text" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bullet" relativePoint="TOPRIGHT" offsetX="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapTelvarStoneLoss_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGameBold" />
+                <Label name="$(parent)Value" font="ZoFontAnnounceLarge" />
+                <Texture name="$(parent)Icon" tier="MEDIUM" textureFile="EsoUI/Art/currency/currency_telvar_32.dds" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapAttack_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Text" >
+                    <Controls>
+                        <Label name="$(grandparent)AttackerName" font="ZoFontGamepad27" />
+                        <Label name="$(grandparent)AttackName" font="ZoFontGamepad34" />
+                        <Label name="$(grandparent)DamageLabel" font="ZoFontGamepad27" />
+                        <Label name="$(grandparent)Damage" font="ZoFontGamepad42" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapHint_Gamepad_Template" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Bullet" hidden="true" />
+                <Texture name="$(parent)GamepadBullet" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_bullet.dds" hidden="false" />
+                <Label name="$(parent)Text" font="ZoFontGamepadCondensed42" color="FFFFFF" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GamepadBullet" relativePoint="TOPRIGHT" offsetX="10" offsetY="-7"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecapTelvarStoneLoss_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad27" />
+                <Label name="$(parent)Value" font="ZoFontGamepad42" />
+                <Texture name="$(parent)Icon" tier="MEDIUM" textureFile="EsoUI/Art/currency/gamepad/gp_telvar.dds" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecap_Gamepad_Template" virtual="true" >
+            <Controls>
+                <Scroll name="$(parent)Scroll" >
+                    <Anchor point="TOPLEFT" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-16" />
+                </Scroll>
+                <Control name="$(parent)ScrollContainer">
+                    <Controls>
+                        <Control name="$(parent)ScrollChild">
+                            <Controls>
+                                <Control name="$(parent)AttacksDivider">
+                                    <Anchor point="TOP" offsetY="60"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Left" hidden="true" />
+                                        <Texture name="$(parent)Right" hidden="true" />
+                                        <Texture name="$(parent)GamepadDivider" hidden="false" />
+                                    </Controls>
+                                </Control>
+                                <Label name="$(parent)Title" font="ZoFontGamepad54">
+                                    <Anchor point="BOTTOM" relativePoint="TOP" relativeTo="$(parent)AttacksDivider" />
+                                </Label>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontGamepad22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttacksDivider" offsetX="18" offsetY="20"/>
+                                </Label>
+                                <Control name="$(parent)Attacks">
+                                    <DimensionConstraints minY="340"/>
+                                </Control>
+                                <Control name="$(parent)TelvarStoneLoss">
+                                    <Anchor point="TOP" relativeTo="$(parent)Attacks" relativePoint="BOTTOM" offsetX="55" offsetY="15"/>
+                                </Control>
+                                <Control name="$(parent)HintsContainer">
+                                    <Anchor point="TOP" relativeTo="$(parent)TelvarStoneLoss" relativePoint="BOTTOM" offsetY="20"  />
+                                    <Controls>
+                                        <Label name="$(parent)HintsHeader" font="ZoFontGamepad22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" offsetX="19"/>
+                                        </Label>
+                                        <Control name="$(parent)HintsDivider" >
+                                            <Controls>
+                                                <Texture name="$(parent)Left" hidden="true" />
+                                                <Texture name="$(parent)Right" hidden="true" />
+                                            </Controls>
+                                        </Control>
+                                        <Control name="$(parent)Hints">
+                                            <Dimensions x="700" y="180"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathRecap_Keyboard_Template" virtual="true" >
+            <Controls>
+                <Scroll name="$(parent)Scroll" >
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-16" />
+                </Scroll>
+                <Control name="$(parent)ScrollContainer">
+                    <Controls>
+                        <Control name="$(parent)ScrollChild">
+                            <Controls>
+                                <Control name="$(parent)AttacksDivider" >
+                                    <Anchor point="TOP" offsetY="40"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Left" hidden="false" />
+                                        <Texture name="$(parent)Right" hidden="false" />
+                                        <Texture name="$(parent)GamepadDivider" hidden="true" />
+                                    </Controls>
+                                </Control>
+                                <Label name="$(parent)Title" font="ZoFontWinH1">
+                                    <Anchor point="TOP" />
+                                </Label>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontWinH3" color="FFFFFF" >
+                                    <Anchor point="TOPLEFT" offsetX="18" offsetY="50"/>
+                                </Label>
+                                <Control name="$(parent)Attacks">
+                                    <DimensionConstraints minY="360"/>
+                                </Control>
+                                <Control name="$(parent)TelvarStoneLoss">
+                                    <Anchor point="TOP" relativeTo="$(parent)Attacks" relativePoint="BOTTOM" offsetX="55" offsetY="0"/>
+                                </Control>
+                                <Control name="$(parent)HintsContainer">
+                                    <Anchor point="TOP" relativeTo="$(parent)TelvarStoneLoss" relativePoint="BOTTOM" offsetX="18"  />
+                                    <Controls>
+                                        <Label name="$(parent)HintsHeader" font="ZoFontWinH3" color="FFFFFF" />
+                                        <Control name="$(parent)HintsDivider" >
+                                            <Controls>
+                                                <Texture name="$(parent)Left" hidden="false" />
+                                                <Texture name="$(parent)Right" hidden="false" />
+                                            </Controls>
+                                        </Control>
+                                        <Control name="$(parent)Hints">
+                                            <Dimensions x="700" y="200"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_DeathRecap" hidden="true" >
+            <Anchor point="TOP" offsetY="105"/>
+            <Dimensions x="752" y="726"/>
+            <OnInitialized>
+                ZO_DeathRecap_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Bg" inherits="ZO_Gamepad_BackgroundControl_Base_Template">
+                    <Anchor point="TOPLEFT" offsetX="-106" offsetY="-98"/>
+                    <Dimensions x="964" y="1024"/>
+                    <Controls>
+                        <Texture name="$(parent)BGLeft" textureFile="EsoUI/Art/DeathRecap/deathRecap_BG_left.dds">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="900" y="1024"/>
+                        </Texture>
+                        <Texture name="$(parent)BGRight" textureFile="EsoUI/Art/DeathRecap/deathRecap_BG_right.dds">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeft" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad" >
+                    <OnInitialized>
+                        ZO_Scroll_Initialize_Gamepad(self)
+                    </OnInitialized>
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Control name="$(parent)AttacksDivider" inherits="ZO_DeathRecapDivider">
+                                    <Anchor point="TOP" offsetY="40"/>
+                                </Control>
+                                <Label name="$(parent)Title" font="ZoFontWinH1" text="SI_DEATH_RECAP_TITLE" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOP" />
+                                </Label>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontWinH3" text="SI_DEATH_RECAP_ATTACKS_HEADER" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPLEFT" offsetX="18" offsetY="50"/>
+                                </Label>
+                                <Control name="$(parent)Attacks" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttacksHeader" relativePoint="BOTTOMLEFT" offsetY="9"/>
+                                    <DimensionConstraints minY="360"/>
+                                    <Controls>
+                                        <Texture name="$(parent)KillingBlowIcon" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/DeathRecap/deathRecap_killingBlow_icon.dds">
+                                            <Dimensions x="64" y="64"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)TelvarStoneLoss" inherits="ZO_DeathRecapTelvarStoneLoss">
+                                    <Anchor point="TOP" relativeTo="$(parent)Attacks" relativePoint="BOTTOM" />
+                                </Control>
+                                <Control name="$(parent)HintsContainer" resizeToFitDescendents="true">
+                                    <Anchor point="TOP" relativeTo="$(parent)TelvarStoneLoss" relativePoint="BOTTOM" offsetY="6"/>
+                                    <Controls>
+                                        <Control name="$(parent)HintsDivider" inherits="ZO_DeathRecapDivider">
+                                            <Anchor point="TOPLEFT" />
+                                        </Control>
+                                        <Label name="$(parent)HintsHeader" font="ZoFontWinH3" text="SI_DEATH_RECAP_HINTS_HEADER" modifyTextType="UPPERCASE">
+                                            <Anchor point="TOPLEFT" offsetY="7"/>
+                                        </Label>
+                                        <Control name="$(parent)Hints">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HintsHeader" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="3"/>
+                                            <Dimensions x="700" y="200"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

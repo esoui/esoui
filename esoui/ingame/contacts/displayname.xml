@@ -1,0 +1,61 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_DisplayName" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_KeyboardFriendsList"/>
+            <OnInitialized>
+                ZO_DisplayName_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Status" mouseEnabled="true">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="48" y="32"/>
+                    <OnInitialized>
+                        ZO_ComboBox:New(self)
+                    </OnInitialized>
+
+                    <OnMouseUp>
+                        ZO_ComboBox_DropdownClicked(self)
+                    </OnMouseUp>
+
+                    <Controls>
+                        <Button name="$(parent)SelectedItem" mouseOverBlendMode="ADD">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="TOPLEFT"/>
+                            <Textures mouseOver="EsoUI/Art/Contacts/social_status_highlight.dds"/>
+                            <OnMouseEnter>
+                                ZO_PlayerStatus_OnMouseEnter(self:GetParent())
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_PlayerStatus_OnMouseExit(self:GetParent())
+                            </OnMouseExit>
+                            <OnClicked>
+                                ZO_ComboBox_DropdownClicked(self:GetParent())
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+                            <Dimensions x="16" y="16" />
+                            <Anchor point="LEFT" relativeTo="$(parent)SelectedItem" relativePoint="RIGHT" offsetX="-4" />
+                            <OnMouseEnter>
+                                ZO_PlayerStatus_OnMouseEnter(self:GetParent())
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_PlayerStatus_OnMouseExit(self:GetParent())
+                            </OnMouseExit>
+                            <OnClicked>
+                                ZO_ComboBox_DropdownClicked(self:GetParent())
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)DisplayNameLabel" text="SI_DISPLAY_NAME_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="TOPRIGHT" offsetX="4" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)DisplayName" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DisplayNameLabel" relativePoint="TOPRIGHT" offsetX="2"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

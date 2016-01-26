@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadQuickslotRadialMenuEntryTemplate" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
+                self.CustomOnStopCallback = ZO_GamepadQuickslot_HideScene
+                ZO_CreateSparkleAnimation(self)
+            </OnInitialized>
+        </Control>
+        
+        <TopLevelControl name="ZO_GamepadQuickslotToplevel" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true" >
+            <OnInitialized>
+                ZO_GamepadQuickslot_Initialize(self)
+            </OnInitialized>     
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer" >
+                            <AnchorFill />
+                        </Control>
+                        <Control name="$(parent)Radial" inherits="ZO_RadialMenuPanelSize_Gamepad" >
+                            <Anchor point="TOP" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOM" offsetY="65" />
+                            <Controls>
+                                <Texture name="$(parent)Icon" tier="MEDIUM">
+                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="CENTER"/>
+                                </Texture>
+                                <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGamepadBold27" text="50">
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="-4"/>
+                                </Label>
+                                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" >
+                                    <Dimensions x="128" y="128" />
+                                    <Anchor point="CENTER"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control> 
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

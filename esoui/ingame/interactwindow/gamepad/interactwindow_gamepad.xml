@@ -1,0 +1,122 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ChatterOption_Gamepad" font="ZoFontGamepad42" virtual="true" >
+            <Anchor point="TOP" relativePoint="CENTER"/>
+            <Dimensions x="590"/>
+            <Controls>
+                <Control name="$(parent)Icon" mouseEnabled="true">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
+                    <Controls>
+                        <Texture name="$(parent)Image" level="1">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Label>
+
+        <Control name="ZO_QuestReward_Gamepad" virtual="true" inherits="ZO_GamepadMenuEntryTemplate">
+            <Dimensions x="590" y="40"/>
+            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX ="20"/>
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetY ="-8"/>
+                </Texture>
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Icon" offsetX ="60"/>
+                </Label>
+            </Controls>                   
+        </Control>
+
+        <Label name="ZO_GamepadQuestRewardEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
+            <Anchor point="TOPLEFT" offsetY="6" />
+            <Dimensions y="24" />
+        </Label>
+
+        <Control name="ZO_QuestReward_Title_Gamepad" virtual="true">
+            <Dimensions x="590" y="16"/>
+            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX ="20"/>
+            <Controls>
+                <Label name="$(parent)Currency1" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-32" />
+                </Label>
+                
+                <Label name="$(parent)Currency2" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Currency1" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                </Label>
+                
+                <Label name="$(parent)Currency3" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Currency2" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                </Label>
+            </Controls>
+        </Control>
+               
+        <TopLevelControl name="ZO_InteractWindow_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_4Wide_Anchors" hidden="true" tier="MEDIUM">
+            <OnInitialized>
+                ZO_InteractWindow_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_LeftArrowGamepadNavQuadrant_4Wide_Background_Template"/>
+
+                <Label name="$(parent)Title" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+                    <Anchor point="RIGHT" relativeTo="$(parent)BG" relativePoint="LEFT" offsetY="ZO_INTERACT_CENTER_OFFSET" offsetX="-25"/>
+                </Label>
+
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                            <Anchor point="LEFT" relativeTo="$(grandparent)BG" relativePoint="LEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-65" />
+                            <Anchor point="RIGHT" relativeTo="$(grandparent)BG" relativePoint="RIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-65" />
+                        </Control>
+
+                        <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT" verticalAlignment="BOTTOM">
+                            <OnInitialized>
+                                local fonts = 
+                                {
+                                    {
+                                        font = "ZoFontGamepad42", 
+                                        lineLimit = 7
+                                    },
+                                    {
+                                        font = "ZoFontGamepad36",
+                                        lineLimit = 9
+                                    },
+                                    {
+                                        font = "ZoFontGamepad27",
+                                        lineLimit = 10
+                                    }
+                                }
+                                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                            </OnInitialized>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" offsetY="-ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Divider" relativePoint="TOPRIGHT" offsetY="-ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y"/>
+                        </Label>
+
+                        <Scroll name="$(parent)Interact">
+                            <AnchorFill />
+                            <Controls>
+                                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Divider" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <Controls>
+                                        <Texture name="$(parent)ScrollUp" textureFile="EsoUI/Art/Miscellaneous/gamepad/gp_scrollArrow_up.dds" hidden="true">
+                                            <Dimensions x="32" y="32"/>
+                                            <Anchor point="LEFT" relativePoint="TOPLEFT" />
+                                        </Texture>
+
+                                        <Texture name="$(parent)ScrollDown" textureFile="EsoUI/Art/Miscellaneous/gamepad/gp_scrollArrow.dds" hidden="true">
+                                            <Dimensions x="32" y="32"/>
+                                            <Anchor point="LEFT" relativePoint="BOTTOMLEFT" />
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

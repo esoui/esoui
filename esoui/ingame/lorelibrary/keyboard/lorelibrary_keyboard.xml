@@ -1,0 +1,81 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_LoreLibraryNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Control name="ZO_LoreLibrary_BookEntry" mouseEnabled="true" virtual="true">
+            <Dimensions x="580" y="52"/>
+
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+                self.text = self:GetNamedChild("Text")
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.owner:EnterRow(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.owner:ExitRow(self)
+            </OnMouseExit>
+
+            <OnMouseDoubleClick>
+                self.owner:OnMouseDoubleClick(self, button)
+            </OnMouseDoubleClick>
+
+            <OnMouseUp>
+                if upInside then
+                    self.owner:OnRowMouseUp(self, button)
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Icon" level="2">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="47" />
+                </Texture>
+
+                <Label name="$(parent)Text" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="270" />
+                    <Anchor point="LEFT" offsetX="90" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_LoreLibrary" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_LoreLibrary_OnInitialize(self)
+            </OnInitialized>
+
+            <OnShow>
+                self.owner:OnShow()
+            </OnShow>
+
+            <Controls>
+                <Label name="$(parent)TotalCollected" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="7" />
+                </Label>
+
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="400"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TotalCollected" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="BOTTOMLEFT" offsetX="5" offsetY="-55" />
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Dimensions x="485"/>
+                    <Anchor point="TOPRIGHT" offsetX="207" offsetY="60" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

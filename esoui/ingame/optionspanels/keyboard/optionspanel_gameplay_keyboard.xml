@@ -1,0 +1,172 @@
+<GuiXml>
+    <Controls>
+        <Control name="Options_Gameplay_CombatSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_AUDIO_OPTIONS_COMBAT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTells" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_CombatSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_DodgeDoubleTap" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTells" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_ROLL_DODGE_DOUBLE_TAP)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_RollDodgeTime" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_DodgeDoubleTap" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_ROLL_DODGE_WINDOW)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_ClampGroundTarget" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_RollDodgeTime" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_CLAMP_GROUND_TARGET_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_PreventAttackingInnocents" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_ClampGroundTarget" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_PREVENT_ATTACKING_INNOCENTS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_GamepadSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_PreventAttackingInnocents" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPAD_SECTION_HEADER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gamepad_Preferred" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_GamepadSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Gameplay_ItemsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gamepad_Preferred" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPLAY_OPTIONS_ITEMS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_UseAoeLoot" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_ItemsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_LOOT, LOOT_SETTING_AOE_LOOT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_UseAutoLoot" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_UseAoeLoot" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_LOOT, LOOT_SETTING_AUTO_LOOT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_UseAutoLoot_Stolen" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_UseAutoLoot" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_LOOT, LOOT_SETTING_AUTO_LOOT_STOLEN)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+      
+        <Control name="Options_Gameplay_ToggleLootHistory" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_UseAutoLoot_Stolen" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_LOOT, LOOT_SETTING_LOOT_HISTORY)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_HideHelm" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_ToggleLootHistory" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_HELM)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_HideMountStaminaUpgrade" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_HideHelm" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_HideMountSpeedUpgrade" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_HideMountStaminaUpgrade" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_MOUNT_SPEED_UPGRADE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_HideMountInventoryUpgrade" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_HideMountSpeedUpgrade" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_MOUNT_INVENTORY_UPGRADE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_DefaultSoulGem" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_HideMountInventoryUpgrade" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_DEFAULT_SOUL_GEM)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_TutorialsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_DefaultSoulGem" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPLAY_OPTIONS_TUTORIALS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_TutorialEnabled" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_TutorialsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_TUTORIAL, TUTORIAL_ENABLED_SETTING_ID)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <Controls>
+                <Button name="Options_Gameplay_ResetAllTutorials" inherits="ZO_DefaultButton" text="SI_INTERFACE_OPTIONS_RESET_TUTORIALS">
+                    <Dimensions x="210" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                    <OnClicked>
+                        ZO_Dialogs_ShowDialog("CONFIRM_RESET_TUTORIALS")
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

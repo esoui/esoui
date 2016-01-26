@@ -1,0 +1,88 @@
+<GuiXml>
+    <Animations>
+        <AlphaAnimation name="PopToFullAlphaAnimation" duration="850">
+            <OnPlay>
+                if self:GetTimeline():IsPlayingBackward() then
+                    self:SetAlphaValues(0, 1)
+                else
+                    --Needs to pop in when a load starts
+                    self:SetAlphaValues(1, 1)
+                end
+            </OnPlay>
+        </AlphaAnimation>
+
+        <AlphaAnimation name="FadeInOutAnimation" duration="200" startAlpha="0" endAlpha="1" />
+
+        <AnimationTimeline name="LoadingCompleteAnimation">
+            <OnPlay>
+                self.control:SetMouseEnabled(not self:IsPlayingBackward())
+                self.control:SetKeyboardEnabled(not self:IsPlayingBackward())
+            </OnPlay>
+            <OnStop>
+                if LoadingScreen_Base_CanHide() and self:IsPlayingBackward() then
+                    self.control:SetHidden(true)
+                    SetGuiHidden("app", true)
+                end
+            </OnStop>
+            <Animations>
+                <AlphaAnimation inherits="PopToFullAlphaAnimation" />
+
+                <TranslateAnimation duration="850" anchorIndex="3">
+                    <OnPlay>
+                        if self:GetTimeline():IsPlayingBackward() then
+                            self:SetTranslateOffsets(0, -256, 0, -3)
+                        else
+                            self:SetTranslateOffsets(0, -3, 0, -3)
+                        end
+                    </OnPlay>
+                </TranslateAnimation>
+                <AlphaAnimation inherits="PopToFullAlphaAnimation" />
+
+                <TranslateAnimation duration="850" anchorIndex="3">
+                    <OnPlay>
+                        if self:GetTimeline():IsPlayingBackward() then
+                            self:SetTranslateOffsets(0, 256, 0, 3)
+                        else
+                            self:SetTranslateOffsets(0, 3, 0, 3)
+                        end
+                    </OnPlay>
+                </TranslateAnimation>
+                <AlphaAnimation inherits="PopToFullAlphaAnimation" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>      
+        <TopLevelControl name="LoadingScreen" inherits="ZO_LoadingScreenBase" mouseEnabled="true" >
+            <AnchorFill />
+            
+            <OnInitialized>
+                ZO_InitKeyboardLoadScreen(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                GetWindowManager():SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+            </OnMouseEnter>
+
+            <OnMouseWheel />
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_topMunge_tile.dds" addressMode="WRAP" />
+
+                <Texture name="$(parent)BottomMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_bottomMunge_tile.dds" addressMode="WRAP" scale=".75">
+                    <Controls>
+                        <Label name="$(grandparent)ZoneDescription" override="true">
+                            <Anchor point="CENTER" offsetY="55" />
+                        </Label>
+                    </Controls>
+               </Texture>
+
+                <Texture name="$(parent)Spinner" override="true">
+                    <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2" />
+                </Texture>                
+                
+            </Controls>            
+            
+        </TopLevelControl>        
+    </Controls>
+</GuiXml>

@@ -1,0 +1,230 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_BindKeyDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <Anchor point="TOP" relativeTo="GuiRoot" relativePoint="CENTER" offsetY="-230"/>
+            <OnInitialized>
+                self.instructionsLabel = self:GetNamedChild("Instructions")
+                self.overwriteWarning1 = self:GetNamedChild("OverwriteWarning1")
+                self.overwriteWarning2 = self:GetNamedChild("OverwriteWarning2")
+                self.bindBox = self:GetNamedChild("BindBox")
+                self.currentBindLabel = self:GetNamedChild("CurrentBind")
+
+                self.bindButton = self:GetNamedChild("Bind")
+                self.unbindButton = self:GetNamedChild("Unbind")
+
+                ZO_BindKeyDialog_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Instructions" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Texture name="$(parent)BindBox" color="FFFFFF" alpha=".25" mouseEnabled="true" keyboardEnabled="true" layer="CONTROLS">
+                    <Dimensions x="380" y="180" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMRIGHT" offsetY="10" />
+
+                    <OnMouseDown>
+                        self:GetParent().owner:OnMouseDown(button, ctrl, alt, shift, command)
+                    </OnMouseDown>
+
+                    <OnMouseDoubleClick>
+                        self:GetParent().owner:OnMouseDown(button, ctrl, alt, shift, command)
+                    </OnMouseDoubleClick>
+
+                    <OnMouseUp>
+                        self:GetParent().owner:OnMouseUp(button, ctrl, alt, shift, command)
+                    </OnMouseUp>
+
+                    <OnMouseWheel>
+                        self:GetParent().owner:OnMouseWheel(delta, ctrl, alt, shift, command)
+                    </OnMouseWheel>
+
+                    <OnKeyDown>
+                        self:GetParent().owner:OnKeyDown(key, ctrl, alt, shift, command)
+                    </OnKeyDown>
+
+                    <OnKeyUp>
+                        self:GetParent().owner:OnKeyUp(key, ctrl, alt, shift, command)
+                    </OnKeyUp>
+                </Texture>
+
+                <Label name="$(parent)CurrentBind" inherits="ZO_LargeKeyMarkupLabel" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BindBox" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BindBox" />
+                </Label>
+
+                <Label name="$(parent)OverwriteWarning1" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BindBox" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BindBox" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                </Label>
+
+                <Label name="$(parent)OverwriteWarning2" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)OverwriteWarning1" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OverwriteWarning1" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Unbind" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Bind" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <Button name="ZO_KeybindingListButton" virtual="true" inherits="ZO_DefaultButton">
+            <Dimensions x="300" />
+            <OnMouseEnter>
+                ZO_Tooltips_ShowTruncatedTextTooltip(self:GetLabelControl())
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_Tooltips_HideTruncatedTextTooltip()
+            </OnMouseExit>
+            <OnClicked>
+                local rowData = self:GetParent().data
+                local dialogData = ZO_ShallowTableCopy(rowData)
+                dialogData.bindingIndex = self.bindingIndex
+                ZO_Dialogs_ShowDialog("BINDINGS", dialogData)
+            </OnClicked>
+        </Button>
+        
+        <Label name="ZO_KeybindingListHeader" virtual="true" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER"/>
+
+        <Label name="ZO_KeybindingListLayerHeader" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="BOTTOM" virtual="true">
+            <Dimensions x="729" y="60" />
+        </Label>
+
+        <Label name="ZO_KeybindingListCategoryHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" verticalAlignment="CENTER" virtual="true">
+            <Dimensions x="729" y="48" />
+        </Label>
+        
+        <Control name="ZO_KeybindingListRow" virtual="true">
+            <Dimensions x="945" y="29" />
+
+            <OnInitialized>
+                self.actionLabel = self:GetNamedChild("ActionName")
+                self.bindingButtons = {
+                    self:GetNamedChild("PrimaryBind"),
+                    self:GetNamedChild("SecondaryBind"),
+                    self:GetNamedChild("TertiaryBind"),
+                    self:GetNamedChild("QuaternaryBind"),
+                }
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)ActionName" font="ZoFontGame" wrapMode="ELLIPSIS" mouseEnabled="true" verticalAlignment="CENTER">
+                    <Dimensions x="260" y="29"/>
+                    <Anchor point="TOPLEFT" offsetX="5" />
+                    <OnInitialized>
+                        self.normalColor = ZO_NORMAL_TEXT
+                    </OnInitialized>
+                    
+                    <OnMouseEnter>
+                        ZO_Tooltips_ShowTruncatedTextTooltip(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_Tooltips_HideTruncatedTextTooltip()
+                    </OnMouseExit>
+                </Label>
+                
+                <Button name="$(parent)PrimaryBind" inherits="ZO_KeybindingListButton">                                        
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ActionName" relativePoint="TOPRIGHT" />
+                    <OnInitialized>
+                        self.bindingIndex = 1
+                        self:GetLabelControl():SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Button>        
+                
+                <Button name="$(parent)SecondaryBind" inherits="ZO_KeybindingListButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryBind" relativePoint="TOPRIGHT" offsetX="5" />
+                    <OnInitialized>
+                        self.bindingIndex = 2
+                        self:GetLabelControl():SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Button>
+
+                <Button name="$(parent)TertiaryBind" inherits="ZO_KeybindingListButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryBind" relativePoint="TOPRIGHT" offsetX="5" />
+                    <OnInitialized>
+                        self.bindingIndex = 3
+                        self:GetLabelControl():SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Button>
+
+                <Button name="$(parent)QuaternaryBind" inherits="ZO_KeybindingListButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TertiaryBind" relativePoint="TOPRIGHT" offsetX="5" />
+                    <OnInitialized>
+                        self.bindingIndex = 4
+                        self:GetLabelControl():SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Button>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_Keybindings" hidden="true">
+            <Dimensions x="1665" y="750" />
+            <Anchor point="LEFT" offsetX="230" offsetY="20"/>
+
+            <OnInitialized>
+                ZO_Keybindings_OnInitialize(self)
+            </OnInitialized>
+          
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <Dimensions x="1667" y="1024" />
+                    <Anchor point="TOPLEFT" offsetX="-65" offsetY="-75" />
+                </Texture>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
+                    <Dimensions x="64" y="1024" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                </Texture>
+                
+                <Label name="$(parent)PrimaryKeyHeader" inherits="ZO_KeybindingListHeader" text="SI_KEYBINDINGS_PRIMARY_HEADER">
+                    <Dimensions x="306" y="0" />
+                    <Anchor point="TOPLEFT" offsetX="345" offsetY="38" />
+                </Label>
+                
+                <Label name="$(parent)SecondaryKeyHeader" inherits="ZO_KeybindingListHeader" text="SI_KEYBINDINGS_SECONDARY_HEADER">
+                    <Dimensions x="306" y="0" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryKeyHeader" relativePoint="TOPRIGHT" />
+                </Label>
+
+                <Label name="$(parent)TertiaryKeyHeader" inherits="ZO_KeybindingListHeader" text="SI_KEYBINDINGS_TERTIARY_HEADER">
+                    <Dimensions x="306" y="0" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryKeyHeader" relativePoint="TOPRIGHT" />
+                </Label>
+
+                <Label name="$(parent)QuaternaryKeyHeader" inherits="ZO_KeybindingListHeader" text="SI_KEYBINDINGS_QUATERNARY_HEADER">
+                    <Dimensions x="306" y="0" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TertiaryKeyHeader" relativePoint="TOPRIGHT" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetX="80" offsetY="70" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-80" offsetY="-50" />
+                </Control>
+
+                <Control name="$(parent)LoadKeyboardDefaults" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <OnInitialized>
+                        ZO_KeybindButtonTemplate_Setup(self, "KEYBINDS_LOAD_KEYBOARD_DEFAULTS", function() ZO_Dialogs_ShowDialog("KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS") end, GetString(SI_KEYBINDINGS_LOAD_KEYBOARD_DEFAULTS))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)LoadGamepadDefaults" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LoadKeyboardDefaults" relativePoint="TOPRIGHT" offsetX="15" />
+                    <OnInitialized>
+                        ZO_KeybindButtonTemplate_Setup(self, "KEYBINDS_LOAD_GAMEPAD_DEFAULTS", function() ZO_Dialogs_ShowDialog("KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS") end, GetString(SI_KEYBINDINGS_LOAD_GAMEPAD_DEFAULTS))
+                    </OnInitialized>
+                </Control>
+
+                <Label name="$(parent)CurrentKeyboardLayout" inherits="ZO_KeybindingListHeader" font="ZoFontDialogKeybindDescription">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                    <OnInitialized>
+                        local function UpdateKeyboardLayout()
+                            self:SetText(zo_strformat(SI_KEYBIND_CURRENT_KEYBOARD_LAYOUT, GetKeyboardLayout()))
+                        end
+                        self:RegisterForEvent(EVENT_INPUT_LANGUAGE_CHANGED, UpdateKeyboardLayout)
+                    </OnInitialized>
+                </Label>
+            </Controls>
+         </TopLevelControl>
+    </Controls>
+</GuiXml>

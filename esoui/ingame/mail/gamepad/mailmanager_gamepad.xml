@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_MailManager_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_MailManager_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Inbox" inherits="ZO_MailInbox_Gamepad">
+                    <AnchorFill />
+                </Control>
+                <Control name="$(parent)Send" inherits="ZO_MailSend_Gamepad">
+                    <AnchorFill />
+                </Control>
+
+                <!-- Controls used by both Inbox and Send -->
+                <!-- A sending screen shown while waiting for a mail to send. -->
+                <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ListBox" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

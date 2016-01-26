@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>        
+        <TopLevelControl name="ZO_HavokSplash" hidden="true" keyboardEnabled="true" mouseEnabled="true">
+            <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                HavokSplash_Initialize(self)
+            </OnInitialized>
+
+            <OnKeyDown>
+                HavokSplash_AttemptHide()
+            </OnKeyDown>
+
+            <OnMouseDown>
+                HavokSplash_AttemptHide()
+            </OnMouseDown>
+
+            <Controls>
+                <Texture name="$(parent)BG" color="000000">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+
+                <Texture name="$(parent)HavokLogo" textureFile="EsoUI/Art/Login/havok_logo.dds" resizeToFitFile="true">
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

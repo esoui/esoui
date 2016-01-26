@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadSmithingExtractionPanelContent" inherits="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
+            <Controls>
+                <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSmithingExtractionFloatingContent" virtual="true">
+            <Controls>
+                <Control name="$(parent)SlotContainer" >
+                    <Dimensions y="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_SLOT_STANDARD_HEIGHT"/>
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_2_SHOWN" offsetY="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET"/>
+                    <Controls>
+                        <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot_Gamepad">
+                            <Anchor point="TOP" offsetY="64"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Bg" override="true">
+                                    <Anchor point="TOPLEFT" offsetX="-218" offsetY="-64" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="218" offsetY="64" />
+                                </Backdrop>
+
+                                <Label name="$(parent)Name" font="ZoFontGamepad34" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="400" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-2" />
+                                </Label>
+                                <Label name="$(parent)NeedMoreLabel" font="ZoFontGamepad34" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                                    <Dimensions x="400"/>
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-2" />
+                                </Label>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Tooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)SlotContainer" relativePoint="TOP" offsetY="-ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

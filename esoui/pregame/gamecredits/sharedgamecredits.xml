@@ -1,0 +1,13 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="GameCreditsTranslate">
+            <Animations>
+                <TranslateAnimation anchorIndex="0" />
+            </Animations>
+
+            <OnStop>
+                ZO_GameCredits_ReleaseSection(self, completedPlaying)
+            </OnStop>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

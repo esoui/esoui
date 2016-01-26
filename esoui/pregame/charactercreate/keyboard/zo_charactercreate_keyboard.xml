@@ -1,0 +1,727 @@
+<GuiXml>
+    <Font name="CCEditFont" font="$(BOLD_FONT)|20" />
+
+    <Controls>
+        <Label name="CCLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <EditBox name="CCNameEdit" inherits="ZO_DefaultEdit" font="CCEditFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" textType="ALPHABETIC" maxInputCharacters="CHARNAME_MAX_LENGTH" virtual="true">
+            <Dimensions x="370" y="24" />
+
+            <OnTextChanged>
+                ZO_CharacterCreate_CheckEnableCreateButton(self)
+            </OnTextChanged>
+
+            <OnFocusGained>
+                ZO_CharacterCreate_OnNameFieldFocusGained(self)
+                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+                    PlaySound(SOUNDS.EDIT_CLICK)
+                end
+            </OnFocusGained>
+
+            <OnFocusLost>
+                ZO_CharacterCreate_OnNameFieldFocusLost(self)
+            </OnFocusLost>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="-6" offsetY="-6" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="6" offsetY="6" />
+                </Backdrop>
+                
+                <Label name="$(parent)Instructions" font="CCEditFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" text="SI_CREATE_CHARACTER_TITLE_FIRST_NAME">
+                    <AnchorFill />
+
+                    <OnInitialized>
+                        local anim = ZO_AlphaAnimation:New(self)
+                        anim:PingPong(1, .4, 1000, LOOP_INDEFINITELY)
+                    </OnInitialized>
+                </Label>
+            </Controls>
+        </EditBox>
+
+        <Button name="CCCategoryTab" mouseOverBlendMode="ADD" virtual="true" clickSound="Click_CC_Selector">
+            <Dimensions x="64" y="64" />
+
+            <OnMouseEnter>
+                ZO_CharacterCreate_BucketMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_CharacterCreate_BucketMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseDown>
+                ZO_CharacterCreate_BucketClicked(self)
+            </OnMouseDown>
+        </Button>
+
+        <Control name="CCCategoryBucket" virtual="true" hidden="true">
+            <Controls>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-1" offsetY="-2" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CCSubCategory" virtual="true" hidden="true" resizeToFitDescendents="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWindowSubtitle">
+                    <Dimensions x="332" />
+                    <Anchor point="TOP" />
+                </Label>
+
+                <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider.dds">
+                    <Dimensions x="332" y="4" />
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="2" />
+                </Texture>
+
+                <Control name="$(parent)TopSpacer">
+                    <Dimensions x="332" y="10" />
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="8" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Button name="SelectorButton" mouseOverBlendMode="ADD" hidden="true" virtual="true" clickSound="Click_CC_Selector">
+            <OnClicked>
+                ZO_CharacterCreate_OnSelectorClicked(self)
+            </OnClicked>
+
+            <OnMouseEnter>
+                ZO_CharacterCreate_MouseEnterNamedSelector(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_CharacterCreate_MouseExitNamedSelector(self)
+            </OnMouseExit>
+        </Button>
+
+        <Button name="RaceSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_RaceButton">
+            <Dimensions x="64" y="64" />
+            <OnInitialized>
+                self.selectorType = "race"
+                self.tooltipFormatter = SI_CREATE_CHARACTER_RACE_SELECTOR_TOOLTIP
+            </OnInitialized>
+        </Button>
+
+        <Control name="RaceSelector" virtual="true">
+            <Dimensions x="120" y="270" />
+
+            <Controls>
+                <Button name="$(parent)1" inherits="RaceSelectorButton">
+                    <Anchor point="TOP" offsetY="6" />
+                </Button>
+
+                <Button name="$(parent)2" inherits="RaceSelectorButton">
+                    <Anchor point="TOP" offsetY="86" />
+                </Button>
+
+                <Button name="$(parent)3" inherits="RaceSelectorButton">
+                    <Anchor point="TOP" offsetY="166" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Button name="AllianceSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_AllianceButton">
+            <Dimensions x="64" y="64" />
+            <OnInitialized>
+                self.selectorType = "alliance"
+                self.tooltipFormatter = SI_CREATE_CHARACTER_ALLIANCE_SELECTOR_TOOLTIP
+            </OnInitialized>
+        </Button>
+
+        <Control name="AllianceSelector" virtual="true">
+            <Dimensions x="360" y="64" />
+
+            <Controls>
+                <Button name="$(parent)1" inherits="AllianceSelectorButton">
+                    <Anchor point="TOPLEFT" offsetX="30" />
+                </Button>
+
+                <Button name="$(parent)2" inherits="AllianceSelectorButton">
+                    <Anchor point="TOPLEFT" offsetX="150" />
+                </Button>
+
+                <Button name="$(parent)3" inherits="AllianceSelectorButton">
+                    <Anchor point="TOPLEFT" offsetX="270" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="GenderSelector" resizeToFitDescendents="true" virtual="true" >
+            <Controls>
+                <Button name="$(parent)Button" mouseOverBlendMode="ADD" inherits="ZO_RadioButton" clickSound="Click_CC_Selector">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="TOP" />
+
+                    <OnClicked>
+                        ZO_CharacterCreateSelectGender(self)
+                    </OnClicked>
+                </Button>
+
+                <Label name="$(parent)Label" inherits="CCLabel" font="ZoFontGameShadow" mouseEnabled="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="5" />
+                    <OnMouseUp>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                            local sibling = GetControl(self:GetParent(), "Button")
+                            sibling:GetHandler("OnClicked")(sibling, button)
+                        end
+                    </OnMouseUp>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Button name="ClassSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_ClassButton">
+            <Dimensions x="64" y="64" />
+            <OnInitialized>
+                self.selectorType = "class"
+                self.tooltipFormatter = SI_CREATE_CHARACTER_CLASS_SELECTOR_TOOLTIP
+            </OnInitialized>
+        </Button>
+
+        <Button name="CCPadlock" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="16" y="16" />
+            <OnInitialized>
+                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_PADLOCK)
+            </OnInitialized>
+            <OnClicked>
+                ZO_CharacterCreate_TogglePadlock(self)
+            </OnClicked>
+        </Button>
+
+        <Button name="CCPreview" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="32" y="32" />
+
+            <Textures
+                normal="EsoUI/Art/CharacterCreate/characterCreate_audio_up.dds"
+                pressed="EsoUI/Art/CharacterCreate/characterCreate_audio_down.dds"
+                mouseOver="EsoUI/Art/CharacterCreate/characterCreate_audio_over.dds"
+            />
+
+            <OnClicked>
+                ZO_CharacterCreate_PreviewClicked(self)
+            </OnClicked>
+        </Button>
+
+        <Control name="CCSlider" virtual="true" resizeToFitDescendents="true">
+            <OnInitialized>
+                ZO_CharacterCreate_CreateSlider(self, "slider")
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Slider name="$(parent)Slider" inherits="ZO_Slider">
+                    <Dimensions x="230" y="16" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+                    <Limits min="0" max="1" />
+
+                    <OnValueChanged>
+                        ZO_CharacterCreate_SetSlider(self, value)
+                    </OnValueChanged>
+                </Slider>
+
+                <Button name="$(parent)Decrement" clickSound="Spinner_Down">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10" />
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
+                    />
+
+                    <OnClicked>
+                        ZO_CharacterCreate_ChangeSlider(GetControl(self:GetParent(), "Slider"), -1)
+                    </OnClicked>
+                </Button>
+                
+                <Button name="$(parent)Increment" mouseOverBlendMode="ADD" clickSound="Spinner_Up">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="4" />
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
+                    />
+
+                    <OnClicked>
+                        ZO_CharacterCreate_ChangeSlider(GetControl(self:GetParent(), "Slider"), 1)
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)Padlock" inherits="CCPadlock">
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="30" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="CCAppearanceSlider" inherits="CCSlider" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_CharacterCreate_CreateSlider(self, "icon")
+            </OnInitialized>
+        </Control>
+
+        <Control name="CCColorSlider" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_CharacterCreate_CreateSlider(self, "color")
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Slider" inherits="ZO_ColorSwatchPicker">
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <!-- prevent resizeToFit from making the picker grow if a color on the bottom row is picked -->
+                        <Control name="$(parent)BottomSpacer">
+                            <Dimensions x="1" y="5" />
+                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Padlock" inherits="CCPadlock">
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="43" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="CCDropDown" hidden="true" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_CharacterCreate_CreateSlider(self, "named")
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Dimensions x="233" />
+                    <Anchor point="TOPLEFT" />
+                </Control>
+
+                <Button name="$(parent)Preview" inherits="CCPreview">
+                    <Anchor point="LEFT" relativeTo="$(parent)Dropdown" relativePoint="RIGHT" offsetX="2" />
+                </Button>
+
+                <Button name="$(parent)Padlock" inherits="CCPadlock">
+                    <Anchor point="LEFT" relativeTo="$(parent)Dropdown" relativePoint="RIGHT" offsetX="43" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Button name="CharacterCreateTemplateRow" font="ZoFontGame" horizontalAlignment="LEFT" virtual="true">
+            <Dimensions x="350" y="20"/>
+            <NormalOffset x="15" y="0" />
+            <PressedOffset x="17" y="2" />
+            
+            <FontColors
+                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+            />
+
+            <OnMouseEnter>
+                ZO_ScrollList_MouseEnter(GetControl("ZO_CharacterCreateTemplateList"), self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ScrollList_MouseExit(GetControl("ZO_CharacterCreateTemplateList"), self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_CharacterCreateTemplateEntry_OnClicked(self)
+            </OnMouseUp>
+        </Button>
+
+        <Control name="CCTriangle" virtual="true">
+            <Dimensions x="332" y="200" />
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/CharacterCreate/selectorTriangle.dds">
+                    <Dimensions x="256" y="256" />
+                    <Anchor point="TOP" />
+                </Texture>
+                
+                <Control name="$(parent)Picker" inherits="ZO_TrianglePickerTemplate">
+                    <Dimensions x="169" y="145" />
+                    <Anchor point="TOP" offsetY="32" />
+
+                    <Controls>
+                        <Button name="$(parent)Thumb" mouseEnabled="false" mouseOverBlendMode="ADD" tier="MEDIUM" >
+                            <Dimensions x="16" y="16" />
+                            <Textures 
+                                normal="EsoUI/Art/CharacterCreate/triangle_selector_pip.dds"
+                                mouseOver="EsoUI/Art/CharacterCreate/triangle_selector_pip_mouseOver.dds"
+                                disabled="EsoUI/Art/CharacterCreate/triangle_selector_pip_disabled.dds"
+                            />
+
+                            <Controls>
+                                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/CharacterCreate/triangle_selector_pip_glow.dds" tier="MEDIUM">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="CENTER" />
+
+                                    <OnInitialized>
+                                        local anim = ZO_AlphaAnimation:New(self)
+                                        anim:PingPong(1, .4, 1000, LOOP_INDEFINITELY)
+                                    </OnInitialized>                           
+                                </Texture>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Padlock" inherits="CCPadlock">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Picker" relativePoint="TOPRIGHT" offsetX="47" offsetY="-20" />
+                </Button>
+
+                <Label name="$(parent)LabelTop" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Picker" relativePoint="TOP" offsetY="-3" />
+                </Label>
+
+                <Label name="$(parent)LabelLeft" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)LabelRight" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PaperdollManipulation" inherits="ZO_PaperdollManipulation_Shared" virtual="true">
+            <OnMouseEnter>
+                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+            </OnMouseExit>
+
+            <OnMouseDown>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    CharacterCreateStartMouseSpin()
+                end
+            </OnMouseDown>
+
+            <OnMouseUp>
+                CharacterCreateStopMouseSpin()
+            </OnMouseUp>
+
+            <OnMouseWheel>
+                MoveCharacterCameraZoomAmount(delta / zo_abs(delta))
+            </OnMouseWheel>
+        </Control>
+                
+        <TopLevelControl name="ZO_CharacterCreate" layer="BACKGROUND" hidden="true" alpha="0">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_CharacterCreate_Initialize()
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightBg" inherits="ZO_RightFullscreenPanelBG">
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="195" />
+
+                    <OnInitialized>
+                        self:SetHeight(GuiRoot:GetHeight() + 120)
+                        self:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:SetHeight(GuiRoot:GetHeight() + 120) end)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)Buckets">
+                    <Dimensions x="410" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+
+                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation" />
+
+                <EditBox name="$(parent)CharacterName" inherits="CCNameEdit">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Buckets" offsetX="20" offsetY="94" />
+                </EditBox>
+
+                <Texture name="$(parent)TopDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds">
+                    <Dimensions x="432" y="4" />
+                    <Anchor point="TOPRIGHT" offsetX="5" offsetY="128" />
+                </Texture>
+
+                <Texture name="$(parent)BottomDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds">
+                    <Dimensions x="432" y="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="-58" />
+                </Texture>
+
+                <Control name="$(parent)NameInstructions" inherits="ZO_NameInstructionsTemplate" />
+
+                <Control name="$(parent)Race" resizeToFitDescendents="true">
+                    <Controls>
+                        <Texture name="$(parent)TopDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds">
+                            <Dimensions x="360" y="4" />
+                            <Anchor point="TOP" />
+                        </Texture>
+
+                        <Label name="$(parent)AllianceSection" inherits="CCLabel" font="ZoFontWinH2" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_ALLIANCE_LABEL">
+                            <Dimensions x="360" />
+                            <Anchor point="TOPLEFT" offsetY="8" />
+                        </Label>
+
+                        <Texture name="$(parent)AllianceBG" resizeToFitFile="true" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="13" offsetY="-2" />
+                            <Controls>
+                                <Texture name="$(parent)Bottom" resizeToFitFile="true">
+                                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                                </Texture>
+                            </Controls>
+                        </Texture>
+
+                        <Control name="$(parent)AllianceSelector" inherits="AllianceSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceSection" relativePoint="BOTTOMLEFT" offsetY="8" />
+                        </Control>
+
+                        <Label name="$(parent)RaceSection" inherits="CCLabel" font="ZoFontWinH2" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_RACE_LABEL">
+                            <Dimensions x="360" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceSelector" relativePoint="BOTTOMLEFT" offsetY="20" />
+                        </Label>
+                            
+                        <Control name="$(parent)Column1" inherits="RaceSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RaceSection" relativePoint="BOTTOMLEFT" offsetY="8" />
+                        </Control>
+
+                        <Control name="$(parent)Column2" inherits="RaceSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Column1" relativePoint="TOPRIGHT" offsetX="0" />
+                        </Control>
+
+                        <Control name="$(parent)Column3" inherits="RaceSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Column2" relativePoint="TOPRIGHT" offsetX="0" />
+                        </Control>
+
+                        <Button name="$(parent)SingleButton" inherits="RaceSelectorButton">
+                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="0" />
+                        </Button>
+                        
+                        <Label name="$(parent)Name" inherits="CCLabel" font="ZoFontWindowTitle" horizontalAlignment="CENTER">
+                            <Dimensions x="360" />
+                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="70" />
+                        </Label>
+
+                        <Label name="$(parent)Alliance" inherits="CCLabel" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER">
+                            <Dimensions x="360" />
+                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="5" />
+                        </Label>
+
+                        <Label name="$(parent)Description" inherits="CCLabel" font="ZoFontGameShadow">
+                            <Dimensions x="350" />
+                            <Anchor point="TOP" relativeTo="$(parent)Alliance" relativePoint="BOTTOM" offsetY="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ClassSelection" resizeToFitDescendents="true">
+                    <Controls>
+                        <Control name="$(parent)ButtonArea" resizeToFitDescendents="true">
+                            <Anchor point="TOP" />
+                        </Control>
+
+                        <Label name="$(parent)Name" inherits="CCLabel" font="ZoFontWindowTitle">
+                            <Anchor point="TOP" relativeTo="$(parent)ButtonArea" relativePoint="BOTTOM" offsetY="30" />
+                        </Label>
+
+                        <Label name="$(parent)Description" inherits="CCLabel" font="ZoFontGameShadow">
+                            <Dimensions x="350" />
+                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10" />
+                        </Label>
+
+                        <Control name="$(parent)Spacer">
+                            <Dimensions x="280" y="6" />
+                            <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)GenderSelection">
+                    <Dimensions x="350" y="100" />
+                    <Controls>
+                        <Control name="$(parent)Male" inherits="GenderSelector">
+                            <Anchor point="TOP" offsetX="-64" offsetY="5" />
+                            <OnInitialized>
+                                local button = GetControl(self, "Button")
+                                button:SetNormalTexture("EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_up.dds")
+                                button:SetMouseOverTexture("EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_over.dds")
+                                button:SetPressedTexture("EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_down.dds")
+                                button:SetDisabledTexture("EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_up.dds")
+                                button:SetDisabledPressedTexture("EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_down.dds")
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Female" inherits="GenderSelector">
+                            <Anchor point="LEFT" relativeTo="$(parent)Male" relativePoint="RIGHT" offsetX="40" />
+                            <OnInitialized>
+                                local button = GetControl(self, "Button")
+                                button:SetNormalTexture("EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_up.dds")
+                                button:SetMouseOverTexture("EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_over.dds")
+                                button:SetPressedTexture("EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_down.dds")
+                                button:SetDisabledTexture("EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_up.dds")
+                                button:SetDisabledPressedTexture("EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_down.dds")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PhysiqueSelection" inherits="CCTriangle">
+                    <OnInitialized>
+                        ZO_CharacterCreate_CreateTriangle(self, SetPhysique, GetPhysique, SI_CREATE_CHARACTER_BODY_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FAT, SI_CREATE_CHARACTER_TRIANGLE_THIN)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)FaceSelection" inherits="CCTriangle">
+                    <OnInitialized>
+                        ZO_CharacterCreate_CreateTriangle(self, SetFace, GetFace, SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT, SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN)
+                    </OnInitialized>
+                </Control>
+                
+                <Control name="$(parent)TemplateSelected" mouseEnabled="true">
+                    <Dimensions x="350" y="25" />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="8" />
+
+                    <OnMouseDown>
+                        ZO_OpenCharacterCreateTemplateDropdown()
+                    </OnMouseDown>
+
+                    <Controls>
+                        <Control name="$(parent)BG" inherits="ZO_InsetBackground" />
+
+                        <Label name="$(parent)Text" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                            <Anchor point="TOPLEFT" offsetX="4" offsetY="0"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-22" />
+                        </Label>
+
+                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+                            <Dimensions x="16" y="16" />
+                            <Anchor point="RIGHT" offsetX="-3" />
+
+                            <OnClicked>
+                                ZO_OpenCharacterCreateTemplateDropdown()
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TemplateList" mouseEnabled="true" hidden="true" inherits="ZO_ScrollList" tier="HIGH">
+                    <Dimensions x="350" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TemplateSelected" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Controls>
+                        <Backdrop name="$(parent)Bg">
+                            <Anchor point="TOPLEFT" offsetX="-2" offsetY="-10" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="10" />
+
+                            <Edge file="EsoUI/Art/Miscellaneous/dropDown_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                            <Center file="EsoUI/Art/Miscellaneous/dropDown_center.dds" />
+                            <Insets left="16" top="16" right="-16" bottom="-16" />
+
+                            <Controls>
+                                <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP">
+                                    <AnchorFill />
+                                </Texture>
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)RandomizeAppearance" inherits="ZO_DefaultButton" text="SI_RANDOMIZE_APPEARANCE_BUTTON" clickSound="Click_RandomizeButton">
+                    <Dimensions x="230" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-20" offsetY="-16" />
+                    <OnClicked>
+                        ZO_CharacterCreate_RandomizeAppearance()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)DoIt" inherits="ZO_DefaultButton" text="SI_CREATE_CHARACTER_BUTTON" clickSound="Click_CreateButton">
+                    <Anchor point="RIGHT" relativeTo="$(parent)RandomizeAppearance" relativePoint="LEFT" offsetX="-22" />
+                    <OnClicked>
+                        ZO_CharacterCreate_OnCreateButtonClicked()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)RotateCharLeft" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CharacterCreateCharacterViewport" relativePoint="BOTTOM" offsetX="81" />
+
+                    <Textures
+                        normal="EsoUI/Art/CharacterCreate/rotate_left_up.dds"
+                        pressed="EsoUI/Art/CharacterCreate/rotate_left_down.dds"
+                        mouseOver="EsoUI/Art/CharacterCreate/rotate_left_over.dds"
+                    />
+
+                    <OnMouseDown>
+                        CharacterCreateStartMouseSpin(3)
+                    </OnMouseDown>
+                </Button>
+
+                <Button name="$(parent)RotateCharRight" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_CharacterCreateCharacterViewport" relativePoint="BOTTOM" offsetX="95" />
+
+                    <Textures
+                        normal="EsoUI/Art/CharacterCreate/rotate_right_up.dds"
+                        pressed="EsoUI/Art/CharacterCreate/rotate_right_down.dds"
+                        mouseOver="EsoUI/Art/CharacterCreate/rotate_right_over.dds"
+                    />
+
+                    <OnMouseDown>
+                        CharacterCreateStartMouseSpin(-3)
+                    </OnMouseDown>
+                </Button>
+
+                <Button name="$(parent)ZoomOut" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)RotateCharLeft" relativePoint="TOP" offsetX="10" />
+
+                    <Textures
+                        normal="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_up.dds"
+                        pressed="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_down.dds"
+                        mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_over.dds"
+                        disabled="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_disabled.dds"
+                    />
+
+                    <OnInitialized>
+                        self:SetState(BSTATE_DISABLED, true)
+                    </OnInitialized>
+
+                    <OnClicked>
+                        MoveCharacterCameraZoomAmount(-1)
+                    </OnClicked>
+                </Button>
+                
+                <Button name="$(parent)ZoomIn" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)RotateCharRight" relativePoint="TOP" offsetX="-10" />
+
+                    <Textures
+                        normal="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_up.dds"
+                        pressed="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_down.dds"
+                        mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_over.dds"
+                        disabled="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_disabled.dds"
+                    />
+
+                    <OnInitialized>
+                        self:SetEnabled(true)
+                    </OnInitialized>
+
+                    <OnClicked>
+                        MoveCharacterCameraZoomAmount(1)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+
+    </Controls>
+</GuiXml>

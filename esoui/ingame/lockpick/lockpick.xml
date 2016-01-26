@@ -1,0 +1,216 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="PinHighlightAnimation">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_PinTemplate" virtual="true" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/pins.dds" tier="MEDIUM" layer="CONTROLS" />
+
+        <Texture name="ZO_PinHighlightTemplate" virtual="true" textureFile="EsoUI/Art/Lockpicking/pins_over.dds" layer="OVERLAY" blendMode="ADD" alpha="0" />
+        
+        <TopLevelControl name="ZO_LockpickPanel" hidden="true" mouseEnabled="true">
+            <AnchorFill/>
+            
+            <OnInitialized>
+                ZO_Lockpick_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseDown>
+                ZO_Lockpick_OnMouseDown(self)
+            </OnMouseDown>
+            <OnMouseDoubleClick>
+                ZO_Lockpick_OnMouseDown(self)
+            </OnMouseDoubleClick>
+            <OnMouseUp>
+                ZO_Lockpick_OnMouseUp(self)
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Body" textureFile="EsoUI/Art/Lockpicking/lock_body.dds">
+                    <Dimensions x="512" y="512" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Pin1" inherits="ZO_PinTemplate" >
+                    <Dimensions x="34" y="110" />
+                    <TextureCoords left="0.0234375" right="0.15625" top="0.03125" bottom="0.890625" />
+
+                    <Controls>
+                        <Texture name="$(parent)Highlight" inherits="ZO_PinHighlightTemplate">
+                            <Dimensions x="48" y="128" />
+                            <Anchor point="CENTER" offsetX="2" offsetY="5"/>
+                            <TextureCoords left="0.0" right="0.1875" top="0.0" bottom="1.0" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Pin2" inherits="ZO_PinTemplate">
+                    <Dimensions x="32" y="106" />
+                    <TextureCoords left="0.21484375" right="0.33984375" top="0.0546875" bottom="0.8828125" />
+
+                    <Controls>
+                        <Texture name="$(parent)Highlight" inherits="ZO_PinHighlightTemplate">
+                            <Dimensions x="47" y="128" />
+                            <Anchor point="CENTER" offsetY="4"/>
+                            <TextureCoords left="0.1875" right="0.37109375" top="0.0" bottom="1.0" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Pin3" inherits="ZO_PinTemplate">
+                    <Dimensions x="32" y="103" />
+                    <TextureCoords left="0.39453125" right="0.51953125" top="0.078125" bottom="0.8828125" />
+
+                    <Controls>
+                        <Texture name="$(parent)Highlight" inherits="ZO_PinHighlightTemplate">
+                            <Dimensions x="44" y="128" />
+                            <Anchor point="CENTER" offsetY="2"/>
+                            <TextureCoords left="0.37109375" right="0.54296875" top="0.0" bottom="1.0" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Pin4" inherits="ZO_PinTemplate">
+                    <Dimensions x="31" y="100" />
+                    <TextureCoords left="0.5703125" right="0.69140625" top="0.1015625" bottom="0.8828125" />
+                    <Controls>
+                        <Texture name="$(parent)Highlight" inherits="ZO_PinHighlightTemplate">
+                            <Dimensions x="43" y="128" />
+                            <Anchor point="CENTER" offsetX="-1" offsetY="1"/>
+                            <TextureCoords left="0.54296875" right="0.7109375" top="0.0" bottom="1.0" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Pin5" inherits="ZO_PinTemplate">
+                    <Dimensions x="30" y="97" />
+                    <TextureCoords left="0.734375" right="0.8515625" top="0.125" bottom="0.8828125" />
+
+                    <Controls>
+                        <Texture name="$(parent)Highlight" inherits="ZO_PinHighlightTemplate">
+                            <Dimensions x="42" y="128" />
+                            <Anchor point="CENTER" offsetX="-1" offsetY="-1"/>
+                            <TextureCoords left="0.7109375" right="0.875" top="0.0" bottom="1.0" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Spring1" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/spring_01.dds" tier="MEDIUM" layer="CONTROLS" >
+                    <Dimensions x="28" y="99" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Body" offsetX="175" offsetY="-83" />
+                    <TextureCoords left="0.0" right="0.875" top="0.0" bottom="0.7734375" />
+                </Texture>
+
+                <Texture name="$(parent)Spring2" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/spring_02.dds" tier="MEDIUM" layer="CONTROLS" >
+                    <Dimensions x="28" y="99" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Body" offsetX="223" offsetY="-84" />
+                    <TextureCoords left="0.0" right="0.875" top="0.0" bottom="0.7734375" />
+                </Texture>
+
+                <Texture name="$(parent)Spring3" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/spring_03.dds" tier="MEDIUM" layer="CONTROLS" >
+                    <Dimensions x="27" y="95" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Body" offsetX="272" offsetY="-84" />
+                    <TextureCoords left="0.0" right="0.84375" top="0.0" bottom="0.7421875" />
+                </Texture>
+
+                <Texture name="$(parent)Spring4" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/spring_04.dds" tier="MEDIUM" layer="CONTROLS" >
+                    <Dimensions x="27" y="93" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Body" offsetX="315" offsetY="-86" />
+                    <TextureCoords left="0.0" right="0.84375" top="0.0" bottom="0.7265625" />
+                </Texture>
+
+                <Texture name="$(parent)Spring5" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/spring_05.dds" tier="MEDIUM" layer="CONTROLS" >
+                    <Dimensions x="27" y="90" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Body" offsetX="357" offsetY="-86" />
+                    <TextureCoords left="0.0" right="0.84375" top="0.0" bottom="0.703125" />
+                </Texture>
+
+                <Texture name="$(parent)Lockpick" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/lock_pick.dds" layer="OVERLAY" >
+                    <Dimensions x="452" y="110" />
+                    <TextureCoords left="0.0" right="0.8828125" top="0.0" bottom="0.859375" />
+                </Texture>
+
+                <Texture name="$(parent)LockpickBreakLeft" pixelRoundingEnabled="false" hidden="true" textureFile="EsoUI/Art/Lockpicking/lock_pick_broken_left.dds" layer="OVERLAY" >
+                    <Dimensions x="452" y="110" />
+                    <TextureCoords left="0.0" right="0.8828125" top="0.0" bottom="0.859375" />
+                </Texture>
+
+                <Texture name="$(parent)LockpickBreakRight" pixelRoundingEnabled="false" hidden="true" textureFile="EsoUI/Art/Lockpicking/lock_pick_broken_right.dds" layer="OVERLAY" >
+                    <Dimensions x="452" y="110" />
+                    <TextureCoords left="0.0" right="0.8828125" top="0.0" bottom="0.859375" />
+                </Texture>
+
+                <Texture name="$(parent)TensionTop" textureFile="EsoUI/Art/Lockpicking/lock_tensioner_top.dds" layer="OVERLAY">
+                    <Dimensions x="256" y="256" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Body" offsetX="-85" offsetY="229" />
+                </Texture>
+
+                <Texture name="$(parent)TensionBottom" textureFile="EsoUI/Art/Lockpicking/lock_tensioner_bottom.dds" layer="OVERLAY">
+                    <Dimensions x="256" y="64" />
+                    <Anchor point="TOP" relativeTo="$(parent)TensionTop" relativePoint="BOTTOM" />
+                </Texture>
+
+                <Texture name="$(parent)Mask" textureFile="EsoUI/Art/Lockpicking/lock_mask.dds" layer="OVERLAY">
+                    <Dimensions x="128" y="256" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Body" offsetX="57" offsetY="5" />
+                </Texture>
+
+                <Control name="$(parent)InfoBar">
+                    <Dimensions y="150" />
+                    <Anchor point="BOTTOMLEFT" offsetX="57" />
+                    <Controls>
+                        <Label name="$(parent)LockLevel" font="ZoFontKeybindStripDescription" verticalAlignment="CENTER">
+                            <Dimensions y="55" />
+                            <Anchor point="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)LockpicksLeft" font="ZoFontKeybindStripDescription" verticalAlignment="CENTER">
+                            <Dimensions y="55" />
+                            <Anchor point="LEFT" relativeTo="$(parent)LockLevel" relativePoint="RIGHT" offsetX="55" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)GamepadInfoBar" inherits="ZO_Gamepad_InfoBar">
+                    <Controls>
+                        <Label name="$(parent)LockpicksRemainingDescription" font="ZoFontGamepad34" text="SI_GAMEPAD_LOCKPICK_PICKS_REMAINING" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                            <Anchor point="BOTTOMLEFT" offsetX="30" offsetY="4" />
+                        </Label>
+
+                        <Label name="$(parent)LockpicksRemaining" font="ZoFontGamepad42">
+                            <AnchorToBaseline relativeToLabel="$(parent)LockpicksRemainingDescription" side="RIGHT" offsetX="10"/>
+                        </Label>
+
+                        <Label name="$(parent)DifficultyDescription" font="ZoFontGamepad34" text="SI_GAMEPAD_LOCKPICK_DIFFICULTY" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                            <AnchorToBaseline relativeToLabel="$(parent)LockpicksRemaining" side="RIGHT" offsetX="50"/>
+                        </Label>
+
+                        <Label name="$(parent)Difficulty" font="ZoFontGamepad42">
+                            <AnchorToBaseline relativeToLabel="$(parent)DifficultyDescription" side="RIGHT" offsetX="10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TimerBar">
+                    <Dimensions x="400" y="25" />
+                    <Anchor point="TOP" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetY="45" />
+
+                    <Controls>
+                        <StatusBar name="$(parent)Status" inherits="ZO_DefaultStatusBarBG">
+                            <AnchorFill/>
+                        </StatusBar>
+                        <Label name="$(parent)Time" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)StealthIcon" inherits="ZO_StealthIconContainer">
+                    <Anchor point="TOP"  relativeTo="$(parent)TimerBar" relativePoint="BOTTOM" offsetY="60"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

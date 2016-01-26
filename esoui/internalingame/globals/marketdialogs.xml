@@ -1,0 +1,89 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_MarketPurchaseConfirmationDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ConfirmPurchase" inherits="ZO_DialogContentAnchors" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)ItemContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Dimensions y="64"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="3">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="64" y="64"/>
+                            <Controls>
+                                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
+                                    <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                                </Label>
+                            </Controls>
+                        </Texture>
+
+                        <Label name="$(parent)ItemName" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions x="300" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)CostContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(parent)ItemCostLabel" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_COST_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        
+                        <Label name="$(parent)ItemCostAmount" font="ZoFontGame">
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)BalanceContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CostContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CostContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                    <Controls>
+                        <Label name="$(parent)CurrentBalanceLabel" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_CURRENT_BALANCE_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        
+                        <Label name="$(parent)CurrentBalanceAmount" font="ZoFontGame">
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <!-- have to make buttons for a custom dialog -->
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_MarketPurchasingDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_MarketPurchasingDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_SmallKeyMarkupLabel ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                
+                <Control name="$(parent)Loading" inherits="ZO_Loading">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self)
+                    </OnInitialized>
+                </Control>
+                
+                <!-- have to make buttons for a custom dialog -->
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+
+                <Texture name="$(parent)ModalUnderlay" override="true" alpha="0" />
+            </Controls>
+        </TopLevelControl>
+        
+    </Controls>
+</GuiXml>

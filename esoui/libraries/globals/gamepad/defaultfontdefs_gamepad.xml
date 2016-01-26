@@ -1,0 +1,72 @@
+<GuiXml>
+    <!-- Fonts created in this file will only be loaded for gamepad (PC and Consoles)
+         Adding new fonts creates additional memory usage on Consoles and could cause them to be unable to run -->
+    <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/FTN47.otf" />
+    <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.otf" />
+    <String name="GAMEPAD_BOLD_FONT" value="EsoUi/Common/Fonts/FTN87.otf" />
+    
+    <!-- Generic Gamepad Fonts-->
+    <Font name="ZoFontGamepad61" font="$(GAMEPAD_MEDIUM_FONT)|61|soft-shadow-thick" />
+    <Font name="ZoFontGamepad54" font="$(GAMEPAD_MEDIUM_FONT)|54|soft-shadow-thick" />
+    <Font name="ZoFontGamepad45" font="$(GAMEPAD_MEDIUM_FONT)|45|soft-shadow-thick" />
+    <Font name="ZoFontGamepad42" font="$(GAMEPAD_MEDIUM_FONT)|42|soft-shadow-thick" />
+    <Font name="ZoFontGamepad36" font="$(GAMEPAD_MEDIUM_FONT)|36|soft-shadow-thick" />
+    <Font name="ZoFontGamepad34" font="$(GAMEPAD_MEDIUM_FONT)|34|soft-shadow-thick" />
+    <Font name="ZoFontGamepad27" font="$(GAMEPAD_MEDIUM_FONT)|27|soft-shadow-thick" />
+    <Font name="ZoFontGamepad25" font="$(GAMEPAD_MEDIUM_FONT)|25|soft-shadow-thick" />
+    <Font name="ZoFontGamepad22" font="$(GAMEPAD_MEDIUM_FONT)|22|soft-shadow-thick" />
+    <Font name="ZoFontGamepad20" font="$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick" />
+    <Font name="ZoFontGamepad18" font="$(GAMEPAD_MEDIUM_FONT)|18|soft-shadow-thick" />
+
+    <Font name="ZoFontGamepad27NoShadow" font="$(GAMEPAD_MEDIUM_FONT)|27" />
+    <Font name="ZoFontGamepad42NoShadow" font="$(GAMEPAD_MEDIUM_FONT)|42" />
+
+    <Font name="ZoFontGamepadCondensed61" font="$(GAMEPAD_LIGHT_FONT)|61|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed54" font="$(GAMEPAD_LIGHT_FONT)|54|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed45" font="$(GAMEPAD_LIGHT_FONT)|45|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed42" font="$(GAMEPAD_LIGHT_FONT)|42|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed36" font="$(GAMEPAD_LIGHT_FONT)|36|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed34" font="$(GAMEPAD_LIGHT_FONT)|34|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed27" font="$(GAMEPAD_LIGHT_FONT)|27|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed25" font="$(GAMEPAD_LIGHT_FONT)|25|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed22" font="$(GAMEPAD_LIGHT_FONT)|22|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed20" font="$(GAMEPAD_LIGHT_FONT)|20|soft-shadow-thick" />
+    <Font name="ZoFontGamepadCondensed18" font="$(GAMEPAD_LIGHT_FONT)|18|soft-shadow-thick" />
+
+    <Font name="ZoFontGamepadBold61" font="$(GAMEPAD_BOLD_FONT)|61|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold54" font="$(GAMEPAD_BOLD_FONT)|54|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold48" font="$(GAMEPAD_BOLD_FONT)|48|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold45" font="$(GAMEPAD_BOLD_FONT)|45|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold42" font="$(GAMEPAD_BOLD_FONT)|42|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold36" font="$(GAMEPAD_BOLD_FONT)|36|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold34" font="$(GAMEPAD_BOLD_FONT)|34|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold27" font="$(GAMEPAD_BOLD_FONT)|27|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold25" font="$(GAMEPAD_BOLD_FONT)|25|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold22" font="$(GAMEPAD_BOLD_FONT)|22|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold20" font="$(GAMEPAD_BOLD_FONT)|20|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBold18" font="$(GAMEPAD_BOLD_FONT)|18|soft-shadow-thick" />
+    
+    <Font name="ZoFontGamepadChat" font="$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick" />
+    <Font name="ZoFontGamepadEditChat" font="$(GAMEPAD_MEDIUM_FONT)|20|soft-shadow-thick" />
+    
+    <!-- In Game Book Fonts-->
+    <Font name="ZoFontGamepadBookPaper" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontGamepadBookSkin" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontGamepadBookRubbing" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontGamepadBookLetter" font="$(HANDWRITTEN_FONT)|30" />
+    <Font name="ZoFontGamepadBookNote" font="$(HANDWRITTEN_FONT)|32" />
+    <Font name="ZoFontGamepadBookScroll" font="$(HANDWRITTEN_FONT)|36" />
+    <Font name="ZoFontGamepadBookTablet" font="$(STONE_TABLET_FONT)|40|soft-shadow-thick" />
+    
+    <!-- In Game Book Title Fonts-->
+    <Font name="ZoFontGamepadBookPaperTitle" font="$(ANTIQUE_FONT)|40" />
+    <Font name="ZoFontGamepadBookSkinTitle" font="$(ANTIQUE_FONT)|40" />
+    <Font name="ZoFontGamepadBookRubbingTitle" font="$(ANTIQUE_FONT)|40" />
+    <Font name="ZoFontGamepadBookLetterTitle" font="$(HANDWRITTEN_FONT)|40" />
+    <Font name="ZoFontGamepadBookNoteTitle" font="$(HANDWRITTEN_FONT)|42" />
+    <Font name="ZoFontGamepadBookScrollTitle" font="$(HANDWRITTEN_FONT)|44" />
+    <Font name="ZoFontGamepadBookTabletTitle" font="$(STONE_TABLET_FONT)|58|soft-shadow-thick" />
+    
+    <!-- Header fonts-->
+    <Font name="ZoFontGamepadHeaderDataValue" font="$(GAMEPAD_MEDIUM_FONT)|42|soft-shadow-thick" />
+</GuiXml>

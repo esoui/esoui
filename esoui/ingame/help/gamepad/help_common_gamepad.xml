@@ -1,0 +1,51 @@
+<GuiXml>
+    <Controls>
+        <!-- The layout of the box which displays the help text. -->
+        <Control name="ZO_Gamepad_Help_Tutorials_Display" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" virtual="true">
+            <Controls>
+                <!-- This is just used to get the proper anchoring. -->
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true" />
+
+                <Control name="$(parent)HelpTextContainer" inherits="ZO_ScrollContainer_Gamepad">
+                    <OnInitialized>
+                        ZO_Scroll_Initialize_Gamepad(self)
+                        ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
+                    </OnInitialized>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Container"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Container"/>
+                </Control>
+
+                <Control name="$(parent)HelpMessageContainer">
+                    <OnInitialized>
+                        local container = self:GetParent():GetNamedChild("HelpTextContainer")
+                        local scroll = container:GetNamedChild("HelpTextContainer")
+                        local scrollChild = container:GetNamedChild("ScrollChild")
+                        scrollChild:SetResizeToFitPadding(0, 10)
+                        self:SetParent(scrollChild)
+
+                        self:SetAnchor(TOPRIGHT, scroll, TOPRIGHT)
+                        self:SetAnchor(TOPLEFT, nil, TOPLEFT)
+                    </OnInitialized>
+                    <Controls>               
+                        <Label name="$(parent)DetailsBody1" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="15">
+                            <Anchor point="TOPLEFT" offsetY="10" />
+                            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
+                        </Label>
+
+                        <Texture name="$(parent)DetailsImage">
+                            <OnTextureLoaded>
+                                ZO_Gamepad_Tutorials_Entries_OnTextureLoaded(self)
+                            </OnTextureLoaded>
+                            <Anchor point="TOP" relativeTo="$(parent)DetailsBody1" relativePoint="BOTTOM" offsetY="25" />
+                        </Texture>
+
+                        <Label name="$(parent)DetailsBody2" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="15">
+                            <Anchor point="TOP" relativeTo="$(parent)DetailsImage" relativePoint="BOTTOM" offsetY="54" />
+                            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
+                        </Label>
+                    </Controls>
+                </Control>  
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

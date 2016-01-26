@@ -1,0 +1,36 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_WorldMapKeepInfoFootPrintBackground_Gamepad" layer="BACKGROUND" allowBringToTop="false" hidden="true" mouseEnabled="true">
+            <Dimensions x="350" y="540" />
+            <Anchor point="LEFT" offsetY="-80"/>
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/WorldMap/map_AVA_panelBG.dds">
+                    <Dimensions x="512" y="1024" />
+                    <Anchor point="TOPLEFT" offsetY="-75" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_WorldMapKeepInfoContent_Gamepad" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_WorldMapKeepInfo_GamepadKeepName" relativePoint="BOTTOMLEFT" offsetY="25"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMapKeepInfo_GamepadContainer" relativePoint="BOTTOMRIGHT" />
+        </Control>
+
+        <TopLevelControl name="ZO_WorldMapKeepInfo_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_WorldMapKeepInfo_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <!-- This uses non-standard positioning to fit with the worldmap -->
+                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template"/>
+
+                <Control name="$(parent)Container" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Label name="$(parent)KeepName" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerHeader" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Dimensions x="320"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

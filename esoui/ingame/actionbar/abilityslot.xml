@@ -1,0 +1,51 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AbilitySlot" virtual="true">
+            <Dimensions x="50" y="50" />
+            <Controls>
+                <Button name="$(parent)Button" mouseOverBlendMode="ADD">
+                    <AnchorFill />
+
+                    <MouseButton button="1" enabled="true" />
+                    <MouseButton button="2" enabled="true" />
+
+                    <Textures
+                        mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+                    />
+
+                    <OnMouseDown>
+                        ZO_AbilitySlot_OnSlotMouseDown(self, button)
+                    </OnMouseDown>
+
+                    <OnMouseUp>
+                        ZO_AbilitySlot_OnSlotMouseUp(self, upInside, button)
+                    </OnMouseUp>
+
+                    <OnClicked>
+                        ZO_AbilitySlot_OnSlotClicked(self, button)
+                    </OnClicked>
+
+                    <OnMouseDoubleClick>
+                        ZO_AbilitySlot_OnSlotDoubleClicked(self, button)
+                    </OnMouseDoubleClick>
+
+                    <OnDragStart>
+                        ZO_AbilitySlot_OnDragStart(self, button)
+                    </OnDragStart>
+
+                    <OnReceiveDrag>
+                        ZO_AbilitySlot_OnReceiveDrag(self, button)
+                    </OnReceiveDrag>
+
+                    <OnMouseEnter>
+                        ZO_AbilitySlot_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_AbilitySlot_OnMouseExit(self)
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

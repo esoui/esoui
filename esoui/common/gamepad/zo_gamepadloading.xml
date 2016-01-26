@@ -1,0 +1,28 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LoadingIcon_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_LoadingIcon_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <OnUpdate>
+                ZO_LoadingIcon_Gamepad_OnUpdate(self)
+            </OnUpdate>
+
+            <Controls>
+                <Texture name="$(parent)Animation" textureFile="EsoUI/Art/Screens_App/Gamepad/Ouroboros_Loading-128.dds">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_LoadingIcon_Gamepad_Footer" inherits="ZO_LoadingIcon_Gamepad" virtual="true">
+            <Dimensions x="64" y="64" />
+            <Controls>
+                <Texture name="$(parent)Animation" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_ScreenApp_Ouroboros.dds">
+                    <Dimensions x="64" y="64" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

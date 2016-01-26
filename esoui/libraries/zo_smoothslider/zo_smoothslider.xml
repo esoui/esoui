@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_SmoothSliderButton" virtual="true">
+            <OnClicked>
+                ZO_SmoothSliderButton_OnClicked(self)
+            </OnClicked>
+        </Button>
+        <Control name="ZO_SmoothSlider" virtual="true"/>
+
+        <Button name="ZO_DefaultSmoothSliderButton" inherits="ZO_SmoothSliderButton" virtual="true">
+            <Textures
+                normal="EsoUI/Art/Buttons/smoothSliderButton_up.dds"
+                pressed="EsoUI/Art/Buttons/smoothSliderButton_down.dds"
+                mouseOver="EsoUI/Art/Buttons/smoothSliderButton_over.dds"
+            />
+            <TextureCoords left="0.0625" right="0.9375" top="0.15625" bottom="0.84375"/>
+        </Button>
+    </Controls>
+</GuiXml>

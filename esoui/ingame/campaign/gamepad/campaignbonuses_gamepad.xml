@@ -1,0 +1,76 @@
+<GuiXml>
+    <Controls>
+
+        <Control name="ZO_GamepadCampaignBonusesHeader" virtual="true">
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_CAMPAIGN_BONUSES_LIST_ENTRY_INDENT" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19" />
+            <Dimensions y="50" />
+            
+            <OnInitialized>
+                self.text = self:GetNamedChild("Label")
+                self.subText = self:GetNamedChild("SubLabel")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" inherits="ZO_GamepadMenuEntryHeaderFontTemplate">
+                    <Anchor point="TOPELFT" />
+                </Label>
+                <Label name="$(parent)SubLabel" font="ZoFontGamepad22" modifyTextType="NONE" inherits="ZO_GamepadMenuEntryHeaderFontTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+    
+        <Control name="ZO_CampaignBonusEntryTemplate" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_CampaignBonusEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+          
+            <Controls>
+                <Label name="$(parent)Label" override="true" >
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CAMPAIGN_BONUSES_LIST_ENTRY_INDENT"/>
+                    <Dimensions x="ZO_GAMEPAD_CAMPAIGN_BONUSES_LIST_ENTRY_WIDTH" />
+                </Label>
+                <Texture name="$(parent)ItemIcon" level="1">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-20"/>
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Label name="$(parent)ItemCount" font="ZoFontGamepad22" modifyTextType="NONE" inherits="ZO_GamepadMenuEntryHeaderFontTemplate">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ItemIcon" offsetX="-6" />
+                </Label>
+
+                <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_44.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                </Texture>
+
+                <Texture name="$(parent)Checkmark" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-10"/>
+                    <Dimensions x="40" y="40" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_CampaignBonus_Gamepad" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
+            <OnInitialized>
+                ZO_CampaignBonuses_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Scroll name="$(parent)Menu">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <AnchorFill/>
+                            <Controls>
+                                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <Anchor point="TOPLEFT" offsetY="100"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

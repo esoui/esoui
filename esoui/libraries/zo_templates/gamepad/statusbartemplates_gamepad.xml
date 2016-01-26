@@ -1,0 +1,391 @@
+<GuiXml>
+    <Controls>
+        <!-- Textures to construct any width 22 pixel tall white frame progress bar with flat or arrows on either side -->
+        <Texture name="ZO_GamepadWhiteFrameLeftArrowMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame_white.dds" virtual="true">
+            <Dimensions x="11" y="22"/>
+            <TextureCoords left="0.0625" right="0.40625" top="0.15625" bottom="0.84375"/>
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMLEFT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameRightArrowMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame_white.dds" virtual="true">
+            <Dimensions x="11" y="22" />
+            <TextureCoords left="0.40625" right="0.0625" top="0.15625" bottom="0.84375"/>
+            <Anchor point="TOPRIGHT" offsetX="2"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="2" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameLeftMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame_white.dds" virtual="true">
+            <Dimensions x="7" y="22" />
+            <TextureCoords left="0.9375" right="0.71875" top="0.15625" bottom="0.84375"/>
+            <Anchor point="TOPLEFT" offsetX="-2" />
+            <Anchor point="BOTTOMLEFT" offsetX="-2" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameRightMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame_white.dds" level="100" tier="HIGH" virtual="true">
+            <Dimensions x="7" y="22" />
+            <TextureCoords left="0.75" right="0.9375" top="0.15625" bottom="0.84375"/>
+            <Anchor point="TOPRIGHT" offsetX="2"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="2" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameCenterMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame_white.dds" level="100" tier="HIGH" virtual="true">
+            <TextureCoords left="0.6875" right="0.4375" top="0.15625" bottom="0.84375"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+        </Texture>
+
+        <!-- Textures to construct any width 30 pixel tall white frame progress bar with flat or arrows on either side -->
+        <Texture name="ZO_GamepadWhiteFrameLeftArrowLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" virtual="true">
+            <Dimensions x="16" y="32" />
+            <TextureCoords left="0.3359375" right="0.4609375" top="0.265625" bottom="0.765625"/>
+            <Anchor point="RIGHT" relativePoint="LEFT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameRightArrowLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" virtual="true">
+            <Dimensions x="16" y="32" />
+            <TextureCoords left="0.4609375" right="0.3359375" top="0.265625" bottom="0.765625"/>
+            <Anchor point="LEFT" relativePoint="RIGHT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameLeftLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" virtual="true">
+            <Dimensions x="6" y="32" />
+            <TextureCoords left="0.65625" right="0.59375" top="0.265625" bottom="0.765625"/>
+            <Anchor point="RIGHT" relativePoint="LEFT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameRightLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" level="100" tier="HIGH" virtual="true">
+            <Dimensions x="6" y="32" />
+            <TextureCoords left="0.59375" right="0.65625" top="0.265625" bottom="0.765625"/>
+            <Anchor point="LEFT" relativePoint="RIGHT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadWhiteFrameCenterLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" level="100" tier="HIGH" virtual="true">
+            <TextureCoords left="0.484375" right="0.6015625" top="0.265625" bottom="0.765625"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+        </Texture>
+
+        <StatusBar name="ZO_GamepadStatusBarMedium" level="500" virtual="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_fill.dds">
+            <TextureCoords left="0" right="1" top="0.15625" bottom="0.84375"/>
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="8" height="22"/>
+            <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375"/>
+
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_GamepadStatusBarGlossMedium" />
+            </Controls>
+        </StatusBar>
+        
+        <StatusBar name="ZO_GamepadStatusBarGlossMedium" level="550" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_gloss.dds" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0.15625" bottom="0.84375"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge_gloss.dds" width="9" height="22" />
+            <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375"/>
+        </StatusBar>
+        
+        <StatusBar name="ZO_GamepadStatusBarLarge" level="500" virtual="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_fill.dds">
+            <Dimensions y="17" />
+            <Anchor point="LEFT" />
+            <Anchor point="RIGHT" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar30_leadingEdge.dds" width="11" height="17" />
+            <LeadingEdgeTextureCoords left="0" right="0.5625" top="0.03125" bottom="0.46875" />
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_GamepadStatusBarGlossLarge" />
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_GamepadStatusBarGlossLarge" level="550" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_gloss.dds" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0" bottom="0.53125"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_leadingEdge_gloss.dds" width="11" height="17" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0.125" bottom="0.46875" />
+        </StatusBar>        
+        
+        <!-- Gold/Bronze version of progress bar 22-->
+        <Texture name="ZO_GamepadStatusBarFrameLeftArrowMedium" inherits="ZO_GamepadWhiteFrameLeftArrowMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameRightArrowMedium" inherits="ZO_GamepadWhiteFrameRightArrowMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameLeftMedium" inherits="ZO_GamepadWhiteFrameLeftMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameRightMedium" inherits="ZO_GamepadWhiteFrameRightMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameCenterMedium" inherits="ZO_GamepadWhiteFrameCenterMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_frame.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgLeftArrowMedium" inherits="ZO_GamepadStatusBarFrameLeftArrowMedium"  textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_BG.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgLeftMedium" inherits="ZO_GamepadStatusBarFrameLeftMedium"  textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_BG.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgRightArrowMedium" inherits="ZO_GamepadStatusBarFrameRightArrowMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_BG.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgRightMedium" inherits="ZO_GamepadStatusBarFrameRightMedium" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_BG.dds" virtual="true" />
+
+        <Texture name="ZO_GamepadStatusBarBgCenterMedium" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_BG.dds" virtual="true">
+            <TextureCoords left="0.6875" right="0.4375" top="0.15625" bottom="0.84375"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+
+        <!-- Gold/Bronze version of progress bar 30px-->
+        <Texture name="ZO_GamepadStatusBarFrameLeftArrowLarge" inherits="ZO_GamepadWhiteFrameLeftArrowLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame.dds" level="100" tier="HIGH" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameRightArrowLarge" inherits="ZO_GamepadWhiteFrameRightArrowLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame.dds" level="100" tier="HIGH" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameLeftLarge" inherits="ZO_GamepadWhiteFrameLeftLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame.dds" level="100" tier="HIGH" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameRightLarge" inherits="ZO_GamepadWhiteFrameRightLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame.dds" level="100" tier="HIGH" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarFrameCenterLarge" inherits="ZO_GamepadWhiteFrameCenterLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame.dds" level="100" tier="HIGH" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgLeftArrowLarge" inherits="ZO_GamepadStatusBarFrameLeftArrowLarge" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_BG.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgLeftLarge" inherits="ZO_GamepadStatusBarFrameLeftLarge" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_BG.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgRightArrowLarge" inherits="ZO_GamepadStatusBarFrameRightArrowLarge" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_BG.dds" virtual="true" />
+        <Texture name="ZO_GamepadStatusBarBgRightLarge" inherits="ZO_GamepadStatusBarFrameRightLarge" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_BG.dds" virtual="true" />
+
+        <Texture name="ZO_GamepadStatusBarBgCenterLarge" tier="LOW" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_BG.dds" virtual="true">
+            <TextureCoords left="0.4921875" right="0.5546875" top="0.328125" bottom="0.6875"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+
+        <!-- Keep this width in sync with the NORMAL_WIDTH constant in Lua. -->
+        <Control name="ZO_GamepadStatusBarContainerMedium" virtual="true">
+            <Dimensions x="237" y="22" />
+            <OnInitialized>
+                self.bgContainer = self:GetNamedChild("BgContainer")
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadStatusBarBgContainerMedium" level="100" virtual="true">
+            <Dimensions x="237" y="18" />
+        </Control>
+
+        <Control name="ZO_GamepadArrowStatusBarOverlayMedium" tier="HIGH" layer="OVERLAY" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_GamepadStatusBarFrameLeftMedium" tier="MEDIUM" layer="OVERLAY"/>
+                <Texture name="$(parent)Right" inherits="ZO_GamepadStatusBarFrameRightArrowMedium" tier="MEDIUM" layer="OVERLAY"/>
+                <Texture name="$(parent)Middle" inherits="ZO_GamepadStatusBarFrameCenterMedium" tier="MEDIUM" layer="OVERLAY"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadArrowStatusBarBGMedium" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_GamepadStatusBarBgLeftMedium"/>
+                <Texture name="$(parent)Right" inherits="ZO_GamepadStatusBarBgRightArrowMedium"/>
+                <Texture name="$(parent)Middle" inherits="ZO_GamepadStatusBarBgCenterMedium"/>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_GamepadArrowStatusBarGlowLeftMedium" virtual="true" blendMode="ADD" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds">
+            <Dimensions x="16" y="64" />
+            <TextureCoords left=".664" right=".539" top="0" bottom="1" />
+            <Anchor point="LEFT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadArrowStatusBarGlowRightMedium" virtual="true" blendMode="ADD" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds">
+            <Dimensions x="20" y="64" />
+            <TextureCoords left=".5" right=".34375" top="0" bottom="1"/>
+            <Anchor point="RIGHT" />
+        </Texture>
+
+        <Texture name="ZO_GamepadArrowStatusBarGlowCenterMedium" virtual="true" blendMode="ADD" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds">
+            <TextureCoords left=".53125" right=".5078" top="0" bottom="1" />
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+        </Texture>
+        
+        <Control name="ZO_GamepadArrowStatusBarGlowMedium" virtual="true" alpha="0" layer="OVERLAY" tier="HIGH" level="500">
+            <Anchor point="LEFT" offsetX="-10" />
+            <Anchor point="RIGHT" offsetX="8"/>
+        </Control>
+      
+        <Control name="ZO_GamepadArrowStatusBarOverlayLarge" tier="HIGH" layer="OVERLAY" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_GamepadStatusBarFrameLeftLarge"/>
+                <Texture name="$(parent)Right" inherits="ZO_GamepadStatusBarFrameRightArrowLarge"/>
+                <Texture name="$(parent)Middle" inherits="ZO_GamepadStatusBarFrameCenterLarge"/>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadArrowStatusBarBGLarge" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_GamepadStatusBarBgLeftLarge"/>
+                <Texture name="$(parent)Right" inherits="ZO_GamepadStatusBarBgRightArrowLarge"/>
+                <Texture name="$(parent)Middle" inherits="ZO_GamepadStatusBarBgCenterLarge"/>
+            </Controls>
+        </Control>
+
+        <!-- Gamepad progress bar 22px -->
+        <StatusBar name="ZO_GamepadArrowStatusBarWithBGMedium" tier="MEDIUM" layer="CONTROLS" inherits="ZO_GamepadStatusBarMedium" virtual="true">
+            <Dimensions x="200" y="22" />
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </StatusBar>
+        
+        <!-- Gamepad progress bar 30px, used for crafting -->
+        <StatusBar name="ZO_GamepadArrowStatusBarWithBGLarge" inherits="ZO_GamepadStatusBarLarge" virtual="true">
+            <Dimensions x="200" y="18"/>
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGLarge">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
+                </Control>
+              
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayLarge">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
+                </Control>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_GamepadArrowStatusBarWithBGAndLabel" inherits="ZO_GamepadArrowStatusBarWithBGLarge" virtual="true">
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+                self.label = self:GetNamedChild("Label")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+                self.label:SetText(zo_strformat(SI_JOURNAL_PROGRESS_BAR_PROGRESS, self:GetValue(), max))
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+                local min, max = self:GetMinMax()
+                self.label:SetText(zo_strformat(SI_JOURNAL_PROGRESS_BAR_PROGRESS, value, max))
+            </OnValueChanged>
+
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad27" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" layer="OVERLAY">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </StatusBar>
+
+        <!-- Short name because we were hitting the character limit inside of tooltips -->
+        <Control name="ZO_ItemImproveBar_Gamepad" virtual="true" >
+            <Dimensions x="245" y="22"/>
+            <OnInitialized>
+                ZO_InventoryItemImprovementStatusBar:Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <StatusBar name="$(parent)Underlay" inherits="ZO_GamepadStatusBarMedium" color="AA0ACD">
+                    <AnchorFill />
+                </StatusBar>
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_GamepadStatusBarMedium">
+                    <AnchorFill />
+                </StatusBar>
+
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
+            </Controls>
+        </Control>
+  
+        <Control name="ZO_GamepadChampionFrame" tier="HIGH" layer="OVERLAY" level="0" virtual="true" >
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_frame.dds">
+                    <Dimensions x="5" y="12"/>
+                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.75"/>
+                    <Anchor point="TOPLEFT" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-2" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_frame.dds">
+                    <Dimensions x="16" y="12"/>
+                    <TextureCoords left="0.6718" right="0.73047" top="0" bottom="0.75"/>
+                    <Anchor point="TOPRIGHT" offsetX="4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="4"/>
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_frame.dds">
+                    <TextureCoords left="0.0234" right="0.66796875" top="0" bottom="0.75"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                </Texture>
+                
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadChampionBG" virtual="true" >
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_BG.dds">
+                    <Dimensions x="5" y="12"/>
+                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.75"/>
+                    <Anchor point="TOPLEFT" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-2" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_BG.dds">
+                    <Dimensions x="16" y="12"/>
+                    <TextureCoords left="0.6718" right="0.73047" top="0" bottom="0.75"/>
+                    <Anchor point="TOPRIGHT" offsetX="2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="2"/>
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_BG.dds">
+                    <TextureCoords left="0.0234" right="0.66796875" top="0" bottom="0.75"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <StatusBar name="ZO_GamepadChampionBar" level="500" virtual="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_fill.dds">
+            <Dimensions y="12" />
+            <TextureCoords left="0" right="1"  top="0" bottom="0.75"/>
+
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_leadingEdge.dds" width="8" height="12"/>
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.75" />
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_GamepadChampionBarGloss" />
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_GamepadChampionBarGloss" level="550" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_fill_gloss.dds" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_leadingEdge_gloss.dds" width="5" height="12" />
+            <LeadingEdgeTextureCoords left="0.75" right="1" top="0" bottom="0.75"/>
+        </StatusBar>
+    </Controls>
+</GuiXml>

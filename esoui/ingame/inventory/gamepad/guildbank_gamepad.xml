@@ -1,0 +1,37 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadBankCurrencySelectorTemplate" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" font="ZoFontGamepad42" override="true"/>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_GuildBankTopLevel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GuildBank_Gamepad_Initialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Text" text="SI_INVENTORY_RETRIEVING_ITEMS" override="true"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)CenterIsAlongTop">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>
+                </Control>
+                
+                <Control name="$(parent)SelectorContainer" inherits="ZO_GamepadGoldSpinnerContainerTemplate" hidden="true">
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)CenterIsAlongTop"/>
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

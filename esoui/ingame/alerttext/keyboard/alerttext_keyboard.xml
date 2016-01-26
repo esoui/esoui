@@ -1,0 +1,30 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="AlertFade">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="200" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="AlertTranslate">
+            <Animations>
+                <TranslateAnimation duration="0" deltaX="0" deltaY="0" anchorIndex="0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_AlertLine" font="ZoFontAlert" horizontalAlignment="RIGHT" virtual="true">
+            <DimensionConstraints maxX="600" />
+            <Anchor point="TOPRIGHT" />
+        </Label>
+
+        <TopLevelControl name="ZO_AlertTextNotification" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
+            <Anchor point="TOPRIGHT" offsetX="-15" offsetY="15" />
+            <OnInitialized>
+                ZO_AlertTextKeyboard_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

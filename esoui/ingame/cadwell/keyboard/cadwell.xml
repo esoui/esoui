@@ -1,0 +1,100 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CadwellNavigationEntry" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)CompletedIcon" level="3" textureFile="EsoUI/Art/Cadwell/check.dds" hidden="true">
+                    <Dimensions x="16" y="16"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-8"/>
+                </Texture>
+            </Controls>
+        </Label>
+
+        <Control name="ZO_Cadwell_ZoneDetailControl" virtual="true">
+            <OnInitialized>
+                local scrollChild = GetControl(self:GetParent(),"ZoneInfoContainerScrollChild")
+                self:SetParent(scrollChild)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_Cadwell_ZoneStepControl" virtual="true">
+            <OnInitialized>
+                local scrollChild = GetControl(self:GetParent(),"ZoneStepContainerScrollChild")
+                self:SetParent(scrollChild)
+            </OnInitialized>
+        </Control>
+
+        <Label name="ZO_Cadwell_DetailText" inherits="ZO_Cadwell_ZoneDetailControl" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_Cadwell_StepText" inherits="ZO_Cadwell_ZoneStepControl" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Label name="ZO_Cadwell_ObjectiveLine" inherits="ZO_Cadwell_StepText" virtual="true">
+            <Dimensions x="475" />
+            <Controls>
+                <Texture name="$(parent)Check" textureFile="EsoUI/Art/Cadwell/check.dds">
+                    <Dimensions x="16" y="16"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="-5" offsetY="3" />
+                </Texture>
+            </Controls>
+        </Label>
+
+        <TopLevelControl name="ZO_Cadwell" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_Cadwell_Initialize(self)
+            </OnInitialized>
+
+            <OnEffectivelyShown>
+                ZO_Cadwell_OnShown()
+            </OnEffectivelyShown>
+
+            <Controls>
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="335"/>
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="12" />
+                    <Anchor point="BOTTOMLEFT"/>
+                </Control>
+
+                <Control name="$(parent)ZoneInfoContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="550"/>
+                    <Anchor point="TOPRIGHT" offsetX="-33" offsetY="60" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" offsetX="-33" offsetY="-40" />
+                </Control>
+
+                <Label name="$(parent)TitleText" font="ZoFontWinH2" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <OnInitialized>
+                        local scrollChild = GetControl(self:GetParent(),"ZoneInfoContainerScrollChild")
+                        self:SetParent(scrollChild)
+                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                        self:SetWidth(500)
+                    </OnInitialized>
+                </Label>
+
+                <Label name="$(parent)DescriptionText" inherits="ZO_Cadwell_DetailText">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                </Label>
+
+                <Control name="$(parent)ZoneStepContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="550"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ZoneInfoContainer" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-33" />
+                </Control>
+
+                <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Quest/questJournal_divider.dds">
+                    <Dimensions x="512" y="4"/>
+                    <OnInitialized>
+                        local scrollChild = GetControl(self:GetParent(),"ZoneStepContainerScrollChild")
+                        self:SetParent(scrollChild)
+                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                    </OnInitialized>
+                </Texture>
+
+                <Label name="$(parent)ObjectivesText" inherits="ZO_Cadwell_StepText" text="SI_CADWELL_OBJECTIVES" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="10"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

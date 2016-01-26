@@ -1,0 +1,54 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="EnchantedResultAnimation" >
+            <Animations>
+                <AlphaAnimation duration="350" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="350" startAlpha="0" endAlpha="1" />
+
+                <AnimationTimeline playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+                    <Animations>
+                        <TextureRotateAnimation duration="8000" startRotation="0" endRotation="6.28318" />
+                        <TextureRotateAnimation duration="8000" startRotation="0" endRotation="-6.28318" />
+                    </Animations>
+                </AnimationTimeline>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_ApplyEnchantPanel" hidden="true">
+            <Dimensions x="236" y="64" />
+            
+            <OnInitialized>
+                ZO_ApplyEnchant_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Arrow" inherits="ZO_TransformArrow">
+                    <Anchor point="TOP" offsetY="9"/>
+                </Texture>
+                
+                <Button name="$(parent)Before" inherits="ZO_InventorySlot">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Arrow" relativePoint="LEFT" offsetX="-10" />
+                    <PressedOffset x="0" y="0" />
+                </Button>
+
+                <Button name="$(parent)After" inherits="ZO_InventorySlot">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Arrow" relativePoint="RIGHT" offsetX="10" />
+                    <PressedOffset x="0" y="0" />
+                    <Controls>
+                        <Texture name="$(parent)Glow1" textureFile="EsoUI/Art/Enchanting/enchanting_highlight.dds" excludeFromResizeToFitExtents="true">
+                            <Dimensions x="128" y="128"/>
+                            <Anchor point="CENTER" />
+                        </Texture>
+                        <Texture name="$(parent)Glow2" textureFile="EsoUI/Art/Enchanting/enchanting_highlight.dds" excludeFromResizeToFitExtents="true">
+                            <Dimensions x="128" y="128"/>
+                            <Anchor point="CENTER" />
+                        </Texture>
+                    </Controls>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

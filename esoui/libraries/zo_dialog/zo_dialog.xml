@@ -1,0 +1,185 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="DialogModalUnderlay">
+            <Animations>
+                <AlphaAnimation duration="175" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <ScaleAnimation duration="100" startScale="1.25" endScale="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Label name="ZO_DialogButtonNameLabel" font="ZoFontDialogKeybindDescription" virtual="true">
+            <Anchor point="RIGHT" offsetX="-5"/>
+        </Label>
+
+        <Label name="ZO_DialogButtonColoredNameLabel" inherits="ZO_DialogButtonNameLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Label name="ZO_DialogButtonKeyLabel" font="ZoFontKeybindStripKey" inherits="ZO_LargeKeyMarkupLabel" virtual="true">
+            <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
+        </Label>
+
+        <Control name="ZO_DialogButton" inherits="ZO_SharedDialogButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)NameLabel" inherits="ZO_DialogButtonColoredNameLabel" />
+                <Label name="$(parent)KeyLabel" inherits="ZO_DialogButtonKeyLabel" />
+            </Controls>
+        </Control>
+        
+        <Label name="ZO_DialogButtonNameLabel_Gamepad" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true">
+            <Anchor point="RIGHT" offsetX="-5"/>
+        </Label>
+
+        <Label name="ZO_DialogButtonKeyLabel_Gamepad" font="ZoFontGamepad22" inherits="ZO_LargeKeyMarkupLabel" virtual="true">
+            <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
+        </Label>
+        
+        <Control name="ZO_DialogButton_Gamepad" inherits="ZO_SharedDialogButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)NameLabel" inherits="ZO_DialogButtonNameLabel_Gamepad" />
+                <Label name="$(parent)KeyLabel" inherits="ZO_DialogButtonKeyLabel_Gamepad" />
+            </Controls>
+        </Control>
+
+        <Button name="ZO_DialogRadioButton" inherits="ZO_RadioButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5"/>
+                </Label>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_DialogContentAnchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="30"/>
+            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+        </Control>
+
+        <Label name="ZO_DialogTitle" font="ZoFontWinH2" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="360" />
+            <Anchor point="TOP" offsetY="15" />
+        </Label>
+
+        <Texture name="ZO_DialogDivider" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider.dds" excludeFromResizeToFitExtents="true" virtual="true">
+            <Dimensions x="512" y="8"/>
+            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5" />
+        </Texture>
+        
+        <!--Positioned above windows. Below chat, tooltips and menues-->
+        <TopLevelControl name="ZO_DialogFrame" tier="MEDIUM" level="1" mouseEnabled="true" hidden="true" allowBringToTop="false" resizeToFitDescendents="true" virtual="true">
+            <Anchor point="CENTER" relativeTo="GuiRoot" />
+            <ResizeToFitPadding width="50" height="33" />
+            <OnEffectivelyShown>
+                if not self.animation then
+                self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DialogModalUnderlay", self)
+                end
+                self.animation:PlayFromStart()
+                PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+            </OnEffectivelyShown>
+
+            <OnEffectivelyHidden>
+                RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+            </OnEffectivelyHidden>
+
+            <Controls>
+                <Texture name="$(parent)ModalUnderlay" color="000000" mouseEnabled="true" alpha=".55" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+
+                    <OnMouseWheel />
+                </Texture>
+
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                    <AnchorFill />
+                </Backdrop>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_DialogBase" inherits="ZO_DialogFrame" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_DialogTitle"/>
+
+                <Texture name="$(parent)Divider" inherits="ZO_DialogDivider"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CustomDialogFrame" inherits="ZO_DialogFrame ZO_SharedCustomDialogSize" virtual="true" />
+
+        <TopLevelControl name="ZO_CustomDialogBase" inherits="ZO_DialogBase ZO_SharedCustomDialogSize" virtual="true" />
+
+        <Control name="ZO_CustomDialogButton" inherits="ZO_DialogButton ZO_SharedCustomDialogButton" virtual="true" />
+        
+        <Control name="ZO_CustomDialogButton_Gamepad" inherits="ZO_DialogButton_Gamepad ZO_SharedCustomDialogButton" virtual="true" />
+
+        <TopLevelControl name="ZO_TwoButtonDialog" inherits="ZO_DialogBase" virtual="true">
+            <OnMouseWheel />
+            
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_SmallKeyMarkupLabel ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)Button2" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT"/>
+                </Control>
+
+                <Label name="$(parent)ButtonExtraText2" font="ZoFontGame" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Button2" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Button2" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+
+                <Control name="$(parent)Button1" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT"/>
+                </Control>
+
+                <Label name="$(parent)ButtonExtraText1" font="ZoFontGame" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Button1" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Button1" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+
+                <Control name="$(parent)Loading" inherits="ZO_Loading">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self)
+                    </OnInitialized>
+                </Control>
+
+                <Backdrop name="$(parent)Edit" inherits="ZO_EditBackdrop" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
+                    <Controls>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                            <OnTextChanged>
+                                ZO_TwoButtonDialogEditBox_OnTextChanged(self)
+                            </OnTextChanged>
+                        </EditBox>
+                        
+                        <Control name="$(parent)Instructions" resizeToFitDescendents="true" excludeFromResizeToFitExtents="true" hidden="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-25" offsetY="-15"/>
+                            <ResizeToFitPadding width="20" height="20" />
+                            <Controls>
+                                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                                    <AnchorFill />
+                                </Backdrop>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)RadioButtonContainer" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_Dialog1" inherits="ZO_TwoButtonDialog">
+            <Anchor point="CENTER" offsetY="-55" />
+            <OnInitialized>
+                ZO_TwoButtonDialog_OnInitialized(self, 1)
+            </OnInitialized>
+        </TopLevelControl>
+</Controls>
+</GuiXml>

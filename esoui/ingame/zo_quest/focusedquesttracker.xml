@@ -1,0 +1,71 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="FocusedQuestTrackerFadeGamepad">
+            <Animations>
+                <AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_IN_MS" startAlpha="GAMEPAD_FQT_TEXT_MIN_ALPHA" endAlpha="1" />
+                    
+                <AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_OUT_MS" startAlpha="1" endAlpha="GAMEPAD_FQT_TEXT_MIN_ALPHA">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+      
+        <AnimationTimeline name="FocusedQuestTrackerBackgroundFadeGamepad">
+            <Animations>
+                <AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_IN_MS" startAlpha="0" endAlpha="GAMEPAD_FQT_BACKGROUND_MAX_ALPHA" />
+                    
+                <AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_OUT_MS" startAlpha="GAMEPAD_FQT_BACKGROUND_MAX_ALPHA" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Texture name="ZO_FocusedQuestTracker_BackgroundTexture" textureFile="EsoUI/Art/Windows/Gamepad/gp_grunge_scalable.dds" virtual="true" />
+      
+        <TopLevelControl name="ZO_FocusedQuestTrackerPanel">
+            <Dimensions x="275"/>
+            <Anchor point="TOPRIGHT" offsetY="100" />
+
+            <OnInitialized>
+                ZO_FocusedQuestTracker_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)TimerAnchor" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" offsetX="10" />
+                    <OnInitialized>
+                        ZO_QuestTimer_CreateInContainer(self)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)Container" resizeToFitDescendents="true" hidden="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)QuestContainer" mouseEnabled="true" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TimerAnchor" relativePoint="BOTTOMLEFT" offsetX="35" offsetY="5"/>
+                            <Controls>
+                                <Control name="$(parent)Assisted" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                                    <OnInitialized>
+                                        ZO_KeybindButtonTemplate_OnInitialized(self)
+                                        local HIDE_UNBOUND = false
+                                        self:SetKeybind("ASSIST_NEXT_TRACKED_QUEST", HIDE_UNBOUND)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+              
+                        <Control name="$(parent)Background" inherits="ZO_ScalableBackgroundFadedEdge" tier="LOW">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)QuestContainer" offsetX="28" offsetY="-20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

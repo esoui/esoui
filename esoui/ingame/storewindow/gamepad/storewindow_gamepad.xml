@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_StoreWindow_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Store_OnInitialize_Gamepad(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SpinnerContainer" inherits="ZO_GamepadLabeledQuantitySpinnerContainerTemplate" hidden="true"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

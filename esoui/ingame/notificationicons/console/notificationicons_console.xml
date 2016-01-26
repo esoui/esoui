@@ -1,0 +1,41 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ConsoleNotificationPulse">
+            <Animations>
+                <ScaleAnimation duration="250" startScale="1" endScale="1.5"/>
+                <AlphaAnimation duration="250" startAlpha="0.5" endAlpha="1"/>
+                <ScaleAnimation duration="250" startScale="1.5" endScale="1" delay="250"/>
+                <AlphaAnimation duration="250" startAlpha="1" endAlpha="0.5" delay="250"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ConsoleNotificationIconsFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>    
+    
+    <Controls>
+        <TopLevelControl name="ZO_NotificationIcons_Console" hidden="false" alpha="0">
+            <Dimensions y="32" />
+            <Anchor point="TOPRIGHT" offsetX="-96" offsetY="54"/>
+            <OnInitialized>
+                ZO_NotificationIcons_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Mail" textureFile="EsoUI/Art/HUD/Gamepad/gp_HUDNotification_Mail.dds" alpha=".5">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" offsetX="-16"/>
+                </Texture>
+
+                <Texture name="$(parent)Notifications" textureFile="EsoUI/Art/HUD/Gamepad/gp_HUDNotification_notification.dds" alpha=".5">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Mail" offsetX="-40"/>
+                </Texture>                
+
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,8 @@
+<GuiXml>
+    <!-- Any fonts created in this file will be loaded for both Gamepad and Keyboard
+         Adding new fonts creates additional memory usage on Consoles and could cause them to be unable to run
+    -->
+    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ProseAntiquePSMT.otf" />
+    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/Handwritten_Bold.otf" />
+    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/TrajanPro-Regular.otf" />
+</GuiXml>

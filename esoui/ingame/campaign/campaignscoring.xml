@@ -1,0 +1,100 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_CampaignScoring_Icon" inherits="ZO_CampaignScoring_IconTemplate" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_CampaignScoring_IconOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_CampaignScoring_IconOnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+        
+        <Control name="ZO_CampaignScoringAllianceSection" inherits="ZO_CampaignScoringAllianceSectionTemplate" virtual="true" override="true">
+            <Dimensions x="612" y="160"/>
+            <Controls>
+                <Texture name="$(parent)UnderdogScoreIcon" tier="MEDIUM" mouseEnabled="true" textureFile="EsoUI/Art/AvA/overview_icon_underdog_score.dds" override="true">
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, 0)
+                        SetTooltipText(InformationTooltip, GetString(SI_CAMPAIGN_SCORING_UNDERDOG_TOOLTIP_TITLE))
+                        InformationTooltip:AddVerticalPadding(10)
+
+                        InformationTooltip:AddLine(GetString(SI_CAMPAIGN_SCORING_UNDERDOG_TOOLTIP), "", ZO_NORMAL_TEXT:UnpackRGB())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Texture>
+
+                <Texture name="$(parent)UnderdogPopIcon" tier="MEDIUM" mouseEnabled="true" textureFile="EsoUI/Art/AvA/overview_icon_underdog_population.dds" override="true">
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOM, 0, 0)
+                        SetTooltipText(InformationTooltip, GetString(SI_CAMPAIGN_SCORING_UNDERPOP_TOOLTIP_TITLE))
+                        InformationTooltip:AddVerticalPadding(10)
+
+                        InformationTooltip:AddLine(GetString(SI_CAMPAIGN_SCORING_UNDERPOP_TOOLTIP), "", ZO_NORMAL_TEXT:UnpackRGB())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CampaignScoring" inherits="ZO_CampaignOverviewSubwindow">
+            <OnInitialized>
+                ZO_CampaignScoring_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)DurationLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CAMPAIGN_SCORING_DURATION_REMAINING">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Label name="$(parent)Duration" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)DurationLabel" relativePoint="BOTTOMRIGHT" offsetX="2" />
+                    <OnUpdate>
+                        ZO_CampaignScoring_TimeUpdate(self, GetSecondsUntilCampaignEnd)
+                    </OnUpdate>
+                </Label>
+
+                <Label name="$(parent)NextScoreLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CAMPAIGN_SCORING_NEXT_SCORE_EVAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DurationLabel" relativePoint="BOTTOMLEFT" />
+                </Label>
+                <Label name="$(parent)NextScore" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)NextScoreLabel" relativePoint="BOTTOMRIGHT" offsetX="2" />
+                    <OnUpdate>
+                        ZO_CampaignScoring_TimeUpdate(self, GetSecondsUntilCampaignScoreReevaluation)
+                    </OnUpdate>
+                </Label>
+                
+                <Control name="$(parent)TierProgress" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NextScoreLabel" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="5"/>
+                    <Controls>
+                        <Label name="$(parent)Rank" font="ZoFontCallout3">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        <Label name="$(parent)Name" font="ZoFontWinH3" text="SI_CAMPAIGN_SCORING_END_OF_CAMPAIGN_REWARD_TIER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetX="38" offsetY="10" />
+                        </Label>
+                        <StatusBar name="$(parent)StatusBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
+                        </StatusBar>
+                    </Controls>
+                </Control>                
+
+                <Control name="$(parent)TopSection" inherits="ZO_CampaignScoringAllianceSection">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TierProgress" relativePoint="BOTTOMLEFT" offsetX="-25" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)MiddleSection" inherits="ZO_CampaignScoringAllianceSection">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)BottomSection" inherits="ZO_CampaignScoringAllianceSection">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MiddleSection" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

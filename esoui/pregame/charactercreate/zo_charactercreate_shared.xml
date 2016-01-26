@@ -1,0 +1,48 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CharacterCreateSceneFade">
+            <Animations>
+                <AlphaAnimation duration="2000" startAlpha="1" endAlpha="0">
+                    <OnStop>
+                        ZO_CharacterCreate_FadeInMainControls()
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CharacterCreateMainControlsFade">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
+                    <OnPlay>
+                        CharacterCreateTransitionFromFirstTimePosture()
+                    </OnPlay>
+                    <OnStop>
+                        ZO_CharacterCreate_FinishTransitions()
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_PaperdollManipulation_Shared" virtual="true">
+            <Dimensions x="580"/>
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" relativePoint="TOP"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" relativePoint="BOTTOM"/>
+        </Control>
+        
+        <TopLevelControl name="ZO_CharacterCreateOverlay" topmost="true" tier="HIGH" layer="OVERLAY" level="1000" mouseEnabled="false" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                self.fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CharacterCreateSceneFade", self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Texture" color="000000" mouseEnabled="false">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

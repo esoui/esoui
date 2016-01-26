@@ -1,0 +1,28 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupingToolsSharedRoles" virtual="true">
+            <OnInitialized>
+                local tankIcon = self:GetNamedChild("Tank")
+                local healerIcon = self:GetNamedChild("Healer")
+                local damageIcon = self:GetNamedChild("Damage")
+                
+                self:SetHeight(zo_max(tankIcon:GetHeight(), healerIcon:GetHeight(), damageIcon:GetHeight()))
+                self:SetWidth(tankIcon:GetWidth() + healerIcon:GetWidth() + damageIcon:GetWidth())
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Tank">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" />
+                </Texture>
+                <Texture name="$(parent)Healer">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Tank" relativePoint="RIGHT" />
+                </Texture>
+                <Texture name="$(parent)Damage">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Healer" relativePoint="RIGHT" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

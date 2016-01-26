@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DyeingSavedPresetListEntry_Gamepad" virtual="true">
+            <Dimensions x="300" y="102"/>
+
+            <OnInitialized>
+                ZO_DyeingSavedSlot_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)SharedHighlight" inherits="ZO_DyeingHighlight_Gamepad" />
+
+                <Control name="$(parent)Dyes" inherits="ZO_DyeingSwatchPresetListEntry_Gamepad">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

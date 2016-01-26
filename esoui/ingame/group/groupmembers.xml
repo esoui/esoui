@@ -1,0 +1,18 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GroupMembers" hidden="true">
+            <OnInitialized>
+                ZO_GroupMembers_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_GROUP_MEMBERS_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GroupList" offsetX="52" offsetY="28"/>
+                </Label>
+
+                <Label name="$(parent)Count" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="2"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

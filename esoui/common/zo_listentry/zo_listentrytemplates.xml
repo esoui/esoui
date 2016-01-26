@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ListEntryBackdrop" tier="LOW" layer="BACKGROUND" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Texture name="$(parent)Top" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds" level="0">
+                    <Dimensions y="16" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.125" />
+                </Texture>
+
+                <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds" level="0">
+                    <Dimensions y="32" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="0" right="1" top="0.375" bottom="0.625" />
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds" level="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Top" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+                    <TextureCoords left="0" right="1" top="0.125" bottom="0.375" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ListEntryHighlight" inherits="ZO_ListEntryBackdrop" alpha="0" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Texture name="$(parent)Top" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight.dds" level="1"/>
+                <Texture name="$(parent)Bottom" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight.dds" level="1"/>
+                <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight.dds" level="1"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

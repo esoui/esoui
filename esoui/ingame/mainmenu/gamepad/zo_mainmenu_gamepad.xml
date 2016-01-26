@@ -1,0 +1,40 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_MainMenu_GamepadCrossFade" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation delay="1000" duration="500" startAlpha="1" endAlpha="0">
+                    <OnStop>
+                        animatingControl.textIndex = (animatingControl.textIndex % #animatingControl.text) + 1
+                        animatingControl:SetText(animatingControl.text[animatingControl.textIndex])
+                    </OnStop>
+                </AlphaAnimation>
+                <AlphaAnimation delay="1500" duration="500" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_GamepadNewAnimatingMenuEntryTemplate" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                self.label.text = { GetString(SI_MAIN_MENU_SKILLS), GetString(SI_STATS_ATTRIBUTES_LEVEL_UP) }
+                self.label.animationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MainMenu_GamepadCrossFade", self.label)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadMenuEntryTemplateWithArrow" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Buttons/Gamepad/gp_menu_rightArrow.dds">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_MainMenu_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_MainMenu_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

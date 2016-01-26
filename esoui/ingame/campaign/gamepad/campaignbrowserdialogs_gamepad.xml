@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CampaignBrowserDialogsGamepadMenuEntry" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.subLabelCount = 2
+                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+
+                <Label name="$(parent)SubLabel2" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" font="ZoFontGamepad42">
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_MINIMUM_INDENT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel2" relativePoint="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon" inherits="ZO_CampaignBrowserDialogsGamepadMenuEntry" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel2" relativePoint="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

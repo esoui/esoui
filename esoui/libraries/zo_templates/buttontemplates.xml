@@ -1,0 +1,356 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_ButtonBehaviorClickSound" clickSound="Click" virtual="true" />
+
+        <Button name="ZO_DefaultButton" font="ZoFontGameBold" endCapWidth="9" verticalAlignment="CENTER" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound" virtual="true">
+            <Dimensions x="128" y="28" />
+            <PressedOffset x="1" y="1" />
+
+            <FontColors
+                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+            />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds"
+                pressed="EsoUI/Art/Buttons/ESO_buttonlLarge_mouseDown.dds"
+                mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds"
+                disabled="EsoUI/Art/Buttons/ESO_buttonLarge_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_DefaultTextButton" font="ZoFontGame" inherits="ZO_ButtonBehaviorClickSound" verticalAlignment="CENTER" virtual="true">
+            <Dimensions x="128" y="26" />
+            <PressedOffset x="1" y="1" />
+
+            <FontColors
+                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+            />
+        </Button>
+
+        <Button name="ZO_MenuDropDownTextButton" font="ZoFontHeader" inherits="ZO_ButtonBehaviorClickSound" verticalAlignment="CENTER" virtual="true">
+            <Dimensions x="128" y="26" />
+            <PressedOffset x="1" y="1" />
+
+            <FontColors
+                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+            />
+        </Button>
+        
+        <Button name="ZO_DropdownButton" clickSound="Click_Combo" virtual="true">
+            <Dimensions x="32" y="32" />
+            <NormalOffset x="0" y="8" />
+            <PressedOffset x="0" y="10" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/dropBox_arrow_normal.dds"
+                pressed="EsoUI/Art/Buttons/dropBox_arrow_mouseDown.dds"
+                mouseOver="EsoUI/Art/Buttons/dropBox_arrow_mouseOver.dds"
+                disabled="EsoUI/Art/Buttons/dropBox_arrow_mouseDown.dds"
+            />
+        </Button>
+
+        <Button name="ZO_RadioButton" inherits="ZO_ButtonBehaviorClickSound" virtual="true">
+          <Dimensions x="16" y="16" />
+
+          <Textures
+              normal="EsoUI/Art/Buttons/RadioButtonUp.dds"
+              pressed="EsoUI/Art/Buttons/RadioButtonDown.dds"
+              mouseOver="EsoUI/Art/Buttons/RadioButtonUpHighlight.dds"
+              disabled="EsoUI/Art/Buttons/RadioButtonDisabledUp.dds"
+              disabledPressed="EsoUI/Art/Buttons/RadioButtonDisabledDown.dds"
+            />
+
+          <!--NOTE: Instantiators of this radio button can choose to make a custom OnClicked handler -->
+        </Button>
+
+        <Button name="ZO_CloseButton" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="20" y="20" />
+            <Anchor point="TOPRIGHT" offsetX="-5" offsetY="6" />
+
+			<TextureCoords left="0" top="0" right="0.625" bottom="0.625" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/closeButton_up.dds"
+                pressed="EsoUI/Art/Buttons/closeButton_down.dds"
+                mouseOver="EsoUI/Art/Buttons/closeButton_mouseOver.dds"
+                disabled="EsoUI/Art/Buttons/closeButton_disabled.dds"
+             />
+        </Button>
+
+        <Button name="ZO_CheckButton" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="16" y="16" />
+
+            <OnClicked>
+                ZO_CheckButton_OnClicked(self, button)
+            </OnClicked>
+
+            <Textures
+                normal="EsoUI/Art/Buttons/checkbox_unchecked.dds"
+                pressed="EsoUI/Art/Buttons/checkbox_checked.dds"
+                mouseOver="EsoUI/Art/Buttons/checkbox_mouseover.dds"
+                disabled="EsoUI/Art/Buttons/checkbox_disabled.dds"
+                disabledPressed="EsoUI/Art/Buttons/checkbox_checked_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_GamepadCheckButton" virtual="true">
+            <Dimensions x="48" y="48" />
+
+            <OnClicked>
+                ZO_CheckButton_OnClicked(self, button)
+            </OnClicked>
+
+            <Textures
+                normal="EsoUI/Art/Buttons/Gamepad/gp_checkBox_upOver.dds"
+                pressed="EsoUI/Art/Buttons/Gamepad/gp_checkBox_downOver.dds"
+            />
+        </Button>
+
+        <Button name="ZO_CheckButton_Text" font="ZoFontGameBold" verticalAlignment="CENTER" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound" virtual="true">
+            <Dimensions x="128" y="26" />
+            <OnInitialized>
+                self.checkedText = GetString(SI_CHECK_BUTTON_ON)
+                self.uncheckedText = GetString(SI_CHECK_BUTTON_OFF)
+            </OnInitialized>
+
+            <OnClicked>
+                ZO_CheckButton_OnClicked(self, button)
+            </OnClicked>
+        </Button>
+
+        <Label name="ZO_CheckButtonLabel" virtual="true" mouseEnabled="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold">
+            <OnMouseUp>
+                if(upInside) then
+                    ZO_CheckButton_OnClicked(self:GetParent(), button)
+                end
+            </OnMouseUp>
+            <OnMouseEnter>
+                ZO_CheckButtonLabel_ColorText(self, true)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CheckButtonLabel_ColorText(self, false)
+            </OnMouseExit>
+        </Label>
+
+        <Button name="ZO_TriStateCheckButton" inherits="ZO_CheckButton" virtual="true">
+            <OnClicked>
+                ZO_TriStateCheckButton_OnClicked(self, button)
+            </OnClicked>
+        </Button>
+
+        <Control name="ZO_TabButtonBehavior" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_TabButton_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_TabButton_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_SimpleIconTabButton" inherits="ZO_TabButtonBehavior" virtual="true">
+            <Controls>               
+                <Texture name="$(parent)Icon" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SimpleIconWithHighlightTabButton" inherits="ZO_TabButtonBehavior" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" />
+                <Texture name="$(parent)Highlight" hidden="true" blendMode="ADD" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TextTabButton" inherits="ZO_TabButtonBehavior" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" offsetX="8" offsetY="6" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ResizableTab" inherits="ZO_TabButtonBehavior" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left">
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+                <Texture name="$(parent)Right">
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)Center">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Right" relativePoint="TOPLEFT"/>
+                </Texture>                              
+            </Controls>
+        </Control>
+   
+        <Control name="ZO_ResizableTextTabButton" inherits="ZO_ResizableTab" virtual="true">
+            <Dimensions x="0" y="24" />
+            <Controls>                
+                <Label name="$(parent)Text" font="ZoFontGame">
+                    <Dimensions x="0" y="12" />
+                    <Anchor point="TOPLEFT" offsetX="8" offsetY="6" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ResizableImageTabButton" inherits="ZO_ResizableTab" virtual="true">
+            <Controls>               
+                <Texture name="$(parent)Icon" level="3"/>
+            </Controls>
+        </Control>
+
+        <Button name="ZO_LeftRightButton" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="20" y="20" />
+            <OnInitialized>
+                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_LEFT_RIGHT)
+            </OnInitialized>
+        </Button>
+
+        <Button name="ZO_MinMaxButton" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="20" y="20" />
+            <OnInitialized>
+                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_MIN_MAX)
+            </OnInitialized>
+        </Button>
+
+        <Button name="ZO_BladeHeader" font="ZoFontGame" endCapWidth="22" verticalAlignment="CENTER" virtual="true">
+            <Dimensions x="200" y="28"/>
+            <PressedOffset x="2" y="2" />
+
+            <OnInitialized>
+                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_BLADE)
+            </OnInitialized>
+            
+            <FontColors
+                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+            />
+        </Button>
+
+        <Button name="ZO_TreeButtonArrow" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <OnInitialized>
+                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_TREE)
+            </OnInitialized>
+        </Button>
+
+        <Button name="ZO_PreviousArrowButton" inherits="ZO_ButtonBehaviorClickSound" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Textures
+                normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_NextArrowButton" inherits="ZO_ButtonBehaviorClickSound" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Textures
+                normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_SwitchButton" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <Textures
+                normal="EsoUI/Art/Buttons/switch_up.dds"
+                pressed="EsoUI/Art/Buttons/switch_down.dds"
+                mouseOver="EsoUI/Art/Buttons/generic32x32MouseOver.dds"
+                disabled="EsoUI/Art/Buttons/switch_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_WeaponSwap" virtual="true" font="ZoFontWinH4" mouseOverBlendMode="ADD">
+            <Dimensions x="52" y="58" />
+
+            <OnInitialized>
+                ZO_WeaponSwap_OnInitialized(self)
+            </OnInitialized>
+
+            <!-- TODO: Convert to button attributes -->
+            <OnMouseDown>
+                OnWeaponSwap()
+            </OnMouseDown>
+
+            <OnClicked>
+            </OnClicked>
+
+            <OnMouseEnter>
+                ZO_WeaponSwap_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_WeaponSwap_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Textures
+                normal="EsoUI/Art/CharacterWindow/swap_button_up.dds"
+                pressed="EsoUI/Art/CharacterWindow/swap_button_down.dds"
+                mouseOver="EsoUI/Art/CharacterWindow/swap_button_over.dds"
+                disabled="EsoUI/Art/CharacterWindow/swap_button_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_WeaponSwapLeft" virtual="true" inherits="ZO_WeaponSwap">
+            <TextureCoords left="0.875" top=".03125" right=".0625" bottom="0.9375"/>
+            <NormalOffset x="-1" y="17" />
+            <PressedOffset x="-1" y="19" />
+            <Controls>
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/CharacterWindow/swap_lock.dds" hidden="true">
+                    <Dimensions x="26" y="26" />
+                    <Anchor point="CENTER" offsetX="-2" offsetY="0" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_WeaponSwapRight" virtual="true" inherits="ZO_WeaponSwap">
+            <TextureCoords left=".0625" top=".03125" right="0.875" bottom="0.9375"/>
+            <NormalOffset x="1" y="17" />
+            <PressedOffset x="1" y="19" />
+            <Controls>
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/CharacterWindow/swap_lock.dds" hidden="true">
+                    <Dimensions x="26" y="26" />
+                    <Anchor point="CENTER" offsetX="2" offsetY="0" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_PlusButton" virtual="true">
+            <Dimensions x="22" y="22"/>
+            <TextureCoords left="0.15625" right="0.84375" top="0.15625" bottom="0.84375"/>
+            <Textures
+                normal="EsoUI/Art/Buttons/plus_up.dds"
+                pressed="EsoUI/Art/Buttons/plus_down.dds"
+                mouseOver="EsoUI/Art/Buttons/plus_over.dds"
+                disabled="EsoUI/Art/Buttons/plus_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_MinusButton" virtual="true">
+            <Dimensions x="22" y="22"/>
+            <TextureCoords left="0.15625" right="0.84375" top="0.15625" bottom="0.84375"/>
+            <Textures
+                normal="EsoUI/Art/Buttons/minus_up.dds"
+                pressed="EsoUI/Art/Buttons/minus_down.dds"
+                mouseOver="EsoUI/Art/Buttons/minus_over.dds"
+                disabled="EsoUI/Art/Buttons/minus_disabled.dds"
+            />
+        </Button>
+    </Controls>
+</GuiXml>

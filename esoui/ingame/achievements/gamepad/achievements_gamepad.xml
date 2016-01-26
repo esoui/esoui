@@ -1,0 +1,104 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_Gamepad_Achievement_FocusIconScaleAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.375"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_Gamepad_Achievement_Icon" level="2" layer="CONTROLS" inherits="ZO_MultiIcon" virtual="true" excludeFromResizeToFitExtents="true">
+            <Dimensions x="40" y="40" />
+        </Texture>
+
+        <Backdrop name="ZO_Gamepad_Achievement_IconFrame" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" pixelRoundingEnabled="false" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8" />
+
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+            <Insets left="8" top="8" right="-8" bottom="-8" />
+        </Backdrop>
+
+        <Control name="ZO_Gamepad_Achievement_Entry" virtual="true">
+            <Dimensions x="55" y="55" />
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="ZO_Gamepad_Achievement_Icon">
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadAchievementsEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.subLabelCount = 1
+                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" level="0" modifyTextType="NONE" inherits="ZO_GamepadMenuEntryLabelTemplate">
+                    <Dimensions x="230"/>
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                </Label>
+                <Texture name="$(parent)Icon" inherits="ZO_Gamepad_Achievement_Icon">
+                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+                </Texture>
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" excludeFromResizeToFitExtents="true" />
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+                <Label name="$(parent)SubLabel1" level="0" horizontalAlignment="RIGHT" inherits="ZO_GamepadMenuEntryLabelTemplate">
+                    <AnchorToBaseline relativeToLabel="$(parent)Label" side="RIGHT" offsetX="10"/>
+                    <Dimensions x="50"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_Gamepad_Achievements_FooterBar" inherits="ZO_GamepadXPBarFooter" hidden="true"/>
+        
+        <TopLevelControl name="ZO_Gamepad_Achievements" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Achievements_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Chain" tier="HIGH" hidden="true">
+                    <!-- No anchors here, as this control is dynamically positioned. -->
+                </Control>
+
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)Recent" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeaderMessage" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderContainerHeaderMessage" relativePoint="BOTTOMRIGHT" />
+
+                                    <OnInitialized>
+                                        self:SetParent(self:GetParent():GetNamedChild("HeaderContainer"):GetNamedChild("Header"))
+                                    </OnInitialized>
+
+                                    <Controls>
+                                        <Label name="$(parent)Header" font="ZoFontGamepadBold22" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" text="SI_ACHIEVEMENTS_RECENT" horizontalAlignment="CENTER">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+                                        <Control name="$(parent)Centerer">
+                                            <Dimensions y="50" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Label name="$(parent)NoEntries" text="SI_GAMEPAD_ACHIEVEMENTS_NO_ITEMS" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Recent" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Recent" relativePoint="BOTTOMRIGHT" offsetY="35" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

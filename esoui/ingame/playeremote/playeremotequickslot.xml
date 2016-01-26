@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PlayerEmoteRadialMenuEntryTemplate" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" scale=".75" virtual="true">
+            <OnInitialized>
+                ZO_PlayerEmoteRadialMenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativeto="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_PlayerEmoteQuickslotTopLevel">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_PlayerEmoteQuickslot_Initialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_RadialMenuHUDSize_Gamepad"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

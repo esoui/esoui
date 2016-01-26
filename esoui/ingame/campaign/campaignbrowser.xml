@@ -1,0 +1,244 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_RulesetTypeHeader" inherits="ZO_IconHeader" virtual="true"/>
+        <Control name="ZO_RulesetTypeEntry" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+            </OnInitialized>
+        </Control>
+        <Label name="ZO_RulesetEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel ZO_TreeEntry"/>
+
+        <Label name="ZO_CampaignBrowserLoadingLabel" virtual="true" inherits="ZO_LoadingText" font="ZoFontGame"/>
+        <Label name="ZO_CampaignBrowserLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
+        <Texture name="ZO_CampaignBrowserTexture" layer="OVERLAY" mouseEnabled="true" virtual="true">
+            <Dimensions x="26" y="26"/>
+        </Texture>
+        <Control name="ZO_CampaignBrowserRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnMouseEnter>
+                ZO_CampaignBrowserRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CampaignBrowserRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_CampaignBrowserRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnMouseDoubleClick>
+                ZO_CampaignBrowserRow_OnMouseDoubleClick(self)
+            </OnMouseDoubleClick>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+
+                <Texture name="$(parent)Icon" inherits="ZO_CampaignBrowserTexture">
+                    <Anchor point="LEFT"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowIcon_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowIcon_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)Name" inherits="ZO_CampaignBrowserLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                    <Dimensions x="344"/>
+                </Label>
+                <Texture name="$(parent)GroupMembers" textureFile="EsoUI/Art/Campaign/campaignBrowser_group.dds" inherits="ZO_CampaignBrowserTexture">
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowGroupMembers_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowGroupMembers_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)Friends" textureFile="EsoUI/Art/Campaign/campaignBrowser_friends.dds" inherits="ZO_CampaignBrowserTexture">
+                    <Anchor point="LEFT" relativeTo="$(parent)GroupMembers" relativePoint="RIGHT" offsetX="10"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowFriends_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowFriends_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)GuildMembers" textureFile="EsoUI/Art/Campaign/campaignBrowser_guild.dds" inherits="ZO_CampaignBrowserTexture">
+                    <Anchor point="LEFT" relativeTo="$(parent)Friends" relativePoint="RIGHT" offsetX="10"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowGuildMembers_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowGuildMembers_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)AlliancePopulation1" inherits="ZO_CampaignBrowserTexture" color="INTERFACE_COLOR_TYPE_ALLIANCE:ALLIANCE_ALDMERI_DOMINION">
+                    <Anchor point="LEFT" relativeTo="$(parent)GuildMembers" relativePoint="RIGHT" offsetX="13"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowAlliancePopulation_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowAlliancePopulation_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)AlliancePopulation2" inherits="ZO_CampaignBrowserTexture" color="INTERFACE_COLOR_TYPE_ALLIANCE:ALLIANCE_EBONHEART_PACT">
+                    <Anchor point="LEFT" relativeTo="$(parent)AlliancePopulation1" relativePoint="RIGHT" offsetX="20"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowAlliancePopulation_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowAlliancePopulation_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)AlliancePopulation3" inherits="ZO_CampaignBrowserTexture" color="INTERFACE_COLOR_TYPE_ALLIANCE:ALLIANCE_DAGGERFALL_COVENANT">
+                    <Anchor point="LEFT" relativeTo="$(parent)AlliancePopulation2" relativePoint="RIGHT" offsetX="20"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserRowAlliancePopulation_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserRowAlliancePopulation_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignBrowserQueueRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnMouseEnter>
+                ZO_CampaignBrowserQueueRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CampaignBrowserQueueRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_CampaignBrowserQueueRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnMouseDoubleClick>
+              ZO_CampaignBrowserQueueRow_OnMouseDoubleClick(self)
+            </OnMouseDoubleClick>
+
+          <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                <Texture name="$(parent)Icon" inherits="ZO_CampaignBrowserTexture">
+                    <Anchor point="LEFT" offsetX="32"/>
+                    <OnMouseEnter>
+                        ZO_CampaignBrowserQueueRowIcon_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBrowserQueueRowIcon_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)Description" inherits="ZO_CampaignBrowserLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                    <Dimensions x="369"/>
+                </Label>
+                <Control name="$(parent)Loading" inherits="ZO_Loading">
+                    <Anchor point="TOPLEFT" offsetX="30"/>
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self, nil, "ZO_CampaignBrowserLoadingLabel")
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_CampaignBrowser" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_CampaignBrowser_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="68"/>
+                    <Dimensions x="265" y="290"/>
+                </Control>
+
+                <Label name="$(parent)RulesHeader" font="ZoFontHeader3" text="SI_CAMPAIGN_BROWSER_RULES_HEADER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10"/>
+                </Label>
+                <Texture name="$(parent)RulesDivider" textureFile="EsoUI/Art/Campaign/campaignBrowser_divider_short.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RulesHeader" relativePoint="BOTTOMLEFT" offsetX="-20"/>
+                    <Dimensions x="256" y="4"/>
+                </Texture>
+                <Label name="$(parent)Rules" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RulesHeader" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                    <Dimensions x="250" y="310"/>
+                </Label>
+                
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" offsetX="290" offsetY="73"/>
+                    <Anchor point="TOPRIGHT" offsetY="73"/>
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_CAMPAIGN_BROWSER_NAME_HEADER), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" offsetX="30"/>
+                            <Dimensions x="344" y="32"/>
+                        </Control>
+                        <Control name="$(parent)GroupMembers" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeArrowHeader(self, "numGroupMembers", ZO_SORT_ORDER_DOWN)
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_GROUP_MEMBERS))
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Dimensions x="16" y="32"/>
+                        </Control>
+                        <Control name="$(parent)Friends" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeArrowHeader(self, "numFriends", ZO_SORT_ORDER_DOWN)
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_FRIENDS))
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GroupMembers" relativePoint="TOPRIGHT" offsetX="20"/>
+                            <Dimensions x="16" y="32"/>
+                        </Control>
+                        <Control name="$(parent)GuildMembers" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeArrowHeader(self, "numGuildMembers", ZO_SORT_ORDER_DOWN)
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_GUILD_MEMBERS))
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Friends" relativePoint="TOPRIGHT" offsetX="20"/>
+                            <Dimensions x="16" y="32"/>
+                        </Control>
+                        <Control name="$(parent)AlliancePopulation1" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeIconWithArrowHeader(self, "EsoUI/Art/Campaign/campaignBrowser_columnHeader_AD.dds", "EsoUI/Art/Campaign/campaignBrowser_columnHeader_AD_over.dds", -5, "alliancePopulation1", ZO_SORT_ORDER_UP)
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_ALDERI_DOMINION_POPULATION))
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GuildMembers" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Dimensions x="32" y="32"/>
+                        </Control>
+                        <Control name="$(parent)AlliancePopulation2" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeIconWithArrowHeader(self, "EsoUI/Art/Campaign/campaignBrowser_columnHeader_EP.dds", "EsoUI/Art/Campaign/campaignBrowser_columnHeader_EP_over.dds", -5, "alliancePopulation2", ZO_SORT_ORDER_UP)
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_EBONHEART_PACT_POPULATION))
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AlliancePopulation1" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Dimensions x="32" y="32"/>
+                        </Control>
+                        <Control name="$(parent)AlliancePopulation3" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeIconWithArrowHeader(self, "EsoUI/Art/Campaign/campaignBrowser_columnHeader_DC.dds", "EsoUI/Art/Campaign/campaignBrowser_columnHeader_DC_over.dds", -5, "alliancePopulation3", ZO_SORT_ORDER_UP)
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_DAGGERFALL_COVENANT_POPULATION))
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AlliancePopulation2" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Dimensions x="32" y="32"/>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)ListDividerLeft" textureFile="EsoUI/Art/Campaign/campaignBrowser_listDivider_left.dds">
+                    <Dimensions x="512" y="4"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT"/>
+                </Texture>
+                <Texture name="$(parent)ListDividerRight" textureFile="EsoUI/Art/Campaign/campaignBrowser_listDivider_right.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ListDividerLeft" relativePoint="TOPRIGHT"/>
+                    <Dimensions x="240" y="4"/>
+                </Texture>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-8" offsetY="-32"/>
+                </Control>        
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

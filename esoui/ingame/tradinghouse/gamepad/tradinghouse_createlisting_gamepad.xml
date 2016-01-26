@@ -1,0 +1,74 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TradingHouse_CreateListing_PriceTemplate" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50" />
+            <Controls>
+                <Label name="$(parent)DescriptorLabel" font="ZoFontGamepad27" horizontalAlignment="LEFT" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" >
+                    <Anchor point="LEFT" />
+                </Label>
+
+                <Label name="$(parent)AmountLabel" font="ZoFontGamepad34" horizontalAlignment="RIGHT" verticalAlignment="CENTER" >
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_TradingHouse_CreateListing_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_TradingHouse_CreateListing_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Control name="$(parent)ListingPriceSelectorContainer" inherits="ZO_GamepadGoldSpinnerContainerTemplate" hidden="true">
+                    <Anchor point="TOP"  relativePoint="BOTTOM" relativeTo="$(parent)HeaderContainerHeader" offsetY="182" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50"/>
+                </Control>
+
+                <Control name="$(parent)ListingPrice" >
+                    <Anchor point="TOP" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOM" offsetY="150" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="110"/>
+                    <Controls>
+                        <Label name="$(parent)AmountLabel" font="ZoFontGamepad36" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="TOPRIGHT" offsetY="30" />
+                        </Label>
+
+                        <Label name="$(parent)DescriptorLabel" inherits="ZO_GamepadMenuEntryLabelTemplate" text="SI_GAMEPAD_TRADING_HOUSE_CREATE_LISTING_TOTAL_PRICE" font="ZoFontGamepad27" verticalAlignment="BOTTOM">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)AmountLabel" relativePoint="BOTTOMLEFT" offsetX="-10" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ListingFee" inherits="ZO_TradingHouse_CreateListing_PriceTemplate" >
+                    <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ListingPrice" offsetY="35" />
+
+                    <Controls>
+                        <Label name="$(parent)DescriptorLabel" override="true" text="SI_TRADING_HOUSE_POSTING_LISTING_FEE" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)HouseCut" inherits="ZO_TradingHouse_CreateListing_PriceTemplate" >
+                    <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ListingFee" />
+
+                    <Controls>
+                        <Label name="$(parent)DescriptorLabel" override="true" text="SI_TRADING_HOUSE_POSTING_TH_CUT" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Rail" inherits="ZO_GamepadHeaderHorizontalDivider" tier="HIGH">
+                    <Anchor point="TOP" relativeTo="$(parent)HouseCut" offsetY="60" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                </Control>
+
+                <Control name="$(parent)Profit" inherits="ZO_TradingHouse_CreateListing_PriceTemplate" >
+                    <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)HouseCut" offsetY="35" />
+
+                    <Controls>
+                        <Label name="$(parent)DescriptorLabel" override="true" text="SI_TRADING_HOUSE_POSTING_PROFIT" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

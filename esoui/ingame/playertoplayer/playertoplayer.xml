@@ -1,0 +1,108 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="PlayerToPlayerResurrectAnimation">
+            <Animations>
+                <AlphaAnimation duration="150" startAlpha="0.0" endAlpha="1.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_PlayerToPlayerMenuEntryTemplate_Keyboard" scale=".75" virtual="true">
+            <Dimensions x="128" y="128"/>
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="TOP" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_PlayerToPlayerMenu_Keyboard" inherits="ZO_RadialMenuTemplate" hidden="true" />
+
+        <TopLevelControl name="ZO_PlayerToPlayerMenu_Gamepad" inherits="ZO_RadialMenuHUDSize_Gamepad" hidden="true">
+            <Controls>
+                <Label name="$(parent)Action" inherits="ZO_RadialMenuActionText_Gamepad"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PlayerToPlayerResurrect">
+            <Controls>
+                <Cooldown name="$(parent)Progress" textureFile="EsoUI/Art/HUD/reviveMeter_progbar.dds" alpha="0">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" relativeTo="GuiRoot"/>
+                    <Controls>
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/reviveMeter_frame.dds">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" offsetX="1" offsetY="-1" />
+                        </Texture>
+                    </Controls>
+                </Cooldown>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PlayerToPlayerArea" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_PlayerToPlayer_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)PromptContainer" hidden="true">
+                    <Dimensions x="870"/>
+                    <Anchor point="BOTTOM" offsetY="-285"/>
+                    <Controls>
+                        <Label name="$(parent)Target" horizontalAlignment="CENTER" verticalAlignment="BOTTOM">
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Label>
+
+                        <Control name="$(parent)ActionArea" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Target" relativePoint="BOTTOM" offsetY="2"/>
+                            <Controls>
+                                <!-- Standard Action -->
+                                <Control name="$(parent)ActionKeybindButton" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                                    <Anchor point="TOP"/>
+                                </Control>
+
+                                <Label name="$(parent)AdditionalInfo" excludeFromResizeToFitExtents="true" horizontalAlignment="CENTER">
+                                    <Anchor point="TOP" relativeTo="$(parent)ActionKeybindButton" relativePoint="BOTTOM" offsetX="5" offsetY="2"/>
+                                </Label>
+                                
+                                <!-- Prompt Response -->
+                                <Control name="$(parent)PromptKeybindButton1" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT"/>
+                                </Control>
+                                <Control name="$(parent)PromptKeybindButton2" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)PromptKeybindButton1" relativePoint="TOPRIGHT" offsetX="40"/>
+                                </Control>
+                                
+                                <!-- Pending Resurrect -->
+                                <Label name="$(parent)PendingResurrectInfo" excludeFromResizeToFitExtents="true" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOP" offsetY="2"/>
+                                </Label>
+
+                                <!-- Console Specific Player to Player Menu Entry -->
+                                <Label name="$(parent)GamerID" font="ZoFontGamepad36" excludeFromResizeToFitExtents="true" horizontalAlignment="CENTER">
+                                    <Anchor point="TOP" offsetY="35" />
+                                </Label>
+                            </Controls>
+                        </Control>                       
+
+                        <Cooldown name="$(parent)ResurrectProgress" textureFile="EsoUI/Art/HUD/reviveMeter_progbar.dds" alpha="0">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" relativeTo="GuiRoot"/>
+                            <Controls>
+                                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/reviveMeter_frame.dds">
+                                    <Dimensions x="128" y="128" />
+                                    <Anchor point="CENTER" offsetX="1" offsetY="-1" />
+                                </Texture>
+                            </Controls>
+                        </Cooldown>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,41 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_UICombatOverlayAnimation" playbackType="PING_PONG" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation startAlpha="0.1" endAlpha="0.9" duration="1000">
+                    <EasingFunction>
+                        return ZO_EaseInOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_UICombatOverlayFadeOut">
+            <Animations>
+                <AlphaAnimation duration="1000">
+                    <OnPlay>
+                        self:SetAlphaValues(animatingControl:GetAlpha(), 0)
+                    </OnPlay>
+                    <OnStop>
+                        animatingControl:SetHidden(true)
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <TopLevelControl name="ZO_UICombat" hidden="true" tier="HIGH">
+            <OnInitialized>
+                ZO_UICombatOverlay_OnInitialized(self)
+            </OnInitialized>
+            <AnchorFill/>
+            <Controls>
+                <Backdrop name="$(parent)Overlay" hidden="true">
+                    <AnchorFill/>
+                    <Center file="EsoUI/Art/UICombatOverlay/UICombatOverlayCenter.dds" />
+                    <Edge file="EsoUI/Art/UICombatOverlay/UICombatOverlayEdge.dds" edgeFileWidth="2048" edgeFileHeight="256" />
+                    <Insets left="256" top="256" right="-256" bottom="-256" />
+                </Backdrop>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

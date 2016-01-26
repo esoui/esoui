@@ -1,0 +1,19 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="FocusIconScaleAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.6"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="FocusAlphaFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

@@ -1,0 +1,599 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="IncreasedArmorFadeAnimation">
+            <Animations>
+                <!-- This controls the larger background -->
+                <AlphaAnimation delay="100" duration="250" startAlpha="0" endAlpha="1" />
+
+                <!-- This controls the standard background -->
+                <AlphaAnimation delay="100" duration="250" startAlpha="1" endAlpha="0" />
+
+                <!-- These all control the frame -->
+                <AlphaAnimation duration="250" startAlpha="0" endAlpha="1" />
+
+                <TranslateAnimation duration="250" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuintic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+                
+                <TranslateAnimation duration="250" anchorIndex="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuintic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+            <Callbacks>
+                <Callback delay="125">
+                    if not self.instant then
+                        if self:IsPlayingBackward() then
+                            self.owner:PlaySoundFromStat(STAT_ARMOR_RATING, STAT_STATE_INCREASE_LOST)
+                        else
+                            self.owner:PlaySoundFromStat(STAT_ARMOR_RATING, STAT_STATE_INCREASE_GAINED)
+                            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_STATUS_EFFECT)
+                        end
+                    end
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+
+        <AlphaAnimation name="NoneToFullAlphaButNoneInReverseAnimation">
+            <OnPlay>
+                if self:GetTimeline():IsPlayingBackward() then
+                    self:SetAlphaValues(0, 0)
+                else
+                    self:SetAlphaValues(0, 1)
+                end
+            </OnPlay>
+        </AlphaAnimation>
+        
+        <AlphaAnimation name="FullToNoAlphaButNoneInReverseAnimation">
+            <OnPlay>
+                if self:GetTimeline():IsPlayingBackward() then
+                    self:SetAlphaValues(0, 0)
+                else
+                    self:SetAlphaValues(1, 0)
+                end
+            </OnPlay>
+        </AlphaAnimation>
+
+        <AnimationTimeline name="DecreasedArmorFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="250">
+                    <OnPlay>
+                        if self:GetTimeline():IsPlayingBackward() then
+                            self:SetAlphaValues(0, 1)
+                        else
+                            self:SetAlphaValues(1, 1)
+                        end
+                    </OnPlay>
+                </AlphaAnimation>
+            </Animations>
+            <Callbacks>
+                <Callback delay="125">
+                    if not self.instant then
+                        if self:IsPlayingBackward() then
+                            self.owner:PlaySoundFromStat(STAT_ARMOR_RATING, STAT_STATE_DECREASE_LOST)
+                        else
+                            self.owner:PlaySoundFromStat(STAT_ARMOR_RATING, STAT_STATE_DECREASE_GAINED)
+                            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_STATUS_EFFECT)
+                        end
+                    end
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedArmorFirstSegmentAnimation">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedArmorFirstSegmentGlowAnimation">
+            <Animations>
+                <AlphaAnimation duration="100" inherits="NoneToFullAlphaButNoneInReverseAnimation" />
+                <AlphaAnimation delay="250" duration="1000" inherits="FullToNoAlphaButNoneInReverseAnimation" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedArmorSecondSegmentAnimation">
+            <Animations>
+                <AlphaAnimation delay="1300" duration="100" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedArmorSecondSegmentGlowAnimation">
+            <Animations>
+                <AlphaAnimation delay="1300" duration="100" inherits="NoneToFullAlphaButNoneInReverseAnimation" />
+                <AlphaAnimation delay="1550" duration="1000" inherits="FullToNoAlphaButNoneInReverseAnimation" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedArmorThirdSegmentAnimation">
+            <Animations>
+                <AlphaAnimation delay="1700" duration="100" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedArmorThirdSegmentGlowAnimation">
+            <Animations>
+                <AlphaAnimation delay="1700" duration="100" inherits="NoneToFullAlphaButNoneInReverseAnimation" />
+                <AlphaAnimation delay="1950" duration="1000" inherits="FullToNoAlphaButNoneInReverseAnimation" />
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="IncreasedPowerFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="125" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="125" startAlpha="0" endAlpha="1" />
+            </Animations>
+            <Callbacks>
+                <Callback delay="65">
+                    if not self.instant then
+                        if self:IsPlayingBackward() then
+                            self.owner:PlaySoundFromStat(STAT_POWER, STAT_STATE_INCREASE_LOST)
+                        else
+                            self.owner:PlaySoundFromStat(STAT_POWER, STAT_STATE_INCREASE_GAINED)
+                            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_STATUS_EFFECT)
+                        end
+                    end
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="DecreasedPowerFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="125" startAlpha="0" endAlpha="1" />
+            </Animations>
+            <Callbacks>
+                <Callback delay="125">
+                    if not self.instant then
+                        if self:IsPlayingBackward() then
+                            self.owner:PlaySoundFromStat(STAT_POWER, STAT_STATE_DECREASE_LOST)
+                        else
+                            self.owner:PlaySoundFromStat(STAT_POWER, STAT_STATE_DECREASE_GAINED)
+                            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_STATUS_EFFECT)
+                        end
+                    end
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="IncreasedPowerAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation cellsWide="4" cellsHigh="8" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_IncreasedPowerTexture" tier="LOW" layer="BACKGROUND" virtual="true">
+            <Dimensions y="128" />
+        </Texture>
+
+        <Texture name="ZO_IncreasedPowerTexture_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/increasedPower_animatedHalo_32fr.dds" virtual="true" />
+        <Texture name="ZO_IncreasedPowerTexture_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_increasedPower_animatedHalo_32fr.dds" virtual="true" />
+
+        <Control name="ZO_IncreasedPowerGlowArrow" inherits="ZO_PlayerAttributeWarner" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedPowerGlowArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedPowerGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedPowerGlowArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedPowerGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedPowerGlowAngle" inherits="ZO_TargetAttributeWarner" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_TargetAttributeWarnerLeftAngle" />
+                <Texture name="$(parent)Right" inherits="ZO_TargetAttributeWarnerRightAngle" />
+                <Texture name="$(parent)Center" inherits="ZO_TargetAttributeWarnerCenter" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedPowerGlowAngle_Keyboard_Template" inherits="ZO_TargetAttributeWarner_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_TargetAttributeWarnerLeftAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_TargetAttributeWarnerRightAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_TargetAttributeWarnerCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedPowerGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedPowerGlowAngle_Gamepad_Template" inherits="ZO_TargetAttributeWarner_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_TargetAttributeWarnerLeftAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_TargetAttributeWarnerRightAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedPowerGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_TargetAttributeWarnerCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedPowerGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_DecreasedPowerTexture" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedPower_halo.dds" tier="LOW" layer="BACKGROUND" virtual="true">
+            <Dimensions y="64" />
+        </Texture>
+
+        <Texture name="ZO_DecreasedPowerTexture_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedPower_halo.dds" virtual="true" />
+        <Texture name="ZO_DecreasedPowerTexture_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedPower_halo.dds" virtual="true" />
+
+        <!-- Increased Armor - Arrow -->
+
+        <Texture name="ZO_IncreasedArmorFrameLeftArrow" tier="MEDIUM" virtual="true" />
+
+        <Texture name="ZO_IncreasedArmorFrameLeftArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMLEFT"/>
+            <Dimensions x="22" />
+            <TextureCoords left="0.296875" right="0.46875" top="0.25" bottom="0.78125"/>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameLeftArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMLEFT" />
+            <Dimensions x="26" />
+            <TextureCoords left="0.265625" right="0.46875" top="0.1875" bottom="0.84375"/>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameRightArrow" tier="MEDIUM" virtual="true" />
+
+        <Texture name="ZO_IncreasedArmorFrameRightArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+            <Dimensions x="22" />
+            <TextureCoords left="0.46875" right="0.296875" top="0.25" bottom="0.78125"/>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameRightArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPRIGHT"  />
+            <Anchor point="BOTTOMRIGHT" />
+            <Dimensions x="26" />
+            <TextureCoords left="0.46875" right="0.265625" top="0.1875" bottom="0.84375"/>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameCenterArrow" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_frame.dds" tier="MEDIUM" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)FrameLeft" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FrameRight" relativePoint="BOTTOMLEFT"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="TOPLEFT" offsetX="-4" />
+                    <Anchor point="TOPRIGHT" offsetX="4" />
+                </Texture>
+                <Texture name="$(parent)BottomMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="BOTTOMLEFT" offsetX="-4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" />
+                </Texture>
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameCenterArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <TextureCoords left="0.46875" right="0.5546875" top="0.25" bottom="0.78125"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="false" />
+                <Texture name="$(parent)BottomMunge" hidden="false" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameCenterArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <TextureCoords left="0.46875" right="0.5546875" top="0.1875" bottom="0.84375"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="true" />
+                <Texture name="$(parent)BottomMunge" hidden="true" />
+            </Controls>
+        </Texture>        
+
+        <Control name="ZO_IncreasedArmorBgContainerArrow" alpha="0" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BgLeft" inherits="ZO_IncreasedArmorFrameLeftArrow" tier="LOW" layer="BACKGROUND" />
+                <Texture name="$(parent)BgRight" inherits="ZO_IncreasedArmorFrameRightArrow" tier="LOW" layer="BACKGROUND" />
+                <Texture name="$(parent)BgCenter" tier="LOW" layer="BACKGROUND" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BgLeft" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BgRight" relativePoint="BOTTOMLEFT"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorBgContainerArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BgLeft" inherits="ZO_IncreasedArmorFrameLeftArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgRight" inherits="ZO_IncreasedArmorFrameRightArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgCenter" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_increasedArmor_bg.dds">
+                    <TextureCoords left="0.46875" right="0.5546875" top="0.25" bottom="0.78125"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorBgContainerArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BgLeft" inherits="ZO_IncreasedArmorFrameLeftArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgRight" inherits="ZO_IncreasedArmorFrameRightArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgCenter" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_increasedArmor_bg.dds">
+                    <TextureCoords left="0.46875" right="0.5546875" top="0.1875" bottom="0.84375"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorFrameContainerArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_IncreasedArmorFrameLeftArrow" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_IncreasedArmorFrameRightArrow" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_IncreasedArmorFrameCenterArrow" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorFrameContainerArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_IncreasedArmorFrameLeftArrow_Keyboard_Template" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_IncreasedArmorFrameRightArrow_Keyboard_Template" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_IncreasedArmorFrameCenterArrow_Keyboard_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorFrameContainerArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_IncreasedArmorFrameLeftArrow_Gamepad_Template" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_IncreasedArmorFrameRightArrow_Gamepad_Template" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_IncreasedArmorFrameCenterArrow_Gamepad_Template" />
+            </Controls>
+        </Control>
+        
+        <!-- Increased Armor - Angle -->
+
+        <Texture name="ZO_IncreasedArmorFrameLeftAngle" tier="MEDIUM" virtual="true" />
+
+        <Texture name="ZO_IncreasedArmorFrameLeftAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMLEFT"/>
+            <Dimensions x="29" />
+            <TextureCoords left="0.1953125" right="0.421875" top="0.25" bottom="0.78125"/>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameLeftAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMLEFT"/>
+            <Dimensions x="32" />
+            <TextureCoords left="0.1719" right="0.4219" top="0.1875" bottom="0.8125" />
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameRightAngle" tier="MEDIUM" virtual="true" />
+
+        <Texture name="ZO_IncreasedArmorFrameRightAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+            <Dimensions x="29" />
+            <TextureCoords left="0.5859375" right="0.8125" top="0.25" bottom="0.78125"/>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameRightAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <Anchor point="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+            <Dimensions x="32" />
+            <TextureCoords left="0.5703" right="0.8203" top="0.1875" bottom="0.8125" />
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameCenterAngle" tier="MEDIUM" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)FrameLeft" relativePoint="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FrameRight" relativePoint="BOTTOMLEFT"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)BottomMunge" inherits="ZO_PlayerAttributeFrameMunge">
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameCenterAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <TextureCoords left="0.4296875" right="0.578125" top="0.25" bottom="0.78125"/>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="false" />
+                <Texture name="$(parent)BottomMunge" hidden="false" />
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_IncreasedArmorFrameCenterAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedArmor_frame.dds" virtual="true">
+            <TextureCoords left="0.4219" right="0.5703" top="0.1875" bottom="0.8125" />
+            <Controls>
+                <Texture name="$(parent)TopMunge" hidden="true" />
+                <Texture name="$(parent)BottomMunge" hidden="true" />
+            </Controls>
+        </Texture>
+
+        <Control name="ZO_IncreasedArmorBgContainerAngle" alpha="0" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BgLeft" inherits="ZO_IncreasedArmorFrameLeftAngle" tier="LOW" layer="BACKGROUND" />
+                <Texture name="$(parent)BgRight" inherits="ZO_IncreasedArmorFrameRightAngle" tier="LOW" layer="BACKGROUND" />
+                <Texture name="$(parent)BgCenter" tier="LOW" layer="BACKGROUND" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BgLeft" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BgRight" relativePoint="BOTTOMLEFT"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorBgContainerAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BgLeft" inherits="ZO_IncreasedArmorFrameLeftAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgRight" inherits="ZO_IncreasedArmorFrameRightAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgCenter" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_increasedArmor_bg.dds">
+                    <TextureCoords left="0.421875" right="0.5625" top="0.25" bottom="0.78125"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorBgContainerAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BgLeft" inherits="ZO_IncreasedArmorFrameLeftAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgRight" inherits="ZO_IncreasedArmorFrameRightAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedArmor_bg.dds" />
+                <Texture name="$(parent)BgCenter" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_increasedArmor_bg.dds">
+                    <TextureCoords left="0.4219" right="0.5703" top="0.1875" bottom="0.8125" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorFrameContainerAngle" virtual="true">
+            <Controls>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_IncreasedArmorFrameLeftAngle" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_IncreasedArmorFrameRightAngle" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_IncreasedArmorFrameCenterAngle" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorFrameContainerAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_IncreasedArmorFrameLeftAngle_Keyboard_Template" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_IncreasedArmorFrameRightAngle_Keyboard_Template" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_IncreasedArmorFrameCenterAngle_Keyboard_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_IncreasedArmorFrameContainerAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_IncreasedArmorFrameLeftAngle_Gamepad_Template" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_IncreasedArmorFrameRightAngle_Gamepad_Template" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_IncreasedArmorFrameCenterAngle_Gamepad_Template" />
+            </Controls>
+        </Control>
+
+        <!-- Decreased Armor -->
+
+        <Control name="ZO_DecreasedArmorOverlayContainer" tier="HIGH" level="0" virtual="true">
+            <OnInitialized>
+                self.smallAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DecreasedArmorFirstSegmentAnimation", self:GetNamedChild("Shrunk"))
+                self.smallGlowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DecreasedArmorFirstSegmentGlowAnimation", self:GetNamedChild("ShrunkGlow"))
+
+                self.normalAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DecreasedArmorSecondSegmentAnimation", self:GetNamedChild("Normal"))
+                self.normalGlowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DecreasedArmorSecondSegmentGlowAnimation", self:GetNamedChild("NormalGlow"))
+
+                self.expandedAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DecreasedArmorThirdSegmentAnimation", self:GetNamedChild("Expanded"))
+                self.expandedGlowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("DecreasedArmorThirdSegmentGlowAnimation", self:GetNamedChild("ExpandedGlow"))
+            </OnInitialized>            
+        </Control>
+
+        <!-- Decreased Armor - Arrow -->
+
+        <Control name="ZO_DecreasedArmorOverlayContainerArrow" inherits="ZO_DecreasedArmorOverlayContainer" tier="HIGH" level="0" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Shrunk" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="512" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)Normal" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="512" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)Expanded" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="512" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)ShrunkGlow" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="512" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)NormalGlow" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="512" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)ExpandedGlow" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="512" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DecreasedArmorOverlayContainerArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Shrunk" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedArmor_small.dds" />
+                <Texture name="$(parent)Normal" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedArmor_standard.dds" />
+                <Texture name="$(parent)Expanded" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedArmor_large.dds" />
+                <Texture name="$(parent)ShrunkGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedArmor_small_glow.dds" />
+                <Texture name="$(parent)NormalGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedArmor_standard_glow.dds" />
+                <Texture name="$(parent)ExpandedGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_decreasedArmor_large_glow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DecreasedArmorOverlayContainerArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Shrunk" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedArmor_small.dds" />
+                <Texture name="$(parent)Normal" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedArmor_standard.dds" />
+                <Texture name="$(parent)Expanded" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedArmor_large.dds" />
+                <Texture name="$(parent)ShrunkGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedArmor_small_glow.dds" />
+                <Texture name="$(parent)NormalGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedArmor_standard_glow.dds" />
+                <Texture name="$(parent)ExpandedGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_decreasedArmor_large_glow.dds" />
+            </Controls>
+        </Control>
+
+        <!-- Decreased Armor - Angle -->
+
+        <Control name="ZO_DecreasedArmorOverlayContainerAngle" inherits="ZO_DecreasedArmorOverlayContainer" tier="HIGH" level="0" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Shrunk" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="590" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)Normal" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="590" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)Expanded" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="590" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)ShrunkGlow" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="590" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)NormalGlow" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="590" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)ExpandedGlow" layer="BACKGROUND" alpha="0">
+                    <Dimensions x="590" y="32" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DecreasedArmorOverlayContainerAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Shrunk" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_decreasedArmor_small.dds" />
+                <Texture name="$(parent)Normal" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_decreasedArmor_standard.dds" />
+                <Texture name="$(parent)Expanded" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_decreasedArmor_large.dds" />
+                <Texture name="$(parent)ShrunkGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_decreasedArmor_small_glow.dds" />
+                <Texture name="$(parent)NormalGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_decreasedArmor_standard_glow.dds" />
+                <Texture name="$(parent)ExpandedGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_decreasedArmor_large_glow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DecreasedArmorOverlayContainerAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Shrunk" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_decreasedArmor_small.dds" />
+                <Texture name="$(parent)Normal" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_decreasedArmor_standard.dds" />
+                <Texture name="$(parent)Expanded" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_decreasedArmor_large.dds" />
+                <Texture name="$(parent)ShrunkGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_decreasedArmor_small_glow.dds" />
+                <Texture name="$(parent)NormalGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_decreasedArmor_standard_glow.dds" />
+                <Texture name="$(parent)ExpandedGlow" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_decreasedArmor_large_glow.dds" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,56 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ListDialogTemplate" inherits="ZO_DialogBase" virtual="true" resizeToFitDescendents="true">
+            <DimensionConstraints minX="440" maxX="440" />
+            <ResizeToFitPadding height="80" />
+
+            <OnHide>
+                ZO_ListDialog_OnHide(self)
+            </OnHide>
+            
+            <Controls>
+                <Control name="$(parent)TopCustomControlContainer" resizeToFitDescendents="true" inherits="ZO_DialogContentAnchors"/>
+
+                <Label name="$(parent)AboveText" font="ZoFontGameMedium" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <DimensionConstraints maxX="380" />
+                    <Anchor point="TOP" relativeTo="$(parent)TopCustomControlContainer" relativePoint="BOTTOM" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Dimensions x="384" y="220" />
+                    <Anchor point="TOP" relativeTo="$(parent)AboveText" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <Texture name="$(parent)BgLeft" textureFile="EsoUI/Art/Miscellaneous/dialog_scrollInset_left.dds">
+                            <Dimensions x="256"/>
+                            <Anchor point="TOPLEFT" offsetY="-5" />
+                            <Anchor point="BOTTOMLEFT" offsetY="35" />
+                        </Texture>
+                        <Texture name="$(parent)BgRight" textureFile="EsoUI/Art/Miscellaneous/dialog_scrollInset_right.dds">
+                            <Dimensions x="128"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BgLeft" relativePoint="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BgLeft" relativePoint="BOTTOMRIGHT" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)EmptyListText" font="ZoFontGameLarge" horizontalAlignment="CENTER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" offsetX="50" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)List" offsetX="-50" />
+                </Label>
+
+                <Control name="$(parent)BottomCustomControlContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM" offsetY="15" />
+                </Control>
+
+                <Label name="$(parent)BelowText" font="ZoFontGameMedium" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <DimensionConstraints maxX="380" />
+                    <Anchor point="TOP" relativeTo="$(parent)BottomCustomControlContainer" relativePoint="BOTTOM" offsetY="15" />
+                </Label>
+
+                <Control name="$(parent)Button2" inherits="ZO_CustomDialogButton" excludeFromResizeToFitExtents="true" />
+
+                <Control name="$(parent)Button1" inherits="ZO_CustomDialogButton" excludeFromResizeToFitExtents="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

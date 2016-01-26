@@ -1,0 +1,37 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadHorizontalScrollListTemplate" virtual="true">
+            <Controls>
+                <Scroll name="$(parent)Scroll">
+                    <AnchorFill />
+                    <FadeGradient x1="1" y1="0" size1="200" x2="-1" y2="0" size2="200" />
+                </Scroll>
+
+                <Button name="$(parent)LeftArrow" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT"/>
+
+                    <Textures
+                        normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_up.dds"
+                        pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_down.dds"
+                        disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_disabled.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)RightArrow" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT"/>
+                    <Textures
+                        normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_up.dds"
+                        pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_down.dds"
+                        disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_disabled.dds"
+                    />
+                </Button>
+
+                <Label name="$(parent)NoItemsLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="CENTER" />
+                </Label>
+            </Controls>
+        </Control>
+</Controls>
+</GuiXml>

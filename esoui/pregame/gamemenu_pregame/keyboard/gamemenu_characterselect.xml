@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GameMenu_CharacterSelect" inherits="ZO_GameMenu_Template" hidden="true">
+            <OnInitialized>
+                ZO_GameMenu_CharacterSelect_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

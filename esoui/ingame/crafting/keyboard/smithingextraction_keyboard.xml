@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SmithingExtractionPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)SlotContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds">
+                            <Dimensions x="512" y="512" />
+                            <Anchor point="TOP" />
+                        </Texture>
+
+                        <Label name="$(parent)ExtractLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="TOP" offsetY="64" />
+                        </Label>
+
+                        <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)ExtractLabel" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="185" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                                <Label name="$(parent)NeedMoreLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Controls>
+                        <Label name="$(parent)NoItemsLabel" inherits="ZO_CraftingInventoryNoItemLabel" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

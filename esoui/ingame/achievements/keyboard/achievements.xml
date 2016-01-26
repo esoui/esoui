@@ -1,0 +1,252 @@
+<GuiXml>
+    <Controls>
+        <StatusBar name="ZO_AchievementsAchievementStatusBar" inherits="ZO_JournalProgressStatusBar" virtual="true">
+            <Dimensions x="345" />
+        </StatusBar>
+
+        <Button name="ZO_IconAchievement" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <MouseButton button="2" enabled="true" />
+
+            <Textures
+                mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+            />
+
+            <OnMouseEnter>
+                self.achievement:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.achievement:OnMouseExit()
+            </OnMouseExit>
+
+            <OnClicked>
+                self.achievement:OnClicked(button)
+            </OnClicked>
+
+            <Controls>
+                <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Icon">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Button>
+        
+        <Control name="ZO_AchievementBase" virtual="true">
+            <Dimensions x="550" y="88" />
+            
+            <Controls>
+                <Control name="$(parent)Highlight" inherits="ZO_ListEntryHighlight" />
+
+                <Label name="$(parent)Points" font="ZoFontCallout3" horizontalAlignment="CENTER">
+                    <Dimensions x="60" />
+                    <Anchor point="TOPRIGHT" offsetX="-6" offsetY="2" />
+                </Label>
+                
+                <Texture name="$(parent)Icon" level="3">
+                    <Anchor point="TOPLEFT" offsetX="38" offsetY="10" />
+                    <Dimensions x="52" y="52"/>
+
+                    <Controls>
+                        <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+                
+                <Label name="$(parent)Title" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWindowSubtitle" >
+                    <Dimensions x="274" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="6" />
+                </Label>
+                
+                <Label name="$(parent)Description" inherits="ZO_JournalProgressDefaultLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                </Label>
+
+                <Label name="$(parent)Date" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)Points" relativePoint="BOTTOM" offsetY="-8" />
+                </Label>
+                
+                <Texture name="$(parent)RewardThumb" level="2" resizeToFitFile="true">
+                    <Anchor point="TOPLEFT" offsetX="42" offsetY="58" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Achievement" inherits="ZO_AchievementBase" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_Achievement_OnMouseEnter(self) 
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                ZO_Achievement_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <OnMouseUp>
+                if upInside then
+                    self.achievement:OnClicked(button)
+                end
+            </OnMouseUp>
+            
+            <Controls>
+                <Control name="$(parent)Backdrop" inherits="ZO_ListEntryBackdrop" />
+
+                <Button name="$(parent)ExpandedState" inherits="ZO_TreeButtonArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-5" />
+
+                    <OnClicked>
+                        self:GetParent().achievement:OnClicked(button)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+        
+        <Texture name="ZO_AchievementCheckbox" textureFile="EsoUI/Art/Cadwell/check.dds" resizeToFitFile="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_JournalProgressDefaultLabel" inheritAlpha="false">
+                    <Dimensions x="360" />
+                    <Anchor point="TOPLEFT" offsetX="20" />
+                </Label>
+            </Controls>
+        </Texture>
+        
+        <Label name="ZO_AchievementRewardLabel" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWinH5" virtual="true">
+            <Dimensions x="230" y="20"/>
+        </Label>
+        
+        <Control name="ZO_AchievementRewardItem" mouseEnabled="true" virtual="true">
+            <Dimensions x="260" y="45"/>
+            
+            <OnMouseUp>
+                if(upInside and button == MOUSE_BUTTON_INDEX_RIGHT) then
+                    ZO_Achievement_Reward_OnMouseUp(self)
+                end
+            </OnMouseUp>
+            <OnMouseEnter>
+                ZO_Achievement_Reward_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_Achievement_Reward_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <Controls>
+                <Texture name="$(parent)Icon" level="2">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="2" />
+                    <Dimensions x="34" y="34"/>
+                    <Controls>
+                        <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" level="1" />
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)Label" inherits="ZO_AchievementRewardLabel">
+                    <Dimensions x="207" y="36"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AchievementDyeSwatch" virtual="true" mouseEnabled="true">
+            <Dimensions x="370" y="27"/>
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+                self.icon = self:GetNamedChild("Icon")
+                self.icon:SetSurfaceHidden(4, true)
+            </OnInitialized>
+            <Controls>
+                <TextureComposite name="$(parent)Icon" inherits="ZO_DyeingSwatchVisuals" level="2">
+                    <Anchor point="LEFT" offsetX="5" />
+                    <Dimensions x="24" y="24"/>
+                </TextureComposite>
+                <Label name="$(parent)Label" inherits="ZO_AchievementRewardLabel">
+                    <Dimensions x="350"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AchievementLineThumb" mouseEnabled="true" virtual="true">
+            <Dimensions x="45" y="68" />
+            
+            <OnMouseEnter>
+                ZO_Achievement_Line_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_Achievement_Line_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <Controls>
+                <Texture name="$(parent)Icon" level="3">
+                    <Anchor point="TOP" offsetY="2" />
+                    <Dimensions x="40" y="40"/>
+                    <Controls>
+                        <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)Label" inherits="ZO_JournalProgressDefaultLabel">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="2" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_AchievementPopup" hidden="true" clampedToScreen="true" movable="true" mouseEnabled="true">
+            <Dimensions x="565" y="88" />
+            <Anchor point="CENTER" />
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="28" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="4" />
+                </Backdrop>
+                
+                <Button name="$(parent)Close" inherits="ZO_CloseButton">
+                    <Anchor point="TOPRIGHT" offsetX="-6" offsetY="6" />
+                    <OnClicked>
+                        self:GetParent():SetHidden(true)
+                    </OnClicked>
+                </Button>
+                <Control name="$(parent)Achievement" inherits="ZO_AchievementBase">
+                    <Anchor point="TOPLEFT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_Achievements" inherits="ZO_JournalProgressBook" hidden="true">
+            <OnInitialized>
+                ZO_Achievements_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Label name="$(parent)Points" inherits="ZO_JournalProgressLargeLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="6" />
+                        </Label>
+
+                        <Control name="$(parent)SummaryInset" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Divider" override="true" hidden="false" />
+                                <Label name="$(parent)RecentTitle" override="true" hidden="false" text="SI_ACHIEVEMENTS_RECENT" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+         </TopLevelControl>
+    </Controls>
+</GuiXml>

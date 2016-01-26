@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <!--
+                This screen is a basic screen consisting of a header and a Parametric scroll list.
+            
+                It is intented to be used to generate an instance of a subclass of the ZO_ParametricListGamepadScreen class.
+            -->
+
+        <Control name="ZO_Gamepad_ParametricList_Screen_ListContainer" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                    <OnInitialized>
+                        self:GetParent().list = self
+                    </OnInitialized>
+
+                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_ParametricList_Screen" inherits="ZO_AnchoredToQuadrant1Background" hidden="true" virtual="true">
+            <Controls>
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <AnchorFill />
+
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

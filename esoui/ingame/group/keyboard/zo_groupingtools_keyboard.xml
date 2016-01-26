@@ -1,0 +1,66 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GroupingToolsHeaderLabel" font="ZoFontGameLargeBold" virtual="true" />
+        <Label name="ZO_GroupingToolsLabel" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_GroupingToolsMenu" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_GroupingToolsHeaderLabel">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Text" offsetY="5" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GroupingToolsKeyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GroupingToolsKeyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)LeaderSection">
+                    <AnchorFill />
+                    <Controls>
+                        <Label name="$(parent)ModeLabel" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" offsetX="35" offsetY="70"/>
+                        </Label>
+
+                        <Control name="$(parent)ActivityTypeMenu" inherits="ZO_GroupingToolsMenu">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ModeLabel" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <OnInitialized>
+                                self:GetNamedChild("Dropdown"):SetWidth(250)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Label name="$(parent)Text" override="true" text="SI_GROUPING_TOOLS_PANEL_ACTIVITY_TYPE"/>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)LocationMenu" inherits="ZO_GroupingToolsMenu">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityTypeMenu" relativePoint="TOPRIGHT" offsetX="20" />
+                            <OnInitialized>
+                                self:GetNamedChild("Dropdown"):SetWidth(450)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Label name="$(parent)Text" override="true" text="SI_GROUPING_TOOLS_PANEL_LOCATION"/>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)GroupSize" inherits="ZO_GroupingToolsHeaderLabel">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityTypeMenu" relativePoint="BOTTOMLEFT" offsetY="30" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)NotLeader" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" text="SI_GROUPING_TOOLS_PANEL_NOT_LEADER" hidden="true">
+                    <Anchor point="TOPLEFT" offsetY="200" />
+                    <Anchor point="TOPRIGHT" offsetY="200" />
+                    <Dimensions y="30"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

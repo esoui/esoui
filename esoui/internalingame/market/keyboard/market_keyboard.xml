@@ -1,0 +1,205 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MarketChildlessCategory" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
+        </Control>
+        
+        <Label name="ZO_MarketSubCategory" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+        
+        <Label name="ZO_Market_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" modifyTextType="UPPERCASE" virtual="true"/>
+
+        <TopLevelControl name="ZO_Market" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
+            <OnInitialized>
+                ZO_Market_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                
+                <Control name="$(parent)Header">
+                    <Dimensions x="1024" y="50" />
+                    <Anchor point="RIGHT" offsetX="30" offsetY="-370" />
+                    <Controls>
+                        <Label name="$(parent)Label" text="SI_MARKET_TITLE" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="LEFT" offsetX="50" />
+                        </Label>
+
+                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
+                            <Dimensions x="1024" y="4" />
+                            <Anchor point="BOTTOM"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+
+                    <Controls>
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="26" />
+                            <Dimensions x="240"/>
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_MARKET_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized>
+
+                                    <OnEscape>
+                                        ZO_Market_EndSearch(self)
+                                    </OnEscape>
+
+                                    <OnMouseDown>
+                                        ZO_Market_BeginSearch(self)
+                                    </OnMouseDown>
+
+                                    <OnTextChanged>
+                                        ZO_EditDefaultText_OnTextChanged(self)
+                                        ZO_Market_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+
+                                    <OnEnter>
+                                        ZO_Market_OnSearchEnterKeyPressed(self)
+                                    </OnEnter>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                        
+                        <Label name="$(parent)SearchLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_SEARCH_FILTER_BY_LABEL">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT"/>
+                        </Label>
+
+                        <Control name="$(parent)Filter" inherits="ZO_ComboBox">
+                            <Dimensions x="222" y="32" />
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="26"/>
+                        </Control>
+
+                        <Label name="$(parent)FilterLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_FILTER_LABEL">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Filter" relativePoint="TOPLEFT"/>
+                        </Label>
+
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="280" />
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="72"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-62"/>
+                        </Control>
+
+                        <Control name="$(parent)EntryList" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-10"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
+                        </Control>
+
+                        <Control name="$(parent)Currency" mouseEnabled="true" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Categories" relativePoint="BOTTOM" />
+                            <OnMouseEnter>
+                                ZO_MarketCurrency_OnMouseEnter(self)
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_MarketCurrency_OnMouseExit(self)
+                            </OnMouseExit>
+                            <Controls>
+                                <Label name="$(parent)CurrencyLabel" inherits="ZO_MarketDefaultLabel" horizontalAlignment="CENTER" font="ZoFontHeader">
+                                    <Anchor point="TOP" offsetX="-16" />
+                                </Label>
+                        
+                                <Texture name="$(parent)CurrencyIcon" inherits="ZO_MarketCurrencyIcon">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)CurrencyLabel" relativePoint="RIGHT" offsetX="2" offsetY="-3" />
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)BuyCrowns" inherits="ZO_DefaultButton" text="SI_MARKET_BUY_CROWNS">
+                            <Dimensions x="200"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Currency" relativePoint="BOTTOM" offsetY="4"/>
+                            <OnClicked>
+                                ZO_MarketCurrencyBuyCrowns_OnClicked(self)
+                            </OnClicked>
+                        </Button>
+                        
+                        <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
+                            <Anchor point="TOP" relativeTo="$(parent)EntryList"/>
+                        </Label>
+
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Message">
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Dimensions y="100"/>
+                            <Anchor point="TOP" offsetY="77"/>
+                        </Label>
+                        
+                        <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="TOPLEFT" offsetX="-10"/>
+                            <Dimensions x="64" y="64"/>
+                            <OnInitialized>
+                                ZO_Loading_Initialize(self)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RotationArea" mouseEnabled="true" tier="HIGH">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="300" offsetY="100" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-1020" offsetY="-85" />
+
+                    <OnMouseEnter>
+                        self.mouseInside = true
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self.mouseInside = false
+                    </OnMouseExit>
+
+                    <OnMouseDown>
+                        if button == MOUSE_BUTTON_INDEX_LEFT and self.canRotate then
+                            self.isRotating = true
+                            BeginItemPreviewSpin()
+                        end
+                    </OnMouseDown>
+
+                    <OnMouseUp>
+                        if button == MOUSE_BUTTON_INDEX_LEFT then
+                            if self.isRotating then
+                                self.isRotating = false
+                                EndItemPreviewSpin()
+                            end
+                        end
+                    </OnMouseUp>
+
+                    <OnEffectivelyHidden>
+                        if self.isRotating then
+                            self.isRotating = false
+                            EndItemPreviewSpin()
+                        end
+                    </OnEffectivelyHidden>
+
+                    <OnUpdate>
+                        if self.mouseInside and CanSpinPreviewCharacter() then
+                            self.canRotate = true
+                            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
+                        else
+                            if self.canRotate then
+                                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+                            end
+                            self.canRotate = false
+                        end
+                    </OnUpdate>
+                </Control>
+
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

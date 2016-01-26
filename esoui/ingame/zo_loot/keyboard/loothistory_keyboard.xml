@@ -1,0 +1,30 @@
+<GuiXml> 
+    <Controls>
+        <Control name="ZO_LootHistory_KeyboardEntry" inherits="ZO_LootHistory_SharedEntry" virtual="true">
+            <Anchor point="BOTTOMRIGHT" />
+          
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Controls>
+                        <Label name="$(parent)StackCount" override="true" font="ZoFontGameOutline" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Label" override="true" font="ZoFontGameShadow" />
+              
+                <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <Anchor point="TOPLEFT" offsetX="-50"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="50"/>
+                    <TextureCoords left="0" right="1" top="0" bottom=".78125" />
+                </Texture>
+            </Controls>
+        </Control>
+      
+        <TopLevelControl name="ZO_LootHistoryControl_Keyboard" hidden="true">
+            <Anchor point="BOTTOMRIGHT" offsetY="-95"/>
+            <OnInitialized>
+                ZO_LootHistory_Keyboard_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

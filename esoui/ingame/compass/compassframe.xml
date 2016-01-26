@@ -1,0 +1,136 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CompassFrameCrossFade">
+            <Animations>
+                <AlphaAnimation startAlpha="1" endAlpha="0" duration="250">
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                    <OnStop>
+                        if(completedPlaying and not self:GetTimeline():IsPlayingBackward()) then
+                            animatingControl:SetHidden(true)
+                        end
+                    </OnStop>
+                </AlphaAnimation>
+                <AlphaAnimation startAlpha="0" endAlpha="1" delay="250" duration="250">
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                    <OnStop>
+                        if(completedPlaying and self:GetTimeline():IsPlayingBackward()) then
+                            animatingControl:SetHidden(true)
+                        end
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_CompassFrame_InfamyIcon_FadeAnimation">
+            <Animations>
+                <AlphaAnimation startAlpha="0" endAlpha="1" duration="150">
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                    <OnStop>
+                        if(self:GetTimeline():IsPlayingBackward()) then
+                            animatingControl:SetHidden(true)
+                        end
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_CompassFrame_InfamyIcon_ScaleAnimation">
+            <Animations>
+                <ScaleAnimation startScale="3" endScale="1" duration="250">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_CompassFrame_InfamyIcon_PulseAnimation" playbackType="PING_PONG" loopCount="1">
+            <Animations>
+                <ScaleAnimation startScale="1" endScale="1.5" duration="150">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_CompassFrame_Keyboard_Template" virtual="true">
+            <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
+            <Anchor point="TOP" offsetY="40" />
+
+            <Controls>
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/compass.dds">
+                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.609375" />
+                </Texture>
+
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Compass/compass.dds">
+                    <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
+                    <TextureCoords left="0" right="0.28125" top="0" bottom="0.609375" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Compass/compass.dds">
+                    <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
+                    <TextureCoords left="0.28125" right="0" top="0" bottom="0.609375" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompassFrame_Gamepad_Template" virtual="true">
+            <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
+            <Anchor point="TOP" offsetY="101" />
+
+            <Controls>
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.75" />
+                </Texture>
+
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                    <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
+                    <TextureCoords left="0" right="0.4375" top="0" bottom="0.75" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                    <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
+                    <TextureCoords left="0.4375" right="0" top="0" bottom="0.75" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CompassFrame" hidden="true">
+            <OnInitialized>
+                ZO_CompassFrame_OnInitialized(self)
+            </OnInitialized>
+    
+            <Controls>
+                <Texture name="$(parent)Center">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)TopMungeOverlay" inherits="ZO_RandomizedMunge" level="1">
+                            <Dimensions y="4" />
+                            <Anchor point="TOPLEFT" offsetY="2" />
+                            <Anchor point="TOPRIGHT" offsetY="2" />
+                        </Texture>
+                        <Texture name="$(parent)BottomMungeOverlay" inherits="ZO_RandomizedMunge" level="1">
+                            <Dimensions y="3" />
+                            <Anchor point="BOTTOMLEFT" offsetY="-4" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-4" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Left">
+                    <Anchor point="RIGHT" relativeTo="$(parent)BgCenter" relativePoint="LEFT" />
+                </Texture>
+
+                <Texture name="$(parent)Right">
+                    <Anchor point="LEFT" relativeTo="$(parent)BgCenter" relativePoint="RIGHT" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

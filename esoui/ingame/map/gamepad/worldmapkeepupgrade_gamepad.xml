@@ -1,0 +1,84 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_WorldMapKeepUpgradeButton_Gamepad" virtual="true">
+            <!-- This is set to these dimensions so the selector fits -->
+            <Dimensions x="70" y="70"/>
+            <Controls>
+                <Texture name="$(parent)Icon" tier="MEDIUM">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Backdrop name="$(parent)Border" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/lock.dds" tier="HIGH" hidden="true">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_WorldMapKeepUpgradeLevel_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT"/>
+                </Label>
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapKeepUpgrade_Gamepad" inherits="ZO_WorldMapKeepInfoContent_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_WorldMapKeepUpgrade_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)CurrentLevel" font="ZoFontGamepad54">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_GamepadArrowStatusBarWithBGMedium" >
+                    <Dimensions x="275"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-12" />
+                </StatusBar>
+
+                <Label name="$(parent)BarLabel" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
+                </Label>
+
+                <Control name="$(parent)Time" mouseEnabled="true" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bar" relativePoint="TOPRIGHT" offsetX="-10" offsetY="-2"/>
+                    <Controls>
+                        <Texture name="$(parent)RateIcon" textureFile="EsoUI/Art/Miscellaneous/rateIcon.dds">
+                            <Dimensions x="16" y="16"/>
+                            <Anchor point="TOPLEFT" offsetY="4"/>
+                        </Texture>
+                        <Label name="$(parent)UntilNextLevel" font="ZoFontGamepadBold27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RateIcon" relativePoint="TOPRIGHT" offsetX="5" offsetY="-4"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMLEFT" offsetY="20" />
+                </Control>
+
+                <Control name="$(parent)Selector">
+                    <Dimensions x="70" y="70" />
+                    <Controls>
+                        <Backdrop name="$(parent)Box" inherits="ZO_GamepadWhiteOutlineHighlight">
+                            <Anchor point="TOP"/>
+                            <Dimensions x="70" y="70" />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SideContent" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Tooltip" inherits="ZO_ScrollTooltip_Gamepad ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

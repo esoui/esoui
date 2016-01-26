@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_WorldMapKeyHeader" virtual="true" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+        <Texture name="ZO_WorldMapKeySymbol" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_WorldMapKeySymbol_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_WorldMapKeySymbol_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+        
+        <TopLevelControl name="ZO_WorldMapKey" inherits="ZO_WorldMapInfoContent">
+            <OnInitialized>
+                ZO_WorldMapKey_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" offsetX="20"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+                <Label name="$(parent)NoKey" text="SI_WORLD_MAP_NO_KEY" font="ZoFontHeader">
+                    <Anchor point="TOP"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

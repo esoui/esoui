@@ -1,0 +1,37 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_SmithingPatternLabel" font="ZoFontWinH3" inherits="ZO_SelectableLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
+            <Dimensions y="70" />
+        </Label>
+
+        <TopLevelControl name="ZO_SmithingTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Smithing_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSkillHeader">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)ModeMenu" inherits="ZO_SceneMenu">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+                    <Dimensions x="550"/>
+                </Control>
+
+                <Label name="$(parent)ActiveTab" font="ZoFontHeader2" verticalAlignment="CENTER" modifyTextType="UPPERCASE">
+                    <Dimensions y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)ModeBar" relativePoint="LEFT" offsetX="-10"/>
+                </Label>
+
+                <Control name="$(parent)RefinementPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />
+                <Control name="$(parent)CreationPanel" inherits="ZO_SmithingCreationPanel ZO_SmithingPanelAnchors" />
+                <Control name="$(parent)ImprovementPanel" inherits="ZO_SmithingImprovementPanel ZO_SmithingPanelAnchors" hidden="true" />
+                <Control name="$(parent)DeconstructionPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />
+                <Control name="$(parent)ResearchPanel" inherits="ZO_SmithingResearchPanel ZO_SmithingPanelAnchors" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,122 @@
+<GuiXml>
+    <Controls>
+        <Control name="Options_Camera_GlobalSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_CAMERA, SI_CAMERA_OPTIONS_GLOBAL)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Camera_Smoothing" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_GlobalSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_SMOOTHING)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_InvertY" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_Smoothing" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_INVERT_Y)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_FOVChangesAllowed" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_InvertY" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_FOV_CHANGES_ALLOWED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_FirstPersonSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_FOVChangesAllowed" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_CAMERA, SI_CAMERA_OPTIONS_FIRST_PERSON)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_CameraSensitivityFirstPerson" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_FirstPersonSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_FIRST_PERSON)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_FirstPersonFieldOfView" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_CameraSensitivityFirstPerson" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_FIRST_PERSON_FIELD_OF_VIEW)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_FirstPersonHeadBob" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_FirstPersonFieldOfView" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_FIRST_PERSON_HEAD_BOB)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_ThirdPersonSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_FirstPersonHeadBob" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_CAMERA, SI_CAMERA_OPTIONS_THIRD_PERSON)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_CameraSensitivityThirdPerson" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_ThirdPersonSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_THIRD_PERSON)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_ThirdPersonHorizontalPositionMutliplier" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_CameraSensitivityThirdPerson" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_POSITION_MULTIPLIER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_ThirdPersonHorizontalOffset" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_ThirdPersonHorizontalPositionMutliplier" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_OFFSET)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_ThirdPersonVerticalOffset" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_ThirdPersonHorizontalOffset" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_THIRD_PERSON_VERTICAL_OFFSET)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_ThirdPersonFieldOfView" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_ThirdPersonVerticalOffset" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Camera_SiegeWeaponry" inherits="ZO_Options_Dropdown">
+          <Anchor point="TOPLEFT" relativeTo="Options_Camera_ThirdPersonFieldOfView" relativePoint="BOTTOMLEFT" offsetY="4" />
+          <OnInitialized>
+            self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_THIRD_PERSON_SIEGE_WEAPONRY)
+            ZO_OptionsWindow_InitializeControl(self)
+          </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

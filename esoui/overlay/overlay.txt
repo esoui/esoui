@@ -1,0 +1,7 @@
+## DependsOn: ZO_PregameLocalization
+
+; Show fancy subtitles for movies...
+EsoUI\Overlay\Keyboard\OverlayFontDefs_Keyboard.xml
+EsoUI\Overlay\Gamepad\OverlayFontDefs_Gamepad.xml
+EsoUI\Overlay\Overlay.lua
+EsoUI\Overlay\Overlay.xml

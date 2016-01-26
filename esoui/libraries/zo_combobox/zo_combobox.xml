@@ -1,0 +1,33 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ComboBox" mouseEnabled="true" virtual="true">
+            <Dimensions x="135" y="31" />
+            <OnInitialized>
+                ZO_ComboBox:New(self)
+            </OnInitialized>
+
+            <OnMouseUp>
+                ZO_ComboBox_DropdownClicked(self)
+                PlaySound(SOUNDS.COMBO_CLICK)
+            </OnMouseUp>
+            
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_InsetBackground"/>
+                
+                <Label name="$(parent)SelectedItemText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetX="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
+                </Label>
+
+                <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="RIGHT" offsetX="-3" />
+                    
+                    <OnClicked>
+                        ZO_ComboBox_DropdownClicked(self:GetParent())
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

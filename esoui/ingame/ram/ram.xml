@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_RamIndicator" hidden="true" virtual="true">
+            <Dimensions x="48" y="48"/>
+        </Texture>
+
+        <TopLevelControl name="ZO_RamTopLevel" hidden="true">
+            <Dimensions x="290" y="110" />
+            <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y" />
+            
+            <OnInitialized>
+                ZO_Ram_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" alpha=".5">
+                    <Dimensions x="310" y="114" />
+                    <Anchor point="TOPLEFT" offsetX="-17" offsetY="5" />
+                </Texture>
+                
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" alpha=".5">
+                    <Dimensions x="20" y="114" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontWinH3" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetX="-1" offsetY="17" />
+                    <Anchor point="TOPRIGHT" offsetX="-1" offsetY="17" />
+                    <Dimensions x="212" y="26" />
+                </Label>
+                
+                <Control name="$(parent)Indicators" resizeToFitDescendents="true">
+                    <Anchor point="TOP" offsetY="45"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

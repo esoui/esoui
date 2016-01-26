@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CurrentCampaigns" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_CampaignBrowser" offsetX="-25" offsetY="4"/>
+            <OnInitialized>
+                ZO_CurrentCampaigns_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Assigned" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+                <Texture name="$(parent)AssignedIcon" textureFile="EsoUI/Art/Campaign/campaignBrowser_homeCampaign.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Assigned" relativePoint="LEFT"/>
+                </Texture>
+                <Label name="$(parent)Guest" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Assigned" relativePoint="BOTTOMRIGHT" offsetY="2"/>
+                </Label>
+                <Texture name="$(parent)GuestIcon" textureFile="EsoUI/Art/Campaign/campaignBrowser_guestCampaign.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Guest" relativePoint="LEFT"/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

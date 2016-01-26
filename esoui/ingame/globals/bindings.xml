@@ -1,0 +1,810 @@
+<Bindings>
+    <Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
+        <Category name="SI_KEYBINDINGS_CATEGORY_MOVEMENT">
+            <Action name="MOVE_FORWARD">
+                <Down>MoveForwardStart()</Down>
+                <Up>MoveForwardStop()</Up>
+            </Action>
+
+            <Action name="MOVE_BACKWARD">
+                <Down>MoveBackwardStart()</Down>
+                <Up>MoveBackwardStop()</Up>
+            </Action>
+
+            <Action name="TOGGLE_WALK">
+                <Down>ToggleWalk()</Down>
+            </Action>
+
+            <Action name="TURN_LEFT">
+                <Down>TurnLeftStart()</Down>
+                <Up>TurnLeftStop()</Up>
+            </Action>
+
+            <Action name="TURN_RIGHT">
+                <Down>TurnRightStart()</Down>
+                <Up>TurnRightStop()</Up>
+            </Action>
+
+            <Action name="MOVE_JUMPASCEND">
+                <Down>JumpAscendStart()</Down>
+                <Up>AscendStop()</Up>
+            </Action>
+
+            <Action name="AUTORUN">
+                <Down>ToggleAutoRun()</Down>
+            </Action>
+
+            <Action name="ROLL_DODGE">
+                <Down>RollDodgeStart()</Down>
+                <Up>RollDodgeStop()</Up>
+            </Action>
+
+            <Action name="TOGGLE_MOUNT">
+                <Down>ToggleMount()</Down>
+            </Action>
+
+            <Action name="GAMEPAD_JUMP_OR_INTERACT" hideAction="true">
+                <Down>ZO_ActionHandler_JumpOrInteractDown()</Down>
+                <Up>ZO_ActionHandler_JumpOrInteractUp()</Up>
+            </Action>
+        </Category>
+
+        <Category name="SI_KEYBINDINGS_CATEGORY_COMBAT">
+            <Action name="SPECIAL_MOVE_ATTACK">
+                <Down>
+                    if IsInGamepadPreferredMode() and IsMounted() then
+                        ToggleMount()
+                    end
+                    PrepareAttack()
+                </Down>
+                <Up>PerformAttack()</Up>
+            </Action>
+
+            <Action name="SPECIAL_MOVE_BLOCK">
+                <Down>
+                    if IsInGamepadPreferredMode() and IsMounted() then
+                        ToggleMount()
+                    end
+                    StartBlock()
+                </Down>
+                <Up>StopBlock()</Up>
+            </Action>
+
+            <Action name="PADLOCK_TARGET">
+                <Down>ToggleGameCameraPadlockTarget()</Down>
+            </Action>
+            
+            <Action name="SPECIAL_MOVE_SPRINT">
+                <Down>OnSpecialMoveKeyDown(SPECIAL_MOVE_INDEX_SPRINT)</Down>
+                <Up>OnSpecialMoveKeyUp(SPECIAL_MOVE_INDEX_SPRINT)</Up>
+            </Action>
+
+            <Action name="SPECIAL_MOVE_CROUCH">
+                <Down>OnSpecialMoveKeyPressed(SPECIAL_MOVE_INDEX_CROUCH)</Down>
+            </Action>
+
+            <Action name="SPECIAL_MOVE_INTERRUPT">
+                <Down>PerformInterrupt()</Down>
+            </Action>
+
+            <Action name="USE_SYNERGY">
+                <Down>if SYNERGY:IsVisible() then ActivateSynergy() end</Down>
+            </Action>
+
+            <Action name="SPECIAL_MOVE_WEAPON_SWAP">
+                <Down>OnWeaponSwap()</Down>
+            </Action>
+
+            <Action name="SPECIAL_MOVE_WEAPON_SWAP_TO_SET_1">
+                <Down>OnWeaponSwapToSet1()</Down>
+            </Action>
+
+            <Action name="SPECIAL_MOVE_WEAPON_SWAP_TO_SET_2">
+                <Down>OnWeaponSwapToSet2()</Down>
+            </Action>
+
+            <Action name="ACTION_BUTTON_3">
+                <Down>ActionButtonDown(3)</Down>
+                <Up>ActionButtonUp(3)</Up>
+            </Action>
+            <Action name="ACTION_BUTTON_4">
+                <Down>ActionButtonDown(4)</Down>
+                <Up>ActionButtonUp(4)</Up>
+            </Action>
+            <Action name="ACTION_BUTTON_5">
+                <Down>ActionButtonDown(5)</Down>
+                <Up>ActionButtonUp(5)</Up>
+            </Action>
+            <Action name="ACTION_BUTTON_6">
+                <Down>ActionButtonDown(6)</Down>
+                <Up>ActionButtonUp(6)</Up>
+            </Action>
+            <Action name="ACTION_BUTTON_7">
+                <Down>ActionButtonDown(7)</Down>
+                <Up>ActionButtonUp(7)</Up>
+            </Action>
+            <Action name="ACTION_BUTTON_8">
+                <Down>ActionButtonDown(8)</Down>
+                <Up>ActionButtonUp(8)</Up>
+            </Action>
+            
+            <!--These actions exist because they're on a Button that is also chorded for another action,
+                therefore it can only have one handler, sprint is toggled with Gamepad, so this works -->
+            <Action name="GAMEPAD_SPECIAL_MOVE_SPRINT" hideAction="true">
+                <Down>OnSpecialMoveKeyDown(SPECIAL_MOVE_INDEX_SPRINT)</Down>
+                <Up>OnSpecialMoveKeyUp(SPECIAL_MOVE_INDEX_SPRINT)</Up>
+            </Action>
+
+            <Action name="GAMEPAD_MOVE_JUMPASCEND" hideAction="true">
+                <Down>JumpAscendStart()</Down>
+                <Up>AscendStop()</Up>
+            </Action>
+
+            <Action name="GAMEPAD_ACTION_BUTTON_3" hideAction="true">
+                <Down>ActionButtonDownAndUp(3)</Down>
+            </Action>
+            <Action name="GAMEPAD_ACTION_BUTTON_4" hideAction="true">
+                <Down>ActionButtonDownAndUp(4)</Down>
+            </Action>
+            <Action name="GAMEPAD_ACTION_BUTTON_5" hideAction="true">
+                <Down>ActionButtonDownAndUp(5)</Down>
+            </Action>
+            <Action name="GAMEPAD_ACTION_BUTTON_6" hideAction="true">
+                <Down>ActionButtonDownAndUp(6)</Down>
+            </Action>
+            <Action name="GAMEPAD_ACTION_BUTTON_7" hideAction="true">
+                <Down>ActionButtonDownAndUp(7)</Down>
+            </Action>
+            <Action name="GAMEPAD_ACTION_BUTTON_8" hideAction="true">
+                <Down>ActionButtonDownAndUp(8)</Down>
+            </Action>
+            <Action name="ACTION_BUTTON_9">
+                <Down>QUICKSLOT_RADIAL_MANAGER:StartInteraction()</Down>
+                <Up>QUICKSLOT_RADIAL_MANAGER:StopInteraction()</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
+                <Down>PLAYER_EMOTE_QUICKSLOT:StartInteraction()</Down>
+                <Up>PLAYER_EMOTE_QUICKSLOT:StopInteraction()</Up>
+            </Action>
+            
+            <Action name="SHEATHE_WEAPON_TOGGLE">
+                <Down>TogglePlayerWield()</Down>
+            </Action>
+
+            <Action name="COMMAND_PET">
+                <Down>StartCommandPet()</Down>
+                <Up>StopCommandPet()</Up>
+            </Action>
+        </Category>
+        
+        <Category name="SI_KEYBINDINGS_CATEGORY_TARGETING">
+            <Action name="CYCLE_PREFERRED_ENEMY_TARGET">
+                <Down>CycleGameCameraPreferredEnemyTarget()</Down>
+            </Action>
+        </Category>
+        
+        <Category name="SI_KEYBINDINGS_CATEGORY_CAMERA">
+            <Action name="CAMERA_ZOOM_OUT">
+                <Down>CameraZoomOut()</Down>
+            </Action>
+            
+            <Action name="CAMERA_ZOOM_IN">
+                <Down>CameraZoomIn()</Down>
+            </Action>
+            
+            <Action name="GAME_CAMERA_MOUSE_FREE_LOOK">
+                <Down>GameCameraMouseFreeLookStart()</Down>
+                <Up>GameCameraMouseFreeLookStop()</Up>
+            </Action>
+
+            <Action name="GAME_CAMERA_GAMEPAD_ZOOM" hideAction="true">
+                <Down>GameCameraGamepadZoomDown()</Down>
+                <Up>GameCameraGamepadZoomUp()</Up>
+            </Action>
+        </Category>
+        
+        <Category name="SI_KEYBINDINGS_CATEGORY_INTERACTION">
+            <Action name="GAME_CAMERA_INTERACT">
+                <Down>if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end</Down>
+                <Up>FISHING_MANAGER:StopInteraction()</Up>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_INTERACT">
+                <Down>PLAYER_TO_PLAYER:StartInteraction()</Down>
+                <Up>PLAYER_TO_PLAYER:StopInteraction()</Up>
+            </Action>
+        </Category>
+        
+        <Category name="SI_KEYBINDINGS_CATEGORY_USER_INTERFACE">
+            <Action name="TOGGLE_FULLSCREEN">
+                <Down>
+                    ToggleFullScreen()
+                    KEYBOARD_OPTIONS:UpdateAllPanelOptions(SAVE_CURRENT_VALUES)
+                </Down>
+            </Action>
+
+            <Action name="TAKE_SCREENSHOT">
+                <Up>TakeScreenshot()</Up>
+            </Action>
+
+            <Action name="START_CHAT_ENTER">
+                <Down>StartChatInput("")</Down>
+            </Action>
+
+            <Action name="START_CHAT_SLASH">
+                <Down>StartChatInput("/")</Down>
+            </Action>
+
+            <Action name="CHAT_REPLY_TO_LAST_WHISPER">
+                <Down>ChatReplyToLastWhisper()</Down>
+            </Action>
+
+            <Action name="TOGGLE_SHOW_INGAME_GUI">
+                <Down>ToggleShowIngameGui()</Down>
+            </Action>
+
+            <Action name="TOGGLE_GAME_CAMERA_UI_MODE">
+                <Down>ZO_SceneManager_ToggleUIModeBinding()</Down>
+            </Action>
+            
+            <Action name="TOGGLE_MARKET">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_MARKET)</Down>
+            </Action>
+
+            <Action name="TOGGLE_INVENTORY">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_INVENTORY)</Down>
+            </Action>
+
+            <Action name="TOGGLE_CHARACTER">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CHARACTER)</Down>
+            </Action>
+
+            <Action name="TOGGLE_SKILLS">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_SKILLS)</Down>
+            </Action>
+
+            <Action name="TOGGLE_CHAMPION">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CHAMPION)</Down>
+            </Action>
+
+            <Action name="TOGGLE_JOURNAL">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_JOURNAL)</Down>
+            </Action>
+
+            <Action name="TOGGLE_COLLECTIONS_BOOK">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_COLLECTIONS)</Down>
+            </Action>
+            
+            <Action name="TOGGLE_MAP">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_MAP)</Down>
+            </Action>
+
+            <Action name="TOGGLE_GROUP">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_GROUP)</Down>
+            </Action>
+
+            <Action name="TOGGLE_CONTACTS">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CONTACTS)</Down>
+            </Action>
+
+            <Action name="TOGGLE_GUILDS">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_GUILDS)</Down>
+            </Action>
+
+            <Action name="TOGGLE_ALLIANCE_WAR">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_ALLIANCE_WAR)</Down>
+            </Action>
+
+            <Action name="TOGGLE_MAIL">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_MAIL)</Down>
+            </Action>
+
+            <Action name="TOGGLE_NOTIFICATIONS">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_NOTIFICATIONS)</Down>
+            </Action>
+
+            <Action name="TOGGLE_HELP">
+                <Down>
+                    if not TUTORIAL_SYSTEM:ShowHelp() then
+                        SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_HELP)
+                    end
+                </Down>
+            </Action>
+
+            <Action name="TOGGLE_SYSTEM" rebindable="false">
+                <Down>ZO_SceneManager_ToggleGameMenuBinding()</Down>
+            </Action>
+
+            <Action name="ASSIST_NEXT_TRACKED_QUEST">
+                <Down>QUEST_TRACKER:AssistNext()</Down>
+            </Action>
+
+            <Action name="TOGGLE_FIRST_PERSON">
+                <Down>ToggleGameCameraFirstPerson()</Down>
+            </Action>
+
+            <Action name="TOGGLE_HUD_UI">
+                <Down>SCENE_MANAGER:OnToggleHUDUIBinding()</Down>
+            </Action>
+
+            <Action name="TOGGLE_GAMEPAD_MODE">
+                <Up>
+                    if GetUIPlatform() == UI_PLATFORM_PC then
+                        if GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED) then
+                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "false")
+                        else
+                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "true")
+                        end
+                    end
+                </Up>
+            </Action>
+
+        </Category>
+    </Layer>
+    <!-- This layer should not be player facing -->
+    <Layer name="GamepadUIMode" allowFallthrough="false">
+        <Category>
+            <Action name="GAMEPAD_UI_EXIT" hideAction="true" rebindable="false">
+                <Down>MAIN_MENU_GAMEPAD:AttemptShowBaseScene()</Down>
+            </Action>
+            <AllowAction name="START_CHAT_ENTER"/>
+            <AllowAction name="START_CHAT_SLASH"/>
+            <AllowAction name="TOGGLE_HUD_UI"/>
+            <AllowAction name="TOGGLE_SYSTEM"/>
+            <AllowAction name="TOGGLE_GAME_CAMERA_UI_MODE"/>
+            <AllowAction name="TAKE_SCREENSHOT"/>
+            <AllowAction name="TOGGLE_GAMEPAD_MODE"/>
+
+            <AllowAction name="TOGGLE_MARKET"/>
+            <AllowAction name="TOGGLE_INVENTORY"/>
+            <AllowAction name="TOGGLE_CHARACTER"/>
+            <AllowAction name="TOGGLE_SKILLS"/>
+            <AllowAction name="TOGGLE_CHAMPION"/>
+            <AllowAction name="TOGGLE_JOURNAL"/>
+            <AllowAction name="TOGGLE_COLLECTIONS_BOOK"/>
+            <AllowAction name="TOGGLE_MAP"/>
+            <AllowAction name="TOGGLE_GROUP"/>
+            <AllowAction name="TOGGLE_CONTACTS"/>
+            <AllowAction name="TOGGLE_GUILDS"/>
+            <AllowAction name="TOGGLE_ALLIANCE_WAR"/>
+            <AllowAction name="TOGGLE_MAIL"/>
+            <AllowAction name="TOGGLE_NOTIFICATIONS"/>
+            <AllowAction name="TOGGLE_HELP"/>
+        </Category>
+    </Layer>
+    <Layer name="SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS">
+        <Category>
+            <Action name="UI_SHORTCUT_PRIMARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_SECONDARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_TERTIARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_NEGATIVE">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_REPORT_PLAYER">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_QUICK_SLOTS">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_SHOW_QUEST_ON_MAP">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_CYCLE_FOCUSED_QUEST">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_STACK_ALL">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_RIGHT_TRIGGER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_TRIGGER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_RIGHT_SHOULDER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_SHOULDER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_INPUT_LEFT" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_INPUT_RIGHT" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_INPUT_UP" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_INPUT_DOWN" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_LEFT_STICK" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="UI_SHORTCUT_RIGHT_STICK" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>        
+        </Category>
+    </Layer>
+    <Layer name="SI_KEYBINDINGS_LAYER_SIEGE" allowFallthrough="false">
+        <Category>
+            <Action name="SIEGE_FIRE">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="SIEGE_RELEASE">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="SIEGE_PACK_UP">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="SIEGE_ESCAPE" inheritsBindFrom="TOGGLE_SYSTEM" hideAction="true">
+                <Down>SiegeWeaponRelease()</Down>
+            </Action>
+            <AllowAction name="CAMERA_ZOOM_OUT"/>
+            <AllowAction name="CAMERA_ZOOM_IN"/>
+            <AllowAction name="TOGGLE_FULLSCREEN"/>
+            <AllowAction name="TAKE_SCREENSHOT"/>
+            <AllowAction name="START_CHAT_ENTER"/>
+            <AllowAction name="START_CHAT_SLASH"/>
+            <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER"/>
+            <AllowAction name="TOGGLE_HUD_UI"/>
+            <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
+        </Category>
+    </Layer>
+    <Layer name="SI_KEYBINDINGS_LAYER_DIALOG" allowFallthrough="false">
+        <Category>
+            <Action name="DIALOG_PRIMARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_SECONDARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_TERTIARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_NEGATIVE">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_CLOSE">
+                <Down>ZO_Dialogs_CloseKeybindPressed()</Down>
+            </Action>
+            <Action name="DIALOG_RESET">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            
+            <AllowAction name="START_CHAT_ENTER"/>
+            <AllowAction name="START_CHAT_SLASH"/>
+            <AllowAction name="TAKE_SCREENSHOT"/>
+            <AllowAction name="TOGGLE_FULLSCREEN"/>
+        </Category>
+    </Layer>
+    <Layer name="SI_KEYBINDINGS_LAYER_NOTIFICATIONS">
+        <Category>
+            <Action name="PLAYER_TO_PLAYER_INTERACT_ACCEPT">
+                <Down>PLAYER_TO_PLAYER:Accept()</Down>
+            </Action>
+
+            <Action name="PLAYER_TO_PLAYER_INTERACT_DECLINE">
+                <Down>PLAYER_TO_PLAYER:Decline()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- This layer should not be player facing, it "magically" makes the mouse buttons work differently in UI mode-->
+    <Layer name="MouseUIMode">
+        <Category>
+            <Action name="LEFT_MOUSE_IN_WORLD" hideAction="true" rebindable="false">
+                <Down>LeftMouseDownInWorld()</Down>
+                <Up>LeftMouseUpInWorld()</Up>
+            </Action>
+
+            <Action name="LEFT_AND_RIGHT_MOUSE_IN_WORLD" hideAction="true" rebindable="false">
+                <Down>LeftAndRightMouseDownInWorld()</Down>
+                <Up>LeftAndRightMouseUpInWorld()</Up>
+            </Action>
+
+            <Action name="RIGHT_MOUSE_IN_WORLD" hideAction="true" rebindable="false">
+                <Down>RightMouseDownInWorld()</Down>
+                <Up>RightMouseUpInWorld()</Up>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="Conversation">
+        <Category>
+            <Action name="CONVERSATION_OPTION_1" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(1)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_2" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(2)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_3" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(3)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_4" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(4)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_5" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(5)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_6" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(6)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_7" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(7)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_8" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(8)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_9" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(9)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_10" hideAction="true" rebindable="false">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(10)</Down>
+            </Action>
+            
+            <Action name="CONVERSATION_OPTION_PRIMARY" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(1)</Down>
+            </Action>
+            <Action name="CONVERSATION_OPTION_NEGATIVE" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+                <Down>INTERACT_WINDOW:SelectLastChatterOption()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <Layer name="SceneChangeInterceptLayer">
+        <Category>
+            <!-- Intercept menu keybinds when the player is under arrest -->
+            <Action name="INTERCEPT_UI_SHORTCUT_EXIT" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_EXIT">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_UI_SHORTCUT_NEGATIVE" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_SYSTEM" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SYSTEM">
+                <Down>return true</Down>
+            </Action>
+            
+            <Action name="INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">
+                <Down>return true</Down>
+            </Action>
+            
+            <Action name="INTERCEPT_TOGGLE_MARKET" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MARKET">
+                <Down>return true</Down>
+            </Action>
+            
+            <Action name="INTERCEPT_TOGGLE_INVENTORY" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_INVENTORY">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_CHARACTER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CHARACTER">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_SKILLS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SKILLS">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_CHAMPION" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CHAMPION">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_JOURNAL" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_JOURNAL">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_COLLECTIONS_BOOK" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_COLLECTIONS_BOOK">
+                <Down>return true</Down>
+            </Action>
+            
+            <Action name="INTERCEPT_TOGGLE_MAP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAP">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_GROUP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GROUP">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_CONTACTS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CONTACTS">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_GUILDS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GUILDS">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_ALLIANCE_WAR" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ALLIANCE_WAR">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_MAIL" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAIL">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_NOTIFICATIONS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_NOTIFICATIONS">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
+                <Down>return true</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <Layer name="MarketPreviewInterceptLayer">
+        <Category>
+            <!-- Intercept keybinds for actions that can cause previewing to break -->
+            <Action name="INTERCEPT_SHEATHE_WEAPON_TOGGLE" hideAction="true" rebindable="false" inheritsBindFrom="SHEATHE_WEAPON_TOGGLE">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_AUTORUN" hideAction="true" rebindable="false" inheritsBindFrom="AUTORUN">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_SPECIAL_MOVE_CROUCH" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_CROUCH">
+                <Down>return true</Down>
+            </Action>
+
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="Guild">
+        <Category>
+            <Action name="GUILD_1" hideAction="true" rebindable="false">
+                <Down>GUILD_SELECTOR:SelectGuildByIndex(1)</Down>
+            </Action>
+            <Action name="GUILD_2" hideAction="true" rebindable="false">
+                <Down>GUILD_SELECTOR:SelectGuildByIndex(2)</Down>
+            </Action>
+            <Action name="GUILD_3" hideAction="true" rebindable="false">
+                <Down>GUILD_SELECTOR:SelectGuildByIndex(3)</Down>
+            </Action>
+            <Action name="GUILD_4" hideAction="true" rebindable="false">
+                <Down>GUILD_SELECTOR:SelectGuildByIndex(4)</Down>
+            </Action>
+            <Action name="GUILD_5" hideAction="true" rebindable="false">
+                <Down>GUILD_SELECTOR:SelectGuildByIndex(5)</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="RadialMenu">
+        <BlockKey key="MOUSE_LEFT" />
+        <BlockKey key="MOUSE_RIGHT" />
+        <BlockKey key="MOUSE_MIDDLE" />
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="Death">
+        <Category>
+            <Action name="DEATH_PRIMARY" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY" rebindable="false">
+                <Down>DEATH:SelectOption(keybind)</Down>
+            </Action>
+            <Action name="DEATH_SECONDARY" hideAction="true" inheritsBindFrom="DIALOG_SECONDARY" rebindable="false">
+                <Down>DEATH:SelectOption(keybind)</Down>
+            </Action>
+            <Action name="DEATH_TERTIARY" hideAction="true" inheritsBindFrom="UI_SHORTCUT_TERTIARY" rebindable="false">
+                <Down>DEATH:SelectOption(keybind)</Down>
+            </Action>
+            <Action name="DEATH_DECLINE" hideAction="true" inheritsBindFrom="PLAYER_TO_PLAYER_INTERACT_DECLINE" rebindable="false">
+                <Down>DEATH:SelectOption(keybind)</Down>
+            </Action>
+            <Action name="DEATH_RECAP_TOGGLE" hideAction="true" inheritsBindFrom="ASSIST_NEXT_TRACKED_QUEST" rebindable="false">
+                <Down>DEATH_RECAP_TOGGLE:Toggle()</Down>
+            </Action>
+            <Action name="DEATH_RECAP_HIDE" hideAction="true" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" rebindable="false">
+                <Down>return DEATH_RECAP_TOGGLE:Hide()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    
+    <!-- Not player facing -->
+    <Layer name="Loot">
+        <Category>
+            <Action name="LOOT_ITEM" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>ZO_Loot_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="LOOT_ALL" hideAction="true" inheritsBindFrom="UI_SHORTCUT_SECONDARY">
+                <Down>ZO_Loot_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="LOOT_EXIT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_EXIT">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="GameMenu">
+        <Category>
+            <Action name="GAME_MENU_DO_NOTHING" hideAction="true" inheritsBindFrom="UI_SHORTCUT_EXIT">
+                <Down> do end </Down>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="KeybindWindow">
+        <Category>
+            <Action name="KEYBINDS_LOAD_KEYBOARD_DEFAULTS" hideAction="true" inheritsBindFrom="UI_SHORTCUT_SECONDARY">
+                <Down> ZO_Dialogs_ShowDialog("KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS") </Down>
+            </Action>
+            <Action name="KEYBINDS_LOAD_GAMEPAD_DEFAULTS" hideAction="true" inheritsBindFrom="UI_SHORTCUT_TERTIARY">
+                <Down> ZO_Dialogs_ShowDialog("KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS") </Down>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="Addons">
+        <Category>
+            <Action name="ADDONS_PANEL_MULTI_BUTTON" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY">
+                <Down>ZO_AddOnManagerMultiButton_Callback()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="OptionsWindow">
+        <Category>
+            <Action name="OPTIONS_APPLY_CHANGES" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY">
+                <Down>KEYBOARD_OPTIONS:ApplySettings()</Down>
+            </Action>
+            <Action name="OPTIONS_LOAD_DEFAULTS" hideAction="true" inheritsBindFrom="DIALOG_RESET">
+                <Down>ZO_Dialogs_ShowDialog("OPTIONS_RESET_TO_DEFAULTS")</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing-->
+    <Layer name="ScreenAdjust">
+        <Category>
+            <Action name="SCREEN_ADJUST_SAVE" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>SCREEN_ADJUST:OnSave()</Down>
+            </Action>
+            <Action name="SCREEN_ADJUST_CANCEL" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+                <Down>SCREEN_ADJUST:OnCancel()</Down>
+            </Action>            
+        </Category>
+    </Layer>
+</Bindings>

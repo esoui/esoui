@@ -1,0 +1,118 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="HudInfoBoxTutorialAnimation">
+            <Animations>
+                <AlphaAnimation duration="450" startAlpha="1.0" endAlpha="0.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_HudInfoBoxTutorialTip" alpha="0" hidden="true" virtual="true">
+            <Dimensions x="430" y="350" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-50" offsetY="-130" />
+
+            <OnInitialized>
+                self.title = self:GetNamedChild("Title")
+                self.description = self:GetNamedChild("Description")
+
+                self.helpLabel = self:GetNamedChild("HelpLabel")
+                self.helpKey = self:GetNamedChild("HelpKey")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Tutorial/tutorial_HUD_windowBG.dds">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="0.0" right="0.83203125" top="0.0" bottom="0.724609375" />
+                </Texture>
+                <Label name="$(parent)Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER" horizontalAlignment="CENTER" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE">
+                    <Dimensions x="310" y="30" />
+                    <Anchor point="TOP" offsetY="60"/>
+                </Label>
+                <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM"/>
+                </Texture>
+                <Label name="$(parent)Description" inherits="ZO_SmallKeyMarkupLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS">
+                    <Dimensions x="310" />
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM"/>
+                </Label>
+
+                <Label name="$(parent)HelpLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" text="SI_TUTORIAL_MORE_INFO">
+                    <Anchor point="BOTTOM" offsetX="15" offsetY="-60"/>
+                </Label>
+
+                <Label name="$(parent)HelpKey" font="ZoFontKeybindStripKey" inherits="ZO_LargeKeyMarkupLabel" >
+                    <Anchor point="RIGHT" relativeTo="$(parent)HelpLabel" relativePoint="LEFT" offsetX="-15" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HudInfoBoxTutorialTip_Gamepad" resizeToFitDescendents="true" alpha="0" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <OnInitialized>
+                self.title = self:GetNamedChild("Title")
+                self.description = self:GetNamedChild("Description")
+
+                self.helpLabel = self:GetNamedChild("HelpLabel")
+                self.helpKey = self:GetNamedChild("HelpKey")
+            </OnInitialized>
+
+            <Controls>
+                <!--This makes sure the parent locks in its width for the resizeToFitDescendants (namely for the backdrop), 
+                    so everything below can base their respective widths on this-->
+                <Control name="$(parent)Spacer">
+                    <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
+                    <Anchor point="TOPLEFT" />
+                </Control>
+                
+                <Backdrop name="$(parent)Bg" excludeFromResizeToFitExtents="true" integralWrapping="true">
+                    <Anchor point="TOPLEFT" offsetX="-8" offsetY="-10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="20"/>
+
+                    <Edge file="EsoUI/Art/ChatWindow/chat_BG_edge.dds" edgeFileWidth="256" edgeFileHeight="256" edgeSize="32"/>
+                    <Center file="EsoUI/Art/ChatWindow/chat_BG_center.dds" />
+                    <Insets left="32" top="32" right="-32" bottom="-32" />
+                </Backdrop>
+
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" verticalAlignment="BOTTOM" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Spacer" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Spacer" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepadBold42",
+                            },
+                            {
+                                font = "ZoFontGamepad36",
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Label>
+
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
+                </Control>
+
+                <Label name="$(parent)Description" inherits="ZO_SmallKeyMarkupLabel" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y" />
+                </Label>
+
+                <Label name="$(parent)HelpLabel" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TUTORIAL_MORE_INFO">
+                    <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" offsetX="15" offsetY="20"/>
+                </Label>
+
+                <Label name="$(parent)HelpKey" font="ZoFontGamepad42" inherits="ZO_LargeKeyMarkupLabel" >
+                    <Anchor point="RIGHT" relativeTo="$(parent)HelpLabel" relativePoint="LEFT" offsetX="-15" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,11 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Tooltips" tier="HIGH" topmost="true">
+            <AnchorFill />
+
+            <Controls>
+                <Tooltip name="InformationTooltip"  inherits="ZO_BaseTooltip" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,51 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_Subtitles_TextFadeIn">
+            <Animations>
+                <AlphaAnimation duration="250" startAlpha="0" endAlpha="0.8" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <!-- Templates -->
+        <Label name="ZO_Subtitles_Text_Keyboard_Template" font="ZoFontSubtitleText" virtual="true" />
+
+        <Label name="ZO_Subtitles_Text_Gamepad_Template" font="ZoFontGamepad42" virtual="true" />
+
+        <TopLevelControl name="ZO_Subtitles" layer="BACKGROUND" tier="LOW" level="0">
+            <Anchor point="BOTTOMLEFT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+
+            <OnInitialized>
+                ZO_Subtitles_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Text" horizontalAlignment="CENTER" alpha="0.0">
+                    <Controls>
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/Subtitles/subtitle_background_centerBlur.dds" alpha="0.6">
+                            <Anchor point="TOP" offsetY="-20"/>
+                            <Anchor point="BOTTOM" offsetY="20"/>
+                        </Texture>
+                        <Texture name="$(parent)BackgroundLeft" textureFile="EsoUI/Art/Subtitles/subtitle_background_blurCap.dds" alpha="0.6">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <Dimensions x="64"/>
+                            <DimensionConstraints minX="64" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Background" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)BackgroundRight" textureFile="EsoUI/Art/Subtitles/subtitle_background_blurCap.dds" alpha="0.6">
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                            <Dimensions x="64"/>
+                            <DimensionConstraints minX="64" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+            </Controls>
+            
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,164 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="PossessionFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="125" startAlpha="0" endAlpha="1" />
+            </Animations>
+            <Callbacks>
+                <Callback delay="65">
+                    if not self.instant then
+                        if self:IsPlayingBackward() then
+                            self.owner:PlaySoundFromStat(STAT_MITIGATION, STAT_STATE_POSSESSION_REMOVED)
+                        else
+                            self.owner:PlaySoundFromStat(STAT_MITIGATION, STAT_STATE_POSSESSION_APPLIED)
+                        end
+                    end
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="PossessionHaloAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+          <Animations>
+            <TextureAnimation cellsWide="4" cellsHigh="8" framerate="32"/>
+          </Animations>
+        </AnimationTimeline>
+    </Animations>
+  
+    <Controls>
+        <Texture name="ZO_PossessionHaloTexture" tier="LOW" layer="BACKGROUND" virtual="true">
+            <Dimensions y="128" />
+        </Texture>
+
+        <Texture name="ZO_PossessionHaloTexture_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/possession_animatedHalo_32fr.dds" virtual="true" />
+        <Texture name="ZO_PossessionHaloTexture_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_possession_animatedHalo_32fr.dds" virtual="true" />
+
+        <Control name="ZO_PossessionHaloGlowArrow" inherits="ZO_PlayerAttributeWarner" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionHaloGlowArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possessionGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionHaloGlowArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeftArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_possessionGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionHaloGlowAngle" inherits="ZO_TargetAttributeWarner" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_TargetAttributeWarnerLeftAngle" />
+                <Texture name="$(parent)Right" inherits="ZO_TargetAttributeWarnerRightAngle" />
+                <Texture name="$(parent)Center" inherits="ZO_TargetAttributeWarnerCenter" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionHaloGlowAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_TargetAttributeWarnerLeftAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_TargetAttributeWarnerRightAngle_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_TargetAttributeWarnerCenter_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_possessionGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionHaloGlowAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_TargetAttributeWarnerLeftAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_TargetAttributeWarnerRightAngle_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_possessionGlow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_TargetAttributeWarnerCenter_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_possessionGlow.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionOverlayContainerArrow" tier="HIGH" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" layer="CONTROLS">
+                    <Dimensions x="10" />
+                    <TextureCoords left="0.390625" right="0.46875" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+
+                <Texture name="$(parent)Right" layer="CONTROLS">
+                    <Dimensions x="10" />
+                    <TextureCoords left="0.46875" right="0.390625" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+
+                <Texture name="$(parent)Center" layer="CONTROLS">
+                    <TextureCoords left="0.46875" right="0.5234375" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionOverlayContainerArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_possession.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionOverlayContainerArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_possession.dds" />
+            </Controls>
+        </Control>
+
+        <!-- Possession - Angle -->
+        <Control name="ZO_PossessionOverlayContainerAngle" tier="HIGH" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" layer="CONTROLS">
+                    <Dimensions x="14" />
+                    <TextureCoords left="0.3359375" right="0.4453125" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+
+                <Texture name="$(parent)Right" layer="CONTROLS">
+                    <Dimensions x="14" />
+                    <TextureCoords left="0.5546875" right="0.6796875" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+
+                <Texture name="$(parent)Center" layer="CONTROLS">
+                    <TextureCoords left="0.5546875" right="0.46875" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionOverlayContainerAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_possession.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PossessionOverlayContainerAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_possession.dds" />
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_possession.dds" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

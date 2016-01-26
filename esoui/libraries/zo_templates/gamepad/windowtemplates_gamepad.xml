@@ -1,0 +1,178 @@
+<GuiXml>
+    <Controls>
+        <Backdrop name="ZO_DefaultBackdrop_Gamepad" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8" />
+            <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="8" />
+
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_edge_semiTrans_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_center_semiTrans_16.dds" />
+            <Insets left="16" top="16" right="-16" bottom="-16" />
+        </Backdrop>
+
+        <Backdrop name="ZO_WhiteBackdrop_Gamepad" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8" />
+            <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="8" />
+
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+            <Insets left="8" top="8" right="-8" bottom="-8" />
+        </Backdrop>
+
+        <EditBox name="ZO_DefaultEdit_Gamepad" font="ZoFontGamepad34" mouseEnabled="true" virtual="true">
+            <Dimensions y="36" />
+            <OnMouseDown>
+                self:TakeFocus()
+            </OnMouseDown>
+            <OnEnter>
+                self:LoseFocus()
+            </OnEnter>
+            <OnEscape>
+                self:LoseFocus()
+            </OnEscape>
+
+            <OnFocusGained>
+                ZO_GamepadEditBox_FocusGained(self)
+                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+                    PlaySound(SOUNDS.EDIT_CLICK)
+                end
+            </OnFocusGained>
+            
+            <OnFocusLost>
+                ZO_GamepadEditBox_FocusLost(self)
+            </OnFocusLost>            
+        </EditBox>
+
+        <Backdrop name="ZO_EditBackdrop_Gamepad" virtual="true">
+            <Dimensions y="46"/>
+            <Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center.dds" />
+            <Insets left="8" top="8" right="-8" bottom="-8" />
+        </Backdrop>
+
+        <EditBox name="ZO_DefaultEditForBackdrop_Gamepad" inherits="ZO_DefaultEdit_Gamepad" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="8" offsetY="3"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2"/>
+        </EditBox>
+
+        <EditBox name="ZO_DefaultEditMultiLine_Gamepad" font="ZoFontGamepad34" mouseEnabled="true" multiLine="true" virtual="true">
+            <OnMouseDown>
+                self:TakeFocus()
+            </OnMouseDown>
+            <OnEscape>
+                self:LoseFocus()
+            </OnEscape>
+            <OnMouseWheel>
+                local currentLine = self:GetTopLineIndex()
+                if shift then
+                    delta = delta * 10
+                end
+                local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
+                self:SetTopLineIndex(nextLine)
+            </OnMouseWheel>
+
+            <OnFocusGained>
+                ZO_GamepadEditBox_FocusGained(self)
+                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+                    PlaySound(SOUNDS.EDIT_CLICK)
+                end
+            </OnFocusGained>
+
+            <OnFocusLost>
+                ZO_GamepadEditBox_FocusLost(self)
+            </OnFocusLost>
+        </EditBox>
+
+        <EditBox name="ZO_DefaultEditMultiLineForBackdrop_Gamepad" inherits="ZO_DefaultEditMultiLine_Gamepad" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="6" offsetY="5"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7"/>
+        </EditBox>
+
+        <EditBox name="ZO_EditDefaultText_Gamepad" virtual="true">
+            <OnTextChanged>
+                ZO_EditDefaultText_OnTextChanged(self)
+            </OnTextChanged>
+            <Controls>
+                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" font="ZoFontGamepad34">
+                    <AnchorFill/>
+                </Label>
+            </Controls>
+        </EditBox>
+
+        <Control name="ZO_GamepadSelectableItemRadialMenuEntryTemplate" scale="0.75" virtual="true">
+            <Dimensions x="64" y="64"/>
+            <OnInitialized>
+                ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate">
+                    <Anchor point="TOPLEFT" offsetX="-50" offsetY="-50" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="50" offsetY="50" />
+                </Texture>
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8"/>
+                </Backdrop>
+                <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGamepadBold27" inheritScale="false">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4"/>
+                </Label>
+                <Texture name="$(parent)Icon" tier ="MEDIUM">
+                    <AnchorFill/>
+                </Texture>
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown" alpha="1" tier="HIGH">
+                    <AnchorFill/>
+                </Cooldown>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_RadialMenuHUDEntryTemplate_Gamepad" scale="0.75" virtual="true">
+            <Dimensions x="64" y="64"/>
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" tier="MEDIUM">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="TOP" />
+                </Texture>
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RadialMenuPanelSize_Gamepad" hidden="true" virtual="true">
+            <Dimensions x="350" y="350"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot"/>
+            <Controls>
+                <Texture name="$(parent)Track" textureFile="EsoUI/Art/HUD/Gamepad/gp_radialMenu_track.dds">
+                    <Dimensions x="718" y="718" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)SelectedBackground" textureFile="EsoUI/Art/HUD/Gamepad/gp_radialMenu_thumb.dds">
+                    <Dimensions x="718" y="718" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RadialMenuHUDSize_Gamepad" hidden="true" virtual="true">
+            <Dimensions x="500" y="500"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot"/>
+            <Controls>
+                <Texture name="$(parent)Track" textureFile="EsoUI/Art/HUD/Gamepad/gp_radialMenu_track.dds">
+                    <Dimensions x="1024" y="1024" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)SelectedBackground" textureFile="EsoUI/Art/HUD/Gamepad/gp_radialMenu_thumb.dds">
+                    <Dimensions x="1024" y="1024" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_RadialMenuActionText_Gamepad" virtual="true" font="ZoFontGamepad42" horizontalAlignment="CENTER" verticalAlignment="CENTER" inheritScale="false">
+            <Dimensions x="250" y="250" />
+            <Anchor point="CENTER"/>
+        </Label>
+    </Controls>
+</GuiXml>

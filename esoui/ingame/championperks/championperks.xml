@@ -1,0 +1,391 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_StarSpiralAnimation">
+            <Animations>
+                <CustomAnimation duration="25000">
+                    <UpdateFunction>
+                        CHAMPION_PERKS:OnSpiralUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+            <OnStop>
+                CHAMPION_PERKS:OnSpiralStop(self)
+            </OnStop>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_StarPulseAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_SelectedStarIndicatorAnimation" playbackType="PING_PONG" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation cellsWide="4" cellsHigh="4" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_SelectedStarIndicatorAppearAnimation">
+            <Animations>
+                <AlphaAnimation startAlpha="0" endAlpha="1" duration="300"/>
+                <ScaleAnimation startScale="1.2" endScale="1" duration="80"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChampionCloseCloudsAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <CustomAnimation duration="10000"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChampionStarConfirmAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="8" cellsHigh="4" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChampionStarUnlockedPendingAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="8" cellsHigh="4" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChampionStarLockedPendingAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="8" cellsHigh="4" framerate="96"/>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="ZO_ChampionStarUnlockedConfirmAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChampionConfirmCameraAnimation">
+            <Animations>
+                <CustomAnimation duration="400" delay="410">
+                    <UpdateFunction>
+                        CHAMPION_PERKS:OnConfirmCameraShakeUpdate(self, progress)
+                    </UpdateFunction>
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChampionConfirmCameraPrepAnimation">
+            <Animations>
+                <CustomAnimation duration="375">
+                    <UpdateFunction>
+                        CHAMPION_PERKS:OnConfirmCameraPrepUpdate(self, progress)
+                    </UpdateFunction>
+                    <OnStop>
+                        CHAMPION_PERKS:OnConfirmCameraPrepStop()
+                    </OnStop>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_ConstellationSkyCloud1" virtual="true" pixelRoundingEnabled="false" tier="LOW" textureFile="EsoUI/Art/Champion/champion_sky_cloud1.dds"/>
+        <Texture name="ZO_ConstellationSkyCloud2" virtual="true" pixelRoundingEnabled="false" tier="LOW" textureFile="EsoUI/Art/Champion/champion_sky_cloud2.dds"/>
+        <Texture name="ZO_ChampionOneShotAnimationTexture" virtual="true" pixelRoundingEnabled="false"/>
+        <Label name="ZO_ConstellationStarLabel" virtual="true" horizontalAlignment="CENTER"/>
+        <Label name="ZO_ConstellationDescriptionLabel" virtual="true" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+        <Control name="ZO_ChampionStarText" virtual="true" resizeToFitDescendents="true" mouseEnabled="true">
+            <OnInitialized>
+                self.nameLabel = self:GetNamedChild("Name")
+                self.pointsSpinner = ZO_Spinner:New(self:GetNamedChild("Points"))
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_ConstellationStarComponent_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_ConstellationStarComponent_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_ConstellationStarComponent_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnMouseWheel>
+                ZO_ConstellationStarComponent_OnMouseWheel(self, delta)
+            </OnMouseWheel>
+            <!-- Push the name down to use the width of the name extending upwards as the box that responds to the mouse -->
+            <ResizeToFitPadding height="80" width="25"/>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_ConstellationStarLabel" horizontalAlignment="CENTER" >
+                    <Anchor point="TOP" offsetY="80"/>
+                    <DimensionConstraints maxX="250" />
+                </Label>
+                <Control name="$(parent)Points" inherits="ZO_Spinner">
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="-5"/>
+                    <Controls>
+                        <Label name="$(parent)Display" font="ZoFontGamepad34" override="true"/>
+                        <Button name="$(parent)Decrease" override="true">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Display" relativePoint="LEFT" offsetX="10" />
+                            <OnMouseEnter>
+                                ZO_ConstellationStarComponent_OnMouseEnter(self:GetParent():GetParent())
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_ConstellationStarComponent_OnMouseExit(self:GetParent():GetParent())
+                            </OnMouseExit>
+                        </Button>
+                        <Button name="$(parent)Increase" override="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" offsetX="-10" />
+                            <OnMouseEnter>
+                                ZO_ConstellationStarComponent_OnMouseEnter(self:GetParent():GetParent())
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_ConstellationStarComponent_OnMouseExit(self:GetParent():GetParent())
+                            </OnMouseExit>
+                        </Button>
+                    </Controls>
+
+                    <OnMouseEnter>
+                        ZO_ConstellationStarComponent_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_ConstellationStarComponent_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_ChampionCenterInfoPointCounter" virtual="true" tier="HIGH">
+            <Dimensions x="64" y="96"/>
+            <OnInitialized>
+                self.iconTexture = self:GetNamedChild("Icon")
+                self.pointsLabel = self:GetNamedChild("Points")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false">
+                    <Anchor point="TOP"/>
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                <Label name="$(parent)Points">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="3"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Texture name="ZO_ConstellationStarSpiral" virtual="true" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" textureFile="EsoUI\Art\Champion\champion_star_spiral.dds"/>
+        <Control name="ZO_ConstellationCycleLeftKey" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                self:GetNamedChild("Key"):SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER))
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Cursor" textureFile="EsoUI/Art/Cursors/Cursor_nextLeft.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+                <Texture name="$(parent)Key">
+                    <Dimensions x="55" y="55"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Cursor" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_ConstellationCycleRightKey" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                self:GetNamedChild("Key"):SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER))
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Cursor" textureFile="EsoUI/Art/Cursors/Cursor_nextRight.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)Key">
+                    <Dimensions x="55" y="55"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Cursor" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <!-- Set each of these virtual textures to a concrete texture on load so their texture files are loaded into memory -->
+        <Texture name="ZO_ChampionPreloadTextures" hidden="true" inherits="ZO_ConstellationStarSpiral ZO_ConstellationSkyCloud1 ZO_ConstellationSkyCloud2"/>
+
+        <TopLevelControl name="ZO_ChampionPerksChosenAttributePointCounter_Base" virtual="true" resizeToFitDescendents="true" hidden="true" tier="HIGH"  level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <Dimensions x="100" y="48"/>
+            <OnInitialized>
+                self.iconTexture = self:GetNamedChild("Icon")
+                self.pointsLabel = self:GetNamedChild("Points")
+                self.pointsHeaderLabel = self:GetNamedChild("PointsHeader")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)PointsHeader" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions y="48"/>
+                </Label>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PointsHeader" relativePoint="TOPRIGHT" offsetX="10"/>
+                    <Dimensions x="48" y="48"/>
+                </Texture>
+                <Label name="$(parent)Points">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="8"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_ChampionPerksChosenAttributeEarnedPointCounter" inherits="ZO_ChampionPerksChosenAttributePointCounter_Base"/>
+
+        <TopLevelControl name="ZO_ChampionPerksChosenAttributePointCounter" inherits="ZO_ChampionPerksChosenAttributePointCounter_Base">
+            <Anchor point="LEFT" relativeTo="ZO_ChampionPerksChosenAttributeEarnedPointCounter" relativePoint="RIGHT" offsetX="30"/>
+            <Controls>
+                <Label name="$(parent)PointsHeader" override="true" text="SI_CHAMPION_AVAILABLE_POINTS_HEADER" font="ZoFontKeybindStripDescription"/>
+                <Label name="$(parent)Points" override="true" font="ZoFontKeybindStripDescription"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_ChampionRespecConfirmationDialog" inherits="ZO_CustomDialogBase" >
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
+
+                <Label name="$(parent)BalanceDescription" text="SI_CHAMPION_DIALOG_CONFIRMATION_BALANCE" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="16" />
+                </Label>
+
+                <Label name="$(parent)BalanceAmount" font="ZoFontGame">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="16" />
+                </Label>
+
+                <Label name="$(parent)RespecDescription" text="SI_CHAMPION_DIALOG_CONFIRMATION_COST" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceDescription" relativePoint="BOTTOMLEFT" />
+                </Label>
+
+                <Label name="$(parent)RespecCost" font="ZoFontGame">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceAmount" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_ChampionPerks" hidden="true">
+            <OnInitialized>
+                ZO_ChampionPerks_OnInitialized(self)
+            </OnInitialized>
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)SelectedStarIndicator" textureFile="EsoUI/Art/Champion/champion_star_selection_indicator.dds" alpha="1" pixelRoundingEnabled="false" blendMode="ADD" tier="MEDIUM" hidden="true">
+                    <Dimensions x="128" y="128"/>
+                </Texture>
+                <Control name="$(parent)ChosenConstellation" tier="MEDIUM">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_GAMEPAD_BOTTOM_OFFSET_Y"/>
+                    <Dimensions x="790" y="135"/>
+                    <Controls>
+                        <Control name="$(parent)TopRow" resizeToFitDescendents="true">
+                            <Anchor point="TOP"/>
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontAnnounceLarge">
+                                    <Anchor point="TOPLEFT" offsetY="5"/>
+                                </Label>
+                                <Label name="$(parent)SpentPoints" font="ZoFontGamepad61">
+                                    <AnchorToBaseline relativeToLabel="$(parent)Name" side="RIGHT" offsetX="15"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                        <Label name="$(parent)Description" inherits="ZO_ConstellationDescriptionLabel" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" offsetY="50"/>
+                            <Dimensions x="790"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ChosenConstellationGamepad" tier="MEDIUM" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)LeftTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad">
+                            <OnInitialized>
+                                ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(self, nil, ZO_ChampionPerksGamepad_TooltipResizeHandler, RIGHT)
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="260"/>
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" hidden="true" />
+                            </Controls>
+                        </Control>
+                        <Control  name="$(parent)RightTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad">
+                            <OnInitialized>
+                                ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(self, nil, nil, LEFT)
+                            </OnInitialized>
+                            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_4_RIGHT_OFFSET" offsetY="260"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_QUADRANT_4_RIGHT_OFFSET" offsetY="800" />
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" hidden="true" />
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)CycleLeftKey" inherits="ZO_ConstellationCycleLeftKey">
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+                        </Control>
+                        <Control name="$(parent)CycleRightKey" inherits="ZO_ConstellationCycleRightKey">
+                            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)CenterInfo" tier="MEDIUM">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="385" y="365"/>
+                    <Controls>
+                        <Control name="$(parent)TopRow" resizeToFitDescendents="true">
+                            <Anchor point="TOP"/>
+                            <Controls>
+                                <Label name="$(parent)Name" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPLEFT" offsetY="5"/>
+                                </Label>
+                                <Label name="$(parent)SpentPoints">
+                                    <AnchorToBaseline relativeToLabel="$(parent)Name" side="RIGHT" offsetX="15"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                        <Label name="$(parent)Description" inherits="ZO_ConstellationDescriptionLabel" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" offsetY="46"/>
+                            <Dimensions x="360"/>
+                            <OnInitialized>
+                                local keyboardFonts =
+                                {
+                                    {
+                                        font = "ZoFontWinH3",
+                                        lineLimit = 6,
+                                    }
+                                }
+                                local gamepadFonts =
+                                {
+                                    {
+                                        font = "ZoFontGamepad42",
+                                        lineLimit = 3,
+                                    },
+                                    {
+                                        font = "ZoFontGamepad34",
+                                        lineLimit = 4,
+                                    }
+                                }
+                                ZO_PlatformStyleFontAdjustingWrapLabel_OnInitialized(self, keyboardFonts, gamepadFonts, TEXT_WRAP_MODE_ELLIPSIS)
+                            </OnInitialized>
+                        </Label>
+                        <Control name="$(parent)PointCounters">
+                            <Anchor point="TOP" offsetY="265"/>
+                        </Control>
+                        <Label name="$(parent)PointCountersHeader" modifyTextType="UPPERCASE" text="SI_CHAMPION_AVAILABLE_POINTS_HEADER">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)PointCounters" relativePoint="TOP" offsetY="-10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Canvas" mouseEnabled="true">
+                    <AnchorFill/>
+                    <OnMouseUp>
+                        ZO_ChampionPerksCanvas_OnMouseUp(button)
+                    </OnMouseUp>
+                    <Controls>
+                        <Texture name="$(parent)Sky" textureFile="EsoUI\Art\Champion\champion_sky.dds" tier="LOW" addressMode="WRAP" autoAdjustTextureCoords="false">
+                            <TextureCoords left="0" right="7" top="0" bottom="7"/>
+                        </Texture>
+                        <Texture name="$(parent)DarknessRing" textureFile="EsoUI\Art\Champion\champion_darkness_ring.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)ColorClouds" textureFile="EsoUI\Art\Champion\champion_colorClouds.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Clouds" textureFile="EsoUI\Art\Champion\champion_clouds_bright.dds" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" tier="LOW"/>
+                        <Texture name="$(parent)Smoke" textureFile="EsoUI\Art\Champion\champion_clouds_bright.dds" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" tier="LOW"/>
+                        <Texture name="$(parent)CloseClouds1" textureFile="EsoUI\Art\Champion\champion_clouds.dds" pixelRoundingEnabled="false" blendMode="ADD" tier="LOW"/>
+                        <Texture name="$(parent)CloseClouds2" textureFile="EsoUI\Art\Champion\champion_clouds.dds" pixelRoundingEnabled="false" blendMode="ADD" tier="LOW"/>
+                        <Texture name="$(parent)RadialSelector" textureFile="EsoUI\Art\Champion\champion_radial_selector.dds" pixelRoundingEnabled="false" tier="LOW" alpha="0"/>
+                        <Texture name="$(parent)CenterInfoBG" textureFile="EsoUI\Art\Champion\champion_center_bg.dds" alpha="0.4" tier="LOW"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

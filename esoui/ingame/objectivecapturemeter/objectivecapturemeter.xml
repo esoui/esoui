@@ -1,0 +1,92 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CaptureBarEasing">
+            <Animations>
+                <CustomAnimation duration="500">
+                    <UpdateFunction>
+                        ZO_ObjectiveCapture_UpdateCaptureBar(progress)
+                    </UpdateFunction>
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                    <OnStop>
+                        ZO_ObjectiveCapture_EasingAnimationStopped()
+                    </OnStop>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Texture name="CapturingArrow" textureFile="EsoUI/Art/AvA/avaCaptureBar_arrow_capturing.dds" tier="MEDIUM" level="4" hidden="true" virtual="true">
+            <Dimensions x="128" y="128" />
+            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)"/>
+        </Texture>
+        <Texture name="ContestingArrow" textureFile="EsoUI/Art/AvA/avaCaptureBar_arrow_contesting.dds" tier="MEDIUM" level="4" hidden="true" virtual="true">
+            <Dimensions x="128" y="128" />
+            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)"/>
+        </Texture>
+
+        <Control name="ZO_ObjectiveCapture_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Meter">
+                    <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ObjectiveCapture_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Meter">
+                    <Anchor point="BOTTOM" offsetY="-270"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ObjectiveCapture" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_ObjectiveCapture_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Meter">
+                    <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y"/>
+                    <Controls>
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/AvA/avaCaptureMeter_BackGround.dds" level="1">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                        </Texture>
+                        <Cooldown name="$(parent)ProgressBar">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                            <Controls>
+                                <Texture name="$(parent)EndCap" level="2">
+                                    <Dimensions x="128" y="128" />
+                                    <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)"/>
+                                </Texture>
+                                <Texture name="$(parent)CapturingArrow1" inherits="CapturingArrow" />
+                                <Texture name="$(parent)CapturingArrow2" inherits="CapturingArrow" />
+                                <Texture name="$(parent)CapturingArrow3" inherits="CapturingArrow" />
+                                <Texture name="$(parent)ContestingArrow1" inherits="ContestingArrow" />
+                                <Texture name="$(parent)ContestingArrow2" inherits="ContestingArrow" />
+                                <Texture name="$(parent)ContestingArrow3" inherits="ContestingArrow" />
+                            </Controls>
+                        </Cooldown>
+                        <Texture name="$(parent)MidpointDivider" textureFile="EsoUI/Art/AvA/avaCaptureBar_midpointDivider.dds" tier="MEDIUM" level="3">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                        </Texture>
+                        <Texture name="$(parent)OwnerBadge">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                        </Texture>
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/AvA/avaCaptureBar_barFrame.dds" tier="MEDIUM" level="4">
+                            <Dimensions x="128" y="128" />
+                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

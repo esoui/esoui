@@ -1,0 +1,171 @@
+<Bindings>
+    <Layer name="Pregame">
+        <Category name="Pregame">
+            <Action name="NEXT_CHARACTER" rebindable="false">
+                <Down>ZO_CharacterSelect_NextCharacter()</Down>
+            </Action>
+
+            <Action name="PREVIOUS_CHARACTER" rebindable="false">
+                <Down>ZO_CharacterSelect_PreviousCharacter()</Down>
+            </Action>
+
+            <Action name="PLAY_CHARACTER" rebindable="false">
+                <Down>ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)</Down>
+            </Action>
+
+            <Action name="TOGGLE_FULLSCREEN" rebindable="false">
+                <Down>ToggleFullScreen()</Down>
+            </Action>        
+        </Category>
+    </Layer>
+    <Layer name="GamepadShortcuts">
+      <Category>
+        <Action name="UI_SHORTCUT_PRIMARY">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+        <Action name="UI_SHORTCUT_SECONDARY">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+        <Action name="UI_SHORTCUT_TERTIARY">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+        <Action name="UI_SHORTCUT_NEGATIVE">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+        <Action name="UI_SHORTCUT_EXIT">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_RIGHT_TRIGGER" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_LEFT_TRIGGER" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_RIGHT_SHOULDER" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_LEFT_SHOULDER" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_INPUT_LEFT" hideAction="true" rebindable="false">
+            <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+            <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_INPUT_RIGHT" hideAction="true" rebindable="false">
+            <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+            <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_INPUT_UP" hideAction="true" rebindable="false">
+            <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+            <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_INPUT_DOWN" hideAction="true" rebindable="false">
+            <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+            <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_RIGHT_STICK" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_LEFT_STICK" hideAction="true" rebindable="false">
+            <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+            <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_BACK" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+
+        <Action name="UI_SHORTCUT_START" hideAction="true" rebindable="false">
+          <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+          <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+        </Action>
+      </Category>
+    </Layer>
+    <Layer name="SI_KEYBINDINGS_LAYER_DIALOG" allowFallthrough="false">
+        <Category>
+            <Action name="DIALOG_PRIMARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_SECONDARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_NEGATIVE">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_CLOSE">
+                <Down>ZO_Dialogs_CloseKeybindPressed()</Down>
+            </Action>
+            <Action name="DIALOG_HELP">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_RESET">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_RIGHT_TRIGGER" hideAction="true" rebindable="false">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+                <Up>ZO_Dialogs_ButtonKeybindReleased(keybind)</Up>
+            </Action>
+            <Action name="DIALOG_LEFT_TRIGGER" hideAction="true" rebindable="false">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+                <Up>ZO_Dialogs_ButtonKeybindReleased(keybind)</Up>
+            </Action>
+            <Action name="DIALOG_RIGHT_SHOULDER" hideAction="true" rebindable="false">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+                <Up>ZO_Dialogs_ButtonKeybindReleased(keybind)</Up>
+            </Action>
+            <Action name="DIALOG_LEFT_SHOULDER" hideAction="true" rebindable="false">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+                <Up>ZO_Dialogs_ButtonKeybindReleased(keybind)</Up>
+            </Action>
+            <AllowAction name="TOGGLE_FULLSCREEN"/>
+        </Category>
+    </Layer>
+    <Layer name="OptionsWindow">
+        <Category>
+            <Action name="OPTIONS_APPLY_CHANGES" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY">
+                <Down> KEYBOARD_OPTIONS:ApplySettings() </Down>
+            </Action>
+            <Action name="OPTIONS_LOAD_DEFAULTS" hideAction="true" inheritsBindFrom="DIALOG_RESET">
+                <Down> ZO_Dialogs_ShowDialog("OPTIONS_RESET_TO_DEFAULTS") </Down>
+            </Action>
+        </Category>
+    </Layer>
+    <Layer name="Addons">
+        <Category>
+            <Action name="ADDONS_PANEL_MULTI_BUTTON" hideAction="true" inheritsBindFrom="DIALOG_PRIMARY">
+                <Down>ZO_AddOnManagerMultiButton_Callback()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <Layer name="ScreenAdjust">
+        <Category>
+            <Action name="SCREEN_ADJUST_SAVE" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>ZO_ScreenAdjust_Handle_OnSave()</Down>
+            </Action>
+            <Action name="SCREEN_ADJUST_CANCEL" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+                <Down>ZO_ScreenAdjust_Handle_OnCancel()</Down>
+            </Action>
+        </Category>
+    </Layer>
+</Bindings>

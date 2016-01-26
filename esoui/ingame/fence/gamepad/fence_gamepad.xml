@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_FenceWindow_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Fence_Gamepad_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)SpinnerContainer" inherits="ZO_GamepadLabeledQuantitySpinnerContainerTemplate" hidden="true">
+                    <Anchor point="LEFT" offsetX="40" />
+                    <Anchor point="RIGHT" offsetX="-40" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

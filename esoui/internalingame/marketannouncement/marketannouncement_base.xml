@@ -1,0 +1,73 @@
+<GuiXml>
+    <Controls>
+        <!-- Market Announcement Window-->
+        <TopLevelControl name="ZO_MarketAnnouncementBase_Control" layer="OVERLAY" tier="HIGH" hidden="true" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <!-- Underlay to eat all the mouse input. Hidden for design reasons. -->
+                <Control name="$(parent)ModalUnderlay" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+
+                    <!-- Eat the mouse wheel input -->
+                    <OnMouseWheel />
+                </Control>
+
+                <Control name="$(parent)Container">
+                    <Dimensions x="700" y="740"/>
+                    <Anchor point="RIGHT" offsetX="-60"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true">
+                            <AnchorFill />
+                        </Backdrop>
+
+                        <Label name="$(parent)Title" text="SI_MARKET_ANNOUNCEMENT_TITLE" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetY="20"/>
+                            <Anchor point="TOPRIGHT" offsetY="20"/>
+                        </Label>
+
+                        <Label name="$(parent)PositionTracker" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Control name="$(parent)Divider">
+                            <Dimensions x="620"/>
+                            <Anchor point="TOP" relativeTo="$(parent)PositionTracker" relativePoint="BOTTOM" offsetY="10"/>
+                        </Control>
+
+                        <Control name="$(parent)Carousel" inherits="ZO_HorizontalScrollListTemplate">
+                            <Dimensions x="620" y="300"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="10"/>
+                            <Controls>
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <AnchorFill />
+                                    <FadeGradient x1="1" y1="0" size1="100" x2="-1" y2="0" size2="100" />
+                                </Scroll>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                            <Controls>
+                                <Control name="$(parent)CrownStore" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Controls>
+                                        <Label name="$(parent)NameLabel" text="SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE" override="true"/>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)Close" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CrownStore" relativePoint="TOPRIGHT"/>
+                                    <Controls>
+                                        <Label name="$(parent)NameLabel" text="SI_DIALOG_EXIT" override="true"/>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

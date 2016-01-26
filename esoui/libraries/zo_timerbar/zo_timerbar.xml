@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TimerBar" virtual="true">
+            <Dimensions y="20"/>
+            <Controls>
+                <StatusBar name="$(parent)Status" color="DC2222">
+                    <AnchorFill/>
+                </StatusBar>
+                <Label name="$(parent)Time" font="ZoFontGame">
+                    <Anchor point="RIGHT" offsetX="-3"/>
+                    <Dimensions y="14"/>
+                </Label>
+                <Label name="$(parent)Label" font="ZoFontGame">
+                    <Anchor point="LEFT" offsetX="3"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT" offsetX="-5"/>
+                    <Dimensions y="16"/>
+                </Label>
+                <Texture name="$(parent)Glass" textureFile="EsoUI/Art/Loot/Glass.dds" color="88FFFFFF" layer="1">
+                    <AnchorFill/>
+                </Texture>
+                <Texture name="$(parent)BG" color="4C000000">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

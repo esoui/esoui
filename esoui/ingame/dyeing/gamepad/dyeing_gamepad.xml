@@ -1,0 +1,217 @@
+<GuiXml>
+    <Controls>
+        <TextureComposite name="ZO_DyeingSwatch_Gamepad" inherits="ZO_DyeingSwatch" textureFile="EsoUI/Art/Dye/Gamepad/swatch_multiTexture.dds" virtual="true">
+            <Dimensions x="32" y="32" />
+            <OnInitialized>
+                ZO_DyeingUtils_DyeingSwatchVisuals_OnInitialized_Gamepad(self)
+            </OnInitialized>
+        </TextureComposite>
+
+        <Control name="ZO_Dyeing_RadialMenuBase_Gamepad" inherits="ZO_RadialMenuHUDSize_Gamepad" virtual="true">
+            <Anchor point="TOP" offsetY="75" />
+        </Control>
+
+        <Label name="ZO_Dyeing_Gamepad_ColorLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        
+        <TopLevelControl name="ZO_DyeingGamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Dyeing_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)LeftPane" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer" >
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Control>
+                        <Control name="$(parent)DyeContainer">
+                            <AnchorFill />
+                            <Controls>
+                                <Control name="$(parent)Dyes">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <Controls>
+                                        <Control name="$(parent)Tooltip">
+                                            <Dimensions y="230" />
+                                            <Anchor point="BOTTOMLEFT" />
+                                            <Anchor point="BOTTOMRIGHT" />
+                                            <Controls>
+                                                <Texture name="$(parent)Divider" inherits="ZO_GamepadHorizontalDivider">
+                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPRIGHT" offsetY="10" />
+                                                </Texture>
+                                                <Label name="$(parent)Title" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
+                                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                                                </Label>
+                                                <Label name="$(parent)Body" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+
+                                        <Control name="$(parent)SavedSets">
+                                            <Dimensions y="130" />
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" offsetY="10" />
+                                            <Controls>
+                                                <Control name="$(parent)BaseAnchor" hidden="true">
+                                                    <Anchor point="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" />
+                                                </Control>
+
+                                                <Texture name="$(parent)Divider" inherits="ZO_GamepadHorizontalDivider">
+                                                    <Anchor point="BOTTOMLEFT" />
+                                                    <Anchor point="BOTTOMRIGHT" offsetY="5" />
+                                                </Texture>
+                                            </Controls>
+                                        </Control>
+
+                                        <Backdrop name="$(parent)SharedHighlight" inherits="ZO_DyeingHighlight_Gamepad" />
+
+                                        <Scroll name="$(parent)Scroll">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SavedSets" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Tooltip" relativePoint="TOPRIGHT" />
+                                            <Controls>
+                                                <Control name="$(parent)Container">
+                                                    <AnchorFill />
+                                                    <Controls>
+                                                        <Control name="$(parent)List">
+                                                            <!-- NOTE: Anchors are changed dynamically in code, but need to be initialized here. -->
+                                                            <AnchorFill />
+                                                        </Control>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Scroll>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)PresetContainer" hidden="true">
+                            <AnchorFill />
+                            <Controls>
+                                <Control name="$(parent)SetPresets" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                            <AnchorFill />
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)RadialContainer" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)EquipmentSheet" inherits="ZO_Dyeing_RadialMenuBase_Gamepad" />
+                                
+                                <Texture name="$(parent)CenterSwatch" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_monoPoint.dds" level="2">
+                                    <Dimensions x="128" y="128" />
+                                    <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                    <Controls>
+                                        <Texture name="$(parent)Keybind" level="3">
+                                            <Anchor point="CENTER"/>
+                                            <Dimensions x="52" y="52"/>
+                                        </Texture>
+                                    </Controls>
+                                </Texture>
+
+                                <Control name="$(parent)CenterSwatchSaved" hidden="true">
+                                    <Dimensions x="128" y="128" />
+                                    <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                    <OnInitialized>
+                                        self.dyeControls = {
+                                            self:GetNamedChild("Primary"),
+                                            self:GetNamedChild("Secondary"),
+                                            self:GetNamedChild("Accent"),
+                                        }
+                                    </OnInitialized>
+                                    <Controls>
+                                        <Texture name="$(parent)Primary" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_triPoint.dds" level="2">
+                                            <Dimensions x="128" y="128" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                        </Texture>
+
+                                        <Texture name="$(parent)Secondary" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_triLeft.dds" level="2">
+                                            <Dimensions x="128" y="128" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                        </Texture>
+
+                                        <Texture name="$(parent)Accent" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_triRight.dds" level="2">
+                                            <Dimensions x="128" y="128" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                        </Texture>
+
+                                        <Texture name="$(parent)Keybind" level="3">
+                                            <Anchor point="CENTER"/>
+                                            <Dimensions x="52" y="52"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)TooltipAnchor" hidden="true">
+                                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipmentSheet" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                                
+                                <Control name="$(parent)Tooltip">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TooltipAnchor" offsetY="100" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Texture name="$(parent)Divider" inherits="ZO_GamepadHorizontalDivider">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" offsetY="6" />
+                                        </Texture>
+                                        <Texture name="$(parent)Image" resizeToFitFile="true" level="1">
+                                            <Anchor point="CENTER" relativeTo="$(parent)Divider" />
+                                        </Texture>
+                                        <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Dye/Gamepad/Dye_toggle_icon.dds" resizeToFitFile="true" level="2" hidden="true">
+                                            <Anchor point="CENTER" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetX="-15" offsetY="-10" />
+                                        </Texture>
+                                        <Control name="$(parent)ContentsAnchor" hidden="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetY="3" />
+                                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
+                                        </Control>
+                                        <Control name="$(parent)Contents" inherits="ZO_Tooltip">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentsAnchor" />
+                                            <Anchor point="BOTTOMRIGHT" />
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)PresetDyesContainer" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true">
+                            <Controls>
+                                <Backdrop name="$(parent)SharedHighlight" inherits="ZO_DyeingHighlight_Gamepad" />
+                                <Scroll name="$(parent)Scroll">
+                                    <Anchor point="TOPLEFT" offsetY="100" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Control name="$(parent)Container">
+                                            <AnchorFill />
+                                            <Controls>
+                                                <Control name="$(parent)List">
+                                                    <!-- NOTE: Anchors are changed dynamically in code, but need to be initialized here. -->
+                                                    <AnchorFill />
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Scroll>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

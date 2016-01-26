@@ -1,0 +1,5 @@
+EsoUI\InternalIngameLocalization\LocalizeInternalIngameGeneratedStrings.lua
+; For now, all of the InternalIngame strings will be compiled into the client.lua files
+; if memory becomes an issue, since we are duplicating ingame strings into another GUI,
+; we will need game tools to create new output internalingame.lua files
+$(languageDirectory)\lang\$(language)_client.lua

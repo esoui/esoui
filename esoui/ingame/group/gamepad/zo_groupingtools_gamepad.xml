@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupingToolsGamepadLocationEntry" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" override="true" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GroupingToolsGamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GroupingToolsGamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)LocationInfo" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">                    
+                    <Controls>
+                        <Texture name="$(parent)Background" alpha=".64">
+                            <TextureCoords right="ZO_LFG_BACKGROUND_TEXTURE_COORD_RIGHT"/>
+                            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTENT_BACKGROUND_WIDTH" y="ZO_LFG_BACKGROUND_Y" />
+                            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="18" />
+                        </Texture>
+                        
+                        <Label name="$(parent)Name" verticalAlignment="CENTER" font="ZoFontGamepad42" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
+                            <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="235" />
+                        </Label>
+
+                        <Control name="$(parent)ScrollSection" inherits="ZO_ScrollContainer_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                            
+                            <OnInitialized>
+                                ZO_Scroll_Initialize_Gamepad(self)
+                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+
+                                    <OnInitialized>
+                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+                                    </OnInitialized>
+
+                                    <Controls>
+                                        <Label name="$(parent)Description" verticalAlignment="CENTER" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" />
+                                            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
+                                        </Label>
+
+                                        <Label name="$(parent)GroupSize" verticalAlignment="CENTER" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="48" />
+                                        </Label>
+
+                                        <Control name="$(parent)Campaign">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)GroupSize" relativePoint="BOTTOMLEFT"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSize" relativePoint="BOTTOMRIGHT" offsetY="48" />
+                                            <Controls>
+                                                <Label name="$(parent)Indicator" text="SI_GROUPING_TOOLS_PANEL_CURRENT_CAMPAIGN" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                                    <Anchor point="TOPLEFT"/>
+                                                </Label>
+
+                                                <Label name="$(parent)Text" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Indicator" relativePoint="TOPRIGHT" offsetX="8"/>
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+
+                                        <Control name="$(parent)Lock">
+                                            <Controls>
+                                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds">
+                                                    <Dimensions x="32" y="32" />
+                                                    <Anchor point="TOPLEFT"/>
+                                                </Texture>
+
+                                                <Label name="$(parent)Reason" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="16" />
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

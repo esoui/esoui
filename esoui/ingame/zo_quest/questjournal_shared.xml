@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_QuestJournal_DetailControl" virtual="true">
+            <OnInitialized>
+                local scrollChild = GetControl(self:GetParent(),"QuestInfoContainerScrollChild")
+                self:SetParent(scrollChild)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_QuestJournal_StepControl" virtual="true">
+            <OnInitialized>
+                local scrollChild = GetControl(self:GetParent(),"QuestStepContainerScrollChild")
+                self:SetParent(scrollChild)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

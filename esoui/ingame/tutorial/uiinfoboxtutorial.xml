@@ -1,0 +1,28 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TutorialDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                self:GetNamedChild("Title"):SetWidth(450)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer ZO_DialogContentAnchors">
+                    <DimensionConstraints maxY="350"/>
+                    <Controls>
+                        <Label name="$(parent)Description" inherits="ZO_SmallKeyMarkupLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="5">
+                            <Dimensions x="424"/>
+                            <OnInitialized>
+                                local scrollChild = self:GetParent():GetNamedChild("ScrollChild")
+                                self:SetParent(scrollChild)
+                                scrollChild:SetResizeToFitPadding(0, 6)
+                                
+                                self:SetAnchor(TOPLEFT, nil, TOPLEFT, 3, 3)
+                            </OnInitialized>
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

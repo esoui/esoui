@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_IgnoreListLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
+        <Button name="ZO_IgnoreListRowButton" virtual="true" mouseOverBlendMode="ADD">
+            <Dimensions x="26" y="26"/>
+        </Button>
+        <Control name="ZO_IgnoreListRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnMouseEnter>
+                ZO_IgnoreListRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_IgnoreListRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_IgnoreListRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                
+                <Button name="$(parent)Cancel" inherits="ZO_IgnoreListRowButton">
+                    <Anchor point="LEFT" offsetX="5"/>
+                    <Textures
+                        normal="EsoUI/Art/Buttons/decline_up.dds"
+                        pressed="EsoUI/Art/Buttons/decline_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/decline_over.dds"
+                    />
+                    <OnMouseEnter>
+                        ZO_Tooltips_ShowTextTooltip(self, TOP, GetString(SI_IGNORE_LIST_REMOVE_IGNORE))
+                        ZO_IgnoreListRow_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_Tooltips_HideTextTooltip()
+                        ZO_IgnoreListRow_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                    <OnClicked>
+                        RemoveIgnore(self:GetParent().displayName)
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)DisplayName" inherits="ZO_IgnoreListLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Cancel" relativePoint="RIGHT" offsetX="55"/>
+                    <Dimensions x="225"/>
+                </Label>
+                <Button name="$(parent)Note">
+                    <Textures
+                        normal="EsoUI/Art/Contacts/social_note_up.dds"
+                        pressed="EsoUI/Art/Contacts/social_note_down.dds"
+                        mouseOver="EsoUI/Art/Contacts/social_note_over.dds"
+                    />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DisplayName" offsetX="430"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_IgnoreListRowNote_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_IgnoreListRowNote_OnMouseExit(self)
+                    </OnMouseExit>
+                    <OnClicked>
+                        ZO_IgnoreListRowNote_OnClicked(self)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_KeyboardIgnoreList" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_IgnoreList_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" offsetX="30" offsetY="67"/>
+                    <Anchor point="TOPRIGHT" offsetY="67"/>
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Control name="$(parent)DisplayName" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_DISPLAY_NAME), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" offsetX="89"/>
+                            <Dimensions x="225" y="32"/>
+                        </Control>                        
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-35" offsetY="-32"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

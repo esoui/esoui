@@ -1,0 +1,85 @@
+<Bindings>
+    <Layer name="SI_KEYBINDINGS_LAYER_DIALOG" allowFallthrough="false">
+        <Category>
+            <Action name="DIALOG_PRIMARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_SECONDARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_TERTIARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_NEGATIVE">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+            <Action name="DIALOG_CLOSE">
+                <Down>ZO_Dialogs_CloseKeybindPressed()</Down>
+            </Action>
+            <Action name="DIALOG_RESET">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
+        <Category name="SI_KEYBINDINGS_CATEGORY_USER_INTERFACE">
+            <Action name="UI_SHORTCUT_PRIMARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_SECONDARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_TERTIARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_NEGATIVE">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_RIGHT_STICK" hideAction="true" rebindable="false">
+              <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+              <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_RIGHT_TRIGGER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_LEFT_TRIGGER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_RIGHT_SHOULDER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="UI_SHORTCUT_LEFT_SHOULDER" hideAction="true" rebindable="false">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS">
+        <Category>
+            <Action name="UI_SHORTCUT_EXIT" hideAction="true">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="MarketAnnouncement" allowFallthrough="false">
+        <Category>
+            <Action name="MARKET_ANNOUNCEMENT_CLOSE" hideAction="true">
+                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnMarketAnnouncementCloseKeybind()</Down>
+            </Action>
+            <Action name="MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnMarketAnnouncementViewCrownStoreKeybind()</Down>
+            </Action>
+        </Category>
+    </Layer>
+</Bindings>

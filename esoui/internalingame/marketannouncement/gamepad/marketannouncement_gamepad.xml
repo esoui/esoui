@@ -1,0 +1,112 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_MarketAnnouncement_ArrowScaleAnimation_Gamepad">
+            <Animations>
+                <ScaleAnimation duration="80" startScale="0.9" endScale="1.1" />
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_MarketAnnouncement_ArrowDownScaleAnimation_Gamepad">
+            <Animations>
+                <ScaleAnimation duration="80" startScale="1.1" endScale="0.95" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Gamepad" inherits="ZO_Gamepad_MarketProductTemplate" virtual="true" >
+            <Dimensions x="ZO_LARGE_SINGLE_MARKET_PRODUCT_WIDTH" y="ZO_LARGE_SINGLE_MARKET_PRODUCT_HEIGHT"/>
+        </Control>
+        
+        <Button name="ZO_MarketAnnouncementCarouselArrowTemplate_Gamepad" virtual="true">
+            <Dimensions x="32" y="64" />
+            <Textures
+                normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
+                pressed=""
+                mouseOver=""
+                disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"
+            />
+            <OnMouseEnter>
+                local PLAY_FORWARD = true
+                ZO_MarketAnnouncement_Gamepad_PlayArrowAnimation(self, self.animation, PLAY_FORWARD)
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.animation:PlayInstantlyToStart()
+            </OnMouseExit>
+            <OnMouseDown>
+                self.downAnimation:PlayForward()
+            </OnMouseDown>
+            <OnMouseUp>
+                if upInside then
+                    local PLAY_BACKWARD = false
+                    ZO_MarketAnnouncement_Gamepad_PlayArrowAnimation(self, self.downAnimation, PLAY_BACKWARD)
+                end
+            </OnMouseUp>
+        </Button>
+
+        <!-- Market Announcement Window-->
+        <TopLevelControl name="ZO_MarketAnnouncement_Gamepad" inherits="ZO_MarketAnnouncementBase_Control">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_MarketAnnouncement_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="RIGHT" offsetX="-80"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop_Gamepad" override="true" />
+
+                        <Label name="$(parent)Title" font="ZoFontGamepadBold48" override="true" />
+                        
+                        <Label name="$(parent)PositionTracker" font="ZoFontGamepad27" override="true" />
+
+                        <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" override="true">
+                            <Dimensions y="8" />
+                        </Control>
+
+                        <Control name="$(parent)Carousel" override="true">
+                            <Controls>
+                                <Button name="$(parent)LeftArrow" inherits="ZO_MarketAnnouncementCarouselArrowTemplate_Gamepad" override="true">
+                                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                                </Button>
+                                <Button name="$(parent)RightArrow" inherits="ZO_MarketAnnouncementCarouselArrowTemplate_Gamepad"  override="true" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
+                            <Dimensions x="620"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="10"/>
+                            <Anchor point="BOTTOM" offsetY="-90"/>
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+
+                                    <OnInitialized>
+                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+                                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                                    </OnInitialized>
+
+                                    <Controls>
+                                        <Label name="$(parent)ProductDescription" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed34">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="620" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                                
+                                <Texture name="$(parent)ScrollIndicator" override="true">
+                                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="-45" />
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Keybinds" override="true">
+                            <Anchor point="BOTTOM" offsetY="-30"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

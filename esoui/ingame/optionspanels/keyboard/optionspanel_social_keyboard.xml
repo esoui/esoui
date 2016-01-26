@@ -1,0 +1,352 @@
+<GuiXml>
+    <Controls>
+        <Control name="Options_Social_ColorOption" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" />
+                </Label>
+                <Control name="$(parent)Color" mouseEnabled="true">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+
+                    <OnMouseEnter>
+                        ZO_OptionsPanel_Social_OnColorOptionEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_OptionsPanel_Social_OnColorOptionExit(self)
+                    </OnMouseExit>
+
+                    <OnMouseUp>
+                        if upInside then
+                            PlaySound(SOUNDS.DEFAULT_CLICK)
+                        end
+                    </OnMouseUp>
+
+                    <Controls>
+                        <Texture name="$(parent)Texture">
+                            <Dimensions x="36" y="22" />
+                            <Anchor point="LEFT" offsetX="4" />
+                        </Texture>
+                        <Texture name="$(parent)Border" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds">
+                            <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
+                            <Dimensions x="40" y="26" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Texture" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Label name="Options_Social_GuildLabel" font="ZoFontWinH3" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="510" y="26" />
+        </Label>
+
+        <Texture name="Options_Social_SharedHighlight" textureFile="EsoUI/Art/Buttons/generic_highlight.dds" layer="3" hidden="true">
+            <Dimensions x="36" y="22" />
+            <OnInitialized>
+                self.data = { controlType = OPTIONS_CUSTOM }
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Texture>
+
+        <Control name="Options_Social_ChatSettingsSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_SOCIAL, SI_SOCIAL_OPTIONS_CHAT_SETTINGS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_TextSize" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatSettingsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <OnShow>
+                ZO_OptionsPanel_Social_TextSizeOnShow(self)
+            </OnShow>
+        </Control>
+
+        <Control name="Options_Social_MinAlpha" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_TextSize" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <OnShow>
+                ZO_OptionsPanel_Social_MinAlphaOnShow(self)
+            </OnShow>
+        </Control>
+        
+        <Control name="Options_Social_UseProfanityFilter" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_MinAlpha" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_LANGUAGE, LANGUAGE_SETTING_USE_PROFANITY_FILTER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ReturnCursorOnChatFocus" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_UseProfanityFilter" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_UI, UI_SETTING_RETURN_CURSOR_ON_CHAT_FOCUS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_NotificationsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ReturnCursorOnChatFocus" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_SOCIAL, SI_SOCIAL_OPTIONS_NOTIFICATIONS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_LeaderboardsNotification" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_NotificationsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_UI, UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColorsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_LeaderboardsNotification" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_SOCIAL, SI_SOCIAL_OPTIONS_CHAT_COLORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <OnEffectivelyHidden>
+                if COLOR_PICKER:IsShown() then
+                    COLOR_PICKER:Cancel()
+                end
+            </OnEffectivelyHidden>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Say" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColorsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SAY)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Yell" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Say" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_YELL)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_WhisperIncoming" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Yell" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_INC)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_WhisperOutoing" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_WhisperIncoming" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_OUT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Group" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_WhisperOutoing" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GROUP)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Zone" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Group" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Zone_English" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Zone_French" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_English" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Zone_German" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_French" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_NPC" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_German" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Emote" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_NPC" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_EMOTE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_System" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Emote" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SYSTEM)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Label name="Options_Social_Guild1Title" inherits="Options_Social_GuildLabel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_System" relativePoint="BOTTOMLEFT" offsetY="30" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_TITLE_GUILD1)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Label>
+
+        <Control name="Options_Social_ChatColor_Guild1" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild1Title" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD1)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Officer1" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild1" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER1)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Label name="Options_Social_Guild2Title" inherits="Options_Social_GuildLabel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Officer1" relativePoint="BOTTOMLEFT" offsetY="30" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_TITLE_GUILD2)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Label>
+
+        <Control name="Options_Social_ChatColor_Guild2" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild2Title" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD2)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Officer2" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild2" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER2)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Label name="Options_Social_Guild3Title" inherits="Options_Social_GuildLabel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Officer2" relativePoint="BOTTOMLEFT" offsetY="30" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_TITLE_GUILD3)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Label>
+
+        <Control name="Options_Social_ChatColor_Guild3" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild3Title" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD3)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Officer3" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild3" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER3)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Label name="Options_Social_Guild4Title" inherits="Options_Social_GuildLabel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Officer3" relativePoint="BOTTOMLEFT" offsetY="30" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_TITLE_GUILD4)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Label>
+
+        <Control name="Options_Social_ChatColor_Guild4" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild4Title" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD4)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Officer4" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild4" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER4)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Label name="Options_Social_Guild5Title" inherits="Options_Social_GuildLabel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Officer4" relativePoint="BOTTOMLEFT" offsetY="30" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_TITLE_GUILD5)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Label>
+
+        <Control name="Options_Social_ChatColor_Guild5" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild5Title" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD5)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_Officer5" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild5" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER5)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

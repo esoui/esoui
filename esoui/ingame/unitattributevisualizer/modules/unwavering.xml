@@ -1,0 +1,170 @@
+<GuiXml>
+    <Animations>
+        <AlphaAnimation name="UnwaveringBarAnimation" duration="125" startAlpha="1.0" endAlpha="0.0" />
+        <AlphaAnimation name="UnwaveringGlowInAnimation" duration="350">
+            <OnPlay>
+                if self:GetTimeline():IsPlayingBackward() then
+                    self:SetAlphaValues(0.0, 1.0)
+                else
+                    self:SetAlphaValues(animatingControl:GetAlpha(), 1.0)
+                end
+            </OnPlay>
+        </AlphaAnimation>
+        <AlphaAnimation name="UnwaveringGlowOutAnimation" delay="450" duration="350" startAlpha="1.0" endAlpha="0.0" />
+        
+        <AnimationTimeline name="UnwaveringAnimation">
+            <Animations>
+                <AlphaAnimation duration="125" startAlpha="0.0" endAlpha="1.0" />
+            </Animations>
+            <Callbacks>
+                <Callback delay="55">
+                    if not self.instant then
+                        if self:IsPlayingBackward() then
+                            self.owner:PlaySoundFromStat(STAT_MITIGATION, STAT_STATE_IMMUNITY_LOST)
+                        else
+                            self.owner:PlaySoundFromStat(STAT_MITIGATION, STAT_STATE_IMMUNITY_GAINED)
+                            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_STATUS_EFFECT)
+                        end
+                    end
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <!-- Unwavering - Arrow -->
+
+        <Control name="ZO_UnwaveringOverlayContainerArrow" tier="HIGH" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" layer="CONTROLS" />
+                
+                <Texture name="$(parent)Right" layer="CONTROLS" />
+                
+                <Texture name="$(parent)Center" layer="CONTROLS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+
+                    <Controls>
+                        <Texture name="$(parent)Munge" level="1" addressMode="WRAP" tier="HIGH" layer="OVERLAY" alpha=".5">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_UnwaveringOverlayContainerArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_invulnerable.dds">
+                    <Dimensions x="10" />
+                    <TextureCoords left="0.390625" right="0.46875" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_invulnerable.dds">
+                    <Dimensions x="10" />
+                    <TextureCoords left="0.46875" right="0.390625" top="0.359375" bottom="0.65625"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_invulnerable.dds">
+                    <TextureCoords left="0.46875" right="0.5234375" top="0.359375" bottom="0.65625"/>
+                    <Controls>
+                        <Texture name="$(parent)Munge" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_invulnerable_munge.dds" />
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_UnwaveringOverlayContainerArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable.dds">
+                    <Dimensions x="9" />
+                    <TextureCoords left="0.3984375" right="0.46875" top="0.375" bottom="0.65625"/>
+                    <Anchor point="TOPLEFT" offsetX="3" />
+                    <Anchor point="BOTTOMLEFT" offsetX="3" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable.dds">
+                    <Dimensions x="9" />
+                    <TextureCoords left="0.46875" right="0.3984375" top="0.375" bottom="0.65625"/>
+                    <Anchor point="TOPRIGHT" offsetX="-3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable.dds">
+                    <TextureCoords left="0.46875" right="0.5234375" top="0.375" bottom="0.65625"/>
+                    <Controls>
+                        <Texture name="$(parent)Munge" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable_munge.dds" />
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <!-- Unwavering - Angle -->
+
+        <Control name="ZO_UnwaveringOverlayContainerAngle" tier="HIGH" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" layer="CONTROLS">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+
+                <Texture name="$(parent)Right" layer="CONTROLS">
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+
+                <Texture name="$(parent)Center" layer="CONTROLS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+
+                    <Controls>
+                        <Texture name="$(parent)Munge" inherits="ZO_RandomizedMunge" level="1" tier="HIGH" layer="OVERLAY" alpha=".5">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_UnwaveringOverlayContainerAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_invulnerable.dds" >
+                    <Dimensions x="15" />
+                    <TextureCoords left="0.3281" right="0.4453" top="0.3594" bottom="0.6406" />
+                </Texture>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_invulnerable.dds">
+                    <Dimensions x="15" />
+                    <TextureCoords left="0.5547" right="0.6797" top="0.3594" bottom="0.6406" />
+                </Texture>
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/targetBar_dynamic_invulnerable.dds">
+                    <TextureCoords left="0.5546875" right="0.46875" top="0.3594" bottom="0.6406"/>
+                    <Controls>
+                        <Texture name="$(parent)Munge" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_invulnerable_munge.dds" />
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_UnwaveringOverlayContainerAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_invulnerable.dds" >
+                    <Dimensions x="16" />
+                    <TextureCoords left="0.3359" right="0.4609" top="0.3750" bottom="0.6406" />
+                </Texture>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_invulnerable.dds" >
+                    <Dimensions x="16" />
+                    <TextureCoords left="0.5391" right="0.6641" top="0.3750" bottom="0.6406" />
+                </Texture>
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_invulnerable.dds">
+                    <TextureCoords left="0.4688" right="0.5391" top="0.3750" bottom="0.6406" />
+                    <Controls>
+                        <Texture name="$(parent)Munge" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_dynamic_invulnerable_munge.dds" />
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SortHeaderBehavior" virtual="true" mouseEnabled="true">
+            <OnMouseEnter>
+                ZO_SortHeader_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_SortHeader_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_SortHeader_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Control>
+
+        <Control name="ZO_SortHeader" inherits="ZO_SortHeaderBehavior" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                    <AnchorFill />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SortHeaderIcon" inherits="ZO_SortHeaderBehavior" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Mouseover" blendMode="ADD">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_SortHeaderArrow" hidden="true" layer="TEXT" virtual="true">
+            <Dimensions x="16" y="16"/>
+        </Texture>
+    </Controls>
+</GuiXml>

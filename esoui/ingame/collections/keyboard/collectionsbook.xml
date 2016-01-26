@@ -1,0 +1,115 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CollectionsBookDefaultLabel" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+        <Label name="ZO_CollectionsBookLargeLabel" font="ZoFontWinH2" inherits="ZO_CollectionsBookDefaultLabel" virtual="true" />
+
+        <Control name="ZO_CollectableStickerBase" virtual="true">
+            <Dimensions x="170" y="125" />
+            <Controls>
+                <Texture name="$(parent)Icon" level="3" hidden="true">
+                    <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
+                    <Dimensions x="52" y="52"/>
+                </Texture>
+
+                <Label name="$(parent)Title" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT"  offsetX="7" offsetY="69" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2" />
+                </Label>
+
+                <Texture name="$(parent)ActiveIcon" level="3" textureFile="EsoUI/Art/Inventory/inventory_icon_equipped.dds" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                </Texture>
+
+                <Texture name="$(parent)CornerTag" level="3" textureFile="EsoUI/Art/Collections/collections_cornerTag_fromStore.dds" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CollectableSticker" inherits="ZO_CollectableStickerBase" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                self.collectible:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.collectible:OnMouseExit()
+            </OnMouseExit>
+
+            <OnMouseUp>
+                if upInside then
+                    self.collectible:OnClicked(button)
+                end
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                self.collectible:OnMouseDoubleClick(button)
+            </OnMouseDoubleClick>
+
+            <OnEffectivelyHidden>
+                self.collectible:OnEffectivelyHidden()
+            </OnEffectivelyHidden>
+
+            <Controls>
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" hidden="true" layer="BACKGROUND" level="1">
+                    <AnchorFill />
+                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
+                </Texture>
+                <Backdrop name="$(parent)BG" inherits="ZO_CenterlessBackdrop" level="0"/>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_CollectionsBook" inherits="ZO_JournalProgressBook" hidden="true">
+            <OnInitialized>
+                ZO_CollectionsBook_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="28" />
+                            <Dimensions x="240"/>
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized>
+                                    <OnEscape>
+                                        ZO_CollectionsBook_EndSearch(self)
+                                    </OnEscape>
+                                    <OnMouseDown>
+                                        ZO_CollectionsBook_BeginSearch(self)
+                                    </OnMouseDown>
+                                    <OnTextChanged>
+                                        ZO_EditDefaultText_OnTextChanged(self)
+                                        ZO_CollectionsBook_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+                                    <OnEnter>
+                                        ZO_CollectionsBook_OnSearchEnterKeyPressed(self)
+                                    </OnEnter>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                        
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_COLLECTIONS_BOOK_SEARCH_FILTER_BY">
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
+                        </Label>
+
+                        <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_COLLECTIONS_BOOK_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
+                            <Anchor point="TOP" relativeTo="$(parent)ContentList" relativePoint="TOP" />
+                        </Label>
+
+                        <Control name="$(parent)SummaryInset" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Divider" override="true" hidden="false" />
+                                <Label name="$(parent)RecentTitle" override="true" hidden="false" text="SI_COLLECTIONS_BOOK_RECENT" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>   
+</GuiXml>

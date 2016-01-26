@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_FriendsOnline" hidden="true">
+            <OnInitialized>
+                ZO_FriendsOnline_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NumOnlineLabel" text="SI_FRIENDS_LIST_PANEL_NUM_ONLINE_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_KeyboardFriendsList" offsetX="52" offsetY="28"/>
+                </Label>
+                <Label name="$(parent)NumOnline" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NumOnlineLabel" relativePoint="TOPRIGHT" offsetX="2"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

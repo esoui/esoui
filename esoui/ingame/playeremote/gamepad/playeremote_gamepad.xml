@@ -1,0 +1,79 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadPlayerEmoteRadialMenuEntryTemplate" inherits="ZO_GamepadSelectableItemRadialMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+                ZO_SelectableItemRadialMenuEntryTemplate_OnInitialized(self)
+                ZO_CreateSparkleAnimation(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad54" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativeto="$(parent)Icon" relativePoint="BOTTOM" offsetY="5"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_PlayerEmoteItemControl" virtual="true" >
+            <Dimensions x="ZO_EMOTE_COLUMN_WIDTH" y="ZO_EMOTE_ROW_HEIGHT"/>
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
+                    <AnchorFill />
+                </Backdrop>
+
+                <Label name="$(parent)Title" font="ZoFontGamepad42" horizontalAlignment="LEFT" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
+                    <Anchor point="TOPLEFT" offsetX="24" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadPlayerEmoteTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadPlayerEmote_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer">
+                                    <AnchorFill/>
+                                </Control>
+
+                                <Control name="$(parent)Footer" inherits="ZO_PagedListFooterBar" hidden="true" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)EmoteListGrid">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RightPaneContainerContentHeaderHeader" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RightPaneContainerFooter" relativePoint="TOPRIGHT" />
+                </Control>
+
+                <Control name="$(parent)Quickslot" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors">
+                    <Controls>
+                        <Label name="$(parent)Assign" horizontalAlignment="CENTER" font="ZoFontGamepadCondensed54" text="SI_GAMEPAD_EMOTE_ASSIGN_INSTRUCTIONS" hidden="true">
+                            <Anchor point="TOPLEFT" offsetY="35"/>
+                            <Anchor point="TOPRIGHT" offsetY="35"/>
+                        </Label>
+                        <Label name="$(parent)SelectedEmoteName" horizontalAlignment="CENTER" font="ZoFontGamepad54" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Assign" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Assign" relativePoint="BOTTOMRIGHT"/>
+                        </Label>
+                        <Control name="$(parent)Radial" inherits="ZO_RadialMenuHUDSize_Gamepad" >
+                            <Anchor point="CENTER" offsetY="80" />
+                            <Controls>
+                                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" >
+                                    <Dimensions x="128" y="128" />
+                                    <Anchor point="CENTER"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

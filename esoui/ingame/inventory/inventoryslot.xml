@@ -1,0 +1,307 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_InventorySlotBehavior_Keyboard" virtual="true">
+            <OnMouseDoubleClick>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_InventorySlot_DoPrimaryAction(self)
+                end
+            </OnMouseDoubleClick>
+
+            <OnClicked>
+                ZO_InventorySlot_OnSlotClicked(self, button)
+            </OnClicked>
+
+            <OnMouseEnter>
+                ZO_InventorySlot_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_InventorySlot_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnDragStart>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_InventorySlot_OnDragStart(self)
+                end
+            </OnDragStart>
+
+            <OnReceiveDrag>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_InventorySlot_OnReceiveDrag(self)
+                end
+            </OnReceiveDrag>
+        </Button>
+
+        <Button name="ZO_ItemSlot_Shared" virtual="true">
+            <Dimensions x="32" y="32" />
+
+            <Textures
+                mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+                pressedMouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+            />
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="2">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Texture>
+
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                    <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                </Label>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_ItemSlot" inherits="ZO_ItemSlot_Shared ZO_InventorySlotBehavior_Keyboard" mouseOverBlendMode="ADD" virtual="true">
+            <MouseButton button="2" enabled="true" />
+        </Button>
+
+        <Button name="ZO_ItemSlot_Gamepad" inherits="ZO_ItemSlot_Shared" virtual="true">
+            <Controls>
+                <Label name="$(parent)StackCount" override="true" font="ZoFontGamepad27" />
+            </Controls>
+        </Button>
+
+        <Button name="ZO_InventorySlot" virtual="true" inherits="ZO_ItemSlot">
+            <Controls>
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown" />
+            </Controls>
+        </Button>
+
+        <Button name="ZO_InventorySlot_Gamepad" virtual="true" inherits="ZO_ItemSlot_Gamepad">
+            <Controls>
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown" />
+            </Controls>
+        </Button>
+
+        <Button name="ZO_InventorySlotNoMouseover" virtual="true" mouseEnabled="false" inherits="ZO_InventorySlot">
+            <OnInitialized>
+                self:SetMouseOverTexture()
+                self:SetPressedMouseOverTexture()
+            </OnInitialized>
+        </Button>
+
+        <Control name="ZO_ListInventorySlotBehavior" mouseEnabled="true" tier="MEDIUM" layer="CONTROLS" virtual="true">
+            <OnInitialized>
+                local button = self:GetNamedChild("Button")
+                button.tooltipAnchor = self
+                self.slotControlType = "listSlot"
+            </OnInitialized>
+
+            <OnMouseDoubleClick>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_InventorySlot_DoPrimaryAction(self)
+                end
+            </OnMouseDoubleClick>
+
+            <OnMouseUp>
+                if(upInside) then
+                    ZO_InventorySlot_OnSlotClicked(self, button)
+                end
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_InventorySlot_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_InventorySlot_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnDragStart>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_InventorySlot_OnDragStart(self)
+                end
+            </OnDragStart>
+
+            <OnReceiveDrag>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_InventorySlot_OnReceiveDrag(self)
+                end
+            </OnReceiveDrag>
+        </Control>
+
+        <Control name="ZO_PlayerInventorySlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions x="509" y="52" />
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+                
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Control name="$(parent)Status" mouseEnabled="true">
+                    <Dimensions x="32" y="52" />
+                    <Anchor point="TOPLEFT" />
+                    <Controls>
+                        <Texture name="$(parent)Texture" inherits="ZO_MultiIcon" mouseEnabled="true">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="CENTER" />
+                            <OnMouseEnter>
+                                ZO_InventorySlot_Status_OnMouseEnter(self)
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26" />
+                </Button>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="274" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="89" />
+                </Label>
+
+                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
+                    <Dimensions x="87" />
+                    <Anchor point="RIGHT" offsetX="-5" />
+                </Label>
+
+                <Label name="$(parent)StatValue" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT">
+                    <Dimensions x="60" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)SellPrice" relativePoint="LEFT" offsetX="-5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ListDialogInventorySlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions y="52" />
+
+            <OnMouseDoubleClick />
+            <OnDragStart />
+            <OnReceiveDrag />
+
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Texture name="$(parent)Selected" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="70" offsetY="26" />
+                </Button>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="250" />
+                    <Anchor point="LEFT" offsetX="100" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TradingHouseSearchResult" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions x="509" y="52" />
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+                
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="26" offsetY="26" />
+                </Button>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="342" y="20" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="LEFT" offsetX="57" />
+                </Label>
+
+                <Label name="$(parent)SellerName" font="ZoFontGameShadow" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="290" y="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10" />
+                </Label>
+
+                <Label name="$(parent)TimeRemaining" font="ZoFontGameShadow">
+                    <Dimensions x="140" y="20" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="RIGHT" offsetX="-5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TradingHouseItemListing" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions x="509" y="52" />
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+                
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="26" offsetY="26" />
+                </Button>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="342" y="20" />
+                    <Anchor point="LEFT" offsetX="57" />
+                </Label>
+
+                <Label name="$(parent)TimeRemaining" font="ZoFontGameShadow">
+                    <Dimensions x="140" y="20" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="40" />
+                </Label>
+
+                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="RIGHT" offsetX="-140" />
+                </Label>
+
+                <Button name="$(parent)CancelSale" mouseOverBlendMode="ADD">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" offsetX="-50" offsetY="26" />
+                    
+                    <OnMouseEnter>
+                        ZO_Tooltips_ShowTextTooltip(self, TOP, GetString(SI_TRADING_HOUSE_CANCEL_LISTING_LABEL))
+                    </OnMouseEnter>
+                    
+                    <OnMouseExit>
+                        ZO_Tooltips_HideTextTooltip()
+                    </OnMouseExit>
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/decline_up.dds"
+                        pressed="EsoUI/Art/Buttons/decline_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/decline_over.dds"
+                    />
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,48 @@
+﻿<GuiXml>
+    <Controls>
+        <Label name="ZO_Gamepad_ItemImprovement_StatLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE"  virtual="true" />
+        <Label name="ZO_Gamepad_ItemImprovement_ValueLabel" font="ZoFontGamepad34" virtual="true" />
+        
+        <Control name="ZO_Gamepad_ItemImprovement_ItemTemplate" inherits="ZO_GamepadItemSubEntryTemplate" hidden="true" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.subLabelCount = 5
+                self.subLabel1 = self:GetNamedChild("SubLabel1")
+                self.subLabel5 = self:GetNamedChild("SubLabel5")
+                
+                self.GetHeight = function()
+                    local height = self.label:GetTextHeight()
+                    
+                    if self.selected then
+                        height = height  + self.subLabel1:GetTextHeight() + self.subLabel5:GetTextHeight() + ZO_GAMEPAD_ITEM_IMPROVEMENT_DESCRIPTION_Y_OFFSET
+                    end
+                    
+                    return height
+                end
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)SubLabel1" inherits="ZO_Gamepad_ItemImprovement_StatLabel" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Label" />
+                </Label>
+
+                <Label name="$(parent)SubLabel2" inherits="ZO_Gamepad_ItemImprovement_ValueLabel" >
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)SubLabel1" offsetX="10" offsetY="2" />
+                </Label>
+
+                <Label name="$(parent)SubLabel3" inherits="ZO_Gamepad_ItemImprovement_StatLabel" >
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)SubLabel2" offsetX="10" offsetY="-2" />
+                </Label>
+
+                <Label name="$(parent)SubLabel4" inherits="ZO_Gamepad_ItemImprovement_ValueLabel" >
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)SubLabel3" offsetX="10" offsetY="2" />
+                </Label>
+
+                <Label name="$(parent)SubLabel5" inherits="ZO_Gamepad_ItemImprovement_ValueLabel" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)SubLabel1" offsetY="ZO_GAMEPAD_ITEM_IMPROVEMENT_DESCRIPTION_Y_OFFSET" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,68 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="CreateLinkLoadingScreen_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                CreateLinkLoadingScreen_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Header" inherits="ZO_PregameGamepadHeaderImageTemplate" />
+
+                        <Control name="$(parent)Base">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+
+                            <Controls>
+                                <Control name="$(parent)CenterIsAlongTop">
+                                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
+                                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
+                                </Control>
+                                
+                                <Control name="$(parent)Loading" >
+                                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)CenterIsAlongTop"/>
+                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+
+                                    <Controls>
+                                        <Control name="$(parent)Icon" inherits="ZO_LoadingIcon_Gamepad">
+                                            <Anchor point="LEFT" />
+                                            <Dimensions x="90" y="90"/>
+                                        </Control>
+
+                                        <Label name="$(parent)Text" text="SI_CONSOLE_PREGAME_LOADING" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                                            <Anchor point="RIGHT"/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)Queued" hidden="true">
+                                    <AnchorFill/>
+                                    <Controls>
+                                        <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepad42">
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
+                                        </Label>
+                                        <Control name="$(parent)Icon" inherits="ZO_LoadingIcon_Gamepad">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="40"/>
+                                            <Dimensions x="90" y="90"/>
+                                        </Control>
+                                        <StatusBar name="$(parent)StatusBar" inherits="ZO_GamepadArrowStatusBarWithBGLarge">
+                                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                                            <Dimensions x="275"/>
+                                            <OnInitialized>
+                                                self.gloss = self:GetNamedChild("Gloss")
+                                                ZO_StatusBar_InitializeDefaultColors(self)
+                                            </OnInitialized>
+                                        </StatusBar>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

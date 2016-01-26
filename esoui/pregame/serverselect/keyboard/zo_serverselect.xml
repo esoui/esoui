@@ -1,0 +1,118 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ServerSelectHeaderTemplate" mouseEnabled="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame" mouseEnabled="true" text="SI_SERVER_NAME">
+                    <Dimensions x="434" y="20" />
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+
+                    <OnMouseUp>
+                        ZO_ServerSelect_SortListAndCommit("name")
+                    </OnMouseUp>
+
+                    <OnMouseEnter>
+                        self:SetColor(1, 1, 0, 1)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self:SetColor(1, 1, 1, 1)
+                    </OnMouseExit>
+                </Label>
+
+                <Label name="$(parent)Status" font="ZoFontGame" mouseEnabled="true" text="SI_SERVER_STATUS">
+                    <Dimensions x="150" y="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" />
+
+                    <OnMouseUp>
+                        ZO_ServerSelect_SortListAndCommit("status")
+                    </OnMouseUp>
+
+                    <OnMouseEnter>
+                        self:SetColor(1, 1, 0, 1)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self:SetColor(1, 1, 1, 1)
+                    </OnMouseExit>
+                </Label>
+
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPLEFT" offsetX="-8" offsetY="-4" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Status" relativePoint="BOTTOMRIGHT" offsetX="8" offsetY="4" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ServerSelectRowTemplate" virtual="true" mouseEnabled="true">
+            <Dimensions x="552" y="24" />
+
+            <OnMouseEnter>
+                ZO_ScrollList_MouseEnter(ZO_ServerSelectScrollList, self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ScrollList_MouseExit(ZO_ServerSelectScrollList, self)
+            </OnMouseExit>
+            
+            <OnMouseUp>
+                if(upInside) then
+                    ZO_ScrollList_MouseClick(ZO_ServerSelectScrollList, self)
+                end
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                ZO_ServerSelect_SelectWorldForPlay()
+            </OnMouseDoubleClick>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame">
+                    <Dimensions x="434" y="18" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Status" font="ZoFontGame" color="FFFF00">
+                    <Dimensions x="150" y="18" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ServerSelect" hidden="true">
+            <Dimensions x="600" y="650" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                ZO_ServerSelect_Initialize()
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+                <Control name="$(parent)HeaderRow" inherits="ZO_ServerSelectHeaderTemplate">
+                    <Anchor point="TOPLEFT" />
+                </Control>
+
+                <Control name="$(parent)ScrollList" inherits="ZO_ScrollList">
+                    <Dimensions y="528" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderRowName" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderRowStatus" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="8" />
+                </Control>
+
+                <Button name="$(parent)Login" inherits="ZO_DefaultButton" text="SI_SELECT_SERVER" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="-70" offsetY="-10" />
+                    <OnClicked>
+                        ZO_ServerSelect_SelectWorldForPlay()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)Cancel" inherits="ZO_DefaultButton" text="SI_DIALOG_CANCEL" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="70" offsetY="-10" />
+                    <OnClicked>
+                        SetCVar("QuickLaunch", "0")
+                        PregameStateManager_SetState(self.gameStateString)
+                    </OnClicked>
+                </Button>
+
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

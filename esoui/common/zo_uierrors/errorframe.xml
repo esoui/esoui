@@ -1,0 +1,84 @@
+<GuiXml>
+    <Controls>
+        <!-- Keyboard templates-->
+        <EditBox name="ZO_ErrorFrameTextEdit_Keyboard_Template" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="32000" editEnabled="false" virtual="true" />
+        <Label name="ZO_ErrorFrameTitle_Keyboard_Template" inherits="ZO_WindowTitle" text="SI_WINDOW_TITLE_UI_ERROR" virtual="true" />
+        <Button name="ZO_ErrorFrameDismiss_Keyboard_Template" inherits="ZO_DefaultButton" text="SI_DISMISS_UI_ERROR" virtual="true">
+            <Dimensions x="156" y="28" />
+            <Anchor point="BOTTOM" offsetY="-3" />
+            <OnClicked>
+                ZO_UIErrors_HideCurrent()
+            </OnClicked>
+
+            <Controls>
+                <Texture name="$(parent)GamepadIcon" hidden="true" />
+            </Controls>
+        </Button>
+        
+        <!-- Gamepad Templates-->
+        <EditBox name="ZO_ErrorFrameTextEdit_Gamepad_Template" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad" maxInputCharacters="32000" editEnabled="false" virtual="true" />
+        <Label name="ZO_ErrorFrameTitle_Gamepad_Template" font="ZoFontGamepadBold34" text="SI_WINDOW_TITLE_UI_ERROR" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
+            <Dimensions y="28" />
+            <Anchor point="TOP" offsetY="-7" />
+        </Label>
+        <Button name="ZO_ErrorFrameDismiss_Gamepad_Template" inherits="ZO_DefaultButton ZO_ButtonBehaviorClickSound" font="ZoFontGamepadBold22" text="SI_DISMISS_UI_ERROR" endCapWidth="9" verticalAlignment="CENTER" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="156" y="28" />
+            <Anchor point="BOTTOM" offsetY="-3" />
+            <OnClicked>
+                ZO_UIErrors_HideCurrent()
+            </OnClicked>
+
+            <Controls>
+                <Texture name="$(parent)GamepadIcon" keyboardEnabled="true" hidden="true">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                    
+                    <OnKeyDown>
+                        if key == KEY_GAMEPAD_BUTTON_1 then
+                            ZO_UIErrors_HideCurrent()
+                        end
+                    </OnKeyDown>
+                </Texture>
+            </Controls>
+        </Button>
+        
+        <TopLevelControl name="ZO_UIErrors" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_UI_ERRORS">
+            <Dimensions x="730" y="400" />
+            <Anchor point="CENTER" />
+            <OnInitialized>
+                ZO_UIErrors_Init(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_WindowTitle" text="SI_WINDOW_TITLE_UI_ERROR" />
+              
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" />
+
+                <Button name="$(parent)Close" inherits="ZO_CloseButton">
+                    <Anchor point="TOPRIGHT" offsetY="3" />
+                    <OnClicked>
+                        ZO_UIErrors_HideAll()
+                    </OnClicked>
+                </Button>
+
+                <Backdrop name="$(parent)Text" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" offsetY="30"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-40"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" />
+                    </Controls>
+                </Backdrop>
+
+                <Button name="$(parent)Dismiss">
+                    <Controls>
+                        <Texture name="$(parent)GamepadIcon" hidden="true">
+                            <OnInitialized>
+                                self:SetTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_BUTTON_1))
+                            </OnInitialized>
+                        </Texture>
+                    </Controls>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

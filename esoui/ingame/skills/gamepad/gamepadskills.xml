@@ -1,0 +1,149 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="GamepadSkillsSingleAssignActionBarAnimation">
+            <Animations>
+                <!-- Action bar animation -->
+                <TranslateAnimation duration="200" deltaX="0" deltaY="210" anchorIndex="3">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+
+                <!-- List animations -->
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="GamepadActionBarAbilitySlotted">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha=".5" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_GamepadSkillsSimpleActionButtonTemplate" tier="MEDIUM" virtual="true">
+            <Dimensions x="40" y="40" />
+
+            <OnInitialized>
+                self:GetNamedChild("Icon"):SetDimensions(self:GetDimensions())
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadSkillsActionButtonTemplate" inherits="ZO_GamepadSkillsSimpleActionButtonTemplate" virtual="true">
+            <Dimensions x="40" y="40" />
+            <Controls>
+                <Label name="$(parent)KeybindLabel" font="ZoFontGamepad18" alpha="1" layer="OVERLAY" tier="HIGH" pixelRoundingEnabled="false">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP" offsetY="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsActionBarTemplate" virtual="true">
+            <Dimensions x="466" y="130" />
+            <Controls>                
+                <Label name="$(parent)Header" modifyTextType="UPPERCASE" text="SI_GAMEPAD_SKILLS_ACTIONBAR_HEADER" inherits="ZO_GamepadMenuEntryHeaderTemplate">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="15"/>
+                </Label>
+
+                <Control name="$(parent)Button1" inherits="ZO_GamepadSkillsActionButtonTemplate">
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="54"/>
+                </Control>
+
+                <Control name="$(parent)Button2" inherits="ZO_GamepadSkillsActionButtonTemplate">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button1" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button3" inherits="ZO_GamepadSkillsActionButtonTemplate">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button2" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button4" inherits="ZO_GamepadSkillsActionButtonTemplate">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button3" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button5" inherits="ZO_GamepadSkillsActionButtonTemplate">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button4" relativePoint="RIGHT" offsetX="19"/>
+                </Control>
+
+                <Control name="$(parent)Button6" inherits="ZO_GamepadSkillsActionButtonTemplate">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button5" relativePoint="RIGHT" offsetX="38"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSkillsDummyMenuEntry" virtual="true">
+            <Dimensions x="440" y="0" />
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadSkillsFooter" inherits="ZO_GamepadXPBarFooter" virtual="true">
+            <OnInitialized>
+                ZO_SkillsInfo_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <!--Toplevel so it can show above Gamepad Tooltips Left Background -->
+        <TopLevelControl name="ZO_GamepadSkillsLinePreview" hidden="true" tier="HIGH">
+            <AnchorFill/>
+            <Controls>
+                <Scroll name="$(parent)Scroll" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="-630"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
+                            <Controls>
+                                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <Controls>
+                                        <Scroll name="$(parent)Scroll" override="true">
+                                            <AnchorFill />
+                                            <FadeGradient x1="1" y1="0" size1="50" x2="-1" y2="0" size2="50" />
+                                        </Scroll>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GamepadSkillsTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
+
+        <TopLevelControl name="ZO_GamepadSkillsTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadSkills_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad" />
+                
+                <Scroll name="$(parent)BuildPlanner">
+                    <Anchor point="TOPLEFT" offsetY="-6" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-6" />
+                    <Controls>
+                        <Control name="$(parent)Container" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>            
+                                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <Controls>
+                                        <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad"/>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,130 @@
+local gameEntries = {}
+
+-- Resume Game
+
+local function HideGameMenu()
+    SCENE_MANAGER:Hide("gameMenuInGame")
+end
+
+local function AddResumeEntry(entryTable)
+    local data = {name = GetString(SI_GAME_MENU_RESUME), callback = HideGameMenu}
+    table.insert(entryTable, data)
+end
+
+-- Settings
+
+local function AddSettingsEntries(entryTable)
+    local settingsHeaderData = {name = GetString(SI_GAME_MENU_SETTINGS)}
+    table.insert(entryTable, settingsHeaderData)
+end
+
+-- Controls
+
+local function ShowKeybindings()
+    SCENE_MANAGER:AddFragment(KEYBINDINGS_FRAGMENT)
+end
+
+local function HideKeybindings()
+    SCENE_MANAGER:RemoveFragment(KEYBINDINGS_FRAGMENT)
+end
+
+local function AddControlsEntries(entryTable)
+    local keybindingsData = {name = GetString(SI_GAME_MENU_KEYBINDINGS), categoryName = GetString(SI_GAME_MENU_CONTROLS), callback = ShowKeybindings, unselectedCallback = HideKeybindings}
+    table.insert(entryTable, keybindingsData)
+end
+
+-- Addons
+
+local function ShowAddons()
+    SCENE_MANAGER:AddFragment(ADDONS_FRAGMENT)
+end
+
+local function HideAddons()
+    SCENE_MANAGER:RemoveFragment(ADDONS_FRAGMENT)
+end
+
+local function AddAddonsEntry(entryTable)
+    local function ShouldShowNewIcon()
+        return not HasViewedEULA(EULA_TYPE_ADDON_EULA)
+    end
+
+    local data = {name = GetString(SI_GAME_MENU_ADDONS), callback = ShowAddons, unselectedCallback = HideAddons, showNewIconCallback = ShouldShowNewIcon, hasSelectedState = true}
+    table.insert(entryTable, data)
+end
+
+-- Logout
+
+local function ShowLogoutDialog()
+    ZO_Dialogs_ShowDialog("LOG_OUT")
+end
+
+local function AddLogoutEntry(entryTable)
+    local data = {name = GetString(SI_GAME_MENU_LOGOUT), callback = ShowLogoutDialog}
+    table.insert(entryTable, data)
+end
+
+-- Exit Game
+
+local function ShowQuitDialog()
+    ZO_Dialogs_ShowDialog("QUIT")
+end
+
+local function AddQuitEntry(entryTable)
+    local data = {name = GetString(SI_GAME_MENU_QUIT), callback = ShowQuitDialog}
+    table.insert(entryTable, data)
+end
+
+-- Setup
+
+local function RebuildTree(gameMenu)
+    gameEntries = {}
+    AddResumeEntry(gameEntries)
+    AddSettingsEntries(gameEntries)
+    AddControlsEntries(gameEntries)
+    AddAddonsEntry(gameEntries)
+    AddLogoutEntry(gameEntries)
+    AddQuitEntry(gameEntries)
+    gameMenu:SubmitLists(gameEntries)
+end
+
+local wasChatMaximized
+
+local function OnShow(gameMenu)
+    RebuildTree(gameMenu)
+    wasChatMaximized = not CHAT_SYSTEM:IsMinimized()
+    if wasChatMaximized then
+        CHAT_SYSTEM:Minimize()
+    end
+end
+
+local function OnHide(gameMenu)
+    if wasChatMaximized and CHAT_SYSTEM:IsMinimized()then
+        CHAT_SYSTEM:Maximize()
+    end
+
+    wasChatMaximized = nil
+end
+
+function ZO_GameMenu_InGame_Initialize(self)
+    local GAME_MENU_INGAME = ZO_GameMenu_Initialize(self, OnShow, OnHide)
+
+    local gameMenuIngameFragment = ZO_FadeSceneFragment:New(self)
+    gameMenuIngameFragment:RegisterCallback("StateChange",   function(oldState, newState)
+                                            if(newState == SCENE_FRAGMENT_SHOWING) then
+                                                KEYBIND_STRIP:RemoveDefaultExit()
+                                                PushActionLayerByName("GameMenu")
+                                            elseif(newState == SCENE_FRAGMENT_HIDING) then
+                                                RemoveActionLayerByName("GameMenu")
+                                                KEYBIND_STRIP:RestoreDefaultExit()
+                                            end
+                                        end)
+
+    GAME_MENU_SCENE = ZO_Scene:New("gameMenuInGame", SCENE_MANAGER)
+    GAME_MENU_SCENE:AddFragment(gameMenuIngameFragment)
+
+    local function UpdateNewStates()
+        GAME_MENU_INGAME:RefreshNewStates()
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("AddOnEULAHidden", UpdateNewStates)
+end

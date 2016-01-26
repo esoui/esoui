@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <Slider name="ZO_VerticalScrollbarBase_Shared" virtual="true">
+            <Dimensions x="16" y="32" />
+            <ThumbTexture
+                textureFile="EsoUI/Art/Miscellaneous/scrollbox_elevator.dds"
+                disabledTextureFile="EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds"
+                thumbWidth="16"
+                thumbHeight="32"
+            />
+
+            <Controls>
+                <Texture name="$(parent)ThumbMunge" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP" layer="OVERLAY" alpha="0.5">
+                    <OnInitialized>
+                        local slider = self:GetParent()
+                        local thumb = slider:GetThumbTextureControl()
+                        self:SetAnchorFill(thumb)
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+
+            <BackgroundBottom textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+            <BackgroundMiddle textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+            <BackgroundTop textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+
+            <OnInitialized>
+                ZO_VerticalScrollbarBase_OnInitialized(self)
+            </OnInitialized>
+
+            <OnEffectivelyHidden>
+                ZO_VerticalScrollbarBase_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
+        </Slider>
+
+        <!--Scroll Panel-->
+        <Scroll name="ZO_Scroll_Shared" virtual="true">
+            <OnScrollExtentsChanged>
+                ZO_Scroll_OnExtentsChanged(self:GetParent())
+            </OnScrollExtentsChanged>
+        </Scroll>
+    </Controls>
+</GuiXml>

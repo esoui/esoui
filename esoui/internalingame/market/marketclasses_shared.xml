@@ -1,0 +1,94 @@
+﻿<GuiXml>
+    <Animations>
+        <AnimationTimeline name="MarketProductHighlightAnimation">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha=".7">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        
+        <Texture name="ZO_MarketCurrencyIcon" textureFile="EsoUI/Art/currency/currency_crown.dds" virtual="true">
+            <Dimensions x="32" y="32" />
+        </Texture>
+        
+        <Control name="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL">
+                    <AnchorFill />
+                </Texture>
+                
+                <!-- The Overlay should appear over top of the background -->
+                <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="ZO_MARKET_TILE_OVERLAY_LEVEL">
+                    <AnchorFill />
+                </Texture>
+
+                <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="ZO_MARKET_TILE_BORDER_LEVEL">
+                    <AnchorFill/>
+                </Backdrop>
+                
+                <Label name="$(parent)Title" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                
+                <Label name="$(parent)PreviousCost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
+                    <Controls>
+                        <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY" level="ZO_MARKET_TILE_ABOVE_TEXT_LEVEL">
+                            <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
+                            <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
+                            <OnInitialized>
+                                self:SetHeight(2.5)
+                            </OnInitialized>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                    <Controls>
+                        <Texture name="$(parent)CurrencyIcon" inherits="ZO_MarketCurrencyIcon" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
+                </Label>
+                
+                <Label name="$(parent)TextCallout" modifyTextType="UPPERCASE">
+                    <Controls>
+                        <Control name="$(parent)Background" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                            <Anchor point="LEFT" />
+                            <Anchor point="RIGHT" />
+                            <Controls>
+                                <Texture name="$(parent)Center" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                                    <DimensionConstraints minX="0" />
+                                    <AnchorFill />
+                                </Texture>
+                                <Texture name="$(parent)Left" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                                    <Dimensions x="16"/>
+                                    <DimensionConstraints minX="16" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Center" relativePoint="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Center" relativePoint="BOTTOMLEFT"/>
+                                </Texture>
+                                <Texture name="$(parent)Right" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                                    <Dimensions x="16"/>
+                                    <DimensionConstraints minX="16" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Center" relativePoint="TOPRIGHT"/>
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Center" relativePoint="BOTTOMRIGHT"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

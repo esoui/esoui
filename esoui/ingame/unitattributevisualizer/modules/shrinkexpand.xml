@@ -1,0 +1,24 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ShrinkExpandAnimation">
+            <Animations>
+                <SizeAnimation delay="550" duration="750" startHeight="23" endHeight="23">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+                <SizeAnimation delay="550" duration="750" startHeight="23" endHeight="23">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+                <AlphaAnimation duration="550">
+                    <OnPlay>
+                        self:SetAlphaValues(animatingControl:GetAlpha(), 1.0)
+                    </OnPlay>
+                </AlphaAnimation>
+                <AlphaAnimation duration="550" delay="1300" startAlpha="1.0" endAlpha="0.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

@@ -1,0 +1,203 @@
+<GuiXml>
+    <Font name="ZoMarketKeyboardTileFont" font="$(BOLD_FONT)|18|soft-shadow-thick" />
+    <Font name="ZoMarketKeyboardDescriptionFont" font="$(BOLD_FONT)|16|soft-shadow-thick" />
+    <Font name="ZoMarketKeyboardTileTitleFont" font="$(BOLD_FONT)|22|soft-shadow-thick" />
+    <Font name="ZoMarketCalloutFont" font="$(BOLD_FONT)|18|soft-shadow-thin" />
+    
+    <Controls>
+        <Label name="ZO_MarketDefaultLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        
+        <Button name="ZO_MarketProductIcon" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="68" y="68" />
+
+            <MouseButton button="2" enabled="true" />
+
+            <OnMouseEnter>
+                ZO_MarketProductIcon_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_MarketProductIcon_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnClicked>
+                self.marketProductIcon:OnClicked(button)
+            </OnClicked>
+
+            <Controls>
+                <TextureComposite name="$(parent)Frame" textureFile="EsoUI/Art/Market/market_iconFrame_multiTexture.dds" level="ZO_MARKET_TILE_ICON_FRAME_LEVEL">
+                    <AnchorFill />
+                    <OnInitialized>
+                        ZO_MarketProductIcon_StyleFrame_OnInitialized(self)
+                    </OnInitialized>
+
+                    <!--  Background Texture -->
+                    <Surface texCoordLeft="0.0" texCoordRight="0.25" texCoordTop="0.5" texCoordBottom="0.75" insetLeft="1" insetRight="-1" insetTop="1" insetBottom="-1" />
+                    <!--  Selected Texture -->
+                    <Surface texCoordLeft="0.25" texCoordRight="0.5" texCoordTop="0.5" texCoordBottom="0.75" insetLeft="1" insetRight="-1" insetTop="1" insetBottom="-1" />
+                    <!-- Frame Texture, texture coords are set randomly -->
+                    <Surface />
+                </TextureComposite>
+                
+                <Texture name="$(parent)Icon" level="ZO_MARKET_TILE_ICON_IMAGE_LEVEL">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Button>
+        
+        <Control name="ZO_MarketProductBase_Keyboard" inherits="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
+            
+            <OnMouseEnter>
+                ZO_MarketProduct_OnMouseEnter(self) 
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                ZO_MarketProduct_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <OnMouseUp>
+                if upInside then
+                    self.marketProduct:OnClicked(button)
+                end
+            </OnMouseUp>
+            
+            <OnMouseDoubleClick>
+                self.marketProduct:OnDoubleClicked(button)
+            </OnMouseDoubleClick>
+            
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true">
+                    <Edge file="EsoUI/Art/Market/Keyboard/market_cel_dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+                </Backdrop>
+
+                <Backdrop name="$(parent)Highlight" centerColor="00000000" hidden="true" level="ZO_MARKET_TILE_HIGHLIGHT_LEVEL" blendMode="ADD">
+                    <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <AnchorFill/>
+                </Backdrop>
+                
+                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoMarketKeyboardTileTitleFont" mouseEnabled="true" override="true">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/>
+                    <OnMouseEnter>
+                        ZO_MarketProduct_OnMouseEnter(self:GetParent())
+                        ZO_Tooltips_ShowTruncatedTextTooltip(self)
+                    </OnMouseEnter>
+            
+                    <OnMouseExit>
+                        ZO_MarketProduct_OnMouseExit(self:GetParent())
+                        ZO_Tooltips_HideTruncatedTextTooltip()
+                    </OnMouseExit>
+                    
+                    <OnMouseUp>
+                        if upInside then
+                            self:GetParent().marketProduct:OnClicked(button)
+                        end
+                    </OnMouseUp>
+            
+                    <OnMouseDoubleClick>
+                        self:GetParent().marketProduct:OnDoubleClicked(button)
+                    </OnMouseDoubleClick>
+                </Label>
+                
+                
+                <Label name="$(parent)PreviousCost" font="ZoMarketKeyboardTileFont" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
+                    <Controls>
+                        <Texture name="$(parent)Strikethrough" override="true">
+                            <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
+                            <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
+                            <OnInitialized>
+                                self:SetHeight(2.5)
+                            </OnInitialized>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Cost" font="ZoMarketKeyboardTileFont" override="true">
+                    <Controls>
+                        <Texture name="$(parent)CurrencyIcon" override="true">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Purchased" font="ZoMarketKeyboardTileFont" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
+                </Label>
+                
+                <Label name="$(parent)TextCallout" font="ZoMarketCalloutFont" override="true">
+                    <Controls>
+                        <Control name="$(parent)Background" override="true">
+                            <Dimensions y="32"/>
+                            <Controls>
+                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" override="true"/>
+                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_MarketProduct" inherits="ZO_MarketProductBase_Keyboard" virtual="true">
+            <Dimensions x="ZO_MARKET_PRODUCT_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
+            
+            <Controls>
+                <Texture name="$(parent)Background" override="true">
+                    <!-- 512x256 image cropped to 302x200-->
+                    <TextureCoords left="0" right="0.58984375" top="0" bottom="0.78125"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_MarketProductBundle" inherits="ZO_MarketProductBase_Keyboard" virtual="true">
+            <Dimensions x="ZO_MARKET_PRODUCT_BUNDLE_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
+            
+            <Controls>
+                <Texture name="$(parent)Background" override="true">
+                    <!-- 1024x256 image cropped to 614x200-->
+                    <TextureCoords left="0" right="0.599609375" top="0" bottom="0.78125"/>
+                </Texture>
+                
+                <Label name="$(parent)Title" override="true">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" offsetX="-316" offsetY="10"/>
+                </Label>
+                
+                <Label name="$(parent)Description" inherits="ZO_MarketDefaultLabel" font="ZoMarketKeyboardDescriptionFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" wrapMode="ELLIPSIS" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-250" offsetY="-70"/>
+                    
+                    <OnMouseEnter>
+                        ZO_MarketProduct_OnMouseEnter(self:GetParent())
+                        ZO_Tooltips_ShowTruncatedTextTooltip(self)
+                    </OnMouseEnter>
+            
+                    <OnMouseExit>
+                        ZO_MarketProduct_OnMouseExit(self:GetParent())
+                        ZO_Tooltips_HideTruncatedTextTooltip()
+                    </OnMouseExit>
+                    
+                    <OnMouseUp>
+                        if upInside then
+                            self:GetParent().marketProduct:OnClicked(button)
+                        end
+                    </OnMouseUp>
+            
+                    <OnMouseDoubleClick>
+                        self:GetParent().marketProduct:OnDoubleClicked(button)
+                    </OnMouseDoubleClick>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,40 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_OverflowDialog" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase" resizeToFitDescendents="false">
+            <Dimensions x="750" y="430" />
+            <Anchor point="CENTER" />
+            <OnInitialized>
+                ZO_OverflowDialogInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)MainText" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="50" offsetY="70" />
+                    <Anchor point="TOPRIGHT" offsetX="-50" offsetY="70" />
+                </Label>
+
+                <Control name="$(parent)DetailsList" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MainText" relativePoint="BOTTOMRIGHT" offsetY="30" />
+
+                    <OnInitialized>
+                        local list = ZO_BulletList:New(self)
+                        list:AddLine(GetString(SI_OVERFLOW_DIALOG_LIST_ENTRY_1))
+                        list:AddLine(GetString(SI_OVERFLOW_DIALOG_LIST_ENTRY_2))
+                        list:AddLine(GetString(SI_OVERFLOW_DIALOG_LIST_ENTRY_3))
+                        list:AddLine(GetString(SI_OVERFLOW_DIALOG_LIST_ENTRY_4))
+                    </OnInitialized>
+                </Control>
+                
+                <Label name="$(parent)FooterText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_OVERFLOW_DIALOG_FOOTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsList" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DetailsList" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Overflow" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Queue" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,3 @@
+GAMEPAD_TEXT_CHAT_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadTextChat)
+GAMEPAD_TEXT_CHAT_FRAGMENT:SetHideOnSceneHidden(true)
+GAMEPAD_TEXT_CHAT_FRAGMENT:SetConditional(IsChatSystemAvailableForCurrentPlatform)

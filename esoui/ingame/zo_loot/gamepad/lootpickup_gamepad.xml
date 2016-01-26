@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Gamepad_LootPickup" inherits="ZO_GamepadGrid_NavQuadrant_3_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_LootPickup_Gamepad_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Bg" inherits="ZO_Gamepad_BackgroundControl_Rails">
+                    <Controls>
+                        <Texture name="$(parent)NestedBg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                            <TextureCoords left="ZO_GAMEPAD_QUADRANT_3_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_3_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Content" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" tier="MEDIUM">
+                    <Controls>
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Control>
+
+                        <Scroll name="$(parent)List">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainer" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+
+                            <Controls>
+                                <Control name="$(parent)Container">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-100"/>
+                                    <Controls>
+                                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate ">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="BOTTOMRIGHT"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Scroll>
+
+                        <Control name="$(parent)KeybindContainer">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-50"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+
+                            <Controls>
+                                <Control name="$(parent)TakeContainer" inherits="ZO_KeybindStripButtonTemplate">
+                                    <Anchor point="TOPLEFT" />
+                                </Control>
+                                <Control name="$(parent)TakeAllContainer" inherits="ZO_KeybindStripButtonTemplate">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TakeContainer" relativePoint="TOPRIGHT" offsetX="50"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>  
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

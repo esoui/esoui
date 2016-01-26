@@ -1,0 +1,431 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_DeathInEncouterLoadingLabel_Keyboard_Template" font="ZoFontWinH2" inherits="ZO_LoadingText" virtual="true"/>
+        <Label name="ZO_DeathInEncouterLoadingLabel_Gamepad_Template" font="ZoFontGamepad22" inherits="ZO_LoadingText" virtual="true"/>
+
+        <Control name="ZO_DeathRecapToggleButton" inherits="ZO_KeybindButton" virtual="true">
+            <OnInitialized>
+                ZO_KeybindButtonTemplate_OnInitialized(self)
+                self:SetText(GetString(SI_DEATH_RECAP_TOGGLE_KEYBIND))
+                self:SetKeybind("DEATH_RECAP_TOGGLE")
+                self:SetCallback(ZO_Death_ToggleDeathRecapCallback)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_DeathReviveButton" inherits="ZO_KeybindButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)ReviveText" text="SI_DEATH_PROMPT_REVIVE_LABEL" font="ZoFontWinH3" excludeFromResizeToFitExtendts="true">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_DeathOneButton" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOP" offsetY="32"/>
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathKeybindButton_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" modifyTextType="NONE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+            </Controls>    
+        </Control>
+
+        <Control name="ZO_DeathKeybindButton_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <Label name="$(parent)KeyLabel" font="ZoFontGamepad22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_DeathReviveButton_Keyboard_Template" inherits="ZO_DeathKeybindButton_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)ReviveText" font="ZoFontWinH3" modifyTextType="NONE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathReviveButton_Gamepad_Template" inherits="ZO_DeathKeybindButton_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)ReviveText" font="ZoFontGamepadBold22" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOM" relativePoint="TOP" relativeTo="$(parent)NameLabel" offsetY="-5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathOneButton_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Buttons">
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton_Keyboard_Template" />
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathOneButton_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Buttons">
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton_Gamepad_Template" />
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_DeathOneButtonTimer" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Label name="$(parent)Message" font="ZoFontWinH2">
+                    <Anchor point="TOP"/>
+                </Label>
+                <Cooldown name="$(parent)Timer" inherits="ZO_RadialCountdownTimer">
+                    <Anchor point="CENTER" relativeTo="$(parent)Message" relativePoint="LEFT" offsetX="-19"/>
+                </Cooldown>
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOP" offsetY="32"/>
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathOneButtonTimer_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Message" font="ZoFontWinH2" >
+                    <Anchor point="TOP"/>
+                </Label>
+                <Control name="$(parent)Buttons">
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Keyboard_Template" />
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathOneButtonTimer_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Message" font="ZoFontGamepad34" >
+                    <Anchor point="TOP" offsetY="-20"/>
+                </Label>
+                <Control name="$(parent)Buttons">
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Gamepad_Template" />
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathTwoButton" hidden="true" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)Buttons">
+                    <Anchor point="TOPLEFT" offsetY="32"/>
+                    <Anchor point="TOPRIGHT" offsetY="32"/>
+                    <Controls>
+                        <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton">
+                            <Anchor point="TOP"/>
+                        </Control>
+                        <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Button2" relativePoint="TOPLEFT" offsetX="-40"/>
+                        </Control>
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathTwoButton_Keyboard_Template" inherits="ZO_DeathOneButton_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Buttons" override="true">
+                    <Controls>
+                        <Control name="$(grandparent)Button2" modifyTextType="NONE" inherits="ZO_DeathReviveButton_Keyboard_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathTwoButton_Gamepad_Template" inherits="ZO_DeathOneButton_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Buttons" override="true">
+                    <Controls>
+                        <Control name="$(grandparent)Button2" modifyTextType="UPPERCASE" inherits="ZO_DeathReviveButton_Gamepad_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Death_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"/>
+                <Control name="$(parent)BG" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"/>
+                <Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton_Keyboard_Template"/>
+                <Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton_Keyboard_Template"/>
+
+                <Control name="$(parent)Resurrect">
+                    <Controls>
+                        <Label name="$(parent)Message" font="ZoFontWinH2">
+                            <Anchor point="TOP"/>
+                        </Label>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                                <Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InEncounter">
+                    <Controls>
+                        <Control name="$(parent)Message" >
+                            <Anchor point="TOP"/>
+                        </Control>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RaidLifeCounter">
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontWinH1"/>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer_Keyboard_Template">
+                    <Controls>
+                        <Label name="$(parent)Message" override="true">
+                            <Anchor point="TOP" offsetY="-40"/>
+                        </Label>
+                        <Control name="$(parent)Buttons" override="true">
+                            <Controls>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton_Keyboard_Template" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ImperialPvE">
+                    <Controls>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton_Keyboard_Template"/>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                                <Control name="$(grandparent)Button3" inherits="ZO_DeathReviveButton_Keyboard_Template"/>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Death_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"/>
+                <Control name="$(parent)BG" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"/>
+                <Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton_Gamepad_Template"/>
+                <Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton_Gamepad_Template"/>
+
+                <Control name="$(parent)Resurrect">
+                    <Controls>
+                        <Label name="$(parent)Message" font="ZoFontGamepad34">
+                            <Anchor point="TOP" offsetY="-20"/>
+                        </Label>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
+                                <Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InEncounter">
+                    <Controls>
+                        <Control name="$(parent)Message" >
+                            <Anchor point="TOP" offsetY="-20"/>
+                        </Control>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RaidLifeCounter">
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontGamepad22"/>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer_Gamepad_Template">
+                    <Controls>
+                        <Label name="$(parent)Message" override="true">
+                            <Anchor point="TOP" offsetY="-48"/>
+                        </Label>
+                        <Control name="$(parent)Buttons" override="true">
+                            <Controls>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton_Gamepad_Template" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ImperialPvE">
+                    <Controls>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton_Gamepad_Template"/>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton_Gamepad_Template"/>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_Death" hidden="true">
+            <Dimensions x="800" y="116"/>
+            <Anchor point="BOTTOM" offsetY="-16"/>
+            <OnInitialized>
+                ZO_Death_OnInitialized(self)
+            </OnInitialized>
+            <OnEffectivelyHidden>
+                ZO_Death_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
+            <OnEffectivelyShown>
+                ZO_Death_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+            <Controls>
+                <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer" hidden="true"/>
+                <Control name="$(parent)BG" inherits="ZO_DeathOneButtonTimer" hidden="true"/>
+                <Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton" hidden="true"/>  
+                <Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton" />
+
+                <Control name="$(parent)Resurrect" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Label name="$(parent)Message" font="ZoFontWinH2">
+                            <Anchor point="TOP"/>
+                        </Label>
+                        <Cooldown name="$(parent)Timer" inherits="ZO_RadialCountdownTimer">
+                            <Anchor point="CENTER" relativeTo="$(parent)Message" relativePoint="LEFT" offsetX="-19"/>                            
+                        </Cooldown>
+                        <Control name="$(parent)Buttons">
+                            <Anchor point="TOPLEFT" offsetY="32"/>
+                            <Anchor point="TOPRIGHT" offsetY="32"/>
+                            <Controls>
+                                <Control name="$(grandparent)Button2" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOP"/>
+                                </Control>
+                                <Control name="$(grandparent)Button1" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Button2" relativePoint="TOPLEFT" offsetX="-40"/>
+                                </Control>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InEncounter" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Message" inherits="ZO_Loading">
+                            <Anchor point="TOP"/>
+                            <OnInitialized>
+                                ZO_Loading_Initialize(self, GetString(SI_DEATH_PROMPT_IN_ENCOUNTER), IsInGamepadPreferredMode() and "ZO_DeathInEncouterLoadingLabel_Gamepad_Template" or "ZO_DeathInEncouterLoadingLabel_Keyboard_Template")
+                                self:Show()
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" offsetY="32"/>
+                            <Controls>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                                    <Anchor point="TOPLEFT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RaidLifeCounter" inherits="ZO_RaidLifeDisplay">
+                    <Anchor point="BOTTOM"/>
+                </Control>
+
+                <Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Message" override="true">
+                            <Anchor point="TOP" offsetY="-32"/>
+                        </Label>
+                        <Control name="$(parent)Buttons" override="true">
+                            <Controls>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
+                                </Control>
+                                <Control name="$(grandparent)DeathRecapToggleButton" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)ImperialPvE" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" offsetY="32"/>
+                            <Controls>
+                                <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
+                                </Control>
+                                <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
+                                </Control>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

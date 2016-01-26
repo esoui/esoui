@@ -1,0 +1,71 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GamepadBankingTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Banking_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SpinnerContainer" inherits="ZO_GamepadLabeledQuantitySpinnerContainerTemplate" hidden="true">
+                    <Anchor point="LEFT" offsetX="40" />
+                    <Anchor point="RIGHT" offsetX="-40" />
+                </Control>
+
+                <Control name="$(parent)CenterIsAlongTop">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>
+                </Control>
+
+                <Control name="$(parent)SelectorContainer" hidden="true" resizeToFitDescendents="true" tier="MEDIUM">
+                    <ResizeToFitPadding height="100" />
+                    <Anchor point="TOP" relativeTo="$(parent)CenterIsAlongTop" relativePoint="TOPRIGHT" offsetY="-70" />
+                    
+                    <Controls>
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_WhiteBackdrop_Gamepad" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetY="0" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="0" />
+                        </Backdrop>
+
+                        <Control name="$(parent)Selector" inherits="ZO_GamepadCurrencySelectorTemplate" excludeFromResizeToFitExtents="true">
+                            <Dimensions x="255" y="50"/>
+                            <Anchor point="TOP" relativePoint="TOP" offsetY="55"/>
+                        </Control>
+
+                        <Texture name="$(parent)CurrencyTexture">
+                            <Dimensions x="28" y="28"/>
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Selector" offsetX="10"/>
+                        </Texture>
+
+                        <Control name="$(parent)RootSpacer">
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="3" hidden="true" />
+                            <Anchor point="TOP" offsetY="130" />
+                        </Control>
+
+                        <Label name="$(parent)FirstLabel" hidden="true" maxLineCount="1" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" >
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RootSpacer" relativePoint="BOTTOMLEFT" offsetX="35" offsetY="40" />
+                        </Label>
+
+                        <Label name="$(parent)FirstValue" hidden="true" maxLineCount="1" font="ZoFontGamepadHeaderDataValue" wrapMode="ELLIPSIS">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RootSpacer" relativePoint="BOTTOMRIGHT" offsetX="-35" offsetY="40"/>
+                        </Label>
+
+                        <Label name="$(parent)SecondLabel" hidden="true" maxLineCount="1" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" >
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)FirstLabel" relativePoint="BOTTOMLEFT" offsetY="40" />
+                        </Label>
+
+                        <Label name="$(parent)SecondValue" hidden="true" maxLineCount="1" font="ZoFontGamepadHeaderDataValue" wrapMode="ELLIPSIS">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FirstValue" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GamepadBankingBuyBankSpaceTopLevel" hidden="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_GamepadBankingBuyBankSpaceTopLevel_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

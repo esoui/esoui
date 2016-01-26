@@ -1,0 +1,126 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CraftingResultDialogLabel" font="ZoFontWinH4" virtual="true">
+            <DimensionConstraints maxX="200" />
+        </Label>
+
+        <Control name="ZO_CraftingResultEnchantRow" virtual="true">
+            <Dimensions x="48" y="48" />
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+                self.itemName = self:GetNamedChild("ItemName")
+                self.translatedName = self:GetNamedChild("TranslatedName")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <AnchorFill />
+                </Texture>
+
+                <Label name="$(parent)ItemName" inherits="ZO_CraftingResultDialogLabel" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-25" />
+                </Label>
+
+                <Label name="$(parent)TranslatedName" inherits="ZO_CraftingResultDialogLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="25" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CraftingResultEnchantDialog" inherits="ZO_CustomDialogBase">
+            <ResizeToFitPadding width="100" height="91" />
+            <Controls>
+                <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" horizontalAlignment="CENTER" font="ZoFontGameMedium" text="SI_ENCHANTING_TRANSLATION_LEARNED_DIALOG_BODY" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)Row1" inherits="ZO_CraftingResultEnchantRow" >
+                    <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Row2" inherits="ZO_CraftingResultEnchantRow" >
+                    <Anchor point="TOP" relativeTo="$(parent)Row1" relativePoint="BOTTOM" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Row3" inherits="ZO_CraftingResultEnchantRow" >
+                    <Anchor point="TOP" relativeTo="$(parent)Row2" relativePoint="BOTTOM" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Exit" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_CraftingResultAlchemyRow" hidden="true" virtual="true">
+            <Dimensions x="48" y="48" />
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+                self.itemName = self:GetNamedChild("ItemName")
+
+                self.traitContainer = self:GetNamedChild("Container")
+                self.traits = {
+                self.traitContainer:GetNamedChild("Trait1"),
+                self.traitContainer:GetNamedChild("Trait2"),
+                self.traitContainer:GetNamedChild("Trait3"),
+                self.traitContainer:GetNamedChild("Trait4"),
+                }
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <AnchorFill />
+                </Texture>
+
+                <Label name="$(parent)ItemName" inherits="ZO_CraftingResultDialogLabel" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-25" />
+                </Label>
+
+                <Control name="$(parent)Container">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="25" />
+                    <Controls>
+                        <Label name="$(parent)Trait1" inherits="ZO_CraftingResultDialogLabel" >
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        <Label name="$(parent)Trait2" inherits="ZO_CraftingResultDialogLabel" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trait1" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                        <Label name="$(parent)Trait3" inherits="ZO_CraftingResultDialogLabel" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trait2" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                        <Label name="$(parent)Trait4" inherits="ZO_CraftingResultDialogLabel" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trait3" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CraftingResultAlchemyDialog" inherits="ZO_CustomDialogBase">
+            <ResizeToFitPadding width="100" height="91" />
+            <Controls>
+                <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" horizontalAlignment="CENTER" font="ZoFontGameMedium" text="SI_ALCHEMY_REAGENT_TRAIT_LEARNED_DIALOG_BODY" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)Row1" inherits="ZO_CraftingResultAlchemyRow" />
+                <Control name="$(parent)Row2" inherits="ZO_CraftingResultAlchemyRow" />
+                <Control name="$(parent)Row3" inherits="ZO_CraftingResultAlchemyRow" />
+
+                <Control name="$(parent)Exit" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <Label name="ZO_CraftingResultItem" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true">
+            <Anchor point="TOP" />
+
+            <Controls>
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-10" />
+                </Button>
+            </Controls>
+        </Label>
+
+        <TopLevelControl name="ZO_CraftingResultsTopLevel" hidden="true">
+            <Dimensions x="500" y="750" />
+            <Anchor point="TOP" offsetY="258" />
+
+            <OnInitialized>
+                ZO_CraftingResults_Keyboard_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

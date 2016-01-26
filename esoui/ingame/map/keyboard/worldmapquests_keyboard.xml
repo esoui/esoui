@@ -1,0 +1,62 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapQuestHeader" mouseEnabled="true" virtual="true">
+            <Dimensions x="285"/>
+            <Controls>
+                <Texture name="$(parent)AssistedIcon" textureFile="EsoUI/Art/Quest/questJournal_trackedQuest_icon.dds" hidden="true">
+                    <Dimensions x="24" y="24"/>
+                    <Anchor point="TOPLEFT"/>
+                    <TextureCoords top="0.125" bottom="0.875" left="0.125" right="0.875"/>
+                </Texture>
+                <Label name="$(parent)Name" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="8">
+                    <DimensionConstraints maxX="285"/>
+                    <Anchor point="TOPLEFT" offsetX="26"/>
+                    <OnMouseDown>
+                        ZO_WorldMapQuestHeader_OnMouseDown(self:GetParent(), button)
+                    </OnMouseDown>
+                    <OnMouseUp>
+                        ZO_WorldMapQuestHeader_OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
+                    <OnMouseEnter>
+                        ZO_SelectableLabel_OnMouseEnter(self)
+                        ZO_WorldMapQuestHeader_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_SelectableLabel_OnMouseExit(self)
+                        ZO_WorldMapQuestHeader_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_MapQuestDetailsCondition" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        
+        <TopLevelControl name="ZO_MapQuestDetailsTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ZO_MapQuestDetailsTooltip" inherits="ZO_BaseTooltip">
+                    <OnInitialized>
+                        ZO_MapQuestDetailsTooltip_OnInitialized(self)
+                    </OnInitialized>
+                    <OnCleared>
+                        ZO_MapQuestDetailsTooltip_OnCleared(self)
+                    </OnCleared>
+                    <ResizeToFitPadding width="32" height="20"/>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_WorldMapQuests" inherits="ZO_WorldMapInfoContent">
+            <OnInitialized>
+                ZO_WorldMapQuests_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <AnchorFill/>
+                </Control>
+                <Label name="$(parent)NoQuests" text="SI_WORLD_MAP_NO_QUESTS" font="ZoFontHeader">
+                    <Anchor point="TOP"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,68 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_ScreenAdjustCorner" virtual="true" textureFile="EsoUI/Art/ScreenAdjust/adjust_corner.dds" pixelRoundingEnabled="false">
+            <Dimensions x="128" y="128"/>
+        </Texture>
+        <Control name="ZO_ScreenAdjustBase" tier="HIGH" level="ZO_HIGH_TIER_SCREEN_ADJUST" hidden="true" virtual="true">
+            <Anchor point="CENTER"/>
+            <Controls>
+                <Texture name="$(parent)BG" color="222222">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
+                </Texture>
+                <Texture name="$(parent)TopLeft" inherits="ZO_ScreenAdjustCorner">
+                    <Anchor point="TOPLEFT"/>                    
+                </Texture>
+                <Texture name="$(parent)TopRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="4.712">
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)BottomLeft" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="1.571">
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+                <Texture name="$(parent)BottomRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="3.142">
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+
+                <Control name="$(parent)Instructions" resizeToFitDescendents="true">
+                    <Anchor point="CENTER"/>
+                    <ResizeToFitPadding width="40" height="40"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true">
+                            <AnchorFill/>
+                        </Backdrop>
+                        <Label name="$(parent)Text" font="ZoFontGamepad36" text="SI_SCREEN_ADJUST_INSTRUCTIONS" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" offsetY="20"/>
+                            <Dimensions x="500"/>
+                        </Label>
+                        <Control name="$(parent)Binds" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="40"/>
+                            <Controls>
+                                <Control name="$(parent)Adjust" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT"/>
+                                </Control>
+                                <Control name="$(parent)Save" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Adjust" relativePoint="TOPRIGHT" offsetX="20"/>
+                                </Control>
+                                <Control name="$(parent)Cancel" inherits="ZO_KeybindButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Save" relativePoint="TOPRIGHT" offsetX="20"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ScreenAdjust" inherits="ZO_ScreenAdjustBase">
+            <OnInitialized>
+                ZO_ScreenAdjust_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ScreenAdjustIntro" inherits="ZO_ScreenAdjustBase">
+            <OnInitialized>
+                ZO_ScreenAdjustIntro_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

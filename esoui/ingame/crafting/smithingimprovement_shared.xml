@@ -1,0 +1,9 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="SmithingImprovementBoosterFade">
+            <Animations>
+                <AlphaAnimation duration="150" startAlpha=".2" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

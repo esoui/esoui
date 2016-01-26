@@ -1,0 +1,64 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_SelectableLabel" mouseEnabled="true" virtual="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <OnInitialized>
+                ZO_SelectableLabel_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_SelectableLabel_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_SelectableLabel_OnMouseExit(self)
+            </OnMouseExit>
+        </Label>
+
+        <Label name="ZO_WindowTitle" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
+            <Dimensions y="28" />
+            <Anchor point="TOP" offsetY="-7" />
+        </Label>
+        
+        <Label name="ZO_TooltipIfTruncatedLabel" mouseEnabled="true" wrapMode="ELLIPSIS" virtual="true">
+            <OnMouseEnter>
+                if self:WasTruncated() then
+                InitializeTooltip(InformationTooltip)
+                ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
+                SetTooltipText(InformationTooltip, self:GetText())
+                end
+            </OnMouseEnter>
+            <OnMouseExit>
+                if self:WasTruncated() then
+                ClearTooltip(InformationTooltip)
+                end
+            </OnMouseExit>
+        </Label>
+
+        <Label name="ZO_LoadingText" virtual="true" font="ZoFontHeader">
+            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+        </Label>
+
+        <Backdrop name="ZO_LargeKeyBackdrop" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/interactKeyFrame_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+            <Center file="EsoUI/Art/Miscellaneous/interactKeyFrame_center.dds" />
+            <Insets left="8" top="8" right="-8" bottom="-8" />
+        </Backdrop>
+
+        <Label name="ZO_LargeKeyMarkupLabel" virtual="true">
+            <OnTextChanged>
+                ZO_LargeKeyMarkupLabel_OnTextChanged(...)
+            </OnTextChanged>
+            <OnUserAreaCreated>
+                ZO_LargeKeyMarkupLabel_OnNewUserAreaCreated(...)
+            </OnUserAreaCreated>
+        </Label>
+
+        <Label name="ZO_SmallKeyMarkupLabel" lineSpacing="5" virtual="true">
+            <OnTextChanged>
+                ZO_SmallKeyMarkupLabel_OnTextChanged(...)
+            </OnTextChanged>
+            <OnUserAreaCreated>
+                ZO_SmallKeyMarkupLabel_OnNewUserAreaCreated(...)
+            </OnUserAreaCreated>
+        </Label>
+    </Controls>
+</GuiXml>

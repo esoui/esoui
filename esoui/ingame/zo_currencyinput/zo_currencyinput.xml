@@ -1,0 +1,65 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CurrencyInputPulse" playbackType="PING_PONG" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha=".55" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CurrencyInputBadInput">
+            <Animations>
+                <ColorAnimation duration="550" startColor="FFFF0000" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Backdrop name="ZO_DefaultCurrencyInputField" inherits="ZO_EditBackdrop" mouseEnabled="true" virtual="true">
+            <OnMouseUp>
+                if(upInside and button == MOUSE_BUTTON_INDEX_LEFT) then
+                    self.OnBeginInput()
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" offsetX="18" />
+                </Label>
+            </Controls>
+        </Backdrop>
+        
+        <TopLevelControl name="ZO_CurrencyInput" hidden="true" tier="HIGH" keyboardEnabled="true">
+            <Dimensions x="270" y="105" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                CURRENCY_INPUT = ZO_CurrencyInputObject:New(self, "CurrencyInputPulse")
+            </OnInitialized>
+
+            <OnKeyDown>
+                CURRENCY_INPUT:OnKeyDown(key, ctrl, alt, shift)
+            </OnKeyDown>
+
+            <Controls>
+                <Backdrop name="$(parent)BG">
+                    <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="8" />
+
+                    <Edge file="EsoUI/Art/Miscellaneous/textEntry_highlight_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Crafting/crafting_toolTip_glow_center.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+
+                <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate" font="ZoFontGame">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+	</Controls>
+</GuiXml>

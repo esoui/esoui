@@ -1,0 +1,244 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LoginTrustedSettingsButton" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_Login_TrustedSettingsOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Login_TrustedSettingsOnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/Icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_PregameSlideShow" layer="BACKGROUND" tier="LOW" hidden="true">
+            <Anchor point="CENTER"/>
+            <Controls>
+                <Control name="$(parent)Crossfade" inherits="ZO_CrossfadeBG" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_LoginBG" layer="BACKGROUND" tier="LOW" hidden="true">
+            <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
+            <Anchor point="CENTER"/>
+            <Controls>
+                <Texture name="$(parent)TopMunge" textureFile="EsoUI/Art/Screens/LoadScreen_topMunge_tile.dds" addressMode="WRAP" scale=".75" level="5">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
+                    <Dimensions y="256" />
+                </Texture>
+
+                <Texture name="$(parent)BottomMunge" textureFile="EsoUI/Art/Screens/LoadScreen_bottomMunge_tile.dds" addressMode="WRAP" scale=".75" level="5">
+                    <Dimensions y="256" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+
+                <Texture name="$(parent)FramingBar" textureFile="EsoUI/Art/Login/login_framingBar.dds" resizeToFitFile="true" level="5">
+                    <Anchor point="TOP" relativeTo="GuiRoot" offsetY="23" />
+                    <Controls>
+                        <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Login/login_framingBar.dds" resizeToFitFile="true" level="5">
+                            <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-23" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)GameVersionLabel" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" level="5">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)FramingBarBottom" offsetX="240" offsetY="-5" />
+                    <OnMouseEnter>
+                        InitializeTooltip(InformationTooltip, self, BOTTOMLEFT, 0, -10, TOPLEFT)
+                        SetTooltipText(InformationTooltip, zo_strformat(SI_VERSION, self.fullVersion))
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ClearTooltip(InformationTooltip)
+                    </OnMouseExit>
+                </Label>
+
+                <Label name="$(parent)AcctRequired" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" level="5" mouseEnabled="true" linkEnabled="true">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)FramingBarBottom" offsetY="-5" />
+
+                    <OnInitialized>
+                        ZO_Login_RequiredAccountOnOnInitialized()
+                    </OnInitialized>
+
+                    <OnLinkClicked>
+                        ZO_LinkHandler_OnLinkClicked(linkText, button)
+                    </OnLinkClicked>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_Login" hidden="true">
+            <Dimensions x="1920" y="1080" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                ZO_Login_Initialize()
+            </OnInitialized>
+
+            <OnUpdate>
+                ZO_Login_OnUpdate(self, time)
+            </OnUpdate>
+
+            <Controls>
+                <Texture name="$(parent)BGMunge" textureFile="EsoUI/Art/Login/login_UIWindowBG_left.dds">
+                    <Dimensions x="512" y="914" />
+                    <Anchor point="TOPLEFT" offsetX="160" offsetY="10" />
+                    <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                    <Controls>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_UIWindowBG_right.dds">
+                            <Dimensions x="256" y="914" />
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                            <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)ESOLogo" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGMunge" offsetX="-34" offsetY="70" />
+                    <Controls>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_logo_right.dds" resizeToFitFile="true">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Backdrop name="$(parent)AccountName" inherits="ZO_EditBackdrop">
+                    <Dimensions x="500" y="28" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOMLEFT" offsetX="130" offsetY="50" />
+
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
+                            <OnEnter>
+                                ZO_LoginPasswordEdit:TakeFocus()
+                            </OnEnter>
+
+                            <OnTab>
+                                ZO_LoginPasswordEdit:TakeFocus()
+                            </OnTab>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>               
+
+                <Label name="$(parent)AccountNameLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ACCOUNT_NAME">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)AccountName" relativePoint="TOPLEFT" offsetY="-5" />
+                </Label>
+
+                <Control name="$(parent)TrustedSettingsBar" inherits="ZO_MenuBarTemplate">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)AccountName" relativePoint="TOPRIGHT" offsetY="-16" />
+                </Control>
+
+                <Control name="$(parent)RememberAccount" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Controls>
+                        <Button name="$(parent)Button" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT"/>
+                            <OnInitialized>
+                                ZO_Login_SetupCheckButton(self, "RememberAccountName")
+                            </OnInitialized>
+                        </Button>
+                        <Label name="$(parent)Text" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_REMEMBER_ACCOUNT">
+                            <Anchor point="LEFT" relativeTo="$(parent)Button" relativePoint="RIGHT" offsetX="10" offsetY="1"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Backdrop name="$(parent)Password" inherits="ZO_EditBackdrop">
+                    <Dimensions y="28" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="80" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMRIGHT" offsetY="80" />
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" textType="PASSWORD">
+                            <OnEnter>
+                                local state = ZO_LoginLogin:GetState()
+                                if(state == BSTATE_NORMAL) then
+                                    self:LoseFocus()
+                                    ZO_LoginLogin:SetEnabled(false)
+                                    ZO_Login_DoLogin(ZO_LoginAccountNameEdit, ZO_LoginPasswordEdit)
+                                end
+                            </OnEnter>
+
+                            <OnTab>
+                                WINDOW_MANAGER:SetFocusByName("ZO_LoginAccountNameEdit")
+                            </OnTab>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>                    
+
+                <Label name="$(parent)PasswordLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_PASSWORD">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Password" relativePoint="TOPLEFT" offsetY="-5" />
+                </Label>
+
+                <Label name="$(parent)CapsLockWarning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_CAPS_LOCK_PASSWORD_WARNING">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Password" relativePoint="TOPRIGHT" offsetY="-5" />
+                    <OnInitialized>
+                        local function UpdateForCaps(eventCode, capsLockIsOn)
+                            self:SetHidden(not capsLockIsOn)
+                        end
+                        self:RegisterForEvent(EVENT_CAPS_LOCK_STATE_CHANGED, UpdateForCaps)
+                        self:SetHidden(not IsCapsLockOn())
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" resizeToFitFile="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Button name="$(parent)Login" inherits="ZO_DefaultTextButton" font="ZoFontWinH2" modifyTextType="UPPERCASE" text="SI_LOGIN">
+                    <Dimensions x="300" />
+                    <Anchor point="TOP" relativeTo="$(parent)PasswordEdit" relativePoint="BOTTOM" offsetY="40" />
+                    <OnClicked>
+                        ZO_Login_DoLogin(ZO_LoginAccountNameEdit, ZO_LoginPasswordEdit)
+                        self:SetState(BSTATE_DISABLED, true)
+                    </OnClicked>
+
+                    <Controls>
+                        <Label name="$(parent)DisabledTimer" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10" />
+                        </Label>
+                    </Controls>
+                </Button>
+
+                <Control name="$(parent)Announcements" hidden="true">
+                    <Dimensions y="240" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PasswordEdit" relativePoint="BOTTOMLEFT" offsetY="120" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)PasswordEdit" relativePoint="BOTTOMRIGHT" offsetY="120" />
+
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontWinH3" text="SI_LOGIN_ANNOUNCEMENTS_TITLE" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Login/login_divider.dds" resizeToFitFile="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Texture>
+                        <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" offsetY="40"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Control>
+                        <Label name="$(parent)Text" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" linkEnabled="true">
+                            <Dimensions x="470" />
+                            <OnInitialized>
+                                local scrollChild = GetControl(self:GetParent(),"PaneScrollChild")
+                                self:SetParent(scrollChild)
+                                self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                            </OnInitialized>
+
+                            <OnLinkClicked>
+                                ZO_LinkHandler_OnLinkClicked(linkText, button)
+                            </OnLinkClicked>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

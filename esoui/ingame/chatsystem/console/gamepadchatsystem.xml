@@ -1,0 +1,99 @@
+<GuiXml>
+    <Controls>        
+        <TextBuffer name="ZO_ChatBuffer" font="ZoFontGamepad34" maxHistoryLines="200" mouseEnabled="true" virtual="true" inherits="ZO_ChatBufferTemplate">
+            <OnLinkMouseUp>
+                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+            </OnLinkMouseUp>
+        </TextBuffer>
+
+        <!--This is the only XML chat container, the rest are created dynamically as needed-->
+        <!--Positioned above windows and the dialogs. Below tooltips and menues-->
+        <TopLevelControl name="ZO_GamepadTextChat" inherits="ZO_ChatContainerTemplate ZO_TextChatTemplate" tier="MEDIUM" level="2">
+            <OnInitialized>
+                ZO_GamepadTextChat_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" override="true">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-25" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="35" offsetY="20" />
+                </Backdrop>
+
+                <Slider name="$(parent)Scrollbar" override="true">
+                    <Anchor point="TOPRIGHT" offsetX="-23" offsetY="60" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-23" offsetY="-95" />
+                </Slider>
+
+                <Control name="$(parent)TextEntry"> 
+                    <Dimensions y="30" />
+                    <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-13"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-42" offsetY="-13"/>
+                    
+                    <Controls>
+                        <Label name="$(parent)Label" mouseEnabled="true" font="ZoFontGamepad34" verticalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" />
+
+                            <OnMouseUp>
+                                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                                    ZO_ChannelLabel_MouseUp(self:GetParent())
+                                end
+                            </OnMouseUp>
+                        </Label>
+
+                        <Backdrop name="$(parent)Edit" inherits="ZO_EditBackdrop_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="6" />
+                            <Anchor point="BOTTOMRIGHT" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop_Gamepad" maxInputCharacters="350">
+                                    <OnEnter>
+                                        ZO_ChatTextEntry_Execute(self:GetParent():GetParent())
+                                    </OnEnter>
+
+                                    <OnMouseDown>
+                                        if not self:HasFocus() then
+                                            StartChatInput()
+                                        end
+                                    </OnMouseDown>
+
+                                    <OnFocusGained />
+
+                                    <OnFocusLost>
+                                        ZO_ChatTextEntry_FocusLost(self:GetParent():GetParent())
+                                    </OnFocusLost>
+
+                                    <OnEscape>
+                                        ZO_ChatTextEntry_Escape(self:GetParent():GetParent())
+                                    </OnEscape>
+
+                                    <OnUpArrow>
+                                        ZO_ChatTextEntry_PreviousCommand(self:GetParent():GetParent())
+                                    </OnUpArrow>
+
+                                    <OnDownArrow>
+                                        ZO_ChatTextEntry_NextCommand(self:GetParent():GetParent())
+                                    </OnDownArrow>
+
+                                    <OnTextChanged>
+                                        ZO_ChatTextEntry_TextChanged(self:GetParent():GetParent(), self:GetText())
+                                    </OnTextChanged>
+
+                                    <OnTab>
+                                        ZO_ChatTextEntry_Tab(self:GetParent():GetParent())
+                                    </OnTab>                               
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>                    
+                    </Controls>
+                </Control>
+
+                <!-- TODO: attach gamepad chat bubble texture -->
+                <Texture name="$(parent)ChatBubble" textureFile="EsoUI/Art/ChatWindow/chat_notification_up.dds" inheritAlpha="false">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TextEntry" relativePoint="RIGHT" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
+

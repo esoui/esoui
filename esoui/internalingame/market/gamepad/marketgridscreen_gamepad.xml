@@ -1,0 +1,130 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadMarket_TitleAnchors" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="56"/>
+        </Control>
+        
+        <Control name="ZO_GamepadMarket_TabBarEntryTemplate" resizeToFitDescendents="true" virtual="true">
+            <Anchor point="CENTER"/>
+            <DimensionConstraints maxX="ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH" />
+            <OnInitialized>
+                ZO_GamepadTabBarTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepadBold48" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadMarket_GridScreen" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" virtual="true">
+            <Controls>
+                <Control name="$(parent)FullPane">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                    <Controls>
+                                        <Control name="$(parent)Header" inherits="ZO_GamepadHeaderAnchors">
+                                            <OnInitialized>
+                                                self:GetParent().header = self
+                                            </OnInitialized>
+
+                                            <Controls>
+                                                <Control name="$(parent)TabBarContainer" inherits="ZO_GamepadMarket_TitleAnchors">
+                                                    <Controls>
+                                                        <Control name="$(grandparent)TabBar">
+                                                            <Anchor point="TOPLEFT"/>
+                                                            <Anchor point="BOTTOMRIGHT"/>
+                                                            <Controls>
+                                                                <Scroll name="$(parent)Scroll">
+                                                                    <Anchor point="TOPLEFT" offsetX="55"/>
+                                                                    <Anchor point="BOTTOMRIGHT" offsetX="-55"/>
+                                                                    <FadeGradient x1="1" y1="0" size1="200" x2="-1" y2="0" size2="200"/>
+                                                                </Scroll>
+                                                            </Controls>
+                                                        </Control>
+                                                    </Controls>
+                                                </Control>
+
+                                                <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TabBar" relativePoint="BOTTOMLEFT"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TabBar" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y"/>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)Content" inherits="ZO_ScrollContainer">
+                                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)HeaderContainerHeader" offsetX="-20"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="20" />
+                                    <OnEffectivelyShown/> <!-- Overrides the parent's OnEffectivelyShown so it is not called. It is mouse related and not needed in the gamepad market. -->
+                                    <OnEffectivelyHidden/> <!-- Overrides the parent's OnEffectivelyHidden so it is not called. It is mouse related and not needed in the gamepad market -->
+                                    <Controls>
+                                        <Scroll name="$(parent)Scroll" mouseEnabled="false" override="true">
+                                            <AnchorFill/>
+                                            <OnScrollExtentsChanged>
+                                                ZO_Scroll_OnExtentsChanged(self:GetParent())
+                                            </OnScrollExtentsChanged>
+                                        </Scroll>
+                                        <Control name="$(parent)ScrollChild" resizeToFitDescendents="false" override="true"/>
+                                        <Slider name="$(parent)ScrollBar" visible="false" mouseEnabled="false" override="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetX="-4" offsetY="16"/>
+                                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-16"/>
+                                            <ThumbTexture
+                                                textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
+                                                disabledTextureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
+                                                thumbWidth="8"
+                                                thumbHeight="32"
+                                                top="0"
+                                                left="0.5" 
+                                                bottom="0.5"
+                                                right="1"
+                                            />
+                                            <Controls>
+                                                <Button name="$(parent)Up" inherits="ZO_ScrollUpButton" visible="false" override="true"/>
+                                                <Button name="$(parent)Down" inherits="ZO_ScrollDownButton" visible="false" override="true"/>
+                                                <Texture name="$(parent)ThumbMunge" alpha="0" override="true"/>
+                                            </Controls>
+                                        </Slider>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+
+    <Animations>
+        <AnimationTimeline name="ZO_GamepadMarket_GridScreen_PageInSceneAnimation">
+            <Animations>
+                <TranslateAnimation duration="150" anchorIndex="0"/>
+                <TranslateAnimation duration="150" anchorIndex="1"/>
+                <AlphaAnimation duration="150" startAlpha="0.2" endAlpha="1.0">
+                    <EasingFunction>
+                        return ZO_LinearEase(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_GamepadMarket_GridScreen_PageOutSceneAnimation">
+            <Animations>
+                <TranslateAnimation duration="150" anchorIndex="0"/>
+                <TranslateAnimation duration="150" anchorIndex="1"/>
+                <AlphaAnimation duration="150" startAlpha="1.0" endAlpha="0.2">
+                    <EasingFunction>
+                        return ZO_LinearEase(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

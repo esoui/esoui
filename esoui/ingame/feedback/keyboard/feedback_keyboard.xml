@@ -1,0 +1,41 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="FeedbackAnimation">
+            <Animations>
+                <AlphaAnimation duration="150" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <TopLevelControl name="ZO_FeedbackPanel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_Feedback_Initialize(self)
+            </OnInitialized>
+            
+             <Controls>
+                <Label name="$(parent)LoadingLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_FEEDBACK_LOADING">
+                    <Anchor point="CENTER" />
+                </Label>
+               
+                <Browser name="$(parent)Browser" layer="OVERLAY" alpha="0" mouseEnabled="true">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+
+                    <OnMouseWheel />
+                    <OnLoadStart>
+                        ZO_Feedback_OnLoadStart(self:GetParent())
+                    </OnLoadStart>
+
+                    <OnLoadFinished>
+                        ZO_Feedback_OnLoadFinished(self:GetParent())
+                    </OnLoadFinished>
+
+                    <OnRequestClose>
+                        ZO_Feedback_OnRequestClose(self:GetParent())
+                    </OnRequestClose>
+                </Browser>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

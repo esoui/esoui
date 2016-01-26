@@ -1,0 +1,118 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadGuildRosterRow" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Controls>
+                <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH" />
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Control>
+
+                <Control name="$(parent)Rank" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_GUILD_ROSTER_RANK_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Control>
+                
+                <Label name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_GUILD_ROSTER_USER_FACING_NAME_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <Label name="$(parent)Zone" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_GUILD_ROSTER_ZONE_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)DisplayName" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <Control name="$(parent)Class" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_CLASS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Zone" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Control>
+
+                <Control name="$(parent)Alliance" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_ALLIANCE_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Control>
+
+                <Label name="$(parent)Level" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="CENTER">
+                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_LEVEL_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <Texture name="$(parent)Veteran" layer="OVERLAY">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Level" offsetX="ZO_GAMEPAD_SOCIAL_LIST_VETERAN_ICON_OFFSET_X"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadGuildRoster" hidden="true" inherits="ZO_AnchoredToQuadrant123Background ZO_GamepadInteractiveSortFilterListControl">
+            <OnInitialized>
+                ZO_GamepadGuildRoster_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH"/>
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_STATUS), "status", TEXT_ALIGN_CENTER)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Rank" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_GUILD_ROSTER_RANK_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_GUILD_ROSTER_RANK_HEADER), "rankIndex", TEXT_ALIGN_CENTER)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_GUILD_ROSTER_USER_FACING_NAME_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Zone" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_GUILD_ROSTER_ZONE_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DisplayName" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_ZONE), "formattedZone", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Class" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_CLASS_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Zone" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_CLASS), "class", TEXT_ALIGN_CENTER)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Alliance" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_ALLIANCE_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Class" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_ALLIANCE), "alliance", TEXT_ALIGN_CENTER)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Level" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_SOCIAL_LIST_LEVEL_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL), "level", TEXT_ALIGN_CENTER)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

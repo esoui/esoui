@@ -1,0 +1,59 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CrownStoreShineAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation delay="3000" duration="1000" cellsWide="32" cellsHigh="1" />
+                <AlphaAnimation delay="3000" duration="20" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="4000" duration="20" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_MainMenuSubcategoryBar" virtual="true" resizeToFitDescendents="true" hidden="true"/>
+        <Label name="ZO_MainMenuSubcategoryButton" virtual="true" font="ZoFontHeader3" mouseEnabled="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+            <OnMouseEnter>
+                self:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGBA())
+            </OnMouseEnter>
+            <OnMouseExit>
+                self:SetColor(ZO_CONTRAST_TEXT:UnpackRGBA())
+            </OnMouseExit>
+        </Label>
+        <Control name="ZO_MainMenuCategoryBarButton" virtual="true" inherits="ZO_MenuBarButtonTemplate1">
+            <OnMouseEnter>
+                ZO_MainMenuCategoryBarButton_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_MainMenuCategoryBarButton_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Image" level="1" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Animation" level="20" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Texture name="$(parent)Indicator" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" tier="HIGH" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" offsetY="24"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_MainMenu" tier="MEDIUM">
+            <Anchor point="TOP" offsetY="28"/>
+            <OnInitialized>
+                ZO_MainMenu_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)CategoryBar" inherits="ZO_MenuBarTemplate" hidden="true">
+                    <Anchor point="TOP"/>
+                </Control>
+
+                <Control name="$(parent)SceneGroupBar" inherits="ZO_LabelButtonBar" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-40" offsetY="-340" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

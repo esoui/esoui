@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TradingHouse_Sell_Item_Gamepad" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
+            <Dimensions x="440" y="40" />
+            <Controls>
+                <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                </Label>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Price" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_TradingHouse_Sell_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_TradingHouse_Sell_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)StatusMessage" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" hidden="true">
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)ListListScreenCenterIsAlongTop"/>
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

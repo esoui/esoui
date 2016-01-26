@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Gamepad_LoreLibrary" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Gamepad_LoreLibrary_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

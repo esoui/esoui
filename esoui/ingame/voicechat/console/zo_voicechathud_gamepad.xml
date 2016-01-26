@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_VoiceChatHUDGamepad" inherits="ZO_VoiceChatHUD" tier="HIGH" level="ZO_HIGH_TIER_VOICE_CHAT_HUD">
+            <OnInitialized>
+                ZO_VoiceChatHUDGamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <OnUpdate>
+                ZO_VoiceChatHUDGamepad_OnUpdate(self)
+            </OnUpdate>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

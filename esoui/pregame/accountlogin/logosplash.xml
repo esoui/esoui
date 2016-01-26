@@ -1,0 +1,57 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CopyrightInfo_Keyboard_Template" font="ZoFontWinH2" virtual="true">
+            <Anchor point="BOTTOMLEFT" offsetX="50" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-50" offsetY="-100" />
+        </Label>
+
+        <Label name="ZO_CopyrightInfo_Gamepad_Template" font="ZoFontGamepad34" virtual="true">
+            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+        </Label>
+        
+        <TopLevelControl name="ZO_LogoSplash" hidden="true" keyboardEnabled="true" mouseEnabled="true">
+            <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                LogoSplash_Initialize(self)
+            </OnInitialized>
+
+            <OnKeyDown>
+                LogoSplash_AttemptHide()
+            </OnKeyDown>
+
+            <OnMouseDown>
+                LogoSplash_AttemptHide()
+            </OnMouseDown>
+
+            <Controls>
+                <Texture name="$(parent)BG" color="000000">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+
+                <Label name="$(parent)CopyrightInfo" text="SI_SPLASH_SCREEN_COPYRIGHT"/>
+
+                <Texture name="$(parent)ZOSLogo" textureFile="EsoUI/Art/Login/zos_logo.dds">
+                    <Dimensions x="256" y="75" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CopyrightInfo" relativePoint="TOPLEFT" offsetY="-50" />
+                    <TextureCoords left="0.0000" right="1.0000" top="0.0000" bottom="0.5859" />
+                </Texture>
+
+                <Texture name="$(parent)BethesdaLogo" textureFile="EsoUI/Art/Login/bethesda_logo.dds">
+                    <Dimensions x="315" y="47" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ZOSLogo" relativePoint="TOPRIGHT" offsetX="66" offsetY="26" />
+                    <TextureCoords left="0.0000" right="0.6152" top="0.0000" bottom="0.7344" />
+                </Texture>
+
+                <Texture name="$(parent)ZenimaxMediaLogo" textureFile="EsoUI/Art/Login/zenimax_media_logo.dds">
+                    <Dimensions x="285" y="69" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BethesdaLogo" relativePoint="TOPRIGHT" offsetX="66" />
+                    <TextureCoords left="0.0000" right="0.5566" top="0.0000" bottom="0.5313" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

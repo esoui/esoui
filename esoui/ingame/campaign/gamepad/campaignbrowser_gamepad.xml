@@ -1,0 +1,129 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadAvAItem" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true" />
+
+        <Label name="ZO_AvALabelTitleTemplate" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_AvALabelDataTemplate" font="ZoFontGamepad34" modifyTextType="NONE" virtual="true" />
+        <Label name="ZO_AvALabelCopyTemplate" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_AvALabelHeaderTemplate" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />    
+
+        <Control name="ZO_AvAFactionPopulation_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Faction">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)"/>
+                </Texture>
+                <Texture name="$(parent)LockedIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds" layer="OVERLAY" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)"/>
+                </Texture>
+                <Texture name="$(parent)Population">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Faction" />
+                </Texture>
+                <Label name="$(parent)AllianceName" inherits="ZO_AvALabelDataTemplate" modifyTextType="NONE">
+                    <Anchor point="CENTER" relativeTo="$(parent)Population" relativePoint="BOTTOM" />
+                </Label>
+                <Label name="$(parent)FullText" text="SI_GAMEPAD_CAMPAIGN_BROWSER_CAMPAIGN_FULL" inherits="ZO_AvALabelTitleTemplate" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignBrowserContentAnchor" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_CampaignBrowser_GamepadTopLevelRightPaneContentContainerHeader" relativePoint="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CampaignBrowser_GamepadTopLevelRightPaneContentContainer" relativePoint="BOTTOMRIGHT" />
+        </Control>
+
+        <TopLevelControl name="ZO_CampaignBrowser_GamepadTopLevelAvaRankFooter" inherits="ZO_GamepadSkillsFooter" hidden="true">
+            <Dimensions x="370" y="65" />
+            <OnInitialized>
+                ZO_CampaignAvARank_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT"/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_CampaignBrowser_GamepadTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_CampaignBrowser_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)CampaignInfo" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Rules" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING_WIDE"/>
+                            <Controls>
+                                <Label name="$(parent)QueueMessage" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
+                                
+                                <Texture name="$(parent)QueueMessageIcon" hidden="true">
+                                    <Dimensions x="32" y="32"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)QueueMessage" relativePoint="RIGHT" />
+                                </Texture>
+
+                                <Label name="$(parent)GroupQueueMessage" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)QueueMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                                </Label>
+
+                                <Texture name="$(parent)GroupQueueMessageIcon" hidden="true">
+                                    <Dimensions x="32" y="32"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)GroupQueueMessage" relativePoint="RIGHT" />
+                                </Texture>                               
+                                
+                                <Label name="$(parent)RulesContent" inherits="ZO_AvALabelCopyTemplate" horizontalAlignment="LEFT">
+                                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)GroupQueueMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                                </Label>
+
+                                <Label name="$(parent)Header" text="SI_GAMEPAD_CAMPAIGN_BROWSER_SERVER_POPULATION" inherits="ZO_AvALabelTitleTemplate">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RulesContent" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING_WIDE"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)Stats" resizeToFitDescendents="true">
+                            <Anchor point="RIGHT"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RulesHeader" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                            <Controls>
+                                
+                                <Control name="$(parent)EbonheartPact" inherits="ZO_AvAFactionPopulation_Gamepad">
+                                    <Anchor point="TOP"/>
+                                    <OnInitialized>
+                                        ZO_AvAFactionPopulation_Gamepad_OnInitialize(self, ALLIANCE_EBONHEART_PACT)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)AldmeriDominion" inherits="ZO_AvAFactionPopulation_Gamepad">
+                                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)EbonheartPact" offsetX="-75" />
+                                    <OnInitialized>
+                                        ZO_AvAFactionPopulation_Gamepad_OnInitialize(self, ALLIANCE_ALDMERI_DOMINION)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)DaggerfallCovenant" inherits="ZO_AvAFactionPopulation_Gamepad">
+                                    <Anchor point="LEFT" relativeTo="$(parent)EbonheartPact" relativePoint="RIGHT" offsetX="75"/>
+                                    <OnInitialized>
+                                        ZO_AvAFactionPopulation_Gamepad_OnInitialize(self, ALLIANCE_DAGGERFALL_COVENANT)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

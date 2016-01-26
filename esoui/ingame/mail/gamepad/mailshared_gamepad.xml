@@ -1,0 +1,109 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_Mail_Gamepad_Label" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true" />
+        <Label name="ZO_Mail_Gamepad_Value" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+        <Label name="ZO_Mail_Gamepad_ValueBackground" inherits="ZO_MailInbox_Gamepad_Value" virtual="true" />
+
+        <Button name="ZO_MailAttachmentSlot_Gamepad" inherits="ZO_InventorySlot_Gamepad" virtual="true">
+            <Dimensions x="55" y="55" />
+        </Button>
+
+        <Control name="ZO_Mail_Gamepad_EditBox" virtual="true">
+            <OnInitialized>
+                self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Edit")
+                self.highlight = self:GetNamedChild("Highlight")
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
+                            <OnEnter>
+                                self:LoseFocus()
+                            </OnEnter>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backdrop"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backdrop"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Mail_Gamepad_EditBox_Multiline" virtual="true">
+            <OnInitialized>
+                self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Edit")
+                self.highlight = self:GetNamedChild("Highlight")
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad">
+                    <AnchorFill/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad"/>
+                    </Controls>
+                </Backdrop>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backdrop"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backdrop"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Mail_Gamepad_LabelBox" virtual="true">
+            <OnInitialized>
+                self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Label")
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop_Gamepad">
+                    <AnchorFill />
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontGamepad34">
+                            <Anchor point="TOPLEFT" offsetX="11" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2" />
+                        </Label>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Mail_Gamepad_Scrollable_LabelBox" virtual="true">
+            <OnInitialized>
+                self.edit = self:GetNamedChild("BackdropScrollContainerScrollChildLabel")
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop_Gamepad">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
+                            <Anchor point="TOPLEFT" offsetX="11" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2" />
+                            <OnInitialized>
+                                ZO_Scroll_Initialize_Gamepad(self)
+                                local label = self:GetNamedChild("ScrollChildLabel")
+                                label:SetHandler("OnTextChanged", function() self:ResetToTop() end)
+                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_4_Background, LEFT, nil, ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW)
+                            </OnInitialized>
+                            <Controls>
+                                <Texture name="$(parent)ScrollIndicator" override="true">
+                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="3" />
+                                </Texture>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                    <Controls>
+                                        <Label name="$(parent)Label" font="ZoFontGamepad34">
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

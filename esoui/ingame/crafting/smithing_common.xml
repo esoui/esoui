@@ -1,0 +1,120 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="SmithingHorizontalScrollListPulse">
+            <Animations>
+                <AlphaAnimation duration="70" startAlpha=".55" endAlpha=".8">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <AlphaAnimation delay="70" duration="160" startAlpha=".8" endAlpha=".55">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Button name="ZO_SmithingListSlot" inherits="ZO_ItemSlot" pixelRoundingEnabled="false" virtual="true">
+            <Dimensions x="64" y="64" />
+            <Textures mouseOver="" pressedMouseOver="" />
+        </Button>
+
+        <Button name="ZO_GamepadSmithingListSlot" inherits="ZO_ItemSlot_Gamepad" pixelRoundingEnabled="false" virtual="true">
+            <Dimensions x="64" y="64" />
+            <Textures mouseOver="" pressedMouseOver="" />
+        </Button>
+
+        <Texture name="ZO_SmithingListHighlight" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha=".35" virtual="true">
+            <Dimensions x="128" y="128" />
+            <OnInitialized>
+                self.pulseAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("SmithingHorizontalScrollListPulse", self)
+            </OnInitialized>
+        </Texture>
+
+        <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
+            <Dimensions x="500" y="135" />
+
+            <OnInitialized>
+                self.listControl = self:GetNamedChild("List")
+                self.highlightTexture = self:GetNamedChild("Highlight")
+                self.titleLabel = self:GetNamedChild("Title")
+                self.selectedLabel = self:GetNamedChild("SelectedLabel")
+                self.extraInfoLabel = self:GetNamedChild("ExtraInfoLabel")
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="TOP" />
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_HorizontalScrollListTemplate">
+                    <Dimensions x="470" y="64" />
+                    <Anchor point="CENTER" />
+                </Control>
+
+                <Label name="$(parent)Title" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetY="8"/>
+                </Label>
+
+                <Label name="$(parent)SelectedLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" offsetY="8"/>
+                </Label>
+
+                <Label name="$(parent)ExtraInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="BOTTOM" offsetY="-8"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSmithingHorizontalListTemplate" virtual="true">
+            <Dimensions y="300"/>
+            <OnInitialized>
+                self.listControl = self:GetNamedChild("List")
+                self.highlightTexture = self:GetNamedChild("Highlight")
+                self.titleLabel = self:GetNamedChild("Title")
+                self.selectedLabel = self:GetNamedChild("SelectedLabel")
+                self.extraInfoLabel = self:GetNamedChild("ExtraInfoLabel")
+                self.inactiveBG = self:GetNamedChild("BG_Inactive")
+                self.activeBG = self:GetNamedChild("BG_Active")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_GamepadHorizontalScrollListTemplate">
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="64" />
+                    <Anchor point="CENTER"/>
+                </Control>
+
+                <Label name="$(parent)SelectedLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING"/>
+                </Label>
+
+                <Label name="$(parent)ExtraInfoLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
+                </Label>
+
+                <Backdrop name="$(parent)BG_Inactive" inherits="ZO_GamepadGreyOutlineHighlight" hidden="true" excludeFromResizeToFitExtents="true">
+                    <AnchorFill/>
+                </Backdrop>
+
+                <Backdrop name="$(parent)BG_Active" inherits="ZO_GamepadWhiteOutlineHighlight" excludeFromResizeToFitExtents="true">
+                    <AnchorFill/>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SmithingPanelAnchors" virtual="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+        </Control>
+    </Controls>
+</GuiXml>

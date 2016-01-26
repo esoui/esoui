@@ -1,0 +1,173 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_SmithingImprovementQualityLabel" font="ZoFontWinH5" virtual="true" />
+
+        <Texture name="ZO_SmithingImprovementIcon" mouseEnabled="true" tier="MEDIUM" virtual="true">
+            <Dimensions x="48" y="48"/>
+            <OnMouseEnter>
+                InitializeTooltip(ItemTooltip)
+                local row = self:GetParent()
+                ItemTooltip:SetSmithingImprovementItem(GetCraftingInteractionType(), row.index)
+                ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(ItemTooltip)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                    <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                </Label>
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_SmithingImprovementBoosterTexture" virtual="true">
+            <Dimensions x="128" y="64" />
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadSmithingImprovementIcon">
+                    <Anchor point="CENTER" offsetY="-10"/>
+                </Texture>
+            </Controls>
+        </Texture>
+        
+        <Control name="ZO_SmithingImprovementPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)BoosterContainer">
+                    <Dimensions x="500" y="130" />
+                    <Anchor point="BOTTOM" offsetY="-7" />
+                    <Controls>
+                        <Texture name="$(parent)NormalToFine" inherits="ZO_SmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/smithing_temperChart_normal2fine.dds">
+                            <Anchor point="LEFT" offsetX="20" offsetY="30" />
+                        </Texture>
+
+                        <Texture name="$(parent)FineToSuperior" inherits="ZO_SmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/smithing_temperChart_fine2superior.dds">
+                            <Anchor point="LEFT" relativeTo="$(parent)NormalToFine" relativePoint="RIGHT" offsetX="-27" />
+                        </Texture>
+
+                        <Texture name="$(parent)SuperiorToEpic" inherits="ZO_SmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/smithing_temperChart_superior2epic.dds">
+                            <Anchor point="LEFT" relativeTo="$(parent)FineToSuperior" relativePoint="RIGHT" offsetX="-16" />
+                        </Texture>
+
+                        <Texture name="$(parent)EpicToLegendary" inherits="ZO_SmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/smithing_temperChart_epic2legendary.dds">
+                            <Dimensions x="256" y="64" />
+                            <Anchor point="LEFT" relativeTo="$(parent)SuperiorToEpic" relativePoint="RIGHT" offsetX="-18" />
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true">
+                                    <Anchor point="CENTER" offsetX="-60" offsetY="-10" />
+                                </Texture>
+                            </Controls>
+                        </Texture>
+                        
+                        <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                          <Anchor point="TOP" />
+                        </Control>
+                      
+                        <Label name="$(parent)Header" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetY="8"/>
+                        </Label>
+
+                        <Label name="$(parent)Normal" inherits="ZO_SmithingImprovementQualityLabel">
+                            <Anchor point="CENTER" relativeTo="$(parent)NormalToFine" relativePoint="TOPLEFT" offsetX="5" offsetY="50" />
+                        </Label>
+
+                        <Label name="$(parent)Fine" inherits="ZO_SmithingImprovementQualityLabel">
+                            <Anchor point="CENTER" relativeTo="$(parent)NormalToFine" relativePoint="TOPLEFT" offsetX="105" offsetY="-10" />
+                        </Label>
+
+                        <Label name="$(parent)Superior" inherits="ZO_SmithingImprovementQualityLabel">
+                            <Anchor point="CENTER" relativeTo="$(parent)NormalToFine" relativePoint="TOPLEFT" offsetX="219" offsetY="50" />
+                        </Label>
+
+                        <Label name="$(parent)Epic" inherits="ZO_SmithingImprovementQualityLabel">
+                            <Anchor point="CENTER" relativeTo="$(parent)NormalToFine" relativePoint="TOPLEFT" offsetX="326" offsetY="-10" />
+                        </Label>
+
+                        <Label name="$(parent)Legendary" inherits="ZO_SmithingImprovementQualityLabel">
+                            <Anchor point="CENTER" relativeTo="$(parent)NormalToFine" relativePoint="TOPLEFT" offsetX="452" offsetY="50" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)SlotContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds">
+                            <Dimensions x="512" y="512" />
+                            <Anchor point="TOP" />
+                        </Texture>
+
+                        <Label name="$(parent)ImprovementLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_SMITHING_IMPROVE_ITEM_TO_IMPROVE_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="110" offsetY="64" />
+                        </Label>
+
+                        <Label name="$(parent)ChanceLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_SMITHING_IMPROVE_CHANCE_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOP" relativePoint="TOPRIGHT" offsetX="-165" offsetY="64" />
+                        </Label>
+
+                        <Button name="$(parent)ImprovementSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)ImprovementLabel" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="185" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                            </Controls>
+                        </Button>
+
+                        <Button name="$(parent)BoosterSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)ChanceLabel" relativePoint="BOTTOM" offsetY="20" />
+                        </Button>
+
+                        <Label name="$(parent)AwaitingLabel" font="ZoFontWinH4" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions x="100" />
+                            <Anchor point="CENTER" relativeTo="$(parent)BoosterSlot" />
+                        </Label>
+
+                        <Control name="$(parent)Spinner" mouseEnabled="true">
+                            <Dimensions x="110" y="33" />
+                            <Anchor point="TOP" relativeTo="$(parent)BoosterSlot" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Button name="$(parent)Decrease">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="LEFT" offsetX="-5" />
+                                    <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds"
+                                              pressed="EsoUI/Art/Buttons/pointsMinus_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds"
+                                              disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
+                                </Button>
+
+                                <Label name="$(parent)Display" font="ZoFontWinH2" horizontalAlignment="CENTER" >
+                                    <Anchor point="TOPLEFT" offsetX="18" offsetY="4"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-18" offsetY="-4"/>
+                                </Label>
+
+                                <Button name="$(parent)Increase">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="RIGHT" offsetX="5" />
+                                    <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
+                                              pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
+                                              disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-175" />
+
+                    <Controls>
+                        <Label name="$(parent)NoItemsLabel" text="SI_SMITHING_NOTHING_TO_IMPROVE" inherits="ZO_CraftingInventoryNoItemLabel" />
+                    </Controls>
+                </Control>
+                
+                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-335" />
+                </Tooltip>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

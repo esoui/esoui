@@ -1,0 +1,87 @@
+<GuiXml>
+    <Controls>       
+        <Label name="ZO_ChatOptionsSectionLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_ChatOptionsDefaultLabel" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+               
+        <Control name="ZO_ChatOptionsFilterEntry" virtual="true">
+            <Dimensions x="100" y="20" />
+
+            <Controls>
+                <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" />
+                    <OnInitialized>
+                        ZO_CheckButton_SetToggleFunction(self, ZO_ChatOptions_ToggleChannel)
+                    </OnInitialized>
+                </Button>
+                <Label name="$(parent)Label" inherits="ZO_ChatOptionsDefaultLabel">
+                    <DimensionConstraints minX="145" maxX="210" />
+					<Anchor point="LEFT" relativeTo="$(parent)Check" relativePoint="RIGHT" offsetX="5" />
+				</Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ChatOptionsGuildFilters" virtual="true">
+            <Dimensions x="150" y="90" />
+            <Controls>
+                <Label name="$(parent)GuildName" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions y="24" />
+                    <DimensionConstraints maxX="210" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+                <Control name="$(parent)Guild" inherits="ZO_ChatOptionsFilterEntry" >
+                    <Anchor point ="TOPLEFT" relativeTo="$(parent)GuildName" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Control>
+                <Control name="$(parent)Officer" inherits="ZO_ChatOptionsFilterEntry" >
+                    <Anchor point ="TOPLEFT" relativeTo="$(parent)Guild" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Control>                
+            </Controls>
+        </Control>    
+        
+        <TopLevelControl name="ZO_ChatOptionsDialog" inherits="ZO_CustomDialogBase">
+            <OnShow>
+                ZO_TabButton_SetDisabled(CHAT_SYSTEM.primaryContainer.newWindowTab, true)
+            </OnShow>
+            <OnHide>
+                ZO_TabButton_SetDisabled(CHAT_SYSTEM.primaryContainer.newWindowTab, false)
+            </OnHide>
+            <Controls>
+                <Label name="$(parent)NameLabel" inherits="ZO_ChatOptionsSectionLabel" text="SI_CHAT_OPTIONS_TAB_NAME">
+                    <Anchor point="TOPLEFT" offsetX="35" offsetY="70" />
+                </Label>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" offsetX="10" offsetY="25"/>
+                    <Dimensions x="300"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxInputCharacters="50"/>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)FilterLabel" inherits="ZO_ChatOptionsSectionLabel" text="SI_CHAT_OPTIONS_FILTERS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" offsetY="70" />
+                </Label>
+
+                <Control name="$(parent)FilterSection" resizeToFitDescendents="true" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterLabel" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10" />                   
+                </Control>
+                
+                <Label name="$(parent)GuildChannelLabel" inherits="ZO_ChatOptionsSectionLabel" text="SI_CHAT_OPTIONS_GUILD_CHANNELS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterSection" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="20" />
+                </Label>
+
+                <Control name="$(parent)GuildSection" resizeToFitDescendents="true" >
+                    <Anchor point ="TOPLEFT" relativeTo="$(parent)GuildChannelLabel" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Commit" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Reset" inherits="ZO_CustomDialogButton" />                
+            </Controls>
+		</TopLevelControl>
+
+        <TopLevelControl name="ZO_ChatOptions" tier="MEDIUM" hidden="true">
+            <OnInitialized>
+                ZO_ChatOptions_OnInitialized(ZO_ChatOptionsDialog)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

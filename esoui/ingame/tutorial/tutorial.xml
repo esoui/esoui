@@ -1,0 +1,11 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Tutorial">
+            <AnchorFill />
+            
+            <OnInitialized>
+                ZO_Tutorial_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

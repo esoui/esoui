@@ -1,0 +1,60 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PregameInitialScreen_FadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <TopLevelControl name="PregameInitialScreen_Gamepad" hidden="true">
+            <AnchorFill/>
+            <OnInitialized>
+                PregameInitialScreen_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Ouroboros" alpha="0" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Ouroboros.dds">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)PressText" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Ouroboros" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Ouroboros" relativePoint="BOTTOMRIGHT" offsetY="-72" />
+                </Label>
+
+                <Texture name="$(parent)Logo" alpha="0" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo.dds">
+                    <Anchor point="CENTER"/>
+                </Texture>
+
+                <Control name="$(parent)ErrorBox" hidden="true">
+                    <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" y="ZO_GAMEPAD_PANEL_BG_HEIGHT"/>
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X"/>
+                    
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                            <Anchor point="LEFT"/>
+                            <Controls>
+                                <Label name="$(parent)ErrorTitle" font="ZoFontGamepadBold42" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                </Label>
+
+                                <Label name="$(parent)ErrorMessage" font="ZoFontGamepad42">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ErrorTitle" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ErrorTitle" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

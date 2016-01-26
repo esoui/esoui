@@ -1,0 +1,91 @@
+<GuiXml>
+    <String name="GAMEPAD_MEDIUM_FONT_APP" value="EsoUI/Common/Fonts/FTN57.otf" />
+    <Font name="ZoFontGamepad61App" font="$(GAMEPAD_MEDIUM_FONT_APP)|61|soft-shadow-thick" />
+    <Font name="ZoFontGamepad42App" font="$(GAMEPAD_MEDIUM_FONT_APP)|42|soft-shadow-thick" />
+
+    <Animations>
+        <AnimationTimeline name="LongLoadingAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="5000" duration="200" startAlpha="1" endAlpha="0" />
+                <CustomAnimation delay="5200" duration="50000" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="GamepadLoadingCompleteAnimation">
+            <OnPlay>
+                self.control:SetKeyboardEnabled(not self:IsPlayingBackward())
+            </OnPlay>
+            <OnStop>
+                if LoadingScreen_Base_CanHide() and self:IsPlayingBackward() then
+                    self.control:SetHidden(true)
+                    SetGuiHidden("app", true)
+                end
+            </OnStop>
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <TopLevelControl name="GamepadLoadingScreen" inherits="ZO_LoadingScreenBase" keyboardEnabled="false">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_InitGamepadLoadScreen(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)TopMunge" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/MungeBar_Loading-1024x256.dds" alpha="0">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetY="-40"/>
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetY="-40"/>
+
+                    <TextureCoords left="1" right="0" top="1" bottom=".01" />
+
+                    <Controls>
+                        <Label name="$(parent)LongLoadMessage" font="ZoFontGamepad61App" color="FFFFFF" horizontalAlignment="CENTER" alpha="0" text="SI_LONG_LOAD_TIME">
+                            <Anchor point="BOTTOM" offsetY="-20"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)BottomMunge" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/MungeBar_Loading-1024x256.dds" alpha="0">
+                    <Dimensions y="256"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetY="40"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetY="40"/>
+
+                    <TextureCoords left="1" right="0" top="-.01" bottom="1" />
+
+                    <Controls>
+                        <Label name="$(grandparent)ZoneDescription" override="true" font="ZoFontGamepad42App" color="FFFFFF" alpha="0">
+                            <Dimensions x="1280"/>
+                            <Anchor point="BOTTOM" relativePoint="TOP" />
+                        </Label>
+
+                        <Texture name="$(grandparent)DescriptionBg" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_Loading_Text_Background-1024x256.dds" alpha="0">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)ZoneDescription" relativePoint="TOPLEFT" offsetX="-300" offsetY="-100" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)ZoneDescription" relativePoint="BOTTOMRIGHT" offsetX="300" offsetY="100" />
+                        </Texture>
+
+                        <Control name="$(grandparent)ZoneInfoContainer" override="true">
+                            <Controls>
+                                <Label name="$(parent)ZoneName" font="ZoFontGamepad61App" override="true" color="FFFFFF" />
+                                <Label name="$(parent)InstanceType" font="ZoFontGamepad61App" override="true" color="FFFFFF" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Spinner" override="true" textureFile="EsoUI/Art/LoadScreen/Gamepad/load_ouroboros.dds" alpha="0">
+                    <Anchor point="BOTTOM" offsetY="-60"/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>        
+    </Controls>
+</GuiXml>

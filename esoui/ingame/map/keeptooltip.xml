@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_KeepTooltipLine" virtual="true" font="ZoFontGame"/>
+
+        <Control name="ZO_KeepTooltipBase" hidden="true" tier="HIGH" clampedToScreen="true" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+
+                <Label name="$(parent)Name" font="ZoFontGameOutline">
+                    <Anchor point="TOPLEFT" offsetX="8" offsetY="8"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_KeepTooltip" inherits="ZO_KeepTooltipBase">
+            <OnInitialized>
+                ZO_KeepTooltip_OnInitialized(self)
+            </OnInitialized>    
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ImperialCityTooltip" inherits="ZO_KeepTooltipBase">
+            <OnInitialized>
+                ZO_ImperialCityTooltip_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

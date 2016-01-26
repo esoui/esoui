@@ -1,0 +1,56 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ActiveCombatTipAnimation">
+            <Animations>
+                <AlphaAnimation duration="250" delay="750" startAlpha="1.0" endAlpha="0.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_ActiveCombatTips_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Tip">
+                    <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y"/>
+                    <Controls>
+                        <Label name="$(parent)TipText" font="ZoInteractionPrompt" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ActiveCombatTips_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Tip">
+                    <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_GAMEPAD_BOTTOM_OFFSET_Y"/>
+                    <Controls>
+                        <Label name="$(parent)TipText" font="ZoFontGamepad42" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ActiveCombatTips">
+            <AnchorFill />
+            
+            <OnInitialized>
+                ZO_ActiveCombatTips_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Tip" alpha="0" resizeToFitDescendents="true" >
+                    <ResizeToFitPadding width="10" />
+                    
+                    <Controls>
+                        <Texture name="$(parent)Icon" resizeToFitFile="true">
+                            <Anchor point="TOPLEFT" />
+                        </Texture>
+                        
+                        <!-- Anchors set in Lua -->
+                        <Label name="$(parent)TipText" font="ZoInteractionPrompt" inherits="ZO_LargeKeyMarkupLabel" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

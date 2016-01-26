@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>        
+        <Control name="ZO_GamepadIgnoreListRow" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Controls>
+                <Label name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                    <Anchor point="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadIgnoreList" inherits="ZO_AnchoredToQuadrant123Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+            <OnInitialized>
+                ZO_IgnoreList_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="450" />
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,232 @@
+<GuiXml>
+    <Controls>
+        <!-- Generic header templates common to both SCREEN and CONTENT headers. -->
+        <!-- =================================================================== -->
+
+        <!-- Font Templates -->
+        
+        <Label name="ZO_GamepadHeaderLabelTextTemplate" maxLineCount="1" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true" />
+        
+        <Label name="ZO_GamepadHeaderDataTextTemplate" maxLineCount="1" font="ZoFontGamepadHeaderDataValue" wrapMode="ELLIPSIS" virtual="true" />
+
+        <!-- End Font Templates -->
+        
+        <Control name="ZO_GamepadHeaderAnchors" resizeToFitDescendents="true" virtual="true">
+            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPRIGHT" />
+        </Control>
+
+        <Control name="ZO_GamepadHeaderTitleAnchors" virtual="true">
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+        </Control>
+
+        <Control name="ZO_GamepadHeaderHorizontalDivider" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="4" y="8" />
+                    <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Anchor point="RIGHT" />
+                    <Dimensions x="4" y="8" />
+                    <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadHeaderHorizontalDividerSimple" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT" />
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadHeaderHorizontalDividerWithAccent" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT" />
+            <Controls>
+                <Texture name="$(parent)Accent">
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Control name="$(parent)LeftDivider" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Accent" relativePoint="LEFT" offsetX="-5" />
+                </Control>
+                <Control name="$(parent)RightDivider" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Accent" relativePoint="RIGHT" offsetX="3" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadHeaderHorizontalDividerWithTabs" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT" />
+            <Controls>
+                <Button name="$(parent)LeftIcon">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="50" y="50" />
+                    <OnInitialized>
+                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_LEFT_SHOULDER))
+                    </OnInitialized>
+                </Button>
+                <Button name="$(parent)RightIcon">
+                    <Anchor point="RIGHT" />
+                    <Dimensions x="50" y="50" />
+                    <OnInitialized>
+                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_RIGHT_SHOULDER))
+                    </OnInitialized>
+                </Button>
+                <Control name="$(parent)Pips" resizeToFitDescendents="true">
+                    <Anchor point="CENTER" />
+                </Control>
+                <Control name="$(parent)LeftDivider" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="LEFT" relativeTo="$(parent)LeftIcon" relativePoint="RIGHT" offsetX="3" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Pips" relativePoint="LEFT" offsetX="-5" />
+                </Control>
+                <Control name="$(parent)RightDivider" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="RIGHT" relativeTo="$(parent)RightIcon" relativePoint="LEFT" offsetX="-3" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Pips" relativePoint="RIGHT" offsetX="5" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Generic CONTENT header templates. -->
+        <!-- ================================= -->
+
+        <Label name="ZO_GamepadContentHeaderTitleTextTemplate" font="ZoFontGamepadCondensed54" verticalAlignment="BOTTOM" wrapMode="ELLIPSIS" virtual="true" />
+
+        <!-- General CONTENT header to be used on most gamepad screens. Place this in an appropriately sized and positioned container. -->
+        <!-- Avoid using this directly.  See ZO_GamepadContentHeaderContainer below. -->
+        <Control name="ZO_GamepadGenericContentHeader" inherits="ZO_GamepadHeaderAnchors" virtual="true">
+            <Controls>
+                <Control name="$(parent)TitleContainer" inherits="ZO_GamepadHeaderTitleAnchors">
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_GamepadContentHeaderTitleTextTemplate" excludeFromResizeToFitExtents="true">
+                            <Anchor point="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <!--This control fakes the area of where a divider would go so that content header is at least as tall as a header would normally be
+                    With a divider.  This ensures controls anchoring to the header begin where the Datas would be if there is no data-->
+                <Control name="$(parent)DividerSimple">
+                    <Dimensions y="ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT" />
+                </Control>
+
+                <Control name="$(parent)CenterAnchor" hidden="true">
+                    <Dimensions x="60" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)DividerSimple" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_INFO_BOTTOM_PADDING_Y" />
+                </Control>
+
+                <!-- Note: The anchors for the following elements are setup dynamically. -->
+                <!-- Left Side -->
+                <Label name="$(parent)Data1Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data1" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)Data2Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data2" inherits="ZO_GamepadHeaderDataTextTemplate" />
+
+                <!-- Right Side -->
+                <Label name="$(parent)Data3Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data3" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)Data4Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data4" inherits="ZO_GamepadHeaderDataTextTemplate" />
+           </Controls>
+        </Control>
+
+        <!-- General CONTENT header CONTAINER to be used on most gamepad screens. Example usage is as follows: -->
+        <!-- 
+                <Control name="$(parent)SomeContainer" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors">
+                    <Controls>
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+        -->
+        <Control name="ZO_GamepadContentHeaderContainer" virtual="true">
+            <Controls>
+                <Control name="$(parent)Header" inherits="ZO_GamepadGenericContentHeader">
+                    <OnInitialized>
+                        self:GetParent().header = self
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Generic SCREEN header templates. -->
+        <!-- ================================ -->
+
+        <Label name="ZO_GamepadScreenHeaderTitleTextTemplate" inherits="ZO_ThreeLineHeaderAdjustingWrapLabel_Gamepad" horizontalAlignment="CENTER" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_GamepadScreenHeaderContextTitleTextTemplate" font="ZoFontGamepadBold22" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_GamepadScreenHeaderMessageTextTemplate" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <!-- General SCREEN header to be used on most gamepad screens. Place this in an appropriately sized and positioned container. -->
+        <!-- Avoid using this directly.  See ZO_GamepadScreenHeaderContainer below. -->
+        <Control name="ZO_GamepadGenericScreenHeader" inherits="ZO_GamepadHeaderAnchors" virtual="true">
+            <Controls>
+                <Control name="$(parent)TitleContainer" inherits="ZO_GamepadHeaderTitleAnchors">
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_GamepadScreenHeaderTitleTextTemplate" excludeFromResizeToFitExtents="true" >
+                            <Anchor point="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TabBar" inherits="ZO_TabBarScrollListTemplate ZO_GamepadHeaderTitleAnchors" hidden="true" />
+
+                <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
+                </Control>
+
+                <Control name="$(parent)DividerPipped" inherits="ZO_GamepadHeaderHorizontalDividerWithTabs" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
+                </Control>
+
+                <!-- Note: The anchors for these data elements are setup dynamically. -->
+                <Label name="$(parent)Data1Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data1" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)Data2Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data2" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)Data3Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data3" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)Data4Header" inherits="ZO_GamepadHeaderLabelTextTemplate" />
+                <Label name="$(parent)Data4" inherits="ZO_GamepadHeaderDataTextTemplate" />
+
+                <Label name="$(parent)Message" inherits="ZO_GamepadScreenHeaderMessageTextTemplate" />
+            </Controls>
+        </Control>
+
+        <!-- General SCREEN header CONTAINER to be used on most gamepad screens. Example usage is as follows: -->
+        <!-- 
+                <Control name="$(parent)SomeContainer" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors">
+                    <Controls>
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+        -->
+        <Control name="ZO_GamepadScreenHeaderContainer" virtual="true">
+            <Controls>
+                <Control name="$(parent)Header" inherits="ZO_GamepadGenericScreenHeader">
+                    <OnInitialized>
+                        self:GetParent().header = self
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

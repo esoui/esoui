@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildSelector" hidden="true">
+            <Dimensions x="1024" y="50" />
+            <Anchor point="RIGHT" offsetX="30" offsetY="-335" />
+            <OnInitialized>
+                ZO_GuildSelector_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+              
+                <Texture name="$(parent)GuildIcon" mouseEnabled="false">
+                  <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="65" offsetY="10"/>
+                  <Dimensions x="32" y="32"/>
+                </Texture>
+              
+                <Control name="$(parent)ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
+                    <Anchor point="LEFT" offsetX="115" />
+                    <OnInitialized>
+                        ZO_ComboBox:New(self)
+                    </OnInitialized>
+
+                    <OnMouseUp>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                            ZO_ComboBox_DropdownClicked(self)
+                        end
+                    </OnMouseUp>
+
+                    <Controls>
+                        <Label name="$(parent)SelectedItemText" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions y="35" />
+                            <DimensionConstraints maxX="450" />
+                            <Anchor point="TOPLEFT"/>
+
+                            <OnMouseUp>
+                                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                                    ZO_ComboBox_DropdownClicked(self:GetParent())
+                                end
+                            </OnMouseUp>
+                        </Label>
+
+                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+                            <Dimensions x="16" y="16" />
+                            <Anchor point="LEFT" relativeTo="$(parent)SelectedItemText" relativePoint="RIGHT" offsetX="3" />
+                            <OnClicked>
+                                ZO_ComboBox_DropdownClicked(self:GetParent())
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
+                    <Dimensions x="1024" y="4" />
+                    <Anchor point="BOTTOM"/>
+                </Texture>                
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

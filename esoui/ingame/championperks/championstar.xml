@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_ConstellationStar" virtual="true" pixelRoundingEnabled="false" blendMode="ADD" />
+    </Controls>
+</GuiXml>

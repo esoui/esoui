@@ -1,0 +1,116 @@
+<GuiXml>
+    <Font name="ZoMarketAnnouncementKeyboardDescriptionFont" font="$(MEDIUM_FONT)|22" />
+    
+    <Font name="ZoMarketAnnouncementKeyboardTileFont" font="$(BOLD_FONT)|24|soft-shadow-thick" />
+    <Font name="ZoMarketAnnouncementKeyboardTileTitleFont" font="$(BOLD_FONT)|24|soft-shadow-thick" />
+    <Font name="ZoMarketAnnouncementCalloutFont" font="$(BOLD_FONT)|32|soft-shadow-thin" />
+    
+    <Controls>
+        <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Keyboard" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" virtual="true" >
+            <Dimensions x="ZO_LARGE_SINGLE_MARKET_PRODUCT_WIDTH" y="ZO_LARGE_SINGLE_MARKET_PRODUCT_HEIGHT"/>
+            
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoMarketAnnouncementKeyboardTileTitleFont" mouseEnabled="false" override="true"/>
+                
+                <Label name="$(parent)PreviousCost" font="ZoMarketAnnouncementKeyboardTileFont" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Strikethrough" override="true">
+                            <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
+                            <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
+                            <OnInitialized>
+                                self:SetHeight(2.5)
+                            </OnInitialized>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Cost" font="ZoMarketAnnouncementKeyboardTileFont" override="true">
+                    <Controls>
+                        <Texture name="$(parent)CurrencyIcon" override="true">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Purchased" font="ZoMarketAnnouncementKeyboardTileFont" override="true"/>
+                
+                <Label name="$(parent)TextCallout" font="ZoMarketAnnouncementCalloutFont" override="true">
+                    <Controls>
+                        <Control name="$(parent)Background" override="true">
+                            <Dimensions y="32"/>
+                            <Controls>
+                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" override="true"/>
+                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+
+        <!-- Market Announcement Window-->
+        <TopLevelControl name="ZO_MarketAnnouncement_Keyboard" inherits="ZO_MarketAnnouncementBase_Control">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_MarketAnnouncement_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Dimensions y="680"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" override="true" />
+
+                        <Label name="$(parent)Title" font="ZoFontWinH1" override="true"/>
+                        
+                        <Label name="$(parent)PositionTracker" font="ZoFontWinT1" override="true"/>
+
+                        <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" override="true">
+                            <Dimensions y="6"/>
+                        </Control>
+                        
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
+                            <Dimensions x="620"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="24"/>
+                            <Anchor point="BOTTOM" offsetY="-100"/>
+                            
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    
+                                    <OnInitialized>
+                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+                                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                                    </OnInitialized>
+                                    
+                                    <Controls>
+                                        <Label name="$(parent)ProductDescription" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoMarketAnnouncementKeyboardDescriptionFont">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="600" />
+                                        </Label>
+                                        <Control name="$(parent)BottomPadding">
+                                            <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ProductDescription"/>
+                                            <Dimensions y="20"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Texture name="$(parent)ProductBG" color="FFFFFF" alpha="0.1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ScrollContainer" offsetX="-14" offsetY="-14"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ScrollContainer" offsetX="14" offsetY="14"/>
+                        </Texture>
+
+                        <Control name="$(parent)Keybinds" override="true">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-40" offsetY="-30"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

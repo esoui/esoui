@@ -1,0 +1,48 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildSharedInfo" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_GuildHome"/>
+            <OnInitialized>
+                ZO_GuildSharedInfo_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)CountLabel" text="SI_GUILD_NUM_MEMBERS_ONLINE_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="52" offsetY="28"/>
+                </Label>
+                <Label name="$(parent)Count" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CountLabel" relativePoint="TOPRIGHT" offsetX="2"/>
+                </Label>
+                <Texture name="$(parent)Bank" textureFile="EsoUI/Art/Guild/guild_bankAccess.dds" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Count" relativePoint="RIGHT" offsetX="10"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GuildSharedInfoBank_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildSharedInfoBank_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)Heraldry" textureFile="EsoUI/Art/Guild/guild_heraldryAccess.dds" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Bank" relativePoint="RIGHT" offsetX="5"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GuildSharedInfoHeraldry_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildSharedInfoHeraldry_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)TradingHouse" textureFile="EsoUI/Art/Guild/guild_tradingHouseAccess.dds" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Heraldry" relativePoint="RIGHT" offsetX="5"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GuildSharedInfoTradingHouse_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildSharedInfoTradingHouse_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="LegalAgreementsScreen_Gamepad" hidden="true">
+            <Anchor point="TOPLEFT" offsetX="260" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-260" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            
+            <OnInitialized>
+                LegalAgreementsScreen_Gamepad_Initialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)EULAContainer">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Fill" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav2Journal_focus_left.dds">
+                            <Anchor point="TOPLEFT" offsetY="115" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-70" />
+                        </Texture>
+
+                        <Texture name="$(parent)LeftDivider" inherits="ZO_GamepadGrid_LeftVertDivider">
+                            <Dimensions y="ZO_GAMEPAD_PANEL_BG_HEIGHT" />
+                            <Anchor point="LEFT"/>
+                        </Texture>
+
+                        <Texture name="$(parent)RightDivider" inherits="ZO_GamepadGrid_RightVertDivider">
+                            <Dimensions y="ZO_GAMEPAD_PANEL_BG_HEIGHT" />
+                            <Anchor point="RIGHT"/>
+                        </Texture>
+
+                        <Control name="$(parent)ContentAnchor" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Fill" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Fill" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+                        </Control>
+
+                        <Control name="$(parent)TitleContainer">
+                            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                            <Controls>
+                                <Label name="$(parent)Title" font="ZoFontGamepadBold42" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="BOTTOMLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT"/>
+                        </Control>
+
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ContentAnchor" />
+                            
+                            <Controls>
+                                <Scroll name="$(parent)Scroll">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Control name="$(parent)Child" resizeToFitDescendents="true">
+                                            <Anchor point="TOPLEFT" />
+                                            <Controls>
+                                                <Label name="$(parent)Text" font="ZoFontGamepad25" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                                    <Anchor point="TOPRIGHT" relativeTo="LegalAgreementsScreen_GamepadEULAContainerContentAnchor" />
+                                                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Scroll>
+                            </Controls>    
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

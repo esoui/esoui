@@ -1,0 +1,37 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadSpinnerStyle" virtual="true">
+            <Dimensions x="80" y="32" />
+        </Control>
+        
+        <Control name="ZO_GamepadSpinnerButtons" virtual="true">
+            <Controls>
+                <Button name="$(parent)Decrease">
+                    <Dimensions x="20" y="32" />
+                    <Anchor point="LEFT"/>
+                    <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_up.dds"
+                              pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_down.dds"
+                              disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_disabled.dds"/>
+                </Button>
+
+                <Button name="$(parent)Increase">
+                    <Dimensions x="20" y="32" />
+                    <Anchor point="RIGHT"/>
+                    <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_up.dds"
+                              pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_down.dds"
+                              disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_disabled.dds"/>
+                    
+                </Button>
+            </Controls>
+        </Control>
+            
+        <Control name="ZO_GamepadSpinner" inherits="ZO_GamepadSpinnerButtons ZO_GamepadSpinnerStyle" virtual="true">
+            <Controls>
+                <Label name="$(parent)Display" font="ZoFontGamepadCondensed34" horizontalAlignment="CENTER" verticalAlignment="CENTER" >
+                    <Anchor point="TOPLEFT" offsetX="18" offsetY="-2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-22" offsetY="0"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,69 @@
+﻿<GuiXml>
+    <Controls>
+        <Label name="ZO_Gamepad_GuildKiosk_HeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
+            <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-19" />
+            <Dimensions y="24" />
+        </Label>
+
+        <TopLevelControl name="ZO_Gamepad_GuildKiosk_Purchase" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Gamepad_GuildKiosk_Purchase_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)CenterIsAlongTop">
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>
+                        </Control>
+                        
+                        <Control name="$(parent)Dropdown" inherits="ZO_GamepadGuildSelectorTemplate">
+                            <Anchor point="CENTER" relativeTo="$(parent)CenterIsAlongTop" relativePoint="TOPRIGHT"/>
+                        </Control>
+
+                        <Label name="$(parent)SelectorLabel" font="ZoFontGamepadBold22" horizontalAlignment="CENTER" text="SI_GAMEPAD_GUILD_KIOSK_GUILD_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" >
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Dropdown" offsetY="-15" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)Dropdown" offsetY="-15" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+            
+        </TopLevelControl>
+
+        <Control name="ZO_GamepadBidSelectorTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryControlSizedTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)BidAmountLabel" font="ZoFontGamepad34" horizontalAlignment="CENTER" >
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point ="TOPRIGHT" />
+                    <Dimensions y="30" />
+                </Label>
+
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BidAmountLabel" offsetX="52" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BidAmountLabel" offsetX="-48" offsetY="20" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_Gamepad_GuildKiosk_Bid" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" >
+            <OnInitialized>
+                ZO_Gamepad_GuildKiosk_Bid_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)CenterIsAlongTop">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>
+                </Control>
+
+                <Control name="$(parent)BidSelectorContainer" inherits="ZO_GamepadGoldSpinnerContainerTemplate" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)CenterIsAlongTop" relativePoint="TOPRIGHT"/>
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_InstanceKickWarning" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Anchor point="BOTTOM" offsetY="-220"/>
+                    <Controls>
+                        <Label name="$(parent)Text" text="SI_INSTANCE_KICK_WARNING">
+                            <Anchor point="CENTER" />
+                        </Label>
+
+                        <Cooldown name="$(parent)Timer" inherits="ZO_RadialCountdownTimer">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="LEFT" offsetX="-19"/>
+                        </Cooldown>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_InstanceKickWarning_Alive" inherits="ZO_InstanceKickWarning" hidden="true">
+            <OnInitialized>
+                ZO_InstanceKickWarning_Alive_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_InstanceKickWarning_Dead" inherits="ZO_InstanceKickWarning">
+            <OnInitialized>
+                ZO_InstanceKickWarning_Dead_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
+

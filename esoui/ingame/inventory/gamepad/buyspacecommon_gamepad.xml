@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadBuyBagSpaceGoldAndLabel" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <AnchorFill />
+                </Label>
+          
+                <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate" font="ZoFontGamepad34">
+                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Label" offsetX="385"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadBuySpaceCommonTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Info" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" offsetX="5" />
+                    <Anchor point="RIGHT" offsetY="-200"/>
+                </Label>
+
+                <Control name="$(parent)MyGold" inherits="ZO_GamepadBuyBagSpaceGoldAndLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Info" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_CURRENCY_GOLD" />
+                    </Controls>
+                </Control>
+              
+                <Control name="$(parent)Cost" inherits="ZO_GamepadBuyBagSpaceGoldAndLabel">
+                  <Anchor point="TOPLEFT" relativeTo="$(parent)MyGold" relativePoint="BOTTOMLEFT" offsetY="38" />
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_BUY_BAG_SPACE_COST" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

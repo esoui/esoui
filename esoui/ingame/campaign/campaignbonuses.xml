@@ -1,0 +1,82 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_CampaignBonuses_AbilitySlot" virtual="true" level="1">
+            <Dimensions x="56" y="56"/>
+            <Textures
+                normal="EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds"
+                pressed="EsoUI/Art/ActionBar/passiveAbilityFrame_round_down.dds"
+                mouseOver="EsoUI/Art/ActionBar/passiveAbilityFrame_round_over.dds"
+                    />
+
+            <OnMouseEnter>
+                ZO_CampaignBonuses_AbilitySlot_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CampaignBonuses_AbilitySlot_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Label name="ZO_CampaignBonusesRowLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" virtual="true" />
+        <Label name="ZO_CampaignBonusesHeaderLabel" font="ZoFontWinH3" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Control name="ZO_CampaignBonusesHeaderRow" virtual="true">
+            <Dimensions y="50" />
+            <Controls>
+                <Label name="$(parent)Header" inherits="ZO_CampaignBonusesHeaderLabel">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+                <Label name="$(parent)CountInfo" mouseEnabled="true" inherits="ZO_CampaignBonusesRowLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                    <OnMouseEnter>
+                        ZO_CampaignBonuses_CountInfo_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignBonuses_CountInfo_OnMouseExit(self)
+                    </OnMouseExit>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignBonusesBonusRow" virtual="true">
+            <Dimensions y="80"/>
+            <Controls>
+                <Texture name="$(parent)TypeIcon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT" />
+                </Texture>
+                <Label name="$(parent)Count" font="ZoFontWinH4">
+                    <Anchor point="LEFT" offsetX="56" />
+                </Label>
+
+                <Button name="$(parent)Ability" inherits="ZO_CampaignBonuses_AbilitySlot">
+                    <Anchor point="LEFT" offsetX="95" />
+
+                    <MouseButton button="1" enabled="false" />
+                    <MouseButton button="2" enabled="false" />
+                </Button>
+
+                <Label name="$(parent)Name" inherits="ZO_CampaignBonusesRowLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Ability" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CampaignBonuses" inherits="ZO_CampaignOverviewSubwindow">
+            <OnInitialized>
+                ZO_CampaignBonuses_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

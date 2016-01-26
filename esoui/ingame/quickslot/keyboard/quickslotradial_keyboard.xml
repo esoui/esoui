@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_QuickslotRadial_Keyboard">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_QuickslotRadial_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_RadialMenuTemplate" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

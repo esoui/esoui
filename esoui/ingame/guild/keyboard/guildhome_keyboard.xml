@@ -1,0 +1,117 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildHomeSectionDivider" virtual="true">
+            <Dimensions x="612" y="4"/>
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Guild/sectionDivider_left.dds">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="512" y="4"/>
+                </Texture>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Guild/sectionDivider_right.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <TextureCoords top="0" bottom="1" left="0" right=".391"/>
+                    <Dimensions x="100" y="4"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GuildHomeInfo" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Controls>
+                <Control name="$(parent)UpdatesDivider" inherits="ZO_GuildHomeSectionDivider">
+                    <Anchor point="TOPLEFT"/>
+                </Control>
+                <Label name="$(parent)UpdatesHeader" font="ZoFontHeader3" modifyTextType="UPPERCASE" text="SI_GUILD_UPDATES_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)UpdatesDivider" offsetX="15" offsetY="5"/>
+                </Label>
+                <Label name="$(parent)MotDHeader" font="ZoFontHeader2" text="SI_GUILD_MOTD_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)UpdatesHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
+                </Label>
+                <Control name="$(parent)MotD" inherits="ZO_ScrollingSavingEditBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MotDHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Dimensions x="570" y="210"/>
+                </Control>
+                <Control name="$(parent)BackgroundDivider" inherits="ZO_GuildHomeSectionDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MotD" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="30"/>
+                </Control>
+                <Label name="$(parent)BackgroundHeader" font="ZoFontHeader3" modifyTextType="UPPERCASE" text="SI_GUILD_BACKGROUND_INFO_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundDivider" offsetX="15" offsetY="5"/>
+                </Label>
+                <Label name="$(parent)DescriptionHeader" font="ZoFontHeader2" text="SI_GUILD_DESCRIPTION_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
+                </Label>
+                <Control name="$(parent)Description" inherits="ZO_SavingEditBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Dimensions x="570" y="175"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_GuildHome" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildHome_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)GuildMaster" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPRIGHT" offsetX="-25" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)GuildMasterLabel" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_MASTER_LABEL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildMaster" relativePoint="TOPLEFT" offsetX="-2"/>
+                </Label>
+                <Label name="$(parent)Founded" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildMaster" relativePoint="BOTTOMRIGHT" offsetY="2"/>
+                </Label>
+                <Label name="$(parent)FoundedLabel" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_FOUNDED_LABEL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Founded" relativePoint="TOPLEFT" offsetX="-2"/>
+                </Label>
+                
+                <Control name="$(parent)Keep">
+                    <Dimensions x="200"/>
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="100"/>
+                    <Controls>
+                        <Label name="$(parent)Ownership" horizontalAlignment="CENTER" font="ZoFontHeader2" modifyTextType="UPPERCASE" text="SI_GUILD_KEEP_OWNERSHIP_HEADER">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Texture name="$(parent)Icon">
+                            <Dimensions x="128" y="128"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Ownership" relativePoint="BOTTOM" offsetY="-10"/>
+                        </Texture>
+                        <Label name="$(parent)Name" horizontalAlignment="CENTER" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" offsetY="152"/>
+                            <Anchor point="TOPRIGHT" offsetY="152"/>
+                        </Label>
+                        <Label name="$(parent)CampaignName" horizontalAlignment="CENTER" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Trader">
+                    <Dimensions x="200"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Keep" offsetY="210"/>
+                    <Controls>
+                        <Label name="$(parent)Ownership" horizontalAlignment="CENTER" font="ZoFontHeader2" modifyTextType="UPPERCASE" text="SI_GUILD_TRADER_OWNERSHIP_HEADER">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Guild/ownership_icon_guildTrader.dds">
+                            <Dimensions x="128" y="128"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Ownership" relativePoint="BOTTOM" offsetY="-10"/>
+                        </Texture>
+                        <Label name="$(parent)Name" horizontalAlignment="CENTER" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" offsetY="132"/>
+                            <Anchor point="TOPRIGHT" offsetY="132"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" offsetX="240" offsetY="80"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-40" offsetY="-40"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

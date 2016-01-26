@@ -1,0 +1,52 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HorizontalScrollListTemplate" mouseEnabled="true" virtual="true">
+            <OnMouseWheel>
+                if delta > 0 then
+                    self.horizontalScrollList:MoveLeft()
+                else
+                    self.horizontalScrollList:MoveRight()
+                end
+            </OnMouseWheel>
+
+            <Controls>
+                <Scroll name="$(parent)Scroll">
+                    <AnchorFill />
+                    <FadeGradient x1="1" y1="0" size1="200" x2="-1" y2="0" size2="200" />
+                </Scroll>
+                <Button name="$(parent)LeftArrow">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativePoint="LEFT" />
+                    
+                    <Textures
+                        normal="EsoUI/Art/Crafting/smithing_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Crafting/smithing_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Crafting/smithing_leftArrow_over.dds"
+                        disabled="EsoUI/Art/Crafting/smithing_leftArrow_disabled.dds"
+                    />
+                    <OnClicked>
+                        self:GetParent().horizontalScrollList:MoveRight()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)RightArrow">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativePoint="RIGHT" />
+                    <Textures
+                        normal="EsoUI/Art/Crafting/smithing_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Crafting/smithing_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Crafting/smithing_rightArrow_over.dds"
+                        disabled="EsoUI/Art/Crafting/smithing_rightArrow_disabled.dds"
+                    />
+                    <OnClicked>
+                        self:GetParent().horizontalScrollList:MoveLeft()
+                    </OnClicked>
+                </Button>
+
+                <Label name="$(parent)NoItemsLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="CENTER" />
+                </Label>
+            </Controls>
+        </Control>    
+    </Controls>
+</GuiXml>

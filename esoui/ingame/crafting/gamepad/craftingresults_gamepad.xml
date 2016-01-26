@@ -1,0 +1,36 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadCraftingResultsHeaderTemplate" font="ZoFontGamepad54" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Anchor point="TOPRIGHT" offsetX="-40" />
+        </Label>
+
+        <Control name="ZO_GamepadCraftingResultsTemplate" virtual="true">
+            <Anchor point="TOPRIGHT" offsetY="2" />
+            <Dimensions y="48" />
+
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="RIGHT" />
+                </Texture>
+
+                <Label name="$(parent)Label" font="ZoFontGamepad34" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" />
+                </Label>
+
+                <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="1" offsetY="5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CraftingResultsTopLevel_Gamepad" hidden="true">
+            <Dimensions x="500" y="750" />
+            <Anchor point="TOP" offsetY="258" />
+
+            <OnInitialized>
+                ZO_CraftingResults_Gamepad_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

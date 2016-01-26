@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SoulGemItemChargerPanel" hidden="true">
+            <Dimensions x="298" y="68" />
+
+            <OnInitialized>
+                ZO_SoulGemItemCharger_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ImprovementPreviewContainer" inherits="ZO_ItemImprovementShared"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

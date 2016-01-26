@@ -1,0 +1,32 @@
+<GuiXml> 
+    <Controls>
+        <Control name="ZO_LootHistory_GamepadEntry" inherits="ZO_LootHistory_SharedEntry" virtual="true">
+            <Dimensions x="315" y="50" />
+            <Anchor point="BOTTOMLEFT" offsetX="96"/>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="LEFT" offsetX="5" />
+                    <Controls>
+                        <Label name="$(parent)StackCount" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
+                    </Controls>
+                </Texture>
+                
+                <Label name="$(parent)Label" override="true" font="ZoFontGamepad34" maxLineCount="1">
+                    <Dimensions x="220"/>
+                </Label>
+              
+                <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/HUD/Gamepad/LootHistoryBG.dds">
+                    <TextureCoords left="0" right="1" top="0.25" bottom="1" />
+                </Texture>
+            </Controls>
+        </Control>
+      
+        <TopLevelControl name="ZO_LootHistoryControl_Gamepad" hidden="true">
+            <Anchor point="BOTTOMLEFT" offsetY="-160"/>
+            <OnInitialized>
+                ZO_LootHistory_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,46 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SearchingForGroup_StatValuePair" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Stat" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT"/>
+                </Label>
+
+                <Label name="$(parent)Value" font="ZoFontHeader">
+                    <Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SearchingForGroup" hidden="true" resizeToFitDescendents="true">
+            <Anchor point="BOTTOM" relativeTo="ZO_GroupingToolsKeyboard" relativePoint="BOTTOM" offsetY="-8" />
+            <OnInitialized>
+                ZO_SearchingForGroup_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Spinner" hidden="true" resizeToFitDescendents="true">
+                    <Anchor point="TOP" />
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self, GetString(SI_GROUP_WINDOW_SEARCHING_FOR_MEMBERS))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)EstimatedTime" inherits="ZO_SearchingForGroup_StatValuePair" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Spinner" relativePoint="BOTTOM" />
+                    <Controls>
+                        <Label name="$(parent)Stat" override="true" text="SI_GROUPING_TOOLS_QUEUE_ESTIMATED" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ActualTime" inherits="ZO_SearchingForGroup_StatValuePair" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)EstimatedTime" relativePoint="BOTTOM" />
+
+                    <Controls>
+                        <Label name="$(parent)Stat" override="true" text="SI_GROUPING_TOOLS_QUEUE_ACTUAL" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

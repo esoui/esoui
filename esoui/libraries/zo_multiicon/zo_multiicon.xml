@@ -1,0 +1,34 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="MultiIconAnimation">
+            <Animations>
+                <CustomAnimation duration="500">
+                    <UpdateFunction>
+                        ZO_MultiIconAnimation_SetAlpha(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+                <CustomAnimation duration="500" delay="1500">
+                    <UpdateFunction>
+                        ZO_MultiIconAnimation_SetAlpha(self, 1-progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+            <OnStop>
+                ZO_MultiIconAnimation_OnStop(self)
+            </OnStop>
+        </AnimationTimeline>        
+    </Animations>
+    <Controls>
+        <Texture name="ZO_MultiIcon" hidden="true" virtual="true">
+            <OnInitialized>
+                ZO_MultiIcon_Initialize(self)
+            </OnInitialized>
+            <OnShow>
+                ZO_MultiIcon_OnShow(self)
+            </OnShow>
+            <OnHide>
+                ZO_MultiIcon_OnHide(self)
+            </OnHide>
+        </Texture>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,37 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="AlertFadeGamepad">
+            <Animations>
+                <AlphaAnimation duration="700" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="AlertTranslateGamepad">
+            <Animations>
+                <TranslateAnimation duration="0" deltaX="0" deltaY="0" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_AlertLineGamepad" horizontalAlignment="RIGHT" font="ZoFontGamepad34" modifyTextType="UPPERCASE" virtual="true">
+            <Anchor point="TOPRIGHT" />
+        </Label>
+
+        <TopLevelControl name="ZO_AlertTextNotificationGamepad" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
+            <Anchor point="TOPRIGHT" offsetX="-15" offsetY="15" />
+            <OnInitialized>
+                ZO_AlertTextGamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

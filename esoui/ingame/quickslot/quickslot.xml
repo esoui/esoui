@@ -1,0 +1,126 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="QuickslotGlowAlphaAnimation">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0.0" endAlpha="1.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_QuickSlotTemplate" inherits="ZO_AbilitySlot" virtual="true">
+            <Dimensions x="64" y="64" />
+            <OnInitialized>
+                ZO_QuickslotControl_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" level="1">
+                    <Dimensions x="61" y="61" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGameShadow">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4"/>
+                </Label>
+
+                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate">
+                    <Anchor point="TOPLEFT" offsetX="-50" offsetY="-50" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="50" offsetY="50" />
+                </Texture>
+
+                <Texture name="$(parent)DropCallout" hidden="true" textureFile="EsoUI/Art/Quickslots/quickslot_dragSlot.dds">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha="0" level="0">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CollectionsSlot" inherits="ZO_PlayerInventorySlot" virtual="true">
+            <Controls>
+                <Texture name="$(parent)ActiveIcon" textureFile="EsoUI/Art/Inventory/inventory_icon_equipped.dds">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_QuickSlotTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_QuickSlot_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_QuickSlot_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <TopLevelControl name="ZO_QuickSlotCircle" mouseEnabled="true" hidden="true" layer="BACKGROUND">
+            <Dimensions x="300" y="300" />
+            <Anchor point="CENTER" relativeTo="GuiRoot" offsetX="-20" offsetY="-100" />
+
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Quickslots/quickslot_mapping_bg.dds">
+                    <Dimensions x="512" y="512" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Underlay" color="000000" alpha=".55" excludeFromResizeToFitExtents="true" inheritScale="false">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_QuickSlot" inherits="ZO_InventoryTemplate" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <OnInitialized>
+                ZO_Quickslot_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
+                            <Dimensions x="16" y="32" />
+                            <Anchor point="LEFT" offsetX="8"/>
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeaderIcon(self,
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
+                                "age")
+
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="241" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="RIGHT" offsetX="-21" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

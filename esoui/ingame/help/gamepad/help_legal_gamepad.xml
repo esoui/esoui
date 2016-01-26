@@ -1,0 +1,11 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadHelpLegalURL" font="ZoFontGamepad34" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GAMEPAD_TOS_WEBSITE" virtual="true"/>
+        
+        <TopLevelControl name="ZO_GamepadHelpLegal" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadHelpLegal_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,34 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_PagedListLabelTemplate" font="ZoFontGamepadBold54" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" />
+        <Label name="ZO_PagedListValueTemplate" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER" virtual="true" />
+        <Control name="ZO_PagedListFooterBar" virtual="true">
+            <Dimensions y="64" />
+            <Anchor point="BOTTOMLEFT" offsetY="-20" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-20" />
+            <Controls>
+                <Label name="$(parent)PageNumberText" inherits="ZO_PagedListLabelTemplate">
+                    <Anchor point="CENTER" />
+                </Label>
+                
+                <Button name="$(parent)PreviousButton">
+                    <Anchor point="RIGHT" relativeTo="$(parent)PageNumberText" relativePoint="LEFT" offsetX="-10" />
+                    <Dimensions x="50" y="50"/>
+                    <OnInitialized>
+                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_LEFT_TRIGGER))
+                        self:SetDisabledTexture(ZO_GAMEPAD_LEFT_TRIGGER_DISABLED)
+                    </OnInitialized>
+                </Button>
+
+                <Button name="$(parent)NextButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)PageNumberText" relativePoint="RIGHT" offsetX="10" />
+                    <Dimensions x="50" y="50"/>
+                    <OnInitialized>
+                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_RIGHT_TRIGGER))
+                        self:SetDisabledTexture(ZO_GAMEPAD_RIGHT_TRIGGER_DISABLED)
+                    </OnInitialized>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

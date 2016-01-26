@@ -1,0 +1,98 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_LoreReader" allowBringToTop="false" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-55" />
+
+            <OnInitialized>
+                ZO_LoreReader_OnInitialize(self)
+            </OnInitialized>
+
+            <OnHide>
+                ZO_LoreReader_OnHide(self)
+            </OnHide>
+
+            <OnMouseUp>
+                if upInside then
+                    ZO_LoreReader_OnClicked(self, button)
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Control name="$(parent)BookContainer">
+                    <Dimensions x="1024" y="1024"/>
+                    <Anchor point="CENTER" offsetY="-20" />
+                    <Controls>
+
+                        <Texture name="$(parent)MediumBg">
+                            <Dimensions x="1024" y="1024"/>
+                            <Anchor point="CENTER" />
+                        </Texture>
+
+                        <Scroll name="$(parent)FirstPage">
+                            <Anchor point="TOPLEFT" offsetX="45" offsetY="20" />
+
+                            <OnInitialized>
+                                self:SetScrollBounding(SCROLL_BOUNDING_UNBOUND)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Control name="$(parent)Child" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" />
+
+                                    <Controls>
+                                        <Label name="$(parent)Title" horizontalAlignment="CENTER">
+                                            <Anchor point="TOPLEFT" />
+                                        </Label>
+                                        <Label name="$(parent)Body">
+                                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Scroll>
+
+                        <Scroll name="$(parent)SecondPage">
+                            <Anchor point="TOPRIGHT" offsetX="-45" offsetY="20" />
+
+                            <OnInitialized>
+                                self:SetScrollBounding(SCROLL_BOUNDING_UNBOUND)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Control name="$(parent)Child" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Controls>
+                                        <Label name="$(parent)Body">
+                                            <Anchor point="TOPLEFT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)KeyStripMouseButtons">
+                    <Dimensions x="98" y="54" />
+                    <Controls>
+                        <Texture name="$(parent)PreviousPage" mouseEnabled="true" textureFile="EsoUI/Art/Miscellaneous/icon_LMB.dds">
+                            <Dimensions x="52" y="52" />
+                            <Anchor point="TOPLEFT" />
+                            <OnMouseUp>
+                                ZO_LoreReader_OnPagePreviousClicked(self:GetParent())
+                            </OnMouseUp>
+                        </Texture>
+                        <Texture name="$(parent)NextPage" mouseEnabled="true" textureFile="EsoUI/Art/Miscellaneous/icon_RMB.dds">
+                            <Dimensions x="52" y="52" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PreviousPage" relativePoint="TOPRIGHT" offsetX="-10" />
+                            <OnMouseUp>
+                                ZO_LoreReader_OnPageNextClicked(self:GetParent())
+                            </OnMouseUp>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadSmithingHeaderBottomAnchor" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="TOPRIGHT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMRIGHT"/>
+        </Control>
+
+        <Control name="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+        </Control>
+        
+        <Texture name="ZO_GamepadSmithingHeaderBottomDivider" inherits="ZO_GamepadHorizontalDivider" virtual="true">
+            <Anchor point="TOP" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOM"/>
+        </Texture>
+    </Controls>
+
+    <Controls>
+        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />"
+        
+        <TopLevelControl name="ZO_GamepadSmithingTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Smithing_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Controls>
+                                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Creation" inherits="ZO_GamepadSmithingCreationPanelContent"/>
+                        <Control name="$(parent)Refinement" inherits="ZO_GamepadSmithingExtractionPanelContent"/>
+                        <Control name="$(parent)Deconstruction" inherits="ZO_GamepadSmithingExtractionPanelContent"/>
+                        <Control name="$(parent)Improvement" inherits="ZO_GamepadSmithingImprovementPanelContent"/>
+                        <Control name="$(parent)Research" inherits="ZO_GamepadSmithingResearchPanelContent" />
+                    </Controls>
+                </Scroll>
+
+                <Control name="$(parent)Creation" inherits="ZO_GamepadSmithingCreationFloatingContent" hidden="true"/>
+                <Control name="$(parent)Refinement" inherits="ZO_GamepadSmithingExtractionFloatingContent" hidden="true"/>
+                <Control name="$(parent)Deconstruction" inherits="ZO_GamepadSmithingExtractionFloatingContent" hidden="true"/>
+                <Control name="$(parent)Improvement" inherits="ZO_GamepadSmithingImprovementFloatingContent" hidden="true"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

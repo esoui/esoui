@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_FishingPanel_Keyboard">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_Fishing_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_RadialMenuTemplate" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

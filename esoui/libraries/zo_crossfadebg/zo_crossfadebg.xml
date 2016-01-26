@@ -1,0 +1,35 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CrossfadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="1500" startAlpha="1" endAlpha="0" />
+            </Animations>
+
+            <OnStop>
+                ZO_CrossfadeBG_OnCrossfadeComplete(self, completedPlaying)
+            </OnStop>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_CrossfadeBG" layer="BACKGROUND" tier="LOW" virtual="true">
+            <Anchor point="CENTER" />
+            <OnInitialized>
+                ZO_CrossfadeBG_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)1" tier="LOW" layer="BACKGROUND" level="1">
+                    <Anchor point="CENTER" />
+                    <TextureCoords left="0" right="0.8203125" top="0" bottom="0.5126953125"/>
+                </Texture>
+
+                <Texture name="$(parent)2" tier="LOW" layer="BACKGROUND" level="0">
+                    <Anchor point="CENTER" />
+                    <TextureCoords left="0" right="0.8203125" top="0" bottom="0.5126953125"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+    </Controls>
+</GuiXml>

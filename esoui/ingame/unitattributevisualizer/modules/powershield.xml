@@ -1,0 +1,192 @@
+<GuiXml>
+    <Controls>
+        <!-- Bar -->
+
+        <StatusBar name="ZO_PowerShieldBar" level="2000" virtual="true">
+            <Dimensions y="17" />
+
+            <OnInitialized>
+                self.chunk = self:GetNamedChild("Chunk")
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarArrow" inherits="ZO_PowerShieldBar" virtual="true" />
+        <StatusBar name="ZO_PowerShieldBarArrow_Keyboard_Template" inherits="ZO_PowerShieldBar ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldBarArrow_Gamepad_Template" inherits="ZO_PowerShieldBar ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" />
+
+        <StatusBar name="ZO_PowerShieldBarAngle" inherits="ZO_PowerShieldBar" virtual="true" />
+        <StatusBar name="ZO_PowerShieldBarAngle_Keyboard_Template" inherits="ZO_PowerShieldBar ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldBarAngle_Gamepad_Template" inherits="ZO_PowerShieldBar ZO_TargetAttributeStatusBar_Gamepad_Template" virtual="true" />
+
+        <!-- Chunk Bar -->
+        
+        <StatusBar name="ZO_PowerShieldChunkBarArrow" inherits="ZO_PlayerAttributeStatusBar" level="3000" virtual="true" />
+        <StatusBar name="ZO_PowerShieldChunkBarArrow_Keyboard_Template" inherits="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldChunkBarArrow_Gamepad_Template" inherits="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" />
+
+        <StatusBar name="ZO_PowerShieldChunkBarAngle" inherits="ZO_TargetAttributeStatusBar" level="3000" virtual="true" />
+        <StatusBar name="ZO_PowerShieldChunkBarAngle_Keyboard_Template" inherits="ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldChunkBarAngle_Gamepad_Template" inherits="ZO_TargetAttributeStatusBar_Gamepad_Template" virtual="true" />
+
+        <!-- Overlay -->
+
+        <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow" inherits="ZO_PowerShieldBarArrow" barAlignment="REVERSE" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE"/>
+                
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow" barAlignment="REVERSE">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="3001" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow_Keyboard_Template" inherits="ZO_PowerShieldBarArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template"/>
+                
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Keyboard_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template"  virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+                
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Gamepad_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRightOverlayArrow" inherits="ZO_PowerShieldBarArrow" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss"/>
+                
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="3001" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRightOverlayArrow_Keyboard_Template" inherits="ZO_PowerShieldBarArrow_Keyboard_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template"/>
+                
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Keyboard_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRightOverlayArrow_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template"/>
+                
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Gamepad_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarLeftOverlayAngle" inherits="ZO_PowerShieldBarAngle" barAlignment="REVERSE" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" barAlignment="REVERSE"/>
+
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle" barAlignment="REVERSE">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="3001" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarLeftOverlayAngle_Keyboard_Template" inherits="ZO_PowerShieldBarAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
+
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Keyboard_Template">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarLeftOverlayAngle_Gamepad_Template" inherits="ZO_PowerShieldBarAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
+
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Gamepad_Template">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-15" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRightOverlayAngle" inherits="ZO_PowerShieldBarAngle" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss"/>
+
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="3001" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRightOverlayAngle_Keyboard_Template" inherits="ZO_PowerShieldBarAngle_Keyboard_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template"/>
+
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Keyboard_Template">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRightOverlayAngle_Gamepad_Template" inherits="ZO_PowerShieldBarAngle_Gamepad_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template"/>
+
+                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Gamepad_Template">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="15" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+    </Controls>
+</GuiXml>

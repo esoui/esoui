@@ -1,0 +1,169 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_RequestFriendDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_RequestFriendDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_NAME_INSTRUCTIONS"/>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
+                                local includeFlags = { AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }
+                                local excludeFlags = { AUTO_COMPLETE_FLAG_FRIEND }
+                                ZO_AutoComplete:New(self, includeFlags, excludeFlags, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+                            </OnInitialized>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                            <OnTab>
+                                ZO_RequestFriendDialogMessageEdit:TakeFocus()
+                            </OnTab>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>                
+
+                <Label name="$(parent)MessageHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_FRIEND_MESSAGE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+                <Backdrop name="$(parent)Message" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_FRIEND_MESSAGE_DEFAULT_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Request" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_EditNoteDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_EditNoteDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)DisplayName" inherits="ZO_DialogContentAnchors" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3"/>
+
+                <Backdrop name="$(parent)Note" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="265"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="255" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
+                            </OnInitialized>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Save" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ReportPlayerDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_ReportPlayerDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Header" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+                
+                <Control name="$(parent)ReportSpam" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="26" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="26" />
+                </Control>
+
+                <Label name="$(parent)SpamText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_DIALOG_TEXT_REPORT_PLAYER_FOR_SPAM">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ReportSpam" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ReportSpam" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)OpenTicket" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SpamText" relativePoint="BOTTOMLEFT" offsetY="26" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SpamText" relativePoint="BOTTOMRIGHT" offsetY="26" />
+                </Control>
+
+                <Label name="$(parent)OpenTicketText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_DIALOG_TEXT_REPORT_PLAYER_OPEN_TICKET">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)OpenTicket" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OpenTicket" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CreateGuildDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_CreateGuildDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)NameInstructions" inherits="ZO_NameInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true"/>
+                
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" font="ZoFontHeader2" text="SI_GUILD_CREATE_DIALOG_NAME_HEADER"/>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="24">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_CREATE_DIALOG_NAME_DEFAULT_TEXT))
+                            </OnInitialized>
+                            <OnTextChanged>
+                                ZO_EditDefaultText_OnTextChanged(self)
+                                ZO_CreateGuildDialogName_UpdateViolations(self)
+                            </OnTextChanged>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                            <OnFocusGained>
+                                ZO_GuildEditBox_FocusGained(self)
+                                ZO_CreateGuildDialogName_UpdateViolations(self)
+                            </OnFocusGained>
+                            <OnFocusLost>
+                                ZO_GamepadEditBox_FocusLost(self)
+                                ZO_CreateGuildDialogName_HideViolations(self)
+                            </OnFocusLost>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)AllianceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" font="ZoFontHeader2" text="SI_GUILD_CREATE_DIALOG_ALLIANCE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+
+                <Label name="$(parent)AllianceRules" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AllianceHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)Alliance" inherits="ZO_ComboBox">
+                    <Dimensions y="36"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceRules" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AllianceRules" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Create" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

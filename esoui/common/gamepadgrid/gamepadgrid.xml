@@ -1,0 +1,107 @@
+<GuiXml>
+    <Controls>
+        <!-- ******** ZO_GamepadGrid_Nav#Anchors is a deprecated naming convention. Please use the Quadrant anchors above ******** -->
+        
+        <Control name="ZO_GamepadGrid_Nav1Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="30" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="-30" />
+            <Dimensions x="480" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav2Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="30" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="-30" />
+            <Dimensions x="480" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav3Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="576" offsetY="92" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="576" offsetY="-92" />
+            <Dimensions x="392" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav4Anchors" virtual="true">
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-96" offsetY="92"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-96" offsetY="-92" />
+            <Dimensions x="392" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav5Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="576" offsetY="92"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="576" offsetY="-92" />
+            <Dimensions x="480" />
+        </Control>
+
+        <!-- ******** ZO_GamepadGrid_Nav#Anchors is a deprecated naming convention. Please use the Quadrant anchors above ******** -->
+
+        <Control name="ZO_GamepadGrid_Nav6Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="96" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="-92" />
+            <Dimensions x="480" />
+		</Control>
+
+        <Control name="ZO_GamepadGrid_Nav8Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="30" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="-30" />
+            <Dimensions x="1080" />
+        </Control>
+
+        <!-- Double wide tooltip for character stats menu -->
+		<Control name="ZO_GamepadGrid_Nav10Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="578" offsetY="92" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="578" offsetY="-92" />
+            <Dimensions x="752" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav11Anchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="0" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="96" offsetY="-92" />
+            <Dimensions x="1728" />
+        </Control>
+         <!-- Triple wide tooltip for options menu -->
+        <Control name="ZO_GamepadGrid_Nav12Anchors" virtual="true">
+            <Dimensions x="1242" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="576" offsetY="92" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="576" offsetY="-92" />
+        </Control>
+
+        <!-- ******** ZO_GamepadGrid_Nav#Anchors is a deprecated naming convention. Please use the Quadrant anchors above ******** -->
+
+        <Control name="ZO_GamepadGrid_ListAnchors" virtual="true">
+            <Anchor point="TOPLEFT" offsetY="200" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-100" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_SubListAnchors" virtual="true">
+            <Anchor point="TOPLEFT" offsetY="300" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-200" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_ShortListAnchors" virtual="true">
+            <Anchor point="TOPLEFT" offsetY="290" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-100" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav1ContainerAnchors" virtual="true">
+            <Dimensions x="440" />
+            <Anchor point="TOPLEFT" offsetX="20" />
+            <Anchor point="BOTTOMLEFT" offsetX="20" />
+        </Control>
+
+        <Control name="ZO_GamepadGrid_Nav2ContainerAnchors" inherits="ZO_GamepadGrid_Nav1ContainerAnchors" virtual="true" />
+        
+        <Control name="ZO_GamepadGrid_Nav8ContainerAnchors" virtual="true">
+            <Dimensions x="1040" />
+            <Anchor point="TOPLEFT" offsetX="20" />
+            <Anchor point="BOTTOMLEFT" offsetX="20" />
+        </Control>
+		
+		<Control name="ZO_GamepadGrid_Nav9ContainerAnchors" virtual="true">
+            <Dimensions x="1180" />
+            <Anchor point="TOPLEFT" offsetX="20" />
+            <Anchor point="BOTTOMLEFT" offsetX="20" />
+        </Control>
+
+        <!-- ******** ZO_GamepadGrid_Nav#Anchors is a deprecated naming convention. Please use the Quadrant anchors above ******** -->
+    </Controls>
+</GuiXml>

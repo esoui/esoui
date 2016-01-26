@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TreasureMap" mouseEnabled="true" hidden="true">
+            <Dimensions x="1024" y="1024" />
+            <Anchor point="CENTER" offsetY="-30" />
+            
+            <OnInitialized>
+                ZO_TreasureMap_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Image">
+                    <Dimensions x="1024" y="1024"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

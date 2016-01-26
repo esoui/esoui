@@ -1,0 +1,28 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadSelectableLabel" inherits="ZO_SelectableLabel" virtual="true">
+            <OnInitialized>
+                ZO_SelectableLabel_OnInitialized(self)
+                ZO_SelectableLabel_SetNormalColor(self, ZO_DISABLED_TEXT)
+            </OnInitialized>
+        </Label>
+
+        <Label name="ZO_ThreeLineHeaderAdjustingWrapLabel_Gamepad" virtual="true">
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepadBold48",
+                    },
+                    {
+                        font = "ZoFontGamepad36",
+                    },
+                    {
+                        font = "ZoFontGamepad27",
+                    }
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
+        </Label>
+    </Controls>
+</GuiXml>

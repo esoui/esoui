@@ -1,0 +1,34 @@
+; Script Files shared between Ingame and InternalIngame
+## DependsOn: ZO_Common
+
+EsoUI\Ingame\Globals\SharedTextures.lua
+EsoUI\Ingame\Currency\Keyboard\CurrencyOptionsTable_Keyboard.lua
+EsoUI\Ingame\Currency\Gamepad\CurrencyOptionsTable_Gamepad.lua
+
+EsoUI\Ingame\Currency\Currency.lua
+EsoUI\Ingame\Currency\Currency.xml
+EsoUI\Ingame\Currency\Gamepad\CurrencySelector_Gamepad.lua
+EsoUI\Ingame\Currency\Gamepad\CurrencySelector_Gamepad.xml
+
+EsoUI\Ingame\Tooltip\Tooltip.lua
+EsoUI\Ingame\Tooltip\Tooltip.xml
+EsoUI\Ingame\Tooltip\TooltipStyles.lua
+EsoUI\Ingame\Tooltip\AchievementTooltips.lua
+EsoUI\Ingame\Tooltip\CadwellsTooltips.lua
+EsoUI\Ingame\Tooltip\ItemTooltips.lua
+EsoUI\Ingame\Tooltip\MapTooltips.lua
+EsoUI\Ingame\Tooltip\AbilityTooltips.lua
+EsoUI\Ingame\Tooltip\AvATooltips.lua
+EsoUI\Ingame\Tooltip\NotificationsTooltips.lua
+EsoUI\Ingame\Tooltip\CollectionsTooltips.lua
+EsoUI\Ingame\Tooltip\SocialTooltips.lua
+EsoUI\Ingame\Tooltip\StableTooltips.lua
+EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
+EsoUI\Ingame\Tooltip\GroupTooltips.lua
+EsoUI\Ingame\Tooltip\ChampionTooltips.lua
+EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
+
+EsoUI\Ingame\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
+EsoUI\Ingame\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml
+
+EsoUI\Ingame\TrialAccount\TrialAccount_IngameShared.lua

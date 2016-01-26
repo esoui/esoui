@@ -1,0 +1,28 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildBankErrorTopLevel_Gamepad" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_GamepadGuildBankError_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name ="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors">
+                    <Controls>
+                        <Label name="$(parent)Error" font="ZoFontGamepadCondensed27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text ="SI_GAMEPAD_GUILD_BANK_NO_PERMISSION">
+                            <Dimensions x="370" y="65" />
+                            <Anchor point="TOPLEFT" offsetY="200" offsetX="50"/>
+                            <Anchor point="TOPRIGHT" offsetY="200" offsetX="-50"/>
+                        </Label>
+              
+                        <Label name="$(parent)Message" font="ZoFontGamepadCondensed34" verticalAlignment="TOP" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="370" y="300" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Error" relativePoint="BOTTOMLEFT" offsetY="30" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Error" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,396 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GamepadQuadrantFadeAlphaIn">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0.0" endAlpha="1.0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_GamepadQuadrantFadeAlphaOut">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="1.0" endAlpha="0.0">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <!-- Quadrant System Gamepad Grid Anchors: DO NOT BLOAT! -->
+
+        <Texture name="ZO_GamepadGrid_BackgroundTextureBase" virtual="true" addressMode="WRAP" tier="LOW" level="2" autoAdjustTextureCoords="false">
+            <AnchorFill/>
+            <OnUpdate>
+                ZO_GamepadGrid_BackgroundTextureBase_OnUpdate(self, time)
+            </OnUpdate>
+        </Texture>
+        
+        <!-- Textures -->        
+        <Texture name="ZO_GamepadGrid_BackgroundTexture" inherits="ZO_GamepadGrid_BackgroundTextureBase" textureFile="EsoUI/Art/Windows/Gamepad/panelBG_focus_512.dds" virtual="true"/>
+        
+        <Texture name="ZO_GamepadGrid_VertDivider" textureFile="EsoUI/Art/Windows/Gamepad/gp_fullVertDiv.dds" tier="HIGH" virtual="true">
+            <Dimensions x="8"/>
+        </Texture>
+
+        <Texture name="ZO_GamepadGrid_LeftVertDivider" inherits="ZO_GamepadGrid_VertDivider" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMLEFT"/>
+        </Texture>
+
+        <Texture name="ZO_GamepadGrid_RightVertDivider" inherits="ZO_GamepadGrid_VertDivider" virtual="true">
+            <Anchor point="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+        </Texture>
+
+        <Control name="ZO_GamepadGrid_LeftVertDividerWithArrow" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMLEFT"/>
+            <Dimensions x="8"/>
+            <Controls>
+                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Windows/Gamepad/gp_windowPointer.dds" tier="HIGH">
+                    <Anchor point="RIGHT"/>
+                    <Dimensions x="32" y="32"/>
+                    <TextureCoords left="1" right="0"/>
+                </Texture> 
+                <Texture name="$(parent)Top" inherits="ZO_GamepadGrid_VertDivider">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" />
+                </Texture>
+                <Texture name="$(parent)Bottom" inherits="ZO_GamepadGrid_VertDivider">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Arrow" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMLEFT"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadGrid_RightVertDividerWithArrow" virtual="true">
+            <Anchor point="TOPRIGHT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+            <Dimensions x="8"/>
+            <Controls>
+                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Windows/Gamepad/gp_windowPointer.dds" tier="HIGH">
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+                <Texture name="$(parent)Top" inherits="ZO_GamepadGrid_VertDivider">
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPLEFT" />
+                </Texture>
+                <Texture name="$(parent)Bottom" inherits="ZO_GamepadGrid_VertDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <!-- Background Templates -->
+
+        <Control name="ZO_Gamepad_Background_Screen_Center_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)ScreenCenterIsAlongTop">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT"/>
+                </Control>
+                <!-- Right side of background at screen center height is the TOPRIGHT, Left side of background at screen center height is TOPLEFT -->
+                <Control name="$(parent)BackgroundAtScreenCenterHeight">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ScreenCenterIsAlongTop" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_BackgroundTopLevel_OnInitialized_Template" virtual="true">
+            <OnInitialized>
+                ZO_GamepadQuadrants_BackgroundTemplate_Initialize(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_Gamepad_BackgroundTopLevel_Base_Template" inherits="ZO_Gamepad_BackgroundTopLevel_OnInitialized_Template" hidden="true" layer="BACKGROUND" virtual="true"/>
+
+        <Control name="ZO_Gamepad_BackgroundControl_Base_Template" inherits="ZO_Gamepad_Background_Screen_Center_Template" virtual="true">
+            <Anchor point="TOPLEFT" offsetY="-ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+            <Controls>
+                <Texture name="$(parent)Highlight" color="2D6099" alpha="0.5" tier="LOW" level="10" hidden="true">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_BackgroundControl_Rails" inherits="ZO_Gamepad_BackgroundControl_Base_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)LeftDivider" inherits="ZO_GamepadGrid_LeftVertDivider" />
+                <Texture name="$(parent)RightDivider" inherits="ZO_GamepadGrid_RightVertDivider" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_BackgroundControl_LeftArrow" inherits="ZO_Gamepad_BackgroundControl_Base_Template" virtual="true">
+            <Controls>                
+                <Control name="$(parent)LeftDivider" inherits="ZO_GamepadGrid_LeftVertDividerWithArrow" />
+                <Texture name="$(parent)RightDivider" inherits="ZO_GamepadGrid_RightVertDivider" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_BackgroundControl_RightArrow" inherits="ZO_Gamepad_BackgroundControl_Base_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)LeftDivider" inherits="ZO_GamepadGrid_LeftVertDivider" />
+                <Control name="$(parent)RightDivider" inherits="ZO_GamepadGrid_RightVertDividerWithArrow" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+        </Control>
+
+        <!-- Quadrant Region Anchors -->
+        
+        <!-- Quadrant Content Containers, To Be Used Inside A Quadrant Region -->
+        <!-- Since we are going to be screen res dependent (for now), please do not anchor containers off the bottom. -->
+        <!-- In order for these to work with conveyor fragments. The anchors need to uniform offsetX values. -->
+        
+        <!-- Background Instances -->
+
+        <!-- Quadrant_1 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_1_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET" />
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_1_Background_Template" inherits="ZO_Gamepad_BackgroundControl_Rails" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_1_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_1_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_1_SubContainerAnchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_DEFAULT_PANEL_SUB_CONTAINER_WIDTH" />
+            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_PANEL_BG_EDGE_VERTICAL_DIVIDER_INSIDE_PADDING_X" />
+            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PANEL_BG_EDGE_VERTICAL_DIVIDER_INSIDE_PADDING_X" />
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_1_Background" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_AnchoredToQuadrant1Background" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background"/>
+        </Control>
+        
+        <!-- Quadrant_2 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_2_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET" />
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_2_Background_Template" inherits="ZO_Gamepad_BackgroundControl_LeftArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_2_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_2_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_2_Background" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <!-- Quadrant_3 -->
+        
+        <Control name="ZO_GamepadGrid_NavQuadrant_3_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_3_RIGHT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_3_RIGHT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET" />
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_3_Background_Template" inherits="ZO_Gamepad_BackgroundControl_LeftArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_3_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_3_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_3_Background" inherits="ZO_GamepadGrid_NavQuadrant_3_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_3_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_RightArrowGamepadNavQuadrant_3_Background_Template" inherits="ZO_Gamepad_BackgroundControl_RightArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_3_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_3_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_RightArrowGamepadNavQuadrant_3_Background" inherits="ZO_GamepadGrid_NavQuadrant_3_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_RightArrowGamepadNavQuadrant_3_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+        
+        <!-- Quadrant_4 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_4_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_4_RIGHT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_4_RIGHT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_4_Background_Template" inherits="ZO_Gamepad_BackgroundControl_Rails" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_4_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_4_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_4_Background" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+        
+        <!-- Quadrant_4Wide is used for NPC Conversations -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_4Wide_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDE_WIDTH" />
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_4_RIGHT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_4_RIGHT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+        </Control>
+        
+        <Control name="ZO_LeftArrowGamepadNavQuadrant_4Wide_Background_Template" inherits="ZO_Gamepad_BackgroundControl_LeftArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_4_WIDE_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_4_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <!-- Quadrant_1_2_3 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_1_2_3_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+        </Control>
+        
+        <Control name="ZO_SharedGamepadNavQuadrant_1_2_3_Background_Template" inherits="ZO_Gamepad_BackgroundControl_Rails" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_1_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_3_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_1_2_3_Background" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_2_3_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_AnchoredToQuadrant123Background" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_3_Background"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_3_Background"/>
+        </Control>
+        
+        <!-- Quadrant_2_3 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_2_3_Background_Template" inherits="ZO_Gamepad_BackgroundControl_LeftArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_2_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_3_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+       
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_2_3_Background" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_2_3_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <!-- Quadrant_2_3_4 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_4_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_2_3_4_Background_Template" inherits="ZO_Gamepad_BackgroundControl_LeftArrow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_2_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_4_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_2_3_4_Background" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_2_3_4_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <!-- Quadrant_1_2_3_4 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_1_2_3_4_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_1_2_3_4_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_1_2_3_4_Background_Template" inherits="ZO_Gamepad_BackgroundControl_Rails" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_1_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_4_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_1_2_3_4_Background" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_4_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_2_3_4_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <!-- Dialog -->
+        <Control name="ZO_SharedGamepadDialog_Background_Template" inherits="ZO_Gamepad_Background_Screen_Center_Template" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="-ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+            <Controls>
+                <Texture name="$(parent)Bg" color="000000" tier="LOW">
+                    <AnchorFill/>
+                </Texture>
+                <Texture name="$(parent)RightDivider" inherits="ZO_GamepadGrid_RightVertDivider" />
+            </Controls>
+        </Control>
+
+        <!-- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! -->
+    </Controls>
+</GuiXml>

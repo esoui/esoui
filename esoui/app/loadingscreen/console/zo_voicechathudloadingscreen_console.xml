@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_VoiceChatHUDLoadingScreenConsole" inherits="ZO_VoiceChatHUD">
+            <OnInitialized>
+                ZO_VoiceChatHUDLoadingScreenConsole_OnInitialize(self)
+            </OnInitialized>
+
+            <OnUpdate>
+                ZO_VoiceChatHUDLoadingScreenConsole_OnUpdate(self)
+            </OnUpdate>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

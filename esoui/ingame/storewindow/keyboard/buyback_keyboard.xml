@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_BuyBack" inherits="ZO_InventoryTemplate" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <OnInitialized>
+                ZO_BuyBack_OnInitialize(self)
+            </OnInitialized>
+
+            <OnEffectivelyShown>
+                self.owner:OnShown()
+            </OnEffectivelyShown>
+
+            <Controls>
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="290" y="20" />
+                            <Anchor point="LEFT" offsetX="73" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="RIGHT" offsetX="-22" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_STORE_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackBuyPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>                
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

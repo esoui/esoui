@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GameMenu_PreGame" inherits="ZO_GameMenu_Template" hidden="true">
+            <OnInitialized>
+                ZO_GameMenu_PreGame_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,73 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildHistory_Gamepad_ActivityItem" virtual="true" hidden="true">
+            <Dimensions x="50" y="80" />
+
+            <OnInitialized>
+                self.text = self:GetNamedChild("Text")
+                self.time = self:GetNamedChild("Time")
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="-10"/>
+                </Backdrop>
+                
+                <Label name="$(parent)Text" verticalAlignment="CENTER" font="ZoFontGamepadCondensed34" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetY="10" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-155" offsetY="-10" />
+                </Label>
+
+                <Label name="$(parent)Time" verticalAlignment="CENTER" horizontalAlignment="RIGHT" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                    <Dimensions x="150" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetX="6" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GamepadGuildHistoryTriggerButtonLabelTemplate" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" />
+        <Label name="ZO_GamepadGuildHistoryHeaderLabelTemplate" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" verticalAlignment="CENTER" virtual="true" />
+
+        <TopLevelControl name="ZO_GuildHistory_Gamepad" tier="MEDIUM" hidden="true" inherits="ZO_GuildHomeContentAnchor">
+            <OnInitialized>
+                ZO_GuildHistory_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadLoadingIconAndLabelTemplate">
+                    <Dimensions y="64"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
+
+                    <Controls>
+                        <Label name="$(parent)Text" text="SI_GAMEPAD_GUILD_HISTORY_LOADING" override="true">
+                            <Anchor point="RIGHT"/>
+                        </Label>
+
+                        <Control name="$(parent)LoadingIcon" override="true">
+                            <Dimensions x="64" y="64"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Text" relativePoint="LEFT" offsetX="-5"/>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Footer" inherits="ZO_PagedListFooterBar" hidden="true" />
+                
+                <Control name="$(parent)ActivityLog">
+                    <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Footer" relativePoint="TOPRIGHT" />
+
+                    <Controls>
+                        <!-- NOTE: This control is used as the base anchor for the list of dynamically created instances of ZO_GuildHistory_Gamepad_ActivityItem. -->
+                        <Control name="$(parent)ActivityItemListTopAnchor" hidden="true">
+                            <Dimensions y="0" />
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

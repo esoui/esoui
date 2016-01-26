@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GameCreditsDepartmentGamepad" font="ZoFontGamepadCondensed61" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_GameCreditsSectionGamepad" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_GameCreditsNamesGamepad" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" horizontalAlignment="CENTER" virtual="true">
+            <Dimensions x="800" />
+        </Label>
+        <Label name="ZO_GameCreditsTextBlockGamepad" inherits="ZO_GameCreditsNamesGamepad" virtual="true" />
+        <Texture name="ZO_GameCreditsLogoGamepad" pixelRoundingEnabled="false" resizeToFitFile="true" virtual="true" />
+        <Texture name="ZO_GameCreditsBGSwitchGamepad" virtual="true" />
+        <Control name="ZO_GameCreditsPaddingGamepad" virtual="true" />        
+        
+        <TopLevelControl name="ZO_GameCredits_Gamepad"  hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_GameCredits_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Scroll">
+                    <Dimensions x="800"/>
+                    <Anchor point="TOP" />
+                    <Anchor point="BOTTOM" />
+                    <FadeGradient x1="0" y1="1" size1="300" x2="0" y2="-1" size2="300" />
+                </Scroll>
+            </Controls>            
+            
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

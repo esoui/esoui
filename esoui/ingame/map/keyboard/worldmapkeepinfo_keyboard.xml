@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_WorldMapKeepInfoFootPrintBackground" layer="BACKGROUND" allowBringToTop="false" hidden="true" mouseEnabled="true">
+            <Dimensions x="350" y="540" />
+            <Anchor point="LEFT" offsetY="-80"/>
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/WorldMap/map_AVA_panelBG.dds">
+                    <Dimensions x="512" y="1024" />
+                    <Anchor point="TOPLEFT" offsetY="-75" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_WorldMapKeepInfoContent" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_WorldMapKeepInfoKeepName" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMapKeepInfo" relativePoint="BOTTOMRIGHT"/>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_WorldMapKeepInfo" hidden="true">
+            <Dimensions x="350" y="485" />
+            <Anchor point="LEFT" offsetY="-105" />
+            <OnInitialized>
+                ZO_WorldMapKeepInfo_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)MenuBar" inherits="ZO_WorldMapInfoMenuBar">
+                    <Anchor point="TOPLEFT" offsetX="15"/>
+                    <Controls>
+                        <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider" excludeFromResizeToFitExtents="true">
+                            <Dimensions x="472"/>
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="14" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Label name="$(parent)KeepName" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBar" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Dimensions x="320"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,252 @@
+<GuiXml>
+    <Controls>
+        <StatusBar name="ZO_DefaultStatusBarBase" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_tall.dds" virtual="true">
+            <TextureCoords left="0" right="1" top="0" bottom="0.8125" />
+        </StatusBar>
+
+        <StatusBar name="ZO_DefaultStatusBar" inherits="ZO_DefaultStatusBarBase" virtual="true">
+            <Dimensions x="512" y="16" />
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge_blunt.dds" width="4" height="8" />
+            <OnInitialized>
+                ZO_StatusBar_InitializeDefaultColors(self)
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+            <Controls>
+                <StatusBar name="$(parent)Gloss" textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_gloss.dds">
+                    <AnchorFill />
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_leadingEdge_gloss.dds" width="8" height="32" />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.8125" />
+                    <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.8125" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <Control name="ZO_ArrowStatusBarOverlay" tier="HIGH" layer="OVERLAY" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame.dds" layer="OVERLAY">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.6250" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame.dds" layer="OVERLAY">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="0.5938" right="0.6133" top="0" bottom="0.6250" />
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame.dds" layer="OVERLAY">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArrowSecondaryStatusBarOverlay" tier="HIGH" layer="OVERLAY" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_Champion_frame.dds" layer="OVERLAY">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.5" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_Champion_frame.dds" layer="OVERLAY">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="0.5761" right="0.59375" top="0" bottom="0.5" />
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_Champion_frame.dds" layer="OVERLAY">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.0195" right="0.5761" top="0" bottom="0.5" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArrowSecondaryStatusBarBG" tier="LOW" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_ChampionBG.dds">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.5" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_ChampionBG.dds" >
+                    <Dimensions x="10" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="0.5761" right="0.59375" top="0" bottom="0.5" />
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_ChampionBG.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.0195" right="0.5761" top="0" bottom="0.5" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ArrowStatusBarBG" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.6250" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                    <Dimensions x="10" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="0.5938" right="0.6133" top="0" bottom="0.6250" />
+                </Texture>
+
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <StatusBar name="ZO_ArrowStatusBar" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill.dds" virtual="true">
+            <Dimensions x="315" y="20" />
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge.dds" width="8" height="20" />
+            <TextureCoords left="0" right="1" top="0" bottom="0.625" />
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.625" />
+
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+            
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+            <Controls>
+                <StatusBar name="$(parent)Gloss" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_gloss.dds">
+                    <AnchorFill />
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge_gloss.dds" width="8" height="20" />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.625" />
+                    <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.625" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_ArrowStatusBarWithBG" inherits="ZO_ArrowStatusBar" virtual="true">
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG" />
+                <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay" />
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_DefaultStatusBarBG" inherits="ZO_DefaultStatusBar" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="4" />
+                </Backdrop>
+            </Controls>
+        </StatusBar>
+
+        <Control name="ZO_AttributeBar" inherits="ZO_PlayerAttributeContainer" virtual="true">
+            <Controls>
+                <Control name="$(parent)BgContainer" inherits="ZO_PlayerAttributeBgContainer">
+                    <Anchor point="LEFT" />
+                    <Controls>
+                        <Texture name="$(parent)BgLeft" inherits="ZO_PlayerAttributeBgLeft" />
+                        <Texture name="$(parent)BgRight" inherits="ZO_PlayerAttributeBgRightArrow" />
+                        <Texture name="$(parent)BgCenter" inherits="ZO_PlayerAttributeBgCenter" />
+                    </Controls>
+                </Control>
+                <StatusBar name="$(parent)Bar" inherits="ZO_PlayerAttributeStatusBar">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
+                    </Controls>
+                </StatusBar>
+                <Texture name="$(parent)FrameLeft" inherits="ZO_PlayerAttributeFrameLeft" layer="CONTROLS" />
+                <Texture name="$(parent)FrameRight" inherits="ZO_PlayerAttributeFrameRightArrow" layer="CONTROLS" />
+                <Texture name="$(parent)FrameCenter" inherits="ZO_PlayerAttributeFrameCenter" layer="CONTROLS" />
+
+                <Label name="$(parent)Value" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventoryItemImprovementStatusBar" virtual="true" >
+            <Dimensions x="245" y="20"/>
+            <OnInitialized>
+                ZO_InventoryItemImprovementStatusBar:Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <StatusBar name="$(parent)Underlay" inherits="ZO_ArrowStatusBar" color="AA0ACD">
+                    <AnchorFill />
+                </StatusBar>
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_ArrowStatusBar">
+                    <AnchorFill />
+                </StatusBar>
+
+                <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_StableAttributeBar" inherits="ZO_PlayerAttributeContainer" virtual="true">
+            <Controls>
+                <Label name="$(parent)Value" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="65" />
+                    <Anchor point="RIGHT" relativePoint="RIGHT" />
+                </Label>
+                <Control name="$(parent)StatusBar">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5"/>
+                    <!--Add the actual status bar and frames as relevant to gamepad vs keyboard when inheriting-->
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_StableTrainingBar_Gamepad" inherits="ZO_StableAttributeBar" virtual="true">
+            <OnInitialized>
+                ZO_StableTrainingBar_Gamepad:Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Value" override="true" font="ZoFontGamepad34"/>
+                <Control name="$(parent)StatusBar" override="true">
+                    <Controls>
+                        <StatusBar name="$(parent)Bar" inherits="ZO_GamepadArrowStatusBarWithBGMedium">
+                            <Anchor point="LEFT"/>
+                            <Anchor point="RIGHT" offsetX="-10"/>
+                            <OnInitialized>
+                                self.gloss = self:GetNamedChild("Gloss")
+                            </OnInitialized>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

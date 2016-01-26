@@ -1,0 +1,105 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildKioskDialog" inherits="ZO_CustomDialogBase" virtual="true">
+            <Controls>
+                <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
+                <Label name="$(parent)GuildHeader"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+                <Control name="$(parent)Guild" inherits="ZO_ComboBox">
+                    <Dimensions y="36"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GuildHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)ErrorControls">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Guild" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Guild" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Dimensions y="115"/>
+                    <Controls>
+                        <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" verticalAlignment="CENTER">
+                            <AnchorFill/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_GuildKioskPurchaseDialog" inherits="ZO_GuildKioskDialog">
+            <OnInitialized>
+                ZO_GuildKioskPurchaseDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)PurchaseControls">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Guild" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Guild" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Dimensions y="85"/>
+                    <Controls>
+                        <Label name="$(parent)GuildBalance" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" offsetY="20" />
+                        </Label>
+                        <Label name="$(parent)GuildBalanceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_BANKED_GOLD_HEADER">
+                            <Anchor point="TOPLEFT"  offsetY="20" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildBalance" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                        <Label name="$(parent)PurchaseCost" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildBalance" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                        </Label>
+                        <Label name="$(parent)PurchaseCostHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_PURCHASE_COST">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GuildBalanceHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PurchaseCost" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GuildKioskBidDialog" inherits="ZO_GuildKioskDialog">
+            <OnInitialized>
+                ZO_GuildKioskBidDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)BidControls">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Guild" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Guild" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Dimensions y="115"/>
+                    <Controls>
+                        <Label name="$(parent)BiddingCloses" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Label name="$(parent)BiddingClosesHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_BIDDING_CLOSES_IN_HEADER">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BiddingCloses" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                        <Label name="$(parent)GuildBalance" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BiddingCloses" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                        </Label>
+                        <Label name="$(parent)GuildBalanceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_BANKED_GOLD_HEADER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BiddingClosesHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildBalance" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                        <Label name="$(parent)CurrentBid" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildBalance" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                        </Label>
+                        <Label name="$(parent)CurrentBidHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GuildBalanceHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentBid" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                        <Backdrop name="$(parent)NewBid" inherits="ZO_DefaultCurrencyInputField">
+                            <Dimensions x="100"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentBid" relativePoint="BOTTOMRIGHT" offsetX="-18" offsetY="5" />
+                        </Backdrop>
+                        <Label name="$(parent)NewBidHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_NEW_BID_HEADER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentBidHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)NewBid" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,142 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_TradeAcceptOverlay" tier="LOW" layer="BACKGROUND" textureFile="EsoUI/Art/TradeWindow/trade_player_readyBG_topLeft.dds" virtual="true">
+            <Dimensions x="256" y="256" />
+            <Anchor point="TOPLEFT" />
+            <Controls>
+                <Texture name="$(parent)TopRight" textureFile="EsoUI/Art/TradeWindow/trade_player_readyBG_topRight.dds">
+                    <Dimensions x="128" y="256" />
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                </Texture>
+                <Texture name="$(parent)BottomLeft" textureFile="EsoUI/Art/TradeWindow/trade_player_readyBG_bottomLeft.dds">
+                    <Dimensions x="256" y="128" />
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                </Texture>
+                <Texture name="$(parent)BottomRight" textureFile="EsoUI/Art/TradeWindow/trade_player_readyBG_bottomRight.dds">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" />
+                </Texture>
+            </Controls>
+        </Texture>
+
+        <Control name="ZO_TradeSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions x="345" y="45" />
+
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/TradeWindow/trade_itemBG_left.dds">
+                    <Dimensions x="256" y="58" />
+                    <Anchor point="TOPLEFT" />
+                    <Controls>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/TradeWindow/trade_itemBG_right.dds">
+                            <Dimensions x="128" y="58" />
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+                
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="30" offsetY="23" />
+                </Button>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
+                    <Dimensions x="230" y="40" />
+                    <Anchor point="LEFT" offsetX="60" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_TradeReadyText" font="ZoFontWinH4" modifyTextType="UPPERCASE" text="SI_TRADE_READY" virtual="true" />
+		
+        <!-- Trade Window -->
+        <TopLevelControl name="ZO_Trade" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+				ZO_Trade_OnInitialize(self)
+			</OnInitialized>
+
+            <Controls>
+                <!--My Controls-->
+                <Control name="$(parent)MyControls">
+                    <Dimensions x="355" y="285" />
+                    <Anchor point="BOTTOMLEFT" offsetY="8" />
+                    <OnReceiveDrag>
+                        ZO_Trade_OnReceiveDrag()
+                    </OnReceiveDrag>
+                    <OnMouseDown>
+                        ZO_Trade_OnMouseDown()
+                    </OnMouseDown>
+                    <Controls>
+                        <Texture name="$(parent)AcceptOverlay" inherits="ZO_TradeAcceptOverlay" hidden="true" />
+                        
+                        <Label name="$(parent)Name" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_TRADE_YOUR_OFFER">
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-8" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-8" />
+                        </Label>
+
+                        <Label name="$(parent)ReadyText" inherits="ZO_TradeReadyText">
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-8" />
+                        </Label>
+
+                        <!--Money Input-->
+                        <Backdrop name="$(parent)BG" inherits="ZO_EditBackdrop" mouseEnabled="true">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-29" offsetY="-24" />
+                            <Dimensions x="260" y="20" />
+
+                            <OnMouseUp>
+                                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                                    ZO_Trade_BeginChangeMoney(self)
+                                end
+                            </OnMouseUp>
+                        </Backdrop>
+
+                        <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="LEFT" relativeTo="$(parent)BG" offsetX="4" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)BG" offsetX="-6" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <!--Their Controls-->
+                <Control name="$(parent)TheirControls">
+                    <Dimensions x="356" y="263" />
+                    <Anchor point="TOPLEFT" offsetY="38" />
+                    <Controls>
+                        <Texture name="$(parent)AcceptOverlay" inherits="ZO_TradeAcceptOverlay" hidden="true"/>
+
+                        <Label name="$(parent)Name" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-8" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-8" />
+                        </Label>
+
+                        <Label name="$(parent)ReadyText" inherits="ZO_TradeReadyText">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetY="-4" />
+                        </Label>
+                        
+                        <!--Their Money Display-->
+                        <Texture name="$(parent)BG" textureFile="EsoUI/Art/TradeWindow/trade_itemBG_left.dds">
+                            <Dimensions x="256" y="24" />
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetY="-27" />
+
+                            <Controls>
+                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/TradeWindow/trade_itemBG_right.dds">
+                                    <Dimensions x="128" y="24" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                                </Texture>
+                            </Controls>
+                        </Texture>
+                                
+                        <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="LEFT" relativeTo="$(parent)BG" offsetX="4" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)BGRight" offsetX="-64" offsetY="-2" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>    
+</GuiXml>

@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>        
+        <TopLevelControl name="ZO_TopBar" hidden="true" tier="LOW" layer="BACKGROUND">
+            <Dimensions y="64" />
+            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPRIGHT" />
+            
+            <Controls>
+                <Texture name="$(parent)Background" inherits="ZO_TopBarBG" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

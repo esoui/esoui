@@ -1,0 +1,40 @@
+<GuiXml>
+    <Controls>
+        <Control name="GameStartupLabelEntry" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                self.GetHeight = function(control)
+                return control:GetNamedChild("Name"):GetTextHeight()
+                end
+                self.label = self:GetNamedChild("Name")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadFullWidthLabelTemplate"/>
+            </Controls>
+        </Control>
+               
+        <TopLevelControl name="GameStartup_GamepadMiddlePane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <OnInitialized>
+                        self.header = self:GetNamedChild("GenericHeader")
+                    </OnInitialized>
+
+                    <Controls>
+                        <Control name="$(parent)GenericHeader" inherits="ZO_GamepadGenericContentHeader" />
+
+                        <Label name="$(parent)Content" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GenericHeader" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_TITLE_INFO_PADDING_Y" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="GameStartup_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_GameStartup_Gamepad_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

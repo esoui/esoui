@@ -1,0 +1,57 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_VerticalParametricScrollListTemplate" mouseEnabled="true" virtual="true">
+            <OnMouseWheel>
+                if self.scrollList.active then
+                    if delta > 0 then
+                        self.scrollList:MovePrevious()
+                    else
+                        self.scrollList:MoveNext()
+                    end
+                end
+            </OnMouseWheel>
+
+            <Controls>
+                <Scroll name="$(parent)Scroll">
+                    <AnchorFill />
+                    <FadeGradient x1="0" y1="1" size1="ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE" x2="0" y2="-1" size2="ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE" />
+                </Scroll>
+                
+                <Control name="$(parent)ListScreenCenterIsAlongTop">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
+
+                    <Controls>
+                        <Control name="$(parent)ListScreenCenter">
+                            <Anchor point="CENTER" relativePoint="TOPRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)NoItemsLabel"  font="ZoFontGamepadCondensed36" horizontalAlignment="CENTER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)ListScreenCenterIsAlongTop"/>
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HorizontalParametricScrollListTemplate" mouseEnabled="true" virtual="true">
+            <OnMouseWheel>
+                if self.scrollList.active then
+                    if delta > 0 then
+                        self.scrollList:MoveNext()
+                    else
+                        self.scrollList:MovePrevious()
+                    end
+                end
+            </OnMouseWheel>
+
+            <Controls>
+                <Scroll name="$(parent)Scroll">
+                    <AnchorFill />
+                    <FadeGradient x1="1" y1="0" size1="ZO_HORIZONTAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE" x2="-1" y2="0" size2="ZO_HORIZONTAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE" />
+                </Scroll>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

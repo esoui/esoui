@@ -1,0 +1,56 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_KeybindButtonBehavior" mouseEnabled="true" virtual="true" resizeToFitDescendents="true">
+            <OnInitialized>
+                ZO_KeybindButtonTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_SelectableLabel_OnMouseEnter(self.nameLabel)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_SelectableLabel_OnMouseExit(self.nameLabel)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_KeybindButtonTemplate_OnMouseUp(self, button, upInside)
+            </OnMouseUp>            
+        </Control>
+
+        <Control name="ZO_KeybindButton_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" />
+                <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_KeybindButton_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontGamepad34" />
+                <Label name="$(parent)KeyLabel" font="ZoFontGamepad22" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_KeybindButton" inherits="ZO_KeybindButtonBehavior" virtual="true">
+            <DimensionConstraints minY="35" maxY="35" />
+
+            <OnInitialized>
+                ZO_KeybindButtonTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="RIGHT"/>
+                    <OnInitialized>
+                        ZO_SelectableLabel_OnInitialized(self)
+                    </OnInitialized>
+                </Label>
+
+                <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" inherits="ZO_LargeKeyMarkupLabel">
+                    <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

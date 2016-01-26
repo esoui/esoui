@@ -1,0 +1,114 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CenterScreenLargeText">
+            <Animations>
+                <!-- Keep the height "large" so that we don't have to worry about fitting the scroll around the text -->
+                <SizeAnimation duration="1700" startWidth="512" endWidth="2184" startHeight="500" endHeight="500" />
+                <SizeAnimation duration="2000" delay="3500" startWidth="2184" endWidth="512" startHeight="500" endHeight="500" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenSmallTextFadeIn">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenSmallTextFadeOut">
+            <Animations>
+                <AlphaAnimation duration="500" delay="3500" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenSmallTextTranslate">
+            <Animations>
+                <TranslateAnimation duration="1000" deltaX="0" deltaY="0" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_CenterScreenAnnounceTextTemplate" horizontalAlignment="CENTER" virtual="true">
+            <Dimensions x="1160" />
+            <Anchor point="TOP" />
+        </Label>
+
+        <Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_CenterScreenAnnounceSmallTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" virtual="true" />
+
+        <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontCenterScreenAnnounceLarge">
+                    <Controls>
+                        <Label name="$(parent)Combined" font="ZoFontCenterScreenAnnounceSmall">
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="5"/>
+                        </Label>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGamepadBold45">
+                    <Controls>
+                        <Label name="$(parent)Combined" font="ZoFontGamepad42">
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
+                        </Label>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true">
+            <Anchor point="TOP" offsetY="190" />
+        </Control>
+
+        <Control name="ZO_CenterScreenAnnounce_Gamepad_Template" virtual="true">
+            <Anchor point="TOP" offsetY="270" />
+        </Control>
+
+        <TopLevelControl name="ZO_CenterScreenAnnounce" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
+            <Dimensions x="1160" />
+
+            <OnInitialized>
+                ZO_CenterScreenAnnounce_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)LargeTextContainer">
+                    <FadeGradient x1="1" y1="0" size1="512" x2="-1" y2="0" size2="512" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Text" inherits="ZO_CenterScreenAnnounceLargeTextTemplate">
+                            <Anchor point="TOP" relativeTo="ZO_CenterScreenAnnounce" />
+                            <Controls>
+                                <Label name="$(parent)Combined" inherits="ZO_CenterScreenAnnounceSmallTextTemplate">
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" level="3">
+                                            <Dimensions x="50" y="50" />
+                                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
+                                            <Controls>
+                                                <Texture name="$(parent)BG" hidden="true" level="2">
+                                                    <AnchorFill />
+                                                </Texture>
+
+                                                <Texture name="$(parent)Frame" layer="CONTROLS">
+                                                    <AnchorFill />
+                                                </Texture>
+                                            </Controls>
+                                        </Texture>
+                                    </Controls>
+                                </Label>
+                            </Controls>
+                        </Label>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

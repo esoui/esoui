@@ -1,0 +1,23 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_TreeOpenAnimation">
+            <Animations>
+                <CustomAnimation duration="300"/>
+                <AlphaAnimation duration="300" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Scroll name="ZO_TreeChildContainer" virtual="true"/>
+        <Control name="ZO_TreeHeader" virtual="true" mouseEnabled="true">
+            <OnMouseUp>
+                ZO_TreeHeader_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Control>
+        <Control name="ZO_TreeEntry" virtual="true" mouseEnabled="true">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Control>
+    </Controls>
+</GuiXml>

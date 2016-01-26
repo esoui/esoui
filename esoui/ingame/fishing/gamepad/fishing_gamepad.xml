@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_FishingPanel_Gamepad">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_Fishing_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Menu" inherits="ZO_RadialMenuHUDSize_Gamepad">
+                    <Controls>
+                        <Label name="$(parent)Action" inherits="ZO_RadialMenuActionText_Gamepad"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

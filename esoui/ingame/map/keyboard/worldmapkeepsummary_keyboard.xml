@@ -1,0 +1,59 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapKeepSummaryRow" resizeToFitDescendents="true" virtual="true">
+            <Dimensions x="310"/>
+            <Controls>
+                <Texture name="$(parent)Alliance" mouseEnabled="true">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="TOPLEFT"/>
+                    <OnMouseEnter>
+                        ZO_WorldMapKeepAlliance_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_WorldMapKeepAlliance_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)Level" font="ZoFontCallout3">
+                    <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
+                <Label name="$(parent)ResourceName" font="ZoFontWinH3" modifyTextType="UPPERCASE">
+                    <Dimensions x="175"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Level" relativePoint="TOPRIGHT" offsetX="10" offsetY="8"/>
+                </Label>
+                <Label name="$(parent)TimeUntilNextLevel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <AnchorToBaseline relativeToLabel="$(parent)Level" side="RIGHT" offsetX="10"/>
+                    <Dimensions x="225"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapKeepSummary" inherits="ZO_WorldMapKeepInfoContent">
+            <OnInitialized>
+                ZO_WorldMapKeepSummary_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Alliance" mouseEnabled="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" offsetY="9"/>
+                    <OnMouseEnter>
+                        ZO_WorldMapKeepAlliance_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_WorldMapKeepAlliance_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)GuildOwnerLabel" text="SI_KEEP_GUILD_OWNER_HEADER" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
+                <Label name="$(parent)GuildOwner" font="ZoFontWinH4">
+                    <Dimensions x="245" y="50"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
+                <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="472"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="15" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

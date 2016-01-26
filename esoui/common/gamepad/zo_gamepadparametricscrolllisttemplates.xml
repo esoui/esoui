@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+
+        <Control name="ZO_GamepadVerticalParametricScrollListSublistTemplate" inherits="ZO_GamepadGrid_NavQuadrant_1_SubContainerAnchors" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate ZO_GamepadGrid_SubListAnchors">
+                    <Controls>
+                        <Backdrop name="$(parent)Bg" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" pixelRoundingEnabled="false">
+                            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds" edgeFileWidth="64" edgeFileHeight="8" />
+                            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                            <Insets left="8" top="8" right="-8" bottom="-8" />
+                            <AnchorFill/>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+    </Controls>
+</GuiXml>

@@ -1,0 +1,2 @@
+EsoUI\IngameLocalization\LocalizeGeneratedStrings.lua
+$(languageDirectory)\lang\$(language)_client.lua

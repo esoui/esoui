@@ -1,0 +1,91 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_PreferredRolesButton"  inherits="ZO_CheckButton" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <OnMouseEnter>
+                ZO_PreferredRolesButton_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PreferredRolesButton_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnClicked>
+                ZO_PreferredRolesButton_OnClicked(self, button)
+            </OnClicked>
+        </Button>
+
+        <TopLevelControl name="ZO_PreferredRoles" resizeToFitDescendents="true" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_GroupList" offsetX="-54" />
+            <OnInitialized>
+                ZO_PreferredRoles_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_PreferredRolesHelp_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_PreferredRolesHelp_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+
+                <Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" relativeTo="$(parent)Help" relativePoint="RIGHT" offsetX="5"/>
+                </Label>
+
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" offsetY="-2" />
+                    <Controls>
+                        <Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="32" y="32"/>
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_tank_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_tank_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_tank_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_tank_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_tank_down_disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.role = LFG_ROLE_TANK
+                            </OnInitialized>
+                        </Button>
+                        <Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Tank" relativePoint="RIGHT" offsetX="7" />
+                            <Dimensions x="32" y="32"/>
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_healer_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_healer_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_healer_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_healer_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_healer_down_disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.role = LFG_ROLE_HEAL
+                            </OnInitialized>
+                        </Button>
+                        <Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="7" />
+                            <Dimensions x="32" y="32"/>
+                            <Textures
+                                normal="EsoUI/Art/LFG/LFG_dps_up.dds"
+                                pressed="EsoUI/Art/LFG/LFG_dps_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_dps_over.dds"
+                                disabled="EsoUI/Art/LFG/LFG_dps_disabled.dds"
+                                disabledPressed="EsoUI/Art/LFG/LFG_dps_down_disabled.dds"
+                            />
+                            <OnInitialized>
+                                self.role = LFG_ROLE_DPS
+                            </OnInitialized>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

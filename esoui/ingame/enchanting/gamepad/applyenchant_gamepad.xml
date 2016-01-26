@@ -1,0 +1,45 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_Gamepad_ApplyEnchant_ItemTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.subLabelCount = 3
+                self.GetHeight = function()
+                    local height = self.label:GetTextHeight()
+                    
+                    if self.selected then
+                        for i = 1, self.subLabelCount do
+                            local subLabelControl = self:GetNamedChild("SubLabel"..i)
+                            height = height + subLabelControl:GetTextHeight()
+                        end
+                    end
+                    
+                    return height
+                end
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)SubLabel1" font="ZoFontGamepad27" modifyTextType="UPPERCASE" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Label" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
+                </Label>
+
+                <Label name="$(parent)SubLabel2" inherits="ZO_Gamepad_ItemImprovement_ValueLabel" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)SubLabel1" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
+                </Label>
+
+                <Label name="$(parent)SubLabel3" inherits="ZO_Gamepad_ItemImprovement_ValueLabel" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)SubLabel2" offsetY="15" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_Gamepad_ApplyEnchant" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_Gamepad_ApplyEnchant_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

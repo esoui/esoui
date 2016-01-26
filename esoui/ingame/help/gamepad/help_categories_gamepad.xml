@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Gamepad_Help_Search_Row" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.GetHeight = function(control)
+                    return control.label:GetTextHeight() + self:GetNamedChild("EditBox"):GetHeight()
+                end
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" text="SI_GAMEPAD_HELP_SEARCH"/>
+                <Backdrop name="$(parent)EditBox" inherits="ZO_EditBackdrop_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
+                    <Dimensions x="300"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GAMEPAD_HELP_SEARCH_PROMPT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_Gamepad_Help_Tutorials_Categories" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Gamepad_Tutorials_Categories_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

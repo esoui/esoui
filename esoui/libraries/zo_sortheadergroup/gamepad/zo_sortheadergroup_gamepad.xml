@@ -1,0 +1,12 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadSortHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GameCreditsDepartment" font="ZoFontCreditsHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_GameCreditsSection" font="ZoFontCreditsText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_GameCreditsNames" font="ZoFontCreditsText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" virtual="true">
+            <Dimensions x="400" />
+        </Label>
+        <Label name="ZO_GameCreditsTextBlock" inherits="ZO_GameCreditsNames" virtual="true" />
+        <Texture name="ZO_GameCreditsLogo" pixelRoundingEnabled="false" resizeToFitFile="true" virtual="true" />
+        <Texture name="ZO_GameCreditsBGSwitch" virtual="true" />
+        <Control name="ZO_GameCreditsPadding" virtual="true" />
+
+        <TopLevelControl name="ZO_GameCredits_Keyboard" keyboardEnabled="true" mouseEnabled="true" hidden="true" >
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_GameCredits_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <OnKeyUp>
+                ZO_GameCredits_Keyboard_OnKeyUp()
+            </OnKeyUp>
+
+            <OnMouseUp>
+                ZO_GameCredits_Keyboard_OnMouseUp(upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Control name="$(parent)ScrollBG" inherits="ZO_RightFullscreenPanelBG">
+                    <Anchor point="TOPRIGHT" offsetX="380"/>
+                    <Dimensions x="960" />
+                    <Controls>
+                        <Texture name="$(parent)Right" layer="CONTROLS" override="true">
+                            <Dimensions x="192"/>
+                        </Texture>
+                        <Texture name="$(parent)Left" layer="CONTROLS" override="true">
+                            <Dimensions x="768"/>
+                        </Texture>
+                    </Controls>
+                    <OnInitialized>
+                        self:SetHeight(GuiRoot:GetHeight() + 120)
+                        self:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:SetHeight(GuiRoot:GetHeight() + 120) end)
+                    </OnInitialized>
+                </Control>
+
+                <Scroll name="$(parent)Scroll">
+                    <Dimensions x="500"/>
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <FadeGradient x1="0" y1="1" size1="300" x2="0" y2="-1" size2="300" />
+                </Scroll>
+            </Controls>            
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

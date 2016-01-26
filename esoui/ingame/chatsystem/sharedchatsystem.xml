@@ -1,0 +1,231 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="NotificationAddedBurst">
+            <Animations>
+                <ScaleAnimation duration="433" startScale="0" endScale="0.75" />
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="333" startAlpha="1" endAlpha="0" delay="100"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="NotificationPulse" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <ScaleAnimation duration="1000" startScale="1" endScale="3"/>
+                <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ChatMinMaxAnim">
+            <Animations>
+                <TranslateAnimation duration="500" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>     
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_ChatBufferTemplate" virtual="true">
+            <AnchorFill/>
+
+            <OnMouseEnter>
+                ZO_ChatSystem_OnMouseEnter(self:GetParent():GetParent():GetParent())
+            </OnMouseEnter>
+        </Control>
+      
+        <Control name="ZO_ChatWindowTemplate" hidden="true" virtual="true">
+            <Controls>
+                <TextBuffer name="$(parent)Buffer" inherits="ZO_ChatBuffer" linkEnabled="true"/>
+             </Controls>
+        </Control>
+
+        <Control name="ZO_ChatWindowTabTemplate" inherits="ZO_ResizableTextTabButton" clampedToScreen="true" mouseEnabled="true" virtual="true">
+            <OnDragStart>
+                ZO_ChatSystem_OnDragStart(self)
+            </OnDragStart>
+
+            <OnMouseUp>
+                if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
+                    ZO_ChatWindow_OpenContextMenu(self)
+                end
+
+                ZO_ChatSystem_OnDragStop(self)
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_ChatSystem_OnMouseEnter(self)
+                ZO_TabButton_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_TabButton_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+      
+        <TopLevelControl name="ZO_ChatContainerTemplate" resizeHandleSize="8" mouseEnabled="true" clampedToScreen="true" virtual="true">
+            <Dimensions x="350" y="155" />
+            <ClampedToScreenInsets top="-24"/>
+            
+            <OnResizeStart>
+                ZO_ChatSystem_OnResizeStart(self)
+            </OnResizeStart>
+            
+            <OnResizeStop>
+                ZO_ChatSystem_OnResizeStop(self)
+            </OnResizeStop>
+            
+            <OnMoveStop>
+                ZO_ChatSystem_OnMoveStop(self)
+            </OnMoveStop>
+            
+            <OnMouseWheel>
+                ZO_ChatSystem_OnMouseWheel(self, -delta, ctrl, alt, shift)
+            </OnMouseWheel>
+            
+            <OnMouseEnter>
+                ZO_ChatSystem_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" integralWrapping="true">
+                    <Anchor point="TOPLEFT" offsetX="-8" offsetY="-6"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+
+                    <Edge file="EsoUI/Art/ChatWindow/chat_BG_edge.dds" edgeFileWidth="256" edgeFileHeight="256" edgeSize="32"/>
+                    <Center file="EsoUI/Art/ChatWindow/chat_BG_center.dds" />
+                    <Insets left="32" top="32" right="-32" bottom="-32" />
+                </Backdrop>
+
+                <Slider name="$(parent)Scrollbar" mouseEnabled="true">
+                    <Dimensions x="8" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="-23" offsetY="60" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-23" offsetY="-80" />
+
+                    <ThumbTexture
+                        textureFile="EsoUI/Art/ChatWindow/chat_thumb.dds"
+                        disabledTextureFile="EsoUI/Art/ChatWindow/chat_thumb_disabled.dds"
+                        thumbWidth="8"
+                        thumbHeight="22"
+                        bottom="0.6875"
+                    />
+                    
+                    <BackgroundMiddle textureFile="EsoUI/Art/ChatWindow/chat_scrollbar_track.dds"/>
+                    <BackgroundBottom textureFile="" />
+                    <BackgroundTop textureFile="" />
+                    
+                    <OnMouseWheel>
+                        ZO_ChatSystem_OnMouseWheel(self, -delta, ctrl, alt, shift)
+                    </OnMouseWheel>
+
+                    <OnValueChanged>
+                        if eventReason == EVENT_REASON_HARDWARE then
+                            ZO_ChatSystem_SetScroll(self, value)
+                        end
+                    </OnValueChanged>
+                    
+                    <OnMouseEnter>
+                        ZO_ChatSystem_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <Controls>
+                        <Button name="$(parent)ScrollUp" inherits="ZO_ScrollUpButton">
+                            <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-1"/>
+                            <Textures
+                                normal="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_up.dds"
+                                pressed="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_down.dds"
+                                mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_over.dds"
+                                disabled="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_disabled.dds"
+                            />
+                            <OnMouseDown>
+                                ZO_ChatSystem_ScrollByOffset(self:GetParent(), -1)
+                            </OnMouseDown>
+                        </Button>
+
+                        <Button name="$(parent)ScrollDown" inherits="ZO_ScrollDownButton">
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetX="-1"/>
+                            <Textures
+                                normal="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_up.dds"
+                                pressed="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_down.dds"
+                                mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_over.dds"
+                                disabled="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_disabled.dds"
+                            />
+                            <OnMouseDown>
+                                ZO_ChatSystem_ScrollByOffset(self:GetParent(), 1)
+                            </OnMouseDown>
+                        </Button>
+                        
+                        <Button name="$(parent)ScrollEnd" inherits="ZO_ScrollEndButton">
+                            <Dimensions x="16" y="16" />
+                            <Anchor point="TOP" relativeTo="$(parent)ScrollDown" relativePoint="BOTTOM"/>
+                            
+                            <OnMouseDown>
+                                ZO_ChatSystem_ScrollToBottom(self:GetParent())
+                            </OnMouseDown>
+                        </Button>
+                    </Controls>
+                </Slider>
+                
+                <Control name="$(parent)WindowContainer"/>
+                
+                <Control name="$(parent)OverflowTab" inherits="ZO_SimpleIconWithHighlightTabButton" hidden="true">
+                    <OnMouseEnter>
+                        ZO_ChatSystem_OnMouseEnter(self)
+                        ZO_TabButton_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseDown>
+                        ZO_TabButton_Select(self)
+                    </OnMouseDown>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_TextChatTemplate" virtual="true">
+            <Anchor point="BOTTOMLEFT" offsetX="8" offsetY="-50" />
+            
+            <Controls>
+                 <Texture name="$(parent)InsertIndicator" textureFile="EsoUI/Art/ChatWindow/chat_tabInsertIndicator.dds" hidden="true">
+                    <Dimensions x="8" y="32" />
+                    <TextureCoords left="0.25" right=".75" top="0" bottom="1" />
+                </Texture>
+
+                <Button name="$(parent)AgentChat" mouseOverBlendMode="ADD" inherits="ZO_ButtonBehaviorClickSound" inheritAlpha="false" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)NumNotifications" relativePoint="RIGHT" offsetX="10" />
+
+                    <Textures
+                        normal="EsoUI/Art/ChatWindow/chat_cs_up.dds"
+                        pressed="EsoUI/Art/ChatWindow/chat_cs_down.dds"
+                        mouseOver="EsoUI/Art/ChatWindow/chat_cs_over.dds"
+                    />
+
+                    <OnMouseEnter>
+                        ZO_ChatSystem_OnAgentChatEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_ChatSystem_OnAgentChatExit(self)
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_ChatSystem_OnAgentChatClicked(self)
+                    </OnClicked>
+
+                    <Controls>
+                        <Texture name="$(parent)Glow" tier="HIGH" textureFile="EsoUI/Art/ChatWindow/chat_cs_glow.dds" hidden="false" inheritAlpha="false">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Texture name="$(parent)Burst" tier="HIGH" textureFile="EsoUI/Art/ChatWindow/chat_notification_burst.dds" blendMode="ADD" alpha="0" inheritAlpha="false">
+                            <Dimensions x="512" y="512"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Texture name="$(parent)Echo" tier="MEDIUM" textureFile="EsoUI/Art/ChatWindow/chat_cs_echo.dds" blendMode="ADD" alpha="0" inheritAlpha="false">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                    </Controls>
+                </Button>  
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

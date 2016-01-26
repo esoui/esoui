@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TrianglePickerTemplate" mouseEnabled="true" virtual="true">
+            <OnMouseDown>
+                ZO_TrianglePicker_OnMouseDown(self)
+            </OnMouseDown>
+
+            <OnMouseUp>
+                ZO_TrianglePicker_OnMouseUp(self)
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_TrianglePicker_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_TrianglePicker_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+    </Controls>
+</GuiXml>

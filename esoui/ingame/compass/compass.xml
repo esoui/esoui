@@ -1,0 +1,832 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CompassAreaOverrideLabelAnimation" >
+            <Animations>
+                <SizeAnimation delay="350" duration="450">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+                <CustomAnimation delay="350" duration="450">
+                    <UpdateFunction>
+                        self:GetAnimatedControl():SetFadeGradient(2, -1, 0, (1.0 - progress) * 64)
+                    </UpdateFunction>
+                </CustomAnimation>
+
+                <AlphaAnimation delay="3850" duration="500" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CompassPoiPinAnimationOut">
+            <Animations>                
+                <ScaleAnimation duration="500">
+                    <OnPlay>
+                        self:SetScaleValues(animatingControl:GetScale(), 3)
+                    </OnPlay>
+                </ScaleAnimation>
+                <AlphaAnimation duration="500">
+                    <OnPlay>
+                        self:SetAlphaValues(animatingControl:GetAlpha(), 0)
+                    </OnPlay>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CompassAreaTextureAnimationOut">
+            <Animations>
+                <AlphaAnimation duration="350">
+                    <OnPlay>
+                        self:SetAlphaValues(animatingControl:GetAlpha(), 0)
+                    </OnPlay>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CompassAreaTextureAnimationIn">
+            <Animations>
+                <TextureAnimation duration="650" cellsWide="8" cellsHigh="1" />
+                <TextureAnimation duration="650" cellsWide="8" cellsHigh="1" mirrorAlongY="true" />
+                <TextureAnimation duration="650" cellsWide="8" cellsHigh="1" />
+                
+                <AlphaAnimation duration="350">
+                    <OnPlay>
+                        self:SetAlphaValues(animatingControl:GetAlpha(), 1)
+                    </OnPlay>
+                </AlphaAnimation>
+                
+                <SizeAnimation duration="350">
+                    <OnPlay>
+                        local pinScale = animatingControl.pin:GetScale()
+                        local width, height = animatingControl:GetParent():GetDimensions()
+                        self:SetStartAndEndWidth(32 * pinScale, width + 36)
+                        self:SetStartAndEndHeight(32 * pinScale, height)
+                    </OnPlay>
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+                
+                <TranslateAnimation duration="350">
+                    <OnPlay>
+                        local parent = animatingControl:GetParent()
+                        local offsetX = animatingControl.pin:GetCenter() - parent:GetCenter()
+                        animatingControl:SetAnchor(CENTER, parent, CENTER, offsetX, 0)
+
+                        self:SetTranslateDeltas(-offsetX, 0)
+                    </OnPlay>
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+                
+                <AlphaAnimation delay="350" duration="350" startAlpha="1" endAlpha=".45">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation delay="700" duration="350" startAlpha=".45" endAlpha=".85">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CompassAreaPinAnimationOut">
+            <Animations>
+                <ScaleAnimation duration="350">
+                    <OnPlay>
+                        self:SetScaleValues(animatingControl:GetScale(), 3)
+                    </OnPlay>
+                </ScaleAnimation>
+                <AlphaAnimation duration="350">
+                    <OnPlay>
+                        if self:GetTimeline().owner.refreshingJournalIndex then
+                            self:SetAlphaValues(0, 0)
+                        else
+                            self:SetAlphaValues(animatingControl:GetAlpha(), 0)
+                        end
+                    </OnPlay>
+                </AlphaAnimation>
+                <AnimationTimeline delay="700" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+                    <Animations>
+                        <CustomAnimation duration="-1" />
+                    </Animations>
+                </AnimationTimeline>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CompassPinOut">
+            <Callbacks>
+                <Callback delay="500" />
+            </Callbacks>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CompassCenterOverPinAnimation">
+            <Animations>
+                <AlphaAnimation delay="150" duration="150" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="MapPing" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation cellsWide="32" cellsHigh="1" framerate="32.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_CompassAreaTexture_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left">
+                    <Dimensions x="37" />
+                    <Anchor point="TOPLEFT" offsetY="-22" />
+                    <Anchor point="BOTTOMLEFT" offsetY="22" />
+                </Texture>
+                <Texture name="$(parent)Right">
+                    <Dimensions x="37" />
+                    <Anchor point="TOPRIGHT" offsetY="-22" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="22" />
+                </Texture>
+                <Texture name="$(parent)Center">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" offsetX="-16" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" offsetX="16" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompassAreaTexture_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left">
+                    <Dimensions x="32" />
+                    <Anchor point="TOPLEFT" offsetY="-16" />
+                    <Anchor point="BOTTOMLEFT" offsetY="16" />
+                </Texture>
+                <Texture name="$(parent)Right">
+                    <Dimensions x="32" />
+                    <Anchor point="TOPRIGHT" offsetY="-16" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="16" />
+                </Texture>
+                <Texture name="$(parent)Center">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" offsetX="-15" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" offsetX="15" />
+                </Texture>
+            </Controls>
+        </Control>
+            
+        <Control name="ZO_CompassAreaTexture" virtual="true">
+            <OnInitialized>
+                self.left = self:GetNamedChild("Left")
+                self.right = self:GetNamedChild("Right")
+                self.center = self:GetNamedChild("Center")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Left" />
+                <Texture name="$(parent)Right" />
+                <Texture name="$(parent)Center" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Compass_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)CenterOverPinLabel" font="ZoFontHeader2">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5"/>
+                </Label>
+
+                <Scroll name="$(parent)AreaOverride">
+                    <Dimensions y="28"/>
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-16" offsetY="-5"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontHeader2" />
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Compass_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)CenterOverPinLabel" font="ZoFontGamepad36">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-12"/>
+                </Label>
+
+                <Scroll name="$(parent)AreaOverride">
+                    <Dimensions y="42"/>
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-16" offsetY="-12"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontGamepad36" />
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Compass" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_CompassFrame"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CompassFrame"/>
+            <OnInitialized>
+                ZO_Compass_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)CenterOverPinLabel" tier="MEDIUM" alpha="0" />
+
+                <Scroll name="$(parent)AreaOverride">
+                    <Dimensions y="24" />
+                    <Controls>
+                        <Label name="$(parent)Label" color="A5EBEF">
+                            <Anchor point="LEFT"/>
+                        </Label>
+                    </Controls>
+                </Scroll>
+
+                <Compass name="$(parent)Container" tier="MEDIUM">
+                    <AnchorFill />
+
+                    <CompassPinType name="GROUP_LEADER" 
+                                pinTexture="EsoUI/Art/Compass/groupLeader.dds"
+                                linkTexture="EsoUI/Art/Compass/groupLeader_door.dds"
+                                layer="OVERLAY"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
+                        
+                    <CompassPinType name="QUEST_OFFER"
+                                pinTexture="EsoUI/Art/Compass/quest_available_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_available_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_available_icon.dds"
+                                layer="OVERLAY"
+                                clamped="true"
+                    />
+                    
+                    <!-- These inherit the style depending on the type of condition they are overriding. -->
+                    <CompassPinType name="QUEST_COMPLETE" />
+                    <CompassPinType name="QUEST_INTERACT" />
+                    <CompassPinType name="QUEST_TALK_TO" />
+
+                    <CompassPinType name="ASSISTED_QUEST_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                areaTexture="EsoUI/Art/Compass/quest_assistedAreaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                layer="TEXT"
+                                clamped="true"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
+                    <CompassPinType name="ASSISTED_QUEST_OPTIONAL_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                areaTexture="EsoUI/Art/Compass/quest_assistedAreaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                layer="TEXT"
+                                clamped="true"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
+                    <CompassPinType name="ASSISTED_QUEST_ENDING"
+                                pinTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
+                                linkTexture="EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                layer="TEXT"
+                                clamped="true"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                areaTexture="EsoUI/Art/Compass/quest_areaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/quest_icon_door.dds"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_OPTIONAL_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                areaTexture="EsoUI/Art/Compass/quest_areaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/quest_icon_door.dds"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_ENDING"
+                                pinTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/quest_icon.dds"
+                                linkTexture="EsoUI/Art/Compass/quest_icon_door.dds"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="POI_SEEN"
+                                minScale="1.0"
+                                removedAnimation="CompassPinOut"
+                    />
+                    <CompassPinType name="POI_COMPLETE"
+                                minScale="1.0"
+                                removedAnimation="CompassPinOut"
+                    />
+                    <CompassPinType name="FLAG_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagCarrier_Aldmeri.dds"
+                    />
+                    <CompassPinType name="FLAG_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagCarrier_Ebonheart.dds"
+                    />
+                    <CompassPinType name="FLAG_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagCarrier_Daggerfall.dds"
+                    />
+                    <CompassPinType name="FLAG_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagCarrier_neutral.dds"
+                    />
+                    <CompassPinType name="FLAG_BASE_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagBase_Aldmeri.dds"
+                    />
+                    <CompassPinType name="FLAG_BASE_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagBase_Ebonheart.dds"
+                    />
+                    <CompassPinType name="FLAG_BASE_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagBase_Daggerfall.dds"
+                    />
+                    <CompassPinType name="FLAG_BASE_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagBase_Neutral.dds"
+                    />
+                    <CompassPinType name="CAPTURE_FLAG_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagAldmeri.dds"
+                    />
+                    <CompassPinType name="CAPTURE_FLAG_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagEbonheart.dds"
+                    />
+                    <CompassPinType name="CAPTURE_FLAG_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagDaggerfall.dds"
+                    />
+                    <CompassPinType name="CAPTURE_FLAG_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagNeutral.dds"
+                    />
+                    <CompassPinType name="HALF_CAPTURE_FLAG_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagAttack_aldmeri.dds"
+                    />
+                    <CompassPinType name="HALF_CAPTURE_FLAG_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagAttack_ebonheart.dds"
+                    />
+                    <CompassPinType name="HALF_CAPTURE_FLAG_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_flagAttack_daggerfall.dds"
+                    />
+                    <CompassPinType name="BALL_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_murderball_Aldmeri.dds"
+                    />
+                    <CompassPinType name="BALL_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_murderball_Ebonheart.dds"
+                    />
+                    <CompassPinType name="BALL_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_murderball_Daggerfall.dds"
+                    />
+                    <CompassPinType name="BALL_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_murderball_Neutral.dds"
+                    />
+                    <CompassPinType name="RETURN_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_returnPoint_Aldmeri.dds"
+                    />
+                    <CompassPinType name="RETURN_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_returnPoint_Ebonheart.dds"
+                    />
+                    <CompassPinType name="RETURN_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_returnPoint_Daggerfall.dds"
+                    />
+                    <CompassPinType name="RETURN_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_returnPoint_neutral.dds"
+                    />
+                    <CompassPinType name="KEEP_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_largeKeep_neutral.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="KEEP_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_largeKeep_Aldmeri.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="KEEP_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_largeKeep_Ebonheart.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="KEEP_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_largeKeep_Daggerfall.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="OUTPOST_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_outpost_neutral.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="OUTPOST_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_outpost_aldmeri.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="OUTPOST_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_outpost_ebonheart.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="OUTPOST_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_outpost_daggerfall.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="ARTIFACT_GATE_OPEN_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactGate_aldmeri_open.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="ARTIFACT_GATE_CLOSED_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactGate_aldmeri_closed.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="ARTIFACT_GATE_OPEN_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactGate_ebonheart_open.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="ARTIFACT_GATE_CLOSED_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactGate_ebonheart_closed.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="ARTIFACT_GATE_OPEN_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactGate_daggerfall_open.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="ARTIFACT_GATE_CLOSED_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactGate_daggerfall_closed.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="ARTIFACT_KEEP_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactTemple_Aldmeri.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="ARTIFACT_KEEP_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactTemple_Ebonheart.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="ARTIFACT_KEEP_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifactTemple_Daggerfall.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="FARM_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_farm_Neutral.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="FARM_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_farm_Aldmeri.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="FARM_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_farm_Ebonheart.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="FARM_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_farm_Daggerfall.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MINE_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_mine_Neutral.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MINE_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_mine_Aldmeri.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MINE_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_mine_Ebonheart.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MINE_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_mine_Daggerfall.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MILL_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_lumbermill_Neutral.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MILL_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_lumbermill_Aldmeri.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MILL_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_lumbermill_Ebonheart.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="MILL_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_lumbermill_Daggerfall.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="BORDER_KEEP_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_borderKeep_pin_aldmeri.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                   />
+                    <CompassPinType name="BORDER_KEEP_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_borderKeep_pin_ebonheart.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="BORDER_KEEP_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_borderKeep_pin_daggerfall.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="KEEP_ATTACKED_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_attackBurst_64.dds"
+                                layer="BACKGROUND"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                    />
+                    <CompassPinType name="PING"
+                                pinTexture="EsoUI/Art/MapPins/MapPing.dds"
+                                allowUpdatesWhenAnimating="true"
+                                animation="MapPing"
+                                minScale="1.0"
+                                maxScale="1.0"
+                                minAlpha="1.0"
+                                maxAlpha="1.0"
+                    />
+                    <CompassPinType name="RALLY_POINT"
+                                pinTexture="EsoUI/Art/MapPins/MapRallyPoint.dds"
+                                allowUpdatesWhenAnimating="true"
+                                animation="MapPing"
+                                minScale="1.0"
+                                maxScale="1.0"
+                                minAlpha="1.0"
+                                maxAlpha="1.0"
+                    />
+                    <CompassPinType name="PLAYER_WAYPOINT"
+                                pinTexture="EsoUI/Art/Compass/compass_waypoint.dds"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                                layer="OVERLAY"
+                                clamped="true"
+                    />
+                    <CompassPinType name="TRI_BATTLE_SMALL"
+                                pinTexture="EsoUI/Art/Compass/AvA_3Way.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="TRI_BATTLE_MEDIUM"
+                                pinTexture="EsoUI/Art/Compass/AvA_3Way.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="TRI_BATTLE_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_3Way.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ALDMERI_VS_EBONHEART_SMALL"
+                                pinTexture="EsoUI/Art/Compass/AvA_AldmeriVEbonheart.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ALDMERI_VS_EBONHEART_MEDIUM"
+                                pinTexture="EsoUI/Art/Compass/AvA_AldmeriVEbonheart.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ALDMERI_VS_EBONHEART_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_AldmeriVEbonheart.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ALDMERI_VS_DAGGERFALL_SMALL"
+                                pinTexture="EsoUI/Art/Compass/AvA_AldmeriVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ALDMERI_VS_DAGGERFALL_MEDIUM"
+                                pinTexture="EsoUI/Art/Compass/AvA_AldmeriVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ALDMERI_VS_DAGGERFALL_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_AldmeriVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="EBONHEART_VS_DAGGERFALL_SMALL"
+                                pinTexture="EsoUI/Art/Compass/AvA_EbonheartVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="EBONHEART_VS_DAGGERFALL_MEDIUM"
+                                pinTexture="EsoUI/Art/Compass/AvA_EbonheartVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="EBONHEART_VS_DAGGERFALL_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_EbonheartVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="EBONHEART_VS_DAGGERFALL_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_EbonheartVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="EBONHEART_VS_DAGGERFALL_LARGE"
+                                pinTexture="EsoUI/Art/Compass/AvA_EbonheartVDaggerfall.dds"
+                                leadingAlphaCoefficient="-1.2"
+                                alphaCoefficient="-6.2"
+                                leadingScaleCoefficient="-30.0"
+                                scaleCoefficient="-19.8"
+                                minVisibleAlpha="0.7"
+                    />
+                    <CompassPinType name="ARTIFACT_ALDMERI_OFFENSIVE"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifact_altadoon.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="ARTIFACT_ALDMERI_DEFENSIVE"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifact_mnem.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="ARTIFACT_EBONHEART_OFFENSIVE"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifact_ghartok.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="ARTIFACT_EBONHEART_DEFENSIVE"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifact_chim.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="ARTIFACT_DAGGERFALL_OFFENSIVE"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifact_nimohk.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="ARTIFACT_DAGGERFALL_DEFENSIVE"
+                                pinTexture="EsoUI/Art/Compass/AvA_artifact_almaruma.dds"
+                                leadingAlphaCoefficient="-7.0"
+                                alphaCoefficient="0.0"
+                                leadingScaleCoefficient="-11.5"
+                                scaleCoefficient="0.0"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="AGGRO"
+                                pinSize="24"
+                                pinTexture="EsoUI/Art/MapPins/hostile_pin.dds"
+                                minScale="1.0"
+                                maxScale="1.0"
+                                minAlpha="1.0"
+                                maxAlpha="1.0"
+                                maxVisibleNormalizedDistance=".0075"
+                                layer="OVERLAY"
+                    />
+                </Compass>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

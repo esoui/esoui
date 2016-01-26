@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_RaidLeaderboardsInformationArea_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_RaidLeaderboardsInformationArea_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

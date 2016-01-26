@@ -1,0 +1,93 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_BossBar_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Health">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_CompassFrame" offsetX="-10"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CompassFrame" offsetX="10"/>
+
+                    <Controls>
+                        <StatusBar name="$(parent)BarLeft">
+                            <Dimensions y="23"/>
+                        </StatusBar>
+                        <StatusBar name="$(parent)BarRight">
+                            <Dimensions y="23"/>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)BracketLeft" textureFile="EsoUI/Art/BossBar/bossBar_bracket_left.dds">
+                    <Anchor point="RIGHT" relativeTo="ZO_CompassFrame" relativePoint="LEFT" offsetX="8"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)BracketRight" textureFile="EsoUI/Art/BossBar/bossBar_bracket_right.dds">
+                    <Anchor point="LEFT" relativeTo="ZO_CompassFrame" relativePoint="RIGHT" offsetX="-8"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BossBar_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Health">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_CompassFrame" offsetX="-6"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CompassFrame" offsetX="6"/>
+
+                    <Controls>
+                        <StatusBar name="$(parent)BarLeft">
+                            <Dimensions y="14"/>
+                        </StatusBar>
+                        <StatusBar name="$(parent)BarRight">
+                            <Dimensions y="14"/>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)BracketLeft" textureFile="EsoUI/Art/BossBar/Gamepad/gp_bossBar_bracket.dds">
+                    <Anchor point="RIGHT" relativeTo="ZO_CompassFrame" relativePoint="LEFT" offsetX="6" />
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)BracketRight" textureFile="EsoUI/Art/BossBar/Gamepad/gp_bossBar_bracket.dds">
+                    <Anchor point="LEFT" relativeTo="ZO_CompassFrame" relativePoint="RIGHT" offsetX="-6" />
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_BossBar">
+            <OnInitialized>
+                ZO_BossBar_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Health" inherits="ZO_PlayerAttributeContainer">
+                    <Controls>
+                        <StatusBar name="$(parent)BarLeft" inherits="ZO_PlayerAttributeStatusBar" barAlignment="REVERSE">
+                            <Anchor point="LEFT" />
+                            <Anchor point="RIGHT" relativePoint="CENTER" />
+                            <Controls>
+                                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE" />
+                            </Controls>
+                        </StatusBar>
+                        <StatusBar name="$(parent)BarRight" inherits="ZO_PlayerAttributeStatusBar">
+                            <Anchor point="RIGHT" />
+                            <Anchor point="LEFT" relativePoint="CENTER" />
+                            <Controls>
+                                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
+                            </Controls>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)BracketLeft">
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+
+                <Texture name="$(parent)BracketRight">
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+            </Controls>
+        </Control>        
+    </Controls>
+</GuiXml>

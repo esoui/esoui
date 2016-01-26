@@ -1,0 +1,160 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_AlchemyTraitIcon_Gamepad" virtual="true">
+            <Dimensions x="32" y="32" />
+        </Texture>
+
+        <Control name="ZO_GamepadAlchemyLabeledTrait" virtual ="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
+
+            <Dimensions y="30" />
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="ZO_AlchemyTraitIcon_Gamepad">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" />
+                </Texture>
+                <Label name="$(parent)Label" font="ZoFontGamepadCondensed25" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Button name="ZO_GamepadAlchemyCraftingSlotWithTraits" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_CraftingSlot_OnInitialized(self)
+                ZO_CraftingGamepadEntryTraits_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Trait1" inherits="ZO_AlchemyTraitIcon_Gamepad" >
+                    <Anchor point="TOP" relativeTo="$(parent)Bg" relativePoint="CENTER" offsetX="-45" offsetY="26" />
+                </Texture>
+                <Texture name="$(parent)Trait2" inherits="ZO_AlchemyTraitIcon_Gamepad" >
+                    <Anchor point="TOP" relativeTo="$(parent)Bg" relativePoint="CENTER" offsetX="-15" offsetY="26" />
+                </Texture>
+                <Texture name="$(parent)Trait3" inherits="ZO_AlchemyTraitIcon_Gamepad" >
+                    <Anchor point="TOP" relativeTo="$(parent)Bg" relativePoint="CENTER" offsetX="15" offsetY="26" />
+                </Texture>
+                <Texture name="$(parent)Trait4" inherits="ZO_AlchemyTraitIcon_Gamepad" >
+                    <Anchor point="TOP" relativeTo="$(parent)Bg" relativePoint="CENTER" offsetX="45" offsetY="26" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_AlchemySolventSlot_Gamepad" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="90" offsetY="84" />
+            <Controls>
+                <Label name="$(parent)CreatesLevel" inheritScale="false" horizontalAlignment="CENTER" verticalAlignment="CENTER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad34",
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                            },
+                            {
+                                font = "ZoFontGamepad25",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                    <Dimensions x="154"/>
+                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="48" />
+                </Label>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_GamepadAlchemyInventorySolventRow" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.GetHeight = function(control)
+                    return control.label:GetTextHeight() + control:GetNamedChild("DescriptionLabel"):GetTextHeight()
+                end
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)DescriptionLabel" font="ZoFontGamepadCondensed25" modifyTextType="UPPERCASE" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadAlchemyInventoryReagentRow" inherits="ZO_GamepadItemSubEntryTemplate" alpha="0.5" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.GetHeight = function(control)
+                    local height = control.label:GetTextHeight()
+                    if not control.selectedItems:IsControlHidden() then
+                        height = height + control:GetNamedChild("Selected"):GetHeight()
+                    end
+                    return height
+                end
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Label" override="true">
+                    <Dimensions x="175"/>
+                </Control>
+                <Control name="$(parent)Unselected" resizeToFitDescendents="true">
+                    <OnInitialized>
+                        ZO_CraftingGamepadEntryTraits_OnInitialized(self)
+                    </OnInitialized>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" relativePoint="TOPRIGHT" offsetY="5"/>
+                    <Controls>
+                        <Texture name="$(parent)Trait4" inherits="ZO_AlchemyTraitIcon_Gamepad">
+                            <Anchor point="RIGHT" relativePoint="RIGHT" />
+                        </Texture>
+                        <Texture name="$(parent)Trait3" inherits="ZO_AlchemyTraitIcon_Gamepad">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Trait4" relativePoint="LEFT" />
+                        </Texture>
+                        <Texture name="$(parent)Trait2" inherits="ZO_AlchemyTraitIcon_Gamepad">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Trait3" relativePoint="LEFT" />
+                        </Texture>
+                        <Texture name="$(parent)Trait1" inherits="ZO_AlchemyTraitIcon_Gamepad">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Trait2" relativePoint="LEFT" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Selected" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
+                    <OnInitialized>
+                        ZO_CraftingGamepadEntryTraits_OnInitialized(self)
+                    </OnInitialized>
+                    <Dimensions y="120"/>
+                    <Controls>
+                        <Control name="$(parent)Trait1" inherits="ZO_GamepadAlchemyLabeledTrait">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>
+                        <Control name="$(parent)Trait2" inherits="ZO_GamepadAlchemyLabeledTrait">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trait1" relativePoint="BOTTOMLEFT" />
+                        </Control>
+                        <Control name="$(parent)Trait3" inherits="ZO_GamepadAlchemyLabeledTrait">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trait2" relativePoint="BOTTOMLEFT" />
+                        </Control>
+                        <Control name="$(parent)Trait4" inherits="ZO_GamepadAlchemyLabeledTrait">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trait3" relativePoint="BOTTOMLEFT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadAlchemyTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
+        
+        <TopLevelControl name="ZO_GamepadAlchemyTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadAlchemy_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SlotContainer" inherits="ZO_GamepadCraftingIngredientBarTemplate" />
+
+                <Control name="$(parent)Tooltip" inherits="ZO_CraftingTooltip_Gamepad" hidden="true">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)SlotContainer" relativePoint="TOP" offsetY="-ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

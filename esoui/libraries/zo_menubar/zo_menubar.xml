@@ -1,0 +1,115 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MenuBarButtonTemplate1" mouseEnabled="true" virtual="true">
+            <Dimensions x="32" y="32" />
+
+            <OnInitialized>
+                ZO_MenuBarButtonTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_MenuBarButtonTemplate_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_MenuBarButtonTemplate_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseDown>
+                ZO_MenuBarButtonTemplate_OnPress(self, button)
+            </OnMouseDown>
+
+            <OnMouseUp>
+                ZO_MenuBarButtonTemplate_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            
+            <Controls>
+                <Texture name="$(parent)Image" level="1" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Texture name="$(parent)Highlight" level="0" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_MenuBarButtonTemplateWithTooltip" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_MenuBarButtonTemplateWithTooltip_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_MenuBarButtonTemplateWithTooltip_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+        
+        <Control name="ZO_MenuBarTemplate" resizeToFitDescendents="true" virtual="true">
+            <Dimensions y="32" />
+
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_DefaultMenuBar" virtual="true" inherits="ZO_MenuBarTemplate">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local barData =
+                {
+                    buttonPadding = 20,
+                    normalSize = 51,
+                    downSize = 64,
+                    animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+                    buttonTemplate = "ZO_MenuBarButtonTemplate1",
+                }
+                ZO_MenuBar_SetData(self, barData)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_DefaultMenuBarWithTooltips" inherits="ZO_MenuBarTemplate" virtual="true">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local barData =
+                {
+                    buttonPadding = 20,
+                    normalSize = 51,
+                    downSize = 64,
+                    animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+                    buttonTemplate = "ZO_MenuBarButtonTemplateWithTooltip",
+                }
+                ZO_MenuBar_SetData(self, barData)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_MenuBarTooltipButton" virtual="true" inherits="ZO_MenuBarButtonTemplate1">
+            <OnMouseEnter>
+                ZO_MenuBarTooltipButton_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_MenuBarTooltipButton_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_LabelButtonBar" inherits="ZO_MenuBarTemplate" virtual="true">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local barData =
+                {
+                    buttonPadding = 20,
+                    normalSize = 51,
+                    downSize = 64,
+                    animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+                    buttonTemplate = "ZO_MenuBarTooltipButton",
+                }
+                ZO_MenuBar_SetData(self, barData)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-25" offsetY="7" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

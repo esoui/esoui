@@ -1,0 +1,11 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_Gamepad_HelpWebsiteTemplate" font="ZoFontGamepad34" horizontalAlignment="CENTER" color="C5C29E" text="SI_GAMEPAD_HELP_WEBSITE" virtual="true"/>
+        
+        <TopLevelControl name="ZO_Gamepad_Help_Root" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Gamepad_Help_Root_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

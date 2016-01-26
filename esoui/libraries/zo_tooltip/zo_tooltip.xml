@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_TooltipLabel" virtual="true"/>
+        <Texture name="ZO_TooltipTexture" virtual="true"/>
+        <Texture name="ZO_TooltipColorSwatch" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" centerColor="00000000">
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+                </Backdrop>
+            </Controls>
+        </Texture>
+        <Control name="ZO_TooltipStatValuePair" virtual="true">
+            <Controls>
+                <Label name="$(parent)Stat">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Label name="$(parent)Value"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TooltipStatValueSlider" virtual="true">
+            <Controls>
+                <Label name="$(parent)Stat">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-5" />
+                </Label>
+                <Control name="$(parent)Slider" inherits="ZO_AttributeBar">
+                    <Anchor point="TOPLEFT" offsetX="75" />
+                </Control>
+                <Label name="$(parent)Value"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TooltipSection" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents">
+                    <AnchorFill/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_Tooltip" inherits="ZO_TooltipSection" virtual="true"/>
+    </Controls>
+</GuiXml>

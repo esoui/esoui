@@ -1,0 +1,63 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="SkillIncreasedBarAnimation">
+            <Animations>
+                <AlphaAnimation duration="550">
+                    <OnPlay>
+                        self:SetAlphaValues(animatingControl:GetAlpha(), 1.0)
+                    </OnPlay>
+                </AlphaAnimation>
+                <AlphaAnimation duration="550" delay="1300" startAlpha="1.0" endAlpha="0.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+  
+    <Controls>
+        <Control name="ZO_Skills_HeaderGlowContainer" inherits="ZO_PlayerAttributeWarner" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeft" textureFile="EsoUI/Art/Crafting/inspirationBar_glow.dds" />
+                <Texture name="$(parent)Right" inherits="ZO_PlayerAttributeWarnerRightArrow" textureFile="EsoUI/Art/Crafting/inspirationBar_glow.dds" />
+                <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" textureFile="EsoUI/Art/Crafting/inspirationBar_glow.dds" />
+            </Controls>
+        </Control>
+      
+        <Control name="ZO_SkillsSkillHeader" mouseEnabled="true" virtual="true">
+            <Dimensions x="370" y="65" />
+            <OnInitialized>
+                ZO_SkillsInfo_OnInitialized(self)
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_SkillInfoXPBar_OnMouseEnter(self:GetNamedChild("XPBar"))
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_SkillInfoXPBar_OnMouseExit(self:GetNamedChild("XPBar"))
+            </OnMouseExit>
+
+            <Controls>
+                <Label name="$(parent)Rank" font="ZoFontCallout3">
+                    <Anchor point="LEFT" offsetX="5" />
+                </Label>
+
+                <Label name="$(parent)Name" font="ZoFontHeader2" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="15" offsetY="9" />
+                </Label>
+
+                <StatusBar name="$(parent)XPBar" inherits="ZO_SkillsXPBar">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-11" />
+                    <OnMouseEnter>
+                        ZO_SkillInfoXPBar_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_SkillInfoXPBar_OnMouseExit(self)
+                    </OnMouseExit>
+
+                    <Controls>
+                        <Control name="$(parent)GlowContainer" inherits="ZO_Skills_HeaderGlowContainer" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </Control>
+
+        <StatusBar name="ZO_SkillsXPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG" virtual="true" />
+    </Controls>
+</GuiXml>

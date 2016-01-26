@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_StoreTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_Store_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Store_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+        
+        <TopLevelControl name="ZO_RepairWindow" inherits="ZO_InventoryTemplate" mouseEnabled="true" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <OnInitialized>
+                ZO_Repair_OnInitialize(self)
+            </OnInitialized>
+
+            <OnEffectivelyShown>
+                self.owner:OnShown()
+            </OnEffectivelyShown>
+
+            <Controls>
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="290" y="20" />
+                            <Anchor point="LEFT" offsetX="73" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Condition" inherits="ZO_SortHeader">
+                            <Dimensions x="103" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_REPAIR_SORT_TYPE_CONDITION, TEXT_ALIGN_RIGHT, "condition")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)RepairCost" inherits="ZO_SortHeader">
+                            <Dimensions x="70" y="20" />
+                            <Anchor point="RIGHT" offsetX="-22" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_REPAIR_SORT_TYPE_COST, TEXT_ALIGN_RIGHT, "repairCost")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,20 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ArrowRegenerationAnimation">
+            <Animations>
+                <TranslateAnimation duration="1000"/>
+                <AlphaAnimation delay="150" duration="350" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation delay="500" duration="350" startAlpha="1" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Texture name="ZO_ArrowRegeneration" alpha="0" tier="MEDIUM" virtual="true">
+            <Dimensions x="16" y="16" />
+        </Texture>
+
+        <Texture name="ZO_ArrowRegeneration_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_arrow.dds" virtual="true" />
+        <Texture name="ZO_ArrowRegeneration_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_arrow.dds" virtual="true" />
+    </Controls>
+</GuiXml>

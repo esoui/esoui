@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>        
+        <TopLevelControl name="ZO_QuestToolMonitor">
+            <AnchorFill />
+            
+            <OnInitialized>
+                ZO_ActiveQuestToolMonitor_Initialize(self)
+            </OnInitialized>
+
+            <Controls>                   
+                <Label name="$(parent)Prompt" font="ZoFontAnnounceMedium">
+                    <Anchor point="CENTER" offsetY="200" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

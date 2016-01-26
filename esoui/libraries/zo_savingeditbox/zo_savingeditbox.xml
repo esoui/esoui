@@ -1,0 +1,127 @@
+<GuiXml>
+    <Controls>
+        <Label name="SavingEditBoxDisplayLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="SavingEditBoxEmptyLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)SavingEdit"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SavingEdit"/>
+        </Label>
+        
+        <Button name="SavingEditBoxModifyButton" excludeFromResizeToFitExtents="true" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <Textures
+                normal="EsoUI/Art/Buttons/edit_up.dds"
+                pressed="EsoUI/Art/Buttons/edit_down.dds"
+                mouseOver="EsoUI/Art/Buttons/edit_over.dds"
+                disabled="EsoUI/Art/Buttons/edit_disabled.dds"
+                    />
+            <OnMouseEnter>
+                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -2)
+                SetTooltipText(InformationTooltip, GetString(SI_SAVING_EDIT_BOX_EDIT))
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Button>
+            
+        <Button name="SavingEditBoxCancelButton" excludeFromResizeToFitExtents="true" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <Textures
+                normal="EsoUI/Art/Buttons/edit_cancel_up.dds"
+                pressed="EsoUI/Art/Buttons/edit_cancel_down.dds"
+                mouseOver="EsoUI/Art/Buttons/edit_cancel_over.dds"
+                    />
+            <OnMouseEnter>
+                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -2)
+                SetTooltipText(InformationTooltip, GetString(SI_SAVING_EDIT_BOX_CANCEL))
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Button>
+            
+        <Button name="SavingEditBoxSaveButton" excludeFromResizeToFitExtents="true" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <Textures
+                normal="EsoUI/Art/Buttons/edit_save_up.dds"
+                pressed="EsoUI/Art/Buttons/edit_save_down.dds"
+                mouseOver="EsoUI/Art/Buttons/edit_save_over.dds"
+                disabled="EsoUI/Art/Buttons/edit_save_disabled.dds"
+                    />
+            <OnMouseEnter>
+                InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -2)
+                SetTooltipText(InformationTooltip, GetString(SI_SAVING_EDIT_BOX_SAVE))
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Button>
+        
+        <Control name="ZO_SavingEditBox" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Saving" inherits="ZO_EditBackdrop" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                    </Controls>
+                </Backdrop>
+                <Label name="$(parent)Display" inherits="SavingEditBoxDisplayLabel" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SavingEdit"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SavingEdit"/>
+                </Label>
+                <Label name="$(parent)Empty" inherits="SavingEditBoxEmptyLabel" />
+
+                <Button name="$(parent)Modify" inherits="SavingEditBoxModifyButton">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Saving" relativePoint="TOPRIGHT" offsetY="-2"/>
+                </Button>
+                <Button name="$(parent)Cancel" inherits="SavingEditBoxCancelButton">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Saving" relativePoint="TOPRIGHT" offsetY="-2"/>
+                </Button>
+                <Button name="$(parent)Save" inherits="SavingEditBoxSaveButton">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Cancel" relativePoint="BOTTOMLEFT"/>
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ScrollingSavingEditBox" virtual="true" inherits="ZO_SavingEditBox" tier="HIGH">
+            <OnInitialized>
+                local display = self:GetNamedChild("Display")
+                display:ClearAnchors()
+                display:SetParent(self:GetNamedChild("PaneScrollChild"))
+                display:SetAnchor(TOPLEFT)
+                display:SetWidth(self:GetWidth() - 34)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer" tier="MEDIUM">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SavingEdit"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SavingEdit"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_LargeSingleLineSavingEditBox" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Saving" inherits="ZO_EditBackdrop" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" multiLine="false" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                    </Controls>
+                </Backdrop>
+                <Label name="$(parent)Display" inherits="SavingEditBoxDisplayLabel" font="ZoFontHeader4">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SavingEdit"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SavingEdit"/>
+                </Label>
+                <Label name="$(parent)Empty" inherits="SavingEditBoxEmptyLabel" font="ZoFontHeader4" />
+
+                <Button name="$(parent)Modify" inherits="SavingEditBoxModifyButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Display" relativePoint="RIGHT" offsetX="10"/>
+                </Button>
+                <Button name="$(parent)Save" inherits="SavingEditBoxSaveButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Saving" relativePoint="RIGHT"/>
+                </Button>
+                <Button name="$(parent)Cancel" inherits="SavingEditBoxCancelButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Save" relativePoint="RIGHT"/>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

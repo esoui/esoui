@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SpinnerStyle" virtual="true">
+            <Dimensions x="68" y="33" />
+            <Controls>
+                <Texture name="$(parent)BGLeft" textureFile="EsoUI/Art/Miscellaneous/spinnerBG_left.dds">
+                    <Dimensions x="64" y="32" />
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+                <Texture name="$(parent)BGRight" textureFile="EsoUI/Art/Miscellaneous/spinnerBG_right.dds">
+                    <Dimensions x="4" y="32" />
+                    <Anchor point="TOPRIGHT" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_SpinnerButtons" virtual="true">
+            <Controls>
+                <Button name="$(parent)Decrease">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="LEFT"/>
+                    <Textures normal="EsoUI/Art/Miscellaneous/spinnerMinus_up.dds"
+                              pressed="EsoUI/Art/Miscellaneous/spinnerMinus_down.dds"
+                              mouseOver="EsoUI/Art/Miscellaneous/spinnerMinus_over.dds"
+                              disabled="EsoUI/Art/Miscellaneous/spinnerMinus_disabled.dds"/>
+                </Button>
+
+                <Button name="$(parent)Increase">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="RIGHT"/>
+                    <Textures normal="EsoUI/Art/Miscellaneous/spinnerPlus_up.dds"
+                              pressed="EsoUI/Art/Miscellaneous/spinnerPlus_down.dds"
+                              mouseOver="EsoUI/Art/Miscellaneous/spinnerPlus_over.dds"
+                              disabled="EsoUI/Art/Miscellaneous/spinnerPlus_disabled.dds"/>
+                    
+                </Button>
+            </Controls>
+        </Control>
+            
+        <Control name="ZO_EditSpinner" mouseEnabled="true" inherits="ZO_SpinnerButtons ZO_SpinnerStyle" virtual="true">
+            <Controls>
+                <EditBox name="$(parent)Display" inherits="ZO_DefaultEdit" textType="NUMERIC_UNSIGNED_INT">
+                    <Anchor point="TOPLEFT" offsetX="18" offsetY="4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-18" offsetY="-5"/>
+                </EditBox>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Spinner" mouseEnabled="true" inherits="ZO_SpinnerButtons ZO_SpinnerStyle" virtual="true">
+            <Controls>
+                <Label name="$(parent)Display" font="ZoFontGame" horizontalAlignment="CENTER" >
+                    <Anchor point="TOPLEFT" offsetX="18" offsetY="4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-18" offsetY="-5"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,2 @@
+EsoUI\PregameLocalization\LocalizePregameGeneratedStrings.lua
+$(languageDirectory)\lang\$(language)_pregame.lua

@@ -1,0 +1,69 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_PerformanceMeters" movable="true" mouseEnabled="true" clampedToScreen="true" hidden="true">
+            <Dimensions x="173" y="70" />
+            <ClampedToScreenInsets top="20" bottom="-20" left="20" right="-20"/>
+            <Anchor point="BOTTOMLEFT"/>
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Performance/StatusMeterMunge.dds">
+                    <Dimensions x="256" y="256"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="CENTER"/>
+                </Texture>
+                <Control name="$(parent)FramerateMeter" mouseEnabled="true" >
+                    <Dimensions x="65" y="40"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="CENTER"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontWinT2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <AnchorFill/>
+                        </Label>
+                    </Controls>
+                    <OnMouseDown>
+                        self:GetParent():StartMoving()
+                    </OnMouseDown>
+                    <OnMouseUp>
+                        self:GetParent():StopMovingOrResizing()
+                    </OnMouseUp>
+                    <OnMouseEnter>
+                        ZO_PerformanceMeters_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_PerformanceMeters_OnMouseExit(self)
+                    </OnMouseExit>
+                </Control>
+                <Control name="$(parent)LatencyMeter" mouseEnabled="true" >
+                    <Dimensions x="65" y="40"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="CENTER"/>
+                    <Controls>
+                        <Texture name="$(parent)Bars" textureFile="EsoUI/Art/Campaign/campaignBrowser_highPop.dds">
+                            <Dimensions x="26" y="26"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="LEFT"/>
+                        </Texture>
+                        <Label name="$(parent)Label" font="ZoFontWinT2" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                            <Anchor point="LEFT" relativeTo="$(parent)Bars" relativePoint="RIGHT"/>
+                        </Label>
+                    </Controls>
+                    <OnMouseDown>
+                        self:GetParent():StartMoving()
+                    </OnMouseDown>
+                    <OnMouseUp>
+                        self:GetParent():StopMovingOrResizing()
+                    </OnMouseUp>
+                    <OnMouseEnter>
+                        ZO_PerformanceMeters_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_PerformanceMeters_OnMouseExit(self)
+                    </OnMouseExit>
+                </Control>
+            </Controls>
+            
+            <OnMoveStop>
+                ZO_PerformanceMeters_OnMoveStop(self)
+            </OnMoveStop>
+            
+            <OnInitialized>
+                ZO_PerformanceMeters_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildHomeContentAnchor" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_GamepadGuildHomeTopLevelRightPaneContentHeaderHeader" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GamepadGuildHomeTopLevelRightPane" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+        </Control>
+
+        <Control name="ZO_GuildHomeContentAnchorFull" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_GamepadGuildHomeTopLevelFullPaneContentContainerContentAnchor" relativePoint="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GamepadGuildHomeTopLevelFullPane" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+        </Control>
+    </Controls>
+
+    <Controls>
+        <TopLevelControl name="ZO_GamepadGuildHomeTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadGuildHome_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)FullPane" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)ContentAnchor">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_GamepadGuildHomeTopLevelMaskContainerHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

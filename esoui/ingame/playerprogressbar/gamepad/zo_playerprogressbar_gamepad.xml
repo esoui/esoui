@@ -1,0 +1,144 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadProgressBarDataLabel" inherits="ZO_GamepadHeaderDataTextTemplate" virtual="true">
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad42",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad36",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
+        </Label>
+
+        <TopLevelControl name="ZO_PlayerProgressBar_Gamepad">
+            <Controls>
+                <!-- Name and location fragment to be anchored next to the gamepad player progression bar. -->
+
+                <Control name="ZO_GamepadPlayerProgressBarNameLocationFragmentControl" resizeToFitDescendents="true" hidden="true">
+                    <OnInitialized>
+                        ZO_GamepadPlayerProgressBarNameLocation_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Label name="$(parent)Location" inherits="ZO_GamepadProgressBarDataLabel">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20" />
+                            <DimensionConstraints maxX="260" />
+                        </Label>
+
+                        <Label name="$(parent)LocationHeader" text="SI_GAMEPAD_PLAYER_PROGERSS_BAR_LOCATION_HEADER" inherits="ZO_GamepadHeaderLabelTextTemplate" >
+                            <AnchorToBaseline relativeToLabel="$(parent)Location" side="LEFT" offsetX="-10"/>
+                        </Label>
+
+                        <Label name="$(parent)UserName" inherits="ZO_GamepadProgressBarDataLabel" >
+                            <AnchorToBaseline relativeToLabel="$(parent)LocationHeader" side="LEFT" offsetX="-20"/>
+                            <DimensionConstraints maxX="300" />
+                        </Label>
+
+                        <Label name="$(parent)UserNameHeader" text="SI_GAMEPAD_PLAYER_PROGRESS_BAR_USER_NAME_HEADER" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                            <AnchorToBaseline relativeToLabel="$(parent)UserName" side="LEFT" offsetX="-10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <StatusBar name="ZO_GamepadPlayerProgressBarTemplate" tier="MEDIUM" inherits="ZO_GamepadStatusBarMedium" virtual="true">
+            <Dimensions x="205" y="22" />
+            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="6" offsetY="-9" />
+            <Controls>
+                <Control name="$(parent)GlowContainer" inherits="ZO_GamepadArrowStatusBarGlowMedium">
+                    <Controls>
+                        <Texture name="$(parent)Left" inherits="ZO_GamepadArrowStatusBarGlowLeftMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds" />
+                        <Texture name="$(parent)Right" inherits="ZO_GamepadArrowStatusBarGlowRightMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds" />
+                        <Texture name="$(parent)Center" inherits="ZO_GamepadArrowStatusBarGlowCenterMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds" />
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" tier="LOW" />
+                <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium" tier="LOW"/>
+                
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_GamepadPlayerProgressDualBarTemplate" inherits="ZO_GamepadPlayerProgressBarTemplate" tier="MEDIUM" virtual="true">
+            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="-20" />
+            <Controls>
+                <Control name="$(parent)GlowContainer" inherits="ZO_GamepadArrowStatusBarGlowMedium">
+                    <Anchor point="LEFT" offsetX="-11" />
+                    <Anchor point="RIGHT" offsetX="9" offsetY="6" />
+                    <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_dualGlow.dds">
+                            <TextureCoords left=".015625" right=".265625" top="0" bottom="1" />
+                            <Dimensions x="16" />
+                        </Texture>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_dualGlow.dds">
+                            <TextureCoords left=".296875" right=".9375" top="0" bottom="1" />
+                            <Dimensions x="41" />
+                        </Texture>
+                        <Texture name="$(parent)Center" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_dualGlow.dds" >
+                            <TextureCoords left=".265625" right=".296875" top="0" bottom="1" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </StatusBar>
+
+        <Control name="ZO_GamepadPlayerProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
+            <Dimensions x="255" y="56" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-98" offsetY="-53"/>
+            <Controls>
+                <Label name="$(parent)Level" font="ZoFontGamepad42">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_GamepadPlayerProgressBarTemplate" />
+                <StatusBar name="$(parent)SecondaryBar" inherits="ZO_GamepadChampionBar" tier="HIGH" >
+                    <Dimensions x="188" y="12"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bar" relativePoint="BOTTOMLEFT" offsetY="-2" />
+                    <Controls>
+                        <Control name="$(parent)ChampionOverlay" inherits="ZO_GamepadChampionFrame" layer="OVERLAY" tier="HIGH" />
+                        <Control name="$(parent)ChampionBG" inherits="ZO_GamepadChampionBG" tier="LOW"/>
+                        <StatusBar name="$(parent)EnlightenedBar" alpha="0.3" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_fill.dds" tier="HIGH">
+                            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
+                            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_leadingEdge.dds" width="8" height="12"/>
+                            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.75" />
+                            <AnchorFill/>
+                        </StatusBar>
+                    </Controls>
+                </StatusBar>
+
+                <Texture name="$(parent)LevelTypeIcon" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT"/>
+                    <TextureCoords left="0.125" top="0.125" right="0.875" bottom="0.875"/>
+                    <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
+                    <Dimensions x="0" y="32"/>
+                </Texture>
+                <Label name="$(parent)LevelType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_NORMAL_TEXT" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SecondaryLevelTypeIcon" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="5"/>
+                </Label>
+
+                <Texture name="$(parent)SecondaryLevelTypeIcon" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)LevelTypeIcon" relativePoint="TOPLEFT" offsetX="-3"/>
+                    <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
+                    <Dimensions x="0" y="32"/>
+                </Texture>
+
+                <Label name="$(parent)SecondaryLevelType" hidden="true" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

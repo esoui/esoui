@@ -1,0 +1,167 @@
+<GuiXml>
+    <Controls>
+        <Slider name="ZO_ColorPickerControlVerticalSliderTemplate" dragFromThumb="false" tier="HIGH" mouseEnabled="true" virtual="true">
+            <Dimensions x="22" y="122" />
+                    
+            <OnInitialized>
+                self:SetMinMax(0, 1)
+                self:SetValue(0)
+            </OnInitialized>
+                              
+            <ThumbTexture
+                textureFile="EsoUI/Art/Miscellaneous/colorPicker_slider_vertical.dds"
+                thumbWidth="64"
+                thumbHeight="32"
+                flushWithSliderExtents="false"
+            />
+                    
+            <Controls>
+                <Texture name="$(parent)Texture">
+                    <Dimensions x="22" y="128" />
+					<Anchor point="CENTER" />
+				</Texture>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Miscellaneous/colorPicker_sliderFrame.dds">
+                    <TextureCoords left="0" right="0.6875" top="0" bottom="1" />
+					<Dimensions x="22" y="128" />
+                    <Anchor point="CENTER" />
+				</Texture>
+            </Controls>
+        </Slider>
+        
+        <Slider name="ZO_ColorPickerControlHorizontalSliderTemplate" dragFromThumb="false" tier="HIGH" orientation="HORIZONTAL" mouseEnabled="true" virtual="true">
+            <Dimensions x="122" y="22" />
+                    
+            <OnInitialized>
+                self:SetMinMax(0, 1)
+                self:SetValue(0)
+                self:GetThumbTextureControl():SetTextureRotation(math.pi / 2)
+            </OnInitialized>
+                              
+            <ThumbTexture
+                textureFile="EsoUI/Art/Miscellaneous/colorPicker_slider_vertical.dds"
+                thumbWidth="64"
+                thumbHeight="32"
+                flushWithSliderExtents="false"
+            />
+
+            <Controls>
+                <Texture name="$(parent)Texture">
+                    <Dimensions x="128" y="22" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Miscellaneous/colorPicker_sliderFrame.dds">
+                    <TextureCoords left="0" right="0.6875" top="0" bottom="1" />
+                    <Dimensions x="22" y="128" />
+                    <Anchor point="CENTER" />
+                    <OnInitialized>
+                        self:SetTextureRotation(math.pi / 2)
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Slider>
+               
+        <TopLevelControl name="ZO_ColorPickerControl" inherits="ZO_CustomDialogBase">
+            <Dimensions x="512" y="256" />
+            <Anchor point="CENTER" offsetY="-45" />
+            
+            <OnInitialized>
+                ZO_ColorPicker_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Content" inherits="ZO_DialogContentAnchors">
+                    <Controls>
+                        <ColorSelect name="$(parent)ColorSelect" mouseEnabled="true">
+                            <Anchor point="TOP" />
+                            <Dimensions x="128" y="128" />
+
+                            <OnColorSelected>
+                                COLOR_PICKER:OnColorSet(r, g, b)
+                            </OnColorSelected>
+
+                            <Controls>
+                                <Texture name="$(parent)Thumb" textureFile="EsoUI/Art/Miscellaneous/colorPicker_pip.dds" layer="2">
+                                    <Dimensions x="32" y="32" />
+                                </Texture>
+                            </Controls>
+                        </ColorSelect>
+
+                        <Control name="$(parent)Preview">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)ColorSelect" relativePoint="LEFT" offsetX="-25" />
+
+                            <Controls>
+                                <Texture name="$(parent)Border" textureFile="EsoUI/Art/Miscellaneous/colorPicker_swatchFrame.dds">
+                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="CENTER" />
+                                </Texture>
+
+                                <Texture name="$(parent)TextureTop" layer="OVERLAY">
+                                    <Dimensions x="58" y="29" />
+                                    <Anchor point="TOP" offsetY="3" />
+                                </Texture>
+                                <Label name="$(parent)TopLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_NEW">
+                                    <Anchor point="BOTTOM" relativeTo="$(parent)TextureTop" relativePoint="TOP" offsetY="-5" />
+                                </Label>
+                                
+                                <Texture name="$(parent)TextureBottom" layer="OVERLAY">
+                                    <Dimensions x="58" y="29" />
+                                    <Anchor point="BOTTOM" offsetY="-3" />
+                                </Texture>
+                                <Label name="$(parent)BottomLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_CURRENT">
+                                    <Anchor point="TOP" relativeTo="$(parent)TextureBottom" relativePoint="BOTTOM" offsetY="5" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Slider name="$(parent)Value" inherits="ZO_ColorPickerControlVerticalSliderTemplate">
+                            <Anchor point="LEFT" relativeTo="$(parent)ColorSelect" relativePoint="RIGHT" offsetX="35" />
+
+                            <OnValueChanged>
+                                if eventReason == EVENT_REASON_HARDWARE then
+                                    COLOR_PICKER:OnValueSet(1 - value)
+                                end
+                            </OnValueChanged>
+                        </Slider>
+
+                        <Slider name="$(parent)Alpha" inherits="ZO_ColorPickerControlHorizontalSliderTemplate">
+                            <Anchor point="TOP" relativeTo="$(parent)ColorSelect" relativePoint="BOTTOM" offsetY="15" />
+                            <OnValueChanged>
+                                if eventReason == EVENT_REASON_HARDWARE then
+                                    COLOR_PICKER:OnAlphaSet(value)
+                                end
+                            </OnValueChanged>
+                        </Slider>
+
+                        <Label name="$(parent)AlphaLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_ALPHA">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Alpha" relativePoint="TOPLEFT" offsetX="-10" />
+                        </Label>
+
+                        <Control name="$(parent)Spinners" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOM" />
+                            <Controls>
+                                <Control name="$(parent)Red" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" />
+                                </Control>
+
+                                <Control name="$(parent)Green" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Red" relativePoint="RIGHT" offsetX="10" />
+                                </Control>
+
+                                <Control name="$(parent)Blue" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Green" relativePoint="RIGHT" offsetX="10" />
+                                </Control>
+
+                                <Control name="$(parent)Alpha" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Blue" relativePoint="RIGHT" offsetX="10" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

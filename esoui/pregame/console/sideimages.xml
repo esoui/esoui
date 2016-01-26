@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SideImages_Base_Console" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors" hidden="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Image0" resizeToFitFile="true">
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <Texture name="$(parent)Image1" resizeToFitFile="true">
+                    <Anchor point="TOP" />
+                </Texture>
+
+                <Texture name="$(parent)Image2" resizeToFitFile="true">
+                    <Anchor point="TOPRIGHT" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_SideImages_CreateAccount_Console" inherits="ZO_SideImages_Base_Console">
+            <Controls>
+                <Texture name="$(parent)Image0" textureFile="EsoUI/Art/Login/Gamepad/console-LoginSilhouettes-Sorcerer.dds" override="true" />
+                <Texture name="$(parent)Image1" textureFile="EsoUI/Art/Login/Gamepad/console-LoginSilhouettes-Nightblade.dds" override="true" />
+                <Texture name="$(parent)Image2" textureFile="EsoUI/Art/Login/Gamepad/console-LoginSilhouettes-DragonKnight.dds" override="true" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_SideImages_LinkAccount_Console" inherits="ZO_SideImages_Base_Console">
+            <Controls>
+                <Texture name="$(parent)Image0" textureFile="EsoUI/Art/Login/Gamepad/LoginSilhouettes-Existing-Sorcerer.dds" override="true" />
+                <Texture name="$(parent)Image1" textureFile="EsoUI/Art/Login/Gamepad/LoginSilhouettes-Existing-Nightblade.dds" override="true" />
+                <Texture name="$(parent)Image2" textureFile="EsoUI/Art/Login/Gamepad/LoginSilhouettes-Existing-DragonKnight.dds" override="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,71 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_RaidLifeChangeAnimation">
+            <Animations>
+                <AlphaAnimation duration="250" startAlpha="0.1" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInCubic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <ScaleAnimation duration="250" startScale="3" endScale="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_RaidLifeAlphaAnimation">
+            <Animations>
+                <AlphaAnimation duration="250" startAlpha="0" endAlpha="1">
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                    <OnStop>
+                        if(self:GetTimeline():IsPlayingBackward()) then
+                            animatingControl:SetHidden(true)
+                        end
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_RaidLifeDisplay_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPRIGHT" />
+                </Texture>
+                <Label name="$(parent)Label" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RaidLifeDisplay_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPRIGHT" offsetX="10" />
+                </Texture>
+                <Label name="$(parent)Label" font="ZoFontGamepad34" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RaidLifeDisplay" virtual="true">
+            <Dimensions x="60" y="35"/>
+            <OnInitialized>
+                ZO_RaidLifeDisplay_OnInitialized(self)
+            </OnInitialized>
+            <OnEffectivelyShown>
+                ZO_RaidLifeDisplay_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Death/death_soulReservoir_icon.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+                <Label name="$(parent)Label" font="ZoFontWinH1">
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-13"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

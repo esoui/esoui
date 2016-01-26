@@ -1,0 +1,156 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GroupListRowLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
+
+        <Texture name="ZO_GroupListRole" virtual="true" mouseEnabled="true" layer="OVERLAY">
+            <Dimensions x="32" y="32"/>
+            <OnMouseEnter>
+                ZO_GroupListRole_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GroupListRole_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+
+        <Control name="ZO_GroupListRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnMouseEnter>
+                ZO_GroupListRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GroupListRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_GroupListRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnInitialized>
+                self.bg = self:GetNamedChild("BG")
+
+                self.leaderIcon = self:GetNamedChild("Leader")
+                self.characterNameLabel = self:GetNamedChild("CharacterName")
+                self.roleDPS = self:GetNamedChild("RoleDPS")
+                self.roleHeal = self:GetNamedChild("RoleHeal")
+                self.roleTank = self:GetNamedChild("RoleTank")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                
+                <Texture name="$(parent)Leader" mouseEnabled="true" layer="OVERLAY" textureFile="EsoUI/Art/LFG/LFG_leader_icon.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GroupListRowStatus_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GroupListRowStatus_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)CharacterName" inherits="ZO_GroupListRowLabel" verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Leader" offsetX="5"/>
+                    <Dimensions x="225" y="30"/>
+                </Label>
+                <Label name="$(parent)Zone" inherits="ZO_GroupListRowLabel">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CharacterName" offsetX="5"/>
+                    <Dimensions x="230" y="20"/>
+                </Label>
+                <Texture name="$(parent)ClassIcon" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="5"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GroupListRowClass_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GroupListRowClass_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)Veteran" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="62" />
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GroupListRowVeteran_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GroupListRowVeteran_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)Level" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="62"/>
+                    <Dimensions x="75" y="20"/>
+                </Label>
+                <Texture name="$(parent)RoleDPS" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_dps_down.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="RIGHT" offsetX="-7"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnInitialized>
+                        self.role = LFG_ROLE_DPS
+                    </OnInitialized>
+                </Texture>
+                <Texture name="$(parent)RoleHeal" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_healer_down.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)RoleDPS" offsetX="-7"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnInitialized>
+                        self.role = LFG_ROLE_HEAL
+                    </OnInitialized>
+                </Texture>
+                <Texture name="$(parent)RoleTank" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_tank_down.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)RoleHeal" offsetX="-7"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnInitialized>
+                        self.role = LFG_ROLE_TANK
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GroupHeader" virtual="true" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" verticalAlignment="CENTER">
+            <Dimensions y="32"/>
+        </Label>
+
+        <TopLevelControl name="ZO_GroupList" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GroupList_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" offsetX="30" offsetY="67"/>
+                    <Anchor point="TOPRIGHT" offsetY="67"/>
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Label name="$(parent)CharacterName" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_NAME_HEADER">
+                            <Anchor point="LEFT" offsetX="37"/>
+                        </Label>
+                        <Label name="$(parent)Zone" inherits="ZO_GroupHeader" text="SI_SOCIAL_LIST_PANEL_HEADER_ZONE">
+                            <Anchor point="LEFT" offsetX="266" />
+                        </Label>
+                        <Label name="$(parent)Class" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_CLASS_HEADER">
+                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="519" />
+                        </Label>
+                        <Label name="$(parent)Level" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_LEVEL_HEADER">
+                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="632" />
+                        </Label>
+                        <Label name="$(parent)Role" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_ROLES_HEADER">
+                            <Anchor point="CENTER" relativePoint="RIGHT" offsetX="-115" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-35" offsetY="-32"/>
+                </Control>
+
+                <Control name="$(parent)NoGroupRow" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List"/>
+                    <Dimensions y="30"/>
+                    <Controls>
+                        <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                        
+                        <Label name="$(parent)Message" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GROUP_LIST_PANEL_NO_GROUP_MESSAGE">
+                            <Anchor point="CENTER"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

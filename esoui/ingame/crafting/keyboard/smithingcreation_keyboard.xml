@@ -1,0 +1,74 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SmithingCreationPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
+
+                <Control name="$(parent)TabsDivider" inherits="ZO_InventoryFilterDivider" />
+
+                <Button name="$(parent)HaveMaterials" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TabsDivider" offsetX="50" offsetY="14" />
+                </Button>
+
+                <Button name="$(parent)HaveKnowledge" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)HaveMaterials" relativePoint="RIGHT" offsetX="200" />
+                </Button>
+                
+                <Control name="$(parent)PatternList" inherits="ZO_SmithingHorizontalListTemplate">
+                    <Anchor point="TOP" relativeTo="$(parent)TabsDivider" relativePoint="BOTTOM" offsetY="40"/>
+                </Control>
+
+                <Control name="$(parent)MaterialList" inherits="ZO_SmithingHorizontalListTemplate">
+                    <Anchor point="TOP" relativeTo="$(parent)PatternList" relativePoint="BOTTOM" />
+                    <Controls>
+                        <Control name="$(parent)Spinner" mouseEnabled="true">
+                            <Dimensions x="110" y="36" />
+                            <Anchor point="BOTTOM" offsetY="2" />
+                            <Controls>
+                                <Button name="$(parent)Decrease">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="LEFT"/>
+                                    <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds"
+                                              pressed="EsoUI/Art/Buttons/pointsMinus_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds"
+                                              disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
+                                </Button>
+
+                                <Button name="$(parent)Increase">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="RIGHT"/>
+                                    <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
+                                              pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
+                                              mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
+                                              disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
+                                </Button>
+
+                                <Label name="$(parent)Display" font="ZoFontHeader4" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                                    <Anchor point="TOPLEFT" offsetX="34" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-34" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)StyleList" inherits="ZO_SmithingHorizontalListTemplate">
+                    <Anchor point="TOP" relativeTo="$(parent)MaterialList" relativePoint="BOTTOM" offsetY="30" />
+                </Control>
+
+                <Control name="$(parent)TraitList" inherits="ZO_SmithingHorizontalListTemplate">
+                    <Anchor point="TOP" relativeTo="$(parent)StyleList" relativePoint="BOTTOM" />
+                </Control>
+
+                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-245" />
+                </Tooltip>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

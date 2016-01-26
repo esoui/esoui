@@ -1,0 +1,90 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="SpinnerFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Backdrop name="ZO_LoadingScreen_KeyBackdrop" virtual="true">
+            <Edge file="EsoUI/Art/Screens_App/interactKeyFrame_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+            <Center file="EsoUI/Art/Screens_App/interactKeyFrame_center.dds" />
+            <Insets left="8" top="8" right="-8" bottom="-8" />
+        </Backdrop>
+
+        <Control name="ZO_LoadingScreenBase" keyboardEnabled="true" hidden="true" virtual="true">
+            <AnchorFill />
+
+            <OnUpdate>
+                self:Update()
+            </OnUpdate>
+
+            <OnKeyDown>
+                if key == KEY_ENTER and alt then
+                    ToggleFullScreen()
+                end
+            </OnKeyDown>
+
+            <Controls>
+                <Texture name="$(parent)Bg" color="000000">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Art" alpha="0" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <TextureCoords left="0" right="0.8203125" top="0" bottom="0.5126953125"/>
+                    <Anchor point="CENTER" relativeTo="GuiRoot" />
+                </Texture>
+
+                <Texture name="$(parent)TopMunge" alpha="0">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
+                    <Dimensions y="256"/>
+
+                    <!-- TODO: Texture coords are a hack to get around vertical wrapping issue; needs shader work and some more addressing modes -->
+                    <TextureCoords left="0" right="1" top="-0.01" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)BottomMunge" alpha="0">
+                    <Dimensions y="295"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
+
+                    <!-- TODO: Texture coords are a hack to get around vertical wrapping issue; needs shader work and some more addressing modes -->
+                    <TextureCoords left="0" right="1" top="0.01" bottom="1" />
+
+                    <Controls>
+                        <Label name="$(grandparent)ZoneDescription" font="EsoUi/Common/Fonts/Univers67.otf|20|soft-shadow-thick" horizontalAlignment="CENTER" hidden="true" inheritScale="false">
+                            <Dimensions x="1120"/>
+
+                            <OnUserAreaCreated>
+                                self:GetParent():GetParent():OnZoneDescriptionNewUserAreaCreated(...)
+                            </OnUserAreaCreated>
+                        </Label>
+                        <Control name="$(grandparent)ZoneInfoContainer" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOM" relativeTo="$(grandparent)ZoneDescription" relativePoint="TOP" offsetY="-5"/>
+                            <Controls>
+                                <Label name="$(parent)ZoneName" font="EsoUi/Common/Fonts/Univers67.otf|24|soft-shadow-thick" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false">
+                                    <Anchor point="LEFT"/>
+                                </Label>
+                                <Texture name="$(parent)InstanceTypeIcon">
+                                    <Dimensions x="40" y="40"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)ZoneName" relativePoint="RIGHT" offsetX="60"/>
+                                </Texture>
+                                <Label name="$(parent)InstanceType" font="EsoUi/Common/Fonts/Univers67.otf|24|soft-shadow-thick" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false">
+                                    <Anchor point="LEFT" relativeTo="$(parent)InstanceTypeIcon" relativePoint="RIGHT" offsetX="5"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Spinner" textureFile="EsoUI/Art/LoadScreen/Keyboard/load_ourosboros.dds">
+                    <Dimensions x="128" y="128" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>        
+</GuiXml>

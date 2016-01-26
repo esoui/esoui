@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SharedProvisionerTopLevel" hidden="true" />
+    </Controls>
+</GuiXml>

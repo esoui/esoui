@@ -1,0 +1,109 @@
+<GuiXml>
+    <Controls>
+        <!-- Trade Window -->
+        <TopLevelControl name="ZO_Trade_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Trade_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <!--My Controls-->
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)DividerAccent" inherits="ZO_GamepadHeaderHorizontalDividerWithAccent" hidden="true">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DividerSimple" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" />
+                                                    <OnInitialized>
+                                                        local accent = self:GetNamedChild("Accent")
+                                                        accent:SetTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_LEFT_TRIGGER))
+                                                    </OnInitialized>
+                                                    <Controls>
+                                                        <Texture name="$(parent)Accent" override="true">
+                                                            <Dimensions x="50" y="50" />
+                                                        </Texture>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)GoldSliderBox" inherits="ZO_GamepadGoldSpinnerContainerTemplate" hidden="true" tier="MEDIUM">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" offsetY="465" />
+                            <Dimensions y="35" />
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <!--Their Controls-->
+                <Control name="$(parent)TheirControls" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors">
+                    <Controls>
+                        <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)DividerAccent" inherits="ZO_GamepadHeaderHorizontalDividerWithAccent" hidden="true">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DividerSimple" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" />
+                                                    <OnInitialized>
+                                                        local accent = self:GetNamedChild("Accent")
+                                                        accent:SetTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_RIGHT_TRIGGER))
+                                                    </OnInitialized>
+                                                    <Controls>
+                                                        <Texture name="$(parent)Accent" override="true">
+                                                            <Dimensions x="50" y="50" />
+                                                        </Texture>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)Container">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                                            <AnchorFill/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <!--Waiting label, in the hint bar-->
+        <TopLevelControl name="ZO_Trade_GamepadWaiting" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
+            <OnInitialized>
+                self.name = self:GetNamedChild("Name")
+            </OnInitialized>
+            <Anchor point="TOP" relativeTo="ZO_KeybindStripGamepadBackground" />
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadHeaderDataTextTemplate" font="ZoFontGamepad42">
+                    <Anchor point="TOPLEFT" relativePoint="TOP" />
+                </Label>
+
+                <Label name="$(parent)Header" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_GAMEPAD_TRADE_WAITING_MESSAGE">
+                    <AnchorToBaseline relativeToLabel="$(parent)Name" side="LEFT" offsetX="-10"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

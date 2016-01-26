@@ -1,0 +1,119 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_InventoryInfoBar" virtual="true">
+            <Dimensions y="64"/>
+
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="TOP" />
+                </Control>
+                
+                <Label name="$(parent)FreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions y="32" />
+                    <Anchor point="TOPLEFT" offsetX="27" offsetY="1"/>
+                </Label>
+
+                <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" offsetX="-21" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventoryInfoBarBackpack" inherits="ZO_InventoryInfoBar" virtual="true">
+            <Dimensions y="64"/>
+
+            <Controls>
+                <Label name="$(parent)Money" override="true">
+                    <Dimensions x="120"/>
+                </Label>
+                
+                <Label name="$(parent)TelvarStones" inherits="ZO_CurrencyTemplate" hidden="true">
+                    <Dimensions x="120"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Money" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+
+                <Label name="$(parent)AltFreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Dimensions y="32" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FreeSlots" relativePoint="BOTTOMLEFT" offsetY="-9"/>
+                </Label>
+
+                <Label name="$(parent)AltMoney" inherits="ZO_CurrencyTemplate"  hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Money" relativePoint="BOTTOMRIGHT" offsetY="1"/>
+                </Label>
+
+                <Label name="$(parent)AltTelvarStones" inherits="ZO_CurrencyTemplate" hidden="true">
+                    <Dimensions x="120"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TelvarStones" relativePoint="BOTTOMRIGHT" offsetY="1" hidden="true"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventoryInfoBar_Gamepad" virtual="true">
+            <Dimensions y="64"/>
+
+            <Controls>
+                <Label name="$(parent)CapacityDescription" text="SI_GAMEPAD_INVENTORY_CAPACITY" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions y="32"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Label>
+                <Label name="$(parent)FreeSlots" font="ZoFontGamepad34" modifyTextType="UPPERCASE" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions y="32" />
+                    <AnchorToBaseline relativeToLabel="$(parent)CapacityDescription" side="RIGHT" offsetX="10"/>
+                </Label>
+
+                <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-27"/>
+                </Label>
+
+                <Label name="$(parent)AlliancePoints" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-150"/>
+                </Label>
+
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_InventoryTabs" inherits="ZO_MenuBarTemplate" virtual="true">
+            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
+            <Controls>
+                <Label name="$(parent)Active" font="ZoFontHeader2" verticalAlignment="CENTER" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                    <Dimensions y="64" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventoryFilterDivider" inherits="ZO_WideHorizontalDivider" virtual="true">
+            <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="105" />
+        </Control>
+
+        <Control name="ZO_InventorySortHeaders" virtual="true">
+            <Dimensions x="565" y="32" />
+            <Anchor point="TOPRIGHT" offsetY="63" />
+        </Control>
+
+        <Control name="ZO_InventoryList" inherits="ZO_ScrollList" virtual="true">
+            <Dimensions x="565"/>
+            <Anchor point="TOPRIGHT" offsetY="96"/>
+            <Anchor point="BOTTOMRIGHT" />
+        </Control>
+        
+        <TopLevelControl name="ZO_InventoryTemplate" mouseEnabled="true" hidden="true" virtual="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <Control name="$(parent)List" inherits="ZO_InventoryList"/>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,204 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CharacterEntry" mouseEnabled="true" virtual="true">
+            <Dimensions x="367" y="80" />
+
+            <OnMouseUp>
+                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                    ZO_CharacterEntry_OnMouseClick(self)
+                end
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)
+                end
+            </OnMouseDoubleClick>
+
+            <OnMouseEnter>
+                ZO_ScrollList_MouseEnter(ZO_CharacterSelectScrollList, self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ScrollList_MouseExit(ZO_CharacterSelectScrollList, self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".799" />
+                </Texture>
+
+                <Texture name="$(parent)Alliance">
+                    <Dimensions x="32" y="64" />
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="10"/>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="52" offsetY="6"/>
+                    <Anchor point="TOPRIGHT" offsetY="6"/>
+                </Label>
+                <Label name="$(parent)ClassLevel" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
+                </Label>
+                <Label name="$(parent)Location" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_RenameCharacterDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_RenameCharacterDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_RENAME_CHARACTER_NAME_LABEL"/>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                    <Dimensions y="30" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" textType="ALPHABETIC" maxInputCharacters="25">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_CREATE_CHARACTER_TITLE_NAME))
+                            </OnInitialized>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)AttemptRename" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CharacterSelectRenameInstructions" layer="OVERLAY" tier="HIGH">
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="ZO_RenameCharacterDialog" relativePoint="LEFT" offsetX="-20" />
+                    <ResizeToFitPadding width="20" height="20" />
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                            <AnchorFill />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CharacterSelect" layer="BACKGROUND" hidden="true" mouseEnabled="true">
+            <Dimensions x="410" />
+            <Anchor point="TOPRIGHT" />
+            <Anchor point="BOTTOMRIGHT" />
+
+            <OnInitialized>
+              ZO_CharacterSelect_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_RightFullscreenPanelBG">
+                    <Anchor point="TOPRIGHT" offsetX="195"/>
+                    <OnInitialized>
+                        self:SetHeight(GuiRoot:GetHeight() + 120)
+                        self:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:SetHeight(GuiRoot:GetHeight() + 120) end)
+                    </OnInitialized>
+                </Control>
+
+                <Texture name="$(parent)BGLeftTop" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSideBG_top.dds">
+                    <Dimensions x="350" y="512" />
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                </Texture>
+
+                <Texture name="$(parent)BGLeftBottom" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSideBG_bottom.dds">
+                    <Dimensions x="350" y="256" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeftTop" relativePoint="BOTTOMLEFT" />
+                </Texture>
+
+                <Label name="$(parent)CharacterSlots" inherits="ZO_WindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" />
+                </Label>
+
+                <!-- Realm name and realm change functionality has been 'temporarily' disabled from character select.  To change realm you need to logout.  -->
+                <Label name="$(parent)RealmName" inherits="ZO_WindowTitle" color="FFFFFF" hidden="true" />
+
+                <Button name="$(parent)ChangeRealm" inherits="ZO_DefaultButton" text="SI_CHANGE_REALM_BUTTON" hidden="true"> <!-- note, button is hidden -->
+                    <Anchor point="TOP" relativeTo="$(parent)RealmName" relativePoint="BOTTOM" offsetY="10" />
+
+                    <OnClicked>
+                        ZO_ServerSelectCancel.gameStateString = "CharacterSelect_FromIngame"
+                        PregameStateManager_SetState("WorldSelect_Requested")
+                    </OnClicked>
+                </Button>
+
+                <Control name="$(parent)ScrollList" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="58" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-70" />
+                </Control>
+
+                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation" />
+
+                <Button name="$(parent)Login" inherits="ZO_DefaultButton" text="SI_LOGIN_CHARACTER">
+                    <Dimensions x="128" />
+                    <OnInitialized>
+                        local viewport = self:GetParent():GetNamedChild("CharacterViewport")
+                        local centerX = (viewport:GetLeft() + viewport:GetRight()) / 2
+                        self:SetAnchor(BOTTOM, GuiRoot, BOTTOMLEFT, centerX, -16)
+                    </OnInitialized>
+                    <OnClicked>
+                        ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)
+                    </OnClicked>
+                </Button>
+
+                <Control name="$(parent)Selected" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="20" offsetY="20" />
+
+                    <Controls>
+                        <Label name="$(parent)Name" font="$(BOLD_FONT)|28|thick-outline">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Race" font="$(BOLD_FONT)|24|thick-outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)ClassLevel" font="$(BOLD_FONT)|24|thick-outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Race" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Location" font="$(BOLD_FONT)|18|thick-outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Create" inherits="ZO_DefaultButton" tier="MEDIUM" text="SI_CREATE_CHARACTER">
+                    <Dimensions x="140" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-210" offsetY="-16" />
+
+                    <OnClicked>
+                        PregameStateManager_SetState("CharacterCreate")
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)Delete" inherits="ZO_DefaultButton" enabled="false">
+                    <Dimensions x="140" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-16" />
+                    <OnMouseEnter>
+                        ZO_CharacterSelectDelete_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CharacterSelectDelete_OnMouseExit()
+                    </OnMouseExit>
+                    <OnClicked>
+                        ZO_CharacterSelect_DeleteSelected()
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,79 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadGuildHubText" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="ZO_GamepadGuildHubHighlightText" font="ZoFontGamepad34" virtual="true"/>
+        <Control name="AllianceSelectorListItemRulerTemplate" virtual="true">
+            <Anchor point="TOPLEFT" />
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75"/>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadGuildHubTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadGuildHub_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPaneContainer" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                        <Label name="$(parent)CreatingGuildInfo" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeaderHeader" relativePoint="BOTTOMLEFT" offsetY="54" />
+                        </Label>
+                        
+                        <Control name="$(parent)CreateGuildExplanation" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true">
+                            <Controls>
+                                <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)ContentHeaderHeader" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <OnInitialized>
+                                        ZO_Scroll_Initialize_Gamepad(self)
+                                        ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
+                                    </OnInitialized>
+                                    <Controls>
+                                        <Scroll name="$(parent)Scroll" override="true">
+                                            <AnchorFill/>
+                                        </Scroll>
+                                        <Control name="$(parent)ScrollChild" override="true">
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
+                                            <Controls>
+                                                <Label name="$(parent)Section1" text="SI_GUILD_INTRODUCTION" inherits="ZO_GamepadGuildHubText">
+                                                    <Anchor point="TOPLEFT"/>
+                                                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
+                                                </Label>
+                                                <Label name="$(parent)Section2" text="SI_GUILD_BENEFITS_LIST" inherits="ZO_GamepadGuildHubText">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Section1" relativePoint="BOTTOMLEFT"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Section1" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                                                </Label>
+                                                <Label name="$(parent)Section3" inherits="ZO_GamepadGuildHubText">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Section2" relativePoint="BOTTOMLEFT"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Section2" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)AllianceSelector" inherits="ZO_GamepadIconSelectorTemplate" hidden="true" >
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Highlight" override="true">
+                            <Controls>
+                                <Label name="$(parent)Hint" override="true">
+                                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(grandparent)" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+                                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(grandparent)"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

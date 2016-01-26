@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TradingHouse_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_TradingHouse_Gamepad_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Text" text="SI_INVENTORY_RETRIEVING_ITEMS" override="true"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

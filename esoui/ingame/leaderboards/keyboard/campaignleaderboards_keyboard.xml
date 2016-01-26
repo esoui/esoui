@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CampaignLeaderboardSelectorTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_CampaignLeaderboardSelector_ButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_CampaignLeaderboardSelector_ButtonOnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <TopLevelControl name="ZO_CampaignLeaderboardsInformationArea" hidden="true" inherits="ZO_LeaderboardsInformationArea">
+            <OnInitialized>
+                ZO_CampaignLeaderboardsInformationArea_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_MenuBarTemplate">
+                    <Anchor point="TOPRIGHT" offsetY="5" />
+                    <Controls>
+                        <Label name="$(parent)Active" font="ZoFontWinH4" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

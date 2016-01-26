@@ -1,0 +1,53 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ComboBox_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <Dimensions x="150" y="48" />
+            <OnInitialized>
+                ZO_ComboBox_Gamepad:New(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)OpenDropdown" textureFile="EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="TOPRIGHT" offsetX="-3" offsetY="10"/>
+                </Texture>
+                
+                <Label name="$(parent)SelectedItemText" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
+                    <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3"/>
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ComboBox_Item_Gamepad" virtual="true">
+            <Dimensions y="48" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" tier="HIGH" layer="TEXT" verticalAlignment="CENTER">
+                    <Anchor point="LEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+
+        <TopLevelControl name="ZO_ComboBox_Gamepad_Dropdown" tier="HIGH" level="ZO_HIGH_TIER_GAMEPAD_COMBO_BOX_DROPDOWN" hidden="true">
+            <OnInitialized>
+                ZO_ComboBox_Gamepad_Dropdowm_Initialize(self)
+            </OnInitialized>
+            <OnEffectivelyHidden>
+                if self.comboBoxObject then
+                    self.comboBoxObject:Deactivate()
+                end
+            </OnEffectivelyHidden>
+            <Controls>
+                <Scroll name="$(parent)Scroll" tier="HIGH" layer="OVERLAY">
+                    <AnchorFill/>
+                    <FadeGradient x1="0" y1="1" size1="15" x2="0" y2="-1" size2="15" />
+                </Scroll>
+                <Backdrop name="$(parent)Background" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" tier="HIGH" layer="BACKGROUND" >
+                    <AnchorFill/>
+                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="32" edgeFileHeight="8" />
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                </Backdrop>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

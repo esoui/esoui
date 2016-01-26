@@ -1,0 +1,210 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_Options_Divider" textureFile="EsoUI\Art\Login\login_divider.dds" virtual="true">
+            <Dimensions x="512" y="4" />
+        </Texture>
+
+        <Texture name="ZO_Options_WarningIcon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" mouseEnabled="true" virtual="true">
+            <Dimensions x="24" y="24" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+
+        <Texture name="ZO_Options_SliderScreenWarning" inherits="ZO_Options_WarningIcon" virtual="true">
+          <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetX="-5" />
+          <OnInitialized>
+              self.data = { tooltipText = SI_OPTIONS_APPLY_WARNING }
+          </OnInitialized>
+        </Texture>
+
+        <Button name="ZO_Options_DefaultMarker" virtual="true">
+            <Dimensions x="16" y="16" />
+            <PressedOffset x="1" y="1" />
+            <Textures
+                normal="EsoUI\Art\Miscellaneous\slider_marker_up.dds"
+                pressed="EsoUI\Art\Miscellaneous\slider_marker_down.dds"
+                mouseOver="EsoUI\Art\Miscellaneous\slider_marker_over.dds"
+            />
+            <OnInitialized>
+                self.data = { tooltipText = SI_INTERFACE_OPTIONS_RESET_TO_DEFAULT_TOOLTIP }
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Button>
+
+        <Label name="ZO_Options_SectionTitleLabel" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="512" />
+        </Label>
+
+        <Control name="ZO_Options_SectionTitle" resizeToFitDescendents="true" hidden="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_Options_SectionTitleLabel">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_SectionTitle_WithDivider" resizeToFitDescendents="true" hidden="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Divider" inherits="ZO_Options_Divider">
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="ZO_Options_SectionTitleLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_DefaultIndentedDimensions" virtual="true">
+          <Dimensions x="490" y="26" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" override="true">
+                    <Dimensions x="280" y="26" />
+                    <Anchor point="LEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Checkbox" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_CheckBoxOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_CheckBoxOnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                local checkboxControl = GetControl(self, "Checkbox")
+                checkboxControl:GetHandler("OnClicked")(checkboxControl, button)
+            </OnMouseUp>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Dimensions x="300" y="26" />
+                    <Anchor point="LEFT" />
+                </Label>
+                
+                <Button name="$(parent)Checkbox" inherits="ZO_CheckButton_Text" horizontalAlignment="LEFT" font="ZoFontWinH4" modifyTextType="UPPERCASE">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+                    <FontColors
+                        normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                        pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                        mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                        disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                    />
+                    <OnMouseEnter>
+                        ZO_Options_CheckBoxOnMouseEnter(self:GetParent())
+                        self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_Options_CheckBoxOnMouseExit(self:GetParent())
+                        self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+        </Control>
+      
+        <Control name="ZO_Options_Dropdown" mouseEnabled="true" hidden="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Control>
+
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" >
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Dropdown_IncludeApplyScreenWarning" inherits="ZO_Options_Dropdown" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_OPTIONS_APPLY_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Slider" mouseEnabled="true" hidden="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Slider name="$(parent)Slider" inherits="ZO_Slider">
+                    <Dimensions x="190" y="16" />
+                    <Anchor point="RIGHT" offsetX="-10" />
+
+                    <OnValueChanged>
+                        ZO_Options_SliderOnValueChanged(self, value, eventReason)
+                    </OnValueChanged>
+
+                    <OnSliderReleased>
+                        ZO_Options_SliderOnSliderReleased(self, value)
+                    </OnSliderReleased>
+
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Slider>
+
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                    <Dimensions y="26" />
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)LowLabel" relativePoint="LEFT" />
+                </Label>
+
+                <Label name="$(parent)ValueLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="75" y="26" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_PanelHeader" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowSettingsScrollChild" />
+        </Control>
+    </Controls>
+</GuiXml>

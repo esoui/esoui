@@ -1,0 +1,150 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="RankHeaderAnimation">
+            <Animations>
+                <ScaleAnimation duration="180" startScale=".8" endScale="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_RankHeader" inherits="ZO_IconHeader" virtual="true"/>
+        
+        <Control name="ZO_GuildPermission" virtual="true">
+            <Dimensions y="30"/>
+            <Controls>
+                <Texture name="$(parent)Icon" layer="OVERLAY" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT"/>
+                </Texture>
+                <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                    <OnInitialized>
+                        ZO_CheckButton_SetToggleFunction(self, ZO_GuildPermissionCheck_OnToggled)
+                    </OnInitialized>
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRankIconSelector" virtual="true" mouseEnabled="true">
+            <Dimensions x="48" y="48"/>
+            <OnMouseEnter>
+                ZO_GuildRankIconSelector_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GuildRankIconSelector_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                    ZO_GuildRankIconSelector_OnMouseClicked(self)
+                end
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)Frame" tier="LOW">
+                    <AnchorFill/>
+                </Texture>
+                <Texture name="$(parent)Icon" tier="MEDIUM">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildAddRankDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_GUILD_RANKS_ADD_RANK_NAME_HEADER"/>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop">
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)CopyPermissionsHeader" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_RANKS_COPY_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)CopyPermissions" inherits="ZO_ComboBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CopyPermissionsHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CopyPermissionsHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+                
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Add" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_GuildRanks" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildRanks_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ListHeader" font="ZoFontHeader4" text="SI_WINDOW_TITLE_GUILD_RANKS" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="75"/>
+                </Label>
+                <Control name="$(parent)List" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ListHeader" relativePoint="BOTTOMLEFT" offsetX="5" offsetY="10"/>
+                </Control>
+                <Control name="$(parent)AddRank" inherits="ZO_IconHeader">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" offsetY="16"/>
+                </Control>
+                <Texture name="$(parent)RankIcon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" offsetX="275" offsetY="59"/>
+                </Texture>
+                <Control name="$(parent)RankName">
+                    <Anchor point="LEFT" relativeTo="$(parent)RankIcon" relativePoint="RIGHT" offsetX="3"/>
+                    <Dimensions x="400" y="42"/>
+                    <Controls>
+                        <Backdrop name="$(parent)EditBG" inherits="ZO_EditBackdrop">
+                            <AnchorFill/>
+                            <Controls>
+                                <EditBox name="$(grandparent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <OnTextChanged>
+                                        ZO_GuildRankNameEdit_OnTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                        <Label name="$(parent)Display" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Edit"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Edit"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RankIcon" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="15"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
+                </Control>
+
+                <Control name="$(parent)Icons" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_GUILD_ICONS_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Guild/guildHeraldry_swatchFrame_overSelect.dds" excludeFromResizeToFitExtents="true" hidden="true">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="96" y="96"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Permissions" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icons" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                    <Controls>
+                        <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_GUILD_PERMISSIONS_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>    
+</GuiXml>

@@ -1,0 +1,118 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CraftingInventoryRowBase" inherits="ZO_ListInventorySlotBehavior" mouseEnabled="true" virtual="true">
+            <Dimensions x="392" y="52" />
+
+            <OnMouseEnter>
+                self.owner:SetMousedOverRow(self)
+                ZO_InventorySlot_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.owner:SetMousedOverRow(nil)
+                ZO_InventorySlot_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CraftingInventoryIngredientNames" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="270" />
+                    <Anchor point="LEFT" offsetX="73" />
+                </Label>
+
+                <Label name="$(parent)Custom" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
+                    <Dimensions x="90" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="2" />
+                </Label>
+
+                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="RIGHT" offsetX="-15" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CraftingInventoryTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_CraftingInventory_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_CraftingInventory_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_CraftingInventoryComponentRow" inherits="ZO_CraftingInventoryIngredientNames ZO_CraftingInventoryRowBase" virtual="true" />
+        
+        <Label name="ZO_CraftingInventoryNoItemLabel" font="ZoFontWinH4" horizontalAlignment="CENTER" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" offsetY="20" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backpack" />
+        </Label>
+        
+        <Control name="ZO_CraftingInventoryTemplate" virtual="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+            
+            <OnEffectivelyShown>
+                self.owner:OnShow()
+            </OnEffectivelyShown>
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Dimensions x="270" y="20" />
+                            <Anchor point="LEFT" offsetX="73" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, nil, "name")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Custom" inherits="ZO_SortHeader">
+                            <Dimensions x="82" y="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, nil, TEXT_ALIGN_CENTER, "custom")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
+                            <Dimensions x="102" y="20" />
+                            <Anchor point="RIGHT" offsetX="-33" />
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Backpack" inherits="ZO_InventoryList"/>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

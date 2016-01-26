@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_StatsRowName" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Anchor point="LEFT"/>
+        </Label>
+
+        <Label name="ZO_StatsRowValue" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true">
+            <Anchor point="RIGHT"/>
+        </Label>
+
+        <Control name="ZO_StatsEntry" virtual="true" mouseEnabled="true">
+            <Dimensions x="295" y="20" />
+            <OnInitialized>
+                self.name = self:GetNamedChild("Name")
+                self.value = self:GetNamedChild("Value")
+                self.pendingBonus = self:GetNamedChild("PendingBonus")
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_StatsEntry_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_StatsEntry_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
+                <Label name="$(parent)Value" inherits="ZO_StatsRowValue">
+                    <Anchor point="RIGHT" offsetX="-20" />
+                </Label>
+                <Label name="$(parent)PendingBonus" hidden="true" inherits="ZO_StatsRowValue">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-20"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

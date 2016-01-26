@@ -1,0 +1,76 @@
+<GuiXml>
+    <Controls>
+        <!--
+            TODO: ZO_Menu needs to become virtual and be reparented to ZO_Menus to enable
+            nesting.  This is just a quick first pass.
+        -->
+
+        <Control name="ZO_MenuItem" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_Menu_EnterItem(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Menu_ExitItem(self)
+            </OnMouseExit>
+
+            <OnMouseDown>
+                IgnoreMouseDownEditFocusLoss()
+            </OnMouseDown>
+            <OnMouseUp>
+                if(upInside == true) then
+                    ZO_Menu_ClickItem(self, button)
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Label name="$(parent)Name">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Button name="ZO_MenuItemCheckButton" inherits="ZO_CheckButton" virtual="true">
+            <OnMouseEnter>
+                ZO_Menu_EnterItem(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Menu_ExitItem(self)
+            </OnMouseExit>
+        </Button>
+
+        <TopLevelControl name="ZO_Menus" tier="HIGH">
+            <OnInitialized>
+                ZO_Menu_Initialize()
+            </OnInitialized>
+
+            <Controls>
+                <Control name="ZO_Menu" clampedToScreen="true" mouseEnabled="true" hidden="true">
+                    <OnMouseEnter>
+                        -- This is just to prevent tooltips from items underneath from showing up over the menu
+                    </OnMouseEnter>
+
+                    <OnHide>
+                        ZO_Menu_OnHide(self)
+                    </OnHide>
+
+                    <Controls>
+                        <Backdrop name="$(parent)BG">
+                            <AnchorFill />
+
+                            <Controls>
+                                <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                </Texture>
+                            </Controls>
+                        </Backdrop>
+
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_SelectionHighlight" hidden="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

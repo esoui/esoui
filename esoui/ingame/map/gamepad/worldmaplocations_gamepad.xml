@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>      
+        <TopLevelControl name="ZO_WorldMapLocations_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_WorldMapLocations_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Main" inherits="ZO_WorldMapInfoContent_Gamepad">
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                            <AnchorFill/>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SideContent" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Label name="$(grandparent)Info" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed42">
+                                    <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y"/>
+                                    <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

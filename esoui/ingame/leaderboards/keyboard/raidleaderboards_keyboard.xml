@@ -1,0 +1,36 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_RaidLeaderboardsInformationArea" hidden="true" inherits="ZO_LeaderboardsInformationArea">
+            <OnInitialized>
+                ZO_RaidLeaderboardsInformationArea_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ActiveScore" font="ZoFontWinH2">
+                    <Anchor point="TOPRIGHT" offsetY="8" />
+                </Label>
+
+                <Texture name="$(parent)CurrentRankHelp" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="LEFT" relativeTo="$(parent)CurrentRank" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_RaidLeaderboardsInformationArea_CurrentRankHelp_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_RaidLeaderboardsInformationArea_CurrentRankHelp_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+
+                <Texture name="$(parent)ScoringInfoHelp" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ScoringInfo" relativePoint="LEFT" offsetX="-5" />
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_RaidLeaderboardsInformationArea_ScoringInfoHelp_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_RaidLeaderboardsInformationArea_ScoringInfoHelp_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

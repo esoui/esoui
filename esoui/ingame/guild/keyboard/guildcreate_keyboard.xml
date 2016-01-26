@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildCreate" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildCreate_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Section1" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_INTRODUCTION">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="25"/>
+                    <Dimensions x="860"/>
+                </Label>
+                <Label name="$(parent)Section2" font="ZoFontGame" text="SI_GUILD_BENEFITS_LIST">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Section1" relativePoint="BOTTOMLEFT" offsetX="35" offsetY="20"/>
+                    <Dimensions x="860"/>
+                </Label>
+                <Label name="$(parent)Section3" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Section2" relativePoint="BOTTOMLEFT" offsetX="-35" offsetY="20"/>
+                    <Dimensions x="860"/>
+                    <OnInitialized>
+                        self:SetText(zo_strformat(SI_GUILD_CONCLUSION, ZO_GetPlatformAccountLabel()))
+                    </OnInitialized>
+                </Label>
+                <Label name="$(parent)Error" font="ZoFontHeader3">
+                    <Anchor point="TOP" relativeTo="$(parent)Section3" relativePoint="BOTTOM" offsetY="100"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

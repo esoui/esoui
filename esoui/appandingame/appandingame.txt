@@ -1,0 +1,5 @@
+; UI files available in App and Ingame
+EsoUI\AppAndInGame\Globals\Globals.lua
+
+EsoUI\AppAndInGame\VoiceChatHUD\Console\ZO_VoiceChatHUD.lua
+EsoUI\AppAndInGame\VoiceChatHUD\Console\ZO_VoiceChatHUD.xml

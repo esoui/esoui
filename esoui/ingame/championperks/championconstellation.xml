@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_Constellation" virtual="true" pixelRoundingEnabled="false" blendMode="ALPHA" textureFile="EsoUI\Art\Champion\champion_constellations.dds"/>
+        <Texture name="ZO_ConstellationGlow" virtual="true" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" textureFile="EsoUI\Art\Champion\champion_constellations_glow.dds"/>
+        <Texture name="ZO_ConstellationMouseover" virtual="true" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" textureFile="EsoUI\Art\Champion\champion_constellations_mouseover.dds"/>
+        <!-- Set each of these virtual textures to a concrete texture on load so their texture files are loaded into memory -->
+        <Texture name="ZO_ChampionConstellationPreloadTextures" hidden="true" inherits="ZO_Constellation ZO_ConstellationGlow ZO_ConstellationMouseover"/>
+    </Controls>
+</GuiXml>

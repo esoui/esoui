@@ -1,0 +1,52 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GammaAdjust" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase" resizeToFitDescendents="false">
+            <AnchorFill />
+
+            <OnEffectivelyShown>
+                PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+            </OnEffectivelyShown>
+
+            <OnInitialized>
+                ZO_GammaAdjust_Initialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <!-- anchor the middle one first -->
+                <Texture name="$(parent)ReferenceImage2" textureFile="EsoUI/Art/GammaAdjust/gamma_referenceImage2.dds" resizeToFitFile="true">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)ReferenceImage1" textureFile="EsoUI/Art/GammaAdjust/gamma_referenceImage1.dds" resizeToFitFile="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ReferenceImage2" relativePoint="LEFT" offsetX="-50" />
+                </Texture>
+
+                <Texture name="$(parent)ReferenceImage3" textureFile="EsoUI/Art/GammaAdjust/gamma_referenceImage3.dds" resizeToFitFile="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)ReferenceImage2" relativePoint="RIGHT" offsetX="50" />
+                </Texture>
+
+                <Label name="$(parent)MainText" modifyTextType="UPPERCASE" text="SI_GAMMA_MAIN_TEXT">
+                    <Anchor point="TOP" relativeTo="$(parent)ReferenceImage2" relativePoint="BOTTOM" offsetY="50" />
+                </Label>
+
+                <Label name="$(parent)SubText" modifyTextType="UPPERCASE" text="SI_GAMMA_SUB_TEXT">
+                    <Anchor point="TOP" relativeTo="$(parent)MainText" relativePoint="BOTTOM" offsetY="2" />
+                </Label>
+                
+                <Control name="$(parent)KeyContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)SubText" relativePoint="BOTTOM" offsetY="86" />
+
+                    <Controls>
+                        <Control name="$(parent)ConfirmGamma">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>                        
+                    
+                        <Control name="$(parent)DeclineGamma">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmGamma" relativePoint="TOPRIGHT" offsetX="40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

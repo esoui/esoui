@@ -1,0 +1,137 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_CampaignScoring_Icon_Gamepad" inherits="ZO_CampaignScoring_IconTemplate" virtual="true" />
+
+        <Control name="ZO_CampaignScoringAllianceSection_Gamepad" inherits="ZO_CampaignScoringAllianceSectionTemplate" virtual="true" override="true">
+            <Dimensions y="200"/>
+            
+            <Controls>
+                <Texture name="$(parent)BGLeft" override="true" hidden="true" />
+
+                <Texture name="$(parent)BGRight" override="true" hidden="true" />
+
+                <Control name="$(parent)Divider" inherits="ZO_CampaignScoringHorizontalDivider">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Control>
+                
+                <Texture name="$(parent)AllianceIcon" override="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" offsetX="30" offsetY="45"/>
+                </Texture>
+
+                <Label name="$(parent)AllianceScore" override="true" font="ZoFontGamepad61">
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-30" offsetY="121"/>
+                </Label>
+
+                <Label name="$(parent)AllianceName" override="true" font="ZoFontGamepad34">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="TOPRIGHT" offsetX="30" offsetY="-3" />
+                </Label>
+
+                <Label name="$(parent)PotentialPointsLabel" override="true" font="ZoFontGamepadCondensed27" modifyTextType="UPPERCASE" />
+
+                <Label name="$(parent)PotentialPoints" override="true" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PotentialPointsLabel" relativePoint="BOTTOMRIGHT" offsetX="4" offsetY="3" />
+                </Label>
+
+                <Texture name="$(parent)KeepIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="TOPLEFT" offsetX="104" offsetY="113"/>
+                </Texture>
+
+                <Label name="$(parent)NumKeeps" override="true" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5" />
+                </Label>
+
+                <Texture name="$(parent)OutpostIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_outpostIcon.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" offsetX="183" />
+                </Texture>
+
+                <Label name="$(parent)NumOutposts" override="true" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5" />
+                </Label>
+
+                <Texture name="$(parent)ResourcesIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_resourceIcon.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" offsetX="183" />
+                </Texture>
+
+                <Label name="$(parent)NumResources" override="true" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5" />
+                </Label>
+                
+                <Texture name="$(parent)ScrollIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_scrollIcon.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" offsetX="183" />
+                </Texture>
+
+                <Label name="$(parent)NumScrolls" override="true" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ScrollIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignScoringHorizontalDivider" resizeToFitDescendents="true" alpha="0.5" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="4" y="4" />
+                    <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Anchor point="RIGHT" />
+                    <Dimensions x="4" y="4" />
+                    <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                    <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CampaignScoring_Gamepad" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
+            <OnInitialized>
+                ZO_CampaignScoring_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)TierProgress" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" offsetY="20"/>
+                    <Controls>
+                        <Label name="$(parent)Name" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CAMPAIGN_SCORING_END_OF_CAMPAIGN_REWARD_TIER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        
+                        <Label name="$(parent)Rank" font="ZoFontGamepad42">
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="8" offsetY="-2"/>
+                        </Label>
+                        
+                        <StatusBar name="$(parent)StatusBar" mouseEnabled="true" inherits="ZO_GamepadSkillsXPBar">
+                            <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" />
+                        </StatusBar>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TopSection" inherits="ZO_CampaignScoringAllianceSection_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TierProgress" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TierProgress" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Control>
+
+                <Control name="$(parent)MiddleSection" inherits="ZO_CampaignScoringAllianceSection_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)BottomSection" inherits="ZO_CampaignScoringAllianceSection_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MiddleSection" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MiddleSection" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,44 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SynergyTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Synergy_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y"/>
+                    <ResizeToFitPadding width="10" />
+                    
+                    <Controls>
+                        <Texture name="$(parent)Icon">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="50" y="50" />
+
+                            <Controls>
+                                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                                    <AnchorFill />
+                                </Texture>
+                            </Controls>
+                        </Texture>
+
+                        <Control name="$(parent)Key" inherits="ZO_KeybindButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_OnInitialized(self)
+                                self:SetKeybind("USE_SYNERGY")
+                            </OnInitialized>
+                        </Control>
+
+                        <Label name="$(parent)Action" font="ZoInteractionPrompt" horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" relativeTo="$(parent)Key" relativePoint="RIGHT"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
+

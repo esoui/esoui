@@ -1,0 +1,274 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CraftingGlowAlphaAnimation">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0.0" endAlpha="1.0"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <TextureRotateAnimation name="CraftingBurstRotationAnimationBase1">
+            <OnPlay>
+                local start = math.random() * math.pi
+                self:SetRotationValues(start, start + math.pi * 2)
+            </OnPlay>
+        </TextureRotateAnimation>
+
+        <TextureRotateAnimation name="CraftingBurstRotationAnimationBase2">
+            <OnPlay>
+                local start = math.random() * math.pi
+                self:SetRotationValues(start, start - math.pi * 2)
+            </OnPlay>
+        </TextureRotateAnimation>
+
+        <AnimationTimeline name="CraftingBurstRotationTimeline" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureRotateAnimation duration="2000" inherits="CraftingBurstRotationAnimationBase1" />
+                <TextureRotateAnimation duration="2000" inherits="CraftingBurstRotationAnimationBase2" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingBurstRotationTimelineFast" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureRotateAnimation duration="800" inherits="CraftingBurstRotationAnimationBase1" />
+                <TextureRotateAnimation duration="800" inherits="CraftingBurstRotationAnimationBase2" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingLockInAnimation">
+            <Animations>
+                <!-- Locking durations are set in Lua -->
+                <AlphaAnimation startAlpha="0.0" endAlpha="1.0"/>
+                <ScaleAnimation startScale="1" endScale="1.1">
+                    <OnPlay>
+                        PlaySound(self:GetTimeline().lockInSound)
+                    </OnPlay>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingUnlockAnimation">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="1.0" endAlpha="0.0"/>
+                <ScaleAnimation duration="200" startScale="1.1" endScale="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AlphaAnimation name="CraftingExtractionBurstAnimationFadeIn" duration="1" startAlpha="0.0" endAlpha="0.85"/>
+        <AlphaAnimation name="CraftingExtractionBurstAnimationFadeOut" delay="350" duration="1" startAlpha="0.85" endAlpha="0.0"/>
+
+        <ScaleAnimation name="CraftingExtractionBurstAnimationScaleIn" duration="300" startScale="0" endScale="1.0">
+            <EasingFunction>
+                return ZO_BounceEase(progress)
+            </EasingFunction>
+        </ScaleAnimation>
+        
+        <AnimationTimeline name="CraftingEnchantExtractionBurstAnimation">
+            <OnPlay>
+                PlaySound(SOUNDS.ENCHANTING_EXTRACT_START_ANIM)
+            </OnPlay>
+            <Animations>
+                <!-- Burst fade in -->
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeIn"/>
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeIn"/>
+
+                <ScaleAnimation inherits="CraftingExtractionBurstAnimationScaleIn"/>
+                <ScaleAnimation inherits="CraftingExtractionBurstAnimationScaleIn"/>
+
+                <!-- Burst fade out -->
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeOut"/>
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeOut"/>
+                
+                <!-- Underlay fade in-->
+                <AlphaAnimation delay="80" duration="150" startAlpha="0.0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInQuintic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <ScaleAnimation duration="400" startScale="0" endScale="1.0" />
+                
+                <!-- Underlay fade out-->
+                <AlphaAnimation delay="600" duration="600" startAlpha="1" endAlpha="0.0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <!-- Icon scale up -->
+                <ScaleAnimation duration="300" startScale="1" endScale="1.1"/>
+
+                <!-- Icon scale down -->
+                <ScaleAnimation delay="500" duration="300" startScale="1.1" endScale="1.0"/>
+
+                <!-- Burst Rotations -->
+                <AnimationTimeline inherits="CraftingBurstRotationTimelineFast" />
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CraftingSmithingExtractionBurstAnimationPhase1">
+            <OnPlay>
+                local craftingType = GetCraftingInteractionType()
+                if craftingType == CRAFTING_TYPE_BLACKSMITHING then
+                    PlaySound(SOUNDS.BLACKSMITH_EXTRACT_START_ANIM)
+                elseif craftingType == CRAFTING_TYPE_CLOTHIER then
+                    PlaySound(SOUNDS.CLOTHIER_EXTRACT_START_ANIM)
+                elseif craftingType == CRAFTING_TYPE_WOODWORKING then
+                    PlaySound(SOUNDS.WOODWORKER_EXTRACT_START_ANIM)
+                end
+            </OnPlay>
+            <Animations>
+                <!-- Burst fades -->
+                <AlphaAnimation duration="80" startAlpha="0.0" endAlpha="0.85" />
+
+                <!-- Icon color -->
+                <ColorAnimation duration="250" startColor="FFFFFFFF" endColor="FF000000" />
+                <ColorAnimation delay="250" duration="300" startColor="FF000000" endColor="00000000" />
+
+                <!-- Icon scales -->
+                <ScaleAnimation duration="250" startScale="1" endScale="1.1"/>
+
+                <!-- Name fades -->
+                <AlphaAnimation duration="250" startAlpha="1.0" endAlpha="0.0"/>
+
+                <!-- Stack fades -->
+                <AlphaAnimation duration="250" startAlpha="1.0" endAlpha="0.0"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingSmithingExtractionBurstAnimationPhase2">
+            <Animations>
+                <!-- Burst fades -->
+                <AlphaAnimation delay="100" duration="200" startAlpha="0.85" endAlpha="0.0" />
+
+                <!-- Icon color -->
+                <ColorAnimation delay="300" duration="250" startColor="00000000">
+                    <OnPlay>
+                        if animatingControl:GetParent().meetsStackRequirement then
+                            self:SetEndColor(1, 1, 1, 1)
+                        else
+                            self:SetEndColor(1, 0, 0, 1)
+                        end
+                    </OnPlay>
+                </ColorAnimation>
+
+                <!-- Icon scales -->
+                <ScaleAnimation duration="300" startScale="1.1" endScale="1.0"/>
+
+                <!-- Name fades -->
+                <AlphaAnimation duration="200" startAlpha="0.0" endAlpha="1.0"/>
+
+                <!-- Stack fades -->
+                <AlphaAnimation duration="200" startAlpha="0.0" endAlpha="1.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Texture name="ZO_Crafting_BlueStarBurst" textureFile="EsoUI/Art/Crafting/burst_blue.dds" tier="LOW" layer="BACKGROUND" level="1" blendMode="ADD" virtual="true">
+            <Anchor point="CENTER" />
+        </Texture>
+        
+        <Texture name="ZO_CraftingLockInBurst" textureFile="EsoUI/Art/Crafting/slot_locked_burst.dds" alpha="0" virtual="true">
+            <Dimensions x="280" y="280" />
+        </Texture>
+
+        <Control name="ZO_CraftingEnchantExtractionBurst" hidden="true" virtual="true" tier="MEDIUM">
+            <Dimensions x="256" y="256" />
+
+            <OnInitialized>
+                self.underlay = self:GetNamedChild("Underlay")
+                self.burst1 = self:GetNamedChild("Burst1")
+                self.burst2 = self:GetNamedChild("Burst2")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Underlay" textureFile="EsoUI/Art/Crafting/blackcircle.dds" alpha="0">
+                    <Dimensions x="256" y="256" />
+                    <Anchor point="CENTER" />
+
+                    <Controls>
+                        <Texture name="$(parent)LandingArea" textureFile="EsoUI/Art/Crafting/crafting_enchanting_extraction_landingArea_overlay.dds" inheritScale="false">
+                            <Dimensions x="236" y="236" />
+                            <Anchor point="CENTER" offsetY="3" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Burst1" textureFile="EsoUI/Art/Crafting/white_burst.dds" color="fe692a" blendMode="ADD" alpha="0">
+                    <Dimensions x="320" y="320" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                
+                <Texture name="$(parent)Burst2" textureFile="EsoUI/Art/Crafting/white_burst.dds" color="fe692a" blendMode="ADD" alpha="0">
+                    <Dimensions x="320" y="320" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_CraftingSmithingExtractionBurst" textureFile="EsoUI/Art/Crafting/slot_locked_burst.dds" alpha="0" hidden="true" virtual="true">
+            <Dimensions x="179" y="179" />
+        </Texture>
+
+        <Button name="ZO_CraftingSlot" inherits="ZO_ItemSlot" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <OnInitialized>
+                ZO_CraftingSlot_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.animation:PlayForward()
+                ZO_InventorySlot_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.animation:PlayBackward()
+                ZO_InventorySlot_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Textures mouseOver="" pressedMouseOver="" />
+            
+            <Controls>
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha="0" level="0">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER"/>
+                </Texture>
+                <Texture name="$(parent)DropCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER"/>
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Texture name="ZO_CraftingTooltip_Burst" inherits="ZO_Crafting_BlueStarBurst" excludeFromResizeToFitExtents="true" alpha="0" virtual="true">
+            <Dimensions x="320" y="320" />
+        </Texture>
+
+        <Control name="ZO_CraftingTooltip_AddBurstAndGlow" virtual="true">
+            <Controls>
+                <Control name="$(parent)Icon" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Burst1" inherits="ZO_CraftingTooltip_Burst" />
+
+                        <Texture name="$(parent)Burst2" inherits="ZO_CraftingTooltip_Burst" />
+                    </Controls>
+                </Control>
+                
+                <Backdrop name="$(parent)Glow" tier="LOW" excludeFromResizeToFitExtents="true" level="0" alpha="0">
+                    <Anchor point="TOPLEFT" offsetX="-31" offsetY="-31" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="30" />
+
+                    <!-- Edge file determined in Lua -->
+                    <Center file="EsoUI/Art/Crafting/crafting_toolTip_glow_center.dds" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Tooltip name="ZO_CraftingTooltip" tier="HIGH" inherits="ZO_ItemIconTooltip ZO_CraftingTooltip_AddBurstAndGlow" mouseEnabled="true" virtual="true">
+            <Anchor point="BOTTOM" offsetY="-245"/>
+
+            <OnInitialized>
+                self:GetNamedChild("BG"):SetDrawTier(DT_MEDIUM)
+            </OnInitialized>
+        </Tooltip>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,16 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="HudBriefTutorialAnimation">
+            <Animations>
+                <AlphaAnimation duration="450" delay="250" startAlpha="1.0" endAlpha="0.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_BriefHudTutorialTip" font="ZoInteractionPrompt" inherits="ZO_LargeKeyMarkupLabel" verticalAlignment="CENTER" horizontalAlignment="CENTER" wrapMode="ELLIPSIS" alpha="0" hidden="true" virtual="true">
+            <Dimensions x="650" />
+            <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y"/>
+        </Label>
+    </Controls>
+</GuiXml>

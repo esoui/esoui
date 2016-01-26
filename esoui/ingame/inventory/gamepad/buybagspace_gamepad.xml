@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GamepadBuyBagSpaceTopLevel" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_BuyBagSpace_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                
+                <Control name="$(parent)BuySpace" inherits="ZO_GamepadBuySpaceCommonTemplate ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

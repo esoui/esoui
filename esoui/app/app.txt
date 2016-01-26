@@ -1,0 +1,13 @@
+; app UI files
+## DependsOn: ZO_PregameLocalization ZO_AppAndInGame
+EsoUI\App\Globals\Globals.lua
+
+EsoUI\App\LoadingScreen\SharedLoadingScreen.lua
+EsoUI\App\LoadingScreen\SharedLoadingScreen.xml
+EsoUI\App\LoadingScreen\Keyboard\LoadingScreen.lua
+EsoUI\App\LoadingScreen\Keyboard\LoadingScreen.xml
+EsoUI\App\LoadingScreen\Gamepad\GamepadLoadingScreen.lua
+EsoUI\App\LoadingScreen\Gamepad\GamepadLoadingScreen.xml
+
+EsoUI\App\LoadingScreen\Console\ZO_VoiceChatHUDLoadingScreen_Console.lua
+EsoUI\App\LoadingScreen\Console\ZO_VoiceChatHUDLoadingScreen_Console.xml

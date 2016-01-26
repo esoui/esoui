@@ -1,0 +1,66 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LargeSingleMarketProduct_BaseTemplate" inherits="ZO_MarketProductBase" hidden="true" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true">
+                    <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                </Backdrop>
+
+                <Control name="$(parent)Highlight" hidden="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineHighlight" layer="OVERLAY">
+                            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thick.dds" edgeFileWidth="32" edgeFileHeight="8"/>
+                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Title" override="true">
+                    <Anchor point="TOPLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y" />
+                    <Anchor point="TOPRIGHT" offsetX="-ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y" />
+                </Label>
+                
+                <Label name="$(parent)PreviousCost" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y"/>
+                    <Controls>
+                        <Texture name="$(parent)Strikethrough" override="true">
+                            <Anchor point="LEFT" offsetX="-2" offsetY="1"/>
+                            <Anchor point="RIGHT" offsetX="2" offsetY="1"/>
+                            <OnInitialized>
+                                self:SetHeight(3.0)
+                            </OnInitialized>
+                        </Texture>
+                    </Controls>
+                </Label>
+                
+                <Label name="$(parent)Cost" override="true">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)PreviousCost" offsetX="10"/>
+                    <Controls>
+                        <Texture name="$(parent)CurrencyIcon" override="true">
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" offsetX="4" offsetY="-2"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PURCHASED" modifyTextType="UPPERCASE" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y"/>
+                </Label>
+                
+                <Label name="$(parent)TextCallout" override="true">
+                    <Controls>
+                        <Control name="$(parent)Background" override="true">
+                            <Dimensions y="64"/>
+                            <Controls>
+                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_center.dds" override="true"/>
+                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_fadedCap.dds" override="true"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

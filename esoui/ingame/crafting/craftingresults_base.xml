@@ -1,0 +1,111 @@
+<GuiXml>
+    <Animations>
+        <AlphaAnimation name="CraftingResultBurstFadeIn" delay="400" duration="200" startAlpha="0" endAlpha="1">
+            <EasingFunction>
+                return ZO_EaseInQuadratic(progress)
+            </EasingFunction>
+        </AlphaAnimation>
+
+        <AnimationTimeline name="CraftingResultTooltipAnimation">
+            <Animations>
+                <!-- Tooltip -->
+                <AlphaAnimation delay="1300" duration="700" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <AlphaAnimation delay="2500" duration="200" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInCubic(progress)
+                    </EasingFunction>
+                    <OnStop>
+                        self:GetTimeline():Stop()
+                    </OnStop>
+                </AlphaAnimation>
+                
+                <!-- Tooltip background glow -->
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <!-- Burst1 -->
+                <AlphaAnimation inherits="CraftingResultBurstFadeIn" />
+                
+                <!-- Burst2 -->
+                <AlphaAnimation inherits="CraftingResultBurstFadeIn" />
+
+                <!-- Burst Rotations -->
+                <AnimationTimeline inherits="CraftingBurstRotationTimeline" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingResultFade">
+            <Animations>
+                <AlphaAnimation duration="700" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingResultTranslate">
+            <Animations>
+                <TranslateAnimation duration="0" deltaX="0" deltaY="0" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingResultPulse">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha=".5">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <AlphaAnimation delay="100" duration="360" startAlpha=".5" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <AlphaAnimation delay="460" duration="460" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_CraftingResultPulseTexture" virtual="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingBurstRotationTimeline")
+                timeline:GetFirstAnimation():SetAnimatedControl(self:GetNamedChild("Burst1"))
+                timeline:GetLastAnimation():SetAnimatedControl(self:GetNamedChild("Burst2"))
+                timeline:PlayFromStart()
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Burst1" inherits="ZO_Crafting_BlueStarBurst">
+                    <Dimensions x="160" y="160" />
+                </Texture>
+
+                <Texture name="$(parent)Burst2" inherits="ZO_Crafting_BlueStarBurst">
+                    <Dimensions x="160" y="160" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,142 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="GamepadInteractiveSortFilterListFocusAlphaFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_GamepadInteractiveSortFilterListRowLabel" font="ZoFontGamepad34" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="1" virtual="true"/>
+
+        <Control name="ZO_GamepadInteractiveSortFilterListIcon" layer="OVERLAY" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_LIST_ICON_SIZE" />
+
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="ZO_GAMEPAD_LIST_ICON_SIZE" y="ZO_GAMEPAD_LIST_ICON_SIZE"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Backdrop name="ZO_GamepadInteractiveSortFilterDefaultHighlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <AnchorFill />
+        </Backdrop>
+
+        <Backdrop name="ZO_GamepadInteractiveFilterHighlight" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" offsetY="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+            <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" offsetY="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+        </Backdrop>
+
+        <Backdrop name="ZO_GamepadInteractiveSortFilterHeaderHighlight" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+            <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+        </Backdrop>
+        
+        <Control name="ZO_GamepadInteractiveFilterHeader" inherits="ZO_SortHeader" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepad27" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadInteractiveFilterDropdown" virtual="true">
+            <Dimensions x="350" y="48"/>
+
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" />
+
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadInteractiveFilterSearch" virtual="true">
+            <Dimensions x="350" y="48"/>
+            
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" />
+                
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                    <Dimensions x="48" y="48"/>
+                    <TextureCoords left="1" right="0" top="0" bottom="1"/>
+                    <Anchor point="RIGHT" offsetX="-10"/>
+                </Texture>
+                
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" font="ZoFontGamepadCondensed42">
+                    <Anchor point="TOPLEFT" offsetX="20"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-10"/>
+                    <OnInitialized>
+                        ZO_EditDefaultText_Disable(self)
+                    </OnInitialized>
+                    <Controls>
+                        <Label name="$(parent)Text" override="true" font="ZoFontGamepadCondensed42" />
+                    </Controls>
+                </EditBox>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadInteractiveFilterContentHeader" inherits="ZO_GamepadGenericContentHeader" virtual="true">
+            <Controls>
+                <Control name="$(parent)DropdownFilter" inherits="ZO_GamepadInteractiveFilterDropdown">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleContainer" />
+                </Control>
+                <Control name="$(parent)SearchFilter" inherits="ZO_GamepadInteractiveFilterSearch">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TitleContainer" />
+                </Control>
+                <Control name="$(parent)TitleContainer" override="true" >
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)DropdownFilter" relativePoint="BOTTOMRIGHT" offsetX="10" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)SearchFilter" relativePoint="BOTTOMLEFT" offsetX="-10" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT"/>
+            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPRIGHT" />
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" hidden="true">
+                    <AnchorFill />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadInteractiveSortFilterListControl" virtual ="true">
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" >
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" inherits="ZO_GamepadInteractiveFilterContentHeader" />
+
+                        <Control name="$(parent)Headers">
+                            <Dimensions y="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                        </Control>
+
+                        <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+
+                        <Control name="$(parent)EmptyRow" inherits="ZO_SortFilterListEmptyRow_Gamepad" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)List" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List" offsetY="10" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

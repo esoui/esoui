@@ -1,0 +1,176 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GamepadSmithingImprovementQualityLabel" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Texture name="ZO_GamepadSmithingImprovementIcon" tier="MEDIUM" virtual="true">
+            <Dimensions x="64" y="64"/>
+            
+            <Controls>
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGamepad27" inheritScale="false">
+                    <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                </Label>
+            </Controls>
+        </Texture>
+
+        <Texture name="ZO_GamepadSmithingImprovementBoosterTexture" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_STEP_X" y="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_HEIGHT" />
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadSmithingImprovementIcon">
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Texture>
+        
+        <Control name="ZO_GamepadSmithingImprovementPanelContent" inherits="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
+            <Controls>
+                <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate" hidden="true">
+                    <AnchorFill/>
+                </Control>
+            </Controls>    
+        </Control>
+
+        <Control name="ZO_GamepadSmithingImprovementFloatingContent" virtual="true">
+            <Controls>
+                <Control name="$(parent)BoosterContainer">
+                    <Dimensions y="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_AREA_HEIGHT" />
+                    <Anchor point="TOP" relativeTo="GuiRoot" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+                    <Controls>
+                        <Texture name="$(parent)Frame" layer="BACKGROUND" textureFile="EsoUI/Art/Crafting/Gamepad/gp_smithing_temperChart_frame.dds">
+                            <Dimensions x="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_WIDTH" y="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_HEIGHT" />
+                            <Anchor point="CENTER" />
+                            <TextureCoords left="0" right="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_TEXTURE_COORD_BOTTOM" />
+                        </Texture>
+
+                        <Texture name="$(parent)FineToSuperior" inherits="ZO_GamepadSmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/Gamepad/gp_smithing_temperChart_gradientFill.dds">
+                            <Anchor point="RIGHT" relativePoint="CENTER" />
+                            <TextureCoords left="ZO_GAMEPAD_SMITHING_IMPROVEMENT_FINE_SUPERIOR_TEXTURE_COORD_LEFT" right="ZO_GAMEPAD_SMITHING_IMPROVEMENT_FINE_SUPERIOR_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_TEXTURE_COORD_BOTTOM" />
+                        </Texture>
+
+                        <Texture name="$(parent)NormalToFine" inherits="ZO_GamepadSmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/Gamepad/gp_smithing_temperChart_gradientFill.dds">
+                            <Anchor point="RIGHT" relativeTo="$(parent)FineToSuperior" relativePoint="LEFT" />
+                            <TextureCoords left="ZO_GAMEPAD_SMITHING_IMPROVEMENT_NORMAL_FINE_TEXTURE_COORD_LEFT" right="ZO_GAMEPAD_SMITHING_IMPROVEMENT_NORMAL_FINE_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_TEXTURE_COORD_BOTTOM" />
+                        </Texture>
+
+                        <Texture name="$(parent)SuperiorToEpic" inherits="ZO_GamepadSmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/Gamepad/gp_smithing_temperChart_gradientFill.dds">
+                            <Anchor point="LEFT" relativePoint="CENTER" />
+                            <TextureCoords left="ZO_GAMEPAD_SMITHING_IMPROVEMENT_SUPERIOR_EPIC_TEXTURE_COORD_LEFT" right="ZO_GAMEPAD_SMITHING_IMPROVEMENT_SUPERIOR_EPIC_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_TEXTURE_COORD_BOTTOM" />
+                        </Texture>
+
+                        <Texture name="$(parent)EpicToLegendary" inherits="ZO_GamepadSmithingImprovementBoosterTexture" textureFile="EsoUI/Art/Crafting/Gamepad/gp_smithing_temperChart_gradientFill.dds">
+                            <Anchor point="LEFT" relativeTo="$(parent)SuperiorToEpic" relativePoint="RIGHT" />
+                            <TextureCoords left="ZO_GAMEPAD_SMITHING_IMPROVEMENT_EPIC_LEGENDARY_TEXTURE_COORD_LEFT" right="ZO_GAMEPAD_SMITHING_IMPROVEMENT_EPIC_LEGENDARY_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_CHART_TEXTURE_COORD_BOTTOM" />
+                        </Texture>
+
+                        <Label name="$(parent)Header" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetY="8"/>
+                        </Label>
+
+                        <Label name="$(parent)Normal" inherits="ZO_GamepadSmithingImprovementQualityLabel">
+                            <Anchor point="TOP" relativeTo="$(parent)NormalToFine" relativePoint="BOTTOMLEFT" offsetY="25" />
+                        </Label>
+
+                        <Label name="$(parent)Fine" inherits="ZO_GamepadSmithingImprovementQualityLabel">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)FineToSuperior" relativePoint="TOPLEFT" offsetY="-25" />
+                        </Label>
+
+                        <Label name="$(parent)Superior" inherits="ZO_GamepadSmithingImprovementQualityLabel">
+                            <Anchor point="TOP" relativeTo="$(parent)SuperiorToEpic" relativePoint="BOTTOMLEFT" offsetY="25" />
+                        </Label>
+
+                        <Label name="$(parent)Epic" inherits="ZO_GamepadSmithingImprovementQualityLabel">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)EpicToLegendary" relativePoint="TOPLEFT" offsetY="-25" />
+                        </Label>
+
+                        <Label name="$(parent)Legendary" inherits="ZO_GamepadSmithingImprovementQualityLabel">
+                            <Anchor point="TOP" relativeTo="$(parent)EpicToLegendary" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SlotContainer" inherits="ZO_GamepadSmithingHorizontalListTemplate ZO_GamepadSmithingHeaderBottomAnchor" hidden="true">
+                    <Dimensions y="230" />
+                    <Controls>
+                        <!--This is needed for functionality that is shared between keyboard and gamepad.  But it's effectively invisible.-->
+                        <Button name="$(parent)ImprovementSlot" hidden="true" inherits="ZO_CraftingSlot_Gamepad"/>
+                        
+                        <Control name="$(parent)List" override="true" hidden="true" />
+                        
+                        <Label name="$(parent)Title"  override="true" text="SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_TITLE" />
+                        
+                        <Button name="$(parent)BoosterSlot" inherits="ZO_CraftingSlot_Gamepad">
+                            <Anchor point="TOP" relativeTo="$(parent)List"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Bg" override="true" hidden="true" />
+                            </Controls>
+                        </Button>
+
+                        <Control name="$(parent)Spinner">
+                            <Dimensions x="110" y="36" />
+                            <Anchor point="TOP" relativeTo="$(parent)BoosterSlot" relativePoint="BOTTOM" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
+                            <Controls>
+                                <Texture name="$(parent)Icon" hidden="true" inherits="ZO_GamepadSmithingImprovementIcon">
+                                    <Anchor point="LEFT" offsetX="-80" />
+                                </Texture>
+
+                                <Button name="$(parent)Decrease">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="LEFT" offsetX="-5" />
+                                    <Textures
+                                            normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_up.dds"
+                                            pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_down.dds"
+                                            disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_disabled.dds"/>
+                                </Button>
+
+                                <Label name="$(parent)Display" font="ZoFontGamepad42" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                                    <Anchor point="TOPLEFT" offsetX="34" offsetY="-6" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-34" />
+                                </Label>
+
+                                <Button name="$(parent)Increase">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="RIGHT" offsetX="5" />
+                                    <Textures
+                                            normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_up.dds"
+                                            pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_down.dds"
+                                            disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_disabled.dds"/>
+                                </Button>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)ExtraInfoLabel" override="true">
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Spinner" relativePoint="BOTTOM" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)QualityBridge" hidden="true">
+                    <Dimensions x="128" y="256"/>
+                    <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_SMITHING_IMPROVEMENT_TOOLTIP_PANEL_FLOATING_CENTER_OFFSET_Y"/>
+                </Texture>
+                
+                <Control name="$(parent)SourceTooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
+                    <Anchor point="RIGHT" relativeTo="$(parent)QualityBridge" relativePoint="LEFT" offsetX="21"/>
+                    <OnInitialized>
+                        ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadSmithingImprovement_TooltipScreenResizeHandler)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ResultTooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)QualityBridge" relativePoint="RIGHT" offsetX="-21"/>
+                    <OnInitialized>
+                        ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadSmithingImprovement_TooltipScreenResizeHandler)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)Tooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
+                    <Anchor point="CENTER" relativeTo="$(parent)QualityBridge" />
+                    <OnInitialized>
+                        ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadSmithingImprovement_TooltipScreenResizeHandler)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

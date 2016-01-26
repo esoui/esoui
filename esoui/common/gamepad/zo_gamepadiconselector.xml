@@ -1,0 +1,48 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadIconSelectorElementTemplate" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" level="3">
+                    <AnchorFill/>
+                </Texture>
+                
+                <Control name="$(parent)SelectedIndicator" level="2" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Background" color="80FFFFFF" level="2">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Backdrop name="$(parent)Outline" inherits="ZO_GamepadWhiteOutlineHighlight" level="1">
+                            <AnchorFill />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadIconSelectorTemplate" virtual="true">
+            <OnEffectivelyHidden>
+                if self.iconSelectorObject then
+                    self.iconSelectorObject:Deactivate()
+                end
+            </OnEffectivelyHidden>
+            <Controls>
+                <Control name="$(parent)Highlight">
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" />
+                    
+                    <Controls>
+                        <Backdrop name="$(parent)Outline" inherits="ZO_GamepadWhiteOutlineHighlight">
+                            <Anchor point="CENTER"/>
+                            <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_HIGHLIGHT_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_HIGHLIGHT_SIZE" />
+                        </Backdrop>
+                        
+                        <Label name="$(parent)Hint" inherits="ZO_GamepadMenuEntryLabelTemplate">
+                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

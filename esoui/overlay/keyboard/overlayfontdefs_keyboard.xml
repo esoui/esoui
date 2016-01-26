@@ -1,0 +1,8 @@
+<GuiXml>
+    <!--
+         Any fonts created in this file will be loaded for the Keyboard version of Overlay
+    -->
+    <String name="OVERLAY_FONT" value="EsoUi/Common/Fonts/Univers67.otf" />
+    
+    <Font name="ZoFontOverlay" font="$(OVERLAY_FONT)|24|soft-shadow-thick" />
+</GuiXml>

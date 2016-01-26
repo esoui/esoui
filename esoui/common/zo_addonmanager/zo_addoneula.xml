@@ -1,0 +1,34 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_AddOnEulaTemplate" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase" virtual="true">
+            <Dimensions x="730" y="400" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                ZO_AddOnEulaInit(self)
+            </OnInitialized>
+
+            <OnEffectivelyShown>
+                PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+            </OnEffectivelyShown>
+            
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" offsetX="24" offsetY="70" />
+                    <Dimensions x="870" y="666" />
+                </Control>
+
+                <Label name="$(parent)Text" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="850" />
+                    <OnInitialized>
+                        self:SetParent(GetControl("ZO_AddOnEulaContainerScrollChild"))
+                        self:SetAnchor(TOPLEFT, ZO_AddOnEulaContainerScrollChild, TOPLEFT, 4, 4)
+                    </OnInitialized>
+                </Label>
+
+                <Control name="$(parent)Disagree" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Agree" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

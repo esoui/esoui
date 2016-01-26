@@ -1,0 +1,14 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapInfoContent_Gamepad" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_WorldMapInfo_GamepadContainerHeader" relativePoint="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMapInfo_GamepadContainer"/>
+        </Control>
+
+        <TopLevelControl name="ZO_WorldMapInfo_Gamepad" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors">
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

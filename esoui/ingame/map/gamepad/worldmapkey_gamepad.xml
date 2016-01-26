@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapKeySymbol_Gamepad" virtual="true" resizeToFitDescendents="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+            <Controls>
+                <Texture name="$(parent)Symbol">
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="64" y="64" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="321" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Symbol" relativePoint="TOPRIGHT" offsetX="5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_WorldMapKeySymbolContainer_Gamepad" virtual="true">
+            <Dimensions x="GAMEPAD_WORLD_MAP_KEY_COLUMN_WIDTH"/>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapKey_Gamepad" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_4_Anchors" tier="HIGH">
+            <OnInitialized>
+                ZO_WorldMapKey_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_2_3_4_Background_Template"/>
+                
+                <Control name="$(parent)Main" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Label name="$(parent)NoKey" text="SI_WORLD_MAP_NO_KEY" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed42">
+                            <Anchor point="TOP" offsetY="180"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

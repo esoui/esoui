@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TradingHouse_Listings_Gamepad"  inherits="ZO_TradingHouse_ItemList_Gamepad" hidden="true" >
+            <OnInitialized>
+                ZO_TradingHouse_Listings_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Headers" inherits="ZO_TradingHouse_SortHeaderGroup">
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortableParametricList_InitSortHeader(self, SI_TRADING_HOUSE_SORT_TYPE_NAME, TEXT_ALIGN_CENTER, ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_NAME)
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
+                            <Dimensions x="195" y="40" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontGamepad27" override="true"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Price" inherits="ZO_TradingHouse_SortPriceHeader" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

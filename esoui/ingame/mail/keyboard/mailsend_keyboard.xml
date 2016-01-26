@@ -1,0 +1,99 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_MailSendAttachmentSlot" virtual="true" inherits="ZO_InventorySlot">
+            <Dimensions x="38" y="38" />
+        </Button>
+        
+        <TopLevelControl name="ZO_MailSend" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_MailSend_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ToLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MAIL_SEND_TO_LABEL">
+                    <Anchor point="TOPLEFT" offsetY="40"/>
+                </Label>
+                <Backdrop name="$(parent)To" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ToLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Dimensions x="340"/>
+                    <Controls>
+                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText"/>
+                    </Controls>
+                </Backdrop>
+                <Label name="$(parent)SubjectLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MAIL_SEND_SUBJECT_LABEL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)To" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                </Label>
+                <Backdrop name="$(parent)Subject" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Dimensions x="340"/>
+                    <Controls>
+                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" />
+                    </Controls>
+                </Backdrop>
+                <Backdrop name="$(parent)Body" inherits="ZO_EditBackdrop">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Subject" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                    <Dimensions y="320"/>
+                    <Controls>
+                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop"/>
+                    </Controls>
+                </Backdrop>
+
+                <Backdrop name="$(parent)SendCurrency" inherits="ZO_DefaultCurrencyInputField">
+                    <Dimensions x="115"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOMRIGHT" offsetX="-16" offsetY="26" />
+                </Backdrop>
+
+                <Button name="$(parent)AttachRadio" inherits="ZO_RadioButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <OnClicked>
+                        ZO_MailSend_SetMoneyAttachmentMode()
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)AttachMoneyLabel" mouseEnabled="true" font="ZoFontWinH4" text="SI_MAIL_SEND_ATTACH_MONEY">
+                    <Anchor point="LEFT" relativeTo="$(parent)AttachRadio" relativePoint="RIGHT" offsetX="8" />
+
+                    <OnMouseUp>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                            ZO_MailSend_SetMoneyAttachmentMode()
+                        end
+                    </OnMouseUp>
+                </Label>
+
+                <Button name="$(parent)CoDRadio" inherits="ZO_RadioButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttachRadio" relativePoint="BOTTOMLEFT" offsetY="8" />
+                    <OnClicked>
+                        ZO_MailSend_SetCoDMode()
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)CoDLabel" mouseEnabled="true" font="ZoFontWinH4" text="SI_MAIL_SEND_COD">
+                    <Anchor point="LEFT" relativeTo="$(parent)CoDRadio" relativePoint="RIGHT" offsetX="8" />
+                    <OnMouseUp>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                            ZO_MailSend_SetCoDMode()
+                        end
+                    </OnMouseUp>
+                </Label>
+
+                <Texture name="$(parent)PostageHelp" inherits="ZO_HelpIcon">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CoDRadio" relativePoint="BOTTOMLEFT" offsetX="-7" offsetY="10"/>
+                    <OnInitialized>
+                        ZO_HelpIcon_Initialize(self, GetString(SI_MAIL_SEND_POSTAGE_HELP_TOOLTIP))
+                    </OnInitialized>
+                </Texture>
+                <Label name="$(parent)PostageLabel" font="ZoFontWinH4" text="SI_MAIL_SEND_POSTAGE_LABEL">
+                    <Anchor point="LEFT" relativeTo="$(parent)PostageHelp" relativePoint="RIGHT" offsetX="-1" />
+                </Label>
+                <Label name="$(parent)PostageCurrency" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)PostageHelp" relativePoint="LEFT" offsetX="348"/>
+                </Label>
+
+                <Label name="$(parent)AttachmentsHeader" font="ZoFontWinH3" text="SI_MAIL_ATTACHMENTS_HEADER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PostageHelp" relativePoint="BOTTOMLEFT" offsetX="7" offsetY="20"/>
+                </Label>
+                <Control name="$(parent)Attachments" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="BOTTOMLEFT" offsetX="19" offsetY="9"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

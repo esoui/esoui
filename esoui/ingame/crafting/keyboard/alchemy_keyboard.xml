@@ -1,0 +1,218 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_AlchemyTraitIcon" virtual="true">
+            <Dimensions x="32" y="32" />
+        </Texture>
+
+        <Texture name="ZO_AlchemyTraitIconWithTooltip" inherits="ZO_AlchemyTraitIcon" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                if self.traitName then
+                    InitializeTooltip(InformationTooltip, self, RIGHT)
+                    SetTooltipText(InformationTooltip, self.traitName)
+                end
+            </OnMouseEnter>
+            <OnMouseExit>
+                ClearTooltip(InformationTooltip)
+            </OnMouseExit>
+        </Texture>
+        
+        <Button name="ZO_AlchemyCraftingSlotWithTraits" inherits="ZO_CraftingSlot" virtual="true">
+            <OnInitialized>
+                self.traits = {
+                    self:GetNamedChild("Trait1"),
+                    self:GetNamedChild("Trait2"),
+                    self:GetNamedChild("Trait3"),
+                    self:GetNamedChild("Trait4"),
+                }
+                
+                ZO_CraftingSlot_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)Trait1" inherits="ZO_AlchemyTraitIconWithTooltip" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                </Texture>
+                <Texture name="$(parent)Trait2" inherits="ZO_AlchemyTraitIconWithTooltip" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Trait1" relativePoint="BOTTOMLEFT" />
+                </Texture>
+                <Texture name="$(parent)Trait3" inherits="ZO_AlchemyTraitIconWithTooltip" >
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
+                </Texture>
+                <Texture name="$(parent)Trait4" inherits="ZO_AlchemyTraitIconWithTooltip" >
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Trait3" relativePoint="BOTTOMRIGHT" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_AlchemyInventorySolventRow" inherits="ZO_CraftingInventoryRowBase" virtual="true">
+            <Dimensions x="392" y="72" />
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="270" />
+                    <Anchor point="TOPLEFT" offsetX="77" offsetY="20" />
+                </Label>
+                <Label name="$(parent)Level" font="ZoFontGameShadow">
+                    <Dimensions x="270" />
+                    <Anchor point="CENTER" offsetX="-40" offsetY="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_AlchemyIconTraitLabel" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" virtual="true">
+            <Dimensions x="170" y="20" />
+            <OnInitialized>
+                self.label = self
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
+            <OnMouseDoubleClick>
+                if(button == 1) then
+                    ZO_InventorySlot_DoPrimaryAction(self:GetParent())
+                end
+            </OnMouseDoubleClick>
+
+            <OnMouseUp>
+                if(upInside) then
+                    ZO_InventorySlot_OnSlotClicked(self:GetParent(), button)
+                end
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_InventorySlot_OnMouseEnter(self:GetParent())
+                if self:WasTruncated() then
+                    InitializeTooltip(InformationTooltip)
+                    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
+                    SetTooltipText(InformationTooltip, self:GetText())
+                end
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_InventorySlot_OnMouseExit(self:GetParent())
+                if self:WasTruncated() then
+                    ClearTooltip(InformationTooltip)
+                end
+            </OnMouseExit>
+
+            <OnDragStart>
+                if(button == 1) then
+                    ZO_InventorySlot_OnDragStart(self:GetParent())
+                end
+            </OnDragStart>
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="ZO_AlchemyTraitIcon" >
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
+                </Texture>
+            </Controls>
+        </Label>
+
+        <Control name="ZO_AlchemyInventoryReagentRow" inherits="ZO_CraftingInventoryRowBase" virtual="true">
+            <Dimensions x="392" y="108" />
+            
+            <OnInitialized>
+                self.slotControlType = "listSlot"
+                
+                self.traits = {
+                    self:GetNamedChild("Trait1"),
+                    self:GetNamedChild("Trait2"),
+                    self:GetNamedChild("Trait3"),
+                    self:GetNamedChild("Trait4"),
+                }
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="270" />
+                    <Anchor point="TOPLEFT" offsetX="77" offsetY="20" />
+                </Label>
+
+                <Label name="$(parent)Trait1" inherits="ZO_AlchemyIconTraitLabel" >
+                    <Anchor point="TOPLEFT" offsetX="110" offsetY="44" />
+                </Label>
+                <Label name="$(parent)Trait2" inherits="ZO_AlchemyIconTraitLabel" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Trait1" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Label>
+                <Label name="$(parent)Trait3" inherits="ZO_AlchemyIconTraitLabel" >
+                    <Anchor point="TOPLEFT" offsetX="330" offsetY="44" />
+                </Label>
+                <Label name="$(parent)Trait4" inherits="ZO_AlchemyIconTraitLabel" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Trait3" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_AlchemySlotContainerBG" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds" virtual="true">
+            <Dimensions x="512" y="512" />
+            <Anchor point="TOP" />
+        </Texture>
+
+        <Label name="ZO_AlchemySlotContainerSolventLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ALCHEMY_SOLVENT_HEADER" modifyTextType="UPPERCASE" virtual="true">
+            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="110" offsetY="64" />
+        </Label>
+
+        <Label name="ZO_AlchemySlotContainerReagentsLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ALCHEMY_REAGENTS_HEADER" modifyTextType="UPPERCASE" virtual="true">
+            <Anchor point="TOP" relativePoint="TOPRIGHT" offsetX="-165" offsetY="64" />
+        </Label>
+
+        <Button name="ZO_AlchemySlotContainerSolventSlot" inherits="ZO_CraftingSlot" virtual="true">
+            <Anchor point="TOP" relativeTo="$(parent)SolventLabel" relativePoint="BOTTOM" offsetY="20" />
+            <Controls>
+                <Label name="$(parent)CreatesLevel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <DimensionConstraints maxX="135" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10" />
+                </Label>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_AlchemySlotContainer" virtual="true">
+            <Controls>
+                <Label name="$(parent)SolventLabel" inherits="ZO_AlchemySlotContainerSolventLabel" />
+
+                <Label name="$(parent)ReagentsLabel" inherits="ZO_AlchemySlotContainerReagentsLabel" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_AlchemyTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Alchemy_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSkillHeader">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)ModeMenu" inherits="ZO_SceneMenu">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+                    <Dimensions x="550"/>
+                </Control>
+
+                <Control name="$(parent)SlotContainer" inherits="ZO_AlchemySlotContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" inherits="ZO_AlchemySlotContainerBG" />
+
+                        <!-- Anchors for these are set in Lua -->
+                        <Button name="$(parent)ReagentSlot1" inherits="ZO_AlchemyCraftingSlotWithTraits" />
+                        <Button name="$(parent)ReagentSlot2" inherits="ZO_AlchemyCraftingSlotWithTraits" />
+                        <Button name="$(parent)ReagentSlot3" inherits="ZO_AlchemyCraftingSlotWithTraits" />
+
+                        <Button name="$(parent)SolventSlot" inherits="ZO_AlchemySlotContainerSolventSlot" />
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Controls>
+                        <Label name="$(parent)NoSolventOrReagentsLabel" inherits="ZO_CraftingInventoryNoItemLabel" />
+                    </Controls>
+                </Control>
+
+                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip">
+                    <Anchor point="BOTTOM" offsetY="-335" />
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

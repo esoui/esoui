@@ -1,0 +1,7 @@
+TRADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Trade)
+PROVISIONER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_ProvisionerTopLevel)
+GROUPING_TOOLS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupingToolsKeyboard)
+DYEING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DyeingTopLevel)
+ACHIEVEMENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Achievements)
+CADWELLS_ALMANAC_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Cadwell)
+STABLES_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StableWindowMenu)

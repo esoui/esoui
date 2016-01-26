@@ -1,0 +1,47 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GameMenu_LabelHeader" inherits="ZO_LabelHeader" virtual="true">
+            <Dimensions y="30" />
+        </Label>
+      
+        <Label name="ZO_GameMenu_ChildlessHeader" inherits="ZO_GameMenu_LabelHeader" virtual="true">
+            <OnMouseUp>
+                ZO_GameMenu_ChildlessHeader_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Label name="ZO_GameMenu_ChildlessHeader_WithSelectedState" inherits="ZO_GameMenu_LabelHeader" virtual="true">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Label name="ZO_GameMenu_SubCategory" virtual="true" inherits="ZO_SelectableLabel" font="ZoFontWinH3">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Texture name="ZO_GameMenu_NewStatus" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" virtual="true" excludeFromResizeToFitExtents="true">
+            <Dimensions x="27" y="27" />
+        </Texture>
+
+        <TopLevelControl name="ZO_GameMenu_Template" virtual="true">
+            <Dimensions x="210" />
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMLEFT" />
+            <OnShow>
+                ZO_GameMenu_OnShow(self)
+            </OnShow>
+            <OnHide>
+                ZO_GameMenu_OnHide(self)
+            </OnHide>
+            <Controls>
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="240" y="480" />
+                    <Anchor point="LEFT" offsetX="35" offsetY="56" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

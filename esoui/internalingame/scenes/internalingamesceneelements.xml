@@ -1,0 +1,7 @@
+<GuiXml>
+    <Controls>
+        <!-- If elements need to be displayed in a particular order, they will need to have levels specified -->
+        <TopLevelControl name="ZO_SharedTreeUnderlay" inherits="ZO_TreeUnderlay" hidden="true" layer="BACKGROUND" level="2"/>
+        <TopLevelControl name="ZO_SharedRightBackground" inherits="ZO_RightFootPrintBackground" hidden="true" layer="BACKGROUND" level="1"/>
+    </Controls>
+</GuiXml>

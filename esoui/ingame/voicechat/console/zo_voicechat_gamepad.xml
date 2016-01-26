@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_VoiceChatGamepad">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_VoiceChatGamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Channels" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" />
+
+                <Scroll name="$(parent)ParticipantOptions" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

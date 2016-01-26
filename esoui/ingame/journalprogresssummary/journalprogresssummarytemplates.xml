@@ -1,0 +1,120 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="JournalProgressHighlightAnimation">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha=".7">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="JournalProgressIconSlotMouseOverAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.23"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Label name="ZO_JournalProgressDefaultLabel" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+        <Label name="ZO_JournalProgressLargeLabel" font="ZoFontWinH2" inherits="ZO_JournalProgressDefaultLabel" virtual="true" />
+
+        <StatusBar name="ZO_JournalProgressStatusBar" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
+            <Dimensions x="240" />
+
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_JournalProgressLargeLabel" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-4" />
+                </Label>
+                <Label name="$(parent)Progress" inherits="ZO_JournalProgressDefaultLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY">
+                    <Anchor point="TOPLEFT" offsetY="-1" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </StatusBar>
+
+        <Control name="ZO_JournalChildlessCategory" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
+        </Control>
+
+        <Label name="ZO_JournalSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" >
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Control name="ZO_JournalProgressBook" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+
+                    <Controls>
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="335" />
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                        </Control>
+
+                        <Control name="$(parent)ContentList" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetY="5" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12" />
+                        </Control>
+                        
+                        <Control name="$(parent)SummaryInset">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12" />
+
+                            <Controls>
+                                <StatusBar name="$(parent)Total" inherits="ZO_JournalProgressStatusBar">
+                                    <Dimensions x="545" />
+                                    <Anchor point="TOPLEFT" offsetX="4" offsetY="24" />
+                                </StatusBar>
+
+                                <Control name="$(parent)Recent" hidden="true">
+                                    <Anchor point="BOTTOMLEFT" offsetY="-150" />
+
+                                    <Controls>
+                                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Quest/questjournal_divider.dds" resizeToFitFile="true">
+                                            <Anchor point="TOPLEFT" />
+                                        </Texture>
+
+                                        <Label name="$(parent)Title" inherits="ZO_JournalProgressLargeLabel" modifyTextType="UPPERCASE">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="7" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Category">
+                    <Anchor point="TOPLEFT" offsetX="340" offsetY="5" />
+
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_JournalProgressLargeLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="6" />
+                        </Label>
+
+                        <StatusBar name="$(parent)Progress" inherits="ZO_JournalProgressStatusBar">
+                            <Dimensions x="322" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="4" />
+                        </StatusBar>
+                    
+                        <Control name="$(parent)Filter" inherits="ZO_ComboBox">
+                            <Dimensions x="222" y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>   
+</GuiXml>

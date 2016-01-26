@@ -1,0 +1,14 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SharedRightPanelBackground" inherits="ZO_RightPanelBG" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedLeftPanelBackground" inherits="ZO_LeftPanelBG" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedStatsBackground" inherits="ZO_StatsFootPrintBackground" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedThinLeftPanelBackground" inherits="ZO_ThinLeftPanelBG" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedWideLeftPanelBackground" inherits="ZO_WideLeftPanelBG" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedMediumLeftPanelBackground" inherits="ZO_MediumLeftPanelBG" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedRightBackground" inherits="ZO_RightFootPrintBackground" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedWideRightBackground" inherits="ZO_WideRightFootPrintBackground" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedTreeUnderlay" inherits="ZO_TreeUnderlay" hidden="true" layer="BACKGROUND"/>
+        <TopLevelControl name="ZO_SharedTitle" inherits="ZO_PanelTitle" hidden="true" layer="BACKGROUND"/>
+    </Controls>
+</GuiXml>

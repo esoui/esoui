@@ -1,0 +1,171 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildHeraldry_ChildlessHeader" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
+        </Control>
+
+        <Label name="ZO_GuildHeraldry_ChildEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <TextureComposite name="ZO_GuildHeraldry_DyeingSwatch" inherits="ZO_DyeingSwatchVisuals" virtual="true" mouseEnabled="true">
+            <OnMouseEnter>
+                self.mousedOver = true
+                self:UpdateSelectedState()
+
+                <!--Taking out the tooltip for now...uncomment if they decide they want it back-->
+                <!--InitializeTooltip(InformationTooltip, self:GetParent(), TOPRIGHT, -15, select(2, self:GetCenter()) - self:GetParent():GetTop())
+                SetTooltipText(InformationTooltip, zo_strformat(SI_DYEING_SWATCH_TOOLTIP_TITLE, self.colorName))-->
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.mousedOver = false
+                self:UpdateSelectedState()
+                <!--ClearTooltip(InformationTooltip)-->
+            </OnMouseExit>
+        </TextureComposite>
+        
+        <Texture name="ZO_GuildHeraldry_StyleCategory" mouseEnabled="true" pixelRoundingEnabled="false" virtual="true">
+            <Dimensions x="64" y="64" />
+        </Texture>
+
+        <Control  name="ZO_GuildHeraldry_Style" hidden="true" mouseEnabled="true" virtual="true">
+            <Dimensions x="64" y="64" />
+            <OnMouseEnter>
+                self.mousedOver = true
+                self:UpdateSelectedState()
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.mousedOver = false
+                self:UpdateSelectedState()
+            </OnMouseExit>
+            <Controls>
+                <TextureComposite name="$(parent)Frame" textureFile="EsoUI/Art/Guild/guildHeraldry_swatchFrame_multiTexture.dds">
+                    <AnchorFill />
+                    <OnInitialized>
+                        ZO_GuildHeraldry_StyleFrame_OnInitialized(self)
+                    </OnInitialized>
+
+                    <!--  Background Texture -->
+                    <Surface texCoordLeft="0.0" texCoordRight="0.25" texCoordTop="0.5" texCoordBottom="0.75" insetLeft="2" insetRight="-2" insetTop="2" insetBottom="-2" />
+                    <!--  Selected Texture -->
+                    <Surface texCoordLeft="0.25" texCoordRight="0.5" texCoordTop="0.5" texCoordBottom="0.75" insetLeft="2" insetRight="-2" insetTop="2" insetBottom="-2" />
+                    <!-- Frame Texture, texture coords are set randomly -->
+                    <Surface />
+                </TextureComposite>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildHeraldryConfirmationDialog" inherits="ZO_CustomDialogBase">
+            <Controls>
+                <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" text="SI_TRADING_HOUSE_PURCHASE_ITEM_DIALOG_DESCRIPTION"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Label name="$(parent)GuildBalance" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+                <Label name="$(parent)GuildBalanceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_HERALDRY_DIALOG_BANKED_GOLD_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildBalance" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildBalance" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+                <Label name="$(parent)CostHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_HERALDRY_DIALOG_COST_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GuildBalanceHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+                
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Return" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_GuildHeraldry" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildHeraldry_OnInitialized(self)
+            </OnInitialized>
+            <OnHide>
+                EndHeraldryCustomization()
+            </OnHide>
+            <Controls>
+                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                    <Dimensions x="374"/>
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="67" />
+                    <Anchor point="BOTTOMLEFT" offsetX="5" />
+                </Control>
+
+                <Label name="$(parent)PanelName" font="ZoFontWinH2" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="15" offsetY="10"/>
+                </Label>
+
+                <Control name="$(parent)TopDivider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetX="-55" offsetY="2" />
+                </Control>
+
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopDivider" relativePoint="TOPRIGHT" offsetY="-2" />
+                </Label>
+
+                <Label name="$(parent)CostLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_HERALDRY_COST_LABEL">
+                  <Anchor point="RIGHT" relativeTo="$(parent)Cost" relativePoint="LEFT" offsetX="-10"/>
+                </Label>
+
+                <Control name="$(parent)ColorPane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-20" />
+                </Control>
+
+                <Label name="$(parent)CategoriesHeader" text="SI_GUILD_HERALDRY_TYPE_HEADER" inherits="ZO_DyeingHeader">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
+
+                <Control name="$(parent)BGStyleCategoryList" inherits="ZO_HorizontalScrollListTemplate">
+                    <Dimensions x="470" y="64" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="35" />
+                    <Controls>
+                        <Label name="$(parent)SelectedLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="BOTTOM" relativePoint="TOP" offsetY="2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)CrestStyleCategoryList" inherits="ZO_HorizontalScrollListTemplate">
+                    <Dimensions x="470" y="64" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="35" />
+                    <Controls>
+                        <Label name="$(parent)SelectedLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="BOTTOM" relativePoint="TOP" offsetY="2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)StylePane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGStyleCategoryList" relativePoint="BOTTOMLEFT" offsetX="-15" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-20" />
+                </Control>
+
+                <Label name="$(parent)StyleHeader" inherits="ZO_DyeingHeader">
+                    <OnInitialized>
+                        self:SetParent(ZO_GuildHeraldryStylePaneScrollChild)
+                        self:SetAnchor(TOPLEFT, ZO_GuildHeraldryStylePaneScrollChild, TOPLEFT, 4, 4)
+                    </OnInitialized>
+                </Label>
+
+                <Texture name="$(parent)SharedColorHighlight" tier="HIGH" textureFile="EsoUI/Art/Dye/dye_swatch_highlight.dds" inheritScale="false" blendMode="ADD" hidden="true" />
+                <Texture name="$(parent)SharedStyleHighlight" tier="HIGH" textureFile="EsoUI/Art/Guild/guildHeraldry_swatchFrame_overSelect.dds" inheritScale="false" blendMode="ADD" alpha="0">
+                    <Dimensions x="128" y="128" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

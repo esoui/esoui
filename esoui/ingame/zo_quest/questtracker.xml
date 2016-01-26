@@ -1,0 +1,54 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_TrackedHeader" mouseEnabled="true" font="ZoFontGameShadow" virtual="true">
+            <Dimensions x="226" y="0" />
+
+            <OnMouseUp>
+                ZO_TrackedHeader_MouseUp(self, button, upInside)
+            </OnMouseUp>                    
+                    
+            <OnMouseEnter>
+                ZO_TrackedHeader_MouseEnter(self)                        
+            </OnMouseEnter>     
+                    
+            <OnMouseExit>
+                ZO_TrackedHeader_MouseExit(self)
+            </OnMouseExit>
+        </Label>
+
+        <Label name="ZO_QuestCondition" font="ZoFontGameShadow" virtual="true" mouseEnabled="true">
+            <Dimensions x="200" y="0" />
+        </Label>
+
+        <Label name="ZO_QuestStepDescription" font="ZoFontGameShadow" virtual="true">
+            <Dimensions x="200" y="0" />
+        </Label>
+
+        <TopLevelControl name="ZO_QuestTracker" hidden="true">
+            <Dimensions x="275"/>
+            <Anchor point="TOPRIGHT" offsetY="100" />
+
+            <OnInitialized>
+                ZO_QuestTracker_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)TimerAnchor" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="10" />
+                    <OnInitialized>
+                        ZO_QuestTimer_CreateInContainer(self)
+                    </OnInitialized>
+                </Control>
+                <Control name="$(parent)Container" mouseEnabled="true" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TimerAnchor" relativePoint="BOTTOMLEFT" offsetX="35" offsetY="5"/>
+                    <Controls>
+                        <Texture name="$(parent)Assisted" textureFile="EsoUI/Art/Quest/tracker_currentQuest_bullet.dds" layer="OVERLAY" hidden="true" excludeFromResizeToFitExtents="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT"/>
+                            <Dimensions x="16" y="16"/>
+                        </Texture>
+                    </Controls>
+                </Control>                
+            </Controls>
+        </TopLevelControl>        
+    </Controls>
+</GuiXml>

@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapFilterComboBox" inherits="ZO_ComboBox" virtual="true">
+            <Dimensions x="260"/>
+        </Control>
+
+        <Control name="ZO_WorldMapFilterPanelTemplate" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="20"/>
+            <Anchor point="BOTTOMRIGHT"/>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapFilters" inherits="ZO_WorldMapInfoContent">
+            <OnInitialized>
+                ZO_WorldMapFilters_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)PvE" inherits="ZO_WorldMapFilterPanelTemplate" />
+                
+                <Control name="$(parent)PvP" inherits="ZO_WorldMapFilterPanelTemplate" />
+                
+                <Control name="$(parent)ImperialPvP" inherits="ZO_WorldMapFilterPanelTemplate" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

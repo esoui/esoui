@@ -1,0 +1,178 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_ScrollUpButton" clickSound="Scroll_Up" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Anchor point="BOTTOM" relativePoint="TOP"/>
+
+            <Textures
+                normal="EsoUI/Art/Buttons/scrollbox_upArrow_up.dds"
+                pressed="EsoUI/Art/Buttons/scrollbox_upArrow_down.dds"
+                mouseOver="EsoUI/Art/Buttons/scrollbox_upArrow_over.dds"
+                disabled="EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_ScrollDownButton" clickSound="Scroll_Down" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Anchor point="TOP" relativePoint="BOTTOM"/>
+
+            <Textures
+                normal="EsoUI/Art/Buttons/scrollbox_downArrow_up.dds"
+                pressed="EsoUI/Art/Buttons/scrollbox_downArrow_down.dds"
+                mouseOver="EsoUI/Art/Buttons/scrollbox_downArrow_over.dds"
+                disabled="EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_ScrollEndButton" clickSound="Scroll_End" virtual="true">
+            <Textures
+                normal="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_up.dds"
+                pressed="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_down.dds"
+                mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_over.dds"
+                disabled="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_disabled.dds"
+            />
+        </Button>
+        
+        <Button name="ZO_ScrollLeftButton" inherits="ZO_DefaultButton" mouseOverBlendMode="ALPHA" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Anchor point="RIGHT" relativePoint="LEFT" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds" />
+        </Button>
+        
+        <Button name="ZO_ScrollRightButton" inherits="ZO_DefaultButton" mouseOverBlendMode="ALPHA" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Anchor point="LEFT" relativePoint="RIGHT" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                disabled="EsoUI/Art/Buttons/rightArrow_up.dds" />
+        </Button>        
+      
+        <Slider name="ZO_VerticalScrollbarBase" inherits="ZO_VerticalScrollbarBase_Shared" mouseEnabled="true" virtual="true">
+            <Controls>
+                <Button name="$(parent)Up" inherits="ZO_ScrollUpButton">
+                    <OnMouseEnter>
+                        ZO_VerticalScrollbarBase_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_VerticalScrollbarBase_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Button>
+
+                <Button name="$(parent)Down" inherits="ZO_ScrollDownButton">
+                    <OnMouseEnter>
+                        ZO_VerticalScrollbarBase_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_VerticalScrollbarBase_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+
+            <OnMouseEnter>
+                ZO_VerticalScrollbarBase_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_VerticalScrollbarBase_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseDown>
+                ZO_VerticalScrollbarBase_OnMouseDown(self)
+            </OnMouseDown>
+
+            <OnMouseUp>
+                ZO_VerticalScrollbarBase_OnMouseUp(self)
+            </OnMouseUp>
+        </Slider>
+
+        <Control name="ZO_ScrollAreaBarBehavior" virtual="true">
+            <OnEffectivelyShown>
+                ZO_ScrollAreaBarBehavior_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+            <OnEffectivelyHidden>
+                ZO_ScrollAreaBarBehavior_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
+        </Control>
+
+        <!--Scroll List-->
+        <Control name="ZO_ScrollList" inherits="ZO_ScrollAreaBarBehavior" virtual="true">
+            <OnInitialized>
+                ZO_ScrollList_Initialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Scroll name="$(parent)Contents" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-16" />
+                    <OnMouseWheel>
+                        ZO_ScrollList_ScrollRelative(self:GetParent(), -delta * 40)
+                    </OnMouseWheel>
+                </Scroll>
+                <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Contents" relativePoint="TOPRIGHT" offsetY="16" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Contents" relativePoint="BOTTOMRIGHT" offsetY="-16" />
+                    <OnMouseWheel>
+                        ZO_ScrollList_ScrollRelative(self:GetParent(), -delta * 40)
+                    </OnMouseWheel>
+
+                    <OnValueChanged>
+                        ZO_ScrollList_MoveWindow(self:GetParent(), value)
+                    </OnValueChanged>                    
+                </Slider>
+            </Controls>
+        </Control>
+        
+        <!--Scroll Panel-->
+        <Scroll name="ZO_Scroll" inherits="ZO_Scroll_Shared" mouseEnabled="true" virtual="true">
+            <OnMouseWheel>
+                ZO_Scroll_ScrollRelative(self:GetParent(), -delta * 40)
+            </OnMouseWheel>
+        </Scroll>
+
+        <Control name="ZO_ScrollContainerBase" inherits="ZO_ScrollAreaBarBehavior" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_Scroll_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Scroll name="$(parent)Scroll" inherits="ZO_Scroll">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-16" />
+                </Scroll>
+
+                <Slider name="$(parent)ScrollBar" inherits="ZO_VerticalScrollbarBase">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetY="16" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetY="-16" />
+                    <OnMouseWheel>
+                        ZO_Scroll_ScrollRelative(self:GetParent(), -delta * 40)
+                    </OnMouseWheel>
+
+                    <OnValueChanged>
+                        ZO_Scroll_MoveWindow(self:GetParent(), value)
+                    </OnValueChanged>
+                </Slider>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ScrollContainer" inherits="ZO_ScrollContainerBase" virtual="true">
+            <OnInitialized>
+                ZO_Scroll_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ScrollChild" resizeToFitDescendents="true">
+                    <OnInitialized>
+                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

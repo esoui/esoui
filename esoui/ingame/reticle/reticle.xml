@@ -1,0 +1,106 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="StealthIconStealthEyeAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="64" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="StealthIconStealthTextFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1" />
+                <CustomAnimation delay="2800" duration="200">
+                    <UpdateFunction>
+                        local stealthState = GetUnitStealthState("player")
+                        if stealthState ~= STEALTH_STATE_HIDDEN and stealthState ~= STEALTH_STATE_HIDDEN_ALMOST_DETECTED then
+                            self:GetAnimatedControl():SetAlpha(1-progress)
+                        end
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ReticleOpenCloseAnimation">
+            <Animations>
+                <TextureAnimation cellsWide="16" cellsHigh="1" framerate="160"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ReticleHitIndicatorAnimation">
+            <Animations>
+                <ColorAnimation duration="750" startColor="FFFF0000" endColor="FFFFFFFF">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ColorAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="PickpocketBonusScrollAnimation">
+            <Animations>
+                <CustomAnimation duration="100">
+                    <UpdateFunction>
+                        ZO_Reticle_AnimatePickpocketBonus(progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_StealthIconContainer" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StealthEye" textureFile="EsoUI/Art/Stealth/stealth_64.dds" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)StealthText" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" alpha="0">
+                    <Anchor point="CENTER" offsetY="-35" />
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_ReticleContainer" hidden="true" tier="LOW" layer="BACKGROUND">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_Reticle_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Reticle" textureFile="EsoUI/Art/Reticle/reticleAnim.dds" >
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Control name="$(parent)StealthIcon" inherits="ZO_StealthIconContainer">
+                    <Anchor point="CENTER" />
+                </Control>
+                       
+                <Control name="$(parent)Interact" hidden="true">
+                    <Dimensions x="200" y="50" />
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetX="45" offsetY="40" />
+                    <Controls>
+                        <Label name="$(parent)Context">
+                            <DimensionConstraints maxX="260" />
+                            <Anchor point="BOTTOMLEFT" />
+                        </Label>
+
+                        <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Context" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="6"/>
+                        </Control>
+
+                        <Label name="$(parent)AdditionalInfo" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)KeybindButtonNameLabel" relativePoint="BOTTOMLEFT" offsetY="6"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)NonInteract" resizeToFitDescendents="true" hidden="true">                            
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetX="45"/>
+                    <Controls>
+                        <Label name="$(parent)Text">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="300"/>
+                        </Label>
+                    </Controls>                            
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

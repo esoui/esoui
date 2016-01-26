@@ -1,0 +1,58 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_LootHistory_FadeShared">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_LootHistory_IconEntranceShared">
+            <Animations>
+                <AlphaAnimation duration="170" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <ScaleAnimation duration="170" startScale="2" endScale="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_LootHistory_ContainerFadeShared">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_LootHistory_SharedEntry" virtual="true">
+            <Dimensions x="282" y="50" />
+            
+            <OnInitialized>
+                ZO_LootHistory_Shared_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)Icon" tier="MEDIUM" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="LEFT" offsetX="-5"/>
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+                
+                <Label name="$(parent)Label" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2">
+                    <Dimensions x="240"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
+              
+                <Texture name="$(parent)Bg">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

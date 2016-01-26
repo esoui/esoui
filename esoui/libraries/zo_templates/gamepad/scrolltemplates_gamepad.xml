@@ -1,0 +1,85 @@
+<GuiXml>
+    <Controls>
+        <Slider name="ZO_VerticalScrollbarBase_Gamepad" inherits="ZO_VerticalScrollbarBase_Shared" virtual="true">
+            <Dimensions x="16" y="32" />
+            <ThumbTexture
+                textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
+                disabledTextureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
+                thumbWidth="8"
+                thumbHeight="32"
+                top="0"
+                left="0.5"
+                bottom="0.5"
+                right="1" />
+
+            <Controls>
+                <Texture name="$(parent)ThumbMunge" alpha="0" override="true"/>
+                <Texture name="$(parent)Up" hidden="true" />
+                <Texture name="$(parent)Down" hidden="true" />
+            </Controls>
+        </Slider>
+
+        <Control name="ZO_ScrollAreaBarBehavior_Gamepad" virtual="true">
+          <OnEffectivelyShown>
+                ZO_ScrollAreaBarBehavior_OnEffectivelyShown_Gamepad(self)
+            </OnEffectivelyShown>
+            <OnEffectivelyHidden>
+                ZO_ScrollAreaBarBehavior_OnEffectivelyHidden_Gamepad(self)
+            </OnEffectivelyHidden>
+        </Control>
+
+        <!--Scroll List-->
+        <Control name="ZO_ScrollList_Gamepad" inherits="ZO_ScrollAreaBarBehavior_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_ScrollList_Initialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Slider name="$(parent)ScrollBar" inherits="ZO_VerticalScrollbarBase_Gamepad">
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+
+                    <OnValueChanged>
+                        ZO_ScrollList_MoveWindow(self:GetParent(), value)
+                    </OnValueChanged>
+                </Slider>
+                
+                <Scroll name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ScrollBar" relativePoint="BOTTOMLEFT" />
+                </Scroll>
+            </Controls>
+        </Control>
+
+        <!--Scroll Panel-->
+        <Control name="ZO_ScrollContainerBase_Gamepad" inherits="ZO_ScrollAreaBarBehavior_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_Scroll_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Scroll name="$(parent)Scroll" inherits="ZO_Scroll_Shared">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Scroll>
+
+                <Texture name="$(parent)ScrollIndicator" resizeToFitFile="true" hidden="true">
+                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ScrollContainer_Gamepad" inherits="ZO_ScrollContainerBase_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_Scroll_Initialize_Gamepad(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ScrollChild" resizeToFitDescendents="true">
+                    <OnInitialized>
+                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,50 @@
+﻿<GuiXml>
+    <Font name="ZoMarketGamepadCalloutFont" font="$(GAMEPAD_MEDIUM_FONT)|42|soft-shadow-thin" />
+    
+    <Controls>
+        <Control name="ZO_Gamepad_MarketProductTemplate" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" hidden="true" virtual="true">
+            <Controls>
+
+                <Label name="$(parent)Title" font="ZoFontGamepad34" override="true" />
+
+                <Label name="$(parent)PreviousCost" font="ZoFontGamepadBold27" override="true" />
+
+                <Label name="$(parent)Cost" font="ZoFontGamepadBold27" override="true "/>
+
+                <Label name="$(parent)Purchased" font="ZoFontGamepadBold25" override="true" />
+
+                <Label name="$(parent)TextCallout" font="ZoMarketGamepadCalloutFont" override="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_MarketProductBundleAttachmentTemplate" inherits="ZO_Gamepad_MarketProductTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Cost" override="true" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_MarketProductBundleItemAttachmentTemplate" inherits="ZO_Gamepad_MarketProductBundleAttachmentTemplate" virtual="true"/>
+        <Control name="ZO_Gamepad_MarketProductBundleCollectibleAttachmentTemplate" inherits="ZO_Gamepad_MarketProductBundleAttachmentTemplate" virtual="true"/>
+        
+        <Control name="ZO_Gamepad_MarketBlankTileTemplate" inherits="ZO_Gamepad_MarketProductTemplate" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Background" color="00000000" alpha="0.2" override="true"/>
+                <Label name="$(parent)OverlayGradient" hidden="true" override="true"/>
+                <Label name="$(parent)Title" hidden="true" override="true"/>
+                <Label name="$(parent)Cost" hidden="true" override="true"/>
+                <Label name="$(parent)Purchased" hidden="true" override="true"/>
+                <Label name="$(parent)PreviousCost" hidden="true" override="true"/>
+                <Label name="$(parent)TextCallout" hidden="true" override="true"/>
+                <Control name="$(parent)Highlight" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Normal" edgeColor="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PURCHASED" alpha="0.5" override="true">
+                            <Edge edgeFileWidth="2" edgeFileHeight="2" />
+                            <Insets left="2" top="2" right="-2" bottom="-2" />
+                            <AnchorFill />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

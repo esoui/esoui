@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_EndUserLicenseAgreement" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase">
+            <Dimensions x="730" y="400" />
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                ZO_EULAInit(self)
+            </OnInitialized>
+
+            <OnEffectivelyShown>
+                PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+            </OnEffectivelyShown>
+            
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer">
+                    <OnInitialized>
+                        ZO_Scroll_Initialize(self)
+                    </OnInitialized>
+                    <Anchor point="TOPLEFT" offsetX="24" offsetY="70" />
+                    <Dimensions x="870" y="666" />
+                </Control>
+
+                <Label name="$(parent)Text" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" linkEnabled="true">
+                    <Dimensions x="850" />
+                    <OnInitialized>
+                        self:SetParent(GetControl("ZO_EndUserLicenseAgreementContainerScrollChild"))
+                        self:SetAnchor(TOPLEFT, ZO_EndUserLicenseAgreementContainerScrollChild, TOPLEFT, 4, 4)
+                    </OnInitialized>
+
+                    <OnLinkClicked>
+                        ZO_LinkHandler_OnLinkClicked(linkText, button)
+                    </OnLinkClicked>
+                </Label>
+
+                <Control name="$(parent)Disagree" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Agree" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

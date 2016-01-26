@@ -1,0 +1,54 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildHistorySubcategoryEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel ZO_TreeEntry"/>
+
+        <Label name="ZO_GuildHistoryLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
+        <Control name="ZO_GuildHistoryRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="45"/>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                
+                <Label name="$(parent)Time" inherits="ZO_GuildHistoryLabel" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT"/>
+                </Label>
+                <Label name="$(parent)Description" inherits="ZO_GuildHistoryLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" linkEnabled="true" mouseEnabled="true">
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT" offsetX="-30"/>
+                    <OnLinkMouseUp>
+                        ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+                    </OnLinkMouseUp>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildHistory" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildHistory_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)CategoriesHeader" font="ZoFontHeader4" text="SI_GUILD_HISTORY_CATEGORIES_HEADER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="75"/>
+                </Label>
+                <Control name="$(parent)Categories">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoriesHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Control>
+
+                <Label name="$(parent)ActivityLogHeader" font="ZoFontHeader4" text="SI_GUILD_HISTORY_ACTIVITY_LOG" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="280" offsetY="75"/>
+                </Label>
+         
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityLogHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-35" offsetY="-32"/>
+                </Control>
+
+                <Control name="$(parent)Loading" inherits="ZO_Loading">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-20" offsetY="-12"/>
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self, GetString(SI_GUILD_HISTORY_RETRIEVING))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

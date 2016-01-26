@@ -1,0 +1,69 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_ScrollTooltip_Gamepad" virtual="true">
+            <Controls>
+                <Scroll name="$(parent)Scroll">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                            <Controls>
+                                <Control name="$(parent)Tooltip" inherits="ZO_Tooltip">
+                                    <Anchor point="TOPLEFT" />
+                                </Control>
+                                <Control name="$(parent)Padding">
+                                    <Dimensions y="64" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Tooltip" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <!-- Anchors for the ScrollIndicator are setup when tooltip initializes -->
+                <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" resizeToFitFile="true" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ScrollTooltipBackdrop_Gamepad" inherits="ZO_DefaultBackdrop_Gamepad ZO_Gamepad_Background_Screen_Center_Template" virtual="true" />
+
+        <Control name="ZO_ResizingFloatingScrollTooltip_Gamepad" tier="HIGH" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
+
+            <OnInitialized>
+                ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" inherits="ZO_ScrollTooltipBackdrop_Gamepad" tier="MEDIUM" excludeFromResizeToFitExtents="true">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Texture name="$(parent)Icon" excludeFromResizeToFitExtents="true" layer="OVERLAY">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativePoint="TOP"/>
+                </Texture>
+
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Tip" inherits="ZO_ScrollTooltip_Gamepad" tier="MEDIUM">
+                            <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y" />
+                            <Controls>
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)ScrollChildPadding" override="true">
+                                            <Dimensions y="32" />
+                                        </Control>
+                                    </Controls>
+                                </Scroll>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

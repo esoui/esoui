@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_MapLocationTooltipLabel" virtual="true" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+        
+        <TopLevelControl name="ZO_MapLocationTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ZO_MapLocationTooltip" inherits="ZO_BaseTooltip">
+                    <OnInitialized>
+                        ZO_MapLocationTooltip_OnInitialized(self)
+                    </OnInitialized>
+                    <OnCleared>
+                        ZO_MapLocationTooltip_OnCleared(self)
+                    </OnCleared>
+                    <ResizeToFitPadding width="32" height="30"/>
+                    <Controls>
+                        <Label name="$(parent)Header" font="ZoFontHeader" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        <Texture name="$(parent)Divider" inherits="ZO_BaseTooltipDivider" hidden="false">
+                            <Anchor point="TOPLEFT"/>
+                        </Texture>
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_MapLocationTooltipTopLevel_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                <Control name="ZO_MapLocationTooltip_Gamepad" inherits="ZO_ScrollTooltip_Gamepad ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <OnInitialized>
+                        ZO_MapLocationTooltip_Gamepad_OnInitialized(self)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,86 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_WorldMapKeepUpgradeButton" virtual="true">
+            <Dimensions x="40" y="40"/>
+            <Textures
+                normal="EsoUI/Art/ActionBar/abilityFrame64_up.dds"
+                pressed="EsoUI/Art/ActionBar/abilityFrame64_down.dds"
+                mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+                disabled="EsoUI/Art/ActionBar/abilityFrame64_up.dds"
+                    />
+
+            <OnMouseEnter>
+                ZO_WorldMapKeepUpgradeButton_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_WorldMapKeepUpgradeButton_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                </Texture>
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/lock.dds" tier="HIGH" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_WorldMapKeepUpgradeLevel" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH5" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="10"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapKeepUpgrade" inherits="ZO_WorldMapKeepInfoContent">
+            <OnInitialized>
+                ZO_WorldMapKeepUpgrade_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)CurrentLevel" font="ZoFontCallout3">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+
+                <StatusBar name="$(parent)Bar" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true">
+                    <Dimensions x="275"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-12" />
+                    <OnMouseEnter>
+                        ZO_WorldMapKeepUpgradeBar_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_WorldMapKeepUpgradeBar_OnMouseExit(self)
+                    </OnMouseExit>
+                </StatusBar>
+
+                <Label name="$(parent)BarLabel" font="ZoFontHeader2" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
+                </Label>
+
+                <Control name="$(parent)Time" mouseEnabled="true" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bar" relativePoint="TOPRIGHT" offsetX="-10" offsetY="-2"/>
+                    <OnMouseEnter>
+                        ZO_WorldMapKeepUpgradeTime_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_WorldMapKeepUpgradeTime_OnMouseExit(self)
+                    </OnMouseExit>
+                    <Controls>
+                        <Texture name="$(parent)RateIcon" textureFile="EsoUI/Art/Miscellaneous/rateIcon.dds">
+                            <Dimensions x="16" y="16"/>
+                            <Anchor point="TOPLEFT" offsetY="4"/>
+                        </Texture>
+                        <Label name="$(parent)UntilNextLevel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RateIcon" relativePoint="TOPRIGHT" offsetX="5" offsetY="-4"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

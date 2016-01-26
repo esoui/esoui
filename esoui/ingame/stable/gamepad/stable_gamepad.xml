@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_StableTrainingRow_Gamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.GetHeight = function()
+                    return self.label:GetTextHeight() + self:GetNamedChild("BarContainer"):GetHeight()
+                end
+                ZO_StableTrainingRow_Init(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" /> 
+
+                <Control name="$(parent)BarContainer" inherits="ZO_StableTrainingBar_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_StablePanelGamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_Stable_Gamepad_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Notifications" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_StoreWindow_GamepadMaskContainerHeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_StoreWindow_GamepadMaskContainerHeaderContainerHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <Label name="$(parent)TrainableReady" inherits="ZO_GamepadHeaderDataTextTemplate" text="SI_GAMEPAD_STABLE_TRAINABLE_READY" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions y="39"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="-4"/>
+                            <Anchor point="TOPRIGHT" offsetX="-4"/>
+                        </Label>
+
+                        <Label name="$(parent)TrainableTimer" inherits="ZO_GamepadHeaderDataTextTemplate" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SECOND_CONTRAST" hidden="true">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TrainableReady"/>
+                        </Label>
+                        
+                        <Label name="$(parent)TrainableHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" verticalAlignment="BOTTOM" text="SI_GAMEPAD_STABLE_TRAINABLE_HEADER">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TrainableReady" relativePoint="BOTTOMLEFT"/>
+                        </Label>
+                        
+                        <Label name="$(parent)NoSkinWarning" font="ZoFontGamepad27" text="SI_STABLE_NO_ACTIVE_MOUNT_WARNING" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TrainableHeader" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TrainableReady" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

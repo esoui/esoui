@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CampaignAvARank" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_CampaignBrowser"/>
+            <OnInitialized>
+                ZO_CampaignAvARank_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT"/>
+                </Texture>
+                <Label name="$(parent)Rank" font="ZoFontCallout3">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="-7"/>
+                </Label>
+                <Label name="$(parent)Name" font="ZoFontHeader2" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="14" offsetY="10"/>
+                </Label>
+                <StatusBar name="$(parent)XPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
+                    <OnMouseEnter>
+                        ZO_CampaignAvARankStatusBar_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignAvARankStatusBar_OnMouseExit()
+                    </OnMouseExit>
+                </StatusBar>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

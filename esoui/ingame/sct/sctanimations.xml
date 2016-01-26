@@ -1,0 +1,48 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_SCTDownAnimation">
+            <Animations>
+                <AlphaAnimation duration="10" startAlpha="0.0" endAlpha="1.0"/>
+                <AlphaAnimation duration="500" delay="500" startAlpha="1.0" endAlpha="0.0"/>
+                <CustomAnimation duration="1500">
+                    <UpdateFunction>
+                        SetSCTAnimationOffsetY(self:GetTimeline(), progress * 130)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_SCTUpAnimation">
+            <Animations>
+                <ScaleAnimation duration="150" startScale="1.3" endScale="1.0"/>
+                <AlphaAnimation duration="150" startAlpha="0.0" endAlpha="1.0"/>
+                <CustomAnimation duration="75">
+                    <UpdateFunction>
+                        SetSCTAnimationOffsetY(self:GetTimeline(), progress * 10)
+                    </UpdateFunction>
+                </CustomAnimation>                
+                <AlphaAnimation duration="150" delay="675" startAlpha="1.0" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_SCTCritAnimation">
+            <Animations>
+                <ScaleAnimation duration="150" startScale="2" endScale="1.0"/>
+                <AlphaAnimation duration="10" startAlpha="0.0" endAlpha="1.0"/>
+                <AlphaAnimation duration="400" delay="500" startAlpha="1.0" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_SCTStatusAnimation">
+            <Animations>
+                <AlphaAnimation duration="10" startAlpha="0.0" endAlpha="1.0"/>
+                <AlphaAnimation duration="400" delay="1000" startAlpha="1.0" endAlpha="0"/>
+                <CustomAnimation duration="2500">
+                    <UpdateFunction>
+                        SetSCTAnimationOffsetY(self:GetTimeline(), progress * 0)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

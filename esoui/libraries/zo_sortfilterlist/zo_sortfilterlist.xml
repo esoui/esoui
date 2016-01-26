@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SortFilterListEmptyRow" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="TOPRIGHT"/>
+            <Dimensions y="30"/>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                <Label name="$(parent)Message" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                    <Anchor point="CENTER"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

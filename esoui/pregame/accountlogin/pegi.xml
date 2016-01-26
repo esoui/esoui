@@ -1,0 +1,80 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PEGI_CountrySelectDialog_ListItem" virtual="true" mouseEnabled="true" >  
+            <Dimensions x="330" y="32" />
+            <OnInitialized>
+                self.name = self:GetNamedChild("CountryName")
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_PEGI_CountrySelectDialog_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_PEGI_CountrySelectDialog_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                if(upInside) then
+                    ZO_PEGI_CountrySelectDialog_OnMouseUp(self)
+                end
+            </OnMouseUp>
+            <OnMouseDoubleClick>
+                ZO_PEGI_CountrySelectDialog_OnDoubleClick()
+            </OnMouseDoubleClick>
+            <Controls>
+                <Label name="$(parent)CountryName" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" verticalAlignment="CENTER" >
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_PEGI_CountrySelectDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_PEGI_CountrySelectDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)CountryList" inherits="ZO_ScrollList ZO_DialogContentAnchors">
+                    <Dimensions x="330" y="500" />
+                </Control>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_PEGI_AgreementDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_PEGI_AgreementDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Logo" textureFile="EsoUI/Art/Miscellaneous/PEGI_small.dds">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                </Texture>
+                <Label name="$(parent)AgreementText" font="ZoFontGameMedium" text="SI_PEGI_AGREEMENT_TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Logo" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                </Label>
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Decline" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PEGI_AgreementDeclinedDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_PEGI_AgreementDeclinedDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Logo" textureFile="EsoUI/Art/Miscellaneous/PEGI_small.dds">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                </Texture>
+                <Label name="$(parent)AgreementText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" level="5" mouseEnabled="true" linkEnabled="true">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Logo" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                    <OnLinkClicked>
+                        ZO_LinkHandler_OnLinkClicked(linkText, button)
+                    </OnLinkClicked>
+                </Label>
+                <Control name="$(parent)Back" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

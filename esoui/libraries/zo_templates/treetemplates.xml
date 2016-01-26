@@ -1,0 +1,82 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="IconHeaderAnimation">
+            <Animations>
+                <ScaleAnimation duration="180" startScale=".5" endScale=".75" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Label name="ZO_LabelHeader" font="ZoFontHeader3" inherits="ZO_SelectableLabel" verticalAlignment="CENTER" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions y="48" />
+            <OnMouseUp>
+                ZO_TreeHeader_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Control name="ZO_IconHeaderMouseArea" mouseEnabled="true" virtual="true">
+            <OnMouseUp>
+                local parent = self:GetParent()
+                local handler = parent.OnMouseUp
+                if(handler) then
+                    handler(parent, upInside)
+                end
+            </OnMouseUp>
+
+            <OnMouseDown>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    local parent = self:GetParent()
+                    local handler = parent.OnMouseDown
+                    if(handler) then
+                        handler(parent)
+                    end
+                end
+            </OnMouseDown>
+
+            <OnMouseEnter>
+                local parent = self:GetParent()
+                local handler = parent.OnMouseEnter
+                if(handler) then
+                    handler(parent)
+                end
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                local parent = self:GetParent()
+                local handler = parent.OnMouseExit
+                if(handler) then
+                    handler(parent)
+                end
+            </OnMouseExit>
+        </Control>
+        
+        <Control name="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" scale=".5" inherits="ZO_IconHeaderMouseArea" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="30" offsetY="24"/>
+
+                    <Controls>
+                        <Texture name="$(parent)Highlight" hidden="true" blendMode="ADD">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" offsetX="55" offsetY="9"/>
+                    <DimensionConstraints maxX="230"/>
+                </Label>
+                <!-- Fills the space between the text and the icon -->
+                <Control name="$(parent)Channel" inherits="ZO_IconHeaderMouseArea">
+                    <Dimensions x="9"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

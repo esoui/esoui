@@ -1,0 +1,56 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapKeepSummaryRow_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                local levelWidth = self:GetNamedChild("Level"):GetTextWidth()
+                local iconWidth = self:GetNamedChild("Alliance"):GetWidth()
+
+                self:GetNamedChild("ResourceName"):SetWidth(ZO_GAMEPAD_CONTENT_WIDTH - levelWidth - iconWidth - (2 * ZO_KEEP_SUMMARY_GAMEPAD_OFFSET_X))
+                self:GetNamedChild("TimeUntilNextLevel"):SetWidth(ZO_GAMEPAD_CONTENT_WIDTH - levelWidth - iconWidth - (2 * ZO_KEEP_SUMMARY_GAMEPAD_OFFSET_X))
+            </OnInitialized>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+            <Controls>
+                <Texture name="$(parent)Alliance">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT"/>
+                </Texture>
+                <Label name="$(parent)Level" font="ZoFontGamepad54">
+                    <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT" offsetX="ZO_KEEP_SUMMARY_GAMEPAD_OFFSET_X"/>
+                </Label>
+                <Label name="$(parent)ResourceName" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Level" relativePoint="TOPRIGHT" offsetX="ZO_KEEP_SUMMARY_GAMEPAD_OFFSET_X"/>
+                </Label>
+                <Label name="$(parent)TimeUntilNextLevel" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResourceName" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ResourceName" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapKeepSummary_Gamepad" inherits="ZO_WorldMapKeepInfoContent_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_WorldMapKeepSummary_Gamepad_OnInitialized(self)
+                local iconWidth = self:GetNamedChild("Alliance"):GetWidth()
+
+                self:GetNamedChild("GuildOwnerLabel"):SetWidth(ZO_GAMEPAD_CONTENT_WIDTH - iconWidth - ZO_KEEP_SUMMARY_GAMEPAD_OFFSET_X)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Alliance">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y"/>
+                </Texture>
+                <Label name="$(parent)GuildOwnerLabel" modifyTextType="UPPERCASE" text="SI_KEEP_GUILD_OWNER_HEADER" font="ZoFontGamepadBold27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="TOPRIGHT" offsetX="ZO_KEEP_SUMMARY_GAMEPAD_OFFSET_X"/>
+                </Label>
+                <Label name="$(parent)GuildOwner" font="ZoFontGamepad34">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GuildOwnerLabel" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildOwnerLabel" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,69 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EnchantingSlotContainer_Gamepad" virtual="true">
+            <Dimensions x="512" y="128" />
+            <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y" offsetX="160"/>
+        </Control>
+
+        <Control name="ZO_ExtractionEnchantingSlotContainer_Gamepad" inherits="ZO_EnchantingSlotContainer_Gamepad" virtual="true">
+            <Controls>
+                <Texture name="$(parent)LandingArea" textureFile="EsoUI/Art/Crafting/crafting_enchanting_extraction_landingArea_overlay.dds">
+                    <Dimensions x="236" y="236" />
+                    <Anchor point="CENTER" offsetY="50" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Button name="ZO_GamepadEnchantingRuneCraftingSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="106" y="80" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                </Label>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_GamepadEnchantingRuneExtractionSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad27" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="106" y="80" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                </Label>
+            </Controls>
+        </Button>
+
+        <TopLevelControl name="ZO_GamepadEnchantingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />
+
+        <TopLevelControl name="ZO_GamepadEnchantingTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_GamepadEnchanting_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RuneSlotContainer" inherits="ZO_GamepadCraftingIngredientBarTemplate" hidden="true" />
+
+                <Control name="$(parent)ExtractionSlotContainer" inherits="ZO_GamepadCraftingIngredientBarTemplate" hidden="true" />
+
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Mode" inherits="ZO_VerticalParametricScrollListTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Control>
+                        <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <Control name="$(parent)Tooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)RuneSlotContainer" relativePoint="TOP" offsetY="-ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y"/>
+                </Control>
+
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

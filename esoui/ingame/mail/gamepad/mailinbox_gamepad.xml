@@ -1,0 +1,108 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MailInbox_Gamepad" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)Inbox" hidden="true">
+                                    <Anchor point="TOPLEFT" offsetY="68" />
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-120" />
+                                    <OnInitialized>
+                                        self.codNotice = self:GetNamedChild("CODNotice")
+                                        self.addressLabel = self:GetNamedChild("AddressLabel")
+                                        self.addressEdit = self:GetNamedChild("Address")
+                                        self.subjectEdit = self:GetNamedChild("Subject")
+                                        self.bodyEdit = self:GetNamedChild("Body")
+                                        self.attachmentsBox = self:GetNamedChild("AttachmentsBox")
+                                        self.attachmentsNone = self.attachmentsBox:GetNamedChild("NoAttachments")
+                                        self.moneyLabel = self.attachmentsBox:GetNamedChild("MoneyLabel")
+                                        self.moneyValue = self.attachmentsBox:GetNamedChild("Money")
+                                        self.moneyNone = self.attachmentsBox:GetNamedChild("NoMoney")
+
+                                        -- These functions are also used by MailSend_Gamepad
+                                        self.Initialize = ZO_MailView_Initialize_Gamepad
+                                        self.Display = ZO_MailView_Display_Gamepad
+                                        self.SetAttachment = ZO_MailView_SetupAttachment_Gamepad
+                                        self.ClearAttachment = ZO_MailView_ClearAttachment_Gamepad
+                                        self.Clear = ZO_MailView_Clear_Gamepad
+                                        self.GetAddress = ZO_MailView_GetAddress_Gamepad
+                                        self.GetSubject = ZO_MailView_GetSubject_Gamepad
+                                        self.GetBody = ZO_MailView_GetBody_Gamepad
+                                    </OnInitialized>
+
+                                    <Controls>
+                                        <Label name="$(parent)CODNotice" text="SI_GAMEPAD_MAIL_INBOX_COD_NOTICE" inherits="ZO_Mail_Gamepad_Label" hidden="true">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+
+                                        <Label name="$(parent)AddressLabel" inherits="ZO_Mail_Gamepad_Label">
+                                            <!-- Dynamically anchored to either parent or CODNotice -->
+                                        </Label>
+                                        <Control name="$(parent)Address" inherits="ZO_Mail_Gamepad_LabelBox">
+                                            <Dimensions y="43" />
+                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)AddressLabel" relativePoint="BOTTOMLEFT" />
+                                        </Control>
+
+                                        <Label name="$(parent)SubjectLabel" text="SI_GAMEPAD_MAIL_SUBJECT_LABEL" inherits="ZO_Mail_Gamepad_Label">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Address" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                        </Label>
+                                        <Control name="$(parent)Subject" inherits="ZO_Mail_Gamepad_LabelBox">
+                                            <Dimensions y="43" />
+                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" />
+                                        </Control>
+
+                                        <Label name="$(parent)BodyLabel" text="SI_GAMEPAD_MAIL_BODY_LABEL" inherits="ZO_Mail_Gamepad_Label">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                        </Label>
+                                        
+                                        <Control name="$(parent)Body" inherits="ZO_Mail_Gamepad_Scrollable_LabelBox">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)BodyLabel" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="BOTTOMRIGHT" offsetY="-115" />
+                                        </Control>
+
+                                        <Control name="$(parent)AttachmentsBox">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="BOTTOMRIGHT" offsetY="-15" />
+
+                                            <Controls>
+                                                <!-- Sent Money/C.O.D. -->
+                                                <Label name="$(parent)MoneyLabel" inherits="ZO_Mail_Gamepad_Label">
+                                                    <Anchor point="TOPLEFT" />
+                                                </Label>
+                                                <Label name="$(parent)Money" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                                    <!-- NOTE: font is set in the money format options in lua. -->
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MoneyLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                                                </Label>
+                                                <Label name="$(parent)NoMoney" text="SI_GAMEPAD_MAIL_INBOX_NO_ATTACHED_GOLD" inherits="ZO_Mail_Gamepad_Value">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MoneyLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                                                </Label>
+
+                                                <!-- Attached Items -->
+                                                <Label name="$(parent)AttachmentsLabel" text="SI_MAIL_ATTACHMENTS_HEADER" inherits="ZO_Mail_Gamepad_Label">
+                                                    <Anchor point="TOPLEFT" relativePoint="TOP" />
+                                                </Label>
+                                                <Label name="$(parent)NoAttachments" text="SI_GAMEPAD_MAIL_INBOX_NO_ATTACHMENTS" inherits="ZO_Mail_Gamepad_Value">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                                                </Label>
+                                                <Control name="$(parent)AttachmentsBase" hidden="true">
+                                                    <!-- Controls are dynamically anchored to this base. -->
+                                                    <Dimensions x="0" y="55" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

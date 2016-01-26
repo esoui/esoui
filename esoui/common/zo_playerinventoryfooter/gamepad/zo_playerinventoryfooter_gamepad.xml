@@ -1,0 +1,17 @@
+﻿<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Gamepad_PlayerInventoryFooter" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" >
+            <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_X" offsetY="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_Y"/>
+            <Dimensions y="42"/>
+            <Controls>
+                <Label name="$(parent)InventoryCapacityHeader" font="ZoFontGamepad27" modifyTextType="UPPERCASE" text="SI_GAMEPAD_PLAYER_INVENTORY_CAPACITY_FOOTER_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-145"/>
+                </Label>
+
+                <Label name="$(parent)InventoryCapacityAmount" horizontalAlignment="RIGHT" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)InventoryCapacityHeader" offsetX="10" offsetY="4"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

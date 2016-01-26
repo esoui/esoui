@@ -1,0 +1,87 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_CampaignScoring_IconTemplate" virtual="true">
+            <Dimensions x="64" y="64"/>
+        </Texture>
+
+        <Control name="ZO_CampaignScoringAllianceSectionTemplate" virtual="true">
+            <OnInitialized>
+                ZO_CampaignScoring_AllianceSection_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)BGLeft">
+                    <Dimensions x="512" y="256"/>
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+                <Texture name="$(parent)BGRight">
+                    <Dimensions x="256" y="256"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeft" relativePoint="TOPRIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)AllianceIcon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" offsetX="25" offsetY="15"/>
+                </Texture>
+
+                <Label name="$(parent)AllianceScore" font="ZoFontCallout2">
+                    <Anchor point="TOPRIGHT" offsetX="-60" offsetY="14" />
+                </Label>
+
+                <Label name="$(parent)AllianceName" font="ZoFontWinH3" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="TOPRIGHT" offsetY="7" />
+                </Label>
+
+                <Label name="$(parent)PotentialPointsLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CAMPAIGN_SCORING_POTENTIAL_POINTS_LABEL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceName" relativePoint="BOTTOMLEFT" />
+                </Label>
+
+                <Label name="$(parent)PotentialPoints" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PotentialPointsLabel" relativePoint="BOTTOMRIGHT" offsetX="2" />
+                </Label>
+
+                <Texture name="$(parent)UnderdogScoreIcon" tier="MEDIUM" mouseEnabled="true" textureFile="EsoUI/Art/AvA/overview_icon_underdog_score.dds">
+                    <Dimensions x="32" y="32" />
+                    <!-- Anchors are set in Lua-->
+                </Texture>
+
+                <Texture name="$(parent)UnderdogPopIcon" tier="MEDIUM" mouseEnabled="true" textureFile="EsoUI/Art/AvA/overview_icon_underdog_population.dds">
+                    <Dimensions x="32" y="32" />
+                    <!-- Anchors are set in Lua-->
+                </Texture>
+
+                <Texture name="$(parent)KeepIcon" inherits="ZO_CampaignScoring_Icon">
+                    <Anchor point="BOTTOMLEFT" offsetX="68" offsetY="-25" />
+                </Texture>
+
+                <Label name="$(parent)NumKeeps" font="ZoFontWinH2">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" relativePoint="BOTTOMRIGHT" offsetX="-18" offsetY="-11" />
+                </Label>
+
+                <Texture name="$(parent)OutpostIcon" inherits="ZO_CampaignScoring_Icon">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)KeepIcon" relativePoint="TOPRIGHT" offsetX="70" />
+                </Texture>
+
+                <Label name="$(parent)NumOutposts" font="ZoFontWinH2">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-11" />
+                </Label>
+
+                <Texture name="$(parent)ResourcesIcon" inherits="ZO_CampaignScoring_Icon">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="TOPRIGHT" offsetX="70" />
+                </Texture>
+
+                <Label name="$(parent)NumResources" font="ZoFontWinH2">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="-11" />
+                </Label>
+
+                <Texture name="$(parent)ScrollIcon" inherits="ZO_CampaignScoring_Icon">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="TOPRIGHT" offsetX="70" />
+                </Texture>
+
+                <Label name="$(parent)NumScrolls" font="ZoFontWinH2">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ScrollIcon" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-11" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,8 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_BulletLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Texture name="ZO_Bullet" virtual="true" textureFile="EsoUI/Art/Miscellaneous/bullet.dds">
+            <Dimensions x="16" y="16"/>
+        </Texture> 
+    </Controls>
+</GuiXml>

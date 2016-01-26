@@ -1,0 +1,121 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_CampaignEmperorRowAlternatingBackgroundTexture_Gamepad" inherits="ZO_ThinListBgStrip"  virtual="true">
+            <AnchorFill />
+        </Texture>
+
+        <Control name="ZO_CampaignImperialKeep_Gamepad" resizeToFitDescendents="true" hidden="true" virtual="true" >
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" >
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad" font="ZoFontGamepad34" wrapMode="ELLIPSIS" virtual="true" />
+        <Label name="ZO_CampaignEmperorLeaderboardsHeaderLabel_Gamepad" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" wrapMode="ELLIPSIS" />
+
+        <Control name="ZO_CampaignEmperorLeaderboardsRowDimensions_Gamepad" virtual="true">
+            <Dimensions x="789" y="64" />
+        </Control>
+        
+        <Control name="ZO_CampaignEmperorLeaderboardsAllianceRow_Gamepad" inherits="ZO_CampaignEmperorLeaderboardsRowDimensions_Gamepad" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_CampaignEmperorRowAlternatingBackgroundTexture_Gamepad" />
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20"/>
+                </Texture>
+
+                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel_Gamepad" verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignEmperorLeaderboardsEmptyRow_Gamepad" inherits="ZO_CampaignEmperorLeaderboardsRowDimensions_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel_Gamepad" hidden="true" />
+                <Texture name="$(parent)BG" inherits="ZO_CampaignEmperorRowAlternatingBackgroundTexture_Gamepad" />
+            </Controls>
+        </Control>    
+        
+        <Control name="ZO_CampaignEmperorLeaderboardsRow_Gamepad" inherits="ZO_CampaignEmperorLeaderboardsRowDimensions_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Rank" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad">
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20"/>
+                </Label>
+                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad" font="ZoFontGamepad34" verticalAlignment="CENTER" mouseEnabled="true">
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="100"/>
+                </Label>
+                <Texture name="$(parent)Alliance">
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="500" />
+                </Texture>
+                <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT" offsetX="-40"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignEmperorLeaderboardsNonPlayerRow_Gamepad" inherits="ZO_CampaignEmperorLeaderboardsRow_Gamepad" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_CampaignEmperorRowAlternatingBackgroundTexture_Gamepad" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignEmperorLeaderboardsPlayerRow_Gamepad" inherits="ZO_CampaignEmperorLeaderboardsRow_Gamepad" virtual="true">
+            <Controls>
+                <Control name="$(parent)PlayerCallout">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Dye/Gamepad/listItem_highlight.dds" alpha="1">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="5" />
+                            <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CampaignEmperor_Gamepad" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
+            <Dimensions x="1250" />
+            <OnInitialized>
+                ZO_CampaignEmperor_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)KeepsRequired" inherits="ZO_AvALabelHeaderTemplate">
+                    <Anchor point="TOPLEFT" offsetY="20"/>
+                </Label>              
+                
+                <Label name="$(parent)KeepsRequiredData" inherits="ZO_AvALabelDataTemplate">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepsRequired" relativePoint="BOTTOMRIGHT" offsetX="8" />
+                </Label>
+
+                <Label name="$(parent)KeepsHeader" text="SI_CAMPAIGN_EMPEROR_KEEPS_HEADER" inherits="ZO_AvALabelTitleTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)KeepsRequired" relativePoint="BOTTOMLEFT"  offsetY="40"/>
+                </Label>
+
+                <Control name="$(parent)Keeps" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)KeepsHeader" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)PlayerRow" inherits="ZO_CampaignEmperorLeaderboardsPlayerRow_Gamepad">
+                    <Dimensions x="776" y="30" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Keeps" relativePoint="BOTTOMLEFT" offsetY="16"/>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PlayerRow" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+
+                <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" resizeToFitFile="true" hidden="true"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

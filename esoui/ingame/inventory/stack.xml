@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_StackSplit" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_Stack_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Prompt" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
+
+                <Button name="$(parent)Source" inherits="ZO_ItemSlot">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Prompt" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="25" />
+                    <Dimensions x="48" y="48" />
+                </Button>
+
+                <Texture name="$(parent)Arrow" inherits="ZO_TransformArrow">
+                    <Anchor point="LEFT" relativeTo="$(parent)Source" relativePoint="RIGHT" offsetX="20"/>
+                </Texture>
+
+                <Button name="$(parent)Destination1" inherits="ZO_ItemSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)Arrow" relativePoint="RIGHT" offsetX="20" />
+                    <Dimensions x="48" y="48" />
+                </Button>
+
+                <Button name="$(parent)Destination2" inherits="ZO_ItemSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)Destination1" relativePoint="RIGHT" offsetX="25" />
+                    <Dimensions x="48" y="48" />
+                </Button>
+
+                <Control name="$(parent)Spinner" inherits="ZO_EditSpinner">
+                    <Anchor point="TOP" relativeTo="$(parent)Destination2" relativePoint="BOTTOM" offsetY="7" />
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Split" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
