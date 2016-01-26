@@ -5,3 +5,6 @@ This is the code base for Elder Scrolls Online user interface and is presented h
 **Last update is 2.2.7 (API 100013) on November 30 2015.**
 
 [![Join the chat at https://gitter.im/ESOUI/ESOUI](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ESOUI/ESOUI?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+
+[![Join the chat at https://gitter.im/ESOUI/ESOUI](https://badges.gitter.im/ESOUI/ESOUI.svg)](https://gitter.im/ESOUI/ESOUI?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
