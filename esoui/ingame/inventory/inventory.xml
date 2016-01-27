@@ -27,7 +27,7 @@
                     <AnchorFill />
                 </Backdrop>
             </Controls>
-        </EditBox>  
+        </EditBox>
 
         <Control name="ZO_InventoryFilterTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
             <OnMouseEnter>
@@ -45,7 +45,7 @@
                 </Texture>
             </Controls>
         </Control>
-       
+
         <TopLevelControl name="ZO_PlayerInventory" mouseEnabled="true" hidden="true" allowBringToTop="false">
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
@@ -69,11 +69,11 @@
                             <Dimensions x="16" y="32" />
                             <Anchor point="LEFT" offsetX="8"/>
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeaderIcon(self, 
-                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds", 
-                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds", 
-                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds", 
-                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds", 
+                                ZO_PlayerInventory_InitSortHeaderIcon(self,
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                                    "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
                                     "age")
 
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
@@ -90,7 +90,7 @@
                             <Dimensions x="82" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")                                
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Price" inherits="ZO_SortHeader">
@@ -118,7 +118,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backpack" />
                 </Control>
-                
+
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
@@ -130,7 +130,7 @@
             <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
             <Dimensions x="550"/>
         </TopLevelControl>
-        
+
         <TopLevelControl name="ZO_PlayerBank" hidden="true" mouseEnabled="true">
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
@@ -174,7 +174,7 @@
                         </Control>
                     </Controls>
                 </Control>
-                
+
                 <!-- Item Lists -->
                 <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
                     <Controls>
@@ -275,16 +275,16 @@
             <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
             <Dimensions x="550"/>
         </TopLevelControl>
-        
+
         <TopLevelControl name="ZO_GuildBank" hidden="true" mouseEnabled="true">
             <Dimensions x="565" />
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-            
+
             <OnInitialized>
                 ZO_PlayerInventory_Initialize()
             </OnInitialized>
-            
+
             <Controls>
                 <!-- not dead, but dreaming... -->
                 <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">

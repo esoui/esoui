@@ -10,7 +10,7 @@ function ZO_FormatTime(seconds, formatStyle, precision, direction)
    return FormatTimeSeconds(seconds, formatStyle, precision, direction or TIME_FORMAT_DIRECTION_NONE)
 end
 
-function ZO_FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction)   
+function ZO_FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction)
     return FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction or TIME_FORMAT_DIRECTION_NONE)
 end
 

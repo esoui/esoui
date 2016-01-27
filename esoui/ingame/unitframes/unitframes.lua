@@ -272,7 +272,7 @@ end
 
 function UnitFramesManager:SetGroupIndexDirty(groupIndex)
     -- The update we call will update all unit frames after and including the one being modified
-    -- So we really just need to know what is the smallest groupIndex that is being changed 
+    -- So we really just need to know what is the smallest groupIndex that is being changed
     if not self.firstDirtyGroupIndex or groupIndex < self.firstDirtyGroupIndex then
         self.firstDirtyGroupIndex = groupIndex
     end
@@ -356,7 +356,7 @@ local UNITFRAME_BAR_STYLES =
             },
             centered = true,
         },
-    },    
+    },
 
     [GROUP_UNIT_FRAME] =
     {
@@ -722,7 +722,7 @@ local UNITFRAME_LAYOUT_DATA =
         neverHideStatusBar = true,
         showStatusInName = true,
         captionControlName = "Caption",
-    },    
+    },
 }
 
 local function GetPlatformLayoutData(style)
@@ -851,7 +851,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
     newFrame.rightBracket = newFrame:AddFadeComponent("RightBracket")
     newFrame.rightBracketGlow = GetControl(newFrame.frame, "RightBracketGlow")
     newFrame.rightBracketUnderlay = GetControl(newFrame.frame, "RightBracketUnderlay")
-    
+
     newFrame.showBarText = showBarText
 
     newFrame.healthBar = UnitFrameBar:New(baseWindowName.."Hp", newFrame.frame, showBarText, style, POWERTYPE_HEALTH)
@@ -1044,7 +1044,7 @@ function UnitFrame:RefreshControls()
             if self.nameLabel then
                 local name
                 if IsInGamepadPreferredMode() and IsUnitPlayer(self.unitTag) then
-                    name = ZO_FormatUserFacingDisplayName(GetUnitDisplayName(self.unitTag)) 
+                    name = ZO_FormatUserFacingDisplayName(GetUnitDisplayName(self.unitTag))
                 else
                     name = GetUnitName(self.unitTag)
                 end
@@ -1072,7 +1072,7 @@ function UnitFrame:RefreshControls()
     end
 end
 
-function UnitFrame:RefreshUnit(unitChanged)            
+function UnitFrame:RefreshUnit(unitChanged)
     local validTarget = DoesUnitExist(self.unitTag)
     if(validTarget) then
         if(self.unitTag == "reticleovertarget") then
@@ -1200,7 +1200,7 @@ function UnitFrame:UpdateLevel()
         if(showLevel and unitLevel > 0) then
             self.levelLabel:SetHidden(false)
             self.levelLabel:SetText(tostring(unitLevel))
-            self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0) 
+            self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0)
         else
             self.levelLabel:SetHidden(true)
             self.nameLabel:SetAnchor(TOPLEFT)
@@ -1251,14 +1251,14 @@ local DIFFICULTY_BRACKET_GLOW_LEFT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level2_left.dds",
     [MONSTER_DIFFICULTY_HARD] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level3_left.dds",
-    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_left.dds",    
+    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_left.dds",
 }
 
 local DIFFICULTY_BRACKET_GLOW_RIGHT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level2_right.dds",
     [MONSTER_DIFFICULTY_HARD] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level3_right.dds",
-    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_right.dds",    
+    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_right.dds",
 }
 
 local GAMEPAD_DIFFICULTY_BRACKET_TEXTURE =
@@ -1523,55 +1523,55 @@ local unitTypesWhoUseCastInfo =
     [UNIT_REACTION_NEUTRAL] = true,
 }
 
-local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS = 
+local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
 {
-    [STAT_HEALTH_MAX] = 
+    [STAT_HEALTH_MAX] =
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_HEALTH_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_HEALTH_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_HEALTH_DECREASED_TARGET,
     },
-    [STAT_MAGICKA_MAX] = 
+    [STAT_MAGICKA_MAX] =
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_MAGICKA_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_MAGICKA_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_MAGICKA_DECREASED_TARGET,
     },
-    [STAT_STAMINA_MAX] = 
+    [STAT_STAMINA_MAX] =
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_STAMINA_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_STAMINA_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_STAMINA_DECREASED_TARGET,
     },
-    [STAT_HEALTH_REGEN_COMBAT] = 
+    [STAT_HEALTH_REGEN_COMBAT] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_HEALTH_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_HEALTH_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_HEALTH_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_HEALTH_REGEN_LOST_TARGET,
     },
-    [STAT_MAGICKA_REGEN_COMBAT] = 
+    [STAT_MAGICKA_REGEN_COMBAT] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_MAGICKA_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_MAGICKA_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_MAGICKA_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_MAGICKA_REGEN_LOST_TARGET,
     },
-    [STAT_STAMINA_REGEN_COMBAT] = 
+    [STAT_STAMINA_REGEN_COMBAT] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_STAMINA_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_STAMINA_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_STAMINA_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_STAMINA_REGEN_LOST_TARGET,
     },
-    [STAT_ARMOR_RATING] = 
+    [STAT_ARMOR_RATING] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_ARMOR_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_ARMOR_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_ARMOR_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_ARMOR_LOST_TARGET,
     },
-    [STAT_POWER] = 
+    [STAT_POWER] =
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_POWER_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_POWER_LOST_TARGET,
@@ -1609,21 +1609,21 @@ local function CreateTargetFrame()
         increasedArmorFrameContainerTemplate = "ZO_IncreasedArmorFrameContainerAngle",
         decreasedArmorOverlayContainerTemplate = "ZO_DecreasedArmorOverlayContainerAngle",
         increasedPowerGlowTemplate = "ZO_IncreasedPowerGlowAngle",
-        increasedArmorOffsets = 
+        increasedArmorOffsets =
         {
-            keyboard = 
+            keyboard =
             {
                 top = -7,
                 bottom = 8,
                 left = -15,
                 right = 15,
             },
-            gamepad = 
+            gamepad =
             {
                 top = -8,
                 bottom = 9,
                 left = -12,
-                right = 12, 
+                right = 12,
             }
         }
     }
@@ -1633,21 +1633,21 @@ local function CreateTargetFrame()
     VISUALIZER_ANGLE_UNWAVERING_LAYOUT_DATA =
     {
         overlayContainerTemplate = "ZO_UnwaveringOverlayContainerAngle",
-        overlayOffsets = 
+        overlayOffsets =
         {
-            keyboard = 
+            keyboard =
             {
                 top = 2,
                 bottom = -3,
                 left = 6,
                 right = -7,
             },
-            gamepad = 
+            gamepad =
             {
                 top = 4,
                 bottom = -2,
                 left = 8,
-                right = -8, 
+                right = -8,
             }
         }
 
@@ -1773,7 +1773,7 @@ local function UpdateGroupFramesVisualStyle()
         -- Clearing and setting the text again seems to reapply the ModifyTextType attribute.
         local groupNameControl = GetControl(raidFrame, "GroupName")
         groupNameControl:SetText("")
-        
+
         if constants.SHOW_GROUP_LABELS then
             groupNameControl:SetText(zo_strformat(SI_GROUP_SUBGROUP_LABEL, i))
         end
@@ -1873,7 +1873,7 @@ local function RegisterForEvents()
     local function OnTargetChanged(evt, unitTag)
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
-    
+
     local function OnUnitFrameUpdate(evt, unitTag)
         ZO_UnitFrames_UpdateWindow(unitTag)
     end
@@ -1885,13 +1885,13 @@ local function RegisterForEvents()
 
     local function OnPowerUpdate(evt, unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if unitFrame then
             if powerType == POWERTYPE_HEALTH then
                 local oldHealth = unitFrame.healthBar.currentValue
-    
+
                 unitFrame.healthBar:Update(POWERTYPE_HEALTH, powerPool, powerPoolMax)
-    
+
                 if(oldHealth ~= nil and oldHealth == 0) then
                     -- Unit went from dead to non dead...update reaction
                     unitFrame:UpdateUnitReaction()
@@ -1920,7 +1920,7 @@ local function RegisterForEvents()
 
     local function OnLevelUpdate(eventCode, unitTag, level)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if(unitFrame) then
             unitFrame:UpdateLevel()
         end
@@ -1932,7 +1932,7 @@ local function RegisterForEvents()
 
     local function OnDispositionUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if(unitFrame) then
             unitFrame:UpdateUnitReaction()
         end
@@ -1940,7 +1940,7 @@ local function RegisterForEvents()
 
     local function OnGroupSupportRangeUpdate(evt, unitTag, isNearby)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if(unitFrame) then
             local isOnline = IsUnitOnline(unitTag)
             local isLeader = IsUnitGroupLeader(unitTag)
@@ -1948,7 +1948,7 @@ local function RegisterForEvents()
             if(AreUnitsEqual(unitTag, "reticleover")) then
                 UnitFrames:GetFrame("reticleover"):DoAlphaUpdate(isNearby, isOnline, isLeader)
             end
-    
+
             if(AreUnitsEqual(unitTag, "reticleovertarget")) then
                 local targetOfTarget = UnitFrames:GetFrame("reticleovertarget")
                 if(targetOfTarget) then
@@ -1978,14 +1978,14 @@ local function RegisterForEvents()
     local function OnGroupMemberConnectedStateChanged(event, unitTag, isOnline)
         UpdateStatus(unitTag, IsUnitDead(unitTag), isOnline)
     end
-    
+
     local function OnUnitDeathStateChanged(event, unitTag, isDead)
         UpdateStatus(unitTag, isDead, IsUnitOnline(unitTag))
     end
 
     local function OnRankPointUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if(unitFrame) then
             unitFrame:UpdateRank()
         end
@@ -1993,24 +1993,24 @@ local function RegisterForEvents()
 
     local function OnVeteranRankUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if(unitFrame) then
             unitFrame:UpdateLevel()
-        end    
+        end
     end
 
     local function OnTitleUpdated(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
+
         if(unitFrame) then
             unitFrame:UpdateCaption()
-        end    
+        end
     end
 
     local function OnPlayerActivated(eventCode)
         ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
-    
+
         -- do a full update because we probably missed events while loading
         UnitFrames:SetGroupSize()
         UnitFrames:DisableGroupAndRaidFrames()

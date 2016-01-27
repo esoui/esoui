@@ -27,15 +27,15 @@ function ZO_KeyboardFriendsListManager:Initialize(control)
     self.searchBox:SetHandler("OnTextChanged", function() self:OnSearchTextChanged() end)
 
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareFriends(listEntry1, listEntry2) end
-        
+
     FRIENDS_LIST_SCENE = ZO_Scene:New("friendsList", SCENE_MANAGER)
     FRIENDS_LIST_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if(newState == SCENE_SHOWING) then      
+                                                            if(newState == SCENE_SHOWING) then
                                                                 self:PerformDeferredInitialization()
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.staticKeybindStripDescriptor)
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                            elseif(newState == SCENE_HIDDEN) then      
-                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.staticKeybindStripDescriptor)                                                          
+                                                            elseif(newState == SCENE_HIDDEN) then
+                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.staticKeybindStripDescriptor)
                                                                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                             end
                                                         end)
@@ -56,13 +56,13 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
         {
             name = GetString(SI_FRIENDS_LIST_PANEL_ADD_FRIEND),
             keybind = "UI_SHORTCUT_PRIMARY",
-        
+
             callback = function()
                 ZO_Dialogs_ShowDialog("REQUEST_FRIEND")
             end,
         },
     }
-    
+
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
@@ -71,7 +71,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
         {
             name = GetString(SI_SOCIAL_LIST_PANEL_WHISPER),
             keybind = "UI_SHORTCUT_SECONDARY",
-        
+
             callback = function()
                 local data = ZO_ScrollList_GetData(self.mouseOverRow)
                 StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName)
@@ -90,7 +90,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
         {
             name = GetString(SI_FRIENDS_LIST_PANEL_INVITE),
             keybind = "UI_SHORTCUT_TERTIARY",
-        
+
             callback = function()
                 local data = ZO_ScrollList_GetData(self.mouseOverRow)
                 local NOT_SENT_FROM_CHAT = false
@@ -101,14 +101,14 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
             visible = function()
                 if(self.mouseOverRow) then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if(data.hasCharacter and data.online and data.alliance == self.playerAlliance) then                        
+                    if(data.hasCharacter and data.online and data.alliance == self.playerAlliance) then
                         return true
                     end
                 end
                 return false
             end
-        },  
-    }    
+        },
+    }
 end
 
 function ZO_KeyboardFriendsListManager:OnEffectivelyHidden()
@@ -153,10 +153,10 @@ function ZO_KeyboardFriendsListManager:BuildMasterList()
 end
 
 function ZO_KeyboardFriendsListManager:FilterScrollList()
-  
+
     local scrollData = ZO_ScrollList_GetDataList(self.list)
     ZO_ClearNumericallyIndexedTable(scrollData)
-    
+
     local searchTerm = self:GetSearchTerm()
 
     local masterList = FRIENDS_LIST_MANAGER:GetMasterList()
@@ -165,7 +165,7 @@ function ZO_KeyboardFriendsListManager:FilterScrollList()
         if(searchTerm == "" or FRIENDS_LIST_MANAGER:IsMatch(searchTerm, data)) then
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(FRIEND_DATA, data))
         end
-    end    
+    end
 end
 
 function ZO_KeyboardFriendsListManager:SortScrollList()
@@ -179,7 +179,7 @@ end
 
 function ZO_KeyboardFriendsListManager:SetupRow(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
-    FRIENDS_LIST_MANAGER:SetupEntry(control, data) 
+    FRIENDS_LIST_MANAGER:SetupEntry(control, data)
 end
 
 function ZO_KeyboardFriendsListManager:GetSearchTerm()
@@ -212,17 +212,17 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
                     AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
                 end
                 if(data.alliance == self.playerAlliance) then
-                    AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function() 
+                    AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function()
                         local NOT_SENT_FROM_CHAT = false
                         local DISPLAY_INVITED_MESSAGE = true
-                        TryGroupInviteByName(data.characterName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) 
+                        TryGroupInviteByName(data.characterName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
                     end)
                     AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToFriend(data.displayName) end)
-                end     
+                end
             end
             AddMenuItem(GetString(SI_FRIEND_MENU_REMOVE_FRIEND), function() ZO_Dialogs_ShowDialog("CONFIRM_REMOVE_FRIEND", {displayName = data.displayName}, {mainTextParams = {data.displayName}}) end)
             AddMenuItem(GetString(SI_FRIEND_MENU_IGNORE), function() AddIgnore(data.displayName) end)
-        
+
             self:ShowMenu(control)
         end
     end

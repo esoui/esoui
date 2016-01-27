@@ -151,7 +151,7 @@ function ZO_ToggleButton_Initialize(toggleButton, type, initialState)
     if(initialState == nil) then
         initialState = TOGGLE_BUTTON_OPEN
     end
-    
+
     toggleButton.type = type
     toggleButton.state = initialState
     ZO_ToggleButton_UpdateTextures(toggleButton)
@@ -175,7 +175,7 @@ function ZO_CheckButtonLabel_ColorText(label, over)
     if(over) then
         label:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGBA())
     else
-        label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())      
+        label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     end
 end
 
@@ -215,7 +215,7 @@ end
 
 function ZO_CheckButton_OnClicked(buttonControl, mouseButton)
     PlaySound(SOUNDS.DEFAULT_CLICK)
-    
+
     local bState = buttonControl:GetState()
     local callToggleFunc = true
     local checked = true
@@ -296,14 +296,14 @@ function ZO_CheckButton_SetUnchecked(buttonControl)
 end
 
 function ZO_CheckButton_IsChecked(buttonControl)
-    local currentState = buttonControl:GetState()    
+    local currentState = buttonControl:GetState()
     return currentState == BSTATE_PRESSED
 end
 
 function ZO_CheckButton_SetCheckState(buttonControl, checkState)
     local checkStateType = type(checkState)
     local isChecked = false
-    
+
     if(checkStateType == "boolean")
     then
         isChecked = checkState
@@ -314,7 +314,7 @@ function ZO_CheckButton_SetCheckState(buttonControl, checkState)
     then
         isChecked = checkState > 0
     end
-    
+
     if(isChecked)
     then
         ZO_CheckButton_SetChecked(buttonControl)
