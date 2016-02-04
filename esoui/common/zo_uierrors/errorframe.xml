@@ -61,7 +61,7 @@
                     </OnClicked>
                 </Button>
 
-                <Backdrop name="$(parent)Text" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Text" inherits="ZO_MultiLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" offsetY="30"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-40"/>
                     <Controls>

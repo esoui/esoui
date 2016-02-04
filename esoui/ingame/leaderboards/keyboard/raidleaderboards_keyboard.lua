@@ -3,14 +3,11 @@ local RAID_LEADERBOARD_FRAGMENT
 local ZO_RaidLeaderboardsManager_Keyboard = ZO_RaidLeaderboardsManager_Shared:Subclass()
 
 function ZO_RaidLeaderboardsManager_Keyboard:New(...)
-    local manager = ZO_RaidLeaderboardsManager_Shared.New(self, ...)
-    return manager
+    return ZO_RaidLeaderboardsManager_Shared.New(self, ...)
 end
 
 function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
     RAID_LEADERBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
-
-    ZO_RaidLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, RAID_LEADERBOARD_FRAGMENT)
 
     self.currentScoreLabel = GetControl(control, "CurrentScore")
     self.currentRankLabel = GetControl(control, "CurrentRank")
@@ -20,6 +17,8 @@ function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
 
     self.scoringInfoHelpIcon = GetControl(control, "ScoringInfoHelp")
     self.scoringInfoHelpIcon:SetParent(self.scoringInfoLabel)
+    
+    ZO_RaidLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, RAID_LEADERBOARD_FRAGMENT)
 
     self:RegisterForEvents(control)
 
@@ -79,5 +78,6 @@ end
 
 function ZO_RaidLeaderboardsInformationArea_OnInitialized(self)
     RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Keyboard:New(self)
+    LEADERBOARDS:UpdateCategories()
     SYSTEMS:RegisterKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME, RAID_LEADERBOARDS)
 end

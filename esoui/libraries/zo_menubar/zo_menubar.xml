@@ -32,6 +32,20 @@
                         </Texture>
                     </Controls>
                 </Texture>
+
+                <Texture name="$(parent)Status" level="2" excludeFromResizeToFitExtents="true" resizeToFitFile="true" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_MenuBarPaddingBarTemplate" excludeFromResizeToFitExtents="true" virtual="true">
+            <Dimensions x="8" y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Image" level="1" textureFile="EsoUI/Art/Miscellaneous/verticalDivider_64.dds" pixelRoundingEnabled="false">
+                    <AnchorFill />
+                </Texture>
             </Controls>
         </Control>
 

@@ -1,2 +1,4 @@
+## DependsOn: ZO_FontDefs
 EsoUI\PregameLocalization\LocalizePregameGeneratedStrings.lua
 $(languageDirectory)\lang\$(language)_pregame.lua
+$(languageDirectory)\lang\$(language)_pregame.str

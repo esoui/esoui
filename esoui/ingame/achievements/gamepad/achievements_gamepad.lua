@@ -375,15 +375,15 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
             {
                 template = "ZO_GamepadMenuEntryTemplate",
                 header = SI_GAMEPAD_OPTIONS_MENU,
-                templateData = showAllAchievements,
+                entryData = showAllAchievements,
             },
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = showEarnedAchievements,
+                entryData = showEarnedAchievements,
             },
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = showUnearnedAchievements,
+                entryData = showUnearnedAchievements,
             },
         },
         buttons =
@@ -578,7 +578,7 @@ function ZO_Achievements_Gamepad:PopulateCategories()
     self.footerBarBar:SetValue(earnedPoints)
 
     -- Create summary "category".
-    local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_JOURNAL_PROGRESS_SUMMARY), SUMMARY_ICON or ZO_NO_TEXTURE_FILE)
+    local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_JOURNAL_PROGRESS_SUMMARY), SUMMARY_ICON)
     entryData:SetIconTintOnSelection(true)
     entryData.earnedPoints = earnedPoints
     entryData.totalPoints = totalPoints
@@ -591,7 +591,7 @@ function ZO_Achievements_Gamepad:PopulateCategories()
         local categoryName, _, _, earnedPoints, totalPoints = GetAchievementCategoryInfo(categoryIndex)
         local gamepadIcon = GetAchievementCategoryGamepadIcon(categoryIndex)
 
-        local entryData = ZO_GamepadEntryData:New(zo_strformat(categoryName), gamepadIcon or ZO_NO_TEXTURE_FILE)
+        local entryData = ZO_GamepadEntryData:New(zo_strformat(categoryName), gamepadIcon)
         entryData:SetIconTintOnSelection(true)
         entryData.categoryIndex = categoryIndex
         entryData.earnedPoints = earnedPoints

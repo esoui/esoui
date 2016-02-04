@@ -111,7 +111,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text = SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT,
             callback =  function(...)
-                            ZO_MarketDialogs_Shared_OpenURL(...)
+                            ZO_MarketDialogs_Shared_OpenURLByType(...)
                             EndPurchase()
                         end,
         }
@@ -120,11 +120,11 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         buyCrownsButtons[1] = openURLButton
 
         insufficientFundsMainText = SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK
-        self.insufficientCrownsData = ZO_BUY_CROWNS_URL
+        self.insufficientCrownsData = ZO_BUY_CROWNS_URL_TYPE
         self.insufficientCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT) } }
         
         buyCrownsMainText = SI_CONFIRM_OPEN_URL_TEXT
-        g_buyCrownsData = ZO_BUY_CROWNS_URL
+        g_buyCrownsData = ZO_BUY_CROWNS_URL_TYPE
         g_buyCrownsTextParams = ZO_BUY_CROWNS_FRONT_FACING_ADDRESS
 
         buyPlusMainText = nil --no plans for this currently
@@ -189,6 +189,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons = insufficientFundsButtons,
         noChoiceCallback = EndPurchaseNoChoice,
+        finishedCallback =  function()
+                                OnMarketEndPurchase()
+                            end,
     })
 
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_INVENTORY_FULL",
@@ -210,6 +213,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons = { defaultMarketBackButton },
         noChoiceCallback = EndPurchaseNoChoice,
+        finishedCallback =  function()
+                                OnMarketEndPurchase()
+                            end,
     })
 
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_UNABLE_TO_PURCHASE",
@@ -231,6 +237,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons = { defaultMarketBackButton },
         noChoiceCallback = EndPurchaseNoChoice,
+        finishedCallback =  function()
+                                OnMarketEndPurchase()
+                            end,
     })
 
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_OWNED],
@@ -261,7 +270,12 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             },
         },
         mustChoose = true,
-        finishedCallback = function() self:MoveToNextFlowPosition() end
+        finishedCallback = function() 
+                               if not self.doMoveToNextFlowPosition then
+                                    OnMarketEndPurchase()
+                                end
+                               self:MoveToNextFlowPosition()
+                           end
     })
 
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_UNLOCKED],
@@ -292,7 +306,12 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             },
         },
         mustChoose = true,
-        finishedCallback = function() self:MoveToNextFlowPosition() end
+        finishedCallback = function() 
+                                if not self.doMoveToNextFlowPosition then
+                                    OnMarketEndPurchase()
+                                end
+                                self:MoveToNextFlowPosition() 
+                           end
     })
 
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_CONFIRMATION],
@@ -313,18 +332,22 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
-                callback = EndPurchase,
+                callback = function(dialog, isNoChoice)
+                                OnMarketEndPurchase()
+                                self:EndPurchase(isNoChoice)
+                           end,
             },
             {
                 keybind = "DIALOG_SECONDARY",
                 text = SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_BUY_NOW_LABEL,
                 callback =  function(dialog)
+                                OnMarketEndPurchase(self.marketProductId)
                                 self.doMoveToNextFlowPosition = true
                             end,
             },
         },
         mustChoose = true,
-        finishedCallback =  function()
+        finishedCallback =  function(dialog)
                                 self:MoveToNextFlowPosition()
                             end,
     })
@@ -634,20 +657,19 @@ do
         local expectedPurchaseResult = CouldPurchaseMarketProduct(self.marketProductId)
         if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
             ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_INSUFFICIENT_CROWNS", self.insufficientCrownsData, self.insufficientCrownsTextParams)
+        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
+            local spaceNeeded = GetSpaceNeededToPurchaseMarketProduct(self.marketProductId)
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_INVENTORY_FULL", inventoryFullData, { mainTextParams = { spaceNeeded } })
+        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_UNLOCKED_BACKPACK_UPGRADES or expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_UNLOCKED_BANK_UPGRADES then
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_UNABLE_TO_PURCHASE", nil, { mainTextParams = { GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult) } })
+        elseif marketProduct:HasSubscriptionUnlockedAttachments() then
+            self:SetFlowPosition(FLOW_UNLOCKED)
+        elseif marketProduct:HasBeenPartiallyPurchased() then
+            self:SetFlowPosition(FLOW_OWNED)
         else
-            if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
-                local spaceNeeded = GetSpaceNeededToPurchaseMarketProduct(self.marketProductId)
-                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_INVENTORY_FULL", inventoryFullData, { mainTextParams = { spaceNeeded } })
-            elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_UNLOCKED_BACKPACK_UPGRADES or expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_UNLOCKED_BANK_UPGRADES then
-                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_UNABLE_TO_PURCHASE", nil, { mainTextParams = { GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult) } })
-            elseif marketProduct:HasSubscriptionUnlockedAttachments() then
-                self:SetFlowPosition(FLOW_UNLOCKED)
-            elseif marketProduct:HasBeenPartiallyPurchased() then
-                self:SetFlowPosition(FLOW_OWNED)
-            else
-                self:SetFlowPosition(FLOW_CONFIRMATION)
-            end
+            self:SetFlowPosition(FLOW_CONFIRMATION)
         end
+        OnMarketStartPurchase(self.marketProductId)
     end
 end
 
@@ -714,9 +736,15 @@ do
 end
 
 function ZO_GamepadMarket_ShowBuyCrownsDialog()
+    OnMarketPurchaseMoreCrowns()
     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_BUY_CROWNS", g_buyCrownsData, g_buyCrownsTextParams)
 end
 
 function ZO_GamepadMarket_ShowBuyPlusDialog()
-    ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_BUY_PLUS")
+    local uiPlatform = GetUIPlatform()
+    if uiPlatform == UI_PLATFORM_PC then
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+    else
+        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_BUY_PLUS")
+    end
 end

@@ -293,7 +293,7 @@ function CPBarType:GetEnlightenedTooltip()
         local poolSize = self:GetEnlightenedPool()
         local current = self:GetCurrent()
         local nextPoint = GetChampionPointAttributeForRank(level + 1)
-        local pointName = ZO_Champion_GetConstellationGroupNameFromAttribute(nextPoint)
+        local pointName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(nextPoint)
         if poolSize + current > levelSize then
             return zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_OVERRUN, pointName)
         else

@@ -86,8 +86,11 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         if(declineComplete == "") then  declineComplete = GetString(SI_DEFAULT_QUEST_COMPLETE_DECLINE_TEXT) end
 
         self:InitializeInteractWindow(endDialog)
-
-        self:ShowQuestRewards(journalQuestIndex)
+        
+        local confirmError = self:ShowQuestRewards(journalQuestIndex)
+        if confirmError then
+            confirmComplete = zo_strformat(SI_QUEST_COMPLETE_FORMAT_STRING, confirmComplete, confirmError)
+        end
         self:PopulateChatterOption(1, CompleteQuest, confirmComplete, CHATTER_COMPLETE_QUEST)
         self:PopulateChatterOption(2, function() self:CloseChatter() end, declineComplete, CHATTER_GOODBYE)
 
@@ -163,6 +166,14 @@ end
 
 function ZO_SharedInteraction:CloseChatter()
     SCENE_MANAGER:Hide(self.sceneName)
+end
+
+function ZO_SharedInteraction:CloseChatterAndDismissAssistant()
+    self:CloseChatter()
+    local activeAssistant = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT)
+    if activeAssistant ~= 0 then
+        UseCollectible(activeAssistant)
+    end
 end
 
 function ZO_SharedInteraction:InitializeInteractWindow(bodyText)
@@ -320,6 +331,13 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     if(farewell == "") then farewell = GetString(SI_GOODBYE) end
     optionCount = optionCount + 1
     self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
+    
+    if IsInteractingWithAssistant() then
+        local assistantName = GetCollectibleName(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
+        farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, assistantName)
+        optionCount = optionCount + 1
+        self:PopulateChatterOption(optionCount, function() self:CloseChatterAndDismissAssistant() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
+    end
 
     self:FinalizeChatterOptions(optionCount)
 
@@ -430,6 +448,24 @@ function ZO_SharedInteraction:IsCurrencyReward(rewardType)
     return currencyRewards[rewardType]
 end
 
+local currencyRewardToCurrencyType =
+{
+    [REWARD_TYPE_MONEY] = CURT_MONEY,
+    [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
+    [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
+}
+
+function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)
+    return currencyRewardToCurrencyType[rewardType]
+end
+
+function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
+    local currencyType = currencyRewardToCurrencyType[rewardType]
+    if currencyType and (GetCarriedCurrencyAmount(currencyType) + rewardAmount >= MAX_PLAYER_MONEY) then
+        return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetString("SI_CURRENCYTYPE", currencyType))
+    end        
+end
+
 function ZO_SharedInteraction:GetRewardCreateFunc(rewardType)
     return REWARD_CREATORS[rewardType]
 end
@@ -439,18 +475,23 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
     local numRewards = GetJournalQuestNumRewards(journalQuestIndex)
     for i = 1, numRewards do
         local rewardType, name, amount, icon, meetsUsageRequirement, itemQuality, itemType = GetJournalQuestRewardInfo(journalQuestIndex, i)
-        local rewardData = {
-            rewardType = rewardType,
-            name = name,
-            amount = amount,
-            icon = icon,
-            meetsUsageRequirement = meetsUsageRequirement,
-            quality = itemQuality,
-            index = i,
-            itemType = itemType
-        }
+        --We don't want to show a collectible if we already own it
+        local isCollectible = rewardType == REWARD_TYPE_AUTO_ITEM and itemType == REWARD_ITEM_TYPE_COLLECTIBLE
+        local hideOwnedCollectible = isCollectible and not meetsUsageRequirement
+        if not hideOwnedCollectible then
+            local rewardData = {
+                rewardType = rewardType,
+                name = name,
+                amount = amount,
+                icon = icon,
+                meetsUsageRequirement = meetsUsageRequirement,
+                quality = itemQuality,
+                index = i,
+                itemType = itemType
+            }
 
-        table.insert(data, rewardData)
+            table.insert(data, rewardData)
+        end
     end
     return data
 end

@@ -849,11 +849,7 @@ ESO_Dialogs["LOG_OUT"] =
         {
             text = SI_DIALOG_YES,
             callback = function(dialog)
-                if IsFeedbackGatheringEnabled() then
-		            ZO_FEEDBACK:Logout()
-	            else 
-	                Logout()
-	            end
+	            Logout()
             end
         },
         {
@@ -877,11 +873,7 @@ ESO_Dialogs["QUIT"] =
         {
             text = SI_DIALOG_YES,
             callback = function(dialog)
-                if IsFeedbackGatheringEnabled() then
-		            ZO_FEEDBACK:Quit()
-	            else 
-		            Quit()
-	            end
+		        Quit()
             end
         },
         {
@@ -1291,6 +1283,25 @@ ESO_Dialogs["PROMOTE_TO_GUILDMASTER"] =
     }
 }
 
+local function UpdateCampaignQueueReadyTimer(dialog)
+    local frameTimeSeconds = GetFrameTimeSeconds()
+
+    if (not dialog.data.nextUpdateTimeSeconds or frameTimeSeconds > dialog.data.nextUpdateTimeSeconds) then
+        dialog.data.nextUpdateTimeSeconds = zo_floor(frameTimeSeconds + 1)  -- Update on second boundaries
+        local timeLeftSeconds = GetCampaignQueueRemainingConfirmationSeconds(dialog.data.campaignId, dialog.data.isGroup)
+
+        if timeLeftSeconds == 0 then
+            -- Cancel the dialog if we're out of time
+            ZO_Dialogs_ReleaseDialog(dialog)
+        elseif (dialog.data.timeLeftSeconds ~= timeLeftSeconds) then
+            -- Otherwise update the timer
+            dialog.data.timeLeftSeconds = timeLeftSeconds
+            local timeString = ZO_FormatTime(timeLeftSeconds, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+            ZO_Dialogs_UpdateDialogMainText(dialog, nil, { dialog.textParams.mainTextParams[1], timeString })
+        end
+    end
+end
+
 ESO_Dialogs["CAMPAIGN_QUEUE_READY"] =
 {
     gamepadInfo =
@@ -1318,11 +1329,13 @@ ESO_Dialogs["CAMPAIGN_QUEUE_READY"] =
         {
             text = SI_DIALOG_CANCEL,
         },
-    }
+    },
+    updateFn = UpdateCampaignQueueReadyTimer,
 }
 
 ESO_Dialogs["CAMPAIGN_QUEUE"] =
 {
+    canQueue = true,
     title =
     {
         text = SI_CAMPAIGN_BROWSER_QUEUE_DIALOG_TITLE,
@@ -2195,7 +2208,7 @@ ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT"] =
         {
             text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_PRIMARY_BUTTON,
             callback = function(dialog)
-                            SYSTEMS:GetObject("mainMenu"):ShowCategory(MENU_CATEGORY_MARKET)
+                            ShowMarketAndSearch(dialog.data.collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP)
                        end,
             clickSound = SOUNDS.DIALOG_ACCEPT,
         },
@@ -2681,8 +2694,38 @@ ESO_Dialogs["ZONE_COLLECTIBLE_REQUIREMENT_FAILED"] =
         {
             text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_PRIMARY_BUTTON,
             callback = function(dialog)
-                            SYSTEMS:GetObject("mainMenu"):ShowCategory(MENU_CATEGORY_MARKET)
+                            ShowMarketAndSearch(dialog.data.collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE)
                        end
+        },
+        [2] =
+        {
+            text = SI_DIALOG_EXIT,
+        },
+    }
+}
+
+ESO_Dialogs["CONSOLE_BUY_ESO_PLUS"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_GAMEPAD_MARKET_BUY_PLUS_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_GAMEPAD_MARKET_BUY_PLUS_TEXT_CONSOLE,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_GAMEPAD_MARKET_BUY_PLUS_DIALOG_KEYBIND_LABEL,
+            callback =  function(dialog)
+                            ShowConsoleESOPlusSubscriptionUI()
+                        end
         },
         [2] =
         {
@@ -2718,4 +2761,124 @@ ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] =
             text =      SI_DIALOG_CANCEL,
         }
     }
+}
+
+ESO_Dialogs["CRAFT_CONFIRM_UNIVERSAL_STYLE_ITEM"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CRAFTING_CONFIRM_USE_UNIVERSAL_STYLE_ITEM_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CRAFTING_CONFIRM_USE_UNIVERSAL_STYLE_ITEM_DESCRIPTION,
+        align = TEXT_ALIGN_CENTER,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            keybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_CANCEL,
+        },
+        [2] =
+        {
+            keybind = "DIALOG_SECONDARY",
+            text = SI_CRAFTING_PERFORM_FREE_CRAFT,
+            callback =  function(dialog)
+                            CraftSmithingItem(unpack(dialog.data))
+                        end
+        },
+    }
+}
+
+ESO_Dialogs["PROMPT_FOR_LFM_REQUEST"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_LFG_FIND_REPLACEMENT_TITLE,
+    },
+    mainText =
+    {
+        text = SI_LFG_FIND_REPLACEMENT_TEXT,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_LFG_FIND_REPLACEMENT_ACCEPT,
+            callback = function(dialog)
+                            local ACCEPT = true
+                            ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(ACCEPT)
+                       end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_NOTIFICATIONS_REQUEST_DECLINE,
+            callback = function(dialog)
+                            local DECLINE = false
+                            ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(DECLINE)
+                       end,
+        },
+    },
+}
+
+ESO_Dialogs["CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING_TITLE,
+    },
+    mainText =
+    {
+        text = SI_CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING_BODY,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                            dialog.data.onAcceptCallback()
+                       end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["KEYBIND_STRIP_DISABLED_DIALOG"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_KEYBIND_STRIP_DISABLED_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_KEYBIND_STRIP_DISABLED_DIALOG_TEXT,
+    },
+    buttons =
+    {
+        {
+            text = SI_OK,
+        },
+    },
 }

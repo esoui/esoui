@@ -149,8 +149,8 @@ function ZO_WorldMapQuestsData_Singleton:BuildMasterList()
             else        
                 for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
                     for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-                        local _, _, isFailCondition, isComplete = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)                    
-                        if(not (isFailCondition or isComplete)) then
+                        local _, _, isFailCondition, isComplete, _, isVisible = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)                    
+                        if(not (isFailCondition or isComplete) and isVisible) then
                             local taskId = RequestJournalQuestConditionAssistance(questIndex, stepIndex, conditionIndex)
                             if(taskId) then
                                 hadConditionPosition = true

@@ -112,7 +112,7 @@
                 ZO_KeyboardGuildRoster_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-38" offsetY="28"/>
                     <Dimensions x="270"/>
                     <Controls>

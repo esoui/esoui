@@ -174,3 +174,12 @@ function ZO_DeepTableCopy(source, dest)
     
     return dest
 end
+
+function ZO_IsElementInNumericallyIndexedTable(table, element)
+    for index, value in ipairs(table) do
+        if value == element then
+            return true
+        end
+    end
+    return false
+end

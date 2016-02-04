@@ -93,13 +93,12 @@ function ZO_GamepadStoreBuy:InitializeKeybindStrip()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor,
 													GAME_NAVIGATION_TYPE_BUTTON,
 													function() self:UnselectBuyItem() end,
-													nil)	
+													nil)
 end
 
 function ZO_GamepadStoreBuy:ConfirmBuy()
     local selectedData = self.list:GetTargetData()
-
-	if self.confirmationMode then
+    if self.confirmationMode then
 		local quantity = STORE_WINDOW_GAMEPAD:GetSpinnerValue()
 		if quantity > 0 then
 			BuyStoreItem(selectedData.slotIndex, quantity)
@@ -122,10 +121,10 @@ function ZO_GamepadStoreBuy:CanBuy()
         if selectedData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
             local collectibleId = GetCollectibleIdFromLink(selectedData.itemLink)
             if IsCollectibleUnlocked(collectibleId) then
-                return false
+                return false, GetString("SI_STOREFAILURE", STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE) -- "You already have that collectible"
             end
         end
-	    return selectedData.price <= GetCarriedCurrencyAmount(CURT_MONEY)
+        return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
     else
         return false
     end

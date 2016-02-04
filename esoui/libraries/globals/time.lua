@@ -10,7 +10,7 @@ function ZO_FormatTime(seconds, formatStyle, precision, direction)
    return FormatTimeSeconds(seconds, formatStyle, precision, direction or TIME_FORMAT_DIRECTION_NONE)
 end
 
-function ZO_FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction)
+function ZO_FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction)   
     return FormatTimeMilliseconds(milliseconds, formatType, precisionType, direction or TIME_FORMAT_DIRECTION_NONE)
 end
 
@@ -79,19 +79,48 @@ function ZO_NormalizeSecondsUntil(secsUntilExpiry)
 end
 
 do
-    local textUnknown = GetString(SI_STR_TIME_UNKNOWN)
-    local textShortEstimate = GetString(SI_STR_TIME_LESS_THAN_MINUTE)
-    local textLongEstimate = GetString(SI_STR_TIME_GREATER_THAN_HOUR)
+    ZO_TIME_ESTIMATE_STYLE =
+    {
+        ANGLE_BRACKETS = 1,
+        ARITHMETIC = 2,
+    }
 
-    function ZO_GetSimplifiedTimeEstimateText(estimatedTimeMs)
+    local textUnknown = GetString(SI_STR_TIME_UNKNOWN)
+
+    local textMinuteEstimate = GetString(SI_STR_TIME_LESS_THAN_MINUTE)
+    local textMinuteEstimateShort = GetString(SI_STR_TIME_LESS_THAN_MINUTE_SHORT)
+
+    local textHourEstimate = GetString(SI_STR_TIME_GREATER_THAN_HOUR)
+    local textHourEstimateShort = GetString(SI_STR_TIME_GREATER_THAN_HOUR_SHORT)
+    local textHourEstimatePlus = GetString(SI_STR_TIME_GREATER_THAN_HOUR_PLUS)
+    local textHourEstimatePlusShort = GetString(SI_STR_TIME_GREATER_THAN_HOUR_PLUS_SHORT)
+
+    local function GetLessThanStringId(formatType, estimateStyle)
+        --Only the angle bracket style has been designed
+        return formatType == TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT and textMinuteEstimateShort or textMinuteEstimate
+    end
+
+    local function GetGreaterThanStringId(formatType, estimateStyle)
+        if estimateStyle == ZO_TIME_ESTIMATE_STYLE.ANGLE_BRACKETS then
+            return formatType == TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT and textHourEstimateShort or textHourEstimate
+        elseif estimateStyle == ZO_TIME_ESTIMATE_STYLE.ARITHMETIC then
+            return formatType == TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT and textHourEstimatePlusShort or textHourEstimatePlus
+        end 
+    end
+
+    function ZO_GetSimplifiedTimeEstimateText(estimatedTimeMs, formatType, precisionType, estimateStyle)
+        formatType = formatType or TIME_FORMAT_STYLE_COLONS
+        precisionType = precisionType or TIME_FORMAT_PRECISION_TWELVE_HOUR
+        estimateStyle = estimateStyle or ZO_TIME_ESTIMATE_STYLE.ANGLE_BRACKETS
+        
         if estimatedTimeMs == 0 then
             return textUnknown
         elseif estimatedTimeMs < ZO_ONE_MINUTE_IN_MILLISECONDS then
-            return textShortEstimate
+            return GetLessThanStringId(formatType, estimateStyle)
         elseif estimatedTimeMs > ZO_ONE_HOUR_IN_MILLISECONDS then
-            return textLongEstimate
+            return GetGreaterThanStringId(formatType, estimateStyle)
         else
-            return ZO_FormatTimeMilliseconds(estimatedTimeMs, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+            return ZO_FormatTimeMilliseconds(estimatedTimeMs, formatType, precisionType)
         end
     end
 end

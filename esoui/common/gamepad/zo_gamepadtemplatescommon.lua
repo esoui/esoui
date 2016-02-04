@@ -2,7 +2,6 @@
 -- Global Gamepad Entry Template Setup
 --
 
-local NEW_ICON_TEXTURE = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new.dds"
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 local EQUIPPED_THIS_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local EQUIPPED_OTHER_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"    --same for now
@@ -190,7 +189,6 @@ function ZO_SharedGamepadEntry_Cooldown(control, remaining, duration, cooldownTy
 end
 
 local function ZO_SharedGamepadEntryCooldownSetup(control, data)
-    local GAMEPAD_DEFAULT_COOLDOWN_TEXTURE = "EsoUI/Art/Mounts/timer_icon.dds"
 
     if control.cooldown then
         local currentTime = GetFrameTimeMilliseconds()
@@ -199,7 +197,7 @@ local function ZO_SharedGamepadEntryCooldownSetup(control, data)
         local duration = (data.cooldownDuration or 0)
 
         control.inCooldown = (remaining > 0) and (duration > 0)
-        control.cooldown:SetTexture(data.cooldownIcon or GAMEPAD_DEFAULT_COOLDOWN_TEXTURE)
+        control.cooldown:SetTexture(data.cooldownIcon or "EsoUI/Art/Miscellaneous/timer_64.dds")
         
         if data.cooldownIcon then
             control.cooldown:SetFillColor(ZO_SELECTED_TEXT:UnpackRGBA())
@@ -283,7 +281,7 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         end
 
         if isItemNew and data.enabled then
-            statusIndicator:AddIcon(NEW_ICON_TEXTURE)
+            statusIndicator:AddIcon(ZO_GAMEPAD_NEW_ICON_32)
         end
 
         if (data.stolen) then

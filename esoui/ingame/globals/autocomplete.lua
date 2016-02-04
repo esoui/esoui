@@ -263,7 +263,7 @@ local function Initialize(event, name)
         end
 
         local function TryAddRecentTarget(unitTag)
-            if IsUnitPlayer(unitTag) and GetUnitAlliance("player") == GetUnitAlliance(unitTag) then
+            if IsUnitPlayer(unitTag) and AreUnitsCurrentlyAllied("player", unitTag) then
                 g_recentTargets:AddRecentPlayer(GetUnitName(unitTag))
             end
         end

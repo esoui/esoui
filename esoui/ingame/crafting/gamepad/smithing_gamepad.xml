@@ -13,10 +13,29 @@
         <Texture name="ZO_GamepadSmithingHeaderBottomDivider" inherits="ZO_GamepadHorizontalDivider" virtual="true">
             <Anchor point="TOP" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOM"/>
         </Texture>
-    </Controls>
 
-    <Controls>
-        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />"
+        <Control name="ZO_UniversalStyleItemGamepadInfo" virtual="true">
+            <Controls>
+                <Label name="$(parent)Amount" font="ZoFontGamepad42">
+                    <Anchor point="RIGHT"/>
+                </Label>
+                <Texture name="$(parent)USITexture">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Amount" relativePoint="LEFT" />
+                </Texture>
+                <Label name="$(parent)Label" text="SI_GAMEPAD_SMITHING_UNIVERSAL_STYLE_ITEM_NAME" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_UNIVERSAL_ITEM" >
+                    <Anchor point="RIGHT" relativeTo="$(parent)USITexture" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true">
+            <Controls>
+                <Control name="$(parent)UniversalStyleItemAmount" inherits="ZO_UniversalStyleItemGamepadInfo" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="false">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT" offsetX="-40" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
         
         <TopLevelControl name="ZO_GamepadSmithingTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>

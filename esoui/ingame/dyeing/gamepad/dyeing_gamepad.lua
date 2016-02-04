@@ -240,15 +240,15 @@ function ZO_Dyeing_Gamepad:InitializeOptionsDialog()
         {
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = sortRarityEntry,
+                entryData = sortRarityEntry,
             },
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = sortHueEntry,
+                entryData = sortHueEntry,
             },
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = showLockedEntry,
+                entryData = showLockedEntry,
             },
         },
         buttons =

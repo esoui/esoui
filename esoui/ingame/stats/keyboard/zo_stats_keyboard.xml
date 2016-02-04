@@ -238,7 +238,7 @@
                     </OnInitialized>
                 </Control>
 
-                <Texture name="$(parent)Timer" textureFile="EsoUI/Art/Mounts/timer_icon.dds" mouseEnabled="true" hidden="true">
+                <Texture name="$(parent)Timer" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" mouseEnabled="true" hidden="true">
                     <Dimensions x="32" y="32" />
                     <Anchor point="RIGHT" offsetX="-20"/>
                     <OnMouseEnter>
@@ -250,7 +250,7 @@
                         ClearTooltip(InformationTooltip)
                     </OnMouseExit>
                     <Controls>
-                        <Cooldown name="$(parent)Overlay" textureFile="EsoUI/Art/Mounts/timer_overlay.dds">
+                        <Cooldown name="$(parent)Overlay" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_32.dds">
                             <AnchorFill />
                         </Cooldown>
                     </Controls>

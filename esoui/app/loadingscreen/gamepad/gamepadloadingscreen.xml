@@ -1,8 +1,4 @@
 <GuiXml>
-    <String name="GAMEPAD_MEDIUM_FONT_APP" value="EsoUI/Common/Fonts/FTN57.otf" />
-    <Font name="ZoFontGamepad61App" font="$(GAMEPAD_MEDIUM_FONT_APP)|61|soft-shadow-thick" />
-    <Font name="ZoFontGamepad42App" font="$(GAMEPAD_MEDIUM_FONT_APP)|42|soft-shadow-thick" />
-
     <Animations>
         <AnimationTimeline name="LongLoadingAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
@@ -49,7 +45,7 @@
                     <TextureCoords left="1" right="0" top="1" bottom=".01" />
 
                     <Controls>
-                        <Label name="$(parent)LongLoadMessage" font="ZoFontGamepad61App" color="FFFFFF" horizontalAlignment="CENTER" alpha="0" text="SI_LONG_LOAD_TIME">
+                        <Label name="$(parent)LongLoadMessage" font="ZoFontGamepad61" color="FFFFFF" horizontalAlignment="CENTER" alpha="0" text="SI_LONG_LOAD_TIME">
                             <Anchor point="BOTTOM" offsetY="-20"/>
                         </Label>
                     </Controls>
@@ -63,7 +59,7 @@
                     <TextureCoords left="1" right="0" top="-.01" bottom="1" />
 
                     <Controls>
-                        <Label name="$(grandparent)ZoneDescription" override="true" font="ZoFontGamepad42App" color="FFFFFF" alpha="0">
+                        <Label name="$(grandparent)ZoneDescription" override="true" font="ZoFontGamepad42" color="FFFFFF" alpha="0">
                             <Dimensions x="1280"/>
                             <Anchor point="BOTTOM" relativePoint="TOP" />
                         </Label>
@@ -75,8 +71,8 @@
 
                         <Control name="$(grandparent)ZoneInfoContainer" override="true">
                             <Controls>
-                                <Label name="$(parent)ZoneName" font="ZoFontGamepad61App" override="true" color="FFFFFF" />
-                                <Label name="$(parent)InstanceType" font="ZoFontGamepad61App" override="true" color="FFFFFF" />
+                                <Label name="$(parent)ZoneName" font="ZoFontGamepad61" override="true" color="FFFFFF" />
+                                <Label name="$(parent)InstanceType" font="ZoFontGamepad61" override="true" color="FFFFFF" />
                             </Controls>
                         </Control>
                     </Controls>

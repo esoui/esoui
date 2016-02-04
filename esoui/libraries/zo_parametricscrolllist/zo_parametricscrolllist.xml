@@ -29,7 +29,7 @@
                 </Control>
 
                 <Label name="$(parent)NoItemsLabel"  font="ZoFontGamepadCondensed36" horizontalAlignment="CENTER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)ListScreenCenterIsAlongTop"/>
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT"/>
                     <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                 </Label>
             </Controls>

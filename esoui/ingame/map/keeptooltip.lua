@@ -81,12 +81,13 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
         --Alliance Owner Name
         local alliance = GetHistoricalKeepAlliance(keepId, battlegroundContext, historyPercent)
         local allianceName
+        local allianceColor = GetAllianceColor(alliance)
         if(alliance == ALLIANCE_NONE) then
             allianceName = GetString(SI_KEEP_UNCLAIMED)
         else
             allianceName = GetAllianceName(alliance)
         end
-        local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceName)
+        local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceColor:Colorize(allianceName))
         AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
 
         local keepType = GetKeepType(keepId)

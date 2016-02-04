@@ -28,8 +28,8 @@
                     <Controls>
                         <Label name="$(parent)SelectedItemText" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                             <Dimensions y="35" />
-                            <DimensionConstraints maxX="450" />
                             <Anchor point="TOPLEFT"/>
+                            <Anchor point="RIGHT" relativeTo="ZO_MainMenuSceneGroupBarLabel" relativePoint="LEFT" offsetX="-50" />
 
                             <OnMouseUp>
                                 if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then

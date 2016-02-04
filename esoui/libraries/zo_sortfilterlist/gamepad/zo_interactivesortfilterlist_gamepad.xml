@@ -58,28 +58,33 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_GamepadInteractiveFilterSearch" virtual="true">
-            <Dimensions x="350" y="48"/>
-            
+        <Control name="ZO_GamepadInteractiveFilterSearch" resizeToFitDescendents="true" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" />
-                
+                <Control name="$(parent)Search">
+                    <OnInitialized>
+                        ZO_SingleLineEditContainerSize_Gamepad_OnInitialized(self)
+                    </OnInitialized>
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="262"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" font="ZoFontGamepad34">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Disable(self)
+                            </OnInitialized>
+                            <Controls>
+                                <Label name="$(parent)Text" override="true" font="ZoFontGamepad34" />
+                            </Controls>
+                        </EditBox>
+                    </Controls>
+                </Control>
+
                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
                     <Dimensions x="48" y="48"/>
                     <TextureCoords left="1" right="0" top="0" bottom="1"/>
-                    <Anchor point="RIGHT" offsetX="-10"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="10"/>
                 </Texture>
                 
-                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" font="ZoFontGamepadCondensed42">
-                    <Anchor point="TOPLEFT" offsetX="20"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-10"/>
-                    <OnInitialized>
-                        ZO_EditDefaultText_Disable(self)
-                    </OnInitialized>
-                    <Controls>
-                        <Label name="$(parent)Text" override="true" font="ZoFontGamepadCondensed42" />
-                    </Controls>
-                </EditBox>
+                <Backdrop name="$(parent)Highlight" excludeFromResizeToFitExtents="true" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" />
             </Controls>
         </Control>
         

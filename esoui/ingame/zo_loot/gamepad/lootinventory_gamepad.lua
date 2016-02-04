@@ -39,7 +39,7 @@ function ZO_LootInventory_Gamepad:OnSelectionChanged(list, selectedData, oldSele
     if selectedData then
         if not selectedData.currencyType then 
             local itemLink = GetLootItemLink(selectedData.lootId)
-            GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount, ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT)
+            GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount)
         end
 
         self:UpdateButtonTextOnSelection(selectedData)

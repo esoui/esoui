@@ -302,8 +302,9 @@ function ZO_Scroll_ScrollControlIntoView(self, otherControl)
     end
 end
 
-function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl)
+function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl, scrollInstantly)
     local scroll = self.scroll
+    local scrollbar = self.scrollbar
     local scrollTop = scroll:GetTop()
     local scrollBottom = scroll:GetBottom()
     local controlTop = otherControl:GetTop()
@@ -311,11 +312,29 @@ function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl)
 
     local heightDelta = scroll:GetHeight() - otherControl:GetHeight()
     local halfHeightDelta = heightDelta * .5
-    
+
+    local value
     if controlTop < scrollTop then
-        ZO_Scroll_ScrollRelative(self, (controlTop - scrollTop) - halfHeightDelta)
+        value = (controlTop - scrollTop) - halfHeightDelta
     elseif controlBottom > scrollBottom then
-        ZO_Scroll_ScrollRelative(self, (controlBottom - scrollBottom) + halfHeightDelta)
+        value = (controlBottom - scrollBottom) + halfHeightDelta
+    end
+    
+    if value then
+        if scrollInstantly then
+            ZO_Scroll_ResetToTop(self)
+
+            local _, verticalExtents = scroll:GetScrollExtents()
+            local targetValue = (value / verticalExtents) * MAX_SCROLL_VALUE
+            local scrollMin, scrollMax = scrollbar:GetMinMax()
+
+            self.timeline:Stop()
+            self.animationStart = scrollbar:GetValue()
+            self.animationTarget = targetValue
+            self.timeline:PlayInstantlyToEnd()
+        else
+            ZO_Scroll_ScrollRelative(self,  value)
+        end
     end
 end
 

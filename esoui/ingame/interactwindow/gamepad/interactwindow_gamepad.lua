@@ -234,10 +234,12 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
 	local currencyRewards = {}
 	local itemRewards = {}
-
+    local confirmError
 	for i, data in ipairs(rewardData) do
 		if self:IsCurrencyReward(data.rewardType) then
 			table.insert(currencyRewards, data)
+            --warn the player they aren't going to get their money when they hit complete
+            confirmError = self:TryGetMaxCurrencyWarningText(data.rewardType, data.amount)
 		else
 			table.insert(itemRewards, data) 
 		end
@@ -272,6 +274,8 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
 		self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
     end
+
+    return confirmError
 end
 
 function ZO_GamepadInteraction:RefreshList()

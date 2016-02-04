@@ -78,7 +78,7 @@ function ZO_StoreManager:New(container)
 
     local function GetBuyMultipleMaximum()
         local entryIndex = manager.multipleDialog.index
-        return zo_max(GetStoreEntryMaxBuyable(entryIndex), 1) -- always attempt to let one item be bought, just to show the error
+        return zo_min(zo_max(GetStoreEntryMaxBuyable(entryIndex), 1), MAX_STORE_WINDOW_STACK_QUANTITY) -- always attempt to let one item be bought, just to show the error; ensure that the quantity can't go above 999
     end
 
     local spinnerControl = GetControl(ZO_BuyMultipleDialog, "Spinner")
@@ -236,6 +236,12 @@ function ZO_StoreManager:New(container)
     container:RegisterForEvent(EVENT_COLLECTION_UPDATED, RefreshStoreWindow)
     container:RegisterForEvent(EVENT_COLLECTIBLE_UPDATED, RefreshStoreWindow)
 
+    local function OnItemRepaired(bagId, slotIndex)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(manager.keybindStripDescriptor)
+    end
+
+    SHARED_INVENTORY:RegisterCallback("ItemRepaired", OnItemRepaired)
+
     return manager
 end
 
@@ -244,7 +250,11 @@ function ZO_StoreManager:InitializeStore(overrideMode)
 
     self.windowMode = overrideMode or ZO_STORE_WINDOW_MODE_NORMAL
 
-    if self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL then
+    self:RebuildTabs()
+
+    if IsStoreEmpty() then
+        self.modeBar:SelectFragment(SI_STORE_MODE_SELL)
+    elseif self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL then
         self.modeBar:SelectFragment(SI_STORE_MODE_BUY)
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -267,7 +277,7 @@ function ZO_StoreManager:InitializeTabs()
         }
     end
     
-    local stackAllButton =
+    self.stackAllButton =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         {
@@ -282,28 +292,37 @@ function ZO_StoreManager:InitializeTabs()
     self.modeBar = ZO_SceneFragmentBar:New(ZO_StoreWindowMenuBar)
 
     --Buy Button
-    local buyButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_buy_up.dds",
+    self.buyButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_buy_up.dds",
                                             "EsoUI/Art/Vendor/vendor_tabIcon_buy_down.dds",
                                             "EsoUI/Art/Vendor/vendor_tabIcon_buy_over.dds")
-    self.modeBar:Add(SI_STORE_MODE_BUY, { STORE_FRAGMENT }, buyButtonData)
 
     --Sell Button
-    local sellButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_sell_up.dds",
+    self.sellButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_sell_up.dds",
                                             "EsoUI/Art/Vendor/vendor_tabIcon_sell_down.dds",
                                             "EsoUI/Art/Vendor/vendor_tabIcon_sell_over.dds")
-    self.modeBar:Add(SI_STORE_MODE_SELL, { INVENTORY_FRAGMENT, BACKPACK_STORE_LAYOUT_FRAGMENT }, sellButtonData, stackAllButton)
 
     --Buy Back Button
-    local buyBackButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_buyBack_up.dds",
+    self.buyBackButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_buyBack_up.dds",
                                                "EsoUI/Art/Vendor/vendor_tabIcon_buyBack_down.dds",
                                                "EsoUI/Art/Vendor/vendor_tabIcon_buyBack_over.dds")
-    self.modeBar:Add(SI_STORE_MODE_BUY_BACK, { BUY_BACK_FRAGMENT }, buyBackButtonData)
 
     --Repair Button
-    local repairButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_repair_up.dds",
-                                               "EsoUI/Art/Vendor/vendor_tabIcon_repair_down.dds",
-                                               "EsoUI/Art/Vendor/vendor_tabIcon_repair_over.dds")
-    self.modeBar:Add(SI_STORE_MODE_REPAIR, { REPAIR_FRAGMENT }, repairButtonData)
+    self.repairButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_repair_up.dds",
+                                                "EsoUI/Art/Vendor/vendor_tabIcon_repair_down.dds",
+                                                "EsoUI/Art/Vendor/vendor_tabIcon_repair_over.dds")
+end
+
+function ZO_StoreManager:RebuildTabs()
+    self.modeBar:RemoveAll()
+
+    if not IsStoreEmpty() then
+        self.modeBar:Add(SI_STORE_MODE_BUY, { STORE_FRAGMENT }, self.buyButtonData)
+    end
+    self.modeBar:Add(SI_STORE_MODE_SELL, { INVENTORY_FRAGMENT, BACKPACK_STORE_LAYOUT_FRAGMENT }, self.sellButtonData, self.stackAllButton)
+    self.modeBar:Add(SI_STORE_MODE_BUY_BACK, { BUY_BACK_FRAGMENT }, self.buyBackButtonData)
+    if CanStoreRepair() then
+        self.modeBar:Add(SI_STORE_MODE_REPAIR, { REPAIR_FRAGMENT }, self.repairButtonData)
+    end
 end
 
 do
@@ -324,7 +343,7 @@ do
                     return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), goldIcon)
                 end,
                 keybind = "UI_SHORTCUT_SECONDARY",
-                visible = function() return GetRepairAllCost() > 0 end,
+                visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
                 callback = function()
                     ZO_Dialogs_ShowDialog("REPAIR_ALL", {cost = GetRepairAllCost()})
                 end,
@@ -578,8 +597,6 @@ end
 function ZO_StoreManager:OpenBuyMultiple(entryIndex)
     self.multipleDialog.index = entryIndex
     self.buyMultipleSpinner:SetValue(1, true)
-    self:RefreshBuyMultiple()
-    
     ZO_Dialogs_ShowDialog("BUY_MULTIPLE")
 end
 
@@ -600,13 +617,10 @@ function ZO_StoreManager:RefreshBuyMultiple()
     local slotControl = GetControl(self.multipleDialog, "Slot")
     local iconControl = GetControl(self.multipleDialog, "SlotIcon")
     local quantityControl = GetControl(self.multipleDialog, "SlotStackCount")
-    local textControl = GetControl(self.multipleDialog, "Text")
     local currencyControl = GetControl(self.multipleDialog, "Currency")
 
     local icon, name, stack, price, _, meetsRequirementsToBuy, meetsRequirementsToEquip, _, _, currencyType1, currencyQuantity1,
             currencyType2, currencyQuantity2 = GetStoreEntryInfo(entryIndex)
-
-    textControl:SetText(zo_strformat(SI_DIALOG_BUY_MULTIPLE, name))
 
     -- Set info about what slot this is, on the top level slot control
     ZO_InventorySlot_SetType(slotControl, SLOT_TYPE_BUY_MULTIPLE)

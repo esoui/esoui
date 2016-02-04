@@ -34,9 +34,6 @@ EsoUI\Libraries\Globals\Globals.lua
 EsoUI\Libraries\Globals\DefaultAnimationDefs.lua
 EsoUI\Libraries\Globals\DefaultAnimationDefs.xml
 EsoUI\Libraries\Globals\Animation.lua
-EsoUI\Libraries\Globals\DefaultFontDefs.xml
-EsoUI\Libraries\Globals\Keyboard\DefaultFontDefs_Keyboard.xml
-EsoUI\Libraries\Globals\Gamepad\DefaultFontDefs_Gamepad.xml
 EsoUI\Libraries\Globals\DefaultColorDefs.lua
 
 EsoUI\Libraries\ZO_Systems\ZO_Systems.lua
@@ -51,6 +48,14 @@ EsoUI\Libraries\ZO_Templates\WindowTemplates.lua
 EsoUI\Libraries\ZO_Templates\WindowTemplates.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\WindowTemplates_Gamepad.lua
 EsoUI\Libraries\ZO_Templates\Gamepad\WindowTemplates_Gamepad.xml
+
+EsoUI\Libraries\ZO_Templates\EditBoxSizeTemplates.lua
+EsoUI\Libraries\ZO_Templates\EditBoxTemplates.lua
+EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Keyboard.lua
+EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Keyboard.xml
+EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.lua
+EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.xml
+
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.lua
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\LabelTemplates_Gamepad.lua

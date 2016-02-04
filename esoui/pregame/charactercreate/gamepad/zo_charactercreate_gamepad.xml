@@ -403,40 +403,7 @@
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateTriangle(self, SetFace, GetFace, SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT, SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN)
                     </OnInitialized>
-                </Control>
-
-                <Control name="$(parent)Finish" hidden="true" inherits="ZO_AnchoredToQuadrant1Background">
-                    <Controls>
-                        <Scroll name="$(parent)Mask">
-                            <AnchorFill />
-                            <Controls>
-                                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                                    <Controls>
-                                        <Label name="$(parent)Title" font="ZoFontGamepad42" text="SI_CREATE_CHARACTER_GAMEPAD_FINISH_TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                            <Anchor point="LEFT" offsetY="-80" />
-                                        </Label>
-
-                                        <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop_Gamepad">
-                                            <Anchor point="LEFT" offsetX="20" offsetY="100"/>
-                                            <Anchor point="RIGHT" offsetX="-20" offsetY="100"/>
-                                            <Controls>
-                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" textType="ALL" maxInputCharacters="CHARNAME_MAX_LENGTH">
-                                                    <OnInitialized>
-                                                        ZO_EditDefaultText_Initialize(self, GetString(SI_CREATE_CHARACTER_TITLE_NAME))
-                                                    </OnInitialized>
-
-                                                    <OnTextChanged>
-                                                        ZO_EditDefaultText_OnTextChanged(self)
-                                                    </OnTextChanged>
-                                                </EditBox>
-                                            </Controls>
-                                        </Backdrop>
-                                    </Controls>
-                                </Control>
-                            </Controls>
-                        </Scroll>
-                    </Controls>
-                </Control>
+                </Control>                
             </Controls>
         </TopLevelControl>
     </Controls>

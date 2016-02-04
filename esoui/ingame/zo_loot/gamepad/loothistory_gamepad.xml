@@ -22,11 +22,19 @@
             </Controls>
         </Control>
       
-        <TopLevelControl name="ZO_LootHistoryControl_Gamepad" hidden="true">
+        <TopLevelControl name="ZO_LootHistoryControl_Gamepad" inherits="ZO_LootHistory_Shared" >
             <Anchor point="BOTTOMLEFT" offsetY="-160"/>
             <OnInitialized>
                 ZO_LootHistory_Gamepad_OnInitialized(self)
             </OnInitialized>
+            <Controls>
+                <Control name="$(parent)PersistentContainer" override="true">
+                    <Anchor point="BOTTOMLEFT" />
+                </Control>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPLEFT"/>
+                </Control>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

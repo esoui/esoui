@@ -12,11 +12,15 @@ function ZO_GamepadFenceSell:Initialize()
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_STOLEN_ITEMS_SELL))
 end
 
+function ZO_GamepadFenceSell:GetRemainingSells()
+    local totalSells, sellsUsed = GetFenceSellTransactionInfo()
+    return zo_max(totalSells - sellsUsed, 0)
+end
+
 do
     local IGNORE_INVALID_COST = true
     function ZO_GamepadFenceSell:Confirm()
-        local totalSells, sellsUsed = GetFenceSellTransactionInfo()
-        local remainingSells = zo_max(totalSells - sellsUsed, 0)
+        local remainingSells = self:GetRemainingSells()
 
         if remainingSells == 0 then
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString("SI_STOREFAILURE", STORE_FAILURE_AT_FENCE_LIMIT))
@@ -54,6 +58,25 @@ do
             end
         end
     end
+end
+
+function ZO_GamepadFenceSell:RefreshFooter()
+    if self:GetRemainingSells() > 0 then
+        self:ClearFooter()
+        return
+    end
+
+    local footerLabel = GetString(SI_FENCE_SELL_LIMIT_RESET)
+    local resetTimeSeconds = select(3, GetFenceSellTransactionInfo())
+    local footerValue = ZO_FormatTimeMilliseconds(resetTimeSeconds * 1000, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+
+    local data =
+    {
+        data1HeaderText = footerLabel,
+        data1Text = footerValue
+    }
+    
+    GAMEPAD_GENERIC_FOOTER:Refresh(data)
 end
 
 function ZO_GamepadFenceSell:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)

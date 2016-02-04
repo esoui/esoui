@@ -1,9 +1,9 @@
 local function SetSubtitle(eventcode, subTitle)
     if IsInGamepadPreferredMode() then
-        OverlaySubtitle:SetFont("ZoGamepadFontOverlay")
+        OverlaySubtitle:SetFont("ZoFontGamepad34")
         OverlaySubtitle:SetText(subTitle)
     else
-        OverlaySubtitle:SetFont("ZoFontOverlay")
+        OverlaySubtitle:SetFont("ZoFontHeader3")
         OverlaySubtitle:SetText(subTitle)
     end
 end
@@ -30,11 +30,11 @@ local function OnConfirmCancel()
     OverlaySubtitle:SetHidden(true)
     OverlayConfirmSkipInstruction:SetHandler("OnUpdate", UpdateConfirmation)
     if IsInGamepadPreferredMode() then
-        OverlayConfirmSkipInstruction:SetFont("ZoGamepadFontOverlay")
+        OverlayConfirmSkipInstruction:SetFont("ZoFontGamepad34")
         OverlayConfirmSkipInstruction:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         OverlayConfirmSkipInstruction:SetText(GetString(SI_GAMEPAD_VIDEO_PLAYBACK_CONFIRM_CANCEL))
     else
-        OverlayConfirmSkipInstruction:SetFont("ZoFontOverlay")
+        OverlayConfirmSkipInstruction:SetFont("ZoFontHeader3")
         OverlayConfirmSkipInstruction:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
         OverlayConfirmSkipInstruction:SetText(GetString(SI_VIDEO_PLAYBACK_CONFIRM_CANCEL))
     end

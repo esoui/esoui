@@ -84,6 +84,10 @@ local VALIDATION_ERROR_STRINGS =
     }
 }
 
+-- The email address (result of GetActiveUserEmailAddress) needs to be kept private, 
+-- so it can't be stored in the ZO_Help_Customer_Service_Gamepad object
+local g_email = ""
+
 local function GetValidationErrorString(validationStatus, category)
     if validationStatus ~= TICKET_VALIDATION_STATUS.SUCCESS then
         local errorStringContainer = VALIDATION_ERROR_STRINGS[validationStatus]
@@ -287,7 +291,7 @@ end
 
 function ZO_Help_Customer_Service_Gamepad:ValidateTicketFields()
     local result = TICKET_VALIDATION_STATUS.SUCCESS
-    local email = self.savedFields[TICKET_FIELD_EMAIL]
+    local email = g_email
     if (email == nil) or (email == "") then
         result = TICKET_VALIDATION_STATUS.FAILED_NO_EMAIL
     else
@@ -326,7 +330,7 @@ function ZO_Help_Customer_Service_Gamepad:OnCustomerServiceTicketSubmitted(event
         if ((success == true) and (response ~= nil)) then
             dialogParams.titleParams = { self.ticketSubmittedSuccessHeader }
             dialogParams.mainTextParams =   {
-                                                response .. zo_strformat(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_SUBMITTED_EMAIL, self.savedFields[TICKET_FIELD_EMAIL]),
+                                                response .. zo_strformat(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_SUBMITTED_EMAIL, g_email),
                                                 self.knowledgeBaseText, 
                                                 self.websiteText,
                                             }
@@ -403,7 +407,7 @@ end
 function ZO_Help_Customer_Service_Gamepad:PrefillContactEmail()
     local email = GetActiveUserEmailAddress()
     if (email and (email ~= "")) then
-        self.savedFields[TICKET_FIELD_EMAIL] = email
+        g_email = email
         SetCustomerServiceTicketContactEmail(email)
     end
 end
@@ -428,7 +432,11 @@ function ZO_Help_Customer_Service_Gamepad:OnTextFieldFocusLost(control, fieldTyp
         local registerFunction = self.fieldRegistrationFunctions[fieldType]
         if (registerFunction) then
             local text = control:GetText()
-            self.savedFields[fieldType] = text
+            if (fieldType == TICKET_FIELD_EMAIL) then
+                g_email = text
+            else
+                self.savedFields[fieldType] = text
+            end
             registerFunction(text)
         end
     end
@@ -436,6 +444,14 @@ end
 
 function ZO_Help_Customer_Service_Gamepad:SetupList(list)
     ZO_Gamepad_ParametricList_Screen.SetupList(self, list)
+
+    local function GetSavedFieldText(data)
+        if (data.fieldType == TICKET_FIELD_EMAIL) then
+            return g_email
+        else
+            return data.customerServiceObject.savedFields[data.fieldType]
+        end
+    end
 
     local function SetupTextFieldListEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -453,7 +469,7 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
                                                     end)
         control.editBox:SetHandler("OnTextChanged", ZO_EditDefaultText_OnTextChanged)
 
-        local savedText = data.customerServiceObject.savedFields[data.fieldType]
+        local savedText = GetSavedFieldText(data)
         if (savedText) then
             control.editBox:SetText(savedText)
         else
@@ -475,7 +491,7 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         local labelContainer = control:GetNamedChild("TextField")
         control.lockedLabel = labelContainer:GetNamedChild("Label")
 
-        local savedText = data.customerServiceObject.savedFields[data.fieldType]
+        local savedText = GetSavedFieldText(data)
         if (savedText) then
             control.lockedLabel:SetText(savedText)
         else

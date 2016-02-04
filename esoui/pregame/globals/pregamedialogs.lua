@@ -184,6 +184,38 @@ do
     }
 end
 
+ESO_Dialogs["DELETE_SELECTED_CHARACTER_NO_DELETES_LEFT_GAMEPAD"] = 
+    {
+        mustChoose = true,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_DELETE_CHARACTER_DISABLED_GAMEPAD_TITLE,
+        },
+        mainText = 
+        {
+            text = SI_DELETE_CHARACTER_DISABLED_GAMEPAD_TEXT
+        },
+        buttons =
+        {
+            [1] =
+            {
+                text = SI_OK,
+                keybind = "DIALOG_PRIMARY",
+                clickSound = SOUNDS.DIALOG_ACCEPT,
+            }
+        },
+
+        finishedCallback = function(dialog)
+            PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+            ZO_CharacterSelect_Gamepad_ReturnToCharacterList()
+            ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(dialog.data.keybindDescriptor)
+        end,
+    }
+
 ESO_Dialogs["CHARACTER_SELECT_DELETING"] = 
 {
     mustChoose = true,

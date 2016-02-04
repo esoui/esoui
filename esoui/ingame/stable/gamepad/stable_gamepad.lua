@@ -127,7 +127,8 @@ end
 
 function ZO_Stable_Gamepad:SetHidden(hidden)
     if not hidden and STABLE_GAMEPAD then
-        STORE_WINDOW_GAMEPAD:SetActiveComponents(ZO_MODE_STORE_BUY, ZO_MODE_STORE_STABLE)
+        local componentTable = {ZO_MODE_STORE_BUY, ZO_MODE_STORE_STABLE}
+        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
         if HasMountSkin() then
             STORE_WINDOW_GAMEPAD:SetDeferredStartingMode(ZO_MODE_STORE_STABLE)
         end

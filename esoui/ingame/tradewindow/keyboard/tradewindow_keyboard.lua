@@ -60,9 +60,7 @@ local ConfirmChangeFunctions =
 ZO_TradeWindow = ZO_SharedTradeWindow:Subclass()
 
 function ZO_TradeWindow:New(control)
-    local tradeWindow = ZO_SharedTradeWindow.New(self, control)
-    tradeWindow:Initialize(control)
-    return tradeWindow
+    return ZO_SharedTradeWindow.New(self, control)
 end
 
 function ZO_TradeWindow:Initialize(control)

@@ -218,12 +218,7 @@ end
 
 local function CanWithdrawDeposit(inventoryData, bagType)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventoryData)
-
-    if not DoesBagHaveSpaceFor(bagType, bag, index) then
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, bagType == BAG_BANK and SI_INVENTORY_ERROR_BANK_FULL or SI_INVENTORY_ERROR_INVENTORY_FULL)
-    else
-        return true
-    end
+    return DoesBagHaveSpaceFor(bagType, bag, index)
 end
 
 function ZO_GamepadBanking:ConfirmWithdrawDeposit(list, bagType)
@@ -295,26 +290,8 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
                     end
                 end
         end,
-        enabled = function()
-            local data = self.currentItemList:GetTargetData()
-            if data then
-                return data.enabled
-            end
-            return true
-        end,
-        callback = function()
-            local data = self.currentItemList:GetTargetData()
-            if data and data.currencyType then
-                self:SetMaxInputFunction(self.mode == BANKING_GAMEPAD_MODE_WITHDRAW and GetMaxBankWithdrawal or GetMaxBankDeposit)
-                self:ShowSelector()
-            else
-                if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
-                    self:ConfirmWithdrawDeposit(self.withdrawList, BAG_BACKPACK)
-                else
-                    self:ConfirmWithdrawDeposit(self.depositList, BAG_BANK)
-                end
-            end
-        end,
+        enabled = function() return self:CanInteract() end,
+        callback = function() self:PerformWithdrawDeposit() end
     }
 
     self.mainKeybindStripDescriptor = {
@@ -462,6 +439,66 @@ function ZO_GamepadBanking:CreateEventTable()
         [EVENT_INVENTORY_FULL_UPDATE] = OnInventoryUpdate,
         [EVENT_INVENTORY_SINGLE_SLOT_UPDATE] = OnInventoryUpdate,
     }
+end
+
+function ZO_GamepadBanking:CanInteract()
+    local inventoryData = self.currentItemList:GetTargetData()
+    if not inventoryData then
+        return false
+    end
+
+    local currencyType = inventoryData.currencyType
+    if currencyType then
+        if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
+            if GetBankedCurrencyAmount(currencyType) ~= 0 and GetCarriedCurrencyAmount(currencyType) ~= GetMaxCarriedCurrencyAmount(currencyType) then
+                 return true
+            else
+                if GetCarriedCurrencyAmount(currencyType) == GetMaxCarriedCurrencyAmount(currencyType) then
+                    return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your inventory is full"
+                elseif GetBankedCurrencyAmount(currencyType) == 0 then
+                    return false, GetString(SI_INVENTORY_ERROR_NO_BANK_FUNDS) -- "No bank funds"
+                end
+            end
+        elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
+            if GetBankedCurrencyAmount(currencyType) ~= GetMaxBankCurrencyAmount(currencyType) and GetCarriedCurrencyAmount(currencyType) ~= 0 then
+                return true
+            else
+                if GetBankedCurrencyAmount(currencyType) == GetMaxBankCurrencyAmount(currencyType) then
+                    return false, GetString(SI_INVENTORY_ERROR_BANK_FULL) -- "Your bank is full"
+                elseif GetCarriedCurrencyAmount(currencyType) == 0 then
+                    return false, GetString(SI_INVENTORY_ERROR_NO_PLAYER_FUNDS) -- "No player funds"
+                end
+            end
+        end
+    elseif self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
+        if GetNumBagFreeSlots(BAG_BACKPACK) > 0 then
+            return true
+        else
+            return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your Inventory is full"
+        end
+    elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
+        if GetNumBagFreeSlots(BAG_BANK) > 0 then
+            return true
+        else
+            return false, GetString(SI_INVENTORY_ERROR_BANK_FULL) -- "Your bank is full"
+        end
+    end
+end
+
+function ZO_GamepadBanking:PerformWithdrawDeposit()
+    local inventoryData = self.currentItemList:GetTargetData()
+    if inventoryData.currencyType then
+        if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then 
+            self:SetMaxInputFunction(GetMaxBankWithdrawal)
+        elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
+            self:SetMaxInputFunction(GetMaxBankDeposit) 
+        end
+        self:ShowSelector()
+    elseif self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
+        self:ConfirmWithdrawDeposit(self.withdrawList, BAG_BACKPACK)
+    elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
+        self:ConfirmWithdrawDeposit(self.depositList, BAG_BANK)
+    end
 end
 
 -- XML Handlers

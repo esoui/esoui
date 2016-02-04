@@ -78,16 +78,17 @@ function ZO_SocialOptionsDialogGamepad:HasAnyShownOptions()
     return false
 end
 
-function ZO_SocialOptionsDialogGamepad:BuildOptionEntry(header, label, callback, finishedCallback)
+function ZO_SocialOptionsDialogGamepad:BuildOptionEntry(header, label, callback, finishedCallback, icon)
     local entry = {
         template = "ZO_GamepadMenuEntryTemplate",
         header = header or self.currentGroupingHeader,
         templateData = {
-            text = GetString(label),
+            text = type(label) == "number" and GetString(label) or label,
             setup = ZO_SharedGamepadEntry_OnSetup,
             callback = callback,
             finishedCallback = finishedCallback,
         },
+        icon = icon,
     }
     return entry
 end
@@ -173,7 +174,7 @@ function ZO_SocialOptionsDialogGamepad:BuildWhisperOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOption()
-    return self.playerAlliance == self.socialData.alliance and not self:SelectedDataIsPlayer()
+    return not self:SelectedDataIsPlayer()
 end
 function ZO_SocialOptionsDialogGamepad:GetInviteToGroupCallback()
     return function()
@@ -188,16 +189,12 @@ function ZO_SocialOptionsDialogGamepad:BuildInviteToGroupOption()
     end
 end
 
-function ZO_SocialOptionsDialogGamepad:BuildTravelToPlayerOption(jumpFunc, ignoreAlliance)
-    --Ignore alliance is primarily for cases where we may not store the alliance on data (e.g.: Groups)
-    --This will not superscede server/gameplay restrictions
-    if ignoreAlliance or self.playerAlliance == self.socialData.alliance then
-        local callback = function()
-            jumpFunc(DecorateDisplayName(self.socialData.displayName))
-            SCENE_MANAGER:ShowBaseScene()
-        end
-        return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_JUMP_TO_PLAYER, callback)
+function ZO_SocialOptionsDialogGamepad:BuildTravelToPlayerOption(jumpFunc)
+    local callback = function()
+        jumpFunc(DecorateDisplayName(self.socialData.displayName))
+        SCENE_MANAGER:ShowBaseScene()
     end
+    return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_JUMP_TO_PLAYER, callback)
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()

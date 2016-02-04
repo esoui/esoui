@@ -2,6 +2,13 @@
 ZO_MARKET_PREVIEW_WAIT_TIME_MS = 500
 ZO_MARKET_DISPLAY_LOADING_DELAY_MS = 500
 
+ZO_MARKET_CATEGORY_TYPE_NONE = "none"
+ZO_MARKET_CATEGORY_TYPE_FEATURED = "featured"
+ZO_MARKET_CATEGORY_TYPE_ESO_PLUS = "esoPlus"
+
+ZO_MARKET_FEATURED_CATEGORY_INDEX = 0
+ZO_MARKET_ESO_PLUS_CATEGORY_INDEX = -1
+
 --
 --[[ Market Singleton ]]--
 --
@@ -15,13 +22,27 @@ function Market_Singleton:New(...)
 end
 
 function Market_Singleton:Initialize()
-    self:ResetOpenMarketSource()
     self:InitializeEvents()
 end
 
 function Market_Singleton:InitializeEvents()
-    local function OnMarketStateUpdated(...)
-        SYSTEMS:GetObject(ZO_MARKET_NAME):OnMarketStateUpdated(...)
+    local function OnMarketStateUpdated(marketState, ...)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnMarketStateUpdated(marketState, ...)
+
+        -- if we are locked we need to inform both UIs that we need to refresh categories
+        -- because otherwise only the active UI will refresh and the other will get into a bad state
+        if marketState == MARKET_STATE_LOCKED then
+            -- keyboard market won't exist on consoles
+            local keyboardMarket = SYSTEMS:GetKeyboardObject(ZO_MARKET_NAME)
+            if keyboardMarket then
+                keyboardMarket:FlagMarketCategoriesForRefresh()
+            end
+
+            local gamepadMarket = SYSTEMS:GetGamepadObject(ZO_MARKET_NAME)
+            if gamepadMarket then
+                gamepadMarket:FlagMarketCategoriesForRefresh()
+            end
+        end
     end
 
     local function OnMarketCurrencyUpdated(...)
@@ -40,24 +61,25 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectibleUpdated(justUnlocked)
     end
 
+    local function OnShowMarketProduct(...)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(...)
+    end
+
+    local function OnShowMarketAndSearch(...)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketAndSearch(...)
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, function(eventId, ...) OnMarketStateUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_CURRENCY_UPDATE, function(eventId, ...) OnMarketCurrencyUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, function() OnMarketSearchResultsReady() end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
-end
-
-function Market_Singleton:SetOpenMarketSource(source)
-    self.marketOpenSource = source
-end
-
-function Market_Singleton:ResetOpenMarketSource()
-    self:SetOpenMarketSource(MARKET_OPEN_OPERATION_DIRECT)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, function(eventId, ...) OnShowMarketProduct(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, function(eventId, ...) OnShowMarketAndSearch(...) end)
 end
 
 function Market_Singleton:RequestOpenMarket()
-    OpenMarket(self.marketOpenSource)
-    self:ResetOpenMarketSource()
+    OpenMarket()
 end
 
 ZO_MARKET_SINGLETON = Market_Singleton:New()
@@ -78,6 +100,8 @@ function ZO_Market_Shared:Initialize()
     -- clean up any preview that may have been left over
     self:EndCurrentPreview()
     self.featuredProducts = {}
+    self.limitedTimedOfferProducts = {}
+    self.dlcProducts = {}
     self.newProducts = {}
     self.onSaleProducts = {}
     self.marketProducts = {} -- products not contained in a labeled group such as Featured products, new products, on sale products, limited time products, or a subcategory
@@ -99,6 +123,7 @@ function ZO_Market_Shared:Initialize()
             self:OnTutorialHidden()
         end
     end)
+    self.refreshCategories = false
 end
 
 do
@@ -138,8 +163,10 @@ end
 
 function ZO_Market_Shared:OnEndInteraction()
     self.currentTutorial = nil
+    self:ResetSearch()
     SetSecureRenderModeEnabled(false)
-    EndItemPreview()
+    EndPreviewMode()
+    OnMarketClose()
 end
 
 function ZO_Market_Shared:OnStateChanged(oldState, newState)
@@ -166,7 +193,7 @@ end
 
 function ZO_Market_Shared:OnMarketStateUpdated(marketState)
     self:ResetCategoryData()
-    self:UpdateMarket()
+    self:UpdateMarket(marketState)
 end
 
 -- difference is the difference in crowns for this update. For instance, new crowns purchased will show a positive difference.
@@ -196,8 +223,19 @@ function ZO_Market_Shared:OnCollectibleUpdated(justUnlocked)
     end
 end
 
-function ZO_Market_Shared:UpdateMarket()
-    self.marketState = GetMarketState()
+function ZO_Market_Shared:OnShowMarketProduct(marketProductId)
+    SCENE_MANAGER:Show("show_market")
+    self:RequestShowMarketProduct(marketProductId)
+end
+
+function ZO_Market_Shared:OnShowMarketAndSearch(marketProductSearchString)
+    SCENE_MANAGER:Show("show_market")
+    self:RequestShowMarketWithSearchString(marketProductSearchString)
+end
+
+function ZO_Market_Shared:UpdateMarket(marketState)
+    self.marketState = marketState or GetMarketState()
+
     if self.marketState == MARKET_STATE_OPEN then
         self:OnMarketOpen()
     elseif self.marketState == MARKET_STATE_UNKNOWN then
@@ -222,7 +260,7 @@ function ZO_Market_Shared:BeginPreview()
 end 
 
 function ZO_Market_Shared:EndCurrentPreview()
-    EndCurrentItemPreview()
+    EndCurrentMarketPreview()
     self:RefreshActions()
 end
 
@@ -232,18 +270,24 @@ function ZO_Market_Shared:OnMarketOpen()
 end
 
 function ZO_Market_Shared:OnCategorySelected(data)
-    EndCurrentItemPreview()
+    EndCurrentMarketPreview()
     self:ClearLabeledGroups()
     
     self.currentCategoryData = data
     
-    if data.featured then
+    if data.type == ZO_MARKET_CATEGORY_TYPE_FEATURED then
         self:BuildFeaturedMarketProductList(data)
+    elseif data.type == ZO_MARKET_CATEGORY_TYPE_ESO_PLUS then
+        self:DisplayEsoPlusOffer()
     else
         self:BuildMarketProductList(data)
     end
 
     self:RefreshActions()
+end
+
+function ZO_Market_Shared:FlagMarketCategoriesForRefresh()
+    self.refreshCategories = true
 end
 
 function ZO_Market_Shared:AddKeybinds()
@@ -384,6 +428,8 @@ function ZO_Market_Shared:ClearLabeledGroups()
     ZO_ClearNumericallyIndexedTable(self.labeledGroups)
     self.labeledGroupLabelPool:ReleaseAllObjects()
     ZO_ClearNumericallyIndexedTable(self.featuredProducts)
+    ZO_ClearNumericallyIndexedTable(self.limitedTimedOfferProducts)
+    ZO_ClearNumericallyIndexedTable(self.dlcProducts)
     ZO_ClearNumericallyIndexedTable(self.newProducts)
     ZO_ClearNumericallyIndexedTable(self.onSaleProducts)
     ZO_ClearNumericallyIndexedTable(self.marketProducts)
@@ -430,6 +476,40 @@ function ZO_Market_Shared:AddProductToLabeledGroupTable(labeledGroupTable, produ
     table.insert(labeledGroupTable, productInfo)
 end
 
+do
+    local NO_SUBCATEGORY = nil
+    function ZO_Market_Shared:GetCategoryDataForMarketProduct(productId)
+        for categoryIndex = 1, GetNumMarketProductCategories() do
+            local _, numSubCategories, numMarketProducts = GetMarketProductCategoryInfo(categoryIndex)
+            for marketProductIndex = 1, numMarketProducts do
+                local id = GetMarketProductDefId(categoryIndex, NO_SUBCATEGORY, marketProductIndex)
+                if id == productId then
+                    return self:GetCategoryData(categoryIndex, NO_SUBCATEGORY)
+                end
+            end
+            for subcategoryIndex = 1, numSubCategories do
+                local _, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(categoryIndex, subcategoryIndex)
+                for marketProductIndex = 1, numSubCategoryMarketProducts do
+                    local id = GetMarketProductDefId(categoryIndex, subcategoryIndex, marketProductIndex)
+                    if id == productId then
+                        return self:GetCategoryData(categoryIndex, subcategoryIndex)
+                    end
+                end
+            end
+        end
+    end
+end
+
+function ZO_Market_Shared:ShowMarket(show)
+    if self.queuedMarketProductId then
+        self:RequestShowMarketProduct(self.queuedMarketProductId)
+    end
+
+    if self.queuedSearchString then
+        self:DisplayQueuedMarketProductsBySearchString()
+    end
+end
+
 --[[ Functions to be overridden ]]--
 
 function ZO_Market_Shared:OnHidden()
@@ -456,9 +536,6 @@ end
 function ZO_Market_Shared:BuildCategories()
 end
 
-function ZO_Market_Shared:ShowMarket(show)
-end
-
 function ZO_Market_Shared:OnMarketUpdate()
 end
 
@@ -480,6 +557,18 @@ end
 function ZO_Market_Shared:OnTutorialHidden()
 end
 
+function ZO_Market_Shared:DisplayEsoPlusOffer()
+end
+
+function ZO_Market_Shared:GetCategoryData(targetId)
+end
+
+function ZO_Market_Shared:RequestShowMarketWithSearchString(searchString)
+end
+
+function ZO_Market_Shared:ResetSearch()
+end
+
 function ZO_Market_Shared:RemoveActionLayerForTutorial()
     assert(false) -- must be overridden
 end
@@ -497,6 +586,10 @@ end
 
 function ZO_Market_Shared:RefreshActions()
     self:RefreshKeybinds() -- default behavior
+end
+
+function ZO_Market_Shared:RequestShowMarketProduct(id)
+    assert(false)
 end
 
 --[[Search]]--

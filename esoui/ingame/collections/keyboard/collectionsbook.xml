@@ -1,8 +1,35 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_CollectionsBookDefaultLabel" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
-        <Label name="ZO_CollectionsBookLargeLabel" font="ZoFontWinH2" inherits="ZO_CollectionsBookDefaultLabel" virtual="true" />
+        <Control name="ZO_CollectibleIconHeader" inherits="ZO_IconHeader" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                </Texture>
 
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="16" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CollectibleChildlessCategory" inherits="ZO_CollectibleIconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
+        </Control>
+
+        <Label name="ZO_CollectibleSubCategory" inherits="ZO_JournalSubCategory" virtual="true" >
+            <Controls>
+                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                </Texture>
+            </Controls>
+        </Label>
+        
         <Control name="ZO_CollectableStickerBase" virtual="true">
             <Dimensions x="170" y="125" />
             <Controls>
@@ -16,7 +43,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2" />
                 </Label>
 
-                <Texture name="$(parent)ActiveIcon" level="3" textureFile="EsoUI/Art/Inventory/inventory_icon_equipped.dds" hidden="true">
+                <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" level="3" mouseEnabled="false">
                     <Dimensions x="32" y="32" />
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                 </Texture>
@@ -25,6 +52,27 @@
                     <Dimensions x="32" y="32"/>
                     <Anchor point="TOPRIGHT"/>
                 </Texture>
+
+                <Texture name="$(parent)CooldownIconDesaturated" level="4" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" />
+                </Texture>
+
+                <Texture name="$(parent)CooldownIcon" level="5" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CooldownIconDesaturated" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CooldownIconDesaturated" />
+                </Texture>
+
+                <Texture name="$(parent)CooldownEdge" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_QuickslotFill.dds" level="6" hidden="true">
+                    <Dimensions y="12" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CooldownIcon" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CooldownIcon" />
+                </Texture>
+
+                <Label name="$(parent)CooldownTime" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" verticalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT"  offsetX="4" offsetY="4" />
+                </Label>
+                
             </Controls>
         </Control>
 
@@ -51,6 +99,10 @@
                 self.collectible:OnEffectivelyHidden()
             </OnEffectivelyHidden>
 
+            <OnUpdate>
+                self.collectible:OnUpdate()
+            </OnUpdate>
+            
             <Controls>
                 <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" hidden="true" layer="BACKGROUND" level="1">
                     <AnchorFill />
@@ -68,7 +120,13 @@
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>
-                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop">
+                        <Control name="$(parent)Categories" override="true">
+                            <Dimensions x="353" />
+                            <Anchor point="TOPLEFT" offsetX="-28" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                        </Control>
+                        
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Anchor point="TOPLEFT" offsetX="9" offsetY="28" />
                             <Dimensions x="240"/>
                             <Controls>

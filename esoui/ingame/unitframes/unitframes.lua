@@ -54,8 +54,6 @@ local KEYBOARD_CONSTANTS =
     RAID_FRAME_PAD_X = 2,
     RAID_FRAME_PAD_Y = 2,
 
-    RAID_FRAME_ANCHOR_HEIGHT = 20,
-
     GROUP_BAR_FONT = "ZoFontGameOutline",
     RAID_BAR_FONT = "ZoFontGameOutline",
 
@@ -63,8 +61,9 @@ local KEYBOARD_CONSTANTS =
 }
 
 ZO_GAMEPAD_GROUP_FRAME_WIDTH = 160
+ZO_GAMEPAD_GROUP_FRAME_HEIGHT = 70
 ZO_GAMEPAD_RAID_FRAME_WIDTH = 175
-ZO_GAMEPAD_RAID_FRAME_HEIGHT = 9
+ZO_GAMEPAD_RAID_FRAME_HEIGHT = 40
 
 local GAMEPAD_CONSTANTS =
 {
@@ -75,14 +74,14 @@ local GAMEPAD_CONSTANTS =
 
     GROUP_STRIDE = 3,
 
-    GROUP_FRAME_BASE_OFFSET_X = 96,
+    GROUP_FRAME_BASE_OFFSET_X = 105,
     GROUP_FRAME_BASE_OFFSET_Y = 50,
 
-    RAID_FRAME_BASE_OFFSET_X = 114,
-    RAID_FRAME_BASE_OFFSET_Y = 30,
+    RAID_FRAME_BASE_OFFSET_X = 100,
+    RAID_FRAME_BASE_OFFSET_Y = 50,
 
     GROUP_FRAME_SIZE_X = ZO_GAMEPAD_GROUP_FRAME_WIDTH,
-    GROUP_FRAME_SIZE_Y = 70,
+    GROUP_FRAME_SIZE_Y = ZO_GAMEPAD_GROUP_FRAME_HEIGHT,
 
     GROUP_FRAME_PAD_X = 2,
     GROUP_FRAME_PAD_Y = 9,
@@ -90,13 +89,11 @@ local GAMEPAD_CONSTANTS =
     RAID_FRAME_SIZE_X = ZO_GAMEPAD_RAID_FRAME_WIDTH,
     RAID_FRAME_SIZE_Y = ZO_GAMEPAD_RAID_FRAME_HEIGHT,
 
-    RAID_FRAME_PAD_X = 24,
-    RAID_FRAME_PAD_Y = 31,
-
-    RAID_FRAME_ANCHOR_HEIGHT = 46,
+    RAID_FRAME_PAD_X = 8,
+    RAID_FRAME_PAD_Y = 2,
 
     GROUP_BAR_FONT = "ZoFontGamepad34",
-    RAID_BAR_FONT = "ZoFontGamepad20",
+    RAID_BAR_FONT = "ZoFontGamepad18",
 
     SHOW_GROUP_LABELS = false,
 }
@@ -116,7 +113,7 @@ local function CalculateDynamicPlatformConstants()
         constants.RAID_FRAME_OFFSET_Y = constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y
 
         constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH = constants.RAID_FRAME_SIZE_X
-        constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT = constants.RAID_FRAME_ANCHOR_HEIGHT + ((constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y) * constants.GROUP_FRAMES_PER_COLUMN)
+        constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT = (constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y) * constants.GROUP_FRAMES_PER_COLUMN
     end
 end
 
@@ -147,7 +144,7 @@ local function GetGroupFrameAnchor(groupIndex, groupSize)
             row = zo_floor((groupIndex - 1) / 2)
         end
         groupFrameAnchor:SetTarget(GetControl("ZO_LargeGroupAnchorFrame"..(column + 1)))
-        groupFrameAnchor:SetOffsets(0, (row * constants.RAID_FRAME_OFFSET_Y) + constants.RAID_FRAME_ANCHOR_HEIGHT)
+        groupFrameAnchor:SetOffsets(0, row * constants.RAID_FRAME_OFFSET_Y)
         return groupFrameAnchor
     else
         groupFrameAnchor:SetTarget(ZO_SmallGroupAnchorFrame)
@@ -272,7 +269,7 @@ end
 
 function UnitFramesManager:SetGroupIndexDirty(groupIndex)
     -- The update we call will update all unit frames after and including the one being modified
-    -- So we really just need to know what is the smallest groupIndex that is being changed
+    -- So we really just need to know what is the smallest groupIndex that is being changed 
     if not self.firstDirtyGroupIndex or groupIndex < self.firstDirtyGroupIndex then
         self.firstDirtyGroupIndex = groupIndex
     end
@@ -356,7 +353,7 @@ local UNITFRAME_BAR_STYLES =
             },
             centered = true,
         },
-    },
+    },    
 
     [GROUP_UNIT_FRAME] =
     {
@@ -373,7 +370,7 @@ local UNITFRAME_BAR_STYLES =
             gamepad =
             {
                 template = "ZO_GroupUnitFrameStatus",
-                barHeight = 5,
+                barHeight = 8,
                 barWidth = ZO_GAMEPAD_GROUP_FRAME_WIDTH,
                 barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 45) },
                 hideBgIfOffline = true,
@@ -388,17 +385,17 @@ local UNITFRAME_BAR_STYLES =
             keyboard =
             {
                 template = "ZO_UnitFrameStatus",
-                barHeight = 33,
+                barHeight = 34,
                 barWidth = 90,
-                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 3, 3) },
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
             },
 
             gamepad =
             {
                 template = "ZO_UnitFrameStatus",
-                barHeight = ZO_GAMEPAD_RAID_FRAME_HEIGHT - 4,
-                barWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 4,
-                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
+                barHeight = ZO_GAMEPAD_RAID_FRAME_HEIGHT - 2,
+                barWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 2,
+                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 1, 1) },
             },
         },
     },
@@ -692,7 +689,7 @@ local UNITFRAME_LAYOUT_DATA =
             nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 5, 4),
             nameWidth = 86,
 
-            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 16, 4),
+            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 19, 4),
             indentedNameWidth = 75,
 
             statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 5, 20), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -4, 20), height = 15, },
@@ -709,11 +706,12 @@ local UNITFRAME_LAYOUT_DATA =
                 icon = { width = 14, height = 14, customAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 66, 7) },
             },
 
-            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, -25),
-            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 5,
+            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 6, 2),
+            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 6,
+            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 20, 3),
+            indentedNameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 20 - 2,
 
-            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 17, -25),
-            leaderIconData = {width = 18, height = 18, offsetX = 0, offsetY = -20}
+            leaderIconData = {width = 18, height = 18, offsetX = 2, offsetY = 7}
         },
     },
 
@@ -722,7 +720,7 @@ local UNITFRAME_LAYOUT_DATA =
         neverHideStatusBar = true,
         showStatusInName = true,
         captionControlName = "Caption",
-    },
+    },    
 }
 
 local function GetPlatformLayoutData(style)
@@ -844,6 +842,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
 
     local DONT_COLOR_RANK_ICON = false
     newFrame.rankIcon = newFrame:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
+    newFrame.roleIcon = newFrame:AddFadeComponent("RoleIcon", DONT_COLOR_RANK_ICON)
     newFrame.veteranIcon = newFrame:AddFadeComponent("VeteranIcon")
     newFrame.leftBracket = newFrame:AddFadeComponent("LeftBracket")
     newFrame.leftBracketGlow = GetControl(newFrame.frame, "LeftBracketGlow")
@@ -851,7 +850,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
     newFrame.rightBracket = newFrame:AddFadeComponent("RightBracket")
     newFrame.rightBracketGlow = GetControl(newFrame.frame, "RightBracketGlow")
     newFrame.rightBracketUnderlay = GetControl(newFrame.frame, "RightBracketUnderlay")
-
+    
     newFrame.showBarText = showBarText
 
     newFrame.healthBar = UnitFrameBar:New(baseWindowName.."Hp", newFrame.frame, showBarText, style, POWERTYPE_HEALTH)
@@ -880,18 +879,6 @@ function UnitFrame:ApplyVisualStyle()
     local isOnline = IsUnitOnline(self.unitTag)
     self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), isOnline, isLeader)
     self:UpdateDifficulty()
-
-    if isLeader then
-        local layoutData = GetPlatformLayoutData(self.style)
-        if layoutData.leaderIconData then
-            local data = layoutData.leaderIconData
-            ZO_UnitFrames_Leader:SetDimensions(data.width, data.height)
-            ZO_UnitFrames_Leader:SetAnchor(TOPLEFT, self.frame, TOPLEFT, data.offsetX, data.offsetY)
-            self:SetTextIndented(true)
-        end
-
-        ZO_UnitFrames_Leader:SetHidden(not layoutData.leaderIconData)
-    end
 
     local healthBar = self.healthBar
     local barData = GetPlatformBarStyle(healthBar.style, healthBar.mechanic)
@@ -925,12 +912,6 @@ function UnitFrame:ApplyVisualStyle()
     end
     if healthBar.rightText then
         healthBar.rightText:SetFont(font)
-    end
-
-    local bg = self.frame:GetNamedChild("BG")
-    if bg then
-        local mungeOverlay = bg:GetNamedChild("MungeOverlay")
-        mungeOverlay:SetHidden(IsInGamepadPreferredMode())
     end
 
     if self.attributeVisualizer then
@@ -1044,7 +1025,7 @@ function UnitFrame:RefreshControls()
             if self.nameLabel then
                 local name
                 if IsInGamepadPreferredMode() and IsUnitPlayer(self.unitTag) then
-                    name = ZO_FormatUserFacingDisplayName(GetUnitDisplayName(self.unitTag))
+                    name = ZO_FormatUserFacingDisplayName(GetUnitDisplayName(self.unitTag)) 
                 else
                     name = GetUnitName(self.unitTag)
                 end
@@ -1066,13 +1047,14 @@ function UnitFrame:RefreshControls()
 
             self:UpdateStatus(IsUnitDead(self.unitTag), IsUnitOnline(self.unitTag))
             self:UpdateRank()
+            self:UpdateRole()
             self:UpdateDifficulty()
             self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(unitTag))
         end
     end
 end
 
-function UnitFrame:RefreshUnit(unitChanged)
+function UnitFrame:RefreshUnit(unitChanged)            
     local validTarget = DoesUnitExist(self.unitTag)
     if(validTarget) then
         if(self.unitTag == "reticleovertarget") then
@@ -1200,7 +1182,7 @@ function UnitFrame:UpdateLevel()
         if(showLevel and unitLevel > 0) then
             self.levelLabel:SetHidden(false)
             self.levelLabel:SetText(tostring(unitLevel))
-            self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0)
+            self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0) 
         else
             self.levelLabel:SetHidden(true)
             self.nameLabel:SetAnchor(TOPLEFT)
@@ -1233,6 +1215,18 @@ function UnitFrame:UpdateRank()
     end
 end
 
+function UnitFrame:UpdateRole()
+    if self.roleIcon then
+        local unitTag = self:GetUnitTag()
+        local assignedRole = GetGroupMemberAssignedRole(unitTag)
+        local hasAssignedRole = assignedRole ~= LFG_ROLE_INVALID
+        if hasAssignedRole then
+            self.roleIcon:SetTexture(GetRoleIcon(assignedRole))
+        end
+        self.roleIcon:SetHidden(not hasAssignedRole)
+    end
+end
+
 local DIFFICULTY_BRACKET_LEFT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_bracket_level2_left.dds",
@@ -1251,14 +1245,14 @@ local DIFFICULTY_BRACKET_GLOW_LEFT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level2_left.dds",
     [MONSTER_DIFFICULTY_HARD] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level3_left.dds",
-    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_left.dds",
+    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_left.dds",    
 }
 
 local DIFFICULTY_BRACKET_GLOW_RIGHT_TEXTURE =
 {
     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level2_right.dds",
     [MONSTER_DIFFICULTY_HARD] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level3_right.dds",
-    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_right.dds",
+    [MONSTER_DIFFICULTY_DEADLY] = "EsoUI/Art/UnitFrames/targetUnitFrame_glowOverlay_level4_right.dds",    
 }
 
 local GAMEPAD_DIFFICULTY_BRACKET_TEXTURE =
@@ -1445,36 +1439,6 @@ local function CreateGroupAnchorFrames()
     end
 end
 
-local BACKGROUND_OFFSET_X = -26
-local BACKGROUND_SMALL_GROUP_PADDING_X = 60
-local BACKGROUND_SMALL_PADDING_Y = -20
-local BACKGROUND_LARGE_GROUP_PADDING_X = 32
-local BACKGROUND_PADDING_Y = 40
-
-local function UpdateGroupFramesBackground()
-    local background = ZO_UnitFramesScalableBackground
-    local groupSize = GetGroupSize()
-    local showBackground = IsInGamepadPreferredMode() and groupSize > SMALL_GROUP_SIZE_THRESHOLD
-    if showBackground then
-        local constants = GAMEPAD_CONSTANTS
-        background:ClearAnchors()
-        background:SetAnchor(TOPLEFT, ZO_LargeGroupAnchorFrame1, TOPLEFT, BACKGROUND_OFFSET_X)
-
-        local width, height
-        if groupSize > SMALL_GROUP_SIZE_THRESHOLD then
-            width = 2 * constants.RAID_FRAME_OFFSET_X + BACKGROUND_LARGE_GROUP_PADDING_X
-            height = zo_ceil(groupSize / 2) * constants.RAID_FRAME_OFFSET_Y
-        else
-            width = constants.GROUP_FRAME_OFFSET_X + BACKGROUND_SMALL_GROUP_PADDING_X
-            height = groupSize * constants.GROUP_FRAME_OFFSET_Y
-        end
-
-        ZO_ScalableBackgroundWithEdge_SetSize(background, width, height - BACKGROUND_PADDING_Y)
-    end
-
-    background:SetHidden(not showBackground)
-end
-
 local function UpdateLeaderIndicator()
     ZO_UnitFrames_Leader:SetHidden(true)
 
@@ -1509,7 +1473,6 @@ end
 local function DoGroupUpdate(eventCode)
     UpdateLeaderIndicator()
     UnitFrames:UpdateGroupAnchorFrames()
-    UpdateGroupFramesBackground()
 end
 
 local function GetCastBar(unitTag)
@@ -1523,55 +1486,55 @@ local unitTypesWhoUseCastInfo =
     [UNIT_REACTION_NEUTRAL] = true,
 }
 
-local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
+local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS = 
 {
-    [STAT_HEALTH_MAX] =
+    [STAT_HEALTH_MAX] = 
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_HEALTH_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_HEALTH_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_HEALTH_DECREASED_TARGET,
     },
-    [STAT_MAGICKA_MAX] =
+    [STAT_MAGICKA_MAX] = 
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_MAGICKA_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_MAGICKA_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_MAGICKA_DECREASED_TARGET,
     },
-    [STAT_STAMINA_MAX] =
+    [STAT_STAMINA_MAX] = 
     {
         [ATTRIBUTE_BAR_STATE_NORMAL]    = SOUNDS.UAV_MAX_STAMINA_NORMAL_TARGET,
         [ATTRIBUTE_BAR_STATE_EXPANDED]  = SOUNDS.UAV_MAX_STAMINA_INCREASED_TARGET,
         [ATTRIBUTE_BAR_STATE_SHRUNK]    = SOUNDS.UAV_MAX_STAMINA_DECREASED_TARGET,
     },
-    [STAT_HEALTH_REGEN_COMBAT] =
+    [STAT_HEALTH_REGEN_COMBAT] = 
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_HEALTH_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_HEALTH_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_HEALTH_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_HEALTH_REGEN_LOST_TARGET,
     },
-    [STAT_MAGICKA_REGEN_COMBAT] =
+    [STAT_MAGICKA_REGEN_COMBAT] = 
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_MAGICKA_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_MAGICKA_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_MAGICKA_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_MAGICKA_REGEN_LOST_TARGET,
     },
-    [STAT_STAMINA_REGEN_COMBAT] =
+    [STAT_STAMINA_REGEN_COMBAT] = 
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_STAMINA_REGEN_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_STAMINA_REGEN_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_STAMINA_REGEN_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_STAMINA_REGEN_LOST_TARGET,
     },
-    [STAT_ARMOR_RATING] =
+    [STAT_ARMOR_RATING] = 
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_ARMOR_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_ARMOR_LOST_TARGET,
         [STAT_STATE_DECREASE_GAINED]    = SOUNDS.UAV_DECREASED_ARMOR_ADDED_TARGET,
         [STAT_STATE_DECREASE_LOST]      = SOUNDS.UAV_DECREASED_ARMOR_LOST_TARGET,
     },
-    [STAT_POWER] =
+    [STAT_POWER] = 
     {
         [STAT_STATE_INCREASE_GAINED]    = SOUNDS.UAV_INCREASED_POWER_ADDED_TARGET,
         [STAT_STATE_INCREASE_LOST]      = SOUNDS.UAV_INCREASED_POWER_LOST_TARGET,
@@ -1609,21 +1572,21 @@ local function CreateTargetFrame()
         increasedArmorFrameContainerTemplate = "ZO_IncreasedArmorFrameContainerAngle",
         decreasedArmorOverlayContainerTemplate = "ZO_DecreasedArmorOverlayContainerAngle",
         increasedPowerGlowTemplate = "ZO_IncreasedPowerGlowAngle",
-        increasedArmorOffsets =
+        increasedArmorOffsets = 
         {
-            keyboard =
+            keyboard = 
             {
                 top = -7,
                 bottom = 8,
                 left = -15,
                 right = 15,
             },
-            gamepad =
+            gamepad = 
             {
                 top = -8,
                 bottom = 9,
                 left = -12,
-                right = 12,
+                right = 12, 
             }
         }
     }
@@ -1633,21 +1596,21 @@ local function CreateTargetFrame()
     VISUALIZER_ANGLE_UNWAVERING_LAYOUT_DATA =
     {
         overlayContainerTemplate = "ZO_UnwaveringOverlayContainerAngle",
-        overlayOffsets =
+        overlayOffsets = 
         {
-            keyboard =
+            keyboard = 
             {
                 top = 2,
                 bottom = -3,
                 left = 6,
                 right = -7,
             },
-            gamepad =
+            gamepad = 
             {
                 top = 4,
                 bottom = -2,
                 left = 8,
-                right = -8,
+                right = -8, 
             }
         }
 
@@ -1773,7 +1736,7 @@ local function UpdateGroupFramesVisualStyle()
         -- Clearing and setting the text again seems to reapply the ModifyTextType attribute.
         local groupNameControl = GetControl(raidFrame, "GroupName")
         groupNameControl:SetText("")
-
+        
         if constants.SHOW_GROUP_LABELS then
             groupNameControl:SetText(zo_strformat(SI_GROUP_SUBGROUP_LABEL, i))
         end
@@ -1873,7 +1836,7 @@ local function RegisterForEvents()
     local function OnTargetChanged(evt, unitTag)
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
-
+    
     local function OnUnitFrameUpdate(evt, unitTag)
         ZO_UnitFrames_UpdateWindow(unitTag)
     end
@@ -1885,13 +1848,13 @@ local function RegisterForEvents()
 
     local function OnPowerUpdate(evt, unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if unitFrame then
             if powerType == POWERTYPE_HEALTH then
                 local oldHealth = unitFrame.healthBar.currentValue
-
+    
                 unitFrame.healthBar:Update(POWERTYPE_HEALTH, powerPool, powerPoolMax)
-
+    
                 if(oldHealth ~= nil and oldHealth == 0) then
                     -- Unit went from dead to non dead...update reaction
                     unitFrame:UpdateUnitReaction()
@@ -1920,7 +1883,7 @@ local function RegisterForEvents()
 
     local function OnLevelUpdate(eventCode, unitTag, level)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if(unitFrame) then
             unitFrame:UpdateLevel()
         end
@@ -1932,7 +1895,7 @@ local function RegisterForEvents()
 
     local function OnDispositionUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if(unitFrame) then
             unitFrame:UpdateUnitReaction()
         end
@@ -1940,7 +1903,7 @@ local function RegisterForEvents()
 
     local function OnGroupSupportRangeUpdate(evt, unitTag, isNearby)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if(unitFrame) then
             local isOnline = IsUnitOnline(unitTag)
             local isLeader = IsUnitGroupLeader(unitTag)
@@ -1948,7 +1911,7 @@ local function RegisterForEvents()
             if(AreUnitsEqual(unitTag, "reticleover")) then
                 UnitFrames:GetFrame("reticleover"):DoAlphaUpdate(isNearby, isOnline, isLeader)
             end
-
+    
             if(AreUnitsEqual(unitTag, "reticleovertarget")) then
                 local targetOfTarget = UnitFrames:GetFrame("reticleovertarget")
                 if(targetOfTarget) then
@@ -1970,22 +1933,20 @@ local function RegisterForEvents()
     local function OnGroupMemberLeft(eventCode, characterName, reason, wasLocalPlayer, amLeader)
         if(wasLocalPlayer) then
             RefreshGroups(eventCode)
-        else
-            UpdateGroupFramesBackground()
         end
     end
 
     local function OnGroupMemberConnectedStateChanged(event, unitTag, isOnline)
         UpdateStatus(unitTag, IsUnitDead(unitTag), isOnline)
     end
-
+    
     local function OnUnitDeathStateChanged(event, unitTag, isDead)
         UpdateStatus(unitTag, isDead, IsUnitOnline(unitTag))
     end
 
     local function OnRankPointUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if(unitFrame) then
             unitFrame:UpdateRank()
         end
@@ -1993,24 +1954,24 @@ local function RegisterForEvents()
 
     local function OnVeteranRankUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if(unitFrame) then
             unitFrame:UpdateLevel()
-        end
+        end    
     end
 
     local function OnTitleUpdated(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-
+    
         if(unitFrame) then
             unitFrame:UpdateCaption()
-        end
+        end    
     end
 
     local function OnPlayerActivated(eventCode)
         ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
-
+    
         -- do a full update because we probably missed events while loading
         UnitFrames:SetGroupSize()
         UnitFrames:DisableGroupAndRaidFrames()
@@ -2059,7 +2020,7 @@ function ZO_UnitFrames_Initialize()
             local function OnGamepadPreferredModeChanged()
                 UnitFrames:ApplyVisualStyle()
                 UpdateGroupFramesVisualStyle()
-                UpdateGroupFramesBackground()
+                UpdateLeaderIndicator()
             end
             ZO_PlatformStyle:New(OnGamepadPreferredModeChanged)
 

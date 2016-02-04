@@ -1,5 +1,8 @@
 ZO_GamepadQuickslot = ZO_Object:Subclass()
 
+local QUICKSLOT_ASSIGNMENT_TYPE_ITEM = 1
+local QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE = 2
+
 function ZO_GamepadQuickslot:New(control)
     local menu = ZO_Object.New(self)
     menu:Initialize(control)
@@ -42,11 +45,15 @@ function ZO_GamepadQuickslot:Initialize(control)
     GAMEPAD_QUICKSLOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:PerformDeferredInitialization()
-            --Used the item and hit Assign at the same time...
-            if SHARED_INVENTORY:GenerateSingleSlotData(self.itemToSlotId, self.itemToSlotIndex) == nil then
-                SCENE_MANAGER:HideCurrentScene()
-                return
+            
+            if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
+                --Used the item and hit Assign at the same time...
+                if SHARED_INVENTORY:GenerateSingleSlotData(self.itemToSlotId, self.itemToSlotIndex) == nil then
+                    SCENE_MANAGER:HideCurrentScene()
+                    return
+                end
             end
+
             self:RefreshHeader()
             self:ResetActiveIcon()
             self:ShowQuickslotMenu()     
@@ -68,15 +75,28 @@ function ZO_GamepadQuickslot:Initialize(control)
 end
 
 function ZO_GamepadQuickslot:ResetActiveIcon()
-    local icon, stack, _, meetsUsageRequirements = GetItemInfo(self.itemToSlotId, self.itemToSlotIndex)
-    self.radialMenu.activeIcon:SetTexture(icon)
-    self.radialMenu.activeCount:SetText(stack)
-    --tint icon red if can't be used
+    local slotEnabled
+    local slotIcon
+
+    if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
+        local _, _, icon, _, unlocked = GetCollectibleInfo(self.collectibleToSlotId)
+        slotIcon = icon
+        slotEnabled = unlocked
+        self.radialMenu.activeCount:SetHidden(true)
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
+        local icon, stack, _, meetsUsageRequirements = GetItemInfo(self.itemToSlotId, self.itemToSlotIndex)
+        slotIcon = icon
+        slotEnabled = meetsUsageRequirements
+        self.radialMenu.activeCount:SetText(stack)
+    end
+
+    self.radialMenu.activeIcon:SetTexture(slotIcon)
+
     local r,g,b = 1, 1, 1
-    if not meetsUsageRequirements then
+    if not slotEnabled then
         r,g,b = 1, 0, 0
     end
-    self.radialMenu.activeIcon:SetColor(r,g,b)        
+    self.radialMenu.activeIcon:SetColor(r,g,b)
     self.isActiveEmpty = false
 end
 
@@ -91,7 +111,11 @@ function ZO_GamepadQuickslot:OnSelectionChanged(selectedEntry)
 
     --tooltip update on active item
     local itemLink = GetSlotItemLink(selectedEntry.data)
-    GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT, ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT)
+    if slotType == ACTION_TYPE_COLLECTIBLE then
+        GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_LEFT_TOOLTIP, itemLink)
+    else
+        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT)
+    end
 end
 
 function ZO_GamepadQuickslot:PerformDeferredInitialization()
@@ -102,7 +126,7 @@ function ZO_GamepadQuickslot:PerformDeferredInitialization()
     end
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ACTION_SLOT_UPDATED, OnQuickSlotUpdated)
-
+    
     self:InitializeHeader()
     self:InitializeKeybindStrip()
 end
@@ -145,19 +169,6 @@ function ZO_GamepadQuickslot:InitializeHeader()
         end
     end
 
-    self.headerData = {
-        data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
-        data1Text = UpdateGold,
-
-        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_ALLIANCE_POINTS),
-		data2Text = UpdateAlliancePoints,
-
-        data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-        data3Text = UpdateCapacityString,
-
-        titleText = GetString(SI_GAMEPAD_INVENTORY_CONSUMABLES),
-    }
-
     self:RefreshHeader()
 
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, RefreshHeader)
@@ -170,6 +181,27 @@ local EMPTY_QUICKSLOT_TEXTURE = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
 local EMPTY_QUICKSLOT_STRING = GetString(SI_QUICKSLOTS_EMPTY)
 
 function ZO_GamepadQuickslot:RefreshHeader()
+    if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
+        self.headerData = 
+        { 
+            titleText = GetString(SI_MAIN_MENU_COLLECTIONS)
+        }
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
+        self.headerData = 
+        {
+            data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
+            data1Text = UpdateGold,
+
+            data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_ALLIANCE_POINTS),
+	        data2Text = UpdateAlliancePoints,
+
+            data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+            data3Text = UpdateCapacityString,
+
+            titleText = GetString(SI_GAMEPAD_INVENTORY_CONSUMABLES),
+        }
+    end
+
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
@@ -192,28 +224,33 @@ function ZO_GamepadQuickslot:ShowQuickslotMenu()
     self.radialMenu:Show()
 
     --special entrance case, unslot selected item
-    if self.itemToSlotId and self.itemToSlotIndex then
-        local slotNum = GetItemCurrentActionBarSlot(self.itemToSlotId, self.itemToSlotIndex)
-        if slotNum then
-            self.enteringMenuUnslottedItem = true
-            ClearSlot(slotNum)
-            self.slotIndexForAnim = slotNum
-            self.radialMenu.activeIcon:SetHidden(true)
-            self.radialMenu.activeCount:SetHidden(true)
+    local slotNum
+    if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
+        if self.collectibleToSlotId then
+            slotNum = GetCollectibleCurrentActionBarSlot(self.collectibleToSlotId)
         end
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
+        if self.itemToSlotId and self.itemToSlotIndex then
+            slotNum = GetItemCurrentActionBarSlot(self.itemToSlotId, self.itemToSlotIndex)
+        end
+    end
+
+    if slotNum then
+        self.enteringMenuUnslottedItem = true
+        ClearSlot(slotNum)
+        self.slotIndexForAnim = slotNum
+        self.radialMenu.activeIcon:SetHidden(true)
+        self.radialMenu.activeCount:SetHidden(true)
     end
 end
 
 function ZO_GamepadQuickslot:PopulateMenu()
     for i = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, ACTION_BAR_FIRST_UTILITY_BAR_SLOT + ACTION_BAR_UTILITY_BAR_SIZE do
-        
-        local slotType = GetSlotType(i)
-
-        if(slotType == ACTION_TYPE_NOTHING) then
+        if not ZO_QuickslotRadialManager:ValidateOrClearQuickslot(i) then
             self.radialMenu:AddEntry(EMPTY_QUICKSLOT_STRING, EMPTY_QUICKSLOT_TEXTURE, EMPTY_QUICKSLOT_TEXTURE, function() SetCurrentQuickslot(i) end, i)
         else
+            local slotType = GetSlotType(i)
             local slotIcon = GetSlotTexture(i)
-            
             local slotName = GetSlotName(i)
             slotName = zo_strformat(SI_TOOLTIP_ITEM_NAME, slotName)
             local slotItemQuality = GetSlotItemQuality(i)
@@ -247,17 +284,30 @@ function ZO_GamepadQuickslot:PopulateMenu()
 end
 
 function ZO_GamepadQuickslot:SetItemToQuickslot(bagId, slotIndex)
+    self.assignmentType = QUICKSLOT_ASSIGNMENT_TYPE_ITEM
     self.itemToSlotId = bagId
     self.itemToSlotIndex = slotIndex
+end
+
+function ZO_GamepadQuickslot:SetCollectibleToQuickslot(collectibleId)
+    self.assignmentType = QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE
+    self.collectibleToSlotId = collectibleId
 end
 
 function ZO_GamepadQuickslot:TryAssignItemToSlot()
     local selectedData = self.radialMenu.selectedEntry
     if selectedData then
-        if self.itemToSlotId and self.itemToSlotIndex then
-            SelectSlotItem(self.itemToSlotId, self.itemToSlotIndex, selectedData.data)
-            self.itemToSlotId = nil
-            self.itemToSlotIndex = nil
+        if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
+            if self.collectibleToSlotId then
+                SelectSlotCollectible(self.collectibleToSlotId, selectedData.data)
+                self.collectibleToSlotId = nil
+            end
+        elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
+            if self.itemToSlotId and self.itemToSlotIndex then
+                SelectSlotItem(self.itemToSlotId, self.itemToSlotIndex, selectedData.data)
+                self.itemToSlotId = nil
+                self.itemToSlotIndex = nil
+            end
         end
 
         self.radialMenu.activeIcon:SetHidden(true)

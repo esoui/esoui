@@ -6,6 +6,8 @@
             <OnInitialized>
                 self.swatchTexture = self:GetNamedChild("SwatchTexture")
                 self.background = self:GetNamedChild("Background")
+                self.invalidTexture = self:GetNamedChild("InvalidTexture")
+                self.edgeFrame = self:GetNamedChild("EdgeFrame")
             </OnInitialized>
             <Dimensions x="24" y="26"/>
             <Controls>
@@ -20,6 +22,11 @@
                 </Backdrop>     
 
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Dye/Gamepad/gp_EmptySwatch-Diag_4px.dds" addressMode="WRAP" alpha="0.5" level="1">
+                    <Anchor point="TOPLEFT" relativeTo="($parent)SwatchTexture" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)SwatchTexture" />
+                </Texture>
+
+                <Texture name="$(parent)InvalidTexture" textureFile="EsoUI/Art/Dye/Gamepad/gp_Disabled_X.dds" tier="MEDIUM" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
                     <Anchor point="TOPLEFT" relativeTo="($parent)SwatchTexture" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="($parent)SwatchTexture" />
                 </Texture>

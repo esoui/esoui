@@ -165,6 +165,9 @@ local CONSOLE_SETTINGS =
     initialFadeAlpha = 1,
     finalFadeAlpha = 0,
     fadeTransitionTime = FADE_TIME_MS,
+
+    chatEditBufferTop = 9,
+    chatEditBufferBottom = 8,
 }
 
 function ZO_GamepadChatSystem:Initialize(control)

@@ -578,25 +578,18 @@
         </Control>
 
         <Control name="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="54"/>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62"/>
+        </Control>
+        
+        <Control name="ZO_Gamepad_TextEditEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
                 self.highlight = self:GetNamedChild("Highlight")
             </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)TextField" inherits="ZO_EditBackdrop_Gamepad">
-                    <AnchorFill/>
-                </Backdrop>
-                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/>
-                </Backdrop>
-            </Controls>
-        </Control>
-        
-        <Control name="ZO_Gamepad_TextEditEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
-            <Controls>
-                <Backdrop name="$(parent)TextField" override="true">
+                <Backdrop name="$(parent)TextField" inherits="ZO_SingleLineEditBackdrop_Gamepad">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
                             <OnInitialized>
@@ -605,12 +598,21 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/>
+                </Backdrop>
             </Controls>
         </Control>
 
         <Control name="ZO_Gamepad_TextEditEntry_FullWidth_Multiline" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.highlight = self:GetNamedChild("Highlight")
+            </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)TextField" override="true">
+                <Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad">
+                    <AnchorFill/>
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad ZO_EditDefaultText_Gamepad">
                             <OnInitialized>
@@ -619,20 +621,33 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/>
+                </Backdrop>
             </Controls>
-        </Control>        
+        </Control>
 
         <Control name="ZO_Gamepad_TextEditLockedEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.highlight = self:GetNamedChild("Highlight")
+            </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)TextField" override="true">
+                <Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad">
                     <Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge_grey.dds" edgeFileWidth="64" edgeFileHeight="8" />
                     <Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center_grey.dds" />
+                    <AnchorFill/>
                     <Controls>
                         <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontGamepad34">
                             <Anchor point="TOPLEFT" offsetX="6" offsetY="5"/>
                             <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7"/>
                         </Label>
                     </Controls>
+                </Backdrop>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/>
                 </Backdrop>
             </Controls>
         </Control>

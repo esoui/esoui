@@ -65,7 +65,7 @@ function ZO_HelpManager:Initialize(control)
     control:RegisterForEvent(EVENT_HELP_INITIALIZED, UpdateHelp)
     control:RegisterForEvent(EVENT_HELP_SEARCH_RESULTS_READY, OnSearchResultsReady)
 
-    UpdateHelp()
+	self:Refresh()
 end
 
 function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
@@ -90,7 +90,9 @@ function ZO_HelpManager:OnShow()
 end
 
 function ZO_HelpManager:OnHide()
-    self.searchBox:SetText("")
+    if self.searchBox:GetText() ~= "" then
+		self.searchBox:SetText("")
+	end
 end
 
 function ZO_HelpManager:InitializeTree()

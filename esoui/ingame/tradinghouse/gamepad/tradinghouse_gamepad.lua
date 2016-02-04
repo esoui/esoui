@@ -33,24 +33,6 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     self.m_loading = self.m_control:GetNamedChild("Loading")
     ZO_GamepadGenericHeader_Initialize(self.m_header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
-	local function GetGuildTitle(control)
-		local _, guildName = GetCurrentTradingHouseGuildDetails()
-		if guildName ~= "" then
-			return GetString(SI_TRADING_HOUSE_GUILD_HEADER)
-		else
-			return nil
-		end
-	end
-
-	local function GetGuildName(control)
-	    local _, guildName = GetCurrentTradingHouseGuildDetails()
-		if guildName ~= "" then
-			return guildName
-		else
-			return nil
-		end
-	end
-
     local function UpdateGold(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
 		return true
@@ -97,14 +79,11 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     }
 
     self.m_headerData = {
-		data1HeaderText = GetGuildTitle,
-		data1Text = GetGuildName,
+		data1HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
+        data1Text = UpdateGold,
 
-        data2HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
-        data2Text = UpdateGold,
-
-        data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-        data3Text = GetCapacityString,
+        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+        data2Text = GetCapacityString,
 
         tabBarEntries = self.m_tabsTable
     }
@@ -114,6 +93,12 @@ end
 
 function ZO_GamepadTradingHouse:RefreshHeaderData()
     ZO_GamepadGenericHeader_RefreshData(self.m_header, self.m_headerData)
+end
+
+function ZO_GamepadTradingHouse:RefreshGuildNameFooter()
+    local _, guildName = GetCurrentTradingHouseGuildDetails()
+
+    ZO_GUILD_NAME_FOOTER_FRAGMENT:SetGuildName(guildName)
 end
 
 function ZO_GamepadTradingHouse:OnInitialInteraction()
@@ -134,6 +119,7 @@ function ZO_GamepadTradingHouse:UpdateForGuildChange()
     end
     self:SetSearchAllowed(true)
     self:RefreshHeaderData()
+    self:RefreshGuildNameFooter()
 end
 
 function ZO_GamepadTradingHouse:InitializeScene()
@@ -151,6 +137,7 @@ function ZO_GamepadTradingHouse:InitializeScene()
 			ZO_GamepadGenericHeader_Activate(self.m_header)
 			ZO_GamepadGenericHeader_SetActiveTabIndex(self.m_header, self:GetCurrentMode())
             self:RefreshHeaderData()
+            self:RefreshGuildNameFooter()
             self:RegisterForSceneEvents()
         elseif newState == SCENE_SHOWN then
             -- This is in SCENE_SHOWN because SCENE_GROUP_SHOWING fires after SCENE_SHOWING and OnInitialInteraction needs to be called before the curren object is shown

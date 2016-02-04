@@ -1,9 +1,11 @@
 local GAMEPAD_SMITHING_CREATION_OPTIONS_SCENE_NAME = "gamepad_smithing_creation_options"
 
-local GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE = "ZO_GamepadLeftCheckboxOptionTemplate"
+local GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE = "ZO_CheckBoxTemplate_Gamepad"
 
 local GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS = 1
 local GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE = 2
+
+local GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE = 1
 
 local g_options =
 {
@@ -20,6 +22,23 @@ local g_options =
 }
 
 ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y = 3
+
+--[[ SmithingHorizontalScrollList ]]--
+ZO_SmithingHorizontalScrollList_Gamepad = ZO_HorizontalScrollList_Gamepad:Subclass()
+
+function ZO_SmithingHorizontalScrollList_Gamepad:New(...)
+    return ZO_HorizontalScrollList_Gamepad.New(self, ...)
+end
+
+function ZO_SmithingHorizontalScrollList_Gamepad:SetToggleType(type)
+    self.toggleType = type
+end
+
+function ZO_SmithingHorizontalScrollList_Gamepad:GetToggleType()
+    return self.toggleType
+end
+
+--[[ ZO_GamepadSmithingCreation ]]--
 
 ZO_GamepadSmithingCreation = ZO_SharedSmithingCreation:Subclass()
 
@@ -68,6 +87,10 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(self:GetCreateTooltipSound())
 
             self:RefreshScrollPanel()
+
+            SCENE_MANAGER:AddFragment(self.universalStyleItemInfoFragment)
+
+            self:TriggerUSITutorial()
         elseif newState == SCENE_HIDDEN then
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
             ZO_InventorySlot_RemoveMouseOverKeybinds()
@@ -81,6 +104,7 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
 			self.owner:SetEnableSkillBar(false)
 
 			ZO_GamepadGenericHeader_Deactivate(self.owner.header)
+            SCENE_MANAGER:RemoveFragment(self.universalStyleItemInfoFragment)
         end
     end)
 
@@ -123,14 +147,49 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
             end
 
             self.isCrafting = false
+
+            self:RefreshTooltips()
         end
     end)
+end
+
+function ZO_GamepadSmithingCreation:UpdateUniversalStyleItemBarInfo()
+    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
+    local amountControl = self.universalStyleItemInfo:GetNamedChild("Amount")
+    local textureControl = self.universalStyleItemInfo:GetNamedChild("USITexture")
+    amountControl:SetText(universalStyleItemCount)
+    if universalStyleItemCount == 0 then
+        amountControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        textureControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+    else
+        amountControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
+        textureControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
+    end
+end
+
+function ZO_GamepadSmithingCreation:InitializeUniversalStyleItemInfo()
+    self.universalStyleItemInfo = SMITHING_GAMEPAD.skillInfoBar:GetNamedChild("UniversalStyleItemAmount")
+    self.universalStyleItemInfo:SetHidden(true)
+    self.universalStyleItemInfoFragment = ZO_FadeSceneFragment:New(self.universalStyleItemInfo)
+    local textureControl = self.universalStyleItemInfo:GetNamedChild("USITexture")
+    local itemLink = self:GetUniversalStyleItemLink()
+    local icon = GetItemLinkInfo(itemLink)
+    textureControl:SetTexture(icon)
+
+    local function HandleInventoryChanged()
+        self:UpdateUniversalStyleItemBarInfo()
+    end
+
+    self.universalStyleItemInfo:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
+    self.universalStyleItemInfo:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
+
+    self:UpdateUniversalStyleItemBarInfo()
 end
 
 function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
     if self.keybindStripDescriptor then return end
 
-    local scrollListControl = ZO_HorizontalScrollList_Gamepad
+    local scrollListControl = ZO_SmithingHorizontalScrollList_Gamepad
     local traitUnknownFont = "ZoFontGamepadCondensed34"
     local notEnoughInInventoryFont = "ZoFontGamepadCondensed34"
     local listSlotTemplate = "ZO_GamepadSmithingListSlot"
@@ -154,6 +213,10 @@ function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
 
     self:SetupScrollPanel()
     self:InitializeFocusItems()
+
+    self:InitializeUniversalStyleItemInfo()
+
+    self.styleList:SetToggleType(GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE)
 end
 
 do
@@ -277,32 +340,75 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
 		SCENE_MANAGER:HideCurrentScene()
     end
 
+    -- Perform craft
+    local craftButton =
+    {
+        keybind = "UI_SHORTCUT_SECONDARY",
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        name = function()
+            local cost = GetCostToCraftSmithingItem(self:GetAllCraftingParameters())
+            return ZO_CraftingUtils_GetCostToCraftString(cost)
+        end,
+
+        callback = function()
+            if not self.inOptionsMenu then
+                self.isCrafting = true
+                self:Create()
+            end
+        end,
+
+        visible = function()
+            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                return self:IsCraftable()
+            end
+        end
+    }
+
+    local function ShowUniversalItemKeybind()
+        if self.selectedList and self.selectedList:GetToggleType() then
+            if self.selectedList:GetToggleType() == GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE then
+                return true
+            end
+        else
+            return false
+        end
+    end
+
+    local toggleTypeButton =
+    {
+        keybind = "UI_SHORTCUT_PRIMARY",
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        name = GetString(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE),
+
+        callback = function()
+            local haveMaterialChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked
+            local haveKnowledgeChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].checked
+            self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked, not  self:GetIsUsingUniversalStyleItem())
+            self:RefreshStyleList()
+            self:RefreshTooltips()
+        end,
+
+        visible = ShowUniversalItemKeybind
+    }
+
+    local purchaseButton = 
+    {
+        keybind= "UI_SHORTCUT_RIGHT_STICK",
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        name = GetString(SI_GAMEPAD_SMITHING_PURCHASE_MORE),
+
+        callback = function()
+            ShowMarketAndSearch("", MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM)
+        end,
+
+        visible = ShowUniversalItemKeybind
+    }
+
     self.keybindStripDescriptor =
     {
-        -- Perform craft
-        {
-            keybind = "UI_SHORTCUT_SECONDARY",
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
-            name = function()
-                local cost = GetCostToCraftSmithingItem(self:GetAllCraftingParameters())
-                return ZO_CraftingUtils_GetCostToCraftString(cost)
-            end,
-
-            callback = function()
-                if not self.inOptionsMenu then
-                    self.isCrafting = true
-                    self:Create()
-                end
-            end,
-
-            visible = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    return self:IsCraftable()
-                end
-            end
-        },
-
         -- Options (filtering)
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -322,8 +428,11 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         },
     }
 
+	table.insert(self.keybindStripDescriptor, craftButton)
 	table.insert(self.keybindStripDescriptor, startButton)
 	table.insert(self.keybindStripDescriptor, backButton)
+    table.insert(self.keybindStripDescriptor, toggleTypeButton)
+    table.insert(self.keybindStripDescriptor, purchaseButton)
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 
     -- options list keybinds
@@ -331,6 +440,21 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.optionsKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:SelectOption() end)
     table.insert(self.optionsKeybindStripDescriptor, startButton)
 	table.insert(self.optionsKeybindStripDescriptor, optionsBackButton)
+
+end
+
+function ZO_GamepadSmithingCreation:RefreshTooltips()
+    if self.selectedList and self.selectedList:GetToggleType() then
+        if self.selectedList:GetToggleType() == GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE then
+            if self.savedVars.useUniversalStyleItemChecked then
+                GAMEPAD_TOOLTIPS:LayoutUniversalStyleItem(GAMEPAD_LEFT_TOOLTIP, self:GetUniversalStyleItemLink())
+            else
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            end
+        end
+    else
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    end
 end
 
 do
@@ -338,9 +462,12 @@ do
 
     function ZO_GamepadSmithingCreation:InitializeFocusItems()
         self.activateFn = function(focus, data)
+            self.selectedList = focus
             focus:Activate()
             self:UpdateScrollPanel(focus)
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             self:UpdateBorderHighlight(focus, ACTIVE)
+            self:RefreshTooltips()
         end
 
         self.deactivateFn = function(focus, data)
@@ -360,9 +487,12 @@ do
                 control = self.materialQuantitySpinner,
                 canFocus = function(item) return not item:GetControl():IsHidden() end,
                 activate = function(focus, data)
+                    self.selectedList = nil
+                    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
                     self:ActivateMaterialQuantitySpinner()
                     self:UpdateScrollPanel(focus)
                     self:UpdateBorderHighlight(focus, ACTIVE)
+                    self:RefreshTooltips()
                 end,
             },
             {
@@ -445,28 +575,63 @@ function ZO_GamepadSmithingCreation:UpdateBorderHighlight(focus, active)
     focusControlParent.activeBG:SetHidden(not active)
 end
 
+function ZO_GamepadSmithingCreation:UpdateUniversalStyleItemInfo()
+    self:RefreshFilters()
+    self:RefreshStyleList()
+end
+
 function ZO_GamepadSmithingCreation:InitializeOptionList()
     self.optionList = ZO_GamepadVerticalItemParametricScrollList:New(self.panelControl:GetNamedChild("OptionsList"))
     self.optionList:SetAlignToScreenCenter(true)
 
-    self.optionList:AddDataTemplate(GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE, ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.optionList:AddDataTemplateWithHeader(GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE, ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsMenuEntryHeaderTemplate")
+    self.optionList:AddDataTemplate(GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE, ZO_GamepadCheckBoxTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.optionList:AddDataTemplateWithHeader(GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE, ZO_GamepadCheckBoxTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsMenuEntryHeaderTemplate")
+
+    local function HandleInventoryChanged()
+        self:UpdateUniversalStyleItemInfo()
+    end
+
+    self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
+    self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
 
     self.optionDataList = {}
     self:SetupOptionData()
+
+    self.optionList:SetOnSelectedDataChangedCallback(
+        function(list, selectedData)
+            self.currentlySelectedOptionData = selectedData
+            self:UpdateOptionLeftTooltip(selectedData)
+        end
+    )
+end
+
+function ZO_GamepadSmithingCreation:UpdateOptionLeftTooltip(selectedData)
+    if selectedData then
+        if selectedData.optionType == GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE then
+            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, selectedData.text, GetString(SI_CRAFTING_HAVE_KNOWLEDGE_TOOLTIP))
+        elseif selectedData.optionType == GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS then
+            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, selectedData.text, GetString(SI_CRAFTING_HAVE_MATERIALS_TOOLTIP))
+        end
+    end
 end
 
 function ZO_GamepadSmithingCreation:SetupSavedVars()
-    local defaults = { haveMaterialChecked = false, haveKnowledgeChecked = false, }
+    local defaults = { haveMaterialChecked = false, haveKnowledgeChecked = false, useUniversalStyleItemChecked = false}
     self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "GamepadSmithingCreation", defaults)
 
-    self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].currentValue = self.savedVars.haveMaterialChecked
-    self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].currentValue = self.savedVars.haveKnowledgeChecked
+    self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS, self.savedVars.haveMaterialChecked)
+    self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE, self.savedVars.haveKnowledgeChecked)
 
    	if self.savedVars.haveKnowledgeChecked then
 		self:SelectValidKnowledgeIndices()
 	end
     self:HandleDirtyEvent()
+end
+
+function ZO_GamepadSmithingCreation:AddCheckedStateToOption(option, checkedState)
+    if self.optionDataList[option] then
+        self.optionDataList[option].checked = checkedState
+    end
 end
 
 function ZO_GamepadSmithingCreation:ShowOptions()
@@ -485,14 +650,19 @@ function ZO_GamepadSmithingCreation:SetupOptionData()
         end
 
         local newOptionData = ZO_GamepadEntryData:New(optionInfo.optionName)
+        local savedVarTarget = optionInfo.toggleFunctionTarget
+        newOptionData.setChecked = function(control,checked) 
+                                        self.optionDataList[key].checked = checked
+                                   end
         newOptionData:SetHeader(headerText)
+        newOptionData.optionType = key
 
         self.optionDataList[key] = newOptionData
     end
 
 	if self.savedVars then
-		self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].currentValue = self.savedVars.haveMaterialChecked
-		self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].currentValue = self.savedVars.haveKnowledgeChecked
+		self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked = self.savedVars.haveMaterialChecked
+		self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].checked = self.savedVars.haveKnowledgeChecked
 	end
 end
 
@@ -513,17 +683,19 @@ function ZO_GamepadSmithingCreation:RefreshOptionList()
 end
 
 function ZO_GamepadSmithingCreation:SelectOption()
-    ZO_GamepadCraftingUtils_SelectOptionFromOptionList(self)
+    local targetControl = self.optionList:GetTargetControl()
+    ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
+    self:RefreshFilters()
 end
 
 function ZO_GamepadSmithingCreation:RefreshFilters()
-    local haveMaterialChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].currentValue
-    local haveKnowledgeChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].currentValue
+    local haveMaterialChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked
+    local haveKnowledgeChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].checked
 
     local filterChanged = (haveMaterialChecked ~= self.savedVars.haveMaterialChecked) or
                           (haveKnowledgeChecked ~= self.savedVars.haveKnowledgeChecked)
     if filterChanged then
-        self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked)
+        self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked,  self:GetIsUsingUniversalStyleItem())
     end
 end
 
@@ -556,6 +728,7 @@ do
         [SI_SMITHING_MATERIAL_QUANTITY] = SI_GAMEPAD_SMITHING_MATERIAL_QUANTITY,
         [SI_SMITHING_STYLE_DESCRIPTION] = SI_GAMEPAD_SMITHING_STYLE_DESCRIPTION,
         [SI_SMITHING_TRAIT_DESCRIPTION] = SI_GAMEPAD_SMITHING_TRAIT_DESCRIPTION,
+        [SI_CRAFTING_UNIVERSAL_STYLE_DESCRIPTION] = SI_GAMEPAD_SMITHING_UNIVERSAL_STYLE_DESCRIPTION,
     }
 
     function ZO_GamepadSmithingCreation:GetPlatformFormattedTextString(stringId, ...)

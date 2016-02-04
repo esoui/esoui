@@ -37,7 +37,9 @@
             <Anchor point="TOP" />
         </Label>
 
-        <Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" virtual="true" />
+        <Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" >
+            <Dimensions y="64"/>
+        </Label>
         <Label name="ZO_CenterScreenAnnounceSmallTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" virtual="true" />
 
         <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Keyboard_Template" virtual="true">
@@ -47,6 +49,37 @@
                         <Label name="$(parent)Combined" font="ZoFontCenterScreenAnnounceSmall">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="5"/>
                         </Label>
+
+                        <Control name="$(parent)RaidCompleteText">
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
+                            <Controls>
+                                <Label name="$(parent)TimeAmount" font="ZoFontAnnounce" />
+
+                                <Label name="$(parent)TimeLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_TOTAL_TIME"  modifyTextType="NONE">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)TimeAmount" relativePoint="LEFT" offsetX="-5"/>
+                                </Label>
+
+                                <Label name="$(parent)ScoreAmount" font="ZoFontAnnounce" >
+                                    <Anchor point="RIGHT" relativeTo="$(parent)TimeLabel" relativePoint="LEFT" offsetX="-20"/>
+                                </Label>
+
+                                <Label name="$(parent)ScoreLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_FINAL_SCORE"  modifyTextType="NONE">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)ScoreAmount" relativePoint="LEFT" offsetX="-5"/>
+                                </Label>
+
+                                <Label name="$(parent)VitalityLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" modifyTextType="NONE">
+                                    <Anchor point="LEFT" relativeTo="$(parent)TimeAmount" relativePoint="RIGHT" offsetX="20"/>
+                                </Label>
+
+                                <Label name="$(parent)VitalityAmount" font="ZoFontAnnounce" >
+                                    <Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="5"/>
+                                </Label>
+
+                                <Label name="$(parent)VitalityPercent" font="ZoFontAnnounce" >
+                                    <Anchor point="LEFT" relativeTo="$(parent)VitalityIcon" relativePoint="RIGHT" offsetX="5"/>
+                                </Label>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Label>
             </Controls>
@@ -59,8 +92,62 @@
                         <Label name="$(parent)Combined" font="ZoFontGamepad42">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
                         </Label>
+
+                        <Control name="$(parent)RaidCompleteText">
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
+                            <Controls>
+                                <Label name="$(parent)TimeAmount" font="ZoFontGamepad42" /> 
+
+                                <Label name="$(parent)TimeLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_TOTAL_TIME"  modifyTextType="UPPERCASE">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)TimeAmount" relativePoint="LEFT" offsetX="-10" offsetY="5"/>
+                                </Label>
+
+                                <Label name="$(parent)ScoreAmount" font="ZoFontGamepad42">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)TimeLabel" relativePoint="LEFT" offsetX="-20" offsetY="-5"/>
+                                </Label>
+
+                                <Label name="$(parent)ScoreLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_FINAL_SCORE" modifyTextType="UPPERCASE">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)ScoreAmount" relativePoint="LEFT" offsetX="-10" offsetY="5"/>
+                                </Label>
+
+                                <Label name="$(parent)VitalityLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" modifyTextType="UPPERCASE">
+                                    <Anchor point="LEFT" relativeTo="$(parent)TimeAmount" relativePoint="RIGHT" offsetX="20" offsetY="5"/>
+                                </Label>
+
+                                <Label name="$(parent)VitalityAmount" font="ZoFontGamepad42" >
+                                    <Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="10" offsetY="-5"/>
+                                </Label>
+
+                                <Label name="$(parent)VitalityPercent" font="ZoFontGamepad42" />
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RaidCompleteText" virtual="true">
+            <Controls>
+                <Label name="$(parent)TimeAmount" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativePoint="BOTTOM"/>
+                </Label>
+
+                <Label name="$(parent)TimeLabel" text="SI_TRIAL_COMPLETE_TOTAL_TIME" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Label name="$(parent)ScoreAmount" />
+
+                <Label name="$(parent)ScoreLabel" text="SI_TRIAL_COMPLETE_FINAL_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Label name="$(parent)VitalityLabel" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Label name="$(parent)VitalityAmount" />
+
+                <Texture name="$(parent)VitalityIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)VitalityAmount" relativePoint="RIGHT" offsetX="20"/>
+                </Texture>
+
+                <Label name="$(parent)VitalityPercent" />
             </Controls>
         </Control>
 
@@ -104,6 +191,10 @@
                                         </Texture>
                                     </Controls>
                                 </Label>
+                                
+                                <Control name="$(parent)RaidCompleteText" inherits="ZO_RaidCompleteText">
+                                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" />
+                                </Control>
                             </Controls>
                         </Label>
                     </Controls>

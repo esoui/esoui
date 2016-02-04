@@ -786,14 +786,26 @@ function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     INFORMATION_TOOLTIP:AddLine(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
     if isCurrentLoc then --NO CLICK: Can't travel to origin
         INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
-    elseif pin:IsLockedByLinkedCollectible() then --CLICK: Open the store
-        INFORMATION_TOOLTIP:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE))
-        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     elseif g_fastTravelNodeIndex == nil and IsInCampaign() then --NO CLICK: Can't recall while inside AvA zone
         INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
     elseif isOutboundOnly then --NO CLICK: Can't travel to this wayshrine, only from it
         local message = GetErrorString(outboundOnlyErrorStringId)
         INFORMATION_TOOLTIP:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
+    elseif not CanLeaveCurrentLocationViaTeleport() then --NO CLICK: Current Zone or Subzone restricts jumping
+        local cantLeaveStringId
+        if IsInTutorialZone() then
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_TUTORIAL
+        elseif IsInOutlawZone() then
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_OUTLAW_REFUGE
+        else
+            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
+        end
+        INFORMATION_TOOLTIP:AddLine(GetString(cantLeaveStringId), "", ZO_ERROR_COLOR:UnpackRGB())
+    elseif pin:IsLockedByLinkedCollectible() then --CLICK: Open the store
+        INFORMATION_TOOLTIP:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE))
+        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    elseif IsUnitDead("player") then --NO CLICK: Dead
+        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
     elseif g_fastTravelNodeIndex == nil then --Recall
         local _, premiumTimeLeft = GetRecallCooldown()
         if premiumTimeLeft == 0 then --CLICK: Recall
@@ -878,6 +890,7 @@ do
     SetupWorldMap = function()
         local buttonTextures
         if IsInGamepadPreferredMode() then
+            ZO_WorldMapRespawnTimer:SetHidden(true)
             INFORMATION_TOOLTIP = ZO_MapLocationTooltip_Gamepad
             KEEP_TOOLTIP = ZO_MapLocationTooltip_Gamepad
             MAP_LOCATION_TOOLTIP = ZO_MapLocationTooltip_Gamepad
@@ -1724,11 +1737,14 @@ local WAYSHRINE_LMB =
         show = function(pin)
             local nodeIndex = pin:GetFastTravelNodeIndex()
             return nodeIndex ~= nil and g_fastTravelNodeIndex == nil and 
-                    not IsInCampaign() and not GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+                    not IsInCampaign() and not GetFastTravelNodeOutboundOnlyInfo(nodeIndex) and
+                    CanLeaveCurrentLocationViaTeleport() and not IsUnitDead("player")
         end,
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
-                SYSTEMS:GetObject("mainMenu"):ShowCategory(MENU_CATEGORY_MARKET)
+                local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
+                local collectibleName = GetCollectibleName(collectibleId)
+                ShowMarketAndSearch(collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
             else
                 local nodeIndex = pin:GetFastTravelNodeIndex()
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
@@ -1769,7 +1785,9 @@ local WAYSHRINE_LMB =
         end,
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
-                SYSTEMS:GetObject("mainMenu"):ShowCategory(MENU_CATEGORY_MARKET)
+                local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
+                local collectibleName = GetCollectibleName(collectibleId)
+                ShowMarketAndSearch(collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
             else
                 local nodeIndex = pin:GetFastTravelNodeIndex()
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
@@ -3243,7 +3261,7 @@ end
     Map Location Management (set up the place names text that appears on the map...)
 --]]
 
-CONSTANTS.LOCATION_FONT = "EsoUI/Common/Fonts/Univers67.otf|%d|soft-shadow-thin"
+CONSTANTS.LOCATION_FONT = "$(BOLD_FONT)|%d|soft-shadow-thin"
 
 ZO_MapLocations = ZO_ObjectPool:Subclass()
 
@@ -3558,6 +3576,8 @@ local function CalculateContainerAnchorOffsets()
     return containerCenterX - scrollCenterX, containerCenterY - scrollCenterY
 end
 
+local ZOOM_KEYBIND_STRIP_PADDING_Y = 10
+
 --this is a total hack function to fix sizing issues on gamepad PC until map can be redone
 local function GetGamepadAdjustedMapDimensions()
     local UIWidth, UIHeight = GuiRoot:GetDimensions()
@@ -3569,7 +3589,7 @@ local function GetGamepadAdjustedMapDimensions()
     local newMapWidth = left - right - padding
 
     --caculate the safe zone height
-    local headerHeight = ZO_WorldMapHeader_GamepadTitle:GetHeight()
+    local headerHeight = ZO_WorldMapHeader_Gamepad:GetNamedChild("ZoomKeybind"):GetHeight() + ZOOM_KEYBIND_STRIP_PADDING_Y -- use the zoomkeybind so we don't create a cyclical dependancy between the header title and map extants
     local buttonsHeight = ZO_WorldMapButtons:GetHeight()
     local keybindStripHeight = ZO_KeybindStripGamepadBackgroundTexture:GetHeight()
     local safeHeight = UIHeight - ZO_GAMEPAD_SAFE_ZONE_INSET_Y - headerHeight - buttonsHeight - keybindStripHeight - padding
@@ -4766,9 +4786,9 @@ local function AddQuestPins(questIndex)
         else
             for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
                 for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-                    local _, _, isFailCondition, isComplete = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)
+                    local _, _, isFailCondition, isComplete, _, isVisible = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)
 
-                    if(not (isFailCondition or isComplete)) then
+                    if(not (isFailCondition or isComplete) and isVisible) then
                         local taskId = RequestJournalQuestConditionAssistance(questIndex, stepIndex, conditionIndex, assisted)
                         local tag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
                         g_mapPinManager:AddTask(taskId, tag)
@@ -4998,12 +5018,14 @@ end
 
 function ZO_WorldMap_RefreshRespawnTimer(currentTime)
     if (g_nextRespawnTimeMS ~= 0) then
-		local currentTimeMS = currentTime * 1000
+        local currentTimeMS = currentTime * 1000
+        local formattedTimeRemaining = ""
+        local isTimerHidden = true
+
         if (currentTimeMS > g_nextRespawnTimeMS) then
             -- hide the timer and refresh the forward camp pins (which turns the green hightlight back on)
             g_nextRespawnTimeMS = 0
-            ZO_WorldMapRespawnTimer:SetText("")
-			ZO_WorldMapRespawnTimer:SetHidden(true)
+            isTimerHidden = true
 
             ZO_WorldMap_RefreshForwardCamps()
             if(g_mode == MAP_MODE_AVA_RESPAWN) then
@@ -5011,14 +5033,26 @@ function ZO_WorldMap_RefreshRespawnTimer(currentTime)
             end
         else
             if(g_mode == MAP_MODE_AVA_RESPAWN) then
-				local secondsRemaining = (g_nextRespawnTimeMS - currentTimeMS) / 1000
-				local formattedTimeRemaining = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
-				ZO_WorldMapRespawnTimer:SetText(zo_strformat(SI_MAP_FORWARD_CAMP_RESPAWN_COOLDOWN, formattedTimeRemaining))
-				ZO_WorldMapRespawnTimer:SetHidden(false)
-			else
-				-- hide the timer when not in AvA-Respawn map mode
-				ZO_WorldMapRespawnTimer:SetHidden(true)
-			end
+                local secondsRemaining = (g_nextRespawnTimeMS - currentTimeMS) / 1000
+                formattedTimeRemaining = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+                isTimerHidden = false
+            else
+                -- hide the timer when not in AvA-Respawn map mode
+                isTimerHidden = true
+            end
+        end
+
+        if IsInGamepadPreferredMode() then
+            local timerText = isTimerHidden and "" or GetString(SI_MAP_FORWARD_CAMP_RESPAWN_COOLDOWN)
+            local data =
+            {
+                data1HeaderText = timerText,
+                data1Text = formattedTimeRemaining
+            }
+            GAMEPAD_GENERIC_FOOTER:Refresh(data)
+        else
+            ZO_WorldMapRespawnTimerValue:SetText(formattedTimeRemaining)
+            ZO_WorldMapRespawnTimer:SetHidden(isTimerHidden)
         end
     end
 end
@@ -5149,11 +5183,22 @@ local function FloorNavigationUpdate()
 end
 
 function ZO_WorldMap_GetMapTitle()
+    local titleText
     local mapName = GetMapName()
-    if mapName == "" then
-        return GetString(SI_WINDOW_TITLE_WORLD_MAP_NO_ZONE)
+    local dungeonDifficulty = ZO_WorldMap_GetMapDungeonDifficulty()
+    if dungeonDifficulty == DUNGEON_DIFFICULTY_NONE then
+        title = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP, mapName)
     else
-        return zo_strformat(SI_WINDOW_TITLE_WORLD_MAP, mapName)
+        title = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP_WITH_DUNGEON_DIFFICULTY, mapName, GetString("SI_DUNGEONDIFFICULTY", dungeonDifficulty))
+    end
+    return title
+end
+
+function ZO_WorldMap_GetMapDungeonDifficulty()
+    if DoesCurrentMapMatchMapForPlayerLocation() then
+        return GetCurrentZoneDungeonDifficulty()
+    else
+        return DUNGEON_DIFFICULTY_NONE
     end
 end
 
@@ -5163,12 +5208,13 @@ function ZO_WorldMap_UpdateMap()
     -- Set up base map
     g_mapTileManager:UpdateTextures()
 
+    local zoneName = GetMapName()
     local mapTitle = ZO_WorldMap_GetMapTitle()
 
-    if(mapTitle ~= ZO_WorldMap.zoneName) then
-        ZO_WorldMap.zoneName = mapTitle
-        ZO_WorldMapTitle:SetText(ZO_WorldMap.zoneName)
-        ZO_WorldMapHeader_GamepadTitle:SetText(ZO_WorldMap.zoneName)
+    if zoneName ~= ZO_WorldMap.zoneName then
+        ZO_WorldMap.zoneName = zoneName
+        ZO_WorldMapTitle:SetText(mapTitle)
+        ZO_WorldMapHeader_GamepadTitle:SetText(mapTitle)
     end
 
     -- Set up map location names
@@ -6249,18 +6295,20 @@ do
         g_playerPin = g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
 
         local function TryTriggeringTutorials()
-            local interactionType = GetInteractionType()
-            if interactionType == INTERACTION_NONE then
-                if GetMapContentType() == MAP_CONTENT_AVA then
-                    TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_AVA)
-                else
-                    TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_PVE)
-                end
-            elseif interactionType == INTERACTION_FAST_TRAVEL_KEEP then
-                TriggerTutorial(TUTORIAL_TRIGGER_AVA_FAST_TRAVEL)
-            elseif interactionType == INTERACTION_FAST_TRAVEL then
-                TriggerTutorial(TUTORIAL_TRIGGER_PVE_FAST_TRAVEL)
-            end
+			if WORLD_MAP_FRAGMENT:IsShowing() then
+				local interactionType = GetInteractionType()
+				if interactionType == INTERACTION_NONE then
+					if GetMapContentType() == MAP_CONTENT_AVA then
+						TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_AVA)
+					else
+						TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_PVE)
+					end
+				elseif interactionType == INTERACTION_FAST_TRAVEL_KEEP then
+					TriggerTutorial(TUTORIAL_TRIGGER_AVA_FAST_TRAVEL)
+				elseif interactionType == INTERACTION_FAST_TRAVEL then
+					TriggerTutorial(TUTORIAL_TRIGGER_PVE_FAST_TRAVEL)
+				end
+			end
         end
 
         --delay a lot of initialization until after the addon loads
@@ -6590,7 +6638,7 @@ function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
 
             ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
             local KEYBIND_SCALE_PERCENT = 120
-		    ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT, KEYBIND_SCALE_PERCENT), buttonText))
+            ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT, KEYBIND_SCALE_PERCENT), buttonText))
         end
     end
 end

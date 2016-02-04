@@ -1,5 +1,6 @@
 ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING = 20
 ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING = 4
+ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX = ITEMSTYLE_UNIVERSAL + 1 -- 1 is because it expects a lua index
 
 local g_sceneToManagerMap = {}
 
@@ -216,4 +217,12 @@ end
 
 function ZO_Smithing_Common:OnResearchSlotChanged()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_SmithingHorizontalListTemplate_OnInitialized(control)
+    control.listControl = control:GetNamedChild("List")
+    control.highlightTexture = control:GetNamedChild("Highlight")
+    control.titleLabel = control:GetNamedChild("Title")
+    control.selectedLabel = control:GetNamedChild("SelectedLabel")
+    control.extraInfoLabel = control:GetNamedChild("ExtraInfoLabel")
 end

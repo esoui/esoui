@@ -6,9 +6,13 @@ end
 
 function ZO_WorldMapCorner_OnInitialized(self)
     local titleLabel = self:GetNamedChild("Title")
-    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
+    local function UpdateTitleEventCallback()
         UpdateTitle(titleLabel)
-    end)
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", UpdateTitleEventCallback)
+    self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, UpdateTitleEventCallback)
+
     UpdateTitle(titleLabel)
 end
 

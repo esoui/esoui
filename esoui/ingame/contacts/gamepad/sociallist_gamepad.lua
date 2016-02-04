@@ -18,7 +18,6 @@ end
 function ZO_GamepadSocialListPanel:Initialize(control, socialManager, rowTemplate)
     ZO_GamepadInteractiveSortFilterList.Initialize(self, control)
     ZO_SocialOptionsDialogGamepad.Initialize(self)
-    self.playerAlliance = GetUnitAlliance("player")
     self.socialManager = socialManager
     ZO_ScrollList_AddDataType(self.list, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, rowTemplate, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
     self:SetMasterList(socialManager:GetMasterList())
@@ -176,4 +175,29 @@ function ZO_GamepadSocialListPanel:UpdateStatusDropdownSelection(status)
     local IGNORE_CALLBACK = true
     status = status or GetPlayerStatus()
     self.filterDropdown:SelectItemByIndex(status, IGNORE_CALLBACK)
+end
+
+function ZO_GamepadSocialListPanel:BuildGuildInviteOption(header, guildId)
+    local inviteFunction = function()
+            ZO_TryGuildInvite(guildId, self.socialData.displayName)
+        end
+
+    return self:BuildOptionEntry(header, GetGuildName(guildId), inviteFunction, nil, GetLargeAllianceSymbolIcon(GetGuildAlliance(guildId)))
+end
+
+function ZO_GamepadSocialListPanel:AddInviteToGuildOptionTemplates()
+    local guildCount = GetNumGuilds()
+
+    if guildCount > 0 then
+        local guildInviteGroupingId = self:AddOptionTemplateGroup(function() return GetString(SI_GAMEPAD_CONTACTS_INVITE_TO_GUILD_HEADER) end)
+
+        for i = 1, guildCount do
+            local guildId = GetGuildId(i)
+
+            local buildFunction = function() return self:BuildGuildInviteOption(nil, guildId) end
+            local visibleFunction = function() return not self.socialData.isPlayer and DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_INVITE) end
+
+            self:AddOptionTemplate(guildInviteGroupingId, buildFunction, visibleFunction)
+        end
+    end
 end

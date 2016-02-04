@@ -15,7 +15,7 @@ function ZO_Fence_Base:Initialize(control)
     self.control = control
 
     -- Register for callbacks
-    FENCE_MANAGER:RegisterCallback("FenceOpened",  function(sellsUsed, laundersUsed) self:OnOpened(sellsUsed, laundersUsed) end)
+    FENCE_MANAGER:RegisterCallback("FenceOpened",  function(enableSell, enableLaunder) self:OnOpened(enableSell, enableLaunder) end)
     FENCE_MANAGER:RegisterCallback("FenceClosed",  function() self:OnClosed() end)
     FENCE_MANAGER:RegisterCallback("FenceSellSuccess",  function() self:OnSellSuccess() end)
     FENCE_MANAGER:RegisterCallback("FenceLaunderSuccess",  function() self:OnLaunderSuccess() end)
@@ -29,7 +29,7 @@ end
 ---- Callbacks
 --]]
 
-function ZO_Fence_Base:OnOpened(sellsUsed, laundersUsed)
+function ZO_Fence_Base:OnOpened(enableSell, enableLaunder)
     --Stub, to be overriden
 end
 

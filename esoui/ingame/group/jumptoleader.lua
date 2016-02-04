@@ -32,7 +32,7 @@ do
                         local zoneIndex = GetUnitZoneIndex(groupLeaderUnitTag)
                         local collectibleId = GetCollectibleIdForZone(zoneIndex)
                         local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-                        ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT", nil, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryName } })
+                        ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT", { collectibleName = collectibleName }, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryName } })
                     end
                 end
             end

@@ -6,59 +6,14 @@ local ZO_GroupMenu_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 local MENU_ENTRY_TYPE_ROLES = 1
 local MENU_ENTRY_TYPE_CURRENT_GROUP = 2
-local MENU_ENTRY_TYPE_FIND_GROUP = 3
-local MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY = 4
-local MENU_ENTRY_TYPE_INVITE_PLAYER = 5
-local MENU_ENTRY_TYPE_INVITE_FRIEND = 6
-local MENU_ENTRY_TYPE_LEAVE_GROUP = 7
-local MENU_ENTRY_TYPE_DISBAND_GROUP = 8
+local MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY = 3
+local MENU_ENTRY_TYPE_INVITE_PLAYER = 4
+local MENU_ENTRY_TYPE_INVITE_FRIEND = 5
+local MENU_ENTRY_TYPE_LEAVE_GROUP = 6
+local MENU_ENTRY_TYPE_DISBAND_GROUP = 7
 
 local CATEGORY_HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
 local MENU_ENTRY_TEMPLATE = "ZO_GamepadMenuEntryTemplate"
-
-local TOOLTIP_INFO_TEXT = 
-{
-    [MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY] = 
-    {
-        title = GetString(SI_GAMEPAD_GROUP_DUNGEON_DIFFICULTY),
-        text = 
-        {
-            -- Only one error will display. This table is prioritized from most important to least.
-            errors =
-            {
-                {
-                    text = GetString(SI_DUNGEON_DIFFICULTY_VETERAN_TOOLTIP_FAILED_REQUIREMENT),
-                    canDisplay = function()
-                        return GetUnitVeteranRank("player") == 0
-                    end,
-                },
-                {
-                    text = GetString(SI_DUNGEON_DIFFICULTY_VETERAN_TOOLTIP_LEADER_MUST_CHANGE),
-                    canDisplay = function()
-                        local isPlayerVeteran = GetUnitVeteranRank("player") > 0
-                        return isPlayerVeteran and IsUnitGrouped("player") and not IsUnitGroupLeader("player")
-                    end,
-                },
-                {
-                    text = GetString(SI_DUNGEON_DIFFICULTY_VETERAN_TOOLTIP_IN_DUNGEON),
-                    canDisplay = function() 
-                        local isPlayerVeteran = GetUnitVeteranRank("player") > 0
-                        local isLeader = IsUnitGrouped("player") and IsUnitGroupLeader("player")
-                        local isAnyGroupMemberInDungeon = IsAnyGroupMemberInDungeon()
-                        return isPlayerVeteran and isLeader and isAnyGroupMemberInDungeon
-                    end,
-                },
-                {
-                    text = GetString(SI_DUNGEON_DIFFICULTY_VETERAN_TOOLTIP_IN_LFG_GROUP),
-                    canDisplay = function()
-                        return IsInLFGGroup()
-                    end,
-                },
-            },
-            bodyText = GetString(SI_DUNGEON_DIFFICULTY_HELP_TOOLTIP),
-        }
-    },
-}
 
 function ZO_GroupMenu_Gamepad:New(...)
     return ZO_Gamepad_ParametricList_Screen.New(self, ...)
@@ -81,7 +36,6 @@ function ZO_GroupMenu_Gamepad:InitializeScene()
             self:SelectMenuList()
 
             ZO_GamepadGenericHeader_Activate(self.header)
-            self:RefreshFooter()
 
             SCENE_MANAGER:AddFragment(GAMEPAD_GROUP_ROLES_FRAGMENT)
             TriggerTutorial(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED)
@@ -110,8 +64,12 @@ function ZO_GroupMenu_Gamepad:PerformDeferredInitialization()
 
     self:InitializeKeybindDescriptors()
     self:InitializeEvents()
-
-    ZO_GamepadGenericHeader_RefreshData(self.header, GAMEPAD_GROUP_DATA:GetHeaderData())
+    
+    local headerData =
+    {
+        titleText = GetString(SI_MAIN_MENU_GROUP),
+    }
+    ZO_GamepadGenericHeader_RefreshData(self.header, headerData)
 
     self.currentFragmentGroup = nil
     self.menuEntries[MENU_ENTRY_TYPE_CURRENT_GROUP].fragmentGroup = { GROUP_LIST_GAMEPAD:GetListFragment(), GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT }
@@ -145,10 +103,8 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
                     end
 
                     local isAnyGroupMemberInDungeon = IsAnyGroupMemberInDungeon()
-                    local isGrouped = IsUnitGrouped("player")
-                    local isLeader = isGrouped and IsUnitGroupLeader("player")
 
-                    return not IsInLFGGroup() and not isAnyGroupMemberInDungeon and (not isGrouped or isLeader)
+                    return not IsInLFGGroup() and not isAnyGroupMemberInDungeon and IsUnitSoloOrGroupLeader("player")
                 elseif type == MENU_ENTRY_TYPE_CURRENT_GROUP then
                     return GetGroupSize() > 0
                 end
@@ -162,13 +118,10 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
                 if type == MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY then
                     self:DeactivateCurrentList()
                     self.dungeonDifficultyDropdown:Activate()
-                    self.dungeonDifficultyDropdown:SetHighlightedItem(IsUnitUsingVeteranDifficulty("player") and DIFFICULTY_VETERAN_INDEX or DIFFICULTY_NORMAL_INDEX)
+                    self.dungeonDifficultyDropdown:SetHighlightedItem(ZO_GetEffectiveDungeonDifficulty() == DUNGEON_DIFFICULTY_VETERAN and DIFFICULTY_VETERAN_INDEX or DIFFICULTY_NORMAL_INDEX)
 
                 elseif type == MENU_ENTRY_TYPE_CURRENT_GROUP then
                     self:SelectGroupList(SOUNDS.GAMEPAD_MENU_FORWARD)
-
-                elseif type == MENU_ENTRY_TYPE_FIND_GROUP then
-                    SCENE_MANAGER:Push("groupingToolsGamepad")
 
                 elseif type == MENU_ENTRY_TYPE_INVITE_PLAYER then
                     local platform = GetUIPlatform()
@@ -254,7 +207,7 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
         end
     end
 
-    local function OnVeteranDifficultyChanged()
+    local function OnGroupVeteranDifficultyChanged()
         if not self.control:IsControlHidden() then
             self:UpdateMenuList()
         end
@@ -278,18 +231,6 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
         end
     end
 
-    local lastUpdateS = 0
-    local function OnUpdate(control, currentFrameTimeSeconds)
-        --Refresh Grouping Tools tooltip
-        if currentFrameTimeSeconds - lastUpdateS > 1 then
-            local data = self:GetMainList():GetTargetData()
-            if data and data.type == MENU_ENTRY_TYPE_FIND_GROUP then
-                GAMEPAD_TOOLTIPS:LayoutGroupFinder(GAMEPAD_LEFT_TOOLTIP)
-                lastUpdateS = currentFrameTimeSeconds
-            end
-        end
-    end
-
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, function(eventCode, ...) OnGroupMemberJoined(...) end)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, function(eventCode, ...) OnGroupMemberLeft(...) end)
     self.control:RegisterForEvent(EVENT_GROUP_UPDATE, function(eventCode, ...) OnGroupUpdate(...) end)
@@ -297,14 +238,10 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_STATUS_UPDATE, function(eventCode, ...) OnGroupingToolsStatusUpdate(...) end)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS, function(eventCode, ...) OnGroupMemberConnectedStatus(...) end)
 
-    self.control:RegisterForEvent(EVENT_VETERAN_DIFFICULTY_CHANGED, function(eventCode, ...) OnVeteranDifficultyChanged(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, function(eventCode, ...) OnGroupVeteranDifficultyChanged(...) end)
     self.control:RegisterForEvent(EVENT_VETERAN_RANK_UPDATE, function(eventCode, ...) OnVeteranRankChanged(...) end)
 
     self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(eventCode, ...) OnZoneUpdate(...) end)
-
-    self.control:SetHandler("OnUpdate", OnUpdate)
-
-    CALLBACK_MANAGER:RegisterCallback("OnGroupStatusChange", function() self:RefreshFooter() end)
 end
 
 
@@ -327,7 +264,6 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
     end
 
     list:AddEntry(MENU_ENTRY_TEMPLATE, self.menuEntries[MENU_ENTRY_TYPE_CURRENT_GROUP])
-    list:AddEntry(MENU_ENTRY_TEMPLATE, self.menuEntries[MENU_ENTRY_TYPE_FIND_GROUP])
     list:AddEntryWithHeader("ZO_GroupMenuGamepadDungeonDifficultyEntry", self.menuEntries[MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY])  
     
     if groupSize == 0 or (playerIsLeader and groupSize < GROUP_SIZE_MAX) then
@@ -404,7 +340,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
     local function SetupDungeonDifficultyEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
-        local isVeteran = IsUnitUsingVeteranDifficulty("player")
+        local isVeteran = ZO_GetEffectiveDungeonDifficulty() == DUNGEON_DIFFICULTY_VETERAN
         control.icon:ClearIcons()
         control.icon:AddIcon(isVeteran and data.veteranIcon or data.normalIcon)
         control.icon:Show()
@@ -432,24 +368,9 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
 
     --Menu
     local function UpdateTooltipText(menuEntryType)
-        local tooltipInfo = TOOLTIP_INFO_TEXT[menuEntryType]
-        if tooltipInfo then
-            local textEntry = tooltipInfo.text
-            local bodyText, errorText
-            if type(textEntry) == "string" then
-                bodyText = textEntry
-            else
-                bodyText = textEntry.bodyText
-                for _, error in ipairs(textEntry.errors) do
-                    if error.canDisplay() then
-                        errorText = error.text
-                        break
-                    end
-                end
-            end
-            GAMEPAD_TOOLTIPS:LayoutGroupTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipInfo.title, bodyText, errorText)
-		elseif menuEntryType == MENU_ENTRY_TYPE_FIND_GROUP then
-            GAMEPAD_TOOLTIPS:LayoutGroupFinder(GAMEPAD_LEFT_TOOLTIP)
+        if menuEntryType == MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY then
+            local hasControlOfDifficulty, difficultyControlReason = CanPlayerChangeGroupDifficulty()
+            GAMEPAD_TOOLTIPS:LayoutGroupTooltip(GAMEPAD_LEFT_TOOLTIP,  GetString(SI_GAMEPAD_GROUP_DUNGEON_DIFFICULTY),  GetString(SI_DUNGEON_DIFFICULTY_HELP_TOOLTIP), GetString("SI_GROUPDIFFICULTYCHANGEREASON", difficultyControlReason))
         else
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         end
@@ -487,7 +408,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
     local _, point1, relativeTo1, relativePoint1, offsetX1, offsetY1 = listControl:GetAnchor(0)
     local _, point2, relativeTo2, relativePoint2, offsetX2, offsetY2 = listControl:GetAnchor(1)
     listControl:ClearAnchors()
-    listControl:SetAnchor(point1, relativeTo1, relativePoint1, offsetX1, offsetY1 + ZO_ROLES_BAR_ADDITIONAL_HEADER_SPACE)
+    listControl:SetAnchor(point1, relativeTo1, relativePoint1, offsetX1, offsetY1 + ZO_GAMEPAD_ROLES_BAR_ADDITIONAL_HEADER_SPACE)
     listControl:SetAnchor(point2, relativeTo2, relativePoint2, offsetX2, offsetY2)
 
     list:SetDefaultSelectedIndex(2) --don't select MENU_ENTRY_TYPE_ROLES by default
@@ -496,8 +417,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
     self.menuEntries = {
         [MENU_ENTRY_TYPE_ROLES] = CreateListEntry("", MENU_ENTRY_TYPE_ROLES),
         [MENU_ENTRY_TYPE_CURRENT_GROUP] = CreateListEntry(SI_GAMEPAD_GROUP_CURRENT_GROUP, MENU_ENTRY_TYPE_CURRENT_GROUP, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_currentGroup.dds"),
-        [MENU_ENTRY_TYPE_FIND_GROUP] = CreateListEntry(SI_GAMEPAD_GROUP_FIND_MEMBERS, MENU_ENTRY_TYPE_FIND_GROUP, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder.dds"),
-        [MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY] = CreateDifficultyListEntry("", MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY, "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_normalDungeon.dds", "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_veteranDungeon.dds"),
+        [MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY] = CreateDifficultyListEntry("", MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY, GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_NORMAL), GetGamepadDungeonDifficultyIcon(DUNGEON_DIFFICULTY_VETERAN)),
         [MENU_ENTRY_TYPE_INVITE_PLAYER] = CreateListEntry(SI_GROUP_WINDOW_INVITE_PLAYER, MENU_ENTRY_TYPE_INVITE_PLAYER, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_invitePlayer.dds"),
         [MENU_ENTRY_TYPE_INVITE_FRIEND] = CreateListEntry(SI_GROUP_WINDOW_INVITE_FRIEND, MENU_ENTRY_TYPE_INVITE_FRIEND, "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_invitePlayer.dds"),
         [MENU_ENTRY_TYPE_LEAVE_GROUP] = CreateListEntry(SI_GROUP_LIST_MENU_LEAVE_GROUP, MENU_ENTRY_TYPE_LEAVE_GROUP),
@@ -531,12 +451,6 @@ function ZO_GroupMenu_Gamepad:DeactivateCurrentList()
 
     ZO_Gamepad_ParametricList_Screen.DeactivateCurrentList(self)
 end
-
---Other updates
-function ZO_GroupMenu_Gamepad:RefreshFooter()
-    GAMEPAD_GENERIC_FOOTER:Refresh(GAMEPAD_GROUP_DATA:GetFooterData())
-end
-
 
 --XML Calls
 function ZO_GroupMenuGamepad_OnInitialized(control)

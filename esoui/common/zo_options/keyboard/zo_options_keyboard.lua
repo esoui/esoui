@@ -111,9 +111,13 @@ function ZO_KeyboardOptions:ChangePanels(panel)
     end
 
     local panelName = self.panelNames[panel]
+    local isGamepadMode = IsInGamepadPreferredMode()
+    local isCameraSettingPanelActive = (panel == SETTING_PANEL_CAMERA)
+    local isFirstPersonToggleButtonVisible = not isGamepadMode and isCameraSettingPanelActive
+
     GetControl(ZO_OptionsWindow, "Title"):SetText(panelName)
-    GetControl(ZO_OptionsWindow, "ToggleFirstPersonButton"):SetHidden(not (panel == SETTING_PANEL_CAMERA))
-    
+    GetControl(ZO_OptionsWindow, "ToggleFirstPersonButton"):SetHidden(not isFirstPersonToggleButtonVisible)
+
     ZO_Scroll_ResetToTop(GetControl(ZO_OptionsWindow, "Settings"))
 
     self.currentPanel = panel

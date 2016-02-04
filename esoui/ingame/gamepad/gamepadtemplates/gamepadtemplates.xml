@@ -131,6 +131,7 @@
         <!-- Item Slot Related Scroll List Templates -->
         <Control name="ZO_GamepadItemEntryTemplate" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
             <Controls>
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_GamepadMenuEntryCooldownTemplate" tier="MEDIUM" hidden="true"/>
                 <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
             </Controls>
         </Control>
@@ -315,23 +316,23 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_GamepadXPBarFooter" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Anchor point="RIGHT" relativeTo="ZO_KeybindStripControl" offsetX="-85" offsetY="-52" />
+        <Control name="ZO_GamepadXPBarFooter" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
+            <Anchor point="RIGHT" relativeTo="ZO_KeybindStripControl" offsetX="-127" offsetY="-52" />
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontGamepadCondensed27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" />
-                </Label>
-
-                <Label name="$(parent)Rank" font="ZoFontGamepad42">
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="8" />
-                </Label>
-
                 <StatusBar name="$(parent)XPBar" inherits="ZO_GamepadSkillsXPBar">
-                    <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT" />
                     <Controls>
                         <Control name="$(parent)GlowContainer" inherits="ZO_GamepadSkills_HeaderGlowContainer"/>
                     </Controls>
                 </StatusBar>
+
+                <Label name="$(parent)Rank" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)XPBar" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="10" />
+                </Label>
+
+                <Label name="$(parent)Name" font="ZoFontGamepadCondensed27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMRIGHT"  relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="-5"/>
+                </Label>
             </Controls>
         </Control>
 

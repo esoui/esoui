@@ -1,9 +1,19 @@
 ZO_InteractScene = ZO_Scene:Subclass()
 
-function ZO_InteractScene:New(name, sceneManager, interactionInfo)
-    local scene = ZO_Scene.New(self, name, sceneManager)
-    scene.interactionInfo = interactionInfo
-    return scene
+function ZO_InteractScene:New(...)
+    return ZO_Scene.New(self, ...)
+end
+
+function ZO_InteractScene:Initialize(name, sceneManager, interactionInfo)
+    ZO_Scene.Initialize(self, name, sceneManager)
+    self.interactionInfo = interactionInfo
+
+    local function OnGamepadPreferredModeChanged()
+        if self:IsShowing() then
+            sceneManager:ShowBaseScene()
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent(name .. "OnGamepadPreferredModeChanged", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
 end
 
 function ZO_InteractScene:GetInteractionInfo()

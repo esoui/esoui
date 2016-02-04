@@ -20,7 +20,7 @@
             </Controls>
         </Control>
       
-        <TopLevelControl name="ZO_LootHistoryControl_Keyboard" hidden="true">
+        <TopLevelControl name="ZO_LootHistoryControl_Keyboard" inherits="ZO_LootHistory_Shared">
             <Anchor point="BOTTOMRIGHT" offsetY="-95"/>
             <OnInitialized>
                 ZO_LootHistory_Keyboard_OnInitialized(self)

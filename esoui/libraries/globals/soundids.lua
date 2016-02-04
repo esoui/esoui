@@ -695,6 +695,7 @@ SOUNDS = {
     RAID_TRIAL_SCORE_ADDED_NORMAL           = "Raid_Trial_Score_Added_Normal",
     RAID_TRIAL_SCORE_ADDED_HIGH             = "Raid_Trial_Score_Added_High",
     RAID_TRIAL_SCORE_ADDED_VERY_HIGH        = "Raid_Trial_Score_Added_Very_High",
+    RAID_TRIAL_COUNTER_UPDATE               = "Raid_Trial_Counter_Update",
 
     -- Dyeing
     DYEING_OPENED                           = "Dyeing_Opened",

@@ -443,5 +443,8 @@ end
 ZO_CRAFTING_TOOLTIP_STYLES = ZO_DeepTableCopy(ZO_TOOLTIP_STYLES)
 for key,value in pairs(ZO_CRAFTING_TOOLTIP_STYLES) do
     value["horizontalAlignment"] = TEXT_ALIGN_CENTER
-    value["layoutPrimaryDirectionCentered"] = true
+
+    if key ~= "topSubsectionItemCounts" then
+        value["layoutPrimaryDirectionCentered"] = true
+    end
 end

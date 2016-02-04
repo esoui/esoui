@@ -51,8 +51,10 @@ function ZO_LargeSingleMarketProduct_Base:LayoutCostAndText(description, cost, d
 
     self.cost:ClearAnchors()
     self.textCallout:ClearAnchors()
-    
-    if cost > discountedCost then
+
+    if self.isFree then
+        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 4)
+    elseif cost > discountedCost then
         self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
         self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, 4) -- x offset to account for strikethrough
     else
@@ -129,7 +131,7 @@ function ZO_LargeSingleMarketProduct_Base:LayoutTooltip(tooltip)
         GAMEPAD_TOOLTIPS:LayoutCollectible(tooltip, unpack(self.tooltipLayoutArgs))
     elseif GetMarketProductNumItems(self.marketProductId) > 0 then
         local stackCount = self:GetStackCount()
-        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(tooltip, self.itemLink, stackCount, ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT)
+        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(tooltip, self.itemLink, stackCount)
     else
         GAMEPAD_TOOLTIPS:LayoutMarketProduct(tooltip, self)
     end
@@ -144,10 +146,10 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
     local onSale = self.onSale
     local focusedState = isFocused and MARKET_PRODUCT_FOCUS_STATE_FOCUSED or MARKET_PRODUCT_FOCUS_STATE_UNFOCUSED
     local purchaseState = self.purchaseState
-        
+
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, isFocused, purchaseState)
 
-    if isPurchaseLocked then
+    if isPurchaseLocked or self.isFree then
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, isFocused, purchaseState)
         self.normalBorder:SetEdgeColor(ZO_MARKET_PRODUCT_PURCHASED_COLOR:UnpackRGB())
     else
@@ -157,15 +159,15 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
 
     local textCalloutBackgroundColor
     local textCalloutTextColor
-    if onSale then
+    if self:IsLimitedTimeProduct() then
+        textCalloutBackgroundColor = ZO_BLACK
+        textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_ON_SALE_COLOR or ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR
+    elseif onSale then
         textCalloutBackgroundColor = isFocused and ZO_MARKET_PRODUCT_ON_SALE_COLOR or ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR
         textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
     elseif isNew then
         textCalloutBackgroundColor = isFocused and ZO_MARKET_PRODUCT_NEW_COLOR or ZO_MARKET_PRODUCT_NEW_DIMMED_COLOR
         textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
-    elseif self:GetTimeLeftInSeconds() > 0 then
-        textCalloutBackgroundColor = ZO_BLACK
-        textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_ON_SALE_COLOR or ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR
     end
 
     if textCalloutBackgroundColor then

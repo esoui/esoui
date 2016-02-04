@@ -7,7 +7,7 @@
             <Controls>
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_NAME_INSTRUCTIONS"/>
 
-                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
@@ -32,7 +32,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="25" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="25" />
                 </Label>
-                <Backdrop name="$(parent)Message" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Message" inherits="ZO_MultiLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
@@ -57,7 +57,7 @@
             <Controls>
                 <Label name="$(parent)DisplayName" inherits="ZO_DialogContentAnchors" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3"/>
 
-                <Backdrop name="$(parent)Note" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Note" inherits="ZO_MultiLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="265"/>
@@ -118,7 +118,7 @@
                 
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" font="ZoFontHeader2" text="SI_GUILD_CREATE_DIALOG_NAME_HEADER"/>
 
-                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>

@@ -4,6 +4,9 @@ KEYBIND_STRIP_ALIGN_LEFT = 1
 KEYBIND_STRIP_ALIGN_CENTER = 2
 KEYBIND_STRIP_ALIGN_RIGHT = 3
 
+KEYBIND_STRIP_DISABLED_ALERT = "alert"
+KEYBIND_STRIP_DISABLED_DIALOG = "dialog"
+
 function ZO_KeybindStrip:New(...)
     local keybindStrip = ZO_Object.New(self)
     keybindStrip:Initialize(...)
@@ -566,7 +569,7 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
         local buttonOrEtherealDescriptor = self.keybinds[keybind]
         if buttonOrEtherealDescriptor and (not buttonOrEtherealDescriptor.IsControlHidden or not buttonOrEtherealDescriptor:IsControlHidden()) then
             local keybindButtonDescriptor = GetDescriptorFromButton(buttonOrEtherealDescriptor)
-            local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
+            local enabled, disabledAlertText, disabledAlertType = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
             local cooldown = GetValueFromRawOrFunction(keybindButtonDescriptor, "cooldown")
             if cooldown then
                 enabled = false
@@ -585,6 +588,13 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                     end
                 end
                 return true
+            elseif disabledAlertText then
+                if disabledAlertType == KEYBIND_STRIP_DISABLED_DIALOG then
+                    ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, {mainTextParams = {disabledAlertText}})
+                else
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, disabledAlertText)
+                    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+                end
             end
         end
     end

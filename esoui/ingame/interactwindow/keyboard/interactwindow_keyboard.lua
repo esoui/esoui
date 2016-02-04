@@ -248,7 +248,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
 
     local rewardData = self:GetRewardData(journalQuestIndex)
     local numRewards = #rewardData
-
+    local confirmError
     for i, reward in ipairs(rewardData) do
         local creatorFunc = self:GetRewardCreateFunc(reward.rewardType)
         if(creatorFunc) then
@@ -262,6 +262,9 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 end
 
                 moneyControls[#moneyControls + 1] = control
+
+                --warn the player they aren't going to get their money when they hit complete
+                confirmError = self:TryGetMaxCurrencyWarningText(reward.rewardType, reward.amount)
             else
                 local control = self.givenRewardPool:AcquireObject()
                 control.index = i
@@ -296,6 +299,8 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
 
     ZO_InteractWindowRewardArea:SetHidden(numRewards == 0)
     ZO_InteractWindowRewardArea:SetHeight(rewardWindowHeight)
+
+    return confirmError
 end
 
 function ZO_Interaction:GetInteractGoldIcon()

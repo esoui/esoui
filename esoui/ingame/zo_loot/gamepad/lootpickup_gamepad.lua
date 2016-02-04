@@ -84,6 +84,9 @@ function ZO_LootPickup_Gamepad:DeferredInitialize()
 end
 
 function ZO_LootPickup_Gamepad:OnShowing()
+    local dontAutomaticallyExitScene = false
+    SCENE_MANAGER:SetHUDUIScene("lootGamepad", dontAutomaticallyExitScene)
+
     KEYBIND_STRIP:RemoveDefaultExit()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     self.itemList:Activate()
@@ -138,10 +141,8 @@ function ZO_LootPickup_Gamepad:Show()
         self.returnScene = nil
     else
         self.returnScene = SCENE_MANAGER:GetCurrentScene():GetName()
-    end 
+    end
 
-    local dontAutomaticallyExitScene = false
-    SCENE_MANAGER:SetHUDUIScene("lootGamepad", dontAutomaticallyExitScene)
     SCENE_MANAGER:Show("lootGamepad")
     
     local OPEN_LOOT_WINDOW = false

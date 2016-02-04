@@ -188,6 +188,13 @@ function ZO_GamepadInventory:OnUpdate(currentFrameTimeSeconds)
             self:RefreshItemActionList()
         end
     end
+
+    if self.updateItemActions then
+        self.updateItemActions = nil
+        if SCENE_MANAGER:IsShowing("gamepad_inventory_item_filter") then
+            self:RefreshItemActionList()
+        end
+    end
 end
 
 do
@@ -637,7 +644,11 @@ function ZO_GamepadInventory:InitializeItemList()
         end
 
         if SCENE_MANAGER:IsShowing("gamepad_inventory_item_filter") then
-            KEYBIND_STRIP:UpdateKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
+            if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
+                KEYBIND_STRIP:UpdateKeybindButton(self.quickslotKeybindDescriptor)
+            elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
+                KEYBIND_STRIP:UpdateKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
+            end
         end
     end
 
@@ -1009,7 +1020,11 @@ function ZO_GamepadInventory:RefreshItemList()
 
         local remaining, duration
         if isQuestItem then 
-            remaining, duration = GetQuestToolCooldownInfo(itemData.questIndex, itemData.toolIndex)
+            if itemData.toolIndex then
+                remaining, duration = GetQuestToolCooldownInfo(itemData.questIndex, itemData.toolIndex)
+            elseif itemData.stepIndex and itemData.conditionIndex then
+                remaining, duration = GetQuestItemCooldownInfo(itemData.questIndex, itemData.stepIndex, itemData.conditionIndex)
+            end
         else
             remaining, duration = GetItemCooldownInfo(itemData.bagId, itemData.slotIndex)
         end
@@ -1066,9 +1081,13 @@ function ZO_GamepadInventory:RefreshItemActionList()
 
     self.itemActionList:Commit()
 
-    if targetData and numActions == 0 then
-        --If there is an item selected and it has no actions it may be on cooldown so refresh until its cooldown is up.
-        self:MarkDirty()
+    
+    if targetData and targetData.timeCooldownRecorded and targetData.cooldownRemaining then
+        local cooldownEndTime = targetData.timeCooldownRecorded + targetData.cooldownRemaining
+        if cooldownEndTime > GetFrameTimeMilliseconds() then
+            --If there is an item selected and it has a cooldown, let the refresh function get called until it is no longer in cooldown
+            self.updateItemActions = true
+        end
     end
 end
 

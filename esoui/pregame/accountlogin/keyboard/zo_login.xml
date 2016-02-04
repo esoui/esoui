@@ -110,10 +110,9 @@
                     </Controls>
                 </Texture>
 
-                <Backdrop name="$(parent)AccountName" inherits="ZO_EditBackdrop">
-                    <Dimensions x="500" y="28" />
+                <Backdrop name="$(parent)AccountName" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Dimensions x="500"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOMLEFT" offsetX="130" offsetY="50" />
-
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4">
                             <OnEnter>
@@ -150,8 +149,7 @@
                     </Controls>
                 </Control>
 
-                <Backdrop name="$(parent)Password" inherits="ZO_EditBackdrop">
-                    <Dimensions y="28" />
+                <Backdrop name="$(parent)Password" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="80" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMRIGHT" offsetY="80" />
                     <Controls>

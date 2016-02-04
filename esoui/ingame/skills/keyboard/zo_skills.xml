@@ -251,6 +251,11 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMRIGHT" offsetY="5" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55" />
                 </Control>
+
+                <Label name="$(parent)Warning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Dimensions x="450"/>
+                    <Anchor point="TOP" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOM" offsetY="45" />
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

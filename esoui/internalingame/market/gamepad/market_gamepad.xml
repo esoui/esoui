@@ -145,10 +145,64 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_GamepadMarket_Preview"  inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" >
+        <TopLevelControl name="ZO_GamepadMarket_Preview" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" >
             <OnInitialized>
                 ZO_GamepadMarket_Preview_OnInitialize(self)
             </OnInitialized>
         </TopLevelControl>
+        
+        <Control name="ZO_GamepadMarket_EsoPlusCategoryTemplate" inherits="ZO_GamepadMarket_CategoryTemplate" virtual="true">
+            <DimensionConstraints minX="1288" maxY="805"/>
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGamepadBold45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="30" />
+                    <Anchor point="TOPRIGHT" offsetX="-30" />
+                </Label>
+
+                <Control name="$(parent)MembershipInfo" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+
+                        <Label name="$(parent)Status" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Label name="$(parent)Overview" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+                
+                <Control name="$(parent)Benefits" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="50" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="50" />
+                    
+                    <Controls>
+                        <Texture name="$(parent)Image">
+                            <!-- Hide the image for now -->
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
+                            <Anchor point="TOPRIGHT" />
+                        </Texture>
+                        
+                        <Label name="$(parent)Title" font="ZoFontGamepadBold45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetX="-5" />
+                        </Label>
+                        
+                        <Label name="$(parent)Text" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
     </Controls>
 </GuiXml>

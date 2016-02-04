@@ -241,6 +241,8 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
 
     self.questIndexToTreeNode = {}
 
+    ClearTooltip(InformationTooltip)
+
     -- Add items to the tree
     self.navigationTree:Reset()
 
@@ -296,6 +298,7 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
         self.questStepContainer:SetHidden(true)
         self.questIcon:SetHidden(true)
         self.repeatableIcon:SetHidden(true)
+        ClearTooltip(InformationTooltip)
         return
     end
 
@@ -446,7 +449,10 @@ function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
                 AddMenuItem(GetString(SI_QUEST_JOURNAL_ABANDON), function() QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(questIndex) end)
             end
 
-            AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_USER_QUEST_HELP, questIndex - 1) end)
+            AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() 
+																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
+																	HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromQuestName(node.data.name)
+																end)
 
             ShowMenu(label)
         end

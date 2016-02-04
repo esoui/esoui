@@ -118,7 +118,15 @@ function BindKeyDialog:OnUnbindClicked()
 end
 
 local function GetBindTypeTextFromIndex(bindingIndex)
-    return bindingIndex == 1 and GetString(SI_KEYBINDINGS_PRIMARY) or GetString(SI_KEYBINDINGS_SECONDARY)
+    if bindingIndex == 1 then 
+        return GetString(SI_KEYBINDINGS_PRIMARY) 
+    elseif bindingIndex == 2 then
+        return GetString(SI_KEYBINDINGS_SECONDARY)
+    elseif bindingIndex == 3 then
+        return GetString(SI_KEYBINDINGS_TERTIARY)
+    else
+        return GetString(SI_KEYBINDINGS_QUATERNARY)
+    end
 end
 
 function BindKeyDialog:SetupDialog(data)

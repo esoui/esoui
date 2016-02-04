@@ -92,13 +92,16 @@ function ZO_Reticle:TryHandlingQuestInteraction(questInteraction, questTargetBas
         end
 
         self.interactKeybindButton:SetEnabled(not questToolOnCooldown)
+        if not questToolOnCooldown then
+            self.interactKeybindButton:ShowKeyIcon()
+        end
         return true
     end
 end
 
 function ZO_Reticle:TryHandlingInteraction(interactionPossible)
     if interactionPossible then
-        local action, interactableName, interactionBlocked, isOwned, additionalInteractInfo, context, contextLink = GetGameCameraInteractableActionInfo()
+        local action, interactableName, interactionBlocked, isOwnedOrCriminalInteract, additionalInteractInfo, context, contextLink = GetGameCameraInteractableActionInfo()
         local interactKeybindButtonColor = ZO_NORMAL_TEXT
         local additionalInfoLabelColor = ZO_CONTRAST_TEXT
         self.interactKeybindButton:ShowKeyIcon()
@@ -106,7 +109,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible)
         if action and interactableName then
             if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET, action))
-                if (isOwned) then 
+                if (isOwnedOrCriminalInteract) then 
                     interactKeybindButtonColor = ZO_ERROR_COLOR
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_EMPTY then
@@ -115,7 +118,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible)
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_LOCKED then
                 local lockQuality = context
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO, action, GetString("SI_LOCKQUALITY", lockQuality)))
-                if (isOwned) then 
+                if (isOwnedOrCriminalInteract) then 
                     TriggerTutorial(TUTORIAL_TRIGGER_OWNED_LOCK_VIEWED)
                     interactKeybindButtonColor = ZO_ERROR_COLOR
                 end
@@ -177,6 +180,8 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible)
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_WEREWOLF_ACTIVE_WHILE_ATTEMPTING_TO_CRAFT then
                 self.interactKeybindButton:SetText(zo_strformat(SI_CANNOT_CRAFT_WHILE_WEREWOLF))
+            elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_IN_HIDEYHOLE then
+                self.interactKeybindButton:SetText(zo_strformat(SI_EXIT_HIDEYHOLE))
             end
 			
 			local interactContextString = interactableName;
@@ -256,7 +261,7 @@ function ZO_Reticle:UpdateInteractText()
             end
         end
 
-		local showBusy = interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_FISH and interactionType ~= INTERACTION_PICKPOCKET or (IsInGamepadPreferredMode() and IsBlockActive())
+		local showBusy = interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_FISH and interactionType ~= INTERACTION_PICKPOCKET  and interactionType ~= INTERACTION_HIDEYHOLE or (IsInGamepadPreferredMode() and IsBlockActive())
 		self.interactKeybindButton:SetEnabled(not showBusy and not self.interactionBlocked)
     end
 end

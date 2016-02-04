@@ -148,7 +148,7 @@
                     </OnInitialized>
                 </Control>
 
-                <Backdrop name="$(parent)Edit" inherits="ZO_EditBackdrop" hidden="true">
+                <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">

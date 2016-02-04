@@ -54,5 +54,17 @@
                 </Texture>
             </Controls>
         </Control>
+
+        <Control name="ZO_LootHistory_Shared" virtual="true">
+            <Controls>
+                <Control name="$(parent)PersistentContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPRIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+        
     </Controls>
 </GuiXml>

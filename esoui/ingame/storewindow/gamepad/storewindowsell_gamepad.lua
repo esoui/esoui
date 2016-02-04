@@ -67,7 +67,8 @@ function ZO_GamepadStoreSell:InitializeKeybindStrip()
                                                       GAME_NAVIGATION_TYPE_BUTTON,
                                                       function() self:ConfirmSell() end,
                                                       GetString(SI_ITEM_ACTION_SELL),
-                                                      function() return #self.list.dataList > 0 end
+                                                      function() return #self.list.dataList > 0 end,
+                                                      function() return self:CanSell() end
                                                     )
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor,
@@ -87,6 +88,14 @@ function ZO_GamepadStoreSell:InitializeKeybindStrip()
                                                     GAME_NAVIGATION_TYPE_BUTTON,
                                                     function() self:UnselectSellItem() end,
                                                     nil)
+end
+
+function ZO_GamepadStoreSell:CanSell()
+    if GetCarriedCurrencyAmount(CURT_MONEY) ~= GetMaxCarriedCurrencyAmount(CURT_MONEY) then
+        return true
+    else
+        return false, GetString("SI_STOREFAILURE", STORE_FAILURE_SELL_FAILED_MONEY_CAP) -- "You cannot sell items when you are at the gold cap"
+    end
 end
 
 function ZO_GamepadStoreSell:ConfirmSell()

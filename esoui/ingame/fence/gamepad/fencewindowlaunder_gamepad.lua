@@ -12,9 +12,13 @@ function ZO_GamepadFenceLaunder:Initialize()
     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_STOLEN_ITEMS_LAUNDER))
 end
 
-function ZO_GamepadFenceLaunder:Confirm()
+function ZO_GamepadFenceLaunder:GetRemainingLaunders()
     local totalLaunders, laundersUsed = GetFenceLaunderTransactionInfo()
-    local remainingLaunders = zo_max(totalLaunders - laundersUsed, 0)
+    return zo_max(totalLaunders - laundersUsed, 0)
+end
+
+function ZO_GamepadFenceLaunder:Confirm()
+    local remainingLaunders = self:GetRemainingLaunders()
 
     if remainingLaunders == 0 then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString("SI_ITEMLAUNDERRESULT", ITEM_LAUNDER_RESULT_AT_LIMIT))
@@ -52,6 +56,25 @@ function ZO_GamepadFenceLaunder:OnSuccess()
         PlaySound(SOUNDS.FENCE_ITEM_LAUNDERED)
         STORE_WINDOW_GAMEPAD:RefreshHeaderData()
     end
+end
+
+function ZO_GamepadFenceLaunder:RefreshFooter()
+    if self:GetRemainingLaunders() > 0 then
+        self:ClearFooter()
+        return
+    end
+
+    local footerLabel = GetString(SI_FENCE_LAUNDER_LIMIT_RESET)
+    local resetTimeSeconds = select(3, GetFenceLaunderTransactionInfo())
+    local footerValue = ZO_FormatTimeMilliseconds(resetTimeSeconds * 1000, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+
+    local data =
+    {
+        data1HeaderText = footerLabel,
+        data1Text = footerValue
+    }
+    
+    GAMEPAD_GENERIC_FOOTER:Refresh(data)
 end
 
 function ZO_GamepadFenceLaunder_Initialize()

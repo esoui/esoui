@@ -327,10 +327,10 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     local hideQuadrant2Background = isStatsHidden and isEffectsHidden
     if(hideQuadrant2Background) then
         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        self.contentHeader:SetHidden(true)
+        GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
     else
         GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        self.contentHeader:SetHidden(false)
+        GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
     end
 end
 

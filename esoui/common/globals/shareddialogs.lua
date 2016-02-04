@@ -86,3 +86,34 @@ ESO_Dialogs["WAIT_FOR_CONSOLE_NAME_VALIDATION"] =
     {
     }
 }
+
+ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_CONFIRM_OPEN_URL_TITLE,
+    },
+    mainText =
+    {
+        text = SI_CONFIRM_OPEN_URL_TEXT,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_URL_DIALOG_OPEN,
+            callback =  function(dialog)
+                            OpenURLByType(dialog.data.urlType)
+                        end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    }
+}

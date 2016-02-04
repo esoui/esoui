@@ -226,7 +226,7 @@ end
 
 function ZO_GamepadMarketProductBundleItemAttachment:LayoutTooltip(tooltip)
     local stackCount = self:GetStackCount()
-    GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(tooltip, self.itemLink, stackCount, ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT)
+    GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(tooltip, self.itemLink, stackCount)
 end
 
 function ZO_GamepadMarketProductBundleItemAttachment:GetStackCount()

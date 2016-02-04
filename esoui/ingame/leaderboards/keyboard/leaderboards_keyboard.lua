@@ -122,6 +122,15 @@ function ZO_LeaderboardsManager_Keyboard:GetSelectedLeaderboardData()
 end
 
 function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
+    self.navigationTree:Reset()
+
+    if CAMPAIGN_LEADERBOARDS then
+        CAMPAIGN_LEADERBOARDS:AddCategoriesToParentSystem()
+    end
+    if RAID_LEADERBOARDS then
+        RAID_LEADERBOARDS:AddCategoriesToParentSystem()
+    end
+
     self.navigationTree:Commit()
 end
 

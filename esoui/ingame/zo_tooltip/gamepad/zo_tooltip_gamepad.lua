@@ -274,3 +274,22 @@ function ZO_GamepadTooltip_OnInitialized(control, dialogControl)
     GAMEPAD_TOOLTIPS = ZO_GamepadTooltip:New(control, dialogControl)
 end
 
+function ZO_Tooltip:LayoutTitleAndDescriptionTooltip(title, description)
+    self:LayoutTitleAndMultiSectionDescriptionTooltip(title, description)
+end
+
+function ZO_Tooltip:LayoutTitleAndMultiSectionDescriptionTooltip(title, ...)
+    --Title
+    if title then
+        local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
+        headerSection:AddLine(title, self:GetStyle("title"))
+        self:AddSection(headerSection)
+    end
+    
+    --Body
+    for i = 1, select("#", ...) do
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+        bodySection:AddLine(select(i, ...), self:GetStyle("bodyDescription"))
+        self:AddSection(bodySection)
+    end
+end

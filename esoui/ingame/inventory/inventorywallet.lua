@@ -33,7 +33,7 @@ function InventoryWalletManager:Initialize(container)
 
     self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaders:AddHeadersFromContainer()
-    self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+    self.sortHeaders:SelectHeaderByKey("name")
 
     self:RegisterEvents()
     self:RefreshCurrency()

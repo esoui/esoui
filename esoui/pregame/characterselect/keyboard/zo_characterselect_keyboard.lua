@@ -1,5 +1,4 @@
 local CHARACTER_DATA = 1
-local addOnManager
 local g_currentlySelectedCharacterData
 local g_deletingCharacterIds = {}
 
@@ -262,12 +261,12 @@ function ZO_CharacterSelect_Initialize(self)
 end
 
 function ZO_CharacterSelect_SetupAddonManager()
-    if not addOnManager then
-        addOnManager = ZO_AddOnManager:New()
+    if not ADD_ON_MANAGER then
+        ADD_ON_MANAGER = ZO_AddOnManager:New()
     end
 
     local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
-    addOnManager:SetCharacterData(dataList)
+    ADD_ON_MANAGER:SetCharacterData(dataList)
 end
 
 function ZO_CharacterSelect_ClearList()
@@ -276,8 +275,8 @@ function ZO_CharacterSelect_ClearList()
     ZO_CharacterSelect_DisableSelection()
     ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
     local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
-    if addOnManager then
-        addOnManager:SetCharacterData(dataList)
+    if ADD_ON_MANAGER then
+        ADD_ON_MANAGER:SetCharacterData(dataList)
     end
 end
 

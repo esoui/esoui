@@ -97,10 +97,21 @@ local function UpdateOptionControlState(control, updateTable, stateType)
     if updateFn then updateFn(control) end
 
     local nameControl = GetControl(control, "Name")
+    local boxControl = GetControl(control, "Checkbox")
+
     if stateType == ENABLED_STATE then
         nameControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
     else
         nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    end
+
+    if boxControl then
+        -- the checkbox could be in the off state even though we now want it enabled
+        -- so we have to override that color with the appropriate color
+        local currentState = boxControl:GetState()
+        if currentState ~= BSTATE_PRESSED and stateType == ENABLED_STATE then
+            nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+        end
     end
 
     control.state = stateType

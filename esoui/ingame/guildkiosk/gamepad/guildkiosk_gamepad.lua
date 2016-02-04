@@ -97,12 +97,10 @@ function ZO_GuildKiosk_Purchase_Gamepad:PerformDeferredInitialize()
     self.headerData = 
     {
         titleText = GetString(SI_GUILD_KIOSK_PURCHASE_TITLE),
-        data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_LABEL),
-	    data1Text = "",
-        data2HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
-	    data2Text = UpdateGuildMoney,
-        data3HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_PURCHASE_COST),
-	    data3Text = UpdateHireCost
+        data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
+	    data1Text = UpdateGuildMoney,
+        data2HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_PURCHASE_COST),
+	    data2Text = UpdateHireCost
     }
 
     ZO_Dialogs_RegisterCustomDialog("PURCHASE_KIOSK_GAMEPAD", 
@@ -187,8 +185,9 @@ function ZO_GuildKiosk_Purchase_Gamepad:OnGuildSelected(guildEntry)
     self.ownedKioskName = guildEntry.ownedKioskName
     self.guildCanUseTradingHouse = guildEntry.guildCanUseTradingHouse
     self.guildName = guildEntry.name
-    self.headerData.data1Text = guildEntry.name
+    
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+    ZO_GUILD_NAME_FOOTER_FRAGMENT:SetGuildName(self.guildName)
 
     if not self.guildCanUseTradingHouse then
         GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_HIRING_LABEL), zo_strformat(SI_GUILD_KIOSK_PURCHASE_ERROR_TRADING_HOUSE_LOCKED, GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE)))
@@ -419,7 +418,7 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
     local function UpdateBiddingCloses(control)
         local secsRemaining = GetKioskBidWindowSecondsRemaining()
         local ownershipDuration = ZO_FormatTimeLargestTwo(secsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT)
-        local timeString = zo_strformat("<<1>>|t32:32:EsoUI/Art/Mounts/timer_icon.dds|t", ownershipDuration)
+        local timeString = zo_strformat("<<1>>|t32:32:EsoUI/Art/Miscellaneous/timer_32.dds|t", ownershipDuration)
         return timeString
     end
 

@@ -1,5 +1,13 @@
 <GuiXml>
     <Controls>
+        <Label name="ZO_GamepadGenericFooterHeaderDataTextTemplate" inherits="ZO_GamepadHeaderDataTextTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)LoadingIcon" inherits="ZO_LoadingIcon_Gamepad_Footer" hidden="true">
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="5" />
+                </Control>
+            </Controls>
+        </Label>
+        
         <TopLevelControl name="ZO_GenericFooter_Gamepad" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
             <OnInitialized>
                 ZO_GenericFooter_Gamepad_OnInitialized(self)
@@ -11,7 +19,7 @@
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
 
             <Controls>
-                <Label name="$(parent)Data1" inherits="ZO_GamepadHeaderDataTextTemplate">
+                <Label name="$(parent)Data1" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate">
                     <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="2"/>
                 </Label>
 
@@ -19,7 +27,7 @@
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data1" offsetX="-ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING"/>
                 </Label>
 
-                <Label name="$(parent)Data2" inherits="ZO_GamepadHeaderDataTextTemplate">
+                <Label name="$(parent)Data2" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate">
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data1Header" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
                 </Label>
 
@@ -27,23 +35,13 @@
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data2" offsetX="-ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING" />
                 </Label>
 
-                <Label name="$(parent)Data3" inherits="ZO_GamepadHeaderDataTextTemplate">
+                <Label name="$(parent)Data3" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate">
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data2Header" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
                 </Label>
 
                 <Label name="$(parent)Data3Header" inherits="ZO_GamepadHeaderLabelTextTemplate">
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data3" offsetX="-ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING" />
                 </Label>
-
-                <Control name="$(parent)LoadingIcon" inherits="ZO_LoadingIcon_Gamepad_Footer" hidden="true">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Data3" relativePoint="BOTTOMLEFT" offsetX="-5" />
-                    <Controls>
-                        <Texture name="$(parent)Animation" override="true">
-                            <Anchor point="CENTER" offsetY="7" />
-                        </Texture>
-                    </Controls>
-                </Control>
-
             </Controls>
         </TopLevelControl>
     </Controls>

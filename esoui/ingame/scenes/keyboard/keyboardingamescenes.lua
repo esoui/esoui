@@ -210,44 +210,22 @@ SMITHING_SCENE:AddFragmentGroup(FRAGMENT_GROUP.READ_ONLY_EQUIPPED_ITEMS)
 SMITHING_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 
 ----------------
---Group List
+--Group Menu
 ----------------
 
-GROUP_LIST_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-GROUP_LIST_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
-GROUP_LIST_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
-GROUP_LIST_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(GROUP_LIST_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(DISPLAY_NAME_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(TITLE_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(GROUP_TITLE_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(GROUP_MEMBERS_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(PREFERRED_ROLES_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(GROUP_CENTER_INFO_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(SEARCHING_FOR_GROUP_FRAGMENT)
-GROUP_LIST_SCENE:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED))
-GROUP_LIST_SCENE:AddFragment(GROUP_WINDOW_SOUNDS)
-GROUP_LIST_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
-
--------------------
---Grouping Tools
--------------------
-
-GROUPING_TOOLS_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-GROUPING_TOOLS_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
-GROUPING_TOOLS_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
-GROUPING_TOOLS_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(GROUPING_TOOLS_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(DISPLAY_NAME_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(TITLE_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(GROUP_TITLE_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(GROUP_MEMBERS_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(PREFERRED_ROLES_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(GROUP_CENTER_INFO_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(SEARCHING_FOR_GROUP_FRAGMENT)
-GROUPING_TOOLS_SCENE:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_GROUP_TOOLS_OPENED))
-GROUPING_TOOLS_SCENE:AddFragment(GROUP_WINDOW_SOUNDS)
-GROUPING_TOOLS_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
+KEYBOARD_GROUP_MENU_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+KEYBOARD_GROUP_MENU_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+KEYBOARD_GROUP_MENU_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(GROUP_MENU_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(DISPLAY_NAME_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(TITLE_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(GROUP_TITLE_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(SEARCHING_FOR_GROUP_FRAGMENT)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED))
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(GROUP_WINDOW_SOUNDS)
+KEYBOARD_GROUP_MENU_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
 
 -------------------
 --Campaign Browser Scene
@@ -329,9 +307,9 @@ stablesScene:AddFragment(STABLES_MENU_FRAGMENT)
 stablesScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 stablesScene:AddFragment(STORE_WINDOW_SOUNDS)
 
--------------------
+------------------------
 --Collections Book Scene
--------------------
+------------------------
 
 COLLECTIONS_BOOK_SCENE = SCENE_MANAGER:GetScene("collectionsBook")
 COLLECTIONS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
@@ -346,6 +324,23 @@ COLLECTIONS_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
 COLLECTIONS_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_COLLECTIONS_OPENED))
+
+------------------------
+--DLC Book Scene
+------------------------
+
+DLC_BOOK_SCENE = SCENE_MANAGER:GetScene("dlcBook")
+DLC_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+DLC_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+DLC_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+DLC_BOOK_SCENE:AddFragment(DLC_BOOK_FRAGMENT)
+DLC_BOOK_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+DLC_BOOK_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+DLC_BOOK_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
+DLC_BOOK_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+DLC_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
+DLC_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
+DLC_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
 
 -------------------
 --Notifications
@@ -369,9 +364,9 @@ NOTIFICATIONS_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
-HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(HELP_FEEDBACK_FRAGMENT)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(TITLE_FRAGMENT)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(HELP_TITLE_FRAGMENT)
 HELP_CUSTOMER_SUPPORT_SCENE:AddFragment(HELP_WINDOW_SOUNDS)
@@ -572,38 +567,48 @@ MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_CHAMPION, "championPerks")
 
 MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_NOTIFICATIONS, "notifications")
 
---Collections
+--Group
 
-MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_COLLECTIONS, "collectionsBook")
+MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_GROUP, "groupMenuKeyboard")
 
---Group SceneGroup
+--Collections Scene Group
 
 do
     local iconData = {
         {
-            categoryName = SI_WINDOW_TITLE_GROUP_LIST,
-            descriptor = "groupList",
-            normal = "EsoUI/Art/LFG/LFG_tabIcon_myGroup_up.dds",
-            pressed = "EsoUI/Art/LFG/LFG_tabIcon_myGroup_down.dds",
-            highlight = "EsoUI/Art/LFG/LFG_tabIcon_myGroup_over.dds",
+            categoryName = SI_COLLECTION_BOOK_TITLE,
+            descriptor = "collectionsBook",
+            normal = "EsoUI/Art/Collections/collections_tabIcon_collectibles_up.dds",
+            pressed = "EsoUI/Art/Collections/collections_tabIcon_collectibles_down.dds",
+            highlight = "EsoUI/Art/Collections/collections_tabIcon_collectibles_over.dds",
+            statusIcon = function()
+                for categoryIndex = 1, GetNumCollectibleCategories() do
+                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and not DLC_BOOK_KEYBOARD:IsCategoryIndexDLC(categoryIndex) then
+                        return ZO_KEYBOARD_NEW_ICON
+                    end
+                end
+                return nil
+            end,
         },
         {
-            categoryName = SI_WINDOW_TITLE_GROUPING_TOOLS,
-            descriptor = "groupingToolsKeyboard",
-            normal = "EsoUI/Art/LFG/LFG_tabIcon_groupTools_up.dds",
-            pressed = "EsoUI/Art/LFG/LFG_tabIcon_groupTools_down.dds",
-            highlight = "EsoUI/Art/LFG/LFG_tabIcon_groupTools_over.dds",
+            categoryName = SI_DLC_BOOK_TITLE,
+            descriptor = "dlcBook",
+            normal = "EsoUI/Art/Collections/collections_tabIcon_DLC_up.dds",
+            pressed = "EsoUI/Art/Collections/collections_tabIcon_DLC_down.dds",
+            highlight = "EsoUI/Art/Collections/collections_tabIcon_DLC_over.dds",
+            statusIcon = function()
+                for categoryIndex = 1, GetNumCollectibleCategories() do
+                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and DLC_BOOK_KEYBOARD:IsCategoryIndexDLC(categoryIndex) then
+                        return ZO_KEYBOARD_NEW_ICON
+                    end
+                end
+                return nil
+            end,
         },
+
     }
-    local function SceneGroupScenePreference()
-        if IsUnitGrouped("player") then
-            return "groupList"
-        else
-            return "groupingToolsKeyboard"
-        end
-    end
-    SCENE_MANAGER:AddSceneGroup("groupSceneGroup", ZO_SceneGroup:New("groupList", "groupingToolsKeyboard"))
-    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_GROUP, "groupSceneGroup", iconData, SceneGroupScenePreference)
+    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook"))
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_COLLECTIONS, "collectionsSceneGroup", iconData)
 end
 
 --Contacts

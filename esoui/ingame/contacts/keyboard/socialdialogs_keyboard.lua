@@ -236,7 +236,7 @@ function ZO_ReportPlayerDialog_OnInitialized(self)
                 control = self:GetNamedChild("OpenTicket"),
                 text = reasonToString[REPORT_PLAYER_REASON_BEHAVIOR],
                 callback = function(dialog)
-                    ZO_FEEDBACK:ReportPlayer(dialog.data.name, REPORT_PLAYER_REASON_BEHAVIOR)
+					HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT)
                 end,
             },
             {
@@ -244,7 +244,7 @@ function ZO_ReportPlayerDialog_OnInitialized(self)
                 control = self:GetNamedChild("ReportSpam"),
                 callback = function(dialog)
                     local data = dialog.data
-                    ZO_FEEDBACK:QuickReportForSpam(data.name, data.reason, data.rawName)
+                    HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
 
                     if(data.customCallback) then
                         data.customCallback()

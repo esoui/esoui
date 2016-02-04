@@ -31,6 +31,36 @@
             </Controls>
         </Control>
 
+        <Label name="ZO_GamepadCrownStoreMenuEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-10" />
+            <Dimensions y="24" />
+        </Label>
+        
+        <Control name="ZO_GamepadMenuCrownStoreEntryTemplate" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                self.subLabelCount = 0
+                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Balance" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                </Label>
+                
+                <Label name="$(parent)RemainingCrowns" font="ZoFontGamepad34">
+                    <AnchorToBaseline relativeToLabel="$(parent)Balance" side="RIGHT" offsetX="10"/>
+                </Label>
+
+                <Texture name="$(parent)CurrencyIcon" textureFile="EsoUI/Art/currency/currency_crown.dds">
+                    <Anchor point="LEFT" relativeTo="$(parent)RemainingCrowns" relativePoint="RIGHT"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+                
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_MainMenu_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_MainMenu_Gamepad_OnInitialized(self)

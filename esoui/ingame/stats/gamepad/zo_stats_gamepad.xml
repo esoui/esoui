@@ -62,7 +62,7 @@
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" />
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
 
-                <Cooldown name="$(parent)Cooldown" textureFile="EsoUI/Art/Mounts/timer_overlay.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true">
+                <Cooldown name="$(parent)Cooldown" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_32.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET" />
                 </Cooldown>
@@ -87,7 +87,7 @@
                 ZO_GamepadStats_OnInitialize(self)
             </OnInitialized>   
             <Controls>
-                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                <Control name="$(parent)RightPane" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
                     <Controls>
                         <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
                         <Control name="$(parent)BattleLevelHeader" >
@@ -97,20 +97,21 @@
                                 <Label name="$(parent)Level" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_STAT_VALUE:STAT_VALUE_COLOR_BATTLE_LEVELED">
                                     <Anchor point="RIGHT"/>
                                 </Label>
+                                
                                 <Texture name="$(parent)LevelTypeIcon">
                                     <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT"/>
                                     <TextureCoords left="0.125" top="0.125" right="0.875" bottom="0.875"/>
                                     <!-- The width is handled in code based on whenever or not you are Vet BattleRanked-->
                                     <Dimensions x="0" y="32"/>
                                 </Texture>
+                                
                                 <Label name="$(parent)ScaledLevel" text="SI_STATS_SCALED_LEVEL" inherits="ZO_GamepadStatsHeaderTemplate" >
                                     <Anchor point="RIGHT" relativeTo="$(parent)LevelTypeIcon" relativePoint="LEFT" offsetX="-3" offsetY="3" />
                                 </Label>
-
                             </Controls>
                         </Control>
 
-                        <Control name="$(parent)InfoPanel" hidden="true" inherits="ZO_GamepadStatsContentAnchor">
+                        <Control name="$(parent)InfoPanel" inherits="ZO_GamepadStatsContentAnchor">
                             <Controls>
                                 <Control name="$(parent)CharacterEffectsPanel" hidden="true">
                                     <AnchorFill/>

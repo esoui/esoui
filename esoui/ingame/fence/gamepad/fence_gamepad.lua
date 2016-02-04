@@ -30,9 +30,19 @@ end
 ---- Callbacks
 --]]
 
-function ZO_Fence_Gamepad:OnOpened(sellsUsed, laundersUsed)
+function ZO_Fence_Gamepad:OnOpened(enableSell, enableLaunder)
     if IsInGamepadPreferredMode() then
-        STORE_WINDOW_GAMEPAD:SetActiveComponents(ZO_MODE_STORE_SELL_STOLEN, ZO_MODE_STORE_LAUNDER)
+        local componentTable = {}
+        if enableSell then
+            table.insert(componentTable, ZO_MODE_STORE_SELL_STOLEN)
+        end
+
+        if enableLaunder then
+            table.insert(componentTable, ZO_MODE_STORE_LAUNDER)
+        end
+
+        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
+
         SCENE_MANAGER:Show(self.sceneName)
     end
 end

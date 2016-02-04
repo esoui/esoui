@@ -37,7 +37,7 @@ function LoreReader:Initialize(control)
         SCENE_MANAGER:Hide("loreReaderInteraction")
     end
 
-    local function OnScreenResized()
+    local function OnAllGuiScreensResized()
         if not self.control:IsHidden() then
             self.page = 1
             self:LayoutText()
@@ -46,7 +46,7 @@ function LoreReader:Initialize(control)
 
     control:RegisterForEvent(EVENT_SHOW_BOOK, OnShowBook)
     control:RegisterForEvent(EVENT_HIDE_BOOK, OnHideBook)
-    control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
+    control:RegisterForEvent(EVENT_ALL_GUI_SCREENS_RESIZED, OnAllGuiScreensResized)
 
     self:InitializeKeybindStripDescriptors()
 

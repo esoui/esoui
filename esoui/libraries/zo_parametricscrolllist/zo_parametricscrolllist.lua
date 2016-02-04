@@ -96,15 +96,19 @@ function ZO_ParametricScrollList:HasDataTemplate(templateName)
     return self.dataTypes[templateName] ~= nil
 end
 
-function ZO_ParametricScrollList:AddDataTemplate(templateName, setupFunction, parametricFunction, equalityFunction, controlPoolPrefix)
+function ZO_ParametricScrollList:AddDataTemplate(templateName, setupFunction, parametricFunction, equalityFunction, controlPoolPrefix, controlPoolResetFunction)
     if not self.dataTypes[templateName] then
+        local controlPool = ZO_ControlPool:New(templateName, self.scrollControl, controlPoolPrefix)
         local dataTypeInfo = {
-            pool = ZO_ControlPool:New(templateName, self.scrollControl, controlPoolPrefix),
+            pool = controlPool,
             setupFunction = setupFunction,
             parametricFunction = parametricFunction,
             equalityFunction = equalityFunction or DefaultEqualityFunction,
             hasHeader = false,
         }
+        if controlPoolResetFunction then
+            controlPool:SetCustomResetBehavior(controlPoolResetFunction)
+        end
         self.dataTypes[templateName] = dataTypeInfo
     end
 end
@@ -466,6 +470,15 @@ end
 
 function ZO_ParametricScrollList:SetFirstIndexSelected(jumpType)
     self:SetSelectedIndex(self:CalculateFirstSelectableIndex(), nil, nil, jumpType)
+end
+
+function ZO_ParametricScrollList:SetDefaultIndexSelected(animate, allowEvenIfDisabled, forceAnimation, jumpType)
+    local index = self.defaultSelectedIndex or self:CalculateFirstSelectableIndex()
+    if animate then
+        self:SetSelectedIndex(index, allowEvenIfDisabled, forceAnimation, jumpType)
+    else
+        self:SetSelectedIndexWithoutAnimation(index, allowEvenIfDisabled, forceAnimation)
+    end
 end
 
 function ZO_ParametricScrollList:CalculateFirstSelectableIndex()

@@ -67,7 +67,7 @@
                     </Controls>
                 </Texture>
                 <Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
-                    <Anchor point="TOPLEFT" offsetX="55" offsetY="9"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="CENTER" offsetX="25" offsetY="-15"/>
                     <DimensionConstraints maxX="230"/>
                 </Label>
                 <!-- Fills the space between the text and the icon -->
@@ -77,6 +77,14 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT"/>
                 </Control>
             </Controls>
+        </Control>
+
+        <Control name="ZO_IconChildlessHeader" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
         </Control>
     </Controls>
 </GuiXml>

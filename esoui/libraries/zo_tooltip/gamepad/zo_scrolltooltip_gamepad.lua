@@ -124,6 +124,8 @@ end
 do
     local RESIZE_UPDATE_SENSITIVITY_LIMIT = .0001
 
+    local ANCHORS_TO_BACKGROUND = true
+
     local function ResizingUpdateLoop(control)
         local contentHeight = control.scrollTooltip.scrollChild:GetHeight()
         
@@ -148,11 +150,9 @@ do
         control.tip = control.scrollTooltip.tooltip
         control.tip.icon = control.icon
         if screenResizeHandler then
-            control:RegisterForEvent(EVENT_SCREEN_RESIZED, function(_, _, _, guiName)
-                if guiName == "ingame" then
-                    screenResizeHandler(control)
-                    control.forceResizeUpdate = true
-                end
+            control:RegisterForEvent(EVENT_SCREEN_RESIZED, function()
+                screenResizeHandler(control)
+                control.forceResizeUpdate = true
             end)
             control.lastContentHeight = 0
             control:SetHandler("OnUpdate", ResizingUpdateLoop)
@@ -162,7 +162,7 @@ do
         end
 
         if scrollIndicatorSide then
-            ZO_Scroll_Gamepad_SetScrollIndicatorSide(control.scrollTooltip.scrollIndicator, control, scrollIndicatorSide, scrollIndicatorOffsetX)
+            ZO_Scroll_Gamepad_SetScrollIndicatorSide(control.scrollTooltip.scrollIndicator, control, scrollIndicatorSide, scrollIndicatorOffsetX, nil, ANCHORS_TO_BACKGROUND)
         end
     end
 end

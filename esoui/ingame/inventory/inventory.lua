@@ -23,6 +23,7 @@ local cancelButtonDownTexture = "EsoUI/Art/Buttons/cancelButton_mouseDown.dds"
 local NEW_ICON_TEXTURE = "EsoUI/Art/Inventory/newItem_icon.dds"
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 
+
 BANKING_INTERACTION =
 {
     type = "Banking",
@@ -575,6 +576,21 @@ function ZO_InventoryManager:New()
         end
     end)
 
+    self.capacityAnnouncementsInfo = {}
+
+    local function BagCapacityUpgrade(eventId, ...)
+        self:ProcessCapacityUpgrade(BAG_BACKPACK, ...)
+    end
+
+    local function BankCapacityUpgrade(eventId, ...)
+        self:ProcessCapacityUpgrade(BAG_BANK, ...)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_InventoryManager", EVENT_INVENTORY_BAG_CAPACITY_CHANGED, BagCapacityUpgrade)
+    EVENT_MANAGER:RegisterForEvent("ZO_InventoryManager", EVENT_INVENTORY_BANK_CAPACITY_CHANGED, BankCapacityUpgrade)
+
+    EVENT_MANAGER:RegisterForUpdate("ZO_InventoryManager", 100, function(...) self:OnUpdate(...) end)
+
     return manager
 end
 
@@ -699,6 +715,48 @@ function ZO_InventoryManager:SlotForInventoryControl(inventorySlotControl)
             return self.inventories[INVENTORY_BACKPACK].slots[slotIndex]
         elseif(slotType == SLOT_TYPE_BANK_ITEM) then
             return self.inventories[INVENTORY_BANK].slots[slotIndex]
+        end
+    end
+end
+
+local TIMER_DURATION_MS = 3100
+function ZO_InventoryManager:ProcessCapacityUpgrade(capacityType, previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+    if previousCapacity == 0 then 
+        return
+    end
+
+    local currentInfo = self.capacityAnnouncementsInfo[capacityType]
+    if currentInfo == nil then
+        currentInfo = 
+        {
+            startCapacity = previousCapacity,
+            startUpgrade = previousUpgrade,
+        }
+        self.capacityAnnouncementsInfo[capacityType] = currentInfo
+    end
+    currentInfo.timerMS = GetGameTimeMilliseconds() + TIMER_DURATION_MS
+    currentInfo.endCapacity = currentCapacity
+    currentInfo.endUpgrade = currentUpgrade
+end
+
+function ZO_InventoryManager:ShowCapacityAnnouncement(capacityType, startCapacity, endCapacity, startUpgrade, endUpgrade)
+    local improvementText
+    if startCapacity > 0 and startCapacity ~= endCapacity and startUpgrade ~= endUpgrade then
+        if capacityType == BAG_BACKPACK then
+            improvementText = zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, startCapacity, endCapacity)
+            CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_INVENTORY_BAG_CAPACITY_CHANGED, CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), improvementText)
+        elseif capacityType == BAG_BANK then
+            improvementText = zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, startCapacity, endCapacity)
+            CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_INVENTORY_BANK_CAPACITY_CHANGED, CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), improvementText)
+        end
+    end
+end
+
+function ZO_InventoryManager:OnUpdate(timeMS)
+    for capacityType, info in pairs(self.capacityAnnouncementsInfo) do
+        if timeMS > info.timerMS then
+            self.capacityAnnouncementsInfo[capacityType] = nil
+            self:ShowCapacityAnnouncement(capacityType, info.startCapacity, info.endCapacity, info.startUpgrade, info.endUpgrade)
         end
     end
 end

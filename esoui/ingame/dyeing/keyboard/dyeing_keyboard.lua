@@ -656,14 +656,14 @@ function ZO_DyeingEquipmentSheet:Initialize(control, onEquipSlotClickedCallback,
         self:MarkViewDirty()
     end
 
+    --Filtered on bagId == BAG_WORN
     local function OnInventorySlotUpdated(eventCode, bagId, slotIndex)
-        if bagId == BAG_WORN then
-            self:MarkViewDirty()
-        end
+        self:MarkViewDirty()
     end
 
     control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnFullInventoryUpdated)
     control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySlotUpdated)
+    control:AddFilterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
 
     self:MarkViewDirty()
 end

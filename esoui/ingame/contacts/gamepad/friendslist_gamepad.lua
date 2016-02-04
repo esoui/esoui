@@ -23,24 +23,27 @@ function FriendsList_Gamepad:Initialize(control)
 end
 
 function FriendsList_Gamepad:GetAddKeybind()
-    local keybind  =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+    local platform = GetUIPlatform()
+    if platform ~= UI_PLATFORM_XBOX then
+        local keybind  =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
-        name = GetString(SI_GAMEPAD_CONTACTS_ADD_FRIEND_BUTTON_LABEL),
-        
-        keybind = "UI_SHORTCUT_SECONDARY",
+            name = GetString(SI_GAMEPAD_CONTACTS_ADD_FRIEND_BUTTON_LABEL),
+            
+            keybind = "UI_SHORTCUT_SECONDARY",
 
-        callback = function()
-            local platform = GetUIPlatform()
-            if platform == UI_PLATFORM_PC or platform == UI_PLATFORM_XBOX then
-                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG")
-            else
-                ZO_ShowConsoleAddFriendDialogFromUserListSelector()
-            end
-        end,
-    }
-    return keybind
+            callback = function()
+                local platform = GetUIPlatform()
+                if platform == UI_PLATFORM_PC then
+                    ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG")
+                else
+                    ZO_ShowConsoleAddFriendDialogFromUserListSelector()
+                end
+            end,
+        }
+        return keybind
+    end
 end
 
 function FriendsList_Gamepad:LayoutTooltip(tooltipManager, tooltip, data)
@@ -89,6 +92,8 @@ function FriendsList_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGameOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveFriendOption, function() return not IsConsoleUI() end)
+
+    self:AddInviteToGuildOptionTemplates()
 end
 
 function ZO_FriendsList_Gamepad_OnInitialized(self)

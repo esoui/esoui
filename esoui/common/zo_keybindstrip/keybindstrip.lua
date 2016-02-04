@@ -126,7 +126,7 @@ function ZO_KeybindStrip_OnInitialized(control)
 
     function KEYBIND_STRIP:ClearKeybindGroupStateStack(stateIndex)
        ZO_KeybindStrip.ClearKeybindGroupStateStack(self, stateIndex)
-       self:RestoreDefaultExit(stateIndex)
+       self:RefreshDefaultExits(stateIndex)
     end
 
     function KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(callback, keybind, sound)

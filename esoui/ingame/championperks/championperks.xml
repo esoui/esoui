@@ -201,7 +201,7 @@
 
         <!-- Set each of these virtual textures to a concrete texture on load so their texture files are loaded into memory -->
         <Texture name="ZO_ChampionPreloadTextures" hidden="true" inherits="ZO_ConstellationStarSpiral ZO_ConstellationSkyCloud1 ZO_ConstellationSkyCloud2"/>
-
+        
         <TopLevelControl name="ZO_ChampionPerksChosenAttributePointCounter_Base" virtual="true" resizeToFitDescendents="true" hidden="true" tier="HIGH"  level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
             <Dimensions x="100" y="48"/>
             <OnInitialized>
@@ -383,6 +383,18 @@
                         <Texture name="$(parent)CloseClouds2" textureFile="EsoUI\Art\Champion\champion_clouds.dds" pixelRoundingEnabled="false" blendMode="ADD" tier="LOW"/>
                         <Texture name="$(parent)RadialSelector" textureFile="EsoUI\Art\Champion\champion_radial_selector.dds" pixelRoundingEnabled="false" tier="LOW" alpha="0"/>
                         <Texture name="$(parent)CenterInfoBG" textureFile="EsoUI\Art\Champion\champion_center_bg.dds" alpha="0.4" tier="LOW"/>
+                    </Controls>
+                </Control>
+                <Control name ="$(parent)InactiveAlert" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+                    <OnInitialized>
+                        self.messageLabel = self:GetNamedChild("Message")
+                    </OnInitialized>
+                    <Controls>
+                        <Label name ="$(parent)Message">
+                            <Anchor point="TOPLEFT"/>
+                            <DimensionConstraints maxX="550" />
+                        </Label>
                     </Controls>
                 </Control>
             </Controls>

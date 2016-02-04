@@ -47,3 +47,31 @@ function TryGroupInviteByName(characterOrDisplayName, sentFromChat, displayInvit
         CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage)
     end    
 end
+
+function ZO_ConvertToDungeonDifficulty(isVeteranDifficulty)
+    if isVeteranDifficulty then
+        return DUNGEON_DIFFICULTY_VETERAN
+    else
+        return DUNGEON_DIFFICULTY_NORMAL
+    end
+end
+
+function ZO_ConvertToIsVeteranDifficulty(dungeonDifficulty)
+    return dungeonDifficulty == DUNGEON_DIFFICULTY_VETERAN
+end
+
+function ZO_GetGroupDungeonDifficulty()
+    return ZO_ConvertToDungeonDifficulty(IsGroupUsingVeteranDifficulty())
+end
+
+function ZO_GetPlayerDungeonDifficulty()
+    return ZO_ConvertToDungeonDifficulty(IsUnitUsingVeteranDifficulty("player"))
+end
+
+function ZO_GetEffectiveDungeonDifficulty()
+    if IsUnitGrouped("player") then
+        return ZO_GetGroupDungeonDifficulty()
+    else
+        return ZO_GetPlayerDungeonDifficulty()
+    end
+end

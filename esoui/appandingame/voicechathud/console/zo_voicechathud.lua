@@ -3,9 +3,12 @@ local function ZO_FormatUserFacingDisplayName(name)
     return IsConsoleUI() and UndecorateDisplayName(name) or name
 end
 
---------------------------------------------
+--------------------------------------------------------------------------------
 -- Speaker List
---------------------------------------------
+--      A helper class for generating hud speaker entries and anchoring them to
+--      form a list. Allows the VoiceChat HUD to only have to deal with adding
+--      to and clearing from a list.
+--------------------------------------------------------------------------------
 
 local ENTRY_TEMPLATE = "ZO_VoiceChatHUDEntry"
 
@@ -72,12 +75,15 @@ end
 
 
 
---------------------------------------------
+--------------------------------------------------------------------------------
 -- VoiceChat HUD
---------------------------------------------
+--  Class for displaying a list of current voice chat speakers. Templated
+--  outside the ingame UI layer so that we can also create one for the loading
+--  screen.
+--------------------------------------------------------------------------------
 
 local LIST_ENTRY_LIMIT = 4
-local CLEAR_DELAY_MS = 500
+local CLEAR_DELAY_MS = 500 --after a user quits speaking, their HUD entry will persist for this duration before clearing
 
 local function ChannelDataFromName(channelName)
     local channelType, guildId, guildRoomNumber = VoiceChatGetChannelInfo(channelName)
@@ -98,8 +104,8 @@ ZO_VoiceChatHUD = {}
 function ZO_VoiceChatHUD:Initialize(control)
     self.control = control
 
-    self.speakerData = {}
-    self.delayedClears = {}
+    self.speakerData = {} --list of currently speaking users, including users who have stopped talking but their HUD entry is waiting to clear
+    self.delayedClears = {} --table that maps users who have stopped talking to the time that their HUD entry should clear
     self.localPlayerName = ""
     
     self.speakerList = control:GetNamedChild("List")
@@ -110,6 +116,7 @@ function ZO_VoiceChatHUD:Initialize(control)
 end
 
 function ZO_VoiceChatHUD:Update()
+    --Clear entries for users who haven't spoken recently
     local currentTime = GetFrameTimeMilliseconds()
     for displayName, clearTime in pairs(self.delayedClears) do
         if currentTime >= clearTime then
@@ -118,6 +125,7 @@ function ZO_VoiceChatHUD:Update()
         end
     end
 
+    --Create the list
     self.speakerList:Clear()
     for i = 1, #self.speakerData do
         local speakerData = self.speakerData[i]
@@ -126,18 +134,21 @@ function ZO_VoiceChatHUD:Update()
 end
 
 function ZO_VoiceChatHUD:InsertName(channelData, displayName)
+    --The list is a stack with the users who spoke most recently on the bottom. The local player is an
+    --exception to this and always shows at the bottom.
+
     local speakerDataEntry = {
         channelData = channelData,
         displayName = displayName,
     }
-    
-    --Remove any existing entry
+
+    --Remove any existing entry so it can be reinserted at the bottom
     self:RemoveName(displayName)
 
-    --The local player is always at the bottom, and other users are pushed up from above the local player
     local insertIndex = self:IsLocalPlayerFirstListEntry() and 2 or 1
     table.insert(self.speakerData, insertIndex, speakerDataEntry)
 
+    --Remove the oldest entry if we're over the limit
     if #self.speakerData > LIST_ENTRY_LIMIT then
         table.remove(self.speakerData)
     end
@@ -159,7 +170,7 @@ function ZO_VoiceChatHUD:RemoveNamesForChannel(channelData)
     local newList = {}
     for i = 1, #self.speakerData do
         local data = self.speakerData[i]
-        if not channelData.channelName == data.channelData.channelName then
+        if channelData.channelName ~= data.channelData.channelName then
             table.insert(newList, data)
         end
     end
@@ -177,12 +188,11 @@ function ZO_VoiceChatHUD:IsUserLocalPlayer(displayName)
 end
 
 function ZO_VoiceChatHUD:IsLocalPlayerFirstListEntry()
-    if not self.speakerData[1] then
+    local firstEntry = self.speakerData[1]
+    if not firstEntry then
         return false
     end
-
-    local firstName = self.speakerData[1].displayName
-    return self:IsUserLocalPlayer(firstName)
+    return self:IsUserLocalPlayer(firstEntry.displayName)
 end
 
 --Events

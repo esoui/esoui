@@ -5,17 +5,17 @@ CHAT_SYSTEM = nil
 * Chat Container
     This container holds all of the text buffers and tabs.
     By default there is a single Chat Container, but players can create more by dragging a tab off of another Chat Container.
-
+    
 * Chat Window
     This is the actual text buffer (and anything special like filters in the combat log) where chat messages are added to.
     A chat container always contains at least one of these.
-
+    
 * Chat Tab
     Each Chat Window has a tab. The tab is the primary place for mouse manipulation.
     Dragging a tab pulls off a Chat Window and consequently create a new Chat Container.
     Unless the tab is the first tab, then it drags the entire Chat Container.
     When the tab is clicked the associated Chat Window is shown.
-
+    
 Lastly, there is the chat system that coordinates dragging across containers, pooling, and so on
 ]]--
 
@@ -33,8 +33,6 @@ local FADE_ANIMATION_DURATION = 350
 local FADE_ANIMATION_DELAY = 3000
 
 local NUM_COMMAND_HISTORY_TO_SAVE = 50
-
-local TEXT_ENTRY_PADDING = 8
 
 local TAB_ALERT_TEXT_COLOR = ZO_SECOND_CONTRAST_TEXT
 
@@ -59,7 +57,7 @@ local ChannelTarget = ZO_Object:Subclass()
 function ChannelTarget:New(...)
     local target = ZO_Object.New(self)
     target:Initialize(...)
-
+    
     return target
 end
 
@@ -108,7 +106,7 @@ local TextEntry = ZO_Object:Subclass()
 function TextEntry:New(...)
     local entry = ZO_Object.New(self)
     entry:Initialize(...)
-
+    
     return entry
 end
 
@@ -116,9 +114,11 @@ local TEXT_ENTRY_DURATION = 500
 local TEXT_ENTRY_MIN_ALPHA = .25
 local TEXT_ENTRY_MAX_ALPHA = 1.0
 
-function TextEntry:Initialize(system, control)
+function TextEntry:Initialize(system, control, chatEditBufferTop, chatEditBufferBottom)
     self.control = control
     self.system = system
+    self.chatEditBufferTop = chatEditBufferTop
+    self.chatEditBufferBottom = chatEditBufferBottom
     control.system = system
     control.owner = self
 
@@ -127,7 +127,7 @@ function TextEntry:Initialize(system, control)
     self.channelLabel = control:GetNamedChild("Label")
 
     self.commandHistory = ZO_CircularBuffer:New(NUM_COMMAND_HISTORY_TO_SAVE)
-
+    
     self.commandHistoryCursor = 1
     self.autoComplete = ZO_AutoComplete:New(self.editControl, { AUTO_COMPLETE_FLAG_ALL }, nil, AUTO_COMPLETION_ONLINE_ONLY, MAX_AUTO_COMPLETION_RESULTS, AUTO_COMPLETION_MANUAL_MODE)
 
@@ -277,8 +277,9 @@ end
 function TextEntry:SetFont(font)
     self.editControl:SetFont(font)
     self.channelLabel:SetFont(font)
-    local height = self.editControl:GetFontHeight()
-    self.control:SetHeight(height + TEXT_ENTRY_PADDING)
+
+    ZO_EditContainerSizer.ForceRefreshSize(self.editBg, self.chatEditBufferTop, self.chatEditBufferBottom)
+    self.control:SetHeight(self.editBg:GetHeight())
 end
 
 function TextEntry:IsAutoCompleteOpen()
@@ -296,7 +297,7 @@ function SharedChatContainer:New(chatSystem, control, windowPool, tabPool)
     local container = ZO_Object.New(self)
     container.system = chatSystem
     container:Initialize(control, windowPool, tabPool)
-
+    
     return container
 end
 
@@ -318,11 +319,11 @@ end
 function SharedChatContainer:ShowOverflowedTabsDropdown()
     if self.hiddenTabStartIndex <= #self.windows then
         ClearMenu()
-
+        
         for i=self.hiddenTabStartIndex, #self.windows do
             AddMenuItem(self:GetTabName(i), function() self:ForceWindowIntoView(i) end)
         end
-
+   
         ShowMenu(self.overflowTab)
     end
 end
@@ -517,7 +518,7 @@ function SharedChatContainer:ResetToDefaults(tabIndex)
         self:SetBackgroundColor(bgR, bgG, bgB, bgMinAlpha, bgMaxAlpha)
 
         ResetChatContainerTabToDefault(self.id, tabIndex)
-
+        
         self:LoadWindowSettings(window)
 
         self:RegisterCategoriesForWindow(tabIndex)
@@ -611,21 +612,21 @@ function SharedChatContainer:ShowContextMenu(tabIndex)
                 AddMenuItem(GetString(SI_CHAT_CONFIG_SHOW_TIMESTAMP), function() self:SetTimestampsEnabled(tabIndex, true) end)
             end
         end
-
+        
         ShowMenu(window.tab)
     end
 end
 
 function SharedChatContainer:InitializeWindowManagement(control, windowPool, tabPool)
     self.windows = {}
-
+    
     function self.MonitorTabMovementOnUpdate()
         self:MonitorTabMovement()
     end
 
     self.tabPool = tabPool
     self.windowPool = windowPool
-
+    
     self.tabGroup = ZO_TabButtonGroup:New()
     self.windowContainer = control:GetNamedChild("WindowContainer")
 end
@@ -639,7 +640,7 @@ function SharedChatContainer:OnResizeStart()
     self.OnResizeUpdateFunc = self.OnResizeUpdateFunc or function()
         self:PerformLayout()
     end
-
+    
     self.control:SetHandler("OnUpdate", self.OnResizeUpdateFunc)
     self.resizing = true
     self:FadeIn()
@@ -665,13 +666,13 @@ function SharedChatContainer:IsMouseInside()
     if MouseIsOver(self.control) or MouseIsOver(self.overflowTab) then
         return true
     end
-
+    
     for i=1, #self.windows do
         if MouseIsOver(self.windows[i].tab) then
             return true
         end
     end
-
+    
     return false
 end
 
@@ -691,7 +692,7 @@ function SharedChatContainer:MonitorForMouseExit()
 end
 
 function SharedChatContainer:FadeOut(delay)
-    if self.fadeInReferences > 0 or not IsChatSystemAvailableForCurrentPlatform() then
+    if self.fadeInReferences > 0 or not IsChatSystemAvailableForCurrentPlatform() then 
         return
     end
 
@@ -730,13 +731,13 @@ function SharedChatContainer:PerformLayout(insertIndex, xOffset)
     local numWindows = #self.windows
 
     self:CalculateConstraints(xOffset)
-
+    
     self.hiddenTabStartIndex = numWindows + 1
-
+    
     for i=1, numWindows do
         local tab = self.windows[i].tab
         local tabWidth = tab:GetDesiredWidth()
-
+        
         tab:ClearAnchors()
 
         local offset = insertIndex == i and xOffset or 0
@@ -746,13 +747,13 @@ function SharedChatContainer:PerformLayout(insertIndex, xOffset)
             if i < self.hiddenTabStartIndex then
                 self.hiddenTabStartIndex = i
             end
-
+            
             tab:SetHidden(true)
         else
             tab:SetHidden(false)
             tab:SetAnchor(BOTTOMLEFT, nil, TOPLEFT, widthSum + offset, TAB_STARTING_Y)
         end
-
+        
         widthSum = widthSum + tabWidth + offset
     end
 end
@@ -821,10 +822,10 @@ function SharedChatContainer:AddRawTabForWindow(window, name, index, tab)
         tab, key = self.tabPool:AcquireObject()
         tab.key = key
     end
-
+    
     tab.index = index
     tab.container = self
-
+    
     self.tabGroup:Add(tab)
     tab:SetParent(self.control)
 
@@ -865,9 +866,9 @@ function SharedChatContainer:TakeWindow(window, previousContainer)
         --This container was just created due to dragging from another container
         local offsetX = window.tab:GetLeft() - previousContainer.control:GetLeft()
         self:AddRawWindow(window, ZO_TabButton_Text_GetText(window.tab), window.tab)
-
+            
         self:CopyAnchors(previousContainer.control, offsetX)
-
+        
         self:StartDraggingTab(1)
         self:FadeIn()
     else
@@ -890,22 +891,22 @@ function SharedChatContainer:AddRawWindow(window, name, tab, insertIndex, isComb
     else
         self.windows[#self.windows + 1] = window
     end
-
+        
     tab = self:AddRawTabForWindow(window, name, insertIndex or #self.windows, tab)
-
+    
     window.buffer.container = self
-
+    
     window:SetParent(self.windowContainer)
     window:ClearAnchors()
     window:SetAnchorFill()
-
+    
     window.tab = tab
     tab.window = window
-
+    
     if #self.windows == 1 then
         self.tabGroup:SetClickedButton(tab)
     end
-
+    
     self:PerformLayout()
 
     self.system:OnRawWindowCreated(self, name, isCombatLog)
@@ -914,7 +915,7 @@ function SharedChatContainer:AddRawWindow(window, name, tab, insertIndex, isComb
         --Must delay this until the tab is fully transferred to this container and its settings are available
         self:RegisterCategoriesForWindow(tab.index)
     end
-
+    
     return window
 end
 
@@ -987,7 +988,7 @@ function SharedChatContainer:AddMessageToWindow(window, message, r, g, b, catego
             if(category == CHAT_CATEGORY_WHISPER_INCOMING) then
                 ZO_TabButton_Text_SetTextColor(window.tab, TAB_ALERT_TEXT_COLOR)
                 ZO_TabButton_Text_AllowColorChanges(window.tab, false)
-                window.markedForNotification = true
+                window.markedForNotification = true            
             end
         end
     end
@@ -1005,7 +1006,7 @@ end
 function SharedChatContainer:AddWindow(name)
     local window, key = self.windowPool:AcquireObject()
     window.key = key
-
+    
     self:AddRawWindow(window, name)
     self:LoadWindowSettings(window)
 
@@ -1015,17 +1016,17 @@ end
 function SharedChatContainer:AddCombatWindow(name)
     if self.system.combatLogObject then
         local combatLog = self.system.combatLogObject:New()
-
+    
         local combatWindow = CreateControlFromVirtual(self.windowContainer:GetName(), self.windowContainer, combatLog:GetWindowTemplate(), "Combat")
         combatWindow.buffer = combatWindow:GetNamedChild("Buffer")
-
+    
         local isCombatLog = true
         self:AddRawWindow(combatWindow, name, nil, nil, isCombatLog)
-
+    
         combatLog:OnAddedToContainer(self, combatWindow)
 
         combatWindow.combatLog = combatLog
-
+    
         self:LoadWindowSettings(combatWindow)
 
         return combatWindow, combatLog
@@ -1052,17 +1053,17 @@ end
 
 function SharedChatContainer:RemoveWindow(index, freeOption)
     local window = self.windows[index]
-
+    
     if window then
         table.remove(self.windows, index)
         self:UpdateTabIndices(index)
-
+        
         if self.tabGroup:GetClickedButton() == window.tab and #self.windows > 0 then
             self.tabGroup:SetClickedButton(self.windows[1].tab)
         end
         self.tabGroup:Remove(window.tab)
         self:UnregisterCategoriesForWindow(index)
-
+        
         if freeOption == nil or freeOption == FREE then
             self.tabPool:ReleaseObject(window.tab.key)
             self.windowPool:ReleaseObject(window.key)
@@ -1102,7 +1103,7 @@ function SharedChatContainer:StartDraggingTab(index)
         --this is the primary tab, just start moving it
         self.control:SetMovable(true)
         self.control:StartMoving()
-
+        
         if not self.primary then
             self.system:PrepareContainersTabDrop(self, self.windows[index].tab)
         end
@@ -1120,28 +1121,28 @@ do
                 return i
             end
         end
-
+        
         return #self.windows + 1
     end
-
+    
     local function Contains(x, y, left, right, bottom, top)
-        return left <= x
-            and x < right
-            and top <= y
+        return left <= x 
+            and x < right 
+            and top <= y 
             and y < bottom
     end
-
+    
     local function GetTabDropArea(control, tab)
         return tab:GetLeft(), control:GetRight(), tab:GetBottom(), tab:GetTop()
     end
-
+    
     function SharedChatContainer:MonitorTabMovement()
         local monitoredControl = self.monitoredControl
-
+        
         local x, y = GetUIMousePosition()
         if Contains(x, y, GetTabDropArea(self.control, self.windows[1].tab)) then
             self.insertIndex = FindInsertPosition(self, monitoredControl, x)
-
+            
             --peform a layout with extra space for the potential tab
             self:PerformLayout(self.insertIndex, monitoredControl:GetWidth())
         elseif self.insertIndex then
@@ -1155,11 +1156,11 @@ end
 function SharedChatContainer:PrepareTabDrop(controlToMonitor)
     self.monitoredControl = controlToMonitor
     self:FadeIn()
-
+    
     self.MonitorTabMovementOnUpdate = self.MonitorTabMovementOnUpdate or function()
-        self:MonitorTabMovement()
+        self:MonitorTabMovement() 
     end
-
+    
     self.control:SetHandler("OnUpdate", self.MonitorTabMovementOnUpdate)
     self:MonitorTabMovement()
 end
@@ -1188,13 +1189,13 @@ function SharedChatContainer:InitializeScrolling(control)
     self.scrollUpButton = self.scrollbar:GetNamedChild("ScrollUp")
     self.scrollDownButton = self.scrollbar:GetNamedChild("ScrollDown")
     self.scrollEndButton = self.scrollbar:GetNamedChild("ScrollEnd")
-
+    
     self.scrollbar.container = self
 end
 
 function SharedChatContainer:SetScroll(value)
     local max = self:GetCurrentMaxScroll()
-
+   
     self.scrollbar:SetValue(value)
     self.currentBuffer:SetScrollPosition(max - value)
 
@@ -1235,7 +1236,7 @@ function SharedChatContainer:SyncScrollToBuffer()
     self.scrollbar:SetMinMax(1, max)
     self.scrollbar:SetValue(max - self.currentBuffer:GetScrollPosition())
 
-	self:UpdateScrollVisibility()
+	self:UpdateScrollVisibility()    
     self:UpdateScrollButtons()
 end
 
@@ -1265,10 +1266,10 @@ function SharedChatContainer:UpdateScrollButtons()
     end
 
     self.scrollbar:SetEnabled(enabled)
-
+    
     local upDisabled = not enabled or value == 1
     self.scrollUpButton:SetState(GetNewScrollButtonState(self.scrollUpButton, upDisabled))
-
+    
     local downDisabled = not enabled or value == max
     self.scrollDownButton:SetState(GetNewScrollButtonState(self.scrollDownButton, downDisabled))
     self.scrollEndButton:SetState(GetNewScrollButtonState(self.scrollEndButton, downDisabled))
@@ -1297,7 +1298,7 @@ SharedChatSystem = ZO_Object:Subclass()
 function SharedChatSystem:New(...)
     local chat = ZO_Object.New(self)
     chat:Initialize(...)
-
+    
     return chat
 end
 
@@ -1305,7 +1306,7 @@ function SharedChatSystem:Initialize(control, platformSettings)
     self.control = control
     self.platformSettings = platformSettings
 
-    self.textEntry = TextEntry:New(self, control:GetNamedChild("TextEntry"))
+    self.textEntry = TextEntry:New(self, control:GetNamedChild("TextEntry"), platformSettings.chatEditBufferTop, platformSettings.chatEditBufferBottom)
 
     local fontSize = GetChatFontSize()
     local textEntryFont = self:GetTextEntryFontString(fontSize)
@@ -1377,11 +1378,11 @@ function SharedChatSystem:InitializeSharedControlManagement(control, newContaine
     end
 
     self.containers = {}
-
+        
     self.tabPool = ZO_ControlPool:New("ZO_ChatWindowTabTemplate")
     self.tabPool:SetCustomFactoryBehavior(TabFactoryFunc)
-
-    local function CreateWindow(objectPool)
+    
+    local function CreateWindow(objectPool) 
         local window = ZO_ObjectPool_CreateControl("ZO_ChatWindowTemplate", objectPool, GuiRoot)
         window.buffer = window:GetNamedChild("Buffer")
         window.buffer:SetHorizontalAlignment(self.platformSettings.horizontalAlignment)
@@ -1393,7 +1394,7 @@ function SharedChatSystem:InitializeSharedControlManagement(control, newContaine
         ZO_ObjectPool_DefaultResetControl(control)
         control.buffer:Clear()
     end
-
+    
     self.windowPool = ZO_ObjectPool:New(CreateWindow, ResetWindowControl)
     self.insertIndicator = control:GetNamedChild("InsertIndicator")
     self.agentChatButton = control:GetNamedChild("AgentChat")
@@ -1408,10 +1409,10 @@ function SharedChatSystem:InitializeSharedControlManagement(control, newContaine
     self.agentChatPulseTimeline:SetHandler("OnStop", function() agentChatEcho:SetAlpha(0) end)
 
     local function CreateContainer(objectPool)
-        local containerControl = ZO_ObjectPool_CreateControl("ZO_ChatContainerTemplate", objectPool, GuiRoot)
+        local containerControl = ZO_ObjectPool_CreateControl("ZO_ChatContainerTemplate", objectPool, GuiRoot) 
         return newContainerFn(self, containerControl, self.windowPool, self.tabPool)
     end
-
+    
     self.containerPool = ZO_ObjectPool:New(CreateContainer, function(container) container:OnDestroy() end)
 end
 
@@ -1453,7 +1454,7 @@ function SharedChatSystem:InitializeEventManagement()
             self.control:SetHidden(true)
         end
     end
-
+    
     EVENT_MANAGER:RegisterForEvent("ChatSystem_OnAddOnLoaded", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     EVENT_MANAGER:RegisterForEvent("ChatSystem", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
@@ -1474,7 +1475,7 @@ function SharedChatSystem:InitializeEventManagement()
         local function OnAgentChatActiveChanged()
             self:OnAgentChatActiveChanged()
         end
-
+        
         EVENT_MANAGER:RegisterForEvent("ChatSystem", EVENT_CHAT_CHANNEL_INVITE, OnChannelInvite)
         EVENT_MANAGER:RegisterForEvent("ChatSystem", EVENT_ZONE_CHANNEL_CHANGED, OnZoneChannelChanged)
         EVENT_MANAGER:RegisterForEvent("ChatSystem", EVENT_GUILD_DATA_LOADED, function() self:ValidateChatChannel() end)
@@ -1556,7 +1557,7 @@ function SharedChatSystem:RegisterForCategory(container, category)
     if not self.categories[category] then
         self.categories[category] = {}
     end
-
+    
     self.categories[category][container] = (self.categories[category][container] or 0) + 1
 end
 
@@ -1574,7 +1575,7 @@ function SharedChatSystem:UnregisterFromCategory(container, category)
             else
                 categories[container] = categories[container] - 1
             end
-
+            
             if not next(categories) then
                 self.categories[category] = nil
             end
@@ -1627,7 +1628,7 @@ function SharedChatSystem:DestroyContainer(container)
     assert(#container.windows == 0)
     --invalid state, primary containers should never be destroyed
     assert(not container:IsPrimary())
-
+    
     if not self.suppressSave then
         RemoveChatContainer(container.id)
     end
@@ -1643,7 +1644,7 @@ end
 
 function SharedChatSystem:TransferWindow(window, previousContainer, targetContainer)
     local container = targetContainer or self:CreateChatContainer()
-
+    
     self.isTransferring = true
     local tabIndex = window.tab.index
     local newTabIndex = container:TakeWindow(window, previousContainer)
@@ -1699,7 +1700,7 @@ function SharedChatSystem:StopContainersTabDrop(initiator)
             container:StopTabDrop()
         end
     end
-
+    
     if tabDropContainer then
         --It's always the first window since that's the only draggable tab
         initiator:TransferWindow(1, tabDropContainer)
@@ -1765,7 +1766,7 @@ function SharedChatSystem:ValidateChatChannel()
             self.lastValidChannel = CHAT_CHANNEL_SAY
             self.lastValidTarget = nil
         end
-
+        
         if self.requirementErrorMessage then
             if type(self.requirementErrorMessage) == "string" then
                 self:AddMessage(self.requirementErrorMessage)
@@ -1792,10 +1793,10 @@ end
 function SharedChatSystem:SubmitTextEntry()
     local text = self.textEntry:GetText()
     self.textEntry:Close()
-
+    
     if IsChatSystemAvailableForCurrentPlatform() and #text > 0 then
         self.textEntry:AddCommandHistory(text)
-
+        
         local switch = self.switchLookup[text:lower()]
         if switch and not switch.target and (not switch.requires or switch.requires(switch.id)) then
             self:SetChannel(switch.id)
@@ -1838,7 +1839,7 @@ function SharedChatSystem:ValidateSwitch(switch, text, firstSpaceStart)
         if switch.target then
             -- Either get the arguments from the text or from an channel target
             local switchArg
-            local finalSpace
+            local finalSpace          
             if switch.target == true then
                 self.pendingChannel = switch.id
                 --No channel, just a target requirement
@@ -1851,7 +1852,7 @@ function SharedChatSystem:ValidateSwitch(switch, text, firstSpaceStart)
                     finalSpace = secondSpaceStart
 					-- dont look for a second space if the targer begins with a display name flag char
 					if text:byte(secondWordStart) == DISPLAY_NAME_PREFIX_BYTE then
-                        if(self:ValidateTargetName(zo_strsub(text, secondWordStart + 1, secondSpaceStart - 1))) then
+                        if(self:ValidateTargetName(zo_strsub(text, secondWordStart + 1, secondSpaceStart - 1))) then 
 						    switchArg = zo_strsub(text, secondWordStart, secondSpaceStart - 1)
 						    doAutoComplete = false
                         end
@@ -1876,8 +1877,8 @@ function SharedChatSystem:ValidateSwitch(switch, text, firstSpaceStart)
                 --Channel target
                 switchArg = self.targets[switch.target]:GetLastTarget()
             end
-
-            if switchArg and switchArg ~= "" then
+                
+            if switchArg and switchArg ~= "" then 
                 --Valid, Channel Argument, No errors, Override the beginning of the switch
                 return true, switchArg, false, finalSpace
             end
@@ -1902,9 +1903,9 @@ end
 function SharedChatSystem:OnTextEntryChanged(newText)
     if self.ignoreTextEntryChangedEvent then return end
     self.ignoreTextEntryChangedEvent = true
-
+         
     local spaceStart, spaceEnd = zo_strfind(newText, " ", 1, true)
-
+    
     if spaceStart and spaceStart > 1 then
         local potentialSwitch = zo_strsub(newText, 1, spaceStart - 1)
         local switch = self.switchLookup[potentialSwitch:lower()]
@@ -1932,7 +1933,7 @@ function SharedChatSystem:OnTextEntryChanged(newText)
             self.textEntry:CloseAutoComplete()
         end
     end
-
+    
     self.ignoreTextEntryChangedEvent = false
 end
 
@@ -1958,7 +1959,7 @@ STUB_SETTING_KEEP_MINIMIZED = false
 
 function SharedChatSystem:StartTextEntry(text, channel, target)
     if not self.currentChannel or channel then
-        self:SetChannel(channel or CHAT_CHANNEL_SAY, target)
+        self:SetChannel(channel or CHAT_CHANNEL_SAY, target)   
     end
 
     self.textEntry:Open(text)
@@ -1998,8 +1999,8 @@ function SharedChatSystem:SetChannel(newChannel, channelTarget)
 
     if channelData and (newChannel ~= self.currentChannel or channelTarget ~= self.currentTarget) then
         self.lastValidChannel = self.currentChannel
-        self.lastValidTarget = self.currentTarget
-
+        self.lastValidTarget = self.currentTarget    
+                    
         self.channelRequirement = channelData.requires
         self.currentChannel = newChannel
         self.currentTarget = channelTarget
@@ -2043,7 +2044,7 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
     local otherPlayerIsInPlayersGroup = not otherPlayerIsDecoratedName and IsPlayerInGroup(rawName)
 
     if not localPlayerIsGrouped or (localPlayerIsGroupLeader and not otherPlayerIsInPlayersGroup) then
-        AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_GROUP), function()
+        AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_GROUP), function() 
             local SENT_FROM_CHAT = false
             local DISPLAY_INVITED_MESSAGE = true
             TryGroupInviteByName(playerName, SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) end)
@@ -2186,7 +2187,7 @@ end
 
 function SharedChatSystem:ShowTextEntryMenu()
     ClearMenu()
-
+    
     --Prepare switches for sorting
     local switches = {}
     for channel in pairs(self.channelData) do
@@ -2274,7 +2275,7 @@ function SharedChatSystem:GetTextEntryFontString(fontSize)
     if options ~= "" then
         return ("%s|%s|%s"):format(face, fontSize, options)
     end
-    return ("%s|%s"):format(face, fontSize)
+    return ("%s|%s"):format(face, fontSize) 
 end
 
 function SharedChatSystem:OnNumOnlineFriendsChanged()
@@ -2321,14 +2322,14 @@ function StartChatInput(text, channel, target, showVirtualKeyboard)
     end
 end
 
-function ChatReplyToLastWhisper()
+function ChatReplyToLastWhisper()   
     CHAT_SYSTEM:ReplyToLastTarget(CHAT_CHANNEL_WHISPER)
 end
 
 function ZO_ChatSystem_OnMouseWheel(control, delta, ctrl, alt, shift)
     local container = control.container
     local buffer = container.currentBuffer
-
+    
     if shift then
         delta = delta * buffer:GetNumVisibleLines()
     elseif ctrl then
@@ -2388,7 +2389,7 @@ end
 
 function ZO_ChatSystem_OnFriendsClicked(control)
     if(IsInGamepadPreferredMode()) then
-        SCENE_MANAGER:Push("gamepad_friends")
+        SCENE_MANAGER:Show("gamepad_friends")
     else
         FRIENDS_LIST:FriendsButton_OnClicked(control)
     end

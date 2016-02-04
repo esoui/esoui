@@ -125,6 +125,7 @@ local function SetupActionSlot(slotObject, slotId)
 
     local isGamepad = IsInGamepadPreferredMode()
     ZO_ActionSlot_SetupSlot(slotObject.icon, slotObject.button, slotIcon, isGamepad and "" or ACTION_BUTTON_BORDERS.normal, isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown, slotObject.cooldownIcon)
+    slotObject:UpdateState()
 end
 
 local function SetupActionSlotWithBg(slotObject, slotId)
@@ -307,7 +308,7 @@ function ActionButton:UpdateUsable()
         local slotNum = self:GetSlot()
         local slotType = GetSlotType(slotNum)
         local buttonDislaysUnusable = not usable or (isUltimateSlot and isGamepad and self.useFailure)
-        local useDesaturation = slotType == ACTION_TYPE_ITEM or isGamepad
+        local useDesaturation = slotType == ACTION_TYPE_ITEM or slotType == ACTION_TYPE_COLLECTIBLE or isGamepad
         ZO_ActionSlot_SetUnusable(self.icon, buttonDislaysUnusable, useDesaturation)
     end
 end
@@ -360,7 +361,7 @@ function ActionButton:UpdateCooldown(options)
     self.cooldown:SetHidden(not showCooldown)
 
     if showCooldown then
-        self.cooldown:StartCooldown(remain, duration, CD_TYPE_RADIAL, nil, NO_LEADING_EDGE)        
+        self.cooldown:StartCooldown(remain, duration, CD_TYPE_RADIAL, nil, NO_LEADING_EDGE)
         if(self.cooldownCompleteAnim.animation) then
             self.cooldownCompleteAnim.animation:GetTimeline():PlayInstantlyToStart()
         end
@@ -418,6 +419,9 @@ function ActionButton:UpdateCooldown(options)
         self:SetCooldownIconAnchors(showCooldown)
     end
 
+    local textColor = showCooldown and INTERFACE_TEXT_COLOR_FAILED or INTERFACE_TEXT_COLOR_SELECTED
+    self.buttonText:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, textColor))
+
     self.inCooldown = isInCooldown
     self.isGlobalCooldown = global
     self:UpdateUsable()
@@ -463,7 +467,6 @@ function ActionButton:ApplyStyle(template)
 
     local slotnum = self:GetSlot()
     local slotType = GetSlotType(slotnum)
-    ZO_ActionSlot_SetUnusable(self.icon, GetUnusableForPlatform(slotnum, self.useFailure, self.usable), isGamepad or slotType == ACTION_TYPE_ITEM)
 
     local cooldownHeight = 1
 

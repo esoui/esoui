@@ -61,13 +61,25 @@ end
 function ZO_CampaignBrowser_Shared:DoQueue(data)
     if data then
         if(data.type == CAMPAIGN_DATA) then
-            local canQueueIndividual, canQueueGroup = self:CanQueue(data)
-            if(canQueueIndividual and canQueueGroup) then
-                ZO_Dialogs_ShowDialog("CAMPAIGN_QUEUE", {campaignId = data.id}, {mainTextParams = {data.name}})
-            elseif(canQueueIndividual) then
-                QueueForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
+            local function QueueCallback()
+                local canQueueIndividual, canQueueGroup = self:CanQueue(data)
+                if(canQueueIndividual and canQueueGroup) then
+                    if IsInGamepadPreferredMode() then
+                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_DIALOG, data, { mainTextParams = { data.name } })
+                    else
+                        ZO_Dialogs_ShowDialog("CAMPAIGN_QUEUE", {campaignId = data.id}, {mainTextParams = {data.name}})
+                    end
+                elseif(canQueueIndividual) then
+                    QueueForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
+                else
+                    QueueForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)
+                end
+            end
+
+            if IsInLFGGroup() and GetCurrentLFGActivity() ~= LFG_ACTIVITY_AVA then
+                ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING", {onAcceptCallback = QueueCallback })
             else
-                QueueForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)
+                QueueCallback()
             end
         end
     end
@@ -97,6 +109,16 @@ function ZO_CampaignBrowser_Shared:SetupQueuedData(data)
         data.queuedIndividualState = GetCampaignQueueState(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
         data.queuedGroupType = self:GetQueueType()
         data.queuedGroupState = GetCampaignQueueState(data.id, CAMPAIGN_QUEUE_GROUP)
+    end
+end
+
+function ZO_CampaignBrowser_Shared:ShowCampaignQueueReadyDialog(campaignId, isGroup, campaignName)
+    local timeLeftSeconds = GetCampaignQueueRemainingConfirmationSeconds(campaignId, isGroup)
+    if timeLeftSeconds > 0 then
+        local timeString = ZO_FormatTime(timeLeftSeconds, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+        ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_READY", {campaignId = campaignId, isGroup = isGroup, timeLeftSeconds = timeLeftSeconds }, {mainTextParams = { campaignName, timeString }})
+    else
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SI_CAMPAIGN_BROWSER_QUEUE_ACCEPT_ERROR_EXPIRED)
     end
 end
 
@@ -234,11 +256,11 @@ do
                 description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_QUEUED, positionInQueue))
             end
         elseif(state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
-            seconds = ZO_FormatTime(GetCampaignQueueRemainingConfirmationSeconds(id, isGroup), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+            local timeString = ZO_FormatTime(GetCampaignQueueRemainingConfirmationSeconds(id, isGroup), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
             if(isGroup) then            
-                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_GROUP_READY, seconds))
+                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_GROUP_READY, timeString))
             else
-                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_READY, seconds))
+                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_READY, timeString))
             end
         end
     end

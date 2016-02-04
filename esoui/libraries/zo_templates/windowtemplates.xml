@@ -11,7 +11,7 @@
                 <ScaleAnimation duration="125" startScale="1" endScale="1.6"/>
             </Animations>
         </AnimationTimeline>
-
+        
         <AnimationTimeline name="ShowOnMouseOverLabelAnimation">
             <Animations>
                 <AlphaAnimation duration="255" startAlpha="0" endAlpha="1">
@@ -35,7 +35,7 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
+    
     <Animations>
         <AnimationTimeline name="SparkleTranslateAnim" playbackType="PING_PONG" loopCount="1">
             <Animations>
@@ -129,7 +129,7 @@
             <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile.dds" edgeFileWidth="128" edgeFileHeight="16" />
             <Center file="EsoUI/Art/Miscellaneous/inset_center.dds" />
             <Insets left="3" top="3" right="-3" bottom="-3" />
-
+            
             <Controls>
                 <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP">
                     <AnchorFill />
@@ -137,6 +137,13 @@
             </Controls>
         </Backdrop>
 
+        <Backdrop name="ZO_DarkThinFrame" virtual="true" tier="LOW">
+            <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+            <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+        </Backdrop>
+        
         <Backdrop name="ZO_SliderBackdrop" centerColor="00000000" virtual="true">
             <Anchor point="TOPLEFT" offsetX="0" offsetY="4" />
             <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-4" />
@@ -168,76 +175,6 @@
             </Controls>
         </Texture>
 
-        <EditBox name="ZO_DefaultEdit" font="ZoFontEdit" mouseEnabled="true" virtual="true">
-            <Dimensions y="24" />
-            <OnMouseDown>
-                self:TakeFocus()
-            </OnMouseDown>
-            <OnEnter>
-                self:LoseFocus()
-            </OnEnter>
-            <OnEscape>
-                self:LoseFocus()
-            </OnEscape>
-
-            <OnFocusGained>
-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
-                    PlaySound(SOUNDS.EDIT_CLICK)
-                end
-            </OnFocusGained>
-        </EditBox>
-
-        <EditBox name="ZO_EditDefaultText" virtual="true">
-            <OnTextChanged>
-                ZO_EditDefaultText_OnTextChanged(self)
-            </OnTextChanged>
-            <Controls>
-                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontEdit">
-                    <AnchorFill/>
-                </Label>
-            </Controls>
-        </EditBox>
-
-        <Backdrop name="ZO_EditBackdrop" virtual="true">
-            <Dimensions y="28"/>
-            <Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" />
-            <Center file="EsoUI/Art/ChatWindow/textEntry_center.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
-        </Backdrop>
-
-        <EditBox name="ZO_DefaultEditForBackdrop" inherits="ZO_DefaultEdit" virtual="true">
-            <Anchor point="TOPLEFT" offsetX="8" offsetY="3"/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2"/>
-        </EditBox>
-
-        <EditBox name="ZO_DefaultEditMultiLine" font="ZoFontEdit" mouseEnabled="true" multiLine="true" virtual="true">
-            <OnMouseDown>
-                self:TakeFocus()
-            </OnMouseDown>
-            <OnEscape>
-                self:LoseFocus()
-            </OnEscape>
-            <OnMouseWheel>
-                local currentLine = self:GetTopLineIndex()
-                if shift then
-                    delta = delta * 10
-                end
-                local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
-                self:SetTopLineIndex(nextLine)
-            </OnMouseWheel>
-
-            <OnFocusGained>
-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
-                    PlaySound(SOUNDS.EDIT_CLICK)
-                end
-            </OnFocusGained>
-        </EditBox>
-
-        <EditBox name="ZO_DefaultEditMultiLineForBackdrop" inherits="ZO_DefaultEditMultiLine" virtual="true">
-            <Anchor point="TOPLEFT" offsetX="6" offsetY="5"/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7"/>
-        </EditBox>
-
         <Slider name="ZO_Slider" mouseEnabled="true" orientation="HORIZONTAL" virtual="true">
             <Dimensions x="150" y="16" />
             <ThumbTexture
@@ -246,7 +183,7 @@
                 thumbWidth="8"
                 thumbHeight="16"
             />
-
+            
             <Controls>
                 <Backdrop name="$(parent)Backdrop" inherits="ZO_SliderBackdrop" />
             </Controls>
@@ -428,7 +365,7 @@
                 </Texture>
             </Controls>
         </Control>
-
+        
         <Control name="ZO_PanelBackground" tier="LOW" layer="BACKGROUND" virtual="true">
             <AnchorFill/>
             <Controls>
@@ -608,7 +545,7 @@
                 </Texture>
             </Controls>
         </Control>
-
+        
         <Cooldown name="ZO_DefaultCooldown" leadingEdgeTexture="EsoUI/Art/ActionBar/coolDown_leadingEdge.dds" fillColor="000000" alpha=".85" hidden="true" virtual="true">
             <AnchorFill />
         </Cooldown>
@@ -617,7 +554,7 @@
             <Dimensions y="2"/>
             <TextureCoords left="0" right="1" top="0" bottom="0.25"/>
         </Texture>
-
+        
         <Control name="ZO_LineBorderHighlight" virtual="true">
             <Controls>
                 <Texture name="$(parent)Top" layer="OVERLAY" inherits="ZO_HighlightLine">
@@ -660,7 +597,7 @@
                 </Texture>
             </Controls>
         </Control>
-
+        
         <Control name="ZO_DynamicHorizontalDivider" virtual="true">
             <Dimensions y="6"/>
             <Controls>
@@ -719,7 +656,7 @@
                 </Texture>
             </Controls>
         </Control>
-
+        
         <Control name="ZO_RadialMenuTemplate" inherits="ZO_RadialMenuBaseTemplate" hidden="true" virtual="true">
            <Controls>
                 <Label name="$(parent)Action" font="ZoFontHeader3" horizontalAlignment="CENTER" verticalAlignment="CENTER" inheritScale="false">
@@ -764,7 +701,7 @@
             <Anchor point="TOPLEFT"/>
             <Dimensions x="32" y="32"/>
         </Texture>
-
+        
         <Control name="ZO_Loading" hidden="true" resizeToFitDescendents="true" virtual="true"/>
 
         <Texture name="ZO_HelpIcon" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" virtual="true" mouseEnabled="true">
@@ -818,7 +755,7 @@
 
         <Texture name="ZO_UserAreaIconTexture" virtual="true">
             <Dimensions x="24" y="24" />
-        </Texture>
+        </Texture> 
 
         <Texture name="ZO_ScalableBackgroundFadedEdge_BackgroundTexture" textureFile="EsoUI/Art/Windows/Gamepad/gp_HUD_Window.dds" virtual="true" />
         <Control name="ZO_ScalableBackgroundFadedEdge" virtual="true">

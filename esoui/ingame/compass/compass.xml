@@ -825,6 +825,11 @@
                                 maxVisibleNormalizedDistance=".0075"
                                 layer="OVERLAY"
                     />
+                    <CompassPinType name="TIMELY_ESCAPE_NPC"
+                                pinTexture="EsoUI/Art/Compass/timely_escape_npc.dds"
+                                minAlpha="0.75"
+                                layer="OVERLAY"
+                    />
                 </Compass>
             </Controls>
         </Control>

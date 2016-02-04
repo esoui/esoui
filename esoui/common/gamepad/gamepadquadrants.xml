@@ -35,7 +35,7 @@
         <Texture name="ZO_GamepadGrid_BackgroundTexture" inherits="ZO_GamepadGrid_BackgroundTextureBase" textureFile="EsoUI/Art/Windows/Gamepad/panelBG_focus_512.dds" virtual="true"/>
         
         <Texture name="ZO_GamepadGrid_VertDivider" textureFile="EsoUI/Art/Windows/Gamepad/gp_fullVertDiv.dds" tier="HIGH" virtual="true">
-            <Dimensions x="8"/>
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/>
         </Texture>
 
         <Texture name="ZO_GamepadGrid_LeftVertDivider" inherits="ZO_GamepadGrid_VertDivider" virtual="true">
@@ -51,7 +51,7 @@
         <Control name="ZO_GamepadGrid_LeftVertDividerWithArrow" virtual="true">
             <Anchor point="TOPLEFT"/>
             <Anchor point="BOTTOMLEFT"/>
-            <Dimensions x="8"/>
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/>
             <Controls>
                 <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Windows/Gamepad/gp_windowPointer.dds" tier="HIGH">
                     <Anchor point="RIGHT"/>
@@ -72,7 +72,7 @@
         <Control name="ZO_GamepadGrid_RightVertDividerWithArrow" virtual="true">
             <Anchor point="TOPRIGHT"/>
             <Anchor point="BOTTOMRIGHT"/>
-            <Dimensions x="8"/>
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/>
             <Controls>
                 <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Windows/Gamepad/gp_windowPointer.dds" tier="HIGH">
                     <Anchor point="LEFT"/>

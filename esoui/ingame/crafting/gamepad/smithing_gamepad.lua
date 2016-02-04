@@ -107,7 +107,11 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
     self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
         if ZO_Smithing_IsSmithingStation(craftingType) and IsInGamepadPreferredMode() then
-            SCENE_MANAGER:ShowBaseScene()
+            -- make sure that we are, in fact, on a smithing scene before we try to show the base scene
+            -- certain times, such as going to the crown store from crafting, can get squashed without this
+            if SCENE_MANAGER:GetCurrentSceneName() == g_modeToSceneName[self.mode] then
+                SCENE_MANAGER:ShowBaseScene()
+            end
         end
     end)
 
@@ -187,6 +191,10 @@ function ZO_Smithing_Gamepad:SetEnableSkillBar(enable)
 	else
 		ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.skillInfoBar)
 	end
+end
+
+function ZO_Smithing_Gamepad:SetUniversalStyleItemHidden(hidden)
+    self.universalStyleItemInfo:SetHidden(hidden)
 end
 
 function ZO_Smithing_Gamepad_Initialize(control)

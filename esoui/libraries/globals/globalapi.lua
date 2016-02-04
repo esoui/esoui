@@ -146,11 +146,11 @@ function zo_floatsAreEqual(a, b, epsilon)
 end
 
 function zo_iconFormat(path, width, height)
-    return string.format("|t%d:%d:%s|t", width, height, path)
+    return string.format("|t%s:%s:%s|t", tostring(width), tostring(height), path)
 end
 
 function zo_iconFormatInheritColor(path, width, height)
-    return string.format("|t%d:%d:%s:inheritcolor|t", width, height, path)
+    return string.format("|t%s:%s:%s:inheritcolor|t", tostring(width), tostring(height), path)
 end
 
 function zo_iconTextFormat(path, width, height, text)

@@ -63,7 +63,7 @@
                                     <Anchor point="TOPLEFT" />
                                 </Label>
 
-                                <Backdrop name="$(parent)Quantity" inherits="ZO_EditBackdrop" hidden="true">
+                                <Backdrop name="$(parent)Quantity" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true">
                                     <Dimensions x="88" />
                                     <Anchor point="LEFT" relativeTo="$(parent)QuantityLabel" relativePoint="RIGHT" offsetY="2" />
 
@@ -205,8 +205,8 @@
                             <Anchor point="TOPRIGHT" />`
                         </Label>
 
-                        <Backdrop name="$(parent)MinPrice" inherits="ZO_EditBackdrop">
-                            <Dimensions x="88" y="25" />
+                        <Backdrop name="$(parent)MinPrice" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="88"/>
                             <Anchor point="TOPLEFT" relativeTo="$(parent)PriceRangeLabel" relativePoint="BOTTOMLEFT" offsetY="8" />
 
                             <Controls>
@@ -222,8 +222,8 @@
                             <Anchor point="LEFT" relativeTo="$(parent)MinPrice" relativePoint="RIGHT" offsetX="4" />
                         </Texture>
 
-                        <Backdrop name="$(parent)MaxPrice" inherits="ZO_EditBackdrop">
-                            <Dimensions x="88" y="25" />
+                        <Backdrop name="$(parent)MaxPrice" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="88" />
                             <Anchor point="LEFT" relativeTo="$(parent)PriceRangeDivider" relativePoint="RIGHT" offsetX="4" />
 
                             <Controls>
@@ -254,8 +254,8 @@
                             <Anchor point="LEFT" relativeTo="$(parent)LevelRangeToggle" relativePoint="RIGHT" offsetX="5" />
                         </Label>
 
-                        <Backdrop name="$(parent)MinLevel" inherits="ZO_EditBackdrop">
-                            <Dimensions x="40" y="25" />
+                        <Backdrop name="$(parent)MinLevel" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="40"/>
                             <Anchor point="TOPLEFT" relativeTo="$(parent)LevelRangeToggle" relativePoint="BOTTOMLEFT" offsetY="5" />
 
                             <Controls>
@@ -271,8 +271,8 @@
                             <Anchor point="LEFT" relativeTo="$(parent)MinLevel" relativePoint="RIGHT" offsetX="4" />
                         </Texture>
 
-                        <Backdrop name="$(parent)MaxLevel" inherits="ZO_EditBackdrop">
-                            <Dimensions x="40" y="25" />
+                        <Backdrop name="$(parent)MaxLevel" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="40"/>
                             <Anchor point="LEFT" relativeTo="$(parent)LevelRangeDivider" relativePoint="RIGHT" offsetX="4" />
 
                             <Controls>

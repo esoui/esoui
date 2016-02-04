@@ -597,7 +597,8 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
             
             for conditionIndex = 1, conditionCount do
                 local currentValue, maximumValue, isFailCondition, isComplete, isGroupCreditShared = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)
-                
+                -- We're going to ignore the individual conditions' isVisible field here, since we have override text for the whole step which we always want to show
+
 	            if(not isFailCondition and isComplete) then
                     stepOverride.isGroupCreditShared = isGroupCreditShared
 	                conditionIconType = conditionIconType + 1 -- move to complete
@@ -623,15 +624,26 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
 		self:InitializeQuestCondition(stepOverride, questHeader, stepOverrideKey, conditionTreeNode)
     else
 	    -- Process the conditions as usual    
-        local conditionsAreOR = stepType == QUEST_STEP_TYPE_OR and conditionCount > 1
-	    if(conditionsAreOR) then
-			InsertStepDescription(self, questHeader, treeNode, GetString(SI_QUEST_OR_DESCRIPTION))		
-	    end
+        if(stepType == QUEST_STEP_TYPE_OR) then
+            local visibleConditionFound = false
+            for conditionIndex = 1, conditionCount do
+                local isVisible = select(7, GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex))
+                if isVisible then
+                    if visibleConditionFound then
+                        -- We've already found one visible condition, insert the "Choose one" step description and quit
+                        InsertStepDescription(self, questHeader, treeNode, GetString(SI_QUEST_OR_DESCRIPTION))		
+                        break
+                    else
+                        visibleConditionFound = true
+                    end
+                end
+            end
+        end
 	    
 	    for conditionIndex = 1, conditionCount do
-	        local conditionText, curCount, maxCount, isFailCondition, isComplete, isGroupCreditShared = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
+	        local conditionText, curCount, maxCount, isFailCondition, isComplete, isGroupCreditShared, isVisible = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
 	                
-	        if((not isFailCondition) and (conditionText ~= "") and not isComplete) then
+	        if((not isFailCondition) and (conditionText ~= "") and not isComplete and isVisible) then
 	            local questCondition, questConditionKey = self.conditionPool:AcquireObject()
                 questCondition.entryType = entryType
 

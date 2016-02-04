@@ -487,19 +487,17 @@ function ZO_QuestJournal_Gamepad:RefreshOptionsList()
         table.insert(options, abandonQuest)
     end
 
-    if IsConsoleUI() then
-        local reportQuest = ZO_GamepadEntryData:New(GetString(SI_ITEM_ACTION_REPORT_ITEM))
-        reportQuest.action = function()
-                    local selectedQuestIndex = self:GetSelectedQuestIndex()
-                    if selectedQuestIndex then
-                        local questName = GetJournalQuestInfo(selectedQuestIndex)
-                        self:SetKeybindButtonGroup(nil)
-                        ZO_Help_Customer_Service_Gamepad_SetupQuestIssueTicket(questName)
-                        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-                    end
-                end
-        table.insert(options, reportQuest)
-    end
+    local reportQuest = ZO_GamepadEntryData:New(GetString(SI_ITEM_ACTION_REPORT_ITEM))
+    reportQuest.action =    function()
+                                local selectedQuestIndex = self:GetSelectedQuestIndex()
+                                if selectedQuestIndex then
+                                    local questName = GetJournalQuestInfo(selectedQuestIndex)
+                                    self:SetKeybindButtonGroup(nil)
+                                    ZO_Help_Customer_Service_Gamepad_SetupQuestIssueTicket(questName)
+                                    SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+                                end
+                            end
+    table.insert(options, reportQuest)
 
     for _, option in pairs(options) do
         self.optionsList:AddEntry("ZO_GamepadSubMenuEntryTemplate", option)

@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ActivityQueueData_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_ActivityQueueDataGamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

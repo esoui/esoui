@@ -395,12 +395,17 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)RespawnTimer" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3">
-                    <Dimensions x="150" y="36"/>
-                    <!-- Bump it over to the right to leave room for the "Toggle Size" button, which is a Dev button. -->
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Buttons" offsetX="128" />
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Buttons" />
-                </Label>
+                <Control name="$(parent)RespawnTimer" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="12" offsetY="-12"/>
+                    <Controls>
+                        <Label name="$(parent)Stat" text="SI_MAP_FORWARD_CAMP_RESPAWN_COOLDOWN" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="LEFT"/>
+                        </Label>
+                        <Label name="$(parent)Value" font="ZoFontKeybindStripDescription">
+                            <Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="10"/>
+                        </Label>
+                    </Controls>
+                </Control>
 
                 <Label name="$(parent)GamepadInteractKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepadBold34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" hidden="true">
                     <Anchor point="TOP" relativePoint="CENTER" offsetY="40" />

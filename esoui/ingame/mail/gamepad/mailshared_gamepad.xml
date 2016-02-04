@@ -14,7 +14,7 @@
                 self.highlight = self:GetNamedChild("Highlight")
             </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad">
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Gamepad">
                     <Anchor point="TOPLEFT"/>
                     <Anchor point="TOPRIGHT"/>
                     <Controls>
@@ -38,7 +38,7 @@
                 self.highlight = self:GetNamedChild("Highlight")
             </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad">
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_MultiLineEditBackdrop_Gamepad">
                     <AnchorFill/>
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad"/>

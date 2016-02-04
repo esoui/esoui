@@ -56,8 +56,7 @@
             <Controls>
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_RENAME_CHARACTER_NAME_LABEL"/>
 
-                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
-                    <Dimensions y="30" />
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>

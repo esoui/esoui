@@ -279,7 +279,8 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
                 if CHAMPION_PERKS:GetNumAvailablePointsThatCanBeSpent(attribute) > 0 then
                     pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_UPGRADE, iconPath), self:GetStyle("bodyDescription"), self:GetStyle("succeeded"))
                 else
-                    pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_REACHED_MAX_SPEND_LIMIT, GetMaxSpendableChampionPointsInAttribute(), iconPath, ZO_Champion_GetConstellationGroupNameFromAttribute(attribute)), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+                    local attributeName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(attribute)
+                    pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_REACHED_MAX_SPEND_LIMIT, GetMaxSpendableChampionPointsInAttribute(), iconPath, attributeName), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
                 end
             else
                 pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_POINTS_REQUIRED, iconPath), self:GetStyle("bodyDescription"), self:GetStyle("failed"))

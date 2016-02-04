@@ -21,18 +21,37 @@
         <Label name="ZO_TooltipIfTruncatedLabel" mouseEnabled="true" wrapMode="ELLIPSIS" virtual="true">
             <OnMouseEnter>
                 if self:WasTruncated() then
-                InitializeTooltip(InformationTooltip)
-                ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
-                SetTooltipText(InformationTooltip, self:GetText())
+                    InitializeTooltip(InformationTooltip)
+                    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
+                    SetTooltipText(InformationTooltip, self:GetText())
                 end
             </OnMouseEnter>
             <OnMouseExit>
                 if self:WasTruncated() then
-                ClearTooltip(InformationTooltip)
+                    ClearTooltip(InformationTooltip)
                 end
             </OnMouseExit>
         </Label>
 
+        <Label name="ZO_SelectableTooltipIfTruncatedLabel" inherits="ZO_SelectableLabel" wrapMode="ELLIPSIS" virtual="true">
+            <OnMouseEnter>
+                ZO_SelectableLabel_OnMouseEnter(self)
+                
+                if self:WasTruncated() then
+                    InitializeTooltip(InformationTooltip)
+                    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
+                    SetTooltipText(InformationTooltip, self:GetText())
+                end
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_SelectableLabel_OnMouseExit(self)
+                
+                if self:WasTruncated() then
+                    ClearTooltip(InformationTooltip)
+                end
+            </OnMouseExit>
+        </Label>
+        
         <Label name="ZO_LoadingText" virtual="true" font="ZoFontHeader">
             <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
         </Label>

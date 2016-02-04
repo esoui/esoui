@@ -1,0 +1,101 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupMenuKeyboard_CategoryHeader" inherits="ZO_IconChildlessHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="200"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Button name="ZO_PreferredRolesButton"  inherits="ZO_CheckButton" virtual="true">
+            <Dimensions x="48" y="48"/>
+            <OnMouseEnter>
+                ZO_PreferredRolesButton_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PreferredRolesButton_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnClicked>
+                ZO_PreferredRolesButton_OnClicked(self, button)
+            </OnClicked>
+        </Button>
+        
+        <TopLevelControl name="ZO_GroupMenu_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GroupMenuKeyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Dimensions y="70" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" offsetX="-10" />
+                </Control>
+
+                <Control name="$(parent)PreferredRoles" resizeToFitDescendents="true">
+                    <DimensionConstraints minX="265"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="-8" offsetY="-5" />
+                    
+                    <OnInitialized>
+                        ZO_PreferredRoles_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL" font="ZoFontHeader3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" />
+                        </Label>
+
+                        <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" />
+
+                            <Controls>
+                                <Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton">
+                                    <Anchor point="TOP" />
+
+                                    <OnInitialized>
+                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_HEAL)
+                                    </OnInitialized>
+                                </Button>
+
+                                <Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" offsetX="-5" />
+
+                                    <OnInitialized>
+                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_TANK)
+                                    </OnInitialized>
+                                </Button>
+
+                                <Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="5" />
+
+                                    <OnInitialized>
+                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_DPS)
+                                    </OnInitialized>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RolesCategoriesDivider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+                
+                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                    <Dimensions x="275" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="10" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_GroupMenuKeyboard_ContentAnchors" virtual="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_GroupMenu_KeyboardHeader" relativePoint="BOTTOMRIGHT" offsetX="-10" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_GroupMenu_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" />
+        </Control>
+    </Controls>
+</GuiXml>

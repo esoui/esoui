@@ -97,6 +97,7 @@
                 normal="EsoUI/Art/Buttons/checkbox_unchecked.dds"
                 pressed="EsoUI/Art/Buttons/checkbox_checked.dds"
                 mouseOver="EsoUI/Art/Buttons/checkbox_mouseover.dds"
+                pressedMouseOver="EsoUI/Art/Buttons/checkbox_mouseover.dds"
                 disabled="EsoUI/Art/Buttons/checkbox_disabled.dds"
                 disabledPressed="EsoUI/Art/Buttons/checkbox_checked_disabled.dds"
             />

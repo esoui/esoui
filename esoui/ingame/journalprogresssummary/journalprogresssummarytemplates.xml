@@ -35,14 +35,6 @@
             </Controls>
         </StatusBar>
 
-        <Control name="ZO_JournalChildlessCategory" inherits="ZO_IconHeader" virtual="true">
-            <OnInitialized>
-                ZO_IconHeader_OnInitialized(self)
-                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
-                self.SetSelected = ZO_IconHeader_Setup
-            </OnInitialized>
-        </Control>
-
         <Label name="ZO_JournalSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" >
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)

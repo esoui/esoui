@@ -216,7 +216,7 @@ function MailInbox:SetupInboxEntry(control, data)
     local iconControl = GetControl(control, "Icon")
     iconControl:ClearIcons()
     if(data.unread) then
-        iconControl:AddIcon("EsoUI/Art/Miscellaneous/new_icon.dds")
+        iconControl:AddIcon(ZO_KEYBOARD_NEW_ICON)
     end
     if(data.fromSystem) then
         iconControl:AddIcon("EsoUI/Art/Mail/mail_systemIcon.dds")

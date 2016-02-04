@@ -1,5 +1,4 @@
 -- XML CONSTANTS
-GAMEPAD_FQT_BACKGROUND_MAX_ALPHA = 0.5
 GAMEPAD_FQT_TEXT_MIN_ALPHA = 0.3
 GAMEPAD_FQT_ANIMATION_FADE_IN_MS = 300
 GAMEPAD_FQT_ANIMATION_FADE_OUT_MS = 2000
@@ -36,9 +35,7 @@ function ZO_FocusedQuestTracker:InitialTrackingUpdate()
         end
     end
     self:UpdateAssistedVisibility()
-    self:UpdateFading()
     self:FireCallbacks("QuestTrackerInitialUpdate")
-    self:UpdateBackgroundDimensions()
 end
 
 local function IsFocusQuestTrackerVisible()
@@ -145,22 +142,6 @@ do
 
     function ZO_FocusedQuestTracker:OnGamepadPreferredModeChanged()
         self:ApplyPlatformStyle()
-
-        if IsInGamepadPreferredMode() then
-            self.trackerControl.fadeTimeline:PlayFromStart(GAMEPAD_FQT_ANIMATION_FADE_IN_MS)
-
-            self.background:SetHidden(false)
-            self.background:SetAlpha(GAMEPAD_FQT_BACKGROUND_MAX_ALPHA)
-            self.background.fadeTimeline:PlayFromStart(GAMEPAD_FQT_ANIMATION_FADE_IN_MS)
-
-            self:UpdateBackgroundDimensions()
-        else
-            self.trackerControl.fadeTimeline:Stop()
-            self.background.fadeTimeline:Stop()
-            self.trackerControl:SetAlpha(1)
-            self.background:SetHidden(true)
-            QUEST_TRACKER:SetFaded(false)
-        end
     end
 
     local function OnFadeInAnimationStop(animation, control)
@@ -192,34 +173,6 @@ do
     function ZO_FocusedQuestTracker:InitializeFadeAnimations()
         local SET_FADE_HANDLERS = true
         SetupAnimationTimeline(self.trackerControl, "FocusedQuestTrackerFadeGamepad", SET_FADE_HANDLERS)
-
-        local background = self.trackerPanel:GetNamedChild("Container"):GetNamedChild("Background")
-        SetupAnimationTimeline(background, "FocusedQuestTrackerBackgroundFadeGamepad")
-        self.background = background
-    end
-
-    function ZO_FocusedQuestTracker:UpdateFading()
-        local trackerControl = self.trackerControl
-        local background = self.background
-        local fadeTimeline = trackerControl.fadeTimeline
-        local fadeBackgroundTimeline = background.fadeTimeline
-
-        if IsInGamepadPreferredMode() then
-            if trackerControl.isFaded then
-                self:UpdateBackgroundDimensions()
-                fadeTimeline:PlayFromStart()
-                fadeBackgroundTimeline:PlayFromStart()
-            else
-                fadeTimeline:PlayFromStart(GAMEPAD_FQT_ANIMATION_FADE_IN_MS)
-                fadeBackgroundTimeline:PlayFromStart(GAMEPAD_FQT_ANIMATION_FADE_IN_MS)
-            end
-        else
-            fadeTimeline:Stop()
-            fadeBackgroundTimeline:Stop()
-            trackerControl:SetAlpha(1)
-            trackerControl.isFaded = false
-            background:SetHidden(true)
-        end
     end
 
     function ZO_FocusedQuestTracker:TryFadeOut()
@@ -231,10 +184,6 @@ do
                     local fadeTimeline = trackerControl.fadeTimeline
                     fadeTimeline:Stop()
                     fadeTimeline:PlayFromStart(FADE_OUT_OFFSET)
-                    
-                    local fadeBackgroundTimeline = self.background.fadeTimeline
-                    fadeBackgroundTimeline:Stop()
-                    fadeBackgroundTimeline:PlayFromStart(FADE_OUT_OFFSET)
                 end
             else
                 trackerControl:SetAlpha(GAMEPAD_FQT_TEXT_MIN_ALPHA)
@@ -243,16 +192,12 @@ do
     end
 
     function ZO_FocusedQuestTracker:TryFadeIn()
-        self:UpdateFading()
         QUEST_TRACKER:SetFaded(false)
         CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
     end
 end
 
 do
-    local BACKGROUND_PADDING_WIDTH = 40
-    local BACKGROUND_PADDING_HEIGHT = 4
-
     local function GetDimensions(control)
         local width, height = 0, 0
         -- Start at the second child control because the first is the Assisted Keybind Face Button
@@ -261,7 +206,7 @@ do
             local childWidth, childHeight = child:GetTextDimensions()
 
             if childHeight ~= 0 then
-                height = height + childHeight + BACKGROUND_PADDING_HEIGHT
+                height = height + childHeight
             end
 
             if child.extraWidth then
@@ -272,12 +217,6 @@ do
         end
 
         return width, height
-    end
-
-    function ZO_FocusedQuestTracker:UpdateBackgroundDimensions()
-        local panelWidth, panelHeight = GetDimensions(self.trackerControl)
-
-        ZO_ScalableBackgroundWithEdge_SetSize(self.background, panelWidth + BACKGROUND_PADDING_WIDTH, panelHeight)
     end
 
     local MAX_HEIGHT_NO_COLLISION = 300

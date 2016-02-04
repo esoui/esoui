@@ -58,7 +58,7 @@
         
         <Control name="ZO_SavingEditBox" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)Saving" inherits="ZO_EditBackdrop" hidden="true">
+                <Backdrop name="$(parent)Saving" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true">
                     <AnchorFill/>
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
@@ -100,7 +100,7 @@
 
         <Control name="ZO_LargeSingleLineSavingEditBox" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)Saving" inherits="ZO_EditBackdrop" hidden="true">
+                <Backdrop name="$(parent)Saving" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true">
                     <AnchorFill/>
                     <Controls>
                         <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" multiLine="false" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>

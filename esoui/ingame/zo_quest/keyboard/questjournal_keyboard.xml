@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_QuestJournalNavigationEntry" inherits="ZO_SelectableLabel ZO_TooltipIfTruncatedLabel" font="ZoFontHeader" virtual="true" verticalAlignment="CENTER">
+        <Label name="ZO_QuestJournalNavigationEntry" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontHeader" virtual="true" verticalAlignment="CENTER">
             <Dimensions x="220" y="22" />
             <OnInitialized>
                 ZO_SelectableLabel_OnInitialized(self, ZO_QuestJournalNavigationEntry_GetTextColor)

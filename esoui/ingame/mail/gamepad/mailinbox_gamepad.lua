@@ -1,7 +1,6 @@
 -- Some configuration options.
 local MAX_READ_ATTACHMENTS = MAIL_MAX_ATTACHED_ITEMS + 1
 
-local NEW_MAIL_ICON = "EsoUI/Art/Miscellaneous/new_icon.dds"
 local SYSTEM_MAIL_ICON = "EsoUI/Art/Mail/Gamepad/gp_mailMenu_mailType_system.dds"
 local CUSTOMERSERVICE_MAIL_ICON = "EsoUI/Art/Mail/Gamepad/gp_mailMenu_mailType_CS.dds"
 
@@ -602,7 +601,7 @@ end
 local function UpdateMailIcons(mailData, entryData)
     entryData:ClearIcons()
     if mailData.unread then
-       entryData:AddIcon(NEW_MAIL_ICON)
+       entryData:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
     end
     if mailData.fromSystem then
         entryData:AddIcon(SYSTEM_MAIL_ICON)

@@ -125,7 +125,7 @@ function ZO_Stats:SetUpTitleSection()
 end
 
 function ZO_Stats:RefreshTitleSection()
-    local playerAlliance = GetUnitAlliance("player") --varies from cross alliance activities
+    local playerAlliance = GetUnitAlliance("player")
     self.allianceIconControl:SetTexture(GetLargeAllianceSymbolIcon(playerAlliance))
 end
 

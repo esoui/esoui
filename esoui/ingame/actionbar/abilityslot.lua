@@ -66,6 +66,11 @@ local function TryPlaceQuickslotAction(abilitySlot)
 end
 
 local function TryPickupAction(abilitySlot)
+    if not IsActionBarSlottingAllowed() then
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_SKILLS_DISABLED_SPECIAL_ABILITIES)
+        return false
+    end
+
     local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
     if button then
         local slotNum = button:GetSlot()

@@ -26,16 +26,7 @@ function ZO_Feedback:Initialize(control)
     self.logoutOnClose = false
     self.quitOnClose = false
 
-    HELP_CUSTOMER_SUPPORT_SCENE = ZO_Scene:New("helpCustomerSupport", SCENE_MANAGER)
-    HELP_CUSTOMER_SUPPORT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
-            if(not self.pageOpened) then
-                self:OpenBrowserByType(BROWSER_TYPE_USER_HELP)
-            end
-        elseif(newState == SCENE_HIDDEN) then
-            self.openingFramesToWait = nil
-        end
-    end)
+    
 
     INTERACT_WINDOW:RegisterCallback("Hidden", function() self:OnInteractWindowHidden() end)
     INTERACT_WINDOW:RegisterCallback("Shown", function() self:OnInteractWindowShown() end)

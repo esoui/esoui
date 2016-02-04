@@ -230,6 +230,7 @@ end
 function ZO_GamepadProvisioner:InitializeRecipeList()
     local listContainer = self.control:GetNamedChild("ContainerRecipe")
     self.recipeList = ZO_GamepadVerticalItemParametricScrollList:New(listContainer:GetNamedChild("List"))
+    self.recipeList:SetAlignToScreenCenter(true)
 
     self.recipeList:SetNoItemText(GetString(SI_PROVISIONER_NO_MATCHING_RECIPES))
 
@@ -247,6 +248,7 @@ end
 
 function ZO_GamepadProvisioner:InitializeOptionList()
     self.optionList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("ContainerOptionsList"))
+    self.optionList:SetAlignToScreenCenter(true)
 
     self.optionList:AddDataTemplate(GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE, ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.optionList:AddDataTemplateWithHeader(GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE, ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsMenuEntryHeaderTemplate")

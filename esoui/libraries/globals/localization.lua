@@ -64,11 +64,33 @@ end
 
 do
     local DIGIT_GROUP_REPLACER = GetString(SI_DIGIT_GROUP_SEPARATOR)
+    local DIGIT_GROUP_REPLACER_THRESHOLD = 1000
+    local DIGIT_GROUP_DECIMAL_REPLACER = GetString(SI_DIGIT_GROUP_DECIMAL_SEPARATOR)
+    
     function ZO_CommaDelimitNumber(amount)
-        if(amount < 1000) then
+        if(amount < DIGIT_GROUP_REPLACER_THRESHOLD) then
             return tostring(amount)
         end
 
         return FormatIntegerWithDigitGrouping(amount, DIGIT_GROUP_REPLACER)
+    end
+
+    function ZO_LocalizeDecimalNumber(amount)
+        local amountString = tostring(amount)
+
+        if "." ~= DIGIT_GROUP_DECIMAL_REPLACER then
+            amountString = zo_strgsub(amountString, "%.", DIGIT_GROUP_DECIMAL_REPLACER)
+        end
+
+        if amount >= DIGIT_GROUP_REPLACER_THRESHOLD then
+            -- We have a number like 10000.5, so localize the non-decimal digit group separators (e.g., 10000 becomes 10,000)
+            local decimalSeparatorIndex = zo_strfind(amountString, "%"..DIGIT_GROUP_DECIMAL_REPLACER) -- Look for the literal separator
+            local decimalPartString = decimalSeparatorIndex and zo_strsub(amountString, decimalSeparatorIndex) or ""
+            local wholePartString = zo_strsub(amountString, 1, decimalSeparatorIndex and decimalSeparatorIndex - 1)
+
+            amountString = ZO_CommaDelimitNumber(tonumber(wholePartString))..decimalPartString
+        end
+
+        return amountString
     end
 end

@@ -52,7 +52,7 @@
             <Controls>
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_GUILD_RANKS_ADD_RANK_NAME_HEADER"/>
 
-                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
@@ -99,10 +99,10 @@
                 </Texture>
                 <Control name="$(parent)RankName">
                     <Anchor point="LEFT" relativeTo="$(parent)RankIcon" relativePoint="RIGHT" offsetX="3"/>
-                    <Dimensions x="400" y="42"/>
                     <Controls>
-                        <Backdrop name="$(parent)EditBG" inherits="ZO_EditBackdrop">
-                            <AnchorFill/>
+                        <Backdrop name="$(parent)EditBG" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="LEFT"/>
+                            <Dimensions x="400"/>
                             <Controls>
                                 <EditBox name="$(grandparent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                     <OnTextChanged>

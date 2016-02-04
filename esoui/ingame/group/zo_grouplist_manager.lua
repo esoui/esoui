@@ -56,20 +56,25 @@ function ZO_GroupList_Manager:RegisterForEvents()
             RefreshData()
         end
     end
+    
+    local function OnGroupMemberJoined()
+        --EVENT_UNIT_CREATED will handle the major logic, this is just for the sound
+        PlaySound(SOUNDS.GROUP_JOIN)
+    end
 
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnUnitCreated", EVENT_UNIT_CREATED, RegisterDelayedRefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnUnitDestroyed", EVENT_UNIT_DESTROYED, RegisterDelayedRefreshOnUnitEvent)
-    --We don't need to handle EVENT_GROUP_MEMBER_JOINED since EVENT_UNIT_CREATED will also occur
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnGroupMemberLeft", EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnLevelUpdate", EVENT_LEVEL_UPDATE, RefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnVeteranRankUpdate", EVENT_VETERAN_RANK_UPDATE, RefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnZoneUpdate", EVENT_ZONE_UPDATE, RefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnGroupMemberRolesChanged", EVENT_GROUP_MEMBER_ROLES_CHANGED, RegisterDelayedRefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnGroupMemberConnectedStatus", EVENT_GROUP_MEMBER_CONNECTED_STATUS, RefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnLeaderUpdate", EVENT_LEADER_UPDATE, RegisterDelayedRefresh)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnGroupUpdate", EVENT_GROUP_UPDATE, RegisterDelayedRefresh)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnPlayerActivated", EVENT_PLAYER_ACTIVATED, RegisterDelayedRefresh)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_OnGroupMemberAccountNameUpdated", EVENT_GROUP_MEMBER_ACCOUNT_NAME_UPDATED, RefreshData)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_UNIT_CREATED, RegisterDelayedRefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_UNIT_DESTROYED, RegisterDelayedRefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_LEVEL_UPDATE, RefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_VETERAN_RANK_UPDATE, RefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_ZONE_UPDATE, RefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ROLES_CHANGED, RegisterDelayedRefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_CONNECTED_STATUS, RefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_LEADER_UPDATE, RegisterDelayedRefresh)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_UPDATE, RegisterDelayedRefresh)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_PLAYER_ACTIVATED, RegisterDelayedRefresh)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ACCOUNT_NAME_UPDATED, RefreshData)
 end
 
 function ZO_GroupList_Manager:BuildMasterList()

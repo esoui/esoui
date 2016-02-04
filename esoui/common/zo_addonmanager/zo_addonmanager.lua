@@ -459,7 +459,7 @@ function ZO_AddOnManager:RefreshMultiButton()
     local multiButton = self.control:GetNamedChild("MultiButton")
 
     if(HasAgreedToEULA(EULA_TYPE_ADDON_EULA)) then
-        local isShown = self.allowReload and self.isDirty
+        local isShown = self:AllowReload()
         multiButton:SetHidden(not isShown)
         multiButton:SetText(GetString(SI_ADDON_MANAGER_RELOAD))
     else
@@ -513,6 +513,10 @@ function ZO_AddOnManager:OnExpandButtonClicked(row)
     self:CommitScrollList()
 end
 
+function ZO_AddOnManager:AllowReload()
+    return (self.allowReload and self.isDirty)
+end
+
 function ZO_AddOnManager_OnExpandButtonClicked(control)
     local row = control:GetParent()
     row.owner:OnExpandButtonClicked(row)
@@ -525,7 +529,9 @@ end
 
 function ZO_AddOnManagerMultiButton_Callback()
     if(HasAgreedToEULA(EULA_TYPE_ADDON_EULA)) then
-        ReloadUI("ingame")
+        if ADD_ON_MANAGER:AllowReload() then
+            ReloadUI("ingame")
+        end
     else
         CALLBACK_MANAGER:FireCallbacks("ShowAddOnEULAIfNecessary")
     end

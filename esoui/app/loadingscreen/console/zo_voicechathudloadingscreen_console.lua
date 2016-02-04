@@ -1,6 +1,7 @@
---------------------------------------------
+--------------------------------------------------------------------------------
 -- VoiceChat HUD Loading Screen Console
---------------------------------------------
+--  App version of the Voice Chat HUD for display on the loading screen.
+--------------------------------------------------------------------------------
 
 ZO_VoiceChatHUDLoadingScreen_Console = {}
 
