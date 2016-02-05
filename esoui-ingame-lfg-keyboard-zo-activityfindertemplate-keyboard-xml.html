@@ -1,0 +1,224 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/lfg/keyboard/zo_activityfindertemplate_keyboard.xml b/esoui/ingame/lfg/keyboard/zo_activityfindertemplate_keyboard.xml
+new file mode 100644
+index 0000000..5ac8fd5
+--- /dev/null
++++ b/esoui/ingame/lfg/keyboard/zo_activityfindertemplate_keyboard.xml
+@@ -0,0 +1,210 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Control name="ZO_ActivityFinderTemplateNavigationHeader_Keyboard" inherits="ZO_IconHeader" virtual="true"&gt;
++            &lt;DimensionConstraints minY="48" maxY="48" /&gt;
++
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)Icon" override="true"&gt;
++                    &lt;Anchor point="CENTER" relativePoint="LEFT" offsetX="7" /&gt;
++                &lt;/Texture&gt;
++
++                &lt;Label name="$(parent)Text" override="true" font="ZoFontHeader3" inherits="ZO_SelectableLabel"&gt;
++                    &lt;DimensionConstraints maxX="600"/&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="20" offsetY="9" /&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="ZO_ActivityFinderTemplateNavigationEntry_Keyboard" mouseEnabled="true" resizeToFitDescendents="true" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++
++            &lt;OnMouseUp&gt;
++                ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnClicked(self, button)
++            &lt;/OnMouseUp&gt;
++
++            &lt;OnMouseEnter&gt;
++                ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnMouseEnter(self)
++            &lt;/OnMouseEnter&gt;
++
++            &lt;OnMouseExit&gt;
++                ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnMouseExit(self)
++            &lt;/OnMouseExit&gt;
++
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)LockIcon" textureFile="EsoUI/Art/Miscellaneous/locked_disabled.dds" layer="OVERLAY" hidden="true"&gt;
++                    &lt;Dimensions x="16" y="16"/&gt;
++                    &lt;Anchor point="LEFT"/&gt;
++                &lt;/Texture&gt;
++
++                &lt;Button name="$(parent)Check" inherits="ZO_CheckButton" mouseEnabled="false"&gt;
++                    &lt;Anchor point="CENTER" relativeTo="$(parent)LockIcon" /&gt;
++                &lt;/Button&gt;
++
++                &lt;Label name="$(parent)Text" inherits="ZO_SelectableLabel" font="ZoFontWinH3" mouseEnabled="false"&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Check" relativePoint="RIGHT" offsetX="5"/&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="ZO_ActivityFinderTemplateRewardTemplate_Keyboard" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)Text" maxLineCount="2" font="ZoFontWinH2"&gt;
++                    &lt;Dimensions x="220" /&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;TopLevelControl name="ZO_ActivityFinderTemplateTooltip_Keyboard" hidden="true" tier="HIGH" clampedToScreen="true"&gt;
++            &lt;Dimensions x="350" y="200" /&gt;
++
++            &lt;Controls&gt;
++                &lt;Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="-2" offsetY="-3"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/&gt;
++                &lt;/Backdrop&gt;
++                
++                &lt;Texture name="$(parent)ArtTexture"&gt;
++                    &lt;AnchorFill/&gt;
++                    &lt;TextureCoords left="0" top="0" right="0.6836" bottom="0.78125"/&gt;
++                &lt;/Texture&gt;
++                
++                &lt;Control name="$(parent)Contents"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="12" offsetY="12"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12"/&gt;
++
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)GroupSizeLabel" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                            &lt;Anchor point="TOPRIGHT" offsetY="-5"/&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Label name="$(parent)NameLabel" font="ZoFontHeader3" modifyTextType="UPPERCASE"&gt;
++                            &lt;Anchor point="TOPLEFT"/&gt;
++                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="TOPLEFT" offsetX="-10"/&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Label name="$(parent)LockedInfoLabel" font="ZoFontHeader"&gt;
++                            &lt;Anchor point="BOTTOMLEFT"/&gt;
++                            &lt;Anchor point="BOTTOMRIGHT"/&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;                
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;
++
++        &lt;TopLevelControl name="ZO_ActivityFinderTemplateTopLevel_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)SingularSection" inherits="ZO_ActivityFinderSingularTemplate_Shared"&gt;
++                    &lt;AnchorFill /&gt;
++                    &lt;Controls&gt;
++                        &lt;Texture name="$(parent)Background" override="true" level="2" alpha="0.64"&gt;
++                            &lt;Dimensions y="512" /&gt;
++                            &lt;Anchor point="TOPLEFT" /&gt;
++                            &lt;Anchor point="TOPRIGHT" /&gt;
++                            &lt;!-- 1024x512 image cropped to 614x512--&gt;
++                            &lt;TextureCoords left="0" right="0.599609375" top="0" bottom="1"/&gt;
++                            &lt;Controls&gt;
++                                &lt;Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" /&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Texture&gt;
++
++                        &lt;Label name="$(parent)GroupSizeLabel" override="true" font="ZoFontWinH4"&gt;
++                            &lt;Anchor point="TOPRIGHT" offsetX="-10" offsetY="30" /&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Label name="$(parent)Title" override="true" font="ZoFontWinH2"&gt;
++                            &lt;Anchor point="TOPLEFT" offsetX="20" offsetY="30" /&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Control name="$(parent)RewardsSection" override="true"&gt;
++                            &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" offsetX="20" offsetY="-130" /&gt;
++                            
++                            &lt;Controls&gt;
++                                &lt;Control name="$(parent)Entries" override="true"&gt;
++                                    &lt;Anchor point="BOTTOMLEFT" /&gt;
++                                    
++                                    &lt;Controls&gt;
++                                        &lt;Control name="$(parent)ItemReward" override="true"&gt;
++                                            &lt;Anchor point="BOTTOMLEFT" /&gt;
++                                        &lt;/Control&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++                                
++                                &lt;Label name="$(parent)Header" override="true" font="ZoFontWinH2"&gt;
++                                    &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)Entries" relativePoint="TOPLEFT" offsetY="-20" /&gt;
++                                &lt;/Label&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++
++                        &lt;Label name="$(parent)Description" override="true" font="ZoFontWinH4"&gt;
++                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10" /&gt;
++                            &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" offsetY="-20" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++
++                &lt;Control name="$(parent)ListSection" inherits="ZO_ScrollContainer" hidden="true"&gt;
++                    &lt;Anchor point="TOPLEFT" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" offsetY="-70" /&gt;
++                &lt;/Control&gt;
++
++                &lt;Control name="$(parent)LFMPromptSection" hidden="true"&gt;
++                    &lt;AnchorFill /&gt;
++
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Title" font="ZoFontWinH2" horizontalAlignment="CENTER" text="SI_LFG_FIND_REPLACEMENT_TITLE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"&gt;
++                            &lt;Anchor point="TOP" offsetY="100" /&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Label name="$(parent)Body" font="ZoFontWinH4" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="20" /&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Button name="$(parent)Accept" inherits="ZO_DefaultButton" text="SI_LFG_FIND_REPLACEMENT_ACCEPT"&gt;
++                            &lt;Dimensions x="200" /&gt;
++                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetX="-20" offsetY="50" /&gt;
++
++                            &lt;OnClicked&gt;
++                                local ACCEPT = true
++                                ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(ACCEPT)
++                            &lt;/OnClicked&gt;
++                        &lt;/Button&gt;
++
++                        &lt;Button name="$(parent)Decline" inherits="ZO_DefaultButton" text="SI_NOTIFICATIONS_REQUEST_DECLINE"&gt;
++                            &lt;Dimensions x="200" /&gt;
++                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetX="20" offsetY="50" /&gt;
++
++                            &lt;OnClicked&gt;
++                                local DECLINE = false
++                                ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(DECLINE)
++                            &lt;/OnClicked&gt;
++                        &lt;/Button&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++                
++                &lt;Control name="$(parent)Filter" inherits="ZO_ComboBox"&gt;
++                    &lt;Dimensions x="300" y="33" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7" /&gt;
++                &lt;/Control&gt;
++
++                &lt;Label name="$(parent)NotLeader" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" text="SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT" hidden="true"&gt;
++                    &lt;Anchor point="TOP" offsetY="50" /&gt;
++                &lt;/Label&gt;
++
++                &lt;Button name="$(parent)QueueButton" inherits="ZO_DefaultButton" text="SI_LFG_JOIN_QUEUE"&gt;
++                    &lt;Anchor point="BOTTOM" /&gt;
++                    
++                    &lt;OnClicked&gt;
++                        ZO_ActivityFinderTemplateQueueButtonKeyboard_OnClicked(self, button)
++                    &lt;/OnClicked&gt;
++                &lt;/Button&gt;
++
++                &lt;Label name="$(parent)LockReason" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS"&gt;
++                    &lt;Dimensions x="600" /&gt;
++                    &lt;Anchor point="BOTTOM" relativeTo="$(parent)QueueButton" relativePoint="TOP" offsetY="-10" /&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

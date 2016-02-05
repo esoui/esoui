@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/contacts/keyboard/friendslist_keyboard.xml b/esoui/ingame/contacts/keyboard/friendslist_keyboard.xml
+index ef8decb..98d22c0 100755
+--- a/esoui/ingame/contacts/keyboard/friendslist_keyboard.xml
++++ b/esoui/ingame/contacts/keyboard/friendslist_keyboard.xml
+@@ -101,7 +101,7 @@
+                 ZO_FriendsList_OnInitialized(self)
+             &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-38" offsetY="28"/&gt;
+                     &lt;Dimensions x="270"/&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

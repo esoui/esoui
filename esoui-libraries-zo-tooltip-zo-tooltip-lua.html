@@ -1,0 +1,27 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_tooltip/zo_tooltip.lua b/esoui/libraries/zo_tooltip/zo_tooltip.lua
+index 5683cca..31db24a 100755
+--- a/esoui/libraries/zo_tooltip/zo_tooltip.lua
++++ b/esoui/libraries/zo_tooltip/zo_tooltip.lua
+@@ -82,10 +82,13 @@ function ZO_TooltipStyledObject:GetFontString(...)
+     local fontSize = self:GetProperty("fontSize", ...)
+     local fontStyle = self:GetProperty("fontStyle", ...)
+     if(fontFace and fontSize) then
++        if type(fontSize) == "number" then
++            fontSize = tostring(fontSize)
++        end
+         if(fontStyle) then
+-            return string.format("EsoUi/Common/Fonts/%s|%d|%s", fontFace, fontSize, fontStyle)
++            return string.format("%s|%s|%s", fontFace, fontSize, fontStyle)
+         else
+-            return string.format("EsoUi/Common/Fonts/%s|%d", fontFace, fontSize)
++            return string.format("%s|%s", fontFace, fontSize)
+         end
+     else
+         return "ZoFontGame"
+</code></pre>
+<script src="prism.js"></script>

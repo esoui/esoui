@@ -1,0 +1,28 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.lua b/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.lua
+index 0733ba5..ffae53f 100755
+--- a/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.lua
++++ b/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.lua
+@@ -26,11 +26,13 @@ end
+ function ZO_LootHistory_Keyboard:InitializeFadingControlBuffer(control)
+     local HORIZ_OFFSET = 0
+     local VERTICAL_OFFSET = -84
+-    local MAX_ENTRIES = 8
+-    local CONTAINER_SHOW_TIME_MS = 3600
++    local MAX_ENTRIES = 6
++    local CONTAINER_SHOW_TIME_MS = self:GetContainerShowTime()
++    local PERSISTENT_CONTAINER_SHOW_TIME_MS = self:GetPersistentContainerShowTime()
+     local anchor = ZO_Anchor:New(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, HORIZ_OFFSET, VERTICAL_OFFSET)
+ 
+-    self.lootStream = self:CreateFadingStationaryControlBuffer(control, "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, CONTAINER_SHOW_TIME_MS, "Keyboard")
++    self.lootStreamPersistent = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("PersistentContainer"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, PERSISTENT_CONTAINER_SHOW_TIME_MS, "KeyboardPersistent")
++    self.lootStream = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("Container"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, CONTAINER_SHOW_TIME_MS, "Keyboard")
+ end
+ 
+ function ZO_LootHistory_Keyboard:SetEntryTemplate()
+</code></pre>
+<script src="prism.js"></script>

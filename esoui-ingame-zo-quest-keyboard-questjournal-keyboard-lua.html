@@ -1,0 +1,40 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_quest/keyboard/questjournal_keyboard.lua b/esoui/ingame/zo_quest/keyboard/questjournal_keyboard.lua
+index 44500e8..7f3af58 100755
+--- a/esoui/ingame/zo_quest/keyboard/questjournal_keyboard.lua
++++ b/esoui/ingame/zo_quest/keyboard/questjournal_keyboard.lua
+@@ -241,6 +241,8 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
+ 
+     self.questIndexToTreeNode = {}
+ 
++    ClearTooltip(InformationTooltip)
++
+     -- Add items to the tree
+     self.navigationTree:Reset()
+ 
+@@ -296,6 +298,7 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
+         self.questStepContainer:SetHidden(true)
+         self.questIcon:SetHidden(true)
+         self.repeatableIcon:SetHidden(true)
++        ClearTooltip(InformationTooltip)
+         return
+     end
+ 
+@@ -446,7 +449,10 @@ function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
+                 AddMenuItem(GetString(SI_QUEST_JOURNAL_ABANDON), function() QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(questIndex) end)
+             end
+ 
+-            AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_USER_QUEST_HELP, questIndex - 1) end)
++            AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() 
++																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
++																	HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromQuestName(node.data.name)
++																end)
+ 
+             ShowMenu(label)
+         end
+</code></pre>
+<script src="prism.js"></script>

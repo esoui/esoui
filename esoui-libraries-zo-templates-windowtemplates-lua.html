@@ -1,0 +1,60 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/windowtemplates.lua b/esoui/libraries/zo_templates/windowtemplates.lua
+index 1f2eddc..43a3483 100755
+--- a/esoui/libraries/zo_templates/windowtemplates.lua
++++ b/esoui/libraries/zo_templates/windowtemplates.lua
+@@ -72,48 +72,6 @@ function ZO_PanelBackgroundHorizontalDoRotations(control)
+     GetControl(control, "Bottom"):SetTextureCoordsRotation(math.pi / 2)
+ end
+ 
+-function ZO_DefaultEdit_SetEnabled(editBox, enabled)
+-    if(enabled) then
+-        editBox:SetHandler("OnMouseDown", ZO_DefaultEdit_OnMouseDown)
+-        editBox:SetColor(DEFAULT_EDIT_BOX_ENABLED_COLOR:UnpackRGBA())
+-    else
+-        editBox:LoseFocus()
+-        editBox:SetColor(DEFAULT_EDIT_BOX_DISABLED_COLOR:UnpackRGBA())
+-        editBox:SetHandler("OnMouseDown", nil)
+-    end
+-end
+-
+-do
+-    local function UpdateVisibility(self)
+-        local label = GetControl(self, "Text")
+-        if(self.defaultTextEnabled) then
+-            if(self:GetText() == "") then
+-                label:SetHidden(false)
+-            else
+-                label:SetHidden(true)
+-            end
+-        else
+-            label:SetHidden(true)
+-        end
+-    end
+-
+-    function ZO_EditDefaultText_Initialize(self, defaultText)
+-        local label = GetControl(self, "Text")
+-        label:SetText(defaultText)
+-        self.defaultTextEnabled = true
+-        UpdateVisibility(self)
+-    end
+-
+-    function ZO_EditDefaultText_Disable(self)
+-        self.defaultTextEnabled = false
+-        UpdateVisibility(self)
+-    end
+-
+-    function ZO_EditDefaultText_OnTextChanged(self)
+-        UpdateVisibility(self)
+-    end
+-end
+-
+ function ZO_SetupSelectableItemRadialMenuEntryTemplate(template, selected, itemCount)
+     if(itemCount) then
+         template.count:SetHidden(false)
+</code></pre>
+<script src="prism.js"></script>

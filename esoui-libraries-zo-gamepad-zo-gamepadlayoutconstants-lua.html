@@ -1,0 +1,21 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_gamepad/zo_gamepadlayoutconstants.lua b/esoui/libraries/zo_gamepad/zo_gamepadlayoutconstants.lua
+index afb23cd..be0cd0e 100755
+--- a/esoui/libraries/zo_gamepad/zo_gamepadlayoutconstants.lua
++++ b/esoui/libraries/zo_gamepad/zo_gamepadlayoutconstants.lua
+@@ -132,6 +132,9 @@ ZO_GAMEPAD_PANEL_BG_CONTENT_DIVIDER_CENTER_OFFSET_X = ZO_GAMEPAD_CONTENT_INSET_X
+ --Divider offset is the distance from title safe to the top of the divider
+ ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y = ZO_GAMEPAD_CONTENT_TITLE_HEIGHT + ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y
+ 
++--Info offset is the distance from title safe to the top of the info fields
++ZO_GAMEPAD_CONTENT_HEADER_INFO_OFFSET_Y = ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y + ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT + ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y
++
+ --Title/Info offset is the distance from header title bottom to the top of the info fields
+ ZO_GAMEPAD_CONTENT_HEADER_TITLE_INFO_PADDING_Y = ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y + ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT + ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y
+ 
+</code></pre>
+<script src="prism.js"></script>

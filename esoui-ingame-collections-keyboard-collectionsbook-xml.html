@@ -1,0 +1,111 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/collections/keyboard/collectionsbook.xml b/esoui/ingame/collections/keyboard/collectionsbook.xml
+index baea580..ee33e82 100755
+--- a/esoui/ingame/collections/keyboard/collectionsbook.xml
++++ b/esoui/ingame/collections/keyboard/collectionsbook.xml
+@@ -1,7 +1,34 @@
+ &lt;GuiXml&gt;
+     &lt;Controls&gt;
+-        &lt;Label name="ZO_CollectionsBookDefaultLabel" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" /&gt;
+-        &lt;Label name="ZO_CollectionsBookLargeLabel" font="ZoFontWinH2" inherits="ZO_CollectionsBookDefaultLabel" virtual="true" /&gt;
++        &lt;Control name="ZO_CollectibleIconHeader" inherits="ZO_IconHeader" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true"&gt;
++                    &lt;Dimensions x="32" y="32" /&gt;
++                    &lt;Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/&gt;
++                &lt;/Texture&gt;
++
++                &lt;Texture name="$(parent)Icon" override="true"&gt;
++                    &lt;Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="16" /&gt;
++                &lt;/Texture&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="ZO_CollectibleChildlessCategory" inherits="ZO_CollectibleIconHeader" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_IconHeader_OnInitialized(self)
++                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
++                self.SetSelected = ZO_IconHeader_Setup
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Label name="ZO_CollectibleSubCategory" inherits="ZO_JournalSubCategory" virtual="true" &gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true"&gt;
++                    &lt;Dimensions x="24" y="24" /&gt;
++                    &lt;Anchor point="RIGHT" relativePoint="LEFT" /&gt;
++                &lt;/Texture&gt;
++            &lt;/Controls&gt;
++        &lt;/Label&gt;
+         
+         &lt;Control name="ZO_CollectableStickerBase" virtual="true"&gt;
+             &lt;Dimensions x="170" y="125" /&gt;
+@@ -16,7 +43,7 @@
+                     &lt;Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2" /&gt;
+                 &lt;/Label&gt;
+ 
+-                &lt;Texture name="$(parent)ActiveIcon" level="3" textureFile="EsoUI/Art/Inventory/inventory_icon_equipped.dds" hidden="true"&gt;
++                &lt;Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" level="3" mouseEnabled="false"&gt;
+                     &lt;Dimensions x="32" y="32" /&gt;
+                     &lt;Anchor point="TOPLEFT" offsetX="3" offsetY="3" /&gt;
+                 &lt;/Texture&gt;
+@@ -25,6 +52,27 @@
+                     &lt;Dimensions x="32" y="32"/&gt;
+                     &lt;Anchor point="TOPRIGHT"/&gt;
+                 &lt;/Texture&gt;
++
++                &lt;Texture name="$(parent)CooldownIconDesaturated" level="4" hidden="true"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Icon" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" /&gt;
++                &lt;/Texture&gt;
++
++                &lt;Texture name="$(parent)CooldownIcon" level="5" hidden="true"&gt;
++                    &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)CooldownIconDesaturated" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CooldownIconDesaturated" /&gt;
++                &lt;/Texture&gt;
++
++                &lt;Texture name="$(parent)CooldownEdge" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_QuickslotFill.dds" level="6" hidden="true"&gt;
++                    &lt;Dimensions y="12" /&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)CooldownIcon" /&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)CooldownIcon" /&gt;
++                &lt;/Texture&gt;
++
++                &lt;Label name="$(parent)CooldownTime" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" verticalAlignment="CENTER" hidden="true"&gt;
++                    &lt;Anchor point="TOPLEFT"  offsetX="4" offsetY="4" /&gt;
++                &lt;/Label&gt;
++                
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+@@ -51,6 +99,10 @@
+                 self.collectible:OnEffectivelyHidden()
+             &lt;/OnEffectivelyHidden&gt;
+ 
++            &lt;OnUpdate&gt;
++                self.collectible:OnUpdate()
++            &lt;/OnUpdate&gt;
++            
+             &lt;Controls&gt;
+                 &lt;Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" hidden="true" layer="BACKGROUND" level="1"&gt;
+                     &lt;AnchorFill /&gt;
+@@ -68,7 +120,13 @@
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)Contents" override="true"&gt;
+                     &lt;Controls&gt;
+-                        &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop"&gt;
++                        &lt;Control name="$(parent)Categories" override="true"&gt;
++                            &lt;Dimensions x="353" /&gt;
++                            &lt;Anchor point="TOPLEFT" offsetX="-28" offsetY="72" /&gt;
++                            &lt;Anchor point="BOTTOMLEFT" offsetX="-28" /&gt;
++                        &lt;/Control&gt;
++                        
++                        &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                             &lt;Anchor point="TOPLEFT" offsetX="9" offsetY="28" /&gt;
+                             &lt;Dimensions x="240"/&gt;
+                             &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

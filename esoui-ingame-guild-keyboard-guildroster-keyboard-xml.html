@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/guild/keyboard/guildroster_keyboard.xml b/esoui/ingame/guild/keyboard/guildroster_keyboard.xml
+index da4c9ed..1846257 100755
+--- a/esoui/ingame/guild/keyboard/guildroster_keyboard.xml
++++ b/esoui/ingame/guild/keyboard/guildroster_keyboard.xml
+@@ -112,7 +112,7 @@
+                 ZO_KeyboardGuildRoster_OnInitialized(self)
+             &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-38" offsetY="28"/&gt;
+                     &lt;Dimensions x="270"/&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,106 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/help/keyboard/helpsubmitfeedback_keyboard.xml b/esoui/ingame/help/keyboard/helpsubmitfeedback_keyboard.xml
+new file mode 100644
+index 0000000..b498fd9
+--- /dev/null
++++ b/esoui/ingame/help/keyboard/helpsubmitfeedback_keyboard.xml
+@@ -0,0 +1,92 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;  
++        &lt;TopLevelControl name="ZO_Help_Submit_Feedback_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_HelpSubmitFeedback_Keyboard_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="30" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT"  /&gt;
++                    &lt;Controls&gt;
++                        &lt;Control name="$(parent)ScrollChild" override="true"&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)ImpactTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_FEEDBACK_IMPACT"&gt;
++                                    &lt;Anchor point="TOPLEFT"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)ImpactComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ImpactTitle" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Label name="$(parent)CategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_CATEGORY"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ImpactComboBox" relativePoint="BOTTOMLEFT" offsetY="20" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)CategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)CategoryComboBox" relativePoint="BOTTOMLEFT" offsetY="20" /&gt;
++                                    &lt;Controls&gt;
++                                        &lt;Label name="$(grandparent)SubcategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_SUBCATEGORY"&gt;
++                                            &lt;Anchor point="TOPLEFT" /&gt;
++                                        &lt;/Label&gt;
++                                        &lt;Control name="$(grandparent)SubcategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox"&gt;
++                                            &lt;Anchor point="TOPLEFT" relativeTo="$(grandparent)SubcategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                        &lt;/Control&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Control name="$(parent)DetailsContainer" resizeToFitDescendents="true"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)SubcategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20" /&gt;
++                                    &lt;Controls&gt;
++                                        &lt;Label name="$(grandparent)DetailsTitle" inherits="ZO_HelpCustomerService_Keyboard_Title"&gt;
++                                            &lt;Anchor point="TOPLEFT" /&gt;
++                                        &lt;/Label&gt;
++                                        &lt;Backdrop name="$(grandparent)DetailsTextLine" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                                            &lt;Dimensions x="322" /&gt;
++                                            &lt;Anchor point="TOPLEFT" relativeTo="$(grandparent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                            &lt;Controls&gt;
++                                                &lt;EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" /&gt;
++                                            &lt;/Controls&gt;
++                                        &lt;/Backdrop&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Label name="$(parent)DescriptionTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_DESCRIPTION"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard"&gt;
++                                    &lt;Dimensions x="550" y="220"/&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                    &lt;Controls&gt;
++                                        &lt;EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText"/&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Backdrop&gt;
++
++                                &lt;Button name="$(parent)AttachScreenshotCheckButton" inherits="ZO_CheckButton"&gt;
++                                    &lt;Anchor point="TOP" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOM" offsetX="-100" offsetY="10" /&gt;
++                                    &lt;OnInitialized&gt;
++                                        ZO_CheckButton_SetLabelText(self, GetString(SI_CUSTOMER_SERVICE_ATTACH_SCREENSHOT))
++                                    &lt;/OnInitialized&gt;
++                                &lt;/Button&gt;
++
++                                &lt;Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT"&gt;
++                                    &lt;Dimensions x="200" /&gt;
++                                    &lt;Anchor point="TOP" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOM" offsetY="50" /&gt;
++                                    &lt;OnClicked&gt;
++                                        ZO_HelpSubmitFeedback_Keyboard_AttemptToSendFeedback()
++                                    &lt;/OnClicked&gt;
++                                &lt;/Button&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;      
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

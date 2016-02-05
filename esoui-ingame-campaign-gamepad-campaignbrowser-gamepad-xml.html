@@ -1,0 +1,40 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.xml b/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.xml
+index 7714f0d..223f7cd 100755
+--- a/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.xml
++++ b/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.xml
+@@ -21,12 +21,25 @@
+                     &lt;Dimensions x="128" y="128"/&gt;
+                     &lt;Anchor point="CENTER" relativeTo="$(parent)Faction" /&gt;
+                 &lt;/Texture&gt;
+-                &lt;Label name="$(parent)AllianceName" inherits="ZO_AvALabelDataTemplate" modifyTextType="NONE"&gt;
+-                    &lt;Anchor point="CENTER" relativeTo="$(parent)Population" relativePoint="BOTTOM" /&gt;
++                &lt;Label name="$(parent)AllianceName" inherits="ZO_AvALabelDataTemplate" modifyTextType="NONE" horizontalAlignment="CENTER"&gt;
++                    &lt;Dimensions x="208" /&gt;
++                    &lt;Anchor point="TOP" relativeTo="$(parent)Population" relativePoint="BOTTOM" offsetY="-20" /&gt;
+                 &lt;/Label&gt;
+                 &lt;Label name="$(parent)FullText" text="SI_GAMEPAD_CAMPAIGN_BROWSER_CAMPAIGN_FULL" inherits="ZO_AvALabelTitleTemplate" hidden="true"&gt;
+-                    &lt;Anchor point="CENTER" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="10"/&gt;
++                    &lt;Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="5"/&gt;
+                 &lt;/Label&gt;
++                &lt;Control name="$(parent)EstimatedWait" resizeToFitDescendents="true" excludeFromResizeToFitExtents="true" hidden="true"&gt;
++                    &lt;Anchor point="TOP" relativeTo="$(parent)FullText" relativePoint="BOTTOM" offsetY="5"/&gt;
++                    
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Label" inherits="ZO_AvALabelHeaderTemplate" text="SI_GAMEPAD_CAMPAIGN_BROWSER_ESTIMATED_WAIT"&gt;
++                            &lt;Anchor point="LEFT" /&gt;
++                        &lt;/Label&gt;
++                        &lt;Label name="$(parent)Value" font="ZoFontGamepad42" text="SI_GAMEPAD_CAMPAIGN_BROWSER_ESTIMATED_WAIT"&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

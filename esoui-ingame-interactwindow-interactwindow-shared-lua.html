@@ -1,0 +1,96 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/interactwindow/interactwindow_shared.lua b/esoui/ingame/interactwindow/interactwindow_shared.lua
+index dc0dc06..4ac58c6 100755
+--- a/esoui/ingame/interactwindow/interactwindow_shared.lua
++++ b/esoui/ingame/interactwindow/interactwindow_shared.lua
+@@ -87,7 +87,10 @@ function ZO_SharedInteraction:InitializeSharedEvents()
+ 
+         self:InitializeInteractWindow(endDialog)
+         
+-        self:ShowQuestRewards(journalQuestIndex)
++        local confirmError = self:ShowQuestRewards(journalQuestIndex)
++        if confirmError then
++            confirmComplete = zo_strformat(SI_QUEST_COMPLETE_FORMAT_STRING, confirmComplete, confirmError)
++        end
+         self:PopulateChatterOption(1, CompleteQuest, confirmComplete, CHATTER_COMPLETE_QUEST)
+         self:PopulateChatterOption(2, function() self:CloseChatter() end, declineComplete, CHATTER_GOODBYE)
+ 
+@@ -165,6 +168,14 @@ function ZO_SharedInteraction:CloseChatter()
+     SCENE_MANAGER:Hide(self.sceneName)
+ end
+ 
++function ZO_SharedInteraction:CloseChatterAndDismissAssistant()
++    self:CloseChatter()
++    local activeAssistant = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT)
++    if activeAssistant ~= 0 then
++        UseCollectible(activeAssistant)
++    end
++end
++
+ function ZO_SharedInteraction:InitializeInteractWindow(bodyText)
+     self:ResetInteraction(bodyText)
+ 
+@@ -321,6 +332,13 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
+     optionCount = optionCount + 1
+     self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
+     
++    if IsInteractingWithAssistant() then
++        local assistantName = GetCollectibleName(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
++        farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, assistantName)
++        optionCount = optionCount + 1
++        self:PopulateChatterOption(optionCount, function() self:CloseChatterAndDismissAssistant() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
++    end
++
+     self:FinalizeChatterOptions(optionCount)
+ 
+     return optionCount, importantOptions
+@@ -430,6 +448,24 @@ function ZO_SharedInteraction:IsCurrencyReward(rewardType)
+     return currencyRewards[rewardType]
+ end
+ 
++local currencyRewardToCurrencyType =
++{
++    [REWARD_TYPE_MONEY] = CURT_MONEY,
++    [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
++    [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
++}
++
++function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)
++    return currencyRewardToCurrencyType[rewardType]
++end
++
++function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
++    local currencyType = currencyRewardToCurrencyType[rewardType]
++    if currencyType and (GetCarriedCurrencyAmount(currencyType) + rewardAmount &gt;= MAX_PLAYER_MONEY) then
++        return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetString("SI_CURRENCYTYPE", currencyType))
++    end        
++end
++
+ function ZO_SharedInteraction:GetRewardCreateFunc(rewardType)
+     return REWARD_CREATORS[rewardType]
+ end
+@@ -439,6 +475,10 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
+     local numRewards = GetJournalQuestNumRewards(journalQuestIndex)
+     for i = 1, numRewards do
+         local rewardType, name, amount, icon, meetsUsageRequirement, itemQuality, itemType = GetJournalQuestRewardInfo(journalQuestIndex, i)
++        --We don't want to show a collectible if we already own it
++        local isCollectible = rewardType == REWARD_TYPE_AUTO_ITEM and itemType == REWARD_ITEM_TYPE_COLLECTIBLE
++        local hideOwnedCollectible = isCollectible and not meetsUsageRequirement
++        if not hideOwnedCollectible then
+             local rewardData = {
+                 rewardType = rewardType,
+                 name = name,
+@@ -452,6 +492,7 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
+ 
+             table.insert(data, rewardData)
+         end
++    end
+     return data
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

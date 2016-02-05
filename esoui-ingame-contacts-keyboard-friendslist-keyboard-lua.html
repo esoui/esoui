@@ -1,0 +1,44 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/contacts/keyboard/friendslist_keyboard.lua b/esoui/ingame/contacts/keyboard/friendslist_keyboard.lua
+index d5d4615..6deddff 100755
+--- a/esoui/ingame/contacts/keyboard/friendslist_keyboard.lua
++++ b/esoui/ingame/contacts/keyboard/friendslist_keyboard.lua
+@@ -15,7 +15,6 @@ function ZO_KeyboardFriendsListManager:Initialize(control)
+ 
+     control:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
+     self.lastUpdateTime = 0
+-    self.playerAlliance = GetUnitAlliance("player")
+ 
+     self:SetEmptyText(GetString(SI_FRIENDS_LIST_PANEL_NO_FRIENDS_MESSAGE))
+     self.sortHeaderGroup:SelectHeaderByKey("status")
+@@ -101,7 +100,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
+             visible = function()
+                 if(self.mouseOverRow) then
+                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
+-                    if(data.hasCharacter and data.online and data.alliance == self.playerAlliance) then
++                    if(data.hasCharacter and data.online) then                        
+                         return true
+                     end
+                 end
+@@ -211,7 +210,6 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
+                 if IsChatSystemAvailableForCurrentPlatform() then
+                     AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
+                 end
+-                if(data.alliance == self.playerAlliance) then
+                 AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function() 
+                     local NOT_SENT_FROM_CHAT = false
+                     local DISPLAY_INVITED_MESSAGE = true
+@@ -219,7 +217,6 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
+                 end)
+                 AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToFriend(data.displayName) end)
+             end
+-            end
+             AddMenuItem(GetString(SI_FRIEND_MENU_REMOVE_FRIEND), function() ZO_Dialogs_ShowDialog("CONFIRM_REMOVE_FRIEND", {displayName = data.displayName}, {mainTextParams = {data.displayName}}) end)
+             AddMenuItem(GetString(SI_FRIEND_MENU_IGNORE), function() AddIgnore(data.displayName) end)
+         
+</code></pre>
+<script src="prism.js"></script>

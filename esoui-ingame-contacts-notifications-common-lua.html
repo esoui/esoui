@@ -1,0 +1,185 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/contacts/notifications_common.lua b/esoui/ingame/contacts/notifications_common.lua
+index 85d3d72..2aff9f8 100755
+--- a/esoui/ingame/contacts/notifications_common.lua
++++ b/esoui/ingame/contacts/notifications_common.lua
+@@ -191,6 +191,7 @@ function ZO_GuildMotDProvider:BuildNotificationList()
+                 {
+                     dataType = NOTIFICATIONS_ALERT_DATA,
+                     notificationType = NOTIFICATION_TYPE_GUILD_MOTD,
++                    secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                     note = currentMotD,
+                     message = message,
+                     guildId = guildId,
+@@ -707,10 +708,9 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
+                 local displayName, characterName, isFriend, isGuildMember = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+                 hasFriend = hasFriend or isFriend
+                 hasGuildMember = hasGuildMember or isGuildMember
+-           
+             end
+ 
+-            if(hasFriend or hasGuildMember) then
++            if hasFriend or hasGuildMember then
+                 local raidName = GetRaidName(raidId)
+ 
+                 table.insert(self.list,
+@@ -720,7 +720,7 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
+                     raidId = raidId,
+                     notificationType = NOTIFICATION_TYPE_LEADERBOARD,
+                     secsSinceRequest = ZO_NormalizeSecondsSince(millisecondsSinceRequest / 1000),
+-                    message = self:CreateMessage(raidName, raidScore, hasFriend, hasGuildMember),
++                    message = self:CreateMessage(raidName, raidScore, numMembers, hasFriend, hasGuildMember, notificationId),
+                     shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_SHORT_TEXT_FORMATTER, raidName),
+                 })
+             end
+@@ -728,6 +728,16 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
+     end
+ end
+ 
++function ZO_LeaderboardRaidProvider:CreateMessage(raidName, raidScore, numMembers, hasFriend, hasGuildMember, notificationId)
++    if hasFriend and hasGuildMember and numMembers &gt; 1 then
++        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS_AND_GUILD_MEMBERS, raidName, raidScore)
++    elseif hasFriend then
++        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS, raidName, raidScore, numMembers)
++    else
++        return zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_GUILD_MEMBERS, raidName, raidScore, numMembers)
++    end
++end
++
+ local OPEN_LEADERBOARDS = true
+ 
+ function ZO_LeaderboardRaidProvider:Accept(data)
+@@ -822,22 +832,43 @@ function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo
+ end
+ 
+ function ZO_CollectionsUpdateProvider:Accept(entryData)
+-    RemoveCollectibleNotification(entryData.data.notificationId)
++    --this function should be overriden to open the right scene.  We don't clear the notification here
+ end
+ 
+ function ZO_CollectionsUpdateProvider:Decline(entryData)
+     RemoveCollectibleNotification(entryData.data.notificationId)
+ end
+ 
+-function ZO_CollectionsUpdateProvider:ClearNotificationsForCategory(categoryIndex, subcategoryIndex)
+-    for i = 1, #self.list do
+-        local entryData = self.list[i].data
++function ZO_CollectionsUpdateProvider:GetNotificationIdForCollectible(collectibleId)
++    for _, entry in ipairs(self.list) do
++        if entry.data.collectibleId == collectibleId then
++            return entry.data.notificationId
++        end
++    end
++    return nil
++end
+ 
+-        local isEntryInCategory = entryData.categoryIndex == categoryIndex and entryData.subcategoryIndex == subcategoryIndex
+-        if isEntryInCategory then
+-            RemoveCollectibleNotification(entryData.notificationId)
++function ZO_CollectionsUpdateProvider:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
++    for _, entry in ipairs(self.list) do
++        if optionalCategoryIndexFilter then
++            local entryData = entry.data
++            if optionalCategoryIndexFilter == entryData.categoryIndex then
++                if optionalSubcategoryIndexFilter then
++                    --When there are subcategories, we generate a fake subcategory that covers everything not in an explicit subcategory
++                    --ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX is how we know we're asking about the general subcategory and not the entire category
++                    local isFakedGeneralSubcategoryCategory = optionalSubcategoryIndexFilter == ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX and entryData.subcategoryIndex == nil
++                    if optionalSubcategoryIndexFilter == entryData.subcategoryIndex or isFakedGeneralSubcategoryCategory then
++                        return true
++                    end
++                else
++                    return true
++                end
++            end
++        else
++            return true
+         end
+     end
++    return false
+ end
+ 
+ --LFG Update Provider
+@@ -863,10 +894,11 @@ function ZO_LFGUpdateProvider:BuildNotificationList()
+     ZO_ClearNumericallyIndexedTable(self.list)
+ 
+     if HasLFGJumpNotification() then
+-        local activityType, activityIndex, role, expirationTimeSeconds = GetLFGJumpNotificationInfo()
++        local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
++        local role = GetGroupMemberAssignedRole("player")
+ 
+         --No notification for AVA types
+-        if activityType == LFG_ACTIVITY_CYRODIIL or activityType == LFG_ACTIVITY_IMPERIAL_CITY then
++        if activityType == LFG_ACTIVITY_AVA then
+             return
+         end
+ 
+@@ -877,7 +909,7 @@ function ZO_LFGUpdateProvider:BuildNotificationList()
+                 activityType = activityType,
+                 activityIndex = activityIndex,
+                 role = role,
+-                expirationTimeSeconds = expirationTimeSeconds,
++                timeRemainingSeconds = timeRemainingSeconds,
+                 dungeonName = dungeonName,
+             }
+         )
+@@ -904,7 +936,8 @@ function ZO_LFGUpdateProvider:AddJumpNotification(data)
+         shortDisplayText = data.dungeonName,
+         data = data,
+ 
+-        expiresAt = GetFrameTimeSeconds() + data.expirationTimeSeconds,
++        expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
++        expirationCallback = ClearLFGJumpNotification,
+         messageFormat = self:GetMessageFormat(),
+         messageParams = {data.dungeonName, self:GetRoleIcon(role), GetString("SI_LFGROLE", role)},
+ 
+@@ -1004,13 +1037,9 @@ function ZO_NotificationManager:New(control)
+ end
+ 
+ function ZO_NotificationManager:Initialize(control)
+-
+     self.totalNumNotifications = 0
+-
+-
+     self:InitializeNotificationList(control)
+     self:BuildEmptyList()
+-    self:RefreshNotificationList()
+ 
+     local function OnUpdate(updateControl, currentFrameTimeSeconds)
+         if(self.allowUpdate and (self.nextUpdateTimeSeconds == nil or currentFrameTimeSeconds &gt;= self.nextUpdateTimeSeconds)) then
+@@ -1019,6 +1048,8 @@ function ZO_NotificationManager:Initialize(control)
+         end
+     end
+     control:SetHandler("OnUpdate", OnUpdate)
++
++    EVENT_MANAGER:RegisterForEvent(self.eventNamespace, EVENT_PLAYER_ACTIVATED, function() self:RefreshNotificationList() end)
+ end
+ 
+ function ZO_NotificationManager:RefreshNotificationList()
+@@ -1099,6 +1130,9 @@ function ZO_NotificationManager:BuildMessageText(data)
+             local formattedTime = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+             local params = {unpack(data.messageParams)}
+             table.insert(params, formattedTime)
++            if data.expirationCallback and remainingTime == 0 then
++                data.expirationCallback()
++            end
+             return zo_strformat(data.messageFormat, unpack(params))
+         else
+             return zo_strformat(data.messageFormat, unpack(data.messageParams))
+@@ -1122,6 +1156,10 @@ function ZO_NotificationManager:GetNumCollectionsNotifications()
+     return self.collectionsProvider:GetNumNotifications()
+ end
+ 
++function ZO_NotificationManager:GetCollectionsProvider()
++    return self.collectionsProvider
++end
++
+ -- Override
+ -------------------------
+ function ZO_NotificationManager:InitializeNotificationList(control)
+</code></pre>
+<script src="prism.js"></script>

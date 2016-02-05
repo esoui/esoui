@@ -1,0 +1,22 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/scenes/keyboard/keyboardingamefragments.lua b/esoui/ingame/scenes/keyboard/keyboardingamefragments.lua
+index 271af6e..61347cd 100755
+--- a/esoui/ingame/scenes/keyboard/keyboardingamefragments.lua
++++ b/esoui/ingame/scenes/keyboard/keyboardingamefragments.lua
+@@ -1,7 +1,8 @@
+ TRADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Trade)
+ PROVISIONER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_ProvisionerTopLevel)
+-GROUPING_TOOLS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupingToolsKeyboard)
++GROUP_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMenu_Keyboard)
+ DYEING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DyeingTopLevel)
+ ACHIEVEMENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Achievements)
+ CADWELLS_ALMANAC_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Cadwell)
+ STABLES_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StableWindowMenu)
++DLC_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DLCBook_Keyboard)
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

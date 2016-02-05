@@ -1,0 +1,44 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/grouputils.lua b/esoui/ingame/group/grouputils.lua
+index 23d1e99..e30c93d 100755
+--- a/esoui/ingame/group/grouputils.lua
++++ b/esoui/ingame/group/grouputils.lua
+@@ -47,3 +47,31 @@ function TryGroupInviteByName(characterOrDisplayName, sentFromChat, displayInvit
+         CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage)
+     end    
+ end
++
++function ZO_ConvertToDungeonDifficulty(isVeteranDifficulty)
++    if isVeteranDifficulty then
++        return DUNGEON_DIFFICULTY_VETERAN
++    else
++        return DUNGEON_DIFFICULTY_NORMAL
++    end
++end
++
++function ZO_ConvertToIsVeteranDifficulty(dungeonDifficulty)
++    return dungeonDifficulty == DUNGEON_DIFFICULTY_VETERAN
++end
++
++function ZO_GetGroupDungeonDifficulty()
++    return ZO_ConvertToDungeonDifficulty(IsGroupUsingVeteranDifficulty())
++end
++
++function ZO_GetPlayerDungeonDifficulty()
++    return ZO_ConvertToDungeonDifficulty(IsUnitUsingVeteranDifficulty("player"))
++end
++
++function ZO_GetEffectiveDungeonDifficulty()
++    if IsUnitGrouped("player") then
++        return ZO_GetGroupDungeonDifficulty()
++    else
++        return ZO_GetPlayerDungeonDifficulty()
++    end
++end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

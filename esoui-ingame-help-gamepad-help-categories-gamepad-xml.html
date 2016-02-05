@@ -1,0 +1,39 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/help/gamepad/help_categories_gamepad.xml b/esoui/ingame/help/gamepad/help_categories_gamepad.xml
+index b00788f..722e6db 100755
+--- a/esoui/ingame/help/gamepad/help_categories_gamepad.xml
++++ b/esoui/ingame/help/gamepad/help_categories_gamepad.xml
+@@ -1,27 +1,5 @@
+ &lt;GuiXml&gt;
+     &lt;Controls&gt;        
+-        &lt;Control name="ZO_Gamepad_Help_Search_Row" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true"&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_SharedGamepadEntry_OnInitialized(self)
+-                self.GetHeight = function(control)
+-                    return control.label:GetTextHeight() + self:GetNamedChild("EditBox"):GetHeight()
+-                end
+-            &lt;/OnInitialized&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" text="SI_GAMEPAD_HELP_SEARCH"/&gt;
+-                &lt;Backdrop name="$(parent)EditBox" inherits="ZO_EditBackdrop_Gamepad"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/&gt;
+-                    &lt;Dimensions x="300"/&gt;
+-                    &lt;Controls&gt;
+-                        &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad"&gt;
+-                            &lt;OnInitialized&gt;
+-                                ZO_EditDefaultText_Initialize(self, GetString(SI_GAMEPAD_HELP_SEARCH_PROMPT))
+-                            &lt;/OnInitialized&gt;
+-                        &lt;/EditBox&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Backdrop&gt;
+-            &lt;/Controls&gt;
+-        &lt;/Control&gt;
+         &lt;TopLevelControl name="ZO_Gamepad_Help_Tutorials_Categories" inherits="ZO_Gamepad_ParametricList_Screen"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_Gamepad_Tutorials_Categories_OnInitialize(self)
+</code></pre>
+<script src="prism.js"></script>

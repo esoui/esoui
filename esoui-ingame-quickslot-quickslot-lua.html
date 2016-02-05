@@ -1,0 +1,72 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/quickslot/quickslot.lua b/esoui/ingame/quickslot/quickslot.lua
+index 73b2b4d..8d30a42 100755
+--- a/esoui/ingame/quickslot/quickslot.lua
++++ b/esoui/ingame/quickslot/quickslot.lua
+@@ -99,7 +99,7 @@ function ZO_QuickslotManager:New(container)
+ 
+     manager.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+     manager.sortHeaders:AddHeadersFromContainer()
+-    manager.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
++    manager.sortHeaders:SelectHeaderByKey("name")
+ 
+     local function RefreshQuickslotWindow()
+         if not container:IsHidden() then
+@@ -205,6 +205,10 @@ function ZO_QuickslotManager:New(container)
+         end
+     end
+ 
++    local function HandleCooldownUpdates()
++        ZO_ScrollList_RefreshVisible(manager.list, nil, ZO_InventorySlot_UpdateCooldowns)
++    end
++
+     ZO_QuickSlot:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
+     ZO_QuickSlot:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
+     ZO_QuickSlot:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
+@@ -215,6 +219,7 @@ function ZO_QuickslotManager:New(container)
+     ZO_QuickSlot:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
+     ZO_QuickSlot:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, HandleInventorySlotLocked)
+     ZO_QuickSlot:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, HandleInventorySlotUnlocked)
++    ZO_QuickSlot:RegisterForEvent(EVENT_ABILITY_COOLDOWN_UPDATED, HandleCooldownUpdates)
+ 
+     manager:InitializeKeybindDescriptor()
+ 
+@@ -439,6 +444,13 @@ function ZO_QuickslotManager:RefreshCurrency(value)
+     ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, value, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+ end
+ 
++function ZO_QuickslotManager:ValidateOrClearAllQuickslots()
++    for i = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, ACTION_BAR_FIRST_UTILITY_BAR_SLOT + ACTION_BAR_UTILITY_BAR_SIZE do
++        ZO_QuickslotRadialManager:ValidateOrClearQuickslot(i)
++        self:DoQuickSlotUpdate(i)
++    end
++end
++
+ function ZO_QuickslotManager:UpdateList()
+     local scrollData = ZO_ScrollList_GetDataList(self.list)
+     ZO_ScrollList_Clear(self.list)
+@@ -455,7 +467,7 @@ function ZO_QuickslotManager:UpdateList()
+     end
+ 
+     self:ApplySort()
+-
++    self:ValidateOrClearAllQuickslots()
+     self.sortHeadersControl:SetHidden(#scrollData == 0)
+ end
+ 
+@@ -533,6 +545,9 @@ function ZO_QuickslotManager:SetUpCollectionSlot(control, data)
+     slot.collectibleId = data.collectibleId
+     slot.active = data.active
+     slot.categoryType = data.categoryType
++    slot.inCooldown = false
++    slot.cooldown = GetControl(slot, "Cooldown")
++    slot.cooldown:SetTexture(iconFile)
+     ZO_InventorySlot_SetType(slot, SLOT_TYPE_COLLECTIONS_INVENTORY)
+     ZO_ItemSlot_SetupSlotBase(slot, 1, data.iconFile)
+ end
+</code></pre>
+<script src="prism.js"></script>

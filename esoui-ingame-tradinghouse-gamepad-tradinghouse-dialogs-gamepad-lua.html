@@ -1,0 +1,48 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradinghouse/gamepad/tradinghouse_dialogs_gamepad.lua b/esoui/ingame/tradinghouse/gamepad/tradinghouse_dialogs_gamepad.lua
+index 809efae..99da1b2 100755
+--- a/esoui/ingame/tradinghouse/gamepad/tradinghouse_dialogs_gamepad.lua
++++ b/esoui/ingame/tradinghouse/gamepad/tradinghouse_dialogs_gamepad.lua
+@@ -175,12 +175,6 @@ ESO_Dialogs["TRADING_HOUSE_CONFIRM_BUY_GUILD_SPECIFIC_ITEM"] =
+     }
+ }
+ 
+-local function InitializeTradingHouseGuildItem(data, templateData)
+-    if templateData.icon then
+-        data:AddIcon(templateData.icon)
+-    end
+-end
+-
+ local function IsActiveGuild(data)
+     return data.isCurrentGuild
+ end
+@@ -201,7 +195,6 @@ local function SetupGuildSelectionDialog(dialog)
+ 
+     dialog.info.parametricList = {}
+     for i = 1, GetNumGuilds() do
+-
+         local guildId = GetGuildId(i)
+         local guildName = GetGuildName(guildId)
+         local allianceId = GetGuildAlliance(guildId)
+@@ -215,13 +208,12 @@ local function SetupGuildSelectionDialog(dialog)
+                  guildId = guildId,
+                  guildName = guildName,
+                  allianceId = allianceId,
+-                 icon = icon,
+-                 text = guildName,
+                  fontScaleOnSelection = false,
+                  setup = SetupTradingHouseGuildItem,
+                  isCurrentGuild = guildId == currentGuildID
+             },
+-            initializeData = InitializeTradingHouseGuildItem,
++            icon = icon,
++            text = guildName,
+         }
+         table.insert(dialog.info.parametricList, listItem)
+     end
+</code></pre>
+<script src="prism.js"></script>

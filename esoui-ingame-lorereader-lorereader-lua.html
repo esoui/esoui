@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/lorereader/lorereader.lua b/esoui/ingame/lorereader/lorereader.lua
+index 15e14b7..a7314df 100755
+--- a/esoui/ingame/lorereader/lorereader.lua
++++ b/esoui/ingame/lorereader/lorereader.lua
+@@ -37,7 +37,7 @@ function LoreReader:Initialize(control)
+         SCENE_MANAGER:Hide("loreReaderInteraction")
+     end
+ 
+-    local function OnScreenResized()
++    local function OnAllGuiScreensResized()
+         if not self.control:IsHidden() then
+             self.page = 1
+             self:LayoutText()
+@@ -46,7 +46,7 @@ function LoreReader:Initialize(control)
+ 
+     control:RegisterForEvent(EVENT_SHOW_BOOK, OnShowBook)
+     control:RegisterForEvent(EVENT_HIDE_BOOK, OnHideBook)
+-    control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
++    control:RegisterForEvent(EVENT_ALL_GUI_SCREENS_RESIZED, OnAllGuiScreensResized)
+ 
+     self:InitializeKeybindStripDescriptors()
+ 
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,19 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gammaadjust/gammaadjust.lua b/esoui/common/gammaadjust/gammaadjust.lua
+index f3d651b..f06005c 100755
+--- a/esoui/common/gammaadjust/gammaadjust.lua
++++ b/esoui/common/gammaadjust/gammaadjust.lua
+@@ -20,6 +20,7 @@ local function GammaDialogInitialize(dialogControl)
+                 callback =  function(dialog)
+                                 SetCVar("GAMMA_ADJUSTMENT", tostring(currentGamma))
+                                 SCENE_MANAGER:Hide("gammaAdjust")
++                                ZO_SavePlayerConsoleProfile()
+                             end,
+             },
+             [2] =
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,76 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/globals/sharedtextures.lua b/esoui/ingame/globals/sharedtextures.lua
+index 3d54f5b..277347d 100755
+--- a/esoui/ingame/globals/sharedtextures.lua
++++ b/esoui/ingame/globals/sharedtextures.lua
+@@ -173,9 +173,63 @@ function GetChampionPointAttributeActiveIcon(attribute)
+     return POINTS_ATTRIBUTE_ACTIVE_ICON[attribute]
+ end
+ 
+-ZO_NO_TEXTURE_FILE = "esoui/art/icons/icon_missing.dds"
++local KEYBOARD_ROLE_ICONS =
++{
++    [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_icon_dps.dds",
++    [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_icon_tank.dds",
++    [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_icon_healer.dds",
++}
++
++function GetKeyboardRoleIcon(role)
++    return KEYBOARD_ROLE_ICONS[role]
++end
++
++local GAMEPAD_ROLE_ICONS =
++{
++    [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
++    [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
++    [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
++}
++
++function GetGamepadRoleIcon(role)
++    return GAMEPAD_ROLE_ICONS[role]
++end
++
++function GetRoleIcon(role)
++    if IsInGamepadPreferredMode() then
++        return GetGamepadRoleIcon(role)
++    else
++        return GetKeyboardRoleIcon(role)
++    end
++end
++
++local KEYBOARD_DUNEGON_DIFFICULTY_ICONS =
++{
++    [DUNGEON_DIFFICULTY_NORMAL] = "EsoUI/Art/LFG/LFG_normalDungeon_up.dds",
++    [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/LFG_veteranDungeon_up.dds",
++}
++
++function GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
++    return KEYBOARD_DUNEGON_DIFFICULTY_ICONS[dungeonDifficulty]
++end
+ 
++local GAMEPAD_DUNGEON_DIFFICULTY_ICONS =
++{
++    [DUNGEON_DIFFICULTY_NORMAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_normalDungeon.dds",
++    [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_veteranDungeon.dds",
++}
++
++function GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
++    return GAMEPAD_DUNGEON_DIFFICULTY_ICONS[dungeonDifficulty]
++end
++
++ZO_NO_TEXTURE_FILE = "esoui/art/icons/icon_missing.dds"
++ZO_KEYBOARD_NEW_ICON = "EsoUI/Art/Miscellaneous/new_icon.dds"
++ZO_GAMEPAD_NEW_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new.dds"
++ZO_GAMEPAD_NEW_ICON_64 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds"
+ ZO_GAMEPAD_SUBMIT_ENTRY_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_submit.dds"
++ZO_TIMER_ICON_32 = "EsoUI/Art/Miscellaneous/timer_32.dds"
++ZO_TIMER_ICON_64 = "EsoUI/Art/Miscellaneous/timer_64.dds"
+ 
+ -- Gamepad Currency Textures
+ ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE = "EsoUI/Art/currency/gamepad/gp_gold.dds"
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,108 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/keyboard/market_keyboard.xml b/esoui/internalingame/market/keyboard/market_keyboard.xml
+index d9aa2cb..d8dd663 100755
+--- a/esoui/internalingame/market/keyboard/market_keyboard.xml
++++ b/esoui/internalingame/market/keyboard/market_keyboard.xml
+@@ -43,7 +43,7 @@
+                     &lt;Anchor point="BOTTOMRIGHT" offsetX="-5" /&gt;
+ 
+                     &lt;Controls&gt;
+-                        &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop"&gt;
++                        &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                             &lt;Anchor point="TOPLEFT" offsetX="10" offsetY="26" /&gt;
+                             &lt;Dimensions x="240"/&gt;
+                             &lt;Controls&gt;
+@@ -118,16 +118,86 @@
+ 
+                         &lt;Button name="$(parent)BuyCrowns" inherits="ZO_DefaultButton" text="SI_MARKET_BUY_CROWNS"&gt;
+                             &lt;Dimensions x="200"/&gt;
+-                            &lt;Anchor point="TOP" relativeTo="$(parent)Currency" relativePoint="BOTTOM" offsetY="4"/&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Currency" relativePoint="BOTTOM" offsetY="8"/&gt;
+                             &lt;OnClicked&gt;
+                                 ZO_MarketCurrencyBuyCrowns_OnClicked(self)
+                             &lt;/OnClicked&gt;
++                            &lt;Controls&gt;
++                                &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/store_crowns.dds" layer="CONTROLS"&gt;
++                                    &lt;Dimensions x="64" y="64" /&gt;
++                                    &lt;Anchor point="RIGHT" relativePoint="LEFT" offsetX="32" /&gt;
++                                &lt;/Texture&gt;
++                            &lt;/Controls&gt;
+                         &lt;/Button&gt;
+                         
+                         &lt;Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true"&gt;
+                             &lt;Anchor point="TOP" relativeTo="$(parent)EntryList"/&gt;
+                         &lt;/Label&gt;
+                         
++                        &lt;Control name="$(parent)SubscriptionPage" resizeToFitDescendents="true" hidden="true"&gt;
++                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)EntryList" /&gt;
++                            &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)EntryList" /&gt;
++                            
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE"&gt;
++                                    &lt;Anchor point="TOPLEFT" /&gt;
++                                    &lt;Anchor point="TOPRIGHT" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)MembershipInfo" resizeToFitDescendents="true"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" /&gt;
++                                    
++                                    &lt;Controls&gt;
++                                        &lt;Label name="$(parent)Label" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL"&gt;
++                                            &lt;Anchor point="TOPLEFT"/&gt;
++                                        &lt;/Label&gt;
++
++                                        &lt;Label name="$(parent)Status" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"&gt;
++                                            &lt;AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="5" /&gt;
++                                        &lt;/Label&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++                                
++                                &lt;Label name="$(parent)Overview" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMRIGHT" offsetY="10" /&gt;
++                                &lt;/Label&gt;
++                                
++                                &lt;Control name="$(parent)Benefits" resizeToFitDescendents="true"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="40" /&gt;
++                                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="40" /&gt;
++                                    
++                                    &lt;Controls&gt;
++                                        &lt;Texture name="$(parent)Image" hidden="true"&gt;
++                                            &lt;!-- Hide the image for now --&gt;
++                                            &lt;Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/&gt;
++                                            &lt;Anchor point="TOPRIGHT" /&gt;
++                                        &lt;/Texture&gt;
++                                        
++                                        &lt;Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE"&gt;
++                                            &lt;Anchor point="TOPLEFT" /&gt;
++                                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetX="-5" /&gt;
++                                        &lt;/Label&gt;
++                                        
++                                        &lt;Label name="$(parent)Text" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" /&gt;
++                                        &lt;/Label&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++                                
++                                &lt;Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION"&gt;
++                                    &lt;Dimensions x="230" /&gt;
++                                    &lt;Anchor point="TOP" relativeTo="$(parent)Benefits" relativePoint="BOTTOM" offsetY="50" /&gt;
++
++                                    &lt;OnClicked&gt;
++                                        ZO_MarketCurrencyBuySubscription_OnClicked(self)
++                                    &lt;/OnClicked&gt;
++                                &lt;/Button&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

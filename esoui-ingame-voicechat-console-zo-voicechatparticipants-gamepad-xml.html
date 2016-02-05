@@ -1,0 +1,27 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/voicechat/console/zo_voicechatparticipants_gamepad.xml b/esoui/ingame/voicechat/console/zo_voicechatparticipants_gamepad.xml
+new file mode 100644
+index 0000000..78dda6b
+--- /dev/null
++++ b/esoui/ingame/voicechat/console/zo_voicechatparticipants_gamepad.xml
+@@ -0,0 +1,14 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Control name="ZO_VoiceChatParticipantsEntryGamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)Label" override="true" modifyTextType="NONE"&gt;
++                    &lt;Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_VOICECHAT_HISTORY"/&gt;
++                &lt;/Label&gt;
++                &lt;Texture name="$(parent)Icon" override="true"&gt;
++                    &lt;Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET_VOICECHAT" /&gt;
++                &lt;/Texture&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

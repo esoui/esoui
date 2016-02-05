@@ -1,0 +1,30 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/stats/bountydisplay.lua b/esoui/ingame/stats/bountydisplay.lua
+index a81daef..d950dfa 100755
+--- a/esoui/ingame/stats/bountydisplay.lua
++++ b/esoui/ingame/stats/bountydisplay.lua
+@@ -20,9 +20,6 @@ function ZO_BountyDisplay:Initialize(control, isGamepad)
+         iconSide = RIGHT,
+     }   
+ 
+-    self.playerOwesGold = true  -- This controls the color of the currency label. When Enforcers get implemented, this variable will reflect
+-                                -- whether the player is owed gold (reward) or owes gold (bounty). But for now, only the latter is possible.
+-
+     -- Set up controls
+     self.control = control
+ 
+@@ -51,6 +48,6 @@ end
+ 
+ function ZO_BountyDisplay:OnBountyUpdated()
+     if IsJusticeEnabled() then
+-        ZO_CurrencyControl_SetSimpleCurrency(self.control, CURT_MONEY, GetFullBountyPayoffAmount(), self.currencyOptions, CURRENCY_SHOW_ALL, self.playerOwesGold) 
++        ZO_CurrencyControl_SetSimpleCurrency(self.control, CURT_MONEY, GetFullBountyPayoffAmount(), self.currencyOptions, CURRENCY_SHOW_ALL, true) 
+     end
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

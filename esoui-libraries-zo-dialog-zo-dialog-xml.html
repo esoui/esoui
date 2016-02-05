@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_dialog/zo_dialog.xml b/esoui/libraries/zo_dialog/zo_dialog.xml
+index cda0c43..4799919 100755
+--- a/esoui/libraries/zo_dialog/zo_dialog.xml
++++ b/esoui/libraries/zo_dialog/zo_dialog.xml
+@@ -148,7 +148,7 @@
+                     &lt;/OnInitialized&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Backdrop name="$(parent)Edit" inherits="ZO_EditBackdrop" hidden="true"&gt;
++                &lt;Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText"&gt;
+</code></pre>
+<script src="prism.js"></script>

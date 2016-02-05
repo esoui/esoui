@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/map/worldmap.xml b/esoui/ingame/map/worldmap.xml
+index 3d21a55..4ed5434 100755
+--- a/esoui/ingame/map/worldmap.xml
++++ b/esoui/ingame/map/worldmap.xml
+@@ -395,12 +395,17 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Label name="$(parent)RespawnTimer" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3"&gt;
+-                    &lt;Dimensions x="150" y="36"/&gt;
+-                    &lt;!-- Bump it over to the right to leave room for the "Toggle Size" button, which is a Dev button. --&gt;
+-                    &lt;Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Buttons" offsetX="128" /&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Buttons" /&gt;
++                &lt;Control name="$(parent)RespawnTimer" resizeToFitDescendents="true" hidden="true"&gt;
++                    &lt;Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="12" offsetY="-12"/&gt;
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Stat" text="SI_MAP_FORWARD_CAMP_RESPAWN_COOLDOWN" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                            &lt;Anchor point="LEFT"/&gt;
++                        &lt;/Label&gt;
++                        &lt;Label name="$(parent)Value" font="ZoFontKeybindStripDescription"&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="10"/&gt;
+                         &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+ 
+                 &lt;Label name="$(parent)GamepadInteractKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepadBold34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" hidden="true"&gt;
+                     &lt;Anchor point="TOP" relativePoint="CENTER" offsetY="40" /&gt;
+</code></pre>
+<script src="prism.js"></script>

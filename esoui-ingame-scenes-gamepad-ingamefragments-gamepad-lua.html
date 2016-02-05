@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/scenes/gamepad/ingamefragments_gamepad.lua b/esoui/ingame/scenes/gamepad/ingamefragments_gamepad.lua
+index d67e845..8e62374 100755
+--- a/esoui/ingame/scenes/gamepad/ingamefragments_gamepad.lua
++++ b/esoui/ingame/scenes/gamepad/ingamefragments_gamepad.lua
+@@ -21,3 +21,12 @@ function ZO_Gamepad_GuildNameFooterFragment:Show()
+ end
+ 
+ ZO_GUILD_NAME_FOOTER_FRAGMENT = ZO_Gamepad_GuildNameFooterFragment:New(ZO_Gamepad_GuildNameFooter)
++
++GAMEPAD_SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjust")
++
++GAMEPAD_COLLECTIONS_BOOK_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadCollections)
++GAMEPAD_COLLECTIONS_BOOK_FRAGMENT:SetHideOnSceneHidden(true)
++GAMEPAD_COLLECTIONS_BOOK_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadCollectionsInfoPanel, true)
++
++GAMEPAD_ACTIVITY_FINDER_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_ActivityFinderRoot_Gamepad)
++GAMEPAD_ACTIVITY_FINDER_FRAGMENT:SetHideOnSceneHidden(true)
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

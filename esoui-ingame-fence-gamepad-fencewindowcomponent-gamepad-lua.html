@@ -1,0 +1,57 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/fence/gamepad/fencewindowcomponent_gamepad.lua b/esoui/ingame/fence/gamepad/fencewindowcomponent_gamepad.lua
+index fccde29..aead6e0 100755
+--- a/esoui/ingame/fence/gamepad/fencewindowcomponent_gamepad.lua
++++ b/esoui/ingame/fence/gamepad/fencewindowcomponent_gamepad.lua
+@@ -17,6 +17,7 @@ function ZO_GamepadFenceComponent:Initialize(mode, title)
+         if newState == SCENE_SHOWING then
+             self:RegisterEvents()
+             self.list:UpdateList()
++            self:RefreshFooter()
+         elseif newState == SCENE_HIDING then
+             self:UnregisterEvents()
+             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+@@ -40,6 +41,18 @@ function ZO_GamepadFenceComponent:RegisterEvents()
+ 
+     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryFullUpdate)
+     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySingleSlotUpdate)
++
++    local oldUpdateHandler = self.control:GetHandler("OnUpdate")
++    local lastUpdateSeconds = 0
++    local function OnUpdate(control, currentFrameTimeSeconds)
++        oldUpdateHandler(control, currentFrameTimeSeconds)
++
++        if currentFrameTimeSeconds - lastUpdateSeconds &gt; 1 then
++            self:RefreshFooter()
++            lastUpdateSeconds = currentFrameTimeSeconds
++        end
++    end
++    self.control:SetHandler("OnUpdate", OnUpdate)
+ end
+ 
+ function ZO_GamepadFenceComponent:UnregisterEvents()
+@@ -122,3 +135,17 @@ end
+ function ZO_GamepadFenceComponent:OnSuccess()
+     --Stubbed, to be overriden
+ end
++
++function ZO_GamepadFenceComponent:RefreshFooter()
++    --Stubbed, to be overriden
++end
++
++function ZO_GamepadFenceComponent:ClearFooter()
++    local data =
++    {
++        data1HeaderText = nil,
++        data1Text = nil
++    }
++
++    GAMEPAD_GENERIC_FOOTER:Refresh(data)
++end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

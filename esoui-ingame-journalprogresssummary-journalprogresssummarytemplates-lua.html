@@ -1,0 +1,109 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.lua b/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.lua
+index c3e073e..c6c368f 100755
+--- a/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.lua
++++ b/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.lua
+@@ -1,4 +1,4 @@
+-local FAKED_SUBCATEGORY_INDEX = 0
++ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX = 0
+ 
+ ZO_JournalProgressBook_Common = ZO_Object:Subclass()
+ 
+@@ -16,6 +16,7 @@ function ZO_JournalProgressBook_Common:Initialize(control)
+ 
+     self:InitializeControls()
+     self:InitializeEvents()
++    self:InitializeCategoryTemplates()
+ 
+     ZO_StatusBar_SetGradientColor(self.categoryProgress, ZO_XP_BAR_GRADIENT_COLORS)
+     
+@@ -36,6 +37,12 @@ function ZO_JournalProgressBook_Common:InitializeEvents()
+     --Stubbed, to be overriden
+ end
+ 
++function ZO_JournalProgressBook_Common:InitializeCategoryTemplates()
++    self.parentCategoryTemplate = "ZO_IconHeader"
++    self.childlessCategoryTemplate = "ZO_IconChildlessHeader"
++    self.subCategoryTemplate = "ZO_JournalSubCategory"
++end
++
+ function ZO_JournalProgressBook_Common:InitializeFilters(filterData, startingStringId)
+     local comboBox = ZO_ComboBox_ObjectFromContainer(self.categoryFilter)
+     comboBox:SetSortsItems(false)
+@@ -94,8 +101,8 @@ function ZO_JournalProgressBook_Common:InitializeCategories(control)
+     self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 60, -10, 300)
+ 
+     local function BaseTreeHeaderIconSetup(control, data, open)
+-        local iconTexture = (open and data.pressedIcon or data.normalIcon) or "EsoUI/Art/Icons/icon_missing.dds"
+-        local mouseoverTexture = data.mouseoverIcon or "EsoUI/Art/Icons/icon_missing.dds"
++        local iconTexture = (open and data.pressedIcon or data.normalIcon) or ZO_NO_TEXTURE_FILE
++        local mouseoverTexture = data.mouseoverIcon or ZO_NO_TEXTURE_FILE
+         
+         control.icon:SetTexture(iconTexture)
+         control.iconHighlight:SetTexture(mouseoverTexture)
+@@ -139,9 +146,9 @@ function ZO_JournalProgressBook_Common:InitializeCategories(control)
+         control:SetText(data.name)
+     end
+ 
+-    self.categoryTree:AddTemplate("ZO_IconHeader", TreeHeaderSetup_Child, nil, nil, 60, 0)
+-    self.categoryTree:AddTemplate("ZO_JournalChildlessCategory", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
+-    self.categoryTree:AddTemplate("ZO_JournalSubCategory", TreeEntrySetup, TreeEntryOnSelected)
++    self.categoryTree:AddTemplate(self.parentCategoryTemplate, TreeHeaderSetup_Child, nil, nil, 60, 0)
++    self.categoryTree:AddTemplate(self.childlessCategoryTemplate, TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
++    self.categoryTree:AddTemplate(self.subCategoryTemplate, TreeEntrySetup, TreeEntryOnSelected)
+ 
+     self.categoryTree:SetExclusive(true)
+     self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
+@@ -233,7 +240,7 @@ function ZO_JournalProgressBook_Common:GetLookupNodeByCategory(categoryIndex, su
+     if self.nodeLookupData then
+         local node = self.nodeLookupData[categoryIndex]
+         if node then
+-            local subNode = node.subCategories[subcategoryIndex or FAKED_SUBCATEGORY_INDEX]
++            local subNode = node.subCategories[subcategoryIndex or ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX]
+             return subNode or node.node
+         end
+     end
+@@ -333,7 +340,7 @@ do
+         local node = tree:AddNode(nodeTemplate, entryData, parent, soundId)
+         entryData.node = node
+ 
+-        local finalCategoryIndex = isFakedSubcategory and FAKED_SUBCATEGORY_INDEX or categoryIndex
++        local finalCategoryIndex = isFakedSubcategory and ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX or categoryIndex
+         AddNodeLookup(lookup, node, parent, finalCategoryIndex)
+         return node
+     end
+@@ -350,11 +357,11 @@ do
+         local tree = self.categoryTree
+         local lookup = self.nodeLookupData
+ 
+-        local nodeTemplate = "ZO_JournalChildlessCategory"
++        local nodeTemplate = self.childlessCategoryTemplate
+         local hasChildren = not isSummary and (numSubCategories &gt; 0)
+         local numEntries = select(3, self:GetCategoryInfo(categoryIndex))
+         if(hasChildren) then
+-            nodeTemplate = "ZO_IconHeader"
++            nodeTemplate = self.parentCategoryTemplate
+         end
+ 
+         if(isSummary) then
+@@ -367,12 +374,12 @@ do
+         --Otherwise we'd have an emtpy general category
+         if(hasChildren and numEntries &gt; 0) then
+             local isFakedSubcategory = true
+-            self:AddCategory(lookup, tree, "ZO_JournalSubCategory", parent, categoryIndex, GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL), hidesUnearned, normalIcon, pressedIcon, mouseoverIcon, isSummary, isFakedSubcategory)
++            self:AddCategory(lookup, tree, self.subCategoryTemplate, parent, categoryIndex, GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL), hidesUnearned, normalIcon, pressedIcon, mouseoverIcon, isSummary, isFakedSubcategory)
+         end
+         
+         for i = 1, numSubCategories do
+             local subCategoryName, subCategoryEntries, _, _, hidesUnearned = self:GetSubCategoryInfo(categoryIndex, i)
+-            self:AddCategory(lookup, tree, "ZO_JournalSubCategory", parent, i, subCategoryName, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
++            self:AddCategory(lookup, tree, self.subCategoryTemplate, parent, i, subCategoryName, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
+         end
+ 
+         return parent
+</code></pre>
+<script src="prism.js"></script>

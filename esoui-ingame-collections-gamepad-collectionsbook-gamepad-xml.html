@@ -1,0 +1,91 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/collections/gamepad/collectionsbook_gamepad.xml b/esoui/ingame/collections/gamepad/collectionsbook_gamepad.xml
+index 5bb59b4..c9420ea 100755
+--- a/esoui/ingame/collections/gamepad/collectionsbook_gamepad.xml
++++ b/esoui/ingame/collections/gamepad/collectionsbook_gamepad.xml
+@@ -4,6 +4,78 @@
+             &lt;OnInitialized&gt;
+                 ZO_GamepadCollectionsBook_OnInitialize(self)
+             &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)InfoPanel" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors"&gt;
++                    &lt;Controls&gt;
++
++                        &lt;Texture name="$(parent)Background" alpha=".64"&gt;
++                            &lt;TextureCoords right="ZO_DLC_BACKGROUND_TEXTURE_COORD_RIGHT"/&gt;
++                            &lt;Dimensions y="ZO_DLC_BACKGROUND_TEXTURE_SQUARE_DIMENSION" /&gt;
++                            &lt;Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" /&gt;
++                            &lt;Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" /&gt;
++                        &lt;/Texture&gt;
++
++                        &lt;Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors"&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)UnlockStatusLabel" inherits="ZO_GamepadHeaderLabelTextTemplate"&gt;
++                                    &lt;Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_INFO_OFFSET_Y" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)Name" inherits="ZO_GamepadHeaderDataTextTemplate" modifyTextType="UPPERCASE"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)UnlockStatusLabel" relativePoint="BOTTOMLEFT" offsetY="5" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)QuestStatusHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_GAMEPAD_DLC_BOOK_QUEST_STATUS_HEADER"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)QuestStatusValue" inherits="ZO_GamepadHeaderDataTextTemplate"&gt;
++                                    &lt;AnchorToBaseline relativeToLabel="$(parent)QuestStatusHeader" side="RIGHT" offsetX="10"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)ScrollSection" inherits="ZO_ScrollContainer_Gamepad"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)QuestStatusHeader" relativePoint="BOTTOMLEFT" offsetY="30" /&gt;
++                                    &lt;Anchor point="BOTTOMRIGHT" /&gt;
++
++                                    &lt;OnInitialized&gt;
++                                        ZO_Scroll_Initialize_Gamepad(self)
++                                        ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
++                                    &lt;/OnInitialized&gt;
++
++                                    &lt;Controls&gt;
++                                        &lt;Control name="$(parent)ScrollChild" override="true"&gt;
++                                            &lt;Anchor point="TOPLEFT"/&gt;
++                                            &lt;Anchor point="TOPRIGHT"/&gt;
++
++                                            &lt;OnInitialized&gt;
++                                                self:SetParent(self:GetParent():GetNamedChild("Scroll"))
++                                            &lt;/OnInitialized&gt;
++
++                                            &lt;Controls&gt;
++                                                &lt;Label name="$(parent)Description" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                                                    &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" /&gt;
++                                                    &lt;Anchor point="TOPLEFT" /&gt;
++                                                &lt;/Label&gt;
++
++                                                &lt;Label name="$(parent)QuestAcceptIndicator" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" hidden="true"&gt;
++                                                    &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" /&gt;
++                                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="30" /&gt;
++                                                &lt;/Label&gt;
++
++                                                &lt;Label name="$(parent)QuestAcceptDescription" font="ZoFontGamepadCondensed42" hidden="true"&gt;
++                                                    &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" /&gt;
++                                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)QuestAcceptIndicator" relativePoint="BOTTOMLEFT" /&gt;
++                                                &lt;/Label&gt;
++                                            &lt;/Controls&gt;
++                                        &lt;/Control&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+ &lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

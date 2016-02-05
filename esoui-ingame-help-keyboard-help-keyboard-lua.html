@@ -1,0 +1,31 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/help/keyboard/help_keyboard.lua b/esoui/ingame/help/keyboard/help_keyboard.lua
+index b051b65..746f4e8 100755
+--- a/esoui/ingame/help/keyboard/help_keyboard.lua
++++ b/esoui/ingame/help/keyboard/help_keyboard.lua
+@@ -65,7 +65,7 @@ function ZO_HelpManager:Initialize(control)
+     control:RegisterForEvent(EVENT_HELP_INITIALIZED, UpdateHelp)
+     control:RegisterForEvent(EVENT_HELP_SEARCH_RESULTS_READY, OnSearchResultsReady)
+ 
+-    UpdateHelp()
++	self:Refresh()
+ end
+ 
+ function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+@@ -90,8 +90,10 @@ function ZO_HelpManager:OnShow()
+ end
+ 
+ function ZO_HelpManager:OnHide()
++    if self.searchBox:GetText() ~= "" then
+ 		self.searchBox:SetText("")
+ 	end
++end
+ 
+ function ZO_HelpManager:InitializeTree()
+     self.navigationTree = ZO_Tree:New(GetControl(self.control, "NavigationContainerScrollChild"), 60, -10, 350)
+</code></pre>
+<script src="prism.js"></script>

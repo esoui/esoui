@@ -1,0 +1,157 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/unitframes/unitframes.xml b/esoui/ingame/unitframes/unitframes.xml
+index b69ba36..3494b51 100755
+--- a/esoui/ingame/unitframes/unitframes.xml
++++ b/esoui/ingame/unitframes/unitframes.xml
+@@ -23,31 +23,23 @@
+     &lt;/Animations&gt;
+ 
+     &lt;Controls&gt;
+-        &lt;!-- UnitFrame status bars for health/mechanic and any text that goes on them are dynamically created entirely from the following status bar and label templates --&gt;
+-        &lt;StatusBar name="ZO_UnitFrameStatusBar_Gamepad" inherits="ZO_DefaultStatusBar" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter_Fill.dds" virtual="true"&gt;
+-            &lt;Dimensions x="96" y="5" /&gt;
+-            &lt;LeadingEdge textureFile="" width="0" height="0" /&gt;
+-            &lt;TextureCoords left="0" right="1" top="0.3125" bottom="0.625" /&gt;
+-            &lt;Controls&gt;
+-                &lt;StatusBar name="$(parent)Gloss" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter_Fill.dds"&gt;
+-                    &lt;AnchorFill /&gt;
+-                    &lt;LeadingEdge textureFile="" width="0" height="0" /&gt;
+-                    &lt;TextureCoords left="0" right="1" top="0.3125" bottom="0.625" /&gt;
+-                &lt;/StatusBar&gt;
+-            &lt;/Controls&gt;
+-        &lt;/StatusBar&gt;
+-
+-        &lt;StatusBar name="ZO_UnitFrameStatus" inherits="ZO_DefaultStatusBar" virtual="true" /&gt;
++        &lt;StatusBar name="ZO_UnitFrameStatus" virtual="true" /&gt;
+ 
+-        &lt;StatusBar name="ZO_UnitFrameStatus_Keyboard_Template" inherits="ZO_DefaultStatusBar" virtual="true"&gt;
++        &lt;StatusBar name="ZO_UnitFrameStatus_Keyboard_Template" inherits="ZO_DefaultStatusBarBase" virtual="true"&gt;
+             &lt;Dimensions y="32" /&gt;
+         &lt;/StatusBar&gt;
+ 
+-        &lt;StatusBar name="ZO_UnitFrameStatus_Gamepad_Template" inherits="ZO_UnitFrameStatusBar_Gamepad" virtual="true"&gt;
+-            &lt;Dimensions y="5" /&gt;
+-        &lt;/StatusBar&gt;
++        &lt;StatusBar name="ZO_UnitFrameStatus_Gamepad_Template" virtual="true"/&gt;
+ 
+-        &lt;StatusBar name="ZO_GroupUnitFrameStatus" inherits="ZO_ArrowStatusBarWithBG" virtual="true" /&gt;
++        &lt;StatusBar name="ZO_GroupUnitFrameStatus" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                self.gloss = self:GetNamedChild("Gloss")
++            &lt;/OnInitialized&gt;
++            
++            &lt;Controls&gt;
++                &lt;StatusBar name="$(parent)Gloss"/&gt;
++            &lt;/Controls&gt;
++        &lt;/StatusBar&gt;
+ 
+         &lt;StatusBar name="ZO_GroupUnitFrameStatus_Keyboard_Template" inherits="ZO_ArrowStatusBarWithBG" virtual="true"&gt;
+             &lt;Controls&gt;
+@@ -56,7 +48,7 @@
+             &lt;/Controls&gt;
+         &lt;/StatusBar&gt;
+ 
+-        &lt;StatusBar name="ZO_GroupUnitFrameStatus_Gamepad_Template" inherits="ZO_UnitFrameStatusBar_Gamepad" virtual="true"&gt;
++        &lt;StatusBar name="ZO_GroupUnitFrameStatus_Gamepad_Template" inherits="ZO_DefaultStatusBar" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)BG" hidden="true" /&gt;
+                 &lt;Control name="$(parent)Overlay" hidden="true" /&gt;
+@@ -84,8 +76,8 @@
+         &lt;Control name="ZO_RaidFrameAnchor" inherits="ZO_GroupFrameAnchor" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Label name="$(parent)GroupName"&gt;
+-                    &lt;Anchor point="TOPLEFT" /&gt;
+-                    &lt;Anchor point="TOPRIGHT" /&gt;
++                    &lt;Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/&gt;
+                 &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+@@ -156,9 +148,7 @@
+ 
+         &lt;Control name="ZO_NamedUnitFrame" inherits="ZO_UnitFrame" virtual="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="TRUNCATE"&gt;
+-                    &lt;Dimensions y="19" /&gt;
+-                &lt;/Label&gt;
++                &lt;Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="TRUNCATE" maxLineCount="1"/&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+@@ -183,16 +173,20 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+                 &lt;Texture name="$(parent)Background2" hidden="true" /&gt;
++                &lt;Texture name="$(parent)RoleIcon"&gt;
++                    &lt;Dimensions x="32" y="32"/&gt;
++                    &lt;Anchor point="LEFT"/&gt;
++                &lt;/Texture&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_GroupUnitFrame_Gamepad_Template" virtual="true"&gt;
+-            &lt;Dimensions x="ZO_GAMEPAD_GROUP_FRAME_WIDTH" y="13" /&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_GROUP_FRAME_WIDTH" y="ZO_GAMEPAD_GROUP_FRAME_HEIGHT" /&gt;
+             &lt;Controls&gt;
+                 &lt;Label name="$(parent)Name" font="ZoFontGamepad34" wrapMode="ELLIPSIS" /&gt;
+                 &lt;Label name="$(parent)Status" inherits="ZO_UnitFrameBarText_Gamepad_Template" /&gt;
+                 &lt;Control name="$(parent)Background1"&gt;
+-                    &lt;Dimensions x="164" y="9" /&gt;
++                    &lt;Dimensions x="163" y="12" /&gt;
+                     &lt;Anchor point="TOPLEFT" offsetX="-2" offsetY="43" /&gt;
+                     &lt;Controls&gt;
+                         &lt;Texture name="$(parent)Left" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter.dds" color="000000"&gt;
+@@ -206,6 +200,10 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+                 &lt;Texture name="$(parent)Background2" hidden="false" /&gt;
++                &lt;Texture name="$(parent)RoleIcon"&gt;
++                    &lt;Dimensions x="42" y="42"/&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="-54" offsetY="8"/&gt;
++                &lt;/Texture&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+@@ -221,8 +219,9 @@
+                 &lt;/Control&gt;
+                 &lt;Texture name="$(parent)Background2" textureFile="EsoUI/Art/HUD/Gamepad/LootHistoryBG.dds"&gt;
+                     &lt;Dimensions x="256" y="90" /&gt;
+-                    &lt;Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="45" /&gt;
++                    &lt;Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-9"/&gt;
+                 &lt;/Texture&gt;
++                &lt;Texture name="$(parent)RoleIcon" layer="OVERLAY" hidden="true"/&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+@@ -248,11 +247,13 @@
+ 
+         &lt;Control name="ZO_RaidUnitFrame" inherits="ZO_NamedUnitFrame" virtual="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop"&gt;
++                &lt;Backdrop name="$(parent)BG"&gt;
+                     &lt;AnchorFill /&gt;
++                    &lt;Edge file="EsoUI/Art/Tooltips/UI-Border.dds" edgeFileWidth="128" edgeFileHeight="16" /&gt;
++                    &lt;Center file="EsoUI/Art/Tooltips/UI-TooltipCenter.dds" /&gt;
++                    &lt;Insets left="16" top="16" right="-16" bottom="-16" /&gt;
+                 &lt;/Backdrop&gt;
+-                &lt;Texture name="$(parent)Background" textureFile="EsoUI/Art/UnitFrames/Gamepad/gp_RaidMeter.dds" color="000000"&gt;
+-                    &lt;TextureCoords left="0" right="1" top="0.25" bottom="0.75" /&gt;
++                &lt;Texture name="$(parent)Background" color="000000" alpha="0.8"&gt;
+                     &lt;AnchorFill /&gt;
+                 &lt;/Texture&gt;
+                 &lt;Label name="$(parent)Status" hidden="true" /&gt;
+@@ -482,8 +483,6 @@
+                         &lt;/Texture&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+-
+-                &lt;Control name="$(parent)ScalableBackground" inherits="ZO_ScalableBackgroundFadedEdge" tier="LOW" alpha="0.5" hidden="true" /&gt;
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

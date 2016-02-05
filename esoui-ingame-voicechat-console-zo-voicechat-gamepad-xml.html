@@ -1,0 +1,22 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/voicechat/console/zo_voicechat_gamepad.xml b/esoui/ingame/voicechat/console/zo_voicechat_gamepad.xml
+index ce8b7a9..5ee0d46 100755
+--- a/esoui/ingame/voicechat/console/zo_voicechat_gamepad.xml
++++ b/esoui/ingame/voicechat/console/zo_voicechat_gamepad.xml
+@@ -10,7 +10,9 @@
+             &lt;Controls&gt;
+                 &lt;Scroll name="$(parent)Channels" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" /&gt;
+ 
+-                &lt;Scroll name="$(parent)ParticipantOptions" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" /&gt;
++                &lt;Scroll name="$(parent)Participants" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" /&gt;
++
++                &lt;Control name="$(parent)SocialOptions" /&gt;
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/stable/keyboard/stable_keyboard.xml b/esoui/ingame/stable/keyboard/stable_keyboard.xml
+index 285fa66..95830a1 100755
+--- a/esoui/ingame/stable/keyboard/stable_keyboard.xml
++++ b/esoui/ingame/stable/keyboard/stable_keyboard.xml
+@@ -101,7 +101,7 @@
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)StaminaTrainRow" relativePoint="BOTTOMRIGHT" offsetY="20"/&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Texture name="$(parent)Timer" textureFile="EsoUI/Art/Mounts/timer_icon.dds" mouseEnabled="true"&gt;
++                &lt;Texture name="$(parent)Timer" textureFile="EsoUI/Art/Miscellaneous/timer_64.dds" mouseEnabled="true"&gt;
+                     &lt;Dimensions x="64" y="64" /&gt;
+                     &lt;Anchor point="TOP" relativeTo="$(parent)CarryTrainRow" relativePoint="BOTTOM" offsetY="15"/&gt;
+                     &lt;OnMouseEnter&gt;
+@@ -113,7 +113,7 @@
+                         ClearTooltip(InformationTooltip)
+                     &lt;/OnMouseExit&gt;
+                     &lt;Controls&gt;
+-                        &lt;Cooldown name="$(parent)Overlay" textureFile="EsoUI/Art/Mounts/timer_overlay.dds"&gt;
++                        &lt;Cooldown name="$(parent)Overlay" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_64.dds"&gt;
+                             &lt;Dimensions x="64" y="64" /&gt;
+                             &lt;Anchor point="CENTER" /&gt;
+                         &lt;/Cooldown&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,93 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/death/raidlifedisplay.xml b/esoui/ingame/death/raidlifedisplay.xml
+index 54e0c20..c86b45f 100755
+--- a/esoui/ingame/death/raidlifedisplay.xml
++++ b/esoui/ingame/death/raidlifedisplay.xml
+@@ -28,29 +28,55 @@
+                 &lt;/AlphaAnimation&gt;
+             &lt;/Animations&gt;
+         &lt;/AnimationTimeline&gt;
++        &lt;AnimationTimeline name="ZO_RaidLifeScoreUpdateAnimation" &gt;
++            &lt;Animations&gt;
++                &lt;CustomAnimation duration="200"&gt;
++                    &lt;UpdateFunction&gt;
++                        HUD_RAID_LIFE:UpdateRaidScore(self, progress)
++                    &lt;/UpdateFunction&gt;
++                &lt;/CustomAnimation&gt;
++            &lt;/Animations&gt;
++        &lt;/AnimationTimeline&gt;
+     &lt;/Animations&gt;
+ 
+     &lt;Controls&gt;
++
+         &lt;Control name="ZO_RaidLifeDisplay_Keyboard_Template" virtual="true"&gt;
+             &lt;Controls&gt;
++                &lt;Label name="$(parent)ReviveCounter" font="ZoFontWinH2"&gt;
++                    &lt;Anchor point="BOTTOMRIGHT"/&gt;
++                &lt;/Label&gt;
+                 &lt;Texture name="$(parent)Icon"&gt;
+-                    &lt;Anchor point="TOPRIGHT" /&gt;
++                    &lt;Anchor point="RIGHT" relativeTo="$(parent)ReviveCounter" relativePoint="LEFT"/&gt;
+                 &lt;/Texture&gt;
+-                &lt;Label name="$(parent)Label" font="ZoFontWinH1" /&gt;
++
++                &lt;Label name="$(parent)TotalScore" font="ZoFontWinH2"&gt;
++                    &lt;Anchor point="RIGHT" relativeTo="$(parent)ReviveCounter" relativePoint="LEFT" offsetX="-58"/&gt;
++                &lt;/Label&gt;
++                &lt;Label name="$(parent)ScoreLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGameLargeBold" modifyTextType="NONE"&gt;
++                    &lt;Anchor point="RIGHT" relativeTo="$(parent)TotalScore" relativePoint="LEFT" offsetX="-5" offsetY="2"/&gt;
++                &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_RaidLifeDisplay_Gamepad_Template" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Texture name="$(parent)Icon"&gt;
+-                    &lt;Anchor point="TOPRIGHT" offsetX="10" /&gt;
++                    &lt;Anchor point="BOTTOMLEFT" offsetY="-5"/&gt;
+                 &lt;/Texture&gt;
+-                &lt;Label name="$(parent)Label" font="ZoFontGamepad34" /&gt;
++                &lt;Label name="$(parent)ReviveCounter" font="ZoFontGamepad42" &gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT"/&gt;
++                &lt;/Label&gt;
++                &lt;Label name="$(parent)ScoreLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGamepad27" modifyTextType="UPPERCASE"&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)ReviveCounter" relativePoint="RIGHT" offsetX="20" offsetY="5"/&gt;
++                &lt;/Label&gt;
++                &lt;Label name="$(parent)TotalScore" font="ZoFontGamepad42" &gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)ScoreLabel" relativePoint="RIGHT" offsetX="10" offsetY="-5"/&gt;
++                &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_RaidLifeDisplay" virtual="true"&gt;
+-            &lt;Dimensions x="60" y="35"/&gt;
+             &lt;OnInitialized&gt;
+                 ZO_RaidLifeDisplay_OnInitialized(self)
+             &lt;/OnInitialized&gt;
+@@ -58,12 +84,15 @@
+                 ZO_RaidLifeDisplay_OnEffectivelyShown(self)
+             &lt;/OnEffectivelyShown&gt;
+             &lt;Controls&gt;
+-                &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/Death/death_soulReservoir_icon.dds"&gt;
+-                    &lt;Dimensions x="32" y="32"/&gt;
+-                    &lt;Anchor point="TOPRIGHT"/&gt;
++                &lt;Label name="$(parent)ReviveCounter" font="ZoFontWinH2"&gt;
++                &lt;/Label&gt;
++                &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds"&gt;
++                    &lt;Dimensions x="40" y="40"/&gt;
+                 &lt;/Texture&gt;
+-                &lt;Label name="$(parent)Label" font="ZoFontWinH1"&gt;
+-                    &lt;Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-13"/&gt;
++
++                &lt;Label name="$(parent)TotalScore" font="ZoFontWinH2"&gt;
++                &lt;/Label&gt;
++                &lt;Label name="$(parent)ScoreLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+                 &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+</code></pre>
+<script src="prism.js"></script>

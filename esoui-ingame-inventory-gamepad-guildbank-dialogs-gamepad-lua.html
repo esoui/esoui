@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/inventory/gamepad/guildbank_dialogs_gamepad.lua b/esoui/ingame/inventory/gamepad/guildbank_dialogs_gamepad.lua
+index 5eeed8b..40b3e38 100755
+--- a/esoui/ingame/inventory/gamepad/guildbank_dialogs_gamepad.lua
++++ b/esoui/ingame/inventory/gamepad/guildbank_dialogs_gamepad.lua
+@@ -38,7 +38,7 @@ local function SetupGuildSelectionDialog(dialog)
+         local listItem = 
+         {
+             template = GUILD_ENTRY_TEMPLATE,
+-            templateData = entryData,
++            entryData = entryData,
+         }
+         table.insert(dialog.info.parametricList, listItem)
+     end
+</code></pre>
+<script src="prism.js"></script>

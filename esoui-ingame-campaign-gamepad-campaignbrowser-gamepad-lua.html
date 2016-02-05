@@ -1,0 +1,158 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.lua b/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.lua
+index 0188d33..0559e4b 100755
+--- a/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.lua
++++ b/esoui/ingame/campaign/gamepad/campaignbrowser_gamepad.lua
+@@ -46,6 +46,7 @@ function ZO_CampaignBrowser_Gamepad:Initialize(control)
+     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_LIST_ON_SHOW)
+ 
+     self.currentMode = CAMPAIGN_BROWSER_MODES.CAMPAIGNS
++    self.campaignBrowser = ZO_CampaignBrowser_Shared:New()
+ 
+     GAMEPAD_AVA_ROOT_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HUB_SCENE_NAME, SCENE_MANAGER)
+     GAMEPAD_AVA_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+@@ -170,18 +171,31 @@ local function GetPopulationIcon(population)
+     return POPULATION_ICONS[population]
+ end
+ 
+-local function SetupPopulationIcon(statsControl, nameString, population) 
+-    local allianceControl = statsControl:GetNamedChild(nameString)
+-    allianceControl.populationControl:SetTexture(GetPopulationIcon(population))
++local function SetupPopulationIcon(control, data) 
++    control.populationControl:SetTexture(GetPopulationIcon(data.population))
++
++    local isFull = data.population == CAMPAIGN_POP_FULL
++    control.lockedIconControl:SetHidden(not isFull)
++    control.fullTextControl:SetHidden(not isFull)
+ 
+-    local isFull = population == CAMPAIGN_POP_FULL
+-    allianceControl.lockedIconControl:SetHidden(not isFull)
+-    allianceControl.fullTextControl:SetHidden(not isFull)
++    local queueWaitSeconds = GetSelectionCampaignQueueWaitTime(data.campaignId)
++    if data.alliance == GetUnitAlliance("player") and queueWaitSeconds &gt; 0 then
++        --We don't want to show an estimate for seconds
++        if queueWaitSeconds &lt; 60 then
++            queueWaitSeconds = 60
++        end
++        queueWaitMs = queueWaitSeconds * 1000
++        local textEstimatedTime = ZO_GetSimplifiedTimeEstimateText(queueWaitMs, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, nil, ZO_TIME_ESTIMATE_STYLE.ARITHMETIC)
++        control.estimatedWaitValueControl:SetText(textEstimatedTime)
++        control.estimatedWaitControl:SetHidden(false)
++    else
++        control.estimatedWaitControl:SetHidden(true)
++    end
+ 
+     if(isFull) then
+-        allianceControl.factionControl:SetAlpha(0.5)
++        control.factionControl:SetAlpha(0.5)
+     else
+-        allianceControl.factionControl:SetAlpha(1.0)
++        control.factionControl:SetAlpha(1.0)
+     end
+ end
+ 
+@@ -211,14 +225,15 @@ end
+ function ZO_CampaignBrowser_Gamepad:RefreshCampaignInfoContent()
+     local selectedData = self.campaignList:GetTargetData()
+ 
+-    if (selectedData) then
++    if selectedData then
+         self:UpdateQueueMessages(self.campaignQueueMessage, self.campaignQueueMessageIcon, self.groupCampaignQueueMessage, self.groupCampaignQueueMessageIcon, selectedData)
+ 
+         self.campaignInfoRules:SetText(GetCampaignRulesetDescription(selectedData.rulesetId))
+ 
+-        SetupPopulationIcon(self.campaignInfoStats, "AldmeriDominion", selectedData.alliancePopulation1)
+-        SetupPopulationIcon(self.campaignInfoStats, "EbonheartPact", selectedData.alliancePopulation2)
+-        SetupPopulationIcon(self.campaignInfoStats, "DaggerfallCovenant", selectedData.alliancePopulation3)
++        local campaignId = selectedData.id
++        SetupPopulationIcon(self.campaignInfoStats:GetNamedChild("AldmeriDominion"), {population = selectedData.alliancePopulation1, campaignId = campaignId, alliance = ALLIANCE_ALDMERI_DOMINION})
++        SetupPopulationIcon(self.campaignInfoStats:GetNamedChild("EbonheartPact"), {population = selectedData.alliancePopulation2, campaignId = campaignId, alliance =  ALLIANCE_EBONHEART_PACT})
++        SetupPopulationIcon(self.campaignInfoStats:GetNamedChild("DaggerfallCovenant"), {population = selectedData.alliancePopulation3, campaignId = campaignId, alliance = ALLIANCE_DAGGERFALL_COVENANT})
+     end
+ end
+ 
+@@ -242,7 +257,6 @@ function ZO_CampaignBrowser_Gamepad:PerformDeferredInitialization()
+     self.groupCampaignQueueMessage = campaignRules:GetNamedChild("GroupQueueMessage")
+     self.groupCampaignQueueMessageIcon = campaignRules:GetNamedChild("GroupQueueMessageIcon")
+     
+-    self.campaignBrowser = ZO_CampaignBrowser_Shared:New()
+     self.dataRegistration = ZO_CampaignDataRegistration:New("CampaignSelectorData", function() return GAMEPAD_AVA_ROOT_SCENE:IsShowing() end)
+ 
+     ZO_CampaignDialogGamepad_Initialize(self)
+@@ -452,11 +466,8 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
+                     if(selectedData.entryType == ENTRY_TYPES.ENTER_CAMPAIGN and self:CanQueue(selectedData)) then
+                         self:DoQueue(selectedData)
+                     elseif(selectedData.entryType == ENTRY_TYPES.TRAVEL_TO_CAMPAIGN and self:CanEnter(selectedData)) then
+-                        local data = {
+-                            campaignId = selectedData.id,
+-                            isGroup = selectedData.isGroup or selectedData.queuedGroupState == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING,
+-                        }
+-                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_READY_DIALOG, data, { mainTextParams = { selectedData.name } })
++                        local isGroup = selectedData.isGroup or selectedData.queuedGroupState == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING
++                        self.campaignBrowser:ShowCampaignQueueReadyDialog(selectedData.id, isGroup, selectedData.name)
+                     elseif(selectedData.entryType == ENTRY_TYPES.LEAVE_QUEUE and self:IsQueued(selectedData)) then
+                         self:DoLeave(selectedData)
+                     elseif(selectedData.entryType == ENTRY_TYPES.SET_HOME) then
+@@ -563,8 +574,7 @@ end
+ 
+ function ZO_CampaignBrowser_Gamepad:RegisterEvents()
+     self.control:SetHandler("OnUpdate", function(control, seconds) self:OnUpdate(control, seconds) end)
+-    self.updateIntervalLastUpdate = 0
+-    self.updateIntervalSecs = 1
++    self.nextUpdateTimeSeconds = 0
+ 
+     EVENT_MANAGER:RegisterForEvent("ZO_CampaignBrowser_Gamepad", EVENT_CAMPAIGN_SELECTION_DATA_CHANGED, function() self:Update() end)
+     EVENT_MANAGER:RegisterForEvent("ZO_CampaignBrowser_Gamepad", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() self:Update() end)
+@@ -589,8 +599,8 @@ end
+ 
+ function ZO_CampaignBrowser_Gamepad:OnUpdate(control, seconds)
+ 
+-    if(seconds &gt; self.updateIntervalLastUpdate + self.updateIntervalSecs) then
+-        self.updateIntervalLastUpdate = seconds
++    if(seconds &gt; self.nextUpdateTimeSeconds) then
++        self.nextUpdateTimeSeconds = zo_floor(seconds + 1)  -- Update on the second boundary
+ 
+         local listUpdateRequired = false        
+         for i = 1, #self.assignedCampaignData do
+@@ -676,21 +686,16 @@ function ZO_CampaignBrowser_Gamepad:DoLeave(data)
+     end
+ end
+ 
++function ZO_CampaignBrowser_Gamepad:GetCampaignBrowser()
++    return self.campaignBrowser
++end
++
+ function ZO_CampaignBrowser_Gamepad:CanQueue(data)
+     return self.campaignBrowser:CanQueue(data)
+ end
+ 
+ function ZO_CampaignBrowser_Gamepad:DoQueue(data)
+-    if data then
+-        local canQueueIndividual, canQueueGroup = self:CanQueue(data)
+-        if(canQueueIndividual and canQueueGroup) then
+-            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_DIALOG, data, { mainTextParams = { data.name } })
+-        elseif(canQueueIndividual) then
+-            QueueForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
+-        else
+-            QueueForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)
+-        end
+-    end
++    self.campaignBrowser:DoQueue(data.dataSource)
+ end
+ 
+ local DEFAULT_GAMEPAD_CAMPAIGN_ITEM_SORT =
+@@ -926,6 +931,8 @@ function ZO_AvAFactionPopulation_Gamepad_OnInitialize(control, alliance)
+     control.allianceNameControl = control:GetNamedChild("AllianceName")
+     control.lockedIconControl = control:GetNamedChild("LockedIcon")
+     control.fullTextControl = control:GetNamedChild("FullText")
++    control.estimatedWaitControl = control:GetNamedChild("EstimatedWait")
++    control.estimatedWaitValueControl = control.estimatedWaitControl:GetNamedChild("Value")
+ 
+     local r,g,b,a = GetInterfaceColor(INTERFACE_COLOR_TYPE_ALLIANCE, alliance)
+     control.populationControl:SetColor(r,g,b,a)
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,40 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/editboxtemplates_keyboard.lua b/esoui/libraries/zo_templates/editboxtemplates_keyboard.lua
+new file mode 100644
+index 0000000..c3bc0ec
+--- /dev/null
++++ b/esoui/libraries/zo_templates/editboxtemplates_keyboard.lua
+@@ -0,0 +1,26 @@
++ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP = 3
++ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM = 3
++ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_LEFT = 8
++ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_RIGHT = 6
++
++local EditContainerSizer_Keyboard = ZO_EditContainerSizer:New(ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP, ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM)
++
++function ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
++    EditContainerSizer_Keyboard:Add(self)
++end
++
++ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_TOP = 5
++ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_BOTTOM = 8
++ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT = 8
++ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_RIGHT = 6
++
++local EditContainerDarkSizer_Keyboard = ZO_EditContainerSizer:New(ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_TOP, ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_BOTTOM)
++
++function ZO_SingleLineEditContainerDarkSize_Keyboard_OnInitialized(self)
++    EditContainerDarkSizer_Keyboard:Add(self)
++end
++
++ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_TOP = 5
++ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_BOTTOM = 7
++ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_LEFT = 6
++ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_RIGHT = 7
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

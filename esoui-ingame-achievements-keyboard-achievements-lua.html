@@ -1,0 +1,77 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/achievements/keyboard/achievements.lua b/esoui/ingame/achievements/keyboard/achievements.lua
+index f619d6b..06879d6 100755
+--- a/esoui/ingame/achievements/keyboard/achievements.lua
++++ b/esoui/ingame/achievements/keyboard/achievements.lua
+@@ -22,6 +22,8 @@ local ACHIEVEMENT_REWARD_LABEL_WIDTH = 230
+ local ACHIEVEMENT_REWARD_LABEL_HEIGHT = 20
+ local ACHIEVEMENT_REWARD_ICON_HEIGHT = 45
+ 
++local ACHIEVEMENT_DATE_LABEL_EXPECTED_WIDTH = 80
++
+ local NUM_RECENT_ACHIEVEMENTS_TO_SHOW = 6
+ 
+ local SAVE_EXPANDED = true
+@@ -124,7 +126,6 @@ function Achievement:Show(achievementId)
+     
+     self.title:SetText(zo_strformat(name))
+     self.description:SetText(zo_strformat(description))
+-    self:ApplyCollapsedDescriptionConstraints()
+     self.icon:SetTexture(icon)
+ 
+     self.points:SetHidden(points == ACHIEVEMENT_POINT_LEGENDARY_DEED)
+@@ -147,6 +148,9 @@ function Achievement:Show(achievementId)
+         ApplyColorToAchievementIcon(self, ZO_DEFAULT_DISABLED_COLOR)
+     end
+     
++    -- Date strings might overlap the description, so apply dimension constraints after setting the completion date
++    self:ApplyCollapsedDescriptionConstraints()
++
+     self:SetRewardThumb(achievementId)
+     self:UpdateExpandedStateIcon()
+     
+@@ -597,11 +601,25 @@ function Achievement:UpdateExpandedStateIcon()
+     end
+ end
+ 
++function Achievement:CalculateDescriptionWidth()
++    local descriptionWidth = ACHIEVEMENT_DESC_WIDTH
++
++    if self.completed then
++        local widthModifier = zo_max(0, self.date:GetWidth() - ACHIEVEMENT_DATE_LABEL_EXPECTED_WIDTH)
++
++        if widthModifier ~= 0 then
++            descriptionWidth = descriptionWidth - widthModifier
++        end
++    end
++
++    return descriptionWidth
++end
++
+ function Achievement:Expand()
+     if self.collapsed then
+         self.collapsed = false
+ 
+-        self.description:SetDimensionConstraints(0, 0, ACHIEVEMENT_DESC_WIDTH, 0)
++        self.description:SetDimensionConstraints(0, 0, self:CalculateDescriptionWidth(), 0)
+         self:RefreshExpandedView()
+         self:UpdateExpandedStateIcon()
+         self:PlayExpandCollapseSound()
+@@ -610,9 +628,9 @@ end
+ 
+ function Achievement:ApplyCollapsedDescriptionConstraints()
+     if self.title:DidLineWrap() then
+-        self.description:SetDimensionConstraints(0, 0, ACHIEVEMENT_DESC_WIDTH, ACHIEVEMENT_DESC_COLLAPSED_HEIGHT / 2)
++        self.description:SetDimensionConstraints(0, 0, self:CalculateDescriptionWidth(), ACHIEVEMENT_DESC_COLLAPSED_HEIGHT / 2)
+     else
+-        self.description:SetDimensionConstraints(0, 0, ACHIEVEMENT_DESC_WIDTH, ACHIEVEMENT_DESC_COLLAPSED_HEIGHT)
++        self.description:SetDimensionConstraints(0, 0, self:CalculateDescriptionWidth(), ACHIEVEMENT_DESC_COLLAPSED_HEIGHT)
+     end
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

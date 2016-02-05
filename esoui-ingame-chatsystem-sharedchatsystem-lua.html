@@ -1,0 +1,63 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/chatsystem/sharedchatsystem.lua b/esoui/ingame/chatsystem/sharedchatsystem.lua
+index e6b9af9..619b609 100755
+--- a/esoui/ingame/chatsystem/sharedchatsystem.lua
++++ b/esoui/ingame/chatsystem/sharedchatsystem.lua
+@@ -34,8 +34,6 @@ local FADE_ANIMATION_DELAY = 3000
+ 
+ local NUM_COMMAND_HISTORY_TO_SAVE = 50
+ 
+-local TEXT_ENTRY_PADDING = 8
+-
+ local TAB_ALERT_TEXT_COLOR = ZO_SECOND_CONTRAST_TEXT
+ 
+ local MIN_BAR_FADE_TRANSITION_TIME = 2000
+@@ -116,9 +114,11 @@ local TEXT_ENTRY_DURATION = 500
+ local TEXT_ENTRY_MIN_ALPHA = .25
+ local TEXT_ENTRY_MAX_ALPHA = 1.0
+ 
+-function TextEntry:Initialize(system, control)
++function TextEntry:Initialize(system, control, chatEditBufferTop, chatEditBufferBottom)
+     self.control = control
+     self.system = system
++    self.chatEditBufferTop = chatEditBufferTop
++    self.chatEditBufferBottom = chatEditBufferBottom
+     control.system = system
+     control.owner = self
+ 
+@@ -277,8 +277,9 @@ end
+ function TextEntry:SetFont(font)
+     self.editControl:SetFont(font)
+     self.channelLabel:SetFont(font)
+-    local height = self.editControl:GetFontHeight()
+-    self.control:SetHeight(height + TEXT_ENTRY_PADDING)
++
++    ZO_EditContainerSizer.ForceRefreshSize(self.editBg, self.chatEditBufferTop, self.chatEditBufferBottom)
++    self.control:SetHeight(self.editBg:GetHeight())
+ end
+ 
+ function TextEntry:IsAutoCompleteOpen()
+@@ -1305,7 +1306,7 @@ function SharedChatSystem:Initialize(control, platformSettings)
+     self.control = control
+     self.platformSettings = platformSettings
+ 
+-    self.textEntry = TextEntry:New(self, control:GetNamedChild("TextEntry"))
++    self.textEntry = TextEntry:New(self, control:GetNamedChild("TextEntry"), platformSettings.chatEditBufferTop, platformSettings.chatEditBufferBottom)
+ 
+     local fontSize = GetChatFontSize()
+     local textEntryFont = self:GetTextEntryFontString(fontSize)
+@@ -2388,7 +2389,7 @@ end
+ 
+ function ZO_ChatSystem_OnFriendsClicked(control)
+     if(IsInGamepadPreferredMode()) then
+-        SCENE_MANAGER:Push("gamepad_friends")
++        SCENE_MANAGER:Show("gamepad_friends")
+     else
+         FRIENDS_LIST:FriendsButton_OnClicked(control)
+     end
+</code></pre>
+<script src="prism.js"></script>

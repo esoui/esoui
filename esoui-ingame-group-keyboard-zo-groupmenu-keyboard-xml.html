@@ -1,0 +1,115 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/keyboard/zo_groupmenu_keyboard.xml b/esoui/ingame/group/keyboard/zo_groupmenu_keyboard.xml
+new file mode 100644
+index 0000000..e099425
+--- /dev/null
++++ b/esoui/ingame/group/keyboard/zo_groupmenu_keyboard.xml
+@@ -0,0 +1,101 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Control name="ZO_GroupMenuKeyboard_CategoryHeader" inherits="ZO_IconChildlessHeader" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)Text" override="true"&gt;
++                    &lt;DimensionConstraints maxX="200"/&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;Button name="ZO_PreferredRolesButton"  inherits="ZO_CheckButton" virtual="true"&gt;
++            &lt;Dimensions x="48" y="48"/&gt;
++            &lt;OnMouseEnter&gt;
++                ZO_PreferredRolesButton_OnMouseEnter(self)
++            &lt;/OnMouseEnter&gt;
++
++            &lt;OnMouseExit&gt;
++                ZO_PreferredRolesButton_OnMouseExit(self)
++            &lt;/OnMouseExit&gt;
++
++            &lt;OnClicked&gt;
++                ZO_PreferredRolesButton_OnClicked(self, button)
++            &lt;/OnClicked&gt;
++        &lt;/Button&gt;
++        
++        &lt;TopLevelControl name="ZO_GroupMenu_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_GroupMenuKeyboard_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++            
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)Header"&gt;
++                    &lt;Dimensions y="70" /&gt;
++                    &lt;Anchor point="TOPLEFT" /&gt;
++                    &lt;Anchor point="TOPRIGHT" offsetX="-10" /&gt;
++                &lt;/Control&gt;
++
++                &lt;Control name="$(parent)PreferredRoles" resizeToFitDescendents="true"&gt;
++                    &lt;DimensionConstraints minX="265"/&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="-8" offsetY="-5" /&gt;
++                    
++                    &lt;OnInitialized&gt;
++                        ZO_PreferredRoles_OnInitialized(self)
++                    &lt;/OnInitialized&gt;
++
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL" font="ZoFontHeader3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER"&gt;
++                            &lt;Anchor point="TOP" /&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Control name="$(parent)Buttons" resizeToFitDescendents="true"&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" /&gt;
++
++                            &lt;Controls&gt;
++                                &lt;Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton"&gt;
++                                    &lt;Anchor point="TOP" /&gt;
++
++                                    &lt;OnInitialized&gt;
++                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_HEAL)
++                                    &lt;/OnInitialized&gt;
++                                &lt;/Button&gt;
++
++                                &lt;Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" offsetX="-5" /&gt;
++
++                                    &lt;OnInitialized&gt;
++                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_TANK)
++                                    &lt;/OnInitialized&gt;
++                                &lt;/Button&gt;
++
++                                &lt;Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton"&gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="5" /&gt;
++
++                                    &lt;OnInitialized&gt;
++                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_DPS)
++                                    &lt;/OnInitialized&gt;
++                                &lt;/Button&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++
++                &lt;Control name="$(parent)RolesCategoriesDivider" inherits="ZO_DynamicHorizontalDivider"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMLEFT" offsetY="5" /&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMRIGHT" offsetY="5" /&gt;
++                &lt;/Control&gt;
++                
++                &lt;Control name="$(parent)Categories" inherits="ZO_ScrollContainer"&gt;
++                    &lt;Dimensions x="275" /&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="10" /&gt;
++                    &lt;Anchor point="BOTTOMLEFT" offsetX="-10" /&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;
++
++        &lt;Control name="ZO_GroupMenuKeyboard_ContentAnchors" virtual="true"&gt;
++            &lt;Anchor point="TOPRIGHT" relativeTo="ZO_GroupMenu_KeyboardHeader" relativePoint="BOTTOMRIGHT" offsetX="-10" /&gt;
++            &lt;Anchor point="BOTTOMLEFT" relativeTo="ZO_GroupMenu_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" /&gt;
++        &lt;/Control&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,60 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/searchingforgroup.xml b/esoui/ingame/group/searchingforgroup.xml
+deleted file mode 100755
+index 90a6030..0000000
+--- a/esoui/ingame/group/searchingforgroup.xml
++++ /dev/null
+@@ -1,46 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;Control name="ZO_SearchingForGroup_StatValuePair" resizeToFitDescendents="true" virtual="true"&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Stat" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                    &lt;Anchor point="LEFT"/&gt;
+-                &lt;/Label&gt;
+-
+-                &lt;Label name="$(parent)Value" font="ZoFontHeader"&gt;
+-                    &lt;Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="5"/&gt;
+-                &lt;/Label&gt;
+-            &lt;/Controls&gt;
+-        &lt;/Control&gt;
+-
+-        &lt;TopLevelControl name="ZO_SearchingForGroup" hidden="true" resizeToFitDescendents="true"&gt;
+-            &lt;Anchor point="BOTTOM" relativeTo="ZO_GroupingToolsKeyboard" relativePoint="BOTTOM" offsetY="-8" /&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_SearchingForGroup_OnInitialized(self)
+-            &lt;/OnInitialized&gt;
+-            
+-            &lt;Controls&gt;
+-                &lt;Control name="$(parent)Spinner" hidden="true" resizeToFitDescendents="true"&gt;
+-                    &lt;Anchor point="TOP" /&gt;
+-                    &lt;OnInitialized&gt;
+-                        ZO_Loading_Initialize(self, GetString(SI_GROUP_WINDOW_SEARCHING_FOR_MEMBERS))
+-                    &lt;/OnInitialized&gt;
+-                &lt;/Control&gt;
+-
+-                &lt;Control name="$(parent)EstimatedTime" inherits="ZO_SearchingForGroup_StatValuePair" hidden="true"&gt;
+-                    &lt;Anchor point="TOP" relativeTo="$(parent)Spinner" relativePoint="BOTTOM" /&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Label name="$(parent)Stat" override="true" text="SI_GROUPING_TOOLS_QUEUE_ESTIMATED" /&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-
+-                &lt;Control name="$(parent)ActualTime" inherits="ZO_SearchingForGroup_StatValuePair" hidden="true"&gt;
+-                    &lt;Anchor point="TOP" relativeTo="$(parent)EstimatedTime" relativePoint="BOTTOM" /&gt;
+-
+-                    &lt;Controls&gt;
+-                        &lt;Label name="$(parent)Stat" override="true" text="SI_GROUPING_TOOLS_QUEUE_ACTUAL" /&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-            &lt;/Controls&gt;
+-        &lt;/TopLevelControl&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

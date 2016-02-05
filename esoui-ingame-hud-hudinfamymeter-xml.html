@@ -1,0 +1,83 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/hud/hudinfamymeter.xml b/esoui/ingame/hud/hudinfamymeter.xml
+index 592391f..ceb423b 100755
+--- a/esoui/ingame/hud/hudinfamymeter.xml
++++ b/esoui/ingame/hud/hudinfamymeter.xml
+@@ -13,10 +13,24 @@
+             &lt;/Animations&gt;
+         &lt;/AnimationTimeline&gt;
+ 
+-        &lt;AnimationTimeline name="ZO_HUDInfamyMeterKOSIconBounce"&gt;
++        &lt;AnimationTimeline name="ZO_HUDInfamyMeterCenterIconCutoutIn"&gt;
+             &lt;Animations&gt;
+-                &lt;AlphaAnimation duration="200" startAlpha="0"   endAlpha="1"/&gt;
+-                &lt;ScaleAnimation duration="400" startScale="2.5" endScale="1"/&gt;
++                &lt;!-- These animations apply to the cutout that comes in and then fades away --&gt;
++                &lt;AlphaAnimation duration="300" startAlpha="0"   endAlpha=".75" /&gt;
++                &lt;ScaleAnimation duration="500" startScale="1.5" endScale="1" /&gt;
++                &lt;AlphaAnimation duration="300" startAlpha=".75"   endAlpha="0" delay="600" /&gt;
++                &lt;!-- This animation applies to the resulting persistent texture --&gt;
++                &lt;AlphaAnimation duration="300" startAlpha="0"   endAlpha="1" delay="600" /&gt;
++            &lt;/Animations&gt;
++        &lt;/AnimationTimeline&gt;
++
++        &lt;AnimationTimeline name="ZO_HUDInfamyMeterCenterIconScaleOut"&gt;
++            &lt;Animations&gt;
++                &lt;!-- These animations apply to the icon that scales and alphas out --&gt;
++                &lt;AlphaAnimation duration="300" startAlpha="1" endAlpha="0" /&gt;
++                &lt;ScaleAnimation duration="500" startScale="1" endScale="1.5" /&gt;
++                &lt;!-- This animation applies to the resulting persistent texture --&gt;
++                &lt;AlphaAnimation duration="300" startAlpha="0" endAlpha="1" /&gt;
+             &lt;/Animations&gt;
+         &lt;/AnimationTimeline&gt;
+     &lt;/Animations&gt;
+@@ -38,13 +52,19 @@
+                     &lt;Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" /&gt;
+                     &lt;Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" /&gt;
+                 &lt;/Cooldown&gt;
+-                &lt;Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/infamy_meter-frame_px_per.dds" tier="MEDIUM" level="4"&gt;
++                &lt;Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/infamy_meter-frame-generic.dds" tier="MEDIUM" level="4"&gt;
+                     &lt;Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" /&gt;
+                     &lt;Anchor point="RIGHT" /&gt;
+                 &lt;/Texture&gt;
+-                &lt;Texture name="$(parent)KOSIcon" textureFile="EsoUI/Art/HUD/infamy_KOS_icon.dds" tier="MEDIUM" level="4" alpha="0"&gt;
++                &lt;!-- This is the icon that is used at the start of the center-icon animations, and is transparent by the end of them --&gt;
++                &lt;Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" level="4" alpha="0"&gt;
+                     &lt;Dimensions x="51" y="51" /&gt;
+-                    &lt;Anchor point="CENTER" offsetX="80" offsetY="14" /&gt;
++                    &lt;Anchor point="CENTER" offsetX="79" offsetY="15" /&gt;
++                &lt;/Texture&gt;
++                &lt;!-- This is the icon that is faded in during the center-icon animations, and remains visible afterwards --&gt;
++                &lt;Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="4"&gt;
++                    &lt;Dimensions x="51" y="51" /&gt;
++                    &lt;Anchor point="CENTER" offsetX="79" offsetY="15" /&gt;
+                 &lt;/Texture&gt;
+                 &lt;Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="4"&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="-25" /&gt;
+@@ -68,12 +88,18 @@
+                     &lt;Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" /&gt;
+                     &lt;Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" /&gt;
+                 &lt;/Cooldown&gt;
+-                &lt;Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-frame_px_per.dds" tier="MEDIUM" level="4"&gt;
++                &lt;Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-frame-generic.dds" tier="MEDIUM" level="4"&gt;
+                     &lt;Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" /&gt;
+                     &lt;Anchor point="LEFT" offsetX="INFAMY_METER_WIDTH" /&gt;
+                     &lt;Anchor point="RIGHT" offsetX="-INFAMY_METER_WIDTH" /&gt;
+                 &lt;/Texture&gt;
+-                &lt;Texture name="$(parent)KOSIcon" textureFile="EsoUI/Art/HUD/infamy_KOS_icon.dds" tier="MEDIUM" level="4" alpha="0"&gt;
++                &lt;!-- This is the icon that is used at the start of the center-icon animations, and is transparent by the end of them --&gt;
++                &lt;Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" level="4" alpha="0"&gt;
++                    &lt;Dimensions x="54" y="54" /&gt;
++                    &lt;Anchor point="CENTER" relativeTo="$(parent)Background" /&gt;
++                &lt;/Texture&gt;
++                &lt;!-- This is the icon that is faded in during the center-icon animations, and remains visible afterwards --&gt;
++                &lt;Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="4"&gt;
+                     &lt;Dimensions x="54" y="54" /&gt;
+                     &lt;Anchor point="CENTER" relativeTo="$(parent)Background" /&gt;
+                 &lt;/Texture&gt;
+</code></pre>
+<script src="prism.js"></script>

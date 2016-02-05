@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/zo_options/keyboard/zo_options_keyboard.lua b/esoui/common/zo_options/keyboard/zo_options_keyboard.lua
+index 8ad1f8f..c3073fe 100755
+--- a/esoui/common/zo_options/keyboard/zo_options_keyboard.lua
++++ b/esoui/common/zo_options/keyboard/zo_options_keyboard.lua
+@@ -111,8 +111,12 @@ function ZO_KeyboardOptions:ChangePanels(panel)
+     end
+ 
+     local panelName = self.panelNames[panel]
++    local isGamepadMode = IsInGamepadPreferredMode()
++    local isCameraSettingPanelActive = (panel == SETTING_PANEL_CAMERA)
++    local isFirstPersonToggleButtonVisible = not isGamepadMode and isCameraSettingPanelActive
++
+     GetControl(ZO_OptionsWindow, "Title"):SetText(panelName)
+-    GetControl(ZO_OptionsWindow, "ToggleFirstPersonButton"):SetHidden(not (panel == SETTING_PANEL_CAMERA))
++    GetControl(ZO_OptionsWindow, "ToggleFirstPersonButton"):SetHidden(not isFirstPersonToggleButtonVisible)
+ 
+     ZO_Scroll_ResetToTop(GetControl(ZO_OptionsWindow, "Settings"))
+ 
+</code></pre>
+<script src="prism.js"></script>

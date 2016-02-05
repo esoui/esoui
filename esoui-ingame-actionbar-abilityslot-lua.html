@@ -1,0 +1,23 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/actionbar/abilityslot.lua b/esoui/ingame/actionbar/abilityslot.lua
+index 899c957..c6c5457 100755
+--- a/esoui/ingame/actionbar/abilityslot.lua
++++ b/esoui/ingame/actionbar/abilityslot.lua
+@@ -66,6 +66,11 @@ local function TryPlaceQuickslotAction(abilitySlot)
+ end
+ 
+ local function TryPickupAction(abilitySlot)
++    if not IsActionBarSlottingAllowed() then
++        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_SKILLS_DISABLED_SPECIAL_ABILITIES)
++        return false
++    end
++
+     local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
+     if button then
+         local slotNum = button:GetSlot()
+</code></pre>
+<script src="prism.js"></script>

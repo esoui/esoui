@@ -1,0 +1,42 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/storewindow/gamepad/storewindowbuyback_gamepad.lua b/esoui/ingame/storewindow/gamepad/storewindowbuyback_gamepad.lua
+index f2cfcc7..be20a10 100755
+--- a/esoui/ingame/storewindow/gamepad/storewindowbuyback_gamepad.lua
++++ b/esoui/ingame/storewindow/gamepad/storewindowbuyback_gamepad.lua
+@@ -63,27 +63,12 @@ end
+ 
+ function ZO_GamepadStoreBuyback:ConfirmBuyBack()
+     local selectedItem = self.list:GetTargetData()
+-    local cost = selectedItem.stackBuyPrice
+-    if cost &lt;= GetCarriedCurrencyAmount(CURT_MONEY) then
+-        local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+-        if numUsedSlots &lt; numSlots then
+-            local slotIndex = selectedItem.slotIndex
+-            BuybackItem(slotIndex)
+-        else
+-            local message = zo_strformat(SI_INVENTORY_ERROR_INVENTORY_FULL)
+-            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, message)
+-            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+-        end
+-    end
++    BuybackItem(selectedItem.slotIndex)
+ end
+ 
+ function ZO_GamepadStoreBuyback:CanBuyBack()
+-    local selectedItem = self.list:GetTargetData()
+-    if selectedItem then
+-        return selectedItem.stackBuyPrice &lt;= GetCarriedCurrencyAmount(CURT_MONEY)
+-    else
+-        return false
+-    end
++    local selectedData = self.list:GetTargetData()
++    return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
+ end
+ 
+ function ZO_GamepadStoreBuyback:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/zo_gamepadentrydata.lua b/esoui/common/gamepad/zo_gamepadentrydata.lua
+index 25c236f..338371e 100755
+--- a/esoui/common/gamepad/zo_gamepadentrydata.lua
++++ b/esoui/common/gamepad/zo_gamepadentrydata.lua
+@@ -69,6 +69,13 @@ function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, sta
+     end
+ end
+ 
++function ZO_GamepadEntryData:InitializeCollectibleVisualData(itemData)
++    self.uniqueId = itemData.uniqueId
++    self:SetDataSource(itemData)
++    self:AddIcon(itemData.icon)
++    self.cooldownIcon = itemData.icon or itemData.iconFile
++end
++
+ function ZO_GamepadEntryData:AddSubLabels(subLabels)
+     for _, subLabel in ipairs(subLabels) do
+         self:AddSubLabel(subLabel)
+</code></pre>
+<script src="prism.js"></script>

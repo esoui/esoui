@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/interactwindow/gamepad/interactwindow_gamepad.lua b/esoui/ingame/interactwindow/gamepad/interactwindow_gamepad.lua
+index 2d62c2f..35d9457 100755
+--- a/esoui/ingame/interactwindow/gamepad/interactwindow_gamepad.lua
++++ b/esoui/ingame/interactwindow/gamepad/interactwindow_gamepad.lua
+@@ -234,10 +234,12 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
+ 
+ 	local currencyRewards = {}
+ 	local itemRewards = {}
+-
++    local confirmError
+ 	for i, data in ipairs(rewardData) do
+ 		if self:IsCurrencyReward(data.rewardType) then
+ 			table.insert(currencyRewards, data)
++            --warn the player they aren't going to get their money when they hit complete
++            confirmError = self:TryGetMaxCurrencyWarningText(data.rewardType, data.amount)
+ 		else
+ 			table.insert(itemRewards, data) 
+ 		end
+@@ -272,6 +274,8 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
+ 
+ 		self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
+     end
++
++    return confirmError
+ end
+ 
+ function ZO_GamepadInteraction:RefreshList()
+</code></pre>
+<script src="prism.js"></script>

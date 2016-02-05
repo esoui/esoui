@@ -1,0 +1,24 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/marketannouncement/marketannouncement_base.lua b/esoui/internalingame/marketannouncement/marketannouncement_base.lua
+index e894e53..a7a383e 100755
+--- a/esoui/internalingame/marketannouncement/marketannouncement_base.lua
++++ b/esoui/internalingame/marketannouncement/marketannouncement_base.lua
+@@ -219,8 +219,10 @@ function ZO_MarketAnnouncement_Base:OnMarketAnnouncementCloseKeybind()
+ end
+ 
+ function ZO_MarketAnnouncement_Base:OnMarketAnnouncementViewCrownStoreKeybind()
+-    ZO_MARKET_SINGLETON:SetOpenMarketSource(MARKET_OPEN_OPERATION_ANNOUNCEMENT)
+-    SCENE_MANAGER:Show("show_market")
++    local targetData = self.carousel:GetSelectedData()
++    local marketProductId = targetData.marketProduct:GetId()
++    SetOpenMarketSource(MARKET_OPEN_OPERATION_ANNOUNCEMENT)
++    SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(marketProductId)
+ end
+ 
+ -- Functions to be overridden
+</code></pre>
+<script src="prism.js"></script>

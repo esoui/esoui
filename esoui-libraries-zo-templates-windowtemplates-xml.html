@@ -1,0 +1,102 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/windowtemplates.xml b/esoui/libraries/zo_templates/windowtemplates.xml
+index e20cbd7..d941795 100755
+--- a/esoui/libraries/zo_templates/windowtemplates.xml
++++ b/esoui/libraries/zo_templates/windowtemplates.xml
+@@ -137,6 +137,13 @@
+             &lt;/Controls&gt;
+         &lt;/Backdrop&gt;
+ 
++        &lt;Backdrop name="ZO_DarkThinFrame" virtual="true" tier="LOW"&gt;
++            &lt;Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/&gt;
++            &lt;Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/&gt;
++            &lt;Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" /&gt;
++            &lt;Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" /&gt;
++        &lt;/Backdrop&gt;
++        
+         &lt;Backdrop name="ZO_SliderBackdrop" centerColor="00000000" virtual="true"&gt;
+             &lt;Anchor point="TOPLEFT" offsetX="0" offsetY="4" /&gt;
+             &lt;Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-4" /&gt;
+@@ -168,76 +175,6 @@
+             &lt;/Controls&gt;
+         &lt;/Texture&gt;
+ 
+-        &lt;EditBox name="ZO_DefaultEdit" font="ZoFontEdit" mouseEnabled="true" virtual="true"&gt;
+-            &lt;Dimensions y="24" /&gt;
+-            &lt;OnMouseDown&gt;
+-                self:TakeFocus()
+-            &lt;/OnMouseDown&gt;
+-            &lt;OnEnter&gt;
+-                self:LoseFocus()
+-            &lt;/OnEnter&gt;
+-            &lt;OnEscape&gt;
+-                self:LoseFocus()
+-            &lt;/OnEscape&gt;
+-
+-            &lt;OnFocusGained&gt;
+-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+-                    PlaySound(SOUNDS.EDIT_CLICK)
+-                end
+-            &lt;/OnFocusGained&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;EditBox name="ZO_EditDefaultText" virtual="true"&gt;
+-            &lt;OnTextChanged&gt;
+-                ZO_EditDefaultText_OnTextChanged(self)
+-            &lt;/OnTextChanged&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontEdit"&gt;
+-                    &lt;AnchorFill/&gt;
+-                &lt;/Label&gt;
+-            &lt;/Controls&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;Backdrop name="ZO_EditBackdrop" virtual="true"&gt;
+-            &lt;Dimensions y="28"/&gt;
+-            &lt;Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" /&gt;
+-            &lt;Center file="EsoUI/Art/ChatWindow/textEntry_center.dds" /&gt;
+-            &lt;Insets left="8" top="8" right="-8" bottom="-8" /&gt;
+-        &lt;/Backdrop&gt;
+-
+-        &lt;EditBox name="ZO_DefaultEditForBackdrop" inherits="ZO_DefaultEdit" virtual="true"&gt;
+-            &lt;Anchor point="TOPLEFT" offsetX="8" offsetY="3"/&gt;
+-            &lt;Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2"/&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;EditBox name="ZO_DefaultEditMultiLine" font="ZoFontEdit" mouseEnabled="true" multiLine="true" virtual="true"&gt;
+-            &lt;OnMouseDown&gt;
+-                self:TakeFocus()
+-            &lt;/OnMouseDown&gt;
+-            &lt;OnEscape&gt;
+-                self:LoseFocus()
+-            &lt;/OnEscape&gt;
+-            &lt;OnMouseWheel&gt;
+-                local currentLine = self:GetTopLineIndex()
+-                if shift then
+-                    delta = delta * 10
+-                end
+-                local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
+-                self:SetTopLineIndex(nextLine)
+-            &lt;/OnMouseWheel&gt;
+-
+-            &lt;OnFocusGained&gt;
+-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+-                    PlaySound(SOUNDS.EDIT_CLICK)
+-                end
+-            &lt;/OnFocusGained&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;EditBox name="ZO_DefaultEditMultiLineForBackdrop" inherits="ZO_DefaultEditMultiLine" virtual="true"&gt;
+-            &lt;Anchor point="TOPLEFT" offsetX="6" offsetY="5"/&gt;
+-            &lt;Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7"/&gt;
+-        &lt;/EditBox&gt;
+-
+         &lt;Slider name="ZO_Slider" mouseEnabled="true" orientation="HORIZONTAL" virtual="true"&gt;
+             &lt;Dimensions x="150" y="16" /&gt;
+             &lt;ThumbTexture
+</code></pre>
+<script src="prism.js"></script>

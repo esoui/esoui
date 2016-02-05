@@ -1,0 +1,35 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_tooltip/gamepad/zo_tooltip_gamepad.lua b/esoui/ingame/zo_tooltip/gamepad/zo_tooltip_gamepad.lua
+index 7176bdf..e40883b 100755
+--- a/esoui/ingame/zo_tooltip/gamepad/zo_tooltip_gamepad.lua
++++ b/esoui/ingame/zo_tooltip/gamepad/zo_tooltip_gamepad.lua
+@@ -274,3 +274,22 @@ function ZO_GamepadTooltip_OnInitialized(control, dialogControl)
+     GAMEPAD_TOOLTIPS = ZO_GamepadTooltip:New(control, dialogControl)
+ end
+ 
++function ZO_Tooltip:LayoutTitleAndDescriptionTooltip(title, description)
++    self:LayoutTitleAndMultiSectionDescriptionTooltip(title, description)
++end
++
++function ZO_Tooltip:LayoutTitleAndMultiSectionDescriptionTooltip(title, ...)
++    --Title
++    if title then
++        local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
++        headerSection:AddLine(title, self:GetStyle("title"))
++        self:AddSection(headerSection)
++    end
++    
++    --Body
++    for i = 1, select("#", ...) do
++        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
++        bodySection:AddLine(select(i, ...), self:GetStyle("bodyDescription"))
++        self:AddSection(bodySection)
++    end
++end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

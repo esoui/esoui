@@ -1,0 +1,105 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/gamepad/zo_groupingtools_gamepad.xml b/esoui/ingame/group/gamepad/zo_groupingtools_gamepad.xml
+deleted file mode 100755
+index a5e844a..0000000
+--- a/esoui/ingame/group/gamepad/zo_groupingtools_gamepad.xml
++++ /dev/null
+@@ -1,92 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;Control name="ZO_GroupingToolsGamepadLocationEntry" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true"&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Label" override="true" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" /&gt;
+-            &lt;/Controls&gt;
+-        &lt;/Control&gt;
+-
+-        &lt;TopLevelControl name="ZO_GroupingToolsGamepad" inherits="ZO_Gamepad_ParametricList_Screen"&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_GroupingToolsGamepad_OnInitialized(self)
+-            &lt;/OnInitialized&gt;
+-
+-            &lt;Controls&gt;
+-                &lt;Control name="$(parent)LocationInfo" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors"&gt;                    
+-                    &lt;Controls&gt;
+-                        &lt;Texture name="$(parent)Background" alpha=".64"&gt;
+-                            &lt;TextureCoords right="ZO_LFG_BACKGROUND_TEXTURE_COORD_RIGHT"/&gt;
+-                            &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTENT_BACKGROUND_WIDTH" y="ZO_LFG_BACKGROUND_Y" /&gt;
+-                            &lt;Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="18" /&gt;
+-                        &lt;/Texture&gt;
+-                        
+-                        &lt;Label name="$(parent)Name" verticalAlignment="CENTER" font="ZoFontGamepad42" modifyTextType="UPPERCASE"&gt;
+-                            &lt;Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/&gt;
+-                            &lt;Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="235" /&gt;
+-                        &lt;/Label&gt;
+-
+-                        &lt;Control name="$(parent)ScrollSection" inherits="ZO_ScrollContainer_Gamepad"&gt;
+-                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="30"/&gt;
+-                            &lt;Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" /&gt;
+-                            
+-                            &lt;OnInitialized&gt;
+-                                ZO_Scroll_Initialize_Gamepad(self)
+-                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
+-                            &lt;/OnInitialized&gt;
+-
+-                            &lt;Controls&gt;
+-                                &lt;Control name="$(parent)ScrollChild" override="true" resizeToFitDescendents="true"&gt;
+-                                    &lt;Anchor point="TOPLEFT"/&gt;
+-                                    &lt;Anchor point="TOPRIGHT"/&gt;
+-
+-                                    &lt;OnInitialized&gt;
+-                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+-                                    &lt;/OnInitialized&gt;
+-
+-                                    &lt;Controls&gt;
+-                                        &lt;Label name="$(parent)Description" verticalAlignment="CENTER" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                                            &lt;Anchor point="TOPLEFT" /&gt;
+-                                            &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" /&gt;
+-                                        &lt;/Label&gt;
+-
+-                                        &lt;Label name="$(parent)GroupSize" verticalAlignment="CENTER" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT"/&gt;
+-                                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="48" /&gt;
+-                                        &lt;/Label&gt;
+-
+-                                        &lt;Control name="$(parent)Campaign"&gt;
+-                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)GroupSize" relativePoint="BOTTOMLEFT"/&gt;
+-                                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSize" relativePoint="BOTTOMRIGHT" offsetY="48" /&gt;
+-                                            &lt;Controls&gt;
+-                                                &lt;Label name="$(parent)Indicator" text="SI_GROUPING_TOOLS_PANEL_CURRENT_CAMPAIGN" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                                                    &lt;Anchor point="TOPLEFT"/&gt;
+-                                                &lt;/Label&gt;
+-
+-                                                &lt;Label name="$(parent)Text" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" &gt;
+-                                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Indicator" relativePoint="TOPRIGHT" offsetX="8"/&gt;
+-                                                &lt;/Label&gt;
+-                                            &lt;/Controls&gt;
+-                                        &lt;/Control&gt;
+-
+-                                        &lt;Control name="$(parent)Lock"&gt;
+-                                            &lt;Controls&gt;
+-                                                &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"&gt;
+-                                                    &lt;Dimensions x="32" y="32" /&gt;
+-                                                    &lt;Anchor point="TOPLEFT"/&gt;
+-                                                &lt;/Texture&gt;
+-
+-                                                &lt;Label name="$(parent)Reason" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"&gt;
+-                                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="16" /&gt;
+-                                                &lt;/Label&gt;
+-                                            &lt;/Controls&gt;
+-                                        &lt;/Control&gt;
+-                                    &lt;/Controls&gt;
+-                                &lt;/Control&gt;
+-                            &lt;/Controls&gt;
+-                        &lt;/Control&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-            &lt;/Controls&gt;
+-        &lt;/TopLevelControl&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

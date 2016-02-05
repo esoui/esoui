@@ -1,0 +1,23 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/pregame/gamepad/pregametemplates.xml b/esoui/pregame/gamepad/pregametemplates.xml
+index 0aa142f..c6d8b17 100755
+--- a/esoui/pregame/gamepad/pregametemplates.xml
++++ b/esoui/pregame/gamepad/pregametemplates.xml
+@@ -28,9 +28,9 @@
+             &lt;OnInitialized&gt;
+                 ZO_PregameGamepadTextEditTemplate_OnInitialized(self)
+             &lt;/OnInitialized&gt;
+-            &lt;Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="45" /&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62" /&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad"&gt;
++                &lt;Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" /&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" /&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,41 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/crafting/keyboard/smithing_keyboard.lua b/esoui/ingame/crafting/keyboard/smithing_keyboard.lua
+index 16cca1a..802a7e7 100755
+--- a/esoui/ingame/crafting/keyboard/smithing_keyboard.lua
++++ b/esoui/ingame/crafting/keyboard/smithing_keyboard.lua
+@@ -170,6 +170,29 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
+                 end
+             end,
+         },
++
++        -- Crown Store opening action
++        {
++            name = function()
++                if self.mode == SMITHING_MODE_CREATION then
++                    return GetString(SI_SMITHING_BUY_CRAFTING_ITEMS)
++                end
++            end,
++
++            keybind = "UI_SHORTCUT_TERTIARY",
++
++            callback = function()
++                if self.mode == SMITHING_MODE_CREATION then
++                    self.creationPanel:BuyCraftingItems()
++                end
++            end,
++
++            visible = function()
++                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
++                    return self.mode == SMITHING_MODE_CREATION
++                end
++            end,
++        },
+     }
+ 
+     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
+</code></pre>
+<script src="prism.js"></script>

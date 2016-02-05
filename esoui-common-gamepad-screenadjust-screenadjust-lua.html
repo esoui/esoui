@@ -1,0 +1,58 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/screenadjust/screenadjust.lua b/esoui/common/gamepad/screenadjust/screenadjust.lua
+index 89d4207..ebeb5a4 100755
+--- a/esoui/common/gamepad/screenadjust/screenadjust.lua
++++ b/esoui/common/gamepad/screenadjust/screenadjust.lua
+@@ -1,5 +1,4 @@
+ local ScreenAdjust = ZO_Object:Subclass()
+-local g_actionLayerFragment = nil
+ 
+ function ScreenAdjust:New(...)
+     local adjust = ZO_Object.New(self)
+@@ -18,10 +17,8 @@ function ScreenAdjust:Initialize(control, sceneName)
+     local sceneFragment = ZO_FadeSceneFragment:New(control)
+ 
+     -- adjust screen to be used from options menus
+-    local actionLayerFragment = ZO_ScreenAdjust_GetActionLayerFragment()
+     local scene = ZO_Scene:New(sceneName, SCENE_MANAGER)
+     scene:AddFragment(sceneFragment)
+-    scene:AddFragment(actionLayerFragment)
+ 
+     scene:RegisterCallback("StateChange", function(oldState, newState)
+         if newState == SCENE_SHOWN then
+@@ -39,14 +36,12 @@ function ScreenAdjust:Initialize(control, sceneName)
+         end
+     end)
+ 
+-    control:RegisterForEvent(EVENT_SCREEN_RESIZED, function(_, width, height, guiName)
+-        if guiName == "ingame" then
++    control:RegisterForEvent(EVENT_SCREEN_RESIZED, function(_, width, height)
+         self:RefreshGuiDimensions()
+         if scene:IsShowing() then
+             local IGNORE_INITIAL_SCREEN_SIZE = false
+             self:InitializeSize(IGNORE_INITIAL_SCREEN_SIZE)
+         end
+-        end
+     end)
+ 
+     EVENT_MANAGER:RegisterForEvent("ScreenAdjustResizeEvent", 
+@@ -205,13 +200,6 @@ function ZO_ScreenAdjust_Handle_OnCancel()
+     end
+ end
+ 
+-function ZO_ScreenAdjust_GetActionLayerFragment()
+-    if g_actionLayerFragment == nil then
+-        g_actionLayerFragment = ZO_ActionLayerFragment:New("ScreenAdjust")
+-    end
+-    return g_actionLayerFragment
+-end
+-
+ function ZO_ScreenAdjust_OnInitialized(self)
+     SCREEN_ADJUST = ScreenAdjust:New(self, "screenAdjust")
+ end
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/editboxtemplates_gamepad.lua b/esoui/libraries/zo_templates/editboxtemplates_gamepad.lua
+new file mode 100644
+index 0000000..981e242
+--- /dev/null
++++ b/esoui/libraries/zo_templates/editboxtemplates_gamepad.lua
+@@ -0,0 +1,15 @@
++ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_TOP = 8
++ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_BOTTOM = 8
++ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_LEFT = 8
++ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_RIGHT = 6
++
++local EditContainerSizer_Gamepad = ZO_EditContainerSizer:New(ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_TOP, ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_BOTTOM)
++
++function ZO_SingleLineEditContainerSize_Gamepad_OnInitialized(self)
++    EditContainerSizer_Gamepad:Add(self)
++end
++
++ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_TOP = 8
++ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_BOTTOM = 8
++ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_LEFT = 9
++ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_RIGHT = 10
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

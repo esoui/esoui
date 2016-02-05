@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/mainmenu/keyboard/zo_mainmenu_keyboard.xml b/esoui/ingame/mainmenu/keyboard/zo_mainmenu_keyboard.xml
+index cd0ce31..1eff475 100755
+--- a/esoui/ingame/mainmenu/keyboard/zo_mainmenu_keyboard.xml
++++ b/esoui/ingame/mainmenu/keyboard/zo_mainmenu_keyboard.xml
+@@ -27,6 +27,13 @@
+                 ZO_MainMenuCategoryBarButton_OnMouseExit(self)
+             &lt;/OnMouseExit&gt;
+             &lt;Controls&gt;
++                &lt;Label name="$(parent)RemainingCrowns" font="ZoFontHeader2" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHTED" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true"&gt;
++                    &lt;Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-20" offsetY="0" /&gt;
++                &lt;/Label&gt;
++                &lt;Label name="$(parent)Membership" font="ZoFontGameSmall" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true"&gt;
++                    &lt;Dimensions x="210"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RemainingCrowns" relativePoint="TOPRIGHT" /&gt;
++                &lt;/Label&gt;
+                 &lt;Texture name="$(parent)Image" level="1" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" override="true"&gt;
+                     &lt;Controls&gt;
+                         &lt;Texture name="$(parent)Animation" level="20" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true"&gt;
+</code></pre>
+<script src="prism.js"></script>

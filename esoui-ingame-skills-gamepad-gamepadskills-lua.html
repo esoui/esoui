@@ -1,0 +1,87 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/skills/gamepad/gamepadskills.lua b/esoui/ingame/skills/gamepad/gamepadskills.lua
+index 746780c..6245613 100755
+--- a/esoui/ingame/skills/gamepad/gamepadskills.lua
++++ b/esoui/ingame/skills/gamepad/gamepadskills.lua
+@@ -243,6 +243,11 @@ function ZO_GamepadSkills:InitializeKeybindStrip()
+                 --Here we determine what fragment to load, but we're going to wait until it loads to decide how to populate it
+                 --So we'll prevent any further movement and proceed based on what we expect the selected data to be by the time we need it.
+                 --We may already be in the process of a scroll, so "current data" isn't reliable.
++                if not IsActionBarSlottingAllowed() then
++                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_SKILLS_DISABLED_SPECIAL_ABILITIES)
++                    return false
++                end
++
+                 self:DeactivateCurrentList()
+                 local selectedData = self.categoryList:GetTargetData()
+                 if selectedData == ACTION_BAR_ID then
+@@ -353,7 +358,7 @@ function ZO_GamepadSkills:InitializeKeybindStrip()
+                         self.assignableActionBar:Deactivate()
+                         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+                         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+-                        self:SetMode(ABILITY_LIST_BROWSE_MODE)
++                        --Don't set mode back to ABILITY_LIST_BROWSE_MODE til OnAbilityFinalizedCallback says everything worked
+                     end
+                 else
+                     self:DeactivateCurrentList()
+@@ -412,6 +417,7 @@ function ZO_GamepadSkills:InitializeAssignableActionBar()
+             self.singleAbilitySkillType = nil
+             self.singleAbilitySkillLineIndex = nil
+             self.singleAbilityAbilityIndex = nil
++            self:SetMode(ABILITY_LIST_BROWSE_MODE)
+         end
+     end)
+ 
+@@ -509,7 +515,8 @@ function ZO_GamepadSkills:InitializeLineFilterList()
+         list:AddDataTemplate("ZO_GamepadSkillsDummyMenuEntry", ActionBarSetup)
+     end
+ 
+-    local lineFilterPreviewList = ZO_ParametricScrollList:New(ZO_GamepadSkillsLinePreview:GetNamedChild("Scroll"):GetNamedChild("Container"):GetNamedChild("List"), PARAMETRIC_SCROLL_LIST_VERTICAL)
++    local lineFilterPreviewContainer = ZO_GamepadSkillsLinePreview:GetNamedChild("ScrollContainer")
++    local lineFilterPreviewList = ZO_ParametricScrollList:New(lineFilterPreviewContainer:GetNamedChild("List"), PARAMETRIC_SCROLL_LIST_VERTICAL)
+     lineFilterPreviewList:SetHeaderPadding(GAMEPAD_HEADER_DEFAULT_PADDING, 0)
+     lineFilterPreviewList:SetUniversalPostPadding(GAMEPAD_DEFAULT_POST_PADDING)
+     lineFilterPreviewList:SetSelectedItemOffsets(0, 0)
+@@ -519,6 +526,7 @@ function ZO_GamepadSkills:InitializeLineFilterList()
+     lineFilterPreviewList:AddDataTemplateWithHeader("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
+ 
+     self.lineFilterPreviewList = lineFilterPreviewList
++    self.lineFilterPreviewWarning = lineFilterPreviewContainer:GetNamedChild("Warning")
+ 
+     self.lineFilterList = self:AddList("LineFilter", SetupLineFilterList)
+ 
+@@ -624,8 +632,7 @@ function ZO_GamepadSkills:InitializeEvents()
+     self.control:RegisterForEvent(EVENT_SKILL_XP_UPDATE, FullRefresh)
+     self.control:RegisterForEvent(EVENT_SKILL_POINTS_CHANGED, FullRefresh)
+     self.control:RegisterForEvent(EVENT_ABILITY_PROGRESSION_RANK_UPDATE, FullRefresh)
+-    self.control:RegisterForEvent(EVENT_ABILITY_LIST_CHANGED, FullRefresh)
+-    
++    self.control:RegisterForEvent(EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED, FullRefresh)    
+ 
+     self.control:RegisterForEvent(EVENT_ACTION_SLOT_UPDATED, MarkForRefreshVisible)
+     self.control:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
+@@ -700,6 +707,18 @@ function ZO_GamepadSkills:RefreshLineFilterList(refreshPreviewList)
+     local list = refreshPreviewList and self.lineFilterPreviewList or self.lineFilterList
+     list:Clear()
+ 
++    --Don't show the preview list if action bar slotting isn't allowed
++    if refreshPreviewList then
++        if not IsActionBarSlottingAllowed() then
++            self.lineFilterPreviewWarning:SetHidden(false)
++            self.lineFilterPreviewWarning:SetText(GetString(SI_SKILLS_DISABLED_SPECIAL_ABILITIES))
++            list:Commit()
++            return
++        else
++            self.lineFilterPreviewWarning:SetHidden(true)
++        end
++    end
++
+     if not refreshPreviewList then
+         list:AddEntry("ZO_GamepadSkillsDummyMenuEntry", ACTION_BAR_ID)
+     end
+</code></pre>
+<script src="prism.js"></script>

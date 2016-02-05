@@ -1,0 +1,113 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/editboxtemplates_keyboard.xml b/esoui/libraries/zo_templates/editboxtemplates_keyboard.xml
+new file mode 100644
+index 0000000..8900886
+--- /dev/null
++++ b/esoui/libraries/zo_templates/editboxtemplates_keyboard.xml
+@@ -0,0 +1,99 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Backdrop name="ZO_EditBackdrop" virtual="true"&gt;
++            &lt;Dimensions y="28"/&gt;
++            &lt;Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" virtual="true"/&gt;
++            &lt;Center file="EsoUI/Art/ChatWindow/textEntry_center.dds" /&gt;
++            &lt;Insets left="8" top="8" right="-8" bottom="-8" /&gt;
++        &lt;/Backdrop&gt;
++
++        &lt;Backdrop name="ZO_SingleLineEditBackdrop_Keyboard" inherits="ZO_EditBackdrop" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Backdrop&gt;
++
++        &lt;Backdrop name="ZO_SingleLineEditBackdropDark_Keyboard" inherits="ZO_DefaultBackdrop" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_SingleLineEditContainerDarkSize_Keyboard_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Backdrop&gt;
++
++        &lt;Backdrop name="ZO_MultiLineEditBackdrop_Keyboard" inherits="ZO_EditBackdrop" virtual="true"/&gt;
++
++        &lt;EditBox name="ZO_DefaultEdit" font="ZoFontEdit" mouseEnabled="true" virtual="true"&gt;
++            &lt;Dimensions y="24" /&gt;
++            &lt;OnMouseDown&gt;
++                self:TakeFocus()
++            &lt;/OnMouseDown&gt;
++            &lt;OnEnter&gt;
++                self:LoseFocus()
++            &lt;/OnEnter&gt;
++            &lt;OnEscape&gt;
++                self:LoseFocus()
++            &lt;/OnEscape&gt;
++
++            &lt;OnFocusGained&gt;
++                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
++                    PlaySound(SOUNDS.EDIT_CLICK)
++                end
++            &lt;/OnFocusGained&gt;
++        &lt;/EditBox&gt;
++
++        &lt;EditBox name="ZO_EditDefaultText" virtual="true"&gt;
++            &lt;OnTextChanged&gt;
++                ZO_EditDefaultText_OnTextChanged(self)
++            &lt;/OnTextChanged&gt;
++            &lt;OnIMEBeginComposition&gt;
++                ZO_EditDefaultText_OnIMECompositionChanged(self)
++            &lt;/OnIMEBeginComposition&gt;
++            &lt;OnIMEEndComposition&gt;
++                ZO_EditDefaultText_OnIMECompositionChanged(self)
++            &lt;/OnIMEEndComposition&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontEdit"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="3"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT"/&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/EditBox&gt;
++
++        &lt;EditBox name="ZO_DefaultEditForBackdrop" inherits="ZO_DefaultEdit" virtual="true"&gt;
++            &lt;Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP"/&gt;
++            &lt;Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/&gt;
++        &lt;/EditBox&gt;
++
++        &lt;EditBox name="ZO_DefaultEditForDarkBackdrop" inherits="ZO_DefaultEdit" font="ZoFontEdit20NoShadow" virtual="true"&gt;
++            &lt;Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_TOP"/&gt;
++            &lt;Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_BOTTOM"/&gt;
++        &lt;/EditBox&gt;
++
++        &lt;EditBox name="ZO_DefaultEditMultiLine" font="ZoFontEdit" mouseEnabled="true" multiLine="true" virtual="true"&gt;
++            &lt;OnMouseDown&gt;
++                self:TakeFocus()
++            &lt;/OnMouseDown&gt;
++            &lt;OnEscape&gt;
++                self:LoseFocus()
++            &lt;/OnEscape&gt;
++            &lt;OnMouseWheel&gt;
++                local currentLine = self:GetTopLineIndex()
++                if shift then
++                    delta = delta * 10
++                end
++                local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
++                self:SetTopLineIndex(nextLine)
++            &lt;/OnMouseWheel&gt;
++
++            &lt;OnFocusGained&gt;
++                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
++                    PlaySound(SOUNDS.EDIT_CLICK)
++                end
++            &lt;/OnFocusGained&gt;
++        &lt;/EditBox&gt;
++
++        &lt;EditBox name="ZO_DefaultEditMultiLineForBackdrop" inherits="ZO_DefaultEditMultiLine" virtual="true"&gt;
++            &lt;Anchor point="TOPLEFT" offsetX="ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_TOP"/&gt;
++            &lt;Anchor point="BOTTOMRIGHT" offsetX="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/&gt;
++        &lt;/EditBox&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

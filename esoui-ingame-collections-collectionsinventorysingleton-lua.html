@@ -1,0 +1,56 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/collections/collectionsinventorysingleton.lua b/esoui/ingame/collections/collectionsinventorysingleton.lua
+index 763e8dc..f49d64e 100755
+--- a/esoui/ingame/collections/collectionsinventorysingleton.lua
++++ b/esoui/ingame/collections/collectionsinventorysingleton.lua
+@@ -1,16 +1,8 @@
+-COLLECTIONS_INVENTORY_VALID_CATEGORY_TYPES =
+-{
+-    [COLLECTIBLE_CATEGORY_TYPE_MOUNT] = true,
+-    [COLLECTIBLE_CATEGORY_TYPE_VANITY_PET] = true,
+-    [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = true,
+-}
+ 
+ --------------------------------------
+ --Collections Inventory Singleton
+ --------------------------------------
+ 
+-COLLECTIONS_INVENTORY_SINGLETON = nil
+-
+ ZO_CollectionsInventorySingleton = ZO_CallbackObject:Subclass()
+ 
+ function ZO_CollectionsInventorySingleton:New()
+@@ -41,8 +33,7 @@ function ZO_CollectionsInventorySingleton:BuildQuickslotData()
+ 
+     for i = 1, GetNumCollectibleCategories() do
+         local categoryType = select(7, GetCollectibleCategoryInfo(i))
+-        if COLLECTIONS_INVENTORY_VALID_CATEGORY_TYPES[categoryType] then
+-            if IsCollectibleCategorySlottable(categoryType) then
++        if IsCollectibleCategoryUsable(categoryType) and IsCollectibleCategorySlottable(categoryType) then
+             for i = 1, GetTotalCollectiblesByCategoryType(categoryType) do
+                 local collectibleId = GetCollectibleIdFromType(categoryType, i)
+                 local _, _, iconFile, _, unlocked, _, isActive = GetCollectibleInfo(collectibleId)
+@@ -64,7 +55,6 @@ function ZO_CollectionsInventorySingleton:BuildQuickslotData()
+         end
+     end
+ end
+-end
+ 
+ function ZO_CollectionsInventorySingleton:GetQuickslotData()
+     return self.quickslotData
+@@ -78,7 +68,4 @@ function ZO_CollectionsInventorySingleton:GetCollectibleInventoryDisplayName(col
+     return displayName
+ end
+ 
+-
+-do
+ COLLECTIONS_INVENTORY_SINGLETON = ZO_CollectionsInventorySingleton:New()
+\ No newline at end of file
+-end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

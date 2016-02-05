@@ -1,0 +1,22 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.lua b/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.lua
+index 9076c73..a8cf936 100755
+--- a/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.lua
++++ b/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.lua
+@@ -19,7 +19,9 @@ function MarketAnnouncementMarketProduct_Keyboard:LayoutCostAndText(description,
+     self.cost:ClearAnchors()
+     self.textCallout:ClearAnchors()
+ 
+-    if cost &gt; discountedCost then
++    if self.isFree then
++        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 0)
++    elseif cost &gt; discountedCost then
+         self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
+         self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, 0) -- x offset to account for strikethrough
+     else
+</code></pre>
+<script src="prism.js"></script>

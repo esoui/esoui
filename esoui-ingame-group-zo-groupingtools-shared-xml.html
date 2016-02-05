@@ -1,0 +1,41 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/zo_groupingtools_shared.xml b/esoui/ingame/group/zo_groupingtools_shared.xml
+deleted file mode 100755
+index 038112a..0000000
+--- a/esoui/ingame/group/zo_groupingtools_shared.xml
++++ /dev/null
+@@ -1,28 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;Control name="ZO_GroupingToolsSharedRoles" virtual="true"&gt;
+-            &lt;OnInitialized&gt;
+-                local tankIcon = self:GetNamedChild("Tank")
+-                local healerIcon = self:GetNamedChild("Healer")
+-                local damageIcon = self:GetNamedChild("Damage")
+-                
+-                self:SetHeight(zo_max(tankIcon:GetHeight(), healerIcon:GetHeight(), damageIcon:GetHeight()))
+-                self:SetWidth(tankIcon:GetWidth() + healerIcon:GetWidth() + damageIcon:GetWidth())
+-            &lt;/OnInitialized&gt;
+-            &lt;Controls&gt;
+-                &lt;Texture name="$(parent)Tank"&gt;
+-                    &lt;Dimensions x="32" y="32" /&gt;
+-                    &lt;Anchor point="LEFT" /&gt;
+-                &lt;/Texture&gt;
+-                &lt;Texture name="$(parent)Healer"&gt;
+-                    &lt;Dimensions x="32" y="32" /&gt;
+-                    &lt;Anchor point="LEFT" relativeTo="$(parent)Tank" relativePoint="RIGHT" /&gt;
+-                &lt;/Texture&gt;
+-                &lt;Texture name="$(parent)Damage"&gt;
+-                    &lt;Dimensions x="32" y="32" /&gt;
+-                    &lt;Anchor point="LEFT" relativeTo="$(parent)Healer" relativePoint="RIGHT" /&gt;
+-                &lt;/Texture&gt;
+-            &lt;/Controls&gt;
+-        &lt;/Control&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

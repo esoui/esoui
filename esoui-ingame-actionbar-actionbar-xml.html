@@ -1,0 +1,39 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/actionbar/actionbar.xml b/esoui/ingame/actionbar/actionbar.xml
+index 1ed6287..cb78c6f 100755
+--- a/esoui/ingame/actionbar/actionbar.xml
++++ b/esoui/ingame/actionbar/actionbar.xml
+@@ -145,7 +145,7 @@
+                     &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="12" offsetY="12" /&gt;
+                 &lt;/Texture&gt;
+ 
+-                &lt;Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown ZO_ActionButton_FlipCardControl" tier="HIGH" /&gt;
++                &lt;Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown ZO_ActionButton_FlipCardControl" tier="HIGH" alpha="0.7" /&gt;
+                 &lt;Texture name="$(parent)CooldownCompleteAnimation" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/ActionBar/coolDown_completeEFX.dds" blendMode="ADD" tier="HIGH" hidden="true" /&gt;
+                 &lt;Texture name="$(parent)CooldownEdge" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_QuickslotFill.dds" level="2" hidden="true"&gt;
+                     &lt;Dimensions y="8" /&gt;
+@@ -253,17 +253,8 @@
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+-        &lt;Control name="ZO_ActionBar1_Keyboard_Template" virtual="true"&gt;
+-            &lt;Dimensions x="483" y="70" /&gt;
+-            &lt;Anchor point="BOTTOM" /&gt;
+-        &lt;/Control&gt;
+-
+-        &lt;Control name="ZO_ActionBar1_Gamepad_Template" virtual="true"&gt;
+-            &lt;Dimensions x="606" y="70" /&gt;
+-            &lt;Anchor point="BOTTOM" offsetY="-70" /&gt;
+-        &lt;/Control&gt;
+-
+         &lt;TopLevelControl name="ZO_ActionBar1" hidden="true" allowBringToTop="false" layer="OVERLAY" level="1"&gt;
++            &lt;Dimensions y="70"/&gt;
+             &lt;OnInitialized&gt;
+                 ZO_ActionBar1_OnInitialized(self)
+             &lt;/OnInitialized&gt;
+</code></pre>
+<script src="prism.js"></script>

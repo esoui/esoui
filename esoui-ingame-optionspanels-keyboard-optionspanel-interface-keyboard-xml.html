@@ -1,0 +1,198 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/optionspanels/keyboard/optionspanel_interface_keyboard.xml b/esoui/ingame/optionspanels/keyboard/optionspanel_interface_keyboard.xml
+index f119b0f..9b7e916 100755
+--- a/esoui/ingame/optionspanels/keyboard/optionspanel_interface_keyboard.xml
++++ b/esoui/ingame/optionspanels/keyboard/optionspanel_interface_keyboard.xml
+@@ -134,9 +134,185 @@
+             &lt;/OnInitialized&gt;
+         &lt;/Control&gt;
+ 
+-        &lt;Control name="Options_Interface_IndicatorsSection" inherits="ZO_Options_SectionTitle_WithDivider"&gt;
++        &lt;Control name="Options_Interface_SCTSection" inherits="ZO_Options_SectionTitle_WithDivider"&gt;
+             &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_EnemyPlayerHB" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" /&gt;
+             &lt;OnInitialized&gt;
++                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_INTERFACE, SI_INTERFACE_OPTIONS_SCT)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTSection" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTEnabled" relativePoint="BOTTOMLEFT" offsetY="4"/&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingDamageEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingEnabled" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_DAMAGE_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingDoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingDamageEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_DOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingHealingEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingDoTEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_HEALING_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingHoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingHealingEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_HOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingStatusEffectsEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingHoTEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_STATUS_EFFECTS_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingPetDamageEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingStatusEffectsEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_PET_DAMAGE_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingPetDoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingPetDamageEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_PET_DOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingPetHealingEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingPetDoTEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_PET_HEALING_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTOutgoingPetHoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingPetHealingEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_PET_HOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTOutgoingPetHoTEnabled" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingDamageEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingEnabled" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_DAMAGE_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingDoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingDamageEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_DOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingHealingEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingDoTEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_HEALING_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingHoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingHealingEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_HOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingStatusEffectsEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingHoTEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingPetDamageEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingStatusEffectsEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_SCTIncomingPetDoTEnabled" inherits="ZO_Options_Checkbox"&gt;
++            &lt;Dimensions x="490"/&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingPetDamageEnabled" relativePoint="BOTTOMLEFT" offsetY="4" /&gt;
++            &lt;OnInitialized&gt;
++                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED)
++                ZO_OptionsWindow_InitializeControl(self)
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="Options_Interface_IndicatorsSection" inherits="ZO_Options_SectionTitle_WithDivider"&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingPetDoTEnabled" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" /&gt;
++            &lt;OnInitialized&gt;
+                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_INTERFACE, SI_INTERFACE_OPTIONS_INDICATORS)
+                 ZO_OptionsWindow_InitializeControl(self)
+             &lt;/OnInitialized&gt;
+</code></pre>
+<script src="prism.js"></script>

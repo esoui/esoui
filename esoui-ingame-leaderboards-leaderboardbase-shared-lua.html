@@ -1,0 +1,19 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/leaderboards/leaderboardbase_shared.lua b/esoui/ingame/leaderboards/leaderboardbase_shared.lua
+index 9928697..0427af4 100755
+--- a/esoui/ingame/leaderboards/leaderboardbase_shared.lua
++++ b/esoui/ingame/leaderboards/leaderboardbase_shared.lua
+@@ -23,6 +23,7 @@ function ZO_LeaderboardBase_Shared:Initialize(control, leaderboardSystem, leader
+ end
+ 
+ function ZO_LeaderboardBase_Shared:OnDataChanged()
++    self.leaderboardSystem:UpdateCategories()
+     self.leaderboardSystem:OnLeaderboardDataChanged(self)
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

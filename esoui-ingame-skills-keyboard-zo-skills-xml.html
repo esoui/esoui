@@ -1,0 +1,23 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/skills/keyboard/zo_skills.xml b/esoui/ingame/skills/keyboard/zo_skills.xml
+index 8ceda74..4ca95c5 100755
+--- a/esoui/ingame/skills/keyboard/zo_skills.xml
++++ b/esoui/ingame/skills/keyboard/zo_skills.xml
+@@ -251,6 +251,11 @@
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMRIGHT" offsetY="5" /&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55" /&gt;
+                 &lt;/Control&gt;
++
++                &lt;Label name="$(parent)Warning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true"&gt;
++                    &lt;Dimensions x="450"/&gt;
++                    &lt;Anchor point="TOP" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOM" offsetY="45" /&gt;
++                &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

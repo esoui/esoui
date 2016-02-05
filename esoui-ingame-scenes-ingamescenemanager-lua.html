@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/scenes/ingamescenemanager.lua b/esoui/ingame/scenes/ingamescenemanager.lua
+index 108107b..197b8a8 100755
+--- a/esoui/ingame/scenes/ingamescenemanager.lua
++++ b/esoui/ingame/scenes/ingamescenemanager.lua
+@@ -162,7 +162,7 @@ end
+ 
+ function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
+     --if a scene was already shown when we change input mode, hide it
+-    if self.currentScene and not self:IsShowingBaseScene() and self.currentScene:GetState() == SCENE_SHOWN then
++    if not self:IsShowingBaseScene() and self.currentScene and self.currentScene:IsShowing() then
+         self:SetInUIMode(false)
+     end
+ end
+@@ -435,8 +435,11 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
+     end
+ 
+     if(self:IsShowingBaseScene() and not self:IsInUIMode()) then
+-        if(GetInteractionType() ~= INTERACTION_NONE) then
+-            EndInteraction(GetInteractionType())
++        local interactionType = GetInteractionType()
++        --hidey holes are the first interaction type to have two parts and we don't want hitting
++        --Esc to take the player out of a hideyhole.
++        if(interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_HIDEYHOLE) then
++            EndInteraction(interactionType)
+             return
+         end
+ 
+</code></pre>
+<script src="prism.js"></script>

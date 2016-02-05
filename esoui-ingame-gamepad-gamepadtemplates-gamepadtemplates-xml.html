@@ -1,0 +1,54 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/gamepad/gamepadtemplates/gamepadtemplates.xml b/esoui/ingame/gamepad/gamepadtemplates/gamepadtemplates.xml
+index 43b004e..87f0069 100755
+--- a/esoui/ingame/gamepad/gamepadtemplates/gamepadtemplates.xml
++++ b/esoui/ingame/gamepad/gamepadtemplates/gamepadtemplates.xml
+@@ -131,6 +131,7 @@
+         &lt;!-- Item Slot Related Scroll List Templates --&gt;
+         &lt;Control name="ZO_GamepadItemEntryTemplate" inherits="ZO_GamepadMenuEntryTemplate" virtual="true"&gt;
+             &lt;Controls&gt;
++                &lt;Cooldown name="$(parent)Cooldown" inherits="ZO_GamepadMenuEntryCooldownTemplate" tier="MEDIUM" hidden="true"/&gt;
+                 &lt;Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" /&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+@@ -315,23 +316,23 @@
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+-        &lt;Control name="ZO_GamepadXPBarFooter" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true"&gt;
+-            &lt;Anchor point="RIGHT" relativeTo="ZO_KeybindStripControl" offsetX="-85" offsetY="-52" /&gt;
++        &lt;Control name="ZO_GamepadXPBarFooter" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true"&gt;
++            &lt;Anchor point="RIGHT" relativeTo="ZO_KeybindStripControl" offsetX="-127" offsetY="-52" /&gt;
+             &lt;Controls&gt;
+-                &lt;Label name="$(parent)Name" font="ZoFontGamepadCondensed27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE"&gt;
+-                    &lt;Anchor point="LEFT" /&gt;
+-                &lt;/Label&gt;
+-
+-                &lt;Label name="$(parent)Rank" font="ZoFontGamepad42"&gt;
+-                    &lt;Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="8" /&gt;
+-                &lt;/Label&gt;
+-
+                 &lt;StatusBar name="$(parent)XPBar" inherits="ZO_GamepadSkillsXPBar"&gt;
+-                    &lt;Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" /&gt;
++                    &lt;Anchor point="RIGHT" /&gt;
+                     &lt;Controls&gt;
+                         &lt;Control name="$(parent)GlowContainer" inherits="ZO_GamepadSkills_HeaderGlowContainer"/&gt;
+                     &lt;/Controls&gt;
+                 &lt;/StatusBar&gt;
++
++                &lt;Label name="$(parent)Rank" font="ZoFontGamepad42"&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)XPBar" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="10" /&gt;
++                &lt;/Label&gt;
++
++                &lt;Label name="$(parent)Name" font="ZoFontGamepadCondensed27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE"&gt;
++                    &lt;Anchor point="BOTTOMRIGHT"  relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="-5"/&gt;
++                &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

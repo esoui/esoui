@@ -1,0 +1,38 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/gamepad/marketgridscreen_gamepad.xml b/esoui/internalingame/market/gamepad/marketgridscreen_gamepad.xml
+index 40d94fe..a3bc3eb 100755
+--- a/esoui/internalingame/market/gamepad/marketgridscreen_gamepad.xml
++++ b/esoui/internalingame/market/gamepad/marketgridscreen_gamepad.xml
+@@ -66,14 +66,8 @@
+                                     &lt;OnEffectivelyShown/&gt; &lt;!-- Overrides the parent's OnEffectivelyShown so it is not called. It is mouse related and not needed in the gamepad market. --&gt;
+                                     &lt;OnEffectivelyHidden/&gt; &lt;!-- Overrides the parent's OnEffectivelyHidden so it is not called. It is mouse related and not needed in the gamepad market --&gt;
+                                     &lt;Controls&gt;
+-                                        &lt;Scroll name="$(parent)Scroll" mouseEnabled="false" override="true"&gt;
+-                                            &lt;AnchorFill/&gt;
+-                                            &lt;OnScrollExtentsChanged&gt;
+-                                                ZO_Scroll_OnExtentsChanged(self:GetParent())
+-                                            &lt;/OnScrollExtentsChanged&gt;
+-                                        &lt;/Scroll&gt;
+                                         &lt;Control name="$(parent)ScrollChild" resizeToFitDescendents="false" override="true"/&gt;
+-                                        &lt;Slider name="$(parent)ScrollBar" visible="false" mouseEnabled="false" override="true"&gt;
++                                        &lt;Slider name="$(parent)ScrollBar" hidden="true" mouseEnabled="false" override="true"&gt;
+                                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetX="-4" offsetY="16"/&gt;
+                                             &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-16"/&gt;
+                                             &lt;ThumbTexture
+@@ -87,8 +81,8 @@
+                                                 right="1"
+                                             /&gt;
+                                             &lt;Controls&gt;
+-                                                &lt;Button name="$(parent)Up" inherits="ZO_ScrollUpButton" visible="false" override="true"/&gt;
+-                                                &lt;Button name="$(parent)Down" inherits="ZO_ScrollDownButton" visible="false" override="true"/&gt;
++                                                &lt;Button name="$(parent)Up" inherits="ZO_ScrollUpButton" hidden="true" override="true"/&gt;
++                                                &lt;Button name="$(parent)Down" inherits="ZO_ScrollDownButton" hidden="true" override="true"/&gt;
+                                                 &lt;Texture name="$(parent)ThumbMunge" alpha="0" override="true"/&gt;
+                                             &lt;/Controls&gt;
+                                         &lt;/Slider&gt;
+</code></pre>
+<script src="prism.js"></script>

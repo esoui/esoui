@@ -1,0 +1,62 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/help/keyboard/helpoverview_keyboard.xml b/esoui/ingame/help/keyboard/helpoverview_keyboard.xml
+new file mode 100644
+index 0000000..b975c4c
+--- /dev/null
++++ b/esoui/ingame/help/keyboard/helpoverview_keyboard.xml
+@@ -0,0 +1,48 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Label name="ZO_HelpOverview_Keyboard_Question" virtual="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++            &lt;Dimensions x="550" /&gt;
++            &lt;Anchor point="TOPLEFT" /&gt;
++        &lt;/Label&gt;
++        &lt;Label name="ZO_HelpOverview_Keyboard_Answer" virtual="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"&gt;
++            &lt;Dimensions x="550" /&gt;
++            &lt;Anchor point="TOPLEFT" /&gt;
++        &lt;/Label&gt;
++        
++        &lt;TopLevelControl name="ZO_HelpOverview_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_HelpOverview_Keyboard_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)DetailsContainer" inherits="ZO_ScrollContainer"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="30" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" /&gt;
++                    &lt;Controls&gt;
++                        &lt;Control name="$(parent)ScrollChild" override="true"&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)IntroDetailsBody" text="SI_ACCOUNTCREATELINKERROR3" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                                    &lt;Anchor point="TOPLEFT" offsetY="5" /&gt;
++                                    &lt;Anchor point="TOPRIGHT" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)DetailsLine" inherits="ZO_HelpCustomerServiceDivider"&gt;
++                                    &lt;Anchor point="TOP" relativeTo="$(parent)IntroDetailsBody" relativePoint="BOTTOM" offsetY="15" /&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Label name="$(parent)QuestionAnswerTitle" text="SI_CUSTOMER_SERVICE_OVERVIEW_COMMON_QUESTIONS" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)DetailsLine" relativePoint="BOTTOMLEFT" offsetY="-14" /&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)QuestionAnswerContainer"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)QuestionAnswerTitle" relativePoint="BOTTOMLEFT" offsetY="20" /&gt;
++                                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)QuestionAnswerTitle" relativePoint="BOTTOMRIGHT" offsetY="20" /&gt;
++                                &lt;/Control&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;      
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,51 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/quickslot/quickslotradial.lua b/esoui/ingame/quickslot/quickslotradial.lua
+index 25b2189..9b71265 100755
+--- a/esoui/ingame/quickslot/quickslotradial.lua
++++ b/esoui/ingame/quickslot/quickslotradial.lua
+@@ -34,8 +34,11 @@ function ZO_QuickslotRadialManager:PopulateMenu()
+     self.selectedSlotNum = GetCurrentQuickslot()
+ 
+     for i = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, ACTION_BAR_FIRST_UTILITY_BAR_SLOT + ACTION_BAR_UTILITY_BAR_SIZE do
+-        local slotIcon = GetSlotTexture(i)
++        if not self:ValidateOrClearQuickslot(i) then
++            self.menu:AddEntry(EMPTY_QUICKSLOT_STRING, EMPTY_QUICKSLOT_TEXTURE, EMPTY_QUICKSLOT_TEXTURE, function() SetCurrentQuickslot(i) end, i)
++        else
+             local slotType = GetSlotType(i)
++            local slotIcon = GetSlotTexture(i)
+             local slotName = GetSlotName(i)
+             slotName = zo_strformat(SI_TOOLTIP_ITEM_NAME, slotName)
+             local slotItemQuality = GetSlotItemQuality(i)
+@@ -49,13 +52,23 @@ function ZO_QuickslotRadialManager:PopulateMenu()
+             else
+                 slotNameData = slotName
+             end
++            self.menu:AddEntry(slotNameData, slotIcon, slotIcon, function() SetCurrentQuickslot(i) end, i)
++        end
++    end
++end
+ 
+-        if(slotType == ACTION_TYPE_NOTHING) then
+-            self.menu:AddEntry(EMPTY_QUICKSLOT_STRING, EMPTY_QUICKSLOT_TEXTURE, EMPTY_QUICKSLOT_TEXTURE, function() SetCurrentQuickslot(i) end, i)
++function ZO_QuickslotRadialManager:ValidateOrClearQuickslot(slot)
++    local isValid = false
++    local slotType = GetSlotType(slot)
++    if slotType ~= ACTION_TYPE_NOTHING then
++        local slotIcon = GetSlotTexture(slot)
++        if not slotIcon or slotIcon == '' then
++            ClearSlot(slot)
+         else
+-            self.menu:AddEntry(slotNameData, slotIcon, slotIcon, function() SetCurrentQuickslot(i) end, i)
++            isValid = true
+         end
+     end
++    return isValid
+ end
+ 
+ --Quickslot Radial Manager
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,32 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/storewindow/gamepad/storewindowbuy_gamepad.lua b/esoui/ingame/storewindow/gamepad/storewindowbuy_gamepad.lua
+index b484ae7..31c71bd 100755
+--- a/esoui/ingame/storewindow/gamepad/storewindowbuy_gamepad.lua
++++ b/esoui/ingame/storewindow/gamepad/storewindowbuy_gamepad.lua
+@@ -98,7 +98,6 @@ end
+ 
+ function ZO_GamepadStoreBuy:ConfirmBuy()
+     local selectedData = self.list:GetTargetData()
+-
+     if self.confirmationMode then
+ 		local quantity = STORE_WINDOW_GAMEPAD:GetSpinnerValue()
+ 		if quantity &gt; 0 then
+@@ -122,10 +121,10 @@ function ZO_GamepadStoreBuy:CanBuy()
+         if selectedData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
+             local collectibleId = GetCollectibleIdFromLink(selectedData.itemLink)
+             if IsCollectibleUnlocked(collectibleId) then
+-                return false
++                return false, GetString("SI_STOREFAILURE", STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE) -- "You already have that collectible"
+             end
+         end
+-	    return selectedData.price &lt;= GetCarriedCurrencyAmount(CURT_MONEY)
++        return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
+     else
+         return false
+     end
+</code></pre>
+<script src="prism.js"></script>

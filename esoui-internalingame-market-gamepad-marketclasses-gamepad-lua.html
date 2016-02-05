@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/gamepad/marketclasses_gamepad.lua b/esoui/internalingame/market/gamepad/marketclasses_gamepad.lua
+index 4cdec93..2f13f06 100755
+--- a/esoui/internalingame/market/gamepad/marketclasses_gamepad.lua
++++ b/esoui/internalingame/market/gamepad/marketclasses_gamepad.lua
+@@ -226,7 +226,7 @@ end
+ 
+ function ZO_GamepadMarketProductBundleItemAttachment:LayoutTooltip(tooltip)
+     local stackCount = self:GetStackCount()
+-    GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(tooltip, self.itemLink, stackCount, ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT)
++    GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(tooltip, self.itemLink, stackCount)
+ end
+ 
+ function ZO_GamepadMarketProductBundleItemAttachment:GetStackCount()
+</code></pre>
+<script src="prism.js"></script>

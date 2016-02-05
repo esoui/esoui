@@ -1,0 +1,505 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/keyboard/market_keyboard.lua b/esoui/internalingame/market/keyboard/market_keyboard.lua
+index 90f35c6..d5c5725 100755
+--- a/esoui/internalingame/market/keyboard/market_keyboard.lua
++++ b/esoui/internalingame/market/keyboard/market_keyboard.lua
+@@ -20,6 +20,16 @@ function Market:Initialize(control)
+     self.messageLoadingIcon = self.control:GetNamedChild("MessageLoadingIcon")
+     self.rotationControl = self.control:GetNamedChild("RotationArea")
+     self.noMatchesMessage = self.contentsControl:GetNamedChild("NoMatchMessage")
++    self.searchBox = self.contentsControl:GetNamedChild("Search"):GetNamedChild("Box");
++
++    local subscriptionControl = self.contentsControl:GetNamedChild("SubscriptionPage")
++    self.subscriptionPage = subscriptionControl
++    self.subscriptionOverviewLabel = subscriptionControl:GetNamedChild("Overview")
++    self.subscriptionStatusLabel = subscriptionControl:GetNamedChild("MembershipInfoStatus")
++    self.subscriptionBenefitsLabel = subscriptionControl:GetNamedChild("BenefitsText")
++    self.subscriptionBenefitsImage = subscriptionControl:GetNamedChild("BenefitsImage")
++    self.subscriptionSubscribeButton = subscriptionControl:GetNamedChild("SubscribeButton")
++
+     self.nextPreviewChangeTime = 0
+     self.canBeginPreview = true
+ 
+@@ -170,6 +180,19 @@ function Market:InitializeCategories()
+ 
+         if selected and not reselectingDuringRebuild then
+             self:OnCategorySelected(data)
++
++            local categoryIndex, subCategoryIndex
++            -- faked category types don't have real category indices so keep them as nil
++            if data.type == ZO_MARKET_CATEGORY_TYPE_NONE then
++                if data.parentData then
++                    categoryIndex = data.parentData.categoryIndex
++                    subCategoryIndex = data.categoryIndex
++                else
++                    categoryIndex = data.categoryIndex
++                end
++            end
++
++            OnMarketCategorySelected(categoryIndex, subCategoryIndex)
+         end
+     end
+ 
+@@ -196,6 +219,13 @@ function Market:InitializeMarketList()
+     self.marketProductList = self.contentsControl:GetNamedChild("EntryList")
+     self.marketScrollChild = self.marketProductList:GetNamedChild("ScrollChild")
+ 
++    -- override the default functionality when the extants change for the product list so we can scroll to a specific item
++    -- if one exists because we openned the market to see a specific item
++    self.marketProductList.scroll:SetHandler("OnScrollExtentsChanged", function(control)
++                                                                                   ZO_Scroll_OnExtentsChanged(control:GetParent()) 
++                                                                                   self:ScrollAndPreviewQueuedMarketProduct()
++                                                                                   end)
++
+     -- MarketProductIcon Pool
+ 
+     local function CreateMarketProductIcon(objectPool)
+@@ -243,9 +273,17 @@ function Market:BuildCategories()
+         --Special featured items blade
+         local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
+         if numFeaturedMarketProducts &gt; 0 then
+-            self:AddTopLevelCategory(nil, GetString(SI_MARKET_FEATURED_CATEGORY), 0)
++            local normalIcon = "esoui/art/treeicons/achievements_indexicon_summary_up.dds"
++            local pressedIcon = "esoui/art/treeicons/achievements_indexicon_summary_down.dds"
++            local mouseoverIcon = "esoui/art/treeicons/achievements_indexicon_summary_over.dds"
++            self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, GetString(SI_MARKET_FEATURED_CATEGORY), 0, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_FEATURED)
+         end
+ 
++        local normalIcon = "esoui/art/treeicons/store_indexIcon_ESOPlus_up.dds"
++        local pressedIcon = "esoui/art/treeicons/store_indexIcon_ESOPlus_down.dds"
++        local mouseoverIcon = "esoui/art/treeicons/store_indexIcon_ESOPlus_over.dds"
++        self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, GetString(SI_MARKET_ESO_PLUS_CATEGORY), 0, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS)
++
+         for i = 1, GetNumMarketProductCategories() do
+             local name, numSubCategories, numMarketProducts, normalIcon, pressedIcon, mouseoverIcon = GetMarketProductCategoryInfo(i)
+             self:AddTopLevelCategory(i, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon)
+@@ -268,38 +306,40 @@ function Market:BuildCategories()
+         else
+             categoryIndex = currentCategory.categoryIndex
+         end
+-        nodeToSelect = self:LookupTreeNodeForData(categoryIndex, subcatgoryIndex)
++        nodeToSelect = self:GetCategoryData(categoryIndex, subcatgoryIndex)
+     end
+ 
+     self.categoryTree:Commit(nodeToSelect)
++
++    self.refreshCategories = false
+ end
+ 
+ function Market:RefreshVisibleCategoryFilter()
+     local data = self.categoryTree:GetSelectedData()
+-    if(data ~= nil) then
++    if data ~= nil then
+         self:OnCategorySelected(data)
+     end
+ end
+ 
+ do
+     local function AddNodeLookup(lookup, node, parent, categoryIndex)
+-        if(categoryIndex ~= nil) then
++        if categoryIndex ~= nil then
+             local parentCategory = categoryIndex
+             local subCategory
+ 
+-            if(parent) then
++            if parent then
+                 parentCategory = parent.data.categoryIndex
+                 subCategory = categoryIndex
+             end
+ 
+             local categoryTable = lookup[parentCategory]
+             
+-            if(categoryTable == nil) then
++            if categoryTable == nil then
+                 categoryTable = { subCategories = {} }
+                 lookup[parentCategory] = categoryTable
+             end
+ 
+-            if(subCategory) then
++            if subCategory then
+                 categoryTable.subCategories[subCategory] = node
+             else
+                 categoryTable.node = node
+@@ -307,14 +347,14 @@ do
+         end
+     end
+ 
+-    function Market:LookupTreeNodeForData(categoryIndex, subCategoryIndex)
+-        if(categoryIndex ~= nil) then
++    function Market:GetCategoryData(categoryIndex, subCategoryIndex)
++        if categoryIndex ~= nil then
+             local categoryTable = self.nodeLookupData[categoryIndex]
+-            if(categoryTable ~= nil) then
+-                if(subCategoryIndex ~= nil) then
++            if categoryTable ~= nil then
++                if subCategoryIndex ~= nil then
+                     return categoryTable.subCategories[subCategoryIndex]
+                 else
+-                    if(categoryTable.node:IsLeaf()) then
++                    if categoryTable.node:IsLeaf() then
+                         return categoryTable.node
+                     else
+                         return categoryTable.node:GetChildren()[1]
+@@ -324,13 +364,83 @@ do
+         end
+     end
+ 
+-    local function AddCategory(lookup, tree, nodeTemplate, parent, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, isFeaturedCategory, isFakedSubcategory)
++    function Market:GetMarketProductInfo(productId)
++        for i = 1, #self.marketProducts do
++            if self.marketProducts[i].product:GetId() == productId then
++                return self.marketProducts[i]
++            end
++        end
++
++        for i = 1, #self.featuredProducts do
++            if self.featuredProducts[i].product:GetId() == productId then
++                return self.featuredProducts[i]
++            end
++        end
++
++        for i = 1, #self.limitedTimedOfferProducts do
++            if self.limitedTimedOfferProducts[i].product:GetId() == productId then
++                return self.limitedTimedOfferProducts[i]
++            end
++        end
++    end
++
++    function Market:RequestShowMarketProduct(id)
++        if self.marketState ~= MARKET_STATE_OPEN then
++            self.queuedMarketProductId = id
++            return
++        end
++
++        local targetNode = self:GetCategoryDataForMarketProduct(id)
++        if targetNode then
++            if self.categoryTree:GetSelectedNode() == targetNode then
++                self:ScrollAndPreviewMarketProduct(id)
++            else
++                self.categoryTree:SelectNode(targetNode)
++                self.queuedMarketProductId = id -- order of operations is important here
++            end
++        end
++    end
++
++    local INSTANTLY_SCROLL_TO_CENTER = true
++    function Market:ScrollAndPreviewMarketProduct(marketProductId)
++        local marketProductInfo = self:GetMarketProductInfo(marketProductId)
++        if marketProductInfo then
++            ZO_Scroll_ScrollControlIntoCentralView(self.marketProductList, marketProductInfo.control, INSTANTLY_SCROLL_TO_CENTER)
++            marketProductInfo.product:PlayHighlightAnimationToEnd()
++            self.queuedMarketProductPreview = marketProductInfo.product
++        end
++    end
++
++    function Market:ScrollAndPreviewQueuedMarketProduct()
++        self:ScrollAndPreviewMarketProduct(self.queuedMarketProductId)
++        self.queuedMarketProductId = nil
++    end
++
++    function Market:RequestShowMarketWithSearchString(searchString)
++        if self.marketState ~= MARKET_STATE_OPEN then
++            self.queuedSearchString = searchString
++            return
++        end
++
++        self:DisplayMarketProductsBySearchString(searchString)
++    end
++
++    function Market:DisplayMarketProductsBySearchString(searchString)
++        self.searchBox:SetText(searchString)
++    end
++
++    function Market:DisplayQueuedMarketProductsBySearchString()
++        self:DisplayMarketProductsBySearchString(self.queuedSearchString)
++        self.queuedSearchString = nil
++    end
++
++    local function AddCategory(lookup, tree, nodeTemplate, parent, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType)
++        categoryType = categoryType or ZO_MARKET_CATEGORY_TYPE_NONE
+         local entryData = 
+         {
+-            isFakedSubcategory = isFakedSubcategory,
+             categoryIndex = categoryIndex,
+             name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name),
+-            featured = isFeaturedCategory,
++            type = categoryType,
+             parentData = parent and parent.data or nil,
+             normalIcon = normalIcon,
+             pressedIcon = pressedIcon,
+@@ -345,35 +455,7 @@ do
+         return node
+     end
+ 
+-    local featuredIcons =
+-    {
+-        "esoui/art/treeicons/achievements_indexicon_summary_up.dds",
+-        "esoui/art/treeicons/achievements_indexicon_summary_down.dds",
+-        "esoui/art/treeicons/achievements_indexicon_summary_over.dds",
+-    }
+-    
+-    local SPOTLIT = 1
+-    local IS_NEW = 2
+-    local ON_SALE = 3
+-    
+-    local FEATURED_SUBCATEGORY_FILTER =
+-    {
+-        -- spotlit is featured but nothing else "special" about it
+-        [SPOTLIT] = function(id)
+-            local _, _, cost, discountedCost, _, _, isNew = GetMarketProductInfo(id)
+-            return not (cost &gt; discountedCost or isNew)
+-        end,
+-        [IS_NEW] = function(id) return select(7, GetMarketProductInfo(id)) end,
+-        [ON_SALE] = function(id) 
+-            local _, _, cost, discountedCost = GetMarketProductInfo(id)
+-            return cost &gt; discountedCost
+-        end
+-    }
+-    
+-    local FEATURED_CATEGORY_INDEX = 0
+-
+-    function Market:AddTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon)
+-        local isFeaturedCategory = categoryIndex == nil
++    function Market:AddTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, categoryType)
+         local tree = self.categoryTree
+         local lookup = self.nodeLookupData
+ 
+@@ -381,13 +463,9 @@ do
+         local searchResultsWithChildren = self.searchString ~= "" and (NonContiguousCount(self.searchResults[categoryIndex]) &gt; 1 or self.searchResults[categoryIndex]["root"] == nil)
+         local hasChildren = numSubCategories &gt; 0 --Only for non-search results
+ 
+-        local nodeTemplate = (hasChildren or isFeaturedCategory) and "ZO_IconHeader" or "ZO_MarketChildlessCategory"
+-
+-        if isFeaturedCategory then
+-            normalIcon, pressedIcon, mouseoverIcon = unpack(featuredIcons)
+-        end
++        local nodeTemplate = hasChildren and "ZO_IconHeader" or "ZO_MarketChildlessCategory"
+ 
+-        local parent = AddCategory(lookup, tree, nodeTemplate, nil, isFeaturedCategory and FEATURED_CATEGORY_INDEX or categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, isFeaturedCategory)
++        local parent = AddCategory(lookup, tree, nodeTemplate, nil, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType)
+ 
+         if searchResultsWithChildren then
+             for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
+@@ -401,60 +479,23 @@ do
+                 local subCategoryName, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(categoryIndex, i)
+                 AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, i, subCategoryName, normalIcon, pressedIcon, mouseoverIcon)
+             end
+-        elseif isFeaturedCategory then
+-            local hasSpotlitCategory = false
+-            local hasNewSubCategory = false
+-            local hasOnSaleSubCategory = false
+-            local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
+-
+-            -- search the featured products to find the presence of products in various subcategories including New and On Sale. 
+-            -- This way only subcategories that have contents will be displayed as selectable.
+-            for i = 1, numFeaturedMarketProducts do
+-                local featuredProductId = GetFeaturedMarketProductId(i)
+-                local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = GetMarketProductInfo(featuredProductId)
+-                
+-                hasNewSubCategory = hasNewSubCategory or isNew
+-                hasOnSaleSubCategory = hasOnSaleSubCategory or (cost &gt; discountedCost)
+-                hasSpotlitCategory = hasSpotlitCategory or not (isNew or (cost &gt; discountedCost))
+-                
+-                if hasNewSubCategory and hasOnSaleSubCategory then
+-                    break
+-                end
+-            end
+-            
+-            if hasSpotlitCategory then
+-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, SPOTLIT, GetString(SI_MARKET_FEATURED_SUBCATEGORY), normalIcon, pressedIcon, mouseoverIcon, isFeaturedCategory)
+-            end
+-            
+-            if hasNewSubCategory then
+-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, IS_NEW, GetString(SI_MARKET_NEW_LABEL), normalIcon, pressedIcon, mouseoverIcon, isFeaturedCategory)
+-            end
+-            
+-            if hasOnSaleSubCategory then
+-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, ON_SALE, GetString(SI_MARKET_DISCOUNT_LABEL), normalIcon, pressedIcon, mouseoverIcon, isFeaturedCategory)
+-            end
+         end
+ 
+         return parent
+     end
+     
+-    local function GetFeaturedSubCategoryProductIds(filterFunc, index, ...)
++    local function GetFeaturedSubCategoryProductIds(index, ...)
+         if index &gt;= 1 then
+             local id = GetFeaturedMarketProductId(index)
+             index = index - 1
+-            if filterFunc(id) then
+-                return GetFeaturedSubCategoryProductIds(filterFunc, index, id, ...)
+-            else
+-                return GetFeaturedSubCategoryProductIds(filterFunc, index, ...)
+-            end
++            return GetFeaturedSubCategoryProductIds(index, id, ...)
+         end
+         return ...
+     end
+     
+     function Market:BuildFeaturedMarketProductList(data)
+         local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
+-        local filterFunc = FEATURED_SUBCATEGORY_FILTER[data.categoryIndex]
+-        self:LayoutMarketProducts(GetFeaturedSubCategoryProductIds(filterFunc, numFeaturedMarketProducts))
++        self:LayoutMarketProducts(GetFeaturedSubCategoryProductIds(numFeaturedMarketProducts))
+     end
+ end
+ 
+@@ -537,13 +578,40 @@ do
+     end
+ end
+ 
+-local NO_LABELED_GROUP_HEADER = nil
+-function Market:LayoutMarketProducts(...)
++function Market:ClearMarketProducts()
+     self.marketProductPool:ReleaseAllObjects()
+     self.marketProductBundlePool:ReleaseAllObjects()
+     self:ClearLabeledGroups()
+     ZO_Scroll_ResetToTop(self.marketProductList)
+     self.previousRowControl = nil
++end
++
++function Market:DisplayEsoPlusOffer()
++    self:ClearMarketProducts()
++
++    self.subscriptionPage:SetHidden(false)
++
++    local overview, benefits, image = GetMarketSubscriptionKeyboardInfo()
++
++    self.subscriptionOverviewLabel:SetText(overview)
++    self.subscriptionBenefitsLabel:SetText(benefits)
++    self.subscriptionBenefitsImage:SetTexture(image)
++
++    local isSubscribed = IsESOPlusSubscriber()
++    local statusText = isSubscribed and SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_ACTIVE or SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_NOT_ACTIVE
++
++    self.subscriptionSubscribeButton:SetEnabled(not isSubscribed)
++
++    self.subscriptionStatusLabel:SetText(GetString(statusText))
++end
++
++local NO_LABELED_GROUP_HEADER = nil
++function Market:LayoutMarketProducts(...)
++    self:ClearMarketProducts()
++
++    self.subscriptionPage:SetHidden(true)
++
++    local categoryType = self.currentCategoryData.type
+ 
+     local filterType = self.categoryFilter.filterType
+     local hasShownProduct = false
+@@ -559,18 +627,40 @@ function Market:LayoutMarketProducts(...)
+             marketProduct:Show(id)
+ 
+             local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
++            local timeLeft = marketProduct:GetTimeLeftInSeconds()
++            -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
++            local isLimitedTime = timeLeft &gt; 0 and timeLeft &lt;= ZO_ONE_MONTH_IN_SECONDS
++            local doesContainDLC = DoesMarketProductContainDLC(id)
+ 
+             -- only show the market product in the featured section or the all section
+-            if not self.currentCategoryData.featured and isFeatured then
++            if doesContainDLC and categoryType == ZO_MARKET_CATEGORY_TYPE_FEATURED then
++                self:AddProductToLabeledGroupTable(self.dlcProducts, name, marketProduct)
++            else
++                if isLimitedTime then
++                    self:AddProductToLabeledGroupTable(self.limitedTimedOfferProducts, name, marketProduct)
++                elseif isFeatured then
+                     self:AddProductToLabeledGroupTable(self.featuredProducts, name, marketProduct)
+                 else
+                     self:AddProductToLabeledGroupTable(self.marketProducts, name, marketProduct)
+                 end
+             end
+         end
++    end
+ 
+-    if not self.currentCategoryData.featured and #self.featuredProducts &gt; 0 then
++    if #self.limitedTimedOfferProducts &gt; 0 then
++        self:AddLabeledGroupTable(GetString(SI_MARKET_LIMITED_TIME_OFFER_CATEGORY), self.limitedTimedOfferProducts)
++    end
++
++    if #self.dlcProducts &gt; 0 then
++        self:AddLabeledGroupTable(GetString(SI_MARKET_DLC_CATEGORY), self.dlcProducts)
++    end
++
++    if #self.featuredProducts &gt; 0 then
++        if categoryType == ZO_MARKET_CATEGORY_TYPE_NONE then
+             self:AddLabeledGroupTable(GetString(SI_MARKET_FEATURED_CATEGORY), self.featuredProducts)
++        else -- featured
++            self:AddLabeledGroupTable(GetString(SI_MARKET_ALL_LABEL), self.featuredProducts)
++        end
+     end
+ 
+     local categoryHeader = (#self.labeledGroups &gt; 0) and GetString(SI_MARKET_ALL_LABEL) or NO_LABELED_GROUP_HEADER
+@@ -579,6 +669,7 @@ function Market:LayoutMarketProducts(...)
+ end
+ 
+ function Market:ShowMarket(showMarket)
++    ZO_Market_Shared.ShowMarket(self, showMarket)
+     self.contentsControl:SetHidden(not showMarket)
+     self.messageLabel:SetHidden(showMarket)
+     self.rotationControl:SetHidden(not showMarket)
+@@ -661,6 +752,15 @@ end
+ function Market:OnShown()
+     self:AddKeybinds()
+     ZO_Market_Shared.OnShown(self)
++
++    if self.refreshCategories then
++        self:BuildCategories()
++    end
++
++    if self.queuedMarketProductPreview and IsCharacterPreviewingAvailable() then
++        self.queuedMarketProductPreview:Preview()
++        self.queuedMarketProductPreview = nil
++    end
+ end
+ 
+ function Market:OnHidden()
+@@ -678,6 +778,16 @@ function Market:RefreshProducts()
+         local product = self.featuredProducts[i].product
+         product:Refresh()
+     end
++
++    for i = 1, #self.limitedTimedOfferProducts do
++        local product = self.limitedTimedOfferProducts[i].product
++        product:Refresh()
++    end
++
++    for i = 1, #self.dlcProducts do
++        local product = self.dlcProducts[i].product
++        product:Refresh()
++    end
+ end
+ 
+ function Market:RestoreActionLayerForTutorial()
+@@ -689,6 +799,10 @@ function Market:RemoveActionLayerForTutorial()
+     RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
+ end
+ 
++function Market:ResetSearch()
++    self.searchBox:SetText("")
++end
++
+ --
+ --[[ XML Handlers ]]--
+ --
+@@ -724,7 +838,11 @@ function ZO_MarketCurrency_OnMouseExit(control)
+     ClearTooltip(InformationTooltip)
+ end
+ 
+-
+ function ZO_MarketCurrencyBuyCrowns_OnClicked(control)
+-    ZO_Dialogs_ShowDialog("MARKET_CONFIRM_OPEN_URL", ZO_BUY_CROWNS_URL, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
++    OnMarketPurchaseMoreCrowns()
++    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_CROWNS_URL_TYPE, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
++end
++
++function ZO_MarketCurrencyBuySubscription_OnClicked(control)
++    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/guild/keyboard/zo_guildranks_keyboard.xml b/esoui/ingame/guild/keyboard/zo_guildranks_keyboard.xml
+index c427812..4c81faf 100755
+--- a/esoui/ingame/guild/keyboard/zo_guildranks_keyboard.xml
++++ b/esoui/ingame/guild/keyboard/zo_guildranks_keyboard.xml
+@@ -52,7 +52,7 @@
+             &lt;Controls&gt;
+                 &lt;Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_GUILD_RANKS_ADD_RANK_NAME_HEADER"/&gt;
+ 
+-                &lt;Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/&gt;
+                     &lt;Controls&gt;
+@@ -99,10 +99,10 @@
+                 &lt;/Texture&gt;
+                 &lt;Control name="$(parent)RankName"&gt;
+                     &lt;Anchor point="LEFT" relativeTo="$(parent)RankIcon" relativePoint="RIGHT" offsetX="3"/&gt;
+-                    &lt;Dimensions x="400" y="42"/&gt;
+                     &lt;Controls&gt;
+-                        &lt;Backdrop name="$(parent)EditBG" inherits="ZO_EditBackdrop"&gt;
+-                            &lt;AnchorFill/&gt;
++                        &lt;Backdrop name="$(parent)EditBG" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                            &lt;Anchor point="LEFT"/&gt;
++                            &lt;Dimensions x="400"/&gt;
+                             &lt;Controls&gt;
+                                 &lt;EditBox name="$(grandparent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"&gt;
+                                     &lt;OnTextChanged&gt;
+</code></pre>
+<script src="prism.js"></script>

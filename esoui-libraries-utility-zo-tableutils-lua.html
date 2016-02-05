@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/utility/zo_tableutils.lua b/esoui/libraries/utility/zo_tableutils.lua
+index debf91c..9487fdb 100755
+--- a/esoui/libraries/utility/zo_tableutils.lua
++++ b/esoui/libraries/utility/zo_tableutils.lua
+@@ -174,3 +174,12 @@ function ZO_DeepTableCopy(source, dest)
+     
+     return dest
+ end
++
++function ZO_IsElementInNumericallyIndexedTable(table, element)
++    for index, value in ipairs(table) do
++        if value == element then
++            return true
++        end
++    end
++    return false
++end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

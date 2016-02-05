@@ -1,0 +1,39 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/gamepad/scrolltemplates_gamepad.lua b/esoui/libraries/zo_templates/gamepad/scrolltemplates_gamepad.lua
+index e50c767..b701b8e 100755
+--- a/esoui/libraries/zo_templates/gamepad/scrolltemplates_gamepad.lua
++++ b/esoui/libraries/zo_templates/gamepad/scrolltemplates_gamepad.lua
+@@ -136,14 +136,14 @@ do
+     end
+ end
+ 
+-function ZO_Scroll_Gamepad_SetScrollIndicatorSide(scrollIndicator, background, anchorSide, customOffsetX, customOffsetY)
++function ZO_Scroll_Gamepad_SetScrollIndicatorSide(scrollIndicator, background, anchorSide, customOffsetX, customOffsetY, anchorsToBackground)
+     scrollIndicator:ClearAnchors()
+ 
+-    local anchorRelativePos = TOPRIGHT
++    local anchorRelativePos = anchorsToBackground and RIGHT or TOPRIGHT
+     local offsetY = customOffsetY or 0
+     local offsetX = customOffsetX or -ZO_GAMEPAD_PANEL_BG_VERTICAL_DIVIDER_HALF_WIDTH
+     if anchorSide == LEFT then
+-        anchorRelativePos = TOPLEFT
++        anchorRelativePos = anchorsToBackground and LEFT or TOPLEFT
+         offsetX = customOffsetX or ZO_GAMEPAD_PANEL_BG_VERTICAL_DIVIDER_HALF_WIDTH
+     end
+ 
+@@ -154,7 +154,7 @@ function ZO_Scroll_Gamepad_SetScrollIndicatorSide(scrollIndicator, background, a
+     end
+ 
+     if bgControl then
+-        local anchorControl = bgControl:GetNamedChild("BackgroundAtScreenCenterHeight")
++        local anchorControl = anchorsToBackground and bgControl or bgControl:GetNamedChild("BackgroundAtScreenCenterHeight")
+         scrollIndicator:SetAnchor(CENTER, anchorControl, anchorRelativePos, offsetX, offsetY)
+     end
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

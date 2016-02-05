@@ -1,0 +1,74 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/lfg/zo_activityfindertemplate_shared.xml b/esoui/ingame/lfg/zo_activityfindertemplate_shared.xml
+new file mode 100644
+index 0000000..64a4096
+--- /dev/null
++++ b/esoui/ingame/lfg/zo_activityfindertemplate_shared.xml
+@@ -0,0 +1,60 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Control name="ZO_ActivityFinderTemplateRewardTemplate_Shared" resizeToFitDescendents="true" virtual="true"&gt;
++            &lt;DimensionConstraints minY="64" /&gt;
++
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)Icon" layer="CONTROLS" hidden="true" &gt;
++                    &lt;Dimensions x="64" y="64" /&gt;
++                    &lt;Anchor point="LEFT" /&gt;
++                &lt;/Texture&gt;
++
++                &lt;Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true" &gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" /&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
++        &lt;Control name="ZO_ActivityFinderSingularTemplate_Shared" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)Background" textureFile="EsoUI/Art/Icons/icon_missing.dds"/&gt;
++
++                &lt;Label name="$(parent)GroupSizeLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" /&gt;
++
++                &lt;Label name="$(parent)Title" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" /&gt;
++
++                &lt;Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" /&gt;
++
++                &lt;Control name="$(parent)RewardsSection" resizeToFitDescendents="true"&gt;
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true" /&gt;
++
++                        &lt;Control name="$(parent)Entries" resizeToFitDescendents="true"&gt;
++                            &lt;Controls&gt;
++                                &lt;Control name="$(parent)ItemReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared"&gt;
++                                    &lt;Controls&gt;
++                                        &lt;Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/LFG/LFG_bonus_crate.dds" /&gt;
++                                        &lt;Label name="$(parent)Text" override="true" /&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Control name="$(parent)Padding"&gt;
++                                    &lt;Dimensions x="ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING" /&gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)ItemReward" relativePoint="RIGHT" /&gt;
++                                &lt;/Control&gt;
++                                
++                                &lt;Control name="$(parent)XPReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared"&gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)Padding" relativePoint="RIGHT" /&gt;
++                                    
++                                    &lt;Controls&gt;
++                                        &lt;Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/LFG/LFG_bonus_XP.dds" /&gt;
++                                    &lt;/Controls&gt;
++                                &lt;/Control&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

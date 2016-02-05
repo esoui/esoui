@@ -1,0 +1,53 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/stats/gamepad/zo_stats_gamepad.xml b/esoui/ingame/stats/gamepad/zo_stats_gamepad.xml
+index f8d2935..817c352 100755
+--- a/esoui/ingame/stats/gamepad/zo_stats_gamepad.xml
++++ b/esoui/ingame/stats/gamepad/zo_stats_gamepad.xml
+@@ -62,7 +62,7 @@
+                 &lt;Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" /&gt;
+                 &lt;Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/&gt;
+ 
+-                &lt;Cooldown name="$(parent)Cooldown" textureFile="EsoUI/Art/Mounts/timer_overlay.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true"&gt;
++                &lt;Cooldown name="$(parent)Cooldown" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_32.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true"&gt;
+                     &lt;Dimensions x="32" y="32"/&gt;
+                     &lt;Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET" /&gt;
+                 &lt;/Cooldown&gt;
+@@ -87,7 +87,7 @@
+                 ZO_GamepadStats_OnInitialize(self)
+             &lt;/OnInitialized&gt;   
+             &lt;Controls&gt;
+-                &lt;Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors"&gt;
++                &lt;Control name="$(parent)RightPane" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors"&gt;
+                     &lt;Controls&gt;
+                         &lt;Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" /&gt;
+                         &lt;Control name="$(parent)BattleLevelHeader" &gt;
+@@ -97,20 +97,21 @@
+                                 &lt;Label name="$(parent)Level" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_STAT_VALUE:STAT_VALUE_COLOR_BATTLE_LEVELED"&gt;
+                                     &lt;Anchor point="RIGHT"/&gt;
+                                 &lt;/Label&gt;
++                                
+                                 &lt;Texture name="$(parent)LevelTypeIcon"&gt;
+                                     &lt;Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT"/&gt;
+                                     &lt;TextureCoords left="0.125" top="0.125" right="0.875" bottom="0.875"/&gt;
+                                     &lt;!-- The width is handled in code based on whenever or not you are Vet BattleRanked--&gt;
+                                     &lt;Dimensions x="0" y="32"/&gt;
+                                 &lt;/Texture&gt;
++                                
+                                 &lt;Label name="$(parent)ScaledLevel" text="SI_STATS_SCALED_LEVEL" inherits="ZO_GamepadStatsHeaderTemplate" &gt;
+                                     &lt;Anchor point="RIGHT" relativeTo="$(parent)LevelTypeIcon" relativePoint="LEFT" offsetX="-3" offsetY="3" /&gt;
+                                 &lt;/Label&gt;
+-
+                             &lt;/Controls&gt;
+                         &lt;/Control&gt;
+ 
+-                        &lt;Control name="$(parent)InfoPanel" hidden="true" inherits="ZO_GamepadStatsContentAnchor"&gt;
++                        &lt;Control name="$(parent)InfoPanel" inherits="ZO_GamepadStatsContentAnchor"&gt;
+                             &lt;Controls&gt;
+                                 &lt;Control name="$(parent)CharacterEffectsPanel" hidden="true"&gt;
+                                     &lt;AnchorFill/&gt;
+</code></pre>
+<script src="prism.js"></script>

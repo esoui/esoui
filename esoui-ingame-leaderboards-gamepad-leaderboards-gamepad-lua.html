@@ -1,0 +1,50 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/leaderboards/gamepad/leaderboards_gamepad.lua b/esoui/ingame/leaderboards/gamepad/leaderboards_gamepad.lua
+index 0a51285..b59e73c 100755
+--- a/esoui/ingame/leaderboards/gamepad/leaderboards_gamepad.lua
++++ b/esoui/ingame/leaderboards/gamepad/leaderboards_gamepad.lua
+@@ -11,6 +11,9 @@ function ZO_LeaderboardsManager_Gamepad:Initialize(control)
+     local ACTIVATE_ON_SHOW = true
+     ZO_LeaderboardsManager_Shared.Initialize(self, control)
+     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_LEADERBOARDS_SCENE)
++
++    self.pointsHeaderLabel = GAMEPAD_LEADERBOARD_LIST:GetHeaderControl("PointsName")
++
+     self:InitializeCategoryList(control)
+ end
+ 
+@@ -105,8 +108,6 @@ function ZO_LeaderboardsManager_Gamepad:InitializeHeader()
+ end
+ 
+ function ZO_LeaderboardsManager_Gamepad:OnDeferredInitialize()
+-    self.pointsHeaderLabel = GAMEPAD_LEADERBOARD_LIST:GetHeaderControl("PointsName")
+-
+     self:InitializeHeader()
+ end
+ 
+@@ -153,7 +154,18 @@ local function SortFunc(item1, item2)
+ end
+ 
+ function ZO_LeaderboardsManager_Gamepad:UpdateCategories()
+-    table.sort(self.categoryListData, SortFunc)
++    self.categoryListData = {}
++
++    if GAMEPAD_CAMPAIGN_LEADERBOARDS then
++        GAMEPAD_CAMPAIGN_LEADERBOARDS:AddCategoriesToParentSystem()
++    end
++    if GAMEPAD_RAID_LEADERBOARDS then
++        GAMEPAD_RAID_LEADERBOARDS:AddCategoriesToParentSystem()
++    end
++
++    if GAMEPAD_LEADERBOARDS_SCENE:IsShowing() then
++        self:RefreshCategoryList()
++    end
+ end
+ 
+ function ZO_LeaderboardsManager_Gamepad:SetSelectedLeaderboardObject(leaderboardObject, subType)
+</code></pre>
+<script src="prism.js"></script>

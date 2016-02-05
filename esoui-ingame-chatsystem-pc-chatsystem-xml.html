@@ -1,0 +1,28 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/chatsystem/pc/chatsystem.xml b/esoui/ingame/chatsystem/pc/chatsystem.xml
+index e6d2676..fce2002 100755
+--- a/esoui/ingame/chatsystem/pc/chatsystem.xml
++++ b/esoui/ingame/chatsystem/pc/chatsystem.xml
+@@ -215,13 +215,13 @@
+                             &lt;/OnMouseUp&gt;
+                         &lt;/Label&gt;
+ 
+-                        &lt;Backdrop name="$(parent)Edit" inherits="ZO_EditBackdrop"&gt;
++                        &lt;Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="6" /&gt;
+-                            &lt;Anchor point="BOTTOMRIGHT" /&gt;
++                            &lt;Anchor point="TOPRIGHT" /&gt;
+                             &lt;Controls&gt;
+                                 &lt;EditBox name="$(parent)Box" font="ZoFontEditChat" mouseEnabled="true" maxInputCharacters="350"&gt;
+                                     &lt;Anchor point="TOPLEFT" offsetX="4" offsetY="3"/&gt;
+-                                    &lt;Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2"/&gt;
++                                    &lt;Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-3"/&gt;
+                                     &lt;OnEnter&gt;
+                                         ZO_ChatTextEntry_Execute(self:GetParent():GetParent())
+                                     &lt;/OnEnter&gt;
+</code></pre>
+<script src="prism.js"></script>

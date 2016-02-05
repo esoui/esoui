@@ -1,0 +1,74 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/lfg/gamepad/zo_grouprolesbar_gamepad.xml b/esoui/ingame/lfg/gamepad/zo_grouprolesbar_gamepad.xml
+new file mode 100644
+index 0000000..d544257
+--- /dev/null
++++ b/esoui/ingame/lfg/gamepad/zo_grouprolesbar_gamepad.xml
+@@ -0,0 +1,61 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Control name="ZO_GroupRolesBarRole" virtual="true"&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_ROLES_BAR_BUTTON_DIMENSIONS" y="ZO_GAMEPAD_ROLES_BAR_BUTTON_DIMENSIONS" /&gt;
++            &lt;OnInitialized&gt;
++                self.icon = self:GetNamedChild("Icon")
++                self.selectedFrame = self:GetNamedChild("Selector")
++                self.pressedFrame = self:GetNamedChild("SelectedIndicator")
++            &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Backdrop name="$(parent)SelectedIndicator" inherits="ZO_GamepadGreySelectorHighlight" level="1" hidden="true"&gt;
++                    &lt;AnchorFill /&gt;
++                &lt;/Backdrop&gt;
++                
++                &lt;Texture name="$(parent)Icon" level="3"&gt;
++                    &lt;AnchorFill /&gt;
++                &lt;/Texture&gt;
++                
++                &lt;Backdrop name="$(parent)Selector" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" &gt;
++                    &lt;AnchorFill /&gt;
++                &lt;/Backdrop&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;TopLevelControl name="ZO_GroupRolesBarGamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors"&gt;
++            &lt;OnInitialized&gt;
++                local contentContainer = self:GetNamedChild("Mask"):GetNamedChild("Container")
++                ZO_GroupRolesBar_Gamepad_OnInitialized(contentContainer)
++            &lt;/OnInitialized&gt;
++            
++            &lt;Controls&gt;
++                &lt;Scroll name="$(parent)Mask"&gt;
++                    &lt;AnchorFill /&gt;
++                    &lt;Controls&gt;
++                        &lt;Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true"&gt;
++                            &lt;AnchorFill /&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)Header" modifyTextType="UPPERCASE" text="SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER" inherits="ZO_GamepadMenuEntryHeaderTemplate"&gt;
++                                    &lt;Anchor point="TOP" relativePoint="TOP" offsetY="ZO_GAMEPAD_CONTENT_HEADER_INFO_OFFSET_Y"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Control name="$(parent)Healer" inherits="ZO_GroupRolesBarRole"&gt;
++                                    &lt;Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="TOP" offsetY="ZO_GAMEPAD_ROLES_BAR_HEADER_BUTTONS_PADDING_Y"/&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Control name="$(parent)Tank" inherits="ZO_GroupRolesBarRole"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)Healer" relativePoint="LEFT" offsetX="-19"/&gt;
++                                &lt;/Control&gt;
++
++                                &lt;Control name="$(parent)DPS" inherits="ZO_GroupRolesBarRole"&gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)Healer" relativePoint="RIGHT" offsetX="19"/&gt;
++                                &lt;/Control&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Scroll&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,131 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/centerscreenannounce/centerscreenannounce.lua b/esoui/ingame/centerscreenannounce/centerscreenannounce.lua
+index ac35c5d..962e743 100755
+--- a/esoui/ingame/centerscreenannounce/centerscreenannounce.lua
++++ b/esoui/ingame/centerscreenannounce/centerscreenannounce.lua
+@@ -3,6 +3,7 @@ CSA_EVENT_SMALL_TEXT = 1
+ CSA_EVENT_LARGE_TEXT = 2
+ CSA_EVENT_COMBINED_TEXT = 3
+ CSA_EVENT_NO_TEXT = 4
++CSA_EVENT_RAID_COMPLETE_TEXT = 5
+ 
+ CSA_OPTION_SUPPRESS_ICON_FRAME = true
+ 
+@@ -16,6 +17,12 @@ local ARG_INDEX_BAR_PARAMS = 7
+ local ARG_INDEX_LIFESPAN = 8
+ local ARG_INDEX_SUPPRESS_FRAME = 9
+ 
++local ARG_BREAKDOWN_INDEX_SCORE = 1
++local ARG_BREAKDOWN_INDEX_TIME = 2
++local ARG_BREAKDOWN_INDEX_SHOW_AS_ERROR = 3
++local ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT = 4
++local ARG_BREAKDOWN_INDEX_VITALITY_PERCENT = 5
++
+ local SMALL_TEXT_FONT_KEYBOARD = "ZoFontCenterScreenAnnounceSmall"
+ local SMALL_TEXT_FONT_GAMEPAD = "ZoFontGamepad42"
+ 
+@@ -113,6 +120,13 @@ function CenterScreenAnnounce:Initialize(control)
+     self.m_smallCombinedIconFrame = self.m_smallCombinedText:GetNamedChild("IconFrame")
+     self.m_nextQueueIndex = 1
+ 
++    self.longformBreakdownContainer = self.m_largeText:GetNamedChild("RaidCompleteText")
++    self.breakdownLabel1 = self.longformBreakdownContainer:GetNamedChild("TimeAmount")
++    self.breakdownLabel2 = self.longformBreakdownContainer:GetNamedChild("ScoreAmount")
++    self.breakdownLabel3 = self.longformBreakdownContainer:GetNamedChild("VitalityAmount")
++    self.breakdownIconLabel = self.longformBreakdownContainer:GetNamedChild("VitalityPercent")
++    self.breakdownIcon = self.longformBreakdownContainer:GetNamedChild("VitalityIcon")
++
+     -- Recent message handler, using a 250 ms expiry delay
+     self.m_recentMessages = ZO_RecentMessages:New(250)
+ 
+@@ -548,6 +562,8 @@ local setupFunctions =
+             translateTimeline:PlayFromStart()
+         end
+ 
++        self.longformBreakdownContainer:SetHidden(true)
++
+         return line
+     end,
+ 
+@@ -571,6 +587,7 @@ local setupFunctions =
+         self.m_largeTextContainer.m_timeline.beforeExpiring = true
+ 
+         self.m_smallCombinedIcon:SetHidden(true)
++        self.longformBreakdownContainer:SetHidden(true)
+ 
+         return self.m_largeTextContainer
+     end,
+@@ -613,11 +630,57 @@ local setupFunctions =
+             self.m_smallCombinedIconBG:SetTexture(iconBG)
+         end
+ 
++        self.longformBreakdownContainer:SetHidden(true)
++
+         return self.m_largeTextContainer
+     end,
++
+     [CSA_EVENT_NO_TEXT] = function(self, ...)
+         return nil
+     end,
++
++    [CSA_EVENT_RAID_COMPLETE_TEXT] = function(self,...)
++        TrySettingDynamicText(self.m_largeText, select(ARG_INDEX_MESSAGE, ...))
++        TrySettingDynamicText(self.m_smallCombinedText, "")
++        local raidArgumentTable = select(ARG_INDEX_COMBINED_MESSAGE, ...)
++        TrySettingDynamicText(self.breakdownLabel1, raidArgumentTable[ARG_BREAKDOWN_INDEX_TIME])
++        TrySettingDynamicText(self.breakdownLabel2, raidArgumentTable[ARG_BREAKDOWN_INDEX_SCORE])
++        TrySettingDynamicText(self.breakdownLabel3, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT])
++        TrySettingDynamicText(self.breakdownIconLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT])
++
++        if raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT] == 0 then
++            self.breakdownIconLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
++            self.breakdownIcon:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
++        else
++            self.breakdownIconLabel:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
++            self.breakdownIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
++        end
++
++        if raidArgumentTable[ARG_BREAKDOWN_INDEX_SHOW_AS_ERROR] then
++            self.breakdownLabel1:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
++        else
++            self.breakdownLabel1:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
++        end
++
++        local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
++        local lifespan = select(ARG_INDEX_LIFESPAN, ...)
++
++        if lifespan then
++            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
++            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
++        else
++            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, DEFAULT_FADE_OUT_TIME)
++            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, DEFAULT_FADE_OUT_TIME)
++        end
++
++        self.m_largeTextContainer.m_timeline:PlayFromStart()
++        self.m_largeTextContainer.m_timeline.beforeExpiring = true
++
++        self.m_smallCombinedIcon:SetHidden(true)
++        self.longformBreakdownContainer:SetHidden(false)
++
++        return self.m_largeTextContainer
++    end,
+ }
+ 
+ function CenterScreenAnnounce:SetExpiringCallback(line, callback)
+@@ -674,7 +737,8 @@ local ALLOWED_EVENTS_WHILE_CRAFTING = {
+     [EVENT_QUEST_COMPLETE] = true,
+     [EVENT_OBJECTIVE_COMPLETED] = true,
+     [EVENT_QUEST_OPTIONAL_STEP_ADVANCED] = true,
+-    [EVENT_ACHIEVEMENT_AWARDED] = true
++    [EVENT_ACHIEVEMENT_AWARDED] = true,
++    [EVENT_BROADCAST] = true,
+ }
+ 
+ function CenterScreenAnnounce:AddMessage(eventId, category, ...)
+</code></pre>
+<script src="prism.js"></script>

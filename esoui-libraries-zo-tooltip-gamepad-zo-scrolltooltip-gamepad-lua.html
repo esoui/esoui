@@ -1,0 +1,43 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_tooltip/gamepad/zo_scrolltooltip_gamepad.lua b/esoui/libraries/zo_tooltip/gamepad/zo_scrolltooltip_gamepad.lua
+index 34dfdcc..cc79bb1 100755
+--- a/esoui/libraries/zo_tooltip/gamepad/zo_scrolltooltip_gamepad.lua
++++ b/esoui/libraries/zo_tooltip/gamepad/zo_scrolltooltip_gamepad.lua
+@@ -124,6 +124,8 @@ end
+ do
+     local RESIZE_UPDATE_SENSITIVITY_LIMIT = .0001
+ 
++    local ANCHORS_TO_BACKGROUND = true
++
+     local function ResizingUpdateLoop(control)
+         local contentHeight = control.scrollTooltip.scrollChild:GetHeight()
+         
+@@ -148,11 +150,9 @@ do
+         control.tip = control.scrollTooltip.tooltip
+         control.tip.icon = control.icon
+         if screenResizeHandler then
+-            control:RegisterForEvent(EVENT_SCREEN_RESIZED, function(_, _, _, guiName)
+-                if guiName == "ingame" then
++            control:RegisterForEvent(EVENT_SCREEN_RESIZED, function()
+                 screenResizeHandler(control)
+                 control.forceResizeUpdate = true
+-                end
+             end)
+             control.lastContentHeight = 0
+             control:SetHandler("OnUpdate", ResizingUpdateLoop)
+@@ -162,7 +162,7 @@ do
+         end
+ 
+         if scrollIndicatorSide then
+-            ZO_Scroll_Gamepad_SetScrollIndicatorSide(control.scrollTooltip.scrollIndicator, control, scrollIndicatorSide, scrollIndicatorOffsetX)
++            ZO_Scroll_Gamepad_SetScrollIndicatorSide(control.scrollTooltip.scrollIndicator, control, scrollIndicatorSide, scrollIndicatorOffsetX, nil, ANCHORS_TO_BACKGROUND)
+         end
+     end
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,79 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/keyboard/zo_groupingtools_keyboard.xml b/esoui/ingame/group/keyboard/zo_groupingtools_keyboard.xml
+deleted file mode 100755
+index ff67b2b..0000000
+--- a/esoui/ingame/group/keyboard/zo_groupingtools_keyboard.xml
++++ /dev/null
+@@ -1,66 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;Label name="ZO_GroupingToolsHeaderLabel" font="ZoFontGameLargeBold" virtual="true" /&gt;
+-        &lt;Label name="ZO_GroupingToolsLabel" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" /&gt;
+-
+-        &lt;Control name="ZO_GroupingToolsMenu" resizeToFitDescendents="true" virtual="true"&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Text" inherits="ZO_GroupingToolsHeaderLabel"&gt;
+-                    &lt;Anchor point="TOPLEFT"/&gt;
+-                &lt;/Label&gt;
+-
+-                &lt;Control name="$(parent)Dropdown" inherits="ZO_ComboBox"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Text" offsetY="5" /&gt;
+-                &lt;/Control&gt;
+-            &lt;/Controls&gt;
+-        &lt;/Control&gt;
+-
+-        &lt;TopLevelControl name="ZO_GroupingToolsKeyboard" inherits="ZO_RightPanelFootPrint" hidden="true"&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_GroupingToolsKeyboard_OnInitialized(self)
+-            &lt;/OnInitialized&gt;
+-            &lt;Controls&gt;
+-                &lt;Control name="$(parent)LeaderSection"&gt;
+-                    &lt;AnchorFill /&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Label name="$(parent)ModeLabel" font="ZoFontWinH2"&gt;
+-                            &lt;Anchor point="TOPLEFT" offsetX="35" offsetY="70"/&gt;
+-                        &lt;/Label&gt;
+-
+-                        &lt;Control name="$(parent)ActivityTypeMenu" inherits="ZO_GroupingToolsMenu"&gt;
+-                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ModeLabel" relativePoint="BOTTOMLEFT" offsetY="20" /&gt;
+-                            &lt;OnInitialized&gt;
+-                                self:GetNamedChild("Dropdown"):SetWidth(250)
+-                            &lt;/OnInitialized&gt;
+-
+-                            &lt;Controls&gt;
+-                                &lt;Label name="$(parent)Text" override="true" text="SI_GROUPING_TOOLS_PANEL_ACTIVITY_TYPE"/&gt;
+-                            &lt;/Controls&gt;
+-                        &lt;/Control&gt;
+-
+-                        &lt;Control name="$(parent)LocationMenu" inherits="ZO_GroupingToolsMenu"&gt;
+-                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ActivityTypeMenu" relativePoint="TOPRIGHT" offsetX="20" /&gt;
+-                            &lt;OnInitialized&gt;
+-                                self:GetNamedChild("Dropdown"):SetWidth(450)
+-                            &lt;/OnInitialized&gt;
+-
+-                            &lt;Controls&gt;
+-                                &lt;Label name="$(parent)Text" override="true" text="SI_GROUPING_TOOLS_PANEL_LOCATION"/&gt;
+-                            &lt;/Controls&gt;
+-                        &lt;/Control&gt;
+-
+-                        &lt;Label name="$(parent)GroupSize" inherits="ZO_GroupingToolsHeaderLabel"&gt;
+-                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ActivityTypeMenu" relativePoint="BOTTOMLEFT" offsetY="30" /&gt;
+-                        &lt;/Label&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-
+-                &lt;Label name="$(parent)NotLeader" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" text="SI_GROUPING_TOOLS_PANEL_NOT_LEADER" hidden="true"&gt;
+-                    &lt;Anchor point="TOPLEFT" offsetY="200" /&gt;
+-                    &lt;Anchor point="TOPRIGHT" offsetY="200" /&gt;
+-                    &lt;Dimensions y="30"/&gt;
+-                &lt;/Label&gt;
+-            &lt;/Controls&gt;
+-        &lt;/TopLevelControl&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.xml b/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.xml
+index ff08434..349cb02 100755
+--- a/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.xml
++++ b/esoui/ingame/zo_loot/keyboard/loothistory_keyboard.xml
+@@ -20,7 +20,7 @@
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+       
+-        &lt;TopLevelControl name="ZO_LootHistoryControl_Keyboard" hidden="true"&gt;
++        &lt;TopLevelControl name="ZO_LootHistoryControl_Keyboard" inherits="ZO_LootHistory_Shared"&gt;
+             &lt;Anchor point="BOTTOMRIGHT" offsetY="-95"/&gt;
+             &lt;OnInitialized&gt;
+                 ZO_LootHistory_Keyboard_OnInitialized(self)
+</code></pre>
+<script src="prism.js"></script>

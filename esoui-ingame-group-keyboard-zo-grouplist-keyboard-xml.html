@@ -1,0 +1,324 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/keyboard/zo_grouplist_keyboard.xml b/esoui/ingame/group/keyboard/zo_grouplist_keyboard.xml
+index 1a7f26e..f7facaf 100755
+--- a/esoui/ingame/group/keyboard/zo_grouplist_keyboard.xml
++++ b/esoui/ingame/group/keyboard/zo_grouplist_keyboard.xml
+@@ -1,6 +1,6 @@
+ &lt;GuiXml&gt;
+     &lt;Controls&gt;
+-        &lt;Label name="ZO_GroupListRowLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/&gt;
++        &lt;Label name="ZO_GroupListRowLabel" font="ZoFontGame" maxLineCount="1" wrapMode="ELLIPSIS" verticalAlignment="CENTER" virtual="true"/&gt;
+ 
+         &lt;Texture name="ZO_GroupListRole" virtual="true" mouseEnabled="true" layer="OVERLAY"&gt;
+             &lt;Dimensions x="32" y="32"/&gt;
+@@ -8,10 +8,28 @@
+                 ZO_GroupListRole_OnMouseEnter(self)
+             &lt;/OnMouseEnter&gt;
+             &lt;OnMouseExit&gt;
+-                ZO_GroupListRole_OnMouseExit(self)
++                ZO_GroupListRowChild_OnMouseExit(self)
+             &lt;/OnMouseExit&gt;
+         &lt;/Texture&gt;
+ 
++        &lt;Label name="ZO_GroupListRowTooltipIfTruncatedLabel" inherits="ZO_GroupListRowLabel" mouseEnabled="true" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                self.row = self:GetParent()
++            &lt;/OnInitialized&gt;
++            
++            &lt;OnMouseEnter&gt;
++                ZO_GroupListRowTooltipIfTruncatedLabel_OnMouseEnter(self)
++            &lt;/OnMouseEnter&gt;
++            
++            &lt;OnMouseExit&gt;
++                ZO_GroupListRowChild_OnMouseExit(self)
++            &lt;/OnMouseExit&gt;
++            
++            &lt;OnMouseUp&gt;
++                ZO_GroupListRow_OnMouseUp(self.row, button, upInside)
++            &lt;/OnMouseUp&gt;
++        &lt;/Label&gt;
++
+         &lt;Control name="ZO_GroupListRow" mouseEnabled="true" virtual="true"&gt;
+             &lt;Dimensions y="30"/&gt;
+             &lt;OnMouseEnter&gt;
+@@ -26,7 +44,7 @@
+             &lt;OnInitialized&gt;
+                 self.bg = self:GetNamedChild("BG")
+ 
+-                self.leaderIcon = self:GetNamedChild("Leader")
++                self.leaderIcon = self:GetNamedChild("LeaderIcon")
+                 self.characterNameLabel = self:GetNamedChild("CharacterName")
+                 self.roleDPS = self:GetNamedChild("RoleDPS")
+                 self.roleHeal = self:GetNamedChild("RoleHeal")
+@@ -35,37 +53,61 @@
+             &lt;Controls&gt;
+                 &lt;Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" /&gt;
+ 
+-                &lt;Texture name="$(parent)Leader" mouseEnabled="true" layer="OVERLAY" textureFile="EsoUI/Art/LFG/LFG_leader_icon.dds"&gt;
++                &lt;Control name="$(parent)Leader"&gt;
++                    &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_LEADER_WIDTH" /&gt;
+                     &lt;Anchor point="LEFT" /&gt;
++                    &lt;Controls&gt;
++                        &lt;Texture name="$(parent)Icon" mouseEnabled="true" layer="OVERLAY" textureFile="EsoUI/Art/LFG/LFG_leader_icon.dds"&gt;
++                            &lt;Anchor point="CENTER" /&gt;
+                             &lt;Dimensions x="32" y="32"/&gt;
++                            &lt;OnInitialized&gt;
++                                self.row = self:GetParent():GetParent()
++                            &lt;/OnInitialized&gt;
+                             &lt;OnMouseEnter&gt;
+                                 ZO_GroupListRowStatus_OnMouseEnter(self)
+                             &lt;/OnMouseEnter&gt;
+                             &lt;OnMouseExit&gt;
+-                        ZO_GroupListRowStatus_OnMouseExit(self)
++                                ZO_GroupListRowChild_OnMouseExit(self)
+                             &lt;/OnMouseExit&gt;
+                         &lt;/Texture&gt;
+-                &lt;Label name="$(parent)CharacterName" inherits="ZO_GroupListRowLabel" verticalAlignment="CENTER"&gt;
+-                    &lt;Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Leader" offsetX="5"/&gt;
+-                    &lt;Dimensions x="225" y="30"/&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++                
++                &lt;Label name="$(parent)CharacterName" inherits="ZO_GroupListRowTooltipIfTruncatedLabel"&gt;
++                    &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH" /&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Leader" relativePoint="RIGHT" /&gt;
+                 &lt;/Label&gt;
+-                &lt;Label name="$(parent)Zone" inherits="ZO_GroupListRowLabel"&gt;
+-                    &lt;Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CharacterName" offsetX="5"/&gt;
+-                    &lt;Dimensions x="230" y="20"/&gt;
++                
++                &lt;Label name="$(parent)Zone" inherits="ZO_GroupListRowTooltipIfTruncatedLabel"&gt;
++                    &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_ZONE_WIDTH" /&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)CharacterName" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/&gt;
+                 &lt;/Label&gt;
+-                &lt;Texture name="$(parent)ClassIcon" mouseEnabled="true" layer="OVERLAY"&gt;
+-                    &lt;Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="5"/&gt;
++                
++                &lt;Control name="$(parent)Class"&gt;
++                    &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_CLASS_WIDTH" /&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Zone" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/&gt;
++                    &lt;Controls&gt;
++                        &lt;Texture name="$(parent)Icon" mouseEnabled="true" layer="OVERLAY"&gt;
+                             &lt;Dimensions x="32" y="32"/&gt;
++                            &lt;Anchor point="CENTER" /&gt;
+                             &lt;OnMouseEnter&gt;
+-                        ZO_GroupListRowClass_OnMouseEnter(self)
++                                ZO_GroupListRowClass_OnMouseEnter(self:GetParent())
+                             &lt;/OnMouseEnter&gt;
+                             &lt;OnMouseExit&gt;
+-                        ZO_GroupListRowClass_OnMouseExit(self)
++                                ZO_GroupListRowClass_OnMouseExit(self:GetParent())
+                             &lt;/OnMouseExit&gt;
+                         &lt;/Texture&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++
++                &lt;Label name="$(parent)Level" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER"&gt;
++                    &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH" /&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/&gt;
++                &lt;/Label&gt;
++
+                 &lt;Texture name="$(parent)Veteran" mouseEnabled="true" layer="OVERLAY"&gt;
+-                    &lt;Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="62" /&gt;
+                     &lt;Dimensions x="32" y="32"/&gt;
++                    &lt;Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="CENTER" offsetX="-7" /&gt;
+                     &lt;OnMouseEnter&gt;
+                         ZO_GroupListRowVeteran_OnMouseEnter(self)
+                     &lt;/OnMouseEnter&gt;
+@@ -73,69 +115,95 @@
+                         ZO_GroupListRowVeteran_OnMouseExit(self)
+                     &lt;/OnMouseExit&gt;
+                 &lt;/Texture&gt;
+-                &lt;Label name="$(parent)Level" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER"&gt;
+-                    &lt;Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="62"/&gt;
+-                    &lt;Dimensions x="75" y="20"/&gt;
+-                &lt;/Label&gt;
+-                &lt;Texture name="$(parent)RoleDPS" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_dps_down.dds" mouseEnabled="true" layer="OVERLAY"&gt;
+-                    &lt;Anchor point="RIGHT" offsetX="-7"/&gt;
+-                    &lt;Dimensions x="32" y="32"/&gt;
++
++                &lt;Control name="$(parent)Role"&gt;
++                    &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH" /&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Level" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/&gt;
++                    &lt;Controls&gt;
++                        &lt;Texture name="$(parent)Heal" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_healer_down.dds"&gt;
++                            &lt;Anchor point="CENTER" /&gt;
+                             &lt;OnInitialized&gt;
+-                        self.role = LFG_ROLE_DPS
++                                self.role = LFG_ROLE_HEAL
++                                self.row = self:GetParent():GetParent()
+                             &lt;/OnInitialized&gt;
+                         &lt;/Texture&gt;
+-                &lt;Texture name="$(parent)RoleHeal" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_healer_down.dds" mouseEnabled="true" layer="OVERLAY"&gt;
+-                    &lt;Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)RoleDPS" offsetX="-7"/&gt;
+-                    &lt;Dimensions x="32" y="32"/&gt;
++                        
++                        &lt;Texture name="$(parent)DPS" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_dps_down.dds"&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" /&gt;
+                             &lt;OnInitialized&gt;
+-                        self.role = LFG_ROLE_HEAL
++                                self.role = LFG_ROLE_DPS
++                                self.row = self:GetParent():GetParent()
+                             &lt;/OnInitialized&gt;
+                         &lt;/Texture&gt;
+-                &lt;Texture name="$(parent)RoleTank" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_tank_down.dds" mouseEnabled="true" layer="OVERLAY"&gt;
+-                    &lt;Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)RoleHeal" offsetX="-7"/&gt;
+-                    &lt;Dimensions x="32" y="32"/&gt;
++                        
++                        &lt;Texture name="$(parent)Tank" inherits="ZO_GroupListRole" textureFile="EsoUI/Art/LFG/LFG_tank_down.dds"&gt;
++                            &lt;Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" /&gt;
+                             &lt;OnInitialized&gt;
+                                 self.role = LFG_ROLE_TANK
++                                self.row = self:GetParent():GetParent()
+                             &lt;/OnInitialized&gt;
+                         &lt;/Texture&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
+ 
+-        &lt;Label name="ZO_GroupHeader" virtual="true" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" verticalAlignment="CENTER"&gt;
++        &lt;Label name="ZO_GroupHeader" virtual="true" font="ZoFontGameLargeBold" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" verticalAlignment="CENTER"&gt;
+             &lt;Dimensions y="32"/&gt;
+         &lt;/Label&gt;
+ 
+-        &lt;TopLevelControl name="ZO_GroupList" inherits="ZO_RightPanelFootPrint" hidden="true"&gt;
++        &lt;Button name="ZO_VeteranDifficultyButton" virtual="true"&gt;
++            &lt;Dimensions x="32" y="32"/&gt;
++            &lt;OnMouseEnter&gt;
++                ZO_VeteranDifficultyButton_OnMouseEnter(self)
++            &lt;/OnMouseEnter&gt;
++
++            &lt;OnMouseExit&gt;
++                ZO_VeteranDifficultyButton_OnMouseExit(self)
++            &lt;/OnMouseExit&gt;
++
++            &lt;OnClicked&gt;
++                ZO_VeteranDifficultyButton_OnClicked(self)
++            &lt;/OnClicked&gt;
++        &lt;/Button&gt;
++        
++        &lt;TopLevelControl name="ZO_GroupList" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_GroupList_OnInitialized(self)
+             &lt;/OnInitialized&gt;
++            
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)Headers"&gt;
+-                    &lt;Anchor point="TOPLEFT" offsetX="30" offsetY="67"/&gt;
+-                    &lt;Anchor point="TOPRIGHT" offsetY="67"/&gt;
++                    &lt;Anchor point="TOPLEFT" /&gt;
++                    &lt;Anchor point="TOPRIGHT" /&gt;
+                     &lt;Dimensions y="32"/&gt;
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)CharacterName" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_NAME_HEADER"&gt;
+-                            &lt;Anchor point="LEFT" offsetX="37"/&gt;
++                            &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH" /&gt;
++                            &lt;Anchor point="LEFT" offsetX="ZO_KEYBOARD_GROUP_LIST_LEADER_WIDTH" /&gt;
+                         &lt;/Label&gt;
+                         &lt;Label name="$(parent)Zone" inherits="ZO_GroupHeader" text="SI_SOCIAL_LIST_PANEL_HEADER_ZONE"&gt;
+-                            &lt;Anchor point="LEFT" offsetX="266" /&gt;
++                            &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_ZONE_WIDTH" /&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)CharacterName" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" /&gt;
+                         &lt;/Label&gt;
+-                        &lt;Label name="$(parent)Class" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_CLASS_HEADER"&gt;
+-                            &lt;Anchor point="CENTER" relativePoint="LEFT" offsetX="519" /&gt;
++                        &lt;Label name="$(parent)Class" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_CLASS_HEADER" horizontalAlignment="CENTER"&gt;
++                            &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_CLASS_WIDTH" /&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Zone" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" /&gt;
+                         &lt;/Label&gt;
+-                        &lt;Label name="$(parent)Level" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_LEVEL_HEADER"&gt;
+-                            &lt;Anchor point="CENTER" relativePoint="LEFT" offsetX="632" /&gt;
++                        &lt;Label name="$(parent)Level" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_LEVEL_HEADER" horizontalAlignment="CENTER"&gt;
++                            &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH" /&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" /&gt;
+                         &lt;/Label&gt;
+-                        &lt;Label name="$(parent)Role" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_ROLES_HEADER"&gt;
+-                            &lt;Anchor point="CENTER" relativePoint="RIGHT" offsetX="-115" /&gt;
++                        &lt;Label name="$(parent)Role" inherits="ZO_GroupHeader" text="SI_GROUP_LIST_PANEL_ROLES_HEADER" horizontalAlignment="CENTER"&gt;
++                            &lt;Dimensions x="ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH" /&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Level" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X" /&gt;
+                         &lt;/Label&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+                 
+                 &lt;Control name="$(parent)List" inherits="ZO_ScrollList"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" offsetX="-35" offsetY="-32"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" /&gt;
+                 &lt;/Control&gt;
+ 
+                 &lt;Control name="$(parent)NoGroupRow" hidden="true"&gt;
+@@ -150,6 +218,66 @@
+                         &lt;/Label&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
++
++                &lt;Control name="$(parent)VeteranDifficultySettings" resizeToFitDescendents="true"&gt;
++                    &lt;Anchor point="BOTTOM" relativePoint="TOP" offsetY="-10" /&gt;
++                    
++                    &lt;OnInitialized&gt;
++                        ZO_VeteranDifficultySettings_OnInitialized(self)
++                    &lt;/OnInitialized&gt;
++
++                    &lt;Controls&gt;
++                        &lt;Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY"&gt;
++                            &lt;Anchor point="TOPLEFT"/&gt;
++                            &lt;Dimensions x="32" y="32"/&gt;
++                            &lt;OnMouseEnter&gt;
++                                ZO_VeteranDifficultyHelp_OnMouseEnter(self)
++                            &lt;/OnMouseEnter&gt;
++
++                            &lt;OnMouseExit&gt;
++                                ZO_VeteranDifficultyHelp_OnMouseExit(self)
++                            &lt;/OnMouseExit&gt;
++                        &lt;/Texture&gt;
++
++                        &lt;Label name="$(parent)Text" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_DUNGEON_DIFFICULTY_HEADER"&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Help" relativePoint="RIGHT" offsetX="5"/&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton"&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetX="-16" offsetY="-2" /&gt;
++
++                            &lt;Textures
++                                normal="EsoUI/Art/LFG/LFG_normalDungeon_up.dds"
++                                pressed="EsoUI/Art/LFG/LFG_normalDungeon_down.dds"
++                                mouseOver="EsoUI/Art/LFG/LFG_normalDungeon_over.dds"
++                                disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
++                                disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
++                            /&gt;
++
++                            &lt;OnInitialized&gt;
++                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL
++                            &lt;/OnInitialized&gt;
++                        &lt;/Button&gt;
++                        &lt;Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton"&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetX="16" offsetY="-2" /&gt;
++
++                            &lt;Textures
++                                normal="EsoUI/Art/LFG/LFG_veteranDungeon_up.dds"
++                                pressed="EsoUI/Art/LFG/LFG_veteranDungeon_down.dds"
++                                mouseOver="EsoUI/Art/LFG/LFG_veteranDungeon_over.dds"
++                                disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
++                                disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
++                            /&gt;
++
++                            &lt;OnInitialized&gt;
++                                self.dungeonDifficulty = DUNGEON_DIFFICULTY_VETERAN
++                            &lt;/OnInitialized&gt;
++                        &lt;/Button&gt;
++                        &lt;Label name="$(parent)DifficultyLabel" font="ZoFontGameLargeBold"&gt;
++                            &lt;Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="2" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

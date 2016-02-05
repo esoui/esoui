@@ -1,0 +1,176 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/championperks/championperks.lua b/esoui/ingame/championperks/championperks.lua
+index aeb7955..2c9ef73 100755
+--- a/esoui/ingame/championperks/championperks.lua
++++ b/esoui/ingame/championperks/championperks.lua
+@@ -17,6 +17,7 @@ local ZOOMED_IN_CAMERA_Z = 0.9
+ local ZOOMED_IN_CAMERA_Y = 1035
+ local ZOOMED_OUT_CAMERA_Z = -1.2
+ 
++do
+     local ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME =
+     {
+         [ATTRIBUTE_HEALTH] = zo_strformat(SI_CHAMPION_CONSTELLATION_GROUP_NAME_FORMAT, GetString(SI_CHAMPION_CONSTELLATION_GROUP_HEALTH_NAME)),
+@@ -27,6 +28,20 @@ local ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME =
+     function ZO_Champion_GetConstellationGroupNameFromAttribute(attribute)
+         return ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME[attribute]
+     end
++end
++
++do
++    local ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME =
++    {
++        [ATTRIBUTE_HEALTH] = GetString(SI_CHAMPION_CONSTELLATION_GROUP_HEALTH_NAME),
++        [ATTRIBUTE_MAGICKA] = GetString(SI_CHAMPION_CONSTELLATION_GROUP_MAGICKA_NAME),
++        [ATTRIBUTE_STAMINA] = GetString(SI_CHAMPION_CONSTELLATION_GROUP_STAMINA_NAME),
++    }
++
++    function ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(attribute)
++        return ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME[attribute]
++    end
++end
+ 
+ local CHAMPION_ATTRIBUTES = { ATTRIBUTE_HEALTH, ATTRIBUTE_STAMINA, ATTRIBUTE_MAGICKA }
+ 
+@@ -91,6 +106,8 @@ function ChampionPerks:Initialize(control)
+     end
+     self.starTextControlPool:ReleaseAllObjects()
+ 
++    self.inactiveAlert = self.control:GetNamedChild("InactiveAlert")
++
+     self.chosenAttributeTypePointCounter = ZO_ChampionPerksChosenAttributePointCounter
+     CHAMPION_PERKS_CHOSEN_ATTRIBUTE_TYPE_POINT_COUNTER_FRAGMENT = ZO_SimpleSceneFragment:New(self.chosenAttributeTypePointCounter)
+     CHAMPION_PERKS_CHOSEN_ATTRIBUTE_TYPE_POINT_COUNTER_FRAGMENT:SetConditional(function()
+@@ -424,8 +441,15 @@ function ChampionPerks:InitializeSharedKeybindStripDescriptors()
+             end,
+             keybind = "UI_SHORTCUT_SECONDARY",
+             callback = function() self:SpendPendingPoints() end,
+-            visible = function() return self:HasUnsavedChanges() end,
++            visible = function()
++                return self:HasUnsavedChanges()
++            end,
+             enabled = function()
++                local active, activeReason = AreChampionPointsActive()
++                if not active then
++                    return false, GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason), KEYBIND_STRIP_DISABLED_DIALOG
++                end
++
+                 if self:IsRespecNeeded() then
+                     return GetCarriedCurrencyAmount(CURT_MONEY) &gt;= GetChampionRespecCost()
+                 else
+@@ -446,6 +470,12 @@ function ChampionPerks:InitializeSharedKeybindStripDescriptors()
+                     return true
+                 end
+             end,
++            enabled = function()
++                local active, activeReason = AreChampionPointsActive()
++                if not active then
++                    return false, GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason), KEYBIND_STRIP_DISABLED_DIALOG
++                end
++            end,
+         },
+         enabled = function() return not self:IsAnimating() end,
+     }
+@@ -779,6 +809,7 @@ function ChampionPerks:RegisterEvents()
+     self.control:RegisterForEvent(EVENT_UNSPENT_CHAMPION_POINTS_CHANGED, function() self:OnUnspentChampionPointsChanged() end)
+     self.control:RegisterForEvent(EVENT_CHAMPION_PURCHASE_RESULT, function(_, result) self:OnChampionPurchaseResult(result) end)
+     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:OnMoneyChanged() end)
++    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
+ end
+ 
+ local KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS
+@@ -798,6 +829,11 @@ function ChampionPerks:BuildStyleTables()
+         EARNED_POINTS_HEADER_FONT = "ZoFontKeybindStripDescription",
+         EARNED_POINTS_POINTS_FONT = "ZoFontKeybindStripDescription",
+         EARNED_POINTS_MODIFY_TEXT_TYPE = MODIFY_TEXT_TYPE_NONE,
++
++        INACTIVE_ALERT_MODIFY_TEXT_TYPE = MODIFY_TEXT_TYPE_NONE,
++        INACTIVE_ALERT_FONT = "ZoFontWinH1",
++        INACTIVE_ALERT_OFFSETX = 10,
++        INACTIVE_ALERT_OFFSETY = 20,
+     }
+ 
+     GAMEPAD_CONSTANTS =
+@@ -815,6 +851,11 @@ function ChampionPerks:BuildStyleTables()
+         EARNED_POINTS_HEADER_FONT = "ZoFontGamepad34",
+         EARNED_POINTS_POINTS_FONT = "ZoFontGamepad34",
+         EARNED_POINTS_MODIFY_TEXT_TYPE = MODIFY_TEXT_TYPE_UPPERCASE,
++
++        INACTIVE_ALERT_MODIFY_TEXT_TYPE = MODIFY_TEXT_TYPE_UPPERCASE,
++        INACTIVE_ALERT_FONT = "ZoFontGamepad42",
++        INACTIVE_ALERT_OFFSETX = 100,
++        INACTIVE_ALERT_OFFSETY = 50,
+     }
+ end
+ 
+@@ -848,6 +889,14 @@ function ChampionPerks:ApplyCenterInfoStyle(constants)
+     self.radialSelectorNode:SetControlPosition(self.radialSelectorTexture, 0, constants.RADIAL_SELECTOR_Y, CONSTELLATIONS_DEPTH)
+ end
+ 
++function ChampionPerks:ApplyInactiveAlertStyle(constants, control)
++    control.messageLabel:SetFont(constants.INACTIVE_ALERT_FONT)
++    control.messageLabel:SetModifyTextType(constants.INACTIVE_ALERT_MODIFY_TEXT_TYPE)
++    control.messageLabel:SetText(GetString(SI_CHAMPION_NO_ABILITIES_INACTIVE_ALERT))
++    control:ClearAnchors()
++    control:SetAnchor(TOPLEFT, nil, TOPLEFT, constants.INACTIVE_ALERT_OFFSETX, constants.INACTIVE_ALERT_OFFSETY)
++end
++
+ function ChampionPerks:ApplyKeyboardStyle()
+     if self.visualStyle ~= VISUAL_STYLE_KEYBOARD then
+         self.visualStyle = VISUAL_STYLE_KEYBOARD
+@@ -862,6 +911,9 @@ function ChampionPerks:ApplyKeyboardStyle()
+ 
+         self:ApplyCenterInfoStyle(KEYBOARD_CONSTANTS)
+ 
++        --Champion Points Inactive Notification
++        self:ApplyInactiveAlertStyle(KEYBOARD_CONSTANTS, self.inactiveAlert)
++        
+         --Chosen Info
+         self:SetupDescriptionLabels(KEYBOARD_CONSTANTS, self.chosenConstellationNameLabel, self.chosenConstellationSpentPointsLabel, self.chosenConstellationDescriptionLabel)
+ 
+@@ -884,6 +936,9 @@ function ChampionPerks:ApplyGamepadStyle()
+ 
+         self:ApplyCenterInfoStyle(GAMEPAD_CONSTANTS)
+ 
++        --Champion Points Inactive Notification
++        self:ApplyInactiveAlertStyle(GAMEPAD_CONSTANTS, self.inactiveAlert)
++
+         --Chosen Info
+         self:SetupDescriptionLabels(GAMEPAD_CONSTANTS, self.chosenConstellationNameLabel, self.chosenConstellationSpentPointsLabel, self.chosenConstellationDescriptionLabel)
+ 
+@@ -1683,11 +1738,17 @@ function ChampionPerks:SetState(state)
+ 
+         if state == STATE_ZOOMED_OUT then
+             self.centerAlphaInterpolator:SetTargetBase(1)
++            local active, activeReason = AreChampionPointsActive()
++            if not active then
++                self.inactiveAlert.messageLabel:SetHidden(false)
++                self.inactiveAlert.messageLabel:SetText(GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason))
++            end
+         else
+             self.centerAlphaInterpolator:SetCurrentValue(0)
+             self.centerAlphaInterpolator:SetTargetBase(0)
+             self.centerInfo:SetAlpha(0)
+             self.radialSelectorTexture:SetAlpha(0)
++            self.inactiveAlert.messageLabel:SetHidden(true)
+         end
+ 
+         CHAMPION_PERKS_CHOSEN_ATTRIBUTE_TYPE_POINT_COUNTER_FRAGMENT:Refresh()
+@@ -2166,6 +2227,11 @@ function ChampionPerks:OnMoneyChanged()
+     end
+ end
+ 
++function ChampionPerks:OnPlayerActivated()
++    --Refresh confirm and redistribute keybinds (which can be disabled by being in an AvA campaign) on loading into a new zone
++    self:RefreshApplicableSharedKeybinds()
++end
++
+ function ChampionPerks:OnPowerUpdate(eventCode, unitTag, powerIndex, powerType, value, max, effectiveMax)
+     if unitTag == "player" and powerType == POWERTYPE_HEALTH then
+         if IsUnitInCombat("player") and value &lt; self.lastHealthValue then
+</code></pre>
+<script src="prism.js"></script>

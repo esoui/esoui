@@ -1,0 +1,28 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/appandingame/voicechathud/console/zo_voicechathud.xml b/esoui/appandingame/voicechathud/console/zo_voicechathud.xml
+index 851141d..1568d28 100755
+--- a/esoui/appandingame/voicechathud/console/zo_voicechathud.xml
++++ b/esoui/appandingame/voicechathud/console/zo_voicechathud.xml
+@@ -1,7 +1,4 @@
+ &lt;GuiXml&gt;
+-    &lt;String name="GAMEPAD_MEDIUM_FONT_APPANDINGAME" value="EsoUI/Common/Fonts/FTN57.otf" /&gt;
+-    &lt;Font name="ZoFontGamepad34AppAndInGame" font="$(GAMEPAD_MEDIUM_FONT_APPANDINGAME)|34|soft-shadow-thick" /&gt;
+-    
+     &lt;Controls&gt;
+         &lt;Control name="ZO_VoiceChatHUDEntry" virtual="true"&gt;
+             &lt;Dimensions x="256" y="64" /&gt;
+@@ -15,7 +12,7 @@
+                     &lt;Anchor point="BOTTOMRIGHT" offsetX="-8" offsetY="-8" /&gt;
+                 &lt;/Texture&gt;
+ 
+-                &lt;Label name="$(parent)Text" font="ZoFontGamepad34AppAndInGame" verticalAlignment="CENTER" &gt;
++                &lt;Label name="$(parent)Text" font="ZoFontGamepad34" verticalAlignment="CENTER" &gt;
+                     &lt;Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8" /&gt;
+                 &lt;/Label&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,56 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/help/keyboard/helpcustomerservice_keyboard.xml b/esoui/ingame/help/keyboard/helpcustomerservice_keyboard.xml
+new file mode 100644
+index 0000000..97bc9e2
+--- /dev/null
++++ b/esoui/ingame/help/keyboard/helpcustomerservice_keyboard.xml
+@@ -0,0 +1,43 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;Control name="ZO_HelpCustomerService_Type" inherits="ZO_IconChildlessHeader" virtual="true" /&gt;
++        &lt;Label name="ZO_HelpCustomerService_Keyboard_Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" virtual="true" /&gt;
++        &lt;Control name="ZO_HelpCustomerService_Keyboard_ComboBox" inherits="ZO_ComboBox" virtual="true"&gt;
++            &lt;Dimensions x="322" /&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="ZO_HelpCustomerServiceDivider" virtual="true"&gt;
++            &lt;Dimensions x="768" y="30"/&gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)Left" textureFile="EsoUI/Art/AvA/AvA_rightColumnDivider_left.dds"&gt;
++                    &lt;Dimensions x="512" y="4"/&gt;
++                    &lt;Anchor point="LEFT"/&gt;
++                &lt;/Texture&gt;
++                &lt;Texture name="$(parent)Right" textureFile="EsoUI/Art/AvA/AvA_rightColumnDivider_right.dds"&gt;
++                    &lt;Dimensions x="256" y="4"/&gt;
++                    &lt;Anchor point="RIGHT" /&gt;
++                &lt;/Texture&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
++        &lt;TopLevelControl name="ZO_HelpCustomerService_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_HelpCustomerService_Keyboard_Initialize(self)
++            &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)Categories"&gt;
++                    &lt;Dimensions x="290" /&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="-10" offsetY="68"/&gt;
++                    &lt;Anchor point="BOTTOMLEFT" offsetX="-10" /&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;
++
++        &lt;Control name="ZO_HelpCustomerService_Keyboard_ContentAnchors" virtual="true"&gt;
++            &lt;Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-10" offsetY="50" /&gt;
++            &lt;Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" /&gt;
++        &lt;/Control&gt;
++        
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

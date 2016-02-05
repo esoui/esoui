@@ -1,0 +1,63 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.xml b/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.xml
+index 92659be..db3d290 100755
+--- a/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.xml
++++ b/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.xml
+@@ -58,31 +58,36 @@
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+         
+-        &lt;Control name="ZO_GamepadInteractiveFilterSearch" virtual="true"&gt;
+-            &lt;Dimensions x="350" y="48"/&gt;
+-            
++        &lt;Control name="ZO_GamepadInteractiveFilterSearch" resizeToFitDescendents="true" virtual="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" /&gt;
+-                
+-                &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"&gt;
+-                    &lt;Dimensions x="48" y="48"/&gt;
+-                    &lt;TextureCoords left="1" right="0" top="0" bottom="1"/&gt;
+-                    &lt;Anchor point="RIGHT" offsetX="-10"/&gt;
+-                &lt;/Texture&gt;
+-                
+-                &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" font="ZoFontGamepadCondensed42"&gt;
+-                    &lt;Anchor point="TOPLEFT" offsetX="20"/&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetX="-10"/&gt;
++                &lt;Control name="$(parent)Search"&gt;
++                    &lt;OnInitialized&gt;
++                        ZO_SingleLineEditContainerSize_Gamepad_OnInitialized(self)
++                    &lt;/OnInitialized&gt;
++                    &lt;Anchor point="TOPLEFT"/&gt;
++                    &lt;Dimensions x="262"/&gt;
++                    &lt;Controls&gt;
++                        &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" font="ZoFontGamepad34"&gt;
+                             &lt;OnInitialized&gt;
+                                 ZO_EditDefaultText_Disable(self)
+                             &lt;/OnInitialized&gt;
+                             &lt;Controls&gt;
+-                        &lt;Label name="$(parent)Text" override="true" font="ZoFontGamepadCondensed42" /&gt;
++                                &lt;Label name="$(parent)Text" override="true" font="ZoFontGamepad34" /&gt;
+                             &lt;/Controls&gt;
+                         &lt;/EditBox&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
++                &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"&gt;
++                    &lt;Dimensions x="48" y="48"/&gt;
++                    &lt;TextureCoords left="1" right="0" top="0" bottom="1"/&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="10"/&gt;
++                &lt;/Texture&gt;
++                
++                &lt;Backdrop name="$(parent)Highlight" excludeFromResizeToFitExtents="true" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" /&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
+         &lt;Control name="ZO_GamepadInteractiveFilterContentHeader" inherits="ZO_GamepadGenericContentHeader" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)DropdownFilter" inherits="ZO_GamepadInteractiveFilterDropdown"&gt;
+</code></pre>
+<script src="prism.js"></script>

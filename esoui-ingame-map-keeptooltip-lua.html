@@ -1,0 +1,26 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/map/keeptooltip.lua b/esoui/ingame/map/keeptooltip.lua
+index d017965..5fe424f 100755
+--- a/esoui/ingame/map/keeptooltip.lua
++++ b/esoui/ingame/map/keeptooltip.lua
+@@ -81,12 +81,13 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
+         --Alliance Owner Name
+         local alliance = GetHistoricalKeepAlliance(keepId, battlegroundContext, historyPercent)
+         local allianceName
++        local allianceColor = GetAllianceColor(alliance)
+         if(alliance == ALLIANCE_NONE) then
+             allianceName = GetString(SI_KEEP_UNCLAIMED)
+         else
+             allianceName = GetAllianceName(alliance)
+         end
+-        local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceName)
++        local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceColor:Colorize(allianceName))
+         AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
+ 
+         local keepType = GetKeepType(keepId)
+</code></pre>
+<script src="prism.js"></script>

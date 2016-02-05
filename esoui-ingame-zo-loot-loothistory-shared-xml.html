@@ -1,0 +1,30 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_loot/loothistory_shared.xml b/esoui/ingame/zo_loot/loothistory_shared.xml
+index ee44cc3..6c52f3d 100755
+--- a/esoui/ingame/zo_loot/loothistory_shared.xml
++++ b/esoui/ingame/zo_loot/loothistory_shared.xml
+@@ -54,5 +54,17 @@
+                 &lt;/Texture&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
++
++        &lt;Control name="ZO_LootHistory_Shared" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)PersistentContainer" resizeToFitDescendents="true"&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" /&gt;
++                &lt;/Control&gt;
++                &lt;Control name="$(parent)Container" resizeToFitDescendents="true"&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPRIGHT"/&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
+     &lt;/Controls&gt;
+ &lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

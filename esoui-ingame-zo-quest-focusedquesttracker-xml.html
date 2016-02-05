@@ -1,0 +1,46 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_quest/focusedquesttracker.xml b/esoui/ingame/zo_quest/focusedquesttracker.xml
+index 9930898..25fb3c0 100755
+--- a/esoui/ingame/zo_quest/focusedquesttracker.xml
++++ b/esoui/ingame/zo_quest/focusedquesttracker.xml
+@@ -11,23 +11,9 @@
+                 &lt;/AlphaAnimation&gt;
+             &lt;/Animations&gt;
+         &lt;/AnimationTimeline&gt;
+-      
+-        &lt;AnimationTimeline name="FocusedQuestTrackerBackgroundFadeGamepad"&gt;
+-            &lt;Animations&gt;
+-                &lt;AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_IN_MS" startAlpha="0" endAlpha="GAMEPAD_FQT_BACKGROUND_MAX_ALPHA" /&gt;
+-                    
+-                &lt;AlphaAnimation duration="GAMEPAD_FQT_ANIMATION_FADE_OUT_MS" startAlpha="GAMEPAD_FQT_BACKGROUND_MAX_ALPHA" endAlpha="0"&gt;
+-                    &lt;EasingFunction&gt;
+-                        return ZO_EaseOutQuadratic(progress)
+-                    &lt;/EasingFunction&gt;
+-                &lt;/AlphaAnimation&gt;
+-            &lt;/Animations&gt;
+-        &lt;/AnimationTimeline&gt;
+     &lt;/Animations&gt;
+ 
+     &lt;Controls&gt;
+-        &lt;Texture name="ZO_FocusedQuestTracker_BackgroundTexture" textureFile="EsoUI/Art/Windows/Gamepad/gp_grunge_scalable.dds" virtual="true" /&gt;
+-      
+         &lt;TopLevelControl name="ZO_FocusedQuestTrackerPanel"&gt;
+             &lt;Dimensions x="275"/&gt;
+             &lt;Anchor point="TOPRIGHT" offsetY="100" /&gt;
+@@ -59,10 +45,6 @@
+                                 &lt;/Control&gt;
+                             &lt;/Controls&gt;
+                         &lt;/Control&gt;
+-              
+-                        &lt;Control name="$(parent)Background" inherits="ZO_ScalableBackgroundFadedEdge" tier="LOW"&gt;
+-                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)QuestContainer" offsetX="28" offsetY="-20" /&gt;
+-                        &lt;/Control&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+             &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

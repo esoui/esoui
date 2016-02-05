@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/crafting/gamepad/smithingcreation_gamepad.xml b/esoui/ingame/crafting/gamepad/smithingcreation_gamepad.xml
+index 82a51cb..54c617e 100755
+--- a/esoui/ingame/crafting/gamepad/smithingcreation_gamepad.xml
++++ b/esoui/ingame/crafting/gamepad/smithingcreation_gamepad.xml
+@@ -95,7 +95,7 @@
+         &lt;Control name="ZO_GamepadSmithingCreationFloatingContent" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip_Gamepad" hidden="true"&gt;
+-                    &lt;Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_PANEL_FLOATING_CENTER_OFFSET_Y"/&gt;
++                    &lt;Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_2_SHOWN" offsetY="ZO_GAMEPAD_PANEL_FLOATING_CENTER_OFFSET_Y"/&gt;
+                     &lt;OnInitialized&gt;
+                         ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadCraftingUtils_CraftingTooltip_StandardFloatingCenterScreenResizeHandler)
+                     &lt;/OnInitialized&gt;
+</code></pre>
+<script src="prism.js"></script>

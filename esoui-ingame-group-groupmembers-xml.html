@@ -1,0 +1,32 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/groupmembers.xml b/esoui/ingame/group/groupmembers.xml
+deleted file mode 100755
+index 5ec8ea7..0000000
+--- a/esoui/ingame/group/groupmembers.xml
++++ /dev/null
+@@ -1,18 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;TopLevelControl name="ZO_GroupMembers" hidden="true"&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_GroupMembers_OnInitialized(self)
+-            &lt;/OnInitialized&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_GROUP_MEMBERS_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="ZO_GroupList" offsetX="52" offsetY="28"/&gt;
+-                &lt;/Label&gt;
+-
+-                &lt;Label name="$(parent)Count" font="ZoFontGameLargeBold"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="2"/&gt;
+-                &lt;/Label&gt;
+-            &lt;/Controls&gt;
+-        &lt;/TopLevelControl&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,24 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/stats/gamepad/zo_stats_gamepad.lua b/esoui/ingame/stats/gamepad/zo_stats_gamepad.lua
+index b205ec0..6b4a232 100755
+--- a/esoui/ingame/stats/gamepad/zo_stats_gamepad.lua
++++ b/esoui/ingame/stats/gamepad/zo_stats_gamepad.lua
+@@ -327,10 +327,10 @@ function ZO_GamepadStats:UpdateScreenVisibility()
+     local hideQuadrant2Background = isStatsHidden and isEffectsHidden
+     if(hideQuadrant2Background) then
+         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+-        self.contentHeader:SetHidden(true)
++        GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
+     else
+         GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+-        self.contentHeader:SetHidden(false)
++        GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
+     end
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

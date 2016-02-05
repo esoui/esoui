@@ -1,0 +1,32 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/storewindow/keyboard/storewindow_keyboard.xml b/esoui/ingame/storewindow/keyboard/storewindow_keyboard.xml
+index 0b09789..e7e73c2 100755
+--- a/esoui/ingame/storewindow/keyboard/storewindow_keyboard.xml
++++ b/esoui/ingame/storewindow/keyboard/storewindow_keyboard.xml
+@@ -7,10 +7,8 @@
+         &lt;!-- Buy Multiple Dialog --&gt;
+         &lt;TopLevelControl name="ZO_BuyMultipleDialog" inherits="ZO_CustomDialogBase" hidden="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_DIALOG_BUY_MULTIPLE"/&gt;
+-
+                 &lt;Button name="$(parent)Slot" inherits="ZO_ItemSlot"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" /&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" /&gt;
+                     &lt;Dimensions x="48" y="48" /&gt;
+                 &lt;/Button&gt;
+ 
+@@ -18,7 +16,7 @@
+                     &lt;Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="20" /&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate" hidden="false"&gt;
++                &lt;Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate"&gt;
+                     &lt;Dimensions x="0" y="20" /&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Spinner" relativePoint="BOTTOMRIGHT" offsetY="6" /&gt;
+                 &lt;/Label&gt;
+</code></pre>
+<script src="prism.js"></script>

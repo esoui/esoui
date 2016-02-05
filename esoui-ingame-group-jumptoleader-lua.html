@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/jumptoleader.lua b/esoui/ingame/group/jumptoleader.lua
+index cfc29ad..04e2dbf 100755
+--- a/esoui/ingame/group/jumptoleader.lua
++++ b/esoui/ingame/group/jumptoleader.lua
+@@ -32,7 +32,7 @@ do
+                         local zoneIndex = GetUnitZoneIndex(groupLeaderUnitTag)
+                         local collectibleId = GetCollectibleIdForZone(zoneIndex)
+                         local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
+-                        ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT", nil, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryName } })
++                        ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT", { collectibleName = collectibleName }, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryName } })
+                     end
+                 end
+             end
+</code></pre>
+<script src="prism.js"></script>

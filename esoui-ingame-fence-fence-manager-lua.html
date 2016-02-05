@@ -1,0 +1,33 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/fence/fence_manager.lua b/esoui/ingame/fence/fence_manager.lua
+index 430dde9..91eb585 100755
+--- a/esoui/ingame/fence/fence_manager.lua
++++ b/esoui/ingame/fence/fence_manager.lua
+@@ -16,7 +16,7 @@ function ZO_Fence_Manager:Initialize()
+     self.totalLaunders, self.laundersUsed = GetFenceLaunderTransactionInfo()
+ 
+     -- Register for events
+-    EVENT_MANAGER:RegisterForEvent("ZO_Fence_Manager", EVENT_OPEN_FENCE, function(eventCode) self:OnFenceOpened() end)
++    EVENT_MANAGER:RegisterForEvent("ZO_Fence_Manager", EVENT_OPEN_FENCE, function(eventCode, enableSell, enableLaunder) self:OnFenceOpened(enableSell, enableLaunder) end)
+     EVENT_MANAGER:RegisterForEvent("ZO_Fence_Manager", EVENT_CLOSE_STORE, function(eventCode) self:OnFenceClosed() end)
+     EVENT_MANAGER:RegisterForEvent("ZO_Fence_Manager", EVENT_SELL_RECEIPT, function(eventCode, itemName, quantity, money) self:OnSellSuccess() end)
+     EVENT_MANAGER:RegisterForEvent("ZO_Fence_Manager", EVENT_ITEM_LAUNDER_RESULT, function(eventCode, result) self:OnLaunderResult(result) end)
+@@ -31,10 +31,10 @@ end
+ ---- Events
+ --]]
+ 
+-function ZO_Fence_Manager:OnFenceOpened()
++function ZO_Fence_Manager:OnFenceOpened(enableSell, enableLaunder)
+     self.totalSells, self.sellsUsed = GetFenceSellTransactionInfo()
+     self.totalLaunders, self.laundersUsed = GetFenceLaunderTransactionInfo()
+-    self:FireCallbacks("FenceOpened", self.sellsUsed, self.laundersUsed)
++    self:FireCallbacks("FenceOpened", enableSell, enableLaunder)
+ end
+ 
+ function ZO_Fence_Manager:OnFenceClosed()
+</code></pre>
+<script src="prism.js"></script>

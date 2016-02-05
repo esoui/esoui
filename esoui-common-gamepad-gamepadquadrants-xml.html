@@ -1,0 +1,38 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/gamepadquadrants.xml b/esoui/common/gamepad/gamepadquadrants.xml
+index ded01d2..e8a88fd 100755
+--- a/esoui/common/gamepad/gamepadquadrants.xml
++++ b/esoui/common/gamepad/gamepadquadrants.xml
+@@ -35,7 +35,7 @@
+         &lt;Texture name="ZO_GamepadGrid_BackgroundTexture" inherits="ZO_GamepadGrid_BackgroundTextureBase" textureFile="EsoUI/Art/Windows/Gamepad/panelBG_focus_512.dds" virtual="true"/&gt;
+         
+         &lt;Texture name="ZO_GamepadGrid_VertDivider" textureFile="EsoUI/Art/Windows/Gamepad/gp_fullVertDiv.dds" tier="HIGH" virtual="true"&gt;
+-            &lt;Dimensions x="8"/&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/&gt;
+         &lt;/Texture&gt;
+ 
+         &lt;Texture name="ZO_GamepadGrid_LeftVertDivider" inherits="ZO_GamepadGrid_VertDivider" virtual="true"&gt;
+@@ -51,7 +51,7 @@
+         &lt;Control name="ZO_GamepadGrid_LeftVertDividerWithArrow" virtual="true"&gt;
+             &lt;Anchor point="TOPLEFT"/&gt;
+             &lt;Anchor point="BOTTOMLEFT"/&gt;
+-            &lt;Dimensions x="8"/&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/&gt;
+             &lt;Controls&gt;
+                 &lt;Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Windows/Gamepad/gp_windowPointer.dds" tier="HIGH"&gt;
+                     &lt;Anchor point="RIGHT"/&gt;
+@@ -72,7 +72,7 @@
+         &lt;Control name="ZO_GamepadGrid_RightVertDividerWithArrow" virtual="true"&gt;
+             &lt;Anchor point="TOPRIGHT"/&gt;
+             &lt;Anchor point="BOTTOMRIGHT"/&gt;
+-            &lt;Dimensions x="8"/&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/&gt;
+             &lt;Controls&gt;
+                 &lt;Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Windows/Gamepad/gp_windowPointer.dds" tier="HIGH"&gt;
+                     &lt;Anchor point="LEFT"/&gt;
+</code></pre>
+<script src="prism.js"></script>

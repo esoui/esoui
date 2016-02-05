@@ -1,0 +1,157 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/death/death.xml b/esoui/ingame/death/death.xml
+index 608a19f..531471b 100755
+--- a/esoui/ingame/death/death.xml
++++ b/esoui/ingame/death/death.xml
+@@ -3,6 +3,45 @@
+         &lt;Label name="ZO_DeathInEncouterLoadingLabel_Keyboard_Template" font="ZoFontWinH2" inherits="ZO_LoadingText" virtual="true"/&gt;
+         &lt;Label name="ZO_DeathInEncouterLoadingLabel_Gamepad_Template" font="ZoFontGamepad22" inherits="ZO_LoadingText" virtual="true"/&gt;
+ 
++        &lt;Control name="ZO_DeathCountdownBar" hidden="true" virtual="true"&gt;
++            &lt;Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/&gt;
++            &lt;Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/&gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)Background" textureFile="EsoUI/Art/Windows/Gamepad/gp_hintbar.dds"&gt;
++                    &lt;Anchor point="TOPLEFT"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT"/&gt;
++                    &lt;TextureCoords left="0" right="0.9375" top="0" bottom="1"/&gt;
++                &lt;/Texture&gt;
++                &lt;Texture name="$(parent)LoadBar" textureFile="EsoUI/Art/Death/respawn_loadbar.dds" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_BAR"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetY="2"/&gt;
++                    &lt;Dimensions x="0" y="12"/&gt;
++                &lt;/Texture&gt;
++                &lt;Texture name="$(parent)LoadBarFill" textureFile="EsoUI/Art/Death/respawn_loadbar.dds" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_FILL_KEYBOARD"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)LoadBar" relativePoint="TOPRIGHT" offsetY="2"/&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Background"  relativePoint="TOPRIGHT" offsetY="2"/&gt;
++                    &lt;Dimensions y="12"/&gt;
++                &lt;/Texture&gt;
++                &lt;Texture name="$(parent)Transition" textureFile="EsoUI/Art/Death/respawn_loadbar_buffer.dds" alpha="0.8"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)LoadBar" relativePoint="TOPRIGHT" offsetX="-24"/&gt;
++                    &lt;Dimensions x="48" y="12"/&gt;
++                &lt;/Texture&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="ZO_DeathCountdownBar_Keyboard_Template" virtual ="true"&gt;
++            &lt;Dimensions y="12" /&gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)LoadBarFill" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_KEYBOARD"/&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
++        &lt;Control name="ZO_DeathCountdownBar_Gamepad_Template" virtual ="true"&gt;
++            &lt;Dimensions y="128" /&gt;
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)LoadBarFill" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_GAMEPAD"/&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
+         &lt;Control name="ZO_DeathRecapToggleButton" inherits="ZO_KeybindButton" virtual="true"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_KeybindButtonTemplate_OnInitialized(self)
+@@ -184,7 +223,17 @@
+         &lt;Control name="ZO_Death_Keyboard_Template" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"/&gt;
+-                &lt;Control name="$(parent)BG" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"/&gt;
++                &lt;Control name="$(parent)BG"&gt;
++                    &lt;Controls&gt;
++                        &lt;Control name="$(parent)CountdownBar" inherits="ZO_DeathCountdownBar_Keyboard_Template"/&gt;
++                        &lt;Control name="$(parent)Buttons"&gt;
++                            &lt;Controls&gt;
++                                &lt;Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Keyboard_Template" /&gt;
++                                &lt;Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template" /&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+                 &lt;Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton_Keyboard_Template"/&gt;
+                 &lt;Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton_Keyboard_Template"/&gt;
+ 
+@@ -216,12 +265,6 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Control name="$(parent)RaidLifeCounter"&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Label name="$(parent)Label" font="ZoFontWinH1"/&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-
+                 &lt;Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"&gt;
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)Message" override="true"&gt;
+@@ -253,7 +296,17 @@
+         &lt;Control name="ZO_Death_Gamepad_Template" virtual="true"&gt;
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"/&gt;
+-                &lt;Control name="$(parent)BG" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"/&gt;
++                &lt;Control name="$(parent)BG"&gt;
++                    &lt;Controls&gt;
++                        &lt;Control name="$(parent)CountdownBar" inherits="ZO_DeathCountdownBar_Gamepad_Template"/&gt;
++                        &lt;Control name="$(parent)Buttons"&gt;
++                            &lt;Controls&gt;
++                                &lt;Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Gamepad_Template" /&gt;
++                                &lt;Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template" /&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+                 &lt;Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton_Gamepad_Template"/&gt;
+                 &lt;Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton_Gamepad_Template"/&gt;
+ 
+@@ -285,12 +338,6 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Control name="$(parent)RaidLifeCounter"&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Label name="$(parent)Label" font="ZoFontGamepad22"/&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-
+                 &lt;Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"&gt;
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)Message" override="true"&gt;
+@@ -332,7 +379,23 @@
+             &lt;/OnEffectivelyShown&gt;
+             &lt;Controls&gt;
+                 &lt;Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer" hidden="true"/&gt;
+-                &lt;Control name="$(parent)BG" inherits="ZO_DeathOneButtonTimer" hidden="true"/&gt;
++                &lt;Control name="$(parent)BG" hidden="true"&gt;
++                    &lt;AnchorFill/&gt;
++                    &lt;Controls&gt;
++                        &lt;Control name="$(parent)CountdownBar" inherits="ZO_DeathCountdownBar"/&gt;
++                        &lt;Control name="$(parent)Buttons" resizeToFitDescendents="true"&gt;
++                            &lt;Anchor point="TOP" offsetY="32"/&gt;
++                            &lt;Controls&gt;
++                                &lt;Control name="$(grandparent)Button1" inherits="ZO_KeybindButton"&gt;
++                                    &lt;Anchor point="TOPLEFT"/&gt;
++                                &lt;/Control&gt;
++                                &lt;Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton"&gt;
++                                    &lt;Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/&gt;
++                                &lt;/Control&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+                 &lt;Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton" hidden="true"/&gt;
+                 &lt;Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton" /&gt;
+ 
+@@ -384,10 +447,6 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Control name="$(parent)RaidLifeCounter" inherits="ZO_RaidLifeDisplay"&gt;
+-                    &lt;Anchor point="BOTTOM"/&gt;
+-                &lt;/Control&gt;
+-
+                 &lt;Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer" hidden="true"&gt;
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)Message" override="true"&gt;
+</code></pre>
+<script src="prism.js"></script>

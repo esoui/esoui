@@ -1,0 +1,47 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/contacts/keyboard/socialdialogs_keyboard.xml b/esoui/ingame/contacts/keyboard/socialdialogs_keyboard.xml
+index 62c554c..3cab998 100755
+--- a/esoui/ingame/contacts/keyboard/socialdialogs_keyboard.xml
++++ b/esoui/ingame/contacts/keyboard/socialdialogs_keyboard.xml
+@@ -7,7 +7,7 @@
+             &lt;Controls&gt;
+                 &lt;Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_NAME_INSTRUCTIONS"/&gt;
+ 
+-                &lt;Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/&gt;
+                     &lt;Controls&gt;
+@@ -32,7 +32,7 @@
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="25" /&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="25" /&gt;
+                 &lt;/Label&gt;
+-                &lt;Backdrop name="$(parent)Message" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Message" inherits="ZO_MultiLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMLEFT" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)MessageHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/&gt;
+                     &lt;Dimensions y="180"/&gt;
+@@ -57,7 +57,7 @@
+             &lt;Controls&gt;
+                 &lt;Label name="$(parent)DisplayName" inherits="ZO_DialogContentAnchors" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3"/&gt;
+ 
+-                &lt;Backdrop name="$(parent)Note" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Note" inherits="ZO_MultiLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMLEFT" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMRIGHT" offsetY="10"/&gt;
+                     &lt;Dimensions y="265"/&gt;
+@@ -118,7 +118,7 @@
+                 
+                 &lt;Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" font="ZoFontHeader2" text="SI_GUILD_CREATE_DIALOG_NAME_HEADER"/&gt;
+ 
+-                &lt;Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

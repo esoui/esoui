@@ -1,0 +1,57 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/tooltip.lua b/esoui/libraries/zo_templates/tooltip.lua
+index c0fc0ba..c4868b3 100755
+--- a/esoui/libraries/zo_templates/tooltip.lua
++++ b/esoui/libraries/zo_templates/tooltip.lua
+@@ -1,5 +1,7 @@
+ local function OnTooltipHidden(tooltip)
++    if tooltip.ClearLines then
+         tooltip:ClearLines()
++    end
+     tooltip:SetHidden(true)
+     if tooltip == ItemTooltip then
+         tooltip:HideComparativeTooltips()
+@@ -9,7 +11,9 @@ end
+ -- Yes, all controls that want to clear tooltips could just call Tooltip:ClearLines.
+ -- This function is here in case we want to have custom behavior for clearing tooltips.
+ function ClearTooltip(tooltip)
++    if tooltip.SetOwner then
+         tooltip:SetOwner(nil)
++    end
+ 
+     if not tooltip:IsControlHidden() then
+         if not tooltip.animation then
+@@ -32,7 +36,9 @@ function ClearTooltipImmediately(tooltip)
+         tooltip.animation:Stop()
+     end
+ 
++    if tooltip.SetOwner then
+         tooltip:SetOwner(nil)
++    end
+     OnTooltipHidden(tooltip)
+ end
+ 
+@@ -56,10 +62,17 @@ end
+ 
+ -- Pass nil for relativePoint to have the control choose a good relativePoint
+ function InitializeTooltip(tooltip, owner, point, offsetX, offsetY, relativePoint)
++    if tooltip.ClearLines then
+         tooltip:ClearLines()
++    end
+     tooltip:SetHidden(false)
+     if owner then
++        if tooltip.SetOwner then
+             tooltip:SetOwner(owner, point, offsetX, offsetY, relativePoint)
++        else
++            tooltip:ClearAnchors()
++            tooltip:SetAnchor(point, owner, relativePoint, offsetX, offsetY)
++        end
+     end
+     if tooltip.animation then
+         tooltip.animation:Stop()
+</code></pre>
+<script src="prism.js"></script>

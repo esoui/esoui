@@ -1,0 +1,30 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/dyeing/gamepad/dyeing_gamepad.lua b/esoui/ingame/dyeing/gamepad/dyeing_gamepad.lua
+index b9d0967..af1b712 100755
+--- a/esoui/ingame/dyeing/gamepad/dyeing_gamepad.lua
++++ b/esoui/ingame/dyeing/gamepad/dyeing_gamepad.lua
+@@ -240,15 +240,15 @@ function ZO_Dyeing_Gamepad:InitializeOptionsDialog()
+         {
+             {
+                 template = "ZO_GamepadMenuEntryTemplate",
+-                templateData = sortRarityEntry,
++                entryData = sortRarityEntry,
+             },
+             {
+                 template = "ZO_GamepadMenuEntryTemplate",
+-                templateData = sortHueEntry,
++                entryData = sortHueEntry,
+             },
+             {
+                 template = "ZO_GamepadMenuEntryTemplate",
+-                templateData = showLockedEntry,
++                entryData = showLockedEntry,
+             },
+         },
+         buttons =
+</code></pre>
+<script src="prism.js"></script>

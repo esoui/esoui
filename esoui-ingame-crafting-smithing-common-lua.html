@@ -1,0 +1,31 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/crafting/smithing_common.lua b/esoui/ingame/crafting/smithing_common.lua
+index 4ae5cba..52b5b18 100755
+--- a/esoui/ingame/crafting/smithing_common.lua
++++ b/esoui/ingame/crafting/smithing_common.lua
+@@ -1,5 +1,6 @@
+ ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING = 20
+ ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING = 4
++ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX = ITEMSTYLE_UNIVERSAL + 1 -- 1 is because it expects a lua index
+ 
+ local g_sceneToManagerMap = {}
+ 
+@@ -217,3 +218,11 @@ end
+ function ZO_Smithing_Common:OnResearchSlotChanged()
+     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+ end
++
++function ZO_SmithingHorizontalListTemplate_OnInitialized(control)
++    control.listControl = control:GetNamedChild("List")
++    control.highlightTexture = control:GetNamedChild("Highlight")
++    control.titleLabel = control:GetNamedChild("Title")
++    control.selectedLabel = control:GetNamedChild("SelectedLabel")
++    control.extraInfoLabel = control:GetNamedChild("ExtraInfoLabel")
++end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

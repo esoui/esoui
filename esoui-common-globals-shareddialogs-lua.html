@@ -1,0 +1,47 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/globals/shareddialogs.lua b/esoui/common/globals/shareddialogs.lua
+index eab43d3..6c35cb8 100755
+--- a/esoui/common/globals/shareddialogs.lua
++++ b/esoui/common/globals/shareddialogs.lua
+@@ -86,3 +86,34 @@ ESO_Dialogs["WAIT_FOR_CONSOLE_NAME_VALIDATION"] =
+     {
+     }
+ }
++
++ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
++{
++    gamepadInfo =
++    {
++        dialogType = GAMEPAD_DIALOGS.BASIC,
++    },
++    canQueue = true,
++    title =
++    {
++        text = SI_CONFIRM_OPEN_URL_TITLE,
++    },
++    mainText =
++    {
++        text = SI_CONFIRM_OPEN_URL_TEXT,
++    },
++    buttons =
++    {
++        [1] =
++        {
++            text = SI_URL_DIALOG_OPEN,
++            callback =  function(dialog)
++                            OpenURLByType(dialog.data.urlType)
++                        end,
++        },
++        [2] =
++        {
++            text = SI_DIALOG_CANCEL,
++        },
++    }
++}
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,5 +1,0 @@
-## DependsOn: ZO_PregameLocalization
-
-; Show fancy subtitles for movies...
-EsoUI\Overlay\Overlay.lua
-EsoUI\Overlay\Overlay.xml

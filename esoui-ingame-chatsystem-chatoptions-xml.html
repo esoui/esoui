@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/chatsystem/chatoptions.xml b/esoui/ingame/chatsystem/chatoptions.xml
+index fdb0ef4..2745f2c 100755
+--- a/esoui/ingame/chatsystem/chatoptions.xml
++++ b/esoui/ingame/chatsystem/chatoptions.xml
+@@ -49,7 +49,7 @@
+                     &lt;Anchor point="TOPLEFT" offsetX="35" offsetY="70" /&gt;
+                 &lt;/Label&gt;
+ 
+-                &lt;Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" offsetX="10" offsetY="25"/&gt;
+                     &lt;Dimensions x="300"/&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

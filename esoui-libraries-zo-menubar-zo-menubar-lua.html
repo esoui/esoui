@@ -1,0 +1,149 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_menubar/zo_menubar.lua b/esoui/libraries/zo_menubar/zo_menubar.lua
+index 6e9d1a6..f789548 100755
+--- a/esoui/libraries/zo_menubar/zo_menubar.lua
++++ b/esoui/libraries/zo_menubar/zo_menubar.lua
+@@ -12,6 +12,7 @@
+                 disabled = Path to the image to use for the control when it's in its disabled state (the control cannot be clicked on/doesn't respond to mouseover: NOT IMPLEMENTED YET)
+                 highlight = Path to the image to use for the control when the mouse is over it, or its clicked
+                 callback = A function to call when the user clicks the control (LMB down-&gt;up while still inside the control), the callback receives this table as an argument
++                statusIcon = Path to the image, or function returning the potential path, to use for the control to denote status of the contents the button links to
+             }
+ 
+             Example:
+@@ -26,6 +27,7 @@
+                 disabled = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", 
+                 highlight = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", 
+                 callback = function(&lt;fancyButton&gt;) ...do stuff... end,
++                statusIcon = function() return "EsoUI/Art/Miscellaneous/new_icon.dds" end,
+             }
+     
+             local newControl = ZO_MenuBar_AddButton(menuBar, fancyButton)
+@@ -69,6 +71,7 @@ function MenuBarButton:Initialize(button)
+     self.m_button = button
+     self.m_image = button:GetNamedChild("Image")
+     self.m_highlight = button:GetNamedChild("ImageHighlight")
++    self.m_statusIcon = button:GetNamedChild("Status")
+     self.m_state = BSTATE_DISABLED
+     self.m_highlightHidden = true
+ 
+@@ -80,6 +83,7 @@ function MenuBarButton:Reset()
+         self.m_anim:GetTimeline():Stop()
+     end
+     self.m_highlightHidden = true
++    self.m_statusIcon:SetHidden(true)
+     self.m_locked = false
+     self:SetState(BSTATE_DISABLED, ADJUST_SIZE_INSTANT)
+ 
+@@ -204,6 +208,7 @@ function MenuBarButton:SetData(owner, buttonData)
+     self.m_menuBar = owner
+     self.m_highlight:SetTexture(buttonData.highlight)
+     self:SetState(BSTATE_NORMAL, ADJUST_SIZE_INSTANT)
++    self:RefreshStatus()
+ end
+ 
+ function MenuBarButton:MouseEnter()
+@@ -285,6 +290,25 @@ function MenuBarButton:Release(upInside, skipAnimation, playerDriven)
+     end
+ end
+ 
++function MenuBarButton:RefreshStatus()
++    local buttonData = self.m_buttonData
++    if buttonData.statusIcon then
++        local textureFile
++        if type(buttonData.statusIcon) == "function" then
++            textureFile = buttonData.statusIcon()
++        else
++            textureFile = buttonData.statusIcon
++        end
++
++        if textureFile then
++            self.m_statusIcon:SetTexture(textureFile)
++            self.m_statusIcon:SetHidden(false)
++            return
++        end
++    end
++    self.m_statusIcon:SetHidden(true)
++end
++
+ function MenuBarButton:GetDescriptor()
+     return self.m_buttonData and self.m_buttonData.descriptor
+ end
+@@ -345,6 +369,10 @@ local function IsVisible(buttonData)
+     end
+ end
+ 
++local function GetBarPadding(buttonData)
++    return buttonData.barPadding
++end
++
+ function MenuBar:SelectFirstVisibleButton(skipAnimation)
+     for i, button in ipairs(self.m_buttons) do
+         local buttonControl = button[INDEX_BUTTON]
+@@ -371,7 +399,11 @@ function MenuBar:SelectLastVisibleButton(skipAnimation)
+ end
+ 
+ function MenuBar:UpdateButtons(forceSelection)
++    self.m_barPool:ReleaseAllObjects()
++
+     local lastVisibleButton
++    local lastDivider
++    local lastDividerPadding
+ 
+     for i, button in ipairs(self.m_buttons) do
+         local buttonControl = button[INDEX_BUTTON]
+@@ -381,13 +413,30 @@ function MenuBar:UpdateButtons(forceSelection)
+         buttonControl:SetHidden(not isVisible)
+ 
+         if(isVisible) then
+-            if(lastVisibleButton) then
++            if lastDivider and lastDividerPadding then
++                buttonControl:SetAnchor(self.m_point, lastDivider, self.m_relativePoint, lastDividerPadding)
++            elseif(lastVisibleButton) then
+                 buttonControl:SetAnchor(self.m_point, lastVisibleButton, self.m_relativePoint, self.m_buttonPadding)
+             else
+                 buttonControl:SetAnchor(self.m_point, nil, self.m_point, 0, 0)
+             end
+ 
+             lastVisibleButton = buttonControl
++
++            buttonControl.m_object:RefreshStatus()
++        end
++
++        local barPadding = GetBarPadding(buttonControl.m_object.m_buttonData)
++
++        if barPadding then
++            -- create a bar control and place it next to lastVisibleButton
++            -- make sure the next button control is next to the newly created bar
++            lastDivider = self.m_barPool:AcquireObject()
++            lastDivider:SetAnchor(self.m_point, lastVisibleButton, self.m_relativePoint, barPadding)
++            lastDividerPadding = barPadding
++        else
++            lastDivider = nil
++            lastDividerPadding = nil
+         end
+     end
+ 
+@@ -429,6 +478,7 @@ function MenuBar:ClearButtons()
+     self.m_clickedButton = nil
+     self.m_lastClickedButton = nil
+     self.m_pool:ReleaseAllObjects()
++    self.m_barPool:ReleaseAllObjects()
+     self.m_buttons = {}
+ end
+ 
+@@ -490,6 +540,8 @@ function MenuBar:SetData(data)
+                                             control.m_object:Reset()
+                                         end)
+ 
++    self.m_barPool = ZO_ControlPool:New(data.barTemplate or "ZO_MenuBarPaddingBarTemplate", self.m_control, "PaddingBar")
++
+     self.m_buttonPadding = data.buttonPadding or 0
+     self.m_normalSize = data.normalSize or 32
+     self.m_downSize = data.downSize or 50
+</code></pre>
+<script src="prism.js"></script>

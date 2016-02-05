@@ -1,0 +1,58 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/editboxtemplates.lua b/esoui/libraries/zo_templates/editboxtemplates.lua
+new file mode 100644
+index 0000000..a59bfa8
+--- /dev/null
++++ b/esoui/libraries/zo_templates/editboxtemplates.lua
+@@ -0,0 +1,45 @@
++function ZO_DefaultEdit_SetEnabled(editBox, enabled)
++    if(enabled) then
++        editBox:SetHandler("OnMouseDown", ZO_DefaultEdit_OnMouseDown)
++        editBox:SetColor(DEFAULT_EDIT_BOX_ENABLED_COLOR:UnpackRGBA())
++    else
++        editBox:LoseFocus()
++        editBox:SetColor(DEFAULT_EDIT_BOX_DISABLED_COLOR:UnpackRGBA())
++        editBox:SetHandler("OnMouseDown", nil)
++    end
++end
++
++do
++    local function UpdateVisibility(self)
++        local label = GetControl(self, "Text")
++        if(self.defaultTextEnabled) then
++            if(self:GetText() == "" and not self:IsComposingIMEText()) then
++                label:SetHidden(false)
++            else
++                label:SetHidden(true)
++            end
++        else
++            label:SetHidden(true)
++        end
++    end
++
++    function ZO_EditDefaultText_Initialize(self, defaultText)
++        local label = GetControl(self, "Text")
++        label:SetText(defaultText)
++        self.defaultTextEnabled = true
++        UpdateVisibility(self)
++    end
++
++    function ZO_EditDefaultText_Disable(self)
++        self.defaultTextEnabled = false
++        UpdateVisibility(self)
++    end
++
++    function ZO_EditDefaultText_OnTextChanged(self)
++        UpdateVisibility(self)
++    end
++
++    function ZO_EditDefaultText_OnIMECompositionChanged(self)
++        UpdateVisibility(self)
++    end
++end
+</code></pre>
+<script src="prism.js"></script>

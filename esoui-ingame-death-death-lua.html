@@ -1,0 +1,265 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/death/death.lua b/esoui/ingame/death/death.lua
+index 0cb5cb5..acce1d1 100755
+--- a/esoui/ingame/death/death.lua
++++ b/esoui/ingame/death/death.lua
+@@ -88,37 +88,8 @@ function ZO_Death_GetResurrectSoulGemText(level)
+     return success, coloredFilledText, coloredSoulGemIconMarkup
+ end
+ 
+-local RAID_LIFE_ICON_MARKUP = "|t32:32:EsoUI/Art/Death/death_soulReservoir_icon.dds|t"
+-local RAID_LIFE_ICON_MARKUP_INHERIT_COLOR = "|t32:32:EsoUI/Art/Death/death_soulReservoir_icon.dds:inheritColor|t"
+-
+-function ZO_Death_GetResurrectRaidLifeText()
+-    local numRaidRevives = GetRaidReviveCounterInfo()
+-    if(numRaidRevives) then
+-        if(numRaidRevives &gt; 0) then
+-            return true, RAID_LIFE_ICON_MARKUP
+-        else
+-            return false, ZO_ERROR_COLOR:Colorize(RAID_LIFE_ICON_MARKUP_INHERIT_COLOR)
+-        end
+-    end
+-end
+-
+ function ZO_Death_IsRaidReviveAllowed()
+-    if(IsPlayerInRaid()) then
+-        if(HasRaidEnded()) then
+-            if(WasRaidSuccessful()) then
+-                return true
+-            else
+-                return false
+-            end
+-        else
+-            if(ZO_Death_DoesReviveCostRaidLife() and numRaidRevives == 0) then
+-                return false
+-            else
+-                return true
+-            end
+-        end
+-    end
+-    return false
++    return IsPlayerInRaid()
+ end
+ 
+ function ZO_Death_DoesReviveCostRaidLife()
+@@ -138,38 +109,29 @@ function DeathType:LayoutHereButton(hereButton)
+     
+     local level = GetUnitEffectiveLevel("player")
+     local name, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level) 
+-    hereButton:SetEnabled((soulGemStackCount &gt; 0 or freeRevive) and (not inReviveCounterRaid or GetRaidReviveCounterInfo() &gt; 0 or WasRaidSuccessful()))
++    hereButton:SetEnabled(soulGemStackCount &gt; 0 or freeRevive)
+     
+     local soulGemSuccess, coloredFilledText, coloredSoulGemIconMarkup = ZO_Death_GetResurrectSoulGemText(level)
+-    local success
+-    if(ZO_Death_DoesReviveCostRaidLife()) then
+-        local raidLifeSuccess, coloredRaidLifeIconMarkup = ZO_Death_GetResurrectRaidLifeText()
+-        success = soulGemSuccess and raidLifeSuccess
+-        if(freeRevive) then
+-            hereButton:SetText(zo_strformat(success and SI_DEATH_PROMPT_HERE_LIFE or SI_DEATH_PROMPT_HERE_LIFE_FAILED, coloredRaidLifeIconMarkup))
+-        else
+-            hereButton:SetText(zo_strformat(success and SI_DEATH_PROMPT_HERE_GEM_LIFE or SI_DEATH_PROMPT_HERE_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, coloredRaidLifeIconMarkup))
+-        end
+-    else
+-        success = soulGemSuccess
+-        hereButton:SetText(zo_strformat(success and SI_DEATH_PROMPT_HERE_GEM or SI_DEATH_PROMPT_HERE_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup))
+-    end
++    hereButton:SetText(zo_strformat(soulGemSuccess and SI_DEATH_PROMPT_HERE_GEM or SI_DEATH_PROMPT_HERE_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup))
++
++    local reviveTextControl = hereButton:GetNamedChild("ReviveText")
++    reviveTextControl:SetText(GetString(SI_DEATH_PROMPT_REVIVE_LABEL))
+ end
+ 
+ function DeathType:LayoutWayshrineButton(wayshrineButton)
+-    local numRaidRevives = GetRaidReviveCounterInfo()
+-    if(ZO_Death_DoesReviveCostRaidLife() and numRaidRevives ~= 0) then
+-        local iconMarkup = RAID_LIFE_ICON_MARKUP
+-        if IsInGamepadPreferredMode() then
+-            iconMarkup = numRaidRevives..iconMarkup
+-        end
+-        wayshrineButton:SetText(zo_strformat(SI_DEATH_PROMPT_WAYSHRINE_LIFE, iconMarkup))
+-    else
+ 	if IsInImperialCity() then
+ 		wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_RELEASE))
+ 	else
+ 		wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_WAYSHRINE))
+     end
++
++    local reviveTextControl = wayshrineButton:GetNamedChild("ReviveText")
++    reviveTextControl:SetText(GetString(SI_DEATH_PROMPT_REVIVE_LABEL))
++end
++
++function LayoutDeathRecapToggleButton(deathRecapToggleButton)
++    if deathRecapToggleButton then
++        deathRecapToggleButton:SetText(GetString(SI_DEATH_RECAP_TOGGLE_KEYBIND))
+     end
+ end
+ 
+@@ -330,22 +292,26 @@ function BGDeath:New(control)
+     button1:SetCallback(function()
+         JoinRespawnQueue()
+         button1:SetEnabled(false)
++        button1:HideKeyIcon()
+     end)
+-    bg.messageLabel = GetControl(control, "Message")
+-    bg.messageLabel:SetText(GetString(SI_DEATH_PROMPT_BATTLE_GROUND_QUEUE))
+-    bg.timerCooldown = GetControl(control, "Timer")
+-    control:SetHandler("OnUpdate", function() bg:UpdateTimer() end)
+-    control:SetHandler("OnHide", function() bg.timerCooldown:Stop() end)
++
++    control:SetHandler("OnUpdate", function(control, currentFrameTimeSeconds) bg:UpdateTimer(currentFrameTimeSeconds) end)
++    
++    bg.respawnCooldown = GetControl(control, "CountdownBar")
++    control:SetHandler("OnHide", function() bg:ResetRespawnCountdown() end)
++    bg:InitializeRespawnCountdown()
+ 
+     return bg   
+ end
+ 
+-function BGDeath:UpdateTimer()
+-    local respawnQueueTime = select(3, GetDeathInfo())
+-    if(not self.lastRespawnQueueTime or respawnQueueTime &gt; self.lastRespawnQueueTime) then
+-        self.timerCooldown:Start(respawnQueueTime)
++function BGDeath:UpdateTimer(currentFrameTimeSeconds)
++    local respawnQueueTimeLeft, _, _, _, _, _, _, _, _, _, respawnQueueDuration = select(3, GetDeathInfo())
++    if(not self.lastRespawnQueueTimeLeft or respawnQueueTimeLeft &gt; self.lastRespawnQueueTimeLeft) then
++        self:StartRespawnCountdown(respawnQueueTimeLeft, respawnQueueDuration)
++    elseif currentFrameTimeSeconds then
++        self:UpdateRespawnCountdown(currentFrameTimeSeconds)
+     end
+-    self.lastRespawnQueueTime = respawnQueueTime
++    self.lastRespawnQueueTimeLeft = respawnQueueTimeLeft
+ end
+ 
+ function BGDeath:UpdateDisplay()
+@@ -353,6 +319,49 @@ function BGDeath:UpdateDisplay()
+     self:GetButton(1):SetEnabled(true)
+ end
+ 
++function BGDeath:InitializeRespawnCountdown()
++    self.respawnCooldown.cooldownStartMS = 0
++    self.respawnCooldown.cooldownEndMS = 0
++    self.respawnCooldown.cooldownDurationMS = 0
++    self.respawnCooldown.loadBar = GetControl(self.respawnCooldown, "LoadBar")
++end
++
++function BGDeath:StartRespawnCountdown(timeLeftMS, durationMS)
++    local currentFrameTimeMS = GetFrameTimeMilliseconds()
++    self.respawnCooldown.cooldownEndMS = currentFrameTimeMS + timeLeftMS
++    self.respawnCooldown.cooldownDurationMS = durationMS
++    self.respawnCooldown.cooldownStartMS = self.respawnCooldown.cooldownEndMS - durationMS
++    self.respawnCooldown:SetHidden(false)
++end
++
++function BGDeath:UpdateRespawnCountdown(currentFrameTimeSeconds)
++    local currentFrameTimeMS = currentFrameTimeSeconds * 1000
++    local screenWidth = GuiRoot:GetWidth()
++    local progress = 0
++    if self.respawnCooldown.cooldownDurationMS &gt; 0 then
++        progress = (currentFrameTimeMS - self.respawnCooldown.cooldownStartMS) / self.respawnCooldown.cooldownDurationMS
++    end
++
++    self.respawnCooldown.loadBar:SetWidth(screenWidth * progress)
++
++    if IsQueuedForBattleGroundRespawn() then
++        local respawnButton = self:GetButton(1)
++        local secondsToWait = zo_floor((self.respawnCooldown.cooldownEndMS - currentFrameTimeMS) / 1000)
++        respawnButton:SetText(zo_strformat(SI_DEATH_PROMPT_WAITING_RELEASE, secondsToWait))
++    end
++end
++
++function BGDeath:ResetRespawnCountdown()
++    self.respawnCooldown.cooldownStartMS = 0
++    self.respawnCooldown.cooldownEndMS = 0
++    self.respawnCooldown.cooldownDurationMS = 0
++    self.respawnCooldown:SetHidden(true)
++
++    local respawnButton = self:GetButton(1)
++    respawnButton:SetText(GetString(SI_DEATH_PROMPT_JOIN))
++    respawnButton:ShowKeyIcon()
++end
++
+ --Release Only Death
+ ----------------------
+ 
+@@ -405,6 +414,7 @@ function TwoOptionDeath:UpdateDisplay()
+     if self:CheckUpdateTimer() then
+         self:LayoutHereButton(self:GetButton(1))
+         self:LayoutWayshrineButton(self:GetButton(2))
++        LayoutDeathRecapToggleButton(self.deathRecapToggleButton)
+     end
+ end
+ 
+@@ -475,7 +485,6 @@ function Death:New(control)
+     local death = ZO_CallbackObject.New(self)
+ 
+     death.control = control
+-    death.raidLifeCounterControl = control:GetNamedChild("RaidLifeCounter")
+     death.waitingToShowPrompt = false
+     death.isPlayerDead = IsUnitDead("player")
+     death.types = {}
+@@ -508,11 +517,9 @@ function Death:New(control)
+ 	end)
+     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_ACTIVATED, function()
+         death:UpdateDisplay()
+-        death:RefreshRaidEnded()
+     end)
+     EVENT_MANAGER:RegisterForEvent("Death", EVENT_RAID_TIMER_STATE_UPDATE, function()
+         death:UpdateDisplay()
+-        death:RefreshRaidEnded()
+     end)
+ 
+     DEATH_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
+@@ -521,7 +528,6 @@ function Death:New(control)
+     end)
+     DEATH_FRAGMENT:SetHiddenForReason("NotShowingAsDead", true)
+ 
+-    death:RefreshRaidEnded()
+     death:UpdateDisplay()
+ 
+     death:ApplyStyle() -- Setup initial visual style based on current mode.
+@@ -547,7 +553,7 @@ function Death:GetDeathType()
+         elseif isEncounterInProgress then
+             return DEATH_TYPE_IN_ENCOUNTER
+         elseif isRaidDeath then
+-            if isReleaseOnly or WasRaidSuccessful() == false then
++            if isReleaseOnly then
+                 return DEATH_TYPE_RELEASE_ONLY
+             else
+                 return DEATH_TYPE_TWO_OPTION
+@@ -566,10 +572,6 @@ function Death:SetDeathRecapToggleButtonsEnabled(enabled)
+     end
+ end
+ 
+-function Death:RefreshRaidEnded()
+-    self.raidLifeCounterControl.object:SetHiddenForReason("raidEnded", HasRaidEnded())
+-end
+-
+ function Death:UpdateDisplay()
+     if(self.waitingToShowPrompt) then
+         return
+@@ -598,11 +600,8 @@ function Death:UpdateDisplay()
+ 
+     if(self.currentType) then
+         self.types[self.currentType]:UpdateDisplay()
+-        self.raidLifeCounterControl.object:SetHiddenForReason("deathHidden", false)
+-        self.raidLifeCounterControl.object:SetHiddenForReason("inRaidStagingArea", IsPlayerInRaidStagingArea())
+         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", false)
+     else
+-        self.raidLifeCounterControl.object:SetHiddenForReason("deathHidden", true)
+         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", true)
+     end
+ 
+@@ -655,7 +654,6 @@ do
+         local isGamepad = IsInGamepadPreferredMode()
+         ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_Death"))
+         ApplyNormalColorToDeath(self.control, isGamepad and ZO_SELECTED_TEXT or ZO_NORMAL_TEXT)
+-        self.raidLifeCounterControl.object:SetHiddenForReason("isGamepad", isGamepad)
+         self.types[DEATH_TYPE_IN_ENCOUNTER]:ApplyTemplateToMessage(ZO_GetPlatformTemplate("ZO_DeathInEncouterLoadingLabel"))
+     end
+ end
+</code></pre>
+<script src="prism.js"></script>

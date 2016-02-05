@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradinghouse/gamepad/tradinghouse_listings_gamepad.lua b/esoui/ingame/tradinghouse/gamepad/tradinghouse_listings_gamepad.lua
+index a0adc33..4ec1055 100755
+--- a/esoui/ingame/tradinghouse/gamepad/tradinghouse_listings_gamepad.lua
++++ b/esoui/ingame/tradinghouse/gamepad/tradinghouse_listings_gamepad.lua
+@@ -56,7 +56,7 @@ end
+ function ZO_GamepadTradingHouse_Listings:UpdateItemSelectedTooltip(selectedData)
+     if selectedData then
+         local itemLink = GetTradingHouseListingItemLink(selectedData.slotIndex)
+-        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount, ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT)
++        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount)
+     else
+         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+     end
+</code></pre>
+<script src="prism.js"></script>

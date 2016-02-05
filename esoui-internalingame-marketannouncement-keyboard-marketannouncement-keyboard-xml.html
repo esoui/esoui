@@ -1,0 +1,50 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.xml b/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.xml
+index 34430b5..4f334fc 100755
+--- a/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.xml
++++ b/esoui/internalingame/marketannouncement/keyboard/marketannouncement_keyboard.xml
+@@ -1,18 +1,12 @@
+ &lt;GuiXml&gt;
+-    &lt;Font name="ZoMarketAnnouncementKeyboardDescriptionFont" font="$(MEDIUM_FONT)|22" /&gt;
+-    
+-    &lt;Font name="ZoMarketAnnouncementKeyboardTileFont" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoMarketAnnouncementKeyboardTileTitleFont" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoMarketAnnouncementCalloutFont" font="$(BOLD_FONT)|32|soft-shadow-thin" /&gt;
+-    
+     &lt;Controls&gt;
+         &lt;Control name="ZO_MarketAnnouncement_MarketProductTemplate_Keyboard" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" virtual="true" &gt;
+             &lt;Dimensions x="ZO_LARGE_SINGLE_MARKET_PRODUCT_WIDTH" y="ZO_LARGE_SINGLE_MARKET_PRODUCT_HEIGHT"/&gt;
+             
+             &lt;Controls&gt;
+-                &lt;Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoMarketAnnouncementKeyboardTileTitleFont" mouseEnabled="false" override="true"/&gt;
++                &lt;Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" mouseEnabled="false" override="true"/&gt;
+                 
+-                &lt;Label name="$(parent)PreviousCost" font="ZoMarketAnnouncementKeyboardTileFont" override="true"&gt;
++                &lt;Label name="$(parent)PreviousCost" font="ZoFontHeader3" override="true"&gt;
+                     &lt;Controls&gt;
+                         &lt;Texture name="$(parent)Strikethrough" override="true"&gt;
+                             &lt;Anchor point="LEFT" offsetX="-2" offsetY="2"/&gt;
+@@ -24,7 +18,7 @@
+                     &lt;/Controls&gt;
+                 &lt;/Label&gt;
+                 
+-                &lt;Label name="$(parent)Cost" font="ZoMarketAnnouncementKeyboardTileFont" override="true"&gt;
++                &lt;Label name="$(parent)Cost" font="ZoFontHeader3" override="true"&gt;
+                     &lt;Controls&gt;
+                         &lt;Texture name="$(parent)CurrencyIcon" override="true"&gt;
+                             &lt;Dimensions x="32" y="32" /&gt;
+@@ -33,7 +27,7 @@
+                     &lt;/Controls&gt;
+                 &lt;/Label&gt;
+                 
+-                &lt;Label name="$(parent)Purchased" font="ZoMarketAnnouncementKeyboardTileFont" override="true"/&gt;
++                &lt;Label name="$(parent)Purchased" font="ZoFontHeader3" override="true"/&gt;
+                 
+                 &lt;Label name="$(parent)TextCallout" font="ZoMarketAnnouncementCalloutFont" override="true"&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

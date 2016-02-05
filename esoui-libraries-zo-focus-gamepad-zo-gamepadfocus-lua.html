@@ -1,0 +1,39 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_focus/gamepad/zo_gamepadfocus.lua b/esoui/libraries/zo_focus/gamepad/zo_gamepadfocus.lua
+index 81aa044..9c7ac70 100755
+--- a/esoui/libraries/zo_focus/gamepad/zo_gamepadfocus.lua
++++ b/esoui/libraries/zo_focus/gamepad/zo_gamepadfocus.lua
+@@ -46,13 +46,17 @@ function ZO_GamepadFocus:Initialize(control, movementController, direction)
+     self.control = control
+     self.index = nil
+     self.savedIndex = nil
+-    self.movementController = movementController or ZO_MovementController:New(direction or MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
++    self:InitializeMovementController(movementController, direction)
+     self:SetActive(false)
+     self:SetPlaySoundFunction(GamepadListPlaySound)
+ 
+     self.directionalInputEnabled = true
+ end
+ 
++function ZO_GamepadFocus:InitializeMovementController(movementController, direction)
++    self.movementController = movementController or ZO_MovementController:New(direction or MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
++end
++
+ function ZO_GamepadFocus:SetActive(active, retainFocus)
+     if self.active ~= active then
+         self.active = active
+@@ -66,8 +70,6 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
+             self.savedIndex = self.index
+             if not retainFocus then
+                 self:ClearFocus()
+-            else
+-                self.savedIndex = self.index
+             end
+             DIRECTIONAL_INPUT:Deactivate(self)
+         end
+</code></pre>
+<script src="prism.js"></script>

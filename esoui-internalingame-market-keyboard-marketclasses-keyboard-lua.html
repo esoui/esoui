@@ -1,0 +1,59 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/keyboard/marketclasses_keyboard.lua b/esoui/internalingame/market/keyboard/marketclasses_keyboard.lua
+index 80e7a97..fa4ffc3 100755
+--- a/esoui/internalingame/market/keyboard/marketclasses_keyboard.lua
++++ b/esoui/internalingame/market/keyboard/marketclasses_keyboard.lua
+@@ -52,7 +52,9 @@ function KeyboardMarketProduct:LayoutCostAndText(description, cost, discountPerc
+     self.textCallout:ClearAnchors()
+ 
+     local onSale = cost &gt; discountedCost
+-    if onSale then
++    if self.isFree then
++        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, -7)
++    elseif onSale then
+         self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
+         self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, -7) -- x offset to account for strikethrough
+     else
+@@ -62,15 +64,15 @@ function KeyboardMarketProduct:LayoutCostAndText(description, cost, discountPerc
+ 
+     local textCalloutBackgroundColor
+     local textCalloutTextColor
+-    if onSale then
++    if self:IsLimitedTimeProduct() then
++        textCalloutBackgroundColor = ZO_BLACK
++        textCalloutTextColor = ZO_MARKET_PRODUCT_ON_SALE_COLOR
++    elseif onSale then
+         textCalloutBackgroundColor = ZO_MARKET_PRODUCT_ON_SALE_COLOR
+         textCalloutTextColor = ZO_SELECTED_TEXT
+     elseif isNew then
+         textCalloutBackgroundColor = ZO_MARKET_PRODUCT_NEW_COLOR
+         textCalloutTextColor = ZO_SELECTED_TEXT
+-    elseif self:GetTimeLeftInSeconds() &gt; 0 then
+-        textCalloutBackgroundColor = ZO_BLACK
+-        textCalloutTextColor = ZO_MARKET_PRODUCT_ON_SALE_COLOR
+     end
+ 
+     if textCalloutBackgroundColor then
+@@ -83,7 +85,7 @@ function KeyboardMarketProduct:Purchase()
+     PlaySound(SOUNDS.MARKET_PURCHASE_SELECTED)
+     local expectedPurchaseResult = CouldPurchaseMarketProduct(self.marketProductId)
+     if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
+-        ZO_Dialogs_ShowDialog("MARKET_INSUFFICIENT_CROWNS_WITH_LINK", ZO_BUY_CROWNS_URL, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
++        ZO_Dialogs_ShowDialog("MARKET_INSUFFICIENT_CROWNS_WITH_LINK", ZO_BUY_CROWNS_URL_TYPE, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
+     else
+         if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
+             ZO_Dialogs_ShowDialog("MARKET_INVENTORY_FULL", nil, { mainTextParams = { GetSpaceNeededToPurchaseMarketProduct(self.marketProductId) } })
+@@ -98,6 +100,7 @@ function KeyboardMarketProduct:Purchase()
+             ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProductId = self.marketProductId})
+         end
+     end
++    OnMarketStartPurchase(self.marketProductId)
+ end
+ 
+ function KeyboardMarketProduct:Reset()
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,37 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/labeltemplates_shared.xml b/esoui/libraries/zo_templates/labeltemplates_shared.xml
+index ca6b38b..3aa0ad8 100755
+--- a/esoui/libraries/zo_templates/labeltemplates_shared.xml
++++ b/esoui/libraries/zo_templates/labeltemplates_shared.xml
+@@ -33,6 +33,25 @@
+             &lt;/OnMouseExit&gt;
+         &lt;/Label&gt;
+ 
++        &lt;Label name="ZO_SelectableTooltipIfTruncatedLabel" inherits="ZO_SelectableLabel" wrapMode="ELLIPSIS" virtual="true"&gt;
++            &lt;OnMouseEnter&gt;
++                ZO_SelectableLabel_OnMouseEnter(self)
++                
++                if self:WasTruncated() then
++                    InitializeTooltip(InformationTooltip)
++                    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
++                    SetTooltipText(InformationTooltip, self:GetText())
++                end
++            &lt;/OnMouseEnter&gt;
++            &lt;OnMouseExit&gt;
++                ZO_SelectableLabel_OnMouseExit(self)
++                
++                if self:WasTruncated() then
++                    ClearTooltip(InformationTooltip)
++                end
++            &lt;/OnMouseExit&gt;
++        &lt;/Label&gt;
++        
+         &lt;Label name="ZO_LoadingText" virtual="true" font="ZoFontHeader"&gt;
+             &lt;Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/&gt;
+         &lt;/Label&gt;
+</code></pre>
+<script src="prism.js"></script>

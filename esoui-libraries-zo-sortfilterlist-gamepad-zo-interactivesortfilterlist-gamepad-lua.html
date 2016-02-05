@@ -1,0 +1,40 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.lua b/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.lua
+index 3759ea7..e1f6a89 100755
+--- a/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.lua
++++ b/esoui/libraries/zo_sortfilterlist/gamepad/zo_interactivesortfilterlist_gamepad.lua
+@@ -280,7 +280,7 @@ end
+ 
+ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
+     local searchControl = self.contentHeader:GetNamedChild("SearchFilter")
+-    local searchEdit = searchControl:GetNamedChild("Edit")
++    local searchEdit = searchControl:GetNamedChild("SearchEdit")
+ 
+     local function SearchEditFocusLost()
+         ZO_GamepadEditBox_FocusLost(searchEdit)
+@@ -546,17 +546,17 @@ function ZO_GamepadInteractiveSortFilterList:ResetSelectedEntry()
+ end
+ 
+ function ZO_GamepadInteractiveSortFilterList:RefreshFilters()
++    ZO_SortFilterList.RefreshFilters(self)
+     if(not self:IsLockedForUpdates()) then
+         self:ResetSelectedEntry()
+     end
+-    ZO_SortFilterList.RefreshFilters(self)
+ end
+ 
+ function ZO_GamepadInteractiveSortFilterList:RefreshData()
++    ZO_SortFilterList.RefreshData(self)
+     if(not self:IsLockedForUpdates()) then
+         self:ResetSelectedEntry()
+     end
+-    ZO_SortFilterList.RefreshData(self)
+ end
+ 
+ function ZO_GamepadInteractiveSortFilterList:CommitScrollList()
+</code></pre>
+<script src="prism.js"></script>

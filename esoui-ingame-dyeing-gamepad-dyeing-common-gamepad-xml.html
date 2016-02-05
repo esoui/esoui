@@ -1,0 +1,32 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/dyeing/gamepad/dyeing_common_gamepad.xml b/esoui/ingame/dyeing/gamepad/dyeing_common_gamepad.xml
+index f77a371..d417c35 100755
+--- a/esoui/ingame/dyeing/gamepad/dyeing_common_gamepad.xml
++++ b/esoui/ingame/dyeing/gamepad/dyeing_common_gamepad.xml
+@@ -6,6 +6,8 @@
+             &lt;OnInitialized&gt;
+                 self.swatchTexture = self:GetNamedChild("SwatchTexture")
+                 self.background = self:GetNamedChild("Background")
++                self.invalidTexture = self:GetNamedChild("InvalidTexture")
++                self.edgeFrame = self:GetNamedChild("EdgeFrame")
+             &lt;/OnInitialized&gt;
+             &lt;Dimensions x="24" y="26"/&gt;
+             &lt;Controls&gt;
+@@ -23,6 +25,11 @@
+                     &lt;Anchor point="TOPLEFT" relativeTo="($parent)SwatchTexture" /&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" relativeTo="($parent)SwatchTexture" /&gt;
+                 &lt;/Texture&gt;
++
++                &lt;Texture name="$(parent)InvalidTexture" textureFile="EsoUI/Art/Dye/Gamepad/gp_Disabled_X.dds" tier="MEDIUM" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="($parent)SwatchTexture" /&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="($parent)SwatchTexture" /&gt;
++                &lt;/Texture&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,46 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/contacts/gamepad/friendslist_gamepad.lua b/esoui/ingame/contacts/gamepad/friendslist_gamepad.lua
+index 79c0631..b68f676 100755
+--- a/esoui/ingame/contacts/gamepad/friendslist_gamepad.lua
++++ b/esoui/ingame/contacts/gamepad/friendslist_gamepad.lua
+@@ -23,6 +23,8 @@ function FriendsList_Gamepad:Initialize(control)
+ end
+ 
+ function FriendsList_Gamepad:GetAddKeybind()
++    local platform = GetUIPlatform()
++    if platform ~= UI_PLATFORM_XBOX then
+         local keybind  =
+         {
+             alignment = KEYBIND_STRIP_ALIGN_LEFT,
+@@ -33,7 +35,7 @@ function FriendsList_Gamepad:GetAddKeybind()
+ 
+             callback = function()
+                 local platform = GetUIPlatform()
+-            if platform == UI_PLATFORM_PC or platform == UI_PLATFORM_XBOX then
++                if platform == UI_PLATFORM_PC then
+                     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG")
+                 else
+                     ZO_ShowConsoleAddFriendDialogFromUserListSelector()
+@@ -42,6 +44,7 @@ function FriendsList_Gamepad:GetAddKeybind()
+         }
+         return keybind
+     end
++end
+ 
+ function FriendsList_Gamepad:LayoutTooltip(tooltipManager, tooltip, data)
+     tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.veteranRank, data.formattedAllianceName, data.formattedZone, not data.online)
+@@ -89,6 +92,8 @@ function FriendsList_Gamepad:BuildOptionsList()
+     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGameOption)
+     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
+     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveFriendOption, function() return not IsConsoleUI() end)
++
++    self:AddInviteToGuildOptionTemplates()
+ end
+ 
+ function ZO_FriendsList_Gamepad_OnInitialized(self)
+</code></pre>
+<script src="prism.js"></script>

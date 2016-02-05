@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/guild/keyboard/guildhome_keyboard.xml b/esoui/ingame/guild/keyboard/guildhome_keyboard.xml
+index 6d6e748..668ae29 100755
+--- a/esoui/ingame/guild/keyboard/guildhome_keyboard.xml
++++ b/esoui/ingame/guild/keyboard/guildhome_keyboard.xml
+@@ -90,7 +90,7 @@
+ 
+                 &lt;Control name="$(parent)Trader"&gt;
+                     &lt;Dimensions x="200"/&gt;
+-                    &lt;Anchor point="TOP" relativeTo="$(parent)Keep" offsetY="210"/&gt;
++                    &lt;Anchor point="TOP" relativeTo="$(parent)KeepCampaignName" relativePoint="BOTTOM" /&gt;
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)Ownership" horizontalAlignment="CENTER" font="ZoFontHeader2" modifyTextType="UPPERCASE" text="SI_GUILD_TRADER_OWNERSHIP_HEADER"&gt;
+                             &lt;Anchor point="TOPLEFT"/&gt;
+</code></pre>
+<script src="prism.js"></script>

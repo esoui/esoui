@@ -1,0 +1,24 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradinghouse/keyboard/armorfilter_keyboard.lua b/esoui/ingame/tradinghouse/keyboard/armorfilter_keyboard.lua
+index 2f9f733..d6dab8c 100755
+--- a/esoui/ingame/tradinghouse/keyboard/armorfilter_keyboard.lua
++++ b/esoui/ingame/tradinghouse/keyboard/armorfilter_keyboard.lua
+@@ -24,8 +24,10 @@ function ArmorFilter:Initialize(parentControl)
+     local function SetGenericArmorSearch(mode, traitType, enchantmentType, armorType)
+         self.m_mode = mode
+         self.m_armorType = armorType
+-        SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):GetTraitFilters():SetTraitType(traitType)
+-	    SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):GetEnchantmentFilters():SetEnchantmentType(enchantmentType)
++        local traitFilters = TRADING_HOUSE:GetTraitFilters()
++        local enchantmentFilters = TRADING_HOUSE:GetEnchantmentFilters()
++        traitFilters:SetTraitType(traitType)
++	    enchantmentFilters:SetEnchantmentType(enchantmentType)
+     end
+ 
+     ZO_TradingHouse_InitializeRangeComboBox(control:GetNamedChild("Category"), ZO_TradingHouseFilter_GenerateArmorTypeData(SetGenericArmorSearch), PopulateArmorSubTypes)
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,22 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/globals/bindings.xml b/esoui/ingame/globals/bindings.xml
+index d60d235..753e105 100755
+--- a/esoui/ingame/globals/bindings.xml
++++ b/esoui/ingame/globals/bindings.xml
+@@ -304,6 +304,10 @@
+                 &lt;Down&gt;SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_NOTIFICATIONS)&lt;/Down&gt;
+             &lt;/Action&gt;
+ 
++            &lt;Action name="TOGGLE_ACTIVITY_FINDER"&gt;
++                &lt;Down&gt;SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_ACTIVITY_FINDER)&lt;/Down&gt;
++            &lt;/Action&gt;
++
+             &lt;Action name="TOGGLE_HELP"&gt;
+                 &lt;Down&gt;
+                     if not TUTORIAL_SYSTEM:ShowHelp() then
+</code></pre>
+<script src="prism.js"></script>

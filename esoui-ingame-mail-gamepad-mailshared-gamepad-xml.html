@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/mail/gamepad/mailshared_gamepad.xml b/esoui/ingame/mail/gamepad/mailshared_gamepad.xml
+index edddaf9..2cf2b54 100755
+--- a/esoui/ingame/mail/gamepad/mailshared_gamepad.xml
++++ b/esoui/ingame/mail/gamepad/mailshared_gamepad.xml
+@@ -14,7 +14,7 @@
+                 self.highlight = self:GetNamedChild("Highlight")
+             &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad"&gt;
++                &lt;Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Gamepad"&gt;
+                     &lt;Anchor point="TOPLEFT"/&gt;
+                     &lt;Anchor point="TOPRIGHT"/&gt;
+                     &lt;Controls&gt;
+@@ -38,7 +38,7 @@
+                 self.highlight = self:GetNamedChild("Highlight")
+             &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad"&gt;
++                &lt;Backdrop name="$(parent)Backdrop" inherits="ZO_MultiLineEditBackdrop_Gamepad"&gt;
+                     &lt;AnchorFill/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad"/&gt;
+</code></pre>
+<script src="prism.js"></script>

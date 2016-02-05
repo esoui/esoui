@@ -1,0 +1,48 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/mainmenu/gamepad/zo_mainmenu_gamepad.xml b/esoui/ingame/mainmenu/gamepad/zo_mainmenu_gamepad.xml
+index 69d31d8..511c544 100755
+--- a/esoui/ingame/mainmenu/gamepad/zo_mainmenu_gamepad.xml
++++ b/esoui/ingame/mainmenu/gamepad/zo_mainmenu_gamepad.xml
+@@ -31,6 +31,36 @@
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
++        &lt;Label name="ZO_GamepadCrownStoreMenuEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true"&gt;
++            &lt;Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" /&gt;
++            &lt;Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-10" /&gt;
++            &lt;Dimensions y="24" /&gt;
++        &lt;/Label&gt;
++        
++        &lt;Control name="ZO_GamepadMenuCrownStoreEntryTemplate" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_SharedGamepadEntry_OnInitialized(self)
++                self.subLabelCount = 0
++                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
++            &lt;/OnInitialized&gt;
++            
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)Balance" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" /&gt;
++                &lt;/Label&gt;
++                
++                &lt;Label name="$(parent)RemainingCrowns" font="ZoFontGamepad34"&gt;
++                    &lt;AnchorToBaseline relativeToLabel="$(parent)Balance" side="RIGHT" offsetX="10"/&gt;
++                &lt;/Label&gt;
++
++                &lt;Texture name="$(parent)CurrencyIcon" textureFile="EsoUI/Art/currency/currency_crown.dds"&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)RemainingCrowns" relativePoint="RIGHT"/&gt;
++                    &lt;Dimensions x="32" y="32"/&gt;
++                &lt;/Texture&gt;
++                
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
+         &lt;TopLevelControl name="ZO_MainMenu_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_MainMenu_Gamepad_OnInitialized(self)
+</code></pre>
+<script src="prism.js"></script>

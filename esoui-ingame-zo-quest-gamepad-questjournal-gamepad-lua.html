@@ -1,0 +1,27 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_quest/gamepad/questjournal_gamepad.lua b/esoui/ingame/zo_quest/gamepad/questjournal_gamepad.lua
+index d9a5ed4..4e3420d 100755
+--- a/esoui/ingame/zo_quest/gamepad/questjournal_gamepad.lua
++++ b/esoui/ingame/zo_quest/gamepad/questjournal_gamepad.lua
+@@ -487,7 +487,6 @@ function ZO_QuestJournal_Gamepad:RefreshOptionsList()
+         table.insert(options, abandonQuest)
+     end
+ 
+-    if IsConsoleUI() then
+     local reportQuest = ZO_GamepadEntryData:New(GetString(SI_ITEM_ACTION_REPORT_ITEM))
+     reportQuest.action =    function()
+                                 local selectedQuestIndex = self:GetSelectedQuestIndex()
+@@ -499,7 +498,6 @@ function ZO_QuestJournal_Gamepad:RefreshOptionsList()
+                                 end
+                             end
+     table.insert(options, reportQuest)
+-    end
+ 
+     for _, option in pairs(options) do
+         self.optionsList:AddEntry("ZO_GamepadSubMenuEntryTemplate", option)
+</code></pre>
+<script src="prism.js"></script>

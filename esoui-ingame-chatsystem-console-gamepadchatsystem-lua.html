@@ -1,0 +1,21 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/chatsystem/console/gamepadchatsystem.lua b/esoui/ingame/chatsystem/console/gamepadchatsystem.lua
+index 57e10be..70997e6 100755
+--- a/esoui/ingame/chatsystem/console/gamepadchatsystem.lua
++++ b/esoui/ingame/chatsystem/console/gamepadchatsystem.lua
+@@ -165,6 +165,9 @@ local CONSOLE_SETTINGS =
+     initialFadeAlpha = 1,
+     finalFadeAlpha = 0,
+     fadeTransitionTime = FADE_TIME_MS,
++
++    chatEditBufferTop = 9,
++    chatEditBufferBottom = 8,
+ }
+ 
+ function ZO_GamepadChatSystem:Initialize(control)
+</code></pre>
+<script src="prism.js"></script>

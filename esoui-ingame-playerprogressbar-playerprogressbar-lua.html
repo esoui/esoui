@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/playerprogressbar/playerprogressbar.lua b/esoui/ingame/playerprogressbar/playerprogressbar.lua
+index b1c0dcf..184466a 100755
+--- a/esoui/ingame/playerprogressbar/playerprogressbar.lua
++++ b/esoui/ingame/playerprogressbar/playerprogressbar.lua
+@@ -293,7 +293,7 @@ function CPBarType:GetEnlightenedTooltip()
+         local poolSize = self:GetEnlightenedPool()
+         local current = self:GetCurrent()
+         local nextPoint = GetChampionPointAttributeForRank(level + 1)
+-        local pointName = ZO_Champion_GetConstellationGroupNameFromAttribute(nextPoint)
++        local pointName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(nextPoint)
+         if poolSize + current &gt; levelSize then
+             return zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_OVERRUN, pointName)
+         else
+</code></pre>
+<script src="prism.js"></script>

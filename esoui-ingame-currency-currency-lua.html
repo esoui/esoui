@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/currency/currency.lua b/esoui/ingame/currency/currency.lua
+index 0145164..dfd186d 100755
+--- a/esoui/ingame/currency/currency.lua
++++ b/esoui/ingame/currency/currency.lua
+@@ -176,7 +176,12 @@ function ZO_CurrencyControl_SetCurrencyData(control, currencyType, amount, showA
+     end
+ end
+ 
+-local CURRENCY_SUFFIXES = {"", "K", "M", "B"} -- These may need to be localized, depending on design.
++local CURRENCY_SUFFIXES = {
++                           "",  -- No suffix for currency amounts less than 10000
++                           GetString(SI_CURRENCY_SUFFIX_ONE_THOUSAND),
++                           GetString(SI_CURRENCY_SUFFIX_ONE_MILLION),
++                           GetString(SI_CURRENCY_SUFFIX_ONE_BILLION),
++                          }
+ 
+ function ZO_CurrencyControl_FormatCurrency(amount, useShortFormat)
+     if useShortFormat then
+@@ -191,7 +196,7 @@ function ZO_CurrencyControl_FormatCurrency(amount, useShortFormat)
+             -- Round the number to two decimal places.
+             shortAmount = math.floor(shortAmount * 100 + 0.5) / 100
+ 
+-            return shortAmount..CURRENCY_SUFFIXES[suffix]
++            return ZO_LocalizeDecimalNumber(shortAmount)..CURRENCY_SUFFIXES[suffix]
+         else
+             return amount
+         end
+</code></pre>
+<script src="prism.js"></script>

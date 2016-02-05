@@ -1,0 +1,22 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradewindow/keyboard/tradewindow_keyboard.lua b/esoui/ingame/tradewindow/keyboard/tradewindow_keyboard.lua
+index be5de2c..901d3d4 100755
+--- a/esoui/ingame/tradewindow/keyboard/tradewindow_keyboard.lua
++++ b/esoui/ingame/tradewindow/keyboard/tradewindow_keyboard.lua
+@@ -60,9 +60,7 @@ local ConfirmChangeFunctions =
+ ZO_TradeWindow = ZO_SharedTradeWindow:Subclass()
+ 
+ function ZO_TradeWindow:New(control)
+-    local tradeWindow = ZO_SharedTradeWindow.New(self, control)
+-    tradeWindow:Initialize(control)
+-    return tradeWindow
++    return ZO_SharedTradeWindow.New(self, control)
+ end
+ 
+ function ZO_TradeWindow:Initialize(control)
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,53 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/fence/gamepad/fencewindowlaunder_gamepad.lua b/esoui/ingame/fence/gamepad/fencewindowlaunder_gamepad.lua
+index b6fd2e3..e1e6fbc 100755
+--- a/esoui/ingame/fence/gamepad/fencewindowlaunder_gamepad.lua
++++ b/esoui/ingame/fence/gamepad/fencewindowlaunder_gamepad.lua
+@@ -12,9 +12,13 @@ function ZO_GamepadFenceLaunder:Initialize()
+     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_STOLEN_ITEMS_LAUNDER))
+ end
+ 
+-function ZO_GamepadFenceLaunder:Confirm()
++function ZO_GamepadFenceLaunder:GetRemainingLaunders()
+     local totalLaunders, laundersUsed = GetFenceLaunderTransactionInfo()
+-    local remainingLaunders = zo_max(totalLaunders - laundersUsed, 0)
++    return zo_max(totalLaunders - laundersUsed, 0)
++end
++
++function ZO_GamepadFenceLaunder:Confirm()
++    local remainingLaunders = self:GetRemainingLaunders()
+ 
+     if remainingLaunders == 0 then
+         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString("SI_ITEMLAUNDERRESULT", ITEM_LAUNDER_RESULT_AT_LIMIT))
+@@ -54,6 +58,25 @@ function ZO_GamepadFenceLaunder:OnSuccess()
+     end
+ end
+ 
++function ZO_GamepadFenceLaunder:RefreshFooter()
++    if self:GetRemainingLaunders() &gt; 0 then
++        self:ClearFooter()
++        return
++    end
++
++    local footerLabel = GetString(SI_FENCE_LAUNDER_LIMIT_RESET)
++    local resetTimeSeconds = select(3, GetFenceLaunderTransactionInfo())
++    local footerValue = ZO_FormatTimeMilliseconds(resetTimeSeconds * 1000, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
++
++    local data =
++    {
++        data1HeaderText = footerLabel,
++        data1Text = footerValue
++    }
++    
++    GAMEPAD_GENERIC_FOOTER:Refresh(data)
++end
++
+ function ZO_GamepadFenceLaunder_Initialize()
+     FENCE_LAUNDER_GAMEPAD = ZO_GamepadFenceLaunder:New()
+     STORE_WINDOW_GAMEPAD:AddComponent(FENCE_LAUNDER_GAMEPAD)
+</code></pre>
+<script src="prism.js"></script>

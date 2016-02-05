@@ -1,0 +1,35 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/collections/collectionsbook_manager.lua b/esoui/ingame/collections/collectionsbook_manager.lua
+index 78e4b86..302d320 100755
+--- a/esoui/ingame/collections/collectionsbook_manager.lua
++++ b/esoui/ingame/collections/collectionsbook_manager.lua
+@@ -16,6 +16,8 @@ function CollectionsBook_Singleton:Initialize()
+     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
+     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) self:OnCollectibleUpdated(...) end)
+     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTION_UPDATED, function(eventId, ...) self:OnCollectionUpdated(...) end)
++    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_NOTIFICATION_REMOVED, function(eventId, ...) self:OnCollectionNotificationRemoved(...) end)
++    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
+ end
+ 
+ function CollectionsBook_Singleton:BrowseToCollectible(...)
+@@ -30,6 +32,14 @@ function CollectionsBook_Singleton:OnCollectionUpdated(...)
+     self:FireCallbacks("OnCollectionUpdated", ...)
+ end
+ 
++function CollectionsBook_Singleton:OnCollectionNotificationRemoved(...)
++    self:FireCallbacks("OnCollectionNotificationRemoved", ...)
++end
++
++function CollectionsBook_Singleton:OnUpdateCooldowns(...)
++    self:FireCallbacks("OnUpdateCooldowns", ...)
++end
++
+ function ZO_GetCollectibleCategoryAndName(collectibleId)
+     local categoryIndex = GetCategoryInfoFromCollectibleId(collectibleId)
+     local categoryName = GetCollectibleCategoryInfo(categoryIndex)
+</code></pre>
+<script src="prism.js"></script>

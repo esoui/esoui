@@ -1,0 +1,75 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/leaderboards/gamepad/campaignleaderboards_gamepad.lua b/esoui/ingame/leaderboards/gamepad/campaignleaderboards_gamepad.lua
+index 9a54664..5fd06b6 100755
+--- a/esoui/ingame/leaderboards/gamepad/campaignleaderboards_gamepad.lua
++++ b/esoui/ingame/leaderboards/gamepad/campaignleaderboards_gamepad.lua
+@@ -1,4 +1,4 @@
+-local GAMEPAD_CAMPAIGN_LEADERBOARDS
++GAMEPAD_CAMPAIGN_LEADERBOARDS = nil
+ 
+ local ACTIVE_CAMPAIGN_INDEX = 1
+ local ICON_SIZE = 60
+@@ -46,12 +46,18 @@ end
+ function ZO_LeaderboardCampaignSelector_Gamepad:RefreshQueryTypes()
+     local campaignName = GetCampaignName(self:GetCampaignId())
+ 
+-    if self.selectedQueryType == HOME_TAB.queryType then
+-        self:SetActiveCampaign(campaignName, HOME_TAB)
+-    elseif GetCurrentCampaignId() ~= 0 and self.selectedQueryType == GUEST_TAB.queryType then
+-        self:SetActiveCampaign(campaignName, GUEST_TAB)
++    if not self.selectedQueryType then
++        if self:IsHomeSelectable() then
++            self:OnQueryTypeChanged(HOME_TAB)
++        elseif self:IsGuestSelectable() then
++            self:OnQueryTypeChanged(GUEST_TAB)
++        end
+     else
++        if self.selectedQueryType == HOME_TAB.queryType then
+             self:OnQueryTypeChanged(HOME_TAB)
++        elseif GetCurrentCampaignId() ~= 0 and self.selectedQueryType == GUEST_TAB.queryType then
++            self:OnQueryTypeChanged(GUEST_TAB)
++        end
+     end
+ end
+ 
+@@ -72,8 +78,7 @@ end
+ local ZO_CampaignLeaderboardsManager_Gamepad = ZO_CampaignLeaderboardsManager_Shared:Subclass()
+ 
+ function ZO_CampaignLeaderboardsManager_Gamepad:New(...)    
+-    local manager = ZO_CampaignLeaderboardsManager_Shared.New(self, ...)
+-    return manager
++    return ZO_CampaignLeaderboardsManager_Shared.New(self, ...)
+ end
+ 
+ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
+@@ -81,8 +86,6 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
+ 
+     ZO_CampaignLeaderboardsManager_Shared.Initialize(self, control, GAMEPAD_LEADERBOARDS, GAMEPAD_LEADERBOARDS_SCENE, GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT)
+ 
+-    self:InitializeCategories()
+-
+     GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+                                                  if newState == SCENE_FRAGMENT_SHOWING then
+                                                      self:PerformDeferredInitialization(control)
+@@ -154,12 +157,13 @@ function ZO_CampaignLeaderboardsManager_Gamepad:InitializeKeybindStripDescriptor
+                 self.selector:OnQueryTypeChanged(HOME_TAB)
+             end
+         end,
+-        visible = function() return self.selector:ShouldAllowSwitchingTabs() end,
++        visible = function() return self.selector:IsHomeSelectable() and self.selector:IsGuestSelectable() end,
+         sound = SOUNDS.DEFAULT_CLICK,
+     }
+ end
+ 
+ function ZO_CampaignLeaderboardsInformationArea_Gamepad_OnInitialized(self)
+     GAMEPAD_CAMPAIGN_LEADERBOARDS = ZO_CampaignLeaderboardsManager_Gamepad:New(self)
++    GAMEPAD_LEADERBOARDS:UpdateCategories()
+     GAMEPAD_CAMPAIGN_LEADERBOARDS.selector = ZO_LeaderboardCampaignSelector_Gamepad:New(self)
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

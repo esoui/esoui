@@ -1,0 +1,32 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/guild/guildroster_shared.lua b/esoui/ingame/guild/guildroster_shared.lua
+index d2f6b1a..1391bc7 100755
+--- a/esoui/ingame/guild/guildroster_shared.lua
++++ b/esoui/ingame/guild/guildroster_shared.lua
+@@ -27,9 +27,6 @@ function ZO_GuildRosterManager:New()
+ end
+ 
+ function ZO_GuildRosterManager:Initialize()
+-
+-    self.playerAlliance = GetUnitAlliance("player")
+-
+     self.noteEditedFunction = function(displayName, note)
+         local numGuildMembers = GetNumGuildMembers(self.guildId)
+         for guildMemberIndex = 1, numGuildMembers do       
+@@ -174,10 +171,6 @@ function ZO_GuildRosterManager:GetGuildAlliance()
+     return self.guildAlliance
+ end
+ 
+-function ZO_GuildRosterManager:GetPlayerAlliance()
+-    return self.playerAlliance
+-end
+-
+ function ZO_GuildRosterManager:GetPlayerData()
+     local playerIndex = GetPlayerGuildMemberIndex(self.guildId)   
+     return self.masterList[playerIndex]
+</code></pre>
+<script src="prism.js"></script>

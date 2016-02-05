@@ -1,5 +1,0 @@
-<GuiXml>
-    <Controls>
-        <Label name="ZO_BountyDisplay" inherits="ZO_CurrencyTemplate" mouseEnabled="true" virtual="true" />
-    </Controls>
-</GuiXml>

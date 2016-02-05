@@ -1,0 +1,98 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/pregame/charactercreate/keyboard/zo_charactercreate_keyboard.xml b/esoui/pregame/charactercreate/keyboard/zo_charactercreate_keyboard.xml
+index c24a0e7..42fed5f 100755
+--- a/esoui/pregame/charactercreate/keyboard/zo_charactercreate_keyboard.xml
++++ b/esoui/pregame/charactercreate/keyboard/zo_charactercreate_keyboard.xml
+@@ -1,44 +1,7 @@
+ &lt;GuiXml&gt;
+-    &lt;Font name="CCEditFont" font="$(BOLD_FONT)|20" /&gt;
+-
+     &lt;Controls&gt;
+         &lt;Label name="CCLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" /&gt;
+ 
+-        &lt;EditBox name="CCNameEdit" inherits="ZO_DefaultEdit" font="CCEditFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" textType="ALPHABETIC" maxInputCharacters="CHARNAME_MAX_LENGTH" virtual="true"&gt;
+-            &lt;Dimensions x="370" y="24" /&gt;
+-
+-            &lt;OnTextChanged&gt;
+-                ZO_CharacterCreate_CheckEnableCreateButton(self)
+-            &lt;/OnTextChanged&gt;
+-
+-            &lt;OnFocusGained&gt;
+-                ZO_CharacterCreate_OnNameFieldFocusGained(self)
+-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+-                    PlaySound(SOUNDS.EDIT_CLICK)
+-                end
+-            &lt;/OnFocusGained&gt;
+-
+-            &lt;OnFocusLost&gt;
+-                ZO_CharacterCreate_OnNameFieldFocusLost(self)
+-            &lt;/OnFocusLost&gt;
+-
+-            &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop"&gt;
+-                    &lt;Anchor point="TOPLEFT" offsetX="-6" offsetY="-6" /&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" offsetX="6" offsetY="6" /&gt;
+-                &lt;/Backdrop&gt;
+-                
+-                &lt;Label name="$(parent)Instructions" font="CCEditFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" text="SI_CREATE_CHARACTER_TITLE_FIRST_NAME"&gt;
+-                    &lt;AnchorFill /&gt;
+-
+-                    &lt;OnInitialized&gt;
+-                        local anim = ZO_AlphaAnimation:New(self)
+-                        anim:PingPong(1, .4, 1000, LOOP_INDEFINITELY)
+-                    &lt;/OnInitialized&gt;
+-                &lt;/Label&gt;
+-            &lt;/Controls&gt;
+-        &lt;/EditBox&gt;
+-
+         &lt;Button name="CCCategoryTab" mouseOverBlendMode="ADD" virtual="true" clickSound="Click_CC_Selector"&gt;
+             &lt;Dimensions x="64" y="64" /&gt;
+ 
+@@ -446,9 +409,39 @@
+ 
+                 &lt;Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation" /&gt;
+ 
+-                &lt;EditBox name="$(parent)CharacterName" inherits="CCNameEdit"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Buckets" offsetX="20" offsetY="94" /&gt;
++                &lt;Backdrop name="$(parent)Character" inherits="ZO_SingleLineEditBackdropDark_Keyboard" tier="MEDIUM"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Buckets" offsetX="20" offsetY="88" /&gt;
++                    &lt;Dimensions x="370"/&gt;
++                    &lt;Controls&gt;
++                        &lt;EditBox name="$(parent)Name" inherits="ZO_DefaultEditForDarkBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" textType="ALPHABETIC" maxInputCharacters="CHARNAME_MAX_LENGTH"&gt;
++                            &lt;OnTextChanged&gt;
++                                ZO_CharacterCreate_CheckEnableCreateButton(self)
++                            &lt;/OnTextChanged&gt;
++
++                            &lt;OnFocusGained&gt;
++                                ZO_CharacterCreate_OnNameFieldFocusGained(self)
++                                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
++                                    PlaySound(SOUNDS.EDIT_CLICK)
++                                end
++                            &lt;/OnFocusGained&gt;
++
++                            &lt;OnFocusLost&gt;
++                                ZO_CharacterCreate_OnNameFieldFocusLost(self)
++                            &lt;/OnFocusLost&gt;
++
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)Instructions" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" text="SI_CREATE_CHARACTER_TITLE_FIRST_NAME"&gt;
++                                    &lt;AnchorFill /&gt;
++
++                                    &lt;OnInitialized&gt;
++                                        local anim = ZO_AlphaAnimation:New(self)
++                                        anim:PingPong(1, .4, 1000, LOOP_INDEFINITELY)
++                                    &lt;/OnInitialized&gt;
++                                &lt;/Label&gt;
++                            &lt;/Controls&gt;
+                         &lt;/EditBox&gt;
++                    &lt;/Controls&gt;
++                &lt;/Backdrop&gt;                
+ 
+                 &lt;Texture name="$(parent)TopDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds"&gt;
+                     &lt;Dimensions x="432" y="4" /&gt;
+</code></pre>
+<script src="prism.js"></script>

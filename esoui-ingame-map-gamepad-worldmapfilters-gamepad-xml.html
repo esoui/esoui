@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/map/gamepad/worldmapfilters_gamepad.xml b/esoui/ingame/map/gamepad/worldmapfilters_gamepad.xml
+index 95d1661..575c7b4 100755
+--- a/esoui/ingame/map/gamepad/worldmapfilters_gamepad.xml
++++ b/esoui/ingame/map/gamepad/worldmapfilters_gamepad.xml
+@@ -3,7 +3,7 @@
+         &lt;Control name="ZO_GamepadWorldMapFilterCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsRightCheckbox_Gamepad" virtual="true"&gt;
+             &lt;Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" /&gt;
+             &lt;Controls&gt;
+-                &lt;Label name="$(parent)Label" maxLines="1" override="true"&gt;
++                &lt;Label name="$(parent)Label" maxLineCount="1" override="true"&gt;
+                     &lt;Anchor point="TOPLEFT"/&gt;
+                     &lt;Dimensions x="340"/&gt;
+                 &lt;/Label&gt;
+</code></pre>
+<script src="prism.js"></script>

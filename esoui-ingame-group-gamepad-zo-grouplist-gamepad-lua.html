@@ -1,0 +1,76 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/gamepad/zo_grouplist_gamepad.lua b/esoui/ingame/group/gamepad/zo_grouplist_gamepad.lua
+index cb90ecb..e1b3f37 100755
+--- a/esoui/ingame/group/gamepad/zo_grouplist_gamepad.lua
++++ b/esoui/ingame/group/gamepad/zo_grouplist_gamepad.lua
+@@ -16,7 +16,7 @@ local SORT_KEYS =
+ --Group List Gamepad
+ ----------------------------------
+ 
+-local GroupList_Gamepad = ZO_Object.MultiSubclass(ZO_GroupList_Base, ZO_GamepadSocialListPanel)
++local GroupList_Gamepad = ZO_GamepadSocialListPanel:Subclass()
+ 
+ function GroupList_Gamepad:New(...)
+     return ZO_GamepadSocialListPanel.New(self, ...)
+@@ -24,18 +24,8 @@ end
+ 
+ function GroupList_Gamepad:Initialize(control)
+     ZO_GamepadSocialListPanel.Initialize(self, control, GROUP_LIST_MANAGER, "ZO_GroupListRow_Gamepad")
+-    ZO_GroupList_Base.Initialize(self, control)
+     self:SetEmptyText(GetString(SI_GAMEPAD_GROUP_LIST_PANEL_NO_GROUP_MESSAGE));
+     self:SetupSort(SORT_KEYS, "displayName", ZO_SORT_ORDER_DOWN)
+-
+-    self:InitializeEvents()
+-end
+-
+-function GroupList_Gamepad:InitializeEvents()
+-    local function OnGroupMemberJoined()
+-        PlaySound(SOUNDS.GROUP_JOIN)
+-    end
+-    self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
+ end
+ 
+ function GroupList_Gamepad:GetBackKeybindCallback()
+@@ -51,7 +41,7 @@ function GroupList_Gamepad:SetupRow(control, data, selected)
+ 
+     local displayNameControl = control:GetNamedChild("DisplayName")
+     if data.leader then
+-        displayNameControl:SetText(zo_iconTextFormat("EsoUI/Art/LFG/LFG_leader_icon.dds", 32, 32, ZO_FormatUserFacingDisplayName(data.displayName)))
++        displayNameControl:SetText(zo_iconTextFormat("EsoUI/Art/UnitFrames/Gamepad/gp_Group_Leader.dds", 32, 32, ZO_FormatUserFacingDisplayName(data.displayName)))
+     end
+ 
+     displayNameControl:SetColor(fontColor:UnpackRGB())
+@@ -76,7 +66,7 @@ end
+ 
+ function GroupList_Gamepad:RefreshData()
+     if not self.control:IsHidden() then
+-        ZO_SortFilterList.RefreshData(self)
++        ZO_GamepadSocialListPanel.RefreshData(self)
+     end
+ end
+ 
+@@ -92,8 +82,7 @@ function GroupList_Gamepad:BuildOptionsList()
+     local groupingId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
+ 
+     local function BuildTravelToGroupPlayerOption()
+-        local IGNORE_ALLIANCE = true
+-        return self:BuildTravelToPlayerOption(JumpToGroupMember, IGNORE_ALLIANCE)
++        return self:BuildTravelToPlayerOption(JumpToGroupMember)
+     end
+     self:AddOptionTemplate(groupingId, BuildTravelToGroupPlayerOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
+     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption, ZO_SocialOptionsDialogGamepad.ShouldAddWhisperOption)
+@@ -109,6 +98,8 @@ function GroupList_Gamepad:BuildOptionsList()
+     self:AddOptionTemplate(groupingId, GroupList_Gamepad.BuildKickMemberOption, CanManipulateRank)
+     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
+     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
++
++    self:AddInviteToGuildOptionTemplates()
+ end
+ 
+ function GroupList_Gamepad:BuildPromoteToLeaderOption()
+</code></pre>
+<script src="prism.js"></script>

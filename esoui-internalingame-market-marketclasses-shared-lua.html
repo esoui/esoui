@@ -1,0 +1,127 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/marketclasses_shared.lua b/esoui/internalingame/market/marketclasses_shared.lua
+index 50d9c7f..73788e6 100755
+--- a/esoui/internalingame/market/marketclasses_shared.lua
++++ b/esoui/internalingame/market/marketclasses_shared.lua
+@@ -150,6 +150,11 @@ function ZO_MarketProductBase:GetBackgroundSaturation(isPurchased)
+     return isPurchased and ZO_MARKET_PRODUCT_PURCHASED_DESATURATION or ZO_MARKET_PRODUCT_NOT_PURCHASED_DESATURATION
+ end
+ 
++function ZO_MarketProductBase:IsLimitedTimeProduct()
++    local remainingTime = self:GetTimeLeftInSeconds()
++    return remainingTime &gt; 0 and remainingTime &lt;= ZO_ONE_MONTH_IN_SECONDS
++end
++
+ do
+     local TEXT_CALLOUT_BACKGROUND_ALPHA = 0.9
+     function ZO_MarketProductBase:SetCalloutColor(calloutColor)
+@@ -167,14 +172,20 @@ do
+     function ZO_MarketProductBase:LayoutCostAndText(description, cost, discountPercent, discountedCost, isNew)
+         local canPurchase = not self:IsPurchaseLocked()
+         local hideCallouts = true
++        local isFree = cost == 0 or discountedCost == 0
++        self.isFree = isFree
+ 
+         if canPurchase then
+              -- callouts for new and on sale
+             local onSale = discountPercent &gt; 0
+-            local remainingTime = self:GetTimeLeftInSeconds()
+ 
+             local calloutUpdateHandler
+-            if onSale then
++            -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
++            if self:IsLimitedTimeProduct() then
++                hideCallouts = false
++                self:UpdateRemainingTimeCalloutText()
++                calloutUpdateHandler = function() self:UpdateRemainingTimeCalloutText() end
++            elseif onSale then
+                 hideCallouts = false
+                 self.textCallout:SetText(zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent))
+                 calloutUpdateHandler = nil
+@@ -184,11 +195,6 @@ do
+                 self.textCallout:SetText(NEW_STRING)
+                 calloutUpdateHandler = nil
+                 self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+-            -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
+-            elseif remainingTime &gt; 0 and remainingTime &lt;= ZO_ONE_MONTH_IN_SECONDS then
+-                hideCallouts = false
+-                self:UpdateRemainingTimeCalloutText()
+-                calloutUpdateHandler = function() self:UpdateRemainingTimeCalloutText() end
+             end
+ 
+             self.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
+@@ -197,16 +203,25 @@ do
+             self.isNew = isNew
+ 
+             -- setup the cost
+-            if onSale then
++            if onSale and not isFree then
+                 self.previousCost:SetText(ZO_CommaDelimitNumber(cost))
+             end
+ 
++            if not isFree then
+                 self.previousCost:SetHidden(not onSale)
+                 self.previousCostStrikethrough:SetHidden(not onSale)
+-
+                 self.cost:SetText(zo_strformat(SI_MARKET_LABEL_CURRENCY_FORMAT_NO_ICON, ZO_CommaDelimitNumber(discountedCost)))
+             else
+                 self.previousCost:SetHidden(true)
++                self.previousCostStrikethrough:SetHidden(true)
++                self.purchaseLabelControl:SetText(GetString(SI_MARKET_FREE_LABEL))
++                ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
++            end
++
++            self.purchaseLabelControl:SetHidden(not isFree)
++            self.cost:SetHidden(isFree)
++        else
++            self.previousCost:SetHidden(true)
+             if self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
+                 --There can only be one where completion is concerned
+                 local errorStringId = GetMarketProductReqListErrorStringIds(self.marketProductId)
+@@ -217,15 +232,14 @@ do
+                 self.purchaseLabelControl:SetText(GetString(SI_MARKET_PURCHASED_LABEL))
+             end
+             ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
++
++            self.purchaseLabelControl:SetHidden(false)
++            self.cost:SetHidden(true)
+         end
+ 
+         self.textCallout:SetHidden(hideCallouts)
+ 
+         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, FOCUSED, self.purchaseState)
+-
+-        self.cost:SetHidden(self:IsPurchaseLocked())
+-
+-        self.purchaseLabelControl:SetHidden(canPurchase)
+     end
+ end
+ 
+@@ -307,6 +321,12 @@ function ZO_MarketProductBase:SetHighlightHidden(hidden)
+     end
+ end
+ 
++function ZO_MarketProductBase:PlayHighlightAnimationToEnd()
++    if self.highlightAnimation then
++        self.highlightAnimation:PlayInstantlyToEnd()
++    end
++end
++
+ function ZO_MarketProductBase:HasActiveIcon()
+     return self.activeMarketProductIcon ~= nil
+ end
+@@ -332,7 +352,7 @@ function ZO_MarketProductBase:IsPreviewingCollectible(index)
+ end
+ 
+ function ZO_MarketProductBase:EndPreview()
+-    EndCurrentItemPreview()
++    EndCurrentMarketPreview()
+     self.owner:RefreshActions()
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

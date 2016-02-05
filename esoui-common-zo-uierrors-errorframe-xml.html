@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/zo_uierrors/errorframe.xml b/esoui/common/zo_uierrors/errorframe.xml
+index d2f3174..d2da25f 100755
+--- a/esoui/common/zo_uierrors/errorframe.xml
++++ b/esoui/common/zo_uierrors/errorframe.xml
+@@ -61,7 +61,7 @@
+                     &lt;/OnClicked&gt;
+                 &lt;/Button&gt;
+ 
+-                &lt;Backdrop name="$(parent)Text" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Text" inherits="ZO_MultiLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" offsetY="30"/&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-40"/&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

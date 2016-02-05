@@ -1,0 +1,68 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/genericfooters/genericfooters.xml b/esoui/common/gamepad/genericfooters/genericfooters.xml
+index 7d61576..0e0beff 100755
+--- a/esoui/common/gamepad/genericfooters/genericfooters.xml
++++ b/esoui/common/gamepad/genericfooters/genericfooters.xml
+@@ -1,5 +1,13 @@
+ &lt;GuiXml&gt;
+     &lt;Controls&gt;
++        &lt;Label name="ZO_GamepadGenericFooterHeaderDataTextTemplate" inherits="ZO_GamepadHeaderDataTextTemplate" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)LoadingIcon" inherits="ZO_LoadingIcon_Gamepad_Footer" hidden="true"&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="5" /&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/Label&gt;
++        
+         &lt;TopLevelControl name="ZO_GenericFooter_Gamepad" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_GenericFooter_Gamepad_OnInitialized(self)
+@@ -11,7 +19,7 @@
+             &lt;Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/&gt;
+ 
+             &lt;Controls&gt;
+-                &lt;Label name="$(parent)Data1" inherits="ZO_GamepadHeaderDataTextTemplate"&gt;
++                &lt;Label name="$(parent)Data1" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate"&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="2"/&gt;
+                 &lt;/Label&gt;
+ 
+@@ -19,7 +27,7 @@
+                     &lt;AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data1" offsetX="-ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING"/&gt;
+                 &lt;/Label&gt;
+ 
+-                &lt;Label name="$(parent)Data2" inherits="ZO_GamepadHeaderDataTextTemplate"&gt;
++                &lt;Label name="$(parent)Data2" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate"&gt;
+                     &lt;AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data1Header" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" /&gt;
+                 &lt;/Label&gt;
+ 
+@@ -27,23 +35,13 @@
+                     &lt;AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data2" offsetX="-ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING" /&gt;
+                 &lt;/Label&gt;
+ 
+-                &lt;Label name="$(parent)Data3" inherits="ZO_GamepadHeaderDataTextTemplate"&gt;
++                &lt;Label name="$(parent)Data3" inherits="ZO_GamepadGenericFooterHeaderDataTextTemplate"&gt;
+                     &lt;AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data2Header" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" /&gt;
+                 &lt;/Label&gt;
+ 
+                 &lt;Label name="$(parent)Data3Header" inherits="ZO_GamepadHeaderLabelTextTemplate"&gt;
+                     &lt;AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Data3" offsetX="-ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING" /&gt;
+                 &lt;/Label&gt;
+-
+-                &lt;Control name="$(parent)LoadingIcon" inherits="ZO_LoadingIcon_Gamepad_Footer" hidden="true"&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Data3" relativePoint="BOTTOMLEFT" offsetX="-5" /&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Texture name="$(parent)Animation" override="true"&gt;
+-                            &lt;Anchor point="CENTER" offsetY="7" /&gt;
+-                        &lt;/Texture&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,410 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/voicechat/console/zo_voicechatchannels_gamepad.lua b/esoui/ingame/voicechat/console/zo_voicechatchannels_gamepad.lua
+index 63e9b69..30129d3 100755
+--- a/esoui/ingame/voicechat/console/zo_voicechatchannels_gamepad.lua
++++ b/esoui/ingame/voicechat/console/zo_voicechatchannels_gamepad.lua
+@@ -1,19 +1,18 @@
+---------------------------------------------
++--------------------------------------------------------------------------------
+ -- Voice Chat Channels
+---------------------------------------------
++--  Consists of a list of channels the user can join, and a history
++--  list of previous users heard for each channel.
++--------------------------------------------------------------------------------
+ 
+-local ICON_LISTENING_CHANNEL = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_listening.dds"
+-local ICON_MUTED_PLAYER = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_muted.dds"
+-
+-local LIST_MODE_CHANNELS = 1
+-local LIST_MODE_HISTORY = 2
++local LIST_CHANNELS = 1
++local LIST_HISTORY = 2
+ 
+ 
+ local function ComparatorGuildRoomEntries(entry1, entry2)
+-    --Room 0 is Officers room and is placed at the bottom
+-    if entry1.guildRoomNumber == 0 then
++    --We want the officer's room to always be placed at the bottom.
++    if entry1.guildRoomNumber == VOICE_CHAT_OFFICERS_ROOM_NUMBER then
+         return false
+-    elseif entry2.guildRoomNumber == 0 then
++    elseif entry2.guildRoomNumber == VOICE_CHAT_OFFICERS_ROOM_NUMBER then
+         return true
+     end
+ 
+@@ -34,11 +33,9 @@ function ZO_VoiceChatChannelsGamepad:Initialize(control)
+     self:SetListsUseTriggerKeybinds(true)
+ 
+     self.control = control
+-    self.unavailableMessage = zo_strformat(GetString(SI_GAMEPAD_VOICECHAT_UNAVAILABLE), GetString(SI_GAMEPAD_HELP_WEBSITE))
+     
+     self:InitializeHeaders()
+     self:InitializeFragment(control)
+-
+     self:InitializeEvents()
+ end
+ 
+@@ -50,7 +47,7 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
+ 
+         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.historyKeybinds)
+-        self.listMode = LIST_MODE_CHANNELS
++        self.currentList = LIST_CHANNELS
+         self:Update()
+         KEYBIND_STRIP:AddKeybindButtonGroup(self.channelKeybinds)
+     end
+@@ -61,7 +58,7 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
+ 
+         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.channelKeybinds)
+-        self.listMode = LIST_MODE_HISTORY
++        self.currentList = LIST_HISTORY
+         self:Update()
+         KEYBIND_STRIP:AddKeybindButtonGroup(self.historyKeybinds)
+     end
+@@ -85,48 +82,44 @@ function ZO_VoiceChatChannelsGamepad:InitializeHeaders()
+ end
+ 
+ function ZO_VoiceChatChannelsGamepad:InitializeFragment(control)
++    local function OnStateChange(oldState, newState)
++        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
++    end
++
+     GAMEPAD_VOICECHAT_CHANNELS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+     self.fragment = GAMEPAD_VOICECHAT_CHANNELS_FRAGMENT
+-    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
+-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
+-    end)
++    self.fragment:RegisterCallback("StateChange", OnStateChange)
+ end
+ 
+ function ZO_VoiceChatChannelsGamepad:InitializeEvents()
+     --Manager callbacks
+     VOICE_CHAT_MANAGER:RegisterCallback("ChannelsUpdate", function() self:Update() end)
+     VOICE_CHAT_MANAGER:RegisterCallback("ParticipantsUpdate", function()
+-        self:UpdateParticipants()
++        self:UpdateParticipantsPanel()
+         self:UpdateKeybinds()
+     end)
+     VOICE_CHAT_MANAGER:RegisterCallback("MuteUpdate", function() self:Update() end)
+     VOICE_CHAT_MANAGER:RegisterCallback("RequestsAllowed", function() self:UpdateKeybinds() end)
+     VOICE_CHAT_MANAGER:RegisterCallback("RequestsDisabled", function()
+         local SHOULD_PERSIST = true
+-        KEYBIND_STRIP:TriggerCooldown(self.joinOrActivateChannelBind, VOICE_CHAT_REQUEST_DELAY, nil, SHOULD_PERSIST)
+-        KEYBIND_STRIP:TriggerCooldown(self.leaveChannelBind, VOICE_CHAT_REQUEST_DELAY, nil, SHOULD_PERSIST)
++        KEYBIND_STRIP:TriggerCooldown(self.joinOrActivateChannelKeybind, VOICE_CHAT_REQUEST_DELAY, nil, SHOULD_PERSIST)
++        KEYBIND_STRIP:TriggerCooldown(self.leaveChannelKeybind, VOICE_CHAT_REQUEST_DELAY, nil, SHOULD_PERSIST)
+     end)
+ 
+-    --Event callbacks for playing sounds
+-    local eventToSound = {
+-        [EVENT_VOICE_CHANNEL_JOINED] = SOUNDS.VOICE_CHAT_MENU_CHANNEL_JOINED,
+-        [EVENT_VOICE_CHANNEL_LEFT] = SOUNDS.VOICE_CHAT_MENU_CHANNEL_LEFT,
+-        [EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED] = SOUNDS.VOICE_CHAT_MENU_CHANNEL_MADE_ACTIVE,
+-    }
+-
++    --Event callbacks for playing sounds specifically while on this scene
+     local function OnVoiceChannelJoined()
+         if not self:IsHidden() then
+-            PlaySound(eventToSound[EVENT_VOICE_CHANNEL_JOINED])
++            PlaySound(SOUNDS.VOICE_CHAT_MENU_CHANNEL_JOINED)
+         end
+     end
+     local function OnVoiceChannelLeft()
+         if not self:IsHidden() then
+-            PlaySound(eventToSound[EVENT_VOICE_CHANNEL_LEFT])
++            PlaySound(SOUNDS.VOICE_CHAT_MENU_CHANNEL_LEFT)
+         end
+     end
+     local function OnVoiceTransmitChannelChanged()
+         if not self:IsHidden() then
+-            PlaySound(eventToSound[EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED])
++            PlaySound(SOUNDS.VOICE_CHAT_MENU_CHANNEL_MADE_ACTIVE)
+         end
+     end
+ 
+@@ -135,13 +128,13 @@ function ZO_VoiceChatChannelsGamepad:InitializeEvents()
+     self.control:RegisterForEvent(EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED, function(eventCode, ...) OnVoiceTransmitChannelChanged(...) end)
+ end
+ 
+-local function PopulateChannelsHelper(list, channel, header)
+-    local newEntry = ZO_GamepadEntryData:New(channel.name, channel.isJoined and ICON_LISTENING_CHANNEL)
++local function PopulateChannelsHelper(list, channel, headerText)
++    local newEntry = ZO_GamepadEntryData:New(channel.name, channel.isJoined and VOICE_CHAT_ICON_LISTENING_CHANNEL)
+     newEntry.channel = channel
+     newEntry:SetChannelActive(channel.isTransmitting)
+ 
+-    if header then
+-        newEntry:SetHeader(header)
++    if headerText then
++        newEntry:SetHeader(headerText)
+ 	    list:AddEntryWithHeader("ZO_VoiceChatChannelsEntryGamepad", newEntry)
+     else
+         list:AddEntry("ZO_VoiceChatChannelsEntryGamepad", newEntry)
+@@ -180,20 +173,20 @@ function ZO_VoiceChatChannelsGamepad:PopulateChannels()
+     end
+ end
+ 
+-local function PopulateHistoryHelper(list, historyData, header, channel)
++local function PopulateHistoryHelper(list, historyData, channelName, channel)
+     local dataList = historyData.list
+ 
+-    for i = #dataList, 1, -1 do
++    for i = #dataList, 1, -1 do --we want newer entries added first, and the list is in order from old to new
+         local userData = dataList[i]
+-        local newEntry = ZO_GamepadEntryData:New(ZO_FormatUserFacingDisplayName(userData.displayName), userData.isMuted and ICON_MUTED_PLAYER)
++        local newEntry = ZO_GamepadEntryData:New(ZO_FormatUserFacingDisplayName(userData.displayName), userData.isMuted and VOICE_CHAT_ICON_MUTED_PLAYER)
+         newEntry.historyData = userData
+-        newEntry.channelName = header
++        newEntry.channelName = channelName
+         newEntry.channel = channel
+-        if i == #dataList then
+-            newEntry:SetHeader(header)
+-            list:AddEntryWithHeader("ZO_VoiceChatChannelsHistoryEntryGamepad", newEntry)
++        if i == #dataList then --first entry
++            newEntry:SetHeader(channelName)
++            list:AddEntryWithHeader("ZO_VoiceChatHistoryEntryGamepad", newEntry)
+         else
+-            list:AddEntry("ZO_VoiceChatChannelsHistoryEntryGamepad", newEntry)
++            list:AddEntry("ZO_VoiceChatHistoryEntryGamepad", newEntry)
+         end
+     end
+ end
+@@ -223,36 +216,28 @@ function ZO_VoiceChatChannelsGamepad:PopulateHistory()
+     end
+ end
+ 
+-function ZO_VoiceChatChannelsGamepad:ShowVoiceChatUnavailableMessage()
+-    self.headerData.messageText = self.unavailableMessage
+-end
+-
+-function ZO_VoiceChatChannelsGamepad:HideVoiceChatUnavailableMessage()
+-    self.headerData.messageText = nil
+-end
+-
+ function ZO_VoiceChatChannelsGamepad:RefreshHeaderData()
+     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
+ end
+ 
+-function ZO_Gamepad_ParametricList_Screen:UpdateKeybinds()
+-    if not GAMEPAD_VOICECHAT_SCENE:IsShowing() then
++function ZO_VoiceChatChannelsGamepad:UpdateKeybinds()
++    if not GAMEPAD_VOICECHAT_CHANNELS_SCENE:IsShowing() then
+         return
+     end
+ 
+-    if self.listMode == LIST_MODE_CHANNELS then
++    if self.currentList == LIST_CHANNELS then
+         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.channelKeybinds)
+-    elseif self.listMode == LIST_MODE_HISTORY then
++    elseif self.currentList == LIST_HISTORY then
+         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.historyKeybinds)
+     end
+ end
+ 
+-function ZO_Gamepad_ParametricList_Screen:UpdateParticipants()
++function ZO_VoiceChatChannelsGamepad:UpdateParticipantsPanel()
+     if self:IsHidden() then
+         return
+     end
+ 
+-    if self.listMode ~= LIST_MODE_CHANNELS then
++    if self.currentList ~= LIST_CHANNELS then
+         return
+     end
+ 
+@@ -268,7 +253,7 @@ function ZO_Gamepad_ParametricList_Screen:UpdateParticipants()
+     end
+ end
+ 
+-function ZO_Gamepad_ParametricList_Screen:IsHidden()
++function ZO_VoiceChatChannelsGamepad:IsHidden()
+     return self.control:IsControlHidden()
+ end
+ 
+@@ -278,17 +263,17 @@ function ZO_VoiceChatChannelsGamepad:SetupList(list)
+     list:AddDataTemplate("ZO_VoiceChatChannelsEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+ 	list:AddDataTemplateWithHeader("ZO_VoiceChatChannelsEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+ 
+-    list:AddDataTemplate("ZO_VoiceChatChannelsHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+-	list:AddDataTemplateWithHeader("ZO_VoiceChatChannelsHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
++    list:AddDataTemplate("ZO_VoiceChatHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
++	list:AddDataTemplateWithHeader("ZO_VoiceChatHistoryEntryGamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+ 
+-    self.listMode = LIST_MODE_CHANNELS
++    self.currentList = LIST_CHANNELS
+ end
+ 
+ function ZO_VoiceChatChannelsGamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+     if selectedData then
+         GAMEPAD_TOOLTIPS:ClearStatusLabel(GAMEPAD_LEFT_TOOLTIP)
+ 
+-        if self.listMode == LIST_MODE_CHANNELS then
++        if self.currentList == LIST_CHANNELS then
+             local channel = selectedData.channel
+ 
+             if channel.isJoined then
+@@ -298,14 +283,14 @@ function ZO_VoiceChatChannelsGamepad:OnSelectionChanged(list, selectedData, oldS
+                 GAMEPAD_TOOLTIPS:LayoutVoiceChatChannel(GAMEPAD_LEFT_TOOLTIP, channel)
+             end
+ 
+-        elseif self.listMode == LIST_MODE_HISTORY then
++        elseif self.currentList == LIST_HISTORY then
+             local historyData = selectedData.historyData
+ 
+             local displayName = historyData.displayName
+             local channelName = selectedData.channelName
+             local lastTimeSpoken = historyData.lastTimeSpoken
+             GAMEPAD_TOOLTIPS:LayoutVoiceChatParticipantHistory(GAMEPAD_LEFT_TOOLTIP, displayName, channelName, lastTimeSpoken)
+-            VOICE_CHAT_GAMEPAD:SetupOptions({speakerData = historyData, channel = selectedData.channel})
++            VOICE_CHAT_SOCIAL_OPTIONS:SetupOptions({speakerData = historyData, channel = selectedData.channel})
+         else
+             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+         end
+@@ -319,7 +304,7 @@ do
+         return VOICE_CHAT_MANAGER:AreRequestsAllowed()
+     end
+     function ZO_VoiceChatChannelsGamepad:InitializeKeybindStripDescriptors()
+-        local joinOrActivateChannel = {
++        local joinOrActivateChannelKeybind = {
+             name =
+                 function()
+                     local channel = self.list:GetTargetData().channel
+@@ -337,7 +322,7 @@ do
+                 end,
+             visible =
+                 function()
+-                    if self.listMode ~= LIST_MODE_CHANNELS then
++                    if self.currentList ~= LIST_CHANNELS then
+                         return false
+                     end
+     
+@@ -351,7 +336,7 @@ do
+                 end,
+             enabled = RequestDelayEnabled,
+         }
+-        local leaveChannel = {
++        local leaveChannelKeybind = {
+             name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_LEAVE_CHANNEL),
+             keybind = "UI_SHORTCUT_SECONDARY",
+             callback =
+@@ -361,7 +346,7 @@ do
+                 end,
+             visible =
+                 function()
+-                    if self.listMode ~= LIST_MODE_CHANNELS then
++                    if self.currentList ~= LIST_CHANNELS then
+                         return false
+                     end
+     
+@@ -375,18 +360,18 @@ do
+                 end,
+             enabled = RequestDelayEnabled,
+         }
+-        local showParticipantOptions = {
++        local showParticipantsKeybind = {
+             name = GetString(SI_GAMEPAD_VOICECHAT_KEYBIND_PARTICIPANT_OPTIONS),
+             keybind = "UI_SHORTCUT_TERTIARY",
+             callback =
+                 function()
+                     local channel = self.list:GetTargetData().channel
+-                    VOICE_CHAT_PARTICIPANT_OPTIONS_GAMEPAD:SetChannel(channel)
+-                    SCENE_MANAGER:Push("gamepad_voice_chat_participant_options")
++                    VOICE_CHAT_PARTICIPANTS_GAMEPAD:SetChannel(channel)
++                    SCENE_MANAGER:Push("gamepad_voice_chat_participants")
+                 end,
+             visible =
+                 function()
+-                    if self.listMode ~= LIST_MODE_CHANNELS then
++                    if self.currentList ~= LIST_CHANNELS then
+                         return false
+                     end
+     
+@@ -401,20 +386,25 @@ do
+                     end
+     
+                     local participantDataList = VOICE_CHAT_MANAGER:GetParticipantDataList(channel)
+-                    return #participantDataList &gt; 1 --need to have someone other than the local player to show
++                    return #participantDataList &gt; 1 --we don't show the local player, so we need at least 1 other player
+                 end,
+         }
++
+         self.channelKeybinds = {
+             alignment = KEYBIND_STRIP_ALIGN_LEFT,
+-            joinOrActivateChannel, leaveChannel, showParticipantOptions, --these are map entries defined above, and are inserted in the same way as indiced entries
++            --These are inserted as numerically indiced entries
++            joinOrActivateChannelKeybind,
++            leaveChannelKeybind,
++            showParticipantsKeybind,
+         }
+         ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.channelKeybinds, GAME_NAVIGATION_TYPE_BUTTON)
+ 
+-        self.historyKeybinds = {}
++        self.historyKeybinds = {} --ZO_VoiceChatSocialOptions_Gamepad will add the social keybinds
+         ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.historyKeybinds, GAME_NAVIGATION_TYPE_BUTTON)
+ 
+-        self.joinOrActivateChannelBind = joinOrActivateChannel
+-        self.leaveChannelBind = leaveChannel
++        --Save these off so we can register cooldown delays on them later
++        self.joinOrActivateChannelKeybind = joinOrActivateChannelKeybind
++        self.leaveChannelKeybind = leaveChannelKeybind
+     end
+ end
+ 
+@@ -423,9 +413,9 @@ function ZO_VoiceChatChannelsGamepad:OnShowing()
+ 
+     self:PerformUpdate()
+ 
+-    if self.listMode == LIST_MODE_CHANNELS then
++    if self.currentList == LIST_CHANNELS then
+         KEYBIND_STRIP:AddKeybindButtonGroup(self.channelKeybinds)
+-    elseif self.listMode == LIST_MODE_HISTORY then
++    elseif self.currentList == LIST_HISTORY then
+         KEYBIND_STRIP:AddKeybindButtonGroup(self.historyKeybinds)
+     end
+ end
+@@ -441,24 +431,33 @@ function ZO_VoiceChatChannelsGamepad:OnHiding()
+     ZO_Gamepad_ParametricList_Screen.OnHiding(self)
+ end
+ 
++do
++    local function ShowUnavailableMessage(self)
++        self.headerData.messageText = zo_strformat(GetString(SI_GAMEPAD_VOICECHAT_UNAVAILABLE), GetString(SI_GAMEPAD_HELP_WEBSITE))
++    end
++    local function HideUnavailableMessage(self)
++        self.headerData.messageText = nil
++    end
++    
+     function ZO_VoiceChatChannelsGamepad:PerformUpdate()
+         self.dirty = false
+         self.list:Clear()
+     
+         if VOICE_CHAT_MANAGER:HasChannelData() then
+-        self:HideVoiceChatUnavailableMessage()
++            HideUnavailableMessage(self)
+             
+-        if self.listMode == LIST_MODE_CHANNELS then
++            if self.currentList == LIST_CHANNELS then
+                 self:PopulateChannels()
+                 TriggerTutorial(TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_CHANNELS)
+-        elseif self.listMode == LIST_MODE_HISTORY then
++            elseif self.currentList == LIST_HISTORY then
+                 self:PopulateHistory()
+                 TriggerTutorial(TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_HISTORY)
+             end
+         else
+-        self:ShowVoiceChatUnavailableMessage()
++            ShowUnavailableMessage(self)
+         end
+         self:RefreshHeaderData()
+     
+         self.list:Commit()
+     end
++end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

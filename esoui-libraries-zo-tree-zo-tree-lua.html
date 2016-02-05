@@ -1,0 +1,135 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_tree/zo_tree.lua b/esoui/libraries/zo_tree/zo_tree.lua
+index c9ccbbe..921e133 100755
+--- a/esoui/libraries/zo_tree/zo_tree.lua
++++ b/esoui/libraries/zo_tree/zo_tree.lua
+@@ -58,9 +58,9 @@ function ZO_Tree:Reset()
+ end
+ 
+ function ZO_Tree:SelectAnything()
+-    if not self.selectedNode then
++    if not self.selectedNode or not self.selectedNode:IsEnabled() then
+         local currentNode = self.rootNode
+-        while currentNode and not currentNode:IsLeaf() do
++        while currentNode and not currentNode:IsLeaf() and currentNode:IsEnabled() do
+             currentNode = currentNode:GetChildren()[1]
+         end
+         if currentNode and currentNode ~= self.rootNode then
+@@ -124,15 +124,14 @@ function ZO_Tree:AddTemplate(template, setupFunction, selectionFunction, equalit
+     }    
+ end
+ 
+-function ZO_Tree:AddNode(template, data, parentNode, selectSound)
++function ZO_Tree:AddNode(template, data, parentNode, selectSound, open)
+     if(not parentNode) then
+         parentNode = self.rootNode
+     end
+ 
+     local templateInfo = self.templateInfo[template]
+ 
+-    local CLOSED = false
+-    local treeNode = ZO_TreeNode:New(self, templateInfo, parentNode, data, templateInfo.childIndent or self.defaultIndent, templateInfo.childSpacing or self.defaultSpacing, CLOSED)
++    local treeNode = ZO_TreeNode:New(self, templateInfo, parentNode, data, templateInfo.childIndent or self.defaultIndent, templateInfo.childSpacing or self.defaultSpacing, open == true)
+ 	treeNode.selectSound = selectSound
+     parentNode:AddChild(treeNode)
+     
+@@ -174,7 +173,7 @@ function ZO_Tree:Commit(nodeToSelect)
+         ReopenNodes(self, currentNodeOfPreviousTree, currentNodeOfCurrentTree)
+     end
+ 
+-    if nodeToSelect ~= nil then
++    if nodeToSelect ~= nil and nodeToSelect:IsEnabled() then
+         self:SelectNode(nodeToSelect)
+     elseif self.exclusive then
+         self:SelectAnything()
+@@ -202,7 +201,7 @@ function ZO_Tree:RefreshVisible()
+ end
+ 
+ function ZO_Tree:ToggleNode(treeNode)
+-    if not self.exclusive or not treeNode:IsOpen() then
++    if treeNode:IsEnabled() and (not self.exclusive or not treeNode:IsOpen()) then
+         self:SetNodeOpen(treeNode, not treeNode:IsOpen(), USER_REQUESTED_OPEN)
+     end
+ end
+@@ -240,7 +239,7 @@ function ZO_Tree:SetNodeOpen(treeNode, open, userRequested)
+ end
+ 
+ function ZO_Tree:SelectNode(treeNode, reselectingDuringRebuild)
+-    if(treeNode:IsLeaf() and self.selectedNode ~= treeNode) then
++    if(treeNode:IsLeaf() and treeNode:IsEnabled() and self.selectedNode ~= treeNode) then
+         if self.selectedNode then
+             self.selectedNode:OnUnselected()
+         end
+@@ -276,6 +275,10 @@ function ZO_Tree:GetSelectedData()
+     end
+ end
+ 
++function ZO_Tree:GetSelectedNode()
++    return self.selectedNode
++end
++
+ function ZO_Tree:GetSelectionHighlight()
+     if(self.selectionHighlight) then
+         return self.selectionHighlight
+@@ -362,6 +365,7 @@ function ZO_TreeNode:New(tree, templateInfo, parentNode, data, childIndent, chil
+     node.open = open
+     node.openPercentage = open and 1 or 0
+     node.selected = false
++    node.enabled = true
+ 
+     node:RefreshControl()
+ 
+@@ -439,6 +443,16 @@ function ZO_TreeNode:IsSelected()
+     return self:IsLeaf() and self.selected
+ end
+ 
++--This functionality works in the context of a full refresh rather than arbitrarily deciding to disable a node manually
++--So you'll want to control this in a setup/refresh, and ensure that the tree's Commit function is called after said refresh.
++function ZO_TreeNode:SetEnabled(enabled)
++    self.enabled = enabled
++end
++
++function ZO_TreeNode:IsEnabled()
++    return self.enabled
++end
++
+ function ZO_TreeNode:RefreshVisible(userRequested)
+     self:RefreshControl(userRequested)
+     if self.children then
+@@ -457,7 +471,7 @@ function ZO_TreeNode:IsOpen()
+ end
+ 
+ function ZO_TreeNode:SetOpen(open, userRequested)
+-    if(not self:IsLeaf() and self.open ~= open) then
++    if(not self:IsLeaf() and self.enabled and self.open ~= open) then
+         self.open = open
+         self:RefreshControl(userRequested)
+         if(self:IsAnimated()) then
+@@ -613,7 +627,9 @@ end
+ function ZO_TreeHeader_OnMouseUp(self, upInside)
+     if(upInside and self.node.tree.enabled) then
+         -- Play the selected sound if not already opened
+-		if(not self.node.open and self.node.selectSound) then
++        if not self.node:IsEnabled() then
++            PlaySound(SOUNDS.NEGATIVE_CLICK)
++		elseif not self.node.open and self.node.selectSound then
+ 			PlaySound(self.node.selectSound)
+ 		end
+ 
+@@ -624,7 +640,9 @@ end
+ function ZO_TreeEntry_OnMouseUp(self, upInside)
+     if(upInside and self.node.tree.enabled) then
+         -- Play the selected sound if not already selected
+-		if(not self.node.selected and self.node.selectSound) then
++        if not self.node:IsEnabled() then
++            PlaySound(SOUNDS.NEGATIVE_CLICK)
++        elseif not self.node.selected and self.node.selectSound then
+             PlaySound(self.node.selectSound)
+         end
+ 
+</code></pre>
+<script src="prism.js"></script>

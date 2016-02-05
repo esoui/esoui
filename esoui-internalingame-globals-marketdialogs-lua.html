@@ -1,0 +1,142 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/globals/marketdialogs.lua b/esoui/internalingame/globals/marketdialogs.lua
+index f106454..d265ddc 100755
+--- a/esoui/internalingame/globals/marketdialogs.lua
++++ b/esoui/internalingame/globals/marketdialogs.lua
+@@ -1,5 +1,18 @@
++local function LogPurchaseClose(dialog)
++                            if not dialog.info.dontLogClose then
++                                if dialog.info.logPurchasedMarketId then
++                                    OnMarketEndPurchase(dialog.data.marketProductId)
++                                else
++                                    OnMarketEndPurchase()
++                                end
++                            end
++                            dialog.info.dontLogClose = false
++                            dialog.info.logPurchasedMarketId = false
++                         end
++
+ ESO_Dialogs["MARKET_INSUFFICIENT_CROWNS"] =
+ {
++    finishedCallback = LogPurchaseClose,
+     title =
+     {
+         text = SI_MARKET_INSUFFICIENT_FUNDS_TITLE
+@@ -19,6 +32,7 @@ ESO_Dialogs["MARKET_INSUFFICIENT_CROWNS"] =
+ 
+ ESO_Dialogs["MARKET_INSUFFICIENT_CROWNS_WITH_LINK"] =
+ {
++    finishedCallback = LogPurchaseClose,
+     title =
+     {
+         text = SI_MARKET_INSUFFICIENT_FUNDS_TITLE
+@@ -32,7 +46,7 @@ ESO_Dialogs["MARKET_INSUFFICIENT_CROWNS_WITH_LINK"] =
+         [1] =
+         {
+             text = SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT,
+-            callback = ZO_MarketDialogs_Shared_OpenURL,
++            callback = ZO_MarketDialogs_Shared_OpenURLByType,
+             keybind = "DIALOG_PRIMARY",
+         },
+         [2] =
+@@ -45,6 +59,7 @@ ESO_Dialogs["MARKET_INSUFFICIENT_CROWNS_WITH_LINK"] =
+ 
+ ESO_Dialogs["MARKET_INVENTORY_FULL"] =
+ {
++    finishedCallback = LogPurchaseClose,
+     title =
+     {
+         text = SI_MARKET_INVENTORY_FULL_TITLE,
+@@ -63,6 +78,7 @@ ESO_Dialogs["MARKET_INVENTORY_FULL"] =
+ 
+ ESO_Dialogs["MARKET_UNABLE_TO_PURCHASE"] =
+ {
++    finishedCallback = LogPurchaseClose,
+     title =
+     {
+         text = SI_MARKET_UNABLE_TO_PURCHASE_TITLE,
+@@ -81,6 +97,7 @@ ESO_Dialogs["MARKET_UNABLE_TO_PURCHASE"] =
+ 
+ ESO_Dialogs["MARKET_PARTS_UNLOCKED"] =
+ {
++    finishedCallback = LogPurchaseClose,
+     title =
+     {
+         text = SI_MARKET_BUNDLE_PARTS_UNLOCKED_TITLE
+@@ -94,6 +111,7 @@ ESO_Dialogs["MARKET_PARTS_UNLOCKED"] =
+         {
+             text = SI_MARKET_BUNDLE_PARTS_UNLOCKED_CONTINUE,
+             callback =  function(dialog)
++                            dialog.info.dontLogClose = true
+                             -- the MARKET_PURCHASE_CONFIRMATION dialog will be queued to show once this one is hidden
+                             ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProductId = dialog.data.marketProductId })
+                         end,
+@@ -106,6 +124,7 @@ ESO_Dialogs["MARKET_PARTS_UNLOCKED"] =
+ 
+ ESO_Dialogs["MARKET_BUNDLE_PARTS_OWNED"] =
+ {
++    finishedCallback = LogPurchaseClose,
+     title =
+     {
+         text = SI_MARKET_BUNDLE_PARTS_OWNED_TITLE
+@@ -120,6 +139,7 @@ ESO_Dialogs["MARKET_BUNDLE_PARTS_OWNED"] =
+         {
+             text = SI_MARKET_BUNDLE_PARTS_OWNED_CONTINUE,
+             callback =  function(dialog)
++                            dialog.info.dontLogClose = true
+                             -- the MARKET_PURCHASE_CONFIRMATION dialog will be queued to show once this one is hidden
+                             ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProductId = dialog.data.marketProductId })
+                         end,
+@@ -131,30 +151,6 @@ ESO_Dialogs["MARKET_BUNDLE_PARTS_OWNED"] =
+     },
+ }
+ 
+-ESO_Dialogs["MARKET_CONFIRM_OPEN_URL"] =
+-{
+-    title =
+-    {
+-        text = SI_CONFIRM_OPEN_URL_TITLE,
+-    },
+-    mainText =
+-    {
+-        text = SI_CONFIRM_OPEN_URL_TEXT,
+-    },
+-    buttons =
+-    {
+-        [1] =
+-        {
+-            text = SI_URL_DIALOG_OPEN,
+-            callback = ZO_MarketDialogs_Shared_OpenURL,
+-        },
+-        [2] =
+-        {
+-            text = SI_DIALOG_CANCEL,
+-        },
+-    }
+-}
+-
+ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
+     local marketProductId = data.marketProductId
+     local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
+@@ -205,6 +201,7 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
+         "MARKET_PURCHASE_CONFIRMATION",
+         {
+             customControl = self,
++            finishedCallback = LogPurchaseClose,
+             setup = MarketPurchaseConfirmationDialogSetup,
+             title =
+             {
+@@ -218,6 +215,7 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
+                     control =   self:GetNamedChild("Confirm"),
+                     text =      SI_MARKET_CONFIRM_PURCHASE_LABEL,
+                     callback =  function(dialog)
++                                    dialog.info.logPurchasedMarketId = true 
+                                     -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
+                                     ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = dialog.data.itemName, hasItems = dialog.data.hasItems})
+                                     BuyMarketProduct(dialog.data.marketProductId)
+</code></pre>
+<script src="prism.js"></script>

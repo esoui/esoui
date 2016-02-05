@@ -1,0 +1,33 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_loot/gamepad/loothistory_gamepad.xml b/esoui/ingame/zo_loot/gamepad/loothistory_gamepad.xml
+index fa6aaed..8760f93 100755
+--- a/esoui/ingame/zo_loot/gamepad/loothistory_gamepad.xml
++++ b/esoui/ingame/zo_loot/gamepad/loothistory_gamepad.xml
+@@ -22,11 +22,19 @@
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+       
+-        &lt;TopLevelControl name="ZO_LootHistoryControl_Gamepad" hidden="true"&gt;
++        &lt;TopLevelControl name="ZO_LootHistoryControl_Gamepad" inherits="ZO_LootHistory_Shared" &gt;
+             &lt;Anchor point="BOTTOMLEFT" offsetY="-160"/&gt;
+             &lt;OnInitialized&gt;
+                 ZO_LootHistory_Gamepad_OnInitialized(self)
+             &lt;/OnInitialized&gt;
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)PersistentContainer" override="true"&gt;
++                    &lt;Anchor point="BOTTOMLEFT" /&gt;
++                &lt;/Control&gt;
++                &lt;Control name="$(parent)Container" override="true"&gt;
++                    &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPLEFT"/&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+ &lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,33 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_dialog/zo_dialog.lua b/esoui/libraries/zo_dialog/zo_dialog.lua
+index 306e676..f4e2429 100755
+--- a/esoui/libraries/zo_dialog/zo_dialog.lua
++++ b/esoui/libraries/zo_dialog/zo_dialog.lua
+@@ -888,8 +888,8 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
+         end
+     end
+ 
+-    if(dialog.info.noChoiceCallback and not releasedFromButton) then
+-        dialog.info.noChoiceCallback(dialog)
++    if(dialogInfo.noChoiceCallback and not releasedFromButton) then
++        dialogInfo.noChoiceCallback(dialog)
+     end
+ 
+     if next(dialogQueue) then
+@@ -900,6 +900,10 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
+         end
+     end
+ 
++    if dialogInfo.finishedCallback then
++        dialogInfo.finishedCallback(dialog)
++    end
++
+     -- Show next dialog in queue
+     local queuedDialog = table.remove(dialogQueue, 1)
+ 
+</code></pre>
+<script src="prism.js"></script>

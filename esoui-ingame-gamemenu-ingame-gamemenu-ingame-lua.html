@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/gamemenu_ingame/gamemenu_ingame.lua b/esoui/ingame/gamemenu_ingame/gamemenu_ingame.lua
+index 79e61c0..68e3372 100755
+--- a/esoui/ingame/gamemenu_ingame/gamemenu_ingame.lua
++++ b/esoui/ingame/gamemenu_ingame/gamemenu_ingame.lua
+@@ -55,7 +55,7 @@ end
+ -- Logout
+ 
+ local function ShowLogoutDialog()
+-    ZO_Dialogs_ShowDialog("LOG_OUT")
++    ZO_Dialogs_ShowPlatformDialog("LOG_OUT")
+ end
+ 
+ local function AddLogoutEntry(entryTable)
+</code></pre>
+<script src="prism.js"></script>

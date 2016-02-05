@@ -1,0 +1,21 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/stable/gamepad/stable_gamepad.lua b/esoui/ingame/stable/gamepad/stable_gamepad.lua
+index a7ff328..7d78260 100755
+--- a/esoui/ingame/stable/gamepad/stable_gamepad.lua
++++ b/esoui/ingame/stable/gamepad/stable_gamepad.lua
+@@ -127,7 +127,8 @@ end
+ 
+ function ZO_Stable_Gamepad:SetHidden(hidden)
+     if not hidden and STABLE_GAMEPAD then
+-        STORE_WINDOW_GAMEPAD:SetActiveComponents(ZO_MODE_STORE_BUY, ZO_MODE_STORE_STABLE)
++        local componentTable = {ZO_MODE_STORE_BUY, ZO_MODE_STORE_STABLE}
++        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
+         if HasMountSkin() then
+             STORE_WINDOW_GAMEPAD:SetDeferredStartingMode(ZO_MODE_STORE_STABLE)
+         end
+</code></pre>
+<script src="prism.js"></script>

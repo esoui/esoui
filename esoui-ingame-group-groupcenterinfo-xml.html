@@ -1,0 +1,127 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/groupcenterinfo.xml b/esoui/ingame/group/groupcenterinfo.xml
+deleted file mode 100755
+index 74edcd0..0000000
+--- a/esoui/ingame/group/groupcenterinfo.xml
++++ /dev/null
+@@ -1,113 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;Button name="ZO_VeteranDifficultyButton" virtual="true"&gt;
+-            &lt;Dimensions x="32" y="32"/&gt;
+-            &lt;OnMouseEnter&gt;
+-                ZO_VeteranDifficultyButton_OnMouseEnter(self)
+-            &lt;/OnMouseEnter&gt;
+-
+-            &lt;OnMouseExit&gt;
+-                ZO_VeteranDifficultyButton_OnMouseExit(self)
+-            &lt;/OnMouseExit&gt;
+-
+-            &lt;OnClicked&gt;
+-                ZO_VeteranDifficultyButton_OnClicked(self)
+-            &lt;/OnClicked&gt;
+-        &lt;/Button&gt;
+-
+-        &lt;TopLevelControl name="ZO_GroupCenterInfo" resizeToFitDescendents="true" hidden="true"&gt;
+-            &lt;Anchor point="TOP" relativeTo="ZO_GroupList" /&gt;
+-            &lt;Controls&gt;
+-                &lt;Control name="ZO_VeteranDifficultySettings" resizeToFitDescendents="true"&gt;
+-                    &lt;Anchor point="TOPLEFT" /&gt;
+-                    &lt;OnInitialized&gt;
+-                        ZO_VeteranDifficultySettings_OnInitialized(self)
+-                    &lt;/OnInitialized&gt;
+-
+-                    &lt;Controls&gt;
+-                        &lt;Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY"&gt;
+-                            &lt;Anchor point="TOPLEFT"/&gt;
+-                            &lt;Dimensions x="32" y="32"/&gt;
+-                            &lt;OnMouseEnter&gt;
+-                                InitializeTooltip(InformationTooltip, self, RIGHT, -5, 0)
+-                                SetTooltipText(InformationTooltip, GetString(SI_DUNGEON_DIFFICULTY_HELP_TOOLTIP))
+-                            &lt;/OnMouseEnter&gt;
+-
+-                            &lt;OnMouseExit&gt;
+-                                ClearTooltip(InformationTooltip)
+-                            &lt;/OnMouseExit&gt;
+-                        &lt;/Texture&gt;
+-
+-                        &lt;Label name="$(parent)Text" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_DUNGEON_DIFFICULTY_HEADER"&gt;
+-                            &lt;Anchor point="LEFT" relativeTo="$(parent)Help" relativePoint="RIGHT" offsetX="5"/&gt;
+-                        &lt;/Label&gt;
+-
+-                        &lt;Button name="$(parent)NormalDifficulty" inherits="ZO_VeteranDifficultyButton"&gt;
+-                            &lt;Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetX="-16" offsetY="-2" /&gt;
+-
+-                            &lt;Textures
+-                                normal="EsoUI/Art/LFG/LFG_normalDungeon_up.dds"
+-                                pressed="EsoUI/Art/LFG/LFG_normalDungeon_down.dds"
+-                                mouseOver="EsoUI/Art/LFG/LFG_normalDungeon_over.dds"
+-                                disabled="EsoUI/Art/LFG/LFG_normalDungeon_disabled.dds"
+-                                disabledPressed="EsoUI/Art/LFG/LFG_normalDungeon_down_disabled.dds"
+-                    /&gt;
+-
+-                            &lt;OnInitialized&gt;
+-                                self.isVeteranDifficulty = false
+-                            &lt;/OnInitialized&gt;
+-                        &lt;/Button&gt;
+-                        &lt;Button name="$(parent)VeteranDifficulty" inherits="ZO_VeteranDifficultyButton"&gt;
+-                            &lt;Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetX="16" offsetY="-2" /&gt;
+-
+-                            &lt;Textures
+-                                normal="EsoUI/Art/LFG/LFG_veteranDungeon_up.dds"
+-                                pressed="EsoUI/Art/LFG/LFG_veteranDungeon_down.dds"
+-                                mouseOver="EsoUI/Art/LFG/LFG_veteranDungeon_over.dds"
+-                                disabled="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
+-                                disabledPressed="EsoUI/Art/LFG/LFG_veteranDungeon_down_disabled.dds"
+-                    /&gt;
+-
+-                            &lt;OnInitialized&gt;
+-                                self.isVeteranDifficulty = true
+-                            &lt;/OnInitialized&gt;
+-                        &lt;/Button&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-                
+-                &lt;Control name="ZO_GroupReviveCounter" resizeToFitDescendents="true" hidden="true"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="ZO_VeteranDifficultySettings" relativePoint="TOPRIGHT" offsetX="35" offsetY="4" /&gt;
+-                    &lt;OnInitialized&gt;
+-                        ZO_GroupReviveCounter_OnInitialized(self)
+-                    &lt;/OnInitialized&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_REVIVE_COUNTER_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                            &lt;Anchor point="TOPRIGHT"/&gt;
+-                        &lt;/Label&gt;
+-                        
+-                        &lt;Label name="$(parent)Count" font="ZoFontGameLargeBold"&gt;
+-                            &lt;Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" offsetY="1" /&gt;
+-                        &lt;/Label&gt;
+-
+-                        &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/Death/death_soulReservoir_icon.dds"&gt;
+-                            &lt;Dimensions x="24" y="24"/&gt;
+-                            &lt;Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" offsetX="24" offsetY="1" /&gt;
+-                        &lt;/Texture&gt;
+-                        
+-                        &lt;Control name="$(parent)TooltipControl" mouseEnabled="true"&gt;
+-                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Count" /&gt;
+-                            &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" /&gt;
+-
+-                            &lt;OnMouseEnter&gt;
+-                                ZO_GroupReviveCounter_ShowHelpTooltip(self)
+-                            &lt;/OnMouseEnter&gt;
+-                            &lt;OnMouseExit&gt;
+-                                ZO_GroupReviveCounter_HideHelpTooltip()
+-                            &lt;/OnMouseExit&gt;
+-                        &lt;/Control&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-            &lt;/Controls&gt;
+-        &lt;/TopLevelControl&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

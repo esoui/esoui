@@ -1,0 +1,36 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/help/keyboard/help_keyboard.xml b/esoui/ingame/help/keyboard/help_keyboard.xml
+index 498bd80..7a0cb0f 100755
+--- a/esoui/ingame/help/keyboard/help_keyboard.xml
++++ b/esoui/ingame/help/keyboard/help_keyboard.xml
+@@ -48,7 +48,7 @@
+             &lt;/OnHide&gt;
+ 
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPRIGHT" offsetX="-50" offsetY="30" /&gt;
+                     &lt;Dimensions x="240"/&gt;
+                     &lt;Controls&gt;
+@@ -81,13 +81,13 @@
+                 
+                 &lt;Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer"&gt;
+                     &lt;Dimensions x="365"/&gt;
+-                    &lt;Anchor point="TOPLEFT" offsetY="60" /&gt;
++                    &lt;Anchor point="TOPLEFT" offsetY="64" /&gt;
+                     &lt;Anchor point="BOTTOMLEFT"/&gt;
+                 &lt;/Control&gt;
+ 
+                 &lt;Control name="$(parent)DetailsContainer" inherits="ZO_ScrollContainer"&gt;
+                     &lt;Dimensions x="550"/&gt;
+-                    &lt;Anchor point="TOPRIGHT" offsetX="-33" offsetY="60" /&gt;
++                    &lt;Anchor point="TOPRIGHT" offsetX="-33" offsetY="64" /&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" /&gt;
+                 &lt;/Control&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

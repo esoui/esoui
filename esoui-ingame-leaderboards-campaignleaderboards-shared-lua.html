@@ -1,0 +1,58 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/leaderboards/campaignleaderboards_shared.lua b/esoui/ingame/leaderboards/campaignleaderboards_shared.lua
+index d44c862..cbb3279 100755
+--- a/esoui/ingame/leaderboards/campaignleaderboards_shared.lua
++++ b/esoui/ingame/leaderboards/campaignleaderboards_shared.lua
+@@ -42,7 +42,11 @@ function ZO_LeaderboardCampaignSelector_Shared:OnQueryTypeChanged(tabData)
+     end
+ end
+ 
+-function ZO_LeaderboardCampaignSelector_Shared:ShouldAllowSwitchingTabs()
++function ZO_LeaderboardCampaignSelector_Shared:IsHomeSelectable()
++    return GetAssignedCampaignId() ~= 0
++end
++
++function ZO_LeaderboardCampaignSelector_Shared:IsGuestSelectable()
+     local currentId = GetCurrentCampaignId()
+     local assignedId = GetAssignedCampaignId()
+     return currentId ~= 0 and currentId ~= assignedId
+@@ -55,8 +59,7 @@ end
+ ZO_CampaignLeaderboardsManager_Shared = ZO_LeaderboardBase_Shared:Subclass()
+ 
+ function ZO_CampaignLeaderboardsManager_Shared:New(...)
+-    local manager = ZO_LeaderboardBase_Shared.New(self, ...)
+-    return manager
++    return ZO_LeaderboardBase_Shared.New(self, ...)
+ end
+ 
+ function ZO_CampaignLeaderboardsManager_Shared:Initialize(...)
+@@ -128,7 +131,13 @@ function ZO_CampaignLeaderboardsManager_Shared:GetScoreAndRankTexts()
+     return displayedScore, displayedRank
+ end
+ 
+-function ZO_CampaignLeaderboardsManager_Shared:InitializeCategories()
++function ZO_CampaignLeaderboardsManager_Shared:AddCategoriesToParentSystem()
++    local isInCampaign = GetCurrentCampaignId() ~= 0
++    local homeCampaignAssigned = GetAssignedCampaignId() ~= 0
++    if not (isInCampaign or homeCampaignAssigned) then
++        return
++    end
++
+     local header = self.leaderboardSystem:AddCategory(GetString(SI_CAMPAIGN_LEADERBOARDS_ALLIANCE_WAR), "EsoUI/Art/Journal/leaderboard_indexIcon_ava_up.dds", "EsoUI/Art/Journal/leaderboard_indexIcon_ava_down.dds", "EsoUI/Art/Journal/leaderboard_indexIcon_ava_over.dds")
+ 
+     local function GetMaxRank()
+@@ -180,8 +189,6 @@ function ZO_CampaignLeaderboardsManager_Shared:InitializeCategories()
+     AddAllianceEntryToLeaderboard(ALLIANCE_ALDMERI_DOMINION, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_aldmeri.dds")
+     AddAllianceEntryToLeaderboard(ALLIANCE_DAGGERFALL_COVENANT, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_daggerfall.dds")
+     AddAllianceEntryToLeaderboard(ALLIANCE_EBONHEART_PACT, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_ebonheart.dds")
+-
+-    self.leaderboardSystem:UpdateCategories()
+ end
+ 
+ function ZO_CampaignLeaderboardsManager_Shared:SetCampaignAndQueryType(campaignId, queryType)
+</code></pre>
+<script src="prism.js"></script>

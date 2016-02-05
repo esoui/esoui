@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/groupmembers.lua b/esoui/ingame/group/groupmembers.lua
+deleted file mode 100755
+index c7a89cc..0000000
+--- a/esoui/ingame/group/groupmembers.lua
++++ /dev/null
+@@ -1,20 +0,0 @@
+-local GroupMembersManager = GroupMembersManager_Shared:Subclass()
+-
+-function GroupMembersManager:New(...)
+-    return GroupMembersManager_Shared.New(self, ...)
+-end
+-
+-function GroupMembersManager:Initialize(control)
+-    GroupMembersManager_Shared.Initialize(self, control)
+-
+-    self.groupSizeControl = control:GetNamedChild("Count")
+-    self:Update()
+-end
+-
+-function GroupMembersManager_Shared:Update()
+-    self.groupSizeControl:SetText(self:GetGroupSizeText())
+-end
+-
+-function ZO_GroupMembers_OnInitialized(self)
+-    GROUP_MEMBERS = GroupMembersManager:New(self)
+-end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

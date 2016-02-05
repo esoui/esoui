@@ -1,0 +1,103 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/zo_gamepadtemplatescommon.xml b/esoui/common/gamepad/zo_gamepadtemplatescommon.xml
+index 51d0de7..b25c715 100755
+--- a/esoui/common/gamepad/zo_gamepadtemplatescommon.xml
++++ b/esoui/common/gamepad/zo_gamepadtemplatescommon.xml
+@@ -578,25 +578,18 @@
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true"&gt;
+-            &lt;Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="54"/&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62"/&gt;
++        &lt;/Control&gt;
++        
++        &lt;Control name="ZO_Gamepad_TextEditEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_SharedGamepadEntry_OnInitialized(self)
+                 self.highlight = self:GetNamedChild("Highlight")
+             &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)TextField" inherits="ZO_EditBackdrop_Gamepad"&gt;
+-                    &lt;AnchorFill/&gt;
+-                &lt;/Backdrop&gt;
+-                &lt;Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/&gt;
+-                &lt;/Backdrop&gt;
+-            &lt;/Controls&gt;
+-        &lt;/Control&gt;
+-        
+-        &lt;Control name="ZO_Gamepad_TextEditEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true"&gt;
+-            &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)TextField" override="true"&gt;
++                &lt;Backdrop name="$(parent)TextField" inherits="ZO_SingleLineEditBackdrop_Gamepad"&gt;
++                    &lt;Anchor point="TOPLEFT"/&gt;
++                    &lt;Anchor point="TOPRIGHT"/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad"&gt;
+                             &lt;OnInitialized&gt;
+@@ -605,12 +598,21 @@
+                         &lt;/EditBox&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Backdrop&gt;
++                &lt;Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/&gt;
++                &lt;/Backdrop&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_Gamepad_TextEditEntry_FullWidth_Multiline" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_SharedGamepadEntry_OnInitialized(self)
++                self.highlight = self:GetNamedChild("Highlight")
++            &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)TextField" override="true"&gt;
++                &lt;Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad"&gt;
++                    &lt;AnchorFill/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad ZO_EditDefaultText_Gamepad"&gt;
+                             &lt;OnInitialized&gt;
+@@ -619,14 +621,23 @@
+                         &lt;/EditBox&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Backdrop&gt;
++                &lt;Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/&gt;
++                &lt;/Backdrop&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_Gamepad_TextEditLockedEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_SharedGamepadEntry_OnInitialized(self)
++                self.highlight = self:GetNamedChild("Highlight")
++            &lt;/OnInitialized&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)TextField" override="true"&gt;
++                &lt;Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad"&gt;
+                     &lt;Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge_grey.dds" edgeFileWidth="64" edgeFileHeight="8" /&gt;
+                     &lt;Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center_grey.dds" /&gt;
++                    &lt;AnchorFill/&gt;
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontGamepad34"&gt;
+                             &lt;Anchor point="TOPLEFT" offsetX="6" offsetY="5"/&gt;
+@@ -634,6 +645,10 @@
+                         &lt;/Label&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Backdrop&gt;
++                &lt;Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)TextField"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextField"/&gt;
++                &lt;/Backdrop&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

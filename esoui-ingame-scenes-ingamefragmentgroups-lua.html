@@ -1,0 +1,28 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/scenes/ingamefragmentgroups.lua b/esoui/ingame/scenes/ingamefragmentgroups.lua
+index 8fef77c..daf40fd 100755
+--- a/esoui/ingame/scenes/ingamefragmentgroups.lua
++++ b/esoui/ingame/scenes/ingamefragmentgroups.lua
+@@ -143,6 +143,16 @@ FRAGMENT_GROUP =
+         FRAME_TARGET_BLUR_GAMEPAD_RIGHT_FRAGMENT,
+         FRAME_PLAYER_FRAGMENT,
+     },
++
++    GAMEPAD_ACTIVITY_FINDER_DEPENDENCIES =
++    {
++        GAMEPAD_GROUP_ROLES_FRAGMENT,
++        GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT,
++        MINIMIZE_CHAT_FRAGMENT,
++        GAMEPAD_MENU_SOUND_FRAGMENT,
++        GAMEPAD_ACTIVITY_QUEUE_DATA_FRAGMENT,
++        GAMEPAD_GENERIC_FOOTER_FRAGMENT,
++    },
+ }
+ 
+ ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP = FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW
+</code></pre>
+<script src="prism.js"></script>

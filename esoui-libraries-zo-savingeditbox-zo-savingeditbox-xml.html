@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_savingeditbox/zo_savingeditbox.xml b/esoui/libraries/zo_savingeditbox/zo_savingeditbox.xml
+index 7f7062e..32adf41 100755
+--- a/esoui/libraries/zo_savingeditbox/zo_savingeditbox.xml
++++ b/esoui/libraries/zo_savingeditbox/zo_savingeditbox.xml
+@@ -58,7 +58,7 @@
+         
+         &lt;Control name="ZO_SavingEditBox" virtual="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Saving" inherits="ZO_EditBackdrop" hidden="true"&gt;
++                &lt;Backdrop name="$(parent)Saving" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true"&gt;
+                     &lt;AnchorFill/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/&gt;
+@@ -100,7 +100,7 @@
+ 
+         &lt;Control name="ZO_LargeSingleLineSavingEditBox" virtual="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Backdrop name="$(parent)Saving" inherits="ZO_EditBackdrop" hidden="true"&gt;
++                &lt;Backdrop name="$(parent)Saving" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true"&gt;
+                     &lt;AnchorFill/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" multiLine="false" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/&gt;
+</code></pre>
+<script src="prism.js"></script>

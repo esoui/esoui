@@ -1,0 +1,39 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/guild/gamepad/zo_guildhub_gamepad.xml b/esoui/ingame/guild/gamepad/zo_guildhub_gamepad.xml
+index 589d739..288875d 100755
+--- a/esoui/ingame/guild/gamepad/zo_guildhub_gamepad.xml
++++ b/esoui/ingame/guild/gamepad/zo_guildhub_gamepad.xml
+@@ -1,12 +1,26 @@
+ &lt;GuiXml&gt;
+     &lt;Controls&gt;
+-        &lt;Label name="ZO_GamepadGuildHubText" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/&gt;
++        &lt;Label name="ZO_GamepadGuildHubText" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/&gt;
+         &lt;Label name="ZO_GamepadGuildHubHighlightText" font="ZoFontGamepad34" virtual="true"/&gt;
+         &lt;Control name="AllianceSelectorListItemRulerTemplate" virtual="true"&gt;
+             &lt;Anchor point="TOPLEFT" /&gt;
+             &lt;Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75"/&gt;
+         &lt;/Control&gt;
+ 
++        &lt;Control name="ZO_GamepadCreateGuildEntry" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_SharedGamepadEntry_OnInitialized(self)
++                self.subLabelCount = 1
++                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
++            &lt;/OnInitialized&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" /&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/&gt;
++                &lt;/Label&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
+         &lt;TopLevelControl name="ZO_GamepadGuildHubTopLevel" inherits="ZO_Gamepad_ParametricList_Screen"&gt;
+             &lt;OnInitialized&gt;
+                 ZO_GamepadGuildHub_OnInitialize(self)
+</code></pre>
+<script src="prism.js"></script>

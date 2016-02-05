@@ -1,0 +1,27 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/storewindow/keyboard/buyback_keyboard.lua b/esoui/ingame/storewindow/keyboard/buyback_keyboard.lua
+index 27ba572..485342a 100755
+--- a/esoui/ingame/storewindow/keyboard/buyback_keyboard.lua
++++ b/esoui/ingame/storewindow/keyboard/buyback_keyboard.lua
+@@ -91,9 +91,14 @@ function BuyBack:InitializeEvents()
+         end
+     end
+ 
++    local function OnMoneyUpdate()
++        self:UpdateMoney()
++        RefreshList()
++    end
++
+     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, RefreshFreeSlots)
+     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, RefreshFreeSlots)
+-    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:UpdateMoney() end)
++    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdate)
+     self.control:RegisterForEvent(EVENT_UPDATE_BUYBACK, RefreshList)
+     self.control:RegisterForEvent(EVENT_BUYBACK_RECEIPT, function(eventId, itemName, itemQuantity, money, itemSoundCategory)
+         if(itemSoundCategory == ITEM_SOUND_CATEGORY_NONE) then
+</code></pre>
+<script src="prism.js"></script>

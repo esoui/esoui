@@ -1,0 +1,143 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_dialog/gamepad/zo_genericdialog_gamepad.lua b/esoui/libraries/zo_dialog/gamepad/zo_genericdialog_gamepad.lua
+index 4023850..a2f1ff3 100755
+--- a/esoui/libraries/zo_dialog/gamepad/zo_genericdialog_gamepad.lua
++++ b/esoui/libraries/zo_dialog/gamepad/zo_genericdialog_gamepad.lua
+@@ -18,6 +18,12 @@ function DialogKeybindStripDescriptor:Initialize()
+         if self.buttonCallback then
+             self.buttonCallback(self.dialog, pressState)
+         end
++
++        -- it's possible for the callback to remove the dialog and clean it up
++        -- but most don't, so we need to make sure we close them all without error
++        if(self.dialog and not self.dialog.info.blockDialogReleaseOnPress) then
++            ZO_Dialogs_ReleaseDialogOnButtonPress(self.dialog.name)
++        end
+     end
+     self.visible = function()
+         if self.buttonVisible then
+@@ -313,11 +319,6 @@ local function OnDialogHidden(dialog)
+     KEYBIND_STRIP:PopKeybindGroupState()
+     g_keybindStripDescriptors:ReleaseAllObjects()
+ 
+-    if dialog.owningScene then
+-        -- In this case, the scene the dialog belongs to is being hidden
+-        dialog.owningScene = nil
+-    end
+-
+     ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
+ 
+     if dialog.isShowingOnBase then
+@@ -326,10 +327,6 @@ local function OnDialogHidden(dialog)
+         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+     end
+ 
+-    if dialog.info.finishedCallback then
+-        dialog.info.finishedCallback(dialog)
+-    end
+-
+     if dialog.hideSceneOnClose then
+         SCENE_MANAGER:HideCurrentScene()
+     end
+@@ -407,25 +404,13 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
+     dialog.fragment = dialog.fragment or ZO_TranslateFromLeftSceneFragment:New(dialog, true)
+ 
+     dialog.hideFunction = function(dialog, releasedFromButton)
+-        local hideLater = function()
+-            if dialog.owningScene == nil then return end --player pressed another button before call later
+-
+-            dialog.owningScene = nil
+-            if dialog.isShowingOnBase then
+-                SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
+-            end
+-            SCENE_MANAGER:RemoveFragment(dialog.fragment)
+-        end
+-
+         dialog.releasedFromButton = releasedFromButton
+         TryRemoveKeybinds()
+ 
+-        if dialog.info.onHideDelayMS and dialog:IsHidden() ~= true then
+-            zo_callLater(hideLater, dialog.info.onHideDelayMS)
+-            return
++        if ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP then -- pregame doesn't have this fragment group
++            SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
+         end
+-
+-        hideLater()
++        SCENE_MANAGER:RemoveFragment(dialog.fragment)
+     end
+ 
+     dialog.fragment:RegisterCallback("StateChange", function(oldState, newState)
+@@ -456,20 +441,19 @@ function ZO_GenericGamepadDialog_Show(dialog)
+ 
+     --Attach the dialog fragment to whichever scene is currenty showing
+     dialog.isShowingOnBase = false
+-    local currentScene
+-    if SCENE_MANAGER:IsShowingBaseScene() and ZO_GAMEPAD_DIALOG_BASE_SCENE_NAME then
+-        currentScene = SCENE_MANAGER:GetScene(ZO_GAMEPAD_DIALOG_BASE_SCENE_NAME)
++
++    if ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP then -- pregame doesn't have this fragment group
+         SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
++    end
++
++    if SCENE_MANAGER:IsShowingBaseScene() then
+         dialog.isShowingOnBase = true
+-    else
+-        currentScene = SCENE_MANAGER:GetCurrentScene()
+     end
+ 
+     dialog.scrollIndicator:ClearAnchors()
+     local offsetY = dialog.info.offsetScrollIndictorForArrow and ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW
+     ZO_Scroll_Gamepad_SetScrollIndicatorSide(dialog.scrollIndicator, dialog, RIGHT, dialog.rightStickScrollIndicatorOffsetX, offsetY)
+ 
+-    dialog.owningScene = currentScene
+     SCENE_MANAGER:AddFragment(dialog.fragment)
+ 
+     if dialog.entryList then
+@@ -536,13 +520,12 @@ do
+         KEYBIND_STRIP:UpdateKeybindButtonGroup(g_keybindGroupDesc, g_keybindState)
+     end
+     -- Valid fields for parametric list entries are:
+-    --   visible - a bool or function whcih determines if we show the entry
++    --   visible - a bool or function which determines if we show the entry
+     --   template - the template for the gamepad entry data in the parametric list
+     --   templateData - A table of fields to add to the entry data
+     --   text - the text that will appear in the list
+     --   icon - an optional icon to show next to the entry in the parametric list
+     --   entryData - a premade ZO_GamepadEntryData in place of the one created from templateData, text, and icon
+-    --   initializeData - a function called after creating the ZO_GamepadEntryData and is passed the entry data object and the templateData
+     function ZO_GenericParametricListGamepadDialogTemplate_Setup(dialog, limitNumEntries, data)
+         if(data) then
+             ZO_GenericGamepadDialog_DefaultSetup(dialog, data)
+@@ -598,15 +581,10 @@ do
+                         end
+                     end
+ 
+-                    -- TODO remove this? might only be used in TradingHouse_Dialogs_Gamepad.lua for an icon
+-                    if entryInfoTable.initializeData then
+-                        entryInfoTable.initializeData(entryData, entryDataOverrides)
+-                    end
+-        
+                     local entryTemplate = entryInfoTable.template
+                     if(not dialog.entryList:HasDataTemplate(entryTemplate)) then
+-                        dialog.entryList:AddDataTemplateWithHeader(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, entryInfoTable.headerTemplate or "ZO_GamepadMenuEntryHeaderTemplate")
+-                        dialog.entryList:AddDataTemplate(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction)
++                        dialog.entryList:AddDataTemplateWithHeader(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, entryInfoTable.headerTemplate or "ZO_GamepadMenuEntryHeaderTemplate", entryInfoTable.controlReset)
++                        dialog.entryList:AddDataTemplate(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, entryInfoTable.controlReset)
+                     end
+         
+                     local headerText = entryInfoTable.header
+@@ -710,7 +688,6 @@ function ZO_GenericCenteredGamepadDialogTemplate_OnInitialized(dialog)
+     dialog.scrollPadding = dialog.scrollChild:GetNamedChild("Padding")
+     dialog.setupFunc = ZO_GenericCenteredGamepadDialogTemplate_Setup
+ 
+-	
+     local GENERIC_CENTERED_DIALOG_RIGHT_SCROLL_INDICATOR_X_OFFSET = -1
+     dialog.rightStickScrollIndicatorOffsetX = GENERIC_CENTERED_DIALOG_RIGHT_SCROLL_INDICATOR_X_OFFSET
+ 
+</code></pre>
+<script src="prism.js"></script>

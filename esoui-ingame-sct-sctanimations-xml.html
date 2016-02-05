@@ -1,0 +1,40 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/sct/sctanimations.xml b/esoui/ingame/sct/sctanimations.xml
+index 0662ffb..54f4656 100755
+--- a/esoui/ingame/sct/sctanimations.xml
++++ b/esoui/ingame/sct/sctanimations.xml
+@@ -14,7 +14,7 @@
+ 
+         &lt;AnimationTimeline name="ZO_SCTUpAnimation"&gt;
+             &lt;Animations&gt;
+-                &lt;ScaleAnimation duration="150" startScale="1.3" endScale="1.0"/&gt;
++                &lt;ScaleAnimation duration="150" startScale="1.6" endScale="1.0"/&gt;
+                 &lt;AlphaAnimation duration="150" startAlpha="0.0" endAlpha="1.0"/&gt;
+                 &lt;CustomAnimation duration="75"&gt;
+                     &lt;UpdateFunction&gt;
+@@ -22,6 +22,7 @@
+                     &lt;/UpdateFunction&gt;
+                 &lt;/CustomAnimation&gt;                
+                 &lt;AlphaAnimation duration="150" delay="675" startAlpha="1.0" endAlpha="0"/&gt;
++                &lt;ScaleAnimation duration="150" delay="675" startScale="1" endScale="0.9"/&gt;
+             &lt;/Animations&gt;
+         &lt;/AnimationTimeline&gt;
+ 
+@@ -37,11 +38,6 @@
+             &lt;Animations&gt;
+                 &lt;AlphaAnimation duration="10" startAlpha="0.0" endAlpha="1.0"/&gt;
+                 &lt;AlphaAnimation duration="400" delay="1000" startAlpha="1.0" endAlpha="0"/&gt;
+-                &lt;CustomAnimation duration="2500"&gt;
+-                    &lt;UpdateFunction&gt;
+-                        SetSCTAnimationOffsetY(self:GetTimeline(), progress * 0)
+-                    &lt;/UpdateFunction&gt;
+-                &lt;/CustomAnimation&gt;
+             &lt;/Animations&gt;
+         &lt;/AnimationTimeline&gt;
+     &lt;/Animations&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,64 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/slashcommands/pc/slashcommands_pc.lua b/esoui/ingame/slashcommands/pc/slashcommands_pc.lua
+index 0058294..5e3f614 100755
+--- a/esoui/ingame/slashcommands/pc/slashcommands_pc.lua
++++ b/esoui/ingame/slashcommands/pc/slashcommands_pc.lua
+@@ -1,10 +1,6 @@
+ local function DoLogout()
+-	if IsFeedbackGatheringEnabled() then
+-		ZO_FEEDBACK:Logout(false)
+-	else 
+ 	Logout()
+ end
+-end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_LOGOUT)] = function (txt)
+     DoLogout()
+@@ -15,12 +11,8 @@ SLASH_COMMANDS[GetString(SI_SLASH_CAMP)] = function (txt)
+ end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_QUIT)] = function (txt)
+-	if IsFeedbackGatheringEnabled() then
+-		ZO_FEEDBACK:Logout(true)
+-	else 
+ 	Quit()
+ end
+-end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_FPS)] = function(txt)
+     if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_FRAMERATE) then
+@@ -39,21 +31,22 @@ SLASH_COMMANDS[GetString(SI_SLASH_LATENCY)] = function(txt)
+ end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_STUCK)] = function(txt)
+-    STUCK:ShowConfirmDialog()
++	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_CHARACTER_STUCK_KEYBOARD_FRAGMENT)
+ end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_REPORT_BUG)] = function(args) 
+-    ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_BUG)
++	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT)
+ end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_REPORT_FEEDBACK)] = function(args) 
+-    ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_USER_FEEDBACK)
++	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT)
++	HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD:ClearFields()
+ end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_REPORT_HELP)] = function(args) 
+-    ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_USER_HELP)
++	HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp()
+ end
+ 
+ SLASH_COMMANDS[GetString(SI_SLASH_REPORT_CHAT)] = function(args) 
+-    ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_USER_CHAT)
++	HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT)
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

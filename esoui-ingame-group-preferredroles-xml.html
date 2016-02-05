@@ -1,0 +1,105 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/group/preferredroles.xml b/esoui/ingame/group/preferredroles.xml
+deleted file mode 100755
+index 51edddb..0000000
+--- a/esoui/ingame/group/preferredroles.xml
++++ /dev/null
+@@ -1,91 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;Controls&gt;
+-        &lt;Button name="ZO_PreferredRolesButton"  inherits="ZO_CheckButton" virtual="true"&gt;
+-            &lt;Dimensions x="32" y="32"/&gt;
+-            &lt;OnMouseEnter&gt;
+-                ZO_PreferredRolesButton_OnMouseEnter(self)
+-            &lt;/OnMouseEnter&gt;
+-
+-            &lt;OnMouseExit&gt;
+-                ZO_PreferredRolesButton_OnMouseExit(self)
+-            &lt;/OnMouseExit&gt;
+-
+-            &lt;OnClicked&gt;
+-                ZO_PreferredRolesButton_OnClicked(self, button)
+-            &lt;/OnClicked&gt;
+-        &lt;/Button&gt;
+-
+-        &lt;TopLevelControl name="ZO_PreferredRoles" resizeToFitDescendents="true" hidden="true"&gt;
+-            &lt;Anchor point="TOPRIGHT" relativeTo="ZO_GroupList" offsetX="-54" /&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_PreferredRoles_OnInitialized(self)
+-            &lt;/OnInitialized&gt;
+-            &lt;Controls&gt;
+-                &lt;Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY"&gt;
+-                    &lt;Anchor point="TOPLEFT"/&gt;
+-                    &lt;Dimensions x="32" y="32"/&gt;
+-                    &lt;OnMouseEnter&gt;
+-                        ZO_PreferredRolesHelp_OnMouseEnter(self)
+-                    &lt;/OnMouseEnter&gt;
+-                    &lt;OnMouseExit&gt;
+-                        ZO_PreferredRolesHelp_OnMouseExit(self)
+-                    &lt;/OnMouseExit&gt;
+-                &lt;/Texture&gt;
+-
+-                &lt;Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                    &lt;Anchor point="LEFT" relativeTo="$(parent)Help" relativePoint="RIGHT" offsetX="5"/&gt;
+-                &lt;/Label&gt;
+-
+-                &lt;Control name="$(parent)Buttons" resizeToFitDescendents="true"&gt;
+-                    &lt;Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" offsetY="-2" /&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton"&gt;
+-                            &lt;Anchor point="TOPLEFT" /&gt;
+-                            &lt;Dimensions x="32" y="32"/&gt;
+-                            &lt;Textures
+-                                normal="EsoUI/Art/LFG/LFG_tank_up.dds"
+-                                pressed="EsoUI/Art/LFG/LFG_tank_down.dds"
+-                                mouseOver="EsoUI/Art/LFG/LFG_tank_over.dds"
+-                                disabled="EsoUI/Art/LFG/LFG_tank_disabled.dds"
+-                                disabledPressed="EsoUI/Art/LFG/LFG_tank_down_disabled.dds"
+-                            /&gt;
+-
+-                            &lt;OnInitialized&gt;
+-                                self.role = LFG_ROLE_TANK
+-                            &lt;/OnInitialized&gt;
+-                        &lt;/Button&gt;
+-                        &lt;Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton"&gt;
+-                            &lt;Anchor point="LEFT" relativeTo="$(parent)Tank" relativePoint="RIGHT" offsetX="7" /&gt;
+-                            &lt;Dimensions x="32" y="32"/&gt;
+-                            &lt;Textures
+-                                normal="EsoUI/Art/LFG/LFG_healer_up.dds"
+-                                pressed="EsoUI/Art/LFG/LFG_healer_down.dds"
+-                                mouseOver="EsoUI/Art/LFG/LFG_healer_over.dds"
+-                                disabled="EsoUI/Art/LFG/LFG_healer_disabled.dds"
+-                                disabledPressed="EsoUI/Art/LFG/LFG_healer_down_disabled.dds"
+-                            /&gt;
+-
+-                            &lt;OnInitialized&gt;
+-                                self.role = LFG_ROLE_HEAL
+-                            &lt;/OnInitialized&gt;
+-                        &lt;/Button&gt;
+-                        &lt;Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton"&gt;
+-                            &lt;Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="7" /&gt;
+-                            &lt;Dimensions x="32" y="32"/&gt;
+-                            &lt;Textures
+-                                normal="EsoUI/Art/LFG/LFG_dps_up.dds"
+-                                pressed="EsoUI/Art/LFG/LFG_dps_down.dds"
+-                                mouseOver="EsoUI/Art/LFG/LFG_dps_over.dds"
+-                                disabled="EsoUI/Art/LFG/LFG_dps_disabled.dds"
+-                                disabledPressed="EsoUI/Art/LFG/LFG_dps_down_disabled.dds"
+-                            /&gt;
+-                            &lt;OnInitialized&gt;
+-                                self.role = LFG_ROLE_DPS
+-                            &lt;/OnInitialized&gt;
+-                        &lt;/Button&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+-            &lt;/Controls&gt;
+-        &lt;/TopLevelControl&gt;
+-    &lt;/Controls&gt;
+-&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

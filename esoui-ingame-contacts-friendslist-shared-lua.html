@@ -1,0 +1,19 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/contacts/friendslist_shared.lua b/esoui/ingame/contacts/friendslist_shared.lua
+index 62630f8..1bb265e 100755
+--- a/esoui/ingame/contacts/friendslist_shared.lua
++++ b/esoui/ingame/contacts/friendslist_shared.lua
+@@ -28,7 +28,6 @@ end
+ function ZO_FriendsList:Initialize()
+     self.lastUpdateTime = 0
+     self.numOnlineFriends = 0
+-    self.playerAlliance = GetUnitAlliance("player")
+ 
+     self.noteEditedFunction = function(displayName, note)
+         for i = 1, GetNumFriends() do
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/globals/globalapi.lua b/esoui/libraries/globals/globalapi.lua
+index a72adfa..b3fcfc2 100755
+--- a/esoui/libraries/globals/globalapi.lua
++++ b/esoui/libraries/globals/globalapi.lua
+@@ -146,11 +146,11 @@ function zo_floatsAreEqual(a, b, epsilon)
+ end
+ 
+ function zo_iconFormat(path, width, height)
+-    return string.format("|t%d:%d:%s|t", width, height, path)
++    return string.format("|t%s:%s:%s|t", tostring(width), tostring(height), path)
+ end
+ 
+ function zo_iconFormatInheritColor(path, width, height)
+-    return string.format("|t%d:%d:%s:inheritcolor|t", width, height, path)
++    return string.format("|t%s:%s:%s:inheritcolor|t", tostring(width), tostring(height), path)
+ end
+ 
+ function zo_iconTextFormat(path, width, height, text)
+</code></pre>
+<script src="prism.js"></script>

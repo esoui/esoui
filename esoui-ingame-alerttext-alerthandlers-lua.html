@@ -1,0 +1,95 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/alerttext/alerthandlers.lua b/esoui/ingame/alerttext/alerthandlers.lua
+index af1ef2d..de808dc 100755
+--- a/esoui/ingame/alerttext/alerthandlers.lua
++++ b/esoui/ingame/alerttext/alerthandlers.lua
+@@ -40,6 +40,8 @@ local CombatEventToSoundId =
+     [ACTION_RESULT_NO_WEAPONS_TO_SWAP_TO] = SOUNDS.ABILITY_WEAPON_SWAP_FAIL,
+     [ACTION_RESULT_CANT_SWAP_WHILE_CHANGING_GEAR] = SOUNDS.ABILITY_WEAPON_SWAP_FAIL,
+     [ACTION_RESULT_MOUNTED] = SOUNDS.ABILITY_NOT_READY,
++    [ACTION_RESULT_NOT_ENOUGH_INVENTORY_SPACE] = SOUNDS.NEGATIVE_CLICK,
++    [ACTION_RESULT_IN_HIDEYHOLE] = SOUNDS.ABILITY_CASTER_STUNNED,
+ }
+ 
+ local ExperienceReasonToSoundId =
+@@ -163,6 +165,10 @@ local AlertHandlers = {
+         return ERROR, GetString(SI_CANNOT_DO_THAT_WHILE_DEAD), SOUNDS.GENERAL_ALERT_ERROR
+     end,
+ 
++	[EVENT_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT] = function(artifactName)
++		return ERROR, zo_strformat(GetString(SI_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT), artifactName), SOUNDS.GENERAL_ALERT_ERROR
++	end,
++
+     [EVENT_NOT_ENOUGH_MONEY] = function()
+         return ERROR, GetString(SI_NOT_ENOUGH_MONEY), SOUNDS.PLAYER_ACTION_INSUFFICIENT_GOLD
+     end,
+@@ -189,12 +195,14 @@ local AlertHandlers = {
+         end
+     end,
+ 
+-    [EVENT_RESURRECT_FAILURE] = function(targetCharacterName, reason, targetDisplayName)
++    [EVENT_RESURRECT_RESULT] = function(targetCharacterName, reason, targetDisplayName)
++        if reason ~= RESURRECT_RESULT_SUCCESS then
+             local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(targetDisplayName) or targetCharacterName
+-        if reason ~= RESURRECT_FAILURE_REASON_DECLINED then
+-            return ERROR, zo_strformat(GetString("SI_RESURRECTFAILUREREASON", reason), nameToShow), SOUNDS.GENERAL_ALERT_ERROR
++            if reason ~= RESURRECT_RESULT_DECLINED then
++                return ERROR, zo_strformat(GetString("SI_RESURRECTRESULT", reason), nameToShow), SOUNDS.GENERAL_ALERT_ERROR
+             else
+-            return ALERT, zo_strformat(GetString("SI_RESURRECTFAILUREREASON", reason), nameToShow)
++                return ALERT, zo_strformat(GetString("SI_RESURRECTRESULT", reason), nameToShow)
++            end
+         end
+     end,
+ 
+@@ -338,14 +346,20 @@ local AlertHandlers = {
+         return ALERT, zo_strformat(SI_GROUPING_TOOLS_ALERT_LFG_JOINED, locationName), nil
+     end,
+ 
+-    [EVENT_GROUPING_TOOLS_ERROR] = function(errorReason)
+-        return ERROR, GetString("SI_LFGERROR", errorReason), SOUNDS.GENERAL_ALERT_ERROR
++    [EVENT_ACTIVITY_QUEUE_RESULT] = function(result)
++        if result ~= ACTIVITY_QUEUE_RESULT_SUCCESS then
++            return ERROR, GetString("SI_ACTIVITYQUEUERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
++        end
+     end,
+ 
+     [EVENT_COLLECTIBLE_RENAME_ERROR] = function(errorReason)
+         return ERROR, GetString("SI_NAMINGERROR", errorReason), SOUNDS.GENERAL_ALERT_ERROR
+     end,
+ 
++    [EVENT_COLLECTIBLE_SET_IN_WATER_ALERT] = function()
++        return ALERT, GetString(SI_COLLECTIONS_SET_IN_WATER_ALERT)
++    end,
++
+     [EVENT_TRADE_INVITE_FAILED] = function(errorReason, inviteeCharacterName, inviteeDisplayName)
+         if errorReason == TRADE_ACTION_RESULT_IGNORING_YOU then
+             ZO_AlertEvent(EVENT_TRADE_INVITE_WAITING, inviteeCharacterName, inviteeDisplayName)
+@@ -483,17 +497,11 @@ local AlertHandlers = {
+         end
+     end,
+ 
+-    [EVENT_VETERAN_DIFFICULTY_CHANGED] = function(unitTag, isVeteranDifficulty)
+-        if(unitTag == "player") then
+-            local isGrouped = IsUnitGrouped(unitTag)
+-
+-            -- Being grouped displays the message in addition to playing the sound
+-            -- If you're not grouped and just setting your own difficulty, just play the sound.
+-            if(isVeteranDifficulty) then
+-                return ALERT, isGrouped and GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_VETERAN) or nil, SOUNDS.DUNGEON_DIFFICULTY_VETERAN
++    [EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED] = function(isVeteranDifficulty)
++        if isVeteranDifficulty then
++            return ALERT, GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_VETERAN), SOUNDS.DUNGEON_DIFFICULTY_VETERAN
+         else
+-                return ALERT, isGrouped and GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_NORMAL) or nil, SOUNDS.DUNGEON_DIFFICULTY_NORMAL
+-            end
++            return ALERT, GetString(SI_DUNGEON_DIFFICULTY_CHANGED_TO_NORMAL), SOUNDS.DUNGEON_DIFFICULTY_NORMAL
+         end
+     end,
+ 
+</code></pre>
+<script src="prism.js"></script>

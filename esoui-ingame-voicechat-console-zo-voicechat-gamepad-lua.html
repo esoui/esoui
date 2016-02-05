@@ -1,0 +1,190 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/voicechat/console/zo_voicechat_gamepad.lua b/esoui/ingame/voicechat/console/zo_voicechat_gamepad.lua
+index a8e0c76..d5eb58f 100755
+--- a/esoui/ingame/voicechat/console/zo_voicechat_gamepad.lua
++++ b/esoui/ingame/voicechat/console/zo_voicechat_gamepad.lua
+@@ -1,69 +1,29 @@
+---------------------------------------------
+--- VoiceChat Gamepad
+---------------------------------------------
++----------------------------------------------------------------------------------------
++-- Voice Chat Social Options Gamepad
++--  Class for displaying voice chat related social options for a voice chat
++--  participant. Registers social keybinds with scenes that display it.
++----------------------------------------------------------------------------------------
+ 
+-ZO_VoiceChat_Gamepad = ZO_SocialOptionsDialogGamepad:Subclass()
++ZO_VoiceChatSocialOptions_Gamepad = ZO_SocialOptionsDialogGamepad:Subclass()
+ 
+-function ZO_VoiceChat_Gamepad:New(...)
+-	local voiceChatGamepad = ZO_Object.New(self)
+-	voiceChatGamepad:Initialize(...)
+-	return voiceChatGamepad
++function ZO_VoiceChatSocialOptions_Gamepad:New(...)
++	local object = ZO_Object.New(self)
++	object:Initialize(...)
++	return object
+ end
+ 
+-function ZO_VoiceChat_Gamepad:Initialize(control)
++function ZO_VoiceChatSocialOptions_Gamepad:Initialize(control)
+     self.control = control
+     ZO_SocialOptionsDialogGamepad.Initialize(self)
+ 
+-    GAMEPAD_VOICECHAT_SCENE = ZO_Scene:New("gamepad_voice_chat", SCENE_MANAGER)
+-    GAMEPAD_VOICECHAT_PARTICIPANT_OPTIONS_SCENE = ZO_Scene:New("gamepad_voice_chat_participant_options", SCENE_MANAGER)
++    assert(VOICE_CHAT_CHANNELS_GAMEPAD)
++    assert(VOICE_CHAT_PARTICIPANTS_GAMEPAD)
+ 
+-    VOICE_CHAT_CHANNELS_GAMEPAD = ZO_VoiceChatChannelsGamepad:New(self.control:GetNamedChild("Channels"))
+     self:AddSocialOptionsKeybind(VOICE_CHAT_CHANNELS_GAMEPAD.historyKeybinds)
+-    VOICE_CHAT_PARTICIPANT_OPTIONS_GAMEPAD = ZO_VoiceChatParticipantOptionsGamepad:New(self.control:GetNamedChild("ParticipantOptions"))
+-    self:AddSocialOptionsKeybind(VOICE_CHAT_PARTICIPANT_OPTIONS_GAMEPAD.keybindStripDescriptor)
+-
+-    self:InitializeEvents()
+-end
+-
+-function ZO_VoiceChat_Gamepad:InitializeEvents()
+-    local function OnVoiceTransmitChannelChanged(channelName)
+-        --Special case: Area is rejoined when zoning, and we don't want to play the alert for this situation
+-        local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
+-
+-        if not VOICE_CHAT_MANAGER:DoesChannelExist(channelData) then
+-            return
+-        end
+-
+-        local channelType = channelData.channelType
+-        if channelType == VOICE_CHANNEL_AREA and self.desiredAreaBecameUnavailable then
+-            self.desiredAreaBecameUnavailable = nil
+-            return
+-        end
+-
+-        --Display an alert if not on a Voice Chat menu
+-        if VOICE_CHAT_CHANNELS_GAMEPAD:IsHidden() and VOICE_CHAT_PARTICIPANT_OPTIONS_GAMEPAD:IsHidden() then
+-            local channel = VOICE_CHAT_MANAGER:GetChannel(channelData)
+-
+-            local soundId = SOUNDS.VOICE_CHAT_ALERT_CHANNEL_MADE_ACTIVE
+-            local text = zo_strformat(SI_GAMEPAD_VOICECHAT_ALERT_CHANNEL_ACTIVE, channel.name)
+-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, soundId, text)
+-        end
+-
+-        self.desiredAreaBecameUnavailable = nil
++    self:AddSocialOptionsKeybind(VOICE_CHAT_PARTICIPANTS_GAMEPAD.keybindStripDescriptor)
+ end
+-    local function OnVoiceChannelUnavailable(channelName)
+-        local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
+ 
+-        --Special case: Area is rejoined when zoning, and we don't want to play the alert for this situation
+-        if channelData.channelType == VOICE_CHANNEL_AREA and VOICE_CHAT_MANAGER:GetDesiredActiveChannelType() == VOICE_CHANNEL_AREA then
+-            self.desiredAreaBecameUnavailable = true
+-        end
+-    end
+-    self.control:RegisterForEvent(EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED, function(eventCode, ...) OnVoiceTransmitChannelChanged(...) end)
+-    self.control:RegisterForEvent(EVENT_VOICE_CHANNEL_UNAVAILABLE, function(eventCode, ...) OnVoiceChannelUnavailable(...) end)
+-end
+-
+-function ZO_VoiceChat_Gamepad:BuildInviteToGuildOption(guildIndex)
++function ZO_VoiceChatSocialOptions_Gamepad:BuildInviteToGuildOption(guildIndex)
+     local guildId = GetGuildId(guildIndex)
+     if guildId == 0 or not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_INVITE) then
+         return
+@@ -79,9 +39,8 @@ function ZO_VoiceChat_Gamepad:BuildInviteToGuildOption(guildIndex)
+     return entry
+ end
+ 
+-
+ -- ZO_SocialOptionsDialogGamepad Overrides
+-function ZO_VoiceChat_Gamepad:SetupOptions(data)
++function ZO_VoiceChatSocialOptions_Gamepad:SetupOptions(data)
+     local channelType = data.channel.channelType
+ 
+     self.playerAlliance = GetUnitAlliance("player")
+@@ -108,7 +67,7 @@ function ZO_VoiceChat_Gamepad:SetupOptions(data)
+     ZO_SocialOptionsDialogGamepad.SetupOptions(self, socialData)
+ end
+ 
+-function ZO_VoiceChat_Gamepad:BuildOptionsList()
++function ZO_VoiceChatSocialOptions_Gamepad:BuildOptionsList()
+     local groupId = self:AddOptionTemplateGroup()
+     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, function() return self.socialData.voiceChannelType ~= VOICE_CHANNEL_GROUP end)
+ 
+@@ -137,6 +96,73 @@ function ZO_VoiceChat_Gamepad:BuildOptionsList()
+     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
+ end
+ 
++
++
++----------------------------------------------------------------------------------------
++-- Voice Chat Gamepad
++--      Manages creation of voice chat related scenes and objects.
++----------------------------------------------------------------------------------------
++
++ZO_VoiceChat_Gamepad = ZO_Object:Subclass()
++
++function ZO_VoiceChat_Gamepad:New(...)
++	local object = ZO_Object.New(self)
++	object:Initialize(...)
++	return object
++end
++
++function ZO_VoiceChat_Gamepad:Initialize(control)
++    self.control = control
++
++    GAMEPAD_VOICECHAT_CHANNELS_SCENE = ZO_Scene:New("gamepad_voice_chat", SCENE_MANAGER)
++    GAMEPAD_VOICECHAT_PARTICIPANTS_SCENE = ZO_Scene:New("gamepad_voice_chat_participants", SCENE_MANAGER)
++
++    VOICE_CHAT_CHANNELS_GAMEPAD = ZO_VoiceChatChannelsGamepad:New(self.control:GetNamedChild("Channels"))
++    VOICE_CHAT_PARTICIPANTS_GAMEPAD = ZO_VoiceChatParticipantsGamepad:New(self.control:GetNamedChild("Participants"))
++    VOICE_CHAT_SOCIAL_OPTIONS = ZO_VoiceChatSocialOptions_Gamepad:New(self.control:GetNamedChild("SocialOptions"))
++
++    self:InitializeEventAlerts()
++end
++
++function ZO_VoiceChat_Gamepad:InitializeEventAlerts()
++    --Area is left and rejoined when zoning, but we don't want to play a second alert when this happens. To prevent this,
++    --flag when it becomes unavailable and is the desired channel, and skip showing the alert later on if it's true.
++    self.desiredAreaBecameUnavailable = nil
++
++    local function OnVoiceTransmitChannelChanged(channelName)
++        local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
++        if not VOICE_CHAT_MANAGER:DoesChannelExist(channelData) then
++            return
++        end
++
++        local channelType = channelData.channelType
++        if channelType == VOICE_CHANNEL_AREA and self.desiredAreaBecameUnavailable then
++            self.desiredAreaBecameUnavailable = nil
++            return
++        end
++
++        --Display an alert if not on a Voice Chat menu
++        if VOICE_CHAT_CHANNELS_GAMEPAD:IsHidden() and VOICE_CHAT_PARTICIPANTS_GAMEPAD:IsHidden() then
++            local channel = VOICE_CHAT_MANAGER:GetChannel(channelData)
++
++            local soundId = SOUNDS.VOICE_CHAT_ALERT_CHANNEL_MADE_ACTIVE
++            local text = zo_strformat(SI_GAMEPAD_VOICECHAT_ALERT_CHANNEL_ACTIVE, channel.name)
++            ZO_Alert(UI_ALERT_CATEGORY_ALERT, soundId, text)
++        end
++
++        self.desiredAreaBecameUnavailable = nil
++    end
++    local function OnVoiceChannelUnavailable(channelName)
++        local channelData = ZO_VoiceChat_GetChannelDataFromName(channelName)
++        if channelData.channelType == VOICE_CHANNEL_AREA and VOICE_CHAT_MANAGER:GetDesiredActiveChannelType() == VOICE_CHANNEL_AREA then
++            self.desiredAreaBecameUnavailable = true
++        end
++    end
++
++    self.control:RegisterForEvent(EVENT_VOICE_TRANSMIT_CHANNEL_CHANGED, function(eventCode, ...) OnVoiceTransmitChannelChanged(...) end)
++    self.control:RegisterForEvent(EVENT_VOICE_CHANNEL_UNAVAILABLE, function(eventCode, ...) OnVoiceChannelUnavailable(...) end)
++end
++
+ -- XML Calls
+ function ZO_VoiceChatGamepad_OnInitialize(control)
+ 	VOICE_CHAT_GAMEPAD = ZO_VoiceChat_Gamepad:New(control)
+</code></pre>
+<script src="prism.js"></script>

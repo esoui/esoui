@@ -1,0 +1,98 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/gamepad/windowtemplates_gamepad.xml b/esoui/libraries/zo_templates/gamepad/windowtemplates_gamepad.xml
+index 81a5626..fd9c9d7 100755
+--- a/esoui/libraries/zo_templates/gamepad/windowtemplates_gamepad.xml
++++ b/esoui/libraries/zo_templates/gamepad/windowtemplates_gamepad.xml
+@@ -18,86 +18,6 @@
+             &lt;Insets left="8" top="8" right="-8" bottom="-8" /&gt;
+         &lt;/Backdrop&gt;
+ 
+-        &lt;EditBox name="ZO_DefaultEdit_Gamepad" font="ZoFontGamepad34" mouseEnabled="true" virtual="true"&gt;
+-            &lt;Dimensions y="36" /&gt;
+-            &lt;OnMouseDown&gt;
+-                self:TakeFocus()
+-            &lt;/OnMouseDown&gt;
+-            &lt;OnEnter&gt;
+-                self:LoseFocus()
+-            &lt;/OnEnter&gt;
+-            &lt;OnEscape&gt;
+-                self:LoseFocus()
+-            &lt;/OnEscape&gt;
+-
+-            &lt;OnFocusGained&gt;
+-                ZO_GamepadEditBox_FocusGained(self)
+-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+-                    PlaySound(SOUNDS.EDIT_CLICK)
+-                end
+-            &lt;/OnFocusGained&gt;
+-            
+-            &lt;OnFocusLost&gt;
+-                ZO_GamepadEditBox_FocusLost(self)
+-            &lt;/OnFocusLost&gt;            
+-        &lt;/EditBox&gt;
+-
+-        &lt;Backdrop name="ZO_EditBackdrop_Gamepad" virtual="true"&gt;
+-            &lt;Dimensions y="46"/&gt;
+-            &lt;Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" /&gt;
+-            &lt;Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center.dds" /&gt;
+-            &lt;Insets left="8" top="8" right="-8" bottom="-8" /&gt;
+-        &lt;/Backdrop&gt;
+-
+-        &lt;EditBox name="ZO_DefaultEditForBackdrop_Gamepad" inherits="ZO_DefaultEdit_Gamepad" virtual="true"&gt;
+-            &lt;Anchor point="TOPLEFT" offsetX="8" offsetY="3"/&gt;
+-            &lt;Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2"/&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;EditBox name="ZO_DefaultEditMultiLine_Gamepad" font="ZoFontGamepad34" mouseEnabled="true" multiLine="true" virtual="true"&gt;
+-            &lt;OnMouseDown&gt;
+-                self:TakeFocus()
+-            &lt;/OnMouseDown&gt;
+-            &lt;OnEscape&gt;
+-                self:LoseFocus()
+-            &lt;/OnEscape&gt;
+-            &lt;OnMouseWheel&gt;
+-                local currentLine = self:GetTopLineIndex()
+-                if shift then
+-                    delta = delta * 10
+-                end
+-                local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
+-                self:SetTopLineIndex(nextLine)
+-            &lt;/OnMouseWheel&gt;
+-
+-            &lt;OnFocusGained&gt;
+-                ZO_GamepadEditBox_FocusGained(self)
+-                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+-                    PlaySound(SOUNDS.EDIT_CLICK)
+-                end
+-            &lt;/OnFocusGained&gt;
+-
+-            &lt;OnFocusLost&gt;
+-                ZO_GamepadEditBox_FocusLost(self)
+-            &lt;/OnFocusLost&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;EditBox name="ZO_DefaultEditMultiLineForBackdrop_Gamepad" inherits="ZO_DefaultEditMultiLine_Gamepad" virtual="true"&gt;
+-            &lt;Anchor point="TOPLEFT" offsetX="6" offsetY="5"/&gt;
+-            &lt;Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7"/&gt;
+-        &lt;/EditBox&gt;
+-
+-        &lt;EditBox name="ZO_EditDefaultText_Gamepad" virtual="true"&gt;
+-            &lt;OnTextChanged&gt;
+-                ZO_EditDefaultText_OnTextChanged(self)
+-            &lt;/OnTextChanged&gt;
+-            &lt;Controls&gt;
+-                &lt;Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" font="ZoFontGamepad34"&gt;
+-                    &lt;AnchorFill/&gt;
+-                &lt;/Label&gt;
+-            &lt;/Controls&gt;
+-        &lt;/EditBox&gt;
+-
+         &lt;Control name="ZO_GamepadSelectableItemRadialMenuEntryTemplate" scale="0.75" virtual="true"&gt;
+             &lt;Dimensions x="64" y="64"/&gt;
+             &lt;OnInitialized&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/genericheaders/genericheaders.xml b/esoui/common/gamepad/genericheaders/genericheaders.xml
+index a05f8ef..dc3a884 100755
+--- a/esoui/common/gamepad/genericheaders/genericheaders.xml
++++ b/esoui/common/gamepad/genericheaders/genericheaders.xml
+@@ -23,19 +23,19 @@
+ 
+         &lt;Control name="ZO_GamepadHeaderHorizontalDivider" resizeToFitDescendents="true" virtual="true"&gt;
+             &lt;Controls&gt;
+-                &lt;Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"&gt;
++                &lt;Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2"&gt;
+                     &lt;Anchor point="LEFT" /&gt;
+                     &lt;Dimensions x="4" y="8" /&gt;
+                     &lt;TextureCoords left="0" right="0.25" top=".25" bottom=".75" /&gt;
+                 &lt;/Texture&gt;
+ 
+-                &lt;Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"&gt;
++                &lt;Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2"&gt;
+                     &lt;Anchor point="RIGHT" /&gt;
+                     &lt;Dimensions x="4" y="8" /&gt;
+                     &lt;TextureCoords left="0.75" right="1" top=".25" bottom=".75" /&gt;
+                 &lt;/Texture&gt;
+ 
+-                &lt;Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"&gt;
++                &lt;Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" /&gt;
+                     &lt;Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" /&gt;
+                     &lt;TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" /&gt;
+</code></pre>
+<script src="prism.js"></script>

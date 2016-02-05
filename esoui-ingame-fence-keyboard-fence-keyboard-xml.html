@@ -1,0 +1,39 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/fence/keyboard/fence_keyboard.xml b/esoui/ingame/fence/keyboard/fence_keyboard.xml
+index f0bc4a6..d7368ab 100755
+--- a/esoui/ingame/fence/keyboard/fence_keyboard.xml
++++ b/esoui/ingame/fence/keyboard/fence_keyboard.xml
+@@ -6,6 +6,26 @@
+             &lt;OnInitialized&gt;
+                 ZO_Fence_Keyboard_Initialize(self)
+             &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)ResetTime" resizeToFitDescendents="true" hidden="true"&gt;
++                    &lt;Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="12" offsetY="-12"/&gt;
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Stat" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                            &lt;Anchor point="LEFT"/&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Texture name="$(parent)Icon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds"&gt;
++                            &lt;Dimensions x="32" y="32" /&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="5"/&gt;
++                        &lt;/Texture&gt;
++                        
++                        &lt;Label name="$(parent)Value" font="ZoFontKeybindStripDescription"&gt;
++                            &lt;Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+ &lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

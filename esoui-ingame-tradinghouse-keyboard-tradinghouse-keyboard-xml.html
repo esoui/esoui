@@ -1,0 +1,64 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.xml b/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.xml
+index c341ce9..d264401 100755
+--- a/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.xml
++++ b/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.xml
+@@ -63,7 +63,7 @@
+                                     &lt;Anchor point="TOPLEFT" /&gt;
+                                 &lt;/Label&gt;
+ 
+-                                &lt;Backdrop name="$(parent)Quantity" inherits="ZO_EditBackdrop" hidden="true"&gt;
++                                &lt;Backdrop name="$(parent)Quantity" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true"&gt;
+                                     &lt;Dimensions x="88" /&gt;
+                                     &lt;Anchor point="LEFT" relativeTo="$(parent)QuantityLabel" relativePoint="RIGHT" offsetY="2" /&gt;
+ 
+@@ -205,8 +205,8 @@
+                             &lt;Anchor point="TOPRIGHT" /&gt;`
+                         &lt;/Label&gt;
+ 
+-                        &lt;Backdrop name="$(parent)MinPrice" inherits="ZO_EditBackdrop"&gt;
+-                            &lt;Dimensions x="88" y="25" /&gt;
++                        &lt;Backdrop name="$(parent)MinPrice" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                            &lt;Dimensions x="88"/&gt;
+                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)PriceRangeLabel" relativePoint="BOTTOMLEFT" offsetY="8" /&gt;
+ 
+                             &lt;Controls&gt;
+@@ -222,8 +222,8 @@
+                             &lt;Anchor point="LEFT" relativeTo="$(parent)MinPrice" relativePoint="RIGHT" offsetX="4" /&gt;
+                         &lt;/Texture&gt;
+ 
+-                        &lt;Backdrop name="$(parent)MaxPrice" inherits="ZO_EditBackdrop"&gt;
+-                            &lt;Dimensions x="88" y="25" /&gt;
++                        &lt;Backdrop name="$(parent)MaxPrice" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                            &lt;Dimensions x="88" /&gt;
+                             &lt;Anchor point="LEFT" relativeTo="$(parent)PriceRangeDivider" relativePoint="RIGHT" offsetX="4" /&gt;
+ 
+                             &lt;Controls&gt;
+@@ -254,8 +254,8 @@
+                             &lt;Anchor point="LEFT" relativeTo="$(parent)LevelRangeToggle" relativePoint="RIGHT" offsetX="5" /&gt;
+                         &lt;/Label&gt;
+ 
+-                        &lt;Backdrop name="$(parent)MinLevel" inherits="ZO_EditBackdrop"&gt;
+-                            &lt;Dimensions x="40" y="25" /&gt;
++                        &lt;Backdrop name="$(parent)MinLevel" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                            &lt;Dimensions x="40"/&gt;
+                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)LevelRangeToggle" relativePoint="BOTTOMLEFT" offsetY="5" /&gt;
+ 
+                             &lt;Controls&gt;
+@@ -271,8 +271,8 @@
+                             &lt;Anchor point="LEFT" relativeTo="$(parent)MinLevel" relativePoint="RIGHT" offsetX="4" /&gt;
+                         &lt;/Texture&gt;
+ 
+-                        &lt;Backdrop name="$(parent)MaxLevel" inherits="ZO_EditBackdrop"&gt;
+-                            &lt;Dimensions x="40" y="25" /&gt;
++                        &lt;Backdrop name="$(parent)MaxLevel" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                            &lt;Dimensions x="40"/&gt;
+                             &lt;Anchor point="LEFT" relativeTo="$(parent)LevelRangeDivider" relativePoint="RIGHT" offsetX="4" /&gt;
+ 
+                             &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

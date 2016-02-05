@@ -1,0 +1,33 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradewindow/tradewindow_shared.lua b/esoui/ingame/tradewindow/tradewindow_shared.lua
+index 6b87e4e..f929d48 100755
+--- a/esoui/ingame/tradewindow/tradewindow_shared.lua
++++ b/esoui/ingame/tradewindow/tradewindow_shared.lua
+@@ -161,19 +161,13 @@ end
+ --
+ 
+ --Shared Trade Window Constructor
+-function ZO_SharedTradeWindow:New(control)
++function ZO_SharedTradeWindow:New(...)
+     local manager = ZO_Object.New(self)
++    manager:Initialize(...)
+     return manager
+ end
+ 
+ function ZO_SharedTradeWindow:Initialize(control)
+-    if not TRADE_WINDOW then
+-        -- This represents the public interface to the Trade Window
+-        TRADE_WINDOW = ZO_TradeManager:New()
+-    end
+-
+-    TradeCancel() -- Make sure any trades from reloadui are cancelled
+-
+     self.confirm = 
+     {
+         [TRADE_ME] = TRADE_CONFIRM_EDIT,
+</code></pre>
+<script src="prism.js"></script>

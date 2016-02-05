@@ -1,0 +1,35 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/crafting/gamepad/smithing_gamepad.lua b/esoui/ingame/crafting/gamepad/smithing_gamepad.lua
+index 789e25e..49e3c2c 100755
+--- a/esoui/ingame/crafting/gamepad/smithing_gamepad.lua
++++ b/esoui/ingame/crafting/gamepad/smithing_gamepad.lua
+@@ -107,8 +107,12 @@ function ZO_Smithing_Gamepad:Initialize(control)
+ 
+     self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
+         if ZO_Smithing_IsSmithingStation(craftingType) and IsInGamepadPreferredMode() then
++            -- make sure that we are, in fact, on a smithing scene before we try to show the base scene
++            -- certain times, such as going to the crown store from crafting, can get squashed without this
++            if SCENE_MANAGER:GetCurrentSceneName() == g_modeToSceneName[self.mode] then
+                 SCENE_MANAGER:ShowBaseScene()
+             end
++        end
+     end)
+ 
+     local function HandleDirtyEvent()
+@@ -189,6 +193,10 @@ function ZO_Smithing_Gamepad:SetEnableSkillBar(enable)
+ 	end
+ end
+ 
++function ZO_Smithing_Gamepad:SetUniversalStyleItemHidden(hidden)
++    self.universalStyleItemInfo:SetHidden(hidden)
++end
++
+ function ZO_Smithing_Gamepad_Initialize(control)
+     SMITHING_GAMEPAD = ZO_Smithing_Gamepad:New(control)
+ 
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,50 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/storewindow/gamepad/storewindowrepair_gamepad.lua b/esoui/ingame/storewindow/gamepad/storewindowrepair_gamepad.lua
+index eb0a907..42f39e0 100755
+--- a/esoui/ingame/storewindow/gamepad/storewindowrepair_gamepad.lua
++++ b/esoui/ingame/storewindow/gamepad/storewindowrepair_gamepad.lua
+@@ -58,27 +58,30 @@ function ZO_GamepadStoreRepair:InitializeKeybindStrip()
+                                                     GAME_NAVIGATION_TYPE_BUTTON,
+                                                     function() self:ConfirmRepair() end,
+                                                     GetString(SI_ITEM_ACTION_REPAIR),
+-                                                    function() return #self.list.dataList &gt; 0 end
+-                                                    )
++                                                    function() return #self.list.dataList &gt; 0 end,
++                                                    function() return self:CanRepair() end)
+ 
+     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+ 
+     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
+ end
+ 
+-function ZO_GamepadStoreRepair:ConfirmRepair()
++function ZO_GamepadStoreRepair:CanRepair()
+     local selectedItem = self.list:GetTargetData()
+     local cost = selectedItem.repairCost
+-    local condition = selectedItem.condition
+-    --All items in this list are damaged
+     if cost &lt;= GetCarriedCurrencyAmount(CURT_MONEY) then
++        return true
++    else
++        return false, GetString("SI_ITEMREPAIRREASON", ITEM_REPAIR_CANT_AFFORD_REPAIR) -- "You can't afford to repair this item"
++    end
++end
++
++function ZO_GamepadStoreRepair:ConfirmRepair()
++    local selectedItem = self.list:GetTargetData() --All items in this list are damaged
+     local bagId = selectedItem.bagId
+     local slotIndex = selectedItem.slotIndex
+     RepairItem(bagId, slotIndex)
+     PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
+-    else
+-        STORE_WINDOW_GAMEPAD:FailedRepairMessageBox(ITEM_REPAIR_CANT_AFFORD_REPAIR)
+-    end
+ end
+ 
+ function ZO_GamepadStoreRepair:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+</code></pre>
+<script src="prism.js"></script>

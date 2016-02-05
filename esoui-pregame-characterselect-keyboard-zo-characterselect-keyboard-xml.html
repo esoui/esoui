@@ -1,0 +1,21 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/pregame/characterselect/keyboard/zo_characterselect_keyboard.xml b/esoui/pregame/characterselect/keyboard/zo_characterselect_keyboard.xml
+index 1d9af24..d864e28 100755
+--- a/esoui/pregame/characterselect/keyboard/zo_characterselect_keyboard.xml
++++ b/esoui/pregame/characterselect/keyboard/zo_characterselect_keyboard.xml
+@@ -56,8 +56,7 @@
+             &lt;Controls&gt;
+                 &lt;Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_RENAME_CHARACTER_NAME_LABEL"/&gt;
+ 
+-                &lt;Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop"&gt;
+-                    &lt;Dimensions y="30" /&gt;
++                &lt;Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

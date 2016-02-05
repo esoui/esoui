@@ -1,0 +1,37 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/lfg/activitytracker.xml b/esoui/ingame/lfg/activitytracker.xml
+new file mode 100644
+index 0000000..518d08b
+--- /dev/null
++++ b/esoui/ingame/lfg/activitytracker.xml
+@@ -0,0 +1,23 @@
++&lt;GuiXml&gt;
++    &lt;Controls&gt;
++        &lt;TopLevelControl name="ZO_ActivityTracker"&gt;
++            &lt;Anchor point="TOPRIGHT" relativeTo="ZO_FocusedQuestTrackerPanelContainerQuestContainer" relativePoint="BOTTOMRIGHT" /&gt;
++
++            &lt;OnInitialized&gt;
++                ZO_ActivityTracker_OnInitialized(self)
++            &lt;/OnInitialized&gt;
++
++            &lt;Controls&gt;
++                &lt;Control name="$(parent)Container" hidden="true"&gt;
++                    &lt;Anchor point="TOPRIGHT" /&gt;
++
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" /&gt;
++
++                        &lt;Label name="$(parent)Status" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" /&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/TopLevelControl&gt;
++    &lt;/Controls&gt;
++&lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

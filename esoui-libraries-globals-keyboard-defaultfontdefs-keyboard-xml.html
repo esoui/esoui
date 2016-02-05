@@ -1,0 +1,109 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/globals/keyboard/defaultfontdefs_keyboard.xml b/esoui/libraries/globals/keyboard/defaultfontdefs_keyboard.xml
+deleted file mode 100755
+index 318c1e4..0000000
+--- a/esoui/libraries/globals/keyboard/defaultfontdefs_keyboard.xml
++++ /dev/null
+@@ -1,96 +0,0 @@
+-&lt;GuiXml&gt;
+-    &lt;!-- Fonts created in this file will only be loaded for Keyboard (i.e. PC) 
+-         Any files loaded on the Consoles should not use these fonts as they will not render --&gt;
+-    &lt;String name="MEDIUM_FONT" value="EsoUi/Common/Fonts/Univers57.otf" /&gt;
+-    &lt;String name="BOLD_FONT" value="EsoUi/Common/Fonts/Univers67.otf" /&gt;
+-    &lt;String name="CHAT_FONT" value="EsoUi/Common/Fonts/Univers57.otf" /&gt;
+-
+-    &lt;Font name="ZoFontWinH1" font="$(BOLD_FONT)|30|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontWinH2" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontWinH3" font="$(BOLD_FONT)|20|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontWinH4" font="$(BOLD_FONT)|18|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontWinH5" font="$(BOLD_FONT)|16|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontWinT1" font="$(BOLD_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontWinT2" font="$(BOLD_FONT)|16|soft-shadow-thin" /&gt;
+-
+-    &lt;Font name="ZoFontGame" font="$(MEDIUM_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontGameMedium" font="$(MEDIUM_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontGameBold" font="$(BOLD_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontGameOutline" font="$(BOLD_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontGameShadow" font="$(BOLD_FONT)|18|soft-shadow-thin" /&gt;
+-
+-    &lt;Font name="ZoFontGameSmall" font="$(BOLD_FONT)|13|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontGameLarge" font="$(MEDIUM_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontGameLargeBold" font="$(BOLD_FONT)|18|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontGameLargeBoldShadow" font="$(BOLD_FONT)|18|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontHeader" font="$(BOLD_FONT)|18|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontHeader2" font="$(BOLD_FONT)|20|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontHeader3" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontHeader4" font="$(BOLD_FONT)|26|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontHeaderNoShadow" font="$(BOLD_FONT)|18" /&gt;
+-
+-    &lt;Font name="ZoFontCallout" font="$(BOLD_FONT)|36|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontCallout2" font="$(BOLD_FONT)|48|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontCallout3" font="$(BOLD_FONT)|54|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontEdit" font="$(MEDIUM_FONT)|18|shadow"/&gt;
+-
+-    &lt;Font name="ZoFontChat" font="$(CHAT_FONT)|18|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontEditChat" font="$(CHAT_FONT)|18|shadow" /&gt;
+-
+-    &lt;Font name="ZoFontWindowTitle" font="$(BOLD_FONT)|30|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontWindowSubtitle" font="$(BOLD_FONT)|18|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontTooltipTitle" font="$(BOLD_FONT)|22" /&gt;
+-    &lt;Font name="ZoFontTooltipSubtitle" font="$(MEDIUM_FONT)|18" /&gt;
+-
+-    &lt;Font name="ZoFontAnnounce" font="$(BOLD_FONT)|28|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontAnnounceMessage" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontAnnounceMedium" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontAnnounceLarge" font="$(BOLD_FONT)|36|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontAnnounceLargeNoShadow" font="$(BOLD_FONT)|36" /&gt;
+-    
+-    &lt;Font name="ZoFontCenterScreenAnnounceLarge" font="$(BOLD_FONT)|40|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontCenterScreenAnnounceSmall" font="$(BOLD_FONT)|30|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontAlert" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontConversationName" font="$(BOLD_FONT)|28|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontConversationText" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontConversationOption" font="$(BOLD_FONT)|22|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontConversationQuestReward" font="$(BOLD_FONT)|20|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontKeybindStripKey" font="$(MEDIUM_FONT)|20|soft-shadow-thin" /&gt;
+-    &lt;Font name="ZoFontKeybindStripDescription" font="$(BOLD_FONT)|25|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontDialogKeybindDescription" font="$(BOLD_FONT)|20|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoInteractionPrompt" font="$(BOLD_FONT)|24|soft-shadow-thick" /&gt;
+-
+-    &lt;Font name="ZoFontCreditsHeader" font="$(BOLD_FONT)|24" /&gt;
+-    &lt;Font name="ZoFontCreditsText" font="$(BOLD_FONT)|18" /&gt;
+-
+-    &lt;!-- Subtitle Fonts --&gt;
+-    &lt;Font name="ZoFontSubtitleText" font="$(MEDIUM_FONT)|28|soft-shadow-thick" /&gt;
+-    
+-    &lt;!-- In Game Book Fonts--&gt;
+-    &lt;Font name="ZoFontBookPaper" font="$(ANTIQUE_FONT)|20" /&gt;
+-    &lt;Font name="ZoFontBookSkin" font="$(ANTIQUE_FONT)|20" /&gt;
+-    &lt;Font name="ZoFontBookRubbing" font="$(ANTIQUE_FONT)|20" /&gt;
+-    &lt;Font name="ZoFontBookLetter" font="$(HANDWRITTEN_FONT)|20" /&gt;
+-    &lt;Font name="ZoFontBookNote" font="$(HANDWRITTEN_FONT)|22" /&gt;
+-    &lt;Font name="ZoFontBookScroll" font="$(HANDWRITTEN_FONT)|26" /&gt;
+-    &lt;Font name="ZoFontBookTablet" font="$(STONE_TABLET_FONT)|30|soft-shadow-thick" /&gt;
+-
+-    &lt;!-- In Game Book Title Fonts--&gt;
+-    &lt;Font name="ZoFontBookPaperTitle" font="$(ANTIQUE_FONT)|30" /&gt;
+-    &lt;Font name="ZoFontBookSkinTitle" font="$(ANTIQUE_FONT)|30" /&gt;
+-    &lt;Font name="ZoFontBookRubbingTitle" font="$(ANTIQUE_FONT)|30" /&gt;
+-    &lt;Font name="ZoFontBookLetterTitle" font="$(HANDWRITTEN_FONT)|30" /&gt;
+-    &lt;Font name="ZoFontBookNoteTitle" font="$(HANDWRITTEN_FONT)|32" /&gt;
+-    &lt;Font name="ZoFontBookScrollTitle" font="$(HANDWRITTEN_FONT)|34" /&gt;
+-    &lt;Font name="ZoFontBookTabletTitle" font="$(STONE_TABLET_FONT)|48|soft-shadow-thick" /&gt;
+-&lt;/GuiXml&gt;
+</code></pre>
+<script src="prism.js"></script>

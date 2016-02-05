@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/vibration/vibration.lua b/esoui/ingame/vibration/vibration.lua
+index 8c37d6f..ac9de84 100755
+--- a/esoui/ingame/vibration/vibration.lua
++++ b/esoui/ingame/vibration/vibration.lua
+@@ -1,6 +1,6 @@
+ 
+-local function Vibrate(eventCode, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
+-    if IsInGamepadPreferredMode() then
++local function Vibrate(eventCode, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, foundInfo, debugSourceInfo)
++    if IsInGamepadPreferredMode() and foundInfo then
+         SetGamepadVibration(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
+     end
+ end
+</code></pre>
+<script src="prism.js"></script>

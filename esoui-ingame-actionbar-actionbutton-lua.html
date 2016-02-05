@@ -1,0 +1,46 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/actionbar/actionbutton.lua b/esoui/ingame/actionbar/actionbutton.lua
+index cb54776..5ebaba4 100755
+--- a/esoui/ingame/actionbar/actionbutton.lua
++++ b/esoui/ingame/actionbar/actionbutton.lua
+@@ -125,6 +125,7 @@ local function SetupActionSlot(slotObject, slotId)
+ 
+     local isGamepad = IsInGamepadPreferredMode()
+     ZO_ActionSlot_SetupSlot(slotObject.icon, slotObject.button, slotIcon, isGamepad and "" or ACTION_BUTTON_BORDERS.normal, isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown, slotObject.cooldownIcon)
++    slotObject:UpdateState()
+ end
+ 
+ local function SetupActionSlotWithBg(slotObject, slotId)
+@@ -307,7 +308,7 @@ function ActionButton:UpdateUsable()
+         local slotNum = self:GetSlot()
+         local slotType = GetSlotType(slotNum)
+         local buttonDislaysUnusable = not usable or (isUltimateSlot and isGamepad and self.useFailure)
+-        local useDesaturation = slotType == ACTION_TYPE_ITEM or isGamepad
++        local useDesaturation = slotType == ACTION_TYPE_ITEM or slotType == ACTION_TYPE_COLLECTIBLE or isGamepad
+         ZO_ActionSlot_SetUnusable(self.icon, buttonDislaysUnusable, useDesaturation)
+     end
+ end
+@@ -418,6 +419,9 @@ function ActionButton:UpdateCooldown(options)
+         self:SetCooldownIconAnchors(showCooldown)
+     end
+ 
++    local textColor = showCooldown and INTERFACE_TEXT_COLOR_FAILED or INTERFACE_TEXT_COLOR_SELECTED
++    self.buttonText:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, textColor))
++
+     self.inCooldown = isInCooldown
+     self.isGlobalCooldown = global
+     self:UpdateUsable()
+@@ -463,7 +467,6 @@ function ActionButton:ApplyStyle(template)
+ 
+     local slotnum = self:GetSlot()
+     local slotType = GetSlotType(slotnum)
+-    ZO_ActionSlot_SetUnusable(self.icon, GetUnusableForPlatform(slotnum, self.useFailure, self.usable), isGamepad or slotType == ACTION_TYPE_ITEM)
+ 
+     local cooldownHeight = 1
+ 
+</code></pre>
+<script src="prism.js"></script>

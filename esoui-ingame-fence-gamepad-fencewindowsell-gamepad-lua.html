@@ -1,0 +1,55 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/fence/gamepad/fencewindowsell_gamepad.lua b/esoui/ingame/fence/gamepad/fencewindowsell_gamepad.lua
+index 004260a..bcf4e8f 100755
+--- a/esoui/ingame/fence/gamepad/fencewindowsell_gamepad.lua
++++ b/esoui/ingame/fence/gamepad/fencewindowsell_gamepad.lua
+@@ -12,11 +12,15 @@ function ZO_GamepadFenceSell:Initialize()
+     self.list:SetNoItemText(GetString(SI_GAMEPAD_NO_STOLEN_ITEMS_SELL))
+ end
+ 
++function ZO_GamepadFenceSell:GetRemainingSells()
++    local totalSells, sellsUsed = GetFenceSellTransactionInfo()
++    return zo_max(totalSells - sellsUsed, 0)
++end
++
+ do
+     local IGNORE_INVALID_COST = true
+     function ZO_GamepadFenceSell:Confirm()
+-        local totalSells, sellsUsed = GetFenceSellTransactionInfo()
+-        local remainingSells = zo_max(totalSells - sellsUsed, 0)
++        local remainingSells = self:GetRemainingSells()
+ 
+         if remainingSells == 0 then
+             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString("SI_STOREFAILURE", STORE_FAILURE_AT_FENCE_LIMIT))
+@@ -56,6 +60,25 @@ do
+     end
+ end
+ 
++function ZO_GamepadFenceSell:RefreshFooter()
++    if self:GetRemainingSells() &gt; 0 then
++        self:ClearFooter()
++        return
++    end
++
++    local footerLabel = GetString(SI_FENCE_SELL_LIMIT_RESET)
++    local resetTimeSeconds = select(3, GetFenceSellTransactionInfo())
++    local footerValue = ZO_FormatTimeMilliseconds(resetTimeSeconds * 1000, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
++
++    local data =
++    {
++        data1HeaderText = footerLabel,
++        data1Text = footerValue
++    }
++    
++    GAMEPAD_GENERIC_FOOTER:Refresh(data)
++end
++
+ function ZO_GamepadFenceSell:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+     local price = self.confirmationMode and selected and data.sellPrice * STORE_WINDOW_GAMEPAD:GetSpinnerValue() or data.sellPrice
+     self:SetupStoreItem(control, data, selected, selectedDuringRebuild, enabled, activated, price, ZO_STORE_FORCE_VALID_PRICE, self.mode)
+</code></pre>
+<script src="prism.js"></script>

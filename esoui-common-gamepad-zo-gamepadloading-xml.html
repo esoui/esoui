@@ -1,0 +1,25 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/common/gamepad/zo_gamepadloading.xml b/esoui/common/gamepad/zo_gamepadloading.xml
+index 2dee746..fdaa460 100755
+--- a/esoui/common/gamepad/zo_gamepadloading.xml
++++ b/esoui/common/gamepad/zo_gamepadloading.xml
+@@ -17,11 +17,9 @@
+         &lt;/Control&gt;
+ 
+         &lt;Control name="ZO_LoadingIcon_Gamepad_Footer" inherits="ZO_LoadingIcon_Gamepad" virtual="true"&gt;
+-            &lt;Dimensions x="64" y="64" /&gt;
++            &lt;Dimensions x="ZO_GAMEPAD_LOADING_ICON_FOOTER_SIZE" y="ZO_GAMEPAD_LOADING_ICON_FOOTER_SIZE" /&gt;
+             &lt;Controls&gt;
+-                &lt;Texture name="$(parent)Animation" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_ScreenApp_Ouroboros.dds"&gt;
+-                    &lt;Dimensions x="64" y="64" /&gt;
+-                &lt;/Texture&gt;
++                &lt;Texture name="$(parent)Animation" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_ScreenApp_Ouroboros.dds" /&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

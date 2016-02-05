@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/leaderboards/gamepad/raidleaderboards_gamepad.lua b/esoui/ingame/leaderboards/gamepad/raidleaderboards_gamepad.lua
+index 31a1611..f9dc106 100755
+--- a/esoui/ingame/leaderboards/gamepad/raidleaderboards_gamepad.lua
++++ b/esoui/ingame/leaderboards/gamepad/raidleaderboards_gamepad.lua
+@@ -1,8 +1,7 @@
+ local ZO_RaidLeaderboardsManager_Gamepad = ZO_RaidLeaderboardsManager_Shared:Subclass()
+ 
+ function ZO_RaidLeaderboardsManager_Gamepad:New(...)
+-    local manager = ZO_RaidLeaderboardsManager_Shared.New(self, ...)
+-    return manager
++    return ZO_RaidLeaderboardsManager_Shared.New(self, ...)
+ end
+ 
+ function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
+@@ -70,5 +69,6 @@ end
+ 
+ function ZO_RaidLeaderboardsInformationArea_Gamepad_OnInitialized(self)
+     GAMEPAD_RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Gamepad:New(self)
++    GAMEPAD_LEADERBOARDS:UpdateCategories()
+     SYSTEMS:RegisterGamepadObject(RAID_LEADERBOARD_SYSTEM_NAME, GAMEPAD_RAID_LEADERBOARDS)
+ end
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

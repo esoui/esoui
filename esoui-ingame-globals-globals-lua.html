@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/globals/globals.lua b/esoui/ingame/globals/globals.lua
+index 5f865ac..420754c 100755
+--- a/esoui/ingame/globals/globals.lua
++++ b/esoui/ingame/globals/globals.lua
+@@ -51,7 +51,7 @@ local function OnZoneCollectibleRequirementFailed(eventId, collectibleId)
+     else
+         storeTextId = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_STORE_XBOX
+     end
+-    ZO_Dialogs_ShowPlatformDialog("ZONE_COLLECTIBLE_REQUIREMENT_FAILED", nil, {mainTextParams = {collectibleName, GetString(storeTextId) }})
++    ZO_Dialogs_ShowPlatformDialog("ZONE_COLLECTIBLE_REQUIREMENT_FAILED", { collectibleName = collectibleName }, {mainTextParams = {collectibleName, GetString(storeTextId) }})
+ end
+ 
+ EVENT_MANAGER:RegisterForEvent("Globals", EVENT_GLOBAL_MOUSE_UP, OnGlobalMouseUp)
+</code></pre>
+<script src="prism.js"></script>

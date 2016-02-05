@@ -1,0 +1,69 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/crafting/keyboard/smithingcreation_keyboard.xml b/esoui/ingame/crafting/keyboard/smithingcreation_keyboard.xml
+index daaaf0d..20d95bc 100755
+--- a/esoui/ingame/crafting/keyboard/smithingcreation_keyboard.xml
++++ b/esoui/ingame/crafting/keyboard/smithingcreation_keyboard.xml
+@@ -7,10 +7,26 @@
+                 &lt;Control name="$(parent)TabsDivider" inherits="ZO_InventoryFilterDivider" /&gt;
+ 
+                 &lt;Button name="$(parent)HaveMaterials" inherits="ZO_CheckButton"&gt;
+-                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)TabsDivider" offsetX="50" offsetY="14" /&gt;
++                    &lt;OnMouseEnter&gt;
++                        ZO_SmithingCreation_HaveMaterialsOnMouseEnter(self)
++                    &lt;/OnMouseEnter&gt;
++
++                    &lt;OnMouseExit&gt;
++                        ZO_SmithingCreation_FilterOnMouseExit(self)
++                    &lt;/OnMouseExit&gt;
++                    
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)TabsDivider" offsetX="30" offsetY="14" /&gt;
+                 &lt;/Button&gt;
+ 
+                 &lt;Button name="$(parent)HaveKnowledge" inherits="ZO_CheckButton"&gt;
++                    &lt;OnMouseEnter&gt;
++                        ZO_SmithingCreation_HaveKnowledgeOnMouseEnter(self)
++                    &lt;/OnMouseEnter&gt;
++
++                    &lt;OnMouseExit&gt;
++                        ZO_SmithingCreation_FilterOnMouseExit(self)
++                    &lt;/OnMouseExit&gt;
++                    
+                     &lt;Anchor point="LEFT" relativeTo="$(parent)HaveMaterials" relativePoint="RIGHT" offsetX="200" /&gt;
+                 &lt;/Button&gt;
+                 
+@@ -52,12 +68,27 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Control name="$(parent)StyleList" inherits="ZO_SmithingHorizontalListTemplate"&gt;
++                &lt;Control name="$(parent)StyleList" inherits="ZO_SmithingUniversalItemHorizontalListTemplate"&gt;
++                    &lt;Dimensions y="140" /&gt;
+                     &lt;Anchor point="TOP" relativeTo="$(parent)MaterialList" relativePoint="BOTTOM" offsetY="30" /&gt;
++
++                    &lt;Controls&gt;
++                        &lt;Button name="$(parent)UniversalStyleItem" inherits="ZO_CheckButton"&gt;
++                            &lt;OnMouseEnter&gt;
++                                ZO_SmithingCreation_UniversalStyleItemOnMouseEnter(self)
++                            &lt;/OnMouseEnter&gt;
++
++                            &lt;OnMouseExit&gt;
++                                ZO_SmithingCreation_FilterOnMouseExit(self)
++                            &lt;/OnMouseExit&gt;
++
++                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)UniversalItemBg" relativePoint="BOTTOMLEFT"/&gt;
++                        &lt;/Button&gt;
++                    &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+                 &lt;Control name="$(parent)TraitList" inherits="ZO_SmithingHorizontalListTemplate"&gt;
+-                    &lt;Anchor point="TOP" relativeTo="$(parent)StyleList" relativePoint="BOTTOM" /&gt;
++                    &lt;Anchor point="TOP" relativeTo="$(parent)StyleList" relativePoint="BOTTOM" offsetY="25"/&gt;
+                 &lt;/Control&gt;
+ 
+                 &lt;Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip"&gt;
+</code></pre>
+<script src="prism.js"></script>

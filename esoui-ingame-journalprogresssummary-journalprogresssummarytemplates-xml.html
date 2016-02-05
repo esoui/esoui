@@ -1,0 +1,26 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.xml b/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.xml
+index 52bd1e2..29958a3 100755
+--- a/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.xml
++++ b/esoui/ingame/journalprogresssummary/journalprogresssummarytemplates.xml
+@@ -35,14 +35,6 @@
+             &lt;/Controls&gt;
+         &lt;/StatusBar&gt;
+ 
+-        &lt;Control name="ZO_JournalChildlessCategory" inherits="ZO_IconHeader" virtual="true"&gt;
+-            &lt;OnInitialized&gt;
+-                ZO_IconHeader_OnInitialized(self)
+-                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+-                self.SetSelected = ZO_IconHeader_Setup
+-            &lt;/OnInitialized&gt;
+-        &lt;/Control&gt;
+-
+         &lt;Label name="ZO_JournalSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" &gt;
+             &lt;OnMouseUp&gt;
+                 ZO_TreeEntry_OnMouseUp(self, upInside)
+</code></pre>
+<script src="prism.js"></script>

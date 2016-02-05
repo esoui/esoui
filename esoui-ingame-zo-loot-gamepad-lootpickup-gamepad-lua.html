@@ -1,0 +1,30 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/zo_loot/gamepad/lootpickup_gamepad.lua b/esoui/ingame/zo_loot/gamepad/lootpickup_gamepad.lua
+index a5c4cf4..5d681d6 100755
+--- a/esoui/ingame/zo_loot/gamepad/lootpickup_gamepad.lua
++++ b/esoui/ingame/zo_loot/gamepad/lootpickup_gamepad.lua
+@@ -84,6 +84,9 @@ function ZO_LootPickup_Gamepad:DeferredInitialize()
+ end
+ 
+ function ZO_LootPickup_Gamepad:OnShowing()
++    local dontAutomaticallyExitScene = false
++    SCENE_MANAGER:SetHUDUIScene("lootGamepad", dontAutomaticallyExitScene)
++
+     KEYBIND_STRIP:RemoveDefaultExit()
+     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+     self.itemList:Activate()
+@@ -140,8 +143,6 @@ function ZO_LootPickup_Gamepad:Show()
+         self.returnScene = SCENE_MANAGER:GetCurrentScene():GetName()
+     end
+ 
+-    local dontAutomaticallyExitScene = false
+-    SCENE_MANAGER:SetHUDUIScene("lootGamepad", dontAutomaticallyExitScene)
+     SCENE_MANAGER:Show("lootGamepad")
+     
+     local OPEN_LOOT_WINDOW = false
+</code></pre>
+<script src="prism.js"></script>

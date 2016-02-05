@@ -1,0 +1,137 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/centerscreenannounce/centerscreenannounce.xml b/esoui/ingame/centerscreenannounce/centerscreenannounce.xml
+index 71565ec..d39e01c 100755
+--- a/esoui/ingame/centerscreenannounce/centerscreenannounce.xml
++++ b/esoui/ingame/centerscreenannounce/centerscreenannounce.xml
+@@ -37,7 +37,9 @@
+             &lt;Anchor point="TOP" /&gt;
+         &lt;/Label&gt;
+ 
+-        &lt;Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" virtual="true" /&gt;
++        &lt;Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" &gt;
++            &lt;Dimensions y="64"/&gt;
++        &lt;/Label&gt;
+         &lt;Label name="ZO_CenterScreenAnnounceSmallTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" virtual="true" /&gt;
+ 
+         &lt;Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Keyboard_Template" virtual="true"&gt;
+@@ -47,6 +49,37 @@
+                         &lt;Label name="$(parent)Combined" font="ZoFontCenterScreenAnnounceSmall"&gt;
+                             &lt;Anchor point="TOP" relativePoint="BOTTOM" offsetY="5"/&gt;
+                         &lt;/Label&gt;
++
++                        &lt;Control name="$(parent)RaidCompleteText"&gt;
++                            &lt;Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)TimeAmount" font="ZoFontAnnounce" /&gt;
++
++                                &lt;Label name="$(parent)TimeLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_TOTAL_TIME"  modifyTextType="NONE"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)TimeAmount" relativePoint="LEFT" offsetX="-5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)ScoreAmount" font="ZoFontAnnounce" &gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)TimeLabel" relativePoint="LEFT" offsetX="-20"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)ScoreLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_FINAL_SCORE"  modifyTextType="NONE"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)ScoreAmount" relativePoint="LEFT" offsetX="-5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)VitalityLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" modifyTextType="NONE"&gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)TimeAmount" relativePoint="RIGHT" offsetX="20"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)VitalityAmount" font="ZoFontAnnounce" &gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)VitalityPercent" font="ZoFontAnnounce" &gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)VitalityIcon" relativePoint="RIGHT" offsetX="5"/&gt;
++                                &lt;/Label&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Label&gt;
+             &lt;/Controls&gt;
+@@ -59,11 +92,65 @@
+                         &lt;Label name="$(parent)Combined" font="ZoFontGamepad42"&gt;
+                             &lt;Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/&gt;
+                         &lt;/Label&gt;
++
++                        &lt;Control name="$(parent)RaidCompleteText"&gt;
++                            &lt;Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)TimeAmount" font="ZoFontGamepad42" /&gt; 
++
++                                &lt;Label name="$(parent)TimeLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_TOTAL_TIME"  modifyTextType="UPPERCASE"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)TimeAmount" relativePoint="LEFT" offsetX="-10" offsetY="5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)ScoreAmount" font="ZoFontGamepad42"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)TimeLabel" relativePoint="LEFT" offsetX="-20" offsetY="-5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)ScoreLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_FINAL_SCORE" modifyTextType="UPPERCASE"&gt;
++                                    &lt;Anchor point="RIGHT" relativeTo="$(parent)ScoreAmount" relativePoint="LEFT" offsetX="-10" offsetY="5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)VitalityLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" modifyTextType="UPPERCASE"&gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)TimeAmount" relativePoint="RIGHT" offsetX="20" offsetY="5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)VitalityAmount" font="ZoFontGamepad42" &gt;
++                                    &lt;Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="10" offsetY="-5"/&gt;
++                                &lt;/Label&gt;
++
++                                &lt;Label name="$(parent)VitalityPercent" font="ZoFontGamepad42" /&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Label&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
++        &lt;Control name="ZO_RaidCompleteText" virtual="true"&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)TimeAmount" horizontalAlignment="CENTER"&gt;
++                    &lt;Anchor point="TOP" relativePoint="BOTTOM"/&gt;
++                &lt;/Label&gt;
++
++                &lt;Label name="$(parent)TimeLabel" text="SI_TRIAL_COMPLETE_TOTAL_TIME" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" /&gt;
++
++                &lt;Label name="$(parent)ScoreAmount" /&gt;
++
++                &lt;Label name="$(parent)ScoreLabel" text="SI_TRIAL_COMPLETE_FINAL_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" /&gt;
++
++                &lt;Label name="$(parent)VitalityLabel" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" /&gt;
++
++                &lt;Label name="$(parent)VitalityAmount" /&gt;
++
++                &lt;Texture name="$(parent)VitalityIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds"&gt;
++                    &lt;Dimensions x="40" y="40"/&gt;
++                    &lt;Anchor point="LEFT" relativeTo="$(parent)VitalityAmount" relativePoint="RIGHT" offsetX="20"/&gt;
++                &lt;/Texture&gt;
++
++                &lt;Label name="$(parent)VitalityPercent" /&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
+         &lt;Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true"&gt;
+             &lt;Anchor point="TOP" offsetY="190" /&gt;
+         &lt;/Control&gt;
+@@ -104,6 +191,10 @@
+                                         &lt;/Texture&gt;
+                                     &lt;/Controls&gt;
+                                 &lt;/Label&gt;
++                                
++                                &lt;Control name="$(parent)RaidCompleteText" inherits="ZO_RaidCompleteText"&gt;
++                                    &lt;Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" /&gt;
++                                &lt;/Control&gt;
+                             &lt;/Controls&gt;
+                         &lt;/Label&gt;
+                     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

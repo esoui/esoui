@@ -1,0 +1,35 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/treetemplates.xml b/esoui/libraries/zo_templates/treetemplates.xml
+index 1f53ad6..bc7bf8b 100755
+--- a/esoui/libraries/zo_templates/treetemplates.xml
++++ b/esoui/libraries/zo_templates/treetemplates.xml
+@@ -67,7 +67,7 @@
+                     &lt;/Controls&gt;
+                 &lt;/Texture&gt;
+                 &lt;Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS"&gt;
+-                    &lt;Anchor point="TOPLEFT" offsetX="55" offsetY="9"/&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="CENTER" offsetX="25" offsetY="-15"/&gt;
+                     &lt;DimensionConstraints maxX="230"/&gt;
+                 &lt;/Label&gt;
+                 &lt;!-- Fills the space between the text and the icon --&gt;
+@@ -78,5 +78,13 @@
+                 &lt;/Control&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
++
++        &lt;Control name="ZO_IconChildlessHeader" inherits="ZO_IconHeader" virtual="true"&gt;
++            &lt;OnInitialized&gt;
++                ZO_IconHeader_OnInitialized(self)
++                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
++                self.SetSelected = ZO_IconHeader_Setup
++            &lt;/OnInitialized&gt;
++        &lt;/Control&gt;
+     &lt;/Controls&gt;
+ &lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

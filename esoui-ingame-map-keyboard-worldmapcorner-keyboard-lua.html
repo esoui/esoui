@@ -1,0 +1,27 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/map/keyboard/worldmapcorner_keyboard.lua b/esoui/ingame/map/keyboard/worldmapcorner_keyboard.lua
+index a79afa3..c009de3 100755
+--- a/esoui/ingame/map/keyboard/worldmapcorner_keyboard.lua
++++ b/esoui/ingame/map/keyboard/worldmapcorner_keyboard.lua
+@@ -6,9 +6,13 @@ end
+ 
+ function ZO_WorldMapCorner_OnInitialized(self)
+     local titleLabel = self:GetNamedChild("Title")
+-    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
++    local function UpdateTitleEventCallback()
+         UpdateTitle(titleLabel)
+-    end)
++    end
++
++    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", UpdateTitleEventCallback)
++    self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, UpdateTitleEventCallback)
++
+     UpdateTitle(titleLabel)
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,37 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/mail/keyboard/mailsend_keyboard.xml b/esoui/ingame/mail/keyboard/mailsend_keyboard.xml
+index eb1c9fe..418ec22 100755
+--- a/esoui/ingame/mail/keyboard/mailsend_keyboard.xml
++++ b/esoui/ingame/mail/keyboard/mailsend_keyboard.xml
+@@ -12,7 +12,7 @@
+                 &lt;Label name="$(parent)ToLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MAIL_SEND_TO_LABEL"&gt;
+                     &lt;Anchor point="TOPLEFT" offsetY="40"/&gt;
+                 &lt;/Label&gt;
+-                &lt;Backdrop name="$(parent)To" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)To" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ToLabel" relativePoint="BOTTOMLEFT" offsetY="5"/&gt;
+                     &lt;Dimensions x="340"/&gt;
+                     &lt;Controls&gt;
+@@ -22,14 +22,14 @@
+                 &lt;Label name="$(parent)SubjectLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MAIL_SEND_SUBJECT_LABEL"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)To" relativePoint="BOTTOMLEFT" offsetY="5"/&gt;
+                 &lt;/Label&gt;
+-                &lt;Backdrop name="$(parent)Subject" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Subject" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" offsetY="5"/&gt;
+                     &lt;Dimensions x="340"/&gt;
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" /&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Backdrop&gt;
+-                &lt;Backdrop name="$(parent)Body" inherits="ZO_EditBackdrop"&gt;
++                &lt;Backdrop name="$(parent)Body" inherits="ZO_MultiLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Subject" relativePoint="BOTTOMRIGHT" offsetY="20"/&gt;
+                     &lt;Dimensions y="320"/&gt;
+</code></pre>
+<script src="prism.js"></script>

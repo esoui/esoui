@@ -1,0 +1,49 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/app/loadingscreen/gamepad/gamepadloadingscreen.xml b/esoui/app/loadingscreen/gamepad/gamepadloadingscreen.xml
+index beda29e..bf1d2f5 100755
+--- a/esoui/app/loadingscreen/gamepad/gamepadloadingscreen.xml
++++ b/esoui/app/loadingscreen/gamepad/gamepadloadingscreen.xml
+@@ -1,8 +1,4 @@
+ &lt;GuiXml&gt;
+-    &lt;String name="GAMEPAD_MEDIUM_FONT_APP" value="EsoUI/Common/Fonts/FTN57.otf" /&gt;
+-    &lt;Font name="ZoFontGamepad61App" font="$(GAMEPAD_MEDIUM_FONT_APP)|61|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoFontGamepad42App" font="$(GAMEPAD_MEDIUM_FONT_APP)|42|soft-shadow-thick" /&gt;
+-
+     &lt;Animations&gt;
+         &lt;AnimationTimeline name="LongLoadingAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY"&gt;
+             &lt;Animations&gt;
+@@ -49,7 +45,7 @@
+                     &lt;TextureCoords left="1" right="0" top="1" bottom=".01" /&gt;
+ 
+                     &lt;Controls&gt;
+-                        &lt;Label name="$(parent)LongLoadMessage" font="ZoFontGamepad61App" color="FFFFFF" horizontalAlignment="CENTER" alpha="0" text="SI_LONG_LOAD_TIME"&gt;
++                        &lt;Label name="$(parent)LongLoadMessage" font="ZoFontGamepad61" color="FFFFFF" horizontalAlignment="CENTER" alpha="0" text="SI_LONG_LOAD_TIME"&gt;
+                             &lt;Anchor point="BOTTOM" offsetY="-20"/&gt;
+                         &lt;/Label&gt;
+                     &lt;/Controls&gt;
+@@ -63,7 +59,7 @@
+                     &lt;TextureCoords left="1" right="0" top="-.01" bottom="1" /&gt;
+ 
+                     &lt;Controls&gt;
+-                        &lt;Label name="$(grandparent)ZoneDescription" override="true" font="ZoFontGamepad42App" color="FFFFFF" alpha="0"&gt;
++                        &lt;Label name="$(grandparent)ZoneDescription" override="true" font="ZoFontGamepad42" color="FFFFFF" alpha="0"&gt;
+                             &lt;Dimensions x="1280"/&gt;
+                             &lt;Anchor point="BOTTOM" relativePoint="TOP" /&gt;
+                         &lt;/Label&gt;
+@@ -75,8 +71,8 @@
+ 
+                         &lt;Control name="$(grandparent)ZoneInfoContainer" override="true"&gt;
+                             &lt;Controls&gt;
+-                                &lt;Label name="$(parent)ZoneName" font="ZoFontGamepad61App" override="true" color="FFFFFF" /&gt;
+-                                &lt;Label name="$(parent)InstanceType" font="ZoFontGamepad61App" override="true" color="FFFFFF" /&gt;
++                                &lt;Label name="$(parent)ZoneName" font="ZoFontGamepad61" override="true" color="FFFFFF" /&gt;
++                                &lt;Label name="$(parent)InstanceType" font="ZoFontGamepad61" override="true" color="FFFFFF" /&gt;
+                             &lt;/Controls&gt;
+                         &lt;/Control&gt;
+                     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

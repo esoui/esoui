@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/optionspanels/keyboard/optionspanel_gameplay_keyboard.xml b/esoui/ingame/optionspanels/keyboard/optionspanel_gameplay_keyboard.xml
+index 24a25d5..29652a5 100755
+--- a/esoui/ingame/optionspanels/keyboard/optionspanel_gameplay_keyboard.xml
++++ b/esoui/ingame/optionspanels/keyboard/optionspanel_gameplay_keyboard.xml
+@@ -49,7 +49,7 @@
+         &lt;/Control&gt;
+ 
+         &lt;Control name="Options_Gameplay_GamepadSection" inherits="ZO_Options_SectionTitle_WithDivider"&gt;
+-            &lt;Anchor point="TOPLEFT" relativeTo="Options_Gameplay_PreventAttackingInnocents" relativePoint="BOTTOMLEFT" offsetY="15" /&gt;
++            &lt;Anchor point="TOPLEFT" relativeTo="Options_Gameplay_PreventAttackingInnocents" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" /&gt;
+             &lt;OnInitialized&gt;
+                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPAD_SECTION_HEADER)
+                 ZO_OptionsWindow_InitializeControl(self)
+</code></pre>
+<script src="prism.js"></script>

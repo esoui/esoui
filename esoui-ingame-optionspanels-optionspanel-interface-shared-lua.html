@@ -1,0 +1,206 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/optionspanels/optionspanel_interface_shared.lua b/esoui/ingame/optionspanels/optionspanel_interface_shared.lua
+index 7f77fed..23fb6d3 100755
+--- a/esoui/ingame/optionspanels/optionspanel_interface_shared.lua
++++ b/esoui/ingame/optionspanels/optionspanel_interface_shared.lua
+@@ -1,3 +1,11 @@
++local function SetControlActiveFromPredicate(control, predicate)
++    if predicate() then
++        ZO_Options_SetOptionActive(control)
++    else
++        ZO_Options_SetOptionInactive(control)
++    end
++end
++
+ function ZO_OptionsPanel_Interface_ChatBubbleSpeedSliderValueFunc(value)
+     if value &lt;= .5 then
+         return GetString(SI_INTERFACE_OPTIONS_FADE_RATE_VERY_SLOW)
+@@ -45,6 +53,68 @@ local function AreHealthbarsEnabled()
+     return tonumber(GetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS)) ~= 0
+ end
+ 
++local function IsSCTEnabled()
++    return tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED)) ~= 0
++end
++
++local function OnSCTEnabledChanged(control)
++    SetControlActiveFromPredicate(control, IsSCTEnabled)
++end
++
++local function IsSCTAndOutgoingEnabled()
++    return IsSCTEnabled() and tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_ENABLED)) ~= 0
++end
++
++local function OnSCTOrOutgoingEnabledChanged(control)
++    SetControlActiveFromPredicate(control, IsSCTAndOutgoingEnabled)
++end
++
++local function IsSCTAndIncomingEnabled()
++    return IsSCTEnabled() and tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_ENABLED)) ~= 0
++end
++
++local function OnSCTOrIncomingEnabledChanged(control)
++    SetControlActiveFromPredicate(control, IsSCTAndIncomingEnabled)
++end
++
++local function GenerateSCTOutgoingOption(optionType)
++    local option =
++    {
++        controlType = OPTIONS_CHECKBOX,
++        system = SETTING_TYPE_COMBAT,
++        settingId = _G["COMBAT_SETTING_SCT_OUTGOING_"..optionType.."_ENABLED"],
++        panel = SETTING_PANEL_INTERFACE,
++        text = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_"..optionType.."_ENABLED"],
++        tooltipText = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_"..optionType.."_ENABLED_TOOLTIP"],
++        eventCallbacks =
++        {
++            ["SCTEnabled_Changed"] = OnSCTOrOutgoingEnabledChanged,
++            ["SCTOutgoingEnabled_Changed"] = OnSCTOrOutgoingEnabledChanged,
++        },
++        gamepadIsEnabledCallback = IsSCTAndOutgoingEnabled,
++    }
++    return option
++end
++
++local function GenerateSCTIncomingOption(optionType)
++    local option =
++    {
++        controlType = OPTIONS_CHECKBOX,
++        system = SETTING_TYPE_COMBAT,
++        settingId = _G["COMBAT_SETTING_SCT_INCOMING_"..optionType.."_ENABLED"],
++        panel = SETTING_PANEL_INTERFACE,
++        text = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_"..optionType.."_ENABLED"],
++        tooltipText = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_"..optionType.."_ENABLED_TOOLTIP"],
++        eventCallbacks =
++        {
++            ["SCTEnabled_Changed"] = OnSCTOrIncomingEnabledChanged,
++            ["SCTIncomingEnabled_Changed"] = OnSCTOrIncomingEnabledChanged,
++        },
++        gamepadIsEnabledCallback = IsSCTAndIncomingEnabled,
++    }
++    return option
++end
++
+ local ZO_OptionsPanel_Interface_ControlData =
+ {
+     --UI Settings
+@@ -437,7 +507,7 @@ local ZO_OptionsPanel_Interface_ControlData =
+             settingId = CHAT_BUBBLE_SETTING_ENABLED,
+             panel = SETTING_PANEL_INTERFACE,
+             text = SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
+-            gamepadTextOverride = SI_QUICK_CHAT_SETTING_ENABLED,
++            consoleTextOverride = SI_QUICK_CHAT_SETTING_ENABLED,
+             tooltipText = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_TOOLTIP,
+             events = {[false] = "ChatBubbles_Off", [true] = "ChatBubbles_On",},
+             gamepadHasEnabledDependencies = true,
+@@ -449,8 +519,8 @@ local ZO_OptionsPanel_Interface_ControlData =
+             system = SETTING_TYPE_CHAT_BUBBLE,
+             settingId = CHAT_BUBBLE_SETTING_SPEED_MODIFIER,
+             panel = SETTING_PANEL_INTERFACE,
+-            text = SI_INTERFACE_OPTIONS_FADE_RATE,
+-            tooltipText = SI_INTERFACE_OPTIONS_FADE_RATE_TOOLTIP,
++            text = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_FADE_RATE,
++            tooltipText = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_FADE_RATE_TOOLTIP,
+             minValue = .25,
+             maxValue = 3.0,
+             valueFormat = "%.2f",
+@@ -473,8 +543,8 @@ local ZO_OptionsPanel_Interface_ControlData =
+             system = SETTING_TYPE_CHAT_BUBBLE,
+             settingId = CHAT_BUBBLE_SETTING_ENABLED_ONLY_FROM_CONTACTS,
+             panel = SETTING_PANEL_INTERFACE,
+-            text = SI_INTERFACE_OPTIONS_ONLY_KNOWN,
+-            tooltipText = SI_INTERFACE_OPTIONS_ONLY_KNOWN_TOOLTIP,
++            text = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_ONLY_KNOWN,
++            tooltipText = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_ONLY_KNOWN_TOOLTIP,
+ 
+             eventCallbacks =
+             {
+@@ -489,8 +559,8 @@ local ZO_OptionsPanel_Interface_ControlData =
+             system = SETTING_TYPE_CHAT_BUBBLE,
+             settingId = CHAT_BUBBLE_SETTING_ENABLED_FOR_LOCAL_PLAYER,
+             panel = SETTING_PANEL_INTERFACE,
+-            text = SI_INTERFACE_OPTIONS_SELF_BUBBLE,
+-            tooltipText = SI_INTERFACE_OPTIONS_SELF_BUBBLE_TOOLTIP,
++            text = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_SELF,
++            tooltipText = SI_INTERFACE_OPTIONS_CHAT_BUBBLES_SELF_TOOLTIP,
+ 
+             eventCallbacks =
+             {
+@@ -499,6 +569,71 @@ local ZO_OptionsPanel_Interface_ControlData =
+             },
+         },
+     },
++
++    --Combat
++    [SETTING_TYPE_COMBAT] =
++    {
++        [COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED] =
++        {
++            controlType = OPTIONS_CHECKBOX,
++            system = SETTING_TYPE_COMBAT,
++            settingId = COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED,
++            panel = SETTING_PANEL_INTERFACE,
++            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_ENABLED,
++            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_ENABLED_TOOLTIP,
++            events = {[true] = "SCTEnabled_Changed", [false] = "SCTEnabled_Changed",},
++            gamepadHasEnabledDependencies = true,
++        },
++        [COMBAT_SETTING_SCT_OUTGOING_ENABLED] =
++        {
++            controlType = OPTIONS_CHECKBOX,
++            system = SETTING_TYPE_COMBAT,
++            settingId = COMBAT_SETTING_SCT_OUTGOING_ENABLED,
++            panel = SETTING_PANEL_INTERFACE,
++            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_ENABLED,
++            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_ENABLED_TOOLTIP,
++            events = {[true] = "SCTOutgoingEnabled_Changed", [false] = "SCTOutgoingEnabled_Changed",},
++            eventCallbacks =
++            {
++                ["SCTEnabled_Changed"]   = OnSCTEnabledChanged,
++            },
++            gamepadIsEnabledCallback = IsSCTEnabled,
++            gamepadHasEnabledDependencies = true,
++        },
++        [COMBAT_SETTING_SCT_OUTGOING_DAMAGE_ENABLED] = GenerateSCTOutgoingOption("DAMAGE"),
++        [COMBAT_SETTING_SCT_OUTGOING_DOT_ENABLED] = GenerateSCTOutgoingOption("DOT"),
++        [COMBAT_SETTING_SCT_OUTGOING_HEALING_ENABLED] = GenerateSCTOutgoingOption("HEALING"),
++        [COMBAT_SETTING_SCT_OUTGOING_HOT_ENABLED] = GenerateSCTOutgoingOption("HOT"),
++        [COMBAT_SETTING_SCT_OUTGOING_STATUS_EFFECTS_ENABLED] = GenerateSCTOutgoingOption("STATUS_EFFECTS"),
++        [COMBAT_SETTING_SCT_OUTGOING_PET_DAMAGE_ENABLED] = GenerateSCTOutgoingOption("PET_DAMAGE"),
++        [COMBAT_SETTING_SCT_OUTGOING_PET_DOT_ENABLED] = GenerateSCTOutgoingOption("PET_DOT"),
++        [COMBAT_SETTING_SCT_OUTGOING_PET_HEALING_ENABLED] = GenerateSCTOutgoingOption("PET_HEALING"),
++        [COMBAT_SETTING_SCT_OUTGOING_PET_HOT_ENABLED] = GenerateSCTOutgoingOption("PET_HOT"),
++        [COMBAT_SETTING_SCT_INCOMING_ENABLED] =
++        {
++            controlType = OPTIONS_CHECKBOX,
++            system = SETTING_TYPE_COMBAT,
++            settingId = COMBAT_SETTING_SCT_INCOMING_ENABLED,
++            panel = SETTING_PANEL_INTERFACE,
++            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_ENABLED,
++            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_ENABLED_TOOLTIP,
++            events = {[true] = "SCTIncomingEnabled_Changed", [false] = "SCTIncomingEnabled_Changed",},
++            eventCallbacks =
++            {
++                ["SCTEnabled_Changed"]   = OnSCTEnabledChanged,
++            },
++            gamepadIsEnabledCallback = IsSCTEnabled,
++            gamepadHasEnabledDependencies = true,
++        },
++        [COMBAT_SETTING_SCT_INCOMING_DAMAGE_ENABLED] = GenerateSCTIncomingOption("DAMAGE"),
++        [COMBAT_SETTING_SCT_INCOMING_DOT_ENABLED] = GenerateSCTIncomingOption("DOT"),
++        [COMBAT_SETTING_SCT_INCOMING_HEALING_ENABLED] = GenerateSCTIncomingOption("HEALING"),
++        [COMBAT_SETTING_SCT_INCOMING_HOT_ENABLED] = GenerateSCTIncomingOption("HOT"),
++        [COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED] = GenerateSCTIncomingOption("PET_DAMAGE"),
++        [COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED] = GenerateSCTIncomingOption("PET_DOT"),
++        [COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED] = GenerateSCTIncomingOption("STATUS_EFFECTS"),
++    },
++
+     --Custom
+     [SETTING_TYPE_CUSTOM] =
+     {
+</code></pre>
+<script src="prism.js"></script>

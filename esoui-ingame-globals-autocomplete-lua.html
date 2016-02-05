@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/globals/autocomplete.lua b/esoui/ingame/globals/autocomplete.lua
+index 7f11c0c..52ceb93 100755
+--- a/esoui/ingame/globals/autocomplete.lua
++++ b/esoui/ingame/globals/autocomplete.lua
+@@ -263,7 +263,7 @@ local function Initialize(event, name)
+         end
+ 
+         local function TryAddRecentTarget(unitTag)
+-            if IsUnitPlayer(unitTag) and GetUnitAlliance("player") == GetUnitAlliance(unitTag) then
++            if IsUnitPlayer(unitTag) and AreUnitsCurrentlyAllied("player", unitTag) then
+                 g_recentTargets:AddRecentPlayer(GetUnitName(unitTag))
+             end
+         end
+</code></pre>
+<script src="prism.js"></script>

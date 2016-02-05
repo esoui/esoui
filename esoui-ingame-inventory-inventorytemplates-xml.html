@@ -1,0 +1,31 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/inventory/inventorytemplates.xml b/esoui/ingame/inventory/inventorytemplates.xml
+index 5e5fc63..248fa77 100755
+--- a/esoui/ingame/inventory/inventorytemplates.xml
++++ b/esoui/ingame/inventory/inventorytemplates.xml
+@@ -28,8 +28,8 @@
+                 &lt;/Label&gt;
+                 
+                 &lt;Label name="$(parent)TelvarStones" inherits="ZO_CurrencyTemplate" hidden="true"&gt;
+-                    &lt;Dimensions x="120"/&gt;
+-                    &lt;Anchor point="RIGHT" relativeTo="$(parent)Money" relativePoint="LEFT" offsetX="-10" /&gt;
++                    &lt;Dimensions x="150"/&gt;
++                    &lt;Anchor point="RIGHT" relativeTo="$(parent)Money" relativePoint="LEFT" offsetX="-40" /&gt;
+                 &lt;/Label&gt;
+ 
+                 &lt;Label name="$(parent)AltFreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true"&gt;
+@@ -42,7 +42,7 @@
+                 &lt;/Label&gt;
+ 
+                 &lt;Label name="$(parent)AltTelvarStones" inherits="ZO_CurrencyTemplate" hidden="true"&gt;
+-                    &lt;Dimensions x="120"/&gt;
++                    &lt;Dimensions x="150"/&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)TelvarStones" relativePoint="BOTTOMRIGHT" offsetY="1" hidden="true"/&gt;
+                 &lt;/Label&gt;
+             &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,21 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tooltip/abilitytooltips.lua b/esoui/ingame/tooltip/abilitytooltips.lua
+index 10d905d..f046f3c 100755
+--- a/esoui/ingame/tooltip/abilitytooltips.lua
++++ b/esoui/ingame/tooltip/abilitytooltips.lua
+@@ -279,7 +279,8 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
+                 if CHAMPION_PERKS:GetNumAvailablePointsThatCanBeSpent(attribute) &gt; 0 then
+                     pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_UPGRADE, iconPath), self:GetStyle("bodyDescription"), self:GetStyle("succeeded"))
+                 else
+-                    pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_REACHED_MAX_SPEND_LIMIT, GetMaxSpendableChampionPointsInAttribute(), iconPath, ZO_Champion_GetConstellationGroupNameFromAttribute(attribute)), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
++                    local attributeName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(attribute)
++                    pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_REACHED_MAX_SPEND_LIMIT, GetMaxSpendableChampionPointsInAttribute(), iconPath, attributeName), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+                 end
+             else
+                 pointCostSection:AddLine(zo_strformat(SI_CHAMPION_TOOLTIP_POINTS_REQUIRED, iconPath), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+</code></pre>
+<script src="prism.js"></script>

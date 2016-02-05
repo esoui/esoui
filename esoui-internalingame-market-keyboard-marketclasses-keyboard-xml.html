@@ -1,0 +1,74 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/keyboard/marketclasses_keyboard.xml b/esoui/internalingame/market/keyboard/marketclasses_keyboard.xml
+index 84d8ec2..6ae911d 100755
+--- a/esoui/internalingame/market/keyboard/marketclasses_keyboard.xml
++++ b/esoui/internalingame/market/keyboard/marketclasses_keyboard.xml
+@@ -1,9 +1,4 @@
+ &lt;GuiXml&gt;
+-    &lt;Font name="ZoMarketKeyboardTileFont" font="$(BOLD_FONT)|18|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoMarketKeyboardDescriptionFont" font="$(BOLD_FONT)|16|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoMarketKeyboardTileTitleFont" font="$(BOLD_FONT)|22|soft-shadow-thick" /&gt;
+-    &lt;Font name="ZoMarketCalloutFont" font="$(BOLD_FONT)|18|soft-shadow-thin" /&gt;
+-    
+     &lt;Controls&gt;
+         &lt;Label name="ZO_MarketDefaultLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" /&gt;
+         
+@@ -82,7 +77,7 @@
+                     &lt;AnchorFill/&gt;
+                 &lt;/Backdrop&gt;
+                 
+-                &lt;Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoMarketKeyboardTileTitleFont" mouseEnabled="true" override="true"&gt;
++                &lt;Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" mouseEnabled="true" override="true"&gt;
+                     &lt;Anchor point="TOPLEFT" offsetX="10" offsetY="10"/&gt;
+                     &lt;Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/&gt;
+                     &lt;OnMouseEnter&gt;
+@@ -107,7 +102,7 @@
+                 &lt;/Label&gt;
+                 
+                 
+-                &lt;Label name="$(parent)PreviousCost" font="ZoMarketKeyboardTileFont" override="true"&gt;
++                &lt;Label name="$(parent)PreviousCost" font="ZoFontWinH4" override="true"&gt;
+                     &lt;Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/&gt;
+                     &lt;Controls&gt;
+                         &lt;Texture name="$(parent)Strikethrough" override="true"&gt;
+@@ -120,7 +115,7 @@
+                     &lt;/Controls&gt;
+                 &lt;/Label&gt;
+                 
+-                &lt;Label name="$(parent)Cost" font="ZoMarketKeyboardTileFont" override="true"&gt;
++                &lt;Label name="$(parent)Cost" font="ZoFontWinH4" override="true"&gt;
+                     &lt;Controls&gt;
+                         &lt;Texture name="$(parent)CurrencyIcon" override="true"&gt;
+                             &lt;Dimensions x="32" y="32" /&gt;
+@@ -129,11 +124,11 @@
+                     &lt;/Controls&gt;
+                 &lt;/Label&gt;
+                 
+-                &lt;Label name="$(parent)Purchased" font="ZoMarketKeyboardTileFont" override="true"&gt;
++                &lt;Label name="$(parent)Purchased" font="ZoFontWinH4" override="true"&gt;
+                     &lt;Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/&gt;
+                 &lt;/Label&gt;
+                 
+-                &lt;Label name="$(parent)TextCallout" font="ZoMarketCalloutFont" override="true"&gt;
++                &lt;Label name="$(parent)TextCallout" font="ZoFontWinT1" override="true"&gt;
+                     &lt;Controls&gt;
+                         &lt;Control name="$(parent)Background" override="true"&gt;
+                             &lt;Dimensions y="32"/&gt;
+@@ -173,9 +168,9 @@
+                     &lt;Anchor point="TOPRIGHT" offsetX="-316" offsetY="10"/&gt;
+                 &lt;/Label&gt;
+                 
+-                &lt;Label name="$(parent)Description" inherits="ZO_MarketDefaultLabel" font="ZoMarketKeyboardDescriptionFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" wrapMode="ELLIPSIS" mouseEnabled="true"&gt;
++                &lt;Label name="$(parent)Description" inherits="ZO_MarketDefaultLabel" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" wrapMode="ELLIPSIS" mouseEnabled="true"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/&gt;
+-                    &lt;Anchor point="BOTTOMRIGHT" offsetX="-250" offsetY="-70"/&gt;
++                    &lt;Anchor point="BOTTOMRIGHT" offsetX="-290" offsetY="-70"/&gt;
+                     
+                     &lt;OnMouseEnter&gt;
+                         ZO_MarketProduct_OnMouseEnter(self:GetParent())
+</code></pre>
+<script src="prism.js"></script>

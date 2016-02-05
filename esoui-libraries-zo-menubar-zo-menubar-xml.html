@@ -1,0 +1,32 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_menubar/zo_menubar.xml b/esoui/libraries/zo_menubar/zo_menubar.xml
+index 681bd3c..55a307e 100755
+--- a/esoui/libraries/zo_menubar/zo_menubar.xml
++++ b/esoui/libraries/zo_menubar/zo_menubar.xml
+@@ -32,6 +32,20 @@
+                         &lt;/Texture&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Texture&gt;
++
++                &lt;Texture name="$(parent)Status" level="2" excludeFromResizeToFitExtents="true" resizeToFitFile="true" hidden="true"&gt;
++                    &lt;Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" /&gt;
++                &lt;/Texture&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++
++        &lt;Control name="ZO_MenuBarPaddingBarTemplate" excludeFromResizeToFitExtents="true" virtual="true"&gt;
++            &lt;Dimensions x="8" y="64" /&gt;
++
++            &lt;Controls&gt;
++                &lt;Texture name="$(parent)Image" level="1" textureFile="EsoUI/Art/Miscellaneous/verticalDivider_64.dds" pixelRoundingEnabled="false"&gt;
++                    &lt;AnchorFill /&gt;
++                &lt;/Texture&gt;
+             &lt;/Controls&gt;
+         &lt;/Control&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

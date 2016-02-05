@@ -1,0 +1,29 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/app/loadingscreen/keyboard/loadingscreen.xml b/esoui/app/loadingscreen/keyboard/loadingscreen.xml
+index a123167..8bbed5c 100755
+--- a/esoui/app/loadingscreen/keyboard/loadingscreen.xml
++++ b/esoui/app/loadingscreen/keyboard/loadingscreen.xml
+@@ -71,9 +71,16 @@
+ 
+                 &lt;Texture name="$(parent)BottomMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_bottomMunge_tile.dds" addressMode="WRAP" scale=".75"&gt;
+                     &lt;Controls&gt;
+-                        &lt;Label name="$(grandparent)ZoneDescription" override="true"&gt;
++                        &lt;Label name="$(grandparent)ZoneDescription" font="ZoFontWinH3" override="true"&gt;
+                             &lt;Anchor point="CENTER" offsetY="55" /&gt;
+                         &lt;/Label&gt;
++
++                        &lt;Control name="$(grandparent)ZoneInfoContainer" override="true"&gt;
++                            &lt;Controls&gt;
++                                &lt;Label name="$(parent)ZoneName" override="true" font="ZoFontWinH2"/&gt;
++                                &lt;Label name="$(parent)InstanceType" override="true" font="ZoFontWinH2"/&gt;
++                            &lt;/Controls&gt;
++                        &lt;/Control&gt;
+                     &lt;/Controls&gt;
+                &lt;/Texture&gt;
+ 
+</code></pre>
+<script src="prism.js"></script>

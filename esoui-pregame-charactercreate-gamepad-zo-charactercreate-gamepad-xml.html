@@ -1,0 +1,51 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/pregame/charactercreate/gamepad/zo_charactercreate_gamepad.xml b/esoui/pregame/charactercreate/gamepad/zo_charactercreate_gamepad.xml
+index 82b7aef..1d5bf5d 100755
+--- a/esoui/pregame/charactercreate/gamepad/zo_charactercreate_gamepad.xml
++++ b/esoui/pregame/charactercreate/gamepad/zo_charactercreate_gamepad.xml
+@@ -404,39 +404,6 @@
+                         ZO_CharacterCreate_Gamepad_CreateTriangle(self, SetFace, GetFace, SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT, SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN)
+                     &lt;/OnInitialized&gt;
+                 &lt;/Control&gt;                
+-
+-                &lt;Control name="$(parent)Finish" hidden="true" inherits="ZO_AnchoredToQuadrant1Background"&gt;
+-                    &lt;Controls&gt;
+-                        &lt;Scroll name="$(parent)Mask"&gt;
+-                            &lt;AnchorFill /&gt;
+-                            &lt;Controls&gt;
+-                                &lt;Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"&gt;
+-                                    &lt;Controls&gt;
+-                                        &lt;Label name="$(parent)Title" font="ZoFontGamepad42" text="SI_CREATE_CHARACTER_GAMEPAD_FINISH_TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
+-                                            &lt;Anchor point="LEFT" offsetY="-80" /&gt;
+-                                        &lt;/Label&gt;
+-
+-                                        &lt;Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop_Gamepad"&gt;
+-                                            &lt;Anchor point="LEFT" offsetX="20" offsetY="100"/&gt;
+-                                            &lt;Anchor point="RIGHT" offsetX="-20" offsetY="100"/&gt;
+-                                            &lt;Controls&gt;
+-                                                &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_EditDefaultText_Gamepad" textType="ALL" maxInputCharacters="CHARNAME_MAX_LENGTH"&gt;
+-                                                    &lt;OnInitialized&gt;
+-                                                        ZO_EditDefaultText_Initialize(self, GetString(SI_CREATE_CHARACTER_TITLE_NAME))
+-                                                    &lt;/OnInitialized&gt;
+-
+-                                                    &lt;OnTextChanged&gt;
+-                                                        ZO_EditDefaultText_OnTextChanged(self)
+-                                                    &lt;/OnTextChanged&gt;
+-                                                &lt;/EditBox&gt;
+-                                            &lt;/Controls&gt;
+-                                        &lt;/Backdrop&gt;
+-                                    &lt;/Controls&gt;
+-                                &lt;/Control&gt;
+-                            &lt;/Controls&gt;
+-                        &lt;/Scroll&gt;
+-                    &lt;/Controls&gt;
+-                &lt;/Control&gt;
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

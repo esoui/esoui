@@ -1,0 +1,36 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/mail/gamepad/mailsend_gamepad.xml b/esoui/ingame/mail/gamepad/mailsend_gamepad.xml
+index 60393ef..e4eaacd 100755
+--- a/esoui/ingame/mail/gamepad/mailsend_gamepad.xml
++++ b/esoui/ingame/mail/gamepad/mailsend_gamepad.xml
+@@ -53,22 +53,20 @@
+                                             &lt;!-- Dynamically anchored to either parent or CODNotice --&gt;
+                                         &lt;/Label&gt;
+                                         &lt;Control name="$(parent)Address" inherits="ZO_Mail_Gamepad_EditBox"&gt;
+-                                            &lt;Dimensions y="43" /&gt;
+                                             &lt;Anchor point="TOPRIGHT" /&gt;
+                                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)AddressLabel" relativePoint="BOTTOMLEFT" /&gt;
+                                         &lt;/Control&gt;
+ 
+                                         &lt;Label name="$(parent)SubjectLabel" text="SI_GAMEPAD_MAIL_SUBJECT_LABEL" inherits="ZO_Mail_Gamepad_Label"&gt;
+-                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Address" relativePoint="BOTTOMLEFT" offsetY="15" /&gt;
++                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)AddressBackdrop" relativePoint="BOTTOMLEFT" offsetY="15" /&gt;
+                                         &lt;/Label&gt;
+                                         &lt;Control name="$(parent)Subject" inherits="ZO_Mail_Gamepad_EditBox"&gt;
+-                                            &lt;Dimensions y="43" /&gt;
+                                             &lt;Anchor point="TOPRIGHT" /&gt;
+                                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" /&gt;
+                                         &lt;/Control&gt;
+ 
+                                         &lt;Label name="$(parent)BodyLabel" text="SI_GAMEPAD_MAIL_BODY_LABEL" inherits="ZO_Mail_Gamepad_Label"&gt;
+-                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" offsetY="15" /&gt;
++                                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)SubjectBackdrop" relativePoint="BOTTOMLEFT" offsetY="15" /&gt;
+                                         &lt;/Label&gt;
+                                         &lt;Control name="$(parent)Body" inherits="ZO_Mail_Gamepad_EditBox_Multiline"&gt;
+                                             &lt;Anchor point="TOPLEFT" relativeTo="$(parent)BodyLabel" relativePoint="BOTTOMLEFT" /&gt;
+</code></pre>
+<script src="prism.js"></script>

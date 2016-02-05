@@ -1,0 +1,53 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/libraries/zo_templates/scrolltemplates.lua b/esoui/libraries/zo_templates/scrolltemplates.lua
+index 1a198b0..e9e9b02 100755
+--- a/esoui/libraries/zo_templates/scrolltemplates.lua
++++ b/esoui/libraries/zo_templates/scrolltemplates.lua
+@@ -302,8 +302,9 @@ function ZO_Scroll_ScrollControlIntoView(self, otherControl)
+     end
+ end
+ 
+-function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl)
++function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl, scrollInstantly)
+     local scroll = self.scroll
++    local scrollbar = self.scrollbar
+     local scrollTop = scroll:GetTop()
+     local scrollBottom = scroll:GetBottom()
+     local controlTop = otherControl:GetTop()
+@@ -312,10 +313,28 @@ function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl)
+     local heightDelta = scroll:GetHeight() - otherControl:GetHeight()
+     local halfHeightDelta = heightDelta * .5
+ 
++    local value
+     if controlTop &lt; scrollTop then
+-        ZO_Scroll_ScrollRelative(self, (controlTop - scrollTop) - halfHeightDelta)
++        value = (controlTop - scrollTop) - halfHeightDelta
+     elseif controlBottom &gt; scrollBottom then
+-        ZO_Scroll_ScrollRelative(self, (controlBottom - scrollBottom) + halfHeightDelta)
++        value = (controlBottom - scrollBottom) + halfHeightDelta
++    end
++    
++    if value then
++        if scrollInstantly then
++            ZO_Scroll_ResetToTop(self)
++
++            local _, verticalExtents = scroll:GetScrollExtents()
++            local targetValue = (value / verticalExtents) * MAX_SCROLL_VALUE
++            local scrollMin, scrollMax = scrollbar:GetMinMax()
++
++            self.timeline:Stop()
++            self.animationStart = scrollbar:GetValue()
++            self.animationTarget = targetValue
++            self.timeline:PlayInstantlyToEnd()
++        else
++            ZO_Scroll_ScrollRelative(self,  value)
++        end
+     end
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

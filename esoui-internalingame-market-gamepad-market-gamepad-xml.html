@@ -1,0 +1,72 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/internalingame/market/gamepad/market_gamepad.xml b/esoui/internalingame/market/gamepad/market_gamepad.xml
+index c0558f4..ef58089 100755
+--- a/esoui/internalingame/market/gamepad/market_gamepad.xml
++++ b/esoui/internalingame/market/gamepad/market_gamepad.xml
+@@ -150,5 +150,59 @@
+                 ZO_GamepadMarket_Preview_OnInitialize(self)
+             &lt;/OnInitialized&gt;
+         &lt;/TopLevelControl&gt;
++        
++        &lt;Control name="ZO_GamepadMarket_EsoPlusCategoryTemplate" inherits="ZO_GamepadMarket_CategoryTemplate" virtual="true"&gt;
++            &lt;DimensionConstraints minX="1288" maxY="805"/&gt;
++            &lt;Controls&gt;
++                &lt;Label name="$(parent)Title" font="ZoFontGamepadBold45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE"&gt;
++                    &lt;Anchor point="TOPLEFT" offsetX="30" /&gt;
++                    &lt;Anchor point="TOPRIGHT" offsetX="-30" /&gt;
++                &lt;/Label&gt;
++
++                &lt;Control name="$(parent)MembershipInfo" resizeToFitDescendents="true"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" /&gt;
++                    
++                    &lt;Controls&gt;
++                        &lt;Label name="$(parent)Label" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL" modifyTextType="UPPERCASE"&gt;
++                            &lt;Anchor point="TOPLEFT"/&gt;
++                        &lt;/Label&gt;
++
++                        &lt;Label name="$(parent)Status" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"&gt;
++                            &lt;AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="5" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++                
++                &lt;Label name="$(parent)Overview" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMRIGHT" offsetY="10" /&gt;
++                &lt;/Label&gt;
++                
++                &lt;Control name="$(parent)Benefits" resizeToFitDescendents="true"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="50" /&gt;
++                    &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="50" /&gt;
++                    
++                    &lt;Controls&gt;
++                        &lt;Texture name="$(parent)Image"&gt;
++                            &lt;!-- Hide the image for now --&gt;
++                            &lt;Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/&gt;
++                            &lt;Anchor point="TOPRIGHT" /&gt;
++                        &lt;/Texture&gt;
++                        
++                        &lt;Label name="$(parent)Title" font="ZoFontGamepadBold45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE" modifyTextType="UPPERCASE"&gt;
++                            &lt;Anchor point="TOPLEFT" /&gt;
++                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetX="-5" /&gt;
++                        &lt;/Label&gt;
++                        
++                        &lt;Label name="$(parent)Text" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"&gt;
++                            &lt;Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" /&gt;
++                            &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
++            &lt;/Controls&gt;
++        &lt;/Control&gt;
++        
+     &lt;/Controls&gt;
+ &lt;/GuiXml&gt;
+\ No newline at end of file
+</code></pre>
+<script src="prism.js"></script>

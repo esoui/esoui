@@ -1,0 +1,20 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/stats/keyboard/zo_stats_keyboard.lua b/esoui/ingame/stats/keyboard/zo_stats_keyboard.lua
+index 48998b8..a05eba1 100755
+--- a/esoui/ingame/stats/keyboard/zo_stats_keyboard.lua
++++ b/esoui/ingame/stats/keyboard/zo_stats_keyboard.lua
+@@ -125,7 +125,7 @@ function ZO_Stats:SetUpTitleSection()
+ end
+ 
+ function ZO_Stats:RefreshTitleSection()
+-    local playerAlliance = GetUnitAlliance("player") --varies from cross alliance activities
++    local playerAlliance = GetUnitAlliance("player")
+     self.allianceIconControl:SetTexture(GetLargeAllianceSymbolIcon(playerAlliance))
+ end
+ 
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,37 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/app/loadingscreen/sharedloadingscreen.xml b/esoui/app/loadingscreen/sharedloadingscreen.xml
+index fec3654..225116f 100755
+--- a/esoui/app/loadingscreen/sharedloadingscreen.xml
++++ b/esoui/app/loadingscreen/sharedloadingscreen.xml
+@@ -56,7 +56,7 @@
+                     &lt;TextureCoords left="0" right="1" top="0.01" bottom="1" /&gt;
+ 
+                     &lt;Controls&gt;
+-                        &lt;Label name="$(grandparent)ZoneDescription" font="EsoUi/Common/Fonts/Univers67.otf|20|soft-shadow-thick" horizontalAlignment="CENTER" hidden="true" inheritScale="false"&gt;
++                        &lt;Label name="$(grandparent)ZoneDescription" horizontalAlignment="CENTER" hidden="true" inheritScale="false"&gt;
+                             &lt;Dimensions x="1120"/&gt;
+ 
+                             &lt;OnUserAreaCreated&gt;
+@@ -66,14 +66,14 @@
+                         &lt;Control name="$(grandparent)ZoneInfoContainer" resizeToFitDescendents="true"&gt;
+                             &lt;Anchor point="BOTTOM" relativeTo="$(grandparent)ZoneDescription" relativePoint="TOP" offsetY="-5"/&gt;
+                             &lt;Controls&gt;
+-                                &lt;Label name="$(parent)ZoneName" font="EsoUi/Common/Fonts/Univers67.otf|24|soft-shadow-thick" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false"&gt;
++                                &lt;Label name="$(parent)ZoneName" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false"&gt;
+                                     &lt;Anchor point="LEFT"/&gt;
+                                 &lt;/Label&gt;
+                                 &lt;Texture name="$(parent)InstanceTypeIcon"&gt;
+                                     &lt;Dimensions x="40" y="40"/&gt;
+                                     &lt;Anchor point="LEFT" relativeTo="$(parent)ZoneName" relativePoint="RIGHT" offsetX="60"/&gt;
+                                 &lt;/Texture&gt;
+-                                &lt;Label name="$(parent)InstanceType" font="EsoUi/Common/Fonts/Univers67.otf|24|soft-shadow-thick" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false"&gt;
++                                &lt;Label name="$(parent)InstanceType" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false"&gt;
+                                     &lt;Anchor point="LEFT" relativeTo="$(parent)InstanceTypeIcon" relativePoint="RIGHT" offsetX="5"/&gt;
+                                 &lt;/Label&gt;
+                             &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

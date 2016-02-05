@@ -1,0 +1,28 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/keybindings/keyboard/keybindings.lua b/esoui/ingame/keybindings/keyboard/keybindings.lua
+index c036899..243e0a1 100755
+--- a/esoui/ingame/keybindings/keyboard/keybindings.lua
++++ b/esoui/ingame/keybindings/keyboard/keybindings.lua
+@@ -118,7 +118,15 @@ function BindKeyDialog:OnUnbindClicked()
+ end
+ 
+ local function GetBindTypeTextFromIndex(bindingIndex)
+-    return bindingIndex == 1 and GetString(SI_KEYBINDINGS_PRIMARY) or GetString(SI_KEYBINDINGS_SECONDARY)
++    if bindingIndex == 1 then 
++        return GetString(SI_KEYBINDINGS_PRIMARY) 
++    elseif bindingIndex == 2 then
++        return GetString(SI_KEYBINDINGS_SECONDARY)
++    elseif bindingIndex == 3 then
++        return GetString(SI_KEYBINDINGS_TERTIARY)
++    else
++        return GetString(SI_KEYBINDINGS_QUATERNARY)
++    end
+ end
+ 
+ function BindKeyDialog:SetupDialog(data)
+</code></pre>
+<script src="prism.js"></script>

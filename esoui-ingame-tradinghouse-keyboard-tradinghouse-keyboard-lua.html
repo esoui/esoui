@@ -1,0 +1,50 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.lua b/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.lua
+index 0f43367..bb28f73 100755
+--- a/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.lua
++++ b/esoui/ingame/tradinghouse/keyboard/tradinghouse_keyboard.lua
+@@ -749,7 +749,7 @@ function ZO_TradingHouseManager:RebuildSearchResultsPage()
+ 
+     for i = 1, self.m_numItemsOnPage do
+         local result = ZO_TradingHouse_CreateItemData(i, GetTradingHouseSearchResultItemInfo)
+-        if(result) then
++        if result then
+             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SEARCH_RESULTS_DATA_TYPE, result)
+         end
+     end
+@@ -760,7 +760,7 @@ function ZO_TradingHouseManager:RebuildSearchResultsPage()
+     -- If no results were returned, disallow further searches (until one or more search criteria are modified),
+     -- and display a "no items found" label.
+     self.m_searchAllowed = (numItems ~= 0)
+-	self.m_noItemsLabel:SetHidden(numItems ~= 0)
++    self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
+ 
+     ZO_ScrollList_Commit(list)
+ end
+@@ -773,12 +773,18 @@ function ZO_TradingHouseManager:AddGuildSpecificItems(ignoreFiltering)
+ 
+     for i = 1, GetNumGuildSpecificItems() do
+         local result = self:CreateGuildSpecificItemData(i, GetGuildSpecificItemInfo)
+-        if(result and ignoreFiltering or self:ShouldAddGuildSpecificItemToList(result)) then
++        if result and ignoreFiltering or self:ShouldAddGuildSpecificItemToList(result) then
+             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(GUILD_SPECIFIC_ITEM_DATA_TYPE, result)
+         end
+     end
+ 
+-	self:UpdateItemsLabels(#scrollData)
++    local numItems = #scrollData
++    self:UpdateItemsLabels(numItems)
++
++    -- If no results were returned, disallow further searches (until one or more search criteria are modified),
++    -- and display a "no items found" label.
++    self.m_searchAllowed = (numItems ~= 0)
++    self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
+ 
+     ZO_ScrollList_Commit(list)
+ end
+</code></pre>
+<script src="prism.js"></script>

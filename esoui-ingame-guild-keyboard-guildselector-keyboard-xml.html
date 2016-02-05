@@ -1,0 +1,21 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/guild/keyboard/guildselector_keyboard.xml b/esoui/ingame/guild/keyboard/guildselector_keyboard.xml
+index 5c9b992..bd5c52d 100755
+--- a/esoui/ingame/guild/keyboard/guildselector_keyboard.xml
++++ b/esoui/ingame/guild/keyboard/guildselector_keyboard.xml
+@@ -28,8 +28,8 @@
+                     &lt;Controls&gt;
+                         &lt;Label name="$(parent)SelectedItemText" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"&gt;
+                             &lt;Dimensions y="35" /&gt;
+-                            &lt;DimensionConstraints maxX="450" /&gt;
+                             &lt;Anchor point="TOPLEFT"/&gt;
++                            &lt;Anchor point="RIGHT" relativeTo="ZO_MainMenuSceneGroupBarLabel" relativePoint="LEFT" offsetX="-50" /&gt;
+ 
+                             &lt;OnMouseUp&gt;
+                                 if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+</code></pre>
+<script src="prism.js"></script>

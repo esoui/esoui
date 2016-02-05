@@ -1,0 +1,30 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/championperks/championperks.xml b/esoui/ingame/championperks/championperks.xml
+index e29e4c3..c7e7101 100755
+--- a/esoui/ingame/championperks/championperks.xml
++++ b/esoui/ingame/championperks/championperks.xml
+@@ -385,6 +385,18 @@
+                         &lt;Texture name="$(parent)CenterInfoBG" textureFile="EsoUI\Art\Champion\champion_center_bg.dds" alpha="0.4" tier="LOW"/&gt;
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
++                &lt;Control name ="$(parent)InactiveAlert" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT"&gt;
++                    &lt;Anchor point="TOPLEFT" relativeTo="GuiRoot"/&gt;
++                    &lt;OnInitialized&gt;
++                        self.messageLabel = self:GetNamedChild("Message")
++                    &lt;/OnInitialized&gt;
++                    &lt;Controls&gt;
++                        &lt;Label name ="$(parent)Message"&gt;
++                            &lt;Anchor point="TOPLEFT"/&gt;
++                            &lt;DimensionConstraints maxX="550" /&gt;
++                        &lt;/Label&gt;
++                    &lt;/Controls&gt;
++                &lt;/Control&gt;
+             &lt;/Controls&gt;
+         &lt;/TopLevelControl&gt;
+     &lt;/Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

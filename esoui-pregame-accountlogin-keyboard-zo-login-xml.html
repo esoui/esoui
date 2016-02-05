@@ -1,0 +1,34 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/pregame/accountlogin/keyboard/zo_login.xml b/esoui/pregame/accountlogin/keyboard/zo_login.xml
+index 458cacb..43be808 100755
+--- a/esoui/pregame/accountlogin/keyboard/zo_login.xml
++++ b/esoui/pregame/accountlogin/keyboard/zo_login.xml
+@@ -110,10 +110,9 @@
+                     &lt;/Controls&gt;
+                 &lt;/Texture&gt;
+ 
+-                &lt;Backdrop name="$(parent)AccountName" inherits="ZO_EditBackdrop"&gt;
+-                    &lt;Dimensions x="500" y="28" /&gt;
++                &lt;Backdrop name="$(parent)AccountName" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
++                    &lt;Dimensions x="500"/&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOMLEFT" offsetX="130" offsetY="50" /&gt;
+-
+                     &lt;Controls&gt;
+                         &lt;EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" font="ZoFontWinH4"&gt;
+                             &lt;OnEnter&gt;
+@@ -150,8 +149,7 @@
+                     &lt;/Controls&gt;
+                 &lt;/Control&gt;
+ 
+-                &lt;Backdrop name="$(parent)Password" inherits="ZO_EditBackdrop"&gt;
+-                    &lt;Dimensions y="28" /&gt;
++                &lt;Backdrop name="$(parent)Password" inherits="ZO_SingleLineEditBackdrop_Keyboard"&gt;
+                     &lt;Anchor point="TOPLEFT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMLEFT" offsetY="80" /&gt;
+                     &lt;Anchor point="TOPRIGHT" relativeTo="$(parent)AccountName" relativePoint="BOTTOMRIGHT" offsetY="80" /&gt;
+                     &lt;Controls&gt;
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,273 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/unitframes/unitframes.lua b/esoui/ingame/unitframes/unitframes.lua
+index 7992c0d..dca1701 100755
+--- a/esoui/ingame/unitframes/unitframes.lua
++++ b/esoui/ingame/unitframes/unitframes.lua
+@@ -54,8 +54,6 @@ local KEYBOARD_CONSTANTS =
+     RAID_FRAME_PAD_X = 2,
+     RAID_FRAME_PAD_Y = 2,
+ 
+-    RAID_FRAME_ANCHOR_HEIGHT = 20,
+-
+     GROUP_BAR_FONT = "ZoFontGameOutline",
+     RAID_BAR_FONT = "ZoFontGameOutline",
+ 
+@@ -63,8 +61,9 @@ local KEYBOARD_CONSTANTS =
+ }
+ 
+ ZO_GAMEPAD_GROUP_FRAME_WIDTH = 160
++ZO_GAMEPAD_GROUP_FRAME_HEIGHT = 70
+ ZO_GAMEPAD_RAID_FRAME_WIDTH = 175
+-ZO_GAMEPAD_RAID_FRAME_HEIGHT = 9
++ZO_GAMEPAD_RAID_FRAME_HEIGHT = 40
+ 
+ local GAMEPAD_CONSTANTS =
+ {
+@@ -75,14 +74,14 @@ local GAMEPAD_CONSTANTS =
+ 
+     GROUP_STRIDE = 3,
+ 
+-    GROUP_FRAME_BASE_OFFSET_X = 96,
++    GROUP_FRAME_BASE_OFFSET_X = 105,
+     GROUP_FRAME_BASE_OFFSET_Y = 50,
+ 
+-    RAID_FRAME_BASE_OFFSET_X = 114,
+-    RAID_FRAME_BASE_OFFSET_Y = 30,
++    RAID_FRAME_BASE_OFFSET_X = 100,
++    RAID_FRAME_BASE_OFFSET_Y = 50,
+ 
+     GROUP_FRAME_SIZE_X = ZO_GAMEPAD_GROUP_FRAME_WIDTH,
+-    GROUP_FRAME_SIZE_Y = 70,
++    GROUP_FRAME_SIZE_Y = ZO_GAMEPAD_GROUP_FRAME_HEIGHT,
+ 
+     GROUP_FRAME_PAD_X = 2,
+     GROUP_FRAME_PAD_Y = 9,
+@@ -90,13 +89,11 @@ local GAMEPAD_CONSTANTS =
+     RAID_FRAME_SIZE_X = ZO_GAMEPAD_RAID_FRAME_WIDTH,
+     RAID_FRAME_SIZE_Y = ZO_GAMEPAD_RAID_FRAME_HEIGHT,
+ 
+-    RAID_FRAME_PAD_X = 24,
+-    RAID_FRAME_PAD_Y = 31,
+-
+-    RAID_FRAME_ANCHOR_HEIGHT = 46,
++    RAID_FRAME_PAD_X = 8,
++    RAID_FRAME_PAD_Y = 2,
+ 
+     GROUP_BAR_FONT = "ZoFontGamepad34",
+-    RAID_BAR_FONT = "ZoFontGamepad20",
++    RAID_BAR_FONT = "ZoFontGamepad18",
+ 
+     SHOW_GROUP_LABELS = false,
+ }
+@@ -116,7 +113,7 @@ local function CalculateDynamicPlatformConstants()
+         constants.RAID_FRAME_OFFSET_Y = constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y
+ 
+         constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH = constants.RAID_FRAME_SIZE_X
+-        constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT = constants.RAID_FRAME_ANCHOR_HEIGHT + ((constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y) * constants.GROUP_FRAMES_PER_COLUMN)
++        constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT = (constants.RAID_FRAME_SIZE_Y + constants.RAID_FRAME_PAD_Y) * constants.GROUP_FRAMES_PER_COLUMN
+     end
+ end
+ 
+@@ -147,7 +144,7 @@ local function GetGroupFrameAnchor(groupIndex, groupSize)
+             row = zo_floor((groupIndex - 1) / 2)
+         end
+         groupFrameAnchor:SetTarget(GetControl("ZO_LargeGroupAnchorFrame"..(column + 1)))
+-        groupFrameAnchor:SetOffsets(0, (row * constants.RAID_FRAME_OFFSET_Y) + constants.RAID_FRAME_ANCHOR_HEIGHT)
++        groupFrameAnchor:SetOffsets(0, row * constants.RAID_FRAME_OFFSET_Y)
+         return groupFrameAnchor
+     else
+         groupFrameAnchor:SetTarget(ZO_SmallGroupAnchorFrame)
+@@ -373,7 +370,7 @@ local UNITFRAME_BAR_STYLES =
+             gamepad =
+             {
+                 template = "ZO_GroupUnitFrameStatus",
+-                barHeight = 5,
++                barHeight = 8,
+                 barWidth = ZO_GAMEPAD_GROUP_FRAME_WIDTH,
+                 barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, 45) },
+                 hideBgIfOffline = true,
+@@ -388,17 +385,17 @@ local UNITFRAME_BAR_STYLES =
+             keyboard =
+             {
+                 template = "ZO_UnitFrameStatus",
+-                barHeight = 33,
++                barHeight = 34,
+                 barWidth = 90,
+-                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 3, 3) },
++                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
+             },
+ 
+             gamepad =
+             {
+                 template = "ZO_UnitFrameStatus",
+-                barHeight = ZO_GAMEPAD_RAID_FRAME_HEIGHT - 4,
+-                barWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 4,
+-                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 2, 2) },
++                barHeight = ZO_GAMEPAD_RAID_FRAME_HEIGHT - 2,
++                barWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 2,
++                barAnchors = { ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 1, 1) },
+             },
+         },
+     },
+@@ -692,7 +689,7 @@ local UNITFRAME_LAYOUT_DATA =
+             nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 5, 4),
+             nameWidth = 86,
+ 
+-            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 16, 4),
++            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 19, 4),
+             indentedNameWidth = 75,
+ 
+             statusData = { anchor1 = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 5, 20), anchor2 = ZO_Anchor:New(TOPRIGHT, nil, TOPRIGHT, -4, 20), height = 15, },
+@@ -709,11 +706,12 @@ local UNITFRAME_LAYOUT_DATA =
+                 icon = { width = 14, height = 14, customAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 66, 7) },
+             },
+ 
+-            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 0, -25),
+-            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 5,
++            nameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 6, 2),
++            nameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 6,
++            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 20, 3),
++            indentedNameWidth = ZO_GAMEPAD_RAID_FRAME_WIDTH - 20 - 2,
+ 
+-            indentedNameAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, 17, -25),
+-            leaderIconData = {width = 18, height = 18, offsetX = 0, offsetY = -20}
++            leaderIconData = {width = 18, height = 18, offsetX = 2, offsetY = 7}
+         },
+     },
+ 
+@@ -844,6 +842,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
+ 
+     local DONT_COLOR_RANK_ICON = false
+     newFrame.rankIcon = newFrame:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
++    newFrame.roleIcon = newFrame:AddFadeComponent("RoleIcon", DONT_COLOR_RANK_ICON)
+     newFrame.veteranIcon = newFrame:AddFadeComponent("VeteranIcon")
+     newFrame.leftBracket = newFrame:AddFadeComponent("LeftBracket")
+     newFrame.leftBracketGlow = GetControl(newFrame.frame, "LeftBracketGlow")
+@@ -881,18 +880,6 @@ function UnitFrame:ApplyVisualStyle()
+     self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), isOnline, isLeader)
+     self:UpdateDifficulty()
+ 
+-    if isLeader then
+-        local layoutData = GetPlatformLayoutData(self.style)
+-        if layoutData.leaderIconData then
+-            local data = layoutData.leaderIconData
+-            ZO_UnitFrames_Leader:SetDimensions(data.width, data.height)
+-            ZO_UnitFrames_Leader:SetAnchor(TOPLEFT, self.frame, TOPLEFT, data.offsetX, data.offsetY)
+-            self:SetTextIndented(true)
+-        end
+-
+-        ZO_UnitFrames_Leader:SetHidden(not layoutData.leaderIconData)
+-    end
+-
+     local healthBar = self.healthBar
+     local barData = GetPlatformBarStyle(healthBar.style, healthBar.mechanic)
+     if barData.template then
+@@ -927,12 +914,6 @@ function UnitFrame:ApplyVisualStyle()
+         healthBar.rightText:SetFont(font)
+     end
+ 
+-    local bg = self.frame:GetNamedChild("BG")
+-    if bg then
+-        local mungeOverlay = bg:GetNamedChild("MungeOverlay")
+-        mungeOverlay:SetHidden(IsInGamepadPreferredMode())
+-    end
+-
+     if self.attributeVisualizer then
+         self.attributeVisualizer:ApplyPlatformStyle()
+     end
+@@ -1066,6 +1047,7 @@ function UnitFrame:RefreshControls()
+ 
+             self:UpdateStatus(IsUnitDead(self.unitTag), IsUnitOnline(self.unitTag))
+             self:UpdateRank()
++            self:UpdateRole()
+             self:UpdateDifficulty()
+             self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(unitTag))
+         end
+@@ -1233,6 +1215,18 @@ function UnitFrame:UpdateRank()
+     end
+ end
+ 
++function UnitFrame:UpdateRole()
++    if self.roleIcon then
++        local unitTag = self:GetUnitTag()
++        local assignedRole = GetGroupMemberAssignedRole(unitTag)
++        local hasAssignedRole = assignedRole ~= LFG_ROLE_INVALID
++        if hasAssignedRole then
++            self.roleIcon:SetTexture(GetRoleIcon(assignedRole))
++        end
++        self.roleIcon:SetHidden(not hasAssignedRole)
++    end
++end
++
+ local DIFFICULTY_BRACKET_LEFT_TEXTURE =
+ {
+     [MONSTER_DIFFICULTY_NORMAL] = "EsoUI/Art/UnitFrames/targetUnitFrame_bracket_level2_left.dds",
+@@ -1445,36 +1439,6 @@ local function CreateGroupAnchorFrames()
+     end
+ end
+ 
+-local BACKGROUND_OFFSET_X = -26
+-local BACKGROUND_SMALL_GROUP_PADDING_X = 60
+-local BACKGROUND_SMALL_PADDING_Y = -20
+-local BACKGROUND_LARGE_GROUP_PADDING_X = 32
+-local BACKGROUND_PADDING_Y = 40
+-
+-local function UpdateGroupFramesBackground()
+-    local background = ZO_UnitFramesScalableBackground
+-    local groupSize = GetGroupSize()
+-    local showBackground = IsInGamepadPreferredMode() and groupSize &gt; SMALL_GROUP_SIZE_THRESHOLD
+-    if showBackground then
+-        local constants = GAMEPAD_CONSTANTS
+-        background:ClearAnchors()
+-        background:SetAnchor(TOPLEFT, ZO_LargeGroupAnchorFrame1, TOPLEFT, BACKGROUND_OFFSET_X)
+-
+-        local width, height
+-        if groupSize &gt; SMALL_GROUP_SIZE_THRESHOLD then
+-            width = 2 * constants.RAID_FRAME_OFFSET_X + BACKGROUND_LARGE_GROUP_PADDING_X
+-            height = zo_ceil(groupSize / 2) * constants.RAID_FRAME_OFFSET_Y
+-        else
+-            width = constants.GROUP_FRAME_OFFSET_X + BACKGROUND_SMALL_GROUP_PADDING_X
+-            height = groupSize * constants.GROUP_FRAME_OFFSET_Y
+-        end
+-
+-        ZO_ScalableBackgroundWithEdge_SetSize(background, width, height - BACKGROUND_PADDING_Y)
+-    end
+-
+-    background:SetHidden(not showBackground)
+-end
+-
+ local function UpdateLeaderIndicator()
+     ZO_UnitFrames_Leader:SetHidden(true)
+ 
+@@ -1509,7 +1473,6 @@ end
+ local function DoGroupUpdate(eventCode)
+     UpdateLeaderIndicator()
+     UnitFrames:UpdateGroupAnchorFrames()
+-    UpdateGroupFramesBackground()
+ end
+ 
+ local function GetCastBar(unitTag)
+@@ -1970,8 +1933,6 @@ local function RegisterForEvents()
+     local function OnGroupMemberLeft(eventCode, characterName, reason, wasLocalPlayer, amLeader)
+         if(wasLocalPlayer) then
+             RefreshGroups(eventCode)
+-        else
+-            UpdateGroupFramesBackground()
+         end
+     end
+ 
+@@ -2059,7 +2020,7 @@ function ZO_UnitFrames_Initialize()
+             local function OnGamepadPreferredModeChanged()
+                 UnitFrames:ApplyVisualStyle()
+                 UpdateGroupFramesVisualStyle()
+-                UpdateGroupFramesBackground()
++                UpdateLeaderIndicator()
+             end
+             ZO_PlatformStyle:New(OnGamepadPreferredModeChanged)
+ 
+</code></pre>
+<script src="prism.js"></script>

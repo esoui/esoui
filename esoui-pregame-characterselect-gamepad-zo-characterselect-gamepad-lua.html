@@ -1,0 +1,67 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/pregame/characterselect/gamepad/zo_characterselect_gamepad.lua b/esoui/pregame/characterselect/gamepad/zo_characterselect_gamepad.lua
+index 8e7f7b1..cde2587 100755
+--- a/esoui/pregame/characterselect/gamepad/zo_characterselect_gamepad.lua
++++ b/esoui/pregame/characterselect/gamepad/zo_characterselect_gamepad.lua
+@@ -3,7 +3,7 @@ local g_lastSelectedData
+ local g_canPlayCharacter = true
+ local g_canCreateCharacter = true
+ 
+-ZO_CHARACTER_SELECT_DETAILS_SPACING_Y = 51
++ZO_CHARACTER_SELECT_DETAILS_VALUE_OFFSET_Y = -14
+ 
+ local CHARACTER_SELECT_GAMEPAD_DIALOG = "CHARACTER_SELECT_GAMEPAD"
+ local ACTIVATE_VIEWPORT = true
+@@ -212,7 +212,9 @@ local function InitKeybindingDescriptor(self)
+             local numCharacterDeletesRemaining = GetNumCharacterDeletesRemaining()
+             local selectedData = self.characterList:GetTargetData()
+ 
+-            if selectedData and selectedData.needsRename then
++            if numCharacterDeletesRemaining == 0 then
++                ZO_Dialogs_ShowGamepadDialog("DELETE_SELECTED_CHARACTER_NO_DELETES_LEFT_GAMEPAD", {keybindDescriptor = self.charListKeybindStripDescriptorDefault})
++            elseif selectedData and selectedData.needsRename then
+                 ZO_Dialogs_ShowGamepadDialog("DELETE_SELECTED_CHARACTER_GAMEPAD", {keybindDescriptor = self.charListKeybindStripDescriptorRename}, {mainTextParams = {numCharacterDeletesRemaining}})
+             else
+                 ZO_Dialogs_ShowGamepadDialog("DELETE_SELECTED_CHARACTER_GAMEPAD", {keybindDescriptor = self.charListKeybindStripDescriptorDefault}, {mainTextParams = {numCharacterDeletesRemaining}})
+@@ -478,14 +480,11 @@ do
+ 
+     SelectedCharacterChanged = function(self, list, selectedData, oldSelectedData)
+         local characterName = self.characterDetails:GetNamedChild("Name")
+-        local characterRace = self.characterDetails:GetNamedChild("Race")
+-        local characterLevel = self.characterDetails:GetNamedChild("Level")
+-        local characterClass = self.characterDetails:GetNamedChild("Class")
+-        local characterAlliance = self.characterDetails:GetNamedChild("Alliance")
+-        local characterRank = self.characterDetails:GetNamedChild("Rank")
+-        local characterGrade = self.characterDetails:GetNamedChild("Grade")
+-        local characterGradeLabel = self.characterDetails:GetNamedChild("GradeLabel")
+-        local characterLocation = self.characterDetails:GetNamedChild("Location")
++        local characterRace = self.characterDetails:GetNamedChild("RaceContainer"):GetNamedChild("Race")
++        local characterLevel = self.characterDetails:GetNamedChild("LevelContainer"):GetNamedChild("Level")
++        local characterClass = self.characterDetails:GetNamedChild("ClassContainer"):GetNamedChild("Class")
++        local characterAlliance = self.characterDetails:GetNamedChild("AllianceContainer"):GetNamedChild("Alliance")
++        local characterLocation = self.characterDetails:GetNamedChild("LocationContainer"):GetNamedChild("Location")
+ 
+         local locationName = ""
+ 
+@@ -784,3 +783,15 @@ function ZO_CharacterSelect_Gamepad_ShowLoginScreen()
+     -- Show the fact that the login has been requested
+     ZO_Dialogs_ShowGamepadDialog("CHARACTER_SELECT_LOGIN")
+ end
++
++function ZO_CharacterSelect_Gamepad_SetLabelMaxWidth(labelControl, siblingName)
++    local siblingControl = labelControl:GetParent():GetNamedChild(siblingName)
++    local isValid, anchor, _, _, offsetX = labelControl:GetAnchor(0)
++    local maxConstraintX = ZO_GAMEPAD_CONTENT_WIDTH - offsetX
++
++    if siblingControl then
++        maxConstraintX = maxConstraintX - siblingControl:GetWidth()
++    end
++
++    labelControl:SetDimensionConstraints(maxConstraintX, 0)
++end
+</code></pre>
+<script src="prism.js"></script>

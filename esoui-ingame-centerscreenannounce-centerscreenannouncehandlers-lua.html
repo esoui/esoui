@@ -1,0 +1,79 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/centerscreenannounce/centerscreenannouncehandlers.lua b/esoui/ingame/centerscreenannounce/centerscreenannouncehandlers.lua
+index c8949d4..a4fcbd5 100755
+--- a/esoui/ingame/centerscreenannounce/centerscreenannouncehandlers.lua
++++ b/esoui/ingame/centerscreenannounce/centerscreenannouncehandlers.lua
+@@ -685,9 +685,16 @@ CSH[EVENT_RAID_TRIAL_STARTED] = function(raidName, isWeekly)
+     return CSA_EVENT_COMBINED_TEXT, SOUNDS.RAID_TRIAL_STARTED, zo_strformat(SI_TRIAL_STARTED, raidName)
+ end
+ 
++do
++    local TRIAL_COMPLETE_LIFESPAN_MS = 10000
+     CSH[EVENT_RAID_TRIAL_COMPLETE] = function(raidName, score, totalTime)
++        local wasUnderTargetTime = GetRaidDuration() &lt;= GetRaidTargetTime()
+         local formattedTime = ZO_FormatTimeMilliseconds(totalTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)
+-    return CSA_EVENT_COMBINED_TEXT, SOUNDS.RAID_TRIAL_COMPLETED, zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName), zo_strformat(SI_TRIAL_COMPLETED_SMALL, score, formattedTime)
++        local vitalityBonus = GetCurrentRaidLifeScoreBonus()
++        local currentCount = GetRaidReviveCountersRemaining()
++        local maxCount = GetCurrentRaidStartingReviveCounters()
++        return CSA_EVENT_RAID_COMPLETE_TEXT, SOUNDS.RAID_TRIAL_COMPLETED, zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName), { score, formattedTime, wasUnderTargetTime, vitalityBonus, zo_strformat(SI_REVIVE_COUNTER_REVIVES_USED, currentCount, maxCount) }, nil, nil, nil, nil, TRIAL_COMPLETE_LIFESPAN_MS
++    end
+ end
+ 
+ CSH[EVENT_RAID_TRIAL_FAILED] = function(raidName, score)
+@@ -748,10 +755,9 @@ do
+     CSH[EVENT_RAID_TRIAL_SCORE_UPDATE] = function(scoreType, scoreAmount, totalScore)
+         local reasonAssets = TRIAL_SCORE_REASON_TO_ASSETS[scoreType]
+         if reasonAssets then
+-            return CSA_EVENT_COMBINED_TEXT,
++            return CSA_EVENT_LARGE_TEXT,
+                 reasonAssets.soundId,
+-                zo_strformat(SI_TRIAL_SCORE_UPDATED_LARGE, reasonAssets.icon, scoreAmount),
+-                zo_strformat(SI_TRIAL_SCORE_UPDATED_SMALL, totalScore)
++                zo_strformat(SI_TRIAL_SCORE_UPDATED_LARGE, reasonAssets.icon, scoreAmount)
+         end
+     end
+ end
+@@ -760,23 +766,11 @@ CSH[EVENT_CHAMPION_POINT_GAINED] = function()
+     local rankGained = GetPlayerChampionPointsEarned()
+     local pointType = GetChampionPointAttributeForRank(rankGained)
+     local icon = GetChampionPointAttributeIcon(pointType)
+-    local constellationGroupName = ZO_Champion_GetConstellationGroupNameFromAttribute(pointType)
++    local constellationGroupName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(pointType)
+     local secondLine = zo_strformat(SI_CHAMPION_POINT_TYPE, constellationGroupName)
+     return CSA_EVENT_COMBINED_TEXT, SOUNDS.CHAMPION_POINT_GAINED, GetString(SI_CHAMPION_POINT_EARNED), secondLine, icon, nil, nil, nil, nil, CSA_OPTION_SUPPRESS_ICON_FRAME
+ end
+ 
+-CSH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+-    if previousCapacity &gt; 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
+-        return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity)
+-    end
+-end
+-
+-CSH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+-    if previousCapacity &gt; 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
+-        return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity)
+-    end
+-end
+-
+ CSH[EVENT_ATTRIBUTE_FORCE_RESPEC] = function(note)
+     return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_ATTRIBUTE_FORCE_RESPEC_TITLE), zo_strformat(SI_ATTRIBUTE_FORCE_RESPEC_PROMPT, note)
+ end
+@@ -866,9 +860,9 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
+                     sound = nil -- no longer needed, we played it once
+                 else
+                     for conditionIndex = 1, conditionCount do
+-                        local conditionText, curCount, maxCount, isFailCondition, isConditionComplete  = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
++                        local conditionText, curCount, maxCount, isFailCondition, isConditionComplete, _, isVisible  = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
+ 
+-                        if(not (isFailCondition or isConditionComplete)) then
++                        if(not (isFailCondition or isConditionComplete) and isVisible) then
+                             announceObject:AddMessage(eventId, CSA_EVENT_SMALL_TEXT, sound, conditionText)
+                             sound = nil -- no longer needed, we played it once
+                         end
+</code></pre>
+<script src="prism.js"></script>

@@ -1,0 +1,40 @@
+<!doctype html>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="prism.css">
+<nav><a href="index.html">&larr; back</a></nav>
+<pre class="line-numbers"><code class="language-diff">
+diff --git a/esoui/ingame/tooltip/maptooltips.lua b/esoui/ingame/tooltip/maptooltips.lua
+index 4476029..b016595 100755
+--- a/esoui/ingame/tooltip/maptooltips.lua
++++ b/esoui/ingame/tooltip/maptooltips.lua
+@@ -151,13 +151,26 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
+     self:LayoutIconStringLine(wayshrineSection, icon, zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), self.tooltip:GetStyle("mapLocationTooltipWayshrineHeader"))
+     if isCurrentLoc then --NO BUTTON: Can't travel to origin
+         self:LayoutIconStringLine(wayshrineSection, nil, zo_strformat(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC, name), self.tooltip:GetStyle("mapKeepAt"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+-    elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store
+-        self:LayoutIconStringLine(wayshrineSection, ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
+     elseif isUsingRecall and IsInCampaign() then --NO BUTTON: Can't recall while inside AvA zone
+         self:LayoutIconStringLine(wayshrineSection, nil, zo_strformat(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA, name), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+     elseif isOutboundOnly then --NO BUTTON: Can't travel to this wayshrine, only from it
+         local message = GetErrorString(outboundOnlyErrorStringId)
+         self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
++    elseif not CanLeaveCurrentLocationViaTeleport() then --NO BUTTON: Current Zone or Subzone restricts jumping
++        local cantLeaveStringId
++        if IsInTutorialZone() then
++            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_TUTORIAL
++        elseif IsInOutlawZone() then
++            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_OUTLAW_REFUGE
++        else
++            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
++        end
++        self:LayoutIconStringLine(wayshrineSection, nil, GetString(cantLeaveStringId), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
++    elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store
++        self:LayoutIconStringLine(wayshrineSection, ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
++    elseif IsUnitDead("player") then -- NO BUTTON: Dead
++        local message = GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD)
++        self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+     elseif isUsingRecall then --Recall
+         local _, premiumTimeLeft = GetRecallCooldown()
+         if premiumTimeLeft == 0 then --BUTTON: Recall
+</code></pre>
+<script src="prism.js"></script>
