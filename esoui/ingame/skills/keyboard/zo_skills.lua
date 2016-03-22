@@ -49,7 +49,8 @@ function ZO_SkillsManager:New(container)
     manager.availablePointsLabel = GetControl(container, "AvailablePoints")
     manager.skyShardsLabel = GetControl(container, "SkyShards")
 
-    manager.navigationTree = ZO_Tree:New(GetControl(container, "NavigationContainerScrollChild"), 60, -10, 300)
+    manager.navigationContainer = GetControl(container, "NavigationContainer")
+    manager.navigationTree = ZO_Tree:New(manager.navigationContainer:GetNamedChild("ScrollChild"), 60, -10, 300)
     local function TreeHeaderSetup(node, control, skillType, open)
         control.skillType = skillType
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
@@ -90,6 +91,8 @@ function ZO_SkillsManager:New(container)
     ZO_ScrollList_AddDataType(manager.abilityList, SKILL_ABILITY_DATA, "ZO_Skills_Ability", 70, function(control, data) manager:SetupAbilityEntry(control, data) end)
     ZO_ScrollList_AddDataType(manager.abilityList, SKILL_HEADER_DATA, "ZO_Skills_AbilityTypeHeader", 32, function(control, data) manager:SetupHeaderEntry(control, data) end)
     ZO_ScrollList_AddResizeOnScreenResize(manager.abilityList)
+
+    manager.warning = GetControl(container, "Warning")
 
     manager.morphDialog = GetControl("ZO_SkillsMorphDialog")
     manager.morphDialog.desc = GetControl(manager.morphDialog, "Description")
@@ -308,7 +311,7 @@ function ZO_SkillsManager:New(container)
         manager:RefreshList()
     end
 
-    local function OnAbilityListChanged()
+    local function OnSkillAbilityProgressionsUpdated()
         manager:RefreshList()
     end
 
@@ -316,7 +319,7 @@ function ZO_SkillsManager:New(container)
     container:RegisterForEvent(EVENT_SKILL_XP_UPDATE, OnSkillLineUpdate)
     container:RegisterForEvent(EVENT_SKILLS_FULL_UPDATE, Refresh)
     container:RegisterForEvent(EVENT_SKILL_POINTS_CHANGED, OnSkillPointsChanged)
-	container:RegisterForEvent(EVENT_ABILITY_LIST_CHANGED, OnAbilityListChanged)
+	container:RegisterForEvent(EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED, OnSkillAbilityProgressionsUpdated)
     container:RegisterForEvent(EVENT_PLAYER_ACTIVATED, Refresh)
     container:RegisterForEvent(EVENT_ABILITY_PROGRESSION_RANK_UPDATE, OnAbilityProgressionUpdate)
     container:RegisterForEvent(EVENT_ABILITY_PROGRESSION_XP_UPDATE, OnAbilityProgressionUpdate)
@@ -368,7 +371,7 @@ function ZO_SkillsManager:SetupAbilityEntry(ability, data)
     end
 
     ability.upgradeAvailable = data.nextUpgradeEarnedRank and data.lineRank >= data.nextUpgradeEarnedRank
-
+    
     if ability.purchased then
         slot:SetEnabled(true)
 
@@ -463,6 +466,13 @@ function ZO_SkillsManager:RefreshList()
         return
     end
 
+    if not IsActionBarSlottingAllowed() then
+        self.abilityList:SetHidden(true)
+        return
+    else
+        self.abilityList:SetHidden(false)
+    end
+
     local skillType = self:GetSelectedSkillType()
     local skillIndex = self:GetSelectedSkillLineIndex()
 
@@ -544,7 +554,14 @@ function ZO_SkillsManager:Refresh()
         self.dirty = true
         return
     end
-    
+
+    if IsActionBarSlottingAllowed() then
+        self.warning:SetHidden(true)
+    else
+        self.warning:SetText(GetString(SI_SKILLS_DISABLED_SPECIAL_ABILITIES))
+        self.warning:SetHidden(false)
+    end
+
     self.navigationTree:Reset()
     for skillType = 1, GetNumSkillTypes() do
         local numSkillLines = GetNumSkillLines(skillType)

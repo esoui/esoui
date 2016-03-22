@@ -24,8 +24,10 @@ function ArmorFilter:Initialize(parentControl)
     local function SetGenericArmorSearch(mode, traitType, enchantmentType, armorType)
         self.m_mode = mode
         self.m_armorType = armorType
-        SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):GetTraitFilters():SetTraitType(traitType)
-	    SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):GetEnchantmentFilters():SetEnchantmentType(enchantmentType)
+        local traitFilters = TRADING_HOUSE:GetTraitFilters()
+        local enchantmentFilters = TRADING_HOUSE:GetEnchantmentFilters()
+        traitFilters:SetTraitType(traitType)
+	    enchantmentFilters:SetEnchantmentType(enchantmentType)
     end
 
     ZO_TradingHouse_InitializeRangeComboBox(control:GetNamedChild("Category"), ZO_TradingHouseFilter_GenerateArmorTypeData(SetGenericArmorSearch), PopulateArmorSubTypes)

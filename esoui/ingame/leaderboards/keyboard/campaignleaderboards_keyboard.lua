@@ -1,4 +1,4 @@
-local CAMPAIGN_LEADERBOARDS
+CAMPAIGN_LEADERBOARDS = nil
 local CAMPAIGN_LEADERBOARD_FRAGMENT
 
 -----------------
@@ -67,25 +67,22 @@ function ZO_LeaderboardCampaignSelector_Keyboard:NeedsData()
 end
 
 function ZO_LeaderboardCampaignSelector_Keyboard:RefreshQueryTypes()
-    local tabSelected = false
     ZO_MenuBar_ClearButtons(self.tabs)
 
-    ZO_MenuBar_AddButton(self.tabs, self.homeTabData)
-    if(self.homeTabData.queryType == self.selectedQueryType) then
-        ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_ASSIGNED_CAMPAIGN)
-        tabSelected = true
-    end
+    if self:IsHomeSelectable() then
+        ZO_MenuBar_AddButton(self.tabs, self.homeTabData)
 
-    if self:ShouldAllowSwitchingTabs() then
-        ZO_MenuBar_AddButton(self.tabs, self.guestTabData)
-        if(self.guestTabData.queryType == self.selectedQueryType) then
-            ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_LOCAL)
-            tabSelected = true
+        if not self.selectedQueryType or (self.homeTabData.queryType == self.selectedQueryType) then
+            ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_ASSIGNED_CAMPAIGN)
         end
     end
 
-    if(not tabSelected) then
-        ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_ASSIGNED_CAMPAIGN)
+    if self:IsGuestSelectable() then
+        ZO_MenuBar_AddButton(self.tabs, self.guestTabData)
+
+        if not self.selectedQueryType or (self.guestTabData.queryType == self.selectedQueryType) then
+            ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_LOCAL)
+        end
     end
 
     self.activeTab:SetText(GetCampaignName(self:GetCampaignId()))
@@ -114,8 +111,7 @@ end
 local ZO_CampaignLeaderboardsManager_Keyboard = ZO_CampaignLeaderboardsManager_Shared:Subclass()
 
 function ZO_CampaignLeaderboardsManager_Keyboard:New(...)  
-    local manager = ZO_CampaignLeaderboardsManager_Shared.New(self, ...)
-    return manager
+    return ZO_CampaignLeaderboardsManager_Shared.New(self, ...)
 end
 
 function ZO_CampaignLeaderboardsManager_Keyboard:Initialize(control)
@@ -129,7 +125,6 @@ function ZO_CampaignLeaderboardsManager_Keyboard:Initialize(control)
     self.timerLabel = GetControl(control, "Timer")
 
     self:InitializeTimer()
-    self:InitializeCategories()
 
     CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                  if newState == SCENE_FRAGMENT_SHOWING then
@@ -161,5 +156,6 @@ end
 
 function ZO_CampaignLeaderboardsInformationArea_OnInitialized(self)
     CAMPAIGN_LEADERBOARDS = ZO_CampaignLeaderboardsManager_Keyboard:New(self)
+    LEADERBOARDS:UpdateCategories()
     CAMPAIGN_LEADERBOARDS.selector = ZO_LeaderboardCampaignSelector_Keyboard:New(self)
 end

@@ -69,6 +69,13 @@ function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, sta
     end
 end
 
+function ZO_GamepadEntryData:InitializeCollectibleVisualData(itemData)
+    self.uniqueId = itemData.uniqueId
+    self:SetDataSource(itemData)
+    self:AddIcon(itemData.icon)
+    self.cooldownIcon = itemData.icon or itemData.iconFile
+end
+
 function ZO_GamepadEntryData:AddSubLabels(subLabels)
     for _, subLabel in ipairs(subLabels) do
         self:AddSubLabel(subLabel)

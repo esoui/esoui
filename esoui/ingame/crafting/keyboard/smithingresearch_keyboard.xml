@@ -73,7 +73,7 @@
                     <Dimensions x="48" y="48" />
                     <Anchor point="CENTER"/>
                 </Texture>
-                <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Mounts/timer_icon.dds">
+                <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds">
                     <Dimensions x="32" y="32" />
                     <Anchor point="CENTER"/>
                 </Texture>
@@ -100,7 +100,7 @@
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)TimerIcon" tier="MEDIUM" textureFile="EsoUI/Art/Mounts/timer_icon.dds" pixelRoundingEnabled="false" alpha=".85">
+                <Texture name="$(parent)TimerIcon" tier="MEDIUM" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" pixelRoundingEnabled="false" alpha=".85">
                     <Dimensions x="32" y="32" />
                     <Anchor point="CENTER" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
@@ -117,7 +117,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TabsDivider" offsetX="80" offsetY="12" />
                 </Label>
 
-                <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Mounts/timer_icon.dds">
+                <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds">
                     <Dimensions x="32" y="32" />
                     <Anchor point="RIGHT" relativeTo="$(parent)NumResearching" relativePoint="LEFT" offsetX="-2" />
                 </Texture>
@@ -138,7 +138,7 @@
                             </OnInitialized>
                             <AnchorFill/>
                         </StatusBar>
-                        <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Mounts/timer_icon.dds" tier="HIGH">
+                        <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" tier="HIGH">
                             <Dimensions x="32" y="32" />
                             <Anchor point="RIGHT" relativePoint="LEFT" />
                         </Texture>

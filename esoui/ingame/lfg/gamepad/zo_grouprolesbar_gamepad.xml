@@ -1,0 +1,61 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GroupRolesBarRole" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_ROLES_BAR_BUTTON_DIMENSIONS" y="ZO_GAMEPAD_ROLES_BAR_BUTTON_DIMENSIONS" />
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+                self.selectedFrame = self:GetNamedChild("Selector")
+                self.pressedFrame = self:GetNamedChild("SelectedIndicator")
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)SelectedIndicator" inherits="ZO_GamepadGreySelectorHighlight" level="1" hidden="true">
+                    <AnchorFill />
+                </Backdrop>
+                
+                <Texture name="$(parent)Icon" level="3">
+                    <AnchorFill />
+                </Texture>
+                
+                <Backdrop name="$(parent)Selector" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
+                    <AnchorFill />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GroupRolesBarGamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors">
+            <OnInitialized>
+                local contentContainer = self:GetNamedChild("Mask"):GetNamedChild("Container")
+                ZO_GroupRolesBar_Gamepad_OnInitialized(contentContainer)
+            </OnInitialized>
+            
+            <Controls>
+                <Scroll name="$(parent)Mask">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true">
+                            <AnchorFill />
+                            <Controls>
+                                <Label name="$(parent)Header" modifyTextType="UPPERCASE" text="SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER" inherits="ZO_GamepadMenuEntryHeaderTemplate">
+                                    <Anchor point="TOP" relativePoint="TOP" offsetY="ZO_GAMEPAD_CONTENT_HEADER_INFO_OFFSET_Y"/>
+                                </Label>
+
+                                <Control name="$(parent)Healer" inherits="ZO_GroupRolesBarRole">
+                                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="TOP" offsetY="ZO_GAMEPAD_ROLES_BAR_HEADER_BUTTONS_PADDING_Y"/>
+                                </Control>
+
+                                <Control name="$(parent)Tank" inherits="ZO_GroupRolesBarRole">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Healer" relativePoint="LEFT" offsetX="-19"/>
+                                </Control>
+
+                                <Control name="$(parent)DPS" inherits="ZO_GroupRolesBarRole">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Healer" relativePoint="RIGHT" offsetX="19"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

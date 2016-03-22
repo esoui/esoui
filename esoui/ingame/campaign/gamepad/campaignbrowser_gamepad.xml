@@ -21,12 +21,25 @@
                     <Dimensions x="128" y="128"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Faction" />
                 </Texture>
-                <Label name="$(parent)AllianceName" inherits="ZO_AvALabelDataTemplate" modifyTextType="NONE">
-                    <Anchor point="CENTER" relativeTo="$(parent)Population" relativePoint="BOTTOM" />
+                <Label name="$(parent)AllianceName" inherits="ZO_AvALabelDataTemplate" modifyTextType="NONE" horizontalAlignment="CENTER">
+                    <Dimensions x="208" />
+                    <Anchor point="TOP" relativeTo="$(parent)Population" relativePoint="BOTTOM" offsetY="-20" />
                 </Label>
                 <Label name="$(parent)FullText" text="SI_GAMEPAD_CAMPAIGN_BROWSER_CAMPAIGN_FULL" inherits="ZO_AvALabelTitleTemplate" hidden="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="10"/>
+                    <Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="5"/>
                 </Label>
+                <Control name="$(parent)EstimatedWait" resizeToFitDescendents="true" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)FullText" relativePoint="BOTTOM" offsetY="5"/>
+                    
+                    <Controls>
+                        <Label name="$(parent)Label" inherits="ZO_AvALabelHeaderTemplate" text="SI_GAMEPAD_CAMPAIGN_BROWSER_ESTIMATED_WAIT">
+                            <Anchor point="LEFT" />
+                        </Label>
+                        <Label name="$(parent)Value" font="ZoFontGamepad42" text="SI_GAMEPAD_CAMPAIGN_BROWSER_ESTIMATED_WAIT">
+                            <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
 

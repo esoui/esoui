@@ -39,7 +39,6 @@ function ZO_RaidLeaderboardsManager_Shared:Initialize(...)
     ZO_LeaderboardBase_Shared.Initialize(self, ...)
 
     self.raidListNodes = {}
-    self:InitializeCategories()
 end
 
 function ZO_RaidLeaderboardsManager_Shared:RegisterForEvents(control)
@@ -122,7 +121,7 @@ do
         return nil
     end
 
-    function ZO_RaidLeaderboardsManager_Shared:InitializeCategories()
+    function ZO_RaidLeaderboardsManager_Shared:AddCategoriesToParentSystem()
         self.headers = {}
         ZO_ClearNumericallyIndexedTable(self.raidListNodes)
 
@@ -217,8 +216,6 @@ do
             end
 
         end
-    
-        self.leaderboardSystem:UpdateCategories()
     end
 end
 
@@ -253,11 +250,6 @@ function ZO_RaidLeaderboardsManager_Shared:SelectRaidById(raidId, selectOption, 
             SCENE_MANAGER:Push(self.leaderboardScene:GetName())
         end
     end
-end
-
-function ZO_RaidLeaderboardsManager_Shared:OnDataChanged()
-    self:InitializeCategories()
-    self.leaderboardSystem:OnLeaderboardDataChanged(self)
 end
 
 do
@@ -330,6 +322,10 @@ function ZO_RaidLeaderboardsManager_Shared:UpdatePlayerParticipationStatus()
 end
 
 function ZO_RaidLeaderboardsManager_Shared:UpdateRaidScore()
+    if not self.selectedSubType then
+        return
+    end
+
     local raidInProgress, raidComplete
     if self.selectedSubType.isWeekly then
         raidInProgress, raidComplete = GetPlayerRaidOfTheWeekProgressInfo(self.selectedSubType.raidCategory)

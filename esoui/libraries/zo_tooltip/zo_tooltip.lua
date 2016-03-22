@@ -82,10 +82,13 @@ function ZO_TooltipStyledObject:GetFontString(...)
     local fontSize = self:GetProperty("fontSize", ...)
     local fontStyle = self:GetProperty("fontStyle", ...)
     if(fontFace and fontSize) then
+        if type(fontSize) == "number" then
+            fontSize = tostring(fontSize)
+        end
         if(fontStyle) then
-            return string.format("EsoUi/Common/Fonts/%s|%d|%s", fontFace, fontSize, fontStyle)
+            return string.format("%s|%s|%s", fontFace, fontSize, fontStyle)
         else
-            return string.format("EsoUi/Common/Fonts/%s|%d", fontFace, fontSize)
+            return string.format("%s|%s", fontFace, fontSize)
         end
     else
         return "ZoFontGame"

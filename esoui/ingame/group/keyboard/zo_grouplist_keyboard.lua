@@ -1,22 +1,31 @@
+--Layout consts, defining the widths of the list's columns as provided by design--
+ZO_KEYBOARD_GROUP_LIST_PADDING_X = 5
+ZO_KEYBOARD_GROUP_LIST_LEADER_WIDTH = 35
+ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH = 210 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+ZO_KEYBOARD_GROUP_LIST_LEADER_AND_NAME_WIDTH = ZO_KEYBOARD_GROUP_LIST_LEADER_WIDTH + ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH
+ZO_KEYBOARD_GROUP_LIST_ZONE_WIDTH = 140 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+ZO_KEYBOARD_GROUP_LIST_CLASS_WIDTH = 75 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH = 70 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH = 80 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+
 ----------------------------------
 --Group List Keyboard
 ----------------------------------
 
-local ZO_GroupList_Keyboard = ZO_Object.MultiSubclass(ZO_GroupList_Base, ZO_SortFilterList)
+local ZO_GroupList_Keyboard = ZO_SortFilterList:Subclass()
 
 local GROUP_DATA = 1
 
-function ZO_GroupList_Keyboard:New(control)
+function ZO_GroupList_Keyboard:New(...)
     local manager = ZO_Object.New(self)
-    manager:Initialize(control)
+    manager:Initialize(...)
     return manager
 end
 
 function ZO_GroupList_Keyboard:Initialize(control)
-    self.noGroupRow = control:GetNamedChild("NoGroupRow")
-
     ZO_SortFilterList.InitializeSortFilterList(self, control)
-    ZO_GroupList_Base.Initialize(self, control)
+
+    self.noGroupRow = control:GetNamedChild("NoGroupRow")
 
     self:InitializeKeybindDescriptors()
 
@@ -36,8 +45,8 @@ function ZO_GroupList_Keyboard:Initialize(control)
 
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
     
-    GROUP_LIST_SCENE = ZO_Scene:New("groupList", SCENE_MANAGER)
-    GROUP_LIST_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
+    GROUP_LIST_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    GROUP_LIST_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
                                                             if(newState == SCENE_SHOWING) then
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
                                                             elseif(newState == SCENE_SHOWN) then
@@ -51,52 +60,20 @@ function ZO_GroupList_Keyboard:Initialize(control)
     self.inactiveColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
     GROUP_LIST_MANAGER:AddList(self)
 
-    self:InitializeEvents()
-end
-
-function ZO_GroupList_Keyboard:InitializeEvents()
-    local function OnGroupSharedUpdate()
-        local isGrouped = IsUnitGrouped("player")
-
-        if self.isGrouped ~= isGrouped then
-            self.isGrouped = isGrouped
-
-            if not isGrouped and GROUP_LIST_SCENE:IsShowing() then
-                MAIN_MENU_KEYBOARD:ShowScene("groupingToolsKeyboard")
-            end
-        end
-    end
-
-    local function OnGroupMemberJoined()
-        PlaySound(SOUNDS.GROUP_JOIN)
-        OnGroupSharedUpdate()
-    end
-
-    local control = self.control
-    control:RegisterForEvent(EVENT_GROUP_UPDATE, OnGroupSharedUpdate)
-    control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
-    control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, OnGroupSharedUpdate)
+    local data = 
+    {
+        name = GetString(SI_MAIN_MENU_GROUP),
+        categoryFragment = GROUP_LIST_FRAGMENT,
+        normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_up.dds",
+        pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_down.dds",
+        mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_over.dds",
+    }
+    GROUP_MENU_KEYBOARD:AddCategory(data)
 end
 
 function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
-        -- Invite to Group
-        {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-            name = GetString(SI_GROUP_WINDOW_INVITE_PLAYER),
-            keybind = "UI_SHORTCUT_PRIMARY",
-        
-            callback = function()
-                ZO_Dialogs_ShowDialog("GROUP_INVITE")
-            end,
-
-            visible = function()
-                return self.groupSize == 0 or (self.playerIsLeader and self.groupSize < GROUP_SIZE_MAX)
-            end
-        },
-
         -- Whisper
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
@@ -171,37 +148,33 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
     end
 end
 
+function ZO_GroupList_Keyboard:TooltipIfTruncatedLabel_OnMouseEnter(control)
+    if control:WasTruncated() then
+        InitializeTooltip(InformationTooltip, control, BOTTOM)
+        SetTooltipText(InformationTooltip, control:GetText())
+    end
+
+    self:EnterRow(control.row)
+end
+
 function ZO_GroupList_Keyboard:Status_OnMouseEnter(control)
-    local row = control:GetParent()
-    local data = ZO_ScrollList_GetData(row)
+    local data = ZO_ScrollList_GetData(control.row)
 
     if(data.leader) then
-        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
+        InitializeTooltip(InformationTooltip, control, BOTTOM)
         SetTooltipText(InformationTooltip, GetString(SI_GROUP_LIST_PANEL_LEADER_TOOLTIP))
     end
 
-    self:EnterRow(row)
-end
-
-function ZO_GroupList_Keyboard:Status_OnMouseExit(control)
-    ClearTooltip(InformationTooltip)
-    self:ExitRow(control:GetParent())
+    self:EnterRow(control.row)
 end
 
 function ZO_GroupList_Keyboard:Role_OnMouseEnter(control)
-    local row = control:GetParent()
-
     if(control.role) then
-        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
+        InitializeTooltip(InformationTooltip, control, BOTTOM)
         SetTooltipText(InformationTooltip, GetString("SI_LFGROLE", control.role))
     end
 
-    self:EnterRow(row)
-end
-
-function ZO_GroupList_Keyboard:Role_OnMouseExit(control)
-    ClearTooltip(InformationTooltip)
-    self:ExitRow(control:GetParent())
+    self:EnterRow(control.row)
 end
 
 function ZO_GroupList_Keyboard:UpdateHeaders(active)
@@ -290,6 +263,11 @@ function ZO_GroupListRow_OnMouseExit(control)
     GROUP_LIST:Row_OnMouseExit(control)
 end
 
+function ZO_GroupListRowChild_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    GROUP_LIST:Row_OnMouseExit(control.row)
+end
+
 function ZO_GroupListRow_OnMouseUp(control, button, upInside)
     GROUP_LIST:GroupListRow_OnMouseUp(control, button, upInside)
 end
@@ -310,20 +288,16 @@ function ZO_GroupListRowVeteran_OnMouseExit(control)
     ZO_SocialListKeyboard.Veteran_OnMouseExit(GROUP_LIST, control)
 end
 
+function ZO_GroupListRowTooltipIfTruncatedLabel_OnMouseEnter(control)
+    GROUP_LIST:TooltipIfTruncatedLabel_OnMouseEnter(control)
+end
+
 function ZO_GroupListRowStatus_OnMouseEnter(control)
     GROUP_LIST:Status_OnMouseEnter(control)
 end
 
-function ZO_GroupListRowStatus_OnMouseExit(control)
-    GROUP_LIST:Status_OnMouseExit(control)
-end
-
 function ZO_GroupListRole_OnMouseEnter(control)
     GROUP_LIST:Role_OnMouseEnter(control)
-end
-
-function ZO_GroupListRole_OnMouseExit(control)
-    GROUP_LIST:Role_OnMouseExit(control)
 end
 
 function ZO_GroupList_OnInitialized(self)

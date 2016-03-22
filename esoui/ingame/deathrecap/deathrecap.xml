@@ -59,7 +59,34 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
+    
     <Controls>
+        <Control name="ZO_DeathRecapBackground" virtual="true">
+            <Controls>
+                <Control name="$(parent)KeyboardBackground" inherits="ZO_Gamepad_BackgroundControl_Base_Template" hidden="false">
+                    <Anchor point="TOPLEFT" offsetX="-106" offsetY="-98"/>
+                    <Dimensions x="964" y="1024"/>
+                    <Controls>
+                        <Texture name="$(parent)BGLeft" textureFile="EsoUI/Art/DeathRecap/deathRecap_BG_left.dds">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="900" y="1024"/>
+                        </Texture>
+                        <Texture name="$(parent)BGRight" textureFile="EsoUI/Art/DeathRecap/deathRecap_BG_right.dds">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeft" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Backdrop name="$(parent)GamepadBackground" inherits="ZO_Gamepad_BackgroundControl_Base_Template" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="-40" offsetY="-35"/>
+                    <Dimensions x="836" y="801"/>
+                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_edge_semiTrans_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_center_semiTrans_16.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_DeathRecapDivider" virtual="true">
             <Dimensions x="768" y="4"/>
             <Controls>
@@ -71,11 +98,11 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
                     <Dimensions x="256" y="4"/>
                 </Texture>
-                <Texture name="$(parent)GamepadDivider" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDivider.dds" hidden="true" >
+                <Control name="$(parent)GamepadDivider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" hidden="true" >
                     <Anchor point="TOPLEFT" />
                     <Anchor point="TOPRIGHT" />
                     <Dimensions y="4"/>
-                </Texture>
+                </Control>
             </Controls>
         </Control>
         
@@ -86,9 +113,38 @@
                     <Dimensions x="56" y="56"/>
                     <Anchor point="CENTER" offsetX="110" offsetY="32" relativePoint="TOPLEFT"/>
                     <Controls>
-                        <Texture name="$(parent)Frame" tier="HIGH">
+                        <Control name="$(parent)Border" hidden="true">
                             <Anchor point="CENTER"/>
-                        </Texture>
+                            <Dimensions x="64" y="64"/>
+                            <Controls>
+                                <Texture name="$(parent)KeyboardFrame" tier="HIGH" textureFile="EsoUI/Art/DeathRecap/deathRecap_attackFrame.dds">
+                                    <Anchor point="CENTER" relativeTo="$(grandparent)Border"/>
+                                    <Dimensions x="56" y="56" />
+                                </Texture>
+                                <Backdrop name="$(parent)GamepadFrame" tier="LOW" pixelRoundingEnabled="false">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)Border"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)Border"/>
+                                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_emptyFrame_gold_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                                </Backdrop>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)BossBorder" hidden="true">
+                            <Anchor point="CENTER"/>
+                            <Dimensions x="64" y="64"/>
+                            <Controls>
+                                <Texture name="$(parent)KeyboardFrame" tier="HIGH" textureFile="EsoUI/Art/DeathRecap/deathRecap_attackBossFrame.dds">
+                                    <Anchor point="CENTER" relativeTo="$(grandparent)BossBorder"/>
+                                    <Dimensions x="128" y="128" />
+                                </Texture>
+                                <Backdrop name="$(parent)GamepadFrame" tier="LOW" pixelRoundingEnabled="false">
+                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)BossBorder" offsetX="-8" offsetY="-8"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)BossBorder" offsetX="8" offsetY="8"/>
+                                    <Edge file="EsoUI/Art/HUD/Gamepad/gp_UltimateFrame_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_center_16.dds" />
+                                </Backdrop>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Texture>
                 <Control name="$(parent)Text">
@@ -141,6 +197,22 @@
 
         <Control name="ZO_DeathRecapAttack_Keyboard_Template" virtual="true">
             <Controls>
+                <Control name="$(parent)Icon">
+                    <Controls>
+                        <Control name="$(parent)Border" hidden="true">
+                            <Controls>
+                                <Texture name="$(parent)KeyboardFrame" hidden="false"/>
+                                <Backdrop name="$(parent)GamepadFrame" hidden="true"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)BossBorder" hidden="true">
+                            <Controls>
+                                <Texture name="$(parent)KeyboardFrame" hidden="false"/>
+                                <Backdrop name="$(parent)GamepadFrame" hidden="true"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
                 <Control name="$(parent)Text" >
                     <Controls>
                         <Label name="$(grandparent)AttackerName" font="ZoFontGameBold" />
@@ -174,6 +246,22 @@
 
         <Control name="ZO_DeathRecapAttack_Gamepad_Template" virtual="true">
             <Controls>
+                <Control name="$(parent)Icon">
+                    <Controls>
+                        <Control name="$(parent)Border" hidden="true">
+                            <Controls>
+                                <Texture name="$(parent)KeyboardFrame" hidden="true"/>
+                                <Backdrop name="$(parent)GamepadFrame" hidden="false"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)BossBorder" hidden="true">
+                            <Controls>
+                                <Texture name="$(parent)KeyboardFrame" hidden="true"/>
+                                <Backdrop name="$(parent)GamepadFrame" hidden="false"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
                 <Control name="$(parent)Text" >
                     <Controls>
                         <Label name="$(grandparent)AttackerName" font="ZoFontGamepad27" />
@@ -211,23 +299,29 @@
                     <Anchor point="TOPLEFT" offsetY="-20" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-16" />
                 </Scroll>
+                <Control name="$(parent)Bg">
+                    <Controls>
+                        <Control name="$(parent)KeyboardBackground" hidden="true"/>
+                        <Backdrop name="$(parent)GamepadBackground" hidden="false"/>
+                    </Controls>
+                </Control>
                 <Control name="$(parent)ScrollContainer">
                     <Controls>
                         <Control name="$(parent)ScrollChild">
                             <Controls>
                                 <Control name="$(parent)AttacksDivider">
-                                    <Anchor point="TOP" offsetY="60"/>
+                                    <Anchor point="TOP" offsetY="65"/>
                                     <Controls>
                                         <Texture name="$(parent)Left" hidden="true" />
                                         <Texture name="$(parent)Right" hidden="true" />
-                                        <Texture name="$(parent)GamepadDivider" hidden="false" />
+                                        <Control name="$(parent)GamepadDivider" hidden="false" />
                                     </Controls>
                                 </Control>
-                                <Label name="$(parent)Title" font="ZoFontGamepad54">
-                                    <Anchor point="BOTTOM" relativePoint="TOP" relativeTo="$(parent)AttacksDivider" />
+                                <Label name="$(parent)Title" font="ZoFontGamepadBold45">
+                                    <Anchor point="BOTTOM" relativePoint="TOP" relativeTo="$(parent)AttacksDivider" offsetY="-10"/>
                                 </Label>
-                                <Label name="$(parent)AttacksHeader" font="ZoFontGamepad22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttacksDivider" offsetX="18" offsetY="20"/>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttacksDivider" offsetX="5" offsetY="17"/>
                                 </Label>
                                 <Control name="$(parent)Attacks">
                                     <DimensionConstraints minY="340"/>
@@ -238,13 +332,14 @@
                                 <Control name="$(parent)HintsContainer">
                                     <Anchor point="TOP" relativeTo="$(parent)TelvarStoneLoss" relativePoint="BOTTOM" offsetY="20"  />
                                     <Controls>
-                                        <Label name="$(parent)HintsHeader" font="ZoFontGamepad22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                            <Anchor point="TOPLEFT" offsetX="19"/>
+                                        <Label name="$(parent)HintsHeader" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HintsDivider" offsetX="8" offsetY="17"/>
                                         </Label>
                                         <Control name="$(parent)HintsDivider" >
                                             <Controls>
                                                 <Texture name="$(parent)Left" hidden="true" />
                                                 <Texture name="$(parent)Right" hidden="true" />
+                                                <Control name="$(parent)GamepadDivider" hidden="false" />
                                             </Controls>
                                         </Control>
                                         <Control name="$(parent)Hints">
@@ -265,6 +360,12 @@
                     <Anchor point="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-16" />
                 </Scroll>
+                <Control name="$(parent)Bg">
+                    <Controls>
+                        <Control name="$(parent)KeyboardBackground" hidden="false"/>
+                        <Backdrop name="$(parent)GamepadBackground" hidden="true"/>
+                    </Controls>
+                </Control>
                 <Control name="$(parent)ScrollContainer">
                     <Controls>
                         <Control name="$(parent)ScrollChild">
@@ -274,7 +375,7 @@
                                     <Controls>
                                         <Texture name="$(parent)Left" hidden="false" />
                                         <Texture name="$(parent)Right" hidden="false" />
-                                        <Texture name="$(parent)GamepadDivider" hidden="true" />
+                                        <Control name="$(parent)GamepadDivider" hidden="true" />
                                     </Controls>
                                 </Control>
                                 <Label name="$(parent)Title" font="ZoFontWinH1">
@@ -297,6 +398,7 @@
                                             <Controls>
                                                 <Texture name="$(parent)Left" hidden="false" />
                                                 <Texture name="$(parent)Right" hidden="false" />
+                                                <Control name="$(parent)GamepadDivider" hidden="true" />
                                             </Controls>
                                         </Control>
                                         <Control name="$(parent)Hints">
@@ -318,19 +420,8 @@
                 ZO_DeathRecap_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)Bg" inherits="ZO_Gamepad_BackgroundControl_Base_Template">
-                    <Anchor point="TOPLEFT" offsetX="-106" offsetY="-98"/>
-                    <Dimensions x="964" y="1024"/>
-                    <Controls>
-                        <Texture name="$(parent)BGLeft" textureFile="EsoUI/Art/DeathRecap/deathRecap_BG_left.dds">
-                            <Anchor point="TOPLEFT"/>
-                            <Dimensions x="900" y="1024"/>
-                        </Texture>
-                        <Texture name="$(parent)BGRight" textureFile="EsoUI/Art/DeathRecap/deathRecap_BG_right.dds">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeft" relativePoint="TOPRIGHT"/>
-                            <Anchor point="BOTTOMRIGHT"/>
-                        </Texture>
-                    </Controls>
+                <Control name="$(parent)Bg" inherits="ZO_DeathRecapBackground">
+                    <Anchor point="TOPLEFT"/>
                 </Control>
                 <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad" >
                     <OnInitialized>
@@ -365,10 +456,10 @@
                                     <Anchor point="TOP" relativeTo="$(parent)TelvarStoneLoss" relativePoint="BOTTOM" offsetY="6"/>
                                     <Controls>
                                         <Control name="$(parent)HintsDivider" inherits="ZO_DeathRecapDivider">
-                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPLEFT" offsetX="11"/>
                                         </Control>
                                         <Label name="$(parent)HintsHeader" font="ZoFontWinH3" text="SI_DEATH_RECAP_HINTS_HEADER" modifyTextType="UPPERCASE">
-                                            <Anchor point="TOPLEFT" offsetY="7"/>
+                                            <Anchor point="TOPLEFT" offsetY="6"/>
                                         </Label>
                                         <Control name="$(parent)Hints">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)HintsHeader" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="3"/>

@@ -14,25 +14,25 @@ function ZO_CadwellManager:New(control)
     manager.objectivesText = control:GetNamedChild("ObjectivesText")
     manager.objectiveLinePool = ZO_ControlPool:New("ZO_Cadwell_ObjectiveLine", control, "Objective")
 
-    manager.currentDifficultyLevel = GetPlayerDifficultyLevel()
+    manager.currentCadwellProgressionLevel = GetCadwellProgressionLevel()
 
     manager:InitializeCategoryList(control)
     manager:RefreshList()
 
-    local function OnDifficultyLevelChanged(event, difficultyLevel)
+    local function OnCadwellProgressionLevelChanged(event, cadwellProgression)
         MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("journalSceneGroup")
-        manager.currentDifficultyLevel = difficultyLevel
+        manager.currentCadwellProgressionLevel = cadwellProgression
         manager:RefreshList()
     end
 
     local function OnPOIUpdated()
-        if manager.currentDifficultyLevel > PLAYER_DIFFICULTY_LEVEL_FIRST_ALLIANCE then
+        if manager.currentCadwellProgressionLevel > CADWELL_PROGRESSION_LEVEL_BRONZE then
             manager:RefreshList()
         end
     end
 
     control:RegisterForEvent(EVENT_POI_UPDATED, OnPOIUpdated)
-    control:RegisterForEvent(EVENT_DIFFICULTY_LEVEL_CHANGED, OnDifficultyLevelChanged)
+    control:RegisterForEvent(EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED, OnCadwellProgressionLevelChanged)
 
     return manager
 end
@@ -40,32 +40,32 @@ end
 function ZO_CadwellManager:InitializeCategoryList(control)
     self.navigationTree = ZO_Tree:New(control:GetNamedChild("NavigationContainerScrollChild"), 60, -10, 300)
 
-    local difficultyToIcon = 
+    local progressionLevelToIcon = 
     {
-        [PLAYER_DIFFICULTY_LEVEL_SECOND_ALLIANCE] = 
+        [CADWELL_PROGRESSION_LEVEL_SILVER] = 
         {
             "EsoUI/Art/Cadwell/cadwell_indexIcon_silver_down.dds",
             "EsoUI/Art/Cadwell/cadwell_indexIcon_silver_up.dds",
             "EsoUI/Art/Cadwell/cadwell_indexIcon_silver_over.dds",
         },
-        [PLAYER_DIFFICULTY_LEVEL_THIRD_ALLIANCE] = 
+        [CADWELL_PROGRESSION_LEVEL_GOLD] = 
         {
             "EsoUI/Art/Cadwell/cadwell_indexIcon_gold_down.dds",
             "EsoUI/Art/Cadwell/cadwell_indexIcon_gold_up.dds",
             "EsoUI/Art/Cadwell/cadwell_indexIcon_gold_over.dds",
         },
     }
-    local function GetIconsForDifficultyLevel(difficultyLevel)
-        if difficultyToIcon[difficultyLevel] then
-            return unpack(difficultyToIcon[difficultyLevel])
+    local function GetIconsForCadwellProgressionLevel(progressionLevel)
+        if progressionLevelToIcon[progressionLevel] then
+            return unpack(progressionLevelToIcon[progressionLevel])
         end
     end
 
-    local function TreeHeaderSetup(node, control, difficulty, open)
-        control.difficulty = difficulty
+    local function TreeHeaderSetup(node, control, progressionLevel, open)
+        control.progressionLevel = progressionLevel
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-        control.text:SetText(GetString("SI_PLAYERDIFFICULTYLEVEL", difficulty))
-        local down, up, over = GetIconsForDifficultyLevel(difficulty)
+        control.text:SetText(GetString("SI_CADWELLPROGRESSIONLEVEL", progressionLevel))
+        local down, up, over = GetIconsForCadwellProgressionLevel(progressionLevel)
 
         control.icon:SetTexture(open and down or up)
         control.iconHighlight:SetTexture(over)
@@ -105,25 +105,25 @@ function ZO_CadwellManager:RefreshList()
 
     local zones = {}
 
-    for difficulty = PLAYER_DIFFICULTY_LEVEL_SECOND_ALLIANCE, PLAYER_DIFFICULTY_LEVEL_THIRD_ALLIANCE do
-        local numZones = GetNumZonesForDifficultyLevel(difficulty)
-        if self.currentDifficultyLevel < difficulty then
+    for progressionLevel = CADWELL_PROGRESSION_LEVEL_SILVER, CADWELL_PROGRESSION_LEVEL_GOLD do
+        local numZones = GetNumZonesForCadwellProgressionLevel(progressionLevel)
+        if self.currentCadwellProgressionLevel < progressionLevel then
             break
         end
 
         if numZones > 0 then
-            local parent = self.navigationTree:AddNode("ZO_IconHeader", difficulty, nil, SOUNDS.CADWELL_BLADE_SELECTED)
+            local parent = self.navigationTree:AddNode("ZO_IconHeader", progressionLevel, nil, SOUNDS.CADWELL_BLADE_SELECTED)
 
             for zoneIndex = 1, numZones do
-                local zoneName, zoneDescription, zoneOrder = GetCadwellZoneInfo(difficulty, zoneIndex)
+                local zoneName, zoneDescription, zoneOrder = GetCadwellZoneInfo(progressionLevel, zoneIndex)
 
                 local zoneCompleted = true
 
                 local objectives = {}
 
-                local numObjectives = GetNumPOIsForDifficultyLevelAndZone(difficulty, zoneIndex)
+                local numObjectives = GetNumPOIsForCadwellProgressionLevelAndZone(progressionLevel, zoneIndex)
                 for objectiveIndex = 1, numObjectives do
-                    local name, openingText, closingText, objectiveOrder, discovered, completed = GetCadwellZonePOIInfo(difficulty, zoneIndex, objectiveIndex)
+                    local name, openingText, closingText, objectiveOrder, discovered, completed = GetCadwellZonePOIInfo(progressionLevel, zoneIndex, objectiveIndex)
                     zoneCompleted = zoneCompleted and completed
                     table.insert(objectives, {name = name, openingText = openingText, closingText = closingText, order = objectiveOrder, discovered = discovered, completed = completed})
                 end

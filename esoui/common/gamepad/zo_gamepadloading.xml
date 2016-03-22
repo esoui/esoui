@@ -17,11 +17,9 @@
         </Control>
 
         <Control name="ZO_LoadingIcon_Gamepad_Footer" inherits="ZO_LoadingIcon_Gamepad" virtual="true">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="ZO_GAMEPAD_LOADING_ICON_FOOTER_SIZE" y="ZO_GAMEPAD_LOADING_ICON_FOOTER_SIZE" />
             <Controls>
-                <Texture name="$(parent)Animation" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_ScreenApp_Ouroboros.dds">
-                    <Dimensions x="64" y="64" />
-                </Texture>
+                <Texture name="$(parent)Animation" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_ScreenApp_Ouroboros.dds" />
             </Controls>
         </Control>
     </Controls>

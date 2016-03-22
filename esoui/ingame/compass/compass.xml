@@ -265,6 +265,7 @@
                     <CompassPinType name="QUEST_COMPLETE" />
                     <CompassPinType name="QUEST_INTERACT" />
                     <CompassPinType name="QUEST_TALK_TO" />
+                    <CompassPinType name="QUEST_GIVE_ITEM" />
 
                     <CompassPinType name="ASSISTED_QUEST_CONDITION"
                                 pinTexture="EsoUI/Art/Compass/quest_icon_assisted.dds"
@@ -823,6 +824,11 @@
                                 minAlpha="1.0"
                                 maxAlpha="1.0"
                                 maxVisibleNormalizedDistance=".0075"
+                                layer="OVERLAY"
+                    />
+                    <CompassPinType name="TIMELY_ESCAPE_NPC"
+                                pinTexture="EsoUI/Art/Compass/timely_escape_npc.dds"
+                                minAlpha="0.75"
                                 layer="OVERLAY"
                     />
                 </Compass>

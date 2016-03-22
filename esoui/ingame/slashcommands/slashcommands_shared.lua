@@ -63,4 +63,8 @@ function DoCommand(text)
     end
 end
 
+function ShowGamepadHelpScreen()
+    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "helpRootGamepad")
+end
+
 CHAT_SYSTEM:AddCommandPrefix('/', DoCommand)

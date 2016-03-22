@@ -27,9 +27,6 @@ function ZO_GuildRosterManager:New()
 end
 
 function ZO_GuildRosterManager:Initialize()
-
-    self.playerAlliance = GetUnitAlliance("player")
-
     self.noteEditedFunction = function(displayName, note)
         local numGuildMembers = GetNumGuildMembers(self.guildId)
         for guildMemberIndex = 1, numGuildMembers do       
@@ -172,10 +169,6 @@ end
 
 function ZO_GuildRosterManager:GetGuildAlliance()
     return self.guildAlliance
-end
-
-function ZO_GuildRosterManager:GetPlayerAlliance()
-    return self.playerAlliance
 end
 
 function ZO_GuildRosterManager:GetPlayerData()

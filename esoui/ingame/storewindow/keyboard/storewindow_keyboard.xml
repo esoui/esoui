@@ -7,10 +7,8 @@
         <!-- Buy Multiple Dialog -->
         <TopLevelControl name="ZO_BuyMultipleDialog" inherits="ZO_CustomDialogBase" hidden="true">
             <Controls>
-                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_DIALOG_BUY_MULTIPLE"/>
-
                 <Button name="$(parent)Slot" inherits="ZO_ItemSlot">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
                     <Dimensions x="48" y="48" />
                 </Button>
 
@@ -18,7 +16,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="20" />
                 </Control>
 
-                <Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate" hidden="false">
+                <Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate">
                     <Dimensions x="0" y="20" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Spinner" relativePoint="BOTTOMRIGHT" offsetY="6" />
                 </Label>

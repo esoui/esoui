@@ -63,27 +63,12 @@ end
 
 function ZO_GamepadStoreBuyback:ConfirmBuyBack()
     local selectedItem = self.list:GetTargetData()
-    local cost = selectedItem.stackBuyPrice
-    if cost <= GetCarriedCurrencyAmount(CURT_MONEY) then
-        local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
-        if numUsedSlots < numSlots then
-            local slotIndex = selectedItem.slotIndex
-            BuybackItem(slotIndex)
-        else
-            local message = zo_strformat(SI_INVENTORY_ERROR_INVENTORY_FULL)
-            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, message)
-            PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
-        end
-    end
+    BuybackItem(selectedItem.slotIndex)
 end
 
 function ZO_GamepadStoreBuyback:CanBuyBack()
-    local selectedItem = self.list:GetTargetData()
-    if selectedItem then
-        return selectedItem.stackBuyPrice <= GetCarriedCurrencyAmount(CURT_MONEY)
-    else
-        return false
-    end
+    local selectedData = self.list:GetTargetData()
+    return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
 end
 
 function ZO_GamepadStoreBuyback:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)

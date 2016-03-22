@@ -55,8 +55,6 @@ function CampaignBrowser:New(control)
     return manager
 end
 
-
-
 function CampaignBrowser:InitializeTree()
     self.tree = ZO_Tree:New(GetControl(self.control, "CategoriesScrollChild"), 60, -10, 255)
 
@@ -198,7 +196,7 @@ function CampaignBrowser:DoEnter()
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
         if(data.type == self.campaignBrowser:GetQueueType()) then
             if(data.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
-                ZO_Dialogs_ShowDialog("CAMPAIGN_QUEUE_READY", {campaignId = data.id, isGroup = data.isGroup}, {mainTextParams = {data.name}})
+                self.campaignBrowser:ShowCampaignQueueReadyDialog(data.id, data.isGroup, data.name)
             end
         end
     end
@@ -231,6 +229,10 @@ function CampaignBrowser:DoLeave()
     if(self.mouseOverRow) then
         self.campaignBrowser:DoLeave(ZO_ScrollList_GetData(self.mouseOverRow))
     end
+end
+
+function CampaignBrowser:GetCampaignBrowser()
+    return self.campaignBrowser
 end
 
 function CampaignBrowser:InitializeKeybindDescriptors()
@@ -314,9 +316,9 @@ function CampaignBrowser:InitializeKeybindDescriptors()
     }
 end
 
-function CampaignBrowser:SetupAllianceControl(control, population)
-    control.population = population
-    control:SetTexture(ZO_CampaignBrowser_GetPopulationIcon(population))
+function CampaignBrowser:SetupAllianceControl(control, data)
+    control.data = data
+    control:SetTexture(ZO_CampaignBrowser_GetPopulationIcon(data.population))
 end
 
 function CampaignBrowser:SetupCampaign(control, data)
@@ -335,15 +337,15 @@ function CampaignBrowser:SetupCampaign(control, data)
     else
         icon:SetHidden(true)
     end
-    
+
     local alliancePopulation1 = GetControl(control, "AlliancePopulation1")
-    self:SetupAllianceControl(alliancePopulation1, data.alliancePopulation1)
+    self:SetupAllianceControl(alliancePopulation1, {population = data.alliancePopulation1, campaignId = data.id, alliance = ALLIANCE_ALDMERI_DOMINION})
 
     local alliancePopulation2 = GetControl(control, "AlliancePopulation2")
-    self:SetupAllianceControl(alliancePopulation2, data.alliancePopulation2)
+    self:SetupAllianceControl(alliancePopulation2, {population = data.alliancePopulation2, campaignId = data.id, alliance = ALLIANCE_EBONHEART_PACT})
 
     local alliancePopulation3 = GetControl(control, "AlliancePopulation3")
-    self:SetupAllianceControl(alliancePopulation3, data.alliancePopulation3)
+    self:SetupAllianceControl(alliancePopulation3, {population = data.alliancePopulation3, campaignId = data.id, alliance = ALLIANCE_DAGGERFALL_COVENANT})
 
     GetControl(control, "GroupMembers"):SetHidden(data.numGroupMembers == 0)
     GetControl(control, "Friends"):SetHidden(data.numFriends == 0)
@@ -404,14 +406,20 @@ function CampaignBrowser:RefreshQueueRows(data)
 
     local hasConfirmingQueues = self.numConfirmingQueues > 0
     if(hasConfirmingQueues and not hadConfirmingQueues) then
-        self:SetUpdateInterval(1)
+        self.control:SetHandler("OnUpdate", function(control, seconds)
+                -- Ensure that refresh only occurs on second boundaries
+                if not self.nextUpdateTimeSeconds or seconds > self.nextUpdateTimeSeconds then
+                    self.nextUpdateTimeSeconds  = zo_floor(seconds + 1)
+                    self:RefreshVisible()
+                end
+            end)
     elseif(not hasConfirmingQueues and hadConfirmingQueues) then
-        self:ClearUpdateInterval()
+        self.control:SetHandler("OnUpdate", nil)
     end
 end
 
 function CampaignBrowser:BuildMasterList()
-    self:ClearUpdateInterval()
+    self.control:SetHandler("OnUpdate", nil)
     self.numConfirmingQueues = 0
 
     self.masterList = self.campaignBrowser:BuildMasterList()
@@ -653,7 +661,25 @@ end
 
 function CampaignBrowser:RowAlliancePopulation_OnMouseEnter(control)
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
-    SetTooltipText(InformationTooltip, GetString("SI_CAMPAIGNPOPULATIONTYPE", control.population))
+
+    local data = control.data
+    
+    local textPopulation = GetString("SI_CAMPAIGNPOPULATIONTYPE", data.population)
+    InformationTooltip:AddLine(textPopulation, "", ZO_NORMAL_TEXT:UnpackRGB())
+
+    if data.alliance == GetUnitAlliance("player") then
+        local queueWaitSeconds = GetSelectionCampaignQueueWaitTime(data.campaignId)
+        if queueWaitSeconds > 0 then
+            --We don't want to show an estimate for seconds
+            if queueWaitSeconds < 60 then
+                queueWaitSeconds = 60
+            end
+            queueWaitMs = queueWaitSeconds * 1000
+            local textEstimatedTime = ZO_GetSimplifiedTimeEstimateText(queueWaitMs, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, nil, ZO_TIME_ESTIMATE_STYLE.ARITHMETIC)
+            textEstimatedTime = zo_strformat(SI_CAMPAIGN_BROWSER_TOOLTIP_ESTIMATED_TIME, textEstimatedTime)
+            InformationTooltip:AddLine(textEstimatedTime, "", ZO_NORMAL_TEXT:UnpackRGB())
+        end
+    end
 
     self:EnterRow(control:GetParent())
 end

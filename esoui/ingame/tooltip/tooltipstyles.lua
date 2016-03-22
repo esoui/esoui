@@ -14,14 +14,14 @@ ZO_TOOLTIP_STYLES =
         width = ZO_GAMEPAD_CONTENT_WIDTH,
         paddingLeft = 0,
         paddingRight = 0,
-        fontFace = "FTN57.otf",
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
         fontColorType = INTERFACE_COLOR_TYPE_GAMEPAD_TOOLTIP,
         fontColorField = GENERAL_COLOR_GREY,
         fontStyle = "soft-shadow-thick",
     },
     title =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         customSpacing = 8,
         uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
@@ -33,13 +33,13 @@ ZO_TOOLTIP_STYLES =
     },
     statValuePairStat =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
     statValuePairValue =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
     fullWidth =
@@ -53,13 +53,13 @@ ZO_TOOLTIP_STYLES =
     },
     statValueSliderStat =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         fontColorType = INTERFACE_COLOR_TYPE_TEXT_COLORS,
         fontColorField = INTERFACE_TEXT_COLOR_NORMAL,
     },
     statValueSliderValue =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         fontColorField = GENERAL_COLOR_WHITE,
         gradientColors = ZO_XP_BAR_GRADIENT_COLORS,
     },
@@ -77,22 +77,28 @@ ZO_TOOLTIP_STYLES =
         childSpacing = 10,
         widthPercent = 100,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
-        fontFace = "FTN47.otf",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
     bodyHeader =
     {
-        fontFace = "FTN57.otf",
-        fontSize = 27,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
         uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
     },
+    itemTagsSection =
+    {
+        customSpacing = 80,
+        widthPercent = 100,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+    },
     bodyDescription =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
     },
     enchantIrreplaceable =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
     },
 
     --Item Tooltip
@@ -169,28 +175,38 @@ ZO_TOOLTIP_STYLES =
     },
     topSection =
     {
-        customSpacing = 7,
         layoutPrimaryDirection = "up",
         layoutSecondaryDirection = "right",
         widthPercent = 100,
         childSpacing = 1,
-        fontSize = 27,
-        height = 67,
+        fontSize = "$(GP_27)",
+        height = 92,
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },    
-    topLine = 
+    topSubsection = 
     {
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "up",
         widthPercent = 100,
         childSpacing = 8,
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         height = 32,
+    },
+    topSubsectionItemDetails =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "up",
+        widthPercent = 100,
+        childSpacing = 15,
+        customSpacing = -4,
+        fontSize = "$(GP_27)",
+        height = 32,
+        fontColorField = GENERAL_COLOR_WHITE,
     },
     flavorText =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
     },
     inactiveBonus =
     {
@@ -234,6 +250,10 @@ ZO_TOOLTIP_STYLES =
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
         fontColorField = ITEM_QUALITY_LEGENDARY,
     },
+    bind = 
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
     stolen = 
     {
         fontColorField = GENERAL_COLOR_RED,
@@ -245,15 +265,26 @@ ZO_TOOLTIP_STYLES =
         customSpacing = 30,
         widthPercent = 100,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
-        fontFace = "FTN47.otf",
-        fontSize = 34,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontSize = "$(GP_34)",
+    },
+    itemTagTitle =
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontSize = "$(GP_34)",
+        uppercase = true,
+    },
+    itemTagDescription =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_42)",
     },
 
     --Gamepad Stable Tooltip
     stableGamepadTooltip = {
         width = 352,
         customSpacing = 50,
-        fontFace = "FTN57.otf",
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
         fontColorType = INTERFACE_COLOR_TYPE_GAMEPAD_TOOLTIP,
         fontColorField = GENERAL_COLOR_GREY,
         fontStyle = "soft-shadow-thick",
@@ -261,12 +292,12 @@ ZO_TOOLTIP_STYLES =
 
     stableGamepadFlavor = {
         customSpacing = 30,
-        fontSize = 34,
+        fontSize = "$(GP_34)",
     },
 
     stableGamepadTitle =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         customSpacing = 8,
         fontColorField = GENERAL_COLOR_WHITE,
         uppercase = false,
@@ -292,7 +323,7 @@ ZO_TOOLTIP_STYLES =
         customSpacing = 7,
         childSpacing = 10,
         widthPercent = 100,
-        fontFace = "FTN57.otf",
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "up",
         height = 64,
@@ -301,20 +332,20 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_ABILITY_UPGRADE,
         uppercase = true,
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         widthPercent = 100,
     },
     newEffectTitle =
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_ABILITY_UPGRADE,
         uppercase = true,
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         widthPercent = 100,
     },
     newEffectBody =
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_ABILITY_UPGRADE,
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         widthPercent = 100,
     },
     abilityProgressBar =
@@ -348,8 +379,8 @@ ZO_TOOLTIP_STYLES =
         paddingRight = 30,
         paddingTop = 32,
         childSpacing = 10,
-        fontFace = "FTN57.otf",
-        fontSize = 27,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
         fontColorType = INTERFACE_COLOR_TYPE_GAMEPAD_TOOLTIP,
         fontColorField = GENERAL_COLOR_GREY,
         fontStyle = "soft-shadow-thick",
@@ -358,16 +389,16 @@ ZO_TOOLTIP_STYLES =
     mapTitle =
     {
         width = 327,
-        fontFace = "FTN87.otf",
-        fontSize = 34,
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_34)",
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
 
     mapQuestTitle =
     {
-        fontFace = "FTN87.otf",
-        fontSize = 34,
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_34)",
     },
 
     -- Map Location Styles
@@ -385,22 +416,22 @@ ZO_TOOLTIP_STYLES =
     },
     mapLocationTooltipContentHeader =
     {
-        fontFace = "FTN57.otf",
-        fontSize = 27,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
         uppercase = true,
     },
     mapLocationTooltipWayshrineHeader =
     {
-        fontFace = "FTN87.otf",
-        fontSize = 34,
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_WHITE,
         uppercase = true,
         widthPercent = 85,
     },
     mapLocationTooltipWayshrineLinkedCollectibleLockedText =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_MARKET_COLORS,
         fontColorField = MARKET_COLORS_ON_SALE,
         widthPercent = 85,
@@ -437,12 +468,12 @@ ZO_TOOLTIP_STYLES =
     },
     mapLocationTooltipContent =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
     mapRecallCost =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
         uppercase = true,
     },
@@ -472,8 +503,8 @@ ZO_TOOLTIP_STYLES =
     },
     mapKeepUnderAttack =
     {
-        fontFace = "FTN87.otf",
-        fontSize = 22,
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_22)",
         fontColorField = GENERAL_COLOR_RED,
         uppercase = true,
     },
@@ -489,17 +520,17 @@ ZO_TOOLTIP_STYLES =
     },
     mapLocationKeepClaimed =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
     mapLocationKeepElderScrollInfo =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
     mapLocationKeepUnclaimed =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_GREY,
     },
     mapKeepAccessible = 
@@ -549,26 +580,26 @@ ZO_TOOLTIP_STYLES =
     },
     keepBaseTooltipContent =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_WHITE,
         width = 305,
     },
     keepUpgradeTooltipContent =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
         widthPercent = 100,
     },
     gamepadElderScrollTooltipContent =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
         widthPercent = 100,
         uppercase = true,
     },
     mapUnitName =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_NAME_PLATE,
         fontColorField = UNIT_NAMEPLATE_ALLY_PLAYER,
     },
@@ -576,7 +607,7 @@ ZO_TOOLTIP_STYLES =
     -- Achievement Tooltip
     achievementSubtitleText =
     {
-        fontSize = 30,
+        fontSize = "$(GP_30)",
         uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
     },
@@ -591,7 +622,7 @@ ZO_TOOLTIP_STYLES =
     
     achievementPointsSection =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         childSpacing = 10,
         fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3,
         layoutPrimaryDirection = "right",
@@ -601,7 +632,7 @@ ZO_TOOLTIP_STYLES =
     achievementRewardsEntrySection =
     {
         widthPercent = 100,
-        fontSize = 30,
+        fontSize = "$(GP_30)",
         childSpacing = 10,
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "down",
@@ -626,8 +657,8 @@ ZO_TOOLTIP_STYLES =
     achievementRewardsName =
     {
         widthPercent = 100,
-        fontSize = 34,
-        uppercase = false,
+        fontSize = "$(GP_34)",
+        uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
     },
     
@@ -688,21 +719,21 @@ ZO_TOOLTIP_STYLES =
     achievementCriteriaProgress =
     {
         widthPercent = 100,
-        fontSize = 30,
+        fontSize = "$(GP_30)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
 
     achievementDescriptionComplete =
     {
         width = 357,
-        fontSize = 30,
+        fontSize = "$(GP_30)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3,
     },
 
     achievementDescriptionIncomplete =
     {
         width = 357,
-        fontSize = 30,
+        fontSize = "$(GP_30)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE,
     },
 
@@ -728,7 +759,7 @@ ZO_TOOLTIP_STYLES =
     achievementName =
     {
         widthPercent = 85,
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
 
@@ -765,8 +796,8 @@ ZO_TOOLTIP_STYLES =
 
     cadwellObjectiveTitle =
     {
-        fontFace = "FTN87.otf",
-        fontSize = 22,
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_22)",
         customSpacing = 3,
         uppercase = true,
         fontColorType = INTERFACE_COLOR_TYPE_TEXT_COLORS,
@@ -784,7 +815,7 @@ ZO_TOOLTIP_STYLES =
 
     cadwellObjectiveSection = 
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "down",
         widthPercent = 90
@@ -825,7 +856,7 @@ ZO_TOOLTIP_STYLES =
     lootTooltip =
     {
         width = 295,
-        fontFace = "FTN57.otf",
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
         fontColorType = INTERFACE_COLOR_TYPE_GAMEPAD_TOOLTIP,
         fontColorField = GENERAL_COLOR_GREY,
         fontStyle = "soft-shadow-thick",
@@ -835,8 +866,8 @@ ZO_TOOLTIP_STYLES =
     socialTitle =
     {
         customSpacing = 3,
-        fontFace = "FTN47.otf",
-        fontSize = 42,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontSize = "$(GP_42)",
         fontStyle = "soft-shadow-thick",
         fontColorType = INTERFACE_COLOR_TYPE_TEXT_COLORS,
         fontColorField = INTERFACE_TEXT_COLOR_NORMAL,
@@ -858,13 +889,13 @@ ZO_TOOLTIP_STYLES =
 
     socialStatsValue =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
 
     socialOffline =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_GREY,
     },
 
@@ -875,7 +906,7 @@ ZO_TOOLTIP_STYLES =
         childSpacing = 25,
         widthPercent = 100,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
-        fontFace = "FTN47.otf",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
 
     -- Gamepad Crown Store Market
@@ -884,12 +915,12 @@ ZO_TOOLTIP_STYLES =
         customSpacing = 25,
         widthPercent = 100,
         fontColorField = GENERAL_COLOR_RED,
-        fontFace = "FTN47.otf",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
 
     instantUnlockIneligibilityLine =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
     },
 
     -- Gamepad Keep Information
@@ -902,8 +933,8 @@ ZO_TOOLTIP_STYLES =
     --Gamepad Voice Chat
     voiceChatBodyHeader =
     {
-        fontFace = "FTN57.otf",
-        fontSize = 27,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
         uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
         widthPercent = 100,
@@ -915,24 +946,24 @@ ZO_TOOLTIP_STYLES =
     },
     voiceChatPairLabel =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
     voiceChatPairText =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
     voiceChatGamepadReputation = {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_RED,
         uppercase = false,
     },
     voiceChatGamepadSpeaker =
     {
         height = 43,
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
         layoutPrimaryDirection = "right",
         childSpacing = 10,
@@ -941,14 +972,14 @@ ZO_TOOLTIP_STYLES =
     },
     voiceChatGamepadSpeakerTitle =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         customSpacing = 8,
         uppercase = false,
         fontColorField = GENERAL_COLOR_WHITE,
     },
     voiceChatGamepadSpeakerText =
     {
-        fontSize = 34,
+        fontSize = "$(GP_34)",
         widthPercent = 90,
     },
     voiceChatGamepadSpeakerIcon =
@@ -969,7 +1000,7 @@ ZO_TOOLTIP_STYLES =
 
     groupTitleSection =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         widthPercent = 100,
         uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
@@ -980,8 +1011,8 @@ ZO_TOOLTIP_STYLES =
     },
     groupDescription =
     {
-        fontSize = 42,
-        fontFace = "FTN47.otf",
+        fontSize = "$(GP_42)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
     groupDescriptionError =
     {
@@ -991,8 +1022,8 @@ ZO_TOOLTIP_STYLES =
     -- Gamepad Champion Screen
     attributeTitleSection =
     {
-        fontSize = 48,
-        fontFace = "FTN87.otf",
+        fontSize = "$(GP_48)",
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
         uppercase = true,
         childSpacing = 20,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
@@ -1040,7 +1071,7 @@ ZO_TOOLTIP_STYLES =
     },
     pointsHeader =
     {
-        fontSize = 27,
+        fontSize = "$(GP_27)",
         uppercase = true,
         widthPercent = 60,
         horizontalAlignment = TEXT_ALIGN_LEFT,
@@ -1048,7 +1079,7 @@ ZO_TOOLTIP_STYLES =
     },
     pointsValue =
     {
-        fontSize = 42,
+        fontSize = "$(GP_42)",
         widthPercent = 40,
         horizontalAlignment = TEXT_ALIGN_RIGHT,
         fontColorField = GENERAL_COLOR_WHITE,
@@ -1071,8 +1102,8 @@ ZO_TOOLTIP_STYLES =
     },
     itemComparisonStatValuePairValue = 
     {
-        fontSize = 34,
-        fontFace = "FTN47.otf",
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
         horizontalAlignment = TEXT_ALIGN_RIGHT,
     },
     itemComparisonStatValuePairDefaultColor = 

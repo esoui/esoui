@@ -71,9 +71,16 @@
 
                 <Texture name="$(parent)BottomMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_bottomMunge_tile.dds" addressMode="WRAP" scale=".75">
                     <Controls>
-                        <Label name="$(grandparent)ZoneDescription" override="true">
+                        <Label name="$(grandparent)ZoneDescription" font="ZoFontWinH3" override="true">
                             <Anchor point="CENTER" offsetY="55" />
                         </Label>
+
+                        <Control name="$(grandparent)ZoneInfoContainer" override="true">
+                            <Controls>
+                                <Label name="$(parent)ZoneName" override="true" font="ZoFontWinH2"/>
+                                <Label name="$(parent)InstanceType" override="true" font="ZoFontWinH2"/>
+                            </Controls>
+                        </Control>
                     </Controls>
                </Texture>
 

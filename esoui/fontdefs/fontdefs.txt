@@ -1,0 +1,3 @@
+## DependsOn: ZO_FontStrings
+EsoUI\FontDefs\Keyboard\DefaultFontDefs_Keyboard.xml
+EsoUI\FontDefs\Gamepad\DefaultFontDefs_Gamepad.xml

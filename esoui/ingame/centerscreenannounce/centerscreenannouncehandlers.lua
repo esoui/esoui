@@ -685,9 +685,16 @@ CSH[EVENT_RAID_TRIAL_STARTED] = function(raidName, isWeekly)
     return CSA_EVENT_COMBINED_TEXT, SOUNDS.RAID_TRIAL_STARTED, zo_strformat(SI_TRIAL_STARTED, raidName)
 end
 
-CSH[EVENT_RAID_TRIAL_COMPLETE] = function(raidName, score, totalTime)
-    local formattedTime = ZO_FormatTimeMilliseconds(totalTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)
-    return CSA_EVENT_COMBINED_TEXT, SOUNDS.RAID_TRIAL_COMPLETED, zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName), zo_strformat(SI_TRIAL_COMPLETED_SMALL, score, formattedTime)
+do
+    local TRIAL_COMPLETE_LIFESPAN_MS = 10000
+    CSH[EVENT_RAID_TRIAL_COMPLETE] = function(raidName, score, totalTime)
+        local wasUnderTargetTime = GetRaidDuration() <= GetRaidTargetTime()
+        local formattedTime = ZO_FormatTimeMilliseconds(totalTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)
+        local vitalityBonus = GetCurrentRaidLifeScoreBonus()
+        local currentCount = GetRaidReviveCountersRemaining()
+        local maxCount = GetCurrentRaidStartingReviveCounters()
+        return CSA_EVENT_RAID_COMPLETE_TEXT, SOUNDS.RAID_TRIAL_COMPLETED, zo_strformat(SI_TRIAL_COMPLETED_LARGE, raidName), { score, formattedTime, wasUnderTargetTime, vitalityBonus, zo_strformat(SI_REVIVE_COUNTER_REVIVES_USED, currentCount, maxCount) }, nil, nil, nil, nil, TRIAL_COMPLETE_LIFESPAN_MS
+    end
 end
 
 CSH[EVENT_RAID_TRIAL_FAILED] = function(raidName, score)
@@ -696,6 +703,16 @@ end
 
 CSH[EVENT_RAID_TRIAL_NEW_BEST_SCORE] = function(raidName, score, isWeekly)
     return CSA_EVENT_SMALL_TEXT, SOUNDS.RAID_TRIAL_NEW_BEST, zo_strformat(isWeekly and SI_TRIAL_NEW_BEST_SCORE_WEEKLY or SI_TRIAL_NEW_BEST_SCORE_LIFETIME, raidName)
+end
+
+CSH[EVENT_RAID_REVIVE_COUNTER_UPDATE] = function(currentCount, countDelta)
+-- TODO: revisit this once there is a way to properly handle this in client/server code
+    if not IsRaidInProgress() then
+        return
+    end
+    if countDelta < 0 then
+        return CSA_EVENT_LARGE_TEXT, SOUNDS.RAID_TRIAL_COUNTER_UPDATE, zo_strformat(SI_REVIVE_COUNTER_UPDATED_LARGE, "EsoUI/Art/Trials/VitalityDepletion.dds")
+    end
 end
 
 do
@@ -748,10 +765,9 @@ do
     CSH[EVENT_RAID_TRIAL_SCORE_UPDATE] = function(scoreType, scoreAmount, totalScore)
         local reasonAssets = TRIAL_SCORE_REASON_TO_ASSETS[scoreType]
         if reasonAssets then
-            return CSA_EVENT_COMBINED_TEXT,
+            return CSA_EVENT_LARGE_TEXT,
                 reasonAssets.soundId,
-                zo_strformat(SI_TRIAL_SCORE_UPDATED_LARGE, reasonAssets.icon, scoreAmount),
-                zo_strformat(SI_TRIAL_SCORE_UPDATED_SMALL, totalScore)
+                zo_strformat(SI_TRIAL_SCORE_UPDATED_LARGE, reasonAssets.icon, scoreAmount)
         end
     end
 end
@@ -760,7 +776,7 @@ CSH[EVENT_CHAMPION_POINT_GAINED] = function()
     local rankGained = GetPlayerChampionPointsEarned()
     local pointType = GetChampionPointAttributeForRank(rankGained)
     local icon = GetChampionPointAttributeIcon(pointType)
-    local constellationGroupName = ZO_Champion_GetConstellationGroupNameFromAttribute(pointType)
+    local constellationGroupName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(pointType)
     local secondLine = zo_strformat(SI_CHAMPION_POINT_TYPE, constellationGroupName)
     return CSA_EVENT_COMBINED_TEXT, SOUNDS.CHAMPION_POINT_GAINED, GetString(SI_CHAMPION_POINT_EARNED), secondLine, icon, nil, nil, nil, nil, CSA_OPTION_SUPPRESS_ICON_FRAME
 end
@@ -783,6 +799,10 @@ end
 
 CSH[EVENT_SKILL_FORCE_RESPEC] = function(note)
     return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_SKILLS_FORCE_RESPEC_TITLE), zo_strformat(SI_SKILLS_FORCE_RESPEC_PROMPT, note)
+end
+
+CSH[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function()
+    return CSA_EVENT_LARGE_TEXT, SOUNDS.LFG_COMPLETE_ANNOUNCEMENT, GetString(SI_ACTIVITY_FINDER_ACTIVITY_COMPLETE_ANNOUNCEMENT_TEXT)
 end
 
 function ZO_CenterScreenAnnounce_GetHandlers()
@@ -866,9 +886,9 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
                     sound = nil -- no longer needed, we played it once
                 else
                     for conditionIndex = 1, conditionCount do
-                        local conditionText, curCount, maxCount, isFailCondition, isConditionComplete  = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
+                        local conditionText, curCount, maxCount, isFailCondition, isConditionComplete, _, isVisible  = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
 
-                        if(not (isFailCondition or isConditionComplete)) then
+                        if(not (isFailCondition or isConditionComplete) and isVisible) then
                             announceObject:AddMessage(eventId, CSA_EVENT_SMALL_TEXT, sound, conditionText)
                             sound = nil -- no longer needed, we played it once
                         end
@@ -885,4 +905,55 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_REMOVED, OnQuestRemoved)
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADVANCED, OnQuestAdvanced)
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADDED, OnQuestAdded)
+end
+
+
+-- Center Screen Queueable Handlers
+--      conditionParameters:    A table of parameter positions that should be unique amoung any given number of eventIds. For example, if you kill a monster that gives
+--                              exp and guild rep, they will both come down as skill xp update events, but their skilltype and skillindex values are different, so they should be added the to system independently
+--                              and not added together for updating
+
+local CSQH = {}
+
+do
+    local PARAMETER_SKILL_TYPE          = 1
+    local PARAMETER_SKILL_INDEX         = 2
+    local PARAMETER_CURRENT_CAPACITY    = 2
+    local PARAMETER_CURRENT_UPGRADE     = 4
+    local PARAMETER_CURRENT_XP          = 6
+
+    local LONG_UPDATE_INTERVAL_SECONDS = 2.5
+    local EXTRA_LONG_UPDATE_INTERVAL_SECONDS = 3.1
+
+    CSQH[EVENT_SKILL_XP_UPDATE] =
+    {
+        updateTimeDelaySeconds = LONG_UPDATE_INTERVAL_SECONDS,
+        updateParameters = {PARAMETER_CURRENT_XP},
+        conditionParameters = {PARAMETER_SKILL_TYPE, PARAMETER_SKILL_INDEX}
+    }
+
+    CSQH[EVENT_RAID_REVIVE_COUNTER_UPDATE] =
+    {
+        updateTimeDelaySeconds = LONG_UPDATE_INTERVAL_SECONDS,
+    }
+
+    CSQH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] =
+    {
+        updateTimeDelaySeconds = EXTRA_LONG_UPDATE_INTERVAL_SECONDS,
+        updateParameters = {PARAMETER_CURRENT_CAPACITY, PARAMETER_CURRENT_UPGRADE}
+    }
+
+    CSQH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] =
+    {
+        updateTimeDelaySeconds = EXTRA_LONG_UPDATE_INTERVAL_SECONDS,
+        updateParameters = {PARAMETER_CURRENT_CAPACITY, PARAMETER_CURRENT_UPGRADE}
+    }
+end
+
+function ZO_CenterScreenAnnounce_GetQueueableHandlers()
+    return CSQH
+end
+
+function ZO_CenterScreenAnnounce_GetQueueableHandler(eventId)
+    return CSQH[eventId]
 end

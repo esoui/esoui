@@ -56,7 +56,7 @@
                     <TextureCoords left="0" right="1" top="0.01" bottom="1" />
 
                     <Controls>
-                        <Label name="$(grandparent)ZoneDescription" font="EsoUi/Common/Fonts/Univers67.otf|20|soft-shadow-thick" horizontalAlignment="CENTER" hidden="true" inheritScale="false">
+                        <Label name="$(grandparent)ZoneDescription" horizontalAlignment="CENTER" hidden="true" inheritScale="false">
                             <Dimensions x="1120"/>
 
                             <OnUserAreaCreated>
@@ -66,14 +66,14 @@
                         <Control name="$(grandparent)ZoneInfoContainer" resizeToFitDescendents="true">
                             <Anchor point="BOTTOM" relativeTo="$(grandparent)ZoneDescription" relativePoint="TOP" offsetY="-5"/>
                             <Controls>
-                                <Label name="$(parent)ZoneName" font="EsoUi/Common/Fonts/Univers67.otf|24|soft-shadow-thick" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false">
+                                <Label name="$(parent)ZoneName" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false">
                                     <Anchor point="LEFT"/>
                                 </Label>
                                 <Texture name="$(parent)InstanceTypeIcon">
                                     <Dimensions x="40" y="40"/>
                                     <Anchor point="LEFT" relativeTo="$(parent)ZoneName" relativePoint="RIGHT" offsetX="60"/>
                                 </Texture>
-                                <Label name="$(parent)InstanceType" font="EsoUi/Common/Fonts/Univers67.otf|24|soft-shadow-thick" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false">
+                                <Label name="$(parent)InstanceType" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="C5C29E" hidden="true" inheritScale="false">
                                     <Anchor point="LEFT" relativeTo="$(parent)InstanceTypeIcon" relativePoint="RIGHT" offsetX="5"/>
                                 </Label>
                             </Controls>

@@ -93,7 +93,7 @@
 
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
-                    <Dimensions x="300" y="26" />
+                    <Dimensions x="290" y="26" />
                     <Anchor point="LEFT" />
                 </Label>
                 

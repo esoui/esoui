@@ -1,15 +1,7 @@
-COLLECTIONS_INVENTORY_VALID_CATEGORY_TYPES =
-{
-    [COLLECTIBLE_CATEGORY_TYPE_MOUNT] = true,
-    [COLLECTIBLE_CATEGORY_TYPE_VANITY_PET] = true,
-    [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = true,
-}
 
 --------------------------------------
 --Collections Inventory Singleton
 --------------------------------------
-
-COLLECTIONS_INVENTORY_SINGLETON = nil
 
 ZO_CollectionsInventorySingleton = ZO_CallbackObject:Subclass()
 
@@ -41,25 +33,23 @@ function ZO_CollectionsInventorySingleton:BuildQuickslotData()
 
     for i = 1, GetNumCollectibleCategories() do
         local categoryType = select(7, GetCollectibleCategoryInfo(i))
-        if COLLECTIONS_INVENTORY_VALID_CATEGORY_TYPES[categoryType] then
-            if IsCollectibleCategorySlottable(categoryType) then
-                for i = 1, GetTotalCollectiblesByCategoryType(categoryType) do
-                    local collectibleId = GetCollectibleIdFromType(categoryType, i)
-                    local _, _, iconFile, _, unlocked, _, isActive = GetCollectibleInfo(collectibleId)
-                    if unlocked then
-                        table.insert(self.quickslotData, 
-                            {
-                            name = self:GetCollectibleInventoryDisplayName(collectibleId),
-                            iconFile = iconFile,
-                            collectibleId = collectibleId,
-                            categoryType = categoryType,
-                            active = isActive,
-                            --even though collectibles don't have a value or age, we want to keep them separate when sorted
-                            stackSellPrice = -1,
-                            age = -1
-                            }
-                        )
-                    end
+        if IsCollectibleCategoryUsable(categoryType) and IsCollectibleCategorySlottable(categoryType) then
+            for i = 1, GetTotalCollectiblesByCategoryType(categoryType) do
+                local collectibleId = GetCollectibleIdFromType(categoryType, i)
+                local _, _, iconFile, _, unlocked, _, isActive = GetCollectibleInfo(collectibleId)
+                if unlocked then
+                    table.insert(self.quickslotData, 
+                        {
+                        name = self:GetCollectibleInventoryDisplayName(collectibleId),
+                        iconFile = iconFile,
+                        collectibleId = collectibleId,
+                        categoryType = categoryType,
+                        active = isActive,
+                        --even though collectibles don't have a value or age, we want to keep them separate when sorted
+                        stackSellPrice = -1,
+                        age = -1
+                        }
+                    )
                 end
             end
         end
@@ -78,7 +68,4 @@ function ZO_CollectionsInventorySingleton:GetCollectibleInventoryDisplayName(col
     return displayName
 end
 
-
-do
-    COLLECTIONS_INVENTORY_SINGLETON = ZO_CollectionsInventorySingleton:New()
-end
+COLLECTIONS_INVENTORY_SINGLETON = ZO_CollectionsInventorySingleton:New()

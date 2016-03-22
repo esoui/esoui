@@ -300,16 +300,28 @@ function ZO_GamepadGenericHeader_SetDataLayout(control, layout)
     control.layout = layout
 end
 
+local g_currentBottomLeftHeader = DATA1HEADER
+
+local function ReflowHeaderDataPairIfNecessary(parentControl, dataControlIndex, dataHeaderControlIndex)
+    local controls = parentControl.controls
+
+    local dataControl = controls[dataControlIndex]
+    if dataControl and dataControl:GetRight() > parentControl:GetRight() then
+        local dataHeaderControl = controls[dataHeaderControlIndex]
+        dataHeaderControl:ClearAnchors()
+        dataHeaderControl:SetAnchor(BOTTOMLEFT, controls[g_currentBottomLeftHeader], BOTTOMLEFT, 0, ROW_OFFSET_Y)
+        g_currentBottomLeftHeader = dataHeaderControlIndex
+    end
+end
+
 local function ContentHeaderDataPairsLinkedReflow(control)
     control.layout = nil
     ZO_GamepadGenericHeader_SetDataLayout(control, ZO_GAMEPAD_HEADER_LAYOUTS.CONTENT_HEADER_DATA_PAIRS_LINKED)
-    local controls = control.controls
-    local data4Control = controls[ZO_GAMEPAD_HEADER_CONTROLS.DATA4]
-    if data4Control and data4Control:GetRight() > control:GetRight() then
-        local data4HeaderControl = controls[ZO_GAMEPAD_HEADER_CONTROLS.DATA4HEADER]
-        data4HeaderControl:ClearAnchors()
-        data4HeaderControl:SetAnchor(BOTTOMLEFT, controls[DATA1HEADER], BOTTOMLEFT, 0, ROW_OFFSET_Y)
-    end
+    g_currentBottomLeftHeader = DATA1HEADER    -- Reset the bottom left header value
+
+    ReflowHeaderDataPairIfNecessary(control, DATA2, DATA2HEADER)
+    ReflowHeaderDataPairIfNecessary(control, DATA3, DATA3HEADER)
+    ReflowHeaderDataPairIfNecessary(control, DATA4, DATA4HEADER)
 end
 
 local SCREEN_HEADER_REFLOW_FUNCS = {}

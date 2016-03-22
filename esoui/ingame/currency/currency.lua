@@ -176,7 +176,12 @@ function ZO_CurrencyControl_SetCurrencyData(control, currencyType, amount, showA
     end
 end
 
-local CURRENCY_SUFFIXES = {"", "K", "M", "B"} -- These may need to be localized, depending on design.
+local CURRENCY_SUFFIXES = {
+                           "",  -- No suffix for currency amounts less than 10000
+                           GetString(SI_CURRENCY_SUFFIX_ONE_THOUSAND),
+                           GetString(SI_CURRENCY_SUFFIX_ONE_MILLION),
+                           GetString(SI_CURRENCY_SUFFIX_ONE_BILLION),
+                          }
 
 function ZO_CurrencyControl_FormatCurrency(amount, useShortFormat)
     if useShortFormat then
@@ -191,7 +196,7 @@ function ZO_CurrencyControl_FormatCurrency(amount, useShortFormat)
             -- Round the number to two decimal places.
             shortAmount = math.floor(shortAmount * 100 + 0.5) / 100
 
-            return shortAmount..CURRENCY_SUFFIXES[suffix]
+            return ZO_LocalizeDecimalNumber(shortAmount)..CURRENCY_SUFFIXES[suffix]
         else
             return amount
         end
@@ -271,7 +276,11 @@ function ZO_CurrencyControl_SetCurrency(self, options)
     end
 
     if(options.color) then
-        overrideColor = options.color
+        if type(options.color) == "function" then
+            overrideColor = options.color()
+        else
+            overrideColor = options.color
+        end
     end
 
     self:SetMouseEnabled(showTooltips)

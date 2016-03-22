@@ -5,7 +5,9 @@ end
 function ZO_IconHeader_OnMouseEnter(control)
     ZO_SelectableLabel_OnMouseEnter(control.text)
     if not control.text:IsSelected() and control.enabled then
-        control.icon.animation:PlayForward()
+        if control.allowIconScaling then
+            control.icon.animation:PlayForward()
+        end
         control.iconHighlight:SetHidden(false)
     end
     if(control.text:WasTruncated()) then
@@ -20,7 +22,7 @@ local ICON_HEADER_TEXT_PADDING_Y = 9
 
 function ZO_IconHeader_OnMouseExit(control)
     ZO_SelectableLabel_OnMouseExit(control.text)
-    if not control.text:IsSelected() then
+    if not control.text:IsSelected() and control.allowIconScaling then
         control.icon.animation:PlayBackward()
     end
     control.iconHighlight:SetHidden(true)
@@ -33,19 +35,24 @@ function ZO_IconHeader_OnMouseUp(control, upInside)
     end
 end
 
-function ZO_IconHeader_Setup(control, open, enabled)
+function ZO_IconHeader_Setup(control, open, enabled, disableScaling)
     enabled = enabled == nil or enabled
     control.enabled = enabled
+    control.allowIconScaling = not disableScaling
 
     if not control.icon.animation then
         control.icon.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual(control.animationTemplate, control.icon)
     end
 
     if enabled and (open or WINDOW_MANAGER:GetMouseOverControl() == control) then
-        control.icon.animation:PlayForward()
+        if control.allowIconScaling then
+            control.icon.animation:PlayForward()
+        end
         control.iconHighlight:SetHidden(WINDOW_MANAGER:GetMouseOverControl() ~= control)
     else
-        control.icon.animation:PlayBackward()
+        if control.allowIconScaling then
+            control.icon.animation:PlayBackward()
+        end
         control.iconHighlight:SetHidden(true)
     end
 

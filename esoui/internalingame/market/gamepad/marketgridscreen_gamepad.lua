@@ -52,31 +52,20 @@ function GamepadGridFocus:New(...)
 end
 
 function GamepadGridFocus:Initialize(control, gridWidth, gridHeight, leftBoundCallBack, rightBoundCallBack, topBoundCallBack, bottomBoundCallBack)
-    self.data = {}
-    self.control = control
-    self.index = nil
-    self.savedIndex = nil
+    ZO_GamepadFocus.Initialize(self, control)
+
     self.gridWidth = gridWidth
     self.gridHeight = gridHeight
-    self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
-    self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
-    self:SetActive(false)
     self.cooldown = 0
     self.leftBoundCallBack = leftBoundCallBack
-    self.righBoundCallBack = rightBoundCallBack
+    self.rightBoundCallBack = rightBoundCallBack
     self.topBoundCallBack = topBoundCallBack
     self.bottomBoundCallBack = bottomBoundCallBack
-    self.directionalInputEnabled = true
+end
 
-    local function GamepadListPlaySound(movementType)
-        if movementType == FOCUS_MOVEMENT_TYPES.MOVE_NEXT then
-            PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
-        elseif movementType == FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS then
-            PlaySound(SOUNDS.GAMEPAD_MENU_UP)
-        end
-    end
-
-    self:SetPlaySoundFunction(GamepadListPlaySound)
+function GamepadGridFocus:InitializeMovementController()
+    self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
+    self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 end
 
 function GamepadGridFocus:GetSelectedIndex()
@@ -114,8 +103,8 @@ do
                         self.leftBoundCallBack()
                     end
                 elseif gridX > self.gridWidth then
-                    if self.righBoundCallBack then
-                        self.righBoundCallBack()
+                    if self.rightBoundCallBack then
+                        self.rightBoundCallBack()
                     end
                 elseif gridY < 1 then
                     if self.topBoundCallBack then
@@ -370,10 +359,6 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, gridWidth, gridHeight, 
     self.scrollbar:SetMinMax(MIN_SCROLL_VALUE, MAX_SCROLL_VALUE)
     self.scrollbar:SetEnabled(true)
     self.scrollbar:SetAllowDraggingFromThumb(false)
-    self.scrollUpButton = self.scrollbar:GetNamedChild("Up")
-    self.scrollDownButton = self.scrollbar:GetNamedChild("Down")
-    self.scrollUpButton:SetHidden(true)
-    self.scrollDownButton:SetHidden(true)
     ZO_Scroll_Initialize(self.contentContainer)
     self.contentContainer.scrollChild = self.contentContainer:GetNamedChild("ScrollChild")
     self.currentCategoryControl = self.contentContainer.scrollChild -- Used for product parenting, may be updated by subclass
@@ -384,8 +369,8 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, gridWidth, gridHeight, 
     self.lastGridY = 1
     self.gridScrollYPosition = 1
     self.currentItemAnchor = ZO_Anchor:New(TOPLEFT, self.contentContainer, TOPLEFT)
-    self.focusList = GamepadGridFocus:New(control, gridWidth, gridHeight, nil, nil)
-    self.focusList:SetFocusChangedCallback(function(...) self:OnSelectionChanged(...)  end)
+    self.focusList = GamepadGridFocus:New(control, gridWidth, gridHeight)
+    self.focusList:SetFocusChangedCallback(function(...) self:OnSelectionChanged(...) end)
     self.previewProducts = {}
     self:InitializeMarketProductPool()
     self.headerContainer = self.fullPane:GetNamedChild("ContainerHeaderContainer")
@@ -426,7 +411,7 @@ function ZO_GamepadMarket_GridScreen:SetGridDimensions(gridWidth, gridHeight)
     self.focusList:SetGridDimensions(gridWidth, gridHeight)
 end
 
-function ZO_GamepadMarket_GridScreen:PrepareGridForBuild(itemsPerRow, itemsPerColumn, itemWidth, itemHeight, itemPadding, isBundle)
+function ZO_GamepadMarket_GridScreen:PrepareGridForBuild(itemsPerRow, itemsPerColumn, itemWidth, itemHeight, itemPadding, useWideTiles)
     self.totalItems = 0
     self.currentItemAnchor:SetTarget(self.currentCategoryControl)
     self.itemsPerRow = itemsPerRow
@@ -434,7 +419,20 @@ function ZO_GamepadMarket_GridScreen:PrepareGridForBuild(itemsPerRow, itemsPerCo
     self.itemWidth = itemWidth
     self.itemHeight = itemHeight
     self.itemPadding = itemPadding
-    self.isBundle = isBundle
+    self.useWideTiles = useWideTiles
+    self.gridYPaddingOffset = ZO_GAMEPAD_MARKET_GRID_INITIAL_Y_OFFSET
+    self.gridYHeight = 0
+end
+
+function ZO_GamepadMarket_GridScreen:ResetGrid()
+    self.totalItems = 0
+    self.currentItemAnchor:SetTarget(self.currentCategoryControl)
+    self.itemsPerRow = 0
+    self.itemsPerColumn = 0
+    self.itemWidth = 0
+    self.itemHeight = 0
+    self.itemPadding = 0
+    self.useWideTiles = false
     self.gridYPaddingOffset = ZO_GAMEPAD_MARKET_GRID_INITIAL_Y_OFFSET
     self.gridYHeight = 0
 end
@@ -447,7 +445,7 @@ function ZO_GamepadMarket_GridScreen:AddEntry(marketProduct, control)
     control:SetParent(self.currentCategoryControl)
     self.totalItems = self.totalItems + 1
     marketProduct:SetListIndex(self.totalItems)
-    marketProduct:SetRenderSize(self.isBundle and ZO_GAMEPAD_MARKET_PRODUCT_RENDER_SIZE_WIDE or ZO_GAMEPAD_MARKET_PRODUCT_RENDER_SIZE_STANDARD)
+    marketProduct:SetRenderSize(self.useWideTiles and ZO_GAMEPAD_MARKET_PRODUCT_RENDER_SIZE_WIDE or ZO_GAMEPAD_MARKET_PRODUCT_RENDER_SIZE_STANDARD)
     local focusData = marketProduct:GetFocusData()
     focusData.gridY = row + 1
     focusData.gridX = col + 1
@@ -483,7 +481,6 @@ do
     local SLIDER_MIN_VALUE = 0
     function ZO_GamepadMarket_GridScreen:FinishBuild()
         self.focusList:SetFocusToFirstEntry()
-        self:RefreshKeybinds()
         self.lastGridY = 1
         self.gridScrollYPosition = 1
         self:SetGridDimensions(self.itemsPerRow, self.itemsPerColumn)
@@ -497,19 +494,13 @@ do
     end
 end
 
-function ZO_GamepadMarket_GridScreen:RefreshKeybinds()
-    ZO_GamepadMarketKeybindStrip_RefreshStyle()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptors)
-end
-
 function ZO_GamepadMarket_GridScreen:InitializeHeader(initialTabBarEntries)
     local header = self.header
     header.tabBarControl = header:GetNamedChild("TabBar")
 
-    header.tabBarControl:SetHidden(false)
     header.tabBar = GamepadMarket_TabBarScrollList:New(header.tabBarControl)
-        
-    self.headerData = 
+
+    self.headerData =
     {
         tabBarEntries = initialTabBarEntries
     }
@@ -519,10 +510,9 @@ end
 
 function ZO_GamepadMarket_GridScreen:RefreshHeader()
     if self.isInitialized then
-        local header = self.header
         local headerData = self.headerData
         if headerData then
-            local tabBar = header.tabBar
+            local tabBar = self.header.tabBar
             local tabBarEntries = headerData.tabBarEntries
 
             if tabBarEntries then
@@ -551,8 +541,7 @@ function ZO_GamepadMarket_GridScreen:BeginPreview()
 end
 
 function ZO_GamepadMarket_GridScreen:EndCurrentPreview()
-    EndCurrentItemPreview()
-    self:RefreshKeybinds()
+    EndCurrentMarketPreview()
 end
 
 function ZO_GamepadMarket_GridScreen:HasMultiplePreviewProducts()
@@ -588,7 +577,6 @@ end
 function ZO_GamepadMarket_GridScreen:OnShowing()
     self:EndCurrentPreview()
     self:PerformDeferredInitialization()
-    self:RefreshHeader()
 end
 
 function ZO_GamepadMarket_GridScreen:SelectAfterPreview()
@@ -686,9 +674,8 @@ function ZO_GamepadMarket_GridScreen:UpdatePreviousAndNewlySelectedProducts(prev
     end
 end
 
-function ZO_GamepadMarket_GridScreen:ScrollToGridEntry(entryData)
-    local scrollPosition = entryData.gridY == 1 and 0 or (entryData.centerScrollHeight - self.scrollToCenterOffsetY)
-    if self.control:IsHidden() then -- Play animation instantly if the market control is hidden
+function ZO_GamepadMarket_GridScreen:ScrollToPosition(scrollPosition, scrollInstantly)
+    if self.control:IsHidden() or scrollInstantly then -- Play animation instantly if the market control is hidden
         ZO_Scroll_ScrollAbsoluteInstantly(self.contentContainer, scrollPosition)
     else
         ZO_Scroll_ScrollAbsolute(self.contentContainer, scrollPosition) -- Animate to scroll position
@@ -697,16 +684,14 @@ function ZO_GamepadMarket_GridScreen:ScrollToGridEntry(entryData)
     self:UpdateScrollbarAlpha()
 end
 
+function ZO_GamepadMarket_GridScreen:ScrollToGridEntry(entryData, scrollInstantly)
+    local scrollPosition = entryData.gridY == 1 and 0 or (entryData.centerScrollHeight - self.scrollToCenterOffsetY)
+    self:ScrollToPosition(scrollPosition, scrollInstantly)
+end
+
 function ZO_GamepadMarket_GridScreen:ScrollToGridScrollYPosition()
     local scrollPosition = (self.gridScrollYPosition - 1) * (self.itemHeight + self.itemPadding)
-    
-    if self.control:IsHidden() then -- Play animation instantly if the market control is hidden
-        ZO_Scroll_ScrollAbsoluteInstantly(self.contentContainer, scrollPosition)
-    else
-        ZO_Scroll_ScrollAbsolute(self.contentContainer, scrollPosition) -- Animate to scroll position
-    end
-
-    self:UpdateScrollbarAlpha()
+    self:ScrollToPosition(scrollPosition)
 end
 
 do
@@ -736,14 +721,6 @@ function ZO_GamepadMarket_GridScreen:OnSelectionChanged(selectedData)
     if selectedData and self.showScrollbar then
         self:ScrollToGridEntry(selectedData)
     end
-end
-
-function ZO_GamepadMarket_GridScreen:AddKeybinds()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptors)
-end
-
-function ZO_GamepadMarket_GridScreen:RemoveKeybinds()
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptors)
 end
 
 function ZO_GamepadMarket_GridScreen:SetQueuedTutorial(queuedTutorial)

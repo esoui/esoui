@@ -712,6 +712,9 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
         ZO_GenericGamepadDialog_Show(dialog)
     end
 
+    -- Append the keybind state index to the dialog so that it knows where its keybinds sit on the keybind stack
+    dialog.keybindStateIndex = KEYBIND_STRIP:GetTopKeybindStateIndex()
+
     g_hasFocusEdit = nil
 
     dialog.name = name
@@ -888,8 +891,8 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
         end
     end
 
-    if(dialog.info.noChoiceCallback and not releasedFromButton) then
-        dialog.info.noChoiceCallback(dialog)
+    if(dialogInfo.noChoiceCallback and not releasedFromButton) then
+        dialogInfo.noChoiceCallback(dialog)
     end
 
     if next(dialogQueue) then
@@ -898,6 +901,10 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
         if state == SCENE_HIDING or state == SCENE_HIDDEN or not state then
             ZO_Dialogs_ReleaseAllDialogs(true)
         end
+    end
+
+    if dialogInfo.finishedCallback then
+        dialogInfo.finishedCallback(dialog)
     end
 
     -- Show next dialog in queue

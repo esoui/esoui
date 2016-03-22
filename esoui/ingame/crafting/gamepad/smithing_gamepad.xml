@@ -13,10 +13,8 @@
         <Texture name="ZO_GamepadSmithingHeaderBottomDivider" inherits="ZO_GamepadHorizontalDivider" virtual="true">
             <Anchor point="TOP" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOM"/>
         </Texture>
-    </Controls>
-
-    <Controls>
-        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />"
+        
+        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />
         
         <TopLevelControl name="ZO_GamepadSmithingTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>

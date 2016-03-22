@@ -629,6 +629,12 @@ ZO_ActionLayerFragment = ZO_SceneFragment:Subclass()
 function ZO_ActionLayerFragment:New(actionLayerName)
     local fragment = ZO_SceneFragment.New(self)
     fragment.actionLayerName = actionLayerName
+
+    --ZO_ActionLayerFragments should always refresh so that in the case where a new scene
+    --is shown with a different combination of layers, the intended stack order for the layers
+    --won't be broken by leaving the previous ones pushed.
+    fragment:SetForceRefresh(true)
+
     return fragment
 end
 

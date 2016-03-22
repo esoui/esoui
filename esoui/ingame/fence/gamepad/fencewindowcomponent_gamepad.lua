@@ -17,8 +17,11 @@ function ZO_GamepadFenceComponent:Initialize(mode, title)
         if newState == SCENE_SHOWING then
             self:RegisterEvents()
             self.list:UpdateList()
+            self:RefreshFooter()
+            self:ShowFenceBar()
         elseif newState == SCENE_HIDING then
             self:UnregisterEvents()
+            self:HideFenceBar()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
             ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")
         end
@@ -40,6 +43,18 @@ function ZO_GamepadFenceComponent:RegisterEvents()
 
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryFullUpdate)
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySingleSlotUpdate)
+
+    local oldUpdateHandler = self.control:GetHandler("OnUpdate")
+    local lastUpdateSeconds = 0
+    local function OnUpdate(control, currentFrameTimeSeconds)
+        oldUpdateHandler(control, currentFrameTimeSeconds)
+
+        if currentFrameTimeSeconds - lastUpdateSeconds > 1 then
+            self:RefreshFooter()
+            lastUpdateSeconds = currentFrameTimeSeconds
+        end
+    end
+    self.control:SetHandler("OnUpdate", OnUpdate)
 end
 
 function ZO_GamepadFenceComponent:UnregisterEvents()
@@ -121,4 +136,26 @@ end
 
 function ZO_GamepadFenceComponent:OnSuccess()
     --Stubbed, to be overriden
+end
+
+function ZO_GamepadFenceComponent:RefreshFooter()
+    --Stubbed, to be overriden
+end
+
+function ZO_GamepadFenceComponent:ShowFenceBar()
+    --Stubbed, to be overriden
+end
+
+function ZO_GamepadFenceComponent:HideFenceBar()
+    --Stubbed, to be overriden
+end
+
+function ZO_GamepadFenceComponent:ClearFooter()
+    local data =
+    {
+        data1HeaderText = nil,
+        data1Text = nil
+    }
+
+    GAMEPAD_GENERIC_FOOTER:Refresh(data)
 end

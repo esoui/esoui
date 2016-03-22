@@ -76,7 +76,7 @@ local PregameStates =
             if not ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING then
                 ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = true
                 SetVideoCancelAllOnCancelAny(true)
-                ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(language).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
+                ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(officialLanguage).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
                 if IsInGamepadPreferredMode() then
                     --Stops extra button presses from modifying the options scene, like restoring options defaults or logging out
                     GAMEPAD_OPTIONS:SetGamepadOptionsInputBlocked(true);
@@ -112,7 +112,7 @@ local PregameStates =
 
         OnEnter = function()
             SetVideoCancelAllOnCancelAny(true)
-            ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(language).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
+            ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(officialLanguage).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
             ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = true
             ZO_CharacterCreate_PrepareFadeFromMovie()
             SCENE_MANAGER:ShowBaseScene()

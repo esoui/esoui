@@ -22,12 +22,12 @@ function ZO_HUDFragment:UpdateVisibility()
     ZO_PlayerToPlayerArea:SetHidden(fragmentHidden)
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, fragmentHidden, TUTORIAL_SUPPRESSED_BY_SCENE)
     INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("hudScene", fragmentHidden)
+    HUD_RAID_LIFE:SetHiddenForReason("hudScene", fragmentHidden)
 
     OBJECTIVE_CAPTURE_METER:SetHiddenForReason("hudScene", hiddenOrDead)
     SetFloatingMarkerGlobalAlpha(hiddenOrDead and 0 or 1)
     SHARED_INFORMATION_AREA:SetSupressed(hiddenOrDead)
     RETICLE:RequestHidden(hiddenOrDead)
-    HUD_RAID_LIFE:SetHiddenForReason("hudScene", hiddenOrDead)
     HUD_INFAMY_METER:RequestHidden(hiddenOrDead)
     HUD_TELVAR_METER:SetHiddenForReason("hudScene", hiddenOrDead)
 end
@@ -77,6 +77,7 @@ local HUD_FRAGMENT_GROUP =
     PLAYER_PROGRESS_BAR_FRAGMENT,
     COMPASS_FRAME_FRAGMENT,
     FOCUSED_QUEST_TRACKER_FRAGMENT,
+    ACTIVITY_TRACKER_FRAGMENT,
     ACTION_BAR_FRAGMENT,
     CONTEXTUAL_ACTION_BAR_AREA_FRAGMENT,
     HUD_FRAGMENT,
@@ -97,6 +98,7 @@ end
 local NO_DEAD_FRAGMENTS =
 {
     FOCUSED_QUEST_TRACKER_FRAGMENT,
+    ACTIVITY_TRACKER_FRAGMENT,
     ACTION_BAR_FRAGMENT,
     CONTEXTUAL_ACTION_BAR_AREA_FRAGMENT,
     PLAYER_ATTRIBUTE_BARS_FRAGMENT,

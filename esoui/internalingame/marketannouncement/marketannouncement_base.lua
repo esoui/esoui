@@ -219,8 +219,10 @@ function ZO_MarketAnnouncement_Base:OnMarketAnnouncementCloseKeybind()
 end
 
 function ZO_MarketAnnouncement_Base:OnMarketAnnouncementViewCrownStoreKeybind()
-    ZO_MARKET_SINGLETON:SetOpenMarketSource(MARKET_OPEN_OPERATION_ANNOUNCEMENT)
-    SCENE_MANAGER:Show("show_market")
+    local targetData = self.carousel:GetSelectedData()
+    local marketProductId = targetData.marketProduct:GetId()
+    SetOpenMarketSource(MARKET_OPEN_OPERATION_ANNOUNCEMENT)
+    SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(marketProductId)
 end
 
 -- Functions to be overridden

@@ -55,7 +55,7 @@ end
 -- Logout
 
 local function ShowLogoutDialog()
-    ZO_Dialogs_ShowDialog("LOG_OUT")
+    ZO_Dialogs_ShowPlatformDialog("LOG_OUT")
 end
 
 local function AddLogoutEntry(entryTable)

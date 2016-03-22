@@ -309,7 +309,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
             local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId, nil,
                 function()
-                    ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_READY", {campaignId = campaignId, isGroup = isGroup}, {mainTextParams = {campaignQueueData.campaignName}})
+                    local campaignBrowser = IsInGamepadPreferredMode() and GAMEPAD_AVA_BROWSER or CAMPAIGN_BROWSER
+                    campaignBrowser:GetCampaignBrowser():ShowCampaignQueueReadyDialog(campaignId, isGroup, campaignQueueData.campaignName)
                 end,
                 function()
                     ConfirmCampaignEntry(campaignId, isGroup, false)
@@ -405,23 +406,12 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE, OnScriptedWorldEventInvite)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
 
-    --Jump to Dungeon prompt on joining a group via LFG
-    local ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_dps_up.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_healer_up.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_tank_up.dds",
-    }
-    local GAMEPAD_ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_dps_down.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_healer_down.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_tank_down.dds",
-    }
-
     local function OnGroupingToolsJumpDungeonNotificationNew()
-        local activityType, activityIndex, role, expirationTimeSeconds = GetLFGJumpNotificationInfo()
+        local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
+        local role = GetGroupMemberAssignedRole("player")
 
         --No prompt for AVA types
-        if activityType == LFG_ACTIVITY_CYRODIIL or activityType == LFG_ACTIVITY_IMPERIAL_CITY then
+        if activityType == LFG_ACTIVITY_AVA then
             return
         end
 
@@ -433,8 +423,18 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
         
         local dungeonName = GetLFGOption(activityType, activityIndex)
-        local roleIcon = IsInGamepadPreferredMode() and GAMEPAD_ROLE_TO_ICON[role] or ROLE_TO_ICON[role]
-        local messageFormat = IsInGamepadPreferredMode() and SI_GAMEPAD_LFG_JUMP_TO_DUNGEON_TEXT or SI_LFG_JUMP_TO_DUNGEON_TEXT
+
+        local messageFormat, messageParams
+        if role == LFG_ROLE_INVALID then
+            messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
+            messageParams = { dungeonName }
+        else
+            local roleIconPath = GetRoleIcon(role)
+            local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
+
+            messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
+            messageParams = { dungeonName, roleIconFormat, GetString("SI_LFGROLE", role) }
+        end
         
         PlaySound(SOUNDS.LFG_JUMP_DUNGEON)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
@@ -443,9 +443,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         promptData.acceptText = GetString(SI_LFG_JUMP_TO_DUNGEON_ACCEPT)
         promptData.declineText = GetString(SI_LFG_JUMP_TO_DUNGEON_HIDE)
 
-        promptData.expiresAt = GetFrameTimeSeconds() + expirationTimeSeconds
+        promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
         promptData.messageFormat = messageFormat
-        promptData.messageParams = {dungeonName, roleIcon, GetString("SI_LFGROLE", role)}
+        promptData.messageParams = messageParams
+        promptData.expirationCallback = ClearLFGJumpNotification
     end
     local function OnGroupingToolsJumpDungeonNotificationRemoved()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
@@ -835,15 +836,16 @@ function ZO_PlayerToPlayer:Decline()
     self:OnPromptDeclined()
 end
 
+--With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
-    if(self.responding) then
+    if(self.responding and #self.incomingQueue > 0) then
         local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
         NotificationAccepted(incomingEntryToRespondTo)
     end
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
-    if(self.responding) then
+    if(self.responding and #self.incomingQueue > 0) then
         local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
         NotificationDeclined(incomingEntryToRespondTo)
     end
@@ -855,6 +857,7 @@ function ZO_PlayerToPlayer:SetTargetIdentification()
     self.currentTargetDisplayName = GetUnitDisplayName(P2P_UNIT_TAG)
 end
 
+local RAID_LIFE_ICON_MARKUP = "|t32:32:EsoUI/Art/Trials/VitalityDepletion.dds|t"
 function ZO_PlayerToPlayer:TryShowingResurrectLabel()
     if IsUnitResurrectableByPlayer(P2P_UNIT_TAG) then
         self:SetTargetIdentification()
@@ -884,15 +887,14 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
             self.failedRaidRevives = IsPlayerInRaid() and not ZO_Death_IsRaidReviveAllowed()
             self.actionKeybindButton:SetEnabled(self.hasRequiredSoulGem and not self.failedRaidRevives)
 
-            local success
+            local finalText
             if(ZO_Death_DoesReviveCostRaidLife()) then
-                local raidLifeSuccess, coloredRaidLifeIconMarkup = ZO_Death_GetResurrectRaidLifeText()
-                success = soulGemSuccess and raidLifeSuccess
-                self.actionKeybindButton:SetText(zo_strformat(success and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, coloredRaidLifeIconMarkup))                
+                finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)           
             else
-                success = soulGemSuccess
-                self.actionKeybindButton:SetText(zo_strformat(success and SI_PLAYER_TO_PLAYER_RESURRECT_GEM or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup))
+                finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup)
             end
+
+            self.actionKeybindButton:SetText(finalText) 
         end        
 
         return true
@@ -951,6 +953,9 @@ function ZO_PlayerToPlayer:SetupTargetLabel(incomingEntry)
             local params = {unpack(incomingEntry.messageParams)}
             table.insert(params, formattedTime)
             self.targetLabel:SetText(zo_strformat(incomingEntry.messageFormat, unpack(params)))
+            if incomingEntry.expirationCallback and remainingTime == 0 then
+                incomingEntry.expirationCallback()
+            end
         else
             self.targetLabel:SetText(zo_strformat(incomingEntry.messageFormat, unpack(incomingEntry.messageParams)))
         end		
@@ -1008,7 +1013,7 @@ end
 function ZO_PlayerToPlayer:IsReticleTargetInteractable()
     return DoesUnitExist(P2P_UNIT_TAG)
        and IsUnitOnline(P2P_UNIT_TAG)
-       and GetUnitAlliance("player") == GetUnitAlliance(P2P_UNIT_TAG)
+       and AreUnitsCurrentlyAllied("player", P2P_UNIT_TAG)
 end
 
 local notificationsKeybindLayerName = GetString(SI_KEYBINDINGS_LAYER_NOTIFICATIONS)
@@ -1205,7 +1210,7 @@ do
         end
 
         --Group--
-        local playerHasGroupPermissions = not IsUnitGrouped("player") or IsUnitGroupLeader("player")
+        local playerHasGroupPermissions = IsUnitSoloOrGroupLeader("player")
         local errorReason = not playerHasGroupPermissions and GetString(SI_PLAYER_TO_PLAYER_GROUP_NOT_LEADER) or nil
         if IsPlayerInGroup(currentTargetCharacterNameRaw) then
             local function GroupKickOption()
@@ -1219,7 +1224,7 @@ do
                 TryGroupInviteByName(currentTargetDisplayName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
             end
             local groupInviteFunction = ENABLED_IF_NOT_IGNORED and InviteOption or AlertIgnored
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], ENABLED_IF_NOT_IGNORED, groupInviteFunction, errorReason)
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], ENABLED_IF_NOT_IGNORED and playerHasGroupPermissions, groupInviteFunction, errorReason)
         end
 
         --Friend--
@@ -1240,12 +1245,15 @@ do
         --Report--
         local reportCallback
         if IsInGamepadPreferredMode() then
-            local dialogData = { characterName = currentTargetCharacterName, displayName = currentTargetDisplayName,}
-            reportCallback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REPORT_PLAYER_DIALOG", dialogData, {mainTextParams = {ZO_FormatUserFacingDisplayName(currentTargetDisplayName)}}) end
+            if IsConsoleUI() then
+                local dialogData = { characterName = currentTargetCharacterName, displayName = currentTargetDisplayName,}
+                reportCallback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REPORT_PLAYER_DIALOG", dialogData, {mainTextParams = {ZO_FormatUserFacingDisplayName(currentTargetDisplayName)}}) end
+                self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
+            end
         else
             reportCallback = function() ZO_ReportPlayerDialog_Show(currentTargetCharacterName, REPORT_PLAYER_REASON_BOTTING, currentTargetCharacterNameRaw) end
+            self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
         end
-        self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
 
         --Trade--
         local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(currentTargetDisplayName) end

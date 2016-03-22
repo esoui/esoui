@@ -16,34 +16,34 @@ local function InitializeBaseComboBox(control)
 end
 
 function ZO_TradingHouse_SortComboBoxEntries(entryData, sortType, sortOrder, anchorFirstEntry, anchorLastEntry)
-	local firstEntry = entryData[1][ZO_RANGE_COMBO_INDEX_TEXT]
-	local lastEntry = entryData[#entryData][ZO_RANGE_COMBO_INDEX_TEXT]
+    local firstEntry = entryData[1][ZO_RANGE_COMBO_INDEX_TEXT]
+    local lastEntry = entryData[#entryData][ZO_RANGE_COMBO_INDEX_TEXT]
 
-	local function DataSortHelper(item1, item2)
-		local name1 = item1[ZO_RANGE_COMBO_INDEX_TEXT]
-		local name2 = item2[ZO_RANGE_COMBO_INDEX_TEXT]
+    local function DataSortHelper(item1, item2)
+        local name1 = item1[ZO_RANGE_COMBO_INDEX_TEXT]
+        local name2 = item2[ZO_RANGE_COMBO_INDEX_TEXT]
 
-		if anchorFirstEntry then
-			if name1 == firstEntry then
-				return true
-			elseif name2 == firstEntry then
-				return false
-			end
-		end
+        if anchorFirstEntry then
+            if name1 == firstEntry then
+                return true
+            elseif name2 == firstEntry then
+                return false
+            end
+        end
 
-		if anchorLastEntry then
-			if name1 == lastEntry then
-				return false
-			elseif name2 == lastEntry then
-				return true
-			end
-		end
+        if anchorLastEntry then
+            if name1 == lastEntry then
+                return false
+            elseif name2 == lastEntry then
+                return true
+            end
+        end
 
-		return (name1 < name2)
-	end
+        return (name1 < name2)
+    end
 
-	-- Sort the entries, while ensuring that the anchored entries remain where they are.
-	table.sort(entryData, function(item1, item2) return DataSortHelper(item1, item2) end)
+    -- Sort the entries, while ensuring that the anchored entries remain where they are.
+    table.sort(entryData, function(item1, item2) return DataSortHelper(item1, item2) end)
 end
 
 -- Global so that the external filter objects can use it.
@@ -141,7 +141,7 @@ function ZO_TradingHouseManager:Initialize(control)
     self.m_initialized = false
     self.m_titleLabel = control:GetNamedChild("TitleLabel")
     TRADING_HOUSE_SCENE = ZO_InteractScene:New("tradinghouse", SCENE_MANAGER, ZO_TRADING_HOUSE_INTERACTION)
-	SYSTEMS:RegisterKeyboardRootScene(ZO_TRADING_HOUSE_SYSTEM_NAME, TRADING_HOUSE_SCENE)
+    SYSTEMS:RegisterKeyboardRootScene(ZO_TRADING_HOUSE_SYSTEM_NAME, TRADING_HOUSE_SCENE)
 end
 
 function ZO_TradingHouseManager:InitializeScene()
@@ -286,7 +286,7 @@ function ZO_TradingHouseManager:HandleTabSwitch(tabData)
     self.m_searchResultsList:SetHidden(notBrowseMode)
     self.m_searchSortHeadersControl:SetHidden(notBrowseMode)
     self.m_nagivationBar:SetHidden(notBrowseMode)
-	self.m_noItemsContainer:SetHidden(notBrowseMode)
+    self.m_noItemsContainer:SetHidden(notBrowseMode)
     self.m_postedItemsList:SetHidden(notListingsMode)
     self.m_postedItemsHeader:SetHidden(notListingsMode)
 
@@ -398,7 +398,7 @@ function ZO_TradingHouseManager:ToggleLevelRangeMode()
 end
 
 function ZO_TradingHouseManager:InitializeSearchTerms()
-	local browseItems = self.m_leftPane:GetNamedChild("BrowseItems")
+    local browseItems = self.m_leftPane:GetNamedChild("BrowseItems")
 
     self.m_browseItems = browseItems
     self.m_minPriceEdit = browseItems:GetNamedChild("CommonMinPriceBox")
@@ -406,10 +406,10 @@ function ZO_TradingHouseManager:InitializeSearchTerms()
     self.m_minLevelEdit = browseItems:GetNamedChild("CommonMinLevelBox")
     self.m_maxLevelEdit = browseItems:GetNamedChild("CommonMaxLevelBox")
 
-	self.m_minPriceEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
-	self.m_maxPriceEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
-	self.m_minLevelEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
-	self.m_maxLevelEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
+    self.m_minPriceEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
+    self.m_maxPriceEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
+    self.m_minLevelEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
+    self.m_maxLevelEdit:SetHandler("OnTextChanged", ZO_TradingHouse_SearchCriteriaChanged)
 
     local editControlGroup = ZO_EditControlGroup:New()
     editControlGroup:AddEditControl(self.m_minPriceEdit)
@@ -738,7 +738,7 @@ function ZO_TradingHouseManager:OnResponseReceived(responseType, result)
 end
 
 function ZO_TradingHouseManager:UpdateItemsLabels(numItems)
-	self.m_resultCount:SetText(zo_strformat(SI_TRADING_HOUSE_RESULT_COUNT, numItems))
+    self.m_resultCount:SetText(zo_strformat(SI_TRADING_HOUSE_RESULT_COUNT, numItems))
 end
 
 function ZO_TradingHouseManager:RebuildSearchResultsPage()
@@ -749,18 +749,18 @@ function ZO_TradingHouseManager:RebuildSearchResultsPage()
 
     for i = 1, self.m_numItemsOnPage do
         local result = ZO_TradingHouse_CreateItemData(i, GetTradingHouseSearchResultItemInfo)
-        if(result) then
+        if result then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SEARCH_RESULTS_DATA_TYPE, result)
         end
     end
 
-	local numItems = #scrollData
+    local numItems = #scrollData
     self:UpdateItemsLabels(numItems)
 
-	-- If no results were returned, disallow further searches (until one or more search criteria are modified),
-	-- and display a "no items found" label.
-	self.m_searchAllowed = (numItems ~= 0)
-	self.m_noItemsLabel:SetHidden(numItems ~= 0)
+    -- If no results were returned, disallow further searches (until one or more search criteria are modified),
+    -- and display a "no items found" label.
+    self.m_searchAllowed = (numItems ~= 0)
+    self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
 
     ZO_ScrollList_Commit(list)
 end
@@ -773,22 +773,31 @@ function ZO_TradingHouseManager:AddGuildSpecificItems(ignoreFiltering)
 
     for i = 1, GetNumGuildSpecificItems() do
         local result = self:CreateGuildSpecificItemData(i, GetGuildSpecificItemInfo)
-        if(result and ignoreFiltering or self:ShouldAddGuildSpecificItemToList(result)) then
+        if result and ignoreFiltering or self:ShouldAddGuildSpecificItemToList(result) then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(GUILD_SPECIFIC_ITEM_DATA_TYPE, result)
         end
     end
 
-	self:UpdateItemsLabels(#scrollData)
+    local numItems = #scrollData
+    self:UpdateItemsLabels(numItems)
+
+    -- If no results were returned, disallow further searches (until one or more search criteria are modified),
+    -- and display a "no items found" label.
+    self.m_searchAllowed = (numItems ~= 0)
+    self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
 
     ZO_ScrollList_Commit(list)
+
+    -- refresh the keybinds because it's not going to be refreshed by an event like the normal searches
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_TradingHouseManager:OnSearchResultsReceived(guildId, numItemsOnPage, currentPage, hasMorePages)
     self.m_search:SetPageData(currentPage, hasMorePages)
     self.m_numItemsOnPage = numItemsOnPage
 
-	-- Item count will get applied in RebuildSearchResultsPage
-	self:UpdateItemsLabels(0)
+    -- Item count will get applied in RebuildSearchResultsPage
+    self:UpdateItemsLabels(0)
 
     self:UpdatePagingButtons()
     self:UpdateSortHeaders()
@@ -822,7 +831,7 @@ function ZO_TradingHouseManager:ClearSearchResults()
     self.m_previousPage:SetEnabled(false)
     self.m_nextPage:SetEnabled(false)
 
-	self:UpdateItemsLabels(0)
+    self:UpdateItemsLabels(0)
 end
 
 function ZO_TradingHouseManager:ClearListedItems()
@@ -849,15 +858,15 @@ function ZO_TradingHouseManager:ResetAllSearchData()
 end
 
 function ZO_TradingHouseManager:OpenTradingHouse()
-	if(not self.m_initialized) then
-		self:RunInitialSetup(self.m_control)
-		self.m_initialized = true
-	end
+    if(not self.m_initialized) then
+        self:RunInitialSetup(self.m_control)
+        self.m_initialized = true
+    end
 
     self:SetCurrentMode(ZO_TRADING_HOUSE_MODE_BROWSE)
-	self.m_searchAllowed = true
-	ZO_MenuBar_SelectDescriptor(self.m_menuBar, self:GetCurrentMode())
-	self.m_currentDisplayName = GetDisplayName()
+    self.m_searchAllowed = true
+    ZO_MenuBar_SelectDescriptor(self.m_menuBar, self:GetCurrentMode())
+    self.m_currentDisplayName = GetDisplayName()
 end
 
 function ZO_TradingHouseManager:CloseTradingHouse()
@@ -1159,11 +1168,11 @@ end
 function ZO_TradingHouseManager:RunInitialSetup(control)
     self.m_leftPane = control:GetNamedChild("LeftPane")
 
-	self.m_noItemsContainer = control:GetNamedChild("ItemPaneNoItemsContainer")
-	self.m_noItemsContainer:SetHidden(false)
-	self.m_noItemsLabel = self.m_noItemsContainer:GetChild()
-	self.m_noItemsLabel:SetHidden(true)
-	self.m_noItemsLabelSavedHiddenState = self.m_noItemsLabel:IsHidden()
+    self.m_noItemsContainer = control:GetNamedChild("ItemPaneNoItemsContainer")
+    self.m_noItemsContainer:SetHidden(false)
+    self.m_noItemsLabel = self.m_noItemsContainer:GetChild()
+    self.m_noItemsLabel:SetHidden(true)
+    self.m_noItemsLabelSavedHiddenState = self.m_noItemsLabel:IsHidden()
     self.m_playerMoney = {}
 
     self:InitializeSharedEvents()

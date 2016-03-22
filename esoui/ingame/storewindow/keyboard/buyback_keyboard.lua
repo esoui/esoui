@@ -91,9 +91,14 @@ function BuyBack:InitializeEvents()
         end
     end
 
+    local function OnMoneyUpdate()
+        self:UpdateMoney()
+        RefreshList()
+    end
+
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, RefreshFreeSlots)
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, RefreshFreeSlots)
-    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:UpdateMoney() end)
+    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdate)
     self.control:RegisterForEvent(EVENT_UPDATE_BUYBACK, RefreshList)
     self.control:RegisterForEvent(EVENT_BUYBACK_RECEIPT, function(eventId, itemName, itemQuantity, money, itemSoundCategory)
         if(itemSoundCategory == ITEM_SOUND_CATEGORY_NONE) then

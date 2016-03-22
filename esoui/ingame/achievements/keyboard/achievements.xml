@@ -47,7 +47,7 @@
                 <Control name="$(parent)Highlight" inherits="ZO_ListEntryHighlight" />
 
                 <Label name="$(parent)Points" font="ZoFontCallout3" horizontalAlignment="CENTER">
-                    <Dimensions x="60" />
+                    <Dimensions x="70" />
                     <Anchor point="TOPRIGHT" offsetX="-6" offsetY="2" />
                 </Label>
                 
@@ -122,7 +122,7 @@
             </Controls>
         </Texture>
         
-        <Label name="ZO_AchievementRewardLabel" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWinH5" virtual="true">
+        <Label name="ZO_AchievementRewardLabel" inherits="ZO_JournalProgressDefaultLabel" virtual="true">
             <Dimensions x="230" y="20"/>
         </Label>
         

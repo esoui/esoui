@@ -1,7 +1,7 @@
 local CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local UNCHECKED_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_bullet_ochre.dds"
 
-function ZO_Tooltip:LayoutCadwells(difficulty, zoneIndex)
+function ZO_Tooltip:LayoutCadwells(progressionLevel, zoneIndex)
     local mainSection = self:AcquireSection(self:GetStyle("cadwellSection"), self:GetStyle("tooltip"))
 
 
@@ -10,8 +10,8 @@ function ZO_Tooltip:LayoutCadwells(difficulty, zoneIndex)
     mainSection:AddSection(titleSection)
 
     objectives = {}
-    for objectiveIndex = 1, GetNumPOIsForDifficultyLevelAndZone(difficulty, zoneIndex) do
-        local name, openingText, closingText, objectiveOrder, discovered, completed = GetCadwellZonePOIInfo(difficulty, zoneIndex, objectiveIndex)
+    for objectiveIndex = 1, GetNumPOIsForCadwellProgressionLevelAndZone(progressionLevel, zoneIndex) do
+        local name, openingText, closingText, objectiveOrder, discovered, completed = GetCadwellZonePOIInfo(progressionLevel, zoneIndex, objectiveIndex)
         table.insert(objectives, {name=name, openingText=openingText, closingText=closingText, order=objectiveOrder, discovered=discovered, completed=completed})
     end
 

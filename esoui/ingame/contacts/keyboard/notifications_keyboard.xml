@@ -41,7 +41,7 @@
                 ZO_NotificationsRowMoreInfo_OnClicked(self)
             </OnClicked>
         </Button>
-        
+
         <Control name="ZO_NotificationsBaseRow" mouseEnabled="true" virtual="true">
             <Dimensions x="1237" y="50"/>
             <OnMouseEnter>
@@ -85,7 +85,7 @@
                 </Button>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_NotificationsTwoButtonRow" inherits="ZO_NotificationsBaseRow" virtual="true">
             <Controls>
                 <Label name="$(parent)Message" inherits="ZO_NotificationsRowMessage"/>
@@ -124,7 +124,7 @@
                 </Button>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_NotificationsRequestRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_REQUEST_ACCEPT)
@@ -138,7 +138,7 @@
                         mouseOver="EsoUI/Art/Buttons/accept_over.dds"
                     />
                 </Button>
-                
+
                 <Button name="$(parent)Note" inherits="ZO_NotificationsRowNote"/>
             </Controls>
         </Control>
@@ -153,7 +153,7 @@
                 message:SetHandler("OnMouseEnter", ZO_NotificationsMessage_OnMouseEnter)
                 message:SetHandler("OnMouseExit", ZO_NotificationsMessage_OnMouseExit)
             </OnInitialized>
-            
+
             <Controls>
                 <Button name="$(parent)Accept" override="true">
                     <Textures
@@ -164,7 +164,7 @@
                 </Button>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_NotificationsWaitingRow" inherits="ZO_NotificationsBaseRow" virtual="true">
             <Controls>
                 <Control name="$(parent)Loading" inherits="ZO_Loading">
@@ -210,7 +210,7 @@
                 self.acceptText = GetString(SI_COLLECTIONS_NOTIFICATION_BUTTON)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
-            
+
             <Controls>
                 <Button name="$(parent)Accept" override="true">
                     <Textures
@@ -219,7 +219,7 @@
                         mouseOver="EsoUI/Art/Notifications/collectionsButton_over.dds"
                     />
                 </Button>
-                
+
                 <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
@@ -258,7 +258,7 @@
                 </Button>
             </Controls>
         </Control>
-                
+
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Notifications_OnInitialized(self)

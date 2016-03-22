@@ -54,6 +54,7 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
 	if(data.optionsEnabled) then
 		data.enabled = data.optionUsable
 		control:SetText(data.optionText)
+        control.optionText = data.optionText
 		if selected then
             if data.recolorIfUnusable and not data.optionUsable then
                 control:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
@@ -147,7 +148,7 @@ function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
     local function IsEnabled()
         local selectedData = self.itemList:GetTargetData()
         if selectedData then
-            return selectedData.optionUsable
+            return selectedData.optionUsable, CHATTER_OPTION_ERROR[selectedData.optionType]
         else
             return true
         end
@@ -234,10 +235,12 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
 	local currencyRewards = {}
 	local itemRewards = {}
-
+    local confirmError
 	for i, data in ipairs(rewardData) do
 		if self:IsCurrencyReward(data.rewardType) then
 			table.insert(currencyRewards, data)
+            --warn the player they aren't going to get their money when they hit complete
+            confirmError = self:TryGetMaxCurrencyWarningText(data.rewardType, data.amount)
 		else
 			table.insert(itemRewards, data) 
 		end
@@ -272,6 +275,8 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
 		self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
     end
+
+    return confirmError
 end
 
 function ZO_GamepadInteraction:RefreshList()
@@ -282,6 +287,15 @@ end
 
 function ZO_GamepadInteraction:GetInteractGoldIcon()
     return GAMEPAD_INTERACT_GOLD_ICON
+end
+
+function ZO_GamepadInteraction:UpdateClemencyOnTimeComplete(control, data)
+    control:SetText(control.optionText)
+    data.optionUsable = true
+    control.optionType = CHATTER_TALK_CHOICE_USE_CLEMENCY
+    control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    self:RefreshList()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_GamepadInteraction:OnShowing()
@@ -300,6 +314,3 @@ end
 function ZO_InteractWindow_Gamepad_Initialize(control)
 	GAMEPAD_INTERACTION = ZO_GamepadInteraction:New(control)
 end
-
-
-

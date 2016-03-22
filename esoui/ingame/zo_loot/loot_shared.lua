@@ -1,6 +1,7 @@
 LOOT_MONEY_ICON = "EsoUI/Art/Icons/Item_Generic_CoinBag.dds"
 LOOT_TELVAR_STONE_ICON = "EsoUI/Art/Icons/Icon_TelVarStone.dds"
 LOOT_ALLIANCE_POINT_ICON = "EsoUI/Art/Icons/Icon_AlliancePoints.dds"
+LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 
 ZO_LootScene = ZO_Scene:Subclass()
 

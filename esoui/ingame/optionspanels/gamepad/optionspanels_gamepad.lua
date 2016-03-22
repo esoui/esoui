@@ -1,5 +1,246 @@
 --Ingame Options table
 
+local interfaceSettingsHUD = {
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_ACTION_BAR,
+        header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_RAID_LIVES,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
+        settingId = 0,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_QUEST_TRACKER,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_COMPASS_QUEST_GIVERS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_COMPASS_ACTIVE_QUESTS,
+    },
+}
+local interfaceSettingsHealthbars = {
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_ALL_HEALTHBARS,
+        header = SI_INTERFACE_OPTIONS_HEALTHBARS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_PLAYER_HEALTHBAR,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS,
+    },
+}
+local interfaceSettingsChatBubbles = {
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CHAT_BUBBLE,
+        settingId = CHAT_BUBBLE_SETTING_ENABLED,
+        header = IsConsoleUI() and SI_INTERFACE_OPTIONS_QUICK_CHAT or SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CHAT_BUBBLE,
+        settingId = CHAT_BUBBLE_SETTING_SPEED_MODIFIER,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CHAT_BUBBLE,
+        settingId = CHAT_BUBBLE_SETTING_ENABLED_ONLY_FROM_CONTACTS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CHAT_BUBBLE,
+        settingId = CHAT_BUBBLE_SETTING_ENABLED_FOR_LOCAL_PLAYER,
+    },
+}
+local interfaceSettingsScrollingCombatText = {
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED,
+        header = SI_INTERFACE_OPTIONS_SCT,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_DAMAGE_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_DOT_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_HEALING_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_HOT_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_STATUS_EFFECTS_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_DAMAGE_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_DOT_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_HEALING_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_HOT_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_DAMAGE_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_DOT_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_HEALING_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_HOT_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED,
+    },
+}
+local interfaceSettingsIndicators = {
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_ALLIANCE_INDICATORS,
+        header = SI_INTERFACE_OPTIONS_INDICATORS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_GROUP_INDICATORS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_NAMEPLATES,
+        settingId = NAMEPLATE_TYPE_FOLLOWER_INDICATORS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_IN_WORLD,
+        settingId = IN_WORLD_UI_SETTING_GLOW_THICKNESS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_IN_WORLD,
+        settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_IN_WORLD,
+        settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_IN_WORLD,
+        settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_IN_WORLD,
+        settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY,
+    },
+}
+
 GAMEPAD_SETTINGS_DATA =
 {
     [SETTING_PANEL_VIDEO] =
@@ -185,139 +426,11 @@ GAMEPAD_SETTINGS_DATA =
     },
     [SETTING_PANEL_INTERFACE] =
     {
-        --Heads-up display--
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_ACTION_BAR,
-            header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_RAID_LIVES,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
-            settingId = 0,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_TRACKER,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_COMPASS_QUEST_GIVERS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_COMPASS_ACTIVE_QUESTS,
-        },
-        --Healthbars--
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ALL_HEALTHBARS,
-            header = SI_INTERFACE_OPTIONS_HEALTHBARS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_PLAYER_HEALTHBAR,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS,
-        },
-        --Chat Bubbles / Quick Chat--
-        -- TODO: Change header based on platform
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_CHAT_BUBBLE,
-            settingId = CHAT_BUBBLE_SETTING_ENABLED,
-            header = SI_INTERFACE_OPTIONS_QUICK_CHAT,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_CHAT_BUBBLE,
-            settingId = CHAT_BUBBLE_SETTING_SPEED_MODIFIER,
-        },
-        --Indicators--
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ALLIANCE_INDICATORS,
-            header = SI_INTERFACE_OPTIONS_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_GROUP_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_FOLLOWER_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_GLOW_THICKNESS,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED,
-        },
-        {
-            panel = SETTING_PANEL_INTERFACE,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY,
-        },
+        --dynamically created
     }
 }
 
---platform specific settings
+--Platform specific settings
 if IsConsoleUI() then
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_AUDIO], {
         panel = SETTING_PANEL_AUDIO,
@@ -329,7 +442,6 @@ if IsConsoleUI() then
         system = SETTING_TYPE_CUSTOM,
         settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
     })
-
 else
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_GAMEPLAY], 1, {
         panel = SETTING_PANEL_GAMEPLAY,
@@ -347,4 +459,42 @@ else
         system = SETTING_TYPE_GRAPHICS,
         settingId = GRAPHICS_SETTING_RESOLUTION,
     })
+
+    table.insert(interfaceSettingsChatBubbles, {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_SAY_ENABLED,
+    })
+    table.insert(interfaceSettingsChatBubbles, {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_YELL_ENABLED,
+    })
+    table.insert(interfaceSettingsChatBubbles, {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_WHISPER_ENABLED,
+    })
+    table.insert(interfaceSettingsChatBubbles, {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_GROUP_ENABLED,
+    })
+    table.insert(interfaceSettingsChatBubbles, {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED,
+    })
 end
+
+local function AddSettings(panel, settings)
+    for _, entry in ipairs(settings) do
+        table.insert(GAMEPAD_SETTINGS_DATA[panel], entry)
+    end
+end
+
+AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsHUD)
+AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsHealthbars)
+AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsChatBubbles)
+AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsScrollingCombatText)
+AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsIndicators)

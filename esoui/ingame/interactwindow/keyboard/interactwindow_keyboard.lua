@@ -12,6 +12,7 @@ local REWARD_ROOT_OFFSET_Y = 10
 local ENABLED_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CHATTER_PLAYER_OPTION))
 local SEEN_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_DISABLED))
 local DISABLED_PLAYER_OPTION_COLOR = ZO_ERROR_COLOR
+local DISABLED_UNUSABLE_PLAYER_OPTION_COLOR = ZO_DISABLED_TEXT
 local HIGHLIGHT_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
 
 local INTERACT_GOLD_ICON = zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 16, 16)
@@ -144,8 +145,10 @@ function ZO_Interaction:RestoreOtherImportantOptions(chatterControl)
     end
 end
 
-local function DisableChatterOption(option, useDisabledColor)
-    if useDisabledColor then
+local function DisableChatterOption(option, useDisabledColor, optionUsable)
+    if useDisabledColor and not optionUsable then
+        option:SetColor(DISABLED_UNUSABLE_PLAYER_OPTION_COLOR:UnpackRGBA())
+    elseif useDisabledColor then
         option:SetColor(DISABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
     end
 
@@ -174,6 +177,7 @@ function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText
     optionControl.isImportant = chatterData.isImportant
     optionControl.chosenBefore = chatterData.chosenBefore
     optionControl.gold = chatterData.gold
+    optionControl.optionText = chatterData.optionText
 
     if optionControl.isImportant then
         importantOptions[#importantOptions + 1] = optionControl
@@ -185,7 +189,7 @@ function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText
         if(chatterData.optionUsable) then
             EnableChatterOption(optionControl)
         else
-            DisableChatterOption(optionControl, chatterData.recolorIfUnusable)
+            DisableChatterOption(optionControl, chatterData.recolorIfUnusable, chatterData.optionUsable)
         end
 
         optionControl:SetText(chatterData.optionText)
@@ -248,7 +252,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
 
     local rewardData = self:GetRewardData(journalQuestIndex)
     local numRewards = #rewardData
-
+    local confirmError
     for i, reward in ipairs(rewardData) do
         local creatorFunc = self:GetRewardCreateFunc(reward.rewardType)
         if(creatorFunc) then
@@ -262,6 +266,9 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 end
 
                 moneyControls[#moneyControls + 1] = control
+
+                --warn the player they aren't going to get their money when they hit complete
+                confirmError = self:TryGetMaxCurrencyWarningText(reward.rewardType, reward.amount)
             else
                 local control = self.givenRewardPool:AcquireObject()
                 control.index = i
@@ -296,10 +303,20 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
 
     ZO_InteractWindowRewardArea:SetHidden(numRewards == 0)
     ZO_InteractWindowRewardArea:SetHeight(rewardWindowHeight)
+
+    return confirmError
 end
 
 function ZO_Interaction:GetInteractGoldIcon()
     return INTERACT_GOLD_ICON
+end
+
+function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
+    control:SetText(control.optionText)
+    control.enabled = true
+    data.optionUsable = true
+    control.optionType = CHATTER_TALK_CHOICE_USE_CLEMENCY
+    control:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
 end
 
 --XML Handlers

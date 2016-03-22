@@ -160,6 +160,7 @@ function ZO_FrameEmoteFragment:Show()
 end
 
 function ZO_FrameEmoteFragment:Hide()
+    SetFramingScreenType(FRAMING_SCREEN_DEFAULT)
     self:OnHidden()
 end
 
@@ -202,9 +203,9 @@ end
 function ZO_SkillsActionBarFragment:OnStateChange(oldState, newState)
     if newState == SCENE_FRAGMENT_HIDDEN then
         ZO_ActionBar1:ClearAnchors()
-        ZO_ActionBar1:SetAnchor(BOTTOM, GuiRoot, BOTTOM, 0, 0)
+        ZO_ActionBar_GetAnchor():Set(ZO_ActionBar1)
         ActionButton9:SetHidden(false)
-        ZO_ActionBar1KeybindBG:SetHidden(false)
+        ZO_ActionBar1KeybindBG:SetHidden(IsInGamepadPreferredMode())
     end
 end
 
@@ -513,12 +514,12 @@ function ZO_ItemPreviewFragment:New()
 end
 
 function ZO_ItemPreviewFragment:Show()
-    BeginItemPreview()
+    BeginPreviewMode()
     self:OnShown()
 end
 
 function ZO_ItemPreviewFragment:Hide()
-    EndItemPreview()
+    EndPreviewMode()
     self:OnHidden()
 end
 
@@ -573,13 +574,13 @@ SHOW_MARKET_FRAGMENT = ShowMarketFragment:New()
 --------------------------------------
 
 INVENTORY_FRAGMENT:AddDependencies(
-    BACKPACK_DEFAULT_LAYOUT_FRAGMENT,
+    BACKPACK_DEFAULT_LAYOUT_FRAGMENT, 
     BACKPACK_BANK_LAYOUT_FRAGMENT,
     BACKPACK_GUILD_BANK_LAYOUT_FRAGMENT,
-    BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT,
-    BACKPACK_MAIL_LAYOUT_FRAGMENT,
-    BACKPACK_PLAYER_TRADE_LAYOUT_FRAGMENT,
-    BACKPACK_MENU_BAR_LAYOUT_FRAGMENT,
+    BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT, 
+    BACKPACK_MAIL_LAYOUT_FRAGMENT, 
+    BACKPACK_PLAYER_TRADE_LAYOUT_FRAGMENT, 
+    BACKPACK_MENU_BAR_LAYOUT_FRAGMENT, 
     BACKPACK_STORE_LAYOUT_FRAGMENT,
     BACKPACK_FENCE_LAYOUT_FRAGMENT,
     BACKPACK_LAUNDER_LAYOUT_FRAGMENT
@@ -668,9 +669,6 @@ DISPLAY_NAME_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DisplayName)
 FRIENDS_ONLINE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_FriendsOnline)
 
 GROUP_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_SOCIAL_MENU_GROUP)
-GROUP_LIST_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupList)
-GROUP_MEMBERS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMembers)
-PREFERRED_ROLES_FRAGMENT = ZO_FadeSceneFragment:New(ZO_PreferredRoles)
 GROUP_CENTER_INFO_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupCenterInfo)
 SEARCHING_FOR_GROUP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SearchingForGroup)
 
@@ -757,15 +755,12 @@ GAMEPAD_NOTIFICATIONS_FRAGMENT:SetHideOnSceneHidden(true)
 SKILLS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_SKILLS)
 STATS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StatsPanel)
 
-COLLECTIONS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_COLLECTION_BOOK_COLLECTIONS)
+COLLECTIONS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_COLLECTIONS_MENU_ROOT_TITLE)
 JOURNAL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_QUEST_JOURNAL_MENU_JOURNAL)
 HELP_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HELP_TITLE)
 
 GAMEPAD_QUEST_JOURNAL_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_QuestJournal_GamepadTopLevel)
 GAMEPAD_QUEST_JOURNAL_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_COLLECTIONS_BOOK_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadCollections)
-GAMEPAD_COLLECTIONS_BOOK_FRAGMENT:SetHideOnSceneHidden(true)
 
 GAMEPAD_LEADERBOARDS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Leaderboards_Gamepad)
 GAMEPAD_LEADERBOARDS_FRAGMENT:SetHideOnSceneHidden(true)
@@ -787,7 +782,7 @@ GAMEPAD_QUICKSLOT_SELECTED_TOOLTIP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Gamepa
 GAMEPAD_STATS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadStatsTopLevel)
 GAMEPAD_STATS_FRAGMENT:SetHideOnSceneHidden(true)
 
-GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadStatsTopLevelRightPaneInfoPanel)
+GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadStatsTopLevelRightPane, ALWAYS_ANIMATE)
 
 GAMEPAD_GUILD_HUB_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadGuildHubTopLevel)
 GAMEPAD_GUILD_HUB_FRAGMENT:SetHideOnSceneHidden(true)
@@ -811,16 +806,16 @@ GAMEPAD_SKILLS_FRAGMENT:SetHideOnSceneHidden(true)
 GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSkillsLinePreview)
 
 -- Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
-
+    
 GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_4_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_Background)
+GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_Background, ALWAYS_ANIMATE)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_4_Background)
+GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_4_Background, ALWAYS_ANIMATE)
 GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
 
 -- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --

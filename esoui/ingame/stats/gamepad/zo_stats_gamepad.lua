@@ -327,10 +327,10 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     local hideQuadrant2Background = isStatsHidden and isEffectsHidden
     if(hideQuadrant2Background) then
         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        self.contentHeader:SetHidden(true)
+        GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
     else
         GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        self.contentHeader:SetHidden(false)
+        GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
     end
 end
 
@@ -706,6 +706,14 @@ function ZO_GamepadStats:InitializeCharacterStats()
 
     self.ridingTrainingTimer:SetHandler("OnUpdate", OnTimerUpdate)
 
+    self.nextStatsRefreshSeconds = 0
+    local function OnStatUpdate(_, currentFrameTimeSeconds)
+        if self.nextStatsRefreshSeconds < currentFrameTimeSeconds then
+            self:RefreshCharacterStats()
+        end    
+    end
+
+    self.characterStats:SetHandler("OnUpdate", OnStatUpdate)
     self.headers = {
         -- Left Column
         { label = self.maxMagickaHeader, stat = STAT_MAGICKA_MAX },
@@ -796,6 +804,8 @@ local function GetStatText(statType)
 end
 
 function ZO_GamepadStats:RefreshCharacterStats()
+    self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
+
     -- Left & Right Column
     local unitRace = GetUnitRace("player")
     local unitClass = GetUnitClass("player")

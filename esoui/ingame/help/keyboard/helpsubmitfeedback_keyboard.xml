@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>  
+        <TopLevelControl name="ZO_Help_Submit_Feedback_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_HelpSubmitFeedback_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT"  />
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Label name="$(parent)ImpactTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_FEEDBACK_IMPACT">
+                                    <Anchor point="TOPLEFT"/>
+                                </Label>
+
+                                <Control name="$(parent)ImpactComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                </Control>
+
+                                <Label name="$(parent)CategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_CATEGORY">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
+
+                                <Control name="$(parent)CategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                </Control>
+
+                                <Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Controls>
+                                        <Label name="$(grandparent)SubcategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_SUBCATEGORY">
+                                            <Anchor point="TOPLEFT" />
+                                        </Label>
+                                        <Control name="$(grandparent)SubcategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
+                                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)SubcategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)DetailsContainer" resizeToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubcategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Controls>
+                                        <Label name="$(grandparent)DetailsTitle" inherits="ZO_HelpCustomerService_Keyboard_Title">
+                                            <Anchor point="TOPLEFT" />
+                                        </Label>
+                                        <Backdrop name="$(grandparent)DetailsTextLine" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                                            <Dimensions x="322" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <Controls>
+                                                <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" />
+                                            </Controls>
+                                        </Backdrop>
+                                    </Controls>
+                                </Control>
+
+                                <Label name="$(parent)DescriptionTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_DESCRIPTION">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
+
+                                <Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                                    <Dimensions x="550" y="220"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Controls>
+                                        <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText"/>
+                                    </Controls>
+                                </Backdrop>
+
+                                <Button name="$(parent)AttachScreenshotCheckButton" inherits="ZO_CheckButton">
+                                    <Anchor point="TOP" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOM" offsetX="-100" offsetY="10" />
+                                    <OnInitialized>
+                                        ZO_CheckButton_SetLabelText(self, GetString(SI_CUSTOMER_SERVICE_ATTACH_SCREENSHOT))
+                                    </OnInitialized>
+                                </Button>
+
+                                <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT">
+                                    <Dimensions x="200" />
+                                    <Anchor point="TOP" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOM" offsetY="50" />
+                                    <OnClicked>
+                                        ZO_HelpSubmitFeedback_Keyboard_AttemptToSendFeedback()
+                                    </OnClicked>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>      
+    </Controls>
+</GuiXml>

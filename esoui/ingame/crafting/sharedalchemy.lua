@@ -23,6 +23,10 @@ function ZO_Alchemy_IsThirdAlchemySlotUnlocked()
     return GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_THIRD_SLOT) ~= 0
 end
 
+function ZO_Alchemy_IsSceneShowing()
+    return SYSTEMS:IsShowing("alchemy")
+end
+
 ZO_SharedAlchemy = ZO_Object:Subclass()
 
 ZO_SharedAlchemy.initializedEvents = false

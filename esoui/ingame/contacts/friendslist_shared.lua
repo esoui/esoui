@@ -28,7 +28,6 @@ end
 function ZO_FriendsList:Initialize()
     self.lastUpdateTime = 0
     self.numOnlineFriends = 0
-    self.playerAlliance = GetUnitAlliance("player")
 
     self.noteEditedFunction = function(displayName, note)
         for i = 1, GetNumFriends() do

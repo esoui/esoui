@@ -187,12 +187,14 @@ function ZO_Dyeing_DyeSortComparator(left, right)
     return left.sortKey < right.sortKey
 end
 
-function ZO_Dyeing_RefreshEquipControlDyes_Colors(slotControl, isDyeable, ...)
+function ZO_Dyeing_RefreshEquipControlDyes_Colors(slotControl, equipSlot, ...)
+    local isDyeable = IsItemDyeable(BAG_WORN, equipSlot)
+    local isChannelDyeableTable = {AreItemDyeChannelsDyeable(BAG_WORN, equipSlot)}
     for dyeChannel, dyeControl in ipairs(slotControl.dyeControls) do
         if isDyeable then
             dyeControl:SetHidden(false)
             local currentDyeIndex = select(dyeChannel, ...)
-            ZO_DyeingUtils_SetSlotDyeSwatchDyeIndex(dyeChannel, dyeControl, currentDyeIndex)
+            ZO_DyeingUtils_SetSlotDyeSwatchDyeIndex(dyeChannel, dyeControl, currentDyeIndex, isChannelDyeableTable[dyeChannel])
         else
             dyeControl:SetHidden(true)
         end
@@ -204,7 +206,7 @@ local function GetFrameForDyeChannel(empty)
 end
 
 function ZO_Dyeing_RefreshEquipControlDyes(slotControl, equipSlot)
-    ZO_Dyeing_RefreshEquipControlDyes_Colors(slotControl, IsItemDyeable(BAG_WORN, equipSlot), GetPendingEquippedItemDye(equipSlot))
+    ZO_Dyeing_RefreshEquipControlDyes_Colors(slotControl, equipSlot, GetPendingEquippedItemDye(equipSlot))
 end
 
 function ZO_Dyeing_GetActiveOffhandEquipSlot()
@@ -216,20 +218,30 @@ function ZO_Dyeing_GetActiveOffhandEquipSlot()
     return EQUIP_SLOT_OFF_HAND
 end
 
-function ZO_DyeingUtils_SetSlotDyeSwatchDyeIndex(dyeChannel, dyeControl, dyeIndex)
-    
-    local isEmptyFrame, hideMunge, hideBackground
-    if dyeIndex then
+function ZO_DyeingUtils_SetSlotDyeSwatchDyeIndex(dyeChannel, dyeControl, dyeIndex, isDyeable)   
+    local isEmptyFrame, hideMunge, hideBackground, hideInvalid
+    --We have a dye and the channel is dyeable
+    if dyeIndex and isDyeable ~= false then
         local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey = GetDyeInfo(dyeIndex)
         dyeControl.swatchTexture:SetColor(r, g, b, 1)
         isEmptyFrame = false
         hideMunge = false
         hideBackground = true
+        hideInvalid = true
+    --We were explicitly told we can't dye this channel
+    elseif isDyeable == false then
+        dyeControl.swatchTexture:SetColor(0, 0, 0, 0)
+        isEmptyFrame = true
+        hideMunge = true
+        hideBackground = false
+        hideInvalid = false
+    --We can dye the channel, but it's currently not dyed
     else
         dyeControl.swatchTexture:SetColor(0, 0, 0, 0)
         isEmptyFrame = true
         hideMunge = true
         hideBackground = false
+        hideInvalid = true
     end
 
     if dyeControl.frameTexture then
@@ -240,6 +252,14 @@ function ZO_DyeingUtils_SetSlotDyeSwatchDyeIndex(dyeChannel, dyeControl, dyeInde
     end
     if dyeControl.background then
         dyeControl.background:SetHidden(hideBackground)
+    end
+    if dyeControl.invalidTexture then
+        dyeControl.invalidTexture:SetHidden(hideInvalid)
+        if dyeControl.edgeFrame then
+            dyeControl.edgeFrame:SetEdgeColor((hideInvalid and ZO_NORMAL_TEXT or ZO_DISABLED_TEXT):UnpackRGB())
+        end
+    else
+        dyeControl:SetHidden(not hideInvalid)
     end
 end
 

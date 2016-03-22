@@ -4,6 +4,9 @@ KEYBIND_STRIP_ALIGN_LEFT = 1
 KEYBIND_STRIP_ALIGN_CENTER = 2
 KEYBIND_STRIP_ALIGN_RIGHT = 3
 
+KEYBIND_STRIP_DISABLED_ALERT = "alert"
+KEYBIND_STRIP_DISABLED_DIALOG = "dialog"
+
 function ZO_KeybindStrip:New(...)
     local keybindStrip = ZO_Object.New(self)
     keybindStrip:Initialize(...)
@@ -160,7 +163,7 @@ end
 function ZO_KeybindStrip:RemoveAllKeyButtonGroups(stateIndex)
     local state = self:GetKeybindState(stateIndex)
     if state then
-        return RemoveAllKeyButtonGroupsStack(state)
+        return ZO_KeybindStrip.RemoveAllKeyButtonGroupsStack(state)
     end
 
     if next(self.keybindGroups) ~= nil then
@@ -233,6 +236,13 @@ end
 
 --- PRIVATE FUNCTIONS ---
 
+local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
+    if type(buttonOrEtherealDescriptor) == "userdata" then
+        return buttonOrEtherealDescriptor.keybindButtonDescriptor
+    end
+    return buttonOrEtherealDescriptor
+end
+
 local function AddKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     if not state.keybindGroups[keybindButtonGroupDescriptor] then
         state.keybindGroups[keybindButtonGroupDescriptor] = keybindButtonGroupDescriptor
@@ -248,7 +258,7 @@ local function AddKeybindButtonStack(keybindButtonDescriptor, state)
     state.individualButtons[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
 end
 
-local function RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+function ZO_KeybindStrip.RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     if state.keybindGroups[keybindButtonGroupDescriptor] then
         state.keybindGroups[keybindButtonGroupDescriptor] = nil
         return true
@@ -277,11 +287,11 @@ local function UpdateCurrentKeybindButtonGroupsStack(stateIndex)
     -- do nothing
 end
 
-local function RemoveAllKeyButtonGroupsStack(state)
+function ZO_KeybindStrip.RemoveAllKeyButtonGroupsStack(state)
     if next(state.keybindGroups) ~= nil then
         local prevKeybindGroups = ZO_ShallowTableCopy(state.keybindGroups)
         for _, groupDescriptor in pairs(prevKeybindGroups) do
-            RemoveKeybindButtonGroupStack(groupDescriptor, state)
+            ZO_KeybindStrip.RemoveKeybindButtonGroupStack(groupDescriptor, state)
         end
     end
 end
@@ -316,7 +326,22 @@ function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
     end
 
     -- Asserting here usually means that a key is already bound (typically because someone forgot to remove a keybinding).
-    assert(self.keybinds[keybindButtonDescriptor.keybind] == nil)
+    local currentSceneName = ""
+    if SCENE_MANAGER then
+        local currentScene = SCENE_MANAGER:GetCurrentScene()
+        if currentScene then
+            currentSceneName = currentScene:GetName()
+        end
+    end
+    local existingButtonOrEtheralDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
+    if existingButtonOrEtheralDescriptor then
+        local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtheralDescriptor)
+        local existingSceneName = existingDescriptor and existingDescriptor.addedForSceneName or ""
+        local context = string.format("Duplicate Keybind: %s. Before: %s. After: %s.", keybindButtonDescriptor.keybind, existingSceneName, currentSceneName)
+        assert(false, context)
+    end
+
+    keybindButtonDescriptor.addedForSceneName = currentSceneName
 
     if keybindButtonDescriptor.ethereal then
         self.keybinds[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
@@ -361,6 +386,8 @@ function ZO_KeybindStrip:RemoveKeybindButton(keybindButtonDescriptor, stateIndex
     local buttonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]     
     if buttonOrEtherealDescriptor and CompareKeybindButtonDescriptor(buttonOrEtherealDescriptor.keybindButtonDescriptor, keybindButtonDescriptor) then
         self.keybinds[keybindButtonDescriptor.keybind] = nil
+
+        keybindButtonDescriptor.addedForSceneName = nil
 
         for i, cooldownKeybindDescriptor in ipairs(self.cooldownKeybinds) do
             if cooldownKeybindDescriptor == keybindButtonDescriptor and not cooldownKeybindDescriptor.shouldCooldownPersist then
@@ -471,7 +498,7 @@ end
 function ZO_KeybindStrip:RemoveKeybindButtonGroup(keybindButtonGroupDescriptor, stateIndex)
     local state = self:GetKeybindState(stateIndex)
     if state then
-        return RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+        return ZO_KeybindStrip.RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     end
 
     if self.keybindGroups[keybindButtonGroupDescriptor] then
@@ -499,7 +526,7 @@ function ZO_KeybindStrip:UpdateCurrentKeybindButtonGroups(stateIndex)
     end
 
     for keybindButtonDescriptor, group in pairs(self.keybindGroups) do
-        self:UpdateKeybindButtonGroup(keybindButtonDescriptor)
+        self:UpdateKeybindButtonGroup(keybindButtonDescriptor, stateIndex)
     end
 end
 
@@ -526,13 +553,6 @@ end
 
 function ZO_KeybindStrip:HasKeybindButtonGroup(keybindButtonGroupDescriptor)
     return self.keybindGroups[keybindButtonGroupDescriptor] ~= nil
-end
-
-local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
-    if type(buttonOrEtherealDescriptor) == "userdata" then
-        return buttonOrEtherealDescriptor.keybindButtonDescriptor
-    end
-    return buttonOrEtherealDescriptor
 end
 
 local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
@@ -566,7 +586,7 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
         local buttonOrEtherealDescriptor = self.keybinds[keybind]
         if buttonOrEtherealDescriptor and (not buttonOrEtherealDescriptor.IsControlHidden or not buttonOrEtherealDescriptor:IsControlHidden()) then
             local keybindButtonDescriptor = GetDescriptorFromButton(buttonOrEtherealDescriptor)
-            local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
+            local enabled, disabledAlertText, disabledAlertType = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
             local cooldown = GetValueFromRawOrFunction(keybindButtonDescriptor, "cooldown")
             if cooldown then
                 enabled = false
@@ -585,6 +605,13 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                     end
                 end
                 return true
+            elseif disabledAlertText then
+                if disabledAlertType == KEYBIND_STRIP_DISABLED_DIALOG then
+                    ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, {mainTextParams = {disabledAlertText}})
+                else
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, disabledAlertText)
+                    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+                end
             end
         end
     end

@@ -1,0 +1,34 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_SearchingForGroup_StatusLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <TopLevelControl name="ZO_SearchingForGroup" hidden="true" level="2" resizeToFitDescendents="true">
+            <Anchor point="BOTTOM" relativeTo="ZO_GroupMenu_KeyboardCategories" offsetY="2" />
+            <OnInitialized>
+                ZO_SearchingForGroup_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Button name="$(parent)LeaveQueueButton" inherits="ZO_DefaultButton" text="SI_LFG_LEAVE_QUEUE">
+                    <Dimensions x="200" />
+                    <Anchor point="BOTTOM"/>
+                    <OnClicked>
+                        ZO_SearchingForGroupQueueButton_OnClicked(self, button)
+                    </OnClicked>
+                </Button>
+
+                <Label name="$(parent)ActualTime" inherits="ZO_SearchingForGroup_StatusLabel">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)LeaveQueueButton" relativePoint="TOP" offsetY="-5" />
+                </Label>
+
+                <Label name="$(parent)EstimatedTime" inherits="ZO_SearchingForGroup_StatusLabel">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ActualTime" relativePoint="TOP" />
+                </Label>
+
+                <Label name="$(parent)Status" inherits="ZO_SearchingForGroup_StatusLabel">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)EstimatedTime" relativePoint="TOP" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

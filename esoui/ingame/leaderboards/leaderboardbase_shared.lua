@@ -23,6 +23,7 @@ function ZO_LeaderboardBase_Shared:Initialize(control, leaderboardSystem, leader
 end
 
 function ZO_LeaderboardBase_Shared:OnDataChanged()
+    self.leaderboardSystem:UpdateCategories()
     self.leaderboardSystem:OnLeaderboardDataChanged(self)
 end
 

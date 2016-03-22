@@ -314,6 +314,12 @@ local function ItemUpdateCooldown(inventorySlot)
     return true
 end
 
+local function CollectibleItemUpdateCooldown(inventorySlot)
+    local remaining, duration = GetCollectibleCooldownAndDuration(inventorySlot.collectibleId)
+    UpdateCooldown(inventorySlot, remaining, duration)
+    return true
+end
+
 local InventoryUpdateCooldown =
 {
     [SLOT_TYPE_ITEM] =
@@ -326,6 +332,12 @@ local InventoryUpdateCooldown =
     {
         [1] =   function(inventorySlot)
                     return QuestItemUpdateCooldown(inventorySlot)
+                end,
+    },
+    [SLOT_TYPE_COLLECTIONS_INVENTORY] = 
+    {
+        [1] =   function(inventorySlot)
+                    return CollectibleItemUpdateCooldown(inventorySlot)
                 end,
     }
 }
@@ -539,6 +551,11 @@ local function TryGuildBankDepositItem(sourceBag, sourceSlot)
             return
         end
 
+		if(GetNumBagFreeSlots(BAG_GUILDBANK) == 0) then
+			ZO_AlertEvent(EVENT_GUILD_BANK_TRANSFER_ERROR, GUILD_BANK_NO_SPACE_LEFT)
+			return
+		end
+
         TransferToGuildBank(sourceBag, sourceSlot)
     end
     ClearCursor()
@@ -649,19 +666,16 @@ local function TryBankItem(inventorySlot)
 end
 
 -- If called on an item inventory slot, returns the index of the attachment slot that's holding it, or nil if it's not attached.
--- If called on an attachment inventory slot, returns the index of that attachment slot.
 local function GetQueuedItemAttachmentSlotIndex(inventorySlot)
     local bag, attachmentIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
     if (bag) then
         for i = 1, MAIL_MAX_ATTACHED_ITEMS do
             local bagId, slotIndex = GetQueuedItemAttachmentInfo(i)
             if bagId == bag and attachmentIndex == slotIndex then
-                attachmentIndex = i
-                break
+                return i
             end
         end
     end
-    return attachmentIndex
 end
 
 local function IsItemAlreadyAttachedToMail(inventorySlot)
@@ -915,11 +929,15 @@ function ZO_InventorySlot_InitiateDestroyItem(inventorySlot)
 end
 
 local function CanUseItem(inventorySlot)
-    -- TODO: cooldown check?
+    local hasCooldown = false
+    if inventorySlot.timeCooldownRecorded and inventorySlot.cooldownRemaining then
+        local cooldownEndTime = inventorySlot.timeCooldownRecorded + inventorySlot.cooldownRemaining
+        hasCooldown = cooldownEndTime > GetFrameTimeMilliseconds()
+    end
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local usable, onlyFromActionSlot = IsItemUsable(bag, index)
     local canInteractWithItem = CanInteractWithItem(bag, index)
-    return (usable and (not onlyFromActionSlot) and canInteractWithItem)
+    return (usable and (not onlyFromActionSlot) and canInteractWithItem and not hasCooldown)
 end
 
 local function TryUseItem(inventorySlot)
@@ -1123,10 +1141,20 @@ local useActions =
     [SLOT_TYPE_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(inventorySlot, slotActions)
-                                            if not (inventorySlot.active and inventorySlot.categoryType == COLLECTIBLE_CATEGORY_TYPE_MOUNT) then --A mount must always be set
-                                                local textEnum = inventorySlot.active and SI_COLLECTIBLE_ACTION_PUT_AWAY or SI_COLLECTIBLE_ACTION_SET_ACTIVE
-                                                slotActions:AddSlotAction(textEnum, function() UseCollectible(inventorySlot.collectibleId) end, "primary", nil, {visibleWhenDead = false})
+                                            local textEnum
+                                            local category = inventorySlot.categoryType
+                                            if category == COLLECTIBLE_CATEGORY_TYPE_TROPHY then
+                                                textEnum = SI_COLLECTIBLE_ACTION_USE
+                                            elseif inventorySlot.active then
+                                                if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET then
+                                                    textEnum = SI_COLLECTIBLE_ACTION_DISMISS
+                                                else
+                                                    textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
+                                                end
+                                            else
+                                                textEnum = SI_COLLECTIBLE_ACTION_SET_ACTIVE
                                             end
+                                            slotActions:AddSlotAction(textEnum, function() UseCollectible(inventorySlot.collectibleId) end, "primary", nil, {visibleWhenDead = false})
                                         end,
 }
 
@@ -1209,18 +1237,15 @@ local function LinkHelper(slotActions, actionName, link)
 
             slotActions:AddSlotAction(SI_ITEM_ACTION_LINK_TO_CHAT, linkFn, "secondary", nil, {visibleWhenDead = true})
         elseif actionName == "report_item" then
-            if IsInGamepadPreferredMode() and not IsConsoleUI() then
-                --Customer service is disabled on PC Gamepad mode
-                return
-            end
             slotActions:AddSlotAction(SI_ITEM_ACTION_REPORT_ITEM, 
                                         function()
-                                            if IsConsoleUI() then
+                                            if IsInGamepadPreferredMode() then
                                                  KEYBIND_STRIP:RemoveAllKeyButtonGroups()
                                                  ZO_Help_Customer_Service_Gamepad_SetupItemIssueTicket(link)
                                                  SCENE_MANAGER:Push("helpCustomerServiceGamepad")
                                             else
-                                                ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_USER_ITEM_BUG, link)
+                                                HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
+                                                HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromItemLink(link)
                                             end
                                         end, 
                                         "secondary")
@@ -2359,7 +2384,7 @@ local InventoryReceiveDrag =
     [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =
     {
         function(inventorySlot)
-            local attachmentIndex = GetQueuedItemAttachmentSlotIndex(inventorySlot)
+            local attachmentIndex = inventorySlot.slotIndex
             if attachmentIndex then
                 PlaceInAttachmentSlot(attachmentIndex)
             end

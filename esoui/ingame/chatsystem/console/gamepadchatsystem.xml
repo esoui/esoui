@@ -41,9 +41,9 @@
                             </OnMouseUp>
                         </Label>
 
-                        <Backdrop name="$(parent)Edit" inherits="ZO_EditBackdrop_Gamepad">
+                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Gamepad">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="6" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Anchor point="TOPRIGHT" />
                             <Controls>
                                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop_Gamepad" maxInputCharacters="350">
                                     <OnEnter>
@@ -86,10 +86,9 @@
                         </Backdrop>                    
                     </Controls>
                 </Control>
-
-                <!-- TODO: attach gamepad chat bubble texture -->
-                <Texture name="$(parent)ChatBubble" textureFile="EsoUI/Art/ChatWindow/chat_notification_up.dds" inheritAlpha="false">
-                    <Dimensions x="40" y="40" />
+                
+                <Texture name="$(parent)ChatBubble" textureFile="EsoUI/Art/HUD/Gamepad/gp_HUDNotification_notification.dds" inheritAlpha="false">
+                    <Dimensions x="32" y="32" />
                     <Anchor point="LEFT" relativeTo="$(parent)TextEntry" relativePoint="RIGHT" />
                 </Texture>
             </Controls>

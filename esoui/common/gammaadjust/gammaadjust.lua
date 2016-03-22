@@ -20,6 +20,7 @@ local function GammaDialogInitialize(dialogControl)
                 callback =  function(dialog)
                                 SetCVar("GAMMA_ADJUSTMENT", tostring(currentGamma))
                                 SCENE_MANAGER:Hide("gammaAdjust")
+                                ZO_SavePlayerConsoleProfile()
                             end,
             },
             [2] =

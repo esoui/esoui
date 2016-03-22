@@ -1,14 +1,13 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_QuestTimer_Keyboard_Template" virtual="true">
-            <Dimensions x="230" y="20" />
             <Controls>
                 <Label name="$(parent)Time" maxLineCount="1" font="ZoFontGameOutline">
                     <Anchor point="RIGHT" offsetX="-3"/>
                 </Label>
 
                 <Label name="$(parent)Label" maxLineCount="1" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" modifyTextType="NONE" font="ZoFontGameOutline">
-                    <Anchor point="LEFT" offsetX="3"/>
+                    <Dimensions x="230" />
                     <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT" offsetX="-5"/>
                 </Label>
             </Controls>
@@ -17,12 +16,11 @@
         <Control name="ZO_QuestTimer_Gamepad_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" font="ZoFontGamepadBold27">
-                    <Dimensions x="450"/>
+                    <Dimensions x="450" />
                     <Anchor point="RIGHT" offsetX="-4"/>
                 </Label>
 
                 <Label name="$(parent)Time" maxLineCount="1" font="ZoFontGamepad42">
-                    <Dimensions y="60" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT" />
                 </Label>
             </Controls>

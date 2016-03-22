@@ -46,7 +46,9 @@ function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybin
                                                                     AddIgnore(data.displayName)
                                                                     PlaySound(SOUNDS.DEFAULT_CLICK)
                                                                    end)
-    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function() ZO_FEEDBACK:ReportPlayer(data.displayName, REPORT_PLAYER_REASON_FRIEND_REQUEST_SPAM) end)
+    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
+																		HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
+																	end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
         self.notificationManager.sortFilterList:ShowMenu(button, 1)
@@ -76,7 +78,9 @@ function ZO_KeyboardGuildInviteProvider:Decline(data, button, openedFromKeybind)
 
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_DECLINE), function() RejectGuildInvite(data.guildId) end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER), function() AddIgnore(data.displayName) end)
-    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function() ZO_FEEDBACK:ReportPlayer(data.displayName, REPORT_PLAYER_REASON_GUILD_REQUEST_SPAM) end)
+    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
+																		HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
+																	end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
         self.notificationManager.sortFilterList:ShowMenu(button, 1)
@@ -104,7 +108,7 @@ function ZO_KeyboardCampaignQueueProvider:CreateLoadText()
 end
 
 function ZO_KeyboardCampaignQueueProvider:Accept(data)
-    ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_READY", {campaignId = data.campaignId, isGroup = data.isGroup}, {mainTextParams = {data.campaignName}})
+    CAMPAIGN_BROWSER:GetCampaignBrowser():ShowCampaignQueueReadyDialog(data.campaignId, data.isGroup, data.campaignName)
 end
 
 --Resurrect Provider
@@ -212,35 +216,23 @@ function ZO_KeyboardLeaderboardRaidProvider:New(notificationManager)
     return provider
 end
 
-function ZO_KeyboardLeaderboardRaidProvider:CreateMessage(raidName, raidScore, hasFriend, hasGuildMember)
-    local messageStringId
-    if(hasFriend and hasGuildMember) then
-        messageStringId = SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS_AND_GUILD_MEMBERS
-    elseif(hasFriend) then
-        messageStringId = SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS
-    else
-        messageStringId = SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_GUILD_MEMBERS
-    end
-    return zo_strformat(messageStringId, raidName, raidScore)
-end
-
 function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
     InitializeTooltip(InformationTooltip, control, TOP, 0, 0)
-    
+
     local numMembers = GetNumRaidScoreNotificationMembers(data.notificationId)
     local guildMembersSection = {}
     local friendsSection = {}
 
     for memberIndex = 1, numMembers do
         local displayName, characterName, isFriend, isGuildMember = GetRaidScoreNotificationMemberInfo(data.notificationId, memberIndex)
-        if(isGuildMember) then
+        if isGuildMember then
             table.insert(guildMembersSection, displayName)
-        elseif(isFriend) then
+        elseif isFriend then
             table.insert(friendsSection, displayName)
         end
     end
 
-    if(#guildMembersSection > 0) then
+    if #guildMembersSection > 0 then
         InformationTooltip:AddLine(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS))
         for _, guildMemberName in ipairs(guildMembersSection) do
             InformationTooltip:AddVerticalPadding(-9)
@@ -248,7 +240,7 @@ function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
         end
     end
 
-    if(#friendsSection > 0) then
+    if #friendsSection > 0 then
         InformationTooltip:AddLine(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS))
         for _, friendName in ipairs(friendsSection) do
             InformationTooltip:AddVerticalPadding(-9)
@@ -276,7 +268,7 @@ function ZO_KeyboardCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
     local data = entryData.data
-    COLLECTIONS_BOOK:BrowseToCollectible(data.collectibleIndex, data.categoryIndex, data.subcategoryIndex)
+    COLLECTIONS_BOOK:BrowseToCollectible(data.collectibleId, data.categoryIndex, data.subcategoryIndex)
 end
 
 function ZO_KeyboardCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
@@ -303,22 +295,6 @@ local ZO_KeyboardLFGUpdateProvider = ZO_LFGUpdateProvider:Subclass()
 
 function ZO_KeyboardLFGUpdateProvider:New(notificationManager)
     return ZO_LFGUpdateProvider.New(self, notificationManager)
-end
-
-function ZO_KeyboardLFGUpdateProvider:GetMessageFormat()
-    return SI_LFG_JUMP_TO_DUNGEON_TEXT
-end
-
-do
-    local ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_dps_up.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_healer_up.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_tank_up.dds",
-    }
-    
-    function ZO_KeyboardLFGUpdateProvider:GetRoleIcon(role)
-        return ROLE_TO_ICON[role]
-    end
 end
 
 
@@ -582,22 +558,30 @@ end
 
 function ZO_KeyboardNotificationManager:Accept_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    self:AcceptRequest(data)
+	if data then
+		self:AcceptRequest(data)
+	end
 end
 
 function ZO_KeyboardNotificationManager:Decline_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    self:DeclineRequest(data, button, MENU_OPENED_FROM_MOUSE)
+	if data then
+		self:DeclineRequest(data, button, MENU_OPENED_FROM_MOUSE)
+	end
 end
 
 function ZO_KeyboardNotificationManager:Message_OnMouseEnter(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    data.provider:ShowMessageTooltip(data, control)
+	if data then
+		data.provider:ShowMessageTooltip(data, control)
+	end
 end
 
 function ZO_KeyboardNotificationManager:Message_OnMouseExit(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    data.provider:HideMessageTooltip(control)
+	if data then
+		data.provider:HideMessageTooltip(control)
+	end
 end
 
 function ZO_KeyboardNotificationManager:RowMoreInfo_OnMouseEnter(control)
@@ -611,7 +595,9 @@ end
 
 function ZO_KeyboardNotificationManager:RowMoreInfo_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    self:ShowMoreInfo(data)
+	if data then
+		self:ShowMoreInfo(data)
+	end
 end
 
 --Global XML

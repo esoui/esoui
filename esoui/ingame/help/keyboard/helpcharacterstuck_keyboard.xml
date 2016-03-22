@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_HelpCharacterStuck_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_HelpCharacterStuck_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Cost" inherits="ZO_SmallKeyMarkupLabel" resizeToFitDescendents="true" text="SI_ACCOUNTCREATELINKERROR3" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" offsetX="-20"/>
+                </Label>
+
+                <Button name="$(parent)GetMeUnstuckButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_GET_ME_UNSTUCK">
+                    <Dimensions x="200" />
+                    <Anchor point="TOP" relativeTo="$(parent)Cost" relativePoint="BOTTOM" offsetY="50" />
+                    <OnClicked>
+                        ZO_HelpCharacterStuck_Keyboard_UnstuckPlayer(self)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

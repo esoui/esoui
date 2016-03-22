@@ -95,8 +95,9 @@ function DeathRecap:Initialize(control)
     self:ApplyStyle() -- Setup initial visual style based on current mode.
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
 
-    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X = -64
-    ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollContainer:GetNamedChild("ScrollIndicator"), self.control, RIGHT, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X)
+    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X = 792
+    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y = 300
+    ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollContainer:GetNamedChild("ScrollIndicator"), self.control, RIGHT, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y, true)
 end
 
 function DeathRecap:InitializeAttackPool()
@@ -200,9 +201,6 @@ local function SortAttacks(left, right)
     end    
 end
 
-local ATTACK_FRAME_TEXTURE = "EsoUI/Art/DeathRecap/deathRecap_attackFrame.dds"
-local ATTACK_BOSS_FRAME_TEXTURE = "EsoUI/Art/DeathRecap/deathRecap_attackBossFrame.dds"
-
 function DeathRecap:SetupAttacks()
     local startAlpha = self.animateOnShow and 0 or 1
     self.attackPool:ReleaseAllObjects()
@@ -243,7 +241,7 @@ function DeathRecap:SetupAttacks()
         end
 
         local attackerNameControl = attackControl:GetNamedChild("AttackerName")
-        local isBoss = false
+        local frameControl
         if(DoesKillingAttackHaveAttacker(attackInfo.index)) then
             local attackerRawName, attackerVeteranRank, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = GetKillingAttackerInfo(attackInfo.index)
             
@@ -269,26 +267,23 @@ function DeathRecap:SetupAttacks()
 
             attackerNameControl:ClearAnchors()
             attackerNameControl:SetAnchor(TOPRIGHT, damageControl, TOPLEFT, -10, 0)
-            attackerNameControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 150, 6)
+            attackerNameControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 155, 6)
 
             attackNameControl:ClearAnchors()
             attackNameControl:SetAnchor(TOPRIGHT, damageControl, TOPLEFT, -10, 0)
             attackNameControl:SetAnchor(TOPLEFT, attackerNameControl, BOTTOMLEFT, 0, 2)
+
+            frameControl = isBoss and iconControl:GetNamedChild("BossBorder") or iconControl:GetNamedChild("Border")
+            frameControl:SetHidden(false)
         else
             attackerNameControl:SetHidden(true)
 
             attackNameControl:ClearAnchors()
             attackNameControl:SetAnchor(TOPRIGHT, damageControl, TOPLEFT, -10, 0)
-            attackNameControl:SetAnchor(LEFT, nil, TOPLEFT, 150, 32)
-        end
+            attackNameControl:SetAnchor(LEFT, nil, TOPLEFT, 155, 32)
 
-        local frameControl = iconControl:GetNamedChild("Frame")
-        if(isBoss) then
-            frameControl:SetTexture(ATTACK_BOSS_FRAME_TEXTURE)
-            frameControl:SetDimensions(128, 128)
-        else
-            frameControl:SetTexture(ATTACK_FRAME_TEXTURE)
-            frameControl:SetDimensions(56, 56)
+            frameControl = iconControl:GetNamedChild("Border")
+            frameControl:SetHidden(false)
         end
 
         if(prevAttackControl) then

@@ -207,16 +207,8 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Video_Ability_Magelight" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
-            <Anchor point="TOPLEFT" relativeTo="Options_Video_God_Rays" relativePoint="BOTTOMLEFT" offsetY="6" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_MAGELIGHT_LIGHTS_VISIBLE)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
         <Control name="Options_Video_Clutter_2D" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
-            <Anchor point="TOPLEFT" relativeTo="Options_Video_Ability_Magelight" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_God_Rays" relativePoint="BOTTOMLEFT" offsetY="6" />
 
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_CLUTTER_2D)

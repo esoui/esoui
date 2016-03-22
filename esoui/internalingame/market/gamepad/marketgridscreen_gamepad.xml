@@ -66,14 +66,8 @@
                                     <OnEffectivelyShown/> <!-- Overrides the parent's OnEffectivelyShown so it is not called. It is mouse related and not needed in the gamepad market. -->
                                     <OnEffectivelyHidden/> <!-- Overrides the parent's OnEffectivelyHidden so it is not called. It is mouse related and not needed in the gamepad market -->
                                     <Controls>
-                                        <Scroll name="$(parent)Scroll" mouseEnabled="false" override="true">
-                                            <AnchorFill/>
-                                            <OnScrollExtentsChanged>
-                                                ZO_Scroll_OnExtentsChanged(self:GetParent())
-                                            </OnScrollExtentsChanged>
-                                        </Scroll>
                                         <Control name="$(parent)ScrollChild" resizeToFitDescendents="false" override="true"/>
-                                        <Slider name="$(parent)ScrollBar" visible="false" mouseEnabled="false" override="true">
+                                        <Slider name="$(parent)ScrollBar" hidden="true" mouseEnabled="false" override="true">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetX="-4" offsetY="16"/>
                                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-16"/>
                                             <ThumbTexture
@@ -87,8 +81,8 @@
                                                 right="1"
                                             />
                                             <Controls>
-                                                <Button name="$(parent)Up" inherits="ZO_ScrollUpButton" visible="false" override="true"/>
-                                                <Button name="$(parent)Down" inherits="ZO_ScrollDownButton" visible="false" override="true"/>
+                                                <Button name="$(parent)Up" inherits="ZO_ScrollUpButton" hidden="true" override="true"/>
+                                                <Button name="$(parent)Down" inherits="ZO_ScrollDownButton" hidden="true" override="true"/>
                                                 <Texture name="$(parent)ThumbMunge" alpha="0" override="true"/>
                                             </Controls>
                                         </Slider>

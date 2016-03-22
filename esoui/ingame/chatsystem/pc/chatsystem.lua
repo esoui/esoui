@@ -84,6 +84,9 @@ local PC_SETTINGS =
     initialFadeAlpha = 0,
     finalFadeAlpha = 1,
     fadeTransitionTime = 2000, -- milliseconds
+
+    chatEditBufferTop = 3,
+    chatEditBufferBottom = 3,
 }
 
 function ZO_ChatSystem:Initialize(control)

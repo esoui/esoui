@@ -94,7 +94,7 @@ end
 
 function ZO_Login_BeginSlideShow()
     local slideShow = ZO_CrossfadeBG_GetObject(ZO_PregameSlideShowCrossfade)
-    slideShow:PlaySlideShow(20000,  "esoui/art/loadingscreens/LoadScreen_Wrothgar_01.dds",
+    slideShow:PlaySlideShow(20000,  "esoui/art/loadingscreens/LoadScreen_TG_Safehouse_01.dds",
                                     "esoui/art/loadingscreens/LoadScreen_Ayleid_04.dds",
                                     "esoui/art/loadingscreens/Loadscreen_Bankorai_01.dds",
                                     "esoui/art/loadingscreens/LoadScreen_BleakRock_01.dds",

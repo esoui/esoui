@@ -47,11 +47,18 @@ function LootHistory_Singleton:Initialize()
         end
     end
 
+    local function OnExperienceGainUpdate(...)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnExperienceGainUpdate(...)
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_LOOT_RECEIVED, function(eventId, ...) OnLootReceived(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MONEY_UPDATE, function(eventId, ...) OnGoldUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_JUSTICE_GOLD_PICKPOCKETED, function(eventId, ...) OnGoldPickpocket(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_ALLIANCE_POINT_UPDATE, function(eventId, ...) OnAlliancePointUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_TELVAR_STONE_UPDATE, function(eventId, ...) OnTelvarStoneUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
 end
 
 ZO_LOOT_HISTOY_SINGLETON = LootHistory_Singleton:New()
@@ -86,8 +93,6 @@ do
 
         control.icon:SetTexture(data.icon)
 
-        control.background:SetColor(data.backgroundColor:UnpackRGBA())
-
         control.stackCountLabel:SetText(data.stackCount)
         control.stackCountLabel:SetHidden(data.stackCount <= 1)
     end
@@ -100,6 +105,8 @@ do
             return data1.moneyType == data2.moneyType
         elseif data1.itemId then
             return data1.itemId == data2.itemId and data1.quality == data2.quality
+        elseif data1.compareExp then
+            return data1.compareExp == data2.compareExp
         else
             return false
         end
@@ -115,7 +122,7 @@ do
         if control and control.stackCountLabel then
             control.stackCountLabel:SetText(currentEntryData.stackCount)
             control.stackCountLabel:SetHidden(false) -- guaranteed to always show because we had at least 1 and we are adding at least 1
-            ZO_CraftingResults_Base_PlayPulse(control.stackCountLabel) -- TODO: Is this the animation we really want?
+            ZO_CraftingResults_Base_PlayPulse(control.stackCountLabel)
         end
     end
 
@@ -138,7 +145,11 @@ function ZO_LootHistory_Shared:CreateLootEntry(lootData)
 end
 
 function ZO_LootHistory_Shared:AddLootEntry(lootEntry)
-    self.lootStream:AddEntry(self.entryTemplate, lootEntry)
+    if lootEntry.isPersistent then
+        self.lootStreamPersistent:AddEntry(self.entryTemplate, lootEntry)
+    else
+        self.lootStream:AddEntry(self.entryTemplate, lootEntry)
+    end
 end
 
 function ZO_LootHistory_Shared:QueueLootEntry(lootEntry)
@@ -171,6 +182,19 @@ function ZO_LootHistory_Shared:HideLootQueue()
     end
 end
 
+do
+    local CONTAINER_SHOW_TIME_MS = 3600
+    local PERSISTENT_CONTAINER_SHOW_TIME_MS = 7000
+
+    function ZO_LootHistory_Shared:GetContainerShowTime()
+        return CONTAINER_SHOW_TIME_MS
+    end
+
+    function ZO_LootHistory_Shared:GetPersistentContainerShowTime()
+        return PERSISTENT_CONTAINER_SHOW_TIME_MS
+    end
+end
+
 -- event handlers
 
 do
@@ -198,10 +222,23 @@ do
                             icon = MONEY_ICONS[moneyType],
                             stackCount = moneyAdded,
                             color = ZO_SELECTED_TEXT,
-                            backgroundColor = MONEY_BACKGROUND_COLORS[moneyType],
                             moneyType = moneyType
                         }
         local lootEntry = self:CreateLootEntry(lootData)
+        lootEntry.isPersistent = true
+        self:InsertOrQueue(lootEntry)
+    end
+
+    function ZO_LootHistory_Shared:AddXpEntry(xpAdded)
+        local lootData = {
+                            text = GetString(SI_LOOT_HISTORY_EXPERIENCE_GAIN),
+                            icon = LOOT_EXPERIENCE_ICON,
+                            stackCount = xpAdded,
+                            color = ZO_SELECTED_TEXT,
+                            compareExp = true
+                        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        lootEntry.isPersistent = true
         self:InsertOrQueue(lootEntry)
     end
 end
@@ -235,7 +272,6 @@ function ZO_LootHistory_Shared:OnLootReceived(receivedBy, itemLinkOrName, stackC
                             icon = icon,
                             stackCount = stackCount,
                             color = color,
-                            backgroundColor = color,
                             itemId = itemId,
                             quality = quality,
                         }
@@ -269,6 +305,11 @@ function ZO_LootHistory_Shared:OnTelvarStoneUpdate(newTelvarStones, oldTelvarSto
             self:AddMoneyEntry(tvStonesAdded, CURT_TELVAR_STONES)
         end
     end
+end
+
+function ZO_LootHistory_Shared:OnExperienceGainUpdate(reason, level, previousExperience, currentExperience)
+    local difference = currentExperience - previousExperience
+    self:AddXpEntry(difference)
 end
 
 -- functions to be overridden

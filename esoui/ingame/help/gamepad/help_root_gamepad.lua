@@ -334,12 +334,7 @@ function ZO_Help_Root_Gamepad:PopulateList()
 
     self:GetMainList():Clear()
 
-    if(IsConsoleUI()) then
-        AddEntry(SI_GAMEPAD_HELP_CUSTOMER_SERVICE, "helpCustomerServiceGamepad", "EsoUI/Art/Notifications/Gamepad/gp_notification_cs.dds")
-    else
-        local SHOW_DIALOG = true 
-        AddEntry(SI_GAMEPAD_HELP_CUSTOMER_SERVICE, GAMEPAD_CS_DISABLED_ON_PC_DIALOG, "EsoUI/Art/Notifications/Gamepad/gp_notification_cs.dds", SHOW_DIALOG)
-    end
+    AddEntry(SI_GAMEPAD_HELP_CUSTOMER_SERVICE, "helpCustomerServiceGamepad", "EsoUI/Art/Notifications/Gamepad/gp_notification_cs.dds")
     AddEntry(SI_GAMEPAD_HELP_GET_ME_UNSTUCK, nil, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_unstuck.dds")
     AddEntry(SI_HELP_TUTORIALS, "helpTutorialsCategoriesGamepad", "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tutorial.dds")
     AddEntry(SI_GAMEPAD_HELP_LEGAL_MENU, "helpLegalDocsGamepad", "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_terms.dds")

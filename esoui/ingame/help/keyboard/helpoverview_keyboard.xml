@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_HelpOverview_Keyboard_Question" virtual="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <Dimensions x="550" />
+            <Anchor point="TOPLEFT" />
+        </Label>
+        <Label name="ZO_HelpOverview_Keyboard_Answer" virtual="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+            <Dimensions x="550" />
+            <Anchor point="TOPLEFT" />
+        </Label>
+        
+        <TopLevelControl name="ZO_HelpOverview_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_HelpOverview_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)DetailsContainer" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <ResizeToFitPadding height="5" />
+                            <Controls>
+                                <Label name="$(parent)IntroDetailsBody" text="SI_ACCOUNTCREATELINKERROR3" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Dimensions x="550" />
+                                    <Anchor point="TOPLEFT" offsetY="5" />
+                                </Label>
+
+                                <Control name="$(parent)DetailsLine" inherits="ZO_HelpCustomerServiceDivider">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)IntroDetailsBody" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                </Control>
+
+                                <Label name="$(parent)QuestionAnswerTitle" text="SI_CUSTOMER_SERVICE_OVERVIEW_COMMON_QUESTIONS" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsLine" relativePoint="BOTTOMLEFT" offsetY="-14" />
+                                </Label>
+
+                                <Control name="$(parent)QuestionAnswerContainer">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)QuestionAnswerTitle" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)QuestionAnswerTitle" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>      
+    </Controls>
+</GuiXml>

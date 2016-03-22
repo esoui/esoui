@@ -10,7 +10,9 @@
             <Controls>
                 <Scroll name="$(parent)Channels" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" />
 
-                <Scroll name="$(parent)ParticipantOptions" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" />
+                <Scroll name="$(parent)Participants" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true" />
+
+                <Control name="$(parent)SocialOptions" />
             </Controls>
         </TopLevelControl>
     </Controls>

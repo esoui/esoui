@@ -13,10 +13,24 @@
             </Animations>
         </AnimationTimeline>
 
-        <AnimationTimeline name="ZO_HUDInfamyMeterKOSIconBounce">
+        <AnimationTimeline name="ZO_HUDInfamyMeterCenterIconCutoutIn">
             <Animations>
-                <AlphaAnimation duration="200" startAlpha="0"   endAlpha="1"/>
-                <ScaleAnimation duration="400" startScale="2.5" endScale="1"/>
+                <!-- These animations apply to the cutout that comes in and then fades away -->
+                <AlphaAnimation duration="300" startAlpha="0"   endAlpha=".75" />
+                <ScaleAnimation duration="500" startScale="1.5" endScale="1" />
+                <AlphaAnimation duration="300" startAlpha=".75"   endAlpha="0" delay="600" />
+                <!-- This animation applies to the resulting persistent texture -->
+                <AlphaAnimation duration="300" startAlpha="0"   endAlpha="1" delay="600" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_HUDInfamyMeterCenterIconScaleOut">
+            <Animations>
+                <!-- These animations apply to the icon that scales and alphas out -->
+                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0" />
+                <ScaleAnimation duration="500" startScale="1" endScale="1.5" />
+                <!-- This animation applies to the resulting persistent texture -->
+                <AlphaAnimation duration="300" startAlpha="0" endAlpha="1" />
             </Animations>
         </AnimationTimeline>
     </Animations>
@@ -38,13 +52,19 @@
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
                 </Cooldown>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/infamy_meter-frame_px_per.dds" tier="MEDIUM" level="4">
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/infamy_meter-frame-generic.dds" tier="MEDIUM" level="4">
                     <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="RIGHT" />
                 </Texture>
-                <Texture name="$(parent)KOSIcon" textureFile="EsoUI/Art/HUD/infamy_KOS_icon.dds" tier="MEDIUM" level="4" alpha="0">
+                <!-- This is the icon that is used at the start of the center-icon animations, and is transparent by the end of them -->
+                <Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" level="4" alpha="0">
                     <Dimensions x="51" y="51" />
-                    <Anchor point="CENTER" offsetX="80" offsetY="14" />
+                    <Anchor point="CENTER" offsetX="79" offsetY="15" />
+                </Texture>
+                <!-- This is the icon that is faded in during the center-icon animations, and remains visible afterwards -->
+                <Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="4">
+                    <Dimensions x="51" y="51" />
+                    <Anchor point="CENTER" offsetX="79" offsetY="15" />
                 </Texture>
                 <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="4">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="-25" />
@@ -68,12 +88,18 @@
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
                 </Cooldown>
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-frame_px_per.dds" tier="MEDIUM" level="4">
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-frame-generic.dds" tier="MEDIUM" level="4">
                     <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="LEFT" offsetX="INFAMY_METER_WIDTH" />
                     <Anchor point="RIGHT" offsetX="-INFAMY_METER_WIDTH" />
                 </Texture>
-                <Texture name="$(parent)KOSIcon" textureFile="EsoUI/Art/HUD/infamy_KOS_icon.dds" tier="MEDIUM" level="4" alpha="0">
+                <!-- This is the icon that is used at the start of the center-icon animations, and is transparent by the end of them -->
+                <Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" level="4" alpha="0">
+                    <Dimensions x="54" y="54" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Background" />
+                </Texture>
+                <!-- This is the icon that is faded in during the center-icon animations, and remains visible afterwards -->
+                <Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="4">
                     <Dimensions x="54" y="54" />
                     <Anchor point="CENTER" relativeTo="$(parent)Background" />
                 </Texture>

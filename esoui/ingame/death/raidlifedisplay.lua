@@ -1,6 +1,8 @@
 local RaidLifeDisplay = ZO_Object:Subclass()
 
-local RECENT_CHANGE_DURATION = 3000
+local RECENT_CHANGE_DURATION = 7000
+local SCORE_ANIMATION_TIME_MS = 200
+local SCORE_ANIMATION_UPDATE_DURATION_MS = 15000
 
 function RaidLifeDisplay:New(...)
     local object = ZO_Object.New(self)
@@ -10,31 +12,27 @@ end
 
 function RaidLifeDisplay:Initialize(control)
     self.control = control
-    self.lifeCountLabel = control:GetNamedChild("Label")
+    self.reviveCounter = control:GetNamedChild("ReviveCounter")
+    self.totalScoreLabel = control:GetNamedChild("TotalScore")
+    self.scoreLabel = control:GetNamedChild("ScoreLabel")
+    self.icon = control:GetNamedChild("Icon")
+    self.totalScore = -1
     self.hiddenReasons = ZO_HiddenReasons:New()
     self.updateRegistrationName = self.control:GetName().."Update"
     self.updateCallback = function()
         self:OnRecentlyChangedExpired()
     end
-    self.reticleTargetChangedCallback = function()
-        self:OnReticleTargetChanged()
-    end
 
     control:RegisterForEvent(EVENT_RAID_REVIVE_COUNTER_UPDATE, function() self:OnRaidLifeCounterChanged() end)
+    control:RegisterForEvent(EVENT_RAID_TRIAL_SCORE_UPDATE, function() self:OnRaidLifeCounterChanged() end)
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
     control:RegisterForEvent(EVENT_RAID_TIMER_STATE_UPDATE, function() self:OnRaidTimerStateUpdate() end)
+    control:RegisterForEvent(EVENT_RAID_TRIAL_SCORE_UPDATE, function() self:OnRaidScoreUpdate() end)
+    control:RegisterForEvent(EVENT_RAID_TRIAL_COMPLETE, function() self:OnRaidTrialComplete() end)
+    control:RegisterForEvent(EVENT_RAID_TRIAL_FAILED, function() self:OnRaidScoreUpdate() end)
 
     ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
 
-    self.labelTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_RaidLifeChangeAnimation", self.lifeCountLabel)
-    local labelAnim = self.labelTimeline:GetAnimation(1)
-    labelAnim:SetHandler("OnPlay", function()
-        self.lifeCountLabel:SetText(self.count)
-        PlaySound(SOUNDS.RAID_LIFE_DISPLAY_CHANGED)
-    end)
-    self.labelTimeline:SetHandler("OnStop", function()
-        self.lifeCountLabel:SetText(self.count)
-    end)
     self:RefreshApplicable()
 end
 
@@ -51,16 +49,6 @@ function RaidLifeDisplay:SetShowOnChange(showOnChange)
         EVENT_MANAGER:UnregisterForUpdate(self.updateRegistrationName)
     end
     self:RefreshVisible("initializeRecentlyChanged")
-end
-
-function RaidLifeDisplay:SetShowOnReticleOverDeadPlayer(showOnReticleOverDeadPlayer)
-    if(showOnReticleOverDeadPlayer) then
-        self.hiddenReasons:AddShowReason("reticleOverDeadPlayer")
-        self.control:RegisterForEvent(EVENT_RETICLE_TARGET_PLAYER_CHANGED, self.reticleTargetChangedCallback)
-    else
-        self.hiddenReasons:RemoveShowReason("reticleOverDeadPlayer")
-        self.control:UnregisterForEvent(EVENT_RETICLE_TARGET_PLAYER_CHANGED)
-    end
 end
 
 function RaidLifeDisplay:SetHiddenForReason(reason, hidden)
@@ -81,20 +69,6 @@ function RaidLifeDisplay:RefreshVisible(reason)
         self.hidden = hidden
 
         if(not hidden) then
-            --pulse the label when we show the display because it's now applicable or the counter just changed
-            if(reason == "applicable" or reason == "recentlyChanged") then
-                local offset
-                local isDisplayFullShown = self.control:GetAlpha() == 1 and not self.control:IsHidden()
-                --if the display is fading in or hidden, with a bit to do the pulse
-                if(not self.animatedShowHide or isDisplayFullShown) then
-                    offset = 0
-                else
-                    offset = 500
-                end
-
-                self:PlayLabelAnimation(offset)
-            end
-
             PlaySound(SOUNDS.RAID_LIFE_DISPLAY_SHOWN)
         end
 
@@ -132,33 +106,55 @@ function RaidLifeDisplay:RefreshApplicable()
     end
 end
 
-function RaidLifeDisplay:GetRaidLifeCount()
-    return GetRaidReviveCounterInfo() or 0
+function RaidLifeDisplay:GetRaidReviveCount()
+    return GetRaidReviveCountersRemaining() or 0
+end
+
+function RaidLifeDisplay:GetRaidBonusScore()
+    return (GetRaidReviveCountersRemaining() or 0) * GetRaidBonusMultiplier()
+end
+
+function RaidLifeDisplay:GetPartyTotalScore()
+    return GetCurrentRaidScore()
 end
 
 function RaidLifeDisplay:RefreshCountInstantly()
-    if(not self.labelTimeline:IsPlaying()) then
-        local count = self:GetRaidLifeCount()
-        self.lifeCountLabel:SetText(count)
-        self.count = count
+    self.count =  self:GetRaidReviveCount()
+    self:RefreshDisplay()
+end
+
+function RaidLifeDisplay:RefreshDisplay()
+    local maxCount = GetCurrentRaidStartingReviveCounters()
+    self.reviveCounter:SetText(zo_strformat(SI_REVIVE_COUNTER_REVIVES_USED, self.count, maxCount))
+    self:UpdateTotalScore()
+    if self.count == 0 then
+        self.reviveCounter:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        self.icon:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+    else
+        self.reviveCounter:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        self.icon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
     end
+end
+
+function RaidLifeDisplay:UpdateTotalScore()
+    local prevScore = self.totalScore
+    local curScore = self:GetPartyTotalScore()
+
+    if prevScore == curScore then
+        return 
+    end
+
+    self.totalScore = curScore
+    ZO_CraftingResults_Base_PlayPulse(self.totalScoreLabel)
+    self.totalScoreLabel:SetText(curScore)
 end
 
 function RaidLifeDisplay:RefreshCountAnimated()
-    local count = self:GetRaidLifeCount()
+    local count = self:GetRaidReviveCount()
     if(count ~= self.count) then
         self.count = count
-        self:PlayLabelAnimation(0)
+        self:UpdateTotalScore()
     end
-end
-
-function RaidLifeDisplay:PlayLabelAnimation(offset)
-    self.labelTimeline:Stop()
-    for i = 1, self.labelTimeline:GetNumAnimations() do
-        local anim = self.labelTimeline:GetAnimation(i)
-        self.labelTimeline:SetAnimationOffset(anim, offset)
-    end
-    self.labelTimeline:PlayFromStart()
 end
 
 function RaidLifeDisplay:OnEffectivelyShown()
@@ -177,29 +173,33 @@ function RaidLifeDisplay:OnRecentlyChangedExpired()
     self:SetShownForReason("recentlyChanged", false)
 end
 
-function RaidLifeDisplay:OnReticleTargetChanged()
-    local overDeadUnit = DoesUnitExist("reticleOver") and IsUnitDead("reticleOver")
-    local raidLifeRequired = ZO_Death_DoesReviveCostRaidLife()
-    self:SetShownForReason("reticleOverDeadPlayer", overDeadUnit and raidLifeRequired)
-end
-
 function RaidLifeDisplay:OnRaidLifeCounterChanged()
     if(not self.control:IsHidden()) then
         self:RefreshCountAnimated()
     end
 
-    if(self.showOnChange) then
-        self.mostRecentChangeTime = GetFrameTimeSeconds()
-        EVENT_MANAGER:UnregisterForUpdate(self.updateRegistrationName)
-        EVENT_MANAGER:RegisterForUpdate(self.updateRegistrationName, RECENT_CHANGE_DURATION, self.updateCallback)
-        self.count = self:GetRaidLifeCount()
-        self:SetShownForReason("recentlyChanged", true)
-    end
+    self.mostRecentChangeTime = GetFrameTimeSeconds()
+    EVENT_MANAGER:UnregisterForUpdate(self.updateRegistrationName)
+    EVENT_MANAGER:RegisterForUpdate(self.updateRegistrationName, RECENT_CHANGE_DURATION, self.updateCallback)
+    self.count = self:GetRaidReviveCount()
+    self:UpdateTotalScore()
+    self:RefreshDisplay()
+    self:SetShownForReason("recentlyChanged", true)
 end
 
 function RaidLifeDisplay:OnRaidTimerStateUpdate()
+    self:OnRaidScoreUpdate()
+    self.scoreLabel:SetText(GetString(SI_REVIVE_COUNTER_SCORE))
+end
+
+function RaidLifeDisplay:OnRaidScoreUpdate()
     self:RefreshCountInstantly()
     self:RefreshApplicable()
+end
+
+function RaidLifeDisplay:OnRaidTrialComplete()
+    self:OnRaidScoreUpdate()
+    self.scoreLabel:SetText(GetString(SI_REVIVE_COUNTER_FINAL_SCORE))
 end
 
 function RaidLifeDisplay:ApplyPlatformStyle()

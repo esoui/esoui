@@ -151,7 +151,7 @@ function ZO_ToggleButton_Initialize(toggleButton, type, initialState)
     if(initialState == nil) then
         initialState = TOGGLE_BUTTON_OPEN
     end
-
+    
     toggleButton.type = type
     toggleButton.state = initialState
     ZO_ToggleButton_UpdateTextures(toggleButton)
@@ -171,11 +171,19 @@ function ZO_ToggleButton_GetState(toggleButton)
     return toggleButton.state
 end
 
+function ZO_CheckButtonLabel_SetDefaultColors(label, defaultNormalColor, defaultHighlightColor)
+    label.defaultNormalColor = defaultNormalColor
+    label.defaultHighlightColor = defaultHighlightColor
+end
+
 function ZO_CheckButtonLabel_ColorText(label, over)
+    local normalColor = label.defaultNormalColor or ZO_NORMAL_TEXT
+    local highlightColor = label.defaultHighlightColor or ZO_HIGHLIGHT_TEXT
+    
     if(over) then
-        label:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGBA())
+        label:SetColor(highlightColor:UnpackRGBA())
     else
-        label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+        label:SetColor(normalColor:UnpackRGBA())      
     end
 end
 
@@ -190,6 +198,8 @@ function ZO_CheckButton_SetLabelText(button, labelText)
         label:SetAnchor(LEFT, button, RIGHT, 5, 0)
         ZO_PreHookHandler(button, "OnMouseEnter", function() ZO_CheckButtonLabel_ColorText(label, true) end)
         ZO_PreHookHandler(button, "OnMouseExit", function() ZO_CheckButtonLabel_ColorText(label, false) end)
+        ZO_PreHookHandler(label, "OnMouseEnter", function() button:GetHandler("OnMouseEnter")(button) end)
+        ZO_PreHookHandler(label, "OnMouseExit", function() button:GetHandler("OnMouseExit")(button) end)
 
         button.label = label
     end
@@ -213,26 +223,23 @@ function ZO_CheckButton_SetLabelWidth(button, labelWidth)
     end
 end
 
-function ZO_CheckButton_OnClicked(buttonControl, mouseButton)
+function ZO_CheckButton_OnClicked(buttonControl)
     PlaySound(SOUNDS.DEFAULT_CLICK)
-
+    
     local bState = buttonControl:GetState()
     local callToggleFunc = true
     local checked = true
 
-    if(bState == BSTATE_NORMAL)
-    then
+    if bState == BSTATE_NORMAL then
         ZO_CheckButton_SetChecked(buttonControl)
-    elseif(bState == BSTATE_PRESSED)
-    then
+    elseif bState == BSTATE_PRESSED then
         ZO_CheckButton_SetUnchecked(buttonControl)
         checked = false
     else
         callToggleFunc = false
     end
 
-    if((buttonControl.toggleFunction ~= nil) and callToggleFunc)
-    then
+    if (buttonControl.toggleFunction ~= nil) and callToggleFunc then
         buttonControl:toggleFunction(checked)
     end
 end
@@ -296,14 +303,14 @@ function ZO_CheckButton_SetUnchecked(buttonControl)
 end
 
 function ZO_CheckButton_IsChecked(buttonControl)
-    local currentState = buttonControl:GetState()
+    local currentState = buttonControl:GetState()    
     return currentState == BSTATE_PRESSED
 end
 
 function ZO_CheckButton_SetCheckState(buttonControl, checkState)
     local checkStateType = type(checkState)
     local isChecked = false
-
+    
     if(checkStateType == "boolean")
     then
         isChecked = checkState
@@ -314,7 +321,7 @@ function ZO_CheckButton_SetCheckState(buttonControl, checkState)
     then
         isChecked = checkState > 0
     end
-
+    
     if(isChecked)
     then
         ZO_CheckButton_SetChecked(buttonControl)

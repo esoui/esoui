@@ -16,13 +16,15 @@ local COST_OPTION_TO_PROMPT_TITLE =
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = GetString(SI_PAY_FOR_CONVERSATION_GIVE_TITLE),
 }
 
-local CHATTER_OPTION_ERROR =
+CHATTER_OPTION_ERROR =
 {
     [CHATTER_TALK_CHOICE_MONEY] = SI_ERROR_CANT_AFFORD_OPTION,
     [CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED] = SI_ERROR_NEED_INTIMIDATE,
     [CHATTER_TALK_CHOICE_PERSUADE_DISABLED] = SI_ERROR_NEED_PERSUADE,
     [CHATTER_GUILDKIOSK_IN_TRANSITION] = SI_INTERACT_TRADER_BIDDING_CLOSED_DURING_BID_TRANSITIONING_PERIOD,
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = SI_ERROR_CANT_AFFORD_OPTION,
+    [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED] = SI_ERROR_NEED_CLEMENCY,
+    [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN] = SI_ERROR_CLEMENCY_ON_COOLDOWN,
 }
 
 --Event Handlers
@@ -55,7 +57,7 @@ end
 local function ContextFilter(object, callback)
     -- This will wrap the callback so that it gets called with the control
     return function(...)
-        local obj = SYSTEMS:GetObjectBasedOnCurrentScene(ZO_INTERACTION_SYSTEM_NAME)
+        local obj = SYSTEMS:GetObject(ZO_INTERACTION_SYSTEM_NAME)
 
         if (obj == object) then
             callback(...)
@@ -86,8 +88,11 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         if(declineComplete == "") then  declineComplete = GetString(SI_DEFAULT_QUEST_COMPLETE_DECLINE_TEXT) end
 
         self:InitializeInteractWindow(endDialog)
-
-        self:ShowQuestRewards(journalQuestIndex)
+        
+        local confirmError = self:ShowQuestRewards(journalQuestIndex)
+        if confirmError then
+            confirmComplete = zo_strformat(SI_QUEST_COMPLETE_FORMAT_STRING, confirmComplete, confirmError)
+        end
         self:PopulateChatterOption(1, CompleteQuest, confirmComplete, CHATTER_COMPLETE_QUEST)
         self:PopulateChatterOption(2, function() self:CloseChatter() end, declineComplete, CHATTER_GOODBYE)
 
@@ -165,6 +170,14 @@ function ZO_SharedInteraction:CloseChatter()
     SCENE_MANAGER:Hide(self.sceneName)
 end
 
+function ZO_SharedInteraction:CloseChatterAndDismissAssistant()
+    self:CloseChatter()
+    local activeAssistant = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT)
+    if activeAssistant ~= 0 then
+        UseCollectible(activeAssistant)
+    end
+end
+
 function ZO_SharedInteraction:InitializeInteractWindow(bodyText)
     self:ResetInteraction(bodyText)
 
@@ -234,6 +247,8 @@ local OPTION_TO_ICON =
     [CHATTER_TALK_CHOICE_MONEY]                 = "EsoUI/Art/Interaction/ConversationWithCost.dds",
     [CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED]   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_TALK_CHOICE_PERSUADE_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
+    [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
+    [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_START_NEW_QUEST_BESTOWAL]          = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_START_COMPLETE_QUEST]              = "EsoUI/Art/Interaction/QuestCompleteAvailable.dds",
     [CHATTER_START_GIVE_ITEM]                   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
@@ -246,6 +261,17 @@ local OPTION_TO_ICON =
 
 local function UpdateFleeChatterOption(self)
     self:SetText(zo_strformat(SI_INTERACT_OPTION_FLEE_ARREST, GetSecondsUntilArrestTimeout()))
+end
+
+function ZO_SharedInteraction:UpdateClemencyChatterOption(control, data)
+    local clemencyTimeRemaningSeconds = GetTimeToClemencyResetInSeconds()
+
+    if clemencyTimeRemaningSeconds == 0 and not data.optionUsable then
+        self:UpdateClemencyOnTimeComplete(control, data)
+    elseif clemencyTimeRemaningSeconds > 0 then
+        local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_CLEMENCY_COOLDOWN, control.optionText, ZO_FormatTimeLargestTwo(clemencyTimeRemaningSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+        control:SetText(formattedString)
+    end
 end
 
 function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
@@ -291,9 +317,21 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             end
         elseif(optionType == CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED 
             or optionType == CHATTER_TALK_CHOICE_PERSUADE_DISABLED
+            or optionType == CHATTER_TALK_CHOICE_CLEMENCY_DISABLED
             or optionType == CHATTER_GUILDKIOSK_IN_TRANSITION) then
             chatterData.optionUsable = false
             chatterData.recolorIfUnusable = false
+        elseif optionType == CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN then
+            local clemencyTimeRemaningSeconds = GetTimeToClemencyResetInSeconds()
+
+            if clemencyTimeRemaningSeconds <= 0 then
+                chatterData.optionUsable = true
+            else
+                chatterData.labelUpdateFunction = function(control) 
+                                                    self:UpdateClemencyChatterOption(control, chatterData)
+                                                  end
+                chatterData.optionUsable = false
+            end
         end
 
         chatterData.iconFile = OPTION_TO_ICON[optionType]
@@ -320,6 +358,13 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     if(farewell == "") then farewell = GetString(SI_GOODBYE) end
     optionCount = optionCount + 1
     self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
+    
+    if IsInteractingWithMyAssistant() then
+        local assistantName = GetCollectibleName(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
+        farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, assistantName)
+        optionCount = optionCount + 1
+        self:PopulateChatterOption(optionCount, function() self:CloseChatterAndDismissAssistant() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
+    end
 
     self:FinalizeChatterOptions(optionCount)
 
@@ -430,6 +475,24 @@ function ZO_SharedInteraction:IsCurrencyReward(rewardType)
     return currencyRewards[rewardType]
 end
 
+local currencyRewardToCurrencyType =
+{
+    [REWARD_TYPE_MONEY] = CURT_MONEY,
+    [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
+    [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
+}
+
+function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)
+    return currencyRewardToCurrencyType[rewardType]
+end
+
+function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
+    local currencyType = currencyRewardToCurrencyType[rewardType]
+    if currencyType and (GetCarriedCurrencyAmount(currencyType) + rewardAmount >= MAX_PLAYER_MONEY) then
+        return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetString("SI_CURRENCYTYPE", currencyType))
+    end        
+end
+
 function ZO_SharedInteraction:GetRewardCreateFunc(rewardType)
     return REWARD_CREATORS[rewardType]
 end
@@ -439,18 +502,23 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
     local numRewards = GetJournalQuestNumRewards(journalQuestIndex)
     for i = 1, numRewards do
         local rewardType, name, amount, icon, meetsUsageRequirement, itemQuality, itemType = GetJournalQuestRewardInfo(journalQuestIndex, i)
-        local rewardData = {
-            rewardType = rewardType,
-            name = name,
-            amount = amount,
-            icon = icon,
-            meetsUsageRequirement = meetsUsageRequirement,
-            quality = itemQuality,
-            index = i,
-            itemType = itemType
-        }
+        --We don't want to show a collectible if we already own it
+        local isCollectible = rewardType == REWARD_TYPE_AUTO_ITEM and itemType == REWARD_ITEM_TYPE_COLLECTIBLE
+        local hideOwnedCollectible = isCollectible and not meetsUsageRequirement
+        if not hideOwnedCollectible then
+            local rewardData = {
+                rewardType = rewardType,
+                name = name,
+                amount = amount,
+                icon = icon,
+                meetsUsageRequirement = meetsUsageRequirement,
+                quality = itemQuality,
+                index = i,
+                itemType = itemType
+            }
 
-        table.insert(data, rewardData)
+            table.insert(data, rewardData)
+        end
     end
     return data
 end
@@ -494,3 +562,10 @@ function ZO_SharedInteraction:ShowQuestRewards(journalQuestIndex)
     -- Should be overridden
 end
 
+function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
+    --Should be overrideen
+end
+
+function ZO_SharedInteraction:UpdateClemencyOnTimeWaiting(control, timeSeconds)
+    --Should be overrideen
+end

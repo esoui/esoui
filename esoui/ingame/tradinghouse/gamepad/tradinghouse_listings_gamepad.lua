@@ -56,7 +56,7 @@ end
 function ZO_GamepadTradingHouse_Listings:UpdateItemSelectedTooltip(selectedData)
     if selectedData then
         local itemLink = GetTradingHouseListingItemLink(selectedData.slotIndex)
-        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount, ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT)
+        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end

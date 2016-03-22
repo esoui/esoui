@@ -280,7 +280,7 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
     local searchControl = self.contentHeader:GetNamedChild("SearchFilter")
-    local searchEdit = searchControl:GetNamedChild("Edit")
+    local searchEdit = searchControl:GetNamedChild("SearchEdit")
 
     local function SearchEditFocusLost()
         ZO_GamepadEditBox_FocusLost(searchEdit)
@@ -546,17 +546,17 @@ function ZO_GamepadInteractiveSortFilterList:ResetSelectedEntry()
 end
 
 function ZO_GamepadInteractiveSortFilterList:RefreshFilters()
+    ZO_SortFilterList.RefreshFilters(self)
     if(not self:IsLockedForUpdates()) then
         self:ResetSelectedEntry()
     end
-    ZO_SortFilterList.RefreshFilters(self)
 end
 
 function ZO_GamepadInteractiveSortFilterList:RefreshData()
+    ZO_SortFilterList.RefreshData(self)
     if(not self:IsLockedForUpdates()) then
         self:ResetSelectedEntry()
     end
-    ZO_SortFilterList.RefreshData(self)
 end
 
 function ZO_GamepadInteractiveSortFilterList:CommitScrollList()

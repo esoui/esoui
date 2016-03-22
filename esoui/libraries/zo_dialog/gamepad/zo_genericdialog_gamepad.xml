@@ -38,9 +38,6 @@
                                     self.textChangedCallback(self)
                                 end
                             </OnTextChanged>
-                            <Controls>
-                                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" override="true"/>
-                            </Controls>
                         </EditBox>
                     </Controls>
                 </Backdrop>

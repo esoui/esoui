@@ -8,16 +8,19 @@ end
 
 function HUDRaidLifeManager:Initialize(control)
     self.control = control
-    self.displayObject = control:GetNamedChild("Display").object
+    self.displayObject = control:GetNamedChild("Reservoir").object
     self.displayObject:SetAnimatedShowHide(true)
 
     self:RefreshMode()
+
+    ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
 
     EVENT_MANAGER:RegisterForEvent("HUDRaidLifeManager", EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
         if(settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_RAID_LIVES) then
             self:RefreshMode()
         end
     end)
+
 end
 
 function HUDRaidLifeManager:RefreshMode()
@@ -36,11 +39,14 @@ function HUDRaidLifeManager:RefreshMode()
     end
 
     self.displayObject:SetShowOnChange(showInSpecificSituations)
-    self.displayObject:SetShowOnReticleOverDeadPlayer(showInSpecificSituations)
 end
 
 function HUDRaidLifeManager:SetHiddenForReason(reason, hidden)
     self.displayObject:SetHiddenForReason(reason, hidden)
+end
+
+function HUDRaidLifeManager:ApplyPlatformStyle()
+    ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_HUDRaidLife"))
 end
 
 function ZO_HUDRaidLife_OnInitialized(self)

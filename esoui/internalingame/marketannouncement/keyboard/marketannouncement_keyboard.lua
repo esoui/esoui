@@ -18,8 +18,10 @@ function MarketAnnouncementMarketProduct_Keyboard:LayoutCostAndText(description,
 
     self.cost:ClearAnchors()
     self.textCallout:ClearAnchors()
-    
-    if cost > discountedCost then
+
+    if self.isFree then
+        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 0)
+    elseif cost > discountedCost then
         self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
         self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, 0) -- x offset to account for strikethrough
     else

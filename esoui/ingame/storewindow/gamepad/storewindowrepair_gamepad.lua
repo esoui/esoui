@@ -58,27 +58,30 @@ function ZO_GamepadStoreRepair:InitializeKeybindStrip()
                                                     GAME_NAVIGATION_TYPE_BUTTON,
                                                     function() self:ConfirmRepair() end,
                                                     GetString(SI_ITEM_ACTION_REPAIR),
-                                                    function() return #self.list.dataList > 0 end
-                                                    )
+                                                    function() return #self.list.dataList > 0 end,
+                                                    function() return self:CanRepair() end)
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
 end
 
-function ZO_GamepadStoreRepair:ConfirmRepair()
+function ZO_GamepadStoreRepair:CanRepair()
     local selectedItem = self.list:GetTargetData()
     local cost = selectedItem.repairCost
-    local condition = selectedItem.condition
-    --All items in this list are damaged
     if cost <= GetCarriedCurrencyAmount(CURT_MONEY) then
-        local bagId = selectedItem.bagId
-        local slotIndex = selectedItem.slotIndex
-        RepairItem(bagId, slotIndex)
-        PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
+        return true
     else
-        STORE_WINDOW_GAMEPAD:FailedRepairMessageBox(ITEM_REPAIR_CANT_AFFORD_REPAIR)
+        return false, GetString("SI_ITEMREPAIRREASON", ITEM_REPAIR_CANT_AFFORD_REPAIR) -- "You can't afford to repair this item"
     end
+end
+
+function ZO_GamepadStoreRepair:ConfirmRepair()
+    local selectedItem = self.list:GetTargetData() --All items in this list are damaged
+    local bagId = selectedItem.bagId
+    local slotIndex = selectedItem.slotIndex
+    RepairItem(bagId, slotIndex)
+    PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
 end
 
 function ZO_GamepadStoreRepair:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)

@@ -1,7 +1,4 @@
 <GuiXml>
-    <String name="GAMEPAD_MEDIUM_FONT_APPANDINGAME" value="EsoUI/Common/Fonts/FTN57.otf" />
-    <Font name="ZoFontGamepad34AppAndInGame" font="$(GAMEPAD_MEDIUM_FONT_APPANDINGAME)|34|soft-shadow-thick" />
-    
     <Controls>
         <Control name="ZO_VoiceChatHUDEntry" virtual="true">
             <Dimensions x="256" y="64" />
@@ -15,7 +12,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-8" offsetY="-8" />
                 </Texture>
 
-                <Label name="$(parent)Text" font="ZoFontGamepad34AppAndInGame" verticalAlignment="CENTER" >
+                <Label name="$(parent)Text" font="ZoFontGamepad34" verticalAlignment="CENTER" >
                     <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8" />
                 </Label>
 

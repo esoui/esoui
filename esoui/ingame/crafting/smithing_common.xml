@@ -35,14 +35,10 @@
         </Texture>
 
         <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
-            <Dimensions x="500" y="135" />
+            <Dimensions x="500" y="125" />
 
             <OnInitialized>
-                self.listControl = self:GetNamedChild("List")
-                self.highlightTexture = self:GetNamedChild("Highlight")
-                self.titleLabel = self:GetNamedChild("Title")
-                self.selectedLabel = self:GetNamedChild("SelectedLabel")
-                self.extraInfoLabel = self:GetNamedChild("ExtraInfoLabel")
+                ZO_SmithingHorizontalListTemplate_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
@@ -69,16 +65,26 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_SmithingUniversalItemHorizontalListTemplate" inherits="ZO_SmithingHorizontalListTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SmithingHorizontalListTemplate_OnInitialized(self)
+                self.universalItemBg = self:GetNamedChild("UniversalItemBg")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)UniversalItemBg" textureFile="EsoUI/Art/Crafting/UniversalStyle_RowBackground.dds" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_UNIVERSAL_ITEM" alpha=".35">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Control>
+
         <Control name="ZO_GamepadSmithingHorizontalListTemplate" virtual="true">
             <Dimensions y="300"/>
             <OnInitialized>
-                self.listControl = self:GetNamedChild("List")
-                self.highlightTexture = self:GetNamedChild("Highlight")
-                self.titleLabel = self:GetNamedChild("Title")
-                self.selectedLabel = self:GetNamedChild("SelectedLabel")
-                self.extraInfoLabel = self:GetNamedChild("ExtraInfoLabel")
+                ZO_SmithingHorizontalListTemplate_OnInitialized(self)
                 self.inactiveBG = self:GetNamedChild("BG_Inactive")
                 self.activeBG = self:GetNamedChild("BG_Active")
+                self.universalItemBg = self:GetNamedChild("UniversalItemBg")
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="CENTER">
@@ -108,6 +114,10 @@
                 <Backdrop name="$(parent)BG_Active" inherits="ZO_GamepadWhiteOutlineHighlight" excludeFromResizeToFitExtents="true">
                     <AnchorFill/>
                 </Backdrop>
+
+                <Texture name="$(parent)UniversalItemBg" textureFile="EsoUI/Art/Crafting/Gamepad/gp_UniversalStyle_RowBackground.dds" hidden="true">
+                    <AnchorFill/>
+                </Texture>
             </Controls>
         </Control>
 

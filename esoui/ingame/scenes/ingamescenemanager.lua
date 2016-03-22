@@ -96,7 +96,7 @@ function ZO_IngameSceneManager:OnGameFocusChanged()
     if(IsGameCameraActive() and IsPlayerActivated()) then
         if(DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor()) then
             if self.actionRequiredTutorialThatActivatedWithoutFocus then
-                self:SetInUIMode(false)
+                self:ClearActionRequiredTutorialBlockers()
                 self.actionRequiredTutorialThatActivatedWithoutFocus = false
                 return
             end
@@ -153,16 +153,28 @@ function ZO_IngameSceneManager:OnTutorialStart(tutorialIndex)
     if IsTutorialActionRequired(tutorialIndex) then
         TUTORIAL_SYSTEM:ForceRemoveAll() --Make sure no tutorial is showing before turning off UI mode
         if DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
-            self:SetInUIMode(false)
+            self:ClearActionRequiredTutorialBlockers()
         else
             self.actionRequiredTutorialThatActivatedWithoutFocus = true
         end
     end
 end
 
+function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
+    local interactionType = GetInteractionType()
+    if interactionType ~= INTERACTION_NONE then
+        EndInteraction(interactionType)
+    end
+
+    if IsInteractionPending() then
+        EndPendingInteraction()
+    end
+    self:SetInUIMode(false)
+end
+
 function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
     --if a scene was already shown when we change input mode, hide it
-    if self.currentScene and not self:IsShowingBaseScene() and self.currentScene:GetState() == SCENE_SHOWN then
+    if not self:IsShowingBaseScene() and self.currentScene and self.currentScene:IsShowing() then
         self:SetInUIMode(false)
     end
 end
@@ -435,8 +447,11 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
     end
 
     if(self:IsShowingBaseScene() and not self:IsInUIMode()) then
-        if(GetInteractionType() ~= INTERACTION_NONE) then
-            EndInteraction(GetInteractionType())
+        local interactionType = GetInteractionType()
+        --hidey holes are the first interaction type to have two parts and we don't want hitting
+        --Esc to take the player out of a hideyhole.
+        if(interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_HIDEYHOLE) then
+            EndInteraction(interactionType)
             return
         end
 

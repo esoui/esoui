@@ -15,7 +15,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_VoiceChatChannelsHistoryEntryGamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+        <Control name="ZO_VoiceChatHistoryEntryGamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" override="true" modifyTextType="NONE">
                     <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_VOICECHAT_HISTORY"/>

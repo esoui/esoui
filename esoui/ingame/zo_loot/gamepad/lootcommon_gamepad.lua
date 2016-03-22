@@ -72,7 +72,7 @@ function ZO_Loot_Gamepad_Base:ShowTooltip(selectedData)
         local itemLink = GetLootItemLink(selectedData.lootId)
         local NOT_EQUIPPED = false
         local FORCE_FULL_DURABILITY = true
-        GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_RIGHT_TOOLTIP, itemLink, NOT_EQUIPPED, nil, FORCE_FULL_DURABILITY, nil, nil, selectedData.stackCount, ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT)
+        GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_RIGHT_TOOLTIP, itemLink, NOT_EQUIPPED, nil, FORCE_FULL_DURABILITY, nil, nil, selectedData.stackCount)
     end
     GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
 end
@@ -208,8 +208,8 @@ local ZO_Loot_Common_Gamepad = ZO_Object:Subclass()
 
 function ZO_Loot_Common_Gamepad:UpdateLootWindow(name, actionName, isOwned)
     if not SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root") then
-        if SCENE_MANAGER:IsShowingBaseScene() then
-            -- Only show the looting window if we didn't show a different scene while waiting for the server response
+        if SCENE_MANAGER:IsShowing("lootGamepad") or SCENE_MANAGER:IsShowingBaseScene() then
+            --The update will show the window if we're on the base scene
             LOOT_WINDOW_GAMEPAD:UpdateLootWindow(name, actionName, isOwned)
         else
             EndInteraction(INTERACTION_LOOT)

@@ -215,10 +215,6 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             barTexture:SetHidden(true)
             leadingEdge:SetHidden(true)
 
-            -- Saturate icon
-            ultimateButton:UpdateUseFailure()
-            icon:SetDesaturation((isGamepad and ultimateButton.useFailure) and 1 or 0)
-
             -- Show fill bar if platform appropriate
             ultimateFillFrame:SetHidden(not isGamepad)
             ultimateFillLeftTexture:SetHidden(not isGamepad)
@@ -240,7 +236,6 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             ultimateFillLeftTexture:SetHidden(not isGamepad)
             ultimateFillRightTexture:SetHidden(not isGamepad)
             ultimateFillFrame:SetHidden(not isGamepad)
-            icon:SetDesaturation(isGamepad and 1 or 0)
         
             -- update both platforms progress bars
             local slotHeight = ultimateSlot:GetHeight()
@@ -449,6 +444,17 @@ local function OnActiveQuickslotChanged(eventCode, slotId)
     HandleSlotChanged(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1)
 end
 
+local function OnCollectionUpdated()
+    local quickslot = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1
+    local button = ZO_ActionBar_GetButton(quickslot)
+    if button then
+        local slotId = button:GetSlot()
+        if ZO_QuickslotRadialManager:ValidateOrClearQuickslot(slotId) then
+            HandleSlotChanged(quickslot)
+        end
+    end
+end
+
 local function OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
     if (activeWeaponPair ~= g_actionBarActiveWeaponPair) then
         g_activeWeaponSwapInProgress = true
@@ -461,23 +467,39 @@ local GAMEPAD_CONSTANTS =
 {
     abilitySlotOffsetX = 10,
     ultimateSlotOffsetX = 65,
+    anchor = ZO_Anchor:New(BOTTOM, GuiRoot, BOTTOM, 0, -70),
+    width = 606,
+    showNormalBindingTextOnUltimate = false,
+    showKeybindBG = false,
+    showWeaponSwapButton = false,
 }
 
 local KEYBOARD_CONSTANTS =
 {
     abilitySlotOffsetX = 2,
     ultimateSlotOffsetX = 62,
+    anchor = ZO_Anchor:New(BOTTOM, GuiRoot, BOTTOM, 0, 0),
+    width = 483,
+    showNormalBindingTextOnUltimate = true,
+    showKeybindBG = true,
+    showWeaponSwapButton = true,
 }
 
 local function GetPlatformConstants()
     return IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS
 end
 
-local function ApplyStyle()
-    ApplyTemplateToControl(ZO_ActionBar1, ZO_GetPlatformTemplate("ZO_ActionBar1"))
+function ZO_ActionBar_GetAnchor()
+    local constants = GetPlatformConstants()
+    return constants.anchor
+end
+
+local function ApplyStyle(style)
+    ZO_ActionBar1:ClearAnchors()
+    style.anchor:Set(ZO_ActionBar1)
+    ZO_ActionBar1:SetWidth(style.width)
 
     local lastButton
-    local constants = GetPlatformConstants()
     local buttonTemplate = ZO_GetPlatformTemplate(ACTION_BUTTON_TEMPLATE)
     for physicalSlot, button in pairs(g_actionBarButtons) do
         if button then
@@ -488,25 +510,20 @@ local function ApplyStyle()
                     anchorTarget = ZO_ActionBar1WeaponSwap
                     anchorOffsetX = 5
                 end
-                button:ApplyAnchor(anchorTarget, constants.abilitySlotOffsetX)
+                button:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
                 lastButton = button
             elseif physicalSlot == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
                 button:ApplyStyle(ZO_GetPlatformTemplate(ULTIMATE_ABILITY_BUTTON_TEMPLATE))
-                button:SetShowBindingText(not IsInGamepadPreferredMode())
-                button:ApplyAnchor(g_actionBarButtons[ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + ACTION_BAR_SLOTS_PER_PAGE - 1].slot, constants.ultimateSlotOffsetX)
+                button:SetShowBindingText(style.showNormalBindingTextOnUltimate)
+                button:ApplyAnchor(g_actionBarButtons[ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + ACTION_BAR_SLOTS_PER_PAGE - 1].slot, style.ultimateSlotOffsetX)
             end
         end
     end
 
-    local isGamepad = IsInGamepadPreferredMode()
-    ZO_ActionBar1:GetNamedChild("KeybindBG"):SetHidden(isGamepad)
-    ZO_WeaponSwap_SetPermanentlyHidden(ZO_ActionBar1:GetNamedChild("WeaponSwap"), isGamepad)
+    ZO_ActionBar1:GetNamedChild("KeybindBG"):SetHidden(not style.showKeybindBG)
+    ZO_WeaponSwap_SetPermanentlyHidden(ZO_ActionBar1:GetNamedChild("WeaponSwap"), not style.showWeaponSwapButton)
 
     UpdateUltimateMeter()
-end
-
-local function OnGamepadPreferredModeChanged()
-    ApplyStyle()
 end
 
 function ZO_ActionBar_Initialize()    
@@ -545,27 +562,11 @@ function ZO_ActionBar_Initialize()
         button:SetupFlipAnimation(OnSwapAnimationHalfDone, OnSwapAnimationDone)
     end
 
-    local constants = GetPlatformConstants()
-
     --Main Bar
-    local buttonTemplate = ZO_GetPlatformTemplate(ACTION_BUTTON_TEMPLATE)
-    local lastButton = nil
     for i = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + ACTION_BAR_SLOTS_PER_PAGE - 1 do
         local barButton = MakeActionButton(i, MAIN_BAR_STYLE)
-        barButton:ApplyStyle(buttonTemplate)
-
-        local anchorTarget = lastButton and lastButton.slot
-        local anchorOffsetX = constants.abilitySlotOffsetX
-        if not lastButton then
-            anchorTarget = ZO_ActionBar1WeaponSwap
-            anchorOffsetX = 5
-        end
-        barButton:ApplyAnchor(anchorTarget, anchorOffsetX)
-
         SetupFlipAnimation(barButton)
         barButton:SetupBounceAnimation()
-
-        lastButton = barButton
     end
 
     --Ultimate Button
@@ -578,8 +579,6 @@ function ZO_ActionBar_Initialize()
     }
 
     local ultimateButton = MakeActionButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, ULTIMATE_BUTTON_STYLE)
-    ultimateButton:ApplyStyle(buttonTemplate)
-    ultimateButton:ApplyAnchor(lastButton.slot, constants.ultimateSlotOffsetX)
     SetupFlipAnimation(ultimateButton)
     ultimateButton:SetupBounceAnimation()
     ultimateButton:SetupKeySlideAnimation()
@@ -617,9 +616,9 @@ function ZO_ActionBar_Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTIVE_QUICKSLOT_CHANGED, OnActiveQuickslotChanged)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_PLAYER_ACTIVATED, UpdateAllSlots)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_COLLECTION_UPDATED, OnCollectionUpdated)
 
-    ApplyStyle() -- Setup initial visual style based on current mode.
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
+    ZO_PlatformStyle:New(ApplyStyle, KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS)
 
     HideHiddenButtons()
 end

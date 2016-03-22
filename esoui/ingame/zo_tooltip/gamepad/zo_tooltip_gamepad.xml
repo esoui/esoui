@@ -40,7 +40,7 @@
                         </Control>
 
                         <Control name="$(parent)Tip" inherits="ZO_ScrollTooltip_Gamepad" tier="MEDIUM">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)BottomRail" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BottomRail" relativePoint="BOTTOMLEFT" />
                             <Anchor point="BOTTOMRIGHT" />
                         </Control>
                     </Controls>

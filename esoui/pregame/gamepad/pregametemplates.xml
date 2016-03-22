@@ -28,9 +28,9 @@
             <OnInitialized>
                 ZO_PregameGamepadTextEditTemplate_OnInitialized(self)
             </OnInitialized>
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="45" />
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62" />
             <Controls>
-                <Backdrop name="$(parent)Backdrop" inherits="ZO_EditBackdrop_Gamepad">
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT" />
                     <Controls>

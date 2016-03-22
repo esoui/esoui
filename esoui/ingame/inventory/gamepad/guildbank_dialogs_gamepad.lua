@@ -38,7 +38,7 @@ local function SetupGuildSelectionDialog(dialog)
         local listItem = 
         {
             template = GUILD_ENTRY_TEMPLATE,
-            templateData = entryData,
+            entryData = entryData,
         }
         table.insert(dialog.info.parametricList, listItem)
     end

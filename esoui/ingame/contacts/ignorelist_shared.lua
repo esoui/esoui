@@ -46,7 +46,7 @@ function ZO_IgnoreList:SetupEntry(control, data, selected)
 end
 
 function ZO_IgnoreList:BuildMasterList()
-    self.masterList = {}
+    ZO_ClearNumericallyIndexedTable(self.masterList)
     local numIgnored = GetNumIgnored()
     for i = 1, numIgnored do
         local displayName, note = GetIgnoredInfo(i)

@@ -16,6 +16,7 @@ local CATEGORY_LAYOUT_INFO =
         --override the sizes set by AddCategories because these icons are twice as big as the others
         overrideNormalSize = 102,
         overrideDownSize = 128,
+        barPadding = 25,
 
         onInitializeCallback =  function(button)
                                     local animationTexture = button:GetNamedChild("ImageAnimation")
@@ -26,11 +27,27 @@ local CATEGORY_LAYOUT_INFO =
 
                                     button.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_CrownStoreShineAnimation", animationTexture)
                                     button.timeline:PlayFromStart()
+
+                                    local isSubscriber = IsESOPlusSubscriber()
+                                    local membershipControl = button:GetNamedChild("Membership")
+                                    local remainingCrownsControl = button:GetNamedChild("RemainingCrowns")
+                                    membershipControl:SetHidden(not isSubscriber)
+                                    membershipControl:SetText(GetString(SI_ESO_PLUS_TITLE))
+                                    remainingCrownsControl:SetHidden(false)
+                                    local currentBalance = GetMarketCurrency()
+                                    remainingCrownsControl:SetText(ZO_CommaDelimitNumber(currentBalance))
+                                    button:RegisterForEvent(EVENT_MARKET_CURRENCY_UPDATE, function(currencyAmount)
+                                                                                                    local currentBalance = GetMarketCurrency()
+                                                                                                    remainingCrownsControl:SetText(ZO_CommaDelimitNumber(currentBalance))
+                                                                                                 end)
                                 end,
         onResetCallback =   function(button)
                                 button.animationTexture:SetHidden(true)
                                 button.timeline:PlayInstantlyToStart()
                                 button.timeline:Stop()
+                                button:UnregisterForEvent(EVENT_MARKET_CURRENCY_UPDATE)
+                                button:GetNamedChild("Membership"):SetHidden(true)
+                                button:GetNamedChild("RemainingCrowns"):SetHidden(true)
                             end,
         onButtonStatePressed =  function(button)
                                     button.animationTexture:SetHidden(true)
@@ -46,7 +63,6 @@ local CATEGORY_LAYOUT_INFO =
                                     button.timeline:PlayInstantlyToStart()
                                     button.timeline:Stop()
                                 end,
-        disableWhenDead = true,
     },
     [MENU_CATEGORY_INVENTORY] =
     {
@@ -94,7 +110,7 @@ local CATEGORY_LAYOUT_INFO =
             if CHAMPION_PERKS then
                 local indicators = {}
                 if CHAMPION_PERKS:IsChampionSystemNew() then
-                    table.insert(indicators, "EsoUI/Art/Miscellaneous/new_icon.dds")
+                    table.insert(indicators, ZO_KEYBOARD_NEW_ICON)
                 end
                 if CHAMPION_PERKS:HasAnySpendableUnspentPoints() then
                     table.insert(indicators, "EsoUI/Art/MainMenu/menuBar_pointsToSpend.dds")
@@ -128,6 +144,12 @@ local CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MainMenu/menuBar_collections_down.dds",
         disabled = "EsoUI/Art/MainMenu/menuBar_collections_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_collections_over.dds",
+
+        indicators = function()
+            if COLLECTIONS_BOOK and COLLECTIONS_BOOK:HasAnyNotifications() then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
     },
     [MENU_CATEGORY_MAP] =
     {
@@ -219,6 +241,13 @@ local CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MenuBar/menuBar_help_down.dds",
         disabled = "EsoUI/Art/MenuBar/menuBar_help_disabled.dds",
         highlight = "EsoUI/Art/MenuBar/menuBar_help_over.dds",
+    },
+    [MENU_CATEGORY_ACTIVITY_FINDER] =
+    {
+        binding = "TOGGLE_ACTIVITY_FINDER",
+        descriptor = MENU_CATEGORY_ACTIVITY_FINDER,
+        hidden = true,
+        alias = MENU_CATEGORY_GROUP, --On keyboard, we want the activity finder keybind to just take you to group naturally for now
     },
 }
 
@@ -678,7 +707,13 @@ function MainMenu_Keyboard:ToggleSceneGroup(sceneGroupName, specificScene)
 end
 
 function MainMenu_Keyboard:ShowCategory(category)
+    --Keyboard and gamepad aren't always one-to-one, so sometimes we might need a binding to do the exact same thing as a different binding
     local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+    if categoryLayoutInfo.alias then
+        category = categoryLayoutInfo.alias
+        categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+    end
+
     if(categoryLayoutInfo.visible == nil or categoryLayoutInfo.visible()) then
         local categoryInfo = self.categoryInfo[category]
         if(categoryInfo.lastSceneName) then
@@ -725,6 +760,12 @@ do
     end
 
     function MainMenu_Keyboard:ToggleCategory(category)
+        --Keyboard and gamepad aren't always one-to-one, so sometimes we might need a binding to do the exact same thing as a different binding
+        local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+        if categoryLayoutInfo.alias then
+            category = categoryLayoutInfo.alias
+        end
+
         if MAIN_MENU_MANAGER:HasBlockingScene() then
             local sceneData = {
                 category = category,

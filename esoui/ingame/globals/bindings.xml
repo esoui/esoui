@@ -304,6 +304,10 @@
                 <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_NOTIFICATIONS)</Down>
             </Action>
 
+            <Action name="TOGGLE_ACTIVITY_FINDER">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_ACTIVITY_FINDER)</Down>
+            </Action>
+
             <Action name="TOGGLE_HELP">
                 <Down>
                     if not TUTORIAL_SYSTEM:ShowHelp() then

@@ -20,9 +20,6 @@ function ZO_BountyDisplay:Initialize(control, isGamepad)
         iconSide = RIGHT,
     }   
 
-    self.playerOwesGold = true  -- This controls the color of the currency label. When Enforcers get implemented, this variable will reflect
-                                -- whether the player is owed gold (reward) or owes gold (bounty). But for now, only the latter is possible.
-
     -- Set up controls
     self.control = control
 
@@ -51,6 +48,6 @@ end
 
 function ZO_BountyDisplay:OnBountyUpdated()
     if IsJusticeEnabled() then
-        ZO_CurrencyControl_SetSimpleCurrency(self.control, CURT_MONEY, GetFullBountyPayoffAmount(), self.currencyOptions, CURRENCY_SHOW_ALL, self.playerOwesGold) 
+        ZO_CurrencyControl_SetSimpleCurrency(self.control, CURT_MONEY, GetFullBountyPayoffAmount(), self.currencyOptions, CURRENCY_SHOW_ALL, true) 
     end
 end

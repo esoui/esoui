@@ -49,7 +49,7 @@
         </Control>
 
         <Control name="Options_Gameplay_GamepadSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_PreventAttackingInnocents" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_PreventAttackingInnocents" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPAD_SECTION_HEADER)
                 ZO_OptionsWindow_InitializeControl(self)

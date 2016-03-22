@@ -136,14 +136,14 @@ do
     end
 end
 
-function ZO_Scroll_Gamepad_SetScrollIndicatorSide(scrollIndicator, background, anchorSide, customOffsetX, customOffsetY)
+function ZO_Scroll_Gamepad_SetScrollIndicatorSide(scrollIndicator, background, anchorSide, customOffsetX, customOffsetY, anchorsToBackground)
     scrollIndicator:ClearAnchors()
 
-    local anchorRelativePos = TOPRIGHT
+    local anchorRelativePos = anchorsToBackground and RIGHT or TOPRIGHT
     local offsetY = customOffsetY or 0
     local offsetX = customOffsetX or -ZO_GAMEPAD_PANEL_BG_VERTICAL_DIVIDER_HALF_WIDTH
     if anchorSide == LEFT then
-        anchorRelativePos = TOPLEFT
+        anchorRelativePos = anchorsToBackground and LEFT or TOPLEFT
         offsetX = customOffsetX or ZO_GAMEPAD_PANEL_BG_VERTICAL_DIVIDER_HALF_WIDTH
     end
 
@@ -154,7 +154,7 @@ function ZO_Scroll_Gamepad_SetScrollIndicatorSide(scrollIndicator, background, a
     end
 
     if bgControl then
-        local anchorControl = bgControl:GetNamedChild("BackgroundAtScreenCenterHeight")
+        local anchorControl = anchorsToBackground and bgControl or bgControl:GetNamedChild("BackgroundAtScreenCenterHeight")
         scrollIndicator:SetAnchor(CENTER, anchorControl, anchorRelativePos, offsetX, offsetY)
     end
 end

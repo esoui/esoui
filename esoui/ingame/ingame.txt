@@ -58,39 +58,41 @@ EsoUI\Ingame\Contacts\Gamepad\SocialDialogs_Gamepad.lua
 EsoUI\Ingame\Contacts\SocialManager.lua
 
 EsoUI\Ingame\Group\ZO_GroupList_Manager.lua
-EsoUI\Ingame\Group\ZO_GroupList_Base.lua
-EsoUI\Ingame\Group\GroupMembers_Shared.lua
 
+EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Manager.lua
 EsoUI\Ingame\Group\GroupUtils.lua
+EsoUI\Ingame\LFG\PreferredRoles.lua
+EsoUI\Ingame\LFG\VeteranDifficultySettings.lua
+EsoUI\Ingame\Group\Keyboard\ZO_GroupMenu_Keyboard.lua
+EsoUI\Ingame\Group\Keyboard\ZO_GroupMenu_Keyboard.xml
 EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.lua
 EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.xml
-EsoUI\Ingame\Group\ZO_GroupingTools_Shared.lua
-EsoUI\Ingame\Group\ZO_GroupingTools_Shared.xml
-EsoUI\Ingame\Group\GroupMembers.lua
-EsoUI\Ingame\Group\GroupMembers.xml
-EsoUI\Ingame\Group\PreferredRoles.lua
-EsoUI\Ingame\Group\PreferredRoles.xml
-EsoUI\Ingame\Group\VeteranDifficultySettings.lua
-EsoUI\Ingame\Group\ReviveCounter.lua
 EsoUI\Ingame\Group\JumpToLeader.lua
-EsoUI\Ingame\Group\GroupCenterInfo.xml
 EsoUI\Ingame\TopBar\TopBar.xml
 
-EsoUI\Ingame\Group\Gamepad\ZO_GroupData_Gamepad.lua
-EsoUI\Ingame\Group\Gamepad\ZO_GroupData_Gamepad.xml
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.xml
 EsoUI\Ingame\Group\Gamepad\ZO_GroupList_Gamepad.lua
 EsoUI\Ingame\Group\Gamepad\ZO_GroupList_Gamepad.xml
-EsoUI\Ingame\Group\Gamepad\ZO_GroupRolesBar_Gamepad.lua
-EsoUI\Ingame\Group\Gamepad\ZO_GroupRolesBar_Gamepad.xml
+EsoUI\Ingame\LFG\Gamepad\ZO_GroupRolesBar_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\ZO_GroupRolesBar_Gamepad.xml
 EsoUI\Ingame\Group\Gamepad\ZO_GroupMenu_Gamepad.lua
 EsoUI\Ingame\Group\Gamepad\ZO_GroupMenu_Gamepad.xml
-EsoUI\Ingame\Group\Keyboard\ZO_GroupingTools_Keyboard.lua
-EsoUI\Ingame\Group\Keyboard\ZO_GroupingTools_Keyboard.xml
-EsoUI\Ingame\Group\Gamepad\ZO_GroupingTools_Gamepad.lua
-EsoUI\Ingame\Group\Gamepad\ZO_GroupingTools_Gamepad.xml
 
-EsoUI\Ingame\Group\SearchingForGroup.lua
-EsoUI\Ingame\Group\SearchingForGroup.xml
+EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Manager.lua
+EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Shared.lua
+EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Shared.xml
+EsoUI\Ingame\LFG\Keyboard\ZO_ActivityFinderTemplate_Keyboard.lua
+EsoUI\Ingame\LFG\Keyboard\ZO_ActivityFinderTemplate_Keyboard.xml
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderTemplate_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderTemplate_Gamepad.xml
+EsoUI\InGame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.lua
+EsoUI\InGame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.xml
+EsoUI\Ingame\LFG\ZO_DungeonFinder_Manager.lua
+EsoUI\Ingame\LFG\ZO_AvAFinder_Manager.lua
+
+EsoUI\Ingame\LFG\SearchingForGroup.lua
+EsoUI\Ingame\LFG\SearchingForGroup.xml
 
 EsoUI\Ingame\MainMenu\ZO_MainMenu_Manager.lua
 EsoUI\Ingame\MainMenu\Keyboard\ZO_MainMenu_Keyboard.lua
@@ -157,6 +159,8 @@ EsoUI\Ingame\Collections\Keyboard\CollectionsBook.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.xml
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
+EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.xml
 
 EsoUI\Ingame\ZO_Quest\QuestTimer.lua
 EsoUI\Ingame\ZO_Quest\QuestTimer.xml
@@ -164,6 +168,8 @@ EsoUI\Ingame\ZO_Quest\QuestTracker.lua
 EsoUI\Ingame\ZO_Quest\QuestTracker.xml
 EsoUI\Ingame\ZO_Quest\FocusedQuestTracker.lua
 EsoUI\Ingame\ZO_Quest\FocusedQuestTracker.xml
+EsoUI\Ingame\LFG\ActivityTracker.lua
+EsoUI\Ingame\LFG\ActivityTracker.xml
 EsoUI\Ingame\ZO_Quest\QuestJournal_Manager.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Shared.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Shared.xml
@@ -350,8 +356,8 @@ EsoUI\Ingame\InteractWindow\Gamepad\InteractWindow_Gamepad.xml
 EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChat_Manager.lua
 EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatChannels_Gamepad.lua
 EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatChannels_Gamepad.xml
-EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatParticipantOptions_Gamepad.lua
-EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatParticipantOptions_Gamepad.xml
+EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatParticipants_Gamepad.lua
+EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatParticipants_Gamepad.xml
 EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChat_Gamepad.lua
 EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChat_Gamepad.xml
 EsoUI\Ingame\VoiceChat\Console\ZO_VoiceChatHUD_Gamepad.lua
@@ -512,8 +518,19 @@ EsoUI\Ingame\Tutorial\Tutorial.xml
 EsoUI\InGame\TrialAccount\TrialAccount.lua
 EsoUI\InGame\TrialAccount\TrialAccount.xml
 
+EsoUI\InGame\Help\Keyboard\HelpScreenTemplate_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpCustomerService_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpCustomerService_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpOverview_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpOverview_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpCharacterStuck_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpCharacterStuck_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpSubmitFeedback_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpSubmitFeedback_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpAskForHelp_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpAskForHelp_Keyboard.xml
 
 ESOUI\Ingame\Stuck\Stuck_Manager.lua
 EsoUI\Ingame\Stuck\Stuck_Base.lua

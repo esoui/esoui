@@ -744,11 +744,13 @@ function ZO_MailSend_Gamepad:EnterInventoryList()
 end
 
 function ZO_MailSend_Gamepad:InventorySelectionChanged(list, inventoryData)
-    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
-    if inventoryData then
-        GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
+    if MAIL_MANAGER_GAMEPAD:GetCurrentList() == self.inventoryList then
+        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
+        if inventoryData then
+            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
+        end
+        MAIL_MANAGER_GAMEPAD:RefreshKeybind()
     end
-    MAIL_MANAGER_GAMEPAD:RefreshKeybind()
 end
 
 function ZO_MailSend_Gamepad:Clear()

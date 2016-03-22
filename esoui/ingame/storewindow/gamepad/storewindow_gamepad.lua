@@ -10,13 +10,29 @@ end
 
 local function OnOpenStore()
     if IsInGamepadPreferredMode() then
-        STORE_WINDOW_GAMEPAD:SetActiveComponents(ZO_MODE_STORE_BUY, ZO_MODE_STORE_BUY_BACK, ZO_MODE_STORE_SELL, ZO_MODE_STORE_REPAIR)
+        local componentTable = {}
+
+        if not IsStoreEmpty() then
+            table.insert(componentTable, ZO_MODE_STORE_BUY)
+        end
+
+        table.insert(componentTable, ZO_MODE_STORE_SELL)
+        table.insert(componentTable, ZO_MODE_STORE_BUY_BACK)
+
+        if CanStoreRepair() then
+            table.insert(componentTable, ZO_MODE_STORE_REPAIR)
+        end
+
+        STORE_WINDOW_GAMEPAD:SetActiveComponents(componentTable)
         SCENE_MANAGER:Show(GAMEPAD_STORE_SCENE_NAME)
     end
 end
 
 local function OnCloseStore()
     if IsInGamepadPreferredMode() then
+        -- Ensure that all dialogs related to the store close on interaction end
+        ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
+
         SCENE_MANAGER:Hide(GAMEPAD_STORE_SCENE_NAME)
     end
 end
@@ -40,7 +56,11 @@ function ZO_GamepadStoreManager:Initialize(control)
     local OnCurrencyChanged = function()
         if not self.control:IsControlHidden() then
             self:RefreshHeaderData()
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindButton)
+
+            local activeComponent = self:GetActiveComponent()
+            if activeComponent then
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(activeComponent.keybindStripDescriptor)
+            end
         end
     end
 
@@ -69,6 +89,12 @@ function ZO_GamepadStoreManager:Initialize(control)
         end    
     end
 
+    local OnInventoryUpdated = function()
+        if not self.control:IsControlHidden() then
+            self:RefreshHeaderData()
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnCurrencyChanged)
     self.control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, OnCurrencyChanged)
     self.control:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, OnCurrencyChanged)
@@ -76,6 +102,8 @@ function ZO_GamepadStoreManager:Initialize(control)
     self.control:RegisterForEvent(EVENT_SELL_RECEIPT, OnSellSuccess)
     self.control:RegisterForEvent(EVENT_BUYBACK_RECEIPT, OnBuyBackSuccess)
     self.control:RegisterForEvent(EVENT_ITEM_REPAIR_FAILURE, OnFailedRepair)
+    self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
+    self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
 
     self:InitializeKeybindStrip()
     self.components = {}
@@ -114,10 +142,9 @@ function ZO_GamepadStoreManager:GetCurrentMode()
     return self.activeComponent and self.activeComponent:GetStoreMode() or nil
 end
 
-function ZO_GamepadStoreManager:SetActiveComponents(...)
+function ZO_GamepadStoreManager:SetActiveComponents(componentTable)
     self.activeComponents = {}
-    for i = 1, select("#", ...) do
-        local componentMode = select(i, ...)
+    for index, componentMode in ipairs(componentTable) do
         local component = self.components[componentMode]
         component:Refresh()
         table.insert(self.activeComponents, component)
@@ -150,7 +177,7 @@ function ZO_GamepadStoreManager:GetSpinnerValue()
 end
 
 function ZO_GamepadStoreManager:SetupSpinner(max, value, unitPrice, currencyType)
-    self.spinner:SetMinMax(1, max)
+    self.spinner:SetMinMax(1, zo_min(max, MAX_STORE_WINDOW_STACK_QUANTITY))
     self.spinner:SetValue(value)
     self.spinner:SetupCurrency(unitPrice, currencyType)
 end
@@ -187,17 +214,30 @@ function ZO_GamepadStoreManager:InitializeKeybindStrip()
                 return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), goldIcon)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
-            visible = function() return GetRepairAllCost() > 0 end,
-            enabled = function() return GetRepairAllCost() <= GetCarriedCurrencyAmount(CURT_MONEY) end,
+            visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
+            enabled = function() 
+                if GetRepairAllCost() <= GetCarriedCurrencyAmount(CURT_MONEY) then
+                    return true
+                else
+                    return false, GetString(SI_REPAIR_ALL_CANNOT_AFFORD)
+                end
+            end,
             callback = function()
                 local cost = GetRepairAllCost()
                 if cost > GetCarriedCurrencyAmount(CURT_MONEY) then
                     self:FailedRepairMessageBox()
                 else
+                    local dialogData = {
+                        cost = cost,
+                        declineCallback = function()
+                                              self.numberItemsRepairing = 0
+                                              self.isRepairingAll = false
+                                          end,
+                    }
+
                     self.isRepairingAll = true
                     self.numberItemsRepairing = self.components[ZO_MODE_STORE_REPAIR]:GetNumRepairItems()
-                    RepairAll()
-                    PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
+                    ZO_Dialogs_ShowGamepadDialog("REPAIR_ALL", dialogData)
                 end
             end,
     }
@@ -258,11 +298,24 @@ end
 
 do
     local function UpdateCapacityString()
-        return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
+        local mode = STORE_WINDOW_GAMEPAD:GetCurrentMode()
+        if GetNumBagFreeSlots(BAG_BACKPACK) == 0 and (mode == ZO_MODE_STORE_BUY or mode == ZO_MODE_STORE_BUY_BACK) then
+            return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)))
+        else
+            return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
+        end
     end
 
+    local STORE_CURRENCY_LABEL_OPTIONS = ZO_ShallowTableCopy(ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+
     local function UpdateGold(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        local mode = STORE_WINDOW_GAMEPAD:GetCurrentMode()
+        if mode == ZO_MODE_STORE_SELL and GetCarriedCurrencyAmount(CURT_MONEY) == GetMaxCarriedCurrencyAmount(CURT_MONEY) then
+            STORE_CURRENCY_LABEL_OPTIONS.color = ZO_ERROR_COLOR
+        else
+            STORE_CURRENCY_LABEL_OPTIONS.color = nil
+        end
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), STORE_CURRENCY_LABEL_OPTIONS)
         return true
     end
 
@@ -481,6 +534,16 @@ function ZO_GamepadStoreManager:FailedRepairMessageBox(reason)
     if message ~= "" then
         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, message)
         PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+    end
+end
+
+function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
+    if selectedData.price > GetCarriedCurrencyAmount(CURT_MONEY) then
+        return false, GetString(SI_NOT_ENOUGH_MONEY)
+    elseif GetNumBagFreeSlots(BAG_BACKPACK) == 0 then
+        return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
+    else
+        return true
     end
 end
 

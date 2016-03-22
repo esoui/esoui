@@ -46,11 +46,15 @@ function ZO_GamepadFocus:Initialize(control, movementController, direction)
     self.control = control
     self.index = nil
     self.savedIndex = nil
-    self.movementController = movementController or ZO_MovementController:New(direction or MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
+    self:InitializeMovementController(movementController, direction)
     self:SetActive(false)
     self:SetPlaySoundFunction(GamepadListPlaySound)
 
     self.directionalInputEnabled = true
+end
+
+function ZO_GamepadFocus:InitializeMovementController(movementController, direction)
+    self.movementController = movementController or ZO_MovementController:New(direction or MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 end
 
 function ZO_GamepadFocus:SetActive(active, retainFocus)
@@ -66,8 +70,6 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
             self.savedIndex = self.index
             if not retainFocus then
                 self:ClearFocus()
-            else
-                self.savedIndex = self.index
             end
             DIRECTIONAL_INPUT:Deactivate(self)
         end
@@ -96,9 +98,9 @@ function ZO_GamepadFocus:AddEntry(entry)
     if not entry.highlightFadeAnimation and entry.highlight then
         entry.highlightFadeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("FocusAlphaFadeAnimation", entry.highlight)
     end
-	if entry.control and entry.control.icon and entry.iconScaleAnimation == nil then
-		entry.iconScaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("FocusIconScaleAnimation", entry.control.icon)
-	end
+    if entry.control and entry.control.icon and entry.iconScaleAnimation == nil then
+        entry.iconScaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("FocusIconScaleAnimation", entry.control.icon)
+    end
 
     if entry.highlightFadeAnimation then
         if entry.highlight then
@@ -122,8 +124,8 @@ function ZO_GamepadFocus:RemoveMatchingEntries(compareItem, equalityFunction)
 
     local focus = self:GetFocus()
     local shouldUpdateFocus = false
-	for k, v in ipairs(self.data) do
-		if equalityFunction(compareItem, v) then
+    for k, v in ipairs(self.data) do
+        if equalityFunction(compareItem, v) then
             if focus and k <= focus then
                 self:ClearFocus()
                 shouldUpdateFocus = true
@@ -132,9 +134,9 @@ function ZO_GamepadFocus:RemoveMatchingEntries(compareItem, equalityFunction)
                     focus = focus - 1
                 end
             end
-			table.remove(self.data, k)
-		end
-	end
+            table.remove(self.data, k)
+        end
+    end
     if shouldUpdateFocus then
         self:SetFocusByIndex(zo_clamp(focus, 1, #self.data))
     end
@@ -225,13 +227,13 @@ function ZO_GamepadFocus:SetFocusToMatchingEntry(compareItem, equalityFunction)
 
     local focus = self:GetFocus()
     local shouldUpdateFocus = false
-	for k, v in ipairs(self.data) do
-		if equalityFunction(compareItem, v) then
+    for k, v in ipairs(self.data) do
+        if equalityFunction(compareItem, v) then
             self:SetFocusByIndex(k)
             didSetFocus = true
             break
-		end
-	end
+        end
+    end
     return didSetFocus
 end
 

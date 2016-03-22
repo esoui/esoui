@@ -24,11 +24,15 @@ function ZO_LootHistory_Gamepad:InitializeFragment()
 end
 
 function ZO_LootHistory_Gamepad:InitializeFadingControlBuffer(control)
+    local HORIZ_OFFSET = 0
+    local VERTICAL_OFFSET = -160
     local anchor = ZO_Anchor:New(BOTTOMLEFT, GuiRoot, BOTTOMLEFT, HORIZ_OFFSET, VERTICAL_OFFSET)
-    local MAX_ENTRIES = 6
-    local CONTAINER_SHOW_TIME_MS = 3600
+    local MAX_ENTRIES = 5
+    local CONTAINER_SHOW_TIME_MS = self:GetContainerShowTime()
+    local PERSISTENT_CONTAINER_SHOW_TIME_MS = self:GetPersistentContainerShowTime()
 
-    self.lootStream = self:CreateFadingStationaryControlBuffer(control, "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, CONTAINER_SHOW_TIME_MS, "Gamepad")
+    self.lootStreamPersistent = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("PersistentContainer"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, PERSISTENT_CONTAINER_SHOW_TIME_MS, "GamepadPersistent")
+    self.lootStream = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("Container"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, CONTAINER_SHOW_TIME_MS, "Gamepad")
 end
 
 function ZO_LootHistory_Gamepad:SetEntryTemplate()

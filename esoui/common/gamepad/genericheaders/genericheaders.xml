@@ -23,19 +23,19 @@
 
         <Control name="ZO_GamepadHeaderHorizontalDivider" resizeToFitDescendents="true" virtual="true">
             <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2">
                     <Anchor point="LEFT" />
                     <Dimensions x="4" y="8" />
                     <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2">
                     <Anchor point="RIGHT" />
                     <Dimensions x="4" y="8" />
                     <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" level="2">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
                     <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />

@@ -23,6 +23,7 @@ local cancelButtonDownTexture = "EsoUI/Art/Buttons/cancelButton_mouseDown.dds"
 local NEW_ICON_TEXTURE = "EsoUI/Art/Inventory/newItem_icon.dds"
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 
+
 BANKING_INTERACTION =
 {
     type = "Banking",
@@ -234,18 +235,30 @@ ITEM_SLOT_CURRENCY_OPTIONS =
     iconSide = RIGHT,
 }
 
-local function SetupInventoryItemRow(rowControl, slot)
+local function GetDefaultSlotSellValue(slot)
+    return (FENCE_MANAGER and SYSTEMS:GetObject("fence"):IsLaundering()) and slot.stackLaunderPrice or slot.stackSellPrice
+end
+
+local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
+    local options = overrideOptions or ITEM_SLOT_CURRENCY_OPTIONS
     local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, slot.quality)
     local nameControl = GetControl(rowControl, "Name")
     nameControl:SetText(slot.name) -- already formatted
     nameControl:SetColor(r, g, b, 1)
 
+    local itemValue 
+    if type(options.overrideSellValue) == "function" then
+        itemValue = options.overrideSellValue(slot)
+    else
+        itemValue = GetDefaultSlotSellValue(slot)
+    end
+
     local sellPriceControl = GetControl(rowControl, "SellPrice")
     sellPriceControl:SetHidden(false)
-    ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, 
-                                         CURT_MONEY, 
-                                         (FENCE_MANAGER and SYSTEMS:GetObject("fence"):IsLaundering()) and slot.stackLaunderPrice or slot.stackSellPrice, 
-                                         ITEM_SLOT_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl,
+                                         CURT_MONEY,
+                                         itemValue,
+                                         options)
 
     local inventorySlot = GetControl(rowControl, "Button")
     ZO_Inventory_BindSlot(inventorySlot, slot.inventory.slotType, slot.slotIndex, slot.bagId)
@@ -255,6 +268,27 @@ local function SetupInventoryItemRow(rowControl, slot)
 
     UpdateStatusControl(rowControl, slot)
     UpdateStatValueControl(rowControl, slot)
+end
+
+local function GetItemSlotSellValueWithBonus(slot)
+    if FENCE_MANAGER and SYSTEMS:GetObject("fence"):IsSellingStolenItems() and FENCE_MANAGER:HasBonusToSellingStolenItems() then
+        return GetItemSellValueWithBonuses(slot.bagId, slot.slotIndex) * slot.stackCount
+    end
+
+    return GetDefaultSlotSellValue(slot)
+end
+
+ITEM_BACKPACK_SLOT_CURRENCY_OPTIONS =
+{
+    showTooltips = false,
+    font = "ZoFontGameShadow",
+    iconSide = RIGHT,
+    color = ZO_SetupInventoryItemOptionsCurrencyColor,
+    overrideSellValue = GetItemSlotSellValueWithBonus,
+}
+
+local function SetupBackpackInventoryItemRow(rowControl, slot)
+    SetupInventoryItemRow(rowControl, slot, ITEM_BACKPACK_SLOT_CURRENCY_OPTIONS)
 end
 
 local function SetupQuestRow(rowControl, questItem)
@@ -435,7 +469,7 @@ function ZO_InventoryManager:New()
             backingBag = BAG_BACKPACK,
             listView = ZO_PlayerInventoryBackpack,
             listDataType = INVENTORY_DATA_TYPE_BACKPACK,
-            listSetupCallback = SetupInventoryItemRow,
+            listSetupCallback = SetupBackpackInventoryItemRow,
             listHiddenCallback = OnInventoryItemRowHidden,
             freeSlotsLabel = ZO_PlayerInventoryInfoBarFreeSlots,
             altFreeSlotsLabel = ZO_PlayerInventoryInfoBarAltFreeSlots,
@@ -571,9 +605,11 @@ function ZO_InventoryManager:New()
     SHARED_INVENTORY:RegisterCallback("SlotRemoved", function(bagId, slotIndex, oldSlotData) 
         local inventory = manager.bagToInventoryType[bagId]
         if inventory then
-            manager:OnInventoryItemRemoved(inventory, bagId, slotIndex, oldSlotData) 
+            manager:OnInventoryItemRemoved(inventory, bagId, slotIndex, oldSlotData)
         end
     end)
+
+    self.capacityAnnouncementsInfo = {}
 
     return manager
 end
@@ -702,6 +738,7 @@ function ZO_InventoryManager:SlotForInventoryControl(inventorySlotControl)
         end
     end
 end
+
 
 --Bag Window
 ------------

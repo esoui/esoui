@@ -9,6 +9,8 @@ STAT_TYPES =
     [ATTRIBUTE_STAMINA] = STAT_STAMINA_MAX,
 }
 
+ZO_STATS_REFRESH_TIME_SECONDS = 2
+
 ------------------
 -- Stats Common --
 ------------------

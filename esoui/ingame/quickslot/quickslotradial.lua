@@ -34,28 +34,41 @@ function ZO_QuickslotRadialManager:PopulateMenu()
     self.selectedSlotNum = GetCurrentQuickslot()
 
     for i = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, ACTION_BAR_FIRST_UTILITY_BAR_SLOT + ACTION_BAR_UTILITY_BAR_SIZE do
-        local slotIcon = GetSlotTexture(i)
-        local slotType = GetSlotType(i)
-        local slotName = GetSlotName(i)
-        slotName = zo_strformat(SI_TOOLTIP_ITEM_NAME, slotName)
-        local slotItemQuality = GetSlotItemQuality(i)
-
-        local slotNameData
-        if slotItemQuality
-        then
-            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, slotItemQuality)
-            local colorTable = { r = r, g = g, b = b }
-            slotNameData = {slotName, colorTable}
-        else
-            slotNameData = slotName
-        end
-
-        if(slotType == ACTION_TYPE_NOTHING) then
+        if not self:ValidateOrClearQuickslot(i) then
             self.menu:AddEntry(EMPTY_QUICKSLOT_STRING, EMPTY_QUICKSLOT_TEXTURE, EMPTY_QUICKSLOT_TEXTURE, function() SetCurrentQuickslot(i) end, i)
         else
+            local slotType = GetSlotType(i)
+            local slotIcon = GetSlotTexture(i)
+            local slotName = GetSlotName(i)
+            slotName = zo_strformat(SI_TOOLTIP_ITEM_NAME, slotName)
+            local slotItemQuality = GetSlotItemQuality(i)
+
+            local slotNameData
+            if slotItemQuality
+            then
+                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, slotItemQuality)
+                local colorTable = { r = r, g = g, b = b }
+                slotNameData = {slotName, colorTable}
+            else
+                slotNameData = slotName
+            end
             self.menu:AddEntry(slotNameData, slotIcon, slotIcon, function() SetCurrentQuickslot(i) end, i)
         end
     end
+end
+
+function ZO_QuickslotRadialManager:ValidateOrClearQuickslot(slot)
+    local isValid = false
+    local slotType = GetSlotType(slot)
+    if slotType ~= ACTION_TYPE_NOTHING then
+        local slotIcon = GetSlotTexture(slot)
+        if not slotIcon or slotIcon == '' then
+            ClearSlot(slot)
+        else
+            isValid = true
+        end
+    end
+    return isValid
 end
 
 --Quickslot Radial Manager

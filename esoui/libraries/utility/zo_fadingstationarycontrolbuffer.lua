@@ -43,6 +43,7 @@ function ZO_FadingStationaryControlBuffer:Initialize(control,  maxDisplayedEntri
     self.emptyDeltaTime = 0
     local offsetY = select(6,self.control:GetAnchor())
     self.resetPositionY = offsetY
+    self.controllerType = controllerType
 
     self:InitializeContainerAnimations(containerAnimationName)
 
@@ -122,7 +123,6 @@ do
 
         control.fadeTimeline = self.fadeTimeline
     end
-
 end
 
 local function ReleaseAllChildren(control)
@@ -313,7 +313,7 @@ do
         if not pool then
             local function Factory(pool)
                 local parent = self.control
-                local name = string.format("%s%s%s%f", parent:GetName(), templateName, "Entry", pool:GetNextControlId())
+                local name = string.format("%s%s%s%f", parent:GetName(), templateName, self.controllerType, pool:GetNextControlId())
                 local control = CreateControl(name, parent, CT_CONTROL)
                 control:SetResizeToFitDescendents(true)
                 control.pool = pool
@@ -339,7 +339,7 @@ do
         local pool = pools[templateName]
         if not pool then
             local function Factory(pool)
-                local name = string.format("%s%s", templateName, name)
+                local name = string.format("%s%s%s", templateName, name, self.controllerType)
                 local control = ZO_ObjectPool_CreateNamedControl(name, templateName, pool, pool.parent)
                 control.pool = pool
                 control.type = CONTROL_TYPE_ITEM
@@ -464,12 +464,22 @@ function ZO_FadingStationaryControlBuffer:FlushEntries()
     while #self.queue > 0 do
         local queuedEntry = self.queue[1]
         local templateName = queuedEntry.templateName
+        local persistent = queuedEntry.isPersistent
 
-        local handled = self:TryConcatWithExistingEntry(templateName, queuedEntry, newBatch)
-        if not handled then
-            self:AddToBatch(templateName, queuedEntry, newBatch)
-            handled = true
-            hadEntries = true
+        local persistHandled = false
+        if persistent then
+            persistHandled = self:TryConcatWithExistingEntry(templateName, queuedEntry, self.activeEntries)
+        end
+
+        if not persistHandled then
+            local handled = self:TryConcatWithExistingEntry(templateName, queuedEntry, newBatch)
+            if not handled then
+                self:AddToBatch(templateName, queuedEntry, newBatch)
+                handled = true
+                hadEntries = true
+            end
+        else
+            self.containerStartTimeMs = GetFrameTimeMilliseconds()
         end
 
         table.remove(self.queue, 1)

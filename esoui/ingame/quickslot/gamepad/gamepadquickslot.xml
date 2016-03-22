@@ -25,7 +25,7 @@
                                     <Dimensions x="64" y="64" />
                                     <Anchor point="CENTER"/>
                                 </Texture>
-                                <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGamepadBold27" text="50">
+                                <Label name="$(parent)CountText" tier="HIGH" font="ZoFontGamepadBold27">
                                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="-4"/>
                                 </Label>
                                 <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" >

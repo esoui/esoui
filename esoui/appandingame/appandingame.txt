@@ -1,3 +1,5 @@
+## DependsOn: ZO_FontDefs
+
 ; UI files available in App and Ingame
 EsoUI\AppAndInGame\Globals\Globals.lua
 

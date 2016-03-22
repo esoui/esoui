@@ -1,2 +1,4 @@
+## DependsOn: ZO_FontDefs
 EsoUI\IngameLocalization\LocalizeGeneratedStrings.lua
-$(languageDirectory)\lang\$(language)_client.lua
+$(languageDirectory)\lang\$(officialLanguage)_client.lua
+$(languageDirectory)\lang\$(language)_client.str

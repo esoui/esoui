@@ -1,0 +1,99 @@
+<GuiXml>
+    <!-- Fonts created in this file will only be loaded for Keyboard (i.e. PC) 
+         Any files loaded on the Consoles should not use these fonts as they will not render -->
+    <Font name="ZoFontWinH1" font="$(BOLD_FONT)|$(KB_30)|soft-shadow-thick" />
+    <Font name="ZoFontWinH2" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+    <Font name="ZoFontWinH3" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thick" />
+    <Font name="ZoFontWinH4" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />
+    <Font name="ZoFontWinH5" font="$(BOLD_FONT)|$(KB_16)|soft-shadow-thick" />
+
+    <Font name="ZoFontWinT1" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontWinT2" font="$(BOLD_FONT)|$(KB_16)|soft-shadow-thin" />
+
+    <Font name="ZoFontGame" font="$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontGameMedium" font="$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontGameBold" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontGameOutline" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontGameShadow" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
+
+    <Font name="ZoFontKeyboard28ThickOutline" font="$(BOLD_FONT)|$(KB_28)|thick-outline" />
+    <Font name="ZoFontKeyboard24ThickOutline" font="$(BOLD_FONT)|$(KB_24)|thick-outline" />
+    <Font name="ZoFontKeyboard18ThickOutline" font="$(BOLD_FONT)|$(KB_18)|thick-outline" />
+
+    <Font name="ZoFontGameSmall" font="$(BOLD_FONT)|$(KB_13)|soft-shadow-thin" />
+    <Font name="ZoFontGameLarge" font="$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontGameLargeBold" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />
+    <Font name="ZoFontGameLargeBoldShadow" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />
+
+    <Font name="ZoFontHeader" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />
+    <Font name="ZoFontHeader2" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thick" />
+    <Font name="ZoFontHeader3" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+    <Font name="ZoFontHeader4" font="$(BOLD_FONT)|$(KB_26)|soft-shadow-thick" />
+
+    <Font name="ZoFontHeaderNoShadow" font="$(BOLD_FONT)|$(KB_18)" />
+
+    <Font name="ZoFontCallout" font="$(BOLD_FONT)|$(KB_36)|soft-shadow-thick" />
+    <Font name="ZoFontCallout2" font="$(BOLD_FONT)|$(KB_48)|soft-shadow-thick" />
+    <Font name="ZoFontCallout3" font="$(BOLD_FONT)|$(KB_54)|soft-shadow-thick" />
+
+    <Font name="ZoFontEdit" font="$(MEDIUM_FONT)|$(KB_18)|shadow"/>
+    <Font name="ZoFontEdit20NoShadow" font="$(BOLD_FONT)|$(KB_20)"/>
+
+    <Font name="ZoFontChat" font="$(CHAT_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontEditChat" font="$(CHAT_FONT)|$(KB_18)|shadow" />
+
+    <Font name="ZoFontWindowTitle" font="$(BOLD_FONT)|$(KB_30)|soft-shadow-thick" />
+    <Font name="ZoFontWindowSubtitle" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />
+
+    <Font name="ZoFontTooltipTitle" font="$(BOLD_FONT)|$(KB_22)" />
+    <Font name="ZoFontTooltipSubtitle" font="$(MEDIUM_FONT)|$(KB_18)" />
+
+    <Font name="ZoFontAnnounce" font="$(BOLD_FONT)|$(KB_28)|soft-shadow-thick" />
+    <Font name="ZoFontAnnounceMessage" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+    <Font name="ZoFontAnnounceMedium" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+    <Font name="ZoFontAnnounceLarge" font="$(BOLD_FONT)|$(KB_36)|soft-shadow-thick" />
+
+    <Font name="ZoFontAnnounceLargeNoShadow" font="$(BOLD_FONT)|$(KB_36)" />
+    
+    <Font name="ZoFontCenterScreenAnnounceLarge" font="$(BOLD_FONT)|$(KB_40)|soft-shadow-thick" />
+    <Font name="ZoFontCenterScreenAnnounceSmall" font="$(BOLD_FONT)|$(KB_30)|soft-shadow-thick" />
+
+    <Font name="ZoFontAlert" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+
+    <Font name="ZoFontConversationName" font="$(BOLD_FONT)|$(KB_28)|soft-shadow-thick" />
+    <Font name="ZoFontConversationText" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+    <Font name="ZoFontConversationOption" font="$(BOLD_FONT)|$(KB_22)|soft-shadow-thick" />
+    <Font name="ZoFontConversationQuestReward" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thick" />
+
+    <Font name="ZoFontKeybindStripKey" font="$(MEDIUM_FONT)|$(KB_20)|soft-shadow-thin" />
+    <Font name="ZoFontKeybindStripDescription" font="$(BOLD_FONT)|$(KB_25)|soft-shadow-thick" />
+    <Font name="ZoFontDialogKeybindDescription" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thick" />
+
+    <Font name="ZoInteractionPrompt" font="$(BOLD_FONT)|$(KB_24)|soft-shadow-thick" />
+
+    <Font name="ZoFontCreditsHeader" font="$(BOLD_FONT)|$(KB_24)" />
+    <Font name="ZoFontCreditsText" font="$(BOLD_FONT)|$(KB_18)" />
+
+    <Font name="ZoFontSubtitleText" font="$(MEDIUM_FONT)|$(KB_28)|soft-shadow-thick" />
+
+    <Font name="ZoMarketAnnouncementKeyboardDescriptionFont" font="$(MEDIUM_FONT)|$(KB_22)" />
+    <Font name="ZoMarketAnnouncementCalloutFont" font="$(BOLD_FONT)|$(KB_32)|soft-shadow-thin" />
+    
+    <!-- In Game Book Fonts-->
+    <Font name="ZoFontBookPaper" font="$(ANTIQUE_FONT)|20" />
+    <Font name="ZoFontBookSkin" font="$(ANTIQUE_FONT)|20" />
+    <Font name="ZoFontBookRubbing" font="$(ANTIQUE_FONT)|20" />
+    <Font name="ZoFontBookLetter" font="$(HANDWRITTEN_FONT)|20" />
+    <Font name="ZoFontBookNote" font="$(HANDWRITTEN_FONT)|22" />
+    <Font name="ZoFontBookScroll" font="$(HANDWRITTEN_FONT)|26" />
+    <Font name="ZoFontBookTablet" font="$(STONE_TABLET_FONT)|30|soft-shadow-thick" />
+
+    <!-- In Game Book Title Fonts-->
+    <Font name="ZoFontBookPaperTitle" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontBookSkinTitle" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontBookRubbingTitle" font="$(ANTIQUE_FONT)|30" />
+    <Font name="ZoFontBookLetterTitle" font="$(HANDWRITTEN_FONT)|30" />
+    <Font name="ZoFontBookNoteTitle" font="$(HANDWRITTEN_FONT)|32" />
+    <Font name="ZoFontBookScrollTitle" font="$(HANDWRITTEN_FONT)|34" />
+    <Font name="ZoFontBookTabletTitle" font="$(STONE_TABLET_FONT)|48|soft-shadow-thick" />
+</GuiXml>

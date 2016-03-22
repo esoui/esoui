@@ -103,7 +103,11 @@ end
 
 function ZO_CraftingResults_Gamepad:DisplayCraftingResult(itemInfo)
     local smithingObject = ZO_Smithing_GetActiveObject()
-    local isCreating = ZO_Enchanting_IsInCreationMode() or smithingObject and not smithingObject:IsDeconstructing()
+    local isSmithingDeconstructing = smithingObject and not smithingObject:IsDeconstructing()
+    local isCreating = isSmithingDeconstructing 
+                       or ZO_Enchanting_IsInCreationMode() 
+                       or ZO_Provisioning_IsSceneShowing() 
+                       or ZO_Alchemy_IsSceneShowing()
 
     local headerTextId = isCreating and SI_GAMEPAD_CRAFTING_COMPLETED_ITEM or SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
 

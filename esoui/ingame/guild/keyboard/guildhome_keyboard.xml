@@ -90,7 +90,7 @@
 
                 <Control name="$(parent)Trader">
                     <Dimensions x="200"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Keep" offsetY="210"/>
+                    <Anchor point="TOP" relativeTo="$(parent)KeepCampaignName" relativePoint="BOTTOM" />
                     <Controls>
                         <Label name="$(parent)Ownership" horizontalAlignment="CENTER" font="ZoFontHeader2" modifyTextType="UPPERCASE" text="SI_GUILD_TRADER_OWNERSHIP_HEADER">
                             <Anchor point="TOPLEFT"/>

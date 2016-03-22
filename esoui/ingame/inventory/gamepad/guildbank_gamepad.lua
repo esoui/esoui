@@ -452,13 +452,7 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                                 return GetString(SI_BANK_WITHDRAW)
                             end
                         end,
-            enabled = function()
-                            local data = self.withdrawList:GetTargetData()
-                            if data then
-                                return data.enabled
-                            end
-                            return true
-                        end,
+            enabled = function() return self:CanWithdraw() end,
             visible =   function()
                             local currentDataType = GetCurrentDataType(self.withdrawList)
                             if currentDataType == CURRENT_DATA_TYPE_GOLD_SELECTOR then
@@ -468,16 +462,7 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                             end
                             return false
                         end,
-            callback =  function()
-                            local currentDataType = GetCurrentDataType(self.withdrawList)
-                            if currentDataType == CURRENT_DATA_TYPE_GOLD_SELECTOR then
-                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
-                                self:SetMaxInputFunction(GetMaxGuildBankWithdrawal)
-                                self:ShowSelector()
-                            elseif currentDataType == CURRENT_DATA_TYPE_ITEM_DATA then
-                                return WithdrawItem(self.withdrawList)
-                            end
-                        end,
+            callback =  function() self:ConfirmWithdrawal() end
         },
         switchActiveGuildKeybind,
     })
@@ -497,13 +482,7 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                                 return GetString(SI_BANK_DEPOSIT)
                             end
                         end,
-            enabled = function()
-                            local data = self.depositList:GetTargetData()
-                            if data then
-                                return data.enabled
-                            end
-                            return true
-                        end,
+            enabled = function() return self:CanDeposit() end,
             visible =   function()
                             local currentDataType = GetCurrentDataType(self.depositList)
                             if currentDataType == CURRENT_DATA_TYPE_GOLD_SELECTOR then
@@ -513,16 +492,7 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
                             end
                             return false
                         end,
-            callback =  function()
-                            local currentDataType = GetCurrentDataType(self.depositList)
-                            if currentDataType == CURRENT_DATA_TYPE_GOLD_SELECTOR then
-                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
-                                self:SetMaxInputFunction(GetMaxGuildBankDeposit)
-                                self:ShowSelector()
-                            elseif currentDataType == CURRENT_DATA_TYPE_ITEM_DATA then
-                                return DepositItem(self.depositList)
-                            end
-                        end,
+            callback =  function() self:ConfirmDeposit() end
         },
         switchActiveGuildKeybind,
     })
@@ -537,6 +507,78 @@ local function CreateModeData(name, mode, itemList, keybind)
         itemList = itemList,
         keybind = keybind,
     }
+end
+
+function ZO_GuildBank_Gamepad:CanDeposit()
+    local inventoryData = self.currentItemList:GetTargetData()
+    if not inventoryData then
+        return false
+    end
+
+    local currencyType = inventoryData.currencyType
+    if currencyType then
+        if self:GetMaxBankedFunds(currencyType) ~= GetGuildBankedMoney() and GetCarriedCurrencyAmount(currencyType) ~= 0 then
+            return true
+        else
+            if self:GetMaxBankedFunds(currencyType) == GetGuildBankedMoney() then
+                return false, GetString("SI_GUILDBANKRESULT", GUILD_BANK_NO_SPACE_LEFT) -- "Your guild bank is full"
+            elseif GetCarriedCurrencyAmount(currencyType) == 0 then
+                return false, GetString(SI_INVENTORY_ERROR_NO_PLAYER_FUNDS) -- "No player funds"
+            end
+        end
+    elseif GetNumBagFreeSlots(BAG_GUILDBANK) > 0 then
+        return true
+    else
+        return false, GetString(SI_INVENTORY_ERROR_BANK_FULL) -- "Your guild bank is full"
+    end
+end
+
+function ZO_GuildBank_Gamepad:CanWithdraw()
+    local inventoryData = self.currentItemList:GetTargetData()
+    if not inventoryData then
+        return false
+    end
+
+    local currencyType = inventoryData.currencyType
+    if currencyType then
+        if GetGuildBankedMoney() ~= 0 and GetCarriedCurrencyAmount(currencyType) ~= GetMaxCarriedCurrencyAmount(currencyType) then
+            return true
+        else
+            if GetCarriedCurrencyAmount(currencyType) == GetMaxCarriedCurrencyAmount(currencyType) then
+                return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your inventory is full"
+            elseif GetGuildBankedMoney() == 0 then
+                return false, GetString(SI_INVENTORY_ERROR_NO_BANK_FUNDS) -- "No bank funds"
+            end
+        end
+    elseif GetNumBagFreeSlots(BAG_BACKPACK) > 0 then
+        return true
+    else
+        return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your inventory is full"
+    end
+end
+
+function ZO_GuildBank_Gamepad:ConfirmDeposit()
+    local inventoryData = self.currentItemList:GetTargetData()
+    if inventoryData.currencyType then
+        self:SetMaxAndShowSelector(GetMaxGuildBankDeposit)
+    else
+        DepositItem(self.depositList)
+    end
+end
+
+function ZO_GuildBank_Gamepad:ConfirmWithdrawal()
+    local inventoryData = self.currentItemList:GetTargetData()
+    if inventoryData.currencyType then
+        self:SetMaxAndShowSelector(GetMaxGuildBankWithdrawal)
+    else
+        WithdrawItem(self.withdrawList)
+    end
+end
+
+function ZO_GuildBank_Gamepad:SetMaxAndShowSelector(maxInputFunction)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    self:SetMaxInputFunction(maxInputFunction)
+    self:ShowSelector()
 end
 
 function ZO_GuildBank_Gamepad:GetWithdrawMoneyAmount()

@@ -1,8 +1,7 @@
 local ZO_RaidLeaderboardsManager_Gamepad = ZO_RaidLeaderboardsManager_Shared:Subclass()
 
 function ZO_RaidLeaderboardsManager_Gamepad:New(...)
-    local manager = ZO_RaidLeaderboardsManager_Shared.New(self, ...)
-    return manager
+    return ZO_RaidLeaderboardsManager_Shared.New(self, ...)
 end
 
 function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
@@ -70,5 +69,6 @@ end
 
 function ZO_RaidLeaderboardsInformationArea_Gamepad_OnInitialized(self)
     GAMEPAD_RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Gamepad:New(self)
+    GAMEPAD_LEADERBOARDS:UpdateCategories()
     SYSTEMS:RegisterGamepadObject(RAID_LEADERBOARD_SYSTEM_NAME, GAMEPAD_RAID_LEADERBOARDS)
 end

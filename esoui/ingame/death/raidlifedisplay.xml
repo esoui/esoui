@@ -31,26 +31,43 @@
     </Animations>
 
     <Controls>
+
         <Control name="ZO_RaidLifeDisplay_Keyboard_Template" virtual="true">
             <Controls>
+                <Label name="$(parent)ReviveCounter" font="ZoFontWinH2">
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Label>
                 <Texture name="$(parent)Icon">
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)ReviveCounter" relativePoint="LEFT"/>
                 </Texture>
-                <Label name="$(parent)Label" font="ZoFontWinH1" />
+
+                <Label name="$(parent)TotalScore" font="ZoFontWinH2">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ReviveCounter" relativePoint="LEFT" offsetX="-58"/>
+                </Label>
+                <Label name="$(parent)ScoreLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGameLargeBold" modifyTextType="NONE">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TotalScore" relativePoint="LEFT" offsetX="-5" offsetY="2"/>
+                </Label>
             </Controls>
         </Control>
 
         <Control name="ZO_RaidLifeDisplay_Gamepad_Template" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Anchor point="TOPRIGHT" offsetX="10" />
+                    <Anchor point="BOTTOMLEFT" offsetY="-5"/>
                 </Texture>
-                <Label name="$(parent)Label" font="ZoFontGamepad34" />
+                <Label name="$(parent)ReviveCounter" font="ZoFontGamepad42" >
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT"/>
+                </Label>
+                <Label name="$(parent)ScoreLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGamepad27" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT" relativeTo="$(parent)ReviveCounter" relativePoint="RIGHT" offsetX="20" offsetY="5"/>
+                </Label>
+                <Label name="$(parent)TotalScore" font="ZoFontGamepad42" >
+                    <Anchor point="LEFT" relativeTo="$(parent)ScoreLabel" relativePoint="RIGHT" offsetX="10" offsetY="-5"/>
+                </Label>
             </Controls>
         </Control>
 
         <Control name="ZO_RaidLifeDisplay" virtual="true">
-            <Dimensions x="60" y="35"/>
             <OnInitialized>
                 ZO_RaidLifeDisplay_OnInitialized(self)
             </OnInitialized>
@@ -58,12 +75,15 @@
                 ZO_RaidLifeDisplay_OnEffectivelyShown(self)
             </OnEffectivelyShown>
             <Controls>
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Death/death_soulReservoir_icon.dds">
-                    <Dimensions x="32" y="32"/>
-                    <Anchor point="TOPRIGHT"/>
+                <Label name="$(parent)ReviveCounter" font="ZoFontWinH2">
+                </Label>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds">
+                    <Dimensions x="40" y="40"/>
                 </Texture>
-                <Label name="$(parent)Label" font="ZoFontWinH1">
-                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-13"/>
+
+                <Label name="$(parent)TotalScore" font="ZoFontWinH2">
+                </Label>
+                <Label name="$(parent)ScoreLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                 </Label>
             </Controls>
         </Control>

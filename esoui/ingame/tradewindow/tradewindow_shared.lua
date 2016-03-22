@@ -161,19 +161,13 @@ end
 --
 
 --Shared Trade Window Constructor
-function ZO_SharedTradeWindow:New(control)
+function ZO_SharedTradeWindow:New(...)
     local manager = ZO_Object.New(self)
+    manager:Initialize(...)
     return manager
 end
 
 function ZO_SharedTradeWindow:Initialize(control)
-    if not TRADE_WINDOW then
-        -- This represents the public interface to the Trade Window
-        TRADE_WINDOW = ZO_TradeManager:New()
-    end
-
-    TradeCancel() -- Make sure any trades from reloadui are cancelled
-
     self.confirm = 
     {
         [TRADE_ME] = TRADE_CONFIRM_EDIT,

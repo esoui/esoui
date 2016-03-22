@@ -1,0 +1,14 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_VoiceChatParticipantsEntryGamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" override="true" modifyTextType="NONE">
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_VOICECHAT_HISTORY"/>
+                </Label>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET_VOICECHAT" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

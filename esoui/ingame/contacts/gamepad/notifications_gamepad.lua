@@ -175,7 +175,7 @@ function ZO_GamepadCampaignQueueProvider:CreateLoadText()
 end
 
 function ZO_GamepadCampaignQueueProvider:Accept(data)
-    ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_READY_DIALOG, data, {mainTextParams = {data.campaignName}})
+    GAMEPAD_AVA_BROWSER:GetCampaignBrowser():ShowCampaignQueueReadyDialog(data.campaignId, data.isGroup, data.campaignName)
 end
 
 --Resurrect Provider
@@ -316,23 +316,56 @@ end
 local ZO_GamepadLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
 
 function ZO_GamepadLeaderboardRaidProvider:New(notificationManager)
-    local provider = ZO_LeaderboardRaidProvider.New(self, notificationManager)
-    return provider
+    return ZO_LeaderboardRaidProvider.New(self, notificationManager)
 end
 
+function ZO_GamepadLeaderboardRaidProvider:CreateMessage(raidName, raidScore, numMembers, hasFriend, hasGuildMember, notificationId)
+    local message = ZO_LeaderboardRaidProvider.CreateMessage(self, raidName, raidScore, numMembers, hasFriend, hasGuildMember)
 
-function ZO_GamepadLeaderboardRaidProvider:CreateMessage(raidName, raidScore, hasFriend, hasGuildMember)
-    local messageStringId
-    if(hasFriend and hasGuildMember) then
-        messageStringId = SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS_AND_GUILD_MEMBERS
-    elseif(hasFriend) then
-        messageStringId = SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_FRIENDS
-    else
-        messageStringId = SI_NOTIFICATIONS_LEADERBOARD_RAID_MESSAGE_GUILD_MEMBERS
+    return self:AppendRaidMembers(message, numMembers, notificationId)
+end
+
+function ZO_GamepadLeaderboardRaidProvider:AppendRaidMemberHeaderText(messageText, headerText)
+    return messageText.."\n\n"..headerText
+end
+
+function ZO_GamepadLeaderboardRaidProvider:AppendRaidMemberName(messageText, raidMemberName)
+    return messageText.."\n"..ZO_SELECTED_TEXT:Colorize(raidMemberName)
+end
+
+function ZO_GamepadLeaderboardRaidProvider:AppendRaidMembers(messageText, numMembers, notificationId)
+    local guildMembersSection = {}
+    local friendsSection = {}
+
+    for memberIndex = 1, numMembers do
+        local displayName, characterName, isFriend, isGuildMember = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+        local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
+
+        if isGuildMember then
+            table.insert(guildMembersSection, userFacingName)
+        elseif isFriend then
+            table.insert(friendsSection, userFacingName)
+        end
     end
-    return zo_strformat(messageStringId, raidName, raidScore)
-end
 
+    if #guildMembersSection > 0 then
+        messageText = self:AppendRaidMemberHeaderText(messageText, GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS))
+
+        for _, guildMemberName in ipairs(guildMembersSection) do
+            messageText = self:AppendRaidMemberName(messageText, guildMemberName)
+        end
+    end
+
+    if #friendsSection > 0 then
+        messageText = self:AppendRaidMemberHeaderText(messageText, GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS))
+
+        for _, friendName in ipairs(friendsSection) do
+            messageText = self:AppendRaidMemberName(messageText, friendName)
+        end
+    end
+
+    return messageText
+end
 
 --Collections Update Provider
 -------------------------
@@ -346,9 +379,9 @@ end
 
 function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
-
+    
     local data = entryData.data
-    GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(data.collectibleIndex, data.categoryIndex, data.subcategoryIndex)
+    GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(data.collectibleId, data.categoryIndex, data.subcategoryIndex)
 end
 
 function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
@@ -376,23 +409,6 @@ local ZO_GamepadLFGUpdateProvider = ZO_LFGUpdateProvider:Subclass()
 
 function ZO_GamepadLFGUpdateProvider:New(notificationManager)
     return ZO_LFGUpdateProvider.New(self, notificationManager)
-end
-
-function ZO_GamepadLFGUpdateProvider:GetMessageFormat()
-    return SI_GAMEPAD_LFG_JUMP_TO_DUNGEON_TEXT
-end
-
-
-do
-    local ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_dps_down.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_healer_down.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_tank_down.dds",
-    }
-    
-    function ZO_GamepadLFGUpdateProvider:GetRoleIcon(role)
-        return ROLE_TO_ICON[role]
-    end
 end
 
 

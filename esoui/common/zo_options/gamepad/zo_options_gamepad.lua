@@ -52,7 +52,7 @@ function ZO_GamepadOptions:InitializeScenes()
             ZO_SavePlayerConsoleProfile()
             SetCameraOptionsPreviewModeEnabled(false, CAMERA_OPTIONS_PREVIEW_NONE)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.panelKeybindDescriptor)
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.checkboxDescriptor)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.primaryActionDescriptor)
         end
     end)
     
@@ -186,11 +186,19 @@ function ZO_GamepadOptions:InitializeKeybindStrip()
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.panelKeybindDescriptor, self.optionsList)
 
-    self.checkboxDescriptor = 
+    self.primaryActionDescriptor = 
     {
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                local control = self.optionsList:GetSelectedControl()
+                local controlType = self:GetControlTypeFromControl(control)
+                if controlType == OPTIONS_CHECKBOX then
+                    return GetString(SI_GAMEPAD_TOGGLE_OPTION)
+                else
+                    return GetString(SI_GAMEPAD_SELECT_OPTION)
+                end
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             order = -500,
             callback = function() 
@@ -326,11 +334,11 @@ function ZO_GamepadOptions:OnSelectionChanged(list)
     local enabled = control.data.enabled
     if ((controlType == OPTIONS_CHECKBOX or controlType == OPTIONS_INVOKE_CALLBACK) and enabled ~= false) then
         if not self.isPrimaryActionActive then 
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.checkboxDescriptor)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.primaryActionDescriptor)
             self.isPrimaryActionActive = true
         end
     else
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.checkboxDescriptor)
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.primaryActionDescriptor)
         self.isPrimaryActionActive = false
     end
 
@@ -412,8 +420,10 @@ function ZO_GamepadOptions:InitializeControl(control, selected)
 
     if(not control.data.enabled and control.data.disabledText) then
         label:SetText(GetTextEntry(control.data.disabledText))
-    else 
-        if control.data.gamepadTextOverride then
+    else
+        if IsConsoleUI() and control.data.consoleTextOverride then
+            label:SetText(GetTextEntry(control.data.consoleTextOverride))
+        elseif control.data.gamepadTextOverride then
             label:SetText(GetTextEntry(control.data.gamepadTextOverride))
         end
     end
@@ -659,6 +669,9 @@ function ZO_GamepadOptions:LoadDefaults()
         -- reset the screen adjustments
         SetOverscanOffsets(0, 0, 0, 0)
     end
+
+    ZO_SavePlayerConsoleProfile()
+    self:SaveCachedSettings()
 
     self:RefreshGamepadInfoPanel()
 end

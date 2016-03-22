@@ -3,7 +3,7 @@
         <Control name="ZO_GamepadWorldMapFilterCheckboxOptionTemplate" inherits="ZO_GamepadOptionsMenuEntryTemplate ZO_OptionsRightCheckbox_Gamepad" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
             <Controls>
-                <Label name="$(parent)Label" maxLines="1" override="true">
+                <Label name="$(parent)Label" maxLineCount="1" override="true">
                     <Anchor point="TOPLEFT"/>
                     <Dimensions x="340"/>
                 </Label>

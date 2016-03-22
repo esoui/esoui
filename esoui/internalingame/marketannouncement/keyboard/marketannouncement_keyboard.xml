@@ -1,18 +1,12 @@
 <GuiXml>
-    <Font name="ZoMarketAnnouncementKeyboardDescriptionFont" font="$(MEDIUM_FONT)|22" />
-    
-    <Font name="ZoMarketAnnouncementKeyboardTileFont" font="$(BOLD_FONT)|24|soft-shadow-thick" />
-    <Font name="ZoMarketAnnouncementKeyboardTileTitleFont" font="$(BOLD_FONT)|24|soft-shadow-thick" />
-    <Font name="ZoMarketAnnouncementCalloutFont" font="$(BOLD_FONT)|32|soft-shadow-thin" />
-    
     <Controls>
         <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Keyboard" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" virtual="true" >
             <Dimensions x="ZO_LARGE_SINGLE_MARKET_PRODUCT_WIDTH" y="ZO_LARGE_SINGLE_MARKET_PRODUCT_HEIGHT"/>
             
             <Controls>
-                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoMarketAnnouncementKeyboardTileTitleFont" mouseEnabled="false" override="true"/>
+                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" mouseEnabled="false" override="true"/>
                 
-                <Label name="$(parent)PreviousCost" font="ZoMarketAnnouncementKeyboardTileFont" override="true">
+                <Label name="$(parent)PreviousCost" font="ZoFontHeader3" override="true">
                     <Controls>
                         <Texture name="$(parent)Strikethrough" override="true">
                             <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
@@ -24,7 +18,7 @@
                     </Controls>
                 </Label>
                 
-                <Label name="$(parent)Cost" font="ZoMarketAnnouncementKeyboardTileFont" override="true">
+                <Label name="$(parent)Cost" font="ZoFontHeader3" override="true">
                     <Controls>
                         <Texture name="$(parent)CurrencyIcon" override="true">
                             <Dimensions x="32" y="32" />
@@ -33,7 +27,7 @@
                     </Controls>
                 </Label>
                 
-                <Label name="$(parent)Purchased" font="ZoMarketAnnouncementKeyboardTileFont" override="true"/>
+                <Label name="$(parent)Purchased" font="ZoFontHeader3" override="true"/>
                 
                 <Label name="$(parent)TextCallout" font="ZoMarketAnnouncementCalloutFont" override="true">
                     <Controls>

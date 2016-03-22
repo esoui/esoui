@@ -1,0 +1,99 @@
+<GuiXml>
+    <Controls>
+        <Backdrop name="ZO_EditBackdrop" virtual="true">
+            <Dimensions y="28"/>
+            <Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" virtual="true"/>
+            <Center file="EsoUI/Art/ChatWindow/textEntry_center.dds" />
+            <Insets left="8" top="8" right="-8" bottom="-8" />
+        </Backdrop>
+
+        <Backdrop name="ZO_SingleLineEditBackdrop_Keyboard" inherits="ZO_EditBackdrop" virtual="true">
+            <OnInitialized>
+                ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
+            </OnInitialized>
+        </Backdrop>
+
+        <Backdrop name="ZO_SingleLineEditBackdropDark_Keyboard" inherits="ZO_DefaultBackdrop" virtual="true">
+            <OnInitialized>
+                ZO_SingleLineEditContainerDarkSize_Keyboard_OnInitialized(self)
+            </OnInitialized>
+        </Backdrop>
+
+        <Backdrop name="ZO_MultiLineEditBackdrop_Keyboard" inherits="ZO_EditBackdrop" virtual="true"/>
+
+        <EditBox name="ZO_DefaultEdit" font="ZoFontEdit" mouseEnabled="true" virtual="true">
+            <Dimensions y="24" />
+            <OnMouseDown>
+                self:TakeFocus()
+            </OnMouseDown>
+            <OnEnter>
+                self:LoseFocus()
+            </OnEnter>
+            <OnEscape>
+                self:LoseFocus()
+            </OnEscape>
+
+            <OnFocusGained>
+                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+                    PlaySound(SOUNDS.EDIT_CLICK)
+                end
+            </OnFocusGained>
+        </EditBox>
+
+        <EditBox name="ZO_EditDefaultText" virtual="true">
+            <OnTextChanged>
+                ZO_EditDefaultText_OnTextChanged(self)
+            </OnTextChanged>
+            <OnIMEBeginComposition>
+                ZO_EditDefaultText_OnIMECompositionChanged(self)
+            </OnIMEBeginComposition>
+            <OnIMEEndComposition>
+                ZO_EditDefaultText_OnIMECompositionChanged(self)
+            </OnIMEEndComposition>
+            <Controls>
+                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontEdit">
+                    <Anchor point="TOPLEFT" offsetX="3"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Label>
+            </Controls>
+        </EditBox>
+
+        <EditBox name="ZO_DefaultEditForBackdrop" inherits="ZO_DefaultEdit" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
+        </EditBox>
+
+        <EditBox name="ZO_DefaultEditForDarkBackdrop" inherits="ZO_DefaultEdit" font="ZoFontEdit20NoShadow" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_TOP"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_BOTTOM"/>
+        </EditBox>
+
+        <EditBox name="ZO_DefaultEditMultiLine" font="ZoFontEdit" mouseEnabled="true" multiLine="true" virtual="true">
+            <OnMouseDown>
+                self:TakeFocus()
+            </OnMouseDown>
+            <OnEscape>
+                self:LoseFocus()
+            </OnEscape>
+            <OnMouseWheel>
+                local currentLine = self:GetTopLineIndex()
+                if shift then
+                    delta = delta * 10
+                end
+                local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
+                self:SetTopLineIndex(nextLine)
+            </OnMouseWheel>
+
+            <OnFocusGained>
+                if WINDOW_MANAGER:IsHandlingHardwareEvent() then
+                    PlaySound(SOUNDS.EDIT_CLICK)
+                end
+            </OnFocusGained>
+        </EditBox>
+
+        <EditBox name="ZO_DefaultEditMultiLineForBackdrop" inherits="ZO_DefaultEditMultiLine" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_TOP"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
+        </EditBox>
+    </Controls>
+</GuiXml>

@@ -7,6 +7,8 @@ local CHANGE_MOTD_GAMEPAD_DIALOG = "CHANGE_MOTD_GAMEPAD"
 local GAMEPAD_OPTIONS_LIST_ENTRY = "ZO_GamepadMenuEntryTemplate"
 local GAMEPAD_GUILD_LIST_ENTRY = "ZO_GamepadSubMenuEntryTemplate"
 
+local GAMEPAD_CREATE_GUILD_LIST_ENTRY = "ZO_GamepadCreateGuildEntry"
+
 local GUILD_HUB_DISPLAY_MODE = 
 {  
     GUILDS_LIST = 1,
@@ -557,6 +559,10 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                         UpdateSelectedName(self.selectedName)
                     end
                 },
+
+                controlReset = function(control, pool)
+                    control.editBoxControl:SetColor(ZO_SELECTED_TEXT:UnpackRGB())
+                end,
             },
 
             -- Finish
@@ -687,13 +693,6 @@ function ZO_GamepadGuildHub:InitializeHeader()
 end
 
 function ZO_GamepadGuildHub:RefreshHeader()
-    local createError = nil
-    if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST then
-        createError = ZO_GetGuildCreateError()
-    end
-
-    self.headerData.messageText = createError
-
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
@@ -764,6 +763,7 @@ end
 function ZO_GamepadGuildHub:SetupList(list)
     list:AddDataTemplate(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:AddDataTemplateWithHeader(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplateWithHeader(GAMEPAD_CREATE_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 end
 
 do
@@ -993,8 +993,14 @@ function ZO_GamepadGuildHub:RefreshGuildList()
     data:SetEnabled(ZO_CanPlayerCreateGuild())
     
     data.createGuild = true
-    data:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_NEW_HEADER)) 
-    self.guildList:AddEntryWithHeader(GAMEPAD_GUILD_LIST_ENTRY, data)
+    local createError
+    if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST then
+        createError = ZO_GetGuildCreateError()
+    end
+    data.subLabels = {createError}
+    data.GetSubLabelColor = function() return ZO_ERROR_COLOR end
+    data:SetHeader(GetString(SI_GAMEPAD_GUILD_LIST_NEW_HEADER))
+    self.guildList:AddEntryWithHeader(GAMEPAD_CREATE_GUILD_LIST_ENTRY, data)
 
     self.guildList:Commit()
 

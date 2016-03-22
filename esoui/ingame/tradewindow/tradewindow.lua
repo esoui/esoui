@@ -5,10 +5,22 @@ ZO_TradeManager = ZO_Object:Subclass()
 --
 --Trade Manager functions
 --
+function ZO_TradeManager:New(...)
+    local manager = ZO_Object.New(self)
+    manager:Initialize(...)
+    return manager
+end
 
 function ZO_TradeManager:Initialize()
     self.target = nil
     self.state = TRADE_STATE_IDLE
+
+    local function OnPlayerActivated()
+        TradeCancel() -- Make sure any trades from reloadui are cancelled
+        EVENT_MANAGER:UnregisterForEvent("TradeSystem", EVENT_PLAYER_ACTIVATED)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("TradeSystem", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 end
 
 function ZO_TradeManager:InitiateTrade(displayName)
@@ -60,3 +72,5 @@ end
 function ZO_TradeManager:IsIdle()
     return self.state == TRADE_STATE_IDLE
 end
+
+TRADE_WINDOW = ZO_TradeManager:New()

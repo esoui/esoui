@@ -200,3 +200,7 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkN
 
     return true
 end
+
+function ZO_Provisioning_IsSceneShowing()
+    return SCENE_MANAGER:IsShowing("provisioner") or SCENE_MANAGER:IsShowing("gamepad_provisioner_root")
+end

@@ -1,9 +1,4 @@
 <GuiXml>
-    <Font name="ZoMarketKeyboardTileFont" font="$(BOLD_FONT)|18|soft-shadow-thick" />
-    <Font name="ZoMarketKeyboardDescriptionFont" font="$(BOLD_FONT)|16|soft-shadow-thick" />
-    <Font name="ZoMarketKeyboardTileTitleFont" font="$(BOLD_FONT)|22|soft-shadow-thick" />
-    <Font name="ZoMarketCalloutFont" font="$(BOLD_FONT)|18|soft-shadow-thin" />
-    
     <Controls>
         <Label name="ZO_MarketDefaultLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
         
@@ -82,7 +77,7 @@
                     <AnchorFill/>
                 </Backdrop>
                 
-                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoMarketKeyboardTileTitleFont" mouseEnabled="true" override="true">
+                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" mouseEnabled="true" override="true">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/>
                     <OnMouseEnter>
@@ -107,7 +102,7 @@
                 </Label>
                 
                 
-                <Label name="$(parent)PreviousCost" font="ZoMarketKeyboardTileFont" override="true">
+                <Label name="$(parent)PreviousCost" font="ZoFontWinH4" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                     <Controls>
                         <Texture name="$(parent)Strikethrough" override="true">
@@ -120,7 +115,7 @@
                     </Controls>
                 </Label>
                 
-                <Label name="$(parent)Cost" font="ZoMarketKeyboardTileFont" override="true">
+                <Label name="$(parent)Cost" font="ZoFontWinH4" override="true">
                     <Controls>
                         <Texture name="$(parent)CurrencyIcon" override="true">
                             <Dimensions x="32" y="32" />
@@ -129,11 +124,11 @@
                     </Controls>
                 </Label>
                 
-                <Label name="$(parent)Purchased" font="ZoMarketKeyboardTileFont" override="true">
+                <Label name="$(parent)Purchased" font="ZoFontWinH4" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                 </Label>
                 
-                <Label name="$(parent)TextCallout" font="ZoMarketCalloutFont" override="true">
+                <Label name="$(parent)TextCallout" font="ZoFontWinT1" override="true">
                     <Controls>
                         <Control name="$(parent)Background" override="true">
                             <Dimensions y="32"/>
@@ -173,9 +168,9 @@
                     <Anchor point="TOPRIGHT" offsetX="-316" offsetY="10"/>
                 </Label>
                 
-                <Label name="$(parent)Description" inherits="ZO_MarketDefaultLabel" font="ZoMarketKeyboardDescriptionFont" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" wrapMode="ELLIPSIS" mouseEnabled="true">
+                <Label name="$(parent)Description" inherits="ZO_MarketDefaultLabel" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" wrapMode="ELLIPSIS" mouseEnabled="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-250" offsetY="-70"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-290" offsetY="-70"/>
                     
                     <OnMouseEnter>
                         ZO_MarketProduct_OnMouseEnter(self:GetParent())

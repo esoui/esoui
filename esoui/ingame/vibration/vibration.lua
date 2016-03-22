@@ -1,6 +1,6 @@
 
-local function Vibrate(eventCode, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
-    if IsInGamepadPreferredMode() then
+local function Vibrate(eventCode, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, foundInfo, debugSourceInfo)
+    if IsInGamepadPreferredMode() and foundInfo then
         SetGamepadVibration(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
     end
 end

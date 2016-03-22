@@ -56,8 +56,7 @@
             <Controls>
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_RENAME_CHARACTER_NAME_LABEL"/>
 
-                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
-                    <Dimensions y="30" />
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Controls>
@@ -158,19 +157,19 @@
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="20" offsetY="20" />
 
                     <Controls>
-                        <Label name="$(parent)Name" font="$(BOLD_FONT)|28|thick-outline">
+                        <Label name="$(parent)Name" font="ZoFontKeyboard28ThickOutline">
                             <Anchor point="TOPLEFT" />
                         </Label>
 
-                        <Label name="$(parent)Race" font="$(BOLD_FONT)|24|thick-outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                        <Label name="$(parent)Race" font="ZoFontKeyboard24ThickOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
                         </Label>
 
-                        <Label name="$(parent)ClassLevel" font="$(BOLD_FONT)|24|thick-outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                        <Label name="$(parent)ClassLevel" font="ZoFontKeyboard24ThickOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Race" relativePoint="BOTTOMLEFT" />
                         </Label>
 
-                        <Label name="$(parent)Location" font="$(BOLD_FONT)|18|thick-outline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                        <Label name="$(parent)Location" font="ZoFontKeyboard18ThickOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
                         </Label>
                     </Controls>

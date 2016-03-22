@@ -8,11 +8,6 @@ ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT = "inventory"
 ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT = "bank"
 ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT = "inventoryAndBank"
 
-ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT = true
-ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT = false
-ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT = true
-ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT = false
-
 --Section Generators
 
 function ZO_Tooltip:AddItemTitle(itemLink, name)
@@ -107,30 +102,45 @@ function ZO_Tooltip:AddTopSection(itemLink)
         end
     end
 
-    self:AddTopLineToTopSection(topSection, itemLink)
+    self:AddTopLinesToTopSection(topSection, itemLink)
 
     self:AddSectionEvenIfEmpty(topSection)
 end
 
-function ZO_Tooltip:AddTopLineToTopSection(topSection, itemLink)
-    local topLine = topSection:AcquireSection(self:GetStyle("topLine"))
-
+function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink)
+    local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
+    
     -- Bound
-    if(IsItemLinkBound(itemLink)) then
-        topLine:AddLine(GetString(SI_ITEM_FORMAT_STR_BOUND))
+    if IsItemLinkBound(itemLink) then
+        topSubsection:AddLine(GetString(SI_ITEM_FORMAT_STR_BOUND), self:GetStyle("bind"))
     else
         local bindType = GetItemLinkBindType(itemLink)
-        if(bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET) then
-            topLine:AddLine(GetString("SI_BINDTYPE", bindType))
+        if bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET then
+            topSubsection:AddLine(GetString("SI_BINDTYPE", bindType), self:GetStyle("bind"))
         end
     end
 
     -- Stolen
-    if(IsItemLinkStolen(itemLink)) then
-        topLine:AddLine(zo_iconTextFormat("EsoUI/Art/Inventory/inventory_stolenItem_icon.dds", 24, 24, GetString(SI_GAMEPAD_ITEM_STOLEN_LABEL)), self:GetStyle("stolen"))
+    if IsItemLinkStolen(itemLink) then
+        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Inventory/inventory_stolenItem_icon.dds", 24, 24, GetString(SI_GAMEPAD_ITEM_STOLEN_LABEL)), self:GetStyle("stolen"))
     end
 
-    topSection:AddSectionEvenIfEmpty(topLine)
+    --Item counts
+    if IsItemLinkStackable(itemLink) then
+        -- @TODO: Also need to support crafting bag stacks here
+        local bagCount, bankCount = GetItemLinkStacks(itemLink)
+        
+        if bagCount > 0 then
+            topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bag.dds", 24, 24, bagCount))
+        end
+        if bankCount > 0 then
+            topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bank.dds", 24, 24, bankCount))
+        end
+
+        -- @TODO: Add crafting bag stack count here as well
+    end
+
+    topSection:AddSectionEvenIfEmpty(topSubsection)
 end
 
 function ZO_Tooltip:AddBaseStats(itemLink, ignoreLevel)
@@ -414,28 +424,33 @@ function ZO_Tooltip:AddMaterialLevels(itemLink)
     end
 end
 
-function ZO_Tooltip:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
-    if IsItemLinkStackable(itemLink) and (showInventoryCount or showBankCount) then
-        local bagCountSection = self:AcquireSection(self:GetStyle("bagCountSection"))
-        local bagCount, bankCount = GetItemLinkStacks(itemLink)
-        
-        if showInventoryCount and bagCount > 0 then
-            local formattedCount = ZO_SELECTED_TEXT:Colorize(ZO_CommaDelimitNumber(bagCount))
-            bagCountSection:AddLine(zo_strformat(SI_TOOLTIP_ITEM_INVENTORY_COUNT, formattedCount))
+local MAX_ITEM_TAGS = 3
+function ZO_Tooltip:AddItemTags(itemLink)
+    local numItemTags = GetItemLinkNumItemTags(itemLink)
+    if numItemTags > 0 then
+        assert(numItemTags <= MAX_ITEM_TAGS)
+        local itemTagsSection = self:AcquireSection(self:GetStyle("itemTagsSection"))
+        local itemTagStrings = {}
+        itemTagsSection:AddLine(zo_strformat(SI_TOOLTIP_ITEM_TAGGING_HEADER), self:GetStyle("itemTagTitle"))
+        for i = 1, numItemTags do
+            local itemTagDescription = GetItemLinkItemTagDescription(itemLink, i)
+            if itemTagDescription ~= "" then
+                table.insert(itemTagStrings, itemTagDescription)
+            end
         end
 
-        if showBankCount and bankCount > 0 then
-            local formattedCount = ZO_SELECTED_TEXT:Colorize(ZO_CommaDelimitNumber(bankCount))
-            bagCountSection:AddLine(zo_strformat(SI_TOOLTIP_ITEM_BANK_COUNT, formattedCount))
+        local itemTagsFormat = _G["SI_TOOLTIP_ITEM_TAGS_" .. #itemTagStrings]
+        if itemTagsFormat then
+            itemTagsSection:AddLine(zo_strformat(itemTagsFormat, unpack(itemTagStrings)), self:GetStyle("itemTagDescription"))
         end
 
-        self:AddSection(bagCountSection)
+        self:AddSection(itemTagsSection)
     end
 end
 
 --Layout Functions
 
-function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
@@ -451,17 +466,17 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddSet(itemLink, equipped)
     self:AddFlavorText(itemLink)
     self:AddCreator(itemLink, creatorName)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutBooster(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutBooster(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -474,12 +489,12 @@ function ZO_Tooltip:LayoutBooster(itemLink, itemName, showInventoryCount, showBa
     fromQualityText = GetItemQualityColor(fromQuality):Colorize(fromQualityText)
     boosterDescriptionSection:AddLine(zo_strformat(SI_ENCHANTMENT_BOOSTER_DESCRIPTION, fromQualityText, toQualityText), self:GetStyle("bodyDescription"))
     self:AddSection(boosterDescriptionSection)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
 do
     local FORMATTED_VETERAN_RANK_ICON = zo_iconFormat(GetGamepadVeteranRankIcon(), 48, 48)
-    function ZO_Tooltip:LayoutInlineGlyph(itemLink, itemName, showInventoryCount, showBankCount)
+    function ZO_Tooltip:LayoutInlineGlyph(itemLink, itemName)
         self:AddItemTitle(itemLink, itemName)
         self:AddEnchant(itemLink)
 
@@ -503,18 +518,17 @@ do
         end
 
         self:AddFlavorText(itemLink)
-        self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
     end
 end
 
-function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName)
     self:AddTopSection(itemLink)
     self:LayoutInlineGlyph(itemLink, itemName)
     self:AddCreator(itemLink, creatorName)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutSiege(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutSiege(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     local maxHP = GetItemLinkSiegeMaxHP(itemLink)
@@ -527,30 +541,30 @@ function ZO_Tooltip:LayoutSiege(itemLink, itemName, showInventoryCount, showBank
         self:AddSection(statsSection)
     end
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutTool(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutTool(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutSoulGem(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutSoulGem(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutAvARepair(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutAvARepair(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
 function ZO_Tooltip:LayoutBook(itemLink)
@@ -564,23 +578,24 @@ function ZO_Tooltip:LayoutBook(itemLink)
     end
     self:AddSection(knownSection)
     self:AddFlavorText(itemLink)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutLure(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutLure(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutQuestStartOrFinishItem(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutQuestStartOrFinishItem(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     local IGNORE_LEVEL = true
@@ -643,10 +658,10 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, showInventoryCou
         useToLearnOrKnownSection:AddLine(GetString(SI_PROVISIONER_USE_TO_LEARN_RECIPE), self:GetStyle("bodyDescription"))
     end
     self:AddSection(useToLearnOrKnownSection)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutReagent(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutReagent(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -675,10 +690,10 @@ function ZO_Tooltip:LayoutReagent(itemLink, itemName, showInventoryCount, showBa
     if(traitSection) then
         self:AddSection(traitSection)
     end
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutEnchantingRune(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutEnchantingRune(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -717,10 +732,9 @@ function ZO_Tooltip:LayoutEnchantingRune(itemLink, itemName, showInventoryCount,
         requirementSection:AddLine(zo_strformat(SI_ENCHANTING_REQUIRES_ASPECT_IMPROVEMENT, requiredRank), requiredRankStyle, self:GetStyle("bodyDescription"))
         self:AddSection(requirementSection)
     end
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
 end
 
-function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -746,28 +760,32 @@ function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName, showInventoryCount, sh
     end
     requirementSection:AddLine(zo_strformat(SI_REQUIRES_ALCHEMY_SOLVENT_PURIFICATION, requiredRank), requirementStyle, self:GetStyle("bodyDescription"))
     self:AddSection(requirementSection)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutIngredient(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutIngredient(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutStyleMaterial(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutStyleMaterial(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
     local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
     local style = GetItemLinkItemStyle(itemLink)
-    styleSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_STYLE_MATERIAL, GetString("SI_ITEMSTYLE", style)), self:GetStyle("bodyDescription"))
+    local descriptionString = SI_ITEM_FORMAT_STR_STYLE_MATERIAL
+    if style == ITEMSTYLE_UNIVERSAL then
+        descriptionString = SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE
+    end
+    styleSection:AddLine(zo_strformat(descriptionString, GetString("SI_ITEMSTYLE", style)), self:GetStyle("bodyDescription"))
     self:AddSection(styleSection)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -786,17 +804,17 @@ function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, showInventoryCount, sh
 
         self:AddMaterialLevels(refinedItemLink)
     end
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutMaterial(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutMaterial(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddMaterialLevels(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutArmorTrait(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutArmorTrait(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -805,10 +823,10 @@ function ZO_Tooltip:LayoutArmorTrait(itemLink, itemName, showInventoryCount, sho
     self:AddSection(traitDescriptionSection)
 
     self:AddTrait(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutWeaponTrait(itemLink, itemName, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutWeaponTrait(itemLink, itemName)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
@@ -817,7 +835,7 @@ function ZO_Tooltip:LayoutWeaponTrait(itemLink, itemName, showInventoryCount, sh
     self:AddSection(traitDescriptionSection)
 
     self:AddTrait(itemLink)
-    self:AddItemBagCounts(itemLink, showInventoryCount, showBankCount)
+    self:AddItemTags(itemLink)
 end
 
 function ZO_Tooltip:LayoutAlchemyPreview(solventBagId, solventSlotIndex, reagent1BagId, reagent1SlotIndex, reagent2BagId, reagent2SlotIndex, reagent3BagId, reagent3SlotIndex)
@@ -882,7 +900,7 @@ function ZO_Tooltip:LayoutStoreItemFromLink(itemLink, icon)
         end
 
         local stackCount = 1 -- currently stores only sell single items not stacks
-        self:LayoutItemWithStackCountSimple(itemLink, stackCount, ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT)
+        self:LayoutItemWithStackCountSimple(itemLink, stackCount)
     end
 end
 
@@ -911,6 +929,23 @@ function ZO_Tooltip:LayoutQuestRewardItem(rewardIndex, icon)
     end
 end
 
+function ZO_Tooltip:LayoutUniversalStyleItem(itemLink)
+    self:AddTopSection(itemLink)
+    local stackCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
+    local itemName = GetItemLinkName(itemLink)
+    if stackCount then
+        itemName = zo_strformat(SI_GAMEPAD_SMITHING_TOOLTIP_UNIVERSAL_STYLE_ITEM_TITLE, itemName, stackCount)
+    end
+    self:AddLine(itemName, self:GetStyle("title"))
+
+    local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
+    local style = GetItemLinkItemStyle(itemLink)
+    styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_TOOLTIP), self:GetStyle("bodyDescription"))
+    styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_CROWN_STORE_TOOLTIP), self:GetStyle("bodyDescription"))
+    self:AddSection(styleSection)
+    self:AddItemTags(itemLink)
+end
+
 function ZO_Tooltip:SetProvisionerResultItem(recipeListIndex, recipeIndex)
     local _, icon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
     local itemLink = GetRecipeResultItemLink(recipeListIndex, recipeIndex)
@@ -928,71 +963,71 @@ end
 do
     local LAYOUT_FUNCTIONS =
     {
-        [ITEMTYPE_RECIPE] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutProvisionerRecipe(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_RECIPE] = function(self, itemLink, creatorName, itemName) self:LayoutProvisionerRecipe(itemLink, itemName) end,
 
-        [ITEMTYPE_BLACKSMITHING_BOOSTER] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutBooster(itemLink, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_WOODWORKING_BOOSTER] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutBooster(itemLink, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_CLOTHIER_BOOSTER] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutBooster(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_BLACKSMITHING_BOOSTER] = function(self, itemLink, creatorName, itemName) self:LayoutBooster(itemLink, itemName) end,
+        [ITEMTYPE_WOODWORKING_BOOSTER] = function(self, itemLink, creatorName, itemName) self:LayoutBooster(itemLink, itemName) end,
+        [ITEMTYPE_CLOTHIER_BOOSTER] = function(self, itemLink, creatorName, itemName) self:LayoutBooster(itemLink, itemName) end,
 
-        [ITEMTYPE_GLYPH_WEAPON] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutGlyph(itemLink, creatorName, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_GLYPH_ARMOR] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutGlyph(itemLink, creatorName, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_GLYPH_JEWELRY] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutGlyph(itemLink, creatorName, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_GLYPH_WEAPON] = function(self, itemLink, creatorName, itemName) self:LayoutGlyph(itemLink, creatorName, itemName) end,
+        [ITEMTYPE_GLYPH_ARMOR] = function(self, itemLink, creatorName, itemName) self:LayoutGlyph(itemLink, creatorName, itemName) end,
+        [ITEMTYPE_GLYPH_JEWELRY] = function(self, itemLink, creatorName, itemName) self:LayoutGlyph(itemLink, creatorName, itemName) end,
 
-        [ITEMTYPE_REAGENT] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutReagent(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_REAGENT] = function(self, itemLink, creatorName, itemName) self:LayoutReagent(itemLink, itemName) end,
 
-        [ITEMTYPE_ALCHEMY_BASE] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutAlchemyBase(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_ALCHEMY_BASE] = function(self, itemLink, creatorName, itemName) self:LayoutAlchemyBase(itemLink, itemName) end,
 
-        [ITEMTYPE_INGREDIENT] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutIngredient(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_INGREDIENT] = function(self, itemLink, creatorName, itemName) self:LayoutIngredient(itemLink, itemName) end,
 
-        [ITEMTYPE_STYLE_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutStyleMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_STYLE_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutStyleMaterial(itemLink, itemName) end,
 
-        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutRawMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutRawMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutRawMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutRawMaterial(itemLink, itemName) end,
+        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutRawMaterial(itemLink, itemName) end,
+        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutRawMaterial(itemLink, itemName) end,
 
-        [ITEMTYPE_BLACKSMITHING_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_CLOTHIER_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
-        [ITEMTYPE_WOODWORKING_MATERIAL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutMaterial(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_BLACKSMITHING_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutMaterial(itemLink, itemName) end,
+        [ITEMTYPE_CLOTHIER_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutMaterial(itemLink, itemName) end,
+        [ITEMTYPE_WOODWORKING_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutMaterial(itemLink, itemName) end,
 
-        [ITEMTYPE_ARMOR_TRAIT] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutArmorTrait(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_ARMOR_TRAIT] = function(self, itemLink, creatorName, itemName) self:LayoutArmorTrait(itemLink, itemName) end,
 
-        [ITEMTYPE_WEAPON_TRAIT] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutWeaponTrait(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_WEAPON_TRAIT] = function(self, itemLink, creatorName, itemName) self:LayoutWeaponTrait(itemLink, itemName) end,
 
-        [ITEMTYPE_SIEGE] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutSiege(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_SIEGE] = function(self, itemLink, creatorName, itemName) self:LayoutSiege(itemLink, itemName) end,
 
-        [ITEMTYPE_TOOL] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutTool(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_TOOL] = function(self, itemLink, creatorName, itemName) self:LayoutTool(itemLink, itemName) end,
 
-        [ITEMTYPE_SOUL_GEM] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutSoulGem(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_SOUL_GEM] = function(self, itemLink, creatorName, itemName) self:LayoutSoulGem(itemLink, itemName) end,
 
-        [ITEMTYPE_AVA_REPAIR] = function(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount) self:LayoutAvARepair(itemLink, itemName, showInventoryCount, showBankCount) end,
+        [ITEMTYPE_AVA_REPAIR] = function(self, itemLink, creatorName, itemName) self:LayoutAvARepair(itemLink, itemName) end,
     }
 
     --TODO: Get creatorName from itemLink?
     --TODO: Pass in some sort of struct for containing all the additional item tooltip parameters
-    function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, showInventoryCount, showBankCount)
+    function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
         local isValidItemLink = itemLink ~= ""
         if isValidItemLink then
             --first do checks that can't be determined from the item type
             if(IsItemLinkVendorTrash(itemLink)) then
-                self:LayoutVendorTrash(itemLink, itemName, showInventoryCount, showBankCount)
+                self:LayoutVendorTrash(itemLink, itemName)
             elseif(DoesItemLinkStartQuest(itemLink) or DoesItemLinkFinishQuest(itemLink)) then
-                self:LayoutQuestStartOrFinishItem(itemLink, itemName, showInventoryCount, showBankCount)
+                self:LayoutQuestStartOrFinishItem(itemLink, itemName)
             else
                 -- now attempt to layout the itemlink by the item type
                 local itemType = GetItemLinkItemType(itemLink)
                 if(IsItemLinkEnchantingRune(itemLink)) then
-                    self:LayoutEnchantingRune(itemLink, itemName, showInventoryCount, showBankCount)
+                    self:LayoutEnchantingRune(itemLink, itemName)
                 elseif(itemType == ITEMTYPE_LURE and IsItemLinkConsumable(itemLink)) then
-                    self:LayoutLure(itemLink, itemName, showInventoryCount, showBankCount)
+                    self:LayoutLure(itemLink, itemName)
                 else
                     local layoutFunction = LAYOUT_FUNCTIONS[itemType]
                     if layoutFunction then
-                        layoutFunction(self, itemLink, creatorName, itemName, showInventoryCount, showBankCount)
+                        layoutFunction(self, itemLink, creatorName, itemName)
                     else
                         if IsItemLinkBook(itemLink) then
                             self:LayoutBook(itemLink)
                         else -- fallback to our default layout
-                            self:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, showInventoryCount, showBankCount)
+                            self:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
                         end
                     end
                 end
@@ -1003,7 +1038,7 @@ do
     end
 end
 
-function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, customOrBagStackCount, showInventoryCount, showBankCount)
+function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, customOrBagStackCount)
     local isValidItemLink = itemLink ~= ""
     if isValidItemLink then
         local stackCount
@@ -1024,7 +1059,7 @@ function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, fo
         if stackCount and stackCount > 1 then
             itemName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount)
         end
-        return self:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, showInventoryCount, showBankCount)
+        return self:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
     end
 end
 
@@ -1035,8 +1070,8 @@ do
     local NO_ENCHANT_MODE = nil
     local NO_PREVIEW_VALUE = nil
 
-    function ZO_Tooltip:LayoutItemWithStackCountSimple(itemLink, customOrBagStackCount, showInventoryCount, showBankCount)
-        return self:LayoutItemWithStackCount(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, NO_ENCHANT_MODE, NO_PREVIEW_VALUE, customOrBagStackCount, showInventoryCount, showBankCount)
+    function ZO_Tooltip:LayoutItemWithStackCountSimple(itemLink, customOrBagStackCount)
+        return self:LayoutItemWithStackCount(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, NO_ENCHANT_MODE, NO_PREVIEW_VALUE, customOrBagStackCount)
     end
 end
 
@@ -1045,32 +1080,27 @@ end
 function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, enchantMode, showInventoryAndBagCount)
     local itemLink = GetItemLink(bagId, slotIndex)
     local equipped = bagId == BAG_WORN
-    local showInventoryCount = ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT
-    local showBankCount = ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT
     local stackCount = ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT
     if showInventoryAndBagCount then
         stackCount = ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT
     else
         if bagId == BAG_BANK then
-            showBankCount = ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT
             stackCount = ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT
         elseif bagId == BAG_BACKPACK then
-            showInventoryCount = ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT
             stackCount = ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT
         elseif equipped then
-            showInventoryCount = ZO_ITEM_TOOLTIP_HIDE_INVENTORY_BODY_COUNT
             stackCount = 1
         end
     end
 
-    return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), nil, enchantMode, nil, stackCount, showInventoryCount, showBankCount)
+    return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), nil, enchantMode, nil, stackCount)
 end
 
 function ZO_Tooltip:LayoutTradeItem(who, tradeIndex)
     local itemLink = GetTradeItemLink(who, tradeIndex, LINK_STYLE_DEFAULT)
     local equipped = false
     local name, icon, stack, quality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(who, tradeIndex)
-    return self:LayoutItemWithStackCount(itemLink, equipped, creator, nil, nil, nil, stack, ZO_ITEM_TOOLTIP_SHOW_INVENTORY_BODY_COUNT, ZO_ITEM_TOOLTIP_SHOW_BANK_BODY_COUNT)
+    return self:LayoutItemWithStackCount(itemLink, equipped, creator, nil, nil, nil, stack)
 end
 
 function ZO_Tooltip:LayoutPendingSmithingItem(patternIndex, materialIndex, materialQuantity, styleIndex, traitIndex)
@@ -1143,8 +1173,8 @@ function ZO_Tooltip:LayoutQuestItem(questItem)
 
     local topSection = self:AcquireSection(self:GetStyle("topSection"))
     topSection:AddLine(header)
-    local topLine = topSection:AcquireSection(self:GetStyle("topLine"))
-    topSection:AddSectionEvenIfEmpty(topLine)
+    local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsection"))
+    topSection:AddSectionEvenIfEmpty(topSubsection)
     self:AddSectionEvenIfEmpty(topSection)
 
     local qualityStyle = ZO_TooltipStyles_GetItemQualityStyle(1) --quest items are always white

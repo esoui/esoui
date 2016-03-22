@@ -49,7 +49,7 @@
                     <Anchor point="TOPLEFT" offsetX="35" offsetY="70" />
                 </Label>
 
-                <Backdrop name="$(parent)Name" inherits="ZO_EditBackdrop">
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" offsetX="10" offsetY="25"/>
                     <Dimensions x="300"/>
                     <Controls>
