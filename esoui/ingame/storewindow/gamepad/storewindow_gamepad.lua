@@ -53,15 +53,18 @@ function ZO_GamepadStoreManager:Initialize(control)
     self.control:RegisterForEvent(EVENT_OPEN_STORE, OnOpenStore)
     self.control:RegisterForEvent(EVENT_CLOSE_STORE, OnCloseStore)
 
+    local function UpdateActiveComponentKeybindButtonGroup()
+        local activeComponent = self:GetActiveComponent()
+        if activeComponent then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(activeComponent.keybindStripDescriptor)
+        end
+    end
+
     local OnCurrencyChanged = function()
         if not self.control:IsControlHidden() then
             self:RefreshHeaderData()
-
-            local activeComponent = self:GetActiveComponent()
-            if activeComponent then
-                KEYBIND_STRIP:UpdateKeybindButtonGroup(activeComponent.keybindStripDescriptor)
-            end
         end
+        UpdateActiveComponentKeybindButtonGroup()
     end
 
     local OnFailedRepair = function(eventId, reason)
@@ -86,7 +89,8 @@ function ZO_GamepadStoreManager:Initialize(control)
             PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
         else
             PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
-        end    
+        end
+        UpdateActiveComponentKeybindButtonGroup()
     end
 
     local OnInventoryUpdated = function()
@@ -120,11 +124,7 @@ function ZO_GamepadStoreManager:Initialize(control)
         else
             self:RepairMessageBox(bagId, slotIndex)
         end
-
-        local activeComponent = self:GetActiveComponent()
-        if activeComponent then
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(activeComponent.keybindStripDescriptor)
-        end
+        UpdateActiveComponentKeybindButtonGroup()
     end
 
     SHARED_INVENTORY:RegisterCallback("ItemRepaired", OnItemRepaired)

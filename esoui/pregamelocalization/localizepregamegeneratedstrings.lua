@@ -349,7 +349,7 @@ EsoStrings =
     "[eng] <<1>>/<<2>>", -- SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL
     "[eng] This increases your inventory capacity by |cffffff<<1>>|r slots, though it can’t exceed the maximum size available from Bag Merchants. ", -- SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION
     "[eng] This increases your bank capacity by |cffffff<<1>>|r slots, though it can’t exceed the maximum size available from Bankers.", -- SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION
-    "[eng] This item allows you to create items in any style.", -- SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE
+    "[eng] This item allows you to craft items in any known style.", -- SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE
     "[eng] \"<<1>>\"", -- SI_TOOLTIP_COLLECTIBLE_NICKNAME
     "[eng] <<1>>", -- SI_COLLECTIBLE_NAME_FORMATTER
     "[eng] <<1>>", -- SI_MARKET_PRODUCT_NAME_FORMATTER
@@ -5314,6 +5314,7 @@ SafeAddVersion(SI_ITEM_FORMAT_STR_WOOD_MATERIAL_VETERAN_RANK, 1)
 SafeAddVersion(SI_ITEM_FORMAT_STR_CLOTH_MATERIAL_VETERAN_RANK, 1)
 SafeAddVersion(SI_ITEM_FORMAT_STR_LEATHER_MATERIAL_VETERAN_RANK, 1)
 SafeAddVersion(SI_ITEM_FORMAT_STR_METAL_MATERIAL_VETERAN_RANK, 1)
+SafeAddVersion(SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE, 1)
 SafeAddVersion(SI_LONG_LOAD_TIME, 1)
 SafeAddVersion(SI_TIME_DURATION_NOT_LONG_AGO, 2)
 SafeAddVersion(SI_TIME_FORMAT_MONTHS, 1)

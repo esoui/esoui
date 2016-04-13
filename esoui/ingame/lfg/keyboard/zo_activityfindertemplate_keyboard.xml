@@ -50,7 +50,7 @@
 
         <Control name="ZO_ActivityFinderTemplateRewardTemplate_Keyboard" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" maxLineCount="2" font="ZoFontWinH2">
+                <Label name="$(parent)Text" font="ZoFontWinH2">
                     <Dimensions x="220" />
                 </Label>
             </Controls>

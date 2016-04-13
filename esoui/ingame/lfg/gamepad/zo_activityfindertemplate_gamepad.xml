@@ -2,7 +2,7 @@
     <Controls>
         <Control name="ZO_ActivityFinderTemplateRewardTemplate_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" maxLineCount="2" font="ZoFontGamepadCondensed42">
+                <Label name="$(parent)Text" font="ZoFontGamepadCondensed42">
                     <Dimensions x="300" />
                 </Label>
             </Controls>
