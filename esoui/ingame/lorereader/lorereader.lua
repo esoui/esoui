@@ -148,7 +148,7 @@ function LoreReader:Show(title, body, medium, showTitle)
             else
                 SCENE_MANAGER:Push("loreReaderLoreLibrary")
             end
-        elseif currentSceneName == "inventory" or currentSceneName == "gamepad_inventory_item_filter" then
+        elseif currentSceneName == "inventory" or currentSceneName == "gamepad_inventory_item_filter" or currentSceneName == "gamepad_inventory_root" then
             if isGamepad then
                 SCENE_MANAGER:Push("gamepad_loreReaderInventory")
             else

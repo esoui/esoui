@@ -4,7 +4,13 @@ function ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType)
     if filterType == nil then
         return true
     end
-    local usedInCraftingType, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
+
+    local _, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
+
+    if type(filterType) == "function" then
+        return filterType(craftingSubItemType)
+    end
+
     return filterType == craftingSubItemType
 end
 
@@ -15,12 +21,16 @@ end
 function ZO_Alchemy_IsAlchemyItem(bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
     if usedInCraftingType == CRAFTING_TYPE_ALCHEMY then
-        return craftingSubItemType == ITEMTYPE_REAGENT or craftingSubItemType == ITEMTYPE_ALCHEMY_BASE
+        return craftingSubItemType == ITEMTYPE_REAGENT or IsAlchemySolvent(craftingSubItemType)
     end
 end
 
 function ZO_Alchemy_IsThirdAlchemySlotUnlocked()
     return GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_THIRD_SLOT) ~= 0
+end
+
+function ZO_Alchemy_IsSceneShowing()
+    return SYSTEMS:IsShowing("alchemy")
 end
 
 ZO_SharedAlchemy = ZO_Object:Subclass()
@@ -30,7 +40,6 @@ ZO_SharedAlchemy.initializedEvents = false
 function ZO_SharedAlchemy:Initialize(control)
     self.control = control
     self.skillInfo = self.control:GetNamedChild("SkillInfo")
-    
 
     self:InitializeInventory()
     self:InitializeTooltip()
@@ -146,7 +155,7 @@ end
 function ZO_SharedAlchemy:CanItemBeAddedToCraft(bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
     if usedInCraftingType == CRAFTING_TYPE_ALCHEMY then
-        if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
+        if IsAlchemySolvent(craftingSubItemType) and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
             return true
         elseif craftingSubItemType == ITEMTYPE_REAGENT then
             return true
@@ -185,7 +194,7 @@ end
 function ZO_SharedAlchemy:AddItemToCraft(bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
     if usedInCraftingType == CRAFTING_TYPE_ALCHEMY then
-        if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
+        if IsAlchemySolvent(craftingSubItemType) and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
             self:SetSolventItem(bagId, slotIndex)
         elseif craftingSubItemType == ITEMTYPE_REAGENT and not self:FindAlreadySlottedReagent(bagId, slotIndex) then
             self:SetReagentItem(nil, bagId, slotIndex)
@@ -209,6 +218,12 @@ end
 
 function ZO_SharedAlchemy:SetSolventItem(bagId, slotIndex)
     self.solventSlot:SetItem(bagId, slotIndex)
+    
+    local _, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
+    if(craftingSubItemType == ITEMTYPE_POISON_BASE) then
+        TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_STATION_OIL_SLOTTED)
+    end
+
     self:OnSlotChanged()
 end
 
@@ -311,7 +326,7 @@ function ZO_SharedAlchemy:FindAlreadySlottedReagent(bagId, slotIndex)
 end
 
 function ZO_SharedAlchemy:ShowAppropriateSlotDropCallouts(craftingSubItemType, rankRequirement)
-    self.solventSlot:ShowDropCallout(craftingSubItemType == ITEMTYPE_ALCHEMY_BASE and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL))
+    self.solventSlot:ShowDropCallout(IsAlchemySolvent(craftingSubItemType) and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL))
     for i, slot in ipairs(self.reagentSlots) do
         slot:ShowDropCallout(craftingSubItemType == ITEMTYPE_REAGENT)
     end
@@ -514,11 +529,13 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
 
     if self:HasItem() then
         if self.createsLevelLabel then
-            local resultingItemLevel, veteranRequiredLevel = select(4, GetItemCraftingInfo(bagId, slotIndex))
-            if veteranRequiredLevel and veteranRequiredLevel > 0 then
-                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_POTION_OF_VETERAN_RANK, veteranRequiredLevel))
+            local craftingSubItemType, _, resultingItemLevel, championRequiredLevel = select(2, GetItemCraftingInfo(bagId, slotIndex))
+            local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
+
+            if championRequiredLevel and championRequiredLevel > 0 then
+                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, championRequiredLevel, itemTypeString))
             else
-                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_POTION_OF_LEVEL, resultingItemLevel))
+                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_LEVEL, resultingItemLevel, itemTypeString))
             end
             self.createsLevelLabel:SetHidden(false)
         end

@@ -97,6 +97,7 @@ function ZO_GamepadStoreListComponent:SetupStoreItem(control, data, selected, se
 end
 
 function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mode, currencyType)
+    local options = self:GetCurrencyOptions()
     local invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_MONEY) or false
     local priceControl = control:GetNamedChild("Price")
 
@@ -107,7 +108,7 @@ function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mod
         invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_TELVAR_STONES) or false
     end
 
-    ZO_CurrencyControl_SetSimpleCurrency(priceControl, currencyType, price, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, invalidPrice)
+    ZO_CurrencyControl_SetSimpleCurrency(priceControl, currencyType, price, options, CURRENCY_SHOW_ALL, invalidPrice)
 end
 
 function ZO_GamepadStoreListComponent:OnSelectedItemChanged(data)
@@ -154,4 +155,8 @@ function ZO_GamepadStoreListComponent:OnExitUnselectItem()
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.confirmKeybindStripDescriptor)
         STORE_WINDOW_GAMEPAD:SetQuantitySpinnerActive(self.confirmationMode, self.list)
     end
+end
+
+function ZO_GamepadStoreListComponent:GetCurrencyOptions()
+    return ZO_GAMEPAD_CURRENCY_OPTIONS
 end

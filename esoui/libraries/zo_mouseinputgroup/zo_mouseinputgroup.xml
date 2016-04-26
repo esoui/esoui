@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MouseOverGroupFromChildren" virtual="true">
+            <OnInitialized>
+                ZO_MouseOverGroupFromChildren_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

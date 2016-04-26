@@ -96,7 +96,7 @@ function ZO_IngameSceneManager:OnGameFocusChanged()
     if(IsGameCameraActive() and IsPlayerActivated()) then
         if(DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor()) then
             if self.actionRequiredTutorialThatActivatedWithoutFocus then
-                self:SetInUIMode(false)
+                self:ClearActionRequiredTutorialBlockers()
                 self.actionRequiredTutorialThatActivatedWithoutFocus = false
                 return
             end
@@ -153,11 +153,23 @@ function ZO_IngameSceneManager:OnTutorialStart(tutorialIndex)
     if IsTutorialActionRequired(tutorialIndex) then
         TUTORIAL_SYSTEM:ForceRemoveAll() --Make sure no tutorial is showing before turning off UI mode
         if DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
-            self:SetInUIMode(false)
+            self:ClearActionRequiredTutorialBlockers()
         else
             self.actionRequiredTutorialThatActivatedWithoutFocus = true
         end
     end
+end
+
+function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
+    local interactionType = GetInteractionType()
+    if interactionType ~= INTERACTION_NONE then
+        EndInteraction(interactionType)
+    end
+
+    if IsInteractionPending() then
+        EndPendingInteraction()
+    end
+    self:SetInUIMode(false)
 end
 
 function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
@@ -192,7 +204,11 @@ end
 
 function ZO_IngameSceneManager:OnMountStateChanged()
     -- The market screen causes a dismount and blocks mounting so we need to ignore this on that screen
-    if not (self:IsShowing("market") or self:IsShowing("gamepad_market_preview")) then
+    if not (self:IsShowing("market") or
+	        self:IsShowing("gamepad_market_pre_scene") or
+			self:IsShowing("gamepad_market") or
+			self:IsShowing("gamepad_market_preview"))
+	then
         self:SetInUIMode(false)
     end
 end

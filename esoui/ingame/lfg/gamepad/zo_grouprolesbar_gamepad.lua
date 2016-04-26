@@ -52,7 +52,8 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
         
         local roleType = control.data.role
         local roleData = ZO_GAMEPAD_LFG_OPTION_INFO[roleType]
-        GAMEPAD_TOOLTIPS:LayoutGroupRole(GAMEPAD_LEFT_TOOLTIP, roleData.optionName, roleData.tooltip)
+        local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(roleType)
+        GAMEPAD_TOOLTIPS:LayoutGroupRole(GAMEPAD_LEFT_TOOLTIP, roleData.optionName, roleData.tooltip, lowestAverage)
     end
     local function OnUnselected(control)
         control.selectedFrame:SetHidden(true)
@@ -61,6 +62,7 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
         local roleType = control.data.role
         local isSelected = not self.roles[roleType].isSelected
         UpdatePlayerRole(roleType, isSelected)
+        ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
         self:RefreshRoles()
     end
 
@@ -97,18 +99,12 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
 end
 
 function ZO_GroupRolesBar_Gamepad:InitializeEvents()
-    local function OnGroupingToolsStatusUpdate(isSearching)
-        self.isLockedFromSearch = isSearching
+    local function OnActivityFinderStatusUpdate(status)
+        self.isLockedFromSearch = status == ACTIVITY_FINDER_STATUS_QUEUED
         self:UpdateDimming()
     end
-
-    local function OnPlayerActivated()
-        OnGroupingToolsStatusUpdate(IsCurrentlySearchingForGroup())
-    end
-
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_STATUS_UPDATE, function(event, ...) OnGroupingToolsStatusUpdate(...) end)
-    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function(event, ...) OnPlayerActivated(...) end)
-    OnGroupingToolsStatusUpdate(IsCurrentlySearchingForGroup())
+    
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
 end
 
 function ZO_GroupRolesBar_Gamepad:ToggleSelected()

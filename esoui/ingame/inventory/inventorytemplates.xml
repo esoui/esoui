@@ -24,12 +24,12 @@
 
             <Controls>
                 <Label name="$(parent)Money" override="true">
-                    <Dimensions x="120"/>
+                    <Dimensions x="160"/>
                 </Label>
                 
                 <Label name="$(parent)TelvarStones" inherits="ZO_CurrencyTemplate" hidden="true">
-                    <Dimensions x="150"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Money" relativePoint="LEFT" offsetX="-40" />
+                    <Dimensions x="160"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Money" relativePoint="LEFT" />
                 </Label>
 
                 <Label name="$(parent)AltFreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
@@ -42,7 +42,7 @@
                 </Label>
 
                 <Label name="$(parent)AltTelvarStones" inherits="ZO_CurrencyTemplate" hidden="true">
-                    <Dimensions x="150"/>
+                    <Dimensions x="160"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)TelvarStones" relativePoint="BOTTOMRIGHT" offsetY="1" hidden="true"/>
                 </Label>
             </Controls>
@@ -83,7 +83,7 @@
         </Control>
 
         <Control name="ZO_InventoryFilterDivider" inherits="ZO_WideHorizontalDivider" virtual="true">
-            <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="105" />
+            <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
         </Control>
 
         <Control name="ZO_InventorySortHeaders" virtual="true">

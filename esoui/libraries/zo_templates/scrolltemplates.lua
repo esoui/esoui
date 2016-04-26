@@ -522,6 +522,18 @@ function ZO_ScrollList_AddResizeOnScreenResize(self)
     self:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
 end
 
+local function UpdateModeFromHeight(self, height)
+    if self.mode == SCROLL_LIST_UNIFORM then
+        if self.controlHeight == NO_HEIGHT_SET then
+            self.controlHeight = height
+        elseif height ~= self.controlHeight then
+            self.controlHeight = nil
+            self.mode = SCROLL_LIST_NON_UNIFORM
+            ZO_ScrollList_Commit(self)
+        end
+    end
+end
+
 --Adds a new control type for the list to handle. It must maintain a consistent size.
 --@typeId - A unique identifier to give to CreateDataEntry when you want to add an element of this type.
 --@templateName - The name of the virtual control template that will be used to hold this data
@@ -545,20 +557,20 @@ function ZO_ScrollList_AddDataType(self, typeId, templateName, height, setupCall
         }
         
         --automatically choose the scrolling logic based on if the controls are all the same height or not
-        if(self.mode == SCROLL_LIST_UNIFORM) then
-            if(self.controlHeight == NO_HEIGHT_SET) then
-                self.controlHeight = height
-            elseif(height ~= self.controlHeight) then
-                self.controlHeight = nil
-                self.mode = SCROLL_LIST_NON_UNIFORM
-                ZO_ScrollList_Commit(self)                
-            end
-        end
+        UpdateModeFromHeight(self, height)
     end
 end
 
 function ZO_ScrollList_GetDataTypeTable(self, typeId)
     return self.dataTypes and self.dataTypes[typeId] or nil
+end
+
+function ZO_ScrollList_UpdateDataTypeHeight(self, typeId, newHeight)
+    local dataTable = ZO_ScrollList_GetDataTypeTable(self, typeId)
+    if dataTable and dataTable.height ~= newHeight then
+        dataTable.height = newHeight
+        UpdateModeFromHeight(self, newHeight)
+    end
 end
 
 function ZO_ScrollList_SetTypeSelectable(self, typeId, selectable)
@@ -1047,6 +1059,14 @@ function ZO_ScrollList_ScrollDataIntoView(self, dataIndex)
     elseif(controlBottom > scrollBottom) then
         ZO_ScrollList_ScrollRelative(self, controlBottom - scrollBottom)
     end
+end
+
+function ZO_ScrollList_ScrollDataToCenter(self, dataIndex)
+    local scrollCenter = self.scrollbar:GetValue() + ZO_ScrollList_GetHeight(self) / 2
+    local controlTop = (dataIndex-1) * self.controlHeight
+    local controlCenter  = controlTop + self.controlHeight / 2
+
+    ZO_ScrollList_ScrollRelative(self, controlCenter - scrollCenter)
 end
 
 function ZO_ScrollList_SelectNextData(self)

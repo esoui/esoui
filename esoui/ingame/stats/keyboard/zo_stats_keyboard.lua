@@ -131,19 +131,19 @@ end
 
 function ZO_Stats:RefreshBattleLevelHeader()       
     local isBattleLeveled = IsUnitBattleLeveled("player")
-    local isVetBattleLeveled = IsUnitVetBattleLeveled("player")
+    local isChampionBattleLeveled = IsUnitChampionBattleLeveled("player")
 
-    if isVetBattleLeveled then
+    if isChampionBattleLeveled then
         self.levelTypeIcon:SetWidth(24)
         self.levelTypeIcon:SetHidden(false)
-        self.levelLabel:SetText(GetUnitVetBattleLevel("player"))
+        self.levelLabel:SetText(GetUnitChampionBattleLevel("player"))
     elseif isBattleLeveled then
         self.levelTypeIcon:SetWidth(0)
         self.levelTypeIcon:SetHidden(true)
         self.levelLabel:SetText(GetUnitBattleLevel("player"))
     end
 
-    self.battleLevelHeader:SetHidden(not (isBattleLeveled or isVetBattleLeveled))
+    self.battleLevelHeader:SetHidden(not (isBattleLeveled or isChampionBattleLeveled))
 end
 
 function ZO_Stats:CreateBackgroundSection()
@@ -405,7 +405,7 @@ function ZO_Stats:AddDivider()
 end
 
 function ZO_Stats:AddHeader(text, optionalTemplate)
-    self:SetNextControlPadding(-5)
+    self:SetNextControlPadding(-3)
     local header = self:CreateControlFromVirtual("Header", "ZO_StatsHeader")
     header:SetText(GetString(text))
     return header

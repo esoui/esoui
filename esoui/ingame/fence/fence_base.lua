@@ -68,3 +68,7 @@ end
 function ZO_Fence_Base:IsLaundering()
     --Stub, to be overriden
 end
+
+function ZO_Fence_Base:IsSellingStolenItems()
+    --Stub, to be overriden
+end

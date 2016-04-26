@@ -59,6 +59,14 @@
 
                 <Control name="$(parent)SceneGroupBar" inherits="ZO_LabelButtonBar" hidden="true">
                     <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-40" offsetY="-340" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Label" override="true">
+                            <OnTextChanged>
+                                ZO_MainMenu_OnSceneGroupBarLabelTextChanged()
+                            </OnTextChanged>
+                        </Label>
+                    </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>

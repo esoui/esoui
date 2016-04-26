@@ -134,15 +134,26 @@ function GetGamepadPlayerStatusIcon(playerStatus)
     return GAMEPAD_STATUS_ICONS[playerStatus]
 end
 
-local VETERAN_RANK_ICON = "EsoUI/Art/UnitFrames/target_veteranRank_icon.dds"
-local GAMEPAD_VETERAN_RANK_ICON = "EsoUI/Art/Contacts/Gamepad/gp_social_levelIcon_veteran.dds"
+local CHAMPION_POINT_ICON = "EsoUI/Art/Champion/champion_icon.dds"
+local GAMEPAD_CHAMPION_POINT_ICON = "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds"
 
-function GetVeteranRankIcon()
-    return VETERAN_RANK_ICON
+function GetChampionPointsIcon()
+    return CHAMPION_POINT_ICON
 end
 
-function GetGamepadVeteranRankIcon()
-    return GAMEPAD_VETERAN_RANK_ICON
+function GetGamepadChampionPointsIcon()
+    return GAMEPAD_CHAMPION_POINT_ICON
+end
+
+local VETERAN_ICON = "EsoUI/Art/UnitFrames/target_veteranRank_icon.dds"
+local GAMEPAD_VETERAN_ICON = "EsoUI/Art/Contacts/Gamepad/gp_social_levelIcon_veteran.dds"
+
+function GetVeteranIcon()
+    return VETERAN_ICON
+end
+
+function GetGamepadVeteranIcon()
+    return GAMEPAD_VETERAN_ICON
 end
 
 function GetColoredAvARankIconMarkup(avaRank, alliance, size)
@@ -160,6 +171,17 @@ local POINTS_ATTRIBUTE_ICON =
 
 function GetChampionPointAttributeIcon(attribute)
     return POINTS_ATTRIBUTE_ICON[attribute]
+end
+
+local POINTS_ATTRIBUTE_HUD_ICON =
+{
+    [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon-HUD.dds",
+    [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon-HUD.dds",
+    [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD.dds",
+}
+
+function GetChampionPointAttributeHUDIcon(attribute)
+    return POINTS_ATTRIBUTE_HUD_ICON[attribute]
 end
 
 local POINTS_ATTRIBUTE_ACTIVE_ICON =
@@ -230,6 +252,8 @@ ZO_GAMEPAD_NEW_ICON_64 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds"
 ZO_GAMEPAD_SUBMIT_ENTRY_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_submit.dds"
 ZO_TIMER_ICON_32 = "EsoUI/Art/Miscellaneous/timer_32.dds"
 ZO_TIMER_ICON_64 = "EsoUI/Art/Miscellaneous/timer_64.dds"
+ZO_KEYBOARD_LOCKED_ICON = "EsoUI/Art/Miscellaneous/status_locked.dds"
+ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
 
 -- Gamepad Currency Textures
 ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE = "EsoUI/Art/currency/gamepad/gp_gold.dds"

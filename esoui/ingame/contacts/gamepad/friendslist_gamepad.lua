@@ -1,6 +1,7 @@
 --Layout consts, defining the widths of the list's columns as provided by design--
-ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH = 350 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH = 396 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH = 310 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH = 205 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH = 260 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 
 -----------------
 -- Friend List
@@ -47,7 +48,7 @@ function FriendsList_Gamepad:GetAddKeybind()
 end
 
 function FriendsList_Gamepad:LayoutTooltip(tooltipManager, tooltip, data)
-    tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.veteranRank, data.formattedAllianceName, data.formattedZone, not data.online)
+    tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp)
 end
 
 function FriendsList_Gamepad:OnNumOnlineChanged()
@@ -71,6 +72,18 @@ function FriendsList_Gamepad:OnShowing()
     self:Activate()
     ZO_GamepadSocialListPanel.OnShowing(self)
 end
+
+function FriendsList_Gamepad:CommitScrollList()
+	ZO_GamepadSocialListPanel.CommitScrollList(self)
+
+	--This just sets the empty text, the visibility of the empty text is contorlled by SortFilterList when the filtered list is empty
+	--The text is reset by GamepadInteractiveSortFilterList.CommitScrollList where it sets the text to No Friends or Filter Returned None as appropriate and this overrides it if the players are offline
+	if #self.masterList > 0 then
+		if self:GetCurrentSearch() == "" and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
+			self.emptyRowMessage:SetText(GetString(SI_FRIENDS_LIST_ALL_FRIENDS_OFFLINE))
+		end
+	end
+end		
 
 function FriendsList_Gamepad:OnHidden()
     if IsConsoleUI() then

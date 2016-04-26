@@ -9,6 +9,8 @@ STAT_TYPES =
     [ATTRIBUTE_STAMINA] = STAT_STAMINA_MAX,
 }
 
+ZO_STATS_REFRESH_TIME_SECONDS = 2
+
 ------------------
 -- Stats Common --
 ------------------
@@ -83,7 +85,7 @@ function ZO_Stats_Common:UpdateTitleDropdownTitles(dropdown)
 end
 
 function ZO_Stats_Common:IsPlayerBattleLeveled()
-    return IsUnitVetBattleLeveled("player") or IsUnitBattleLeveled("player")
+    return IsUnitChampionBattleLeveled("player") or IsUnitBattleLeveled("player")
 end
 
 function ZO_StatsRidingSkillIcon_Initialize(control, trainingType)

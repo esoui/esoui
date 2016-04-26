@@ -11,14 +11,14 @@ function ActivityQueueData_Gamepad:Initialize(control)
     GAMEPAD_ACTIVITY_QUEUE_DATA_FRAGMENT:RegisterCallback("StateChange",
         function(oldState, newState)
             if newState == SCENE_FRAGMENT_SHOWING then
-                self:RefreshQueuedStatus(IsCurrentlySearchingForGroup())
+                self:RefreshQueuedStatus(GetActivityFinderStatus())
             end
         end
     )
 
-    local function OnGroupingToolsStatusUpdate(event, isSearching)
+    local function OnActivityFinderStatusUpdate(status)
         if self:IsShowing() then
-            self:RefreshQueuedStatus(isSearching)
+            self:RefreshQueuedStatus(status)
         end
     end
 
@@ -30,7 +30,7 @@ function ActivityQueueData_Gamepad:Initialize(control)
         end
     end
 
-    control:RegisterForEvent(EVENT_GROUPING_TOOLS_STATUS_UPDATE, OnGroupingToolsStatusUpdate)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
     control:SetHandler("OnUpdate", OnUpdate)
 
     self.footerData = { }
@@ -38,23 +38,23 @@ end
 
 do
     local STATUS_HEADER_TEXT = GetString(SI_LFG_QUEUE_STATUS)
-    local STATUS_QUEUED_TEXT = GetString(SI_LFG_QUEUE_STATUS_QUEUED)
-    local STATUS_NOT_QUEUED_TEXT = GetString(SI_LFG_QUEUE_STATUS_NOT_QUEUED)
     local ESTIMATED_HEADER_TEXT = GetString(SI_GAMEPAD_LFG_QUEUE_ESTIMATED)
     local ACTUAL_HEADER_TEXT = GetString(SI_GAMEPAD_LFG_QUEUE_ACTUAL)
 
-    function ActivityQueueData_Gamepad:RefreshQueuedStatus(isSearching)
-        self.isSearching = isSearching
+    function ActivityQueueData_Gamepad:RefreshQueuedStatus(status)
+        self.activityFinderStatus = status
+        self.statusText = GetString("SI_ACTIVITYFINDERSTATUS", status)
+        self.isSearching = status == ACTIVITY_FINDER_STATUS_QUEUED
 
         local footerData = self.footerData
         footerData.data3ShowLoading = isSearching
 
-        if isSearching then
+        if self.isSearching then
             footerData.data1HeaderText = ACTUAL_HEADER_TEXT
             self:Update()
         else
             footerData.data1HeaderText = STATUS_HEADER_TEXT
-            footerData.data1Text = STATUS_NOT_QUEUED_TEXT
+            footerData.data1Text = self.statusText
             footerData.data2HeaderText = nil
             footerData.data2Text = nil
             footerData.data3HeaderText = nil
@@ -83,10 +83,10 @@ do
                 footerData.data2HeaderText = ESTIMATED_HEADER_TEXT
                 footerData.data2Text = textEstimatedTime
                 footerData.data3HeaderText = STATUS_HEADER_TEXT
-                footerData.data3Text = STATUS_QUEUED_TEXT
+                footerData.data3Text = self.statusText
             else
                 footerData.data2HeaderText = STATUS_HEADER_TEXT
-                footerData.data2Text = STATUS_QUEUED_TEXT
+                footerData.data2Text = self.statusText
                 footerData.data3HeaderText = nil
                 footerData.data3Text = nil
             end

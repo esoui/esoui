@@ -227,9 +227,8 @@ function ZO_Dyeing_Gamepad:InitializeOptionsDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
 
-        setup = function()
-            local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =

@@ -69,30 +69,22 @@ function ActivityTracker:RegisterEvents()
         self:Update()
     end
 
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnGroupingToolsStatusUpdate", Update)
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_LFG_JOINED, Update)
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_NO_LONGER_LFG, Update)
-    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, Update)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", Update)
 end
 
-do
-    local IN_PROGRESS_TEXT = GetString(SI_ACTIVITY_TRACKER_STATUS_IN_PROGRESS)
-    local QUEUED_TEXT = GetString(SI_LFG_QUEUE_STATUS_QUEUED)
-    function ActivityTracker:Update()
-        local activityType
-        if IsInLFGGroup() then
-            activityType = GetCurrentLFGActivity()
-            self.statusLabel:SetText(GetString(SI_ACTIVITY_TRACKER_STATUS_IN_PROGRESS))
-        elseif IsCurrentlySearchingForGroup() then
-            activityType = GetLFGRequestInfo(1)
-            self.statusLabel:SetText(GetString(SI_LFG_QUEUE_STATUS_QUEUED))
-        end
-        if activityType then
-            self.headerLabel:SetText(HEADER_MAPPING[activityType])
-        end
-        self.container:SetHidden(activityType == nil)
-        self.activityType = activityType
+function ActivityTracker:Update()
+    local activityType
+    if IsCurrentlySearchingForGroup() then
+        activityType = GetLFGRequestInfo(1)
+    elseif IsInLFGGroup() then
+        activityType = GetCurrentLFGActivity()
     end
+    if activityType then
+        self.headerLabel:SetText(HEADER_MAPPING[activityType])
+        self.statusLabel:SetText(GetString("SI_ACTIVITYFINDERSTATUS", GetActivityFinderStatus()))
+    end
+    self.container:SetHidden(activityType == nil)
+    self.activityType = activityType
 end
 
 function ActivityTracker:ApplyPlatformStyle(style)

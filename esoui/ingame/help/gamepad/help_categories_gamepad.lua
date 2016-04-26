@@ -56,7 +56,7 @@ function HelpTutorialsCategoriesGamepad:IsCategoryEmpty(categoryIndex)
     local numEntries = GetNumHelpEntriesWithinCategory(categoryIndex)
     for helpIndex = 1, numEntries do
         local showOption = select(7, GetHelpInfo(categoryIndex, helpIndex))
-        if showOption == TUTORIAL_SHOW_OPTIONS_ALL or showOption == TUTORIAL_SHOW_OPTIONS_GAMEPAD then
+        if IsGamepadHelpOption(showOption) then
             return false
         end
     end

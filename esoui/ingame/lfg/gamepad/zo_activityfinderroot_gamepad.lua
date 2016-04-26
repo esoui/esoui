@@ -58,7 +58,7 @@ end
 function ActivityFinderRoot_Gamepad:OnDeferredInitialize()
     self.headerData =
     {
-        titleText = "Activity Finder",
+        titleText = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
     }
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
@@ -71,7 +71,7 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
         if data.data.activityFinderObject then
             isLevelLocked, lowestLevelLimit, lowestRankLimit = data.data.activityFinderObject:GetLevelLockInfo()
         end
-        enabled = enabled and not isLevelLocked and IsUnitSoloOrGroupLeader("player")
+        enabled = enabled and not isLevelLocked
         data.enabled = enabled
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
@@ -121,23 +121,18 @@ function ActivityFinderRoot_Gamepad:OnShowing()
 end
 
 do
-    local LOCK_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds", "100%", "100%")
-    local RANK_ICON = zo_iconFormat(GetGamepadVeteranRankIcon(), "100%", "100%")
-    local NOT_LEADER_TEXT = zo_strformat(SI_FORMAT_ICON_TEXT, LOCK_TEXTURE, GetString(SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT))
+    local LOCK_TEXTURE = zo_iconFormat(ZO_GAMEPAD_LOCKED_ICON_32, "100%", "100%")
+    local CHAMPION_ICON = zo_iconFormat(GetGamepadChampionPointsIcon(), "100%", "100%")
 
     function ActivityFinderRoot_Gamepad:RefreshTooltip(data)
         if self.scene:IsShowing() and not data.isRoleSelector then
-            local isLevelLocked, lowestLevelLimit, lowestRankLimit = data.activityFinderObject:GetLevelLockInfo()
+            local isLevelLocked, lowestLevelLimit, lowestPointsLimit = data.activityFinderObject:GetLevelLockInfo()
             local lockedText
             if isLevelLocked then
                 if lowestLevelLimit then
                     lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
-                elseif lowestRankLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_RANK_LOCK, LOCK_TEXTURE, RANK_ICON, lowestRankLimit)
-                end
-            else
-                if not IsUnitSoloOrGroupLeader("player") then
-                    lockedText = NOT_LEADER_TEXT
+                elseif lowestPointsLimit then
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
                 end
             end
 

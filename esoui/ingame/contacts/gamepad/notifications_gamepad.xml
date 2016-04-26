@@ -13,6 +13,15 @@
             </OnInitialized>
         </Control>
 
+        <Control name="ZO_GamepadNotificationsYesNoRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                self.acceptText = GetString(SI_YES)
+                self.declineText = GetString(SI_NO)
+            </OnInitialized>
+        </Control>
+        
         <Control name="ZO_GamepadNotificationsLeaderboardRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)

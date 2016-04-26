@@ -27,12 +27,12 @@ function ZO_CadwellManager_Gamepad:OnDeferredInitialize()
         titleText = "",
     }
 
-    local function OnDifficultyLevelChanged()
+    local function OnCadwellProgressionLevelChanged()
         self:Update()
     end
 
     local function OnPOIUpdated()
-        if GetPlayerDifficultyLevel() > PLAYER_DIFFICULTY_LEVEL_FIRST_ALLIANCE then
+        if GetCadwellProgressionLevel() > CADWELL_PROGRESSION_LEVEL_BRONZE then
             self:Update()
             -- NOTE: self:Update() will implicitly call self:RefreshEntryHeaderDescriptionAndObjectives() when it rebuilds the list,
             --  as such, there is no need to refresh the details directly here, which simplifies the logic.
@@ -40,7 +40,7 @@ function ZO_CadwellManager_Gamepad:OnDeferredInitialize()
     end
 
     self.control:RegisterForEvent(EVENT_POI_UPDATED, OnPOIUpdated)
-    self.control:RegisterForEvent(EVENT_DIFFICULTY_LEVEL_CHANGED, OnDifficultyLevelChanged)
+    self.control:RegisterForEvent(EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED, OnCadwellProgressionLevelChanged)
 end
 
 function ZO_CadwellManager_Gamepad:InitializeKeybindStripDescriptors()
@@ -67,25 +67,25 @@ end
 function ZO_CadwellManager_Gamepad:PerformUpdate()
     self.itemList:Clear()
 
-    for difficulty = PLAYER_DIFFICULTY_LEVEL_SECOND_ALLIANCE, PLAYER_DIFFICULTY_LEVEL_THIRD_ALLIANCE do
-        if GetPlayerDifficultyLevel() < difficulty then
+    for progressionLevel = CADWELL_PROGRESSION_LEVEL_SILVER, CADWELL_PROGRESSION_LEVEL_GOLD do
+        if GetCadwellProgressionLevel() < progressionLevel then
             break
         end
 
         local zones = {}
-        for zoneIndex = 1, GetNumZonesForDifficultyLevel(difficulty) do
-            local zoneName, zoneDescription, zoneOrder = GetCadwellZoneInfo(difficulty, zoneIndex)
-            local numObjectives = GetNumPOIsForDifficultyLevelAndZone(difficulty, zoneIndex)
+        for zoneIndex = 1, GetNumZonesForCadwellProgressionLevel(progressionLevel) do
+            local zoneName, zoneDescription, zoneOrder = GetCadwellZoneInfo(progressionLevel, zoneIndex)
+            local numObjectives = GetNumPOIsForCadwellProgressionLevelAndZone(progressionLevel, zoneIndex)
             local numCompletedObjectives = 0
 
-            for objectiveIndex = 1, GetNumPOIsForDifficultyLevelAndZone(difficulty, zoneIndex) do
-                local completed = select(6, GetCadwellZonePOIInfo(difficulty, zoneIndex, objectiveIndex))
+            for objectiveIndex = 1, GetNumPOIsForCadwellProgressionLevelAndZone(progressionLevel, zoneIndex) do
+                local completed = select(6, GetCadwellZonePOIInfo(progressionLevel, zoneIndex, objectiveIndex))
                 if completed then
                     numCompletedObjectives = numCompletedObjectives + 1
                 end
             end
 
-            table.insert(zones, {difficulty = difficulty, name = zoneName, description = zoneDescription, order = zoneOrder, numObjectives = numObjectives, numCompletedObjectives = numCompletedObjectives, index = zoneIndex})
+            table.insert(zones, {progressionLevel = progressionLevel, name = zoneName, description = zoneDescription, order = zoneOrder, numObjectives = numObjectives, numCompletedObjectives = numCompletedObjectives, index = zoneIndex})
         end
 
         table.sort(zones, ZO_CadwellSort)
@@ -99,8 +99,8 @@ function ZO_CadwellManager_Gamepad:PerformUpdate()
             local template
             if zoneIndex == 1 then
                 -- TODO: Do they want the icons in here somehow?
-                --local down, up, over = GetIconsForDifficultyLevel(difficulty)
-                entryData:SetHeader(GetString("SI_PLAYERDIFFICULTYLEVEL", difficulty))
+                --local down, up, over = GetIconsForCadwellProgressionLevel(progressionLevel)
+                entryData:SetHeader(GetString("SI_CADWELLPROGRESSIONLEVEL", progressionLevel))
                 template = "ZO_GamepadMenuEntryTemplateWithHeader"
             else
                 template = "ZO_GamepadMenuEntryTemplate"
@@ -127,12 +127,12 @@ function ZO_CadwellManager_Gamepad:RefreshEntryHeaderDescriptionAndObjectives()
 
     local zoneInfo = targetData.zoneInfo
 
-    local difficulty = zoneInfo.difficulty
+    local progressionLevel = zoneInfo.progressionLevel
     local zoneIndex = zoneInfo.index
     local numObjectives = zoneInfo.numObjectives
     local numCompletedObjectives = zoneInfo.numCompletedObjectives
 
-    local zoneName, zoneDescription = GetCadwellZoneInfo(difficulty, zoneIndex)
+    local zoneName, zoneDescription = GetCadwellZoneInfo(progressionLevel, zoneIndex)
     self.entryBody:SetText(zo_strformat(SI_CADWELL_ZONE_DESC_FORMAT, zoneDescription))
     
     self.entryHeaderData.titleText = zo_strformat(SI_CADWELL_ZONE_NAME_FORMAT, zoneName)
@@ -140,7 +140,7 @@ function ZO_CadwellManager_Gamepad:RefreshEntryHeaderDescriptionAndObjectives()
     ZO_GamepadGenericHeader_Refresh(self.entryHeader, self.entryHeaderData)
 
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    GAMEPAD_TOOLTIPS:LayoutCadwells(GAMEPAD_RIGHT_TOOLTIP, difficulty, zoneIndex)
+    GAMEPAD_TOOLTIPS:LayoutCadwells(GAMEPAD_RIGHT_TOOLTIP, progressionLevel, zoneIndex)
     GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
 end
 

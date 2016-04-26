@@ -1,4 +1,5 @@
 local HELP_CUSTOMER_SERVICE_INCOMPLETED_FIELDS_DIALOG = "HELP_CUSTOMER_SERVICE_INCOMPLETED_FIELDS_DIALOG"
+local lastSubmitTime = 0
 
 local HELP_SUBMIT_FEEDBACK_SUBCATEGORY =
 {
@@ -294,15 +295,24 @@ function HelpSubmitFeedback_Keyboard:AttemptToSendFeedback()
 		subcategoryId = self.helpSubcategoryComboBox:GetSelectedItemData().index
 	end
 
-	ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
-	ReportFeedback(impactId, categoryId, subcategoryId, detailsText, descriptionText, attachScreenshot)
+    if attachScreenshot and (lastSubmitTime + 30000) > GetFrameTimeMilliseconds() then
+        ZO_Dialogs_ShowDialog("TOO_FREQUENT_BUG_SCREENSHOT")
+    else
+        ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
+        ReportFeedback(impactId, categoryId, subcategoryId, detailsText, descriptionText, attachScreenshot)
+        SCENE_MANAGER:ShowBaseScene()
+        lastSubmitTime = GetFrameTimeMilliseconds()
+    end
 end
 
-function HelpSubmitFeedback_Keyboard:OnCustomerServiceFeedbackSubmitted(...)
+function HelpSubmitFeedback_Keyboard:OnCustomerServiceFeedbackSubmitted(eventCode, response, success)
 	ZO_Dialogs_ReleaseDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
 
-	ZO_Dialogs_ShowDialog("HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG")
-
+	if success then
+		ZO_Dialogs_ShowDialog("HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG", nil, {mainTextParams = {response}})
+	else
+		ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG", nil, {mainTextParams = {response}})
+	end
 	self:ClearFields()
 end
 

@@ -42,6 +42,9 @@ function HelpCustomerService_Keyboard:InitializeTree()
 end
 
 function HelpCustomerService_Keyboard:InitializeHelpDialogs()
+	local ESO_HELP_URL_TYPE = {urlType = APPROVED_URL_ESO_HELP}
+	local ESO_HELP_FRONT_FACING_ADDRESS = {mainTextParams = {GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB)}}
+
 	ZO_Dialogs_RegisterCustomDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG",
 	{
 		showLoadingIcon = true,
@@ -66,11 +69,18 @@ function HelpCustomerService_Keyboard:InitializeHelpDialogs()
 		},
         mainText =
         {
-			text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FAILED_BODY),
+			text = zo_strformat(SI_CUSTOMER_SERVICE_SUBMIT_FAILED_BODY, GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_HELP))
         },
        
         buttons =
         {
+			{
+				keybind = "DIALOG_PRIMARY",
+				text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
+				callback = function(...)
+					ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ESO_HELP_URL_TYPE, ESO_HELP_FRONT_FACING_ADDRESS)
+				end,
+			},
 			{
 				keybind = "DIALOG_NEGATIVE",
 				text = SI_DIALOG_EXIT,

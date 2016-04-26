@@ -165,7 +165,7 @@ function ZO_HelpManager:AddHelpEntry(helpCategoryIndex, helpIndex)
     if parent then
         local helpName, _,_,_,_,_, showOption = GetHelpInfo(helpCategoryIndex, helpIndex)
 
-        if showOption == TUTORIAL_SHOW_OPTIONS_ALL or showOption == TUTORIAL_SHOW_OPTIONS_KEYBOARD then
+        if IsKeyboardHelpOption(showOption) then
             local helpData =    {
                                     name = helpName,
                                     helpCategoryIndex = helpCategoryIndex,
@@ -261,7 +261,7 @@ function ZO_HelpManager:RefreshDetails()
             name, description, description2, image, _,_, showOption = GetHelpInfo(selectedData.helpCategoryIndex, selectedData.helpIndex)
         end
 
-        if showOption == TUTORIAL_SHOW_OPTIONS_ALL or showOption == TUTORIAL_SHOW_OPTIONS_KEYBOARD then
+        if IsKeyboardHelpOption(showOption) then
             self.helpTitle:SetHidden(false)
             self.helpTitle:SetText(name)
 

@@ -34,7 +34,7 @@ ZO_PlayerProgressBarCurrentFragment = ZO_SceneFragment:Subclass()
 
 function ZO_PlayerProgressBarCurrentFragment:New(...)
     local fragment = ZO_SceneFragment.New(self)
-    EVENT_MANAGER:RegisterForEvent("PlayerProgressBarCurrentFragment", EVENT_VETERAN_POINTS_UPDATE, function()
+    EVENT_MANAGER:RegisterForEvent("PlayerProgressBarCurrentFragment", EVENT_EXPERIENCE_GAIN, function()
         fragment:RefreshBaseType()
     end)
     return fragment
@@ -42,8 +42,8 @@ end
 
 function ZO_PlayerProgressBarCurrentFragment:RefreshBaseType()
     if(self:IsShowing()) then
-        if(GetUnitVeteranRank("player") > 0) then
-            PLAYER_PROGRESS_BAR:SetBaseType(PPB_VP)
+        if(CanUnitGainChampionPoints("player")) then
+            PLAYER_PROGRESS_BAR:SetBaseType(PPB_CP)
         else
             PLAYER_PROGRESS_BAR:SetBaseType(PPB_XP)
         end
@@ -62,60 +62,22 @@ function ZO_PlayerProgressBarCurrentFragment:Hide()
     self:OnHidden()
 end
 
--------------------------
-
-ZO_PlayerProgressBarKeyboardTextureSwapFragment = ZO_SceneFragment:Subclass()
-
-function ZO_PlayerProgressBarKeyboardTextureSwapFragment:New(progressBar)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.progressBar = progressBar
-    fragment.progressBar.isInKeyboardMode = not IsInGamepadPreferredMode()
-    return fragment
-end
-
-function ZO_PlayerProgressBarKeyboardTextureSwapFragment:Show()   
-    if self.progressBar.isInKeyboardMode == false then    
-        self.progressBar.isInKeyboardMode = true
-        self.progressBar:RefreshTemplate()
-    end
-    self:OnShown()
-end
-
--------------------------
-
-ZO_PlayerProgressBarGamepadTextureSwapFragment = ZO_SceneFragment:Subclass()
-
-function ZO_PlayerProgressBarGamepadTextureSwapFragment:New(progressBar)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.progressBar = progressBar
-    fragment.progressBar.isInKeyboardMode = not IsInGamepadPreferredMode()
-    return fragment
-end
-
-function ZO_PlayerProgressBarGamepadTextureSwapFragment:Show()   
-    if self.progressBar.isInKeyboardMode == true then    
-        self.progressBar.isInKeyboardMode = false    
-        self.progressBar:RefreshTemplate()
-    end
-    self:OnShown()
-end
-
 --Bar Type
 
 local PlayerProgressBarType = ZO_Object:Subclass()
 
 function PlayerProgressBarType:New(barTypeClass, barTypeId, ...)
     local obj = ZO_Object.New(self)
-    obj.barTypeClass = barTypeClass
-    obj.params = {...}
-    obj.barTypeId = barTypeId
-    obj:Initialize(...)
+    obj:Initialize(barTypeClass, barTypeId, ...)
     obj:InitializeLastValues()
     return obj
 end
 
-function PlayerProgressBarType:Initialize(...)
-    
+function PlayerProgressBarType:Initialize(barTypeClass, barTypeId, ...)
+    self.barTypeClass = barTypeClass
+    self.params = {...}
+    self.barTypeId = barTypeId
+    self:SetBarLevelColor(ZO_SELECTED_TEXT)
 end
 
 function PlayerProgressBarType:InitializeLastValues()
@@ -128,10 +90,6 @@ function PlayerProgressBarType:GetEnlightenedPool()
 end
 
 function PlayerProgressBarType:GetEnlightenedTooltip()
-    return nil
-end
-
-function PlayerProgressBarType:GetSecondaryBarType()
     return nil
 end
 
@@ -152,12 +110,40 @@ function PlayerProgressBarType:GetBarGradient()
     return self.barGradient
 end
 
+function PlayerProgressBarType:SetBarGradient(barGradient)
+    self.barGradient = barGradient
+end
+
+function PlayerProgressBarType:GetBarGlow()
+    return self.barGlowColor
+end
+
+function PlayerProgressBarType:SetBarGlow(barGlow)
+    self.barGlowColor = barGlow
+end
+
 function PlayerProgressBarType:GetIcon()
     return self.icon
 end
 
 function PlayerProgressBarType:GetLevelTypeText()
     return self.levelTypeText
+end
+
+function PlayerProgressBarType:SetLevelTypeText(text)
+    self.levelTypeText = text
+end
+
+function PlayerProgressBarType:SetTooltipCurrentMaxFormat(format)
+    self.tooltipCurrentMaxFormat = format
+end
+
+function PlayerProgressBarType:SetBarLevelColor(color)
+    self.barLevelColor = color
+end
+
+function PlayerProgressBarType:GetBarLevelColor()
+    return self.barLevelColor
 end
 
 -- XP Bar Type
@@ -168,17 +154,18 @@ function XPBarType:New(barTypeId)
     return PlayerProgressBarType.New(self, PPB_CLASS_XP, barTypeId)
 end
 
-function XPBarType:Initialize()
-    self.barGradient = ZO_XP_BAR_GRADIENT_COLORS
-    self.barGlowColor = ZO_XP_BAR_GLOW_COLOR
-    self.levelTypeText = GetString(SI_EXPERIENCE_LEVEL_LABEL)
-    self.tooltipCurrentMaxFormat = SI_EXPERIENCE_CURRENT_MAX
+function XPBarType:Initialize(barTypeClass, barTypeId, ...)
+    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, ...)
+    self:SetBarGradient(ZO_XP_BAR_GRADIENT_COLORS)
+    self:SetBarGlow(ZO_XP_BAR_GLOW_COLOR)
+    self:SetLevelTypeText(GetString(SI_EXPERIENCE_LEVEL_LABEL))
+    self:SetTooltipCurrentMaxFormat(SI_EXPERIENCE_CURRENT_MAX_PERCENT)
 end
 
 function XPBarType:GetLevelSize(rank)
     return GetNumExperiencePointsInLevel(rank)
 end
-            
+
 function XPBarType:GetLevel()
     return GetUnitLevel("player")
 end
@@ -187,60 +174,6 @@ function XPBarType:GetCurrent()
     return GetUnitXP("player")
 end
 
-function XPBarType:GetLevelTypeText()
-    if not IsInGamepadPreferredMode() then
-        return self.levelTypeText
-    end
-end
-
---VP Bar Type
-
-local VPBarType = PlayerProgressBarType:Subclass()
-
-function VPBarType:New(barTypeId)
-    return PlayerProgressBarType.New(self, PPB_CLASS_VP, barTypeId)
-end
-
-function VPBarType:Initialize()
-    self.barGradient = ZO_VP_BAR_GRADIENT_COLORS
-    self.barGlowColor = ZO_VP_BAR_GLOW_COLOR
-    self.tooltipCurrentMaxFormat = SI_VETERAN_POINTS_CURRENT_MAX
-    
-end
-
-function VPBarType:GetEnlightenedPool()
-    return 0
-end
-
-function VPBarType:GetSecondaryBarType()
-    return PPB_CLASS_CP
-end
-
-function VPBarType:GetLevelSize(rank)
-    return GetNumVeteranPointsInRank(rank)
-end
-
-function VPBarType:GetLevel()
-    return GetUnitVeteranRank("player")
-end
-            
-function VPBarType:GetCurrent()
-    return GetUnitVeteranPoints("player")
-end
-
-function VPBarType:GetLevelTypeText()
-    if not IsInGamepadPreferredMode() then
-        return GetString(SI_EXPERIENCE_VETERAN_RANK_LABEL) 
-    end
-end
-
-function VPBarType:GetIcon()
-    if not IsInGamepadPreferredMode() then
-        return "EsoUI/Art/Progression/veteranIcon_small.dds"
-    else 
-        return GetGamepadVeteranRankIcon()
-    end
-end
 -- Champion Bar Type
 
 local CPBarType = PlayerProgressBarType:Subclass()
@@ -249,22 +182,29 @@ function CPBarType:New(barTypeId)
     return PlayerProgressBarType.New(self, PPB_CLASS_CP, barTypeId)
 end
 
-function CPBarType:Initialize()
-    self.levelTypeText = GetString(SI_EXPERIENCE_CHAMPION_RANK_LABEL)
-    self.tooltipCurrentMaxFormat = SI_CHAMPION_POINTS_CURRENT_MAX
+function CPBarType:Initialize(barTypeClass, barTypeId, ...)
+    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, ...)
+    self:SetTooltipCurrentMaxFormat(SI_EXPERIENCE_CURRENT_MAX_PERCENT)
+    self:SetBarGlow(ZO_CP_BAR_GLOW_COLORS)
+    self:SetBarGradient(ZO_VP_BAR_GRADIENT_COLORS)
+    self:SetBarLevelColor(ZO_NORMAL_TEXT)
 end
 
 -- The champion bar shows the progress for the next point that you will gain, if you're maxed, just leave it at the last point earned.
-function CPBarType:GetShownAttribute()
-    local level = self:GetLevel()
+function CPBarType:GetShownAttribute(overrideLevel)
+    local level = overrideLevel or self.lastLevel
     if self:GetLevelSize(level) ~= nil then
         level = level + 1
     end
     return GetChampionPointAttributeForRank(level)
 end
 
-function CPBarType:GetBarGradient()
-    return ZO_CP_BAR_GRADIENT_COLORS[self:GetShownAttribute()]
+function CPBarType:GetBarGradient(specificLevel)
+    return ZO_CP_BAR_GRADIENT_COLORS[self:GetShownAttribute(specificLevel)]
+end
+
+function CPBarType:GetBarGlow(specificLevel)
+    return self.barGlowColor[self:GetShownAttribute(specificLevel)]
 end
 
 local CHAMPION_ATTRIBUTE_HUD_ICONS = 
@@ -274,8 +214,8 @@ local CHAMPION_ATTRIBUTE_HUD_ICONS =
     [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD-32.dds",
 }
 
-function CPBarType:GetIcon()
-    return CHAMPION_ATTRIBUTE_HUD_ICONS[self:GetShownAttribute()]
+function CPBarType:GetIcon(overrideLevel)
+    return CHAMPION_ATTRIBUTE_HUD_ICONS[self:GetShownAttribute(overrideLevel)]
 end
 
 function CPBarType:GetEnlightenedPool()
@@ -286,30 +226,33 @@ function CPBarType:GetEnlightenedPool()
     end
 end
 
+function CPBarType:GetLevel()
+    return GetPlayerChampionPointsEarned()
+end
+
+function CPBarType:GetLevelTypeText()
+    if IsInGamepadPreferredMode() then
+        return GetString(SI_GAMEPAD_EXPERIENCE_CHAMPION_LABEL)
+    else
+        return GetString(SI_EXPERIENCE_CHAMPION_LABEL)
+    end
+end
+
 function CPBarType:GetEnlightenedTooltip()
     local level = self:GetLevel()
     local levelSize = self:GetLevelSize(level)
     if levelSize then
         local poolSize = self:GetEnlightenedPool()
-        local current = self:GetCurrent()
         local nextPoint = GetChampionPointAttributeForRank(level + 1)
         local pointName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(nextPoint)
-        if poolSize + current > levelSize then
-            return zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_OVERRUN, pointName)
-        else
-            return zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP, pointName, ZO_CommaDelimitNumber(current + poolSize))
-        end
+        return zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP, ZO_CommaDelimitNumber(poolSize))
     else
         return GetString(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_MAXED)
     end
 end
 
 function CPBarType:GetLevelSize(rank)
-    return GetChampionXPInRank(rank)
-end
-
-function CPBarType:GetLevel()
-    return GetPlayerChampionPointsEarned()
+    return GetNumChampionXPInChampionPoint(rank)
 end
 
 function CPBarType:GetCurrent()
@@ -324,14 +267,15 @@ function SkillBarType:New(barTypeId, ...)
     return PlayerProgressBarType.New(self, PPB_CLASS_SKILL, barTypeId, ...)
 end
 
-function SkillBarType:Initialize(skillType, skillIndex)
+function SkillBarType:Initialize(barTypeClass, barTypeId, skillType, skillIndex, ...)
+    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, ...)
     self.skillType = skillType
     self.skillIndex = skillIndex
-    self.barGradient = ZO_SKILL_XP_BAR_GRADIENT_COLORS
-    self.barGlowColor = ZO_SKILL_XP_BAR_GLOW_COLOR
+    self:SetBarGradient(ZO_SKILL_XP_BAR_GRADIENT_COLORS)
+    self:SetBarGlow(ZO_SKILL_XP_BAR_GLOW_COLOR)
     local name = GetSkillLineInfo(skillType, skillIndex)
-    self.levelTypeText = name
-    self.tooltipCurrentMaxFormat = SI_EXPERIENCE_CURRENT_MAX 
+    self:SetLevelTypeText(name)
+    self:SetTooltipCurrentMaxFormat(SI_EXPERIENCE_CURRENT_MAX_PERCENT)
 end
 
 function SkillBarType:GetLevelSize(rank)
@@ -358,15 +302,15 @@ end
 local PlayerProgressBar = ZO_CallbackObject:Subclass()
 
 local FADE_DURATION_MS = 200
-local WAIT_BEFORE_FILL_DURATION_MS = 1500
+local WAIT_BEFORE_FILL_DURATION_MS = 1000
 local MIN_GLOW_DURATION_MS = 1000
 local MIN_WAIT_BEFORE_HIDE_MS = 1000
 local TIME_BETWEEN_ENLIGHTENED_ANIMATIONS_SECS = 6
+local BAR_GROW_DURATION_MS = 1000
 
 PPB_CLASS_XP = 1
-PPB_CLASS_VP = 2
-PPB_CLASS_CP = 3
-PPB_CLASS_SKILL = 4
+PPB_CLASS_CP = 2
+PPB_CLASS_SKILL = 3
 
 local PPB_MODE_INCREASE = 1
 local PPB_MODE_CURRENT = 2
@@ -380,11 +324,13 @@ local PPB_STATE_HIDDEN = "hidden"
 local PROGRESS_BAR_KEYBOARD_STYLE = 
 {
     template = "ZO_PlayerProgressTemplate",
+    championTemplate = "ZO_PlayerChampionProgressTemplate"
 }
 
 local PROGRESS_BAR_GAMEPAD_STYLE = 
 {
     template = "ZO_GamepadPlayerProgressTemplate",
+    championTemplate = "ZO_GamepadPlayerChampionProgressTemplate"
 }
 
 function PlayerProgressBar:New(...)
@@ -396,12 +342,11 @@ end
 function PlayerProgressBar:Initialize(control)
     self.control = control
     self.barControl = control:GetNamedChild("Bar")
-    self.secondaryBarControl = control:GetNamedChild("SecondaryBar")
-    self.enlightenedBarControl = self.secondaryBarControl:GetNamedChild("EnlightenedBar")
-    self.secondaryBarLevelTypeLabel = control:GetNamedChild("SecondaryLevelType")
-    self.secondaryBarLevelTypeIcon = control:GetNamedChild("SecondaryLevelTypeIcon")
+    self.enlightenedBarControl = self.barControl:GetNamedChild("EnlightenedBar")
     self.levelLabel = control:GetNamedChild("Level")
     self.levelTypeLabel = control:GetNamedChild("LevelType")
+    self.championPointsLabel = control:GetNamedChild("ChampionPoints")
+    self.championIcon = control:GetNamedChild("ChampionIcon")
     self.levelTypeIcon = control:GetNamedChild("LevelTypeIcon")
     self.glowContainer = self.barControl:GetNamedChild("GlowContainer")
     self.glowTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_PlayerProgressBarGlow", self.glowContainer)
@@ -414,6 +359,8 @@ function PlayerProgressBar:Initialize(control)
     self:RefreshAlpha()
 
     self.bar = ZO_WrappingStatusBar:New(self.barControl)
+    self.bar:SetAnimationTime(BAR_GROW_DURATION_MS)
+
     self.bar:SetOnLevelChangeCallback(function(_, level)
         self:OnBarLevelChange(level)
     end)
@@ -452,10 +399,11 @@ function PlayerProgressBar:Initialize(control)
     end
 
     control:RegisterForEvent(EVENT_EXPERIENCE_UPDATE, function()
-        self:RefreshCurrentTypeLater(PPB_XP)
-    end)
-    control:RegisterForEvent(EVENT_VETERAN_POINTS_UPDATE, function()
-        self:RefreshCurrentTypeLater(PPB_VP)
+        if(CanUnitGainChampionPoints("player")) then
+            self:RefreshCurrentTypeLater(PPB_CP)
+        else
+            self:RefreshCurrentTypeLater(PPB_XP)
+        end
     end)
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function()
         self:InitializeLastValues()
@@ -468,7 +416,7 @@ function PlayerProgressBar:Initialize(control)
     self:InitializeBarTypeClasses()
     self:InitializeBarTypes()
     
-    ZO_PlatformStyle:New(function(style) self:ApplyStyle(style) end, PROGRESS_BAR_KEYBOARD_STYLE, PROGRESS_BAR_GAMEPAD_STYLE)
+    ZO_PlatformStyle:New(function() self:RefreshTemplate() end)
 end
 
 --Bar Type Interfacing
@@ -486,7 +434,6 @@ function PlayerProgressBar:InitializeBarTypeClasses()
     self.barTypeClasses =
     {
         [PPB_CLASS_XP] = XPBarType,
-        [PPB_CLASS_VP] = VPBarType,
         [PPB_CLASS_SKILL] = SkillBarType,
         [PPB_CLASS_CP] = CPBarType,
     }
@@ -505,7 +452,6 @@ end
 function PlayerProgressBar:InitializeBarTypes()
     self.barTypes = {}
     PPB_XP = self:InstantiateBarType(PPB_CLASS_XP)
-    PPB_VP = self:InstantiateBarType(PPB_CLASS_VP)
     PPB_CP = self:InstantiateBarType(PPB_CLASS_CP)
 end
 
@@ -522,13 +468,6 @@ end
 
 function PlayerProgressBar:GetBarTypeInfo()
     return self.barTypes[self.barType]
-end
-
-function PlayerProgressBar:GetSecondaryBarInfo()
-    local barTypeInfo = self:GetBarTypeInfo()
-    if barTypeInfo then
-        return self.barTypes[barTypeInfo:GetSecondaryBarType()]
-    end
 end
 
 function PlayerProgressBar:GetCurrentInfo()
@@ -572,17 +511,21 @@ end
 
 --Bar Control
 
-function PlayerProgressBar:SetBarValue(level, current)
-    local levelSize = self:GetLevelSize(level)
-    if(levelSize == nil) then
-        current = 1
-        levelSize = 1
-    end
-    self.bar:SetValue(level, current, levelSize)
+do
+    local BAR_NO_WRAP = nil
+
+    function PlayerProgressBar:SetBarValue(level, current)
+        local levelSize = self:GetLevelSize(level)
+        if(levelSize == nil) then
+            current = 1
+            levelSize = 1
+        end
+        self.bar:SetValue(level, current, levelSize, BAR_NO_WRAP)
     
-    local barTypeInfo = self:GetBarTypeInfo()
-    barTypeInfo.lastLevel = level
-    barTypeInfo.lastCurrent = current
+        local barTypeInfo = self:GetBarTypeInfo()
+        barTypeInfo.lastLevel = level
+        barTypeInfo.lastCurrent = current
+    end
 end
 
 function PlayerProgressBar:SetBarState(state)
@@ -636,34 +579,48 @@ function PlayerProgressBar:Show()
     self:SetBarState(PPB_STATE_SHOWING)
 
     local barTypeInfo = self:GetBarTypeInfo()
-    ZO_StatusBar_SetGradientColor(self.barControl, barTypeInfo:GetBarGradient())
     
-    self:RefreshSecondaryBar()
+    self:UpdateBar()
+
+    self.control:SetHidden(false)
+    self.fadeTimeline:PlayForward()
+    CALLBACK_MANAGER:FireCallbacks("PlayerProgressBarFadingIn")
+end
+
+function PlayerProgressBar:UpdateBar(overrideLevel)
+    local barTypeInfo = self:GetBarTypeInfo()
+    ZO_StatusBar_SetGradientColor(self.barControl, barTypeInfo:GetBarGradient(overrideLevel))
+    ZO_StatusBar_SetGradientColor(self.enlightenedBarControl, barTypeInfo:GetBarGradient(overrideLevel))
 
     for i = 1, self.glowContainer:GetNumChildren() do
         local glowTexture = self.glowContainer:GetChild(i)
-        glowTexture:SetColor(barTypeInfo.barGlowColor:UnpackRGB())
+        glowTexture:SetColor(barTypeInfo:GetBarGlow(overrideLevel):UnpackRGB())
     end
 
     local levelTypeText = barTypeInfo:GetLevelTypeText()
     if levelTypeText then
         self.levelTypeLabel:SetText(zo_strformat(SI_LEVEL_BAR_LABEL, levelTypeText))
         self.levelTypeLabel:SetHidden(false)
+        self.levelTypeLabel:SetColor(barTypeInfo:GetBarLevelColor():UnpackRGBA())
     else
         self.levelTypeLabel:SetHidden(true)
         self.levelTypeLabel:SetText("")
     end
 
-    if(barTypeInfo:GetIcon() ~= nil) then
+    if barTypeInfo.barTypeClass == PPB_CLASS_CP then
+        self.championPointsLabel:SetHidden(false)
+        self.championIcon:SetHidden(false)
+    else
+        self.championPointsLabel:SetHidden(true)
+        self.championIcon:SetHidden(true)
+    end
+
+    if(barTypeInfo:GetIcon(overrideLevel) ~= nil) then
         self.levelTypeIcon:SetHidden(false)
-        self.levelTypeIcon:SetTexture(barTypeInfo:GetIcon())
+        self.levelTypeIcon:SetTexture(barTypeInfo:GetIcon(overrideLevel))
     else
         self.levelTypeIcon:SetHidden(true)
     end
-    
-    self.control:SetHidden(false)
-    self.fadeTimeline:PlayForward()
-    CALLBACK_MANAGER:FireCallbacks("PlayerProgressBarFadingIn")
 end
 
 function PlayerProgressBar:Hide()
@@ -712,30 +669,10 @@ function PlayerProgressBar:RefreshCurrentBar()
         self.bar:Reset()
         local level, current, max = self:GetMostRecentlyShownInfo()
         self:SetBarValue(level, current, max)
-        self.levelLabel:SetText(level)
-        self:RefreshSecondaryBar()
-    end
-end
+        self:UpdateBar()
+        self:SetLevelLabelText(level)
 
-function PlayerProgressBar:RefreshSecondaryBar()
-    local secondaryBarInfo = self:GetSecondaryBarInfo()
-    local hasSecondaryBar = secondaryBarInfo ~= nil
-    if hasSecondaryBar then
-        local current = secondaryBarInfo:GetCurrent()
-        local max = secondaryBarInfo:GetLevelSize(secondaryBarInfo:GetLevel())
-        if max == nil then
-            current = 1
-            max = 1
-        end
-        self.secondaryBarControl:SetMinMax(0, max)
-        self.secondaryBarControl:SetValue(current)
-        local gradient = secondaryBarInfo:GetBarGradient()
-        ZO_StatusBar_SetGradientColor(self.secondaryBarControl, gradient)
-        ZO_StatusBar_SetGradientColor(self.enlightenedBarControl, gradient)
-        self.secondaryBarLevelTypeIcon:SetTexture(secondaryBarInfo:GetIcon())
     end
-    self.secondaryBarLevelTypeIcon:SetHidden(not hasSecondaryBar)
-    self.secondaryBarControl:SetHidden(not hasSecondaryBar)
 end
 
 function PlayerProgressBar:OnUpdate(timeSecs)
@@ -745,54 +682,53 @@ end
 function PlayerProgressBar:RefreshEnlightened(timeSecs)    
     if not self.nextEnlightenedUpdate or timeSecs > self.nextEnlightenedUpdate then
         self.nextEnlightenedUpdate = timeSecs + 1
-
-        local barTypeInfo = self:GetSecondaryBarInfo()
-        local poolSize = barTypeInfo and barTypeInfo:GetEnlightenedPool()
-
-        if poolSize and poolSize > 0 then
-            if not self.enlightenedTimeline:IsPlaying() then
-                self.enlightenedTimeline:PlayFromStart()
-            end
-
-            local current = barTypeInfo:GetCurrent()
-            local max = barTypeInfo:GetLevelSize(barTypeInfo:GetLevel())
-            if max then
-                self.enlightenedBarControl:SetHidden(false)
-                self.enlightenedBarControl:SetMinMax(0, max)
-                self.enlightenedBarControl:SetValue(zo_min(max, current + poolSize))
-            else
-                self.enlightenedBarControl:SetHidden(true)
-            end
-        else
-            self.enlightenedTimeline:Stop()
-            self.enlightenedBarControl:SetHidden(true)
-        end
+        self:ForceRefreshEnlightened()
     end
 end
 
-function PlayerProgressBar:ApplyStyle(style)
-    ApplyTemplateToControl(self.control, style.template)
-    self:RefreshTemplate()
+function PlayerProgressBar:ForceRefreshEnlightened()
+    local barTypeInfo = self:GetBarTypeInfo()
+    local poolSize = barTypeInfo and barTypeInfo:GetEnlightenedPool()
+
+    if poolSize and poolSize > 0 then
+        if not self.enlightenedTimeline:IsPlaying() then
+            self.enlightenedTimeline:PlayFromStart()
+        end
+
+        local current = barTypeInfo:GetCurrent()
+        local max = barTypeInfo:GetLevelSize(barTypeInfo:GetLevel())
+        if max then
+            self.enlightenedBarControl:SetHidden(false)
+            self.enlightenedBarControl:SetMinMax(0, max)
+            self.enlightenedBarControl:SetValue(zo_min(max, current + poolSize))
+        else
+            self.enlightenedBarControl:SetHidden(true)
+        end
+    else
+        self.enlightenedTimeline:Stop()
+        self.enlightenedBarControl:SetHidden(true)
+    end
 end
 
 function PlayerProgressBar:RefreshTemplate()
     local template
+    local style
     local barTypeInfo = self:GetBarTypeInfo()
-    local secondaryBarTypeInfo = barTypeInfo and barTypeInfo:GetSecondaryBarType()
-    if not IsInGamepadPreferredMode() then
-        if secondaryBarTypeInfo == nil then
-            template = "ZO_PlayerProgressBarTemplate"
-        else
-            template = "ZO_PlayerProgressDualBarTemplate"
-        end
-        self.secondaryBarLevelTypeLabel:SetHidden(secondaryBarTypeInfo == nil)
+    local useChampionPoints = CanUnitGainChampionPoints("player")
+    if IsInGamepadPreferredMode() then
+        template = "ZO_GamepadPlayerProgressBarTemplate"
+        style = PROGRESS_BAR_GAMEPAD_STYLE
     else
-        if secondaryBarTypeInfo == nil then
-            template = "ZO_GamepadPlayerProgressBarTemplate"
-        else
-            template = "ZO_GamepadPlayerProgressDualBarTemplate"
-        end
-        self.secondaryBarLevelTypeLabel:SetHidden(true)
+        template = "ZO_PlayerProgressBarTemplate"
+        style = PROGRESS_BAR_KEYBOARD_STYLE
+    end
+
+    if barTypeInfo and (barTypeInfo.barTypeClass == PPB_CLASS_SKILL or barTypeInfo.barTypeClass == PPB_CLASS_XP) then
+        ApplyTemplateToControl(self.control, style.template)
+    elseif useChampionPoints then
+        ApplyTemplateToControl(self.control, style.championTemplate)
+    else
+        ApplyTemplateToControl(self.control, style.template)
     end
     ApplyTemplateToControl(self.barControl, template)
 end
@@ -819,8 +755,7 @@ function PlayerProgressBar:OnWaitBeforeShowComplete()
     
     self.bar:Reset()
     self:SetBarValue(startLevel, start)
-    self:RefreshSecondaryBar()
-    self.levelLabel:SetText(startLevel)
+    self:SetLevelLabelText(startLevel)
 
     if(needsShow) then
         self:Show()
@@ -841,7 +776,7 @@ end
 
 function PlayerProgressBar:AnimateFillIncrease()
     local finalLevel = self.increaseStartLevel
-    local finalLevelSize = self:GetLevelSize(self.increaseStartLevel)
+    local finalLevelSize = self:GetLevelSize(finalLevel)
     local finalStop = self.increaseStop
     
     while(finalLevelSize ~= nil and finalStop >= finalLevelSize) do
@@ -870,6 +805,17 @@ function PlayerProgressBar:WaitBeforeStopGlowing()
     else
         self:OnWaitBeforeStopGlowingComplete()
     end
+end
+
+function PlayerProgressBar:SetLevelLabelText(text)
+    local barTypeInfo = self:GetBarTypeInfo()
+    if barTypeInfo and barTypeInfo.barTypeClass == PPB_CLASS_CP then
+        self.championPointsLabel:SetText(text)
+        self.levelLabel:SetText(GetUnitLevel("player"))
+    else
+        self.levelLabel:SetText(text)
+    end
+    self.levelLabel:SetColor(barTypeInfo:GetBarLevelColor():UnpackRGBA())
 end
 
 function PlayerProgressBar:OnWaitBeforeStopGlowingComplete()
@@ -936,8 +882,9 @@ function PlayerProgressBar:ClearIncreaseData()
 end
 
 function PlayerProgressBar:OnBarLevelChange(level)
-    self.levelLabel:SetText(level)
     self:RefreshTemplate()
+    self:UpdateBar(level)
+    self:SetLevelLabelText(level)
 end
 
 --General Events
@@ -979,29 +926,28 @@ function PlayerProgressBar:Bar_OnMouseEnter(bar)
     local level = 0
     local current = 0
     local levelSize = 0
-    if bar == self.secondaryBarControl then
-        barTypeInfo = self:GetSecondaryBarInfo()
-        level = barTypeInfo:GetLevel()
-        current = barTypeInfo:GetCurrent()
-        levelSize = barTypeInfo:GetLevelSize(level)
-    else
-        barTypeInfo = self:GetBarTypeInfo()
-        level, current = self:GetMostRecentlyShownInfo()
-        levelSize = self:GetLevelSize(level)
-    end
+    barTypeInfo = self:GetBarTypeInfo()
+    level, current, levelSize = self:GetMostRecentlyShownInfo()
     
     if(barTypeInfo) then
         InitializeTooltip(InformationTooltip, bar, TOP, 0, 10)
         SetTooltipText(InformationTooltip, zo_strformat(SI_LEVEL_DISPLAY, barTypeInfo:GetLevelTypeText(), level))
 
+        local reachedMaxLevel = false
         if(levelSize) then
-            InformationTooltip:AddLine(zo_strformat(barTypeInfo.tooltipCurrentMaxFormat, ZO_CommaDelimitNumber(current), ZO_CommaDelimitNumber(levelSize)))
+            reachedMaxLevel = current == levelSize
+            if reachedMaxLevel then
+                InformationTooltip:AddLine(GetString(SI_EXPERIENCE_LIMIT_REACHED))
+            else
+                local percentageXP = zo_floor(current / levelSize * 100) 
+                InformationTooltip:AddLine(zo_strformat(barTypeInfo.tooltipCurrentMaxFormat, ZO_CommaDelimitNumber(current), ZO_CommaDelimitNumber(levelSize), percentageXP))
+            end
         end
 
         local enlightenedPool = barTypeInfo:GetEnlightenedPool()
-        if enlightenedPool > 0 then
+        if enlightenedPool > 0 and not reachedMaxLevel then
             local enlightenedTooltip = barTypeInfo:GetEnlightenedTooltip()
-            InformationTooltip:AddLine(enlightenedTooltip)
+            InformationTooltip:AddLine(enlightenedTooltip, nil, ZO_SUCCEEDED_TEXT:UnpackRGB())
         end
     end
 end

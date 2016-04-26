@@ -38,7 +38,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     self.template = template or DEFAULT_TEMPLATE
 
     local function VendorEntryTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-        ZO_Inventory_BindSlot(control, slotType, data.slotIndex, data.bagId)
+        ZO_Inventory_BindSlot(data, slotType, data.slotIndex, data.bagId)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     end
 
@@ -46,6 +46,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     self.list:AddDataTemplate(self.template, templateSetupFunction or VendorEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.list:AddDataTemplateWithHeader(self.template, templateSetupFunction or VendorEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, DEFAULT_HEADER_TEMPLATE, MenuEntryHeaderTemplateSetup)
 
+    -- generate the trigger keybinds so we can add/remove them later when necessary
     self.triggerKeybinds = {}
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.triggerKeybinds, self.list)
 
@@ -222,31 +223,51 @@ end
 --[[
 Query if the inventory list is empty
 ]]--
-function ZO_GamepadInventoryList:IsEmpty()
-    local bagSlots = GetBagSize(self.inventoryType)
-    for slotIndex = 0, bagSlots - 1 do
-        local slotData = SHARED_INVENTORY:GenerateSingleSlotData(self.inventoryType, slotIndex)
+do
+    local function HasSlotData(inventoryType, slotIndex, filterFunction)
+        local slotData = SHARED_INVENTORY:GenerateSingleSlotData(inventoryType, slotIndex)
         if slotData then
-            if (not self.itemFilterFunction) or self.itemFilterFunction(slotData) then
-                return false
+            if (not filterFunction) or filterFunction(slotData) then
+                return true
             end
         end
+        return false
     end
-    return true
+
+    function ZO_GamepadInventoryList:IsEmpty()
+        local inventoryType = self.inventoryType
+        local filterFunction = self.itemFilterFunction
+
+        local bagId = self.inventoryType
+        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+        while slotIndex do
+            if HasSlotData(inventoryType, slotIndex, filterFunction) then
+                return false
+            end
+            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+        end
+
+        return true
+    end
 end
 
 --[[
-Moves the selection to the first item.
+Passthrough functions for operating on the parametric list itself
 ]]--
-function ZO_GamepadInventoryList:SelectFirstIndex()
-    self.list:SetFirstIndexSelected()
+function ZO_GamepadInventoryList:SetFirstIndexSelected(...)
+    self.list:SetFirstIndexSelected(...)
 end
 
---[[
-Moves the selection to the final item.
-]]--
-function ZO_GamepadInventoryList:SelectLastIndex()
-    self.list:SetLastIndexSelected()
+function ZO_GamepadInventoryList:SetLastIndexSelected(...)
+    self.list:SetLastIndexSelected(...)
+end
+
+function ZO_GamepadInventoryList:SetPreviousSelectedDataByEval(...)
+    return self.list:SetPreviousSelectedDataByEval(...)
+end
+
+function ZO_GamepadInventoryList:SetNextSelectedDataByEval(...)
+    return self.list:SetNextSelectedDataByEval(...)
 end
 
 --[[
@@ -294,8 +315,8 @@ local DEFAULT_GAMEPAD_ITEM_SORT =
 {
     bestGamepadItemCategoryName = { tiebreaker = "name" },
     name = { tiebreaker = "requiredLevel" },
-    requiredLevel = { tiebreaker = "requiredVeterankRank", isNumeric = true },
-    requiredVeterankRank = { tiebreaker = "iconFile", isNumeric = true },
+    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
+    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
     iconFile = { tiebreaker = "uniqueId" },
     uniqueId = { isId64 = true },
 }
@@ -304,7 +325,7 @@ local function ItemSortFunc(data1, data2)
      return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", DEFAULT_GAMEPAD_ITEM_SORT, ZO_SORT_ORDER_UP)
 end
 
-function ZO_GamepadInventoryList:AddSlotDataToTable(slots, slotIndex)
+function ZO_GamepadInventoryList:AddSlotDataToTable(slotsTable, slotIndex)
     local itemFilterFunction = self.itemFilterFunction
     local categorizationFunction = self.categorizationFunction or ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription
 
@@ -315,7 +336,7 @@ function ZO_GamepadInventoryList:AddSlotDataToTable(slots, slotIndex)
             -- We'll use bestGamepadItemCategoryName instead so there are no conflicts.
             slotData.bestGamepadItemCategoryName = categorizationFunction(slotData)
 
-            slots[#slots + 1] = slotData
+            table.insert(slotsTable, slotData)
         end
     end
 end
@@ -323,17 +344,11 @@ end
 function ZO_GamepadInventoryList:GenerateSlotTable()
     local slots = {}
 
-    if self.inventoryType == BAG_GUILDBANK then
-        local slotIndex = GetNextGuildBankSlotId()
-        while slotIndex do
-            self:AddSlotDataToTable(slots, slotIndex)
-            slotIndex = GetNextGuildBankSlotId(slotIndex)
-        end
-    else
-        local bagSlots = GetBagSize(self.inventoryType)
-        for slotIndex = 0, bagSlots - 1 do
-            self:AddSlotDataToTable(slots, slotIndex)
-        end
+    local bagId = self.inventoryType
+    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+    while slotIndex do
+        self:AddSlotDataToTable(slots, slotIndex)
+        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
     end
 
     table.sort(slots, self.sortFunction or ItemSortFunc)

@@ -49,7 +49,6 @@
                 <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL">
                     <Controls>
                         <Texture name="$(parent)CurrencyIcon" inherits="ZO_MarketCurrencyIcon" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                            <Dimensions x="32" y="32" />
                             <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
                         </Texture>
                     </Controls>
@@ -88,6 +87,19 @@
                         </Control>
                     </Controls>
                 </Label>
+                
+                <Label name="$(parent)BundledProducts" level="ZO_MARKET_TILE_TEXT_LEVEL" hidden="true">
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Controls>
+                        <Label name="$(parent)Label" text="SI_MARKET_PRODUCT_TOTAL_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                            <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)" offsetX="-6"/>
+                        </Label>
+                    </Controls>
+                </Label>
+                <Texture name="$(parent)BundleIndicator" level="ZO_MARKET_TILE_TEXT_LEVEL" hidden="true">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
             </Controls>
         </Control>
     </Controls>

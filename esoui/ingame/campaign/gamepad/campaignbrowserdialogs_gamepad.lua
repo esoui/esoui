@@ -4,14 +4,15 @@ ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG = "GAMEPAD_CAMPAIGN_LOCKED_DIALOG"
 ZO_GAMEPAD_CAMPAIGN_GUEST_WARNING_DIALOG = "GAMEPAD_CAMPAIGN_GUEST_WARNING_DIALOG"
 ZO_GAMEPAD_CAMPAIGN_SET_HOME_REVIEW_DIALOG = "GAMEPAD_CAMPAIGN_SET_HOME_REVIEW_DIALOG"
 ZO_GAMEPAD_CAMPAIGN_SET_HOME_CONFIRM_DIALOG = "GAMEPAD_CAMPAIGN_SET_HOME_CONFIRM_DIALOG"
+ZO_GAMEPAD_CAMPAIGN_ABANDON_GUEST_DIALOG = "GAMEPAD_CAMPAIGN_ABANDON_GUEST_DIALOG"
+ZO_GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG = "GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG"
+
 
 ---------------------
 -- Select Campaign --
 ---------------------
 
 local function InitializeCampaignSelectDialog(screen)
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
-
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_SELECT_DIALOG,
     {
         gamepadInfo = {
@@ -22,7 +23,7 @@ local function InitializeCampaignSelectDialog(screen)
             KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
         end,
 
-        setup = function()
+        setup = function(dialog)
             local nowCost, endCost = ZO_SelectHomeCampaign_GetCost()
             screen.nowCost = nowCost
             screen.endCost = endCost
@@ -30,7 +31,7 @@ local function InitializeCampaignSelectDialog(screen)
             screen.numAlliancePoints = GetAlliancePoints()
             screen.hasEnough = screen.nowCost <= screen.numAlliancePoints
 
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -47,7 +48,6 @@ local function InitializeCampaignSelectDialog(screen)
                 templateData = {
                     isHome = true,
                     subLabels = {
-                        "",
                         function(control)
                             if screen.isFree then
                                 return ""
@@ -75,23 +75,23 @@ local function InitializeCampaignSelectDialog(screen)
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
-                callback = function()
+                callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local selectedCampaign = screen:GetTargetData()
                     if(selectedCampaign.id) then
                         if(targetData.isHome) then -- assign home
                             local lockTimeLeft = GetCampaignReassignCooldown()
                             if(lockTimeLeft > 0)  then
-                                ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = targetData.isHome } )
+                                ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = targetData.isHome, id = selectedCampaign.id } )
                             else
                                 ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_SET_HOME_REVIEW_DIALOG, { id = selectedCampaign.id }, { mainTextParams = GAMEPAD_AVA_BROWSER:GetTextParamsForSetHomeDialog() })
                             end
                         else -- assign guest
                             local lockTimeLeft = GetCampaignGuestCooldown()
                             if(lockTimeLeft > 0) then
-                                ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = targetData.isHome } )
+                                ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = targetData.isHome, id = selectedCampaign.id} )
                             else
-                                ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_GUEST_WARNING_DIALOG, { id = selectedCampaign.id, name = selectedCampaign.name })                                
+                                ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_GUEST_WARNING_DIALOG, { id = selectedCampaign.id, name = selectedCampaign.name })
                             end
                         end
                     end
@@ -112,8 +112,6 @@ end
 --------------------
 
 local function InitializeCampaignQueueDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
-
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_QUEUE_DIALOG,
     {
         canQueue = true,
@@ -122,8 +120,8 @@ local function InitializeCampaignQueueDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC
         },
 
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -144,7 +142,7 @@ local function InitializeCampaignQueueDialog()
                     isHome = true,
                     text = GetString(SI_CAMPAIGN_BROWSER_QUEUE_GROUP),
                     setup = ZO_SharedGamepadEntry_OnSetup,
-                    callback = function() 
+                    callback = function(dialog)
                         local IS_GROUP = true
                         QueueForCampaign(dialog.data.id, IS_GROUP)
                     end,
@@ -156,7 +154,7 @@ local function InitializeCampaignQueueDialog()
                     isHome = false,
                     text = GetString(SI_CAMPAIGN_BROWSER_QUEUE_SOLO),
                     setup = ZO_SharedGamepadEntry_OnSetup,
-                    callback = function() 
+                    callback = function(dialog)
                         local IS_GROUP = false
                         QueueForCampaign(dialog.data.id, IS_GROUP)
                     end,
@@ -169,10 +167,10 @@ local function InitializeCampaignQueueDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
-                callback = function()
+                callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    if(targetData and targetData.callback) then
-                        targetData.callback()
+                    if targetData and targetData.callback then
+                        targetData.callback(dialog)
                     end
                 end,
             },
@@ -190,34 +188,71 @@ end
 -- Locked Campaign --
 ---------------------
 
-local function InitializeCampaignLockedDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.BASIC)
-
+local function InitializeCampaignLockedDialog(screen)
+    local basicDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.BASIC)
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG,
     {
         canQueue = true,
+
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
         },
-        updateFn = function()
-            ZO_Dialogs_RefreshDialogText(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, dialog)
+        updateFn = function(dialog)
+            ZO_Dialogs_RefreshDialogText(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, basicDialog)
+
+            --If the displayed cooldown reaches 0, automatically forward user to the now unlocked dialog they were trying to navigate to originally
+            if dialog.data.isHome then
+                if dialog.data.isAbandoning then
+                    local timeLeft = GetCampaignUnassignCooldown()
+                    if timeLeft <= 0 then
+                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG, { id = dialog.data.id }, { mainTextParams = self:GetTextParamsForAbandonHomeDialog() })
+                        ZO_Dialogs_ReleaseDialog("GAMEPAD_CAMPAIGN_LOCKED_DIALOG")
+                    end
+                else
+                    local timeLeft = GetCampaignReassignCooldown()
+                    if timeLeft <= 0 then
+                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_SET_HOME_REVIEW_DIALOG, { id = dialog.data.id }, { mainTextParams = screen:GetTextParamsForSetHomeDialog() })
+                        ZO_Dialogs_ReleaseDialog("GAMEPAD_CAMPAIGN_LOCKED_DIALOG")
+                    end
+                end
+            else
+                local timeLeft = GetCampaignGuestCooldown()
+                if timeLeft <= 0 then
+                    if dialog.data.isAbandoning then
+                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_GUEST_DIALOG)
+                        ZO_Dialogs_ReleaseDialog("GAMEPAD_CAMPAIGN_LOCKED_DIALOG")
+                    else
+                        local selectedCampaign = screen:GetTargetData()
+                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_GUEST_WARNING_DIALOG, { id = selectedCampaign.id, name = selectedCampaign.name })
+                        ZO_Dialogs_ReleaseDialog("GAMEPAD_CAMPAIGN_LOCKED_DIALOG")
+                    end
+                end
+            end
         end,
         title =
         {
             text = SI_GAMEPAD_CAMPAIGN_LOCKED_DIALOG_TITLE,
         },
-        mainText = 
+        mainText =
         {
-            text = function() 
-                if(dialog.data.isHome) then
-                    local timeLeft = GetCampaignReassignCooldown()
+            text = function(dialog)
+                if dialog.data.isHome then
+                    local timeLeft = dialog.data.isAbandoning and GetCampaignUnassignCooldown() or GetCampaignReassignCooldown()
                     local timeleftStr = ZO_FormatTime(timeLeft, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING)
-                    return zo_strformat(SI_SELECT_HOME_CAMPAIGN_LOCKED_MESSAGE, timeleftStr)
+                    if (dialog.data.isAbandoning) then
+                        return zo_strformat(SI_ABANDON_HOME_CAMPAIGN_LOCKED_MESSAGE, timeleftStr)
+                    else
+                        return zo_strformat(SI_SELECT_HOME_CAMPAIGN_LOCKED_MESSAGE, timeleftStr)
+                    end
                 else
                     local timeLeft = GetCampaignGuestCooldown()
                     local timeleftStr = ZO_FormatTime(timeLeft, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING)
-                    return zo_strformat(SI_SELECT_GUEST_CAMPAIGN_LOCKED_MESSAGE, timeleftStr)
+                    if (dialog.data.isAbandoning) then
+                        return zo_strformat(SI_ABANDON_GUEST_CAMPAIGN_LOCKED_MESSAGE, timeleftStr)
+                    else
+                        return zo_strformat(SI_SELECT_GUEST_CAMPAIGN_LOCKED_MESSAGE, timeleftStr)
+                    end
                 end
             end,
         },
@@ -238,18 +273,18 @@ local BULLET_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_bullet.dds"
 local BULLET_ICON_SIZE = 32
 
 local function InitializeCampaignGuestWarningDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.STATIC_LIST)
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_GUEST_WARNING_DIALOG,
     {
         canQueue = true,
+        onlyQueueOnce = true,
 
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.STATIC_LIST,
         },
         
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -301,12 +336,59 @@ local function InitializeCampaignGuestWarningDialog()
 end
 
 ----------------------
+-- Abandon Guest --
+----------------------
+local function InitializeCampaignAbandonGuestDialog()
+    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_GUEST_DIALOG,
+    {
+        gamepadInfo = {
+            dialogType = GAMEPAD_DIALOGS.BASIC
+        },
+
+        canQueue = true,
+        onlyQueueOnce = true,
+
+        setup = function(dialog)
+            dialog:setupFunc()
+        end,
+
+        title =
+        {
+            text = SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN,
+        },
+
+        mainText = 
+        {
+            text = function()
+                local guestCampaignId = GetGuestCampaignId()
+                return zo_strformat(GetString(SI_ABANDON_GUEST_CAMPAIGN_QUERY), GetCampaignName(guestCampaignId))
+            end,
+        },
+
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_DIALOG_ACCEPT,
+                callback = function()
+                    UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_GUEST)
+                end,
+                clickSound = SOUNDS.DIALOG_ACCEPT,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+            },
+
+        }
+    })
+end
+
+----------------------
 -- Set Home Review --
 ----------------------
 
 local function InitializeCampaignSetHomeReviewDialog(screen)
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.BASIC)
-
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_SET_HOME_REVIEW_DIALOG,
     {
         gamepadInfo = {
@@ -314,9 +396,10 @@ local function InitializeCampaignSetHomeReviewDialog(screen)
         },
 
         canQueue = true,
+        onlyQueueOnce = true,
 
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -334,7 +417,7 @@ local function InitializeCampaignSetHomeReviewDialog(screen)
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_DIALOG_ACCEPT,
-                callback = function()
+                callback = function(dialog)
                     ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_SET_HOME_CONFIRM_DIALOG, { id = dialog.data.id } )
                 end,
                 clickSound = SOUNDS.DIALOG_ACCEPT,
@@ -353,13 +436,10 @@ end
 ----------------------
 
 local function InitializeCampaignSetHomeConfirmDialog(screen)
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
-    
-    
-    local function CanChange()
+    local function CanChange(dialog)
         local targetData = dialog.entryList:GetTargetData()
 
-        if(targetData.isNow) then
+        if targetData.isNow then
             return screen.nowCost <= screen.numAlliancePoints
         else
             return screen.endCost <= screen.numAlliancePoints
@@ -374,25 +454,21 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
 
         canQueue = true,
 
-        setup = function()
+        setup = function(dialog)
             local nowCost, endCost = ZO_SelectHomeCampaign_GetCost()
             screen.nowCost = nowCost
             screen.endCost = endCost
             screen.isFree = screen.nowCost == 0
             screen.numAlliancePoints = GetAlliancePoints()
-            screen.hasEnough = screen.nowCost <= screen.numAlliancePoints
+            screen.hasEnoughNow = screen.nowCost <= screen.numAlliancePoints
+            screen.hasEnoughEnd = screen.endCost <= screen.numAlliancePoints
 
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         title =
         {
-            text = SI_GAMEPAD_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN_DIALOG_TITLE,
-        },
-
-        mainText = 
-        {
-            text = SI_SELECT_CAMPAIGN_COOLDOWN_WARNING,
+            text = SI_GAMEPAD_CAMPAIGN_BROWSER_CONFIRM_HOME_CAMPAIGN_DIALOG_TITLE,
         },
 
         parametricList =
@@ -401,36 +477,38 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
                 template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
                 text = GetString(SI_GAMEPAD_CAMPAIGN_SELECT_HOME_NOW),
                 templateData = {
-                    isNow = true,               
+                    isNow = true,
                     subLabels = {
-                        "",
                         function(control)
                             if screen.isFree then
                                 return ""
                             else
-                                return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.nowCost, screen.hasEnough)
+                                return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.nowCost, screen.hasEnoughNow)
                             end
                         end
                     },
                     setup = ZO_SharedGamepadEntry_OnSetup,
-                    callback = function()
+                    callback = function(dialog)
                         AssignCampaignToPlayer(dialog.data.id, CAMPAIGN_REASSIGN_TYPE_IMMEDIATE)
                     end,
                 },
             },
             {
-                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
+                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryExtraInfo",
                 text = GetString(SI_GAMEPAD_CAMPAIGN_SELECT_HOME_ON_END),
                 templateData = {
                     subLabels = {
                         GetString(SI_GAMEPAD_CAMPAIGN_SELECT_HOME_ON_END_INFO),
                         function(control)
-                            local hasEnough = screen.numAlliancePoints >= screen.endCost
-                            return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.nowCost, hasEnough)
+                            if screen.isFree then
+                                return ""
+                            else
+                                return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.endCost, screen.hasEnoughEnd)
+                            end
                         end
                     },
                     setup = ZO_SharedGamepadEntry_OnSetup,
-                    callback = function()
+                    callback = function(dialog)
                         AssignCampaignToPlayer(dialog.data.id, CAMPAIGN_REASSIGN_TYPE_ON_END)
                     end,
                     visible = function()
@@ -445,6 +523,142 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
+                visible = function(dialog)
+                    return CanChange(dialog)
+                end,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData and targetData.callback then
+                        targetData.callback(dialog)
+                    end
+                end,
+                clickSound = SOUNDS.DIALOG_ACCEPT,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+            },
+
+        }
+    })
+end
+
+--------------------------
+-- Abandon Home Confirm --
+--------------------------
+
+local function InitializeCampaignAbandonHomeConfirmDialog(screen)
+    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    
+    local function CanChange()
+        local targetData = dialog.entryList:GetTargetData()
+
+        if(targetData.useAlliancePoints) then
+            return screen.alliancePointCost <= screen.numAlliancePoints
+        else
+            return screen.goldCost <= screen.numGoldAvailable
+        end
+    end
+
+    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG,
+    {
+        gamepadInfo = {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC
+        },
+
+        canQueue = true,
+        onlyQueueOnce = true,
+
+        setup = function(dialog)
+            local alliancePointCost, goldCost = ZO_AbandonHomeCampaign_GetCost()
+            screen.alliancePointCost = alliancePointCost
+            screen.goldCost = goldCost
+            screen.numAlliancePoints = GetAlliancePoints()
+            screen.numGoldAvailable = GetCurrentMoney()
+            screen.hasEnoughAlliancePoints = screen.alliancePointCost <= screen.numAlliancePoints
+            screen.hasEnoughGold = screen.goldCost <= screen.numGoldAvailable
+
+            dialog:setupFunc()
+        end,
+
+        title =
+        {
+            text = SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN,
+        },
+
+        mainText = 
+        {
+            text = SI_GAMEPAD_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN_MESSAGE,
+        },
+
+        --Only show those options that are relevant to the current cost of abandoning campaign through visible function parameter
+        parametricList =
+        {
+            --Free Change: this option intentionally empty text, if the change is free then only this option will be allowed and the dialog is just an accept/confirm with no options
+            {
+                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
+                text = "",
+                templateData = {
+                    useAlliancePoints = true,
+                    subLabels = {
+                        ""
+                    },
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function()
+                        UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_HOME_USE_ALLIANCE_POINTS)
+                    end,
+                    visible = function()
+                        return screen.alliancePointCost == 0
+                    end,
+                },
+            },
+            --Use Alliance Points
+            {
+                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
+                text = GetString(SI_ABANDON_HOME_CAMPAIGN_USE_ALLIANCE_POINTS),
+                templateData = {
+                    useAlliancePoints = true,
+                    subLabels = {
+                        function(control)
+                            return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.alliancePointCost, screen.hasEnoughAlliancePoints)
+                        end
+                    },
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function()
+                        UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_HOME_USE_ALLIANCE_POINTS)
+                    end,
+                    visible = function()
+                        return screen.alliancePointCost ~= 0
+                    end,
+                },
+            },
+            --Use Gold
+            {
+                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
+                text = GetString(SI_ABANDON_HOME_CAMPAIGN_USE_GOLD),
+                templateData = {
+                    subLabels = {
+                        function(control)
+                            local USE_GOLD = true
+                            return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.goldCost, screen.hasEnoughGold, USE_GOLD)
+                        end
+                    },
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function()
+                        UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_HOME_USE_GOLD)
+                    end,
+                    visible = function()
+                        return screen.goldCost ~= 0 and screen.alliancePointCost ~= 0
+                    end,
+                },
+            },
+        },
+
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_DIALOG_ACCEPT,
                 visible = function()
                     return CanChange()
                 end,
@@ -472,8 +686,10 @@ end
 function ZO_CampaignDialogGamepad_Initialize(screen)
     InitializeCampaignSelectDialog(screen)
     InitializeCampaignQueueDialog()
-    InitializeCampaignLockedDialog()
+    InitializeCampaignLockedDialog(screen)
     InitializeCampaignGuestWarningDialog()
     InitializeCampaignSetHomeReviewDialog(screen)
     InitializeCampaignSetHomeConfirmDialog(screen)
+    InitializeCampaignAbandonGuestDialog()
+    InitializeCampaignAbandonHomeConfirmDialog(screen)
 end

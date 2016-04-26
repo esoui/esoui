@@ -411,7 +411,7 @@ function ZO_GamepadMarket_GridScreen:SetGridDimensions(gridWidth, gridHeight)
     self.focusList:SetGridDimensions(gridWidth, gridHeight)
 end
 
-function ZO_GamepadMarket_GridScreen:PrepareGridForBuild(itemsPerRow, itemsPerColumn, itemWidth, itemHeight, itemPadding, useWideTiles)
+function ZO_GamepadMarket_GridScreen:PrepareGridForBuild(itemsPerRow, itemsPerColumn, itemWidth, itemHeight, itemPadding)
     self.totalItems = 0
     self.currentItemAnchor:SetTarget(self.currentCategoryControl)
     self.itemsPerRow = itemsPerRow
@@ -419,7 +419,6 @@ function ZO_GamepadMarket_GridScreen:PrepareGridForBuild(itemsPerRow, itemsPerCo
     self.itemWidth = itemWidth
     self.itemHeight = itemHeight
     self.itemPadding = itemPadding
-    self.useWideTiles = useWideTiles
     self.gridYPaddingOffset = ZO_GAMEPAD_MARKET_GRID_INITIAL_Y_OFFSET
     self.gridYHeight = 0
 end
@@ -432,8 +431,8 @@ function ZO_GamepadMarket_GridScreen:ResetGrid()
     self.itemWidth = 0
     self.itemHeight = 0
     self.itemPadding = 0
-    self.useWideTiles = false
     self.gridYPaddingOffset = ZO_GAMEPAD_MARKET_GRID_INITIAL_Y_OFFSET
+    self.gridYHeight = 0
 end
 
 function ZO_GamepadMarket_GridScreen:AddEntry(marketProduct, control)
@@ -444,7 +443,6 @@ function ZO_GamepadMarket_GridScreen:AddEntry(marketProduct, control)
     control:SetParent(self.currentCategoryControl)
     self.totalItems = self.totalItems + 1
     marketProduct:SetListIndex(self.totalItems)
-    marketProduct:SetRenderSize(self.useWideTiles and ZO_GAMEPAD_MARKET_PRODUCT_RENDER_SIZE_WIDE or ZO_GAMEPAD_MARKET_PRODUCT_RENDER_SIZE_STANDARD)
     local focusData = marketProduct:GetFocusData()
     focusData.gridY = row + 1
     focusData.gridX = col + 1
@@ -530,11 +528,6 @@ function ZO_GamepadMarket_GridScreen:BeginPreview()
     self.previewIndex = self.selectedMarketProduct:GetPreviewIndex()
     ZO_GAMEPAD_MARKET_PREVIEW:SetPreviewProductsContainer(self)
     self.isPreviewing = true
-
-    if IsCharacterPreviewingAvailable() then
-        ZO_GAMEPAD_MARKET_PREVIEW:Activate()
-        self.selectedMarketProduct:Preview()
-    end
     self:Deactivate()
     SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)
 end
@@ -574,7 +567,6 @@ function ZO_GamepadMarket_GridScreen:MoveToNextPreviewProduct()
 end
 
 function ZO_GamepadMarket_GridScreen:OnShowing()
-    self:EndCurrentPreview()
     self:PerformDeferredInitialization()
 end
 
@@ -723,7 +715,11 @@ function ZO_GamepadMarket_GridScreen:OnSelectionChanged(selectedData)
 end
 
 function ZO_GamepadMarket_GridScreen:SetQueuedTutorial(queuedTutorial)
-    self.queuedTutorial = queuedTutorial
+    local tutorialId = GetTutorialId(queuedTutorial)
+
+    if not HasSeenTutorial(tutorialId) then
+        self.queuedTutorial = queuedTutorial
+    end
 end
 
 function ZO_GamepadMarket_GridScreen:HasQueuedTutorial()

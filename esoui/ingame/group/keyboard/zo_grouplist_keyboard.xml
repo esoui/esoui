@@ -76,6 +76,15 @@
                 <Label name="$(parent)CharacterName" inherits="ZO_GroupListRowTooltipIfTruncatedLabel">
                     <Dimensions x="ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH" />
                     <Anchor point="LEFT" relativeTo="$(parent)Leader" relativePoint="RIGHT" />
+                    <OnInitialized>
+                        self.row = self:GetParent()
+                    </OnInitialized>
+                    <OnMouseEnter>
+                        ZO_GroupListRowCharacterName_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GroupListRowCharacterName_OnMouseExit(self)
+                    </OnMouseExit>
                 </Label>
                 
                 <Label name="$(parent)Zone" inherits="ZO_GroupListRowTooltipIfTruncatedLabel">
@@ -100,19 +109,19 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)Level" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER">
+                <Label name="$(parent)Level" inherits="ZO_GroupListRowLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                     <Dimensions x="ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH" />
                     <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_KEYBOARD_GROUP_LIST_PADDING_X"/>
                 </Label>
 
-                <Texture name="$(parent)Veteran" mouseEnabled="true" layer="OVERLAY">
-                    <Dimensions x="32" y="32"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="CENTER" offsetX="-7" />
+                <Texture name="$(parent)Champion" mouseEnabled="true" layer="OVERLAY">
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="5" />
                     <OnMouseEnter>
-                        ZO_GroupListRowVeteran_OnMouseEnter(self)
+                        ZO_GroupListRowChampion_OnMouseEnter(self)
                     </OnMouseEnter>
                     <OnMouseExit>
-                        ZO_GroupListRowVeteran_OnMouseExit(self)
+                        ZO_GroupListRowChampion_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
 

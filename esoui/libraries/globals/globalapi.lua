@@ -102,7 +102,11 @@ function zo_round(value)
 end
 
 function zo_roundToZero(value)
-    return zo_floor(value > 0 and value + .5 or value - .5)
+    if value > 0 then
+		return zo_ceil(value - .5)
+	else
+		return zo_floor(value + .5)
+	end
 end
 
 function zo_roundToNearest(value, nearest)
@@ -155,6 +159,10 @@ end
 
 function zo_iconTextFormat(path, width, height, text)
     return zo_strformat(SI_FORMAT_ICON_TEXT, zo_iconFormat(path, width, height), text)
+end
+
+function zo_iconTextFormatNoSpace(path, width, height, text)
+    return zo_strformat(SI_FORMAT_ICON_TEXT_NO_SPACE, zo_iconFormat(path, width, height), text)
 end
 
 function zo_bulletFormat(label, text)

@@ -32,11 +32,13 @@ function ZO_MailSendShared_SavePendingMail()
         for i = 1, MAIL_MAX_ATTACHED_ITEMS do
             local bagId, slotIndex, icon, stack = GetQueuedItemAttachmentInfo(i)
             if(stack > 0) then
-            g_pendingAttachments[i] = { bagId = bagId,
-                                           slotIndex = slotIndex,
-                                           itemInstanceId = GetItemInstanceId(bagId, slotIndex),
-                                           stackSize = stack, 
-                                           icon = icon }
+                g_pendingAttachments[i] = {
+                    bagId = bagId,
+                    slotIndex = slotIndex,
+                    itemInstanceId = GetItemInstanceId(bagId, slotIndex),
+                    stackSize = stack, 
+                    icon = icon
+                }
                 RemoveQueuedItemAttachment(i)
             end
         end
@@ -45,15 +47,12 @@ function ZO_MailSendShared_SavePendingMail()
 end
 
 function ZO_MailSendShared_RestorePendingMail(manager)
-    local nextSlot = 1
-
     if(g_pendingAttachments) then
-        for _, pendingAttachment in ipairs(g_pendingAttachments) do
+        for attachmentSlot, pendingAttachment in pairs(g_pendingAttachments) do
             local sameItemInSlot = GetItemInstanceId(pendingAttachment.bagId, pendingAttachment.slotIndex) == pendingAttachment.itemInstanceId
             local sameStackSize = GetSlotStackSize(pendingAttachment.bagId, pendingAttachment.slotIndex) == pendingAttachment.stackSize
             if(sameItemInSlot and sameStackSize) then
-                QueueItemAttachment(pendingAttachment.bagId, pendingAttachment.slotIndex, nextSlot)
-                nextSlot = nextSlot + 1
+                QueueItemAttachment(pendingAttachment.bagId, pendingAttachment.slotIndex, attachmentSlot)
             else
                 manager.pendingMailChanged = true
             end

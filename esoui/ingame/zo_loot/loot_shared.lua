@@ -61,7 +61,7 @@ function ZO_Loot_Shared:Initialize(control)
 
     local function LootItemFailed(eventCode, reason, itemName)
         if(reason == LOOT_ITEM_RESULT_INVENTORY_FULL or reason == LOOT_ITEM_RESULT_INVENTORY_FULL_LOOT_ALL) then
-            TriggerTutorial(TUTORIAL_TRIGGER_LOOT_FAIL_INVENTORY_FULL)    
+            TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
         end
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
     end

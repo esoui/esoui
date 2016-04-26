@@ -188,6 +188,11 @@ do
 
         for i, timer in ipairs(sortedTimers) do
             ApplyTemplateToControl(timer, template)
+			
+			-- Reapply caption so the text is updated with the new modify text type
+			local caption = GetJournalQuestTimerCaption(timer.index)
+			timer.label:SetText(caption)
+
             if i == 1 then
                 timer:SetAnchor(constants.anchorPoint, nil, constants.anchorRelativePointFirstEntry, constants.offsetX, constants.offsetFirstY)
             else

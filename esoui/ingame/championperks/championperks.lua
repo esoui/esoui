@@ -147,7 +147,7 @@ function ChampionPerks:Initialize(control)
             SetChampionMusicActive(false)
             SetShouldRenderWorld(true)
         elseif newState == SCENE_HIDDEN then
-            if self:HasUnsavedChanges() then
+            if self:HasUnsavedChanges() and AreChampionPointsActive() then
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
             end
             self:ResetToZoomedOut()
@@ -187,6 +187,9 @@ function ChampionPerks:Initialize(control)
             self.gamepadChosenConstellationRightTooltip:ClearLines()
         end
     end)
+
+    SYSTEMS:RegisterKeyboardRootScene("champion", CHAMPION_PERKS_SCENE)
+    SYSTEMS:RegisterGamepadRootScene("champion", GAMEPAD_CHAMPION_PERKS_SCENE)
 end
 
 function ChampionPerks:IsChampionSystemNew()
@@ -2228,8 +2231,10 @@ function ChampionPerks:OnMoneyChanged()
 end
 
 function ChampionPerks:OnPlayerActivated()
-    --Refresh confirm and redistribute keybinds (which can be disabled by being in an AvA campaign) on loading into a new zone
-    self:RefreshApplicableSharedKeybinds()
+    if SYSTEMS:IsShowing("champion") then
+        --Refresh confirm and redistribute keybinds (which can be disabled by being in an AvA campaign) on loading into a new zone
+        self:RefreshApplicableSharedKeybinds()
+    end
 end
 
 function ChampionPerks:OnPowerUpdate(eventCode, unitTag, powerIndex, powerType, value, max, effectiveMax)

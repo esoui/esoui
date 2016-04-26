@@ -100,7 +100,6 @@ function LoreLibraryGamepad:PerformUpdate()
             entryData.description = collectionData.description
             entryData.enabled = collectionData.enabled
             entryData:SetFontScaleOnSelection(false)
-            entryData:SetHeightScaleOnSelection(true)
             entryData:SetShowUnselectedSublabels(true)
 
             if collectionData.enabled then

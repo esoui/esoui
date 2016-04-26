@@ -36,7 +36,7 @@
 
         <Control name="ZO_HelpCustomerService_Keyboard_ContentAnchors" virtual="true">
             <Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-10" offsetY="50" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="40" />
         </Control>
         
     </Controls>

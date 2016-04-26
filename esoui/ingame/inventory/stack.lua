@@ -2,7 +2,7 @@ function ZO_StackSplit_SplitItem(inventorySlotControl)
     local slot = PLAYER_INVENTORY:SlotForInventoryControl(inventorySlotControl)
 
     if(slot) then
-        if(slot.locked) then        
+        if(slot.locked) then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_ERROR_ITEM_LOCKED))
             return false
         end
@@ -14,11 +14,14 @@ function ZO_StackSplit_SplitItem(inventorySlotControl)
         end
 
         if IsInGamepadPreferredMode() then
-            local gamepadData = 
+            local gamepadData =
                 {
-                     inventorySlotControl = inventorySlotControl,
-                     bagId = bagId,
-                     slotIndex = slotIndex,   
+                    sliderMin = 1,
+                    sliderMax = stackSize - 1,
+                    sliderStartValue = zo_floor(stackSize / 2),
+                    bagId = bagId,
+                    slotIndex = slotIndex,
+                    stackSize = stackSize,
                 }
             ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_SPLIT_STACK_DIALOG, gamepadData)
         else

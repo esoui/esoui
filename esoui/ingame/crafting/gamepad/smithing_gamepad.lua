@@ -193,10 +193,6 @@ function ZO_Smithing_Gamepad:SetEnableSkillBar(enable)
 	end
 end
 
-function ZO_Smithing_Gamepad:SetUniversalStyleItemHidden(hidden)
-    self.universalStyleItemInfo:SetHidden(hidden)
-end
-
 function ZO_Smithing_Gamepad_Initialize(control)
     SMITHING_GAMEPAD = ZO_Smithing_Gamepad:New(control)
 

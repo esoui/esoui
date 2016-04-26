@@ -13,10 +13,10 @@ end
 
 local function UpdateSelectedCharacterData(data)
     if(data) then
-        ZO_CharacterSelectSelectedName:SetText(zo_strformat(SI_CHARACTER_SELECT_NAME, data.name))
+        ZO_CharacterSelectSelectedName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(data))
         ZO_CharacterSelectSelectedRace:SetText(zo_strformat(SI_CHARACTER_SELECT_RACE, GetRaceName(data.gender, data.race)))
         ZO_CharacterSelectSelectedLocation:SetText(zo_strformat(SI_CHARACTER_SELECT_LOCATION, GetLocationName(data.location)))
-        ZO_CharacterSelectSelectedClassLevel:SetText(ZO_CharacterSelect_GetFormattedLevelRankAndClass(data))
+        ZO_CharacterSelectSelectedClassLevel:SetText(ZO_CharacterSelect_GetFormattedLevelChampionAndClass(data))
     else
         ZO_CharacterSelectSelectedName:SetText("")
         ZO_CharacterSelectSelectedRace:SetText("")
@@ -41,8 +41,8 @@ local function SetupCharacterEntry(control, data)
     local characterLocation = GetControl(control, "Location")
     local characterAlliance = GetControl(control, "Alliance")
 
-    characterName:SetText(zo_strformat(SI_CHARACTER_SELECT_NAME, data.name))
-    characterStatus:SetText(ZO_CharacterSelect_GetFormattedLevelRankAndClass(data))
+    characterName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(data))
+    characterStatus:SetText(ZO_CharacterSelect_GetFormattedLevelChampionAndClass(data))
 
     if(data.location ~= 0) then
         characterLocation:SetText(zo_strformat(SI_CHARACTER_SELECT_LOCATION, GetLocationName(data.location)))
@@ -115,7 +115,19 @@ do
 
             ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
 
-            SelectCharacter(ZO_CharacterSelect_GetBestSelectionData())
+            local characterData = ZO_CharacterSelect_GetBestSelectionData()
+            SelectCharacter(characterData)
+
+            if characterData then
+                ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
+            end
+        end
+
+        local accountChampionPoints = ZO_CharacterSelect_GetAccountChampionPoints()
+        if accountChampionPoints > 0 then
+            ZO_CharacterSelectChampionPoints:SetText(zo_strformat(SI_KEYBOARD_ACCOUNT_CHAMPION_POINTS, accountChampionPoints))
+        else
+            ZO_CharacterSelectChampionPoints:SetHidden(true)
         end
     end
 
@@ -141,63 +153,93 @@ local function CharacterDeleted(eventCode, charId)
     ZO_CharacterSelect_FlagAsDeleting(charId, false)
 end
 
+local g_requestedCharacterRename = ""
+
+local function OnCharacterRenamedErrorCallback()
+    ZO_CharacterSelect_BeginRename(ZO_CharacterSelect_GetSelectedCharacterData())
+end
+
 local function OnCharacterRenamed(eventCode, charId, result)
-    ZO_Dialogs_ReleaseDialog("RENAME_CHARACTER")
-    if(result ~= NAME_RULE_NO_ERROR) then
-        local errorReason = GetString("SI_NAMINGERROR", result)
+    local OnSuccessCallback = nil
 
-        -- Show the fact that the character could not be created.
-        ZO_Dialogs_ShowDialog("CHARACTER_CREATE_FAILED_REASON", nil, {mainTextParams = {errorReason}})
-    end
+    ZO_CharacterSelect_OnCharacterRenamedCommon(eventCode, charId, result, g_requestedCharacterRename, OnSuccessCallback, OnCharacterRenamedErrorCallback)
 end
 
-local renamingId
 function ZO_CharacterSelect_BeginRename(characterData)
-    renamingId = characterData.id
-    ZO_Dialogs_ShowDialog("RENAME_CHARACTER")
+    ZO_Dialogs_ShowDialog("RENAME_CHARACTER_KEYBOARD", { characterData = characterData }, { titleParams = { GetString(dialogTitle) }})
 end
 
-local renameInstructions
 local function SetupRenameDialog(dialog, data)
-    local nameEdit = dialog:GetNamedChild("NameEdit")
+    local nameHeader = dialog:GetNamedChild("NameHeader")
+    nameHeader:SetText(zo_strformat(SI_RENAME_CHARACTER_NAME_LABEL, data.characterData.name))
 
-    if(renameInstructions == nil) then
-        renameInstructions = ZO_ValidNameInstructions:New(ZO_CharacterSelectRenameInstructionsContainer)
+    dialog.nameEdit = dialog:GetNamedChild("NameEdit")
+
+    dialog.attemptRenameButton = dialog:GetNamedChild("AttemptRename")
+    dialog.cancelButton = dialog:GetNamedChild("Cancel")
+
+    if(dialog.renameInstructions == nil) then
+        local NAME_INSTRUCTIONS_OFFSET_X = -20
+        local NAME_INSTRUCTIONS_OFFSET_Y = 0
+    
+        dialog.renameInstructions = ZO_ValidNameInstructions:New(dialog:GetNamedChild("RenameInstructions"))
+        dialog.renameInstructions:SetPreferredAnchor(RIGHT, dialog, LEFT, NAME_INSTRUCTIONS_OFFSET_X, NAME_INSTRUCTIONS_OFFSET_Y)   -- Attach instructions to left side of the dialog
     end
 
-    renameInstructions:SetPreferredAnchor(TOPRIGHT, nameEdit, TOPLEFT, -30, -118)
-    ZO_CharacterCreate_InitializeNameControl(nameEdit, ZO_RenameCharacterDialogAttemptRename, renameInstructions)
-    nameEdit:SetText("")
+    SetupEditControlForNameValidation(dialog.nameEdit)
+    dialog.nameEdit:SetText("")
 end
 
 function ZO_RenameCharacterDialog_OnInitialized(self)
-    ZO_Dialogs_RegisterCustomDialog("RENAME_CHARACTER",
+    ZO_Dialogs_RegisterCustomDialog("RENAME_CHARACTER_KEYBOARD",
     {
         customControl = self,
+        canQueue = true,
         setup = SetupRenameDialog,
         title =
         {
-            text = SI_PROMPT_TITLE_RENAME_CHARACTER,
+            text = function(dialog)
+                        local titleText = SI_CHARACTER_SELECT_RENAME_CHARACTER_FROM_TOKEN_TITLE
+
+                        if dialog.data.characterData.needsRename then
+                            titleText = SI_CHARACTER_SELECT_RENAME_CHARACTER_TITLE
+                        end
+
+                        return GetString(titleText)
+                   end,
         },
         buttons =
         {
-            [1] =
             {
                 control =   GetControl(self, "AttemptRename"),
-                text =      SI_OK,
-                noReleaseOnClick = true,
+                text =      SI_CHARACTER_SELECT_RENAME_SAVE_NEW_NAME,
                 callback =  function(dialog)
-                                AttemptCharacterRename(renamingId, ZO_RenameCharacterDialogNameEdit:GetText())
-                                -- Do not release dialog here, wait until the server responds, this solves a few issues with button mashers.
+                                g_requestedCharacterRename = ZO_RenameCharacterDialogNameEdit:GetText()
+                                AttemptCharacterRename(dialog.data.characterData.id, g_requestedCharacterRename)
+                                
+                                -- Show a loading dialog in its place until the rename request finishes
+                                ZO_Dialogs_ShowDialog("CHARACTER_SELECT_CHARACTER_RENAMING")
                             end,
             },
-
-            [2] =
             {
                 control =   GetControl(self, "Cancel"),
                 text =      SI_DIALOG_CANCEL,
-            }
-        }
+            },
+        },
+        updateFn = function(dialog)
+                        local nameText = dialog.nameEdit:GetText()
+                        local nameViolations = { IsValidCharacterName(nameText) }
+
+                        if #nameViolations > 0 then
+                            dialog.renameInstructions:Show(nil, nameViolations)
+                            dialog.attemptRenameButton:SetEnabled(false)
+                        else
+                            dialog.renameInstructions:Hide()
+                            dialog.attemptRenameButton:SetEnabled(true)
+                        end
+
+                        dialog.nameEdit:SetText(CorrectCharacterNameCase(nameText))
+                   end,
     })
 end
 
@@ -221,7 +263,9 @@ end
 
 local function OnPregameCharacterListReceived(characterCount, previousCharacterCount)
     if (characterCount > 0) then
-        PregameStateManager_SetState("CharacterSelect")
+        if PregameStateManager_GetCurrentState() ~= "CharacterSelect" then
+            PregameStateManager_SetState("CharacterSelect")
+        end
     end
 end
 
@@ -243,11 +287,41 @@ function ZO_CharacterSelect_Initialize(self)
         ZO_CharacterSelect_DisableSelection(charData)
     end
 
+    local function OnPregameFullyLoaded()
+        if ZO_CharacterSelect_CanShowAdditionalSlotsInfo() then
+            local label = ZO_CharacterSelectExtraCharacterSlots
+            local labelHeight = label:GetHeight()
+            label:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining()))
+            
+            -- The label won't update automatically, but we need to recommit the scroll list once it does to ensure that all characters in the
+            -- list can be selected.
+            local oldUpdateFn = label:GetHandler("OnUpdate")
+            label:SetHandler("OnUpdate", function(...)
+                    if oldUpdateFn then
+                        oldUpdateFn(...)
+                    end
+
+                    if label:GetHeight() ~= labelHeight then
+                        -- Recommit and recenter scroll list
+                        ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
+                        local characterData = ZO_CharacterSelect_GetBestSelectionData()
+                        if characterData then
+                            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
+                        end
+
+                        label:SetHandler("OnUpdate", oldUpdateFn)
+                    end
+                end)
+        end
+    end
+
     local list = ZO_CharacterSelectScrollList
     ZO_ScrollList_AddDataType(list, CHARACTER_DATA, "ZO_CharacterEntry", 80, SetupCharacterEntry)
     ZO_ScrollList_EnableSelection(list, "ZO_TallListHighlight", OnCharacterSelectionChanged)
     ZO_ScrollList_EnableHighlight(list, "ZO_TallListHighlight")
     ZO_ScrollList_SetDeselectOnReselect(list, false)
+
+    ZO_ScrollList_AddResizeOnScreenResize(list)
 
     self:RegisterForEvent(EVENT_CHARACTER_LIST_RECEIVED, ContextFilter(OnCharacterListReceived))
     self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
@@ -256,6 +330,7 @@ function ZO_CharacterSelect_Initialize(self)
 
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", ContextFilter(OnCharacterConstructionReady))
     CALLBACK_MANAGER:RegisterCallback("PregameCharacterListReceived", ContextFilter(OnPregameCharacterListReceived))
+    CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
 
     CHARACTER_SELECT_FRAGMENT = ZO_FadeSceneFragment:New(self, 300)
 end
@@ -294,6 +369,10 @@ function ZO_CharacterSelect_Login(option)
             end
         end
     end
+end
+
+function ZO_CharacterSelect_GetSelectedCharacterData()
+    return ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
 end
 
 local function ChangeSelectedCharacter(direction)
@@ -365,4 +444,143 @@ end
 
 function ZO_CharacterSelectDelete_OnMouseExit()
     ClearTooltip(InformationTooltip)
+end
+
+-- Service Token Indicator Functions
+
+local ServiceTokenIndicator = ZO_Object:Subclass()
+
+function ServiceTokenIndicator:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
+end
+
+function ServiceTokenIndicator:Initialize(control, iconTexture)
+    self.control = control
+    self.icon = control:GetNamedChild("Icon")
+    self.tokenCount = control:GetNamedChild("TokenCount")
+    self.highlight = control:GetNamedChild("BG"):GetNamedChild("Highlight")
+
+    if iconTexture then
+        self.icon:SetTexture(iconTexture)
+    end
+
+    self.tooltip = ServiceTooltip
+
+    control:SetHidden(true)
+end
+
+function ServiceTokenIndicator:SetTokenCount(numTokens)
+    self.tokenCount:SetText(numTokens)
+
+    self.enabled = numTokens ~= 0
+
+    if self.enabled then
+        self.icon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    else
+        self.icon:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    end
+end
+
+function ServiceTokenIndicator:OnMouseEnter()
+    InitializeTooltip(self.tooltip, self.control, BOTTOM, 0, -10, TOP)
+    self.highlight:SetHidden(false)
+end
+
+local SET_TO_FULL_SIZE = true
+function ServiceTokenIndicator:AddHeader(headerText)
+    local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+    self.tooltip:AddHeaderLine(GetString(SI_SERVICE_TOOLTIP_TYPE), "ZoFontWinH5", 1, THS_LEFT, r, g, b)
+
+    r, g, b = ZO_SELECTED_TEXT:UnpackRGB()
+    self.tooltip:AddLine(headerText, "ZoFontWinH3", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_UPPERCASE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+
+    ZO_Tooltip_AddDivider(self.tooltip)
+end
+
+function ServiceTokenIndicator:AddBodyText(bodyText, bodyTextColor)
+    local r, g, b
+    if bodyTextColor then
+        r, g, b = bodyTextColor:UnpackRGB()
+    else
+        r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+    end
+    self.tooltip:AddLine(bodyText, "", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+end
+
+function ServiceTokenIndicator:OnMouseExit()
+    ClearTooltip(self.tooltip)
+    self.highlight:SetHidden(true)
+end
+
+-- Name Change Tokens
+
+local NameChangeTokenIndicator = ServiceTokenIndicator:Subclass()
+
+function NameChangeTokenIndicator:New(...)
+    return ServiceTokenIndicator.New(self, ...)
+end
+
+function NameChangeTokenIndicator:Initialize(control)
+    local NAME_CHANGE_TOKEN_TEXTURE = "EsoUI/Art/Icons/Token_NameChange.dds"
+    ServiceTokenIndicator.Initialize(self, control, NAME_CHANGE_TOKEN_TEXTURE)
+
+    self.tooltipHeaderText = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_HEADER)
+    self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
+
+    local function OnRenameTokensUpdated(eventId, numTokens)
+        self:SetTokenCount(numTokens)
+    end
+
+    control:RegisterForEvent(EVENT_RENAME_TOKENS_UPDATED, ContextFilter(OnRenameTokensUpdated))
+    self:SetTokenCount(GetNumCharacterRenameTokens())
+end
+
+function NameChangeTokenIndicator:OnMouseEnter()
+    ServiceTokenIndicator.OnMouseEnter(self)
+
+    local bodyText2
+    local bodyText2Color
+
+    local numTokens = GetNumCharacterRenameTokens()
+    if numTokens ~= 0 then
+        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKENS_AVAILABLE, numTokens)
+        bodyText2Color = ZO_SUCCEEDED_TEXT
+    else
+        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_NO_NAME_CHANGE_TOKENS_AVAILABLE, numTokens)
+        bodyText2Color = ZO_ERROR_COLOR
+    end
+
+    self:AddHeader(self.tooltipHeaderText)
+    self:AddBodyText(self.tooltipBodyText1)
+    self:AddBodyText(bodyText2, bodyText2Color)
+end
+
+function NameChangeTokenIndicator:OnMouseUp()
+    if self.enabled then
+        local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
+
+        if characterData.needsRename then
+            ZO_Dialogs_ShowDialog("INELIGIBLE_SERVICE")
+        else
+            ZO_CharacterSelect_BeginRename(characterData)
+        end      
+    end
+end
+
+function ZO_NameChangeIndicator_Initialize(control)
+    NAME_CHANGE_TOKEN_INDICATOR = NameChangeTokenIndicator:New(control)
+end
+
+function ZO_NameChangeIndicator_OnMouseEnter()
+    NAME_CHANGE_TOKEN_INDICATOR:OnMouseEnter()
+end
+
+function ZO_NameChangeIndicator_OnMouseExit()
+    NAME_CHANGE_TOKEN_INDICATOR:OnMouseExit()
+end
+
+function ZO_NameChangeIndicator_OnMouseUp()
+    NAME_CHANGE_TOKEN_INDICATOR:OnMouseUp()
 end

@@ -167,12 +167,14 @@ function ZO_Skills_TieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl, cra
     skillInfoHeaderControl:RegisterForEvent(EVENT_SKILL_RANK_UPDATE, UpdateSkillInfoHeader)
     skillInfoHeaderControl:RegisterForEvent(EVENT_SKILL_XP_UPDATE, UpdateSkillInfoHeader)
 
-    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function() 
+    skillInfoHeaderControl.craftingAnimationsStoppedCallback = function() 
         if hadUpdateWhileCrafting then
             UpdateSkillInfoHeader()
             hadUpdateWhileCrafting = false
         end
-    end)
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", skillInfoHeaderControl.craftingAnimationsStoppedCallback)
 
     UpdateSkillInfoHeader()
 end
@@ -188,6 +190,8 @@ end
 function ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl)
     skillInfoHeaderControl:UnregisterForEvent(EVENT_SKILL_RANK_UPDATE)
     skillInfoHeaderControl:UnregisterForEvent(EVENT_SKILL_XP_UPDATE)
+    CALLBACK_MANAGER:UnregisterCallback("CraftingAnimationsStopped", skillInfoHeaderControl.craftingAnimationsStoppedCallback)
+    skillInfoHeaderControl.craftingAnimationsStoppedCallback = nil
 end
 
 function ZO_Skills_AbilityFailsWerewolfRequirement(skillType, lineIndex)

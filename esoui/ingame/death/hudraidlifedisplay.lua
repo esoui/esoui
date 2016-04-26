@@ -21,46 +21,6 @@ function HUDRaidLifeManager:Initialize(control)
         end
     end)
 
-    local function RaidCounterChanged(eventId, ...)
-        self:ProcessRaidCounterChanged()
-    end
-
-    EVENT_MANAGER:RegisterForEvent("HUDRaidLifeManager", EVENT_RAID_REVIVE_COUNTER_UPDATE, RaidCounterChanged)
-
-    EVENT_MANAGER:RegisterForUpdate("HUDRaidLifeManager", 100, function(...) self:OnUpdate(...) end)
-
-end
-
-local TIMER_DURATION_MS = 2500
-function HUDRaidLifeManager:ProcessRaidCounterChanged()
-    local currentInfo = self.announcementsInfo
-    local currentScore = GetCurrentRaidLifeScoreBonus()
-    if currentInfo == nil then
-        currentInfo = 
-        {
-            currentScore = currentScore,
-        }
-        self.announcementsInfo = currentInfo
-    else
-        currentInfo.currentScore = currentScore
-    end
-    currentInfo.endTimeMS = GetGameTimeMilliseconds() + TIMER_DURATION_MS
-end
-
-function HUDRaidLifeManager:ShowCapacityAnnouncement(score)
-    local maxCount = GetCurrentRaidStartingReviveCounters()
-    local currentCount = GetRaidReviveCountersRemaining()
-    if currentCount ~= maxCount then
-        local scoreText = zo_strformat(SI_REVIVE_COUNTER_UPDATED_SMALL, score)
-        CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_RAID_REVIVE_COUNTER_UPDATE, CSA_EVENT_LARGE_TEXT, SOUNDS.RAID_TRIAL_COUNTER_UPDATE, zo_strformat(SI_REVIVE_COUNTER_UPDATED_LARGE, "EsoUI/Art/Trials/VitalityDepletion.dds"))
-    end
-end
-
-function HUDRaidLifeManager:OnUpdate(timeMS)
-    if self.announcementsInfo and timeMS > self.announcementsInfo.endTimeMS then
-        self:ShowCapacityAnnouncement(self.announcementsInfo.currentScore)
-        self.announcementsInfo = nil
-    end
 end
 
 function HUDRaidLifeManager:RefreshMode()

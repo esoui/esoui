@@ -139,7 +139,7 @@ function ZO_MailView_Display_Gamepad(control, codFee, attachedMoney, address, su
     end
 
     if address then
-        control.addressEdit.edit:SetText(ZO_FormatUserFacingDisplayName(address))
+        control.addressEdit.edit:SetText(address)
         if isSystem then
             control.addressEdit.edit:SetColor(ZO_GAME_REPRESENTATIVE_TEXT:UnpackRGBA())
         else

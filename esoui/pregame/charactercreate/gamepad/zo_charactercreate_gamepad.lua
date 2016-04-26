@@ -17,8 +17,8 @@ local SKIP_TUTORIAL_GAMEPAD_DIALOG = "SKIP_TUTORIAL_GAMEPAD"
 local IGNORE_POSITION = -1
 
 local DEFAULT_OFFSET = -60
-local SELECTOR_OFFSET = -10
-local SELECTOR_ROW_OFFSET = -100
+local SELECTOR_PER_ROW_CENTER_OFFSET = -65
+local SELECTOR_STRIDE = 3
 
 local INITIAL_BUCKET = CREATE_BUCKET_RACE
 
@@ -35,7 +35,7 @@ local CUSTOM_CONTROL_FACE = 6
 
 local PREVIEW_NO_GEAR = 1
 local PREVIEW_NOVICE_GEAR = 2
-local PREVIEW_VETERAN_GEAR = 3
+local PREVIEW_CHAMPION_GEAR = 3
 
 local PREVIEW_GEAR_INFO = 
 {
@@ -49,9 +49,9 @@ local PREVIEW_GEAR_INFO =
         name = GetString(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_NOVICE_GEAR),
         fn = function () SelectClothing(DRESSING_OPTION_STARTING_GEAR) end
     },
-    [PREVIEW_VETERAN_GEAR] =
+    [PREVIEW_CHAMPION_GEAR] =
     {
-        name = GetString(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_VETERAN_GEAR),
+        name = GetString(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_CHAMPION_GEAR),
         fn = function () SelectClothing(DRESSING_OPTION_WARDROBE_1) end
     }
 }
@@ -472,16 +472,6 @@ function CharacterCreateBucketManager:Finalize()
     end
 end
 
-function CharacterCreateBucketManager:RefreshBucketCenterOffset(focusControl)
-    local offset = DEFAULT_OFFSET
-
-    if focusControl and focusControl.CalculateAdditionalOffset then
-        offset = offset + focusControl:CalculateAdditionalOffset()
-    end
-
-    self.m_currentBucket:GetScrollChild():SetFixedCenterOffset(offset)
-end
-
 -- Slider Randomization Helper...all sliders share the m_sliderObject from the top control, so this just helps cut down on duplicate functions
 local function RandomizeSlider(control, randomizeType)
     control.m_sliderObject:Randomize(randomizeType)
@@ -782,7 +772,7 @@ function CharacterCreateSelector:Initialize(control)
     self.m_highlightControl = CCSelectorHighlight
     self.m_selectedControl = CreateControlFromVirtual(control:GetName() .. "Selected", control, "CCSelected")
 
-    self.m_stride = 3
+    self.m_stride = SELECTOR_STRIDE
 end
 
 function CharacterCreateSelector:FocusButton(enabled)
@@ -999,10 +989,6 @@ function CharacterCreateSelector:FocusUpdate(move)
     end
 end
 
-function CharacterCreateSelector:CalculateAdditionalOffset()
-    return math.ceil(self.m_currentHighlight / self.m_stride) * SELECTOR_ROW_OFFSET + SELECTOR_OFFSET
-end
-
 -- Character Creation Alliance
 
 local CharacterCreateAllianceSelector = CharacterCreateSelector:Subclass()
@@ -1010,7 +996,7 @@ local CharacterCreateAllianceSelector = CharacterCreateSelector:Subclass()
 function CharacterCreateAllianceSelector:New(control)
     local object = CharacterCreateSelector.New(self, control)
 
-    object.m_stride = 3
+    object.m_stride = SELECTOR_STRIDE
     object.showKeybind = true
 end
 
@@ -1047,7 +1033,7 @@ local CharacterCreateRaceSelector = CharacterCreateSelector:Subclass()
 function CharacterCreateRaceSelector:New(control)
     local object = CharacterCreateSelector.New(self, control)
 
-    object.m_stride = 3
+    object.m_stride = SELECTOR_STRIDE
     object.showKeybind = true
     control.preSelectedOffsetAdditionalPadding = -20
 end
@@ -1192,7 +1178,7 @@ local CharacterCreateClassSelector = CharacterCreateSelector:Subclass()
 function CharacterCreateClassSelector:New(control)
     local object = CharacterCreateSelector.New(self, control)
 
-    object.m_stride = 3
+    object.m_stride = SELECTOR_STRIDE
     object.showKeybind = true
 end
 
@@ -1303,6 +1289,16 @@ local function SetSelectorButtonEnabled(selectorButton, radioGroup, enabled)
     end
 end
 
+local function SetSelectorsControlSelectedCenterOffset(control, numSelectors)
+    if control then
+        if numSelectors > SELECTOR_STRIDE then
+            control.selectedCenterOffset = zo_ceil((numSelectors - SELECTOR_STRIDE) / SELECTOR_STRIDE) * SELECTOR_PER_ROW_CENTER_OFFSET
+        else
+            control.selectedCenterOffset = 0
+        end
+    end
+end
+
 local function InitializeSelectorButton(buttonControl, data, radioGroup)
     if(data == nil) then return end
 
@@ -1375,6 +1371,8 @@ local function InitializeRaceSelectors()
     if raceObject.numButtons == 4 then
         finalRace.position = 5
     end
+
+    SetSelectorsControlSelectedCenterOffset(raceObject, raceObject.numButtons)
 
     local invalidRaces = {}
     for i, race in ipairs(races) do
@@ -1682,6 +1680,7 @@ local function InitializeAllianceSelectors()
         InitializeAllianceSelector(selector, alliance)
     end
 
+    SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadAlliance, #alliances)
 end
 
 local function AddClassSelectionDataToSelector(buttonControl, classData)
@@ -1710,6 +1709,8 @@ local function InitializeClassSelectors()
         InitializeSelectorButton(classButton, class, g_classRadioGroup)
         AddClassSelectionDataToSelector(classButton, class)
     end
+
+    SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadClass, #classes)
 end
 
 local function SetRandomizeAppearanceEnabled(enabled)
@@ -1841,7 +1842,6 @@ local function SetTemplate(templateId)
 end
 
 local function InitializeTemplatesDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     local templates = g_characterData:GetTemplateInfo()
 
     local dialogDescription = 
@@ -1851,8 +1851,8 @@ local function InitializeTemplatesDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC
         },
 
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -1872,7 +1872,7 @@ local function InitializeTemplatesDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
-                callback = function()
+                callback = function(dialog)
                     local selectedData = dialog.entryList:GetTargetData()
                     if(selectedData and selectedData.callback) then
                         selectedData.callback()
@@ -2029,8 +2029,6 @@ function ZO_CharacterCreate_GamepadContainer_OnUpdate()
         elseif moveFocus == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
             g_bucketManager:MovePrevious()
         end
-    else
-        g_bucketManager:RefreshBucketCenterOffset(self.focusControl)
     end
 end
 
@@ -2256,6 +2254,7 @@ function ZO_CharacterCreate_Gamepad_Initialize(self)
             errorFragment = CHARACTER_CREATE_GAMEPAD_FINISH_ERROR_FRAGMENT,
             dialogName = CHARACTER_CREATE_GAMEPAD_DIALOG,
             dialogTitle = SI_CREATE_CHARACTER_GAMEPAD_FINISH_TITLE,
+            dialogMainText = "",
             onBack = function() 
                 if self.focusControl then
                     self.focusControl:EnableFocus(true)
@@ -2343,8 +2342,6 @@ function ZO_CharacterCreate_Gamepad_SetFocus(self, control)
     if (self.focusControl ~= nil and self.focusControl.EnableFocus) then
         self.focusControl:EnableFocus(true)
     end
-
-    g_bucketManager:RefreshBucketCenterOffset(self.focusControl)
 
     if (not self:IsHidden()) then
         ZO_CharacterCreate_Gamepad_RefreshKeybindStrip()
@@ -2575,24 +2572,24 @@ do
 end
 
 function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     self.errorLabel = params.errorControl:GetNamedChild("Errors")
 
     local function UpdateSelectedName(name, suppressErrors)
-        if(dialog.selectedName ~= name) then
-            dialog.selectedName = name
-            dialog.nameViolations = { IsValidCharacterName(dialog.selectedName) }
-            dialog.noViolations = #dialog.nameViolations == 0
+        if parametricDialog.selectedName ~= name then
+            parametricDialog.selectedName = name
+            parametricDialog.nameViolations = { IsValidCharacterName(parametricDialog.selectedName) }
+            parametricDialog.noViolations = #parametricDialog.nameViolations == 0
 
-            dialog.selectedName = CorrectCharacterNameCase(dialog.selectedName)
+            parametricDialog.selectedName = CorrectCharacterNameCase(parametricDialog.selectedName)
             
-            if not dialog.noViolations then
+            if not parametricDialog.noViolations then
                 if suppressErrors then
                     SCENE_MANAGER:RemoveFragment(params.errorFragment)
                 else
                     local HIDE_UNVIOLATED_RULES = true
-                    local violationString = ZO_ValidNameInstructions_GetViolationString(dialog.selectedName, dialog.nameViolations, HIDE_UNVIOLATED_RULES, SI_CREATE_CHARACTER_GAMEPAD_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT)
+                    local violationString = ZO_ValidNameInstructions_GetViolationString(parametricDialog.selectedName, parametricDialog.nameViolations, HIDE_UNVIOLATED_RULES, SI_CREATE_CHARACTER_GAMEPAD_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT)
 
                     self.errorLabel:SetText(violationString)
                     SCENE_MANAGER:AddFragment(params.errorFragment)
@@ -2614,20 +2611,27 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
 
     local function SetupDialog(dialog, data)
         dialog.selectedName = nil
+        local headerData = {}
+
         if data ~= nil and data.characterName ~= nil then
             UpdateSelectedName(data.characterName)
         else
             local SUPPRESS_ERRORS = true
             UpdateSelectedName("", SUPPRESS_ERRORS)
         end
-        dialog.setupFunc(dialog)
+
+        if params and params.createHeaderDataFunction then
+            headerData = params.createHeaderDataFunction(dialog, data)
+        end
+
+        dialog:setupFunc(nil, headerData)
     end
 
     local doneEntry = ZO_GamepadEntryData:New(GetString(SI_CREATE_CHARACTER_GAMEPAD_FINISH_DONE), "EsoUI/Art/Miscellaneous/Gamepad/gp_submit.dds")
     doneEntry.setup = function(control, data, selected, reselectingDuringRebuild, _, active)
         self.doneControl = control
 
-        data.disabled = not dialog.noViolations or self.isCreating
+        data.disabled = not parametricDialog.noViolations or self.isCreating
         local enabled = not data.disabled
         data:SetEnabled(enabled)
 
@@ -2644,7 +2648,7 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
         },
 
         setup = SetupDialog,
-        shownCallback = function()
+        OnShownCallback = function()
             -- Open Keyboard immediately on entering finishing character dialog
             if self.editBoxControl then
                 self.editBoxControl:TakeFocus()
@@ -2658,7 +2662,7 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
         },
         mainText = 
         {
-            text = "",
+            text = params.dialogMainText,
         },
         parametricList =
         {
@@ -2672,19 +2676,19 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
                         local newName = control:GetText()
                         
                         UpdateSelectedName(newName)
-                        if(control:GetText() ~= dialog.selectedName) then
-                            control:SetText(dialog.selectedName)
+                        if control:GetText() ~= parametricDialog.selectedName then
+                            control:SetText(parametricDialog.selectedName)
                         end
-                    end,   
+                    end,
 
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         
                         ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_CREATE_CHARACTER_GAMEPAD_ENTER_NAME))
 
-                        local validInput = dialog.selectedName and dialog.selectedName ~= ""
+                        local validInput = parametricDialog.selectedName and parametricDialog.selectedName ~= ""
                         if validInput then
-                            control.editBoxControl:SetText(dialog.selectedName)
+                            control.editBoxControl:SetText(parametricDialog.selectedName)
                         end
                         
                         SetupEditControlForNameValidation(control.editBoxControl)
@@ -2709,14 +2713,14 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_CREATE_CHARACTER_GAMEPAD_FINISH_SELECT),
 
-                callback = function()
+                callback = function(dialog)
                     if self.editBoxSelected then
                         local targetControl = dialog.entryList:GetTargetControl()
                         if targetControl and targetControl.editBoxControl then
                             targetControl.editBoxControl:TakeFocus()
                         end
                     else
-                        if (not dialog.noViolations) then
+                        if not dialog.noViolations then
                             return
                         end
 
@@ -2728,14 +2732,14 @@ function ZO_CharacterNaming_Gamepad_CreateDialog(self, params)
                     end
                 end,
                 enabled = function()
-                    return self.editBoxSelected or dialog.noViolations
+                    return self.editBoxSelected or parametricDialog.noViolations
                 end,
             },
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = GetString(SI_CREATE_CHARACTER_GAMEPAD_FINISH_BACK),
 
-                callback = function()
+                callback = function(dialog)
                     ReleaseDialog()
 
                     if params.onBack then

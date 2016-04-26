@@ -1,0 +1,52 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_HUDEquipmentStatus_Indicator" virtual="true" mouseEnabled="true">
+            <OnMouseEnter>
+                ZO_HUDEquipmentStatus_Indicator_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_HUDEquipmentStatus_Indicator_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+        
+        <Control name="ZO_HUDEquipmentStatus_Keyboard_Template" virtual="true">
+            <Anchor point="BOTTOM" offsetX="-310" offsetY="-16"/>
+            <Dimensions x="80" y="40"/>
+            <Controls>
+                <Texture name="$(parent)WeaponIndicator" textureFile="EsoUI/Art/HUD/broken_weapon.dds">
+                    <Dimensions x="40" y="40"/>
+                </Texture>
+                <Texture name="$(parent)ArmorIndicator" textureFile="EsoUI/Art/HUD/broken_armor.dds">
+                    <Dimensions x="40" y="40"/>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_HUDEquipmentStatus_Gamepad_Template" virtual="true">
+            <Anchor point="BOTTOM" offsetX="-380" offsetY="-70"/>
+            <Dimensions x="96" y="48"/>
+            <Controls>
+                <Texture name="$(parent)WeaponIndicator" textureFile="EsoUI/Art/HUD/Gamepad/gp_broken_weapon.dds">
+                    <Dimensions x="48" y="48"/>
+                </Texture>
+                <Texture name="$(parent)ArmorIndicator" textureFile="EsoUI/Art/HUD/Gamepad/gp_broken_armor.dds">
+                    <Dimensions x="48" y="48"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HUDEquipmentStatus">
+            <OnInitialized>
+                ZO_HUDEquipmentStatus_Initialize(self)
+            </OnInitialized>        
+            <Controls>
+                <Texture name="$(parent)WeaponIndicator" inherits="ZO_HUDEquipmentStatus_Indicator">
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+                <Texture name="$(parent)ArmorIndicator" inherits="ZO_HUDEquipmentStatus_Indicator">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponIndicator" relativePoint="TOPRIGHT" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

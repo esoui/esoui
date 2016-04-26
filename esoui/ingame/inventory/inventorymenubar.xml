@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_InventoryMenuBar_Template" hidden="true" virtual="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550" y="45"/>
+            <Controls>
+                <Control name="$(parent)Bar" inherits="ZO_MenuBarTemplate">
+                    <Anchor point="TOPRIGHT"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-25" offsetY="7" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="BOTTOM" offsetX="27" offsetY="4" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_PlayerInventoryMenu" inherits="ZO_InventoryMenuBar_Template">
+            <OnInitialized>
+                ZO_PlayerInventoryMenu_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_VendorInventoryMenu" inherits="ZO_InventoryMenuBar_Template">
+            <Dimensions y="99"/>
+            <OnInitialized>
+                ZO_VendorInventoryMenu_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Bar" override="true">
+                    <Anchor point="TOPRIGHT" offsetY="54"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontConversationOption" override="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

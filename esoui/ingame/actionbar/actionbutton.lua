@@ -68,6 +68,14 @@ function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
                                     end
         local onChanged = (slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) and onUltimateChanged or nil
         ZO_Keybindings_RegisterLabelForBindingUpdate(newB.buttonText, "ACTION_BUTTON_".. slotNum, HIDE_UNBOUND, "GAMEPAD_ACTION_BUTTON_".. slotNum, onChanged)
+
+		if slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+			slotCtrl:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
+														if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_ULTIMATE_NUMBER then
+															newB:RefreshUltimateNumberVisibility()
+														end
+													end)
+		end
     end
 
     return newB
@@ -135,7 +143,12 @@ end
 
 local function SetupAbilitySlot(slotObject, slotId)
     SetupActionSlotWithBg(slotObject, slotId)
-    slotObject:SetupCount(nil)
+
+	if slotId == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+		slotObject:RefreshUltimateNumberVisibility()
+	else
+		slotObject:SetupCount(nil)
+	end
 end
 
 local function SetupItemSlot(slotObject, slotId)
@@ -184,7 +197,6 @@ function ActionButton:HandleSlotChanged()
         self:Clear()
     end
 
-    self.inCooldown = false
     if self.showingCooldown then
         ZO_ContextualActionBar_RemoveReference()
     end
@@ -210,6 +222,19 @@ function ActionButton:Clear()
     self.button.actionId = nil
     self.cooldownEdge:SetHidden(true)
     self.countText:SetText("")
+end
+
+function ActionButton:RefreshUltimateNumberVisibility()
+	if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER) then
+		self.countText:SetHidden(false)
+		self:UpdateUltimateNumber()
+	else
+		self:SetupCount(nil)
+	end
+end
+
+function ActionButton:UpdateUltimateNumber()
+	self.countText:SetText(GetUnitPower("player", POWERTYPE_ULTIMATE))
 end
 
 function ActionButton:UpdateActivationHighlight()
@@ -275,41 +300,40 @@ function ActionButton:UpdateUseFailure()
 		end
 	end
 
-    self.useFailure = not slotIsEmpty and
-                      self.itemQtyFailure or
-                      soulGemFailure or
-					  HasCostFailure(slotnum) or
-					  HasTargetFailure(slotnum) or
-					  HasRequirementFailure(slotnum) or
-					  HasWeaponSlotFailure(slotnum) or
-					  HasStatusEffectFailure(slotnum) or
-					  HasFallingFailure(slotnum) or
-					  HasSwimmingFailure(slotnum) or
-					  HasMountedFailure(slotnum) or
-                      HasReincarnatingFailure(slotnum) or
-                      HasRangeFailure(slotnum)
+    local costFailure = HasCostFailure(slotnum)
+    local nonCostFailure = not slotIsEmpty and
+                           self.itemQtyFailure or
+                           soulGemFailure or
+					       HasTargetFailure(slotnum) or
+					       HasRequirementFailure(slotnum) or
+					       HasWeaponSlotFailure(slotnum) or
+					       HasStatusEffectFailure(slotnum) or
+					       HasFallingFailure(slotnum) or
+					       HasSwimmingFailure(slotnum) or
+					       HasMountedFailure(slotnum) or
+                           HasReincarnatingFailure(slotnum) or
+                           HasRangeFailure(slotnum)
+
+    self.costFailureOnly = costFailure and not nonCostFailure
+    self.useFailure = costFailure or nonCostFailure
 end
 
 function ActionButton:UpdateUsable()
-    local usable = not (self.useFailure or (self.inCooldown and not self.isGlobalCooldown))
-
     local isGamepad = IsInGamepadPreferredMode()
-    local isUltimateSlot = self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
-    if(not usable and isUltimateSlot) then
-        local current = GetUnitPower("player", POWERTYPE_ULTIMATE)
-        local max = GetSlotAbilityCost(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
-        if(current < max) then
-            usable = true
-        end
+    local isShowingCooldown = self.showingCooldown
+    local isKeyboardUltimateSlot = not isGamepad and self.slot.slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+    local usable = false
+    if not self.useFailure and not isShowingCooldown then
+        usable = true
+    elseif isKeyboardUltimateSlot and self.costFailureOnly then
+        usable = true
     end
 
-    if usable ~= self.usable then
+    if usable ~= self.usable or isGamepad ~= self.isGamepad then
         self.usable = usable
-        local slotNum = self:GetSlot()
-        local slotType = GetSlotType(slotNum)
-        local buttonDislaysUnusable = not usable or (isUltimateSlot and isGamepad and self.useFailure)
-        local useDesaturation = slotType == ACTION_TYPE_ITEM or slotType == ACTION_TYPE_COLLECTIBLE or isGamepad
-        ZO_ActionSlot_SetUnusable(self.icon, buttonDislaysUnusable, useDesaturation)
+        self.isGamepad = isGamepad
+        local useDesaturation = isShowingCooldown and not self.useFailure
+        ZO_ActionSlot_SetUnusable(self.icon, not usable, useDesaturation)
     end
 end
 
@@ -354,9 +378,10 @@ end
 local NO_LEADING_EDGE = false
 function ActionButton:UpdateCooldown(options)
     local slotnum = self:GetSlot()
-    local remain, duration, global = GetSlotCooldownInfo(slotnum)
+    local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum)
     local isInCooldown = duration > 0
-    local showCooldown = isInCooldown and (g_showGlobalCooldown or not global)
+    local showGlobalForCollectible = global and GetSlotType(slotnum) == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
+    local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalForCollectible)
 
     self.cooldown:SetHidden(not showCooldown)
 
@@ -422,7 +447,6 @@ function ActionButton:UpdateCooldown(options)
     local textColor = showCooldown and INTERFACE_TEXT_COLOR_FAILED or INTERFACE_TEXT_COLOR_SELECTED
     self.buttonText:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, textColor))
 
-    self.inCooldown = isInCooldown
     self.isGlobalCooldown = global
     self:UpdateUsable()
 end
@@ -485,6 +509,8 @@ function ActionButton:ApplyStyle(template)
             self.iconBounceAnimation:Stop()
         end
     end
+
+    self:UpdateUsable()
 end
 
 function ActionButton:ApplyAnchor(target, offsetX)

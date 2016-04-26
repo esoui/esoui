@@ -119,6 +119,7 @@ function ZO_Fence_Keyboard:OnClosed()
     ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")
     ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_INVENTORY_SORT_TYPE_PRICE))
     ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(true)
+    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(true)
 end
 
 function ZO_Fence_Keyboard:OnFenceStateUpdated(totalSells, sellsUsed, totalLaunders, laundersUsed)
@@ -127,13 +128,18 @@ function ZO_Fence_Keyboard:OnFenceStateUpdated(totalSells, sellsUsed, totalLaund
         PlaySound(SOUNDS.FENCE_ITEM_LAUNDERED)
     else
         self:UpdateTransactionLabel(totalSells, sellsUsed, SI_FENCE_SELL_LIMIT, SI_FENCE_SELL_LIMIT_REACHED)
+        local hagglingSkillLevel = FENCE_MANAGER:GetHagglingBonus()
+        self:UpdateHagglingLabel(hagglingSkillLevel)
     end
 end
 
 function ZO_Fence_Keyboard:OnEnterSell(totalSells, sellsUsed)
     self.mode = ZO_MODE_STORE_SELL_STOLEN
     ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(false)
+    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(false)
     self:UpdateTransactionLabel(totalSells, sellsUsed, SI_FENCE_SELL_LIMIT, SI_FENCE_SELL_LIMIT_REACHED)
+    local hagglingSkillLevel = FENCE_MANAGER:GetHagglingBonus()
+    self:UpdateHagglingLabel(hagglingSkillLevel)
     PLAYER_INVENTORY:RefreshBackpackWithFenceData()
     ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_INVENTORY_SORT_TYPE_PRICE))
     self:RefreshFooter()
@@ -142,6 +148,7 @@ end
 function ZO_Fence_Keyboard:OnEnterLaunder(totalLaunders, laundersUsed)
     self.mode = ZO_MODE_STORE_LAUNDER
     ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(false)
+    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(true)
     self:UpdateTransactionLabel(totalLaunders, laundersUsed, SI_FENCE_LAUNDER_LIMIT, SI_FENCE_LAUNDER_LIMIT_REACHED)
 
     local function ColorCost(control, data, scrollList)
@@ -164,8 +171,21 @@ function ZO_Fence_Keyboard:UpdateTransactionLabel(totalTransactions, usedTransac
     ZO_PlayerInventoryInfoBarAltFreeSlots:SetText(zo_strformat(transactionString, usedTransactions, totalTransactions))
 end
 
+function ZO_Fence_Keyboard:UpdateHagglingLabel(skillLevel)
+    if skillLevel > 0 then
+        ZO_PlayerInventoryInfoBarAltMoney:SetText(zo_strformat(SI_FENCE_HAGGLING_SKILL_BONUS_LABEL, skillLevel))
+        ZO_PlayerInventoryInfoBarAltMoney:SetHidden(false)
+    else
+        ZO_PlayerInventoryInfoBarAltMoney:SetHidden(true)
+    end
+end
+
 function ZO_Fence_Keyboard:IsLaundering()
     return self.mode == ZO_MODE_STORE_LAUNDER
+end
+
+function ZO_Fence_Keyboard:IsSellingStolenItems()
+    return self.mode == ZO_MODE_STORE_SELL_STOLEN
 end
 
 function ZO_Fence_Keyboard:RefreshFooter()

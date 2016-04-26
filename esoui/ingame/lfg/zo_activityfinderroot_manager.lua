@@ -6,12 +6,12 @@ local GROUP_TYPE_TO_MAX_SIZE =
 }
 
 local function LFGLevelSort(entry1, entry2)
-    if entry1.veteranRankMin ~= entry2.veteranRankMin then
-        return entry1.veteranRankMin < entry2.veteranRankMin
+    if entry1.championPointsMin ~= entry2.championPointsMin then
+        return entry1.championPointsMin < entry2.championPointsMin
     elseif entry1.levelMin ~= entry2.levelMin then
         return entry1.levelMin < entry2.levelMin
-    elseif entry1.veteranRankMax ~= entry2.veteranRankMax then
-        return entry1.veteranRankMax < entry2.veteranRankMax
+    elseif entry1.championPointsMax ~= entry2.championPointsMax then
+        return entry1.championPointsMax < entry2.championPointsMax
     elseif entry1.levelMax ~= entry2.levelMax then
         return entry1.levelMax < entry2.levelMax
     else
@@ -21,7 +21,7 @@ end
 
 local function GetLFGEntryStringKeyboard(rawName, activityType)
     if activityType == LFG_ACTIVITY_MASTER_DUNGEON then
-        return zo_iconTextFormat(GetVeteranRankIcon(), "100%", "100%", rawName)
+        return zo_iconTextFormat(GetVeteranIcon(), "100%", "100%", rawName)
     else
         return zo_strformat(SI_LFG_ACTIVITY_NAME, rawName)
     end
@@ -35,14 +35,14 @@ local function GetLFGEntryStringGamepad(rawName, activityType)
     end
 end
 
-local function GetLevelRankRequirementText(levelMin, levelMax, rankMin, rankMax)
-    local playerRank = GetUnitVeteranRank("player")
+local function GetLevelOrChampionPointsRequirementText(levelMin, levelMax, pointsMin, pointsMax)
+    local playerChampionPoints = GetUnitChampionPoints("player")
     
-    if playerRank > 0 or levelMin == GetMaxLevel() then
-        if playerRank < rankMin then
-            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_RANK_REQUIREMENT, rankMin)
-        elseif playerRank > rankMax then
-            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MAX_RANK_REQUIREMENT, rankMax)
+    if playerChampionPoints > 0 or levelMin == GetMaxLevel() then
+        if playerChampionPoints < pointsMin then
+            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_CHAMPION_REQUIREMENT, pointsMin)
+        elseif playerChampionPoints > pointsMax then
+            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MAX_CHAMPION_REQUIREMENT, pointsMax)
         end
     else
         local playerLevel = GetUnitLevel("player")
@@ -61,7 +61,7 @@ local function IsPreferredRoleSelected()
 end
 
 local function CreateLocationData(activityType, lfgIndex)
-    local name, levelMin, levelMax, veteranRankMin, veteranRankMax, groupType, minNumMembers, description = GetLFGOption(activityType, lfgIndex)
+    local name, levelMin, levelMax, championPointsMin, championPointsMax, groupType, minNumMembers, description = GetLFGOption(activityType, lfgIndex)
     local descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard = GetLFGOptionKeyboardDescriptionTextures(activityType, lfgIndex)
     local descriptionTextureGamepad = GetLFGOptionGamepadDescriptionTexture(activityType, lfgIndex)
     local requiredCollectible = GetRequiredLFGCollectibleId(activityType, lfgIndex)
@@ -79,8 +79,8 @@ local function CreateLocationData(activityType, lfgIndex)
         descriptionTextureGamepad = descriptionTextureGamepad,
         levelMin = levelMin,
         levelMax = levelMax,
-        veteranRankMin = veteranRankMin,
-        veteranRankMax = veteranRankMax,
+        championPointsMin = championPointsMin,
+        championPointsMax = championPointsMax,
         groupType = groupType,
         minGroupSize = minNumMembers,
         maxGroupSize = GetGroupSizeFromLFGGroupType(groupType),
@@ -102,6 +102,8 @@ end
 
 function ActivityFinderRoot_Manager:Initialize()
     self.groupSize = 0
+    self.activityQueueOnCooldown = false
+    self.activityQueueCooldownExpiresAtS = 0
     self:InitializeLocationData()
     self:RegisterForEvents()
 end
@@ -111,8 +113,8 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:ClearSelections()
     end
 
-    local function ClearAndUpdate()
-        self:ClearAndUpdate()
+    local function MarkDataDirty()
+        self:MarkDataDirty()
     end
 
     function UpdateGroupStatus()
@@ -121,16 +123,32 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
 
     function OnLevelUpdate(eventCode, unitTag)
         if unitTag == "player" or ZO_Group_IsGroupUnitTag(unitTag) then
-            self:ClearAndUpdate()
+            self:MarkDataDirty()
             self:FireCallbacks("OnLevelUpdate")
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUPING_TOOLS_STATUS_UPDATE, function(eventCode, ...) self:OnGroupingToolsStatusUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, function() self:FireCallbacks("OnCooldownsUpdate") end)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, ClearAndUpdate)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_COLLECTION_UPDATED, ClearAndUpdate)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_COLLECTIBLE_UPDATED, ClearAndUpdate)
+    function OnCooldownsUpdate()
+        local wasActivityQueueOnCooldown = self.activityQueueOnCooldown
+        local activityQueueCooldownTimeRemaining = GetActivityQueueCooldownTimeRemainingSeconds()
+        self.activityQueueOnCooldown = activityQueueCooldownTimeRemaining > 0
+        self.activityQueueCooldownExpiresAtS = activityQueueCooldownTimeRemaining + GetFrameTimeSeconds()
+        if self.activityQueueOnCooldown ~= wasActivityQueueOnCooldown then
+            self:MarkDataDirty()
+        end
+        self:FireCallbacks("OnCooldownsUpdate")
+    end
+
+    function OnPlayerActivate()
+        UpdateGroupStatus()
+        OnCooldownsUpdate()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, MarkDataDirty)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_COLLECTION_UPDATED, MarkDataDirty)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_COLLECTIBLE_UPDATED, MarkDataDirty)
 
     --We should clear selections when switching filters, but we won't necessarily clear them when closing scenes
     --However, we can't ensure that gamepad and keyboard will stay on the same filter, so we'll clear selections when switching between modes
@@ -138,9 +156,9 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ClearSelections)
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_VETERAN_RANK_UPDATE, OnLevelUpdate)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CHAMPION_POINT_UPDATE, OnLevelUpdate)
     
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_PLAYER_ACTIVATED, UpdateGroupStatus)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_PLAYER_ACTIVATED, OnPlayerActivate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_MEMBER_LEFT, UpdateGroupStatus)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_UNIT_CREATED, function(eventCode, unitTag) 
         if ZO_Group_IsGroupUnitTag(unitTag) then
@@ -149,6 +167,7 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_UPDATE, UpdateGroupStatus)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_LEADER_UPDATE, UpdateGroupStatus)
+    EVENT_MANAGER:RegisterForUpdate("ActivityFinderRoot_Manager", 0, function() self:OnUpdate() end)
 end
 
 function ActivityFinderRoot_Manager:InitializeLocationData()
@@ -195,6 +214,16 @@ end
 --Updates--
 -----------
 
+function ActivityFinderRoot_Manager:OnUpdate()
+    if self.dataDirty then
+        self:ClearAndUpdate()
+    end
+end
+
+function ActivityFinderRoot_Manager:MarkDataDirty()
+    self.dataDirty = true
+end
+
 function ActivityFinderRoot_Manager:UpdateGroupStatus()
     local wasGrouped = self.playerIsGrouped
     local wasLeader = self.playerIsLeader
@@ -205,7 +234,7 @@ function ActivityFinderRoot_Manager:UpdateGroupStatus()
     if groupStateChanged then
         self:FireCallbacks("OnUpdateGroupStatus", wasGrouped, self.playerIsGrouped, wasLeader, self.playerIsLeader)
     end
-    self:ClearAndUpdate()
+    self:MarkDataDirty()
 end
 
 function ActivityFinderRoot_Manager:GetGroupStatus()
@@ -220,55 +249,57 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
     ZO_ClearTable(self.randomActivityTypeLockReasons)
 
     for activityType, locationsByActivity in pairs(self.locationsLookupData) do
-        if locationsByActivity then
-            local activityIsAvA = activityType == LFG_ACTIVITY_AVA
-            local anyEligible = false
-            local anyLockReason = nil
+        local activityIsAvA = activityType == LFG_ACTIVITY_AVA
+        local isPlayerInAvAWorld = IsPlayerInAvAWorld()
+        local anyEligible = false
+        local anyLockReason = nil
 
-            for index, location in ipairs(locationsByActivity) do
-                location.isLocked = true
+        for index, location in ipairs(locationsByActivity) do
+            location.isLocked = true
+            location.countsForAverageRoleTime = not activityIsAvA
 
-                if inAGroup and not isLeader then
-                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_NOT_LEADER)
-                elseif not isRoleSelected then
-                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_NO_ROLES_SELECTED)
-                elseif activityIsAvA and not IsInAvAZone() then
-                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_NOT_IN_AVA)
-                elseif not activityIsAvA and IsInAvAZone() then
-                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_IN_AVA)
-                elseif IsInAvAZone() and IsInLFGGroup() then
-                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_AVA_CROSS_ALLIANCE)
-                else
-                    location.playerMeetsLevelRequirements = DoesPlayerMeetLFGLevelRequirements(activityType, index)
-                    location.groupMeetsLevelRequirements = DoesGroupMeetLFGLevelRequirements(activityType, index)
-    
-                    local groupTooLarge = self.groupSize > GROUP_TYPE_TO_MAX_SIZE[location.groupType]
-
-                    if groupTooLarge then
-                        location.lockReasonText = GetString(SI_LFG_LOCK_REASON_GROUP_TOO_LARGE)
-                    elseif not location.playerMeetsLevelRequirements then
-                        location.lockReasonText = GetLevelRankRequirementText(location.levelMin, location.levelMax, location.veteranRankMin, location.veteranRankMax)
-                    elseif not location.groupMeetsLevelRequirements and inAGroup then
-                        location.lockReasonText = GetString(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
-                    elseif location.requiredCollectible ~= 0 and not IsCollectibleUnlocked(location.requiredCollectible) then
-                        location.lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_DLC_NOT_UNLOCKED, GetCollectibleName(location.requiredCollectible))
-                    else
-                        location.isLocked = false
-                        location.lockReasonText = ""
-                        anyEligible = true
-                    end
-                end
-
-                if location.lockReasonText ~= "" then
-                    anyLockReason = location.lockReasonText
-                end
-            end
-
-            if anyEligible then
-                self.randomActivityTypeLockReasons[activityType] = nil
+            if self.activityQueueOnCooldown then
+                location.lockReasonText = GetString(SI_LFG_LOCK_REASON_QUEUE_COOLDOWN_CONCISE)
+            elseif location.requiredCollectible ~= 0 and not IsCollectibleUnlocked(location.requiredCollectible) then
+                location.lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_DLC_NOT_UNLOCKED, GetCollectibleName(location.requiredCollectible))
+                location.countsForAverageRoleTime = false
+            elseif not isRoleSelected then
+                location.lockReasonText = GetString(SI_LFG_LOCK_REASON_NO_ROLES_SELECTED)
+            elseif activityIsAvA and not isPlayerInAvAWorld then
+                location.lockReasonText = GetString(SI_LFG_LOCK_REASON_NOT_IN_AVA)
+            elseif not activityIsAvA and isPlayerInAvAWorld then
+                location.lockReasonText = GetString(SI_LFG_LOCK_REASON_IN_AVA)
             else
-                self.randomActivityTypeLockReasons[activityType] = anyLockReason
+                location.playerMeetsLevelRequirements = DoesPlayerMeetLFGLevelRequirements(activityType, index)
+                location.groupMeetsLevelRequirements = DoesGroupMeetLFGLevelRequirements(activityType, index)
+    
+                local groupTooLarge = self.groupSize > GROUP_TYPE_TO_MAX_SIZE[location.groupType]
+
+                if groupTooLarge then
+                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_GROUP_TOO_LARGE)
+                elseif not location.playerMeetsLevelRequirements then
+                    location.lockReasonText = GetLevelOrChampionPointsRequirementText(location.levelMin, location.levelMax, location.championPointsMin, location.championPointsMax)
+                    location.countsForAverageRoleTime = false
+                elseif inAGroup and not location.groupMeetsLevelRequirements then
+                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
+                elseif inAGroup and not isLeader then
+                    location.lockReasonText = GetString(SI_LFG_LOCK_REASON_NOT_LEADER)
+                else
+                    location.isLocked = false
+                    location.lockReasonText = ""
+                    anyEligible = true
+                end
             end
+
+            if location.lockReasonText ~= "" then
+                anyLockReason = location.lockReasonText
+            end
+        end
+
+        if anyEligible then
+            self.randomActivityTypeLockReasons[activityType] = nil
+        else
+            self.randomActivityTypeLockReasons[activityType] = anyLockReason
         end
     end
 
@@ -301,11 +332,12 @@ function ActivityFinderRoot_Manager:ClearAndUpdate()
 
     self:ClearSelections()
     self:UpdateLocationData()
+    self.dataDirty = false
 end
 
-function ActivityFinderRoot_Manager:OnGroupingToolsStatusUpdate(isInQueue)
-    self.isInQueue = isInQueue
-    self:FireCallbacks("OnGroupingToolsStatusUpdate", isInQueue)
+function ActivityFinderRoot_Manager:OnActivityFinderStatusUpdate(status)
+    self.activityFinderStatus = status
+    self:FireCallbacks("OnActivityFinderStatusUpdate", status)
 end
 
 -------------
@@ -331,8 +363,28 @@ function ActivityFinderRoot_Manager:GetLocation(activityType, lfgIndex)
     assert(false) --We should never be asking for a location using a bad activity or lfgIndex, fix the code that called this
 end
 
+function ActivityFinderRoot_Manager:GetAverageRoleTime(role)
+    local lowestAverage
+    for activityType, locationsByActivity in pairs(self.locationsLookupData) do
+        for index, location in ipairs(locationsByActivity) do
+            if location.countsForAverageRoleTime then
+                local dataFound, averageForLocation = GetLFGAverageRoleTimeByActivity(activityType, index, role)
+                if dataFound then
+                    if lowestAverage then
+                        lowestAverage = zo_min(lowestAverage, averageForLocation)
+                    else
+                        lowestAverage = averageForLocation
+                    end
+                end
+            end
+        end
+    end
+
+    return lowestAverage or 0
+end
+
 function ActivityFinderRoot_Manager:GetIsCurrentlyInQueue()
-    return self.isInQueue
+    return self.activityFinderStatus == ACTIVITY_FINDER_STATUS_QUEUED
 end
 
 function ActivityFinderRoot_Manager:ToggleLocationSelected(location)
@@ -386,41 +438,42 @@ function ActivityFinderRoot_Manager:GetGroupSizeRangeForActivityType(activityTyp
     return groupSizeRangeTable.min, groupSizeRangeTable.max
 end
 
-do
-    local function IsRoleSelected(roles)
-        return roles[LFG_ROLE_DPS] or roles[LFG_ROLE_HEAL] or roles[LFG_ROLE_TANK]
+function ActivityFinderRoot_Manager:IsActivityQueueOnCooldown()
+    return self.activityQueueOnCooldown
+end
+
+function ActivityFinderRoot_Manager:GetActivityQueueCooldownExpireTimeS()
+    return self.activityQueueCooldownExpiresAtS
+end
+
+function ActivityFinderRoot_Manager:StartSearch()
+    if IsCurrentlySearchingForGroup() then
+        return
     end
 
-    function ActivityFinderRoot_Manager:StartSearch()
-        if IsCurrentlySearchingForGroup() then
-            return
+    ClearGroupFinderSearch()
+
+    if not IsPreferredRoleSelected() then
+        ZO_AlertEvent(EVENT_ACTIVITY_QUEUE_RESULT, ACTIVITY_QUEUE_RESULT_NO_ROLES_SELECTED)
+        return
+    end
+
+    --Add locations
+    for activityType, locationsByActivity in pairs(self.locationsLookupData) do
+        if self.randomActivitySelections[activityType] then
+            AddGroupFinderSearchEntry(activityType)
         end
 
-        ClearGroupFinderSearch()
-        
-        local roles = PREFERRED_ROLES:GetRoles()
-        if not IsRoleSelected(roles) then
-            ZO_AlertEvent(EVENT_ACTIVITY_QUEUE_RESULT, ACTIVITY_QUEUE_RESULT_NO_ROLES_SELECTED)
-            return
-        end
-
-        --Add locations
-        for activityType, locationsByActivity in pairs(self.locationsLookupData) do
-            if self.randomActivitySelections[activityType] then
-                AddGroupFinderSearchEntry(activityType)
-            end
-
-            for index, location in ipairs(locationsByActivity) do
-                if location.isSelected then
-                    AddGroupFinderSearchEntry(activityType, index)
-                end
+        for index, location in ipairs(locationsByActivity) do
+            if location.isSelected then
+                AddGroupFinderSearchEntry(activityType, index)
             end
         end
+    end
 
-        local result = StartGroupFinderSearch()
-        if result ~= ACTIVITY_QUEUE_RESULT_SUCCESS then
-            ZO_AlertEvent(EVENT_ACTIVITY_QUEUE_RESULT, result)
-        end
+    local result = StartGroupFinderSearch()
+    if result ~= ACTIVITY_QUEUE_RESULT_SUCCESS then
+        ZO_AlertEvent(EVENT_ACTIVITY_QUEUE_RESULT, result)
     end
 end
 

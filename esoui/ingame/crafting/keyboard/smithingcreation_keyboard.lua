@@ -39,7 +39,8 @@ function ZO_SmithingCreation:Initialize(control, owner)
     if IsChatSystemAvailableForCurrentPlatform() then
         local function OnTooltipMouseUp(control, button, upInside)
             if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
-                local link = ZO_LinkHandler_CreateChatLink(GetSmithingPatternResultLink, self:GetAllCraftingParameters())
+                local link = ZO_LinkHandler_CreateChatLink(GetSmithingPatternResultLink, self:GetSelectedPatternIndex(), self:GetSelectedMaterialIndex(), 
+                    self:GetSelectedMaterialQuantity(), self:GetSelectedStyleIndex(), self:GetSelectedTraitIndex())
                 if link ~= "" then
                     ClearMenu()
 

@@ -538,7 +538,7 @@ function ZO_QuickslotManager:SetUpQuickSlot(control, data)
 end
 
 function ZO_QuickslotManager:SetUpCollectionSlot(control, data)
-    control:GetNamedChild("Name"):SetText(data.name)
+    control:GetNamedChild("Name"):SetText(COLLECTIONS_INVENTORY_SINGLETON:GetCollectibleInventoryDisplayName(data))
     control:GetNamedChild("ActiveIcon"):SetHidden(not data.active)
 
     local slot = GetControl(control, "Button")

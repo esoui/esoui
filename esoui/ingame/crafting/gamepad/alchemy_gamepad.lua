@@ -1,5 +1,9 @@
 local GAMEPAD_UNKNOWN_TRAIT_TEXTURE = "EsoUI/Art/Crafting/Gamepad/crafting_alchemy_trait_unknown.dds"
 
+local INGREDIENT_SORT_ORDER_POTION = 0 
+local INGREDIENT_SORT_ORDER_POISON = 1000000
+local INGREDIENT_SORT_ORDER_OTHER  = 2000000
+
 ZO_GamepadAlchemyReagentSlot = ZO_AlchemyReagentSlot:Subclass()
 
 do
@@ -298,7 +302,7 @@ function ZO_GamepadAlchemy:UpdateActiveSlot()
 
         -- Determine which slot should be active
         local _, craftingSubItemType, _ = GetItemCraftingInfo(targetData.bagId, targetData.slotIndex)
-        if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE or targetData.itemType == ITEMTYPE_ALCHEMY_BASE then
+        if IsAlchemySolvent(craftingSubItemType) or IsAlchemySolvent(targetData.itemType) then
             newActiveSlotIndex = 1
         elseif craftingSubItemType == ITEMTYPE_REAGENT or targetData.itemType == ITEMTYPE_REAGENT then
             local existingSlot = self:FindAlreadySlottedReagent(targetData.bagId, targetData.slotIndex)
@@ -379,12 +383,15 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     self.list:SetNoItemText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
 
     self:SetCustomSort(function(bagId, slotIndex)
-        local _, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
+        local _, craftingSubItemType, _, requiredLevel, requiredChampionPoints = GetItemCraftingInfo(bagId, slotIndex)
+        local subSortOrder = (requiredChampionPoints and requiredLevel + requiredChampionPoints or requiredLevel or 0)
 
-        if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE then
-            return 0
+        if craftingSubItemType == ITEMTYPE_POTION_BASE then
+            return INGREDIENT_SORT_ORDER_POTION + subSortOrder
+        elseif craftingSubItemType == ITEMTYPE_POISON_BASE then
+            return INGREDIENT_SORT_ORDER_POISON + subSortOrder
         else
-            return 1
+            return INGREDIENT_SORT_ORDER_OTHER + subSortOrder
         end
 	end)
 end
@@ -401,21 +408,22 @@ function ZO_GamepadAlchemyInventory:AddListDataTypes()
         descriptionLabel:SetHidden(not selected)
 
         if selected then
-            local usedInCraftingType, craftingSubItemType, rankRequirement, resultingItemLevel, veteranRequiredLevel = GetItemCraftingInfo(data.bagId, data.slotIndex)
+            local usedInCraftingType, craftingSubItemType, tradeskillRankRequirement, resultingItemLevel, requiredChampionPoints = GetItemCraftingInfo(data.bagId, data.slotIndex)
 
-            if not rankRequirement or rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
+            if not tradeskillRankRequirement or tradeskillRankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
                 local descriptionText
+                local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
-                if veteranRequiredLevel and veteranRequiredLevel > 0 then
-                    descriptionText = zo_strformat(SI_ALCHEMY_CREATES_POTION_OF_VETERAN_RANK, veteranRequiredLevel)
+                if requiredChampionPoints and requiredChampionPoints > 0 then
+                    descriptionText = zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, requiredChampionPoints, itemTypeString)
                 else
-                    descriptionText = zo_strformat(SI_ALCHEMY_CREATES_POTION_OF_LEVEL, resultingItemLevel)
+                    descriptionText = zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_LEVEL, resultingItemLevel, itemTypeString)
                 end
 
                 descriptionLabel:SetText(descriptionText)
                 descriptionLabel:SetColor(1, 1, 1, 1)
             else
-                descriptionLabel:SetText(zo_strformat(SI_REQUIRES_ALCHEMY_SOLVENT_PURIFICATION, rankRequirement))
+                descriptionLabel:SetText(zo_strformat(SI_REQUIRES_ALCHEMY_SOLVENT_PURIFICATION, tradeskillRankRequirement))
                 descriptionLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
             end
         else
@@ -481,7 +489,7 @@ end
 
 function ZO_GamepadAlchemyInventory:GetListEntryTemplate(data)
     local _, craftingSubItemType = GetItemCraftingInfo(data.bagId, data.slotIndex)
-    if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE then
+    if IsAlchemySolvent(craftingSubItemType) then
         return data.header and "ZO_GamepadAlchemyInventorySolventRowWithHeader" or "ZO_GamepadAlchemyInventorySolventRow"
     elseif craftingSubItemType == ITEMTYPE_REAGENT then
         return data.header and "ZO_GamepadAlchemyInventoryReagentRowWithHeader" or "ZO_GamepadAlchemyInventoryReagentRow"
@@ -496,8 +504,8 @@ function ZO_GamepadAlchemyInventory:Refresh(data)
 end
 
 function ZO_GamepadAlchemyInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)
-    local _, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
-    self.owner:ShowAppropriateSlotDropCallouts(craftingSubItemType, rankRequirement)
+    local _, craftingSubItemType, requiredChampionPoints = GetItemCraftingInfo(bagId, slotIndex)
+    self.owner:ShowAppropriateSlotDropCallouts(craftingSubItemType, requiredChampionPoints)
 end
 
 function ZO_GamepadAlchemyInventory:HideAllSlotDropCallouts()

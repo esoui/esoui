@@ -542,7 +542,7 @@ function ZO_GuildHeraldryManager_Gamepad:PopulateCategories()
         oldData.setSubMode(STYLE_SUBMODE_TOP)
     end
 
-    local colorIcon = "EsoUI/Art/Dye/Gamepad/dye_circle.dds"
+    local colorIcon = "EsoUI/Art/Dye/Gamepad/dye_square.dds"
 
     local bgStyleCost, bgPrimaryColorCost, bgSecondaryColorCost, crestStyleCost, crestColorCost = GetHeraldryCustomizationCosts()
 

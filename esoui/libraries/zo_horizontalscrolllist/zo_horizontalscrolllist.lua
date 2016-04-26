@@ -309,6 +309,10 @@ function ZO_HorizontalScrollList:ApplyTemplateToControls(template)
     end
 end
 
+function ZO_HorizontalScrollList:SetMouseEnabled(mouseEnabled)
+	self.control:SetMouseEnabled(mouseEnabled)
+end
+
 --[[ Private API ]]--
 
 function ZO_HorizontalScrollList:OnUpdate()

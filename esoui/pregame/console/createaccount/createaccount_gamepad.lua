@@ -72,7 +72,7 @@ do
 
             title =
             {
-                text = SI_CONSOLE_CREATEACCOUNT_ERROR_HEADER,
+                text = SI_CREATEACCOUNT_ERROR_HEADER,
             },
 
             mainText = 
@@ -255,7 +255,7 @@ function ZO_CreateAccount_Gamepad:SetupOptionsList()
             self.countriesList:SetDeactivatedCallback(function() self:SwitchToMainList() end)
             self.countriesList:SetSortsItems(false)
             self.defaultTextLabel = control:GetNamedChild("DefaultText")
-            self.defaultTextLabel:SetText(GetString(SI_CONSOLE_CREATEACCOUNT_SELECT_COUNTRY))
+            self.defaultTextLabel:SetText(GetString(SI_CREATEACCOUNT_SELECT_COUNTRY))
         end
     end
 
@@ -278,11 +278,11 @@ function ZO_CreateAccount_Gamepad:ResetMainList()
     -- Populate the list.
     self.optionsList:Clear()
 
-    self:AddComboBox(GetString(SI_CONSOLE_CREATEACCOUNT_COUNTRY), function(data) return self.selectedCountry end, function(control, data)
+    self:AddComboBox(GetString(SI_CREATEACCOUNT_COUNTRY), function(data) return self.selectedCountry end, function(control, data)
                 self:SwitchToCountryList()
             end)
 
-    self:AddTextEdit(GetString(SI_CONSOLE_CREATEACCOUNT_EMAIL), function(data) return self.enteredEmail	end, function(control, data) self:ActivateEditbox(control.edit, true) end, function(newText) self.enteredEmail = newText end)
+    self:AddTextEdit(GetString(SI_CREATEACCOUNT_EMAIL), function(data) return self.enteredEmail	end, function(control, data) self:ActivateEditbox(control.edit, true) end, function(newText) self.enteredEmail = newText end)
     
     self.optionsList:Commit()
     self.countriesList:ClearItems()
@@ -291,9 +291,9 @@ end
 
 function ZO_CreateAccount_Gamepad:AddSecondaryListEntries()
     if((not self.secondaryEntriesAdded) and (self.selectedCountry ~= "")) then
-        self:AddCheckbox(zo_strformat(SI_CONSOLE_CREATEACCOUNT_AGE, MINIMUM_AGE), function(data) return self.ageValid end, function(data, checked) self.ageValid = checked end)
-        self:AddCheckbox(GetString(SI_CONSOLE_CREATEACCOUNT_EMAILSIGNUP), function(data) return self.emailSignup end, function(data, checked) self.emailSignup = checked end)
-        self:AddButton(GetString(SI_CONSOLE_CREATEACCOUNT_CREATEACCOUNT), function(control, data)
+        self:AddCheckbox(zo_strformat(SI_CREATEACCOUNT_AGE, MINIMUM_AGE), function(data) return self.ageValid end, function(data, checked) self.ageValid = checked end)
+        self:AddCheckbox(GetString(SI_CREATEACCOUNT_EMAIL_SIGNUP), function(data) return self.emailSignup end, function(data, checked) self.emailSignup = checked end)
+        self:AddButton(GetString(SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON), function(control, data)
                     PlaySound(SOUNDS.POSITIVE_CLICK)
                     self:CreateAccountSelected()
                 end)
@@ -310,7 +310,7 @@ function ZO_CreateAccount_Gamepad:PopulateCountriesDropdownList()
         -- Populate the combobox list.
         self.countriesList:ClearItems()
 
-        local numCountries = GetNumberCountriesConsole() 
+        local numCountries = GetNumberCountries() 
 
         local function OnCountrySelected(comboBox, entryText, entry)
             self.selectedCountry = entryText 
@@ -319,7 +319,7 @@ function ZO_CreateAccount_Gamepad:PopulateCountriesDropdownList()
         end
 
         for i=1, numCountries do
-            local countryName, countryCode, megaServer = GetCountryEntryConsole(i)
+            local countryName, countryCode, megaServer = GetCountryEntry(i)
             local option = self.countriesList:CreateItemEntry(countryName, OnCountrySelected) 
             option.megaServer = megaServer
             option.countryCode = countryCode

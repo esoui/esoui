@@ -18,7 +18,7 @@ function ZO_FadingStationaryControlBuffer:New(...)
     return fadingStationaryControlBuffer
 end
 
-function ZO_FadingStationaryControlBuffer:Initialize(control,  maxDisplayedEntries, fadeAnimationName, iconAnimationName, containerAnimationName, anchor, controllerType)
+function ZO_FadingStationaryControlBuffer:Initialize(control, maxDisplayedEntries, fadeAnimationName, iconAnimationName, containerAnimationName, anchor, controllerType)
     self.control = control
     self.entryPools = {}
     self.headerPools = {}
@@ -41,9 +41,10 @@ function ZO_FadingStationaryControlBuffer:Initialize(control,  maxDisplayedEntri
     self.containerShowTimeMs = 5000
     self.containerStartTimeMs = 0
     self.emptyDeltaTime = 0
-    local offsetY = select(6,self.control:GetAnchor())
+    local offsetY = select(6, self.control:GetAnchor())
     self.resetPositionY = offsetY
     self.controllerType = controllerType
+    self.additionalEntrySpacingY = 0
 
     self:InitializeContainerAnimations(containerAnimationName)
 
@@ -89,6 +90,9 @@ function ZO_FadingStationaryControlBuffer:AddTemplate(templateName, templateData
     self.templates[templateName] = templateData
 end
 
+function ZO_FadingStationaryControlBuffer:SetAdditionalEntrySpacingY(additionalSpacingY)
+    self.additionalEntrySpacingY = additionalSpacingY
+end
 
 --[[ Private API ]]--
     
@@ -249,7 +253,7 @@ do
             ZO_ClearNumericallyIndexedTable(object.activeLines)
         end
 
-        -- This isn't strictly necessary, but it keeps things clean and avoids potentially nasty bugs. 
+        -- This isn't strictly necessary, but it keeps things clean and avoids potentially nasty bugs.
          local entry = object.entry 
          if entry then 
              entry.control = nil 
@@ -313,7 +317,7 @@ do
         if not pool then
             local function Factory(pool)
                 local parent = self.control
-                local name = string.format("%s%s%s%f", parent:GetName(), templateName, self.controllerType, pool:GetNextControlId())
+                local name = string.format("%s%s%s%d", parent:GetName(), templateName, self.controllerType, pool:GetNextControlId())
                 local control = CreateControl(name, parent, CT_CONTROL)
                 control:SetResizeToFitDescendents(true)
                 control.pool = pool
@@ -395,7 +399,6 @@ do
 end
 
 function ZO_FadingStationaryControlBuffer:UpdateFadeInDelay(entryControl, fadeInDelayFactor)
-
     table.insert(self.queuedTimedEntries, {
                                             control = entryControl, 
                                             fadeStartDelayMs = fadeInDelayFactor + GetFrameTimeMilliseconds()
@@ -428,17 +431,17 @@ function ZO_FadingStationaryControlBuffer:DisplayEntry(templateName, entry, entr
 
     if hasCurrentEntries then
         if entryNumber == 0 then
-            entryControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT)
-            self.bottomEntry:SetAnchor(BOTTOMRIGHT, entryControl, TOPRIGHT)
+            entryControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, 0, 0)
+            self.bottomEntry:SetAnchor(BOTTOMRIGHT, entryControl, TOPRIGHT, 0, self.additionalEntrySpacingY)
         else
-            entryControl:SetAnchor(BOTTOMRIGHT, self.lastAnchoredEntry, TOPRIGHT)
-            self.bottomEntry:SetAnchor(BOTTOMRIGHT, entryControl, TOPRIGHT)
+            entryControl:SetAnchor(BOTTOMRIGHT, self.lastAnchoredEntry, TOPRIGHT, 0, self.additionalEntrySpacingY)
+            self.bottomEntry:SetAnchor(BOTTOMRIGHT, entryControl, TOPRIGHT, 0, self.additionalEntrySpacingY)
         end
     else
         if not self.lastAnchoredEntry then
-            entryControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT)
+            entryControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, 0, 0)
         else
-            entryControl:SetAnchor(BOTTOMRIGHT, self.lastAnchoredEntry, TOPRIGHT)
+            entryControl:SetAnchor(BOTTOMRIGHT, self.lastAnchoredEntry, TOPRIGHT, 0, self.additionalEntrySpacingY)
         end
     end
 

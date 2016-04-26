@@ -36,8 +36,8 @@ local pregameStates =
     ["AccountLogin"] =
     {
         OnEnter = function(allowAnimation)
-            ZO_Login_InitializeCredentialEditBoxes()
-            ZO_Login_BeginSlideShow()
+            LOGIN_KEYBOARD:InitializeCredentialEditBoxes()
+            PREGAME_SLIDESHOW_KEYBOARD:BeginSlideShow()
             PregameLogout()
             RegisterForLoadingUpdates()
 

@@ -61,12 +61,7 @@
             </Action>
 
             <Action name="SPECIAL_MOVE_BLOCK">
-                <Down>
-                    if IsInGamepadPreferredMode() and IsMounted() then
-                        ToggleMount()
-                    end
-                    StartBlock()
-                </Down>
+                <Down>StartBlock()</Down>
                 <Up>StopBlock()</Up>
             </Action>
 
@@ -374,6 +369,7 @@
             <AllowAction name="TOGGLE_ALLIANCE_WAR"/>
             <AllowAction name="TOGGLE_MAIL"/>
             <AllowAction name="TOGGLE_NOTIFICATIONS"/>
+            <AllowAction name="TOGGLE_ACTIVITY_FINDER"/>
             <AllowAction name="TOGGLE_HELP"/>
         </Category>
     </Layer>
@@ -675,6 +671,10 @@
                 <Down>return true</Down>
             </Action>
 
+            <Action name="INTERCEPT_TOGGLE_ACTIVITY_FINDER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ACTIVITY_FINDER">
+                <Down>return true</Down>
+            </Action>
+            
             <Action name="INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
                 <Down>return true</Down>
             </Action>

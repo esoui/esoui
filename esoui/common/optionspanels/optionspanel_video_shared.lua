@@ -309,16 +309,6 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D_TOOLTIP,
         },
-
-        [GRAPHICS_SETTING_MAGELIGHT_LIGHTS_VISIBLE] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_MAGELIGHT_LIGHTS_VISIBLE,
-            panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_ABILITY_MAGELIGHT_LIGHTS_VISIBLE,
-            tooltipText = SI_GRAPHICS_OPTIONS_ABILITY_MAGELIGHT_LIGHTS_VISIBLE_TOOLTIP,
-        },
     },
 
     --UI Settings

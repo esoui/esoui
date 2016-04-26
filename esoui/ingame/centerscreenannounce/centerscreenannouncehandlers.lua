@@ -262,13 +262,13 @@ CSH[EVENT_QUEST_ADDED] = function(journalIndex, questName, objectiveName)
     return CSA_EVENT_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED, zo_strformat(SI_NOTIFYTEXT_QUEST_ACCEPT, questName)
 end
 
-local function GetRelevantBarParams(level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
-    local rankSize
-    if(rank) then
-        rankSize = GetNumVeteranPointsInRank(rank)
+local function GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
+    local championXpToNextPoint
+    if CanUnitGainChampionPoints("player") then
+        championXpToNextPoint = GetNumChampionXPInChampionPoint(championPoints)
     end  
-    if(rankSize ~= nil and currentPoints > previousPoints) then
-        return CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_VP, rank, previousPoints, currentPoints)
+    if(championXpToNextPoint ~= nil and currentExperience > previousExperience) then
+        return CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, previousExperience, currentExperience)
     else
         local levelSize
         if(level) then
@@ -280,13 +280,13 @@ local function GetRelevantBarParams(level, previousExperience, currentExperience
     end
 end
 
-CSH[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
-    local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
+CSH[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, currentExperience, championPoints)
+    local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
     return CSA_EVENT_LARGE_TEXT, SOUNDS.QUEST_COMPLETED, zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questName), nil, nil, nil, nil, barParams
 end
 
-CSH[EVENT_OBJECTIVE_COMPLETED] = function(zoneIndex, poiIndex, level, previousExperience, currentExperience, rank, previousPoints, currentPoints) 
-    local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
+CSH[EVENT_OBJECTIVE_COMPLETED] = function(zoneIndex, poiIndex, level, previousExperience, currentExperience, championPoints) 
+    local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
     local name, _, _, finishedDescription = GetPOIInfo(zoneIndex, poiIndex)
     return CSA_EVENT_COMBINED_TEXT, SOUNDS.OBJECTIVE_COMPLETED, zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, name), finishedDescription, nil, nil, nil, barParams
 end
@@ -347,9 +347,11 @@ CSH[EVENT_BROADCAST] = function(message)
     return CSA_EVENT_SMALL_TEXT, SOUNDS.MESSAGE_BROADCAST, string.format("|cffff00%s|r", message) -- TODO: Proper colorization
 end
 
-CSH[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
+CSH[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, championPoints)
     if(not INTERACT_WINDOW:IsShowingInteraction()) then
-        local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
+        if currentExperience > previousExperience then
+            local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
+        end
         return CSA_EVENT_LARGE_TEXT, SOUNDS.OBJECTIVE_DISCOVERED, zo_strformat(SI_SUBZONE_NOTIFICATION_DISCOVER, subzoneName), nil, nil, nil, nil, barParams
     end
 end
@@ -366,6 +368,7 @@ local XP_GAIN_SHOW_REASONS =
     [PROGRESS_REASON_OVERLAND_BOSS_KILL] = true,
     [PROGRESS_REASON_SCRIPTED_EVENT] = true,
     [PROGRESS_REASON_LOCK_PICK] = true,
+    [PROGRESS_REASON_LFG_REWARD] = true,
 }
 
 local XP_GAIN_SHOW_SOUNDS =
@@ -374,9 +377,9 @@ local XP_GAIN_SHOW_SOUNDS =
     [PROGRESS_REASON_LOCK_PICK] = SOUNDS.LOCKPICKING_SUCCESS_CELEBRATION,
 }
 
-CSH[EVENT_EXPERIENCE_GAIN] = function(reason, level, previousExperience, currentExperience)
+CSH[EVENT_EXPERIENCE_GAIN] = function(reason, level, previousExperience, currentExperience, championPoints)
     if(XP_GAIN_SHOW_REASONS[reason]) then
-        local barParams = GetRelevantBarParams(level, previousExperience, currentExperience)
+        local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
         if(barParams) then
             local sound = XP_GAIN_SHOW_SOUNDS[reason]
             barParams:SetSound(sound)
@@ -385,56 +388,23 @@ CSH[EVENT_EXPERIENCE_GAIN] = function(reason, level, previousExperience, current
     end
 
     local levelSize = GetNumExperiencePointsInLevel(level)
-    if(levelSize ~= nil and currentExperience >= levelSize) then
+    if levelSize ~= nil and currentExperience >= levelSize then
         local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level + 1, currentExperience - levelSize, currentExperience - levelSize)
         barParams:SetShowNoGain(true)
         CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_EXPERIENCE_GAIN, CSA_EVENT_LARGE_TEXT, SOUNDS.LEVEL_UP, GetString(SI_LEVEL_UP_NOTIFICATION), nil, nil, nil, nil, barParams)
     end
 end
 
-local VP_GAIN_SHOW_REASONS =
-{
-    [PROGRESS_REASON_PVP_EMPEROR] = true,
-    [PROGRESS_REASON_DUNGEON_CHALLENGE] = true,
-    [PROGRESS_REASON_OVERLAND_BOSS_KILL] = true,
-    [PROGRESS_REASON_SCRIPTED_EVENT] = true,
-    [PROGRESS_REASON_LOCK_PICK] = true,
-}
-
-local VP_GAIN_SHOW_SOUNDS =
-{
-    [PROGRESS_REASON_OVERLAND_BOSS_KILL] = SOUNDS.OVERLAND_BOSS_KILL,
-    [PROGRESS_REASON_LOCK_PICK] = SOUNDS.LOCKPICKING_SUCCESS_CELEBRATION,
-}
-
-CSH[EVENT_VETERAN_POINTS_GAIN] = function(reason, rank, previousPoints, currentPoints)
-    if(VP_GAIN_SHOW_REASONS[reason]) then
-        local barParams = GetRelevantBarParams(nil, nil, nil, rank, previousPoints, currentPoints)
-        if(barParams) then
-            local sound = VP_GAIN_SHOW_SOUNDS[reason]
-            barParams:SetSound(sound)
-            CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_VETERAN_POINTS_GAIN, CSA_EVENT_NO_TEXT, nil, nil, nil, nil, nil, nil, barParams)
-        end
-    end
-
-    local rankSize = GetNumVeteranPointsInRank(rank)
-    if(rankSize ~= nil and currentPoints >= rankSize) then
-        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_VP, rank + 1, currentPoints - rankSize, currentPoints - rankSize)
-        barParams:SetShowNoGain(true)
-        CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_VETERAN_POINTS_GAIN, CSA_EVENT_LARGE_TEXT, SOUNDS.VETERAN_RANK_UP, GetString(SI_VETERAN_RANK_UP_NOTIFICATION), nil, nil, nil, nil, barParams)
-    end
-end
-
-local function GetCurrentVeteranPointsBarParams()
-    local rank = GetUnitVeteranRank("player")
-    local currentPoints = GetUnitVeteranPoints("player")
-    local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_VP, rank, currentPoints, currentPoints)
+local function GetCurrentChampionPointsBarParams()
+    local championPoints = GetPlayerChampionPointsEarned()
+    local currentChampionXP = GetPlayerChampionXP()
+    local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, currentChampionXP, currentChampionXP)
     barParams:SetShowNoGain(true)
     return barParams
 end
 
 local function GetEnlightenedGainedAnnouncement()
-    local barParams = GetCurrentVeteranPointsBarParams()
+    local barParams = GetCurrentChampionPointsBarParams()
     local headerText = zo_strformat(SI_ENLIGHTENED_STATE_HEADER_FORMAT, GetString(SI_ENLIGHTENED_STATE_GAINED_HEADER))
     return CSA_EVENT_COMBINED_TEXT, SOUNDS.ENLIGHTENED_STATE_GAINED, headerText, GetString(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION), nil, nil, nil, barParams
 end
@@ -447,7 +417,7 @@ end
 
 CSH[EVENT_ENLIGHTENED_STATE_LOST] = function()
     if IsEnlightenedAvailableForCharacter() then
-        local barParams = GetCurrentVeteranPointsBarParams()
+        local barParams = GetCurrentChampionPointsBarParams()
         local headerText = zo_strformat(SI_ENLIGHTENED_STATE_HEADER_FORMAT, GetString(SI_ENLIGHTENED_STATE_LOST_HEADER))
         return CSA_EVENT_LARGE_TEXT, SOUNDS.ENLIGHTENED_STATE_LOST, headerText, nil, nil, nil, nil, barParams
     end
@@ -705,6 +675,16 @@ CSH[EVENT_RAID_TRIAL_NEW_BEST_SCORE] = function(raidName, score, isWeekly)
     return CSA_EVENT_SMALL_TEXT, SOUNDS.RAID_TRIAL_NEW_BEST, zo_strformat(isWeekly and SI_TRIAL_NEW_BEST_SCORE_WEEKLY or SI_TRIAL_NEW_BEST_SCORE_LIFETIME, raidName)
 end
 
+CSH[EVENT_RAID_REVIVE_COUNTER_UPDATE] = function(currentCount, countDelta)
+-- TODO: revisit this once there is a way to properly handle this in client/server code
+    if not IsRaidInProgress() then
+        return
+    end
+    if countDelta < 0 then
+        return CSA_EVENT_LARGE_TEXT, SOUNDS.RAID_TRIAL_COUNTER_UPDATE, zo_strformat(SI_REVIVE_COUNTER_UPDATED_LARGE, "EsoUI/Art/Trials/VitalityDepletion.dds")
+    end
+end
+
 do
     local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
 
@@ -762,13 +742,63 @@ do
     end
 end
 
-CSH[EVENT_CHAMPION_POINT_GAINED] = function()
-    local rankGained = GetPlayerChampionPointsEarned()
-    local pointType = GetChampionPointAttributeForRank(rankGained)
-    local icon = GetChampionPointAttributeIcon(pointType)
-    local constellationGroupName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(pointType)
-    local secondLine = zo_strformat(SI_CHAMPION_POINT_TYPE, constellationGroupName)
-    return CSA_EVENT_COMBINED_TEXT, SOUNDS.CHAMPION_POINT_GAINED, GetString(SI_CHAMPION_POINT_EARNED), secondLine, icon, nil, nil, nil, nil, CSA_OPTION_SUPPRESS_ICON_FRAME
+do
+    local CHAMPION_UNLOCKED_LIFESPAN_MS = 12000
+    CSH[EVENT_CHAMPION_LEVEL_ACHIEVED] = function(wasChampionSystemUnlocked)
+        local barParams
+        local formattedIcon = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")
+        if wasChampionSystemUnlocked then
+            local championPoints = GetPlayerChampionPointsEarned()
+            local currentChampionXP = GetPlayerChampionXP()
+            barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, currentChampionXP, currentChampionXP)
+            barParams:SetShowNoGain(true)
+            return  CSA_EVENT_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED, zo_strformat(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED, formattedIcon), nil, nil, nil, nil, barParams
+        else
+            local totalChampionPoints = GetPlayerChampionPointsEarned()
+            local championXPGained = 0;
+            for i = 0, (totalChampionPoints - 1) do
+                championXPGained = championXPGained + GetNumChampionXPInChampionPoint(i)
+            end
+            barParams =  CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, 0, 0, championXPGained)
+            return  CSA_EVENT_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED, zo_strformat(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED, formattedIcon), nil, nil, nil, nil, barParams, CHAMPION_UNLOCKED_LIFESPAN_MS
+        end
+    end
+end
+
+CSH[EVENT_CHAMPION_POINT_GAINED] = function(pointDelta)
+    -- adding one so that we are starting from the first gained point instead of the starting champion points
+    local endingPoints = GetPlayerChampionPointsEarned()
+    local startingPoints = endingPoints - pointDelta + 1
+    local championPointsByType = { 0, 0, 0 }
+
+    while startingPoints <= endingPoints do
+        local pointType = GetChampionPointAttributeForRank(startingPoints)
+        championPointsByType[pointType] = championPointsByType[pointType] + 1
+        startingPoints = startingPoints + 1
+    end
+
+    local secondLine = ""
+    for pointType,amount in pairs(championPointsByType) do
+        if amount > 0 then
+            local icon = GetChampionPointAttributeHUDIcon(pointType)
+            local constellationGroupName = ZO_Champion_GetUnformattedConstellationGroupNameFromAttribute(pointType)
+            secondLine = secondLine .. zo_strformat(SI_CHAMPION_POINT_TYPE, amount, icon, constellationGroupName) .. "\n"
+        end
+    end
+
+    return CSA_EVENT_COMBINED_TEXT, SOUNDS.CHAMPION_POINT_GAINED, zo_strformat(SI_CHAMPION_POINT_EARNED, pointDelta), secondLine, nil, nil, nil, nil, nil, CSA_OPTION_SUPPRESS_ICON_FRAME
+end
+
+CSH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+    if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
+        return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity)
+    end
+end
+
+CSH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+    if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
+        return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity)
+    end
 end
 
 CSH[EVENT_ATTRIBUTE_FORCE_RESPEC] = function(note)
@@ -777,6 +807,10 @@ end
 
 CSH[EVENT_SKILL_FORCE_RESPEC] = function(note)
     return CSA_EVENT_COMBINED_TEXT, nil, GetString(SI_SKILLS_FORCE_RESPEC_TITLE), zo_strformat(SI_SKILLS_FORCE_RESPEC_PROMPT, note)
+end
+
+CSH[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function()
+    return CSA_EVENT_LARGE_TEXT, SOUNDS.LFG_COMPLETE_ANNOUNCEMENT, GetString(SI_ACTIVITY_FINDER_ACTIVITY_COMPLETE_ANNOUNCEMENT_TEXT)
 end
 
 function ZO_CenterScreenAnnounce_GetHandlers()
@@ -805,7 +839,6 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     --ZO_CenterScreenAnnounce_SetEventPriority(EVENT_GUILD_CLAIM_KEEP_CAMPAIGN_NOTIFICATION)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_REVENGE_KILL)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_AVENGE_KILL)
-    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_CHAMPION_POINT_GAINED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_ABILITY_PROGRESSION_RANK_UPDATE)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_SKILL_LINE_ADDED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_SKILL_RANK_UPDATE)
@@ -820,9 +853,11 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_RAID_TRIAL_FAILED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_RAID_TRIAL_SCORE_UPDATE)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_RAID_TRIAL_STARTED)
-    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_VETERAN_POINTS_GAIN)
-    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_EXPERIENCE_GAIN)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_DISCOVERY_EXPERIENCE)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_CHAMPION_POINT_GAINED)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_LEVEL_UPDATE)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_CHAMPION_LEVEL_ACHIEVED)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_EXPERIENCE_GAIN)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_OBJECTIVE_COMPLETED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_DISPLAY_ANNOUNCEMENT)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_QUEST_COMPLETE)
@@ -879,4 +914,61 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_REMOVED, OnQuestRemoved)
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADVANCED, OnQuestAdvanced)
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADDED, OnQuestAdded)
+end
+
+
+-- Center Screen Queueable Handlers
+-- Usage: Whenever there is an event type that occurs multiple times within a short timeframe
+-- add another table entry with data to help facilitate the combining of the multiple events into a single call
+--      updateTimeDelaySeconds: The time delay from when an event that is marked as queueable is recieved to when the event enters into the regular event queue.
+--                              The system will restart the time after each new event is recieved
+--      updateParameters:       A table of parameter positions that should be overwritten with the latest data from the newest event recieved.
+--                              The position is derived from the parameters in the event callback function defined in the CSH table for the same event. 
+--      conditionParameters:    A table of parameter positions that should be unique amoung any given number of eventIds. For example, if you kill a monster that gives
+--                              exp and guild rep, they will both come down as skill xp update events, but their skilltype and skillindex values are different, so they should be added the to system independently
+--                              and not added together for updating
+
+local CSQH = {}
+
+do
+    local PARAMETER_SKILL_TYPE          = 1
+    local PARAMETER_SKILL_INDEX         = 2
+    local PARAMETER_CURRENT_CAPACITY    = 2
+    local PARAMETER_CURRENT_UPGRADE     = 4
+    local PARAMETER_CURRENT_XP          = 6
+
+    local LONG_UPDATE_INTERVAL_SECONDS = 2.5
+    local EXTRA_LONG_UPDATE_INTERVAL_SECONDS = 3.1
+
+    CSQH[EVENT_SKILL_XP_UPDATE] =
+    {
+        updateTimeDelaySeconds = LONG_UPDATE_INTERVAL_SECONDS,
+        updateParameters = {PARAMETER_CURRENT_XP},
+        conditionParameters = {PARAMETER_SKILL_TYPE, PARAMETER_SKILL_INDEX}
+    }
+
+    CSQH[EVENT_RAID_REVIVE_COUNTER_UPDATE] =
+    {
+        updateTimeDelaySeconds = LONG_UPDATE_INTERVAL_SECONDS,
+    }
+
+    CSQH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] =
+    {
+        updateTimeDelaySeconds = EXTRA_LONG_UPDATE_INTERVAL_SECONDS,
+        updateParameters = {PARAMETER_CURRENT_CAPACITY, PARAMETER_CURRENT_UPGRADE}
+    }
+
+    CSQH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] =
+    {
+        updateTimeDelaySeconds = EXTRA_LONG_UPDATE_INTERVAL_SECONDS,
+        updateParameters = {PARAMETER_CURRENT_CAPACITY, PARAMETER_CURRENT_UPGRADE}
+    }
+end
+
+function ZO_CenterScreenAnnounce_GetQueueableHandlers()
+    return CSQH
+end
+
+function ZO_CenterScreenAnnounce_GetQueueableHandler(eventId)
+    return CSQH[eventId]
 end

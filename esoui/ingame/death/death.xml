@@ -25,6 +25,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LoadBar" relativePoint="TOPRIGHT" offsetX="-24"/>
                     <Dimensions x="48" y="12"/>
                 </Texture>
+                <Label name="$(parent)RespawnTimerText" font="ZoFontWinH3" />
             </Controls>
         </Control>
 
@@ -32,13 +33,19 @@
             <Dimensions y="12" />
             <Controls>
                 <Texture name="$(parent)LoadBarFill" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_KEYBOARD"/>
+                <Label name="$(parent)RespawnTimerText" font="ZoFontKeybindStripDescription" modifyTextType="NONE">
+                    <Anchor point="BOTTOM" relativeTo="ZO_Death" relativePoint="TOP" offsetY="-10" />
+                </Label>
             </Controls>
         </Control>
         
         <Control name="ZO_DeathCountdownBar_Gamepad_Template" virtual ="true">
-            <Dimensions y="128" />
+            <Dimensions y="155" />
             <Controls>
                 <Texture name="$(parent)LoadBarFill" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_GAMEPAD"/>
+                <Label name="$(parent)RespawnTimerText" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5" />
+                </Label>
             </Controls>
         </Control>
         
@@ -53,7 +60,7 @@
 
         <Control name="ZO_DeathReviveButton" inherits="ZO_KeybindButton" virtual="true">
             <Controls>
-                <Label name="$(parent)ReviveText" text="SI_DEATH_PROMPT_REVIVE_LABEL" font="ZoFontWinH3" excludeFromResizeToFitExtendts="true">
+                <Label name="$(parent)ReviveText" text="SI_DEATH_PROMPT_REVIVE_LABEL" font="ZoFontWinH3" excludeFromResizeToFitExtents="true">
                     <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5"/>
                 </Label>
             </Controls>
@@ -222,10 +229,10 @@
 
         <Control name="ZO_Death_Keyboard_Template" virtual="true">
             <Controls>
+                <Control name="$(parent)CyclicRespawnTimer" inherits="ZO_DeathCountdownBar_Keyboard_Template"/>
                 <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"/>
                 <Control name="$(parent)BG">
                     <Controls>
-                        <Control name="$(parent)CountdownBar" inherits="ZO_DeathCountdownBar_Keyboard_Template"/>
                         <Control name="$(parent)Buttons">
                             <Controls>
                                 <Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Keyboard_Template" />
@@ -295,10 +302,10 @@
 
         <Control name="ZO_Death_Gamepad_Template" virtual="true">
             <Controls>
+                <Control name="$(parent)CyclicRespawnTimer" inherits="ZO_DeathCountdownBar_Gamepad_Template"/>
                 <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"/>
                 <Control name="$(parent)BG">
                     <Controls>
-                        <Control name="$(parent)CountdownBar" inherits="ZO_DeathCountdownBar_Gamepad_Template"/>
                         <Control name="$(parent)Buttons">
                             <Controls>
                                 <Control name="$(grandparent)Button1" inherits="ZO_DeathKeybindButton_Gamepad_Template" />
@@ -378,11 +385,11 @@
                 ZO_Death_OnEffectivelyShown(self)
             </OnEffectivelyShown>
             <Controls>
+                <Control name="$(parent)CyclicRespawnTimer" inherits="ZO_DeathCountdownBar" hidden="true"/>
                 <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer" hidden="true"/>
                 <Control name="$(parent)BG" hidden="true">
                     <AnchorFill/>
                     <Controls>
-                        <Control name="$(parent)CountdownBar" inherits="ZO_DeathCountdownBar"/>
                         <Control name="$(parent)Buttons" resizeToFitDescendents="true">
                             <Anchor point="TOP" offsetY="32"/>
                             <Controls>

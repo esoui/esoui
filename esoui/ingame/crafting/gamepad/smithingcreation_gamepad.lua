@@ -88,8 +88,6 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
 
             self:RefreshScrollPanel()
 
-            SCENE_MANAGER:AddFragment(self.universalStyleItemInfoFragment)
-
             self:TriggerUSITutorial()
         elseif newState == SCENE_HIDDEN then
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
@@ -104,7 +102,6 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
 			self.owner:SetEnableSkillBar(false)
 
 			ZO_GamepadGenericHeader_Deactivate(self.owner.header)
-            SCENE_MANAGER:RemoveFragment(self.universalStyleItemInfoFragment)
         end
     end)
 
@@ -153,39 +150,6 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
     end)
 end
 
-function ZO_GamepadSmithingCreation:UpdateUniversalStyleItemBarInfo()
-    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
-    local amountControl = self.universalStyleItemInfo:GetNamedChild("Amount")
-    local textureControl = self.universalStyleItemInfo:GetNamedChild("USITexture")
-    amountControl:SetText(universalStyleItemCount)
-    if universalStyleItemCount == 0 then
-        amountControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
-        textureControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
-    else
-        amountControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
-        textureControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
-    end
-end
-
-function ZO_GamepadSmithingCreation:InitializeUniversalStyleItemInfo()
-    self.universalStyleItemInfo = SMITHING_GAMEPAD.skillInfoBar:GetNamedChild("UniversalStyleItemAmount")
-    self.universalStyleItemInfo:SetHidden(true)
-    self.universalStyleItemInfoFragment = ZO_FadeSceneFragment:New(self.universalStyleItemInfo)
-    local textureControl = self.universalStyleItemInfo:GetNamedChild("USITexture")
-    local itemLink = self:GetUniversalStyleItemLink()
-    local icon = GetItemLinkInfo(itemLink)
-    textureControl:SetTexture(icon)
-
-    local function HandleInventoryChanged()
-        self:UpdateUniversalStyleItemBarInfo()
-    end
-
-    self.universalStyleItemInfo:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
-    self.universalStyleItemInfo:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
-
-    self:UpdateUniversalStyleItemBarInfo()
-end
-
 function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
     if self.keybindStripDescriptor then return end
 
@@ -213,8 +177,6 @@ function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
 
     self:SetupScrollPanel()
     self:InitializeFocusItems()
-
-    self:InitializeUniversalStyleItemInfo()
 
     self.styleList:SetToggleType(GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE)
 end
@@ -380,7 +342,16 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         keybind = "UI_SHORTCUT_PRIMARY",
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
-        name = GetString(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE),
+        name =  function()
+                    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
+                    local universalStyleItemCountString = zo_strformat(GetString(SI_GAMEPAD_SMITHING_UNIVERSAL_STYLE_ITEM_COUNT), universalStyleItemCount)
+
+                    if universalStyleItemCount == 0 then
+                        universalStyleItemCountString = ZO_ERROR_COLOR:Colorize(universalStyleItemCountString)
+                    end
+
+                    return zo_strformat(GetString(SI_GAMEPAD_SMITHING_TOGGLE_UNIVERSAL_STYLE), universalStyleItemCountString)
+                end,
 
         callback = function()
             local haveMaterialChecked = self.optionDataList[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked

@@ -86,7 +86,11 @@ function HelpAskForHelp_Keyboard:Initialize(control)
 
 	self.helpSubmitButton = control:GetNamedChild("SubmitButton")
 
-	control:RegisterForEvent(EVENT_CUSTOMER_SERVICE_TICKET_SUBMITTED, function (...) self:OnCustomerServiceTicketSubmitted(...) end)
+	control:RegisterForEvent(EVENT_CUSTOMER_SERVICE_TICKET_SUBMITTED, function (...)
+																		if HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT:IsShowing() then
+																			self:OnCustomerServiceTicketSubmitted(...)
+																		end
+																	end)
 
 	self:InitializeTextBoxes()
 	self:InitializeComboBoxes()	

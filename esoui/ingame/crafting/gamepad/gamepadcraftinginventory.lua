@@ -66,8 +66,8 @@ local DEFAULT_GAMEPAD_CRAFTING_ITEM_SORT =
     customSortData = { tiebreaker = "bestItemCategoryName" },
     bestItemCategoryName = { tiebreaker = "text" },
     text = { tiebreaker = "requiredLevel" },
-    requiredLevel = { tiebreaker = "requiredVeterankRank", isNumeric = true },
-    requiredVeterankRank = { tiebreaker = "iconFile", isNumeric = true },
+    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
+    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
     iconFile = { tiebreaker = "uniqueId" },
     uniqueId = { isId64 = true },
 }
@@ -93,6 +93,7 @@ end
 function ZO_GamepadCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
     local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
     PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
 
     ZO_ClearTable(self.itemCounts)
 

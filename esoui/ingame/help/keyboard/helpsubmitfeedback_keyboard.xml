@@ -7,7 +7,7 @@
 
             <Controls>
                 <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" offsetX="30" />
+                    <Anchor point="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT"  />
                     <Controls>
                         <Control name="$(parent)ScrollChild" override="true">

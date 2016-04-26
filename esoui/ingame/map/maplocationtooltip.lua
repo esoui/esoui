@@ -46,7 +46,8 @@ local function GetMapLocationLines(locationIndex)
                 table.insert(groupings, grouping)
             end
 
-            table.insert(grouping, {name = name, categoryName = categoryName, icon = icon})
+            local showName = name ~= categoryName
+            table.insert(grouping, { name = name, categoryName = categoryName, icon = icon, showName = showName, })
         end
     end
 
@@ -60,10 +61,30 @@ local function GetMapLocationLines(locationIndex)
     return groupings
 end
 
+local g_maxWidth = MIN_HEADER_WIDTH
+
+local function CreateLineLabel(self, text, indentation)
+    local isIndented = indentation > 0
+    if isIndented then
+        self:AddVerticalPadding(-5)
+    end
+    local label = self.labelPool:AcquireObject()
+    label.indented = isIndented
+    label:SetDimensions(0,0)
+    label:SetText(text)
+    local labelWidth = label:GetTextWidth() + indentation
+    g_maxWidth = zo_max(labelWidth, g_maxWidth)
+
+    self:AddControl(label)
+    label:SetAnchor(CENTER, nil, CENTER, indentation, 0)
+    self:AddVerticalPadding(-8)
+end
+
 local function SetMapLocation(self, locationIndex)
     self:ClearLines()
 
-    local maxWidth = MIN_HEADER_WIDTH
+    g_maxWidth = MIN_HEADER_WIDTH
+    local NAME_INDENT = 32
 
     --add header
     local headerText = GetMapLocationTooltipHeader(locationIndex)
@@ -80,33 +101,22 @@ local function SetMapLocation(self, locationIndex)
     --add lines
     local groupings = GetMapLocationLines(locationIndex)
     for groupingIndex = 1, #groupings do
-        if(groupingIndex > 1) then
-            self:AddVerticalPadding(15)
-        end
-
         local grouping = groupings[groupingIndex]
-        for textIndex = 1, #grouping do
-            local name = grouping[textIndex].name
-            local icon = grouping[textIndex].icon
-            local text = string.format("|t32:32:%s|t%s", icon, name)
-
-            local label = self.labelPool:AcquireObject()
-            label:SetDimensions(0,0)
-            label:SetText(text)
-            local labelWidth = label:GetTextDimensions()
-            maxWidth = zo_max(labelWidth, maxWidth)
-
-            self:AddControl(label)
-            label:SetAnchor(CENTER)
-            self:AddVerticalPadding(-8)
+        for _, entry in ipairs(grouping) do
+            local iconText = zo_iconFormat(entry.icon, 32, 32)
+            CreateLineLabel(self, zo_strformat(SI_TOOLTIP_MAP_LOCATION_CATEGORY_FORMAT, iconText, entry.categoryName), 0)
+            
+            if entry.showName then
+                CreateLineLabel(self, zo_strformat(SI_TOOLTIP_UNIT_NAME, entry.name), NAME_INDENT)
+            end
         end
     end
 
-    self.header:SetWidth(maxWidth)
-    self.divider:SetWidth(maxWidth)
+    self.header:SetWidth(g_maxWidth)
+    self.divider:SetWidth(g_maxWidth)
     local labels = self.labelPool:GetActiveObjects()
     for _, label in pairs(labels) do
-        label:SetWidth(maxWidth)
+        label:SetWidth(label.indented and (g_maxWidth - NAME_INDENT) or g_maxWidth)
     end
 end
 
@@ -122,20 +132,29 @@ local function SetMapLocation_Gamepad(self, locationIndex)
     local groupsSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("mapGroupsSection"))
 
     local groupSectionStyle = self.tooltip:GetStyle("mapLocationGroupSection")
-    local entryStyle = self.tooltip:GetStyle("mapLocationTooltipContent")
-
+    local entryStyle = self.tooltip:GetStyle("mapLocationEntrySection")
+    local titleStyle = self.tooltip:GetStyle("mapLocationTooltipContentTitle")
+    local nameSectionStyle = self.tooltip:GetStyle("mapLocationTooltipNameSection")
+    local nameStyle = self.tooltip:GetStyle("mapLocationTooltipContentName")
     --add lines
     local groupings = GetMapLocationLines(locationIndex)
     for _, grouping in ipairs(groupings) do
         local groupSection = groupsSection:AcquireSection(groupSectionStyle)
 
         for _, entry in ipairs(grouping) do
+            local entrySection = groupSection:AcquireSection(entryStyle)
             local name = zo_strformat(SI_TOOLTIP_UNIT_NAME, entry.name)
             local icon = entry.icon
 
             icon = icon:gsub("servicetooltipicons/", "servicetooltipicons/gamepad/gp_")
 
-            self:LayoutLargeIconStringLine(groupSection, icon, name, entryStyle)
+            self:LayoutLargeIconStringLine(entrySection, icon, entry.categoryName, titleStyle)
+            if entry.showName then
+                local nameSection = entrySection:AcquireSection(nameSectionStyle)
+                self:LayoutStringLine(nameSection, name, nameStyle)
+                entrySection:AddSection(nameSection)
+            end
+            groupSection:AddSection(entrySection)
         end
 
         groupsSection:AddSection(groupSection)

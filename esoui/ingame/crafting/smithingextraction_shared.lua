@@ -157,7 +157,7 @@ function ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem(bagId, slotInd
 end
 
 function ZO_SharedSmithingExtraction_DoesItemPassFilter(bagId, slotIndex, filterType)
-    return ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex) == filterType
+    return ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex) == filterType and not IsItemPlayerLocked(bagId, slotIndex)
 end
 
 function ZO_SharedSmithingExtraction:OnInventoryUpdate(validItemIds)

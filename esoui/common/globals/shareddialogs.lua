@@ -64,9 +64,8 @@ ESO_Dialogs["GAMEPAD_OPTIONS_RESET_TO_DEFAULTS"] =
 
 ESO_Dialogs["WAIT_FOR_CONSOLE_NAME_VALIDATION"] = 
 {
-    
     setup = function(dialog)
-        dialog.setupFunc(dialog)
+        dialog:setupFunc()
     end,
     canQueue = true,
     gamepadInfo =

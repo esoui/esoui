@@ -21,6 +21,7 @@ function GroupMenu_Keyboard:Initialize(control)
                                                                 if self.currentCategoryFragment then
                                                                     SCENE_MANAGER:AddFragment(self.currentCategoryFragment)
                                                                 end
+                                                                PREFERRED_ROLES:RefreshRoles()
                                                             elseif(newState == SCENE_HIDDEN) then
                                                                 KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
                                                             end
@@ -124,8 +125,8 @@ function GroupMenu_Keyboard:SetCurrentCategory(categoryFragment)
 end
 
 do
-    local lockTexture = zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", "100%", "100%")
-    local rankIcon = zo_iconFormat(GetVeteranRankIcon(), "100%", "100%")
+    local LOCK_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", "100%", "100%")
+    local CHAMPION_ICON = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")
 
     function GroupMenu_Keyboard:OnActivityCategoryMouseEnter(control, data)
         ZO_IconHeader_OnMouseEnter(control)
@@ -134,9 +135,9 @@ do
             local lockedText
             if isLevelLocked then
                 if lowestLevelLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, lockTexture, lowestLevelLimit)
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
                 elseif lowestRankLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_RANK_LOCK, lockTexture, rankIcon, lowestRankLimit)
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestRankLimit)
                 end
 
                 if lockedText then

@@ -41,6 +41,10 @@
                         <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
                             <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1"/>
                         </Label>
+
+                        <Texture name="$(parent)CraftBagIcon" hidden="true">
+                            <Dimensions x="40" y="40" />
+                        </Texture>
                     </Controls>
                 </Texture>
                 
@@ -51,6 +55,9 @@
               
                 <Texture name="$(parent)Bg">
                     <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)CraftBagHighlight" hidden="true" />
+                    </Controls>
                 </Texture>
             </Controls>
         </Control>

@@ -732,7 +732,10 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
     local isSystem = (mailData.fromCS or mailData.fromSystem)
     local noAttachments = (mailData.numAttachments == 0)
 
-    self.inbox:Display(mailData.codAmount, mailData.attachedMoney, ZO_FormatUserFacingDisplayName(mailData.senderDisplayName), mailData:GetFormattedSubject(), body, isSystem, noAttachments)
+    -- System mail should not add platform ID icon formatting, the name is already undecorated and ready to display if from the system
+    local displayName = isSystem and mailData.senderDisplayName or ZO_FormatUserFacingDisplayName(mailData.senderDisplayName)
+
+    self.inbox:Display(mailData.codAmount, mailData.attachedMoney, displayName, mailData:GetFormattedSubject(), body, isSystem, noAttachments)
 
     -- Attachments.
     for i = 1, mailData.numAttachments do

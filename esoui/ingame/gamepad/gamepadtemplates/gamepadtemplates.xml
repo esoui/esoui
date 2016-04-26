@@ -265,11 +265,11 @@
                 ZO_SharedGamepadEntry_SetHeightFromLabel(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate">
+                <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate" excludeFromResizeToFitExtents="true">
                     <Anchor point="RIGHT"/>
                 </Label>
 
-                <Label name="$(parent)Condition" font="ZoFontGamepad34" color="FFFFFF" horizontalAlignment="RIGHT" hidden="true">
+                <Label name="$(parent)Condition" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" verticalAlignment="CENTER" horizontalAlignment="RIGHT" hidden="true">
                     <Dimensions x="0"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Price" relativePoint="TOPLEFT"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Price" relativePoint="BOTTOMLEFT"/>
@@ -307,11 +307,11 @@
 
             <Controls>
                 <Label name="$(parent)Label" override="true">
-                    <Dimensions x="220"/>
+                    <Dimensions x="170"/>
                 </Label>
-                <Label name="$(parent)SubLabel1" horizontalAlignment="RIGHT" font="ZoFontGamepad34">
+                <Label name="$(parent)SubLabel1" horizontalAlignment="RIGHT" font="ZoFontGamepad27">
                     <AnchorToBaseline relativeToLabel="$(parent)Label" side="RIGHT"/>
-                    <Dimensions x="70"/>
+                    <Dimensions x="120"/>
                 </Label>
             </Controls>
         </Control>

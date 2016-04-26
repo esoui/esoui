@@ -86,8 +86,6 @@ function ZO_GamepadTradeWindow:PerformDeferredInitialization()
     self.goldSlider = ZO_CurrencySelector_Gamepad:New(self.goldSliderControl:GetNamedChild("Selector"))
     self.goldSlider:SetClampValues(true)
 
-    self.myName = GetUnitDisplayName("player")
-
     self:InitializeOfferLists()
     self:InitializeInventoryList()
     self:InitializeHeaders()
@@ -136,7 +134,7 @@ end
 
 do
     local function ItemFilter(itemData)
-        return not itemData.stolen and not IsItemBound(itemData.bagId, itemData.slotIndex) and not ZO_IsItemCurrentlyOfferedForTrade(itemData.bagId, itemData.slotIndex)
+        return not itemData.stolen and not IsItemBound(itemData.bagId, itemData.slotIndex) and not ZO_IsItemCurrentlyOfferedForTrade(itemData.bagId, itemData.slotIndex) and not itemData.isPlayerLocked
     end
 
     function ZO_GamepadTradeWindow:InitializeInventoryList()
@@ -245,9 +243,10 @@ do
     end
 
     function ZO_GamepadTradeWindow:UpdateHeaders()
+        self.myName = ZO_GetPrimaryPlayerName(GetUnitDisplayName("player"), GetUnitName("player"))
         local myTitle
         if self.confirm[TRADE_ME] == TRADE_CONFIRM_EDIT then
-            myTitle = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, ZO_FormatUserFacingDisplayName(self.myName))
+            myTitle = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, self.myName)
         else
             myTitle = GetString(SI_GAMEPAD_TRADE_READY)
         end
@@ -256,7 +255,7 @@ do
         local theirTitle, theirGoldHeader, theirGoldValue
         
         if self.confirm[TRADE_THEM] == TRADE_CONFIRM_EDIT then
-            theirTitle = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, ZO_FormatUserFacingDisplayName(TRADE_WINDOW.target))
+            theirTitle = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, TRADE_WINDOW.target)
         else
             theirTitle = GetString(SI_GAMEPAD_TRADE_READY)
         end 
@@ -458,14 +457,14 @@ function ZO_GamepadTradeWindow:EnterConfirmation(tradetype)
     if tradetype == TRADE_ME then
         self:RefreshKeybind()
         GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:SetHighlightHidden(false)
-        name = TRADE_WINDOW.target
+        name = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, TRADE_WINDOW.target)
     else
         GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT:SetHighlightHidden(false)
         name = self.myName
     end
-    
+
     if not tradeComplete then
-        ZO_Trade_GamepadWaiting.name:SetText(ZO_FormatUserFacingDisplayName(name))
+        ZO_Trade_GamepadWaiting.name:SetText(name)
     end
 
     self:RefreshOfferList(tradetype)

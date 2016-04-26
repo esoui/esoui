@@ -215,10 +215,6 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             barTexture:SetHidden(true)
             leadingEdge:SetHidden(true)
 
-            -- Saturate icon
-            ultimateButton:UpdateUseFailure()
-            icon:SetDesaturation((isGamepad and ultimateButton.useFailure) and 1 or 0)
-
             -- Show fill bar if platform appropriate
             ultimateFillFrame:SetHidden(not isGamepad)
             ultimateFillLeftTexture:SetHidden(not isGamepad)
@@ -240,7 +236,6 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             ultimateFillLeftTexture:SetHidden(not isGamepad)
             ultimateFillRightTexture:SetHidden(not isGamepad)
             ultimateFillFrame:SetHidden(not isGamepad)
-            icon:SetDesaturation(isGamepad and 1 or 0)
         
             -- update both platforms progress bars
             local slotHeight = ultimateSlot:GetHeight()
@@ -255,6 +250,8 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             PlayUltimateFillAnimation(ultimateButton, ultimateFillLeftTexture, ultimateFillRightTexture, percentComplete, setProgressNoAnim)
             ultimateButton:AnchorKeysOut()
         end
+
+		ultimateButton:UpdateUltimateNumber()
     else
         --stop animation
         ultimateReadyBurstTexture:SetHidden(true)
@@ -449,6 +446,17 @@ local function OnActiveQuickslotChanged(eventCode, slotId)
     HandleSlotChanged(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1)
 end
 
+local function OnCollectionUpdated()
+    local quickslot = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1
+    local button = ZO_ActionBar_GetButton(quickslot)
+    if button then
+        local slotId = button:GetSlot()
+        if ZO_QuickslotRadialManager:ValidateOrClearQuickslot(slotId) then
+            HandleSlotChanged(quickslot)
+        end
+    end
+end
+
 local function OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
     if (activeWeaponPair ~= g_actionBarActiveWeaponPair) then
         g_activeWeaponSwapInProgress = true
@@ -610,6 +618,7 @@ function ZO_ActionBar_Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTIVE_QUICKSLOT_CHANGED, OnActiveQuickslotChanged)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_PLAYER_ACTIVATED, UpdateAllSlots)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_COLLECTION_UPDATED, OnCollectionUpdated)
 
     ZO_PlatformStyle:New(ApplyStyle, KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS)
 

@@ -22,8 +22,8 @@
 
         <AnimationTimeline name="ZO_PlayerProgressBarGlow" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <AlphaAnimation duration="550" startAlpha="0.0" endAlpha="1.0" />
-                <AlphaAnimation duration="550" delay="1000" startAlpha="1.0" endAlpha="0.0" />
+                <AlphaAnimation duration="300" startAlpha="0.0" endAlpha="1.0" />
+                <AlphaAnimation duration="500" delay="500" startAlpha="1.0" endAlpha="0.0" />
             </Animations>
         </AnimationTimeline>
 
@@ -54,14 +54,7 @@
     </Animations>
     
     <Controls>
-        <Texture name="ZO_PlayerProgressBarEnlightenedArrow" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_arrow.dds" alpha="0" tier="HIGH" virtual="true">
-            <Dimensions x="16" y="16" />
-            <Anchor point="TOPLEFT"/>
-            <TextureCoords left="1" right="0"/>
-        </Texture>
-
         <StatusBar name="ZO_PlayerProgressBarTemplate" inherits="ZO_ArrowStatusBar" mouseEnabled="true" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-12" />
             <OnMouseEnter>
                 ZO_PlayerProgressBar_OnMouseEnter(self)
             </OnMouseEnter>
@@ -69,6 +62,8 @@
                 ZO_PlayerProgressBar_OnMouseExit(self)
             </OnMouseExit>
             <Controls>
+                <StatusBar name="$(parent)Gloss" level="550" override="true" />
+                    
                 <Control name="$(parent)GlowContainer" inherits="ZO_PlayerAttributeWarner">
                     <Controls>
                         <Texture name="$(parent)Left" inherits="ZO_PlayerAttributeWarnerLeft" textureFile="EsoUI/Art/Progression/progressBar_genericGlow.dds"/>
@@ -79,29 +74,15 @@
                 
                 <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG" tier="LOW"/>
                 <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay"/>
-            </Controls>
-        </StatusBar>
 
-        <StatusBar name="ZO_PlayerProgressDualBarTemplate" inherits="ZO_PlayerProgressBarTemplate" mouseEnabled="true" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-12" />
-            <Controls>
-                <Control name="$(parent)GlowContainer" inherits="ZO_PlayerAttributeWarner">
-                    <Controls>
-                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Progression/progressBar_dualGlow.dds">
-                            <TextureCoords left=".734375" right=".5390625" top="0" bottom="1" />
-                            <Anchor point="LEFT" offsetY="5" />
-                        </Texture>
-                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Progression/progressBar_dualGlow.dds">
-                            <TextureCoords left=".5078" right=".25" top="0" bottom="1" />
-                            <Anchor point="RIGHT" offsetY="5"/>
-                        </Texture>
-                        <Texture name="$(parent)Center" textureFile="EsoUI/Art/Progression/progressBar_dualGlow.dds" >
-                            <TextureCoords left=".53125" right=".515625" top="0" bottom="1" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
-                        </Texture>
-                    </Controls>
-                </Control>
+                <StatusBar name="$(parent)EnlightenedBar" alpha="0.3" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center.dds" level="1">
+                    <Dimensions x="512" y="16" />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.75" />
+                    <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.6" />
+                    <LeadingEdge alpha="0.3" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge.dds" width="8" height="20" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-1"/>
+                </StatusBar>
             </Controls>
         </StatusBar>
 
@@ -113,43 +94,48 @@
                     <Anchor point="TOPLEFT"/>
                 </Label>
 
-                <StatusBar name="$(parent)Bar" inherits="ZO_PlayerProgressBarTemplate" />
-                <StatusBar name="$(parent)SecondaryBar" inherits="ZO_PlayerAttributeStatusBarSmall" mouseEnabled="true">
-                    <Dimensions x="305" y="8" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bar" relativePoint="BOTTOMLEFT" offsetY="-2" />
+                <StatusBar name="$(parent)Bar">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-12" />
                     <Controls>
-                        <Control name="$(parent)ChampionBG" inherits="ZO_ArrowSecondaryStatusBarBG" tier="LOW"/>
-                        <Control name="$(parent)ChampionOverlay" inherits="ZO_ArrowSecondaryStatusBarOverlay"/>
-
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGlossSmall" />
-                        <StatusBar name="$(parent)EnlightenedBar" alpha="0.3" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center.dds" tier="HIGH">
-                            <TextureCoords left="1" right="1" top="0" bottom="1" />
-                            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="1" />
-                            <LeadingEdge alpha="0.3" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge.dds" width="8" height="8" />
-                            <AnchorFill/>
-                        </StatusBar>
+                        <StatusBar name="$(parent)EnlightenedBar" hidden="true" />
                     </Controls>
                 </StatusBar>
 
                 <Texture name="$(parent)LevelTypeIcon" hidden="true">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
-                    <TextureCoords left="0.125" top="0.125" right="0.875" bottom="0.875"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" />
                     <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
                     <Dimensions x="0" y="24"/>
                 </Texture>
                 <Label name="$(parent)LevelType" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_DEFAULT_ENABLED_COLOR" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="RIGHT"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="BOTTOMRIGHT" offsetX="2" offsetY="3"/>
                 </Label>
+                <Label name="$(parent)ChampionPoints" font="ZoFontWinH1">
+                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" offsetX="5" offsetY="-4"/>
+                </Label>
+            </Controls>
+        </Control>
 
-                <Texture name="$(parent)SecondaryLevelTypeIcon" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryBar" relativePoint="BOTTOMLEFT"/>
+        <Control name="ZO_PlayerChampionProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true" mouseEnabled="true">
+            <Dimensions x="375" y="56" />
+            <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+            <Controls>
+                <Label name="$(parent)Level" font="ZoFontCallout3">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <StatusBar name="$(parent)Bar" inherits="ZO_PlayerProgressBarTemplate">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ChampionIcon" relativePoint="BOTTOMRIGHT" offsetY="-5" />
+                </StatusBar>
+                <Texture name="$(parent)LevelTypeIcon" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" />
                     <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
                     <Dimensions x="0" y="24"/>
                 </Texture>
-                <Label name="$(parent)SecondaryLevelType" font="ZoFontHeader2" modifyTextType="UPPERCASE" >
-                    <Anchor point="LEFT" relativeTo="$(parent)SecondaryLevelTypeIcon" relativePoint="RIGHT" offsetX="2"/>
+                <Label name="$(parent)LevelType" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_DEFAULT_ENABLED_COLOR" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="BOTTOMRIGHT" offsetX="2" offsetY="3"/>
                 </Label>
-
+                <Label name="$(parent)ChampionPoints" font="ZoFontWinH1">
+                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" offsetX="5" offsetY="-4"/>
+                </Label>
             </Controls>
         </Control>
 
@@ -163,33 +149,14 @@
                 <Label name="$(parent)Level" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
                 </Label>
+                <Texture name="$(parent)ChampionIcon" hidden="true" textureFile="EsoUI/Art/Champion/champion_icon.dds">
+                    <Anchor point="LEFT" relativeTo="$(parent)Level" relativePoint="RIGHT"/>
+                    <Dimensions x="50" y="50"/>
+                </Texture>
                 <StatusBar name="$(parent)Bar" inherits="ZO_PlayerProgressBarTemplate" />
-                <StatusBar name="$(parent)SecondaryBar" inherits="ZO_PlayerAttributeStatusBarSmall" mouseEnabled="true">
-                    <Dimensions x="305" y="8" />
-                    <OnMouseEnter>
-                        ZO_PlayerProgressBar_OnMouseEnter(self)
-                    </OnMouseEnter>
-                    <OnMouseExit>
-                        ZO_PlayerProgressBar_OnMouseExit(self)
-                    </OnMouseExit>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bar" relativePoint="BOTTOMLEFT" offsetY="-2" />
-                    <Controls>
-                        <Control name="$(parent)ChampionBG" inherits="ZO_ArrowSecondaryStatusBarBG" tier="LOW"/>
-                        <Control name="$(parent)ChampionOverlay" inherits="ZO_ArrowSecondaryStatusBarOverlay"/>
-
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGlossSmall" />
-                        <StatusBar name="$(parent)EnlightenedBar" alpha="0.3" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_center.dds" tier="HIGH">
-                            <TextureCoords left="1" right="1" top="0" bottom="1" />
-                            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="1" />
-                            <LeadingEdge alpha="0.3" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_small_fill_leadingEdge.dds" width="8" height="8" />
-                            <AnchorFill/>
-                        </StatusBar>
-                    </Controls>
-                </StatusBar>
 
                 <Texture name="$(parent)LevelTypeIcon" hidden="true">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
-                    <TextureCoords left="0.125" top="0.125" right="0.875" bottom="0.875"/>
                     <OnHide>
                         local x, y = self:GetDimensions()
                         self:SetDimensions(0, y)
@@ -200,23 +167,11 @@
                     </OnShow>
                 </Texture>
                 <Label name="$(parent)LevelType" font="ZoFontHeader2" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="LEFT"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="BOTTOMRIGHT"/>
                 </Label>
-                
-                <Texture name="$(parent)SecondaryLevelTypeIcon" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryBar" relativePoint="BOTTOMLEFT"/>
-                    <OnHide>
-                        local x, y = self:GetDimensions()
-                        self:SetDimensions(0, y)
-                    </OnHide>
-                    <OnShow>
-                        local x, y = self:GetDimensions()
-                        self:SetDimensions(y, y)
-                    </OnShow>
-                </Texture>
-                <Label name="$(parent)SecondaryLevelType" font="ZoFontHeader2" text="SI_EXPERIENCE_CHAMPION_POINT_LABEL" modifyTextType="UPPERCASE" hidden="false">
-                    <Anchor point="LEFT" relativeTo="$(parent)SecondaryLevelTypeIcon" relativePoint="RIGHT" offsetX="2"/>
-                </Label>
+                <Label name="$(parent)ChampionPoints" font="ZoFontWinH1">
+                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" />
+                </Label>                   
             </Controls>
         </TopLevelControl>
     </Controls>    

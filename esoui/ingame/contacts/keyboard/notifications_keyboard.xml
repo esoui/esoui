@@ -143,6 +143,22 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_NotificationsYesNoRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+            <OnInitialized>
+                self.acceptText = GetString(SI_YES)
+                self.declineText = GetString(SI_NO)
+            </OnInitialized>
+            <Controls>
+                <Button name="$(parent)Accept" override="true">
+                    <Textures
+                        normal="EsoUI/Art/Buttons/accept_up.dds"
+                        pressed="EsoUI/Art/Buttons/accept_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
+                    />
+                </Button>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_NotificationsLeaderboardRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_LEADERBOARD_SHOW_LEADERBOARD)

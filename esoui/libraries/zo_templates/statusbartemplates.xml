@@ -1,5 +1,18 @@
 <GuiXml>
-    <Controls>
+    <Animations>
+        <AnimationTimeline name="ZO_StatusBarGrowTemplate">
+            <Animations>
+                <!-- duration will be controlled by code -->
+                <CustomAnimation>
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+        <Controls>
         <StatusBar name="ZO_DefaultStatusBarBase" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_tall.dds" virtual="true">
             <TextureCoords left="0" right="1" top="0" bottom="0.8125" />
         </StatusBar>
@@ -50,56 +63,6 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
                     <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250" />
-                </Texture>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_ArrowSecondaryStatusBarOverlay" tier="HIGH" layer="OVERLAY" virtual="true">
-            <AnchorFill />
-            <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_Champion_frame.dds" layer="OVERLAY">
-                    <Dimensions x="10" />
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMLEFT" />
-                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.5" />
-                </Texture>
-
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_Champion_frame.dds" layer="OVERLAY">
-                    <Dimensions x="10" />
-                    <Anchor point="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" />
-                    <TextureCoords left="0.5761" right="0.59375" top="0" bottom="0.5" />
-                </Texture>
-
-                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_Champion_frame.dds" layer="OVERLAY">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
-                    <TextureCoords left="0.0195" right="0.5761" top="0" bottom="0.5" />
-                </Texture>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_ArrowSecondaryStatusBarBG" tier="LOW" virtual="true">
-            <AnchorFill />
-            <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_ChampionBG.dds">
-                    <Dimensions x="10" />
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMLEFT" />
-                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.5" />
-                </Texture>
-
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_ChampionBG.dds" >
-                    <Dimensions x="10" />
-                    <Anchor point="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" />
-                    <TextureCoords left="0.5761" right="0.59375" top="0" bottom="0.5" />
-                </Texture>
-
-                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_ChampionBG.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
-                    <TextureCoords left="0.0195" right="0.5761" top="0" bottom="0.5" />
                 </Texture>
             </Controls>
         </Control>

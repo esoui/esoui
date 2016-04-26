@@ -115,3 +115,28 @@ end
 function ZO_ActionHandler_JumpOrInteractUp()
     JumpOrInteractUp()
 end
+
+function ZO_FormatResourceBarCurrentAndMax(current, maximum)
+	local returnValue = ""
+
+	local percent = 0
+	if maximum ~= 0 then
+		percent = (current/maximum) * 100
+		if percent < 10 then
+			percent = ZO_LocalizeDecimalNumber(zo_roundToNearest(percent, .1))
+		else
+			percent = zo_round(percent)
+		end
+	end
+	
+	local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
+	if setting == RESOURCE_NUMBERS_SETTING_NUMBER_ONLY then
+		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+	elseif setting == RESOURCE_NUMBERS_SETTING_PERCENT_ONLY then
+		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, percent)
+	elseif setting == RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT then
+		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITH_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES), percent)
+	end
+
+	return returnValue
+end

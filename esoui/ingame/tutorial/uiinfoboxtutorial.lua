@@ -37,9 +37,8 @@ function ZO_UiInfoBoxTutorial:Initialize()
     ZO_Dialogs_RegisterCustomDialog("UI_TUTORIAL_GAMEPAD", 
         {
             canQueue = true,
-            setup = function()
-                local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.CENTERED)
-                dialog.setupFunc(dialog)
+            setup = function(dialog)
+                dialog:setupFunc()
             end,
             gamepadInfo =
             {

@@ -17,11 +17,14 @@ local GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_COLLECTIONS] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
     [NOTIFICATION_TYPE_LFG] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_group.dds",
     [NOTIFICATION_TYPE_POINTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
+    [NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
+    [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
 }
 
 local DATA_TYPE_TO_TEMPLATE = 
 {
     [NOTIFICATIONS_REQUEST_DATA] = "ZO_GamepadNotificationsRequestRow",
+    [NOTIFICATIONS_YES_NO_DATA] = "ZO_GamepadNotificationsYesNoRow",
     [NOTIFICATIONS_WAITING_DATA] = "ZO_GamepadNotificationsWaitingRow",
     [NOTIFICATIONS_LEADERBOARD_DATA] = "ZO_GamepadNotificationsLeaderboardRow",
     [NOTIFICATIONS_ALERT_DATA] = "ZO_GamepadNotificationsAlertRow",
@@ -41,10 +44,6 @@ local ZO_GamepadFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
 function ZO_GamepadFriendRequestProvider:New(notificationManager)
     local provider = ZO_FriendRequestProvider.New(self, notificationManager)
     return provider
-end
-
-function ZO_GamepadFriendRequestProvider:CreateMessage(displayName)
-    return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_FRIEND_REQUEST_MESSAGE, displayName)
 end
 
 function ZO_GamepadFriendRequestProvider:Decline(data, button, openedFromKeybind)
@@ -166,14 +165,6 @@ function ZO_GamepadCampaignQueueProvider:New(notificationManager)
     return provider
 end
 
-function ZO_GamepadCampaignQueueProvider:CreateMessageFormat(isGroup)
-    return isGroup and SI_GAMEPAD_NOTIFICATIONS_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_GAMEPAD_NOTIFICATIONS_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL
-end
-
-function ZO_GamepadCampaignQueueProvider:CreateLoadText()
-    return GetString(SI_GAMEPAD_NOTIFICATIONS_CAMPAIGN_ENTER_MESSAGE)
-end
-
 function ZO_GamepadCampaignQueueProvider:Accept(data)
     GAMEPAD_AVA_BROWSER:GetCampaignBrowser():ShowCampaignQueueReadyDialog(data.campaignId, data.isGroup, data.campaignName)
 end
@@ -184,23 +175,8 @@ local ZO_GamepadResurrectProvider = ZO_ResurrectProvider:Subclass()
 
 function ZO_GamepadResurrectProvider:New(notificationManager)
     local provider = ZO_ResurrectProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
     return provider
-end
-
-function ZO_GamepadResurrectProvider:GetMessageFormat()
-    return SI_GAMEPAD_NOTIFICATIONS_RESURRECT_MESSAGE
-end
-
-function ZO_GamepadResurrectProvider:GetNameToShow(resurrectRequesterCharacterName, resurrectRequesterDisplayName)
-    return ZO_FormatUserFacingDisplayName(resurrectRequesterDisplayName)
-end
-
-function ZO_GamepadResurrectProvider:CanShowGamerCard()
-    return true
-end
-
-function ZO_GamepadResurrectProvider:ShowGamerCard(data)
-    ZO_ShowGamerCardFromCharacterName(data.resurrectRequesterCharacterName)
 end
 
 --Group Invite Provider
@@ -209,21 +185,9 @@ local ZO_GamepadGroupInviteProvider = ZO_GroupInviteProvider:Subclass()
 
 function ZO_GamepadGroupInviteProvider:New(notificationManager)
     local provider = ZO_GroupInviteProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
     return provider
 end
-
-function ZO_GamepadGroupInviteProvider:CreateMessage(inviterName)
-    return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_GROUP_INVITE_MESSAGE, inviterName)
-end
-
-function ZO_GamepadGroupInviteProvider:CanShowGamerCard()
-    return true
-end
-
-function ZO_GamepadGroupInviteProvider:ShowGamerCard(data)
-    ZO_ShowGamerCardFromCharacterName(data.inviterCharacterName)
-end
-
 
 --Trade Invite Provider
 -------------------------
@@ -232,19 +196,8 @@ local ZO_GamepadTradeInviteProvider = ZO_TradeInviteProvider:Subclass()
 
 function ZO_GamepadTradeInviteProvider:New(notificationManager)
     local provider = ZO_TradeInviteProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
     return provider
-end
-
-function ZO_GamepadTradeInviteProvider:CreateMessage(inviterName)
-    return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_TRADE_INVITE_MESSAGE, inviterName)
-end
-
-function ZO_GamepadTradeInviteProvider:CanShowGamerCard()
-    return true
-end
-
-function ZO_GamepadTradeInviteProvider:ShowGamerCard(data)
-    ZO_ShowGamerCardFromCharacterName(data.inviterCharacterName)
 end
 
 
@@ -255,19 +208,8 @@ local ZO_GamepadQuestShareProvider = ZO_QuestShareProvider:Subclass()
 
 function ZO_GamepadQuestShareProvider:New(notificationManager)
     local provider = ZO_QuestShareProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
     return provider
-end
-
-function ZO_GamepadQuestShareProvider:CreateMessage(playerName, displayName, questName)
-    return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_QUEST_SHARE_MESSAGE, ZO_FormatUserFacingDisplayName(displayName), questName)
-end
-
-function ZO_GamepadQuestShareProvider:CanShowGamerCard()
-    return true
-end
-
-function ZO_GamepadQuestShareProvider:ShowGamerCard(data)
-    ZO_ShowGamerCardFromCharacterName(data.playerName)
 end
 
 --Pledge of Mara Provider
@@ -277,23 +219,8 @@ local ZO_GamepadPledgeOfMaraProvider = ZO_PledgeOfMaraProvider:Subclass()
 
 function ZO_GamepadPledgeOfMaraProvider:New(notificationManager)
     local provider = ZO_PledgeOfMaraProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
     return provider
-end
-
-function ZO_GamepadPledgeOfMaraProvider:CreateMessage(targetName)
-    return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_PLEDGE_OF_MARA_MESSAGE, targetName)
-end
-
-function ZO_GamepadPledgeOfMaraProvider:CreateSenderMessage(targetName)
-    return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_PLEDGE_OF_MARA_SENDER_MESSAGE, targetName)
-end
-
-function ZO_GamepadPledgeOfMaraProvider:CanShowGamerCard()
-    return true
-end
-
-function ZO_GamepadPledgeOfMaraProvider:ShowGamerCard(data)
-    ZO_ShowGamerCardFromCharacterName(data.targetCharacterName)
 end
 
 -- CS Chat Request Provider
@@ -338,29 +265,31 @@ function ZO_GamepadLeaderboardRaidProvider:AppendRaidMembers(messageText, numMem
     local friendsSection = {}
 
     for memberIndex = 1, numMembers do
-        local displayName, characterName, isFriend, isGuildMember = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+        local displayName, characterName, isFriend, isGuildMember, isPlayer = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
         local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
 
-        if isGuildMember then
-            table.insert(guildMembersSection, userFacingName)
-        elseif isFriend then
-            table.insert(friendsSection, userFacingName)
-        end
-    end
-
-    if #guildMembersSection > 0 then
-        messageText = self:AppendRaidMemberHeaderText(messageText, GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS))
-
-        for _, guildMemberName in ipairs(guildMembersSection) do
-            messageText = self:AppendRaidMemberName(messageText, guildMemberName)
+        if not isPlayer then
+            if isFriend then
+                table.insert(friendsSection, userFacingName)
+            elseif isGuildMember then
+                table.insert(guildMembersSection, userFacingName)
+            end
         end
     end
 
     if #friendsSection > 0 then
-        messageText = self:AppendRaidMemberHeaderText(messageText, GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS))
+        messageText = self:AppendRaidMemberHeaderText(messageText, zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS), #friendsSection))
 
         for _, friendName in ipairs(friendsSection) do
             messageText = self:AppendRaidMemberName(messageText, friendName)
+        end
+    end
+
+    if #guildMembersSection > 0 then
+        messageText = self:AppendRaidMemberHeaderText(messageText, zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS), #guildMembersSection))
+
+        for _, guildMemberName in ipairs(guildMembersSection) do
+            messageText = self:AppendRaidMemberName(messageText, guildMemberName)
         end
     end
 
@@ -410,24 +339,6 @@ local ZO_GamepadLFGUpdateProvider = ZO_LFGUpdateProvider:Subclass()
 function ZO_GamepadLFGUpdateProvider:New(notificationManager)
     return ZO_LFGUpdateProvider.New(self, notificationManager)
 end
-
-function ZO_GamepadLFGUpdateProvider:GetMessageFormat()
-    return SI_GAMEPAD_LFG_JUMP_TO_DUNGEON_TEXT
-end
-
-
-do
-    local ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_dps_down.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_healer_down.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_tank_down.dds",
-    }
-    
-    function ZO_GamepadLFGUpdateProvider:GetRoleIcon(role)
-        return ROLE_TO_ICON[role]
-    end
-end
-
 
 --Notification Manager
 -------------------------
@@ -483,6 +394,7 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsCollectibleRow"] = SetupRequest,
         ["ZO_GamepadNotificationsLFGJumpDungeonRow"] = SetupRequest,
         ["ZO_GamepadNotificationsLFGFindReplacementRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsYesNoRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -511,6 +423,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadCampaignQueueProvider:New(self),
         ZO_GamepadResurrectProvider:New(self),
         ZO_GamepadGroupInviteProvider:New(self),
+        ZO_GroupElectionProvider:New(self),
         ZO_GamepadTradeInviteProvider:New(self),
         ZO_GamepadQuestShareProvider:New(self),
         ZO_PointsResetProvider:New(self, "gamepad"),
@@ -519,6 +432,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadLeaderboardRaidProvider:New(self),
         collectionsProvider,
         ZO_GamepadLFGUpdateProvider:New(self),
+        ZO_CraftBagAutoTransferProvider:New(self),
     }
 end
 
@@ -635,14 +549,13 @@ end
 
 function ZO_GamepadNotificationManager:InitializeHeader()
     self.headerData = {
-	    titleText = GetString(SI_GAMEPAD_NOTIFICATIONS_CATEGORY_HEADER),
+        titleText = GetString(SI_GAMEPAD_NOTIFICATIONS_CATEGORY_HEADER),
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
 function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
     local dialogName = GAMEPAD_NOTIFICATIONS_CONFIRM_DECLINE_DIALOG_NAME
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local declineOption =
         {
@@ -650,7 +563,7 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
             templateData = {
                 text = GetString(SI_GAMEPAD_NOTIFICATIONS_DECLINE_OPTION),
                 setup = ZO_SharedGamepadEntry_OnSetup,
-                callback = function()
+                callback = function(dialog)
                     dialog.data.declineFunction()
                 end
             },
@@ -661,7 +574,7 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
             templateData = {
                 text = GetString(IsConsoleUI() and SI_GAMEPAD_NOTIFICATIONS_REQUEST_BLOCK_PLAYER or SI_GAMEPAD_NOTIFICATIONS_REQUEST_IGNORE_PLAYER),
                 setup = ZO_SharedGamepadEntry_OnSetup,
-                callback = function()
+                callback = function(dialog)
                     dialog.data.ignoreFunction()
                 end
             },
@@ -672,7 +585,7 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
             templateData = {
                 text = GetString(SI_GAMEPAD_NOTIFICATIONS_REQUEST_REPORT_SPAMMING),
                 setup = ZO_SharedGamepadEntry_OnSetup,
-                callback = function()
+                callback = function(dialog)
                     dialog.data.reportFunction()
                 end
             },
@@ -692,8 +605,8 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
 
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -703,7 +616,7 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
 
         mainText =
         {
-            text = function()  
+            text = function(dialog)
                 return dialog.data.mainText()
             end,
         },
@@ -715,7 +628,7 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
                 text = SI_OK,
                 callback =  function(dialog)
                     local data = dialog.entryList:GetTargetData()
-                     data.callback()
+                     data.callback(dialog)
                 end,
             },
 
@@ -746,7 +659,7 @@ function ZO_GamepadNotificationManager:AddDataEntry(dataType, data, isHeader)
     entryData:SetIconDisabledTintOnSelection(true)
 
     if isHeader then
-        entryData:SetHeader(zo_strformat(SI_GAMEPAD_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", data.notificationType)))
+        entryData:SetHeader(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", data.notificationType)))
         self.list:AddEntryWithHeader(DATA_TYPE_TO_TEMPLATE[dataType], entryData)
     else
         self.list:AddEntry(DATA_TYPE_TO_TEMPLATE[dataType], entryData)     

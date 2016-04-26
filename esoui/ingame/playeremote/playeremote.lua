@@ -24,10 +24,25 @@ end
 EVENT_MANAGER:RegisterForEvent("PlayerEmote_OnAddOnLoaded", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
 
-local ZO_PlayerEmoteManager = ZO_Object:Subclass()
+local ZO_PlayerEmoteManager = ZO_CallbackObject:Subclass()
+
+function ZO_PlayerEmoteManager:New(...)
+	local playerEmoteManager = ZO_CallbackObject.New(self)
+	playerEmoteManager:Initialize(...)
+	return playerEmoteManager
+end
+
+function ZO_PlayerEmoteManager:Initialize()
+	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_PERSONALITY_CHANGED, function() self:RefreshPersonalityEmotes() end)
+	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:RefreshPersonalityEmotes() end)
+end
 
 function ZO_PlayerEmoteManager:CompareEmotes(emoteA, emoteB)
-    return self:GetEmoteItemInfo(emoteA).displayName < self:GetEmoteItemInfo(emoteB).displayName
+	if IsInGamepadPreferredMode() then
+		return self:GetEmoteItemInfo(emoteA).displayName < self:GetEmoteItemInfo(emoteB).displayName
+	else
+		return self:GetEmoteItemInfo(emoteA).emoteSlashName < self:GetEmoteItemInfo(emoteB).emoteSlashName
+	end
 end
 
 local function CompareCategories(categoryA, categoryB)
@@ -45,9 +60,12 @@ function ZO_PlayerEmoteManager:InitializeEmoteList()
     self.emoteList = {}
     self.emoteCategories = {}
     self.emoteCategoryTypes = {}
+	self.emotePersonalityCategoryAdded = false
 
 	for emoteIndex = 1, GetNumEmotes() do
         local emoteSlashName, emoteCategory, emoteId, displayName, showInGamepadUI = GetEmoteInfo(emoteIndex)
+		local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
+
         if emoteSlashName ~= "" then
             if displayName == "" then 
                 displayName = string.sub(emoteSlashName,2) --Temp in case data isn't set up.
@@ -62,10 +80,22 @@ function ZO_PlayerEmoteManager:InitializeEmoteList()
                                             emoteId = emoteId,
                                             emoteIndex = emoteIndex,
                                             displayName = displayName,
-                                            showInGamepadUI = showInGamepadUI
+											emoteSlashName = emoteSlashName,
+                                            showInGamepadUI = showInGamepadUI,
+											isOverriddenByPersonality = isOverriddenByPersonality,
                                         }
 
             table.insert(self.emoteCategories[emoteCategory], emoteId)
+
+			if isOverriddenByPersonality then
+				if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
+					self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
+					table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
+					self.emotePersonalityCategoryAdded = true
+				end
+
+				table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
+			end
         end
 	end
 
@@ -76,23 +106,62 @@ function ZO_PlayerEmoteManager:InitializeEmoteList()
     table.sort(self.emoteCategoryTypes, CompareCategories)
 end
 
-local EMOTE_ICON_PATH = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_"
+function ZO_PlayerEmoteManager:RefreshPersonalityEmotes()
+	if not self.emoteCategories then
+        self:InitializeEmoteList()
+    end
 
-local EMOTE_ICONS = {
-    [EMOTE_CATEGORY_INVALID]            = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds",
-    [EMOTE_CATEGORY_CEREMONIAL]         = EMOTE_ICON_PATH .. "ceremonial.dds",
-    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = EMOTE_ICON_PATH .. "cheersJeers.dds",
-    [EMOTE_CATEGORY_DEPRECATED]         = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds",
-    [EMOTE_CATEGORY_EMOTION]            = EMOTE_ICON_PATH .. "emotion.dds",
-    [EMOTE_CATEGORY_ENTERTAINMENT]      = EMOTE_ICON_PATH .. "entertain.dds",
-    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = EMOTE_ICON_PATH .. "eatDrink.dds",
-    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = EMOTE_ICON_PATH .. "direction.dds",
-    [EMOTE_CATEGORY_PERPETUAL]          = EMOTE_ICON_PATH .. "perpetual.dds",
-    [EMOTE_CATEGORY_PHYSICAL]           = EMOTE_ICON_PATH .. "physical.dds",
-    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = EMOTE_ICON_PATH .. "fidget.dds",
-    [EMOTE_CATEGORY_PROP]               = EMOTE_ICON_PATH .. "prop.dds",
-    [EMOTE_CATEGORY_SOCIAL]             = EMOTE_ICON_PATH .. "social.dds",
-}
+	if self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
+		ZO_ClearNumericallyIndexedTable(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE])
+	end
+	local personalityEmoteAdded = false
+
+	for emoteIndex = 1, GetNumEmotes() do
+        local emoteSlashName, emoteCategory, emoteId, displayName, showInGamepadUI = GetEmoteInfo(emoteIndex)
+		local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
+
+        if emoteSlashName ~= "" then
+            self.emoteList[emoteId].isOverriddenByPersonality = isOverriddenByPersonality
+
+			if isOverriddenByPersonality then
+				if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
+					self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
+				end
+
+				if not self.emotePersonalityCategoryAdded then
+					self.emotePersonalityCategoryAdded = true
+					table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
+				end
+
+				if displayName == "" then 
+					displayName = string.sub(emoteSlashName,2) --Temp in case data isn't set up.
+				end
+
+				personalityEmoteAdded = true
+
+				table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
+			end
+        end
+	end
+
+	if not personalityEmoteAdded then
+		if self.emotePersonalityCategoryAdded then
+			for i, categoryType in ipairs(self.emoteCategoryTypes) do
+				if categoryType == EMOTE_CATEGORY_PERSONALITY_OVERRIDE then
+					table.remove(self.emoteCategoryTypes, i)
+					self.emotePersonalityCategoryAdded = false
+					break
+				end
+			end
+		end
+	end
+
+	for _, emoteList in pairs(self.emoteCategories) do
+        table.sort(emoteList, function(emoteA, emoteB) return self:CompareEmotes(emoteA, emoteB) end)
+    end
+
+    table.sort(self.emoteCategoryTypes, CompareCategories)
+end
 
 function ZO_PlayerEmoteManager:GetEmoteListForType(emoteType, optFilterFunction)
     if not self.emoteCategories then
@@ -137,14 +206,6 @@ function ZO_PlayerEmoteManager:GetSlottedEmotes()
     return slottedEmoteList
 end
 
-function ZO_PlayerEmoteManager:GetEmoteIconForCategory(category)
-    if EMOTE_ICONS[category] then
-        return EMOTE_ICONS[category]
-    end
-    return EMOTE_ICONS[EMOTE_CATEGORY_INVALID]
-end
-
 -- Globals
 -------------------------------------------------------------
 PLAYER_EMOTE_MANAGER = ZO_PlayerEmoteManager:New()
-

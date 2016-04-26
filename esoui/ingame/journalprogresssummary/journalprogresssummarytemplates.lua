@@ -17,6 +17,7 @@ function ZO_JournalProgressBook_Common:Initialize(control)
     self:InitializeControls()
     self:InitializeEvents()
     self:InitializeCategoryTemplates()
+	self:InitializeChildIndentAndSpacing()
 
     ZO_StatusBar_SetGradientColor(self.categoryProgress, ZO_XP_BAR_GRADIENT_COLORS)
     
@@ -41,6 +42,11 @@ function ZO_JournalProgressBook_Common:InitializeCategoryTemplates()
     self.parentCategoryTemplate = "ZO_IconHeader"
     self.childlessCategoryTemplate = "ZO_IconChildlessHeader"
     self.subCategoryTemplate = "ZO_JournalSubCategory"
+end
+
+function ZO_JournalProgressBook_Common:InitializeChildIndentAndSpacing()
+	self.childIndent = 60
+	self.childSpacing = 0
 end
 
 function ZO_JournalProgressBook_Common:InitializeFilters(filterData, startingStringId)
@@ -146,7 +152,7 @@ function ZO_JournalProgressBook_Common:InitializeCategories(control)
         control:SetText(data.name)
     end
 
-    self.categoryTree:AddTemplate(self.parentCategoryTemplate, TreeHeaderSetup_Child, nil, nil, 60, 0)
+    self.categoryTree:AddTemplate(self.parentCategoryTemplate, TreeHeaderSetup_Child, nil, nil, self.childIndent, self.childSpacing)
     self.categoryTree:AddTemplate(self.childlessCategoryTemplate, TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
     self.categoryTree:AddTemplate(self.subCategoryTemplate, TreeEntrySetup, TreeEntryOnSelected)
 

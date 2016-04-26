@@ -74,7 +74,6 @@ function WorldMapQuests_Gamepad:LayoutList()
 
         entryData:SetNameColors(questColor, questColor:Lerp(BLACK, 0.25))
         entryData:SetFontScaleOnSelection(false)
-        entryData:SetHeightScaleOnSelection(true)
 
         self.questList:AddEntry("ZO_GamepadSubMenuEntryTemplateWithStatusLowercase42", entryData)
     end

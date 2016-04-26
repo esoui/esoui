@@ -71,7 +71,6 @@ end
 
 function ZO_GamepadSocialDialogs:InitializeSocialOptionsDialog()
     local dialogName = "GAMEPAD_SOCIAL_OPTIONS_DIALOG"
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local finishedCallback = nil
 
@@ -85,7 +84,7 @@ function ZO_GamepadSocialDialogs:InitializeSocialOptionsDialog()
         setup = function(dialog)
             dialog.info.parametricList = dialog.data.parametricList
             finishedCallback = nil
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
         finishedCallback = function(dialog)
             if finishedCallback then
@@ -131,7 +130,7 @@ end
 
 function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
     local dialogName = "GAMEPAD_SOCIAL_EDIT_NOTE_DIALOG"
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
     {
@@ -140,8 +139,8 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
         canQueue = true,
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -155,16 +154,16 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
                 template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
                 templateData = {
                     nameField = true,
-                    textChangedCallback = function(control) 
-                        dialog.data.note = control:GetText()
-                    end,   
+                    textChangedCallback = function(control)
+                        parametricDialog.data.note = control:GetText()
+                    end,
 
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
-                        if dialog.data.note then
-                            control.editBoxControl:SetText(dialog.data.note)
+                        if parametricDialog.data.note then
+                            control.editBoxControl:SetText(parametricDialog.data.note)
                         end
                         data.control = control
                     end,
@@ -204,9 +203,6 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,
-                callback = function()
-                    ReleaseDialog(dialogName)
-                end,
             },
         }
     })
@@ -230,7 +226,6 @@ end
 
 function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
     local dialogName = "GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG"
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local nameText = ""
     local noteText = ""
@@ -255,7 +250,7 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
             templateData = {
                 textChangedCallback = function(control) 
                     nameText = control:GetText()
-                end,  
+                end,
                 setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                     control.highlight:SetHidden(not selected)
 
@@ -326,7 +321,7 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                             end
                         end
                     end
-                end,    
+                end,
                 callback = function(dialog)
                     SetActiveEdit(dialog)
                 end,
@@ -337,18 +332,18 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
     {
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
         canQueue = true,
-        setup = function()
+        setup = function(dialog)
             if dialog.data then
                 nameText = dialog.data.displayName
             else
                 nameText = ""
             end
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -390,7 +385,7 @@ end
 
 function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
     local dialogName = "GAMEPAD_SOCIAL_ADD_IGNORE_DIALOG"
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local nameText = ""
 
@@ -401,8 +396,8 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
         canQueue = true,
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
         title =
         {
@@ -424,8 +419,8 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
                         data.control = control
 
-                        if dialog.data and data.nameField then
-                            control.editBoxControl:SetText(dialog.data.displayName)
+                        if parametricDialog.data and data.nameField then
+                            control.editBoxControl:SetText(parametricDialog.data.displayName)
                         else
                             local validInput = IsValidInput(nameText)
                             if validInput then
@@ -437,7 +432,7 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                     end,
                     callback = function(dialog)
                         SetActiveEdit(dialog)
-                    end,  
+                    end,
                 },
             },
              -- ignore
@@ -490,8 +485,6 @@ end
 
 function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
     local dialogName = "GAMEPAD_GUILD_INVITE_DIALOG"
-
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     local nameText = ""
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
@@ -500,9 +493,9 @@ function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
-        setup = function()
+        setup = function(dialog)
             nameText = ""
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -529,7 +522,7 @@ function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
                         else
                             ZO_EditDefaultText_Initialize(control.editBoxControl, GetInviteInstructions())
                         end
-                    end,   
+                    end,
                     callback = function(dialog)
                         SetActiveEdit(dialog)
                     end,
@@ -586,19 +579,17 @@ end
 
 function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
     local dialogName = "GAMEPAD_GROUP_INVITE_DIALOG"
-
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     local nameText = ""
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
     {
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
-        setup = function()
+        setup = function(dialog)
             nameText = ""
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         title =
@@ -651,7 +642,7 @@ function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
                         return IsValidInput(nameText)
                     end,
                 }
-            },        
+            },
         },
         blockDialogReleaseOnPress = true,
         buttons =
@@ -710,7 +701,6 @@ local function ReportPlayerDefault(displayName)
 end
 
 function ZO_GamepadSocialDialogs:InitializeReportPlayerDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     local targetCharacterName = ""
     local targetDisplayName = ""
 
@@ -719,7 +709,7 @@ function ZO_GamepadSocialDialogs:InitializeReportPlayerDialog()
         setup = function(dialog, data)
                     targetCharacterName = data.characterName
                     targetDisplayName = data.displayName
-                    dialog.setupFunc(dialog)
+                    dialog:setupFunc()
                     ZO_GenericGamepadDialog_ShowTooltip(dialog)
                 end,
         gamepadInfo =
@@ -755,7 +745,7 @@ function ZO_GamepadSocialDialogs:InitializeReportPlayerDialog()
                 text =      SI_GAMEPAD_SELECT_OPTION,
                 callback =  function(dialog)
                                 local targetData = dialog.entryList:GetTargetData()
-                                if (targetData) and (targetData.callback) then
+                                if targetData and targetData.callback then
                                     targetData.callback(targetData)
                                     ZO_GenericGamepadDialog_HideTooltip(dialog)
                                 end

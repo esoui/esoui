@@ -10,12 +10,12 @@ local MIN_LEVEL_SLIDER_MODE = 1
 local MAX_LEVEL_SLIDER_MODE = 2
 
 local MINIMUM_PLAYER_LEVEL = 0
-local MINIMUM_VETERAN_RANK = 1
+local MINIMUM_CHAMPION_POINTS = 1
 local LEVEL_TYPES = 
 {
     { TRADING_HOUSE_FILTER_TYPE_ALL_LEVEL, nil, SI_GAMEPAD_TRADING_HOUSE_BROWSE_ALL_LEVEL },
     { TRADING_HOUSE_FILTER_TYPE_LEVEL, nil, SI_GAMEPAD_TRADING_HOUSE_BROWSE_PLAYER_LEVEL },
-    { TRADING_HOUSE_FILTER_TYPE_VETERAN_LEVEL, nil, SI_GAMEPAD_TRADING_HOUSE_BROWSE_VETEAN_LEVEL },
+    { TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS, nil, SI_GAMEPAD_TRADING_HOUSE_BROWSE_CHAMPION_POINTS },
 }
 
 local QUALITY_COLOR_INDEX = 1
@@ -293,16 +293,16 @@ function ZO_GamepadTradingHouse_Browse:SetLevelSlidersDisabled(disabled)
 end
 
 function ZO_GamepadTradingHouse_Browse:GetMinLevelCap()
-    if self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_VETERAN_LEVEL then
-        return MINIMUM_VETERAN_RANK
+    if self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS then
+        return MINIMUM_CHAMPION_POINTS
     else
         return MINIMUM_PLAYER_LEVEL
     end
 end 
 
 function ZO_GamepadTradingHouse_Browse:GetMaxLevelCap()
-    if self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_VETERAN_LEVEL then
-        return GetMaxVeteranRank()
+    if self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS then
+        return GetChampionPointsPlayerProgressionCap()
     else
         return GetMaxLevel()
     end

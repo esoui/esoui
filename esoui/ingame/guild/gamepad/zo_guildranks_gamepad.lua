@@ -277,10 +277,10 @@ end
 
 function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
     local dialogName = ADD_RANK_DIALOG_NAME
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local function UpdateSelectedName(name)
-        if(self.selectedName ~= name) then
+        if self.selectedName ~= name then
             self.selectedName = name
             self.noViolations = self.selectedName ~= "" and self.selectedName ~= nil
         end
@@ -302,12 +302,12 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
 
-        setup = function()
+        setup = function(dialog)
             self.noViolations = nil
             self.selectedRankIndex = nil
             self.selectedName = nil
             UpdateSelectedName("")
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         blockDialogReleaseOnPress = true, -- We'll handle Dialog Releases ourselves since we don't want DIALOG_PRIMARY to release the dialog on press.
@@ -323,13 +323,13 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                 template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
                 templateData = {
                     nameField = true,
-                    textChangedCallback = function(control) 
+                    textChangedCallback = function(control)
                         local newName = control:GetText()
                         if(self.selectedName ~= newName) then
                             UpdateSelectedName(newName)
-                            dialog.entryList:RefreshVisible()
+                            parametricDialog.entryList:RefreshVisible()
                         end
-                    end,   
+                    end,
                     
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
@@ -425,7 +425,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
-                callback = function()
+                callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
                     if(targetData.nameField and targetControl) then
@@ -449,7 +449,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                     end
                 end,
                 enabled = function()
-                    local targetData = dialog.entryList:GetTargetData()
+                    local targetData = parametricDialog.entryList:GetTargetData()
                     local enabled = true
 
                     if(targetData.finishedSelector) then
@@ -469,10 +469,10 @@ end
 
 function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
     local dialogName = GUILD_RENAME_RANK_GAMEPAD_DIALOG
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local function UpdateSelectedName(name)
-        if(self.selectedName ~= name) then
+        if self.selectedName ~= name then
             self.selectedName = name
             self.noViolations = self.selectedName ~= "" and self.selectedName ~= nil
         end
@@ -488,11 +488,11 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
 
-        setup = function()
+        setup = function(dialog)
             self.noViolations = nil
             self.selectedName = nil
             UpdateSelectedName(self.selectedRank:GetName())
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         blockDialogReleaseOnPress = true, -- We'll handle Dialog Releases ourselves since we don't want DIALOG_PRIMARY to release the dialog on press.
@@ -512,9 +512,9 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                         local newName = control:GetText()
                         if(self.selectedName ~= newName) then
                             UpdateSelectedName(newName)
-                            dialog.entryList:RefreshVisible()
+                            parametricDialog.entryList:RefreshVisible()
                         end
-                    end,   
+                    end,
                     
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
@@ -562,7 +562,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
-                callback = function()
+                callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
                     if(targetData.nameField and targetControl) then
@@ -577,7 +577,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                     end
                 end,
                 enabled = function()
-                    local targetData = dialog.entryList:GetTargetData()
+                    local targetData = parametricDialog.entryList:GetTargetData()
                     local enabled = true
 
                     if(targetData.finishedSelector) then

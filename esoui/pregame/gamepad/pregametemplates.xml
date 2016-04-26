@@ -54,8 +54,9 @@
                 ZO_PregameGamepadButtonWithIconAndTextTemplate_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Label" font="ZoFontGamepad34" verticalAlignment="CENTER" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" offsetX="5" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
+                    <Anchor point="TOPLEFT" offsetX="25" />
+                    <Anchor point="TOPRIGHT" />
                 </Label>
             </Controls>
         </Control>

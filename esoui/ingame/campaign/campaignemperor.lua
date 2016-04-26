@@ -85,6 +85,14 @@ function ZO_CampaignEmperor_DropdownClicked(control)
     CAMPAIGN_EMPEROR:OnDropdownClicked(control)
 end
 
+function ZO_CampaignEmperorName_OnMouseEnter(control)
+    ZO_SocialListKeyboard.CharacterName_OnMouseEnter(CAMPAIGN_EMPEROR, control)
+end
+
+function ZO_CampaignEmperorName_OnMouseExit(control)
+     ZO_SocialListKeyboard.CharacterName_OnMouseExit(CAMPAIGN_EMPEROR, control)
+end
+
 function ZO_CampaignEmperor_OnInitialized(self)
     CAMPAIGN_EMPEROR = CampaignEmperor:New(self)
 end

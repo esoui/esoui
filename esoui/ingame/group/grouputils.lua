@@ -1,3 +1,10 @@
+--Used in the group election system to determine what system requested the election, if relevant
+ZO_GROUP_ELECTION_DESCRIPTORS =
+{
+    NONE = "[ZO_NONE]",
+    READY_CHECK = "[ZO_READY_CHECK]",
+}
+
 local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, displayInvitedMessage)
     local isLeader = IsUnitGroupLeader("player")
     local groupSize = GetGroupSize()
@@ -9,7 +16,7 @@ local function CompleteGroupInvite(characterOrDisplayName, sentFromChat, display
 
         ZO_Menu_SetLastCommandWasFromMenu(not sentFromChat)
         if displayInvitedMessage then
-            ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingDisplayName(characterOrDisplayName)))
+            ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)))
         end
     end
 end
@@ -74,4 +81,19 @@ function ZO_GetEffectiveDungeonDifficulty()
     else
         return ZO_GetPlayerDungeonDifficulty()
     end
+end
+
+function ZO_IsGroupElectionTypeCustom(electionType)
+    return electionType == GROUP_ELECTION_TYPE_GENERIC_SIMPLEMAJORITY or electionType == GROUP_ELECTION_TYPE_GENERIC_SUPERMAJORITY or electionType == GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS
+end
+
+function ZO_GetSimplifiedGroupElectionResultType(resultType)
+    if resultType == GROUP_ELECTION_RESULT_TIED or resultType == GROUP_ELECTION_RESULT_TIMED_OUT then
+        return GROUP_ELECTION_RESULT_ELECTION_LOST
+    end
+    return resultType
+end
+
+function ZO_SendReadyCheck()
+    BeginGroupElection(GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS, ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK)
 end

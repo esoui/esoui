@@ -172,7 +172,14 @@ function ZO_StoreManager:New(container)
     end
 
     local function CloseStoreWindow()
-        SCENE_MANAGER:Hide("store")
+        if not IsInGamepadPreferredMode() then
+            -- Ensure that all dialogs related to the store also close when interaction ends
+            ZO_Dialogs_ReleaseDialog("REPAIR_ALL")
+            ZO_Dialogs_ReleaseDialog("BUY_MULTIPLE")
+            ZO_Dialogs_ReleaseDialog("SELL_ALL_JUNK")
+
+            SCENE_MANAGER:Hide("store")
+        end
     end
 
     local function RefreshStoreWindow()

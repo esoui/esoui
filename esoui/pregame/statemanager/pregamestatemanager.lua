@@ -251,7 +251,14 @@ local PregameStates =
             
             -- TODO: Determine if these videos need localization or subtitles...
             SetVideoCancelAllOnCancelAny(false)
+            local serviceType = GetPlatformServiceType()
+
             PlayVideo("Video/Bethesda_logo.bik", QUEUE_VIDEO, skipMode)
+
+            if serviceType == PLATFORM_SERVICE_TYPE_DMM then
+                PlayVideo("Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
+            end
+
             ZO_PlayVideoAndAdvance("Video/ZOS_logo.bik", QUEUE_VIDEO, skipMode)
         end,
 

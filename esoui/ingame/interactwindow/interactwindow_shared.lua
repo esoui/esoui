@@ -16,24 +16,27 @@ local COST_OPTION_TO_PROMPT_TITLE =
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = GetString(SI_PAY_FOR_CONVERSATION_GIVE_TITLE),
 }
 
-local CHATTER_OPTION_ERROR =
+CHATTER_OPTION_ERROR =
 {
     [CHATTER_TALK_CHOICE_MONEY] = SI_ERROR_CANT_AFFORD_OPTION,
     [CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED] = SI_ERROR_NEED_INTIMIDATE,
     [CHATTER_TALK_CHOICE_PERSUADE_DISABLED] = SI_ERROR_NEED_PERSUADE,
     [CHATTER_GUILDKIOSK_IN_TRANSITION] = SI_INTERACT_TRADER_BIDDING_CLOSED_DURING_BID_TRANSITIONING_PERIOD,
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = SI_ERROR_CANT_AFFORD_OPTION,
+    [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED] = SI_ERROR_NEED_CLEMENCY,
+    [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN] = SI_ERROR_CLEMENCY_ON_COOLDOWN,
 }
 
 --Event Handlers
 ----------------
 
 local function OnQuestCompleteFailedInventoryFull()
-    TriggerTutorial(TUTORIAL_TRIGGER_QUEST_COMPLETE_INVENTORY_FULL)
+    TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
 end
 
 local function OnConversationFailedInventoryFull()
+    TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
 end
 
@@ -55,7 +58,7 @@ end
 local function ContextFilter(object, callback)
     -- This will wrap the callback so that it gets called with the control
     return function(...)
-        local obj = SYSTEMS:GetObjectBasedOnCurrentScene(ZO_INTERACTION_SYSTEM_NAME)
+        local obj = SYSTEMS:GetObject(ZO_INTERACTION_SYSTEM_NAME)
 
         if (obj == object) then
             callback(...)
@@ -245,6 +248,8 @@ local OPTION_TO_ICON =
     [CHATTER_TALK_CHOICE_MONEY]                 = "EsoUI/Art/Interaction/ConversationWithCost.dds",
     [CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED]   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_TALK_CHOICE_PERSUADE_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
+    [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
+    [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_START_NEW_QUEST_BESTOWAL]          = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_START_COMPLETE_QUEST]              = "EsoUI/Art/Interaction/QuestCompleteAvailable.dds",
     [CHATTER_START_GIVE_ITEM]                   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
@@ -257,6 +262,28 @@ local OPTION_TO_ICON =
 
 local function UpdateFleeChatterOption(self)
     self:SetText(zo_strformat(SI_INTERACT_OPTION_FLEE_ARREST, GetSecondsUntilArrestTimeout()))
+end
+
+function ZO_SharedInteraction:UpdateClemencyChatterOption(control, data)
+    local clemencyTimeRemaningSeconds = GetTimeToClemencyResetInSeconds()
+
+    if clemencyTimeRemaningSeconds == 0 and not data.optionUsable then
+        self:UpdateClemencyOnTimeComplete(control, data)
+    elseif clemencyTimeRemaningSeconds > 0 then
+        local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_CLEMENCY_COOLDOWN, control.optionText, ZO_FormatTimeLargestTwo(clemencyTimeRemaningSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+        control:SetText(formattedString)
+    end
+end
+
+function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, data)
+    local timeRemaining = GetTimeToShadowyConnectionsResetInSeconds()
+
+    if timeRemaining == 0 and not data.optionUsable then
+        self:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    elseif timeRemaining > 0 then
+        local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_SHADOWY_CONNECTIONS_COOLDOWN, control.optionText, ZO_FormatTimeLargestTwo(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+        control:SetText(formattedString)
+    end
 end
 
 function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
@@ -302,9 +329,33 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             end
         elseif(optionType == CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED 
             or optionType == CHATTER_TALK_CHOICE_PERSUADE_DISABLED
+            or optionType == CHATTER_TALK_CHOICE_CLEMENCY_DISABLED
             or optionType == CHATTER_GUILDKIOSK_IN_TRANSITION) then
             chatterData.optionUsable = false
             chatterData.recolorIfUnusable = false
+        elseif optionType == CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN then
+            local clemencyTimeRemaningSeconds = GetTimeToClemencyResetInSeconds()
+
+            if clemencyTimeRemaningSeconds <= 0 then
+                chatterData.optionUsable = true
+            else
+                chatterData.labelUpdateFunction = function(control) 
+                                                    self:UpdateClemencyChatterOption(control, chatterData)
+                                                  end
+                chatterData.optionUsable = false
+            end
+        elseif optionType == CHATTER_TALK_CHOICE_SHADOWY_CONNECTIONS_UNAVAILABLE then
+            local timeRemaining = GetTimeToShadowyConnectionsResetInSeconds()
+
+            if timeRemaining <= 0 then
+                -- We're not on cooldown, but the option is otherwise unusable (most likely, the player hasn't unlocked this passive)
+                chatterData.optionUsable = false
+            else
+                chatterData.labelUpdateFunction = function(control) 
+                                                    self:UpdateShadowyConnectionsChatterOption(control, chatterData)
+                                                  end
+                chatterData.optionUsable = false
+            end
         end
 
         chatterData.iconFile = OPTION_TO_ICON[optionType]
@@ -332,7 +383,7 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     optionCount = optionCount + 1
     self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
     
-    if IsInteractingWithAssistant() then
+    if IsInteractingWithMyAssistant() then
         local assistantName = GetCollectibleName(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
         farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, assistantName)
         optionCount = optionCount + 1
@@ -535,3 +586,10 @@ function ZO_SharedInteraction:ShowQuestRewards(journalQuestIndex)
     -- Should be overridden
 end
 
+function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
+    --Should be overridden
+end
+
+function ZO_SharedInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    --Should be overridden
+end

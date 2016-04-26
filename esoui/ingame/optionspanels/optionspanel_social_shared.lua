@@ -141,9 +141,13 @@ do
     function ZO_OptionsPanel_Social_InitializeTextSizeControl(control)
         local data = control.data
         GetControl(control, "Name"):SetText(GetString(data.text))
-        GetControl(control, "Slider"):SetMinMax(data.minValue, data.maxValue)
-        GetControl(control, "Slider"):SetValueStep(1)
-        GetControl(control, "Slider"):SetHandler("OnValueChanged", OnSliderChanged)
+        local slider = GetControl(control, "Slider")
+        --Need to override the existing value changed handler first so it doesn't run when we do the SetMinMax
+        slider:SetHandler("OnValueChanged", nil)
+        slider:SetMinMax(data.minValue, data.maxValue)
+        slider:SetValueStep(1)
+        slider:SetValue(GetChatFontSize())
+        slider:SetHandler("OnValueChanged", OnSliderChanged)
     end
 end
 

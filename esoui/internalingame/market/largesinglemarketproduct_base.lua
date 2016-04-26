@@ -8,8 +8,6 @@ ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y = -20
 --account for the fade that we add to the sides of the callout
 ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
 
-local SINGLE_ITEM_COUNT = 1
-
 --
 --[[ ZO_LargeSingleMarketProduct_Base ]]--
 --
@@ -69,22 +67,21 @@ function ZO_LargeSingleMarketProduct_Base:SetHidden(hidden)
 end
 
 function ZO_LargeSingleMarketProduct_Base:GetBackground()
-    local productId = self:GetId()
-    return GetMarketProductGamepadBackground(productId)
+    return GetMarketProductGamepadBackground(self.marketProductId)
 end
 
 function ZO_LargeSingleMarketProduct_Base:GetStackCount()
-    if not self:IsBundle() then
-        return select(6, GetMarketProductItemInfo(self.marketProductId, 1))
+    if self:GetProductType() == MARKET_PRODUCT_TYPE_ITEM then
+        return GetMarketProductItemStackCount(self.marketProductId)
     else
-        return SINGLE_ITEM_COUNT
+        return 1
     end
 end
 
 function ZO_LargeSingleMarketProduct_Base:SetTitle(title)
     local formattedTitle = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
     local stackCount = self:GetStackCount()
-    if stackCount > SINGLE_ITEM_COUNT then
+    if stackCount > 1 then
         formattedTitle = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, formattedTitle, stackCount)
     end
 
@@ -92,20 +89,21 @@ function ZO_LargeSingleMarketProduct_Base:SetTitle(title)
 end
 
 do
-    local BLANK_HINT = ""
+    local NO_CATEGORY_NAME = nil
+    local NO_NICKNAME = nil
     local IS_PURCHASEABLE = true
-    local SINGLE_PRODUCT_INDEX = 1
+    local BLANK_HINT = ""
     function ZO_LargeSingleMarketProduct_Base:Show(...)
         ZO_MarketProductBase.Show(self, ...)
         self:UpdateProductStyle()
 
-        self.isCollectible = (not self:IsBundle()) and GetMarketProductNumCollectibles(self.marketProductId) > 0
-        if self.isCollectible then
-            local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId(), SINGLE_PRODUCT_INDEX)
+        local productType = self:GetProductType()
+        if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+            local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
             local unlockState = GetCollectibleUnlockStateById(collectibleId)
-            self.tooltipLayoutArgs = { categoryName, name, nil, unlockState, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder }
-        elseif not self:IsBundle() then
-            self.itemLink = GetMarketProductItemLink(self:GetId(), SINGLE_PRODUCT_INDEX)
+            self.tooltipLayoutArgs = { NO_CATEGORY_NAME, name, NO_NICKNAME, unlockState, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder }
+        elseif productType == MARKET_PRODUCT_TYPE_ITEM then
+            self.itemLink = GetMarketProductItemLink(self:GetId())
         end
     end
 end
@@ -121,15 +119,13 @@ function ZO_LargeSingleMarketProduct_Base:Reset()
     ZO_MarketProductBase.Reset(self)
     self.itemLink = nil
     self.layoutArgs = nil
-    self.isCollectible = false
 end
 
 function ZO_LargeSingleMarketProduct_Base:LayoutTooltip(tooltip)
-    if self:IsBundle() then
-        GAMEPAD_TOOLTIPS:LayoutMarketProduct(tooltip, self)
-    elseif self.isCollectible then
+    local productType = self:GetProductType()
+    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
         GAMEPAD_TOOLTIPS:LayoutCollectible(tooltip, unpack(self.tooltipLayoutArgs))
-    elseif GetMarketProductNumItems(self.marketProductId) > 0 then
+    elseif productType == MARKET_PRODUCT_TYPE_ITEM then
         local stackCount = self:GetStackCount()
         GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(tooltip, self.itemLink, stackCount)
     else

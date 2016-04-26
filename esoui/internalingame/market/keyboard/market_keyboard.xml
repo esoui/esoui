@@ -139,18 +139,25 @@
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)EntryList" />
                             
                             <Controls>
-                                <Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE">
+                                <Control name="$(parent)MembershipInfo" resizeToFitDescendents="true">
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="TOPRIGHT" />
-                                </Label>
-
-                                <Control name="$(parent)MembershipInfo" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
                                     
                                     <Controls>
-                                        <Label name="$(parent)Label" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL">
-                                            <Anchor point="TOPLEFT"/>
+                                        <Texture name="$(parent)Banner">
+                                            <Dimensions x="636" y="150" />
+                                            <!-- 1024x256 image cropped to 636x150 -->
+                                            <TextureCoords left="0" right="0.62109375" top="0" bottom="0.5859375"/>
+                                            <Anchor point="TOPLEFT" />
+                                        </Texture>
+                                        
+                                        <Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Banner" offsetX="140" offsetY="45" />
+                                            <Anchor point="TOPRIGHT" offsetY="45" />
+                                        </Label>
+                                        
+                                        <Label name="$(parent)Label" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL" modifyTextType="UPPERCASE">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
                                         </Label>
 
                                         <Label name="$(parent)Status" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
@@ -165,19 +172,13 @@
                                 </Label>
                                 
                                 <Control name="$(parent)Benefits" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="40" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="30" />
                                     
                                     <Controls>
-                                        <Texture name="$(parent)Image" hidden="true">
-                                            <!-- Hide the image for now -->
-                                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
-                                            <Anchor point="TOPRIGHT" />
-                                        </Texture>
-                                        
                                         <Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE">
                                             <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetX="-5" />
+                                            <Anchor point="TOPRIGHT" />
                                         </Label>
                                         
                                         <Label name="$(parent)Text" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
@@ -221,9 +222,11 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)RotationArea" mouseEnabled="true" tier="HIGH">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="300" offsetY="100" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-1020" offsetY="-85" />
+                <!-- Control is given level 1 so that we can click the next/previous buttons to change between preview states -->
+                <Control name="$(parent)RotationArea" mouseEnabled="true" level="1">
+                    <!-- Position this control so it's roughly centered over the player character -->
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="285" offsetY="100" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-1035" offsetY="-85" />
 
                     <OnMouseEnter>
                         self.mouseInside = true
@@ -268,6 +271,39 @@
                         end
                     </OnUpdate>
                 </Control>
+
+                <Label name="$(parent)VariationLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" level="2" hidden="true">
+                    <Dimensions x="350"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)RotationArea" offsetY="-90" />
+                </Label>
+                
+                <Button name="$(parent)PreviewVariationLeftArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)VariationLabel" relativePoint="LEFT" offsetX="-16" />
+                    <Textures
+                        normal="EsoUI/Art/Crafting/smithing_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Crafting/smithing_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Crafting/smithing_leftArrow_over.dds"
+                    />
+
+                    <OnClicked>
+                        ZO_Market_PreviewArrowOnMouseClicked(self, ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS)
+                    </OnClicked>
+                </Button>
+                
+                <Button name="$(parent)PreviewVariationRightArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)VariationLabel" relativePoint="RIGHT" offsetX="16" />
+                    <Textures
+                        normal="EsoUI/Art/Crafting/smithing_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Crafting/smithing_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Crafting/smithing_rightArrow_over.dds"
+                    />
+
+                    <OnClicked>
+                        ZO_Market_PreviewArrowOnMouseClicked(self, ZO_MARKET_PREVIEW_DIRECTION_NEXT)
+                    </OnClicked>
+                </Button>
 
             </Controls>
         </TopLevelControl>

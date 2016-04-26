@@ -413,7 +413,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Buckets" offsetX="20" offsetY="88" />
                     <Dimensions x="370"/>
                     <Controls>
-                        <EditBox name="$(parent)Name" inherits="ZO_DefaultEditForDarkBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" textType="ALPHABETIC" maxInputCharacters="CHARNAME_MAX_LENGTH">
+                        <EditBox name="$(parent)Name" inherits="ZO_DefaultEditForDarkBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" textType="ALPHABETIC_NO_FULLWIDTH_LATIN" maxInputCharacters="CHARNAME_MAX_LENGTH">
                             <OnTextChanged>
                                 ZO_CharacterCreate_CheckEnableCreateButton(self)
                             </OnTextChanged>

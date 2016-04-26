@@ -50,7 +50,7 @@
 
         <Control name="ZO_ActivityFinderTemplateRewardTemplate_Keyboard" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" maxLineCount="2" font="ZoFontWinH2">
+                <Label name="$(parent)Text" font="ZoFontWinH2">
                     <Dimensions x="220" />
                 </Label>
             </Controls>
@@ -95,8 +95,23 @@
 
         <TopLevelControl name="ZO_ActivityFinderTemplateTopLevel_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true" virtual="true">
             <Controls>
+                <Button name="$(parent)QueueButton" inherits="ZO_DefaultButton" text="SI_LFG_JOIN_QUEUE">
+                    <Dimensions x="200" />
+                    <Anchor point="BOTTOM" />
+
+                    <OnClicked>
+                        ZO_ActivityFinderTemplateQueueButtonKeyboard_OnClicked(self, button)
+                    </OnClicked>
+                </Button>
+
+                <Label name="$(parent)LockReason" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="600" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)QueueButton" relativePoint="TOP" offsetY="-10" />
+                </Label>
+                
                 <Control name="$(parent)SingularSection" inherits="ZO_ActivityFinderSingularTemplate_Shared">
                     <AnchorFill />
+                    
                     <Controls>
                         <Texture name="$(parent)Background" override="true" level="2" alpha="0.64">
                             <Dimensions y="512" />
@@ -146,7 +161,7 @@
 
                 <Control name="$(parent)ListSection" inherits="ZO_ScrollContainer" hidden="true">
                     <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetY="-70" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-100" />
                 </Control>
 
                 <Control name="$(parent)LFMPromptSection" hidden="true">
@@ -187,23 +202,6 @@
                     <Dimensions x="300" y="33" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7" />
                 </Control>
-
-                <Label name="$(parent)NotLeader" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" text="SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT" hidden="true">
-                    <Anchor point="TOP" offsetY="50" />
-                </Label>
-
-                <Button name="$(parent)QueueButton" inherits="ZO_DefaultButton" text="SI_LFG_JOIN_QUEUE">
-                    <Anchor point="BOTTOM" />
-                    
-                    <OnClicked>
-                        ZO_ActivityFinderTemplateQueueButtonKeyboard_OnClicked(self, button)
-                    </OnClicked>
-                </Button>
-
-                <Label name="$(parent)LockReason" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
-                    <Dimensions x="600" />
-                    <Anchor point="BOTTOM" relativeTo="$(parent)QueueButton" relativePoint="TOP" offsetY="-10" />
-                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

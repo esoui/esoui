@@ -33,8 +33,7 @@
                             <Controls>
                                 <Control name="$(parent)ItemReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared">
                                     <Controls>
-                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/LFG/LFG_bonus_crate.dds" />
-                                        <Label name="$(parent)Text" override="true" />
+                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/LFG/LFG_bonus_letter.dds" />
                                     </Controls>
                                 </Control>
 
@@ -47,7 +46,7 @@
                                     <Anchor point="LEFT" relativeTo="$(parent)Padding" relativePoint="RIGHT" />
                                     
                                     <Controls>
-                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/LFG/LFG_bonus_XP.dds" />
+                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Icons/Icon_Experience.dds" />
                                     </Controls>
                                 </Control>
                             </Controls>

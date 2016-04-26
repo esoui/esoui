@@ -78,6 +78,8 @@ function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, a
     ZO_ScrollTooltip_Gamepad:Initialize(container.tip, ZO_TOOLTIP_STYLES)
     container.statusLabel = container:GetNamedChild("StatusLabel")
     container.statusLabelValue = container:GetNamedChild("StatusLabelValue")
+	container.statusLabelValueForVisualLayer = container:GetNamedChild("StatusLabelValueForVisualLayer")
+	container.statusLabelVisualLayer = container:GetNamedChild("StatusLabelVisualLayer")
     container.bottomRail = container:GetNamedChild("BottomRail")
     control.container = container
 
@@ -119,14 +121,19 @@ function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, a
     self:SetScrollIndicatorSide(tooltipType, scrollIndicatorSide)
 end
 
-function ZO_GamepadTooltip:ClearTooltip(tooltipType)
+--Set retainFragment to true if you intend to re-layout this tooltip immediately after calling ClearTooltip
+--This saves us the performance cost of removing the fragment just to add it right back in again
+--Particularly when done in an update loop
+function ZO_GamepadTooltip:ClearTooltip(tooltipType, retainFragment)
     local tooltipContainer = self:GetTooltipContainer(tooltipType)
     if tooltipContainer then
         local tooltipInfo = self:GetTooltipInfo(tooltipType)
         tooltipContainer.tip:ClearLines(tooltipInfo.resetScroll)
-        SCENE_MANAGER:RemoveFragment(self:GetTooltipFragment(tooltipType))
-        if self:DoesAutoShowTooltipBg(tooltipType) then
-            SCENE_MANAGER:RemoveFragment(self:GetTooltipBgFragment(tooltipType))
+        if not retainFragment then
+            SCENE_MANAGER:RemoveFragment(self:GetTooltipFragment(tooltipType))
+            if self:DoesAutoShowTooltipBg(tooltipType) then
+                SCENE_MANAGER:RemoveFragment(self:GetTooltipBgFragment(tooltipType))
+            end
         end
         self:ClearStatusLabel(tooltipType)
     end
@@ -143,20 +150,31 @@ function ZO_GamepadTooltip:ClearStatusLabel(tooltipType)
     self:SetStatusLabelText(tooltipType)
 end
 
-function ZO_GamepadTooltip:SetStatusLabelText(tooltipType, stat, value)
+function ZO_GamepadTooltip:SetStatusLabelText(tooltipType, stat, value, visualLayer)
     if stat == nil then stat = "" end
     if value == nil then value = "" end
+	if visualLayer == nil then visualLayer = "" end
     
     local tooltipContainer = self:GetTooltipContainer(tooltipType)
     if tooltipContainer then
         tooltipContainer.statusLabel:SetText(stat)
-        tooltipContainer.statusLabelValue:SetText(value)
+
+		if visualLayer ~= "" then
+			tooltipContainer.statusLabelValueForVisualLayer:SetText(value)		
+		else
+			tooltipContainer.statusLabelValue:SetText(value)
+		end
+
+		tooltipContainer.statusLabelVisualLayer:SetText(visualLayer)
         
-        local hidden = stat == "" and value == ""
+        local hidden = stat == "" and value == "" and visualLayer == ""
         
         tooltipContainer.statusLabel:SetHidden(hidden)
-        tooltipContainer.statusLabelValue:SetHidden(hidden)
+		tooltipContainer.statusLabelVisualLayer:SetHidden(hidden)
         tooltipContainer.bottomRail:SetHidden(hidden)
+
+		tooltipContainer.statusLabelValue:SetHidden(hidden or (visualLayer ~= ""))
+		tooltipContainer.statusLabelValueForVisualLayer:SetHidden(hidden or (visualLayer == ""))
     end
 end
 

@@ -387,9 +387,9 @@ end
 
 function ZO_TradingHouseManager:ToggleLevelRangeMode()
     if(self.m_levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_LEVEL) then
-        self.m_levelRangeFilterType = TRADING_HOUSE_FILTER_TYPE_VETERAN_LEVEL
+        self.m_levelRangeFilterType = TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS
         self.m_levelRangeToggle:SetState(BSTATE_PRESSED, true)
-        self.m_levelRangeLabel:SetText(GetString(SI_TRADING_HOUSE_BROWSE_VETERAN_RANK_RANGE_LABEL))
+        self.m_levelRangeLabel:SetText(GetString(SI_TRADING_HOUSE_BROWSE_CHAMPION_POINTS_RANGE_LABEL))
     else
         self.m_levelRangeFilterType = TRADING_HOUSE_FILTER_TYPE_LEVEL
         self.m_levelRangeToggle:SetState(BSTATE_NORMAL, false)
@@ -787,6 +787,9 @@ function ZO_TradingHouseManager:AddGuildSpecificItems(ignoreFiltering)
     self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
 
     ZO_ScrollList_Commit(list)
+
+    -- refresh the keybinds because it's not going to be refreshed by an event like the normal searches
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_TradingHouseManager:OnSearchResultsReceived(guildId, numItemsOnPage, currentPage, hasMorePages)

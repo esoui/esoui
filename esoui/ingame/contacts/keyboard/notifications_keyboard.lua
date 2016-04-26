@@ -16,6 +16,8 @@ local KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_COLLECTIONS] = "EsoUI/Art/Notifications/notificationIcon_collections.dds",
     [NOTIFICATION_TYPE_LFG] = "EsoUI/Art/Notifications/notificationIcon_group.dds",
     [NOTIFICATION_TYPE_POINTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
+    [NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
+    [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
 }
 
 -- Provider Overrides
@@ -29,10 +31,6 @@ local ZO_KeyboardFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
 function ZO_KeyboardFriendRequestProvider:New(notificationManager)
     local provider = ZO_FriendRequestProvider.New(self, notificationManager)
     return provider
-end
-
-function ZO_KeyboardFriendRequestProvider:CreateMessage(displayName)
-    return zo_strformat(SI_FRIEND_REQUEST_MESSAGE, displayName)
 end
 
 function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybind)
@@ -99,97 +97,8 @@ function ZO_KeyboardCampaignQueueProvider:New(notificationManager)
     return provider
 end
 
-function ZO_KeyboardCampaignQueueProvider:CreateMessageFormat(isGroup)
-    return isGroup and SI_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL
-end
-
-function ZO_KeyboardCampaignQueueProvider:CreateLoadText()
-    return GetString(SI_CAMPAIGN_ENTER_MESSAGE)
-end
-
 function ZO_KeyboardCampaignQueueProvider:Accept(data)
     CAMPAIGN_BROWSER:GetCampaignBrowser():ShowCampaignQueueReadyDialog(data.campaignId, data.isGroup, data.campaignName)
-end
-
---Resurrect Provider
--------------------------
-local ZO_KeyboardResurrectProvider = ZO_ResurrectProvider:Subclass()
-
-function ZO_KeyboardResurrectProvider:New(notificationManager)
-    local provider = ZO_ResurrectProvider.New(self, notificationManager)
-    return provider
-end
-
-function ZO_KeyboardResurrectProvider:GetMessageFormat()
-    return SI_RESURRECT_MESSAGE
-end
-
-function ZO_KeyboardResurrectProvider:GetNameToShow(resurrectRequesterCharacterName, resurrectRequesterDisplayName)
-    return resurrectRequesterCharacterName
-end
-
---Group Invite Provider
--------------------------
-local ZO_KeyboardGroupInviteProvider = ZO_GroupInviteProvider:Subclass()
-
-function ZO_KeyboardGroupInviteProvider:New(notificationManager)
-    local provider = ZO_GroupInviteProvider.New(self, notificationManager)
-    return provider
-end
-
-function ZO_KeyboardGroupInviteProvider:CreateMessage(inviterName)
-    return zo_strformat(SI_GROUP_INVITE_MESSAGE, inviterName)
-end
-
-
---Trade Invite Provider
--------------------------
-
-local ZO_KeyboardTradeInviteProvider = ZO_TradeInviteProvider:Subclass()
-
-function ZO_KeyboardTradeInviteProvider:New(notificationManager)
-    local provider = ZO_TradeInviteProvider.New(self, notificationManager)
-    return provider
-end
-
-function ZO_KeyboardTradeInviteProvider:CreateMessage(inviterName)
-    return zo_strformat(SI_TRADE_INVITE_MESSAGE, inviterName)
-end
-
-
-
---Quest Share Provider
--------------------------
-
-local ZO_KeyboardQuestShareProvider = ZO_QuestShareProvider:Subclass()
-
-function ZO_KeyboardQuestShareProvider:New(notificationManager)
-    local provider = ZO_QuestShareProvider.New(self, notificationManager)
-    return provider
-end
-
-function ZO_KeyboardQuestShareProvider:CreateMessage(characterName, displayName, questName)
-    return zo_strformat(SI_QUEST_SHARE_MESSAGE, characterName, questName)
-end
-
-
-
---Pledge of Mara Provider
--------------------------
-
-local ZO_KeyboardPledgeOfMaraProvider = ZO_PledgeOfMaraProvider:Subclass()
-
-function ZO_KeyboardPledgeOfMaraProvider:New(notificationManager)
-    local provider = ZO_PledgeOfMaraProvider.New(self, notificationManager)
-    return provider
-end
-
-function ZO_KeyboardPledgeOfMaraProvider:CreateMessage(targetName)
-    return zo_strformat(SI_PLEDGE_OF_MARA_MESSAGE, targetName)
-end
-
-function ZO_KeyboardPledgeOfMaraProvider:CreateSenderMessage(targetName)
-    return zo_strformat(SI_PLEDGE_OF_MARA_SENDER_MESSAGE, targetName)
 end
 
 -- CS Chat Request Provider
@@ -224,27 +133,30 @@ function ZO_KeyboardLeaderboardRaidProvider:ShowMessageTooltip(data, control)
     local friendsSection = {}
 
     for memberIndex = 1, numMembers do
-        local displayName, characterName, isFriend, isGuildMember = GetRaidScoreNotificationMemberInfo(data.notificationId, memberIndex)
-        if isGuildMember then
-            table.insert(guildMembersSection, displayName)
-        elseif isFriend then
-            table.insert(friendsSection, displayName)
-        end
-    end
-
-    if #guildMembersSection > 0 then
-        InformationTooltip:AddLine(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS))
-        for _, guildMemberName in ipairs(guildMembersSection) do
-            InformationTooltip:AddVerticalPadding(-9)
-            InformationTooltip:AddLine(guildMemberName, "", ZO_NORMAL_TEXT:UnpackRGB())
+        local displayName, characterName, isFriend, isGuildMember, isPlayer = GetRaidScoreNotificationMemberInfo(data.notificationId, memberIndex)
+        
+        if not isPlayer then
+            if isFriend then
+                table.insert(friendsSection, displayName)
+            elseif isGuildMember then
+                table.insert(guildMembersSection, displayName)
+            end
         end
     end
 
     if #friendsSection > 0 then
-        InformationTooltip:AddLine(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS))
+        InformationTooltip:AddLine(zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_FRIENDS), #friendsSection))
         for _, friendName in ipairs(friendsSection) do
             InformationTooltip:AddVerticalPadding(-9)
             InformationTooltip:AddLine(friendName, "", ZO_NORMAL_TEXT:UnpackRGB())
+        end
+    end
+    
+    if #guildMembersSection > 0 then
+        InformationTooltip:AddLine(zo_strformat(GetString(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_HEADER_GUILD_MEMBERS), #guildMembersSection))
+        for _, guildMemberName in ipairs(guildMembersSection) do
+            InformationTooltip:AddVerticalPadding(-9)
+            InformationTooltip:AddLine(guildMemberName, "", ZO_NORMAL_TEXT:UnpackRGB())
         end
     end
 end
@@ -287,33 +199,6 @@ function ZO_KeyboardCollectionsUpdateProvider:ShowMoreInfo(entryData)
     end
 end
 
-
---LFG Update Provider
--------------------------
-
-local ZO_KeyboardLFGUpdateProvider = ZO_LFGUpdateProvider:Subclass()
-
-function ZO_KeyboardLFGUpdateProvider:New(notificationManager)
-    return ZO_LFGUpdateProvider.New(self, notificationManager)
-end
-
-function ZO_KeyboardLFGUpdateProvider:GetMessageFormat()
-    return SI_LFG_JUMP_TO_DUNGEON_TEXT
-end
-
-do
-    local ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_dps_up.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_healer_up.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_tank_up.dds",
-    }
-    
-    function ZO_KeyboardLFGUpdateProvider:GetRoleIcon(role)
-        return ROLE_TO_ICON[role]
-    end
-end
-
-
 --Notification Manager
 -------------------------
 
@@ -325,13 +210,18 @@ end
 
 function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     self.sortFilterList = ZO_NotificationList:New(control)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", 50, function(control, data) self:SetupRequest(control, data) end)
+    local function SetupRequest(...)
+        self:SetupRequest(...)
+    end
+
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", 50, function(control, data) self:SetupWaiting(control, data) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", 50, function(control, data) self:SetupTwoButtonRow(control, data) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", 50, function(control, data) self:SetupAlert(control, data) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", 50, function(control, data) self:SetupCollectibleRow(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA, "ZO_NotificationsLFGJumpDungeonRow", 50, function(control, data) self:SetupRequest(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", 50, function(control, data) self:SetupRequest(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA, "ZO_NotificationsLFGJumpDungeonRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", 50, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -347,16 +237,18 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_KeyboardGuildInviteProvider:New(self),
         ZO_GuildMotDProvider:New(self),
         ZO_KeyboardCampaignQueueProvider:New(self),
-        ZO_KeyboardResurrectProvider:New(self),
-        ZO_KeyboardGroupInviteProvider:New(self),
-        ZO_KeyboardTradeInviteProvider:New(self),
-        ZO_KeyboardQuestShareProvider:New(self),
+        ZO_ResurrectProvider:New(self),
+        ZO_GroupInviteProvider:New(self),
+        ZO_GroupElectionProvider:New(self),
+        ZO_TradeInviteProvider:New(self),
+        ZO_QuestShareProvider:New(self),
         ZO_PointsResetProvider:New(self, "keyboard"),
-        ZO_KeyboardPledgeOfMaraProvider:New(self),
+        ZO_PledgeOfMaraProvider:New(self),
         ZO_KeyboardAgentChatRequestProvider:New(self),
         ZO_KeyboardLeaderboardRaidProvider:New(self),
         collectionsProvider,
-        ZO_KeyboardLFGUpdateProvider:New(self),
+        ZO_LFGUpdateProvider:New(self),
+        ZO_CraftBagAutoTransferProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))

@@ -11,6 +11,7 @@ local INTERACT_TYPE_CAMPAIGN_QUEUE = 8
 local INTERACT_TYPE_WORLD_EVENT_INVITE = 9
 local INTERACT_TYPE_LFG_JUMP_DUNGEON = 10
 local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 11
+local INTERACT_TYPE_GROUP_ELECTION = 12
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
@@ -153,7 +154,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnGroupInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
         if not self:ExistsInQueue(INTERACT_TYPE_GROUP_INVITE, inviterCharacterName, inviterDisplayName) then
-            local userFacingName = ZO_GetPlatformUserFacingName(inviterCharacterName, inviterDisplayName)
+            local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
 
             PlaySound(SOUNDS.GROUP_INVITE)
             self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_INVITE)
@@ -177,7 +178,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnTradeWindowInviteConsidering(eventCode, inviterCharacterName, inviterDisplayName)
         PlaySound(SOUNDS.TRADE_INVITE_RECEIVED)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_TRADE_INVITE)
-        local userFacingName = ZO_GetPlatformUserFacingName(inviterCharacterName, inviterDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
         -- There is server message received when trade is cancelled/accepted/declined, which sends a Lua event which will play a sound in AlertHandlers.lua
         self:AddPromptToIncomingQueue(INTERACT_TYPE_TRADE_INVITE, inviterCharacterName, inviterDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_TRADE, ZO_SELECTED_TEXT:Colorize(userFacingName)),
             function()
@@ -198,7 +199,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnQuestShared(eventCode, questId)
         PlaySound(SOUNDS.QUEST_SHARED)
         local questName, characterName, timeSinceRequestMs, displayName = GetOfferedQuestShareInfo(questId)
-        local name = ZO_GetPlatformUserFacingName(characterName, displayName)
+        local name = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
         local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_QUEST_SHARE, characterName, displayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, ZO_SELECTED_TEXT:Colorize(name), questName),
             function()
                 AcceptSharedQuest(questId)
@@ -225,7 +226,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         local ritualPrompt = isSender and SI_PLAYER_TO_PLAYER_OUTGOING_RITUAL_OF_MARA or SI_PLAYER_TO_PLAYER_INCOMING_RITUAL_OF_MARA
         PlaySound(SOUNDS.MARA_INVITE_RECEIVED)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA)
-        local userFacingTargetName = ZO_GetPlatformUserFacingName(targetCharacterName, targetDisplayName)
+        local userFacingTargetName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
         local mainTextParams =
         {
             ZO_SELECTED_TEXT:Colorize(ZO_FormatUserFacingDisplayName(targetDisplayName)),
@@ -406,18 +407,6 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE, OnScriptedWorldEventInvite)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
 
-    --Jump to Dungeon prompt on joining a group via LFG
-    local ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_dps_up.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_healer_up.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_tank_up.dds",
-    }
-    local GAMEPAD_ROLE_TO_ICON = {
-        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_dps_down.dds",
-        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_healer_down.dds",
-        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_tank_down.dds",
-    }
-
     local function OnGroupingToolsJumpDungeonNotificationNew()
         local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
         local role = GetGroupMemberAssignedRole("player")
@@ -435,8 +424,18 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
         
         local dungeonName = GetLFGOption(activityType, activityIndex)
-        local roleIcon = IsInGamepadPreferredMode() and GAMEPAD_ROLE_TO_ICON[role] or ROLE_TO_ICON[role]
-        local messageFormat = IsInGamepadPreferredMode() and SI_GAMEPAD_LFG_JUMP_TO_DUNGEON_TEXT or SI_LFG_JUMP_TO_DUNGEON_TEXT
+
+        local messageFormat, messageParams
+        if role == LFG_ROLE_INVALID then
+            messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
+            messageParams = { dungeonName }
+        else
+            local roleIconPath = GetRoleIcon(role)
+            local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
+
+            messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
+            messageParams = { dungeonName, roleIconFormat, GetString("SI_LFGROLE", role) }
+        end
         
         PlaySound(SOUNDS.LFG_JUMP_DUNGEON)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
@@ -447,7 +446,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
         promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
         promptData.messageFormat = messageFormat
-        promptData.messageParams = {dungeonName, roleIcon, GetString("SI_LFGROLE", role)}
+        promptData.messageParams = messageParams
         promptData.expirationCallback = ClearLFGJumpNotification
     end
     local function OnGroupingToolsJumpDungeonNotificationRemoved()
@@ -485,6 +484,60 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW, function(event, ...) OnGroupingToolsFindReplacementNotificationNew(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED, function(event, ...) OnGroupingToolsFindReplacementNotificationRemoved(...) end)
+
+    local function OnGroupElectionNotificationAdded()
+        local electionType, timeRemainingSeconds, descriptor, targetUnitTag = GetGroupElectionInfo()
+
+        local function AcceptCallback()
+            CastGroupVote(GROUP_VOTE_CHOICE_FOR)
+        end
+        local function DeclineCallback()
+            CastGroupVote(GROUP_VOTE_CHOICE_AGAINST)
+        end
+        local function DeferDecisionCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_ELECTION)
+        end
+
+        local messageFormat, messageParams
+        if ZO_IsGroupElectionTypeCustom(electionType) then
+            if descriptor == ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK then
+                messageFormat = GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE)
+            else
+                messageFormat = descriptor
+            end
+            messageParams = {}
+        else
+            if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
+                messageFormat = SI_GROUP_ELECTION_KICK_MESSAGE
+            elseif electionType == GROUP_ELECTION_TYPE_NEW_LEADER then
+                messageFormat = SI_GROUP_ELECTION_PROMOTE_MESSAGE
+            end
+            local primaryName = ZO_GetPrimaryPlayerNameFromUnitTag(targetUnitTag)
+            local secondaryName = ZO_GetSecondaryPlayerNameFromUnitTag(targetUnitTag)
+            messageParams = { primaryName, secondaryName }
+        end
+        
+        PlaySound(SOUNDS.NEW_TIMED_NOTIFICATION)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_ELECTION)
+        
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_GROUP_ELECTION, nil, nil, nil, AcceptCallback, DeclineCallback, DeferDecisionCallback)
+        promptData.acceptText = GetString(SI_YES)
+        promptData.declineText = GetString(SI_NO)
+
+        promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
+        promptData.messageFormat = messageFormat
+        promptData.messageParams = messageParams
+        promptData.expirationCallback = DeferDecisionCallback
+        promptData.uniqueSounds = {
+            accept = SOUNDS.GROUP_ELECTION_VOTE_SUBMITTED,
+            decline = SOUNDS.GROUP_ELECTION_VOTE_SUBMITTED,
+        }
+    end
+    local function OnGroupElectionNotificationRemoved()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_ELECTION)
+    end
+    self.control:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, function(event, ...) OnGroupElectionNotificationAdded(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_REMOVED, function(event, ...) OnGroupElectionNotificationRemoved(...) end)
 
 
     local function OnPlayerActivated()
@@ -529,6 +582,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
         if HasLFGFindReplacementNotification() then
             OnGroupingToolsFindReplacementNotificationNew()
+        end
+
+        if HasPendingGroupElectionVote() then
+            OnGroupElectionNotificationAdded()
         end
     end
 
@@ -660,7 +717,7 @@ function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLab
 end
 
 function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback)
-    local name = GetPlatformName(characterName, displayName)
+    local name = ZO_GetPrimaryPlayerName(displayName, characterName)
     local data = self:AddIncomingEntry(interactType, name, targetLabel)
     data.acceptCallback = acceptCallback
     data.declineCallback = declineCallback
@@ -838,15 +895,16 @@ function ZO_PlayerToPlayer:Decline()
     self:OnPromptDeclined()
 end
 
+--With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
-    if(self.responding) then
+    if(self.responding and #self.incomingQueue > 0) then
         local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
         NotificationAccepted(incomingEntryToRespondTo)
     end
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
-    if(self.responding) then
+    if(self.responding and #self.incomingQueue > 0) then
         local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
         NotificationDeclined(incomingEntryToRespondTo)
     end
@@ -866,7 +924,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
         self.resurrectable = true
 
         self.targetLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-        self.targetLabel:SetText(ZO_GetPlatformUserFacingName(self.currentTargetCharacterName, self.currentTargetDisplayName))
+        self.targetLabel:SetText(ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName))
 
         self.isBeingResurrected = IsUnitBeingResurrected(P2P_UNIT_TAG)
         self.hasResurrectPending = DoesUnitHaveResurrectPending(P2P_UNIT_TAG)
@@ -918,7 +976,7 @@ function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
 
         self.actionKeybindButton:SetHidden(false)
         self.targetLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-        self.targetLabel:SetText(zo_strformat(interactLabel, ZO_GetPlatformUserFacingName(self.currentTargetCharacterName, self.currentTargetDisplayName)))
+        self.targetLabel:SetText(zo_strformat(interactLabel, ZO_GetPrimaryPlayerNameWithSecondary(self.currentTargetDisplayName, self.currentTargetCharacterName)))
         self.actionKeybindButton:SetText(GetString(SI_PLAYER_TO_PLAYER_ACTION_MENU))
 
         return true
@@ -1193,6 +1251,9 @@ do
         local currentTargetCharacterName = self.currentTargetCharacterName
         local currentTargetCharacterNameRaw = self.currentTargetCharacterNameRaw
         local currentTargetDisplayName = self.currentTargetDisplayName
+        local primaryName = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName);
+        local primaryNameInternal = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName, USE_INTERNAL_FORMAT);
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(currentTargetDisplayName, currentTargetCharacterName);
         local platformIcons = IsInGamepadPreferredMode() and GAMEPAD_INTERACT_ICONS or KEYBOARD_INTERACT_ICONS
         local ENABLED = true
         local DISABLED = false
@@ -1205,7 +1266,7 @@ do
 
         --Whisper--
         if IsChatSystemAvailableForCurrentPlatform() then
-            local function WhisperOption() StartChatInput(nil, CHAT_CHANNEL_WHISPER, currentTargetCharacterName) end
+            local function WhisperOption() StartChatInput(nil, CHAT_CHANNEL_WHISPER, primaryNameInternal) end
             local whisperFunction = ENABLED_IF_NOT_IGNORED and WhisperOption or AlertIgnored
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], ENABLED_IF_NOT_IGNORED, whisperFunction)
         end
@@ -1222,12 +1283,12 @@ do
             local function InviteOption()
                 local NOT_SENT_FROM_CHAT = false
                 local DISPLAY_INVITED_MESSAGE = true
-                TryGroupInviteByName(currentTargetDisplayName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+                TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
             end
             local groupInviteFunction = ENABLED_IF_NOT_IGNORED and InviteOption or AlertIgnored
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], ENABLED_IF_NOT_IGNORED and playerHasGroupPermissions, groupInviteFunction, errorReason)
         end
-
+        
         --Friend--
         if IsFriend(currentTargetCharacterNameRaw) then
             local function AlreadyFriendsWarning() ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_ALREADY_FRIEND) end
@@ -1246,18 +1307,15 @@ do
         --Report--
         local reportCallback
         if IsInGamepadPreferredMode() then
-            if IsConsoleUI() then
-                local dialogData = { characterName = currentTargetCharacterName, displayName = currentTargetDisplayName,}
-                reportCallback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REPORT_PLAYER_DIALOG", dialogData, {mainTextParams = {ZO_FormatUserFacingDisplayName(currentTargetDisplayName)}}) end
-                self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
-            end
+            local dialogData = { characterName = currentTargetCharacterName, displayName = currentTargetDisplayName,}
+            reportCallback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REPORT_PLAYER_DIALOG", dialogData, {mainTextParams = {formattedPlayerNames}}) end              
         else
-            reportCallback = function() ZO_ReportPlayerDialog_Show(currentTargetCharacterName, REPORT_PLAYER_REASON_BOTTING, currentTargetCharacterNameRaw) end
-            self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
+            reportCallback = function() ZO_ReportPlayerDialog_Show(primaryName, REPORT_PLAYER_REASON_BOTTING, formattedPlayerNames) end
         end
+		self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
 
         --Trade--
-        local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(currentTargetDisplayName) end
+        local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(primaryNameInternal) end
         local tradeInviteFunction = ENABLED_IF_NOT_IGNORED and TradeInviteOption or AlertIgnored
         self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], ENABLED_IF_NOT_IGNORED, tradeInviteFunction)
 

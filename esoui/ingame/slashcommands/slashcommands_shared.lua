@@ -46,6 +46,8 @@ SLASH_COMMANDS[GetString(SI_SLASH_PLAYED_TIME)] = function(args)
     CHAT_SYSTEM:AddMessage(zo_strformat(SI_CHAT_MESSAGE_PLAYED_TIME, GetRawUnitName("player"), playedTime))
 end
 
+SLASH_COMMANDS[GetString(SI_SLASH_READY_CHECK)] = ZO_SendReadyCheck
+
 function DoCommand(text)
     local command, arguments = zo_strmatch(text, "^(/%S+)%s?(.*)")
 
@@ -61,6 +63,10 @@ function DoCommand(text)
     else
         ExecuteChatCommand(text)
     end
+end
+
+function ShowGamepadHelpScreen()
+    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "helpRootGamepad")
 end
 
 CHAT_SYSTEM:AddCommandPrefix('/', DoCommand)

@@ -160,7 +160,7 @@ end
 
 function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
     local dialogName = CHANGE_MOTD_GAMEPAD_DIALOG
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local function UpdateSelectedMotd(aboutUs)
         if(self.selectedMotd ~= aboutUs) then
@@ -172,10 +172,10 @@ function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
         ZO_Dialogs_ReleaseDialogOnButtonPress(dialogName)
     end 
 
-    local function SetupDialog()
+    local function SetupDialog(dialog)
         self.selectedMotd = nil
         UpdateSelectedMotd(GetGuildMotD(self.optionsGuildId))
-        dialog.setupFunc(dialog)
+        dialog:setupFunc()
     end
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
@@ -202,7 +202,7 @@ function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
                     textChangedCallback = function(control)
                         local newMotd = control:GetText()
                         UpdateSelectedMotd(newMotd)
-                    end,   
+                    end,
 
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
@@ -245,7 +245,7 @@ function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
-                callback = function()
+                callback = function(dialog)
                     local selectedData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
                     if(selectedData.nameField and targetControl) then
@@ -259,7 +259,7 @@ function ZO_GamepadGuildHub:InitializeChangeMotdDialog()
                     end
                 end,
                 enabled = function()
-                    local selectedData = dialog.entryList:GetTargetData()
+                    local selectedData = parametricDialog.entryList:GetTargetData()
                     local enabled = true
 
                     if(selectedData.finishedSelector) then
@@ -279,10 +279,10 @@ end
 
 function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
     local dialogName = CHANGE_ABOUT_US_GAMEPAD_DIALOG
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local function UpdateSelectedAboutUs(aboutUs)
-        if(self.selectedAboutUs ~= aboutUs) then
+        if self.selectedAboutUs ~= aboutUs then
             self.selectedAboutUs = aboutUs
         end
     end
@@ -291,10 +291,10 @@ function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
         ZO_Dialogs_ReleaseDialogOnButtonPress(dialogName)
     end 
 
-    local function SetupDialog()
+    local function SetupDialog(dialog)
         self.selectedAboutUs = nil
         UpdateSelectedAboutUs(GetGuildDescription(self.optionsGuildId))
-        dialog.setupFunc(dialog)
+        dialog:setupFunc()
     end
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
@@ -321,7 +321,7 @@ function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
                     textChangedCallback = function(control) 
                         local newAboutUs = control:GetText()
                         UpdateSelectedAboutUs(newAboutUs)
-                    end,   
+                    end,
 
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
@@ -364,7 +364,7 @@ function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
-                callback = function()
+                callback = function(dialog)
                     local selectedData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
                     if(selectedData.nameField and targetControl) then
@@ -378,7 +378,7 @@ function ZO_GamepadGuildHub:InitializeChangeAboutUsDialog()
                     end
                 end,
                 enabled = function()
-                    local selectedData = dialog.entryList:GetTargetData()
+                    local selectedData = parametricDialog.entryList:GetTargetData()
                     local enabled = true
 
                     if(selectedData.finishedSelector) then
@@ -398,7 +398,6 @@ end
 
 function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
     local dialogName = GUILD_CREATE_GAMEPAD_DIALOG
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     local errorTitle = ZO_ERROR_COLOR:Colorize(GetString(SI_INVALID_NAME_DIALOG_TITLE))
     local defaultTitle = GetString(SI_GAMEPAD_GUILD_CREATE_DIALOG_NEW_GUILD_DEFAULT_HEADER)
 
@@ -428,7 +427,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
         UpdateSelectedAllianceIndex(entry.allianceIndex)
     end
 
-    local function ReleaseDialog()
+    local function ReleaseDialog(dialog)
         self.creatingGuild = false
         if self.allianceDropDown and self.allianceDropDown:IsActive() then
             local BLOCK_CALLBACK = true
@@ -442,7 +441,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
         self.creatingGuildInfoLabel:SetHidden(true)
     end
 
-    local function SetupDialog()
+    local function SetupDialog(dialog)
         self.creatingGuild = true
         self.createGuildEditBoxSelected = false
         self.selectedName = nil
@@ -450,8 +449,8 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
         self.createGuildWithSelectedAllianceMessageText = zo_strformat(SI_GUILD_CREATE_DIALOG_ALLIANCE_RULES, GetAllianceName(playerAlliance))
         self:RefreshCreateGuildExplanation()
         UpdateSelectedName("")
-        UpdateSelectedAllianceIndex(1)
-        dialog.setupFunc(dialog)
+        UpdateSelectedAllianceIndex(playerAlliance)
+        dialog:setupFunc()
 
         self.creatingGuildInfoLabel:SetHidden(false)
     end
@@ -494,7 +493,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                             dropDown:SetSortsItems(false)
                             dropDown:ClearItems()
 
-                            for i=1, NUM_ALLIANCES do
+                            for i = 1, NUM_ALLIANCES do
                                 local allianceText = zo_iconTextFormat(GetLargeAllianceSymbolIcon(i), 32, 32, GetAllianceName(i))
                                 local entry = dropDown:CreateItemEntry(allianceText, OnAllianceSelected)
                                 entry.allianceIndex = i
@@ -520,7 +519,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                         RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
                         self.allianceDropDown:Activate()
                         self.allianceDropDown:SetHighlightedItem(self.selectedAllianceIndex)
-                    end              
+                    end
                 },
             },
 
@@ -553,7 +552,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                         UpdateSelectedName(self.selectedName)
                     end,
 
-                    callback = function()
+                    callback = function(dialog)
                         local targetControl = dialog.entryList:GetTargetControl()
                         targetControl.editBoxControl:TakeFocus()
                         UpdateSelectedName(self.selectedName)
@@ -571,14 +570,14 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                 templateData = {
                     text = GetString(SI_GAMEPAD_GUILD_CREATE_DIALOG_FINISH),
                     setup = SetupRequestEntry,
-                    callback = function()
+                    callback = function(dialog)
                         if self.noViolations then
                             if IsConsoleUI() then
                                 PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestNameValidation(self.selectedName, GuildNameValidationCallback)
                             else
                                 GuildCreate(self.selectedName, self.selectedAllianceIndex)
                             end
-                            ReleaseDialog()
+                            ReleaseDialog(dialog)
                         end
                     end,
                     validInput = function()
@@ -594,8 +593,8 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = GetString(SI_DIALOG_CANCEL),
-                callback = function()
-                    ReleaseDialog()
+                callback = function(dialog)
+                    ReleaseDialog(dialog)
                 end,
             },
 
@@ -603,9 +602,9 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
-                callback = function()
+                callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    if(targetData and targetData.callback) then
+                    if targetData and targetData.callback then
                         targetData.callback(dialog)
                     end
                 end,
@@ -613,7 +612,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
         },
 
         noChoiceCallback = function(dialog)
-            ReleaseDialog()
+            ReleaseDialog(dialog)
         end,
     })
 end

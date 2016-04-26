@@ -113,7 +113,8 @@ local consolePregameStates =
             return false
         end,
 
-        OnEnter = function()
+        OnEnter = function(mustPurchaseGame)
+            GAME_STARTUP_GAMEPAD:SetMustPurchaseGame(mustPurchaseGame)
             SCENE_MANAGER:Show("GameStartup")
         end,
 
@@ -182,7 +183,7 @@ local consolePregameStates =
                 -- should only ever hit this on internal builds testing with PC
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_PCBypassConsoleLogin, GetString(SI_CONSOLE_PREGAME_LOADING))
             else
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", PregameBeginLoginConsole, GetString(SI_CONSOLE_PREGAME_LOADING))
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", PregameBeginLinkedLogin, GetString(SI_CONSOLE_PREGAME_LOADING))
             end
         end,
 
@@ -279,7 +280,7 @@ local consolePregameStates =
         end,
 
         OnEnter = function()
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("CreateLinkAccount", LoadCountryDataConsole, GetString(SI_CONSOLE_PREGAME_LOADING))
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("CreateLinkAccount", LoadCountryData, GetString(SI_CONSOLE_PREGAME_LOADING))
         end,
 
         OnExit = function()
@@ -320,7 +321,7 @@ local consolePregameStates =
                 PregameCreateAccount()
             end
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", CreateAccount, GetString(SI_CONSOLE_PREGAME_CREATING_ACCOUNT), CREATE_ACCOUNT_BACKGROUND_FRAGMENT, CREATE_ACCOUNT_IMAGES_FRAGMENT_CONSOLE)
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", CreateAccount, GetString(SI_CREATEACCOUNT_CREATING_ACCOUNT), CREATE_ACCOUNT_BACKGROUND_FRAGMENT, CREATE_ACCOUNT_IMAGES_FRAGMENT_CONSOLE)
             WORLD_SELECT_GAMEPAD:SetImagesFragment(CREATE_ACCOUNT_IMAGES_FRAGMENT_CONSOLE)
             WORLD_SELECT_GAMEPAD:SetBackgroundFragment(CREATE_ACCOUNT_BACKGROUND_FRAGMENT)
         end,
@@ -403,7 +404,7 @@ local consolePregameStates =
                 end
             end
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", LinkAccount, GetString(SI_CONSOLE_PREGAME_LINKING_ACCOUNT), LINK_ACCOUNT_BACKGROUND_FRAGMENT, LINK_ACCOUNT_IMAGES_FRAGMENT_CONSOLE)
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", LinkAccount, GetString(SI_LINKACCOUNT_LINKING_ACCOUNT), LINK_ACCOUNT_BACKGROUND_FRAGMENT, LINK_ACCOUNT_IMAGES_FRAGMENT_CONSOLE)
             WORLD_SELECT_GAMEPAD:SetImagesFragment(LINK_ACCOUNT_IMAGES_FRAGMENT_CONSOLE)
             WORLD_SELECT_GAMEPAD:SetBackgroundFragment(LINK_ACCOUNT_BACKGROUND_FRAGMENT)
         end,

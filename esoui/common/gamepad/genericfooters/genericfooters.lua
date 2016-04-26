@@ -53,24 +53,28 @@ function GenericFooter:Initialize(control)
     end
 end
 
-local function ProcessData(control, data, anchorToBaselineControl, anchorToBaselineOffsetX)
+local function ProcessData(control, textData, anchorToBaselineControl, anchorToBaselineOffsetX, overrideColor)
     if(control == nil) then
         return false
     end
 
-    if type(data) == "function" then
-        data = data(control)
+    if type(textData) == "function" then
+        textData = textData(control)
     end
 
-    if type(data) == "string" or type(data) == "number" then
-        control:SetText(data)
+    if type(textData) == "string" or type(textData) == "number" then
+        control:SetText(textData)
     else
         control:SetText("")
     end
 
+    if overrideColor then
+        control:SetColor(overrideColor:UnpackRGBA())
+    end
+
     if anchorToBaselineControl then
         control:ClearAnchorToBaseline(anchorToBaselineControl)
-        if data then
+        if textData then
             control:AnchorToBaseline(anchorToBaselineControl, anchorToBaselineOffsetX, LEFT)
         else
             -- This is to make sure there is no gap when a control is missing.
@@ -78,8 +82,8 @@ local function ProcessData(control, data, anchorToBaselineControl, anchorToBasel
         end
     end
 
-    control:SetHidden(not data)
-    return data ~= nil
+    control:SetHidden(not textData)
+    return textData ~= nil
 end
 
 function GenericFooter:Refresh(data)
@@ -92,12 +96,12 @@ function GenericFooter:Refresh(data)
     local loadingIcon3Offset = data.data3ShowLoading and ZO_GAMEPAD_LOADING_ICON_FOOTER_SIZE or 0
     controls[DATA3LOADINGICON]:SetHidden(not data.data3ShowLoading)
 
-    ProcessData(controls[DATA1], data.data1Text)
-    ProcessData(controls[DATA1HEADER], data.data1HeaderText, controls[DATA1], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon1Offset)
-    ProcessData(controls[DATA2], data.data2Text, controls[DATA1HEADER], -ZO_GAMEPAD_CONTENT_INSET_X)
-    ProcessData(controls[DATA2HEADER], data.data2HeaderText, controls[DATA2], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon2Offset)
-    ProcessData(controls[DATA3], data.data3Text, controls[DATA2HEADER], -ZO_GAMEPAD_CONTENT_INSET_X)
-    ProcessData(controls[DATA3HEADER], data.data3HeaderText, controls[DATA3], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon3Offset)
+    ProcessData(controls[DATA1], data.data1Text, nil, nil, data.data1Color)
+    ProcessData(controls[DATA1HEADER], data.data1HeaderText, controls[DATA1], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon1Offset, data.data1HeaderColor)
+    ProcessData(controls[DATA2], data.data2Text, controls[DATA1HEADER], -ZO_GAMEPAD_CONTENT_INSET_X, data.data2Color)
+    ProcessData(controls[DATA2HEADER], data.data2HeaderText, controls[DATA2], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon2Offset, data.data2HeaderColor)
+    ProcessData(controls[DATA3], data.data3Text, controls[DATA2HEADER], -ZO_GAMEPAD_CONTENT_INSET_X, data.data3Color)
+    ProcessData(controls[DATA3HEADER], data.data3HeaderText, controls[DATA3], -ZO_GAMEPAD_DEFAULT_HEADER_DATA_PADDING - loadingIcon3Offset, data.data3HeaderColor)
 end
 
 function ZO_GenericFooter_Gamepad_OnInitialized(self)

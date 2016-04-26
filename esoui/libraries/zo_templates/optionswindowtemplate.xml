@@ -76,6 +76,16 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_Options_DefaultDoubleIndentedDimensions" virtual="true">
+            <Dimensions x="470" y="26" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" override="true">
+                    <Dimensions x="270" y="26" />
+                    <Anchor point="LEFT" />
+                </Label>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_Options_Checkbox" mouseEnabled="true" virtual="true">
             <Dimensions x="510" y="26" />
             <OnMouseEnter>
@@ -93,7 +103,7 @@
 
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
-                    <Dimensions x="300" y="26" />
+                    <Dimensions x="290" y="26" />
                     <Anchor point="LEFT" />
                 </Label>
                 

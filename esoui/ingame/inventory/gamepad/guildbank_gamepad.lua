@@ -356,7 +356,10 @@ end
 
 do
     local function DepositItemFilter(itemData)
-        return not itemData.stolen and not IsItemBound(itemData.bagId, itemData.slotIndex) and not (itemData.itemType == ITEMTYPE_TROPHY)
+        return not itemData.stolen and 
+               not IsItemBound(itemData.bagId, itemData.slotIndex) and 
+               not (itemData.itemType == ITEMTYPE_TROPHY) and
+               not itemData.isPlayerLocked
     end
 
     function ZO_GuildBank_Gamepad:InitializeLists()
@@ -642,8 +645,8 @@ local SORT_KEYS =
 {
     bestGamepadItemCategoryName = { tiebreaker = "name" },
     name = { tiebreaker = "requiredLevel" },
-    requiredLevel = { tiebreaker = "requiredVeterankRank", isNumeric = true },
-    requiredVeterankRank = { tiebreaker = "iconFile", isNumeric = true },
+    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
+    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
     iconFile = { tiebreaker = "uniqueId" },
     uniqueId = { isId64 = true },
 }

@@ -11,9 +11,14 @@
                     <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
                 </Label>
 
+                <Label name="$(parent)CharacterName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_GROUP_LIST_CHARACTER_NAME_WIDTH"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DisplayName" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
                 <Label name="$(parent)Zone" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
                     <Dimensions x="ZO_GAMEPAD_GROUP_LIST_ZONE_WIDTH"/>
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DisplayName" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CharacterName" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Label>
 
                 <Control name="$(parent)Class" inherits="ZO_GamepadInteractiveSortFilterListIcon">
@@ -26,9 +31,9 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Label>
 
-                <Texture name="$(parent)Veteran" layer="OVERLAY">
-                    <Dimensions x="48" y="48"/>
-                    <Anchor point="LEFT" relativeTo="$(parent)Level" offsetX="ZO_GAMEPAD_SOCIAL_LIST_VETERAN_ICON_OFFSET_X"/>
+                <Texture name="$(parent)Champion" layer="OVERLAY">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Level" relativePoint="LEFT" offsetX="ZO_GAMEPAD_SOCIAL_LIST_CHAMPION_POINTS_ICON_OFFSET_X"/>
                 </Texture>
                 
                 <Control name="$(parent)Roles">
@@ -77,9 +82,17 @@
                                     </OnInitialized>
                                 </Control>
 
+                                <Control name="$(parent)CharacterName" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_GROUP_LIST_CHARACTER_NAME_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DisplayName" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_CHARACTER), "characterName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+
                                 <Control name="$(parent)Zone" inherits="ZO_GamepadInteractiveFilterHeader">
                                     <Dimensions x="ZO_GAMEPAD_GROUP_LIST_ZONE_WIDTH"/>
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DisplayName" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CharacterName" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                                     <OnInitialized>
                                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_ZONE), "formattedZone", TEXT_ALIGN_LEFT)
                                     </OnInitialized>

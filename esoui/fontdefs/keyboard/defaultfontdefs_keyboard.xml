@@ -16,6 +16,10 @@
     <Font name="ZoFontGameOutline" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
     <Font name="ZoFontGameShadow" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
 
+    <Font name="ZoFontKeyboard28ThickOutline" font="$(BOLD_FONT)|$(KB_28)|thick-outline" />
+    <Font name="ZoFontKeyboard24ThickOutline" font="$(BOLD_FONT)|$(KB_24)|thick-outline" />
+    <Font name="ZoFontKeyboard18ThickOutline" font="$(BOLD_FONT)|$(KB_18)|thick-outline" />
+
     <Font name="ZoFontGameSmall" font="$(BOLD_FONT)|$(KB_13)|soft-shadow-thin" />
     <Font name="ZoFontGameLarge" font="$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin" />
     <Font name="ZoFontGameLargeBold" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />

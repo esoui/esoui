@@ -32,7 +32,7 @@ local CONSTANTS =
     KEYBOARD_MAP_PADDING_Y_PIXELS = 30,
     GAMEPAD_MAP_PADDING_Y_PIXELS = 75,
     CENTER_OFFSET_Y_PIXELS = 9,
-    GAMEPAD_CENTER_OFFSET_Y_PIXELS = 0,
+    GAMEPAD_CENTER_OFFSET_Y_PIXELS = -10,
     MAIN_MENU_AREA_Y = 120,
     MAP_INFO_WIDTH = 425,
     ZOOM_DIRECTION_IN = 1,
@@ -141,7 +141,7 @@ local MAP_CONTAINER_LAYOUT =
     },
 }
 
-local TOOLTIP_MODE = {
+ZO_MAP_TOOLTIP_MODE = {
     INFORMATION = 1,
     KEEP = 2,
     MAP_LOCATION = 3,
@@ -161,6 +161,7 @@ local g_mapScale = 1
 
 local g_dataRegistration
 local g_cyrodiilMapIndex
+local g_imperialCityMapIndex
 
 local g_mapDragX
 local g_mapDragY
@@ -195,7 +196,7 @@ local MAP_MODE_CHANGE_RESTRICTIONS =
     },
     [MAP_MODE_AVA_RESPAWN] =
     {
-        disableMapChanging = true,
+        restrictedCyrodiilImperialCityMapChanging = true,
     },
 }
 
@@ -369,11 +370,12 @@ function ZO_WorldMapTiles:UpdateTextures()
     for i = 1, (self.horizontalTiles * self.verticalTiles) do
         local tileControl = self:GetTile(i)
         tileControl:SetTexture(GetMapTileTexture(i))
+        tileControl:SetHidden(false)
     end
 
     for i = (self.horizontalTiles * self.verticalTiles) + 1, #self.indexToTile do
         local tileControl = self:GetTile(i)
-        tileControl:SetTexture("")
+        tileControl:SetHidden(true)
     end
 end
 
@@ -468,6 +470,14 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_KEEP_ALDMERI_DOMINION]                    = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_largeKeep_Aldmeri.dds", insetX = 20, insetY = 16},
     [MAP_PIN_TYPE_KEEP_EBONHEART_PACT]                      = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_largeKeep_Ebonheart.dds", insetX = 20, insetY = 16},
     [MAP_PIN_TYPE_KEEP_DAGGERFALL_COVENANT]                 = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_largeKeep_Daggerfall.dds", insetX = 20, insetY = 16},
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_NEUTRAL]                = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_imperialDistrict_Neutral.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_ALDMERI_DOMINION]       = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_imperialDistrict_Aldmeri.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_EBONHEART_PACT]         = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_imperialDistrict_Ebonheart.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_DAGGERFALL_COVENANT]    = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_imperialDistrict_Daggerfall.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_AVA_TOWN_NEUTRAL]                         = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_town_Neutral.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION]                = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_town_Aldmeri.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT]                  = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_town_Ebonheart.dds", insetX = 17, insetY = 17},
+    [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT]             = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_town_Daggerfall.dds", insetX = 17, insetY = 17},
     [MAP_PIN_TYPE_OUTPOST_NEUTRAL]                          = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_outpost_neutral.dds", insetX = 20, insetY = 17},
     [MAP_PIN_TYPE_OUTPOST_ALDMERI_DOMINION]                 = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_outpost_aldmeri.dds", insetX = 20, insetY = 17},
     [MAP_PIN_TYPE_OUTPOST_EBONHEART_PACT]                   = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_outpost_ebonheart.dds", insetX = 20, insetY = 17},
@@ -489,6 +499,8 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_LOCATION]                                 = { level = 50, size = CONSTANTS.MAP_LOCATION_PIN_SIZE, texture = GetLocationPinTexture},
     [MAP_PIN_TYPE_FORWARD_CAMP_ACCESSIBLE]                  = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_linked_backdrop.dds"},
     [MAP_PIN_TYPE_KEEP_GRAVEYARD_ACCESSIBLE]                = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_keep_linked_backdrop.dds"},
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_GRAVEYARD_ACCESSIBLE]   = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_imperialDistrict_glow.dds"},
+    [MAP_PIN_TYPE_AVA_TOWN_GRAVEYARD_ACCESSIBLE]            = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_town_glow.dds"},
     [MAP_PIN_TYPE_FAST_TRAVEL_KEEP_ACCESSIBLE]              = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_keep_linked_backdrop.dds"},
     [MAP_PIN_TYPE_FAST_TRAVEL_BORDER_KEEP_ACCESSIBLE]       = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_borderKeep_linked_backdrop.dds"},
     [MAP_PIN_TYPE_RESPAWN_BORDER_KEEP_ACCESSIBLE]           = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_borderKeep_linked_backdrop.dds"},
@@ -625,12 +637,26 @@ ZO_MapPin.KEEP_PIN_TYPES =
     [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_EBONHEART_PACT] = true,
     [MAP_PIN_TYPE_KEEP_ATTACKED_SMALL] = true,
     [MAP_PIN_TYPE_KEEP_ATTACKED_LARGE] = true,
+    [MAP_PIN_TYPE_AVA_TOWN_NEUTRAL] = true,
+    [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION] = true,
+    [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT] = true,
+    [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT] = true,
 }
 
 ZO_MapPin.IMPERIAL_CITY_GATE_TYPES = 
 {
     [MAP_PIN_TYPE_IMPERIAL_CITY_OPEN] = true,
     [MAP_PIN_TYPE_IMPERIAL_CITY_CLOSED] = true,
+}
+
+ZO_MapPin.DISTRICT_PIN_TYPES =
+{
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_NEUTRAL] = true,
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_ALDMERI_DOMINION] = true,
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_EBONHEART_PACT] = true,
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_DAGGERFALL_COVENANT] = true,
+    [MAP_PIN_TYPE_KEEP_ATTACKED_SMALL] = true,
+    [MAP_PIN_TYPE_KEEP_ATTACKED_LARGE] = true,
 }
 
 ZO_MapPin.MAP_PING_PIN_TYPES =
@@ -680,6 +706,8 @@ ZO_MapPin.AVA_RESPAWN_PIN_TYPES =
 {
     [MAP_PIN_TYPE_FORWARD_CAMP_ACCESSIBLE] = true,
     [MAP_PIN_TYPE_KEEP_GRAVEYARD_ACCESSIBLE] = true,
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_GRAVEYARD_ACCESSIBLE] = true,
+    [MAP_PIN_TYPE_AVA_TOWN_GRAVEYARD_ACCESSIBLE] = true,
     [MAP_PIN_TYPE_RESPAWN_BORDER_KEEP_ACCESSIBLE] = true,
 }
 
@@ -833,13 +861,13 @@ local function LayoutForwardCampTooltip(pin)
 end
 
 local function GetTooltip(mode)
-    if mode == TOOLTIP_MODE.INFORMATION then
+    if mode == ZO_MAP_TOOLTIP_MODE.INFORMATION then
         return INFORMATION_TOOLTIP
-    elseif mode == TOOLTIP_MODE.KEEP then
+    elseif mode == ZO_MAP_TOOLTIP_MODE.KEEP then
         return KEEP_TOOLTIP
-    elseif mode == TOOLTIP_MODE.MAP_LOCATION then
+    elseif mode == ZO_MAP_TOOLTIP_MODE.MAP_LOCATION then
         return MAP_LOCATION_TOOLTIP
-    elseif mode == TOOLTIP_MODE.IMPERIAL_CITY then
+    elseif mode == ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY then
         return IMPERIAL_CITY_TOOLTIP
     else
         assert(false)
@@ -975,16 +1003,18 @@ local function GetQuestCategoryIcon(pin)
     end
 end
 
-local GAMEPAD_PIN_ORDERS = {
+ZO_MapPin.GAMEPAD_PIN_ORDERS =
+{
     DESTINATIONS = 10,
     AVA_KEEP = 20,
     AVA_OUTPOST = 21,
-    AVA_RESOURCE = 22,
-    AVA_GATE = 23,
-    AVA_ARTIFACT = 24,
-    AVA_IMPERIAL_CITY = 25,
-    AVA_FORWARD_CAMP = 26,
-    AVA_RESTRICTED_LINK = 27,
+    AVA_TOWN = 22,
+    AVA_RESOURCE = 23,
+    AVA_GATE = 24,
+    AVA_ARTIFACT = 25,
+    AVA_IMPERIAL_CITY = 26,
+    AVA_FORWARD_CAMP = 27,
+    AVA_RESTRICTED_LINK = 28,
     CRAFTING = 30,
     QUESTS = 40,
     PLAYERS = 50,
@@ -992,103 +1022,111 @@ local GAMEPAD_PIN_ORDERS = {
 
 ZO_MapPin.TOOLTIP_CREATORS =
 {
-    [MAP_PIN_TYPE_PLAYER]                                   =   { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.PLAYERS, gamepadEntryName = GetUnitNameFromPin },
-    [MAP_PIN_TYPE_GROUP]                                    =   { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.PLAYERS, gamepadEntryName = GetUnitNameFromPin },
-    [MAP_PIN_TYPE_GROUP_LEADER]                             =   { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.PLAYERS, gamepadEntryName = GetUnitNameFromPin },
-    [MAP_PIN_TYPE_ASSISTED_QUEST_ENDING]                    =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestEnding(pin:GetQuestIndex()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestEndingFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
-    [MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION]                 =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
-    [MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION]        =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
+    [MAP_PIN_TYPE_PLAYER]                                   =   { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.PLAYERS, gamepadEntryName = GetUnitNameFromPin },
+    [MAP_PIN_TYPE_GROUP]                                    =   { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.PLAYERS, gamepadEntryName = GetUnitNameFromPin },
+    [MAP_PIN_TYPE_GROUP_LEADER]                             =   { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.PLAYERS, gamepadEntryName = GetUnitNameFromPin },
+    [MAP_PIN_TYPE_ASSISTED_QUEST_ENDING]                    =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestEnding(pin:GetQuestIndex()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestEndingFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
+    [MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION]                 =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
+    [MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION]        =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
     [MAP_PIN_TYPE_POI_SEEN]                                 =   { creator = function(pin) SetObjectiveMessage(MAP_PIN_TYPE_POI_SEEN, pin) end, tooltip = nil },
     [MAP_PIN_TYPE_POI_COMPLETE]                             =   { creator = function(pin) SetObjectiveMessage(MAP_PIN_TYPE_POI_COMPLETE, pin) end, tooltip = nil },
-    [MAP_PIN_TYPE_TRACKED_QUEST_ENDING]                     =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestEnding(pin:GetQuestIndex()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestEndingFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
-    [MAP_PIN_TYPE_TRACKED_QUEST_CONDITION]                  =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
-    [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION]         =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
-    [MAP_PIN_TYPE_LOCATION]                                 =   { creator = LayoutMapLocation, hasTooltip = HasMapLocationTooltip, tooltip = TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.CRAFTING, gamepadSpacing = true },
-    [MAP_PIN_TYPE_PING]                                     =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_PING, pin:GetUnitTag()) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
-    [MAP_PIN_TYPE_RALLY_POINT]                              =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_RALLY_POINT) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
-    [MAP_PIN_TYPE_PLAYER_WAYPOINT]                          =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_PLAYER_WAYPOINT) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
+    [MAP_PIN_TYPE_TRACKED_QUEST_ENDING]                     =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestEnding(pin:GetQuestIndex()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestEndingFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
+    [MAP_PIN_TYPE_TRACKED_QUEST_CONDITION]                  =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
+    [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION]         =   { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, gamepadEntryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
+    [MAP_PIN_TYPE_LOCATION]                                 =   { creator = LayoutMapLocation, hasTooltip = HasMapLocationTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.CRAFTING, gamepadSpacing = true },
+    [MAP_PIN_TYPE_PING]                                     =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_PING, pin:GetUnitTag()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
+    [MAP_PIN_TYPE_RALLY_POINT]                              =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_RALLY_POINT) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
+    [MAP_PIN_TYPE_PLAYER_WAYPOINT]                          =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_PLAYER_WAYPOINT) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
     -- The FLAG_* tooltips are not actually used anymore, they will need to be adjusted to work with gamepad if readded to the game.
-    [MAP_PIN_TYPE_FLAG_ALDMERI_DOMINION]                    =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_FLAG_EBONHEART_PACT]                      =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_FLAG_DAGGERFALL_COVENANT]                 =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_FLAG_NEUTRAL]                             =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_ALDMERI_DOMINION]                    =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_EBONHEART_PACT]                      =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_DAGGERFALL_COVENANT]                 =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_NEUTRAL]                             =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
     -- The FLAG_BASE_* tooltips are not actually used anymore, they will need to be adjusted to work with gamepad if readded to the game.
-    [MAP_PIN_TYPE_FLAG_BASE_ALDMERI_DOMINION]               =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_FLAG_BASE_EBONHEART_PACT]                 =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_FLAG_BASE_DAGGERFALL_COVENANT]            =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_FLAG_BASE_NEUTRAL]                        =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_BASE_ALDMERI_DOMINION]               =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_BASE_EBONHEART_PACT]                 =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_BASE_DAGGERFALL_COVENANT]            =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_FLAG_BASE_NEUTRAL]                        =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
     -- The CAPTURE_FLAG_* tooltips are not actually used anymore, they will need to be adjusted to work with gamepad if readded to the game.
-    [MAP_PIN_TYPE_CAPTURE_FLAG_ALDMERI_DOMINION]            =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_CAPTURE_FLAG_EBONHEART_PACT]              =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_CAPTURE_FLAG_DAGGERFALL_COVENANT]         =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_CAPTURE_FLAG_NEUTRAL]                     =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_CAPTURE_FLAG_ALDMERI_DOMINION]            =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_CAPTURE_FLAG_EBONHEART_PACT]              =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_CAPTURE_FLAG_DAGGERFALL_COVENANT]         =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_CAPTURE_FLAG_NEUTRAL]                     =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
     -- The HALF_CAPTURE_FLAG_* tooltips are not actually used anymore, they will need to be adjusted to work with gamepad if readded to the game.
-    [MAP_PIN_TYPE_HALF_CAPTURE_FLAG_ALDMERI_DOMINION]       =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_HALF_CAPTURE_FLAG_EBONHEART_PACT]         =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_HALF_CAPTURE_FLAG_DAGGERFALL_COVENANT]    =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_HALF_CAPTURE_FLAG_ALDMERI_DOMINION]       =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_HALF_CAPTURE_FLAG_EBONHEART_PACT]         =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_HALF_CAPTURE_FLAG_DAGGERFALL_COVENANT]    =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
     -- The BALL_* tooltips are not actually used anymore, they will need to be adjusted to work with gamepad if readded to the game.
-    [MAP_PIN_TYPE_BALL_ALDMERI_DOMINION]                    =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_BALL_EBONHEART_PACT]                      =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_BALL_DAGGERFALL_COVENANT]                 =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_BALL_NEUTRAL]                             =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_BALL_ALDMERI_DOMINION]                    =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_BALL_EBONHEART_PACT]                      =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_BALL_DAGGERFALL_COVENANT]                 =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_BALL_NEUTRAL]                             =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
     -- The RETURN_* tooltips are not actually used anymore, they will need to be adjusted to work with gamepad if readded to the game.
-    [MAP_PIN_TYPE_RETURN_ALDMERI_DOMINION]                  =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_RETURN_EBONHEART_PACT]                    =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_RETURN_DAGGERFALL_COVENANT]               =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_RETURN_NEUTRAL]                           =   { creator = AppendAvATooltip, tooltip = TOOLTIP_MODE.INFORMATION },
-    [MAP_PIN_TYPE_KEEP_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_KEEP_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_KEEP_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_KEEP_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_OUTPOST_NEUTRAL]                          =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
-    [MAP_PIN_TYPE_OUTPOST_ALDMERI_DOMINION]                 =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
-    [MAP_PIN_TYPE_OUTPOST_EBONHEART_PACT]                   =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
-    [MAP_PIN_TYPE_OUTPOST_DAGGERFALL_COVENANT]              =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
-    [MAP_PIN_TYPE_BORDER_KEEP_ALDMERI_DOMINION]             =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_BORDER_KEEP_EBONHEART_PACT]               =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_BORDER_KEEP_DAGGERFALL_COVENANT]          =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_KEEP_ALDMERI_DOMINION]           =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_KEEP_EBONHEART_PACT]             =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_KEEP_DAGGERFALL_COVENANT]        =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
-    [MAP_PIN_TYPE_FARM_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_FARM_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_FARM_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_FARM_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MINE_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MINE_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MINE_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MINE_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MILL_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MILL_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MILL_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_MILL_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_GATE_OPEN_ALDMERI_DOMINION]      =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_GATE_OPEN_DAGGERFALL_COVENANT]   =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_GATE_OPEN_EBONHEART_PACT]        =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_ALDMERI_DOMINION]    =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_DAGGERFALL_COVENANT] =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_EBONHEART_PACT]      =   { creator = LayoutKeepTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
-    [MAP_PIN_TYPE_ARTIFACT_ALDMERI_OFFENSIVE]               =   { creator = AppendArtifactTooltip, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
-    [MAP_PIN_TYPE_ARTIFACT_ALDMERI_DEFENSIVE]               =   { creator = AppendArtifactTooltip, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
-    [MAP_PIN_TYPE_ARTIFACT_EBONHEART_OFFENSIVE]             =   { creator = AppendArtifactTooltip, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
-    [MAP_PIN_TYPE_ARTIFACT_EBONHEART_DEFENSIVE]             =   { creator = AppendArtifactTooltip, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
-    [MAP_PIN_TYPE_ARTIFACT_DAGGERFALL_OFFENSIVE]            =   { creator = AppendArtifactTooltip, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
-    [MAP_PIN_TYPE_ARTIFACT_DAGGERFALL_DEFENSIVE]            =   { creator = AppendArtifactTooltip, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
-    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE]                    =   { creator = function(pin) INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true, gamepadEntryName = GetWayshrineNameFromPin },
-    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC]        =   { creator = function(pin) INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin) end, tooltip = TOOLTIP_MODE.INFORMATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true, gamepadEntryName = GetWayshrineNameFromPin },
-    [MAP_PIN_TYPE_FORWARD_CAMP_ALDMERI_DOMINION]            =   { creator = LayoutForwardCampTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategory = SI_TOOLTIP_FORWARD_CAMP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_FORWARD_CAMP },
-    [MAP_PIN_TYPE_FORWARD_CAMP_EBONHEART_PACT]              =   { creator = LayoutForwardCampTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategory = SI_TOOLTIP_FORWARD_CAMP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_FORWARD_CAMP },
-    [MAP_PIN_TYPE_FORWARD_CAMP_DAGGERFALL_COVENANT]         =   { creator = LayoutForwardCampTooltip, tooltip = TOOLTIP_MODE.KEEP, gamepadCategory = SI_TOOLTIP_FORWARD_CAMP, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_FORWARD_CAMP },
-    [MAP_PIN_TYPE_IMPERIAL_CITY_OPEN]                       =   { creator = LayoutImperialCityTooltip, tooltip = TOOLTIP_MODE.IMPERIAL_CITY, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY },
-    [MAP_PIN_TYPE_IMPERIAL_CITY_CLOSED]                     =   { creator = LayoutImperialCityTooltip, tooltip = TOOLTIP_MODE.IMPERIAL_CITY, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY },
-    [MAP_PIN_TYPE_RESTRICTED_LINK_ALDMERI_DOMINION]         =   { creator = AppendRestrictedLinkTooltip, tooltip = TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESTRICTED_LINK, gamepadSpacing = true },
-    [MAP_PIN_TYPE_RESTRICTED_LINK_EBONHEART_PACT]           =   { creator = AppendRestrictedLinkTooltip, tooltip = TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESTRICTED_LINK, gamepadSpacing = true },
-    [MAP_PIN_TYPE_RESTRICTED_LINK_DAGGERFALL_COVENANT]      =   { creator = AppendRestrictedLinkTooltip, tooltip = TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = GAMEPAD_PIN_ORDERS.AVA_RESTRICTED_LINK, gamepadSpacing = true },
+    [MAP_PIN_TYPE_RETURN_ALDMERI_DOMINION]                  =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_RETURN_EBONHEART_PACT]                    =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_RETURN_DAGGERFALL_COVENANT]               =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_RETURN_NEUTRAL]                           =   { creator = AppendAvATooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION },
+    [MAP_PIN_TYPE_KEEP_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_KEEP_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_KEEP_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_KEEP_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_OUTPOST_NEUTRAL]                          =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
+    [MAP_PIN_TYPE_OUTPOST_ALDMERI_DOMINION]                 =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
+    [MAP_PIN_TYPE_OUTPOST_EBONHEART_PACT]                   =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
+    [MAP_PIN_TYPE_OUTPOST_DAGGERFALL_COVENANT]              =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
+    [MAP_PIN_TYPE_BORDER_KEEP_ALDMERI_DOMINION]             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_BORDER_KEEP_EBONHEART_PACT]               =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_BORDER_KEEP_DAGGERFALL_COVENANT]          =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_KEEP_ALDMERI_DOMINION]           =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_KEEP_EBONHEART_PACT]             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_KEEP_DAGGERFALL_COVENANT]        =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
+    [MAP_PIN_TYPE_FARM_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_FARM_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_FARM_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_FARM_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MINE_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MINE_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MINE_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MINE_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MILL_NEUTRAL]                             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MILL_ALDMERI_DOMINION]                    =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MILL_EBONHEART_PACT]                      =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_MILL_DAGGERFALL_COVENANT]                 =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_AVA_TOWN_NEUTRAL]                         =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_TOWN, gamepadSpacing = true },
+    [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION]                =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_TOWN, gamepadSpacing = true },
+    [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT]                  =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_TOWN, gamepadSpacing = true },
+    [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT]             =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_TOWN, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_GATE_OPEN_ALDMERI_DOMINION]      =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_GATE_OPEN_DAGGERFALL_COVENANT]   =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_GATE_OPEN_EBONHEART_PACT]        =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_ALDMERI_DOMINION]    =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_DAGGERFALL_COVENANT] =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_EBONHEART_PACT]      =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_GATE, gamepadSpacing = true },
+    [MAP_PIN_TYPE_ARTIFACT_ALDMERI_OFFENSIVE]               =   { creator = AppendArtifactTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
+    [MAP_PIN_TYPE_ARTIFACT_ALDMERI_DEFENSIVE]               =   { creator = AppendArtifactTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
+    [MAP_PIN_TYPE_ARTIFACT_EBONHEART_OFFENSIVE]             =   { creator = AppendArtifactTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
+    [MAP_PIN_TYPE_ARTIFACT_EBONHEART_DEFENSIVE]             =   { creator = AppendArtifactTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
+    [MAP_PIN_TYPE_ARTIFACT_DAGGERFALL_OFFENSIVE]            =   { creator = AppendArtifactTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
+    [MAP_PIN_TYPE_ARTIFACT_DAGGERFALL_DEFENSIVE]            =   { creator = AppendArtifactTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_ARTIFACT, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_ARTIFACT },
+    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE]                    =   { creator = function(pin) INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true, gamepadEntryName = GetWayshrineNameFromPin },
+    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC]        =   { creator = function(pin) INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.DESTINATIONS, gamepadSpacing = true, gamepadEntryName = GetWayshrineNameFromPin },
+    [MAP_PIN_TYPE_FORWARD_CAMP_ALDMERI_DOMINION]            =   { creator = LayoutForwardCampTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategory = SI_TOOLTIP_FORWARD_CAMP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_FORWARD_CAMP },
+    [MAP_PIN_TYPE_FORWARD_CAMP_EBONHEART_PACT]              =   { creator = LayoutForwardCampTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategory = SI_TOOLTIP_FORWARD_CAMP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_FORWARD_CAMP },
+    [MAP_PIN_TYPE_FORWARD_CAMP_DAGGERFALL_COVENANT]         =   { creator = LayoutForwardCampTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategory = SI_TOOLTIP_FORWARD_CAMP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_FORWARD_CAMP },
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_NEUTRAL]                =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY, gamepadSpacing = true },
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_ALDMERI_DOMINION]       =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY, gamepadSpacing = true },
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_EBONHEART_PACT]         =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY, gamepadSpacing = true },
+    [MAP_PIN_TYPE_IMPERIAL_DISTRICT_DAGGERFALL_COVENANT]    =   { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY, gamepadSpacing = true },
+    [MAP_PIN_TYPE_IMPERIAL_CITY_OPEN]                       =   { creator = LayoutImperialCityTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY },
+    [MAP_PIN_TYPE_IMPERIAL_CITY_CLOSED]                     =   { creator = LayoutImperialCityTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_IMPERIAL_CITY },
+    [MAP_PIN_TYPE_RESTRICTED_LINK_ALDMERI_DOMINION]         =   { creator = AppendRestrictedLinkTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESTRICTED_LINK, gamepadSpacing = true },
+    [MAP_PIN_TYPE_RESTRICTED_LINK_EBONHEART_PACT]           =   { creator = AppendRestrictedLinkTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESTRICTED_LINK, gamepadSpacing = true },
+    [MAP_PIN_TYPE_RESTRICTED_LINK_DAGGERFALL_COVENANT]      =   { creator = AppendRestrictedLinkTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, gamepadCategoryId = ZO_MapPin.GAMEPAD_PIN_ORDERS.AVA_RESTRICTED_LINK, gamepadSpacing = true },
 }
 
 local tooltipOrder =
 {
-    TOOLTIP_MODE.IMPERIAL_CITY, TOOLTIP_MODE.KEEP, TOOLTIP_MODE.MAP_LOCATION, TOOLTIP_MODE.INFORMATION
+    ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY, ZO_MAP_TOOLTIP_MODE.KEEP, ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, ZO_MAP_TOOLTIP_MODE.INFORMATION
 }
 
 --[[
@@ -1175,6 +1213,11 @@ local currentMouseOverPins = {}
 local previousMouseOverPins = {}
 local mouseExitPins = {}
 local mousedOverPinWasReset = false
+local invalidateTooltip = false
+
+function ZO_WorldMap_InvalidateTooltip()
+    invalidateTooltip = true
+end
 
 local function ResetMouseOverPins()
     currentMouseOverPins = {}
@@ -1408,11 +1451,13 @@ end
 local function UpdateMouseOverPins()
     local isInGamepadPreferredMode = SCENE_MANAGER:IsCurrentSceneGamepad()
     local mapCenterX, mapCenterY = ZO_WorldMapScroll:GetCenter()
-    local needsUpdate, needsContinuousTooltipUpdates = BuildMouseOverPinLists(isInGamepadPreferredMode, mapCenterX, mapCenterY)
-    needsUpdate = needsUpdate or mousedOverPinWasReset
+    local mouseOverListChanged, needsContinuousTooltipUpdates = BuildMouseOverPinLists(isInGamepadPreferredMode, mapCenterX, mapCenterY)
+    local needsTooltipUpdate = mouseOverListChanged or mousedOverPinWasReset or needsContinuousTooltipUpdates or invalidateTooltip
+    local needsTooltipScrollReset = mouseOverListChanged or mousedOverPinWasReset
+    invalidateTooltip = false
     mousedOverPinWasReset = false
 
-    if (not needsUpdate) and (not needsContinuousTooltipUpdates) then
+    if not needsTooltipUpdate then
         return
     end
 
@@ -1462,7 +1507,7 @@ local function UpdateMouseOverPins()
             local layoutTooltip = true
             pin:SetTargetScale(1.3)
 
-            if((not isInGamepadPreferredMode) and (usedTooltip == TOOLTIP_MODE.KEEP or usedTooltip == TOOLTIP_MODE.IMPERIAL_CITY)) then
+            if((not isInGamepadPreferredMode) and (usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP or usedTooltip == ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY)) then
                 local pinLevel = pin:GetLevel()
                 if(pinLevel > maxKeepTooltipPinLevel) then
                     maxKeepTooltipPinLevel = pinLevel
@@ -1484,9 +1529,9 @@ local function UpdateMouseOverPins()
                             if(tooltipOrder[i] == usedTooltip) then
                                 if not usedTooltips[i] then
                                     usedTooltips[i] = true
-                                    if usedTooltip == TOOLTIP_MODE.KEEP then
+                                    if usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
                                         KEEP_TOOLTIP:SetHidden(false)
-                                    elseif usedTooltip == TOOLTIP_MODE.IMPERIAL_CITY then
+                                    elseif usedTooltip == ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY then
                                         IMPERIAL_CITY_TOOLTIP:SetHidden(false)
                                     else
                                         InitializeTooltip(GetTooltip(usedTooltip), control)
@@ -1496,7 +1541,7 @@ local function UpdateMouseOverPins()
                         end
                     else
                         if not ZO_WorldMap_IsWorldMapInfoShowing() and not ZO_WorldMap_IsKeepInfoShowing() then
-                            ShowGamepadTooltip(needsUpdate)
+                            ShowGamepadTooltip(needsTooltipScrollReset)
                         end
                     end
                 end
@@ -1536,7 +1581,7 @@ local function UpdateMouseOverPins()
                 g_keybindStrips.gamepad:DoMouseEnterForPinType(pinType)
 
                 --space out the appended lines in the information tooltip
-                if (usedTooltip == TOOLTIP_MODE.INFORMATION) and (not isInGamepadPreferredMode) then
+                if (usedTooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION) and (not isInGamepadPreferredMode) then
                     informationTooltipAppendedTo = true
                     INFORMATION_TOOLTIP:AddVerticalPadding(5)
                 end
@@ -1589,7 +1634,7 @@ local function UpdateMouseOverPins()
 
             prevControl = tooltipControl
 
-            if(tooltip == TOOLTIP_MODE.INFORMATION) then
+            if(tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION) then
                 g_ownsTooltip = true
             end
         end
@@ -1665,63 +1710,89 @@ local function CanFastTravelToKeep(keepId, bgContext)
     end
 end
 
-local KEEP_PIN_LMB
-do
-    KEEP_PIN_LMB = {
-        {
-            name = GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_KEEP),
-            show = function(pin)
-                local keepId = pin:GetKeepId()
-                local bgContext = pin:GetBattlegroundContext()
-                return CanFastTravelToKeep(keepId, bgContext)
-            end,
-            callback = function(pin)
-                local keepId = pin:GetKeepId()
-                local startKeepId = GetKeepFastTravelInteraction()
-                if(startKeepId and keepId ~= startKeepId) then
-                    TravelToKeep(keepId)
-                    ZO_WorldMap_HideWorldMap()
-                end
-            end,
-            gamepadName = function(pin, handlers)
-                if #handlers == 1 then
-                    return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRAVEL)
-                else
-                    return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_CHOOSE_DESTINATION)
-                end
-            end,
-        },
-        {
-            name = GetString(SI_WORLD_MAP_ACTION_RESPAWN_AT_KEEP),
-            show = function(pin)
-                if(g_mode == MAP_MODE_AVA_RESPAWN) then
-                    return true
-                end
-            end,
-            callback = function(pin)
-                local keepId = pin:GetKeepId()
-                RespawnAtKeep(keepId)
-            end,
-            gamepadName = function(pin, handlers)
-                return GetReviveKeybindText(handlers)
-            end,
-        },
-        {
-            name = GetString(SI_WORLD_MAP_ACTION_SHOW_INFORMATION),
-            gamepadName = GetString(SI_WORLD_MAP_ACTION_SHOW_INFORMATION),
-            show = function(pin)
-                local keepId = pin:GetKeepId()
-                local keepType = GetKeepType(keepId)
-                return (keepType == KEEPTYPE_KEEP or keepType == KEEPTYPE_RESOURCE) and g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN
-            end,
-            callback = function(pin)
-                local keepId = pin:GetKeepId()
+local KEEP_TRAVEL_BIND = 
+{
+    name = GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_KEEP),
+    show = function(pin)
+        local keepId = pin:GetKeepId()
+        local bgContext = pin:GetBattlegroundContext()
+        return CanFastTravelToKeep(keepId, bgContext)
+    end,
+    callback = function(pin)
+        local keepId = pin:GetKeepId()
+        local startKeepId = GetKeepFastTravelInteraction()
+        if(startKeepId and keepId ~= startKeepId) then
+            TravelToKeep(keepId)
+            ZO_WorldMap_HideWorldMap()
+        end
+    end,
+    gamepadName = function(pin, handlers)
+        if #handlers == 1 then
+            return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRAVEL)
+        else
+            return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_CHOOSE_DESTINATION)
+        end
+    end,
+}
 
-                SYSTEMS:GetObject("world_map_keep_info"):ToggleKeep(keepId)
-            end,
-        },
-    }
-end
+local KEEP_RESPAWN_BIND = 
+{
+    name = GetString(SI_WORLD_MAP_ACTION_RESPAWN_AT_KEEP),
+    show = function(pin)
+        if(g_mode == MAP_MODE_AVA_RESPAWN) then
+            return true
+        end
+    end,
+    callback = function(pin)
+        local keepId = pin:GetKeepId()
+        RespawnAtKeep(keepId)
+        ZO_WorldMap_HideWorldMap()
+    end,
+    gamepadName = function(pin, handlers)
+        return GetReviveKeybindText(handlers)
+    end,
+}
+
+local KEEP_INFO_BIND =
+{
+    name = GetString(SI_WORLD_MAP_ACTION_SHOW_INFORMATION),
+    gamepadName = GetString(SI_WORLD_MAP_ACTION_SHOW_INFORMATION),
+    show = function(pin)
+        local keepId = pin:GetKeepId()
+        local keepType = GetKeepType(keepId)
+        return (keepType == KEEPTYPE_KEEP or keepType == KEEPTYPE_RESOURCE) and g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN
+    end,
+    callback = function(pin)
+        local keepId = pin:GetKeepId()
+
+        SYSTEMS:GetObject("world_map_keep_info"):ToggleKeep(keepId)
+    end,
+}
+
+local HIDE_KEEP_INFO_BIND =
+{
+    name = GetString(SI_WORLD_MAP_ACTION_HIDE_INFORMATION),
+    gamepadName = GetString(SI_WORLD_MAP_ACTION_HIDE_INFORMATION),
+    show = function(pin)
+        return g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN and SYSTEMS:GetObject("world_map_keep_info"):GetKeepUpgradeObject() ~= nil
+    end,
+    callback = function(pin)
+        SYSTEMS:GetObject("world_map_keep_info"):HideKeep()
+    end,
+}
+
+local KEEP_PIN_LMB = 
+{
+    KEEP_TRAVEL_BIND,
+    KEEP_RESPAWN_BIND,
+    KEEP_INFO_BIND,
+}
+
+local TOWN_DISTRICT_PIN_LMB = 
+{
+    KEEP_RESPAWN_BIND,
+    HIDE_KEEP_INFO_BIND,
+}
 
 local WAYSHRINE_LMB =
 {
@@ -1743,8 +1814,8 @@ local WAYSHRINE_LMB =
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
                 local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-                local collectibleName = GetCollectibleName(collectibleId)
-                ShowMarketAndSearch(collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, GetCollectibleName(collectibleId))
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
             else
                 local nodeIndex = pin:GetFastTravelNodeIndex()
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
@@ -1786,8 +1857,8 @@ local WAYSHRINE_LMB =
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
                 local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-                local collectibleName = GetCollectibleName(collectibleId)
-                ShowMarketAndSearch(collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, GetCollectibleName(collectibleId))
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
             else
                 local nodeIndex = pin:GetFastTravelNodeIndex()
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
@@ -1831,16 +1902,16 @@ local FORWARD_CAMP_LMB =
 
 CONSTANTS.HANDLER_TYPES = {
         { QUEST_PIN_LMB[1] }, -- Quest types
-        { KEEP_PIN_LMB[1], WAYSHRINE_LMB[1], WAYSHRINE_LMB[2] }, -- Fast Travel types
-        { FORWARD_CAMP_LMB[1], KEEP_PIN_LMB[2] }, -- Revive types
+        { KEEP_TRAVEL_BIND, WAYSHRINE_LMB[1], WAYSHRINE_LMB[2] }, -- Fast Travel types
+        { FORWARD_CAMP_LMB[1], KEEP_RESPAWN_BIND }, -- Revive types
 }
 
 local function IsReviveLocation(pinHandler)
-    return pinHandler == KEEP_PIN_LMB[2] or pinHandler == FORWARD_CAMP_LMB[1]
+    return pinHandler == KEEP_RESPAWN_BIND or pinHandler == FORWARD_CAMP_LMB[1]
 end
 
 local function CanReviveAtPin(pin, pinHandler)
-    if pinHandler == KEEP_PIN_LMB[2] then
+    if pinHandler == KEEP_RESPAWN_BIND then
         local keepId = pin:GetKeepId()
         if CanRespawnAtKeep(keepId) then
             return true
@@ -1921,6 +1992,14 @@ ZO_MapPin.PIN_CLICK_HANDLERS =
         [MAP_PIN_TYPE_FORWARD_CAMP_ALDMERI_DOMINION] = FORWARD_CAMP_LMB,
         [MAP_PIN_TYPE_FORWARD_CAMP_EBONHEART_PACT] = FORWARD_CAMP_LMB,
         [MAP_PIN_TYPE_FORWARD_CAMP_DAGGERFALL_COVENANT] = FORWARD_CAMP_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_NEUTRAL] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_ALDMERI_DOMINION] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_EBONHEART_PACT] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_DAGGERFALL_COVENANT] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_NEUTRAL] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT] = TOWN_DISTRICT_PIN_LMB,
     },
 
     [2] =
@@ -2261,6 +2340,14 @@ function ZO_MapPin:IsKeep()
     return ZO_MapPin.KEEP_PIN_TYPES[self.m_PinType]
 end
 
+function ZO_MapPin:IsDistrict()
+    return ZO_MapPin.DISTRICT_PIN_TYPES[self.m_PinType]
+end
+
+function ZO_MapPin:IsKeepOrDistrict()
+    return self:IsKeep() or self:IsDistrict()
+end
+
 function ZO_MapPin:IsUnit()
     return ZO_MapPin.UNIT_PIN_TYPES[self.m_PinType]
 end
@@ -2309,6 +2396,18 @@ function ZO_MapPin:IsRestrictedLink()
     return ZO_MapPin.AVA_RESTRICTED_LINK_PIN_TYPES[self.m_PinType]
 end
 
+function ZO_MapPin:IsImperialCityPin()
+    return self:IsAvARespawn() or self:IsDistrict()
+end
+
+function ZO_MapPin:IsCyrodiilPin()
+    return self:IsAvAObjective() or self:IsAvARespawn() or self:IsForwardCamp() or self:IsFastTravelKeep() or self:IsKeep() or self:IsImperialCityGate()
+end
+
+function ZO_MapPin:IsAvAPin()
+    return self:IsImperialCityPin() or self:IsCyrodiilPin()
+end
+
 function ZO_MapPin:GetQuestData()
     if(ZO_MapPin.QUEST_PIN_TYPES[self.m_PinType]) then
         -- returns index, step, condition
@@ -2321,11 +2420,18 @@ function ZO_MapPin:GetQuestData()
 end
 
 function ZO_MapPin:ValidateAVAPinAllowed()
-    if GetCurrentMapIndex() == g_cyrodiilMapIndex then
-        return true
-    else
-        return not (self:IsAvAObjective() or self:IsAvARespawn() or self:IsForwardCamp() or self:IsFastTravelKeep() or self:IsKeep() or self:IsImperialCityGate())
+    if self:IsAvAPin() then
+        if GetMapContentType() == MAP_CONTENT_AVA then
+            local currentMapIndex = GetCurrentMapIndex()
+            if currentMapIndex == g_cyrodiilMapIndex then
+                return self:IsCyrodiilPin()
+            elseif currentMapIndex == g_imperialCityMapIndex then
+                return self:IsImperialCityPin()
+            end
+        end
+        return false
     end
+    return true
 end
 
 do
@@ -2348,7 +2454,7 @@ do
         [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon_door.dds",
         [MAP_PIN_TYPE_TRACKED_QUEST_ENDING] = "EsoUI/Art/Compass/quest_icon_door.dds",
     }
-
+    
     function ZO_MapPin:GetQuestIcon()
         if(self.m_PinTag.isBreadcrumb) then
             return breadcrumbQuestPinTextures[self:GetPinType()]
@@ -2445,13 +2551,13 @@ function ZO_MapPin:GetAvAObjectiveObjectiveId()
 end
 
 function ZO_MapPin:GetKeepId()
-    if(self:IsKeep()) then
+    if(self:IsKeepOrDistrict()) then
         return self.m_PinTag[1]
     end
 end
 
 function ZO_MapPin:IsUnderAttackPin()
-    if(self:IsKeep()) then
+    if(self:IsKeepOrDistrict()) then
         return self.m_PinTag[3]
     end
     return false
@@ -2475,7 +2581,7 @@ end
 function ZO_MapPin:GetBattlegroundContext()
     if(self:IsImperialCityGate()) then
         return self.m_PinTag[1]
-    elseif(self:IsKeep()) then
+    elseif(self:IsKeepOrDistrict()) then
         return self.m_PinTag[2]
     elseif(self:IsAvAObjective()) then
         return self.m_PinTag[3]
@@ -2662,6 +2768,11 @@ do
         end
     end
 
+    function ZO_MapPin:ChangePinType(pinType)
+        self:SetData(pinType, self.m_PinTag)
+        self:SetLocation(self.normalizedX, self.normalizedY, self.radius)
+    end
+
     function ZO_MapPin:SetData(pinType, pinTag)
         self.m_PinType = pinType
         self.m_PinTag = pinTag
@@ -2801,8 +2912,10 @@ function ZO_MapPin:SetLocation(xLoc, yLoc, radius)
 
     if(valid) then
         if(radius and radius > 0) then
-            if(not self:IsKeep()) then
-                self.pinBlob, self.pinBlobKey = g_pinBlobManager:AcquireObject()
+            if(not self:IsKeepOrDistrict()) then
+                if not self.pinBlob then
+                    self.pinBlob, self.pinBlobKey = g_pinBlobManager:AcquireObject()
+                end
                 self.pinBlob:SetHidden(false)
             end
 
@@ -3012,7 +3125,7 @@ function ZO_WorldMapPins:CreatePin(pinType, pinTag, xLoc, yLoc, radius)
         self:MapPinLookupToPinKey("quest", pin:GetQuestIndex(), pinTag, pinKey)
     elseif(pin:IsAvAObjective()) then
         self:MapPinLookupToPinKey("ava", pin:GetAvAObjectiveKeepId(), pinTag, pinKey)
-    elseif(pin:IsKeep())  then
+    elseif(pin:IsKeepOrDistrict())  then
         self:MapPinLookupToPinKey("keep", pin:GetKeepId(), pin:IsUnderAttackPin(), pinKey)
     elseif(pin:IsImperialCityGate())  then
         self:MapPinLookupToPinKey("imperialCity", pinType, pinTag, pinKey)
@@ -3072,6 +3185,19 @@ function ZO_WorldMapPins:HasPinForQuest(questIndex)
     end
 
     return false
+end
+
+function ZO_WorldMapPins:SetQuestPinsAssisted(questIndex, assisted)
+    local pins = self:GetActiveObjects()
+
+    for pinKey, pin in pairs(pins) do
+        local curIndex = pin:GetQuestIndex()
+        if curIndex == questIndex and assisted ~= pin:IsAssisted() then
+            local assistedToTrackedDelta = MAP_PIN_TYPE_TRACKED_QUEST_CONDITION - MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION
+            local delta = assisted and -assistedToTrackedDelta or assistedToTrackedDelta
+            pin:ChangePinType(pin:GetPinType() + delta)
+        end
+    end
 end
 
 function ZO_WorldMapPins:FindPin(lookupType, majorIndex, keyIndex)
@@ -3931,6 +4057,7 @@ function ZO_MapPanAndZoom:InitializeMap(wasNavigateIn)
         self:SetMapZoomMinMax(self:ComputeMinZoom(), self:ComputeMaxZoom())
 
         if(self.pendingJumpToPin) then
+            self:SetCurrentZoomInternal(self.maxZoom)
             self:JumpToPin(self.pendingJumpToPin, self.pendingJumpToPinZoomMode)
         elseif(self.pendingPanToPin) then
             self:PanToPin(self.pendingPanToPin, self.pendingPanToPinZoomMode)
@@ -4314,7 +4441,7 @@ function ZO_MapPanAndZoom:OnWorldMapShowing()
         end
 
         local pin = g_mapPinManager:GetPlayerPin()
-        self:JumpToPin(pin)
+        self:JumpToPin(pin, USE_CURRENT_ZOOM)
     end
 end
 
@@ -4610,10 +4737,16 @@ end
 
 local function ZO_WorldMap_FindAvAKeepMap()
     local desiredMap
-    if g_mode == MAP_MODE_KEEP_TRAVEL or g_mode == MAP_MODE_AVA_RESPAWN then
+    if g_mode == MAP_MODE_KEEP_TRAVEL then
         desiredMap = g_cyrodiilMapIndex
+    elseif g_mode == MAP_MODE_AVA_RESPAWN then
+        if IsInImperialCity() then
+            desiredMap = g_imperialCityMapIndex
+        else
+            desiredMap = g_cyrodiilMapIndex
+        end
     end
-    
+
     if desiredMap then
         if GetCurrentMapIndex() == desiredMap then
             g_playerChoseCurrentMap = true  
@@ -4737,7 +4870,24 @@ end
 function ZO_WorldMap_IsMapChangingAllowed(zoomDirection)
     local restrictions = MAP_MODE_CHANGE_RESTRICTIONS[g_mode]
     if restrictions then
-        return not restrictions.disableMapChanging
+        if restrictions.disableMapChanging then
+            return false
+        elseif restrictions.restrictedCyrodiilImperialCityMapChanging then
+            --Restricted means that only zooming will work, and only if the player is inside of Imperial City or Sewers
+            --Can only zoom between Cyrodiil and the City itself
+            if IsInImperialCity() and zoomDirection then
+                local currentMapIndex = GetCurrentMapIndex()
+                if zoomDirection == CONSTANTS.ZOOM_DIRECTION_OUT and currentMapIndex == g_imperialCityMapIndex then
+                    return true
+                elseif zoomDirection == CONSTANTS.ZOOM_DIRECTION_IN and currentMapIndex == g_cyrodiilMapIndex then
+                    local wouldProcess, resultingMapIndex = WouldProcessMapClick(NormalizePreferredMousePositionToMap())
+                    if wouldProcess and resultingMapIndex == g_imperialCityMapIndex then
+                        return true
+                    end
+                end
+            end
+            return false
+        end
     end
     return true
 end
@@ -4833,6 +4983,10 @@ local function IsMapShowingBattlegroundContext(bgContext)
             or (g_queryType == BGQUERY_ASSIGNED_CAMPAIGN and IsAssignedBattlegroundContext(bgContext))
 end
 
+local function IsPresentlyShowingKeeps()
+    return GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL or GetMapFilterType() == MAP_FILTER_TYPE_AVA_IMPERIAL
+end
+
 function ZO_WorldMap_RefreshImperialCity(bgContext)
     --Check for Imperial City information
     g_mapPinManager:RemovePins("imperialCity")
@@ -4852,23 +5006,27 @@ end
 local function AddKeep(keepId, bgContext)
     local historyPercent = GetHistoryPercentToUse()
     local pinType, locX, locY = GetHistoricalKeepPinInfo(keepId, bgContext, historyPercent)
-    if(pinType ~= MAP_PIN_TYPE_INVALID) then
+    if pinType ~= MAP_PIN_TYPE_INVALID then
         local keepUnderAttack = GetHistoricalKeepUnderAttack(keepId, bgContext, historyPercent)
         local keepUnderAttackPinType = ZO_WorldMap_GetUnderAttackPinForKeepPin(pinType)
 
-        if(IsNormalizedPointInsideMapBounds(locX, locY)) then
+        if IsNormalizedPointInsideMapBounds(locX, locY) then
             local keepType = GetKeepType(keepId)
-            if(ZO_WorldMap_IsPinGroupShown(MAP_FILTER_RESOURCE_KEEPS) or (keepType ~= KEEPTYPE_RESOURCE)) then
-                if (IsMapShowingBattlegroundContext(bgContext)) then
+            if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_RESOURCE_KEEPS) or (keepType ~= KEEPTYPE_RESOURCE) then
+                if keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT and GetCurrentMapIndex() ~= g_imperialCityMapIndex then
+                    return
+                end
+
+                if IsMapShowingBattlegroundContext(bgContext) then
                     local underAttackPin = true
                     local notUnderAttackPin = false
 
                     local existingKeepPin = g_mapPinManager:FindPin("keep", keepId, notUnderAttackPin)
-                    if(not existingKeepPin) then
+                    if not existingKeepPin then
                         local tag = ZO_MapPin.CreateKeepPinTag(keepId, bgContext, notUnderAttackPin)
                         g_mapPinManager:CreatePin(pinType, tag, locX, locY)
 
-                        if(keepUnderAttack) then
+                        if keepUnderAttack then
                             tag = ZO_MapPin.CreateKeepPinTag(keepId, bgContext, underAttackPin)
                             g_mapPinManager:CreatePin(keepUnderAttackPinType, tag, locX, locY)
                         end
@@ -4883,7 +5041,7 @@ local function RefreshKeep(keepId, bgContext)
     g_mapPinManager:RemovePins("keep", keepId)
     ZO_WorldMap_RefreshAccessibleAvAGraveyards()
 
-    if(GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL) then
+    if IsPresentlyShowingKeeps() then
         AddKeep(keepId, bgContext)
     end
 
@@ -4895,7 +5053,7 @@ local function RefreshKeeps()
     g_mapPinManager:RemovePins("imperialCity")
     ZO_WorldMap_RefreshAccessibleAvAGraveyards()
 
-    if(GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL) then
+    if IsPresentlyShowingKeeps() then
         local numKeeps = GetNumKeeps()
         for i = 1, numKeeps do
             local keepId, bgContext = GetKeepKeysByIndex(i)
@@ -5034,7 +5192,11 @@ function ZO_WorldMap_RefreshRespawnTimer(currentTime)
         else
             if(g_mode == MAP_MODE_AVA_RESPAWN) then
                 local secondsRemaining = (g_nextRespawnTimeMS - currentTimeMS) / 1000
-                formattedTimeRemaining = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+                if (secondsRemaining < 10) then
+                    formattedTimeRemaining = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING)
+                else
+                    formattedTimeRemaining = ZO_FormatTimeLargestTwo(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+                end
                 isTimerHidden = false
             else
                 -- hide the timer when not in AvA-Respawn map mode
@@ -5092,10 +5254,19 @@ function ZO_WorldMap_RefreshAccessibleAvAGraveyards()
             local keepId, _ = GetKeepKeysByIndex(i)
             if(CanRespawnAtKeep(keepId)) then
                 local keepType = GetKeepType(keepId)
-                local pinType = MAP_PIN_TYPE_KEEP_GRAVEYARD_ACCESSIBLE
-                if(keepType == KEEPTYPE_BORDER_KEEP) then
+                local pinType
+                if keepType == KEEPTYPE_BORDER_KEEP then
                     pinType = MAP_PIN_TYPE_RESPAWN_BORDER_KEEP_ACCESSIBLE
+                elseif keepType == KEEPTYPE_TOWN then
+                    pinType = MAP_PIN_TYPE_AVA_TOWN_GRAVEYARD_ACCESSIBLE
+                elseif keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT then
+                    if GetCurrentMapIndex() == g_imperialCityMapIndex then
+                        pinType = MAP_PIN_TYPE_IMPERIAL_DISTRICT_GRAVEYARD_ACCESSIBLE
+                    end
+                else
+                    pinType = MAP_PIN_TYPE_KEEP_GRAVEYARD_ACCESSIBLE
                 end
+
                 if pinType then
                     local _, locX, locY = GetKeepPinInfo(keepId, g_queryType)
                     g_mapPinManager:CreatePin(pinType, ZO_MapPin.CreateAvARespawnPinTag(i), locX, locY)
@@ -5187,11 +5358,11 @@ function ZO_WorldMap_GetMapTitle()
     local mapName = GetMapName()
     local dungeonDifficulty = ZO_WorldMap_GetMapDungeonDifficulty()
     if dungeonDifficulty == DUNGEON_DIFFICULTY_NONE then
-        title = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP, mapName)
+        titleText = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP, mapName)
     else
-        title = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP_WITH_DUNGEON_DIFFICULTY, mapName, GetString("SI_DUNGEONDIFFICULTY", dungeonDifficulty))
+        titleText = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP_WITH_DUNGEON_DIFFICULTY, mapName, GetString("SI_DUNGEONDIFFICULTY", dungeonDifficulty))
     end
-    return title
+    return titleText
 end
 
 function ZO_WorldMap_GetMapDungeonDifficulty()
@@ -5889,14 +6060,15 @@ do
     --Callbacks
     ------------
     local function OnAssistStateChanged(unassistedData, assistedData)
-        if(unassistedData) then
-            UpdateAppropriateQuestPins(unassistedData:GetJournalIndex())
+        if(unassistedData) then            
+            g_mapPinManager:SetQuestPinsAssisted(unassistedData:GetJournalIndex(), false)
         end
         if(assistedData) then
-            UpdateAppropriateQuestPins(assistedData:GetJournalIndex())
+            g_mapPinManager:SetQuestPinsAssisted(assistedData:GetJournalIndex(), true)
         end
+        ZO_WorldMap_InvalidateTooltip()
     end
-
+    
     local function OnGamepadPreferredModeChanged()
         SetupWorldMap()
     end
@@ -6197,10 +6369,6 @@ do
     --Initialize Refresh Groups
     ----------------------------
 
-    local function IsPresentlyShowingKeeps()
-        return GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL
-    end
-
     local function InitializeRefreshGroups()
         g_mapRefresh:AddRefreshGroup("keep",
         {
@@ -6293,6 +6461,7 @@ do
         InitializeRefreshGroups()
 
         g_playerPin = g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
+        g_nextRespawnTimeMS = GetNextForwardCampRespawnTime()
 
         local function TryTriggeringTutorials()
 			if WORLD_MAP_FRAGMENT:IsShowing() then
@@ -6434,6 +6603,7 @@ do
                 local largeCustom = g_savedVars[MAP_MODE_LARGE_CUSTOM]
 
                 g_cyrodiilMapIndex = GetCyrodiilMapIndex()
+                g_imperialCityMapIndex = GetImperialCityMapIndex()
 
                 CALLBACK_MANAGER:FireCallbacks("OnWorldMapSavedVarsReady", g_savedVars)
 
@@ -6922,14 +7092,14 @@ function ZO_WorldMap_AddRespawnDialogItems(list, pins, handlers, header)
         local handler = handlers[i]
 
         local canRespawn = true
-        if handler == KEEP_PIN_LMB[2] then
+        if handler == KEEP_RESPAWN_BIND then
             local keepId = pin:GetKeepId()
             if not CanRespawnAtKeep(keepId) then
                 canRespawn = false
             end
         end
 
-        if canRespawn and (pin:IsForwardCamp() or pin:IsKeep()) then
+        if canRespawn and (pin:IsForwardCamp() or pin:IsKeepOrDistrict()) then
             local newEntry = ZO_GamepadEntryData:New(handler.name)
             newEntry:SetFontScaleOnSelection(false)
             newEntry.pin = pin

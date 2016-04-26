@@ -23,16 +23,6 @@ function GetInstanceDisplayTypeIcon(instanceType)
     return INSTANCE_DISPLAY_TYPE_ICONS[instanceType]
 end
 
---Texture randomization
-------------------------------
-
-local RANDOM_TEXTURE_COUNT = 10
-    
-local function GetRandomLoadingTexture()
-    local textureIndex = math.random(1, RANDOM_TEXTURE_COUNT)
-    return string.format("esoui/art/loadingscreens/charload_%02d.dds", textureIndex)
-end
-
 --Local implementation of object pool for key edge file
 ------------------------------
 
@@ -151,7 +141,7 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
     local isDefaultTexture = "" == loadingTexture
 
     if(isDefaultTexture) then
-        loadingTexture = GetRandomLoadingTexture()
+        loadingTexture = GetRandomLoadingScreenTexture()
     end
 
     self.art:SetTexture(loadingTexture)

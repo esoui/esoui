@@ -233,7 +233,7 @@ function ZO_CampaignBonuses_Shared:BuildMasterList()
                 typeIcon = info.typeIcon,
                 typeIconGamepad = info.typeIconGamepad,
                 countText = countText,
-                name = name,
+                name = zo_strformat(SI_CAMPAIGN_BONUSES_ENTRY_ROW_FORMATTER, name),
                 icon = icon,
                 active = score and score >= scoreIndex,
                 bonusType = bonusType,

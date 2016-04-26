@@ -65,7 +65,7 @@ do
 
             title =
             {
-                text = SI_CONSOLE_CREATEACCOUNT_ERROR_HEADER,
+                text = SI_LINKACCOUNT_ERROR_HEADER,
             },
 
             mainText = 

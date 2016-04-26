@@ -11,6 +11,13 @@
                 <Label name="$(parent)Purchased" font="ZoFontGamepadBold25" override="true" />
 
                 <Label name="$(parent)TextCallout" font="ZoMarketGamepadCalloutFont" override="true" />
+                
+                <Label name="$(parent)BundledProducts" font="ZoFontGamepad34" override="true">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-10"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontGamepadBold25" override="true" />
+                    </Controls>
+                </Label>
             </Controls>
         </Control>
 
@@ -19,9 +26,6 @@
                 <Label name="$(parent)Cost" override="true" hidden="true" />
             </Controls>
         </Control>
-
-        <Control name="ZO_Gamepad_MarketProductBundleItemAttachmentTemplate" inherits="ZO_Gamepad_MarketProductBundleAttachmentTemplate" virtual="true"/>
-        <Control name="ZO_Gamepad_MarketProductBundleCollectibleAttachmentTemplate" inherits="ZO_Gamepad_MarketProductBundleAttachmentTemplate" virtual="true"/>
         
         <Control name="ZO_Gamepad_MarketBlankTileTemplate" inherits="ZO_Gamepad_MarketProductTemplate" virtual="true">
             <Controls>

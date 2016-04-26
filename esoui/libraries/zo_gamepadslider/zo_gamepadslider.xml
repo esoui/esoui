@@ -1,0 +1,18 @@
+<GuiXml>
+    <Controls>
+        <Slider name="ZO_GamepadSlider" mouseEnabled="true" orientation="HORIZONTAL" virtual="true">
+            <Dimensions x="150" y="16" />
+            <ThumbTexture
+                textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_scrollThumb.dds"
+                thumbWidth="32"
+                thumbHeight="32"
+                />
+
+            <Controls>
+                <Texture name="$(parent)Left" inherits="ZO_GamepadWhiteFrameLeftArrowMedium" tier="LOW" />
+                <Texture name="$(parent)Right" inherits="ZO_GamepadWhiteFrameRightArrowMedium" tier="LOW" />
+                <Texture name="$(parent)Center" inherits="ZO_GamepadWhiteFrameCenterMedium" tier="LOW" />
+            </Controls>
+        </Slider>
+    </Controls>
+</GuiXml>

@@ -163,7 +163,7 @@ end
 function ZO_KeybindStrip:RemoveAllKeyButtonGroups(stateIndex)
     local state = self:GetKeybindState(stateIndex)
     if state then
-        return RemoveAllKeyButtonGroupsStack(state)
+        return ZO_KeybindStrip.RemoveAllKeyButtonGroupsStack(state)
     end
 
     if next(self.keybindGroups) ~= nil then
@@ -236,6 +236,28 @@ end
 
 --- PRIVATE FUNCTIONS ---
 
+local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
+    if type(buttonOrEtherealDescriptor) == "userdata" then
+        return buttonOrEtherealDescriptor.keybindButtonDescriptor
+    end
+    return buttonOrEtherealDescriptor
+end
+
+local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
+    local value
+    if keybindButtonDescriptor[key] == nil then
+        value = keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor[key]
+    else
+        value = keybindButtonDescriptor[key]
+    end
+
+    if type(value) == "function" then
+        return value(keybindButtonDescriptor, keybindButtonDescriptor.keybindButtonGroupDescriptor)
+    end
+
+    return value
+end
+
 local function AddKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     if not state.keybindGroups[keybindButtonGroupDescriptor] then
         state.keybindGroups[keybindButtonGroupDescriptor] = keybindButtonGroupDescriptor
@@ -251,7 +273,7 @@ local function AddKeybindButtonStack(keybindButtonDescriptor, state)
     state.individualButtons[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
 end
 
-local function RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+function ZO_KeybindStrip.RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     if state.keybindGroups[keybindButtonGroupDescriptor] then
         state.keybindGroups[keybindButtonGroupDescriptor] = nil
         return true
@@ -280,11 +302,11 @@ local function UpdateCurrentKeybindButtonGroupsStack(stateIndex)
     -- do nothing
 end
 
-local function RemoveAllKeyButtonGroupsStack(state)
+function ZO_KeybindStrip.RemoveAllKeyButtonGroupsStack(state)
     if next(state.keybindGroups) ~= nil then
         local prevKeybindGroups = ZO_ShallowTableCopy(state.keybindGroups)
         for _, groupDescriptor in pairs(prevKeybindGroups) do
-            RemoveKeybindButtonGroupStack(groupDescriptor, state)
+            ZO_KeybindStrip.RemoveKeybindButtonGroupStack(groupDescriptor, state)
         end
     end
 end
@@ -319,7 +341,31 @@ function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
     end
 
     -- Asserting here usually means that a key is already bound (typically because someone forgot to remove a keybinding).
-    assert(self.keybinds[keybindButtonDescriptor.keybind] == nil)
+    local currentSceneName = ""
+    if SCENE_MANAGER then
+        local currentScene = SCENE_MANAGER:GetCurrentScene()
+        if currentScene then
+            currentSceneName = currentScene:GetName()
+        end
+    end
+    local existingButtonOrEtheralDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
+    if existingButtonOrEtheralDescriptor then
+        local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtheralDescriptor)
+        local existingSceneName = ""
+        local existingDescriptorName = ""
+        if existingDescriptor then
+            existingSceneName = existingDescriptor.addedForSceneName
+            local descriptorName = GetValueFromRawOrFunction(existingDescriptor, "name")
+            if descriptorName then
+                existingDescriptorName = descriptorName
+            end
+        end
+        local newDescriptorName = GetValueFromRawOrFunction(keybindButtonDescriptor, "name") or ""
+        local context = string.format("Duplicate Keybind: %s. Before: %s (%s). After: %s (%s).", keybindButtonDescriptor.keybind, existingSceneName, existingDescriptorName, currentSceneName, newDescriptorName)
+        assert(false, context)
+    end
+
+    keybindButtonDescriptor.addedForSceneName = currentSceneName
 
     if keybindButtonDescriptor.ethereal then
         self.keybinds[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
@@ -364,6 +410,8 @@ function ZO_KeybindStrip:RemoveKeybindButton(keybindButtonDescriptor, stateIndex
     local buttonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]     
     if buttonOrEtherealDescriptor and CompareKeybindButtonDescriptor(buttonOrEtherealDescriptor.keybindButtonDescriptor, keybindButtonDescriptor) then
         self.keybinds[keybindButtonDescriptor.keybind] = nil
+
+        keybindButtonDescriptor.addedForSceneName = nil
 
         for i, cooldownKeybindDescriptor in ipairs(self.cooldownKeybinds) do
             if cooldownKeybindDescriptor == keybindButtonDescriptor and not cooldownKeybindDescriptor.shouldCooldownPersist then
@@ -474,7 +522,7 @@ end
 function ZO_KeybindStrip:RemoveKeybindButtonGroup(keybindButtonGroupDescriptor, stateIndex)
     local state = self:GetKeybindState(stateIndex)
     if state then
-        return RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+        return ZO_KeybindStrip.RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     end
 
     if self.keybindGroups[keybindButtonGroupDescriptor] then
@@ -502,7 +550,7 @@ function ZO_KeybindStrip:UpdateCurrentKeybindButtonGroups(stateIndex)
     end
 
     for keybindButtonDescriptor, group in pairs(self.keybindGroups) do
-        self:UpdateKeybindButtonGroup(keybindButtonDescriptor)
+        self:UpdateKeybindButtonGroup(keybindButtonDescriptor, stateIndex)
     end
 end
 
@@ -529,28 +577,6 @@ end
 
 function ZO_KeybindStrip:HasKeybindButtonGroup(keybindButtonGroupDescriptor)
     return self.keybindGroups[keybindButtonGroupDescriptor] ~= nil
-end
-
-local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
-    if type(buttonOrEtherealDescriptor) == "userdata" then
-        return buttonOrEtherealDescriptor.keybindButtonDescriptor
-    end
-    return buttonOrEtherealDescriptor
-end
-
-local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
-    local value
-    if keybindButtonDescriptor[key] == nil then
-        value = keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor[key]
-    else
-        value = keybindButtonDescriptor[key]
-    end
-
-    if type(value) == "function" then
-        return value(keybindButtonDescriptor, keybindButtonDescriptor.keybindButtonGroupDescriptor)
-    end
-
-    return value
 end
 
 function ZO_KeybindStrip:FilterSceneHiding(keybindButtonDescriptor)

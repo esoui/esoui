@@ -322,6 +322,10 @@ function ZO_RaidLeaderboardsManager_Shared:UpdatePlayerParticipationStatus()
 end
 
 function ZO_RaidLeaderboardsManager_Shared:UpdateRaidScore()
+    if not self.selectedSubType then
+        return
+    end
+
     local raidInProgress, raidComplete
     if self.selectedSubType.isWeekly then
         raidInProgress, raidComplete = GetPlayerRaidOfTheWeekProgressInfo(self.selectedSubType.raidCategory)

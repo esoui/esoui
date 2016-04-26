@@ -35,9 +35,9 @@ function ZO_QuestJournal_Manager:RegisterForEvents()
 end
 
 local function BuildTextHelper(questIndex, stepIndex, conditionStep, questStrings)
-    local conditionText, currentCount, maxCount, isFailCondition, isComplete = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionStep)
+    local conditionText, currentCount, maxCount, isFailCondition, isComplete, _, isVisible = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionStep)
 
-    if(not isFailCondition and conditionText ~= "") then
+    if(isVisible and not isFailCondition and conditionText ~= "") then
         if isComplete then
             conditionText = ZO_DISABLED_TEXT:Colorize(conditionText)
         end

@@ -6,12 +6,12 @@ local gameEntries = {}
 -- Play
 
 local function ShowLogin()
-    SCENE_MANAGER:AddFragment(LOGIN_FRAGMENT)
+    LOGIN_MANAGER_KEYBOARD:ShowRelevantLoginFragment()
     SCENE_MANAGER:AddFragment(LOGIN_BG_FRAGMENT)
 end
 
 local function HideLogin()
-    SCENE_MANAGER:RemoveFragment(LOGIN_FRAGMENT)
+    LOGIN_MANAGER_KEYBOARD:HideShowingLoginFragment()
 end
 
 local function AddPlayEntry(entryTable)

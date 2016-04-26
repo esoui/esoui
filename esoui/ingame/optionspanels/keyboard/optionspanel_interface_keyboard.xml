@@ -7,16 +7,32 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Interface_ShowActionBar" inherits="ZO_Options_Dropdown">
+        <Control name="Options_Interface_PrimaryPlayerNameKeyboard" inherits="ZO_Options_Dropdown">
             <Anchor point="TOPLEFT" relativeTo="Options_Interface_HUDSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Interface_ShowActionBar" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_PrimaryPlayerNameKeyboard" relativePoint="BOTTOMLEFT" offsetY="10" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Interface_ShowRaidLives" inherits="ZO_Options_Dropdown">
+        <Control name="Options_Interface_ResourceNumbers" inherits="ZO_Options_Dropdown">
             <Anchor point="TOPLEFT" relativeTo="Options_Interface_ShowActionBar" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Interface_ShowRaidLives" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_ResourceNumbers" relativePoint="BOTTOMLEFT" offsetY="10" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_RAID_LIVES)
                 ZO_OptionsWindow_InitializeControl(self)
@@ -31,8 +47,16 @@
             </OnInitialized>
         </Control>
 
+        <Control name="Options_Interface_UltimateNumber" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_ActiveCombatTips" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
         <Control name="UI_Settings_ShowQuestTracker" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_ActiveCombatTips" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_UltimateNumber" relativePoint="BOTTOMLEFT" offsetY="6" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
                 ZO_OptionsWindow_InitializeControl(self)
@@ -73,69 +97,24 @@
             </Controls>
         </Control>
 
-        <Control name="Options_Interface_HealthbarsSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_CompassActiveQuests" relativePoint="BOTTOMLEFT" offsetY="15" />
+        <Control name="Options_Interface_ShowWeaponIndicator" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_CompassActiveQuests" relativePoint="BOTTOMLEFT" offsetY="10" />
             <OnInitialized>
-                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_INTERFACE, SI_INTERFACE_OPTIONS_HEALTHBARS)
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_WEAPON_INDICATOR)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Interface_AllHB" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_HealthbarsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+        <Control name="Options_Interface_ShowArmorIndicator" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_ShowWeaponIndicator" relativePoint="BOTTOMLEFT" offsetY="10" />
             <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_PlayerHB" inherits="ZO_Options_Dropdown">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_AllHB" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_PLAYER_HEALTHBAR)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_FriendlyNPCHB" inherits="ZO_Options_Dropdown">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_PlayerHB" relativePoint="BOTTOMLEFT" offsetY="10" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_FriendlyPlayerHB" inherits="ZO_Options_Dropdown">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_FriendlyNPCHB" relativePoint="BOTTOMLEFT" offsetY="10" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_EnemyNPCHB" inherits="ZO_Options_Dropdown">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_FriendlyPlayerHB" relativePoint="BOTTOMLEFT" offsetY="10" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_EnemyPlayerHB" inherits="ZO_Options_Dropdown">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_EnemyNPCHB" relativePoint="BOTTOMLEFT" offsetY="10" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS)
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_ARMOR_INDICATOR)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>
 
         <Control name="Options_Interface_SCTSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_EnemyPlayerHB" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_ShowArmorIndicator" relativePoint="BOTTOMLEFT" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_INTERFACE, SI_INTERFACE_OPTIONS_SCT)
                 ZO_OptionsWindow_InitializeControl(self)
@@ -310,98 +289,8 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Interface_IndicatorsSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingPetDoTEnabled" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
-            <OnInitialized>
-                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_INTERFACE, SI_INTERFACE_OPTIONS_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_AllianceIndicators" inherits="ZO_Options_Dropdown">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_IndicatorsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALLIANCE_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_GroupIndicators" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_AllianceIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_GROUP_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_ResurrectIndicators" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_GroupIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_RESURRECT_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_FollowerIndicators" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_ResurrectIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FOLLOWER_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_QuestBestowers" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_FollowerIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_GlowThickness" inherits="ZO_Options_Slider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_QuestBestowers" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_GLOW_THICKNESS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_TargetGlowCheck" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_GlowThickness" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_TargetGlowIntensity" inherits="ZO_Options_Slider">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_TargetGlowCheck" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_InteractableGlowCheck" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_TargetGlowIntensity" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="6" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
-        <Control name="Options_Interface_InteractableGlowIntensity" inherits="ZO_Options_Slider">
-            <Dimensions x="490" y="26" />
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_InteractableGlowCheck" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-
         <Control name="Options_Interface_ChatBubblesSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_InteractableGlowIntensity" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_SCTIncomingPetDoTEnabled" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_INTERFACE, SI_INTERFACE_OPTIONS_CHAT_BUBBLES)
                 ZO_OptionsWindow_InitializeControl(self)

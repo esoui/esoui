@@ -26,6 +26,11 @@ do
     function ZO_InstanceKickWarning:Initialize(control)
         self.control = control
 
+        local function OnPlayerActivated()
+            local timeRemaining, totalTime = GetInstanceKickTime()
+            self:OnInstanceKickTimeUpdate(timeRemaining, totalTime)
+        end
+
         local function OnInstanceKickTimeUpdate(event, timeRemaining, totalTime)
             if not timeRemaining then
                 timeRemaining, totalTime = GetInstanceKickTime()
@@ -40,7 +45,7 @@ do
             self:UpdateVisibility()
         end
 
-        self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnInstanceKickTimeUpdate)
+        self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
         self.control:RegisterForEvent(EVENT_INSTANCE_KICK_TIME_UPDATE, OnInstanceKickTimeUpdate)
         self.control:RegisterForEvent(EVENT_GROUP_INVITE_RECEIVED, OnGroupInviteUpdate)
         self.control:RegisterForEvent(EVENT_GROUP_INVITE_REMOVED, OnGroupInviteUpdate)

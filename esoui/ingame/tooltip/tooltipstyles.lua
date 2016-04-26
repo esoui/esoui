@@ -42,6 +42,23 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
+    statValuePairMagickaValue =
+    {
+        fontSize = "$(GP_42)",
+        fontColorType = INTERFACE_COLOR_TYPE_POWER,
+        fontColorField = POWERTYPE_MAGICKA,
+    },
+    statValuePairStaminaValue =
+    {
+        fontSize = "$(GP_42)",
+        fontColorType = INTERFACE_COLOR_TYPE_POWER,
+        fontColorField = POWERTYPE_STAMINA,
+    },
+    championRequirements =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
     fullWidth =
     {
         widthPercent = 100
@@ -107,11 +124,17 @@ ZO_TOOLTIP_STYLES =
     {
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "down",
-        statValuePairSpacing = 6,
+        statValuePairSpacing = 3,
         childSpacing = 10,
-        customSpacing = 9,
         childSecondarySpacing = 3,
-        widthPercent = 98,
+        widthPercent = 100,
+    },
+    valueStatsSection =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        paddingTop = 30,
+        widthPercent = 100,
     },
     conditionOrChargeBarSection =
     {
@@ -175,13 +198,12 @@ ZO_TOOLTIP_STYLES =
     },
     topSection =
     {
-        customSpacing = 7,
         layoutPrimaryDirection = "up",
         layoutSecondaryDirection = "right",
         widthPercent = 100,
         childSpacing = 1,
         fontSize = "$(GP_27)",
-        height = 67,
+        height = 92,
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },    
@@ -194,14 +216,26 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_27)",
         height = 32,
     },
-    topSubsectionItemCounts =
+	collectionsTopSection =
+	{
+		customSpacing = 7,
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "up",
+        widthPercent = 100,
+        childSpacing = 7,
+        fontSize = "$(GP_27)",
+        height = 67,
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+	},
+    topSubsectionItemDetails =
     {
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "up",
         widthPercent = 100,
-        childSpacing = 8,
+        childSpacing = 15,
         customSpacing = -4,
-        fontSize = "$(GP_42)",
+        fontSize = "$(GP_27)",
         height = 32,
         fontColorField = GENERAL_COLOR_WHITE,
     },
@@ -250,6 +284,10 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
         fontColorField = ITEM_QUALITY_LEGENDARY,
+    },
+    bind = 
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
     stolen = 
     {
@@ -305,6 +343,25 @@ ZO_TOOLTIP_STYLES =
         statValuePairSpacing = 6,
         childSpacing = 3,
         customSpacing = 40,
+    },
+    suppressedAbility =
+    {
+        fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE,
+    },
+    poisonCountSection =
+    {
+        layoutPrimaryDirection = "left",
+        layoutSecondaryDirection = "down",
+    },
+    poisonCount =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    equippedPoisonSection =
+    {
+        customSpacing = 20,
+        paddingBottom = -20,
     },
 
     --Ability Tooltip
@@ -463,7 +520,16 @@ ZO_TOOLTIP_STYLES =
             minHeight = 40,
         },
     },
-    mapLocationTooltipContent =
+    mapLocationTooltipContentTitle =
+    {
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    mapLocationTooltipNameSection =
+    {
+        paddingLeft = 60,
+    },
+    mapLocationTooltipContentName =
     {
         fontSize = "$(GP_34)",
         fontColorField = GENERAL_COLOR_OFF_WHITE,
@@ -497,6 +563,10 @@ ZO_TOOLTIP_STYLES =
     mapLocationGroupSection =
     {
         childSpacing = 10,
+    },
+    mapLocationEntrySection =
+    {
+        childSpacing = -5,
     },
     mapKeepUnderAttack =
     {
@@ -655,7 +725,7 @@ ZO_TOOLTIP_STYLES =
     {
         widthPercent = 100,
         fontSize = "$(GP_34)",
-        uppercase = false,
+        uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
     },
     
@@ -906,6 +976,21 @@ ZO_TOOLTIP_STYLES =
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
 
+    collectionsStatsSection =
+    {
+        statValuePairSpacing = 10,
+        childSpacing = 20,
+        customSpacing = 20,
+        widthPercent = 100,
+    },
+
+    collectionsStatsValue =
+    {
+        fontSize = "$(GP_42)",
+        customSpacing = 8,
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
     -- Gamepad Crown Store Market
     instantUnlockIneligibilitySection =
     {
@@ -1015,7 +1100,20 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GENERAL_COLOR_RED,
     },
-
+    groupRolesTitleSection =
+    {
+        fontSize = "$(GP_42)",
+        widthPercent = 100,
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_WHITE,
+        paddingTop = 70,
+    },
+    groupRolesStatValuePairValue =
+    {
+        fontSize = "$(GP_42)",
+        uppercase = false,
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
     -- Gamepad Champion Screen
     attributeTitleSection =
     {

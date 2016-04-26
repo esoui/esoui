@@ -52,11 +52,12 @@ do
         self.control:RegisterForEvent(EVENT_DISGUISE_STATE_CHANGED, function(event, unitTag, ...) if unitTag == "player" then self:OnDisguiseStateChanged(...) end end)
         self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function(event, ...) self:SetupReticle(...) end)
         self.control:RegisterForEvent(EVENT_IMPACTFUL_HIT, function(event, ...) self:OnImpactfulHit(...) end)
-        self.control:RegisterForEvent(EVENT_NO_INTERACT_TARGET, function(event, ...) PlaySound(SOUNDS.NO_INTERACT_TARGET) end)    
+        self.control:RegisterForEvent(EVENT_NO_INTERACT_TARGET, function(event, ...) PlaySound(SOUNDS.NO_INTERACT_TARGET) end)
+        self.control:RegisterForEvent(EVENT_RETICLE_TARGET_CHANGED, function(event, ...) self:OnReticleTargetChanged(...) end)    
      
         local hideUnbound = false
         self.interactKeybindButton:SetKeybind("GAME_CAMERA_INTERACT", hideUnbound, "GAMEPAD_JUMP_OR_INTERACT")
-        self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+        self.control:SetHandler("OnUpdate", function(control, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
 
         if IsPlayerActivated() then
             self:SetupReticle()
@@ -68,6 +69,7 @@ end
 
 function ZO_Reticle:SetupReticle()
     self:OnDisguiseStateChanged(GetUnitDisguiseState("player"))
+    self:OnStealthStateChanged(GetUnitStealthState("player"))
 end
 
 function ZO_Reticle:OnStealthStateChanged(newState)
@@ -78,6 +80,25 @@ end
 function ZO_Reticle:OnDisguiseStateChanged(newState)
     self:UpdateHiddenState()
     self.stealthIcon:OnDisguiseStateChanged(newState)
+end
+
+function ZO_Reticle:OnReticleTargetChanged()
+    self:ClearStealingItemTimestamp()
+end
+
+local STEALING_TUTORIAL_SHOWN_AFTER_SECONDS = 1.5
+
+function ZO_Reticle:ClearStealingItemTimestamp()
+    self.stealingItemTimestampSeconds = nil
+end
+
+function ZO_Reticle:TryHandlingStealingTutorial(currentFrameTimeSeconds)
+    if self.stealingItemTimestampSeconds == nil then
+        self.stealingItemTimestampSeconds = currentFrameTimeSeconds
+    elseif currentFrameTimeSeconds - self.stealingItemTimestampSeconds >= STEALING_TUTORIAL_SHOWN_AFTER_SECONDS then
+        TriggerTutorial(TUTORIAL_TRIGGER_STOLEN_ITEM_TARGETED)
+        self.stealingItemTimestampSeconds = nil
+    end
 end
 
 function ZO_Reticle:TryHandlingQuestInteraction(questInteraction, questTargetBased, questJournalIndex, questToolIndex, questToolOnCooldown)
@@ -99,18 +120,32 @@ function ZO_Reticle:TryHandlingQuestInteraction(questInteraction, questTargetBas
     end
 end
 
-function ZO_Reticle:TryHandlingInteraction(interactionPossible)
+function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTimeSeconds)
     if interactionPossible then
-        local action, interactableName, interactionBlocked, isOwnedOrCriminalInteract, additionalInteractInfo, context, contextLink = GetGameCameraInteractableActionInfo()
+        local action, interactableName, interactionBlocked, isOwned, additionalInteractInfo, context, contextLink, isCriminalInteract = GetGameCameraInteractableActionInfo()
         local interactKeybindButtonColor = ZO_NORMAL_TEXT
         local additionalInfoLabelColor = ZO_CONTRAST_TEXT
         self.interactKeybindButton:ShowKeyIcon()
 
+        local isOwnedOrCriminalInteract = isOwned or isCriminalInteract
+
         if action and interactableName then
             if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET, action))
+
+                local isStealingPossible = false
                 if (isOwnedOrCriminalInteract) then 
                     interactKeybindButtonColor = ZO_ERROR_COLOR
+
+                    if isOwned and additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE then
+                        -- Assuming that the only INSTANCE_TYPE owned interactables are doors and that everything else is pilferable...
+                        self:TryHandlingStealingTutorial(currentFrameTimeSeconds)
+                        isStealingPossible = true
+                    end
+                end
+
+                if not isStealingPossible then
+                    self:ClearStealingItemTimestamp()
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_EMPTY then
                 self.interactKeybindButton:SetText(zo_strformat(SI_FORMAT_BULLET_TEXT, GetString(SI_GAME_CAMERA_ACTION_EMPTY)))
@@ -141,18 +176,18 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible)
                 end                
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_PICKPOCKET_CHANCE then
                 local isHostile, difficulty, isEmpty
-				self.isInBonus, isHostile, self.percentChance, difficulty, isEmpty, prospectiveResult = GetGameCameraPickpocketingBonusInfo()
+                self.isInBonus, isHostile, self.percentChance, difficulty, isEmpty, prospectiveResult, monsterClassString = GetGameCameraPickpocketingBonusInfo()
 
                 -- Prevent your success chance from going over 100%
                 self.percentChance = zo_min(self.percentChance, 100)
 
                 local additionalInfoText
-				if(isEmpty and prospectiveResult == PROSPECTIVE_PICKPOCKET_RESULT_INVENTORY_FULL) then
-					additionalInfoText = GetString(SI_JUSTICE_PICKPOCKET_TARGET_EMPTY)
+                if(isEmpty and prospectiveResult == PROSPECTIVE_PICKPOCKET_RESULT_INVENTORY_FULL) then
+                    additionalInfoText = GetString(SI_JUSTICE_PICKPOCKET_TARGET_EMPTY)
                 elseif prospectiveResult ~= PROSPECTIVE_PICKPOCKET_RESULT_CAN_ATTEMPT then
                     additionalInfoText = GetString("SI_PROSPECTIVEPICKPOCKETRESULT", prospectiveResult)
                 else
-                    additionalInfoText = (isEmpty and GetString(SI_JUSTICE_PICKPOCKET_TARGET_EMPTY) or GetString("SI_PICKPOCKETDIFFICULTYTYPE", difficulty))
+                    additionalInfoText = isEmpty and GetString(SI_JUSTICE_PICKPOCKET_TARGET_EMPTY) or monsterClassString
                 end
                 
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO, action, additionalInfoText))
@@ -183,15 +218,15 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible)
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_IN_HIDEYHOLE then
                 self.interactKeybindButton:SetText(zo_strformat(SI_EXIT_HIDEYHOLE))
             end
-			
-			local interactContextString = interactableName;
-			if(additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE) then
-				local instanceType = context
-				if instanceType ~= INSTANCE_DISPLAY_TYPE_NONE then 
-					local instanceTypeString = zo_iconTextFormat(GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
-					interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
-				end
-			end
+            
+            local interactContextString = interactableName;
+            if(additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE) then
+                local instanceType = context
+                if instanceType ~= INSTANCE_DISPLAY_TYPE_NONE then 
+                    local instanceTypeString = zo_iconTextFormat(GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
+                    interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
+                end
+            end
             self.interactContext:SetText(interactContextString)
 
             self.interactionBlocked = interactionBlocked
@@ -222,7 +257,7 @@ function ZO_Reticle:TryHandlingNonInteractableFixture()
     return false
 end
 
-function ZO_Reticle:UpdateInteractText()
+function ZO_Reticle:UpdateInteractText(currentFrameTimeSeconds)
     self.additionalInfo:SetHidden(true)
     if IsGameCameraActive() and not IsGameCameraUIModeActive() then
         --Priority is
@@ -237,7 +272,7 @@ function ZO_Reticle:UpdateInteractText()
         self.interactionBlocked = false
         self.interactKeybindButton:SetNormalTextColor(ZO_NORMAL_TEXT)
 
-		local interactionType = GetInteractionType()
+        local interactionType = GetInteractionType()
 
         -- The loot window does some fancy stuff with this text...wait until it is gone to show it again
         if interactionType == INTERACTION_LOOT then
@@ -252,7 +287,7 @@ function ZO_Reticle:UpdateInteractText()
             local interactionExists, interactionAvailableNow, questInteraction, questTargetBased, questJournalIndex, questToolIndex, questToolOnCooldown = GetGameCameraInteractableInfo()
             if questTargetBased and self:TryHandlingQuestInteraction(questInteraction, questTargetBased, questJournalIndex, questToolIndex, questToolOnCooldown) then
                 self.interact:SetHidden(false)
-            elseif self:TryHandlingInteraction(interactionExists) then
+            elseif self:TryHandlingInteraction(interactionExists, currentFrameTimeSeconds) then
                 self.interact:SetHidden(false)
             elseif self:TryHandlingQuestInteraction(questInteraction, questTargetBased, questJournalIndex, questToolIndex, questToolOnCooldown) then
                 self.interact:SetHidden(false)
@@ -261,12 +296,12 @@ function ZO_Reticle:UpdateInteractText()
             end
         end
 
-		local showBusy = interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_FISH and interactionType ~= INTERACTION_PICKPOCKET  and interactionType ~= INTERACTION_HIDEYHOLE or (IsInGamepadPreferredMode() and IsBlockActive())
-		self.interactKeybindButton:SetEnabled(not showBusy and not self.interactionBlocked)
+        local showBusy = interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_FISH and interactionType ~= INTERACTION_PICKPOCKET  and interactionType ~= INTERACTION_HIDEYHOLE or (IsInGamepadPreferredMode() and IsBlockActive())
+        self.interactKeybindButton:SetEnabled(not showBusy and not self.interactionBlocked)
     end
 end
 
-function ZO_Reticle:OnUpdate()
+function ZO_Reticle:OnUpdate(currentFrameTimeSeconds)
     local interactionPossible = not self.interact:IsHidden()
 
     if interactionPossible or PLAYER_TO_PLAYER:HasTarget() or IsGameCameraUnitHighlightedAttackable() then
@@ -275,7 +310,7 @@ function ZO_Reticle:OnUpdate()
         self.reticleOpenCloseTimeline:PlayBackward()
     end
 
-    self:UpdateInteractText()
+    self:UpdateInteractText(currentFrameTimeSeconds)
 end
 
 function ZO_Reticle:RequestHidden(hidden)

@@ -510,7 +510,7 @@ function MailInbox:MessageFrom_OnMouseEnter(control)
         local senderCharacterName = mailData.senderCharacterName
         if(senderCharacterName ~= "") then
             InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5)
-            SetTooltipText(InformationTooltip, senderCharacterName)
+            SetTooltipText(InformationTooltip, ZO_FormatUserFacingCharacterName(senderCharacterName))
         end
     end
 end

@@ -1,7 +1,8 @@
 --Layout consts, defining the widths of the list's columns as provided by design--
-ZO_GAMEPAD_GUILD_ROSTER_RANK_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_GUILD_ROSTER_USER_FACING_NAME_WIDTH = 295 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_GUILD_ROSTER_ZONE_WIDTH = 330 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_GUILD_ROSTER_RANK_WIDTH = 90 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_GUILD_ROSTER_USER_FACING_NAME_WIDTH = 310 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_GUILD_ROSTER_CHARACTER_NAME_WIDTH = 165 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_GUILD_ROSTER_ZONE_WIDTH = 210 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 
 -----------------
 -- Guild Roster
@@ -15,6 +16,11 @@ end
 
 function ZO_GamepadGuildRosterManager:Initialize(control)
     ZO_GamepadSocialListPanel.Initialize(self, control, GUILD_ROSTER_MANAGER, "ZO_GamepadGuildRosterRow")
+
+	--Need to call SetEmptyText so the empty text label is created and have the text be properly set by InteractiveSortFilterList the filters returns no result
+	--GuildRoster will never be empty unless it was filtered out
+	self:SetEmptyText(GetString(""))
+
     self:SetupSort(GUILD_ROSTER_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_DOWN)
 end
 
@@ -87,7 +93,7 @@ end
 
 function ZO_GamepadGuildRosterManager:LayoutTooltip(tooltipManager, tooltip, data)
     local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
-    tooltipManager:LayoutGuildMember(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, guildId, data.rankIndex, data.note, data.level, data.veteranRank, data.formattedAllianceName, data.formattedZone, not data.online)
+    tooltipManager:LayoutGuildMember(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, guildId, data.rankIndex, data.note, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp)
 end
 
 function ZO_GamepadGuildRosterManager:ColorRow(control, data, selected)

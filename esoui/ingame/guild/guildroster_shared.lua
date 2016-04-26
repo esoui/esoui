@@ -8,12 +8,13 @@ GUILD_MEMBER_DATA = 1
 GUILD_ROSTER_ENTRY_SORT_KEYS =
 {
     ["displayName"] = { },
+    ["characterName"] = { },
     ["status"]  = { tiebreaker = "normalizedLogoffSort", isNumeric = true },
     ["class"]  = { tiebreaker = "displayName" },
     ["formattedZone"]  = { tiebreaker = "displayName" },
     ["alliance"] = { tiebreaker = "displayName" },
-    ["veteranRank"] = { tiebreaker = "displayName", isNumeric = true},
-    ["level"] = { tiebreaker = "veteranRank", isNumeric = true },
+    ["championPoints"] = { tiebreaker = "displayName", isNumeric = true},
+    ["level"] = { tiebreaker = "championPoints", isNumeric = true },
     ["rankIndex"] = { tiebreaker = "displayName", isNumeric = true },
     ["normalizedLogoffSort"] = { tiebreaker = "displayName", isNumeric = true },
 }
@@ -47,7 +48,7 @@ function ZO_GuildRosterManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_UPDATED, function(_, guildId, displayName) if(self:MatchesGuild(guildId)) then self:OnGuildMemberCharacterUpdated(displayName) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED, function(_, guildId, displayName, characterName, zone) if(self:MatchesGuild(guildId)) then self:OnGuildMemberCharacterZoneChanged(displayName, characterName, zone) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_LEVEL_CHANGED, function(_, guildId, displayName, characterName, level) if(self:MatchesGuild(guildId)) then self:OnGuildMemberCharacterLevelChanged(displayName, characterName, level) end end)
-    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_VETERAN_RANK_CHANGED, function(_, guildId, displayName, characterName, veteranRank) if(self:MatchesGuild(guildId)) then self:OnGuildMemberCharacterVeteranRankChanged(displayName, characterName, veteranRank) end end)
+    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_CHAMPION_POINTS_CHANGED, function(_, guildId, displayName, characterName, championPoints) if(self:MatchesGuild(guildId)) then self:OnGuildMemberCharacterChampionPointsChanged(displayName, characterName, championPoints) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName, rankIndex) if(self:MatchesGuild(guildId)) then self:OnGuildMemberRankChanged(displayName, rankIndex) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, displayName, oldStatus, newStatus) if(self:MatchesGuild(guildId)) then self:OnGuildMemberPlayerStatusChanged(displayName, oldStatus, newStatus) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_NOTE_CHANGED, function(_, guildId, displayName, note) if(self:MatchesGuild(guildId)) then self:OnGuildMemberNoteChanged(displayName, note) end end)
@@ -128,7 +129,7 @@ function ZO_GuildRosterManager:BuildMasterList()
         local online = (status ~= PLAYER_STATUS_OFFLINE)
         local rankId = GetGuildRankId(guildId, rankIndex)
         local isLocalPlayer = (localPlayerIndex > 0 and guildMemberIndex == localPlayerIndex)        
-        local hasCharacter, rawCharacterName, zone, class, alliance, level, veteranRank = GetGuildMemberCharacterInfo(guildId, guildMemberIndex)
+        local hasCharacter, rawCharacterName, zone, class, alliance, level, championPoints = GetGuildMemberCharacterInfo(guildId, guildMemberIndex)
        
         local data =  {  
                             index = guildMemberIndex,
@@ -138,7 +139,7 @@ function ZO_GuildRosterManager:BuildMasterList()
                             characterName = zo_strformat(SI_UNIT_NAME, rawCharacterName), 
                             gender = GetGenderFromNameDescriptor(rawCharacterName),
                             level = level, 
-                            veteranRank = veteranRank, 
+                            championPoints = championPoints, 
                             class = class, 
                             formattedZone = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone),                         
                             alliance = alliance, 
@@ -197,7 +198,7 @@ function ZO_GuildRosterManager:OnGuildMemberAdded(guildId, displayName)
     if(DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_INVITE)) then
         local data = self:FindDataByDisplayName(displayName)
         if(data) then
-            local hasCharacter, rawCharacterName, zone, class, alliance, level, veteranRank = GetGuildMemberCharacterInfo(self.guildId, data.index)
+            local hasCharacter, rawCharacterName, zone, class, alliance, level, championPoints = GetGuildMemberCharacterInfo(self.guildId, data.index)
             local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or rawCharacterName
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GUILD_ROSTER_ADDED, zo_strformat(SI_GUILD_ROSTER_ADDED, nameToShow, self.guildName))
         end
@@ -223,7 +224,7 @@ end
 function ZO_GuildRosterManager:OnGuildMemberCharacterUpdated(displayName)
     local data = self:FindDataByDisplayName(displayName)
     if(data) then
-        local hasCharacter, rawCharacterName, zone, class, alliance, level, veteranRank = GetGuildMemberCharacterInfo(self.guildId, data.index)
+        local hasCharacter, rawCharacterName, zone, class, alliance, level, championPoints = GetGuildMemberCharacterInfo(self.guildId, data.index)
         data.hasCharacter = hasCharacter
         data.characterName = zo_strformat(SI_UNIT_NAME, rawCharacterName)
         data.gender = GetGenderFromNameDescriptor(rawCharacterName)
@@ -232,7 +233,7 @@ function ZO_GuildRosterManager:OnGuildMemberCharacterUpdated(displayName)
         data.alliance = alliance
         data.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
         data.level = level
-        data.veteranRank = veteranRank
+        data.championPoints = championPoints
         self:RefreshFilters()
     end
 end
@@ -253,10 +254,10 @@ function ZO_GuildRosterManager:OnGuildMemberCharacterLevelChanged(displayName, c
     end
 end
 
-function ZO_GuildRosterManager:OnGuildMemberCharacterVeteranRankChanged(displayName, characterName, veteranRank)
+function ZO_GuildRosterManager:OnGuildMemberCharacterChampionPointsChanged(displayName, characterName, championPoints)
     local data = self:FindDataByDisplayName(displayName)
     if(data) then
-        data.veteranRank = veteranRank
+        data.championPoints = championPoints
         self:RefreshSort()
     end
 end
@@ -289,7 +290,7 @@ function ZO_GuildRosterManager:OnGuildMemberPlayerStatusChanged(displayName, old
             ZO_SocialList_SetUpOnlineData(data, false, 0)
         elseif(not wasOnline and isOnline) then
             ZO_SocialList_SetUpOnlineData(data, true) 
-            local hasCharacter, rawCharacterName, zone, class, alliance, level, veteranRank = GetGuildMemberCharacterInfo(self.guildId, data.index)
+            local hasCharacter, rawCharacterName, zone, class, alliance, level, championPoints = GetGuildMemberCharacterInfo(self.guildId, data.index)
             data.characterName = zo_strformat(SI_UNIT_NAME, rawCharacterName)
             data.gender = GetGenderFromNameDescriptor(rawCharacterName)
             data.formattedZone = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone)
@@ -297,10 +298,10 @@ function ZO_GuildRosterManager:OnGuildMemberPlayerStatusChanged(displayName, old
             data.alliance = alliance
             data.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
             data.level = level
-            data.veteranRank = veteranRank
+            data.championPoints = championPoints
         end
 
-        self:RefreshSort()
+        self:RefreshFilters()
     end
 end
 

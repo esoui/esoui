@@ -424,15 +424,16 @@ end
 
 function ZO_Tracker:AssistClosestTracked()
     local foundValidCondition, nextQuestToAssist = GetNearestQuestCondition(QUEST_ASSIST_CONSIDER_ONLY_TRACKED_QUESTS)            
-    if(foundValidCondition)
-    then
+    if foundValidCondition then
         local questHeader = self:GetHeaderForIndex(TRACK_TYPE_QUEST, nextQuestToAssist)
-        if(questHeader)
-        then
+        if questHeader then
             self.disableAudio = true
             self:SetAssisted(questHeader, true)
             self.disableAudio = false
         end
+    else
+        --Even if we can't find a quest to path to, let's assist whatever other quests we might have in the journal instead
+        self:AssistNext()
     end
 end
 

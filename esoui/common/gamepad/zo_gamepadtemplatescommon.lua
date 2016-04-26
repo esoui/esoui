@@ -5,6 +5,7 @@
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 local EQUIPPED_THIS_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local EQUIPPED_OTHER_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"    --same for now
+local ITEM_IS_HIDDEN_TEXTURE = "EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds"				--should be red checkmark
 local MAIL_ATTACHED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local TRADE_ITEM_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local ACHIEVEMENT_EARNED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
@@ -13,8 +14,12 @@ local UPGRADE_SKILL_TEXTURE = "EsoUI/Art/Progression/Gamepad/gp_purchase.dds"
 local ASSISTED_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
 local SPEAKER_TEXTURE = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_speaking.dds"
 local SELECTED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
-local LOCK_TEXTURE = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
 local SPEAKER_TEXTURE = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_speaking.dds"
+
+local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
+local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
+local SMALL_FONT_SELECTED = "ZoFontGamepad27"
+local SMALL_FONT_UNSELECTED = "ZoFontGamepad20"
 
 function ZO_SharedGamepadEntry_OnInitialized(control)
     --icon and highlights
@@ -22,6 +27,7 @@ function ZO_SharedGamepadEntry_OnInitialized(control)
     if control.icon then
         control.highlight = control.icon:GetNamedChild("Highlight")
         control.stackCountLabel = control.icon:GetNamedChild("StackCount")
+        control.playerLockedIcon = control.icon:GetNamedChild("PlayerLockedIcon")
     end
     control.checkBox = control:GetNamedChild("CheckBox")
     control.label = control:GetNamedChild("Label")
@@ -191,10 +197,8 @@ end
 local function ZO_SharedGamepadEntryCooldownSetup(control, data)
 
     if control.cooldown then
-        local currentTime = GetFrameTimeMilliseconds()
-        local timeOffset = currentTime - (data.timeCooldownRecorded or 0)
-        local remaining = (data.cooldownRemaining or 0) - timeOffset
-        local duration = (data.cooldownDuration or 0)
+        local remaining = data:GetCooldownTimeRemainingMs()
+        local duration = data:GetCooldownDurationMs()
 
         control.inCooldown = (remaining > 0) and (duration > 0)
         control.cooldown:SetTexture(data.cooldownIcon or "EsoUI/Art/Miscellaneous/timer_64.dds")
@@ -209,7 +213,9 @@ local function ZO_SharedGamepadEntryCooldownSetup(control, data)
     end
 end
 
-local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, data, selected)
+local USE_LOWERCASE_NUMBER_SUFFIXES = false
+
+local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, playerLockedIcon, data, selected)
     if icon then
         if data.iconUpdateFn then
             data.iconUpdateFn()
@@ -231,34 +237,43 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, data, selec
             end
 
             if stackCountLabel then
-                if data.stackCount and data.stackCount > 1 then
-                    stackCountLabel:SetText(data.stackCount)
+                local stackCount = data.stackCount
+                if stackCount and stackCount > 1 then
+                    stackCountLabel:SetText(ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
                 else
                     stackCountLabel:SetText("")
                 end
             end
 
-            local r, g, b = 1, 1, 1
-            if data.enabled then
-                if selected and data.selectedIconTint then
-                    r, g, b = data.selectedIconTint:UnpackRGBA()
-                elseif (not selected) and data.unselectedIconTint then
-                    r, g, b = data.unselectedIconTint:UnpackRGBA()
-                end
-            else
-                if selected and data.selectedIconDisabledTint then
-                    r, g, b = data.selectedIconDisabledTint:UnpackRGBA()
-                elseif (not selected) and data.unselectedIconDisabledTint then
-                    r, g, b = data.unselectedIconDisabledTint:UnpackRGBA()
-                end
+            if playerLockedIcon then
+                playerLockedIcon:SetHidden(not data.isPlayerLocked)
             end
 
-            if data.meetsUsageRequirement == false then
-                icon:SetColor(r, 0, 0, icon:GetControlAlpha())
-            else 
-                icon:SetColor(r, g, b, icon:GetControlAlpha())
-            end
+            ZO_SharedGamepadEntryIconColorize(icon, data, selected)
         end
+    end
+end
+
+function ZO_SharedGamepadEntryIconColorize(icon, data, selected)
+    local r, g, b = 1, 1, 1
+    if data.enabled then
+        if selected and data.selectedIconTint then
+            r, g, b = data.selectedIconTint:UnpackRGBA()
+        elseif (not selected) and data.unselectedIconTint then
+            r, g, b = data.unselectedIconTint:UnpackRGBA()
+        end
+    else
+        if selected and data.selectedIconDisabledTint then
+            r, g, b = data.selectedIconDisabledTint:UnpackRGBA()
+        elseif (not selected) and data.unselectedIconDisabledTint then
+            r, g, b = data.unselectedIconDisabledTint:UnpackRGBA()
+        end
+    end
+
+    if data.meetsUsageRequirement == false then
+        icon:SetColor(r, 0, 0, icon:GetControlAlpha())
+    else 
+        icon:SetColor(r, g, b, icon:GetControlAlpha())
     end
 end
 
@@ -267,10 +282,14 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         --multi-icons control their own alpha, don't set it directly on the icon if you're using a multi-icon
         statusIndicator:ClearIcons()
         
-        if data.isEquippedInCurrentCategory then
+		if data.isEquippedInCurrentCategory then
             statusIndicator:AddIcon(EQUIPPED_THIS_SLOT_TEXTURE)
         elseif data.isEquippedInAnotherCategory then
             statusIndicator:AddIcon(EQUIPPED_OTHER_SLOT_TEXTURE)
+        end
+
+		if data.isHiddenByWardrobe then
+			statusIndicator:AddIcon(ITEM_IS_HIDDEN_TEXTURE)
         end
 
         local isItemNew
@@ -325,7 +344,7 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         end
 
         if data.isLocked then
-            statusIndicator:AddIcon(LOCK_TEXTURE)
+            statusIndicator:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32)
         end
 
         statusIndicator:Show()
@@ -369,10 +388,6 @@ end
 --future use by other systems and Timer/TimerOverlay was turned into control.cooldown
 function ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     
-    if data.heightScaleOnSelection then
-        control:SetDimensions(ZO_GAMEPAD_CONTENT_WIDTH, selected and ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SELECTED_HEIGHT or ZO_GAMEPAD_DEFAULT_LIST_ENTRY_HEIGHT)
-    end
-
     if data.alphaChangeOnSelection or data.disabled then
         control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, data.disabled))
     else
@@ -381,7 +396,7 @@ function ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDurin
     
     ZO_SharedGamepadEntryLabelSetup(control.label, data, selected)
     
-    ZO_SharedGamepadEntryIconSetup(control.icon, control.stackCountLabel, data, selected)
+    ZO_SharedGamepadEntryIconSetup(control.icon, control.stackCountLabel, control.playerLockedIcon, data, selected)
 
     if control.highlight then
         if selected and data.highlight then
@@ -456,12 +471,37 @@ local function SetDefaultColorOnCheckbox(checkbox, selected)
     ZO_CheckButtonLabel_SetTextColor(checkbox, r, g, b)
 end
 
-function SetMenuEntryFontFace(label, selected)
-    label:SetFont(selected and "ZoFontGamepad42" or "ZoFontGamepad34")
-end
+do
+    local function GetUnselectedToSelectedRatio(unselectedFontName, selectedFontName)
+        local _, unselectedSize = _G[unselectedFontName]:GetFontInfo()
+        local _, selectedSize = _G[selectedFontName]:GetFontInfo()
+        return unselectedSize / selectedSize
+    end
 
-function SetMenuEntrySmallFontFace(label, selected)
-    label:SetFont(selected and "ZoFontGamepad27" or "ZoFontGamepad20")
+    local NORMAL_RATIO
+    local SMALL_RATIO 
+
+    function SetMenuEntryFontFace(label, selected)
+        label:SetFont(selected and NORMAL_FONT_SELECTED or NORMAL_FONT_UNSELECTED)
+        if not NORMAL_RATIO then
+            NORMAL_RATIO = GetUnselectedToSelectedRatio(NORMAL_FONT_UNSELECTED, NORMAL_FONT_SELECTED)
+        end
+        if not label.templateFullWidth then
+            label.templateFullWidth = label:GetWidth()
+        end
+        label:SetWidth(selected and label.templateFullWidth or (label.templateFullWidth * NORMAL_RATIO))
+    end
+
+    function SetMenuEntrySmallFontFace(label, selected)
+        label:SetFont(selected and SMALL_FONT_SELECTED or SMALL_FONT_UNSELECTED)
+        if not SMALL_RATIO then
+            SMALL_RATIO = GetUnselectedToSelectedRatio(SMALL_FONT_UNSELECTED, SMALL_FONT_SELECTED)
+        end
+        if not label.templateFullWidth then
+            label.templateFullWidth = label:GetWidth()
+        end
+        label:SetWidth(selected and label.templateFullWidth or (label.templateFullWidth * SMALL_RATIO))
+    end
 end
 
 function ZO_GamepadMenuEntryTemplate_GetAlpha(selected, disabled)
@@ -512,11 +552,6 @@ end
 function ZO_GamepadMenuEntryTemplate_Setup(control, text, pressedTexture, normalTexture, highlightTexture, selected, activated, stackCount)
     SharedGamepadEntryTemplateSetup(control, text, pressedTexture, normalTexture, highlightTexture, selected, activated, stackCount)
     SetMenuEntryFontFace(control.label, selected)
-end
-
---TODO: This function shouldn't be used anymore (update GamepadProvisioner.lua)
-function ZO_GamepadSubMenuEntryTemplate_Setup(control, text, pressedTexture, normalTexture, highlightTexture, selected, activated, stackCount)
-    SharedGamepadEntryTemplateSetup(control, text, pressedTexture, normalTexture, highlightTexture, selected, activated, stackCount)
 end
 
 function ZO_GamepadOnDefaultActivatedChanged(control, activated)

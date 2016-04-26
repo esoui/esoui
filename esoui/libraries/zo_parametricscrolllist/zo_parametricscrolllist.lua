@@ -726,6 +726,10 @@ function ZO_ParametricScrollList:SetPlaySoundFunction(fn)
     self.onPlaySoundFunction = fn
 end
 
+function ZO_ParametricScrollList:SetMouseEnabled(mouseEnabled)
+	self.control:SetMouseEnabled(mouseEnabled)
+end
+
 --[[ Private API ]]--
 local function GetControlDimensionForMode(mode, control)
     return mode == PARAMETRIC_SCROLL_LIST_VERTICAL and control:GetHeight() or control:GetWidth()

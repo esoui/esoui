@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PixelUnitsFromChildren" virtual="true">
+            <OnInitialized>
+                ZO_PixelUnitsFromChildren_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

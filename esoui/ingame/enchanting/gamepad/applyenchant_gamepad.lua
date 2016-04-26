@@ -79,24 +79,14 @@ function ZO_ApplyEnchant_Gamepad:ResetTooltipToDefault()
 end
 
 do
-    local FORMATTED_VETERAN_RANK_ICON = zo_iconFormat(GetGamepadVeteranRankIcon(), 48, 48)
+    local FORMATTED_CHAMPION_POINTS_ICON = zo_iconFormat(GetGamepadChampionPointsIcon(), 48, 48)
     function ZO_ApplyEnchant_Gamepad:AddItemKitSubLabelsToCurrentEntry(itemLink)
-        local minLevel, maxLevel, minVeteranRank, maxVeteranRank = GetItemLinkGlyphMinMaxLevels(itemLink)
-        if minVeteranRank then
-             local vetRankString
-             if minVeteranRank ~= maxVeteranRank then
-                vetRankString = zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_VETERAN_RANK_GAMEPAD, FORMATTED_VETERAN_RANK_ICON, minVeteranRank, maxVeteranRank)
-            else
-                vetRankString = zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_VETERAN_RANK_GAMEPAD, FORMATTED_VETERAN_RANK_ICON, minVeteranRank)
-            end
-            self:AddSubLabel(vetRankString)
+        local minLevel, minChampionPoints = GetItemLinkGlyphMinLevels(itemLink)
+        if minChampionPoints then
+            local champPointString = zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_CHAMPION_POINTS_GAMEPAD, FORMATTED_CHAMPION_POINTS_ICON, minChampionPoints)
+            self:AddSubLabel(champPointString)
         else
-            local levelString
-            if minLevel ~= maxLevel then
-                levelString = zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_LEVEL, minLevel, maxLevel)
-            else
-                levelString = zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_LEVEL, minLevel)
-            end
+            local levelString = zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_LEVEL, minLevel)
             self:AddSubLabel(levelString)
         end
     end

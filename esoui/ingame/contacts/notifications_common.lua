@@ -5,6 +5,7 @@ NOTIFICATIONS_ALERT_DATA = 4
 NOTIFICATIONS_COLLECTIBLE_DATA = 5
 NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA = 6
 NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA = 7
+NOTIFICATIONS_YES_NO_DATA = 8
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -18,6 +19,7 @@ function ZO_NotificationProvider:New(notificationManager)
     local provider = ZO_Object.New(self)
     provider.list = {}
     provider.hasTimer = false
+    provider.canShowGamerCard = false
     provider.notificationManager = notificationManager
 
     provider.pushUpdateCallback = function()
@@ -67,8 +69,16 @@ function ZO_NotificationProvider:ShowMoreInfo(data)
     
 end
 
+function ZO_NotificationProvider:SetCanShowGamerCard(canShowGamerCard)
+    self.canShowGamerCard = canShowGamerCard
+end
+
 function ZO_NotificationProvider:CanShowGamerCard()
-    return false
+    return self.canShowGamerCard
+end
+
+function ZO_NotificationProvider:ShowGamerCard(data)
+    ZO_ShowGamerCardFromCharacterName(data.characterNameForGamercard)
 end
 
 --Friend Request Provier
@@ -90,7 +100,7 @@ function ZO_FriendRequestProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
     for i = 1, GetNumIncomingFriendRequests() do
         local displayName, secsSinceRequest, note = GetIncomingFriendRequestInfo(i)
-		local userFacingDisplayName = ZO_FormatUserFacingDisplayName(displayName)
+        local userFacingDisplayName = ZO_FormatUserFacingDisplayName(displayName)
         local message = self:CreateMessage(userFacingDisplayName)
         self.list[i] =  {
                             dataType = NOTIFICATIONS_REQUEST_DATA,
@@ -101,7 +111,7 @@ function ZO_FriendRequestProvider:BuildNotificationList()
                             message = message,
                             shortDisplayText = userFacingDisplayName,
                             controlsOwnSounds = true,
-							incomingFriendIndex = i,
+                            incomingFriendIndex = i,
                         }
     end
 end
@@ -109,6 +119,10 @@ end
 function ZO_FriendRequestProvider:Accept(data)
     AcceptFriendRequest(data.displayName)
     PlaySound(SOUNDS.DIALOG_ACCEPT)
+end
+
+function ZO_FriendRequestProvider:CreateMessage(displayName)
+    return zo_strformat(SI_FRIEND_REQUEST_MESSAGE, displayName)
 end
 
 --Guild Invite Provider
@@ -196,7 +210,7 @@ function ZO_GuildMotDProvider:BuildNotificationList()
                     message = message,
                     guildId = guildId,
                     shortDisplayText = guildName,
-                })           
+                })
             end
         end
     end
@@ -290,6 +304,15 @@ function ZO_CampaignQueueProvider:Decline(data, button, openedFromKeybind)
     ConfirmCampaignEntry(data.campaignId, data.isGroup, false)
 end
 
+function ZO_CampaignQueueProvider:CreateMessageFormat(isGroup)
+    return isGroup and SI_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL
+end
+
+function ZO_CampaignQueueProvider:CreateLoadText()
+    return GetString(SI_CAMPAIGN_ENTER_MESSAGE)
+end
+
+
 --Resurrect Provider
 -------------------------
 
@@ -312,7 +335,7 @@ function ZO_ResurrectProvider:BuildNotificationList()
     if(IsResurrectPending()) then
         local resurrectRequesterCharacterName, timeLeftToAcceptMs, resurrectRequesterDisplayName = GetPendingResurrectInfo()
         local timeLeftToAcceptS = timeLeftToAcceptMs / 1000
-        local nameToShow = self:GetNameToShow(resurrectRequesterCharacterName, resurrectRequesterDisplayName)
+        local nameToShow = ZO_GetPrimaryPlayerName(resurrectRequesterDisplayName, resurrectRequesterCharacterName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
@@ -324,6 +347,7 @@ function ZO_ResurrectProvider:BuildNotificationList()
             shortDisplayText = nameToShow,
             resurrectRequesterCharacterName = resurrectRequesterCharacterName,
             resurrectRequesterDisplayName = resurrectRequesterDisplayName,
+            characterNameForGamercard = resurrectRequesterCharacterName,
         })
     end
 end
@@ -334,6 +358,10 @@ end
 
 function ZO_ResurrectProvider:Decline(data, button, openedFromKeybind)
     DeclineResurrect()
+end
+
+function ZO_ResurrectProvider:GetMessageFormat()
+    return SI_RESURRECT_MESSAGE
 end
 
 --Group Invite Provider
@@ -354,15 +382,16 @@ function ZO_GroupInviteProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
     local inviterCharacterName, aMillisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
-    local nameToUse = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(inviterDisplayName) or inviterCharacterName
-    if(nameToUse ~= "") then
+	if(inviterCharacterName ~= "") then
+		local nameToUse = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+		local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
             notificationType = NOTIFICATION_TYPE_GROUP,
             secsSinceRequest = ZO_NormalizeSecondsSince(aMillisecondsSinceRequest / 1000),
-            message = self:CreateMessage(nameToUse),
-            inviterCharacterName = inviterCharacterName,
+            message = self:CreateMessage(formattedPlayerNames),
+            characterNameForGamercard = inviterCharacterName,
             shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, nameToUse)
         })
     end
@@ -374,6 +403,78 @@ end
 
 function ZO_GroupInviteProvider:Decline(data, button, openedFromKeybind)
     DeclineGroupInvite()
+end
+
+function ZO_GroupInviteProvider:CreateMessage(inviterName)
+    return zo_strformat(SI_GROUP_INVITE_MESSAGE, inviterName)
+end
+
+--Group Election Provider
+-------------------------
+
+ZO_GroupElectionProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_GroupElectionProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+    provider:SetHasTimer(true)
+
+    provider:RegisterUpdateEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED)
+    provider:RegisterUpdateEvent(EVENT_GROUP_ELECTION_NOTIFICATION_REMOVED)
+
+    return provider
+end
+
+function ZO_GroupElectionProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if HasPendingGroupElectionVote() then
+        local electionType, timeRemainingSeconds, descriptor, targetUnitTag = GetGroupElectionInfo()
+        local messageFormat
+        local messageParams
+        local shortText
+        if ZO_IsGroupElectionTypeCustom(electionType) then
+            if descriptor == ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK then
+                messageFormat = GetString(SI_GROUP_ELECTION_READY_CHECK_MESSAGE)
+                shortText = GetString(SI_GROUP_ELECTION_READY_CHECK_NOTIFICATION_HEADER)
+            else
+                messageFormat = descriptor
+                shortText = GetString(SI_GROUP_ELECTION_NOTIFICATION_HEADER)
+            end
+            messageParams = {}
+        else
+            if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
+                messageFormat = SI_GROUP_ELECTION_KICK_MESSAGE
+            elseif electionType == GROUP_ELECTION_TYPE_NEW_LEADER then
+                messageFormat = SI_GROUP_ELECTION_PROMOTE_MESSAGE
+            end
+            local primaryName = ZO_GetPrimaryPlayerNameFromUnitTag(targetUnitTag)
+            local secondaryName = ZO_GetSecondaryPlayerNameFromUnitTag(targetUnitTag)
+            messageParams = { primaryName, secondaryName }
+            shortText = GetString("SI_GROUPELECTIONTYPE", electionType)
+        end
+        
+        table.insert(self.list,
+            {
+                dataType = NOTIFICATIONS_YES_NO_DATA,
+                notificationType = NOTIFICATION_TYPE_GROUP_ELECTION,
+                messageFormat = messageFormat,
+                messageParams = messageParams,
+                shortDisplayText = shortText,
+                expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds,
+                characterNameForGamercard = GetUnitName(targetUnitTag),
+                --For sorting
+                displayName = shortText,
+                secsSinceRequest = 0,
+            })
+    end
+end
+
+function ZO_GroupElectionProvider:Accept(data)
+    CastGroupVote(GROUP_VOTE_CHOICE_FOR)
+end
+
+function ZO_GroupElectionProvider:Decline(data, button, openedFromKeybind)
+    CastGroupVote(GROUP_VOTE_CHOICE_AGAINST)
 end
 
 --Trade Invite Provider
@@ -395,15 +496,16 @@ function ZO_TradeInviteProvider:BuildNotificationList()
 
     local inviterCharacterName, aMillisecondsSinceRequest, inviterDisplayName = GetTradeInviteInfo()
     if(inviterCharacterName ~= "") then
-        local userFacingInviterName = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(inviterDisplayName) or inviterCharacterName
+        local userFacingInviterName = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
             notificationType = NOTIFICATION_TYPE_TRADE,
             secsSinceRequest = ZO_NormalizeSecondsSince(aMillisecondsSinceRequest / 1000),
-            message = self:CreateMessage(userFacingInviterName),
+            message = self:CreateMessage(formattedPlayerNames),
             shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, userFacingInviterName),
-            inviterCharacterName = ZO_StripGrammarMarkupFromCharacterName(inviterCharacterName),
+            characterNameForGamercard = ZO_StripGrammarMarkupFromCharacterName(inviterCharacterName),
         })
     end
 end
@@ -414,6 +516,10 @@ end
 
 function ZO_TradeInviteProvider:Decline(data, button, openedFromKeybind)
     TradeInviteDecline()
+end
+
+function ZO_TradeInviteProvider:CreateMessage(inviterName)
+    return zo_strformat(SI_TRADE_INVITE_MESSAGE, inviterName)
 end
 
 --Quest Share Provider
@@ -436,16 +542,17 @@ function ZO_QuestShareProvider:BuildNotificationList()
     local questShareIds = { GetOfferedQuestShareIds() }
     for i, questId in ipairs(questShareIds) do
         local questName, characterName, aMillisecondsSinceRequest, displayName = GetOfferedQuestShareInfo(questId)
-        local displayText = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or characterName
+        local displayText = ZO_GetPrimaryPlayerName(displayName, characterName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
         self.list[i] =  {
                             dataType = NOTIFICATIONS_REQUEST_DATA,
                             notificationType = NOTIFICATION_TYPE_QUEST_SHARE,
                             secsSinceRequest = ZO_NormalizeSecondsSince(aMillisecondsSinceRequest / 1000),
-                            message = self:CreateMessage(characterName, displayName, questName),
+                            message = self:CreateMessage(formattedPlayerNames, questName),
                             questId = questId,
                             shortDisplayText = displayText,
                             controlsOwnSounds = true,
-                            playerName = characterName,
+                            characterNameForGamercard = characterName,
                         }
     end
 end
@@ -458,6 +565,10 @@ end
 function ZO_QuestShareProvider:Decline(data, button, openedFromKeybind)
     PlaySound(SOUNDS.QUEST_SHARE_DECLINED)
     DeclineSharedQuest(data.questId)
+end
+
+function ZO_QuestShareProvider:CreateMessage(inviterName, questName)
+    return zo_strformat(SI_QUEST_SHARE_MESSAGE, inviterName, questName)
 end
 
 --Point Reset Provider
@@ -602,20 +713,29 @@ function ZO_PledgeOfMaraProvider:CreateParticipantMessage(targetName, isSender)
     end
 end
 
+function ZO_PledgeOfMaraProvider:CreateMessage(targetName)
+    return zo_strformat(SI_PLEDGE_OF_MARA_MESSAGE, targetName)
+end
+
+function ZO_PledgeOfMaraProvider:CreateSenderMessage(targetName)
+    return zo_strformat(SI_PLEDGE_OF_MARA_SENDER_MESSAGE, targetName)
+end
+
 function ZO_PledgeOfMaraProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
     local targetCharacterName, aMillisecondsSinceRequest, isSender, targetDisplayName = GetPledgeOfMaraOfferInfo() 
     if(targetCharacterName ~= "") then
-        local userFacingDisplayName = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(targetDisplayName) or targetCharacterName
+        local userFacingDisplayName = ZO_GetPrimaryPlayerName(targetDisplayName, targetCharacterName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
             notificationType = NOTIFICATION_TYPE_PLEDGE_OF_MARA,
             secsSinceRequest = ZO_NormalizeSecondsSince(aMillisecondsSinceRequest / 1000),
-            message = self:CreateParticipantMessage(userFacingDisplayName, isSender),
+            message = self:CreateParticipantMessage(formattedPlayerNames, isSender),
             shortDisplayText = userFacingDisplayName,
-            targetCharacterName = targetCharacterName,
+            characterNameForGamercard = targetCharacterName,
         })
     end
 end
@@ -702,15 +822,26 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
             local notificationId = GetRaidScoreNotificationId(notificationIndex)
             local raidId, raidScore, millisecondsSinceRequest = GetRaidScoreNotificationInfo(notificationId)
             local numMembers = GetNumRaidScoreNotificationMembers(notificationId)
+            local numKnownMembers = 0
             local hasFriend = false
             local hasGuildMember = false
+            local hasPlayer = false
             for memberIndex = 1, numMembers do
-                local displayName, characterName, isFriend, isGuildMember = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+                local displayName, characterName, isFriend, isGuildMember, isPlayer = GetRaidScoreNotificationMemberInfo(notificationId, memberIndex)
+
                 hasFriend = hasFriend or isFriend
                 hasGuildMember = hasGuildMember or isGuildMember
+                hasPlayer = hasPlayer or isPlayer
+
+                if isFriend or isGuildMember then
+                    numKnownMembers = numKnownMembers + 1
+                end
             end
 
-            if hasFriend or hasGuildMember then
+            if hasPlayer then
+                -- Player just received a notification about themselves, so filter it out
+                self:Decline({ notificationId = notificationId, })                            
+            elseif hasFriend or hasGuildMember then
                 local raidName = GetRaidName(raidId)
 
                 table.insert(self.list,
@@ -720,7 +851,7 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
                     raidId = raidId,
                     notificationType = NOTIFICATION_TYPE_LEADERBOARD,
                     secsSinceRequest = ZO_NormalizeSecondsSince(millisecondsSinceRequest / 1000),
-                    message = self:CreateMessage(raidName, raidScore, numMembers, hasFriend, hasGuildMember, notificationId),
+                    message = self:CreateMessage(raidName, raidScore, numKnownMembers, hasFriend, hasGuildMember, notificationId),
                     shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LEADERBOARD_RAID_NOTIFICATION_SHORT_TEXT_FORMATTER, raidName),
                 })
             end
@@ -882,7 +1013,7 @@ function ZO_LFGUpdateProvider:New(notificationManager)
 
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_NEW)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_REMOVED)
-	provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
+    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED)
 
     provider:BuildNotificationList()
@@ -915,7 +1046,7 @@ function ZO_LFGUpdateProvider:BuildNotificationList()
         )
     end
 
-	if HasLFGFindReplacementNotification() then
+    if HasLFGFindReplacementNotification() then
         local activityType, activityIndex = GetLFGFindReplacementNotificationInfo()
         local dungeonName = GetLFGOption(activityType, activityIndex)
         self:AddFindReplacementNotification(
@@ -930,19 +1061,31 @@ end
 
 function ZO_LFGUpdateProvider:AddJumpNotification(data)
     local role = data.role
-    local newListEntry = {
+    local dungeonName = data.dungeonName
+
+    local messageFormat, messageParams
+    if role == LFG_ROLE_INVALID then
+        messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
+        messageParams = { dungeonName }
+    else
+        messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
+        messageParams = { dungeonName, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
+    end
+
+    local newListEntry =
+    {
         notificationType = NOTIFICATION_TYPE_LFG,
         dataType = NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA,
-        shortDisplayText = data.dungeonName,
+        shortDisplayText = dungeonName,
         data = data,
 
         expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
         expirationCallback = ClearLFGJumpNotification,
-        messageFormat = self:GetMessageFormat(),
-        messageParams = {data.dungeonName, self:GetRoleIcon(role), GetString("SI_LFGROLE", role)},
+        messageFormat = messageFormat,
+        messageParams = messageParams,
 
         --For sorting
-        displayName = data.dungeonName,
+        displayName = dungeonName,
         secsSinceRequest = 0,
     }
 
@@ -966,18 +1109,10 @@ function ZO_LFGUpdateProvider:AddFindReplacementNotification(data)
     table.insert(self.list, newListEntry)
 end
 
-function ZO_LFGUpdateProvider:GetMessageFormat(role)
-    assert(false) --this function must be overridden in a sub-class
-end
-
-function ZO_LFGUpdateProvider:GetRoleIcon(role)
-    assert(false) --this function must be overridden in a sub-class
-end
-
 function ZO_LFGUpdateProvider:Accept(entryData)
     if entryData.dataType == NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA then
         AcceptLFGJumpNotification()
-	elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
+    elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
         AcceptLFGFindReplacementNotification()
     end
 end
@@ -988,6 +1123,46 @@ function ZO_LFGUpdateProvider:Decline(entryData)
     end
 end
 
+-- Craft Bag Auto Transfer Provider
+-------------------------
+
+ZO_CraftBagAutoTransferProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_CraftBagAutoTransferProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG)
+    provider:RegisterUpdateEvent(EVENT_CRAFT_BAG_AUTO_TRANSFER_NOTIFICATION_CLEARED)
+
+    return provider
+end
+
+function ZO_CraftBagAutoTransferProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if HasCraftBagAutoTransferNotification() then
+        self:AddNotification()
+    end
+end
+
+function ZO_CraftBagAutoTransferProvider:AddNotification()
+    local notificationTypeString = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER)
+    local newListEntry = {
+        notificationType = NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER,
+        dataType = NOTIFICATIONS_ALERT_DATA,
+        shortDisplayText = notificationTypeString,
+        message = GetString(SI_NOTIFICATIONS_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG),
+
+        --For sorting
+        displayName = notificationTypeString,
+        secsSinceRequest = 0,
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_CraftBagAutoTransferProvider:Decline()
+    ClearCraftBagAutoTransferNotification()
+end
 
 -- Sort List
 -------------------------

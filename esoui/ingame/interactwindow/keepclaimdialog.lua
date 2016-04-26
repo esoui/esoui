@@ -70,7 +70,8 @@ function ZO_KeepClaimDialog:New(control)
         end
     end
 
-    control:SetHandler("OnUpdate", function(control, time) dialog:OnUpdate(time) end)
+    dialog:SetDialogUpdateFn(function(control, time) dialog:OnUpdate(time) end)
+
     control:RegisterForEvent(EVENT_KEEP_GUILD_CLAIM_UPDATE, function() self:OnGuildInformationChanged() end)
     control:RegisterForEvent(EVENT_START_KEEP_GUILD_CLAIM_INTERACTION, function() OnStartKeepGuildClaimInteraction() end)
     control:RegisterForEvent(EVENT_END_KEEP_GUILD_CLAIM_INTERACTION, function() OnEndKeepGuildClaimInteraction() end)
@@ -218,7 +219,6 @@ end
 
 function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
     local dialogName = GAMEPAD_KEEP_CLAIM_DIALOG
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local function UpdateViolations()
         local data = self.currentDropdown and self.currentDropdown:GetSelectedItemData()
@@ -265,14 +265,14 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
 
-        setup = function()
+        setup = function(dialog)
             self:RefreshGuildList()
 
             self.noViolations = nil
             UpdateSelectedGuildId(nil)
             UpdateSelectedGuildIndex(nil)
 
-            dialog.setupFunc(dialog)
+            dialog:setupFunc()
         end,
 
         blockDialogReleaseOnPress = true, -- We'll handle Dialog Releases ourselves since we don't want DIALOG_PRIMARY to release the dialog on press.
@@ -308,7 +308,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
             local isClaimAvailable = GetSecondsUntilKeepClaimAvailable(keepId, BGQUERY_LOCAL) == 0
             
             if(isClaimAvailable and not dialog.wasClaimAvailableLastUpdate) then
-                dialog.setupFunc(dialog)
+                dialog:setupFunc()
             end
 
             UpdateViolations()

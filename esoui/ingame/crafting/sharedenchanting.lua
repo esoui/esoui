@@ -502,7 +502,7 @@ function ZO_SharedEnchantExtractionSlot:SetItem(bagId, slotIndex)
     if self.nameLabel then
         if bagId and slotIndex then
             self.nameLabel:SetHidden(false)
-            self.nameLabel:SetText(zo_strformat(GetString("SI_ITEMTYPE", GetItemType(bagId, slotIndex))))
+            self.nameLabel:SetText(zo_strformat(ZO_GetSpecializedItemTypeTextBySlot(bagId, slotIndex)))
         else
             self.nameLabel:SetHidden(true)
         end

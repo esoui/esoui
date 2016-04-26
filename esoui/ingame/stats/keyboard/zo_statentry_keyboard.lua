@@ -23,7 +23,7 @@ local STAT_DESCRIPTIONS = {
     [STAT_MITIGATION] = SI_STAT_TOOLTIP_MITIGATION,
     [STAT_SPELL_MITIGATION] = SI_STAT_TOOLTIP_SPELL_MITIGATION,
     [STAT_ARMOR_RATING] = SI_STAT_TOOLTIP_ARMOR_RATING,
-    [STAT_WEAPON_POWER] = SI_STAT_TOOLTIP_WEAPON_POWER,
+    [STAT_WEAPON_AND_SPELL_DAMAGE] = SI_STAT_TOOLTIP_WEAPON_POWER,
 }
 
 ZO_StatEntry_Keyboard = ZO_Object:Subclass()
@@ -49,6 +49,15 @@ function ZO_StatEntry_Keyboard:Initialize(control, statType, statObject)
     self.control:RegisterForEvent(EVENT_STATS_UPDATED, UpdateStatValue)
     self.control:AddFilterForEvent(EVENT_STATS_UPDATED, REGISTER_FILTER_UNIT_TAG, "player")
     self.control:SetHandler("OnEffectivelyShown", UpdateStatValue)
+    
+    self.nextStatsRefreshSeconds = 0
+    local function OnUpdate(_, currentFrameTimeSeconds)
+        if self.nextStatsRefreshSeconds < currentFrameTimeSeconds then
+            self:UpdateStatValue()
+        end    
+    end
+
+    self.control:SetHandler("OnUpdate", OnUpdate)
 end
 
 function ZO_StatEntry_Keyboard:GetPendingStatBonuses()
@@ -75,6 +84,7 @@ end
 
 function ZO_StatEntry_Keyboard:UpdateStatValue()
     if not self.control:IsHidden() then
+        self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
         local isBattleLeveled = self.statObject and self.statObject:IsPlayerBattleLeveled()
         local value = self:GetValue()
         local displayValue = self:GetDisplayValue()

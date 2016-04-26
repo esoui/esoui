@@ -96,6 +96,7 @@ local PAB_TEMPLATES = {
     statusBarGloss = "ZO_PlayerAttributeStatusBarGloss",
     statusBarSmall = "ZO_PlayerAttributeStatusBarSmall",
     statusBarGlossSmall = "ZO_PlayerAttributeStatusBarGlossSmall",
+	resourceNumbersLabel = "ZO_PlayerAttributeResourceNumbers",
 
 }
 
@@ -106,6 +107,8 @@ local DELAY_BEFORE_FADING = 1500
 local ZO_PlayerAttributeBar = ZO_Object:Subclass()
 
 function ZO_PlayerAttributeBar:New(control, barControls, powerType, unitOverride, secondPriorityUnitTag)
+	self.control = control
+
     local bar = ZO_Object.New(self)
     bar.control = control
     bar.barControls = barControls
@@ -203,6 +206,8 @@ function ZO_PlayerAttributeBar:UpdateStatusBar(current, max, effectiveMax)
     if(self.textEnabled) then
         self.label:SetText(zo_strformat(SI_UNIT_FRAME_BARVALUE, current, max))
     end
+
+	self:UpdateResourceNumbersLabel(current, effectiveMax)
 end
 
 function ZO_PlayerAttributeBar:ResetFadeOutDelay()
@@ -268,6 +273,7 @@ function ZO_PlayerAttributeBar:UpdateContextualFading()
         if self.linkedVisibility then
             self.linkedVisibility:UpdateContextualFading()
         end
+		self:UpdateResourceNumbersLabel(self.current, self.effectiveMax)
     end
 end
 
@@ -305,6 +311,12 @@ function ZO_PlayerAttributeBar:SetTextEnabled(enabled)
             end
         end
     end
+end
+
+function ZO_PlayerAttributeBar:UpdateResourceNumbersLabel(current, maximum)
+	if self.control.resourceNumbersLabel then
+		self.control.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(current, maximum))
+	end
 end
 
 --Events
@@ -420,6 +432,7 @@ function ZO_PlayerAttributeBars:New(control)
     local healthControl = GetControl(control, "Health")
     local healthBarControls = {GetControl(healthControl, "BarLeft"), GetControl(healthControl, "BarRight")}
     healthControl.barControls = healthBarControls
+	healthControl.resourceNumbersLabel = GetControl(healthControl, "ResourceNumbers")
     local healthAttributeBar = ZO_PlayerAttributeBar:New(healthControl, healthBarControls, POWERTYPE_HEALTH)
     table.insert(bars, healthAttributeBar)
     healthControl.warner = ZO_HealthWarner:New(healthControl)
@@ -443,6 +456,7 @@ function ZO_PlayerAttributeBars:New(control)
     local magickaControl = GetControl(control, "Magicka")
     local magickaBarControls = {GetControl(magickaControl, "Bar")}
     magickaControl.barControls = magickaBarControls
+	magickaControl.resourceNumbersLabel = GetControl(magickaControl, "ResourceNumbers")
     local magickaAttributeBar = ZO_PlayerAttributeBar:New(magickaControl, magickaBarControls, POWERTYPE_MAGICKA)
     table.insert(bars, magickaAttributeBar)
     magickaControl.warner = ZO_ResourceWarner:New(magickaControl, POWERTYPE_MAGICKA)
@@ -460,6 +474,7 @@ function ZO_PlayerAttributeBars:New(control)
     local staminaControl = GetControl(control, "Stamina")
     local staminaBarControls = {GetControl(staminaControl, "Bar")}
     staminaControl.barControls = staminaBarControls
+	staminaControl.resourceNumbersLabel = GetControl(staminaControl, "ResourceNumbers")
     local staminaAttributeBar = ZO_PlayerAttributeBar:New(staminaControl, staminaBarControls, POWERTYPE_STAMINA)
     table.insert(bars, staminaAttributeBar)
     staminaControl.warner = ZO_ResourceWarner:New(staminaControl, POWERTYPE_STAMINA)
@@ -627,6 +642,11 @@ function ZO_PlayerAttributeBars:ApplyStyle()
                 end
             end
         end
+
+		local resourceNumbersLabel = bar.control:GetNamedChild("ResourceNumbers")
+		if resourceNumbersLabel then
+			ApplyTemplateToControl(resourceNumbersLabel, ZO_GetPlatformTemplate(PAB_TEMPLATES.resourceNumbersLabel))
+		end
     end
 end
 

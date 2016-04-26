@@ -59,14 +59,16 @@ end
 
 function ZO_GamepadTradingHouse_BrowseResults:InitializeList()
     ZO_GamepadTradingHouse_SortableItemList.InitializeList(self)
-    self:GetList():AddDataTemplate("ZO_TradingHouse_ItemListRow_Gamepad", SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    local list = self:GetList()
+    list:AddDataTemplate("ZO_TradingHouse_ItemListRow_Gamepad", SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
     local BROWSE_RESULTS_ITEM_HEIGHT = 65
-    self:GetList():SetAlignToScreenCenter(true, BROWSE_RESULTS_ITEM_HEIGHT)
-    self:GetList():SetNoItemText(GetString(SI_DISPLAY_GUILD_STORE_NO_ITEMS))
+    list:SetAlignToScreenCenter(true, BROWSE_RESULTS_ITEM_HEIGHT)
+    list:SetNoItemText(GetString(SI_DISPLAY_GUILD_STORE_NO_ITEMS))
 
-    self:GetList():SetOnSelectedDataChangedCallback(
+    list:SetOnSelectedDataChangedCallback(
         function(list, selectedData)
             self:LayoutTooltips(selectedData)
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     )
 end
@@ -308,7 +310,7 @@ end
 -- Overridden functions
 
 function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors()
-    local function NotAwaitingResponse() 
+    local function NotAwaitingResponse()
         return not self.awaitingResponse
     end
 
@@ -338,7 +340,16 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors(
                 local postedItem = self:GetList():GetTargetData()
                 self:ShowPurchaseItemConfirmation(postedItem)
             end,
-            enabled = NotAwaitingResponse
+            enabled =   function()
+                            if NotAwaitingResponse() then
+                                local postedItem = self:GetList():GetTargetData()
+                                if postedItem then
+                                    local sellerName = postedItem.dataSource.sellerName
+                                    return sellerName ~= GetDisplayName(), GetString("SI_TRADINGHOUSERESULT", TRADING_HOUSE_RESULT_CANT_BUY_YOUR_OWN_POSTS)
+                                end
+                            end
+                            return false
+                        end
         },
 
         {

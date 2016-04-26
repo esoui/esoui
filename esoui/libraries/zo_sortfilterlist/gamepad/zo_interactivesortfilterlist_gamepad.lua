@@ -39,6 +39,12 @@ function GamepadInteractiveSortFilterFocus:AppendKeybind(keybind)
     self.keybindDescriptor[#self.keybindDescriptor + 1] = keybind
 end
 
+function GamepadInteractiveSortFilterFocus:UpdateKeybinds()
+	if self.keybindDescriptor then
+		KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindDescriptor)
+	end
+end
+
 function GamepadInteractiveSortFilterFocus:Activate()
     if not self.active then
         self.active = true
@@ -513,6 +519,14 @@ function ZO_GamepadInteractiveSortFilterList:GetListFragment()
     return self.listFragment
 end
 
+function ZO_GamepadInteractiveSortFilterList:UpdateKeybinds()
+	ZO_SortFilterList_Gamepad.UpdateKeybinds(self)
+
+	self.filtersFocalArea:UpdateKeybinds()
+    self.headersFocalArea:UpdateKeybinds()
+    self.panelFocalArea:UpdateKeybinds()
+end
+
 --List management --
 
 function ZO_GamepadInteractiveSortFilterList:FilterScrollList()
@@ -561,10 +575,21 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:CommitScrollList()
     ZO_SortFilterList.CommitScrollList(self)
+
     --Display a different string if there are no results to find than if your filters eliminated all results
     if self.emptyRow and not self.emptyRow:IsHidden() then
-        self.emptyRowMessage:SetText(#self.masterList == 0 and self.emptyText or GetString(SI_GAMEPAD_INTERACTIVE_SORT_FILTER_LIST_NO_RESULTS))
+        self.emptyRowMessage:SetText(#self.masterList == 0 and self.emptyText or GetString(SI_SORT_FILTER_LIST_NO_RESULTS))
     end
+
+    --If the cursor is in the list, but the list is empty because of a filter, we need to force it out of the panel area
+	if self.currentFocalArea == self.panelFocalArea and self.isActive then
+	    local scrollData = ZO_ScrollList_GetDataList(self.list)
+        if #scrollData == 0 then
+		    self.currentFocalArea:Deactivate()
+		    self.currentFocalArea = self.headersFocalArea
+		    self.currentFocalArea:Activate()
+        end
+	end
 end
 
 function ZO_GamepadInteractiveSortFilterList:IsMatch(searchTerm, data)

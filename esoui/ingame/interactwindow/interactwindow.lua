@@ -52,7 +52,7 @@ function ZO_InteractionManager:ShowInteractWindow(bodyText)
 end
 
 function ZO_InteractionManager:IsShowingInteraction()
-    local obj = SYSTEMS:GetObjectBasedOnCurrentScene(ZO_INTERACTION_SYSTEM_NAME)
+    local obj = SYSTEMS:GetObject(ZO_INTERACTION_SYSTEM_NAME)
     if obj then
         return SCENE_MANAGER:IsShowing(obj.sceneName)
     end

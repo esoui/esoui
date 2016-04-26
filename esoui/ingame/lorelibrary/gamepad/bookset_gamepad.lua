@@ -103,7 +103,6 @@ function BookSetGamepad:PerformUpdate()
         entryData.bookListIndex = i
         entryData.enabled = bookData.enabled
         entryData:SetFontScaleOnSelection(false)
-        entryData:SetHeightScaleOnSelection(true)
         entryData:SetShowUnselectedSublabels(true)
 
         if bookData.enabled then

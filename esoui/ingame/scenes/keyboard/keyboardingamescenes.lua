@@ -390,6 +390,21 @@ helpTutorialsScene:AddFragment(HELP_WINDOW_SOUNDS)
 helpTutorialsScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 helpTutorialsScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_HELP_TUTORIALS_OPENED))
 
+--------------------
+--Help Emotes Scene
+--------------------
+
+HELP_EMOTES_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+HELP_EMOTES_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+HELP_EMOTES_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+HELP_EMOTES_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
+HELP_EMOTES_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+HELP_EMOTES_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+HELP_EMOTES_SCENE:AddFragment(TITLE_FRAGMENT)
+HELP_EMOTES_SCENE:AddFragment(HELP_TITLE_FRAGMENT)
+HELP_EMOTES_SCENE:AddFragment(HELP_WINDOW_SOUNDS)
+HELP_EMOTES_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+
 -----------------------
 --Guild Create
 -----------------------
@@ -583,7 +598,7 @@ do
             highlight = "EsoUI/Art/Collections/collections_tabIcon_collectibles_over.dds",
             statusIcon = function()
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and not DLC_BOOK_KEYBOARD:IsCategoryIndexDLC(categoryIndex) then
+                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end
@@ -598,7 +613,7 @@ do
             highlight = "EsoUI/Art/Collections/collections_tabIcon_DLC_over.dds",
             statusIcon = function()
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and DLC_BOOK_KEYBOARD:IsCategoryIndexDLC(categoryIndex) then
+                    if (COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex)) or COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending() then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end
@@ -706,7 +721,7 @@ do
             normal = "EsoUI/Art/Journal/journal_tabIcon_cadwell_up.dds",
             pressed = "EsoUI/Art/Journal/journal_tabIcon_cadwell_down.dds",
             highlight = "EsoUI/Art/Journal/journal_tabIcon_cadwell_over.dds",
-            visible = function() return GetPlayerDifficultyLevel() > PLAYER_DIFFICULTY_LEVEL_FIRST_ALLIANCE end,
+            visible = function() return GetCadwellProgressionLevel() > CADWELL_PROGRESSION_LEVEL_BRONZE end,
         },
         {
             categoryName = SI_JOURNAL_MENU_LORE_LIBRARY,
@@ -780,8 +795,15 @@ do
             pressed = "EsoUI/Art/Help/help_tabIcon_CS_down.dds",
             highlight = "EsoUI/Art/Help/help_tabIcon_CS_over.dds",
         },
+		{
+			categoryName = SI_HELP_EMOTES,
+			descriptor = "helpEmotes",
+			normal = "EsoUI/Art/Help/help_tabIcon_emotes_up.dds",
+            pressed = "EsoUI/Art/Help/help_tabIcon_emotes_down.dds",
+            highlight = "EsoUI/Art/Help/help_tabIcon_emotes_over.dds",
+		}
     }
-    SCENE_MANAGER:AddSceneGroup("helpSceneGroup", ZO_SceneGroup:New("helpTutorials", "helpCustomerSupport"))
+    SCENE_MANAGER:AddSceneGroup("helpSceneGroup", ZO_SceneGroup:New("helpTutorials", "helpCustomerSupport", "helpEmotes"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_HELP, "helpSceneGroup", iconData)
 end
 

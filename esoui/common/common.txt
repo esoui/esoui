@@ -37,8 +37,6 @@ EsoUI\Common\Gamepad\ZO_GamepadEntryData.lua
 
 EsoUI\Common\Gamepad\ZO_GamepadGrid.lua
 
-EsoUI\Common\Gamepad\ZO_GamepadSlider.lua
-
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.lua
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.xml
 

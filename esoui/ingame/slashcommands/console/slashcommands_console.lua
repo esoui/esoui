@@ -22,31 +22,27 @@ SLASH_COMMANDS[GetString(SI_SLASH_LATENCY)] = function(txt)
     -- This uses PC art / fonts.  Unsupported until those are updated.
 end
 
-local function ShowConsoleHelpScreen()
-    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "helpRootGamepad")
-end
-
 SLASH_COMMANDS[GetString(SI_SLASH_STUCK)] = function(txt)
     -- Bring up console unstuck dialog.
     -- Going to gamepad help root screen for all "help" functionality on console, OK-ed by design.
-    ShowConsoleHelpScreen()
+    ShowGamepadHelpScreen()
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_REPORT_BUG)] = function(args) 
     -- Bring up console report bug dialog.
-    ShowConsoleHelpScreen()
+    ShowGamepadHelpScreen()
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_REPORT_FEEDBACK)] = function(args) 
     -- Bring up console report feedback dialog.
-    ShowConsoleHelpScreen()
+    ShowGamepadHelpScreen()
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_REPORT_HELP)] = function(args) 
-    ShowConsoleHelpScreen()
+    ShowGamepadHelpScreen()
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_REPORT_CHAT)] = function(args) 
     -- Bring up console agent chat dialog.
-    ShowConsoleHelpScreen()
+    ShowGamepadHelpScreen()
 end

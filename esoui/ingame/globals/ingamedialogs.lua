@@ -130,6 +130,7 @@ ESO_Dialogs["DESTROY_ITEM_PROMPT"] =
         dialogType = GAMEPAD_DIALOGS.BASIC,
         allowRightStickPassThrough = true,
     },
+    canQueue = true,
     title =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
@@ -370,6 +371,10 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
 
 ESO_Dialogs["REPAIR_ALL"] =
 {
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
     title =
     {
         text = SI_PROMPT_TITLE_REPAIR_ALL,
@@ -383,23 +388,49 @@ ESO_Dialogs["REPAIR_ALL"] =
         [1] =
         {
             text =      SI_DIALOG_ACCEPT,
-            callback =  RepairAll,
+            callback =  function(dialog)
+                            RepairAll()
+                            PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
+                        end,
+            enabled =   function(dialogOrDescriptor)
+                            local dialog = dialogOrDescriptor.dialog or dialogOrDescriptor  -- if .dialog is defined, we're running in Gamepad UI
+                            local canAfford = dialog.data.cost <= GetCarriedCurrencyAmount(CURT_MONEY)
+
+                            if canAfford then
+                                return true
+                            else
+                                return false, GetString(SI_REPAIR_ALL_CANNOT_AFFORD)
+                            end
+                        end,
         },
         [2] =
         {
-            text =       SI_DIALOG_DECLINE,
+            text =      SI_DIALOG_DECLINE,
+            callback =  function(dialog)
+                            if (dialog.data.declineCallback) then
+                               dialog.data.declineCallback()
+                            end
+                        end,
         },
     },
     updateFn = function(dialog)
         local cost = dialog.data.cost
+        local buttonState
+        
         if cost > GetCarriedCurrencyAmount(CURT_MONEY) then
-            ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
+            buttonState = BSTATE_DISABLED
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_REPAIR_ALL_CANNOT_AFFORD })
         else
-            ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
+            buttonState = BSTATE_NORMAL
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_REPAIR_ALL })
         end
-        ZO_Dialogs_UpdateButtonCost(dialog, 1, cost)
+
+        if not IsInGamepadPreferredMode() then
+            ZO_Dialogs_UpdateButtonState(dialog, 1, buttonState)
+            ZO_Dialogs_UpdateButtonCost(dialog, 1, cost)
+        else
+            KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups(dialog.keybindStateIndex)
+        end
     end,
 }
 
@@ -1483,6 +1514,7 @@ ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
 
 ESO_Dialogs["CONFIRM_CONVERT_IMPERIAL_STYLE"] =
 {
+    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -2208,7 +2240,8 @@ ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT"] =
         {
             text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_PRIMARY_BUTTON,
             callback = function(dialog)
-                            ShowMarketAndSearch(dialog.data.collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP)
+                            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleName)
+                            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP)
                        end,
             clickSound = SOUNDS.DIALOG_ACCEPT,
         },
@@ -2570,7 +2603,7 @@ ESO_Dialogs["WAIT_FOR_CONSOLE_CHARACTER_INFO"] =
 ESO_Dialogs["GAMEPAD_GENERIC_WAIT"] = 
 {
     setup = function(dialog)
-        dialog.setupFunc(dialog)
+        dialog:setupFunc()
     end,
     canQueue = true,
     gamepadInfo =
@@ -2694,7 +2727,8 @@ ESO_Dialogs["ZONE_COLLECTIBLE_REQUIREMENT_FAILED"] =
         {
             text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_PRIMARY_BUTTON,
             callback = function(dialog)
-                            ShowMarketAndSearch(dialog.data.collectibleName, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE)
+                            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleName)
+                            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE)
                        end
         },
         [2] =
@@ -2878,6 +2912,7 @@ ESO_Dialogs["KEYBIND_STRIP_DISABLED_DIALOG"] =
     buttons =
     {
         {
+            keybind = "DIALOG_NEGATIVE",
             text = SI_OK,
         },
     },

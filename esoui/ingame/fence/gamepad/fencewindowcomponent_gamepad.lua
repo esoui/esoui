@@ -18,8 +18,10 @@ function ZO_GamepadFenceComponent:Initialize(mode, title)
             self:RegisterEvents()
             self.list:UpdateList()
             self:RefreshFooter()
+            self:ShowFenceBar()
         elseif newState == SCENE_HIDING then
             self:UnregisterEvents()
+            self:HideFenceBar()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
             ZO_Dialogs_ReleaseDialog("CANT_BUYBACK_FROM_FENCE")
         end
@@ -137,6 +139,14 @@ function ZO_GamepadFenceComponent:OnSuccess()
 end
 
 function ZO_GamepadFenceComponent:RefreshFooter()
+    --Stubbed, to be overriden
+end
+
+function ZO_GamepadFenceComponent:ShowFenceBar()
+    --Stubbed, to be overriden
+end
+
+function ZO_GamepadFenceComponent:HideFenceBar()
     --Stubbed, to be overriden
 end
 

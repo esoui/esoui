@@ -1,3 +1,6 @@
+local USER_REQUESTED = true
+local SYSTEM_REQUESTED = false
+
 --------------------------------------
 --Preferred Roles Manager
 --------------------------------------
@@ -13,16 +16,11 @@ function PreferredRolesManager:Initialize(control)
     self.control = control
     self:InitializeRoles()
 
-    local function OnGroupingToolsStatusUpdate(isSearching)
-        self:DisableRoleButtons(isSearching)
+    local function OnActivityFinderStatusUpdate(status)
+        self:DisableRoleButtons(status == ACTIVITY_FINDER_STATUS_QUEUED)
     end
-
-    local function OnPlayerActivated()
-        OnGroupingToolsStatusUpdate(IsCurrentlySearchingForGroup())
-    end
-
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_STATUS_UPDATE, function(event, ...) OnGroupingToolsStatusUpdate(...) end)
-    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+    
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
 end
 
 function PreferredRolesManager:InitializeRoles()
@@ -52,11 +50,23 @@ function PreferredRolesManager:InitializeRoles()
     end
 end
 
-function PreferredRolesManager:SetRoleToggled(role, selected)
+function PreferredRolesManager:RefreshRoles()
+    local isDPS, isHeal, isTank = GetPlayerRoles()
+
+    self:SetRoleToggled(LFG_ROLE_TANK, isTank, SYSTEM_REQUESTED)
+    self:SetRoleToggled(LFG_ROLE_HEAL, isHeal, SYSTEM_REQUESTED)
+    self:SetRoleToggled(LFG_ROLE_DPS, isDPS, SYSTEM_REQUESTED)
+end
+
+function PreferredRolesManager:SetRoleToggled(role, selected, userRequested)
     self.roles[role].isSelected = selected
-    PlaySound(selected and SOUNDS.GROUP_ROLE_SELECTED or SOUNDS.GROUP_ROLE_DESELECTED)
-    UpdatePlayerRole(role, selected)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
+    if userRequested then
+        PlaySound(selected and SOUNDS.GROUP_ROLE_SELECTED or SOUNDS.GROUP_ROLE_DESELECTED)
+        UpdatePlayerRole(role, selected)
+        ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
+    else
+        ZO_CheckButton_SetCheckState(self.roles[role].button, selected)
+    end
 end
 
 function PreferredRolesManager:DisableRoleButtons(isDisabled)
@@ -94,6 +104,11 @@ function PreferredRolesManager:GetRoles()
     }
 end
 
+function PreferredRolesManager:IsRoleSelected()
+    local roles = self.roles
+    return roles[LFG_ROLE_DPS].isSelected or roles[LFG_ROLE_HEAL].isSelected or roles[LFG_ROLE_TANK].isSelected
+end
+
 ---- XML Callbacks ----
 
 function ZO_PreferredRolesButton_OnMouseEnter(control)
@@ -102,6 +117,12 @@ function ZO_PreferredRolesButton_OnMouseEnter(control)
     InformationTooltip:AddLine(GetString("SI_LFGROLE", control.role), "", r, g, b)
     InformationTooltip:AddLine(PREFERRED_ROLES.roles[control.role].tooltip, "", r, g, b)
     InformationTooltip:AddLine(GetString(SI_GROUP_PREFERRED_ROLE_DESCRIPTION), "", r, g, b)
+    local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(control.role)
+    if lowestAverage > 0 then
+        local textLowestAverageTime = ZO_GetSimplifiedTimeEstimateText(lowestAverage * 1000)
+        InformationTooltip:AddLine(zo_strformat(SI_ACTIVITY_FINDER_DUNGEON_AVERAGE_ROLE_TIME_FORMAT, textLowestAverageTime), "", r, g, b) 
+    end
+
     local currentState = control:GetState()
     if currentState == BSTATE_DISABLED or currentState == BSTATE_DISABLED_PRESSED then
         InformationTooltip:AddLine(zo_strformat(SI_GROUP_LIST_PANEL_DISABLED_ROLE_TOOLTIP, tooltipText), "", ZO_ColorDef:New("ff0000"):UnpackRGB())
@@ -116,13 +137,10 @@ function ZO_PreferredRolesButton_OnClicked(buttonControl, mouseButton)
     local buttonState = buttonControl:GetState()
     local role = buttonControl.role
 
-    if buttonState == BSTATE_NORMAL then
-        ZO_CheckButton_SetChecked(buttonControl)
-        PREFERRED_ROLES:SetRoleToggled(role, true)
-
-    elseif buttonState == BSTATE_PRESSED and PREFERRED_ROLES:GetSelectedRoleCount() > 1 then --enforce having at least one role selected
-        ZO_CheckButton_SetUnchecked(buttonControl)
-        PREFERRED_ROLES:SetRoleToggled(role, false)
+    local toggleCheckOn = buttonState == BSTATE_NORMAL
+    if toggleCheckOn or PREFERRED_ROLES:GetSelectedRoleCount() > 1 then --enforce having at least one role selected
+        ZO_CheckButton_SetCheckState(buttonControl, toggleCheckOn)
+        PREFERRED_ROLES:SetRoleToggled(role, toggleCheckOn, USER_REQUESTED)
     end
 end
 

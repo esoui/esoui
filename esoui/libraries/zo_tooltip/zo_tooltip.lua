@@ -105,11 +105,16 @@ function ZO_TooltipStyledObject:FormatLabel(label, text, ...)
     local uppercase = self:GetProperty("uppercase", ...)
     label:SetModifyTextType(uppercase and MODIFY_TEXT_TYPE_UPPERCASE or MODIFY_TEXT_TYPE_NONE)
     label:SetText(text)
-    local interfaceColorField = self:GetProperty("fontColorField", ...)
-    if(interfaceColorField ~= nil) then
-        local interfaceColorType = self:GetProperty("fontColorType", ...)
-        if(interfaceColorType ~= nil) then        
-            label:SetColor(GetInterfaceColor(interfaceColorType, interfaceColorField))
+    local interfaceColor = self:GetProperty("fontColor", ...)
+    if interfaceColor then
+        label:SetColor(interfaceColor:UnpackRGBA())
+    else
+        local interfaceColorField = self:GetProperty("fontColorField", ...)
+        if(interfaceColorField ~= nil) then
+            local interfaceColorType = self:GetProperty("fontColorType", ...)
+            if(interfaceColorType ~= nil) then        
+                label:SetColor(GetInterfaceColor(interfaceColorType, interfaceColorField))
+            end
         end
     end
     local interfaceHorizontalAlignmentField = self:GetProperty("horizontalAlignment", ...)
@@ -223,6 +228,17 @@ function ZO_TooltipStatValuePair:ComputeDimensions()
     end
 
     return width, height
+end
+
+function ZO_TooltipStatValuePair:UpdateFontOffset()
+    local statTop = self.statLabel:GetTop()
+    local valueTop = self.valueLabel:GetTop()
+
+    if statTop ~= valueTop then
+        local heightDifference = statTop - valueTop
+        local isValid, point, relTo, relPoint, offsetX = self.statLabel:GetAnchor()
+        self.statLabel:SetAnchor(point, relTo, relPoint, offsetX, heightDifference)
+    end
 end
 
 --Tooltip Stat Value Slider
@@ -825,6 +841,7 @@ end
 
 function ZO_TooltipSection:AddStatValuePair(statValuePair)    
     self:AddDimensionedControl(statValuePair)
+    statValuePair:UpdateFontOffset()
 end
 
 function ZO_TooltipSection:AcquireStatusBar(...)

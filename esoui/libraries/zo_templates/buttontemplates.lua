@@ -121,7 +121,7 @@ local TOGGLE_BUTTON_TEXTURES =
         },
         [TOGGLE_BUTTON_CLOSED] =
         {
-            [NORMAL] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds",
+            [NORMAL] = ZO_GAMEPAD_LOCKED_ICON_32,
         },
     },
 }

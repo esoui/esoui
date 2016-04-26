@@ -105,7 +105,8 @@ local ChatEventFormatters = {
     end,
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
-        local nameToDisplay = ZO_GetPlatformUserFacingName(characterName, displayName)
+        -- Only one name will be sent here, so use that and do not use special formatting since this appears in chat
+        local nameToDisplay = characterName ~= "" and characterName or displayName
         if(not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response)) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
     

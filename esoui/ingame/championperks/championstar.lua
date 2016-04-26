@@ -629,9 +629,7 @@ function ZO_ChampionStar:OnMouseEnter(control)
 end
 
 function ZO_ChampionStar:OnMouseExit(control)
-    if not MouseIsOver(self.textControl) then
-        self.constellation:SelectStar(nil)
-    end
+    self.constellation:SelectStar(nil)
 end
 
 function ZO_ChampionStar:OnMouseWheel(control, delta)

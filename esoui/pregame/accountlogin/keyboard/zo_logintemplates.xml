@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LoginBase_Keyboard" virtual="true">
+            <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
+
+            <Controls>
+                <Texture name="$(parent)BGMunge" textureFile="EsoUI/Art/Login/login_UIWindowBG_left.dds">
+                    <Dimensions x="512" y="914" />
+                    <Anchor point="TOPLEFT" offsetX="160" offsetY="10" />
+                    <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                    <Controls>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_UIWindowBG_right.dds">
+                            <Dimensions x="256" y="914" />
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                            <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)ESOLogo" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGMunge" offsetX="-34" offsetY="70" />
+                    <Controls>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_logo_right.dds" resizeToFitFile="true">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Button name="ZO_LoginMenuButton" inherits="ZO_DefaultTextButton" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="300" />
+        </Button>
+
+        <Label name="ZO_LoginMenuEditLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Label name="ZO_LoginMenuSectionHeader" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Label name="ZO_LoginMenuInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Label name="ZO_LoginMenuCapsLockWarning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_CAPS_LOCK_PASSWORD_WARNING" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" resizeToFitFile="true">
+                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                </Texture>
+            </Controls>
+        </Label>
+    </Controls>
+</GuiXml>

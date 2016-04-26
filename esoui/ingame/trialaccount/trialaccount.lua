@@ -41,9 +41,8 @@ function TrialAccountSplashDialog:Initialize(control)
 
     ZO_Dialogs_RegisterCustomDialog("TRIAL_ACCOUNT_SPLASH_GAMEPAD", 
         {
-            setup = function()
-                local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.CENTERED)
-                dialog.setupFunc(dialog)
+            setup = function(dialog)
+                dialog:setupFunc()
             end,
             gamepadInfo =
             {

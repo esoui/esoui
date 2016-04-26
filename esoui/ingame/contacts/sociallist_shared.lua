@@ -15,11 +15,16 @@ function ZO_SocialList_ColorRow(control, data, displayNameTextColor, iconColor, 
     displayName:SetColor(displayNameTextColor:UnpackRGBA())
 
     if(data.hasCharacter) then
+        local character = GetControl(control, "CharacterName")
+        if character then
+            character:SetColor(otherTextColor:UnpackRGBA())
+        end
+
         local zone = GetControl(control, "Zone")
         zone:SetColor(otherTextColor:UnpackRGBA())        
         
-        local veteran = GetControl(control, "Veteran")
-        veteran:SetColor(iconColor:UnpackRGBA())
+        local champion = GetControl(control, "Champion")
+        champion:SetColor(iconColor:UnpackRGBA())
 
         local level = GetControl(control, "Level")
         level:SetColor(otherTextColor:UnpackRGBA())
@@ -42,7 +47,7 @@ end
 local KEYBOARD_FUNCTIONS =
 {
     playerStatusIcon = GetPlayerStatusIcon,
-    veteranRankIcon = GetVeteranRankIcon,
+    championPointsIcon = GetChampionPointsIcon,
     allianceIcon = GetAllianceSymbolIcon,
     classIcon = GetClassIcon,
 }
@@ -50,7 +55,7 @@ local KEYBOARD_FUNCTIONS =
 local GAMEPAD_FUNCTIONS = 
 {
     playerStatusIcon = GetGamepadPlayerStatusIcon,
-    veteranRankIcon = GetGamepadVeteranRankIcon,
+    championPointsIcon = GetGamepadChampionPointsIcon,
     allianceIcon = GetLargeAllianceSymbolIcon,
     classIcon = GetGamepadClassIcon,
 }
@@ -59,12 +64,13 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
     local textureFunctions = IsInGamepadPreferredMode() and GAMEPAD_FUNCTIONS or KEYBOARD_FUNCTIONS
 
     local displayName = GetControl(control, "DisplayName")
+    local characterName = GetControl(control, "CharacterName")
     local status = GetControl(control, "StatusIcon")
     local zone = GetControl(control, "Zone")
     local class = GetControl(control, "ClassIcon")
     local alliance = GetControl(control, "AllianceIcon")
     local level = GetControl(control, "Level")
-    local veteran = GetControl(control, "Veteran")
+    local champion = GetControl(control, "Champion")
 
     if displayName then
         displayName:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
@@ -75,23 +81,31 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
     end
 
     local hideCharacterFields = not data.hasCharacter or (zo_strlen(data.characterName) <= 0)
+    if characterName then
+        if not hideCharacterFields then
+            characterName:SetText(ZO_FormatUserFacingCharacterName(data.characterName))
+        else
+            characterName:SetText("")
+        end
+    end
     zone:SetHidden(hideCharacterFields)
     class:SetHidden(hideCharacterFields)
     if alliance then
         alliance:SetHidden(hideCharacterFields)
     end
     level:SetHidden(hideCharacterFields)
-    veteran:SetHidden(hideCharacterFields)
+    champion:SetHidden(hideCharacterFields)
 
     if(data.hasCharacter) then
         zone:SetText(data.formattedZone)
 
-        level:SetText(GetLevelOrVeteranRankStringNoIcon(data.level, data.veteranRank))
+        --TODO: find where the data is being setup and change to champion rank equivilent
+        level:SetText(GetLevelOrChampionPointsStringNoIcon(data.level, data.championPoints))
 
-        if data.veteranRank and data.veteranRank > 0 then
-            veteran:SetTexture(textureFunctions.veteranRankIcon())
+        if data.championPoints and data.championPoints > 0 then
+            champion:SetTexture(textureFunctions.championPointsIcon())
         else
-            veteran:SetHidden(true)
+            champion:SetHidden(true)
         end
 
         if alliance then

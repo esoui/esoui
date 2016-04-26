@@ -179,19 +179,17 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
 end
 
 function ZO_Help_Root_Gamepad:InitializeUnstuckCooldownDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.COOLDOWN)
-
     ZO_Dialogs_RegisterCustomDialog(GAMEPAD_UNSTUCK_COOLDOWN_DIALOG,
     {
         gamepadInfo = {
             dialogType = GAMEPAD_DIALOGS.COOLDOWN,
         },
 
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
-        updateFn = function()
+        updateFn = function(dialog)
             local cooldownTime = GetTimeUntilStuckAvailable()
             if(cooldownTime > 0) then
                 dialog.cooldownLabelControl:SetText(ZO_FormatTimeMilliseconds(cooldownTime, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS, TIME_FORMAT_PRECISION_SECONDS))
@@ -222,8 +220,6 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckCooldownDialog()
 end
 
 function ZO_Help_Root_Gamepad:InitializeUnstuckLoadingDialog()
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.COOLDOWN)
-
     ZO_Dialogs_RegisterCustomDialog(GAMEPAD_UNSTUCK_LOADING_DIALOG,
     {
         canQueue = true,
@@ -233,8 +229,8 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckLoadingDialog()
             dialogType = GAMEPAD_DIALOGS.COOLDOWN,
         },
 
-        setup = function()
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         updateFn = function()

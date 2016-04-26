@@ -4,9 +4,19 @@ local interfaceSettingsHUD = {
     {
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_ACTION_BAR,
+        settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
         header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
     },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_ACTION_BAR,
+    },
+	{
+		panel = SETTING_PANEL_INTERFACE,
+		system = SETTING_TYPE_UI,
+		settingId = UI_SETTING_RESOURCE_NUMBERS,
+	},
     {
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_UI,
@@ -17,6 +27,11 @@ local interfaceSettingsHUD = {
         system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
         settingId = 0,
     },
+	{
+		panel = SETTING_PANEL_INTERFACE,
+		system = SETTING_TYPE_UI,
+		settingId = UI_SETTING_ULTIMATE_NUMBER,
+	},
     {
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_UI,
@@ -32,40 +47,18 @@ local interfaceSettingsHUD = {
         system = SETTING_TYPE_UI,
         settingId = UI_SETTING_COMPASS_ACTIVE_QUESTS,
     },
-}
-local interfaceSettingsHealthbars = {
     {
         panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_ALL_HEALTHBARS,
-        header = SI_INTERFACE_OPTIONS_HEALTHBARS,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,
     },
     {
         panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_PLAYER_HEALTHBAR,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_ARMOR_INDICATOR,
     },
 }
+
 local interfaceSettingsChatBubbles = {
     {
         panel = SETTING_PANEL_INTERFACE,
@@ -187,59 +180,6 @@ local interfaceSettingsScrollingCombatText = {
         settingId = COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED,
     },
 }
-local interfaceSettingsIndicators = {
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_ALLIANCE_INDICATORS,
-        header = SI_INTERFACE_OPTIONS_INDICATORS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_GROUP_INDICATORS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_NAMEPLATES,
-        settingId = NAMEPLATE_TYPE_FOLLOWER_INDICATORS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_IN_WORLD,
-        settingId = IN_WORLD_UI_SETTING_GLOW_THICKNESS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_IN_WORLD,
-        settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_IN_WORLD,
-        settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_IN_WORLD,
-        settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_IN_WORLD,
-        settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY,
-    },
-}
 
 GAMEPAD_SETTINGS_DATA =
 {
@@ -259,15 +199,15 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_INVERT_Y,
         },
+		{
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_ASSASSINATION_CAMERA,
+        },
         {
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY,
-        },
-        {
-            panel = SETTING_PANEL_CAMERA,
-            system = SETTING_TYPE_CAMERA,
-            settingId = CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW,
         },
         {
             panel = SETTING_PANEL_CAMERA,
@@ -278,6 +218,21 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_CAMERA,
             settingId = CAMERA_SETTING_FIRST_PERSON_HEAD_BOB,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_POSITION_MULTIPLIER,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_OFFSET,
         },
     },
     [SETTING_PANEL_GAMEPLAY] =
@@ -302,6 +257,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_COMBAT,
             settingId = COMBAT_SETTING_PREVENT_ATTACKING_INNOCENTS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_QUICK_CAST_GROUND_ABILITIES,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -427,7 +387,218 @@ GAMEPAD_SETTINGS_DATA =
     [SETTING_PANEL_INTERFACE] =
     {
         --dynamically created
-    }
+    },
+    [SETTING_PANEL_NAMEPLATES] =
+    {
+        --Nameplates
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ALL_NAMEPLATES,
+            header = SI_INTERFACE_OPTIONS_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_SHOW_PLAYER_TITLES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_SHOW_PLAYER_GUILDS,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_PLAYER_NAMEPLATE,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_PLAYER_NAMEPLATE_HIGHLIGHT,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_GROUP_MEMBER_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_GROUP_MEMBER_NAMEPLATES_HIGHLIGHT,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_NAMEPLATES_HIGHLIGHT,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_NAMEPLATES_HIGHLIGHT,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_NPC_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_NPC_NAMEPLATES_HIGHLIGHT,
+            panel = SETTING_PANEL_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_NAMEPLATES_HIGHLIGHT,
+            panel = SETTING_PANEL_NAMEPLATES,
+        },
+
+        --Healthbars
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ALL_HEALTHBARS,
+            header = SI_INTERFACE_OPTIONS_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_HEALTHBAR_ALIGNMENT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_HEALTHBAR_CHASE_BAR,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_PLAYER_HEALTHBAR,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_PLAYER_HEALTHBAR_HIGHLIGHT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_GROUP_MEMBER_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_GROUP_MEMBER_HEALTHBARS_HIGHLIGHT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS_HIGHLIGHT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS_HIGHLIGHT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS_HIGHLIGHT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS_HIGHLIGHT,
+        },
+
+        --Indicators
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_ALLIANCE_INDICATORS,
+            header = SI_INTERFACE_OPTIONS_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_GROUP_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_FOLLOWER_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_GLOW_THICKNESS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY,
+        },
+    },
 }
 
 --Platform specific settings
@@ -494,7 +665,5 @@ local function AddSettings(panel, settings)
 end
 
 AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsHUD)
-AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsHealthbars)
 AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsChatBubbles)
 AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsScrollingCombatText)
-AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsIndicators)

@@ -1,6 +1,6 @@
 
 local GAMEPAD_PLAYER_EMOTE_SCENE_NAME = "gamepad_player_emote"
-local GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE = "ZO_GamepadMenuEntryTemplate"
+local GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithSubLabelTemplate"
 
 local EMPTY_QUICKSLOT_TEXTURE = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
 local EMPTY_QUICKSLOT_STRING = GetString(SI_QUICKSLOTS_EMPTY)
@@ -18,6 +18,43 @@ local NUM_EMOTES_ON_PAGE = NUM_EMOTE_ITEM_COLUMNS * NUM_EMOTE_ITEMS_IN_COLUMN
 
 local EMOTE_GRID_MODE_EMOTES = 0
 local EMOTE_GRID_MODE_QUICK_CHAT = 1
+
+local GAMEPAD_EMOTE_ICON_PATH = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_"
+local GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
+
+local GAMEPAD_EMOTE_ICONS = {
+    [EMOTE_CATEGORY_INVALID]            = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
+    [EMOTE_CATEGORY_CEREMONIAL]         = GAMEPAD_EMOTE_ICON_PATH .. "ceremonial.dds",
+    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = GAMEPAD_EMOTE_ICON_PATH .. "cheersJeers.dds",
+    [EMOTE_CATEGORY_DEPRECATED]         = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
+    [EMOTE_CATEGORY_EMOTION]            = GAMEPAD_EMOTE_ICON_PATH .. "emotion.dds",
+    [EMOTE_CATEGORY_ENTERTAINMENT]      = GAMEPAD_EMOTE_ICON_PATH .. "entertain.dds",
+    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = GAMEPAD_EMOTE_ICON_PATH .. "eatDrink.dds",
+    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = GAMEPAD_EMOTE_ICON_PATH .. "direction.dds",
+    [EMOTE_CATEGORY_PERPETUAL]          = GAMEPAD_EMOTE_ICON_PATH .. "perpetual.dds",
+    [EMOTE_CATEGORY_PHYSICAL]           = GAMEPAD_EMOTE_ICON_PATH .. "physical.dds",
+    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = GAMEPAD_EMOTE_ICON_PATH .. "fidget.dds",
+    [EMOTE_CATEGORY_PROP]               = GAMEPAD_EMOTE_ICON_PATH .. "prop.dds",
+    [EMOTE_CATEGORY_SOCIAL]             = GAMEPAD_EMOTE_ICON_PATH .. "social.dds",
+	[EMOTE_CATEGORY_PERSONALITY_OVERRIDE]= GAMEPAD_EMOTE_ICON_PATH .. "personality.dds",
+}
+
+-- TODO: Must use the blue gamepad icons for personalities
+local GAMEPAD_PERSONALITY_EMOTE_ICONS = {
+	[EMOTE_CATEGORY_INVALID]            = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
+    [EMOTE_CATEGORY_CEREMONIAL]         = GAMEPAD_EMOTE_ICON_PATH .. "ceremonial_personality.dds",
+    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = GAMEPAD_EMOTE_ICON_PATH .. "cheersJeers_personality.dds",
+    [EMOTE_CATEGORY_DEPRECATED]         = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
+    [EMOTE_CATEGORY_EMOTION]            = GAMEPAD_EMOTE_ICON_PATH .. "emotion_personality.dds",
+    [EMOTE_CATEGORY_ENTERTAINMENT]      = GAMEPAD_EMOTE_ICON_PATH .. "entertain_personality.dds",
+    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = GAMEPAD_EMOTE_ICON_PATH .. "eatDrink_personality.dds",
+    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = GAMEPAD_EMOTE_ICON_PATH .. "direction_personality.dds",
+    [EMOTE_CATEGORY_PERPETUAL]          = GAMEPAD_EMOTE_ICON_PATH .. "perpetual_personality.dds",
+    [EMOTE_CATEGORY_PHYSICAL]           = GAMEPAD_EMOTE_ICON_PATH .. "physical_personality.dds",
+    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = GAMEPAD_EMOTE_ICON_PATH .. "fidget_personality.dds",
+    [EMOTE_CATEGORY_PROP]               = GAMEPAD_EMOTE_ICON_PATH .. "prop_personality.dds",
+    [EMOTE_CATEGORY_SOCIAL]             = GAMEPAD_EMOTE_ICON_PATH .. "social_personality.dds",
+}
 
 --
 -- ZO_EmoteItem class. These items wrap the controls that make up the grid of emotes the user can select from
@@ -64,7 +101,12 @@ function ZO_EmoteItem:SetEmoteInfo(emoteId)
     self.itemType = EMOTE_ITEM_TYPE_EMOTE
     self.id = emoteId
     local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(emoteId)
-    self:SetName(emoteInfo.displayName)
+
+	if emoteInfo.isOverriddenByPersonality then
+		self:SetName(ZO_PERSONALITY_EMOTES_COLOR:Colorize(emoteInfo.displayName))
+	else
+		self:SetName(emoteInfo.displayName)
+	end
 end
 
 function ZO_EmoteItem:SetQuickChatInfo(quickChatId)
@@ -300,30 +342,50 @@ end
 function ZO_GamepadPlayerEmote:OnDeferredInitialize()
     self:InitializeHeader()
     self:InitializeEmoteGrid()
-    self:InitializeList()
+    self:CreateCategoryList()
     self:InitializeRadialMenu()
+	
+	self.control:RegisterForEvent(EVENT_PERSONALITY_CHANGED, function() self:CreateCategoryList() end)
 end
 
 function ZO_GamepadPlayerEmote:OnSelectionChanged()
-    local targetData = self.itemList:GetTargetData()
-    if targetData then
-        self.currentData = targetData
-        if targetData.type == ACTION_TYPE_EMOTE then
-            self.emoteListGrid:ChangeEmoteListForEmoteType(targetData.emoteCategory)
-        elseif targetData.type == ACTION_TYPE_QUICK_CHAT then
-            self.emoteListGrid:ChangeEmoteListForQuickChat()
-        end
-    end
-    KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+	local targetData = self.itemList:GetTargetData()
+	if targetData then
+		self.currentData = targetData
+		if targetData.type == ACTION_TYPE_EMOTE then
+			self.emoteListGrid:ChangeEmoteListForEmoteType(targetData.emoteCategory)
+		elseif targetData.type == ACTION_TYPE_QUICK_CHAT then
+			self.emoteListGrid:ChangeEmoteListForQuickChat()
+		end
+	end
+	KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+
+	local targetControl = self.itemList:GetTargetControl()
+	if targetControl.subLabel then
+		local personalityId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY)
+		local personalityName = GetCollectibleInfo(personalityId)
+		if personalityName ~= "" then
+			targetControl.subLabel:SetHidden(false)
+			targetControl.subLabel:SetText(ZO_PERSONALITY_EMOTES_COLOR:Colorize(personalityName))
+		else
+			targetControl.subLabel:SetHidden(true)
+			targetControl.subLabel:SetText(nil)
+		end
+	end
 end
 
-function ZO_GamepadPlayerEmote:InitializeList()
+function ZO_GamepadPlayerEmote:SetupList(list)
+	list:AddDataTemplate(GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+end
+
+function ZO_GamepadPlayerEmote:CreateCategoryList()
     self.itemList = self:GetMainList()
 
     self.itemList:Clear()
 
     local quickChatIcon = QUICK_CHAT_MANAGER:GetQuickChatIcon()
     local data = ZO_GamepadEntryData:New(GetString(SI_QUICK_CHAT_EMOTE_MENU_ENTRY_NAME), quickChatIcon)
+	data:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
     data:SetIconTintOnSelection(true)
     data.type = ACTION_TYPE_QUICK_CHAT
     self.itemList:AddEntry(GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE, data)
@@ -332,8 +394,9 @@ function ZO_GamepadPlayerEmote:InitializeList()
 
     for _, category in ipairs(categories) do
         if category ~= EMOTE_CATEGORY_INVALID then
-            local emoteIcon = PLAYER_EMOTE_MANAGER:GetEmoteIconForCategory(category)
+            local emoteIcon = self:GetEmoteIconForCategory(category)
             local data = ZO_GamepadEntryData:New(GetString("SI_EMOTECATEGORY", category), emoteIcon)
+			data:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
             data:SetIconTintOnSelection(true)
             data.type = ACTION_TYPE_EMOTE
             data.emoteCategory = category
@@ -535,6 +598,20 @@ function ZO_GamepadPlayerEmote:HideQuickslotMenu()
     self.radialMenu:Clear()
 end
 
+function ZO_GamepadPlayerEmote:GetEmoteIconForCategory(category)
+	if GAMEPAD_EMOTE_ICONS[category] then
+		return GAMEPAD_EMOTE_ICONS[category]
+	end
+	return GAMEPAD_EMOTE_ICONS[EMOTE_CATEGORY_INVALID]
+end
+
+function ZO_GamepadPlayerEmote:GetPersonalityEmoteIconForCategory(category)
+	if GAMEPAD_PERSONALITY_EMOTE_ICONS[category] then
+		return GAMEPAD_PERSONALITY_EMOTE_ICONS[category]
+	end
+	return GAMEPAD_PERSONALITY_EMOTE_ICONS[EMOTE_CATEGORY_INVALID]
+end
+
 function ZO_GamepadPlayerEmote:PopulateRadialMenu()
     local slottedEmotes = PLAYER_EMOTE_MANAGER:GetSlottedEmotes()
     for i, emote in ipairs(slottedEmotes) do
@@ -549,8 +626,13 @@ function ZO_GamepadPlayerEmote:PopulateRadialMenu()
             local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(id)
             found = emoteInfo ~= nil
             if found then
-                icon = PLAYER_EMOTE_MANAGER:GetEmoteIconForCategory(emoteInfo.emoteCategory)
-                name = emoteInfo.displayName
+				if emoteInfo.isOverriddenByPersonality then
+					icon = self:GetPersonalityEmoteIconForCategory(emoteInfo.emoteCategory)				
+					name = ZO_PERSONALITY_EMOTES_COLOR:Colorize(emoteInfo.displayName)
+				else
+					icon = self:GetEmoteIconForCategory(emoteInfo.emoteCategory)
+					name = emoteInfo.displayName
+				end
             end
         elseif type == ACTION_TYPE_QUICK_CHAT then
             found = QUICK_CHAT_MANAGER:HasQuickChat(id)
@@ -595,6 +677,7 @@ end
 
 function ZO_GamepadPlayerEmote:OnShowing()
     self:ChangeCurrentMode(MODE_CATEGORY_SELECTION)
+    TriggerTutorial(TUTORIAL_TRIGGER_EMOTES_MENU_OPENED)
 end
 
 function ZO_GamepadPlayerEmote:OnHide()

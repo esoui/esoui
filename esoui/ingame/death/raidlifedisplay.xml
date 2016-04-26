@@ -28,15 +28,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="ZO_RaidLifeScoreUpdateAnimation" >
-            <Animations>
-                <CustomAnimation duration="200">
-                    <UpdateFunction>
-                        HUD_RAID_LIFE:UpdateRaidScore(self, progress)
-                    </UpdateFunction>
-                </CustomAnimation>
-            </Animations>
-        </AnimationTimeline>
     </Animations>
 
     <Controls>

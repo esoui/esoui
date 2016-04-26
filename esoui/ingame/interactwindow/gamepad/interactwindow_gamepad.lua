@@ -54,6 +54,7 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
 	if(data.optionsEnabled) then
 		data.enabled = data.optionUsable
 		control:SetText(data.optionText)
+        control.optionText = data.optionText
 		if selected then
             if data.recolorIfUnusable and not data.optionUsable then
                 control:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
@@ -80,7 +81,7 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
 	end
 end
 
-local MAX_CURRENCY_CONTROLS = 3 --JKTODO: Does this need to be 4 now that we have Telvar stones?
+local MAX_CURRENCY_CONTROLS = 3
 
 local function ReleaseChatterOptionControl(control)
     control:SetHandler("OnUpdate", nil)
@@ -147,7 +148,7 @@ function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
     local function IsEnabled()
         local selectedData = self.itemList:GetTargetData()
         if selectedData then
-            return selectedData.optionUsable
+            return selectedData.optionUsable, CHATTER_OPTION_ERROR[selectedData.optionType]
         else
             return true
         end
@@ -288,6 +289,24 @@ function ZO_GamepadInteraction:GetInteractGoldIcon()
     return GAMEPAD_INTERACT_GOLD_ICON
 end
 
+function ZO_GamepadInteraction:UpdateClemencyOnTimeComplete(control, data)
+    control:SetText(control.optionText)
+    data.optionUsable = true
+    control.optionType = CHATTER_TALK_CHOICE_USE_CLEMENCY
+    control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    self:RefreshList()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    control:SetText(control.optionText)
+    data.optionUsable = true
+    control.optionType = CHATTER_TALK_CHOICE_USE_SHADOWY_CONNECTIONS
+    control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    self:RefreshList()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
 function ZO_GamepadInteraction:OnShowing()
 	KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 	self:RefreshList()
@@ -304,6 +323,3 @@ end
 function ZO_InteractWindow_Gamepad_Initialize(control)
 	GAMEPAD_INTERACTION = ZO_GamepadInteraction:New(control)
 end
-
-
-

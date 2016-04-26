@@ -72,8 +72,8 @@ local defaultSortKeys =
 {
     bestGamepadItemCategoryName = { tiebreaker = "name" },
     name = { tiebreaker = "requiredLevel" },
-    requiredLevel = { tiebreaker = "requiredVeterankRank", isNumeric = true },
-    requiredVeterankRank = { tiebreaker = "iconFile", isNumeric = true },
+    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
+    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
     iconFile = { tiebreaker = "uniqueId" },
     uniqueId = { isId64 = true },
 }
@@ -139,7 +139,7 @@ local function GetSellItems()
 
     --- Setup sort filter
     for i, itemData in ipairs(items) do
-        if itemData.bagId ~= BAG_WORN and not itemData.stolen then
+        if itemData.bagId ~= BAG_WORN and not itemData.stolen and not itemData.isPlayerLocked then
             itemData.isEquipped = false
             itemData.meetsRequirementsToBuy = true
             itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements

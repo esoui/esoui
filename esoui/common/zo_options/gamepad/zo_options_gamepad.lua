@@ -131,6 +131,12 @@ function ZO_GamepadOptions:RefreshHeader()
     ZO_GamepadGenericHeader_RefreshData(self.header, headerData)
 end
 
+function ZO_GamepadOptions:OnOptionWithDependenciesChanged()
+    if SCENE_MANAGER:IsShowing("gamepad_options_panel") then
+        self.optionsList:RefreshVisible()
+    end
+end
+
 function ZO_GamepadOptions:Select()
     local control = self.optionsList:GetSelectedControl()
     local controlType = self:GetControlTypeFromControl(control)
@@ -140,7 +146,7 @@ function ZO_GamepadOptions:Select()
         --When a checkbox is toggled that controls subsettings refreshVisible to show the dependent controls in their disabled state
         --TODO: Call RefreshVisible when Sliders/Horizontal Lists change if ever needed.
         if control.data.gamepadHasEnabledDependencies then
-            self.optionsList:RefreshVisible()
+            self:OnOptionWithDependenciesChanged()
         end
     elseif controlType == OPTIONS_INVOKE_CALLBACK then
         ZO_Options_InvokeCallback(control)
@@ -344,12 +350,14 @@ function ZO_GamepadOptions:OnSelectionChanged(list)
 
     if self:HasInfoPanel() then
         local data = list:GetTargetData()
-        local fovCameraSettings = data.settingId == CAMERA_SETTING_FIRST_PERSON_FIELD_OF_VIEW or data.settingId == CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW
-        if data.system == SETTING_TYPE_CAMERA and fovCameraSettings then
-            local option = CAMERA_OPTIONS_PREVIEW_NONE
-            if data.settingId == CAMERA_SETTING_FIRST_PERSON_FIELD_OF_VIEW then
-                option = CAMERA_OPTIONS_PREVIEW_FORCE_FIRST_PERSON
-            elseif data.settingId == CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW then
+        local settingId = data.settingId
+        local isFirstPersonCameraSetting = settingId == CAMERA_SETTING_FIRST_PERSON_FIELD_OF_VIEW
+        local isThirdPersonCameraSetting = settingId == CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW
+                                            or settingId == CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_POSITION_MULTIPLIER
+                                            or settingId == CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_OFFSET
+        if data.system == SETTING_TYPE_CAMERA and (isFirstPersonCameraSetting or isThirdPersonCameraSetting) then
+            local option = CAMERA_OPTIONS_PREVIEW_FORCE_FIRST_PERSON
+            if isThirdPersonCameraSetting then
                 option = CAMERA_OPTIONS_PREVIEW_FORCE_THIRD_PERSON
             end
 
@@ -580,6 +588,7 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self:AddCategory(SETTING_PANEL_GAMEPLAY)
     self:AddCategory(SETTING_PANEL_CAMERA)
     self:AddCategory(SETTING_PANEL_INTERFACE)
+    self:AddCategory(SETTING_PANEL_NAMEPLATES)
     self:AddCategory(SETTING_PANEL_SOCIAL)
 
     self.categoryList:Commit()
@@ -595,6 +604,7 @@ do
         [SETTING_PANEL_CAMERA] = "EsoUI/Art/Options/Gamepad/gp_options_camera.dds",
         [SETTING_PANEL_INTERFACE] = "EsoUI/Art/Options/Gamepad/gp_options_interface.dds",
         [SETTING_PANEL_SOCIAL] = "EsoUI/Art/Options/Gamepad/gp_options_social.dds",
+        [SETTING_PANEL_NAMEPLATES] = "EsoUI/Art/Options/Gamepad/gp_options_nameplates.dds",
     }
 
     function ZO_GamepadOptions:AddCategory(panelId)
@@ -665,13 +675,13 @@ function ZO_GamepadOptions:LoadDefaults()
         self:RefreshOptionsList()
     end
 
-    ZO_SavePlayerConsoleProfile()
-    self:SaveCachedSettings()
-
     if self.currentCategory == SETTING_PANEL_VIDEO or self:IsAtRoot() then
         -- reset the screen adjustments
         SetOverscanOffsets(0, 0, 0, 0)
     end
+
+    ZO_SavePlayerConsoleProfile()
+    self:SaveCachedSettings()
 
     self:RefreshGamepadInfoPanel()
 end

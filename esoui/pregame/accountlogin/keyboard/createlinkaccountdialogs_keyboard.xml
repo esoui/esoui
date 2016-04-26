@@ -1,0 +1,57 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ConfirmLinkAccountLabel_Keyboard" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameMedium" virtual="true" />
+        
+        <Label name="ZO_CreateLinkAccountDialogLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameMedium" virtual="true" />
+        
+        <TopLevelControl name="ZO_LinkAccountsDialog_Keyboard" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_LinkAccountsDialog_Initialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)LinkConfirm1" inherits="ZO_DialogContentAnchors ZO_CreateLinkAccountDialogLabel_Keyboard" text="SI_LINKACCOUNT_CONFIRM_1" />
+
+                <Texture name="$(parent)LinkIcon" textureFile="EsoUI/Art/Login/login_LinkExisting.dds" resizeToFitFile="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LinkConfirm1" relativePoint="BOTTOMLEFT" offsetY="64" />
+                </Texture>
+                
+                <!-- Partner account information. -->
+                <Texture name="$(parent)PartnerIcon" textureFile="EsoUI/Art/Login/link_LoginLogo_ESO.dds" resizeToFitFile="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="TOPRIGHT" offsetY="8" />
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                
+                <Label name="$(parent)PartnerAccount" inherits="ZO_ConfirmLinkAccountLabel_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PartnerIcon" relativePoint="TOPRIGHT" offsetX="5" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PartnerIcon" relativePoint="BOTTOMRIGHT" offsetX="5" />
+                </Label>
+                
+                <!-- ESO Account information -->
+                <Texture name="$(parent)ESOIcon" textureFile="EsoUI/Art/Login/link_LoginLogo_ESO.dds" resizeToFitFile="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMRIGHT" offsetY="-8" />
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                
+                <Label name="$(parent)ESOAccount" inherits="ZO_ConfirmLinkAccountLabel_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ESOIcon" relativePoint="TOPRIGHT" offsetX="5" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ESOIcon" relativePoint="BOTTOMRIGHT" offsetX="5" />
+                </Label>
+
+                <Label name="$(parent)LinkConfirm2" inherits="ZO_CreateLinkAccountDialogLabel_Keyboard" text="SI_KEYBOARD_LINKACCOUNT_CONFIRM_2_DMM">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMLEFT" offsetY="64" />
+                    <Dimensions x="360" />
+                </Label>
+
+                <Label name="$(parent)OptionalText" inherits="ZO_CreateLinkAccountDialogLabel_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LinkConfirm2" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Dimensions x="360" y="0" />
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                
+                <Control name="$(parent)Link" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,7 +1,8 @@
 local function GetCategoryFromItemType(itemType)
     -- Alchemy
     if      ITEMTYPE_REAGENT == itemType or 
-            ITEMTYPE_ALCHEMY_BASE == itemType then
+            ITEMTYPE_POTION_BASE == itemType or
+            ITEMTYPE_POISON_BASE == itemType then
         return GAMEPAD_ITEM_CATEGORY_ALCHEMY
 
     -- Bait
@@ -206,17 +207,24 @@ function ZO_InventoryUtils_DoesNewItemMatchSupplies(itemData)
 end
 
 function ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot)
+	local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(equipSlot or EQUIP_SLOT_NONE)
+	local equipSlotText = ""
+
     if equipSlot == EQUIP_SLOT_MAIN_HAND then
-        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), GetString(SI_GAMEPAD_EQUIPPED_MAIN_HAND_ITEM_HEADER))
+        equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_MAIN_HAND_ITEM_HEADER)
     elseif equipSlot == EQUIP_SLOT_BACKUP_MAIN then
-        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), GetString(SI_GAMEPAD_EQUIPPED_BACKUP_MAIN_ITEM_HEADER))
+        equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_BACKUP_MAIN_ITEM_HEADER)
     elseif equipSlot == EQUIP_SLOT_OFF_HAND then
-        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), GetString(SI_GAMEPAD_EQUIPPED_OFF_HAND_ITEM_HEADER))
+        equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_OFF_HAND_ITEM_HEADER)
     elseif equipSlot == EQUIP_SLOT_BACKUP_OFF then
-        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), GetString(SI_GAMEPAD_EQUIPPED_BACKUP_OFF_ITEM_HEADER))
-    else
-        GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER))
-    end
+        equipSlotText = GetString(SI_GAMEPAD_EQUIPPED_BACKUP_OFF_ITEM_HEADER)
+	end
+
+	if isHidden then
+		GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), equipSlotText, ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
+	else
+		GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), equipSlotText)
+	end
 end
 
 function ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)

@@ -60,6 +60,11 @@ function ZO_Fence_Gamepad:IsLaundering()
     return currentMode == ZO_MODE_STORE_LAUNDER
 end
 
+function ZO_Fence_Gamepad:IsSellingStolenItems()
+    local currentMode = STORE_WINDOW_GAMEPAD:GetCurrentMode()
+    return currentMode == ZO_MODE_STORE_SELL_STOLEN
+end
+
 --[[ 
 ---- Global
 --]]

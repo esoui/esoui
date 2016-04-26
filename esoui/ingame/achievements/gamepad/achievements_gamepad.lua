@@ -365,9 +365,8 @@ function ZO_Achievements_Gamepad:InitializeOptionsDialog()
             text = SI_GAMEPAD_ACHIEVEMENTS_OPTIONS,
         },
 
-        setup = function()
-            local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
-            dialog.setupFunc(dialog)
+        setup = function(dialog)
+            dialog:setupFunc()
         end,
 
         parametricList =

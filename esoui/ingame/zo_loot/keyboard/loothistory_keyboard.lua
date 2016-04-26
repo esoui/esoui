@@ -1,3 +1,4 @@
+ZO_KEYBOARD_LOOT_HISTORY_ENTRY_SPACING_Y = -1
 local KEYBOARD_LOOT_HISTORY_ENTRY_TEMPLATE = "ZO_LootHistory_KeyboardEntry"
 
 local ZO_LootHistory_Keyboard = ZO_LootHistory_Shared:Subclass()
@@ -33,6 +34,9 @@ function ZO_LootHistory_Keyboard:InitializeFadingControlBuffer(control)
 
     self.lootStreamPersistent = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("PersistentContainer"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, PERSISTENT_CONTAINER_SHOW_TIME_MS, "KeyboardPersistent")
     self.lootStream = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("Container"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, CONTAINER_SHOW_TIME_MS, "Keyboard")
+
+    self.lootStreamPersistent:SetAdditionalEntrySpacingY(ZO_KEYBOARD_LOOT_HISTORY_ENTRY_SPACING_Y)
+    self.lootStream:SetAdditionalEntrySpacingY(ZO_KEYBOARD_LOOT_HISTORY_ENTRY_SPACING_Y)
 end
 
 function ZO_LootHistory_Keyboard:SetEntryTemplate()
@@ -40,7 +44,7 @@ function ZO_LootHistory_Keyboard:SetEntryTemplate()
 end
 
 local function IsLootFromInventory()
-    -- TODO: Figure out a better way to determing if it's from a container in inventory
+    -- TODO: Figure out a better way to determine if it's from a container in inventory
     return LOOT_WINDOW.returnScene == "inventory" or SCENE_MANAGER:IsShowing("inventory")
 end
 

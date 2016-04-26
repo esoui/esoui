@@ -59,6 +59,8 @@
         <Label name="ZO_UnitFrameBarText_Keyboard_Template" font="ZoFontGameOutline" modifyTextType="NONE" virtual="true" />
         <Label name="ZO_UnitFrameBarText_Gamepad_Template" font="ZoFontGamepad18" modifyTextType="UPPERCASE" virtual="true" />
 
+        <Label name="ZO_UnitFrameResourceNumbers_Gamepad_Template" inherits="ZO_PlayerAttributeResourceNumbers_Gamepad_Template" font="ZoFontGamepadBold20" virtual="true" />
+
         <Control name="ZO_GroupFrameAnchor" clampedToScreen="true" virtual="true" />
 
         <Control name="ZO_RaidFrameAnchor_Keyboard_Template" virtual="true">
@@ -270,9 +272,9 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)VeteranIcon">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TextArea" relativePoint="TOPLEFT" offsetX="-2" offsetY="-4"/>
-                    <Dimensions x="32" y="32"/>
+                <Texture name="$(parent)ChampionIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT" offsetX="-2"/>
+                    <Dimensions x="20" y="20"/>
                 </Texture>
 
                 <Texture name="$(parent)RankIcon">
@@ -312,6 +314,8 @@
                 <Texture name="$(parent)FrameLeft" inherits="ZO_TargetAttributeFrameLeftAngle_Keyboard_Template" />
                 <Texture name="$(parent)FrameRight" inherits="ZO_TargetAttributeFrameRightAngle_Keyboard_Template" />
                 <Texture name="$(parent)FrameCenter" inherits="ZO_TargetAttributeFrameCenter_Keyboard_Template" />
+
+                <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeResourceNumbers_Keyboard_Template" />
             </Controls>
         </Control>
 
@@ -325,9 +329,9 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)VeteranIcon">
+                <Texture name="$(parent)ChampionIcon">
                     <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT" offsetX="-2"/>
-                    <Dimensions x="40" y="40"/>
+                    <Dimensions x="32" y="32"/>
                 </Texture>
 
                 <Texture name="$(parent)RankIcon">
@@ -368,6 +372,8 @@
                 <Texture name="$(parent)FrameLeft" inherits="ZO_TargetAttributeFrameLeftAngle_Gamepad_Template" />
                 <Texture name="$(parent)FrameRight" inherits="ZO_TargetAttributeFrameRightAngle_Gamepad_Template" />
                 <Texture name="$(parent)FrameCenter" inherits="ZO_TargetAttributeFrameCenter_Gamepad_Template" />
+
+                <Label name="$(parent)ResourceNumbers" inherits="ZO_UnitFrameResourceNumbers_Gamepad_Template" />
             </Controls>
         </Control>
 
@@ -386,9 +392,9 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)VeteranIcon" hidden="true" textureFile="EsoUI/Art/UnitFrames/target_veteranRank_icon.dds">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TextArea" relativePoint="TOPLEFT" offsetX="-2" offsetY="-4"/>
-                    <Dimensions x="32" y="32"/>
+                <Texture name="$(parent)ChampionIcon" hidden="true" textureFile="EsoUI/Art/Champion/champion_icon.dds">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT" offsetX="-2"/>
+                    <Dimensions x="22" y="22"/>
                 </Texture>
 
                 <Texture name="$(parent)RankIcon" hidden="true">
@@ -449,6 +455,8 @@
                 <Texture name="$(parent)FrameCenter" inherits="ZO_TargetAttributeFrameCenter" />
 
                 <Control name="$(parent)Warner" inherits="ZO_PlayerAttributeWarner"/>
+
+                <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeBarText" />
             </Controls>
         </Control>
 

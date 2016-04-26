@@ -41,6 +41,7 @@ function ZO_SocialOptionsDialogGamepad:AddOptionTemplate(groupId, buildFunction,
 end
 
 function ZO_SocialOptionsDialogGamepad:PopulateOptionsList(list)
+    ZO_ClearTable(self.conditionResults)
     for groupId, grouping in pairs(self.optionTemplateGroups) do
         self.currentGroupingHeader = grouping.headerFunction and grouping.headerFunction(self)
 

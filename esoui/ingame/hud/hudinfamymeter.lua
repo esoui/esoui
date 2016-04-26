@@ -196,12 +196,16 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         local oldInfamyLevel = GetInfamyLevel(oldInfamy)
 
         -- Fire CSA
-        if self.infamyMeterState["isTrespassing"] ~= wasTrespassing then
+        if self.infamyMeterState.isTrespassing ~= wasTrespassing then
             local sound, primaryMessage, secondaryMessage
             if wasTrespassing then
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_TRESPASSING_PRIMARY))
                 secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_TRESPASSING_SECONDARY))
+
+                if self.infamyMeterState.bounty > 0 then
+                    TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_EXITED_WITH_BOUNTY)
+                end
             else
             	TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_ENTERED)
                 sound = SOUNDS.JUSTICE_NOW_KOS

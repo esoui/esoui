@@ -44,11 +44,11 @@
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
                 </Texture>
-                <Cooldown name="$(parent)InfamyBar" textureFile="EsoUI/Art/HUD/infamy_meter-heat_px_per.dds">
+                <Cooldown name="$(parent)InfamyBar" textureFile="EsoUI/Art/HUD/infamy_meter-heat_px_per.dds" level="2">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
                 </Cooldown>
-                <Cooldown name="$(parent)BountyBar" textureFile="EsoUI/Art/HUD/infamy_meter-bounty_px_per.dds">
+                <Cooldown name="$(parent)BountyBar" textureFile="EsoUI/Art/HUD/infamy_meter-bounty_px_per.dds" level="3">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="RIGHT" offsetX="INFAMY_METER_KEYBOARD_BAR_OFFSET_X" offsetY="INFAMY_METER_KEYBOARD_BAR_OFFSET_Y" />
                 </Cooldown>
@@ -57,16 +57,16 @@
                     <Anchor point="RIGHT" />
                 </Texture>
                 <!-- This is the icon that is used at the start of the center-icon animations, and is transparent by the end of them -->
-                <Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" level="4" alpha="0">
+                <Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" alpha="0" level="5">
                     <Dimensions x="51" y="51" />
                     <Anchor point="CENTER" offsetX="79" offsetY="15" />
                 </Texture>
                 <!-- This is the icon that is faded in during the center-icon animations, and remains visible afterwards -->
-                <Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="4">
+                <Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="6">
                     <Dimensions x="51" y="51" />
                     <Anchor point="CENTER" offsetX="79" offsetY="15" />
                 </Texture>
-                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="4">
+                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="6">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="-25" />
                 </Label>
             </Controls>
@@ -80,11 +80,11 @@
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
                 </Texture>
-                <Cooldown name="$(parent)InfamyBar" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-heat_px_per.dds">
+                <Cooldown name="$(parent)InfamyBar" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-heat_px_per.dds" level="2">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
                 </Cooldown>
-                <Cooldown name="$(parent)BountyBar" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-bounty_px_per.dds">
+                <Cooldown name="$(parent)BountyBar" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-bounty_px_per.dds" level="3">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />
                     <Anchor point="LEFT" offsetX="-INFAMY_METER_GAMEPAD_BAR_OFFSET" offsetY="INFAMY_METER_GAMEPAD_BAR_OFFSET" />
                 </Cooldown>
@@ -94,16 +94,16 @@
                     <Anchor point="RIGHT" offsetX="-INFAMY_METER_WIDTH" />
                 </Texture>
                 <!-- This is the icon that is used at the start of the center-icon animations, and is transparent by the end of them -->
-                <Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" level="4" alpha="0">
+                <Texture name="$(parent)CenterIconAnimatingTexture" tier="MEDIUM" alpha="0" level="5">
                     <Dimensions x="54" y="54" />
                     <Anchor point="CENTER" relativeTo="$(parent)Background" />
                 </Texture>
                 <!-- This is the icon that is faded in during the center-icon animations, and remains visible afterwards -->
-                <Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="4">
+                <Texture name="$(parent)CenterIconPersistentTexture" textureFile="EsoUI/Art/HUD/infamy_dagger-grey.dds" tier="MEDIUM" level="6">
                     <Dimensions x="54" y="54" />
                     <Anchor point="CENTER" relativeTo="$(parent)Background" />
                 </Texture>
-                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="4">
+                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="6">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-14" />
                 </Label>
             </Controls>

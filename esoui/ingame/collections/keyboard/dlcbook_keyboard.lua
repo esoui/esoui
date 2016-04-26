@@ -74,12 +74,13 @@ function DLCBook_Keyboard:InitializeNavigationList()
     self.navigationTree:AddTemplate("ZO_DLCBookNavigationHeader_Keyboard", TreeHeaderSetup, nil, nil, nil, 0)
 
     local function TreeEntrySetup(node, control, data, open)
-        control:SetText(data.name)
+        control:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
         control:SetSelected(false)
 
         control.statusIcon = control:GetNamedChild("StatusIcon")
         data.notificationId = NOTIFICATIONS_PROVIDER:GetNotificationIdForCollectible(data.collectibleId)
-        control.statusIcon:SetHidden(data.notificationId == nil)
+        local isNew = data.notificationId or COLLECTIONS_BOOK_SINGLETON:IsDLCIdQuestPending(data.collectibleId)
+        control.statusIcon:SetHidden(not isNew)
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
@@ -202,7 +203,7 @@ function DLCBook_Keyboard:RefreshDetails()
 
     if data then
         self.imageControl:SetTexture(data.background)
-        self.nameControl:SetText(data.name)
+        self.nameControl:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
         self.descriptionControl:SetText(data.description)
         self.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", data.unlockState))
 
@@ -243,17 +244,13 @@ end
 
 function DLCBook_Keyboard:SearchSelectedDLCInStore()
     local data = self.navigationTree:GetSelectedData()
-    ShowMarketAndSearch(data.name, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, data.name)
+    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
 end
 
 function DLCBook_Keyboard:BrowseToCollectible(collectibleId)
     self:FocusDLCWithCollectibleId(collectibleId)
     SCENE_MANAGER:Show("dlcBook")
-end
-
-function DLCBook_Keyboard:IsCategoryIndexDLC(categoryIndex)
-    local categoryType = select(7, GetCollectibleCategoryInfo(categoryIndex))
-    return categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC
 end
 
 ----------
@@ -267,12 +264,16 @@ function DLCBook_Keyboard:OnCollectibleUpdated(collectibleId, justUnlocked)
         local node = self.collectibleIdToTreeNode[collectibleId]
         if node then
             local data = node:GetData()
-            data.active = select(7, GetCollectibleInfo(collectibleId))
 
+            local wasActive = data.active
+            data.active = select(7, GetCollectibleInfo(collectibleId))
             local unlockState = GetCollectibleUnlockStateById(collectibleId)
             if data.unlockState ~= unlockState then
                 self:RefreshList()
             else
+                if data.active ~= wasActive then
+                    node:RefreshControl()
+                end
                 self:RefreshDetails()
             end
         end

@@ -129,6 +129,26 @@ function DeathType:LayoutWayshrineButton(wayshrineButton)
     reviveTextControl:SetText(GetString(SI_DEATH_PROMPT_REVIVE_LABEL))
 end
 
+function DeathType:UpdateButtonsEnabled()
+    local button1 = self:GetButton(1)
+    local button2 = self:GetButton(2)
+    if IsQueuedForCyclicRespawn() then
+        if button1 then
+            button1:SetEnabled(false)
+        end
+        if button2 then
+            button2:SetEnabled(false)
+        end
+    else
+        if button1 then
+            button1:SetEnabled(true)
+        end
+        if button2 then
+            button2:SetEnabled(true)
+        end
+    end
+end
+
 function LayoutDeathRecapToggleButton(deathRecapToggleButton)
     if deathRecapToggleButton then
         deathRecapToggleButton:SetText(GetString(SI_DEATH_RECAP_TOGGLE_KEYBIND))
@@ -276,6 +296,7 @@ end
 function ImperialPvEDeath:UpdateDisplay()
     if self:CheckUpdateTimer() then
         self:LayoutHereButton(self:GetButton(1))
+        self:UpdateButtonsEnabled()
     end
 end
 
@@ -289,77 +310,12 @@ function BGDeath:New(control)
 
     local button1 = bg:GetButton(1)
     button1:SetText(GetString(SI_DEATH_PROMPT_JOIN))
-    button1:SetCallback(function()
-        JoinRespawnQueue()
-        button1:SetEnabled(false)
-        button1:HideKeyIcon()
-    end)
-
-    control:SetHandler("OnUpdate", function(control, currentFrameTimeSeconds) bg:UpdateTimer(currentFrameTimeSeconds) end)
-    
-    bg.respawnCooldown = GetControl(control, "CountdownBar")
-    control:SetHandler("OnHide", function() bg:ResetRespawnCountdown() end)
-    bg:InitializeRespawnCountdown()
+    button1:SetCallback(JoinRespawnQueue)
 
     return bg   
 end
 
-function BGDeath:UpdateTimer(currentFrameTimeSeconds)
-    local respawnQueueTimeLeft, _, _, _, _, _, _, _, _, _, respawnQueueDuration = select(3, GetDeathInfo())
-    if(not self.lastRespawnQueueTimeLeft or respawnQueueTimeLeft > self.lastRespawnQueueTimeLeft) then
-        self:StartRespawnCountdown(respawnQueueTimeLeft, respawnQueueDuration)
-    elseif currentFrameTimeSeconds then
-        self:UpdateRespawnCountdown(currentFrameTimeSeconds)
-    end
-    self.lastRespawnQueueTimeLeft = respawnQueueTimeLeft
-end
-
 function BGDeath:UpdateDisplay()
-    self:UpdateTimer()
-    self:GetButton(1):SetEnabled(true)
-end
-
-function BGDeath:InitializeRespawnCountdown()
-    self.respawnCooldown.cooldownStartMS = 0
-    self.respawnCooldown.cooldownEndMS = 0
-    self.respawnCooldown.cooldownDurationMS = 0
-    self.respawnCooldown.loadBar = GetControl(self.respawnCooldown, "LoadBar")
-end
-
-function BGDeath:StartRespawnCountdown(timeLeftMS, durationMS)
-    local currentFrameTimeMS = GetFrameTimeMilliseconds()
-    self.respawnCooldown.cooldownEndMS = currentFrameTimeMS + timeLeftMS
-    self.respawnCooldown.cooldownDurationMS = durationMS
-    self.respawnCooldown.cooldownStartMS = self.respawnCooldown.cooldownEndMS - durationMS
-    self.respawnCooldown:SetHidden(false)
-end
-
-function BGDeath:UpdateRespawnCountdown(currentFrameTimeSeconds)
-    local currentFrameTimeMS = currentFrameTimeSeconds * 1000
-    local screenWidth = GuiRoot:GetWidth()
-    local progress = 0
-    if self.respawnCooldown.cooldownDurationMS > 0 then
-        progress = (currentFrameTimeMS - self.respawnCooldown.cooldownStartMS) / self.respawnCooldown.cooldownDurationMS
-    end
-
-    self.respawnCooldown.loadBar:SetWidth(screenWidth * progress)
-
-    if IsQueuedForBattleGroundRespawn() then
-        local respawnButton = self:GetButton(1)
-        local secondsToWait = zo_floor((self.respawnCooldown.cooldownEndMS - currentFrameTimeMS) / 1000)
-        respawnButton:SetText(zo_strformat(SI_DEATH_PROMPT_WAITING_RELEASE, secondsToWait))
-    end
-end
-
-function BGDeath:ResetRespawnCountdown()
-    self.respawnCooldown.cooldownStartMS = 0
-    self.respawnCooldown.cooldownEndMS = 0
-    self.respawnCooldown.cooldownDurationMS = 0
-    self.respawnCooldown:SetHidden(true)
-
-    local respawnButton = self:GetButton(1)
-    respawnButton:SetText(GetString(SI_DEATH_PROMPT_JOIN))
-    respawnButton:ShowKeyIcon()
 end
 
 --Release Only Death
@@ -445,7 +401,7 @@ end
 
 function ResurrectPending:UpdateDisplay()
     local resurrectRequesterCharacterName, timeLeftToAcceptMs, resurrectRequesterDisplayName = GetPendingResurrectInfo()
-    local text = zo_strformat(SI_DEATH_PROMPT_RESURRECT_TEXT, IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(resurrectRequesterDisplayName) or resurrectRequesterCharacterName)
+    local text = zo_strformat(SI_DEATH_PROMPT_RESURRECT_TEXT, ZO_GetPrimaryPlayerName(resurrectRequesterDisplayName, resurrectRequesterCharacterName))
     self.messageLabel:SetText(text)
     self.timerCooldown:Start(timeLeftToAcceptMs)
 end
@@ -487,6 +443,10 @@ function Death:New(control)
     death.control = control
     death.waitingToShowPrompt = false
     death.isPlayerDead = IsUnitDead("player")
+
+    death.cyclicRespawnTimer = GetControl(control, "CyclicRespawnTimer")
+    death:InitializeCyclicRespawnTimer()
+
     death.types = {}
     death.types[DEATH_TYPE_AVA] = AvADeath:New(GetControl(control, "AvA"))
     death.types[DEATH_TYPE_IMPERIAL_PVP] = ImperialPvPDeath:New(GetControl(control, "ImperialPvP"))
@@ -510,6 +470,7 @@ function Death:New(control)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_RAID_TRIAL_FAILED, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_DEATH_REQUEST_FAILURE, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_DEATH_INFO_UPDATE, UpdateDisplay)
+    EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_QUEUED_FOR_CYCLIC_RESPAWN, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_RAID_REVIVE_COUNTER_UPDATE, function() 
 		if(self.currentType) then
             self.types[self.currentType]:UpdateDisplay()
@@ -539,30 +500,33 @@ function Death:GetDeathType()
     if(IsResurrectPending()) then
         return DEATH_TYPE_RESURRECT_PENDING
     else
-        local isEncounterInProgress, isAVADeath, isBattleGroundDeath, isReleaseOnly, _, _, isRaidDeath = select(5, GetDeathInfo())
+        local isEncounterInProgress, isAVADeath, isBattleGroundDeath, isReleaseOnly, _, _, isRaidDeath, _, respawnQueueDuration = select(5, GetDeathInfo())
+        local useCyclicRespawn = respawnQueueDuration > 0
+        local deathType
         if IsInImperialCity() then -- Special snowflake scenario
 			if isReleaseOnly then
-				return DEATH_TYPE_RELEASE_ONLY
+				deathType = DEATH_TYPE_RELEASE_ONLY
 			else
-				return isAVADeath and DEATH_TYPE_IMPERIAL_PVP or DEATH_TYPE_IMPERIAL_PVE
+				deathType = isAVADeath and DEATH_TYPE_IMPERIAL_PVP or DEATH_TYPE_IMPERIAL_PVE
 			end
         elseif isBattleGroundDeath then
-            return DEATH_TYPE_BATTLE_GROUND
+            deathType = DEATH_TYPE_BATTLE_GROUND
         elseif isAVADeath then 
-            return DEATH_TYPE_AVA
+            deathType = DEATH_TYPE_AVA
         elseif isEncounterInProgress then
-            return DEATH_TYPE_IN_ENCOUNTER
+            deathType = DEATH_TYPE_IN_ENCOUNTER
         elseif isRaidDeath then
             if isReleaseOnly then
-                return DEATH_TYPE_RELEASE_ONLY
+                deathType = DEATH_TYPE_RELEASE_ONLY
             else
-                return DEATH_TYPE_TWO_OPTION
+                deathType = DEATH_TYPE_TWO_OPTION
             end
         elseif isReleaseOnly then 
-            return DEATH_TYPE_RELEASE_ONLY
+            deathType = DEATH_TYPE_RELEASE_ONLY
         else
-            return DEATH_TYPE_TWO_OPTION
+            deathType = DEATH_TYPE_TWO_OPTION
         end
+        return deathType, useCyclicRespawn
     end
 end
 
@@ -577,12 +541,19 @@ function Death:UpdateDisplay()
         return
     end
 
+    if not self.isPlayerDead and self.cyclicRespawnTimer.isRunning then
+        self:StopCyclicRespawnTimer()
+    end
     DEATH_FRAGMENT:SetHiddenForReason("NotShowingAsDead", not self.isPlayerDead)
     
-    local nextType
+    local nextType, useCyclicRespawn
     if(self.isPlayerDead) then
-        nextType = self:GetDeathType()
+        nextType, useCyclicRespawn = self:GetDeathType()
     end    
+
+    if useCyclicRespawn and not self.cyclicRespawnTimer.isRunning then
+        self:StartCyclicRespawnTimer()
+    end
 
     local deathTypeChanged = false
     if(self.currentType ~= nextType) then
@@ -600,6 +571,7 @@ function Death:UpdateDisplay()
 
     if(self.currentType) then
         self.types[self.currentType]:UpdateDisplay()
+        self.types[self.currentType]:UpdateButtonsEnabled()
         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", false)
     else
         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", true)
@@ -656,6 +628,51 @@ do
         ApplyNormalColorToDeath(self.control, isGamepad and ZO_SELECTED_TEXT or ZO_NORMAL_TEXT)
         self.types[DEATH_TYPE_IN_ENCOUNTER]:ApplyTemplateToMessage(ZO_GetPlatformTemplate("ZO_DeathInEncouterLoadingLabel"))
     end
+end
+
+--Cyclic Respawn Timer
+
+function Death:InitializeCyclicRespawnTimer()
+    self.cyclicRespawnTimer.isRunning = false
+    self.cyclicRespawnTimer.loadBar = GetControl(self.cyclicRespawnTimer, "LoadBar")
+    self.cyclicRespawnTimer.respawningTimeLabel = GetControl(self.cyclicRespawnTimer, "RespawnTimerText")
+end
+
+function Death:StartCyclicRespawnTimer()
+    self.cyclicRespawnTimer.isRunning = true
+    self.cyclicRespawnTimer:SetHidden(false)
+    self:UpdateCyclicRespawnTimer()
+    EVENT_MANAGER:RegisterForUpdate("CyclicRespawnTimer", 0, function() self:UpdateCyclicRespawnTimer() end)
+end
+
+function Death:UpdateCyclicRespawnTimer()
+    local respawnQueueDuration, respawnQueueTimeLeft = select(13, GetDeathInfo())
+    local screenWidth = GuiRoot:GetWidth()
+    local progress = 0
+    if respawnQueueDuration > 0 then
+        progress = (respawnQueueDuration - respawnQueueTimeLeft) / respawnQueueDuration
+    end
+    self.cyclicRespawnTimer.loadBar:SetWidth(screenWidth * progress)
+
+    if IsQueuedForCyclicRespawn() then
+        local secondsToWait = respawnQueueTimeLeft / 1000
+        secondsToWait = zo_max(secondsToWait, 0)
+        local timeLeft = ""
+        if (secondsToWait < 10) then
+            timeLeft = ZO_FormatTime(secondsToWait, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING)
+        else
+            timeLeft = ZO_FormatTimeLargestTwo(secondsToWait, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+        end
+        self.cyclicRespawnTimer.respawningTimeLabel:SetText(zo_strformat(SI_DEATH_PROMPT_WAITING_RELEASE, timeLeft))
+    else
+        self.cyclicRespawnTimer.respawningTimeLabel:SetText("")
+    end
+end
+
+function Death:StopCyclicRespawnTimer()
+    self.cyclicRespawnTimer.isRunning = false
+    self.cyclicRespawnTimer:SetHidden(true)
+    EVENT_MANAGER:UnregisterForUpdate("CyclicRespawnTimer")
 end
 
 --bindings

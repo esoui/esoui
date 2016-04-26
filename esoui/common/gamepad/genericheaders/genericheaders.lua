@@ -81,7 +81,7 @@ local DATA4HEADER       = ZO_GAMEPAD_HEADER_CONTROLS.DATA4HEADER
 local MESSAGE           = ZO_GAMEPAD_HEADER_CONTROLS.MESSAGE
 
 local DEFAULT_LAYOUT        = ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE
-local FIRST_DATA_CONTROL    = DATA1HEADER
+local FIRST_DATA_CONTROL    = DATA1
 local LAST_DATA_CONTROL     = MESSAGE
 
 -- Because these consts are created before the xml is loaded, we don't have an effecient way to track the anticipated height of the info labels
@@ -141,6 +141,33 @@ local SCREEN_HEADER_ANCHORS =
         [DATA4HEADER]   = {Anchor:New(BOTTOMRIGHT, DATA4, BOTTOMLEFT, -DATA_OFFSET_X, -GENERIC_HEADER_INFO_FONT_HEIGHT_DISPARITY)},
 
         [MESSAGE]       = {Anchor:New(TOPLEFT, DIVIDER_SIMPLE, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y),    Anchor:New(TOPRIGHT, DIVIDER_SIMPLE, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y)},
+    },
+}
+
+-- The overlap anchors are used instead of the normal anchors in cases where the data label's text overlaps its corresponding header label.
+local DATA_OVERLAP_ROW_OFFSET_Y = 40
+local HEADER_OVERLAP_ROW_OFFSET_Y = 31
+
+local SCREEN_HEADER_OVERLAP_ANCHORS = 
+{
+    -- Anchors header content as
+    -- DATA[N]HEADER
+    -- DATA[N]
+    -- DATA[N+1]HEADER...
+    -- if DATA[N]HEADER and DATA[N] overlap each other
+    
+    [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE] =
+    {
+        [DATA1]         = {Anchor:New(BOTTOMLEFT, DATA1HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA1HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+
+        [DATA2HEADER]   = {Anchor:New(BOTTOMLEFT, DATA1, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA1, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y)},
+        [DATA2]         = {Anchor:New(BOTTOMLEFT, DATA2HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA2HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+
+        [DATA3HEADER]   = {Anchor:New(BOTTOMLEFT, DATA2, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA2, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y)},
+        [DATA3]         = {Anchor:New(BOTTOMLEFT, DATA3HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA3HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
+
+        [DATA4HEADER]   = {Anchor:New(BOTTOMLEFT, DATA3, BOTTOMLEFT, 0, HEADER_OVERLAP_ROW_OFFSET_Y),    Anchor:New(BOTTOMRIGHT, DATA3, BOTTOMRIGHT, 0, HEADER_OVERLAP_ROW_OFFSET_Y)},
+        [DATA4]         = {Anchor:New(BOTTOMLEFT, DATA4HEADER, BOTTOMLEFT, 0, DATA_OVERLAP_ROW_OFFSET_Y), Anchor:New(BOTTOMRIGHT, DATA4HEADER, BOTTOMRIGHT, 0, DATA_OVERLAP_ROW_OFFSET_Y)},
     },
 }
 
@@ -265,16 +292,16 @@ local function ApplyAnchorToControl(control, anchor, targets)
     anchor.anchor:AddToControl(control)
 end
 
-local function ClearDataAnchors(controls)
-    for i = FIRST_DATA_CONTROL, LAST_DATA_CONTROL do
-        if controls[i] then
-            controls[i]:ClearAnchors()
-        end
-    end
-end
-
 local function IsScreenHeader(controls)
     return not controls[CENTER_BASELINE]
+end
+
+local function ApplyAnchorSetToControl(dataControl, anchorSet, controls)
+    dataControl:ClearAnchors()
+    ApplyAnchorToControl(dataControl, anchorSet[1], controls)
+    if anchorSet[2] then
+        ApplyAnchorToControl(dataControl, anchorSet[2], controls)
+    end
 end
 
 -- Note: ZO_GamepadGenericHeader_RefreshData must be called after changing the layout.
@@ -284,25 +311,68 @@ function ZO_GamepadGenericHeader_SetDataLayout(control, layout)
     end
 
     local controls = control.controls
-    ClearDataAnchors(controls)
 
     local anchorSets = IsScreenHeader(controls) and SCREEN_HEADER_ANCHORS[layout] or CONTENT_HEADER_ANCHORS[layout]
     assert(anchorSets ~= nil)
 
     for k, anchors in pairs(anchorSets) do
         local dataControl = controls[k]
-        ApplyAnchorToControl(dataControl, anchors[1], controls)
-        if anchors[2] then
-            ApplyAnchorToControl(dataControl, anchors[2], controls)
-        end
+        ApplyAnchorSetToControl(dataControl, anchors, controls)
     end
 
     control.layout = layout
 end
 
+local g_useHeaderOverlapAnchors = false
+
+local function ReflowScreenHeaderDataPairSeparateIfNecessary(parentControl, dataControlIndex, dataHeaderControlIndex)
+    local overlapAnchors = SCREEN_HEADER_OVERLAP_ANCHORS[parentControl.layout]
+
+    if not overlapAnchors then
+        return
+    end
+
+    local controls = parentControl.controls
+
+    local dataControl = controls[dataControlIndex]
+    local dataHeaderControl = controls[dataHeaderControlIndex]
+
+    if g_useHeaderOverlapAnchors then
+        if dataHeaderControl then
+            local anchorSet = overlapAnchors[dataHeaderControlIndex]
+
+            if anchorSet then
+                ApplyAnchorSetToControl(dataHeaderControl, anchorSet, controls)
+            end
+        end
+        g_useHeaderOverlapAnchors = false
+    end
+
+    if dataControl and dataHeaderControl then
+        if dataControl:GetLeft() < dataHeaderControl:GetLeft() + dataHeaderControl:GetTextWidth() then
+            local anchorSet = overlapAnchors[dataControlIndex]
+            if anchorSet then
+                ApplyAnchorSetToControl(dataControl, anchorSet, controls)
+                g_useHeaderOverlapAnchors = true
+            end
+        end
+    end
+end
+
+local function ScreenHeaderDataPairsSeparateReflow(control)
+    control.layout = nil
+    ZO_GamepadGenericHeader_SetDataLayout(control, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE)
+    g_useHeaderOverlapAnchors = false
+
+    ReflowScreenHeaderDataPairSeparateIfNecessary(control, DATA1, DATA1HEADER)
+    ReflowScreenHeaderDataPairSeparateIfNecessary(control, DATA2, DATA2HEADER)
+    ReflowScreenHeaderDataPairSeparateIfNecessary(control, DATA3, DATA3HEADER)
+    ReflowScreenHeaderDataPairSeparateIfNecessary(control, DATA4, DATA4HEADER)
+end
+
 local g_currentBottomLeftHeader = DATA1HEADER
 
-local function ReflowHeaderDataPairIfNecessary(parentControl, dataControlIndex, dataHeaderControlIndex)
+local function ReflowContentHeaderDataPairIfNecessary(parentControl, dataControlIndex, dataHeaderControlIndex)
     local controls = parentControl.controls
 
     local dataControl = controls[dataControlIndex]
@@ -319,16 +389,19 @@ local function ContentHeaderDataPairsLinkedReflow(control)
     ZO_GamepadGenericHeader_SetDataLayout(control, ZO_GAMEPAD_HEADER_LAYOUTS.CONTENT_HEADER_DATA_PAIRS_LINKED)
     g_currentBottomLeftHeader = DATA1HEADER    -- Reset the bottom left header value
 
-    ReflowHeaderDataPairIfNecessary(control, DATA2, DATA2HEADER)
-    ReflowHeaderDataPairIfNecessary(control, DATA3, DATA3HEADER)
-    ReflowHeaderDataPairIfNecessary(control, DATA4, DATA4HEADER)
+    ReflowContentHeaderDataPairIfNecessary(control, DATA2, DATA2HEADER)
+    ReflowContentHeaderDataPairIfNecessary(control, DATA3, DATA3HEADER)
+    ReflowContentHeaderDataPairIfNecessary(control, DATA4, DATA4HEADER)
 end
 
-local SCREEN_HEADER_REFLOW_FUNCS = {}
+local SCREEN_HEADER_REFLOW_FUNCS = 
+{
+    [ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE] = ScreenHeaderDataPairsSeparateReflow,
+}
 
 local CONTENT_HEADER_REFLOW_FUNCS =
 {
-    [ZO_GAMEPAD_HEADER_LAYOUTS.CONTENT_HEADER_DATA_PAIRS_LINKED] = ContentHeaderDataPairsLinkedReflow
+    [ZO_GAMEPAD_HEADER_LAYOUTS.CONTENT_HEADER_DATA_PAIRS_LINKED] = ContentHeaderDataPairsLinkedReflow,
 }
 
 local function ReflowLayout(control)

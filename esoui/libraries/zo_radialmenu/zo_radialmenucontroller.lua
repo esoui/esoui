@@ -98,7 +98,7 @@ function ZO_InteractiveRadialMenuController:OnUpdate()
         end
     end
 
-    if self.isInteracting and IsInteracting() then
+    if self.isInteracting and IsInteracting() and GetInteractionType() ~= INTERACTION_HIDEYHOLE then
         self:StopInteraction()
     end
 end

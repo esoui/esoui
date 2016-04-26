@@ -217,6 +217,14 @@ end
 --Global XML Handlers
 -----------------------
 
+function ZO_LeaderboardsRowName_OnMouseEnter(control)
+    ZO_SocialListKeyboard.CharacterName_OnMouseEnter(LEADERBOARDS, control)
+end
+
+function ZO_LeaderboardsRowName_OnMouseExit(control)
+     ZO_SocialListKeyboard.CharacterName_OnMouseExit(LEADERBOARDS, control)
+end
+
 function ZO_LeaderboardsRowClass_OnMouseEnter(control)
     ZO_SocialListKeyboard.Class_OnMouseEnter(LEADERBOARDS, control)
 end

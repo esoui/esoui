@@ -67,7 +67,7 @@ function ZO_GroupList_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_LEVEL_UPDATE, RefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_VETERAN_RANK_UPDATE, RefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_CHAMPION_POINT_UPDATE, RefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_ZONE_UPDATE, RefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ROLES_CHANGED, RegisterDelayedRefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_CONNECTED_STATUS, RefreshOnUnitEvent)
@@ -101,7 +101,7 @@ function ZO_GroupList_Manager:BuildMasterList()
                 formattedZone = zoneName,
                 class = GetUnitClassId(unitTag),
                 level = GetUnitLevel(unitTag),
-                veteranRank = GetUnitVeteranRank(unitTag),
+                championPoints = GetUnitChampionPoints(unitTag),
                 leader = IsUnitGroupLeader(unitTag),
                 online = unitOnline,
                 isPlayer = AreUnitsEqual(unitTag, "player"),

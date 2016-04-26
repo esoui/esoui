@@ -593,7 +593,6 @@ end
 
 function ZO_Help_Customer_Service_Gamepad:AddTextFieldEntry(fieldType, header, required, locked)
     local entryData = ZO_GamepadEntryData:New(header)
-    entryData:SetHeightScaleOnSelection(false)
     entryData.customerServiceObject = self
     entryData.fieldType = fieldType
     entryData.header = header
@@ -610,7 +609,6 @@ end
 
 function ZO_Help_Customer_Service_Gamepad:AddDropdownEntry(fieldType, header, list)
     local entryData = ZO_GamepadEntryData:New("Dropdown")
-    entryData:SetHeightScaleOnSelection(false)
     entryData.customerServiceObject = self
     entryData.list = list
     entryData.fieldType = fieldType
