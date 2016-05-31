@@ -207,15 +207,15 @@ end
 local ZO_Loot_Common_Gamepad = ZO_Object:Subclass()
 
 function ZO_Loot_Common_Gamepad:UpdateLootWindow(name, actionName, isOwned)
-    if not SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root") then
+    if SCENE_MANAGER:IsShowing("gamepad_inventory_root") or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root") then
+        LOOT_INVENTORY_WINDOW_GAMEPAD:UpdateLootWindow(name, actionName, isOwned)
+    else
         if SCENE_MANAGER:IsShowing("lootGamepad") or SCENE_MANAGER:IsShowingBaseScene() then
             --The update will show the window if we're on the base scene
             LOOT_WINDOW_GAMEPAD:UpdateLootWindow(name, actionName, isOwned)
         else
             EndInteraction(INTERACTION_LOOT)
         end
-    else
-        LOOT_INVENTORY_WINDOW_GAMEPAD:UpdateLootWindow(name, actionName, isOwned)
     end
 end
 

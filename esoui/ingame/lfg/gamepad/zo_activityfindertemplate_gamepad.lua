@@ -132,6 +132,13 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeSingularPanelControls(rewar
 
     self.lockControl = self.singularSection:GetNamedChild("Lock")
     self.lockReasonLabel = self.lockControl:GetNamedChild("Reason")
+
+    local function OnLockReasonLabelUpdate()
+        if self.lockReasonTextFunction then
+            self.lockReasonLabel:SetText(self.lockReasonTextFunction())
+        end
+    end
+    self.lockReasonLabel:SetHandler("OnUpdate", OnLockReasonLabelUpdate)
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:RegisterEvents()
@@ -291,10 +298,10 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     self.entryList:Clear()
     self:AddRolesMenuEntry(self.entryList)
     local isSearching = IsCurrentlySearchingForGroup()
-
+    
     if self.navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then
         for _, entryData in ipairs(self.randomEntryDatas) do
-            local lockReasonText = self:GetLevelLockTextByActivity(entryData.data.activityType)
+            local lockReasonText = self:GetLockTextByActivity(entryData.data.activityType)
             if not lockReasonText then
                 local reason = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLockReasonForActivityType(entryData.data.activityType)
                 if reason then
@@ -310,10 +317,12 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
             self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
         end
     else
+        local lockReasonTextOverride = self:GetGlobalLockText()
         local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(self.currentSpecificActivityType)
         for locationIndex, location in ipairs(locationData) do
             local specificEntryData = ZO_GamepadEntryData:New(location.nameGamepad, self.categoryData.menuIcon)
             specificEntryData.data = location
+            specificEntryData.data.lockReasonTextOverride = lockReasonTextOverride
             specificEntryData:SetEnabled(not location.isLocked and not isSearching)
             specificEntryData:SetSelected(location.isSelected)
             self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", specificEntryData)
@@ -390,6 +399,10 @@ function ZO_ActivityFinderTemplate_Gamepad:OnShow()
     end
 end
 
+function ZO_ActivityFinderTemplate_Gamepad:OnHiding()
+    ZO_GamepadGenericHeader_Deactivate(self.header)
+end
+
 function ZO_ActivityFinderTemplate_Gamepad:SetNavigationMode(navigationMode)
     --Determine the target list and header
     local targetList, targetHeader
@@ -448,8 +461,14 @@ do
 
                         self:RefreshRewards(entryData.isRandom, entryData.activityType)
                         if entryData.isLocked then
+                            local lockReasonText = entryData.lockReasonTextOverride or entryData.lockReasonText
+                            if type(lockReasonText) == "function" then
+                                self.lockReasonTextFunction = lockReasonText
+                            else
+                                self.lockReasonLabel:SetText(lockReasonText)
+                                self.lockReasonTextFunction = nil
+                            end
                             self.lockControl:SetHidden(false)
-                            self.lockReasonLabel:SetText(entryData.lockReasonText)
                         else
                             self.lockControl:SetHidden(true)
                         end

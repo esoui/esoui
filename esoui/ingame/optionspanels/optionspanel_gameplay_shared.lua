@@ -64,7 +64,19 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             panel = SETTING_PANEL_GAMEPLAY,
             text = SI_INTERFACE_OPTIONS_COMBAT_PREVENT_ATTACKING_INNOCENTS,
             tooltipText = SI_INTERFACE_OPTIONS_COMBAT_PREVENT_ATTACKING_INNOCENTS_TOOLTIP,
-        }
+        },
+        --Options_Gameplay_QuickCastGroundAbilities
+        [COMBAT_SETTING_QUICK_CAST_GROUND_ABILITIES] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_COMBAT,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = COMBAT_SETTING_QUICK_CAST_GROUND_ABILITIES,
+            text = SI_INTERFACE_OPTIONS_COMBAT_QUICK_CAST_GROUND_ABILITIES,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_QUICK_CAST_GROUND_ABILITIES_TOOLTIP,
+            valid = {QUICK_CAST_GROUND_ABILITIES_CHOICE_ON, QUICK_CAST_GROUND_ABILITIES_CHOICE_AUTOMATIC, QUICK_CAST_GROUND_ABILITIES_CHOICE_OFF,},
+            valueStringPrefix = "SI_QUICKCASTGROUNDABILITIESCHOICE",
+        },
     },
 
     --Loot
@@ -167,7 +179,7 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_INVENTORY_UPGRADE,
             text = SI_INTERFACE_OPTIONS_HIDE_MOUNT_INVENTORY_UPGRADE,
             tooltipText = SI_INTERFACE_OPTIONS_HIDE_MOUNT_INVENTORY_UPGRADE_TOOLTIP,
-        },
+        },		
 
         --Options_Gameplay_DefaultSoulGem
         [IN_WORLD_UI_SETTING_DEFAULT_SOUL_GEM] =

@@ -3,9 +3,9 @@ ZO_KEYBOARD_GROUP_LIST_PADDING_X = 5
 ZO_KEYBOARD_GROUP_LIST_LEADER_WIDTH = 35
 ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH = 210 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
 ZO_KEYBOARD_GROUP_LIST_LEADER_AND_NAME_WIDTH = ZO_KEYBOARD_GROUP_LIST_LEADER_WIDTH + ZO_KEYBOARD_GROUP_LIST_NAME_WIDTH
-ZO_KEYBOARD_GROUP_LIST_ZONE_WIDTH = 140 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+ZO_KEYBOARD_GROUP_LIST_ZONE_WIDTH = 130 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
 ZO_KEYBOARD_GROUP_LIST_CLASS_WIDTH = 75 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
-ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH = 70 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
+ZO_KEYBOARD_GROUP_LIST_LEVEL_WIDTH = 80 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
 ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH = 80 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
 
 ----------------------------------
@@ -95,6 +95,20 @@ function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()
             end
         },
 
+        -- Ready Check
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            name = GetString(SI_GROUP_LIST_READY_CHECK_BIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+        
+            callback = ZO_SendReadyCheck,
+
+            visible = function()
+                return self.groupSize and self.groupSize > 0
+            end
+        },
+
         -- Leave Group
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -132,15 +146,25 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGroupMember(data.characterName) end)
             end
 
+            local modicationRequiresVoting = DoesGroupModificationRequireVote()
             if(self.playerIsLeader) then
                 if data.isPlayer then
-                    AddMenuItem(GetString(SI_GROUP_LIST_MENU_DISBAND_GROUP), function() ZO_Dialogs_ShowDialog("GROUP_DISBAND_DIALOG") end)
+                    if not modicationRequiresVoting then
+                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_DISBAND_GROUP), function() ZO_Dialogs_ShowDialog("GROUP_DISBAND_DIALOG") end)
+                    end
                 else
                     if data.online then
                         AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function() GroupPromote(data.unitTag) end)
                     end
-                    AddMenuItem(GetString(SI_GROUP_LIST_MENU_KICK_FROM_GROUP), function() GroupKick(data.unitTag) end)
+                    if not modicationRequiresVoting then
+                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_KICK_FROM_GROUP), function() GroupKick(data.unitTag) end)
+                    end
                 end
+            end
+
+            --Cannot vote for yourself
+            if modicationRequiresVoting and not data.isPlayer then
+                AddMenuItem(GetString(SI_GROUP_LIST_MENU_VOTE_KICK_FROM_GROUP), function() BeginGroupElection(GROUP_ELECTION_TYPE_KICK_MEMBER, ZO_GROUP_ELECTION_DESCRIPTORS.NONE, data.unitTag) end)
             end
 
             self:ShowMenu(control)
@@ -211,7 +235,7 @@ function ZO_GroupList_Keyboard:SetupGroupEntry(control, data)
     data.control = control
 
     control.leaderIcon:SetHidden(not data.leader)
-    control.characterNameLabel:SetText(zo_strformat(SI_GROUP_LIST_PANEL_CHARACTER_NAME, data.index, data.rawCharacterName))
+    control.characterNameLabel:SetText(zo_strformat(SI_GROUP_LIST_PANEL_CHARACTER_NAME, data.index, ZO_FormatUserFacingCharacterName(data.rawCharacterName)))
 
     control.roleDPS:SetTexture(ROLE_SELECTION_TO_ICON[LFG_ROLE_DPS][data.isDps])
     control.roleHeal:SetTexture(ROLE_SELECTION_TO_ICON[LFG_ROLE_HEAL][data.isHeal])
@@ -272,6 +296,14 @@ function ZO_GroupListRow_OnMouseUp(control, button, upInside)
     GROUP_LIST:GroupListRow_OnMouseUp(control, button, upInside)
 end
 
+function ZO_GroupListRowCharacterName_OnMouseEnter(control)
+     ZO_SocialListKeyboard.CharacterName_OnMouseEnter(GROUP_LIST, control)
+end
+
+function ZO_GroupListRowCharacterName_OnMouseExit(control)
+     ZO_SocialListKeyboard.CharacterName_OnMouseExit(GROUP_LIST, control)
+end
+
 function ZO_GroupListRowClass_OnMouseEnter(control)
     ZO_SocialListKeyboard.Class_OnMouseEnter(GROUP_LIST, control)
 end
@@ -280,12 +312,12 @@ function ZO_GroupListRowClass_OnMouseExit(control)
     ZO_SocialListKeyboard.Class_OnMouseExit(GROUP_LIST, control)
 end
 
-function ZO_GroupListRowVeteran_OnMouseEnter(control)
-    ZO_SocialListKeyboard.Veteran_OnMouseEnter(GROUP_LIST, control)
+function ZO_GroupListRowChampion_OnMouseEnter(control)
+    ZO_SocialListKeyboard.Champion_OnMouseEnter(GROUP_LIST, control)
 end
 
-function ZO_GroupListRowVeteran_OnMouseExit(control)
-    ZO_SocialListKeyboard.Veteran_OnMouseExit(GROUP_LIST, control)
+function ZO_GroupListRowChampion_OnMouseExit(control)
+    ZO_SocialListKeyboard.Champion_OnMouseExit(GROUP_LIST, control)
 end
 
 function ZO_GroupListRowTooltipIfTruncatedLabel_OnMouseEnter(control)

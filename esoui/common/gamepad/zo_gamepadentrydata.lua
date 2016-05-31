@@ -30,7 +30,6 @@ function ZO_GamepadEntryData:Initialize(text, icon, selectedIcon, highlight, isN
     self.brandNew = isNew
     self.fontScaleOnSelection = true
     self.alphaChangeOnSelection = false
-    self.heightScaleOnSelection = true
     self.enabled = true
 end
 
@@ -150,10 +149,6 @@ function ZO_GamepadEntryData:SetAlphaChangeOnSelection(active)
     self.alphaChangeOnSelection = active
 end
 
-function ZO_GamepadEntryData:SetHeightScaleOnSelection(active)
-    self.heightScaleOnSelection = active
-end
-
 function ZO_GamepadEntryData:SetMaxIconAlpha(alpha)
     self.maxIconAlpha = alpha
 end
@@ -169,10 +164,26 @@ function ZO_GamepadEntryData:GetColorsBasedOnQuality(quality)
     return selectedNameColor, unselectedNameColor
 end
 
-function ZO_GamepadEntryData:SetCooldown(remaining, duration)
-    self.timeCooldownRecorded = GetFrameTimeMilliseconds()
-    self.cooldownRemaining = remaining
-    self.cooldownDuration = duration
+function ZO_GamepadEntryData:SetCooldown(remainingMs, durationMs)
+    self.timeCooldownRecordedMs = GetFrameTimeMilliseconds()
+    self.cooldownRemainingMs = remainingMs
+    self.cooldownDurationMs = durationMs
+end
+
+function ZO_GamepadEntryData:GetCooldownDurationMs()
+    return self.cooldownDurationMs or 0
+end
+
+function ZO_GamepadEntryData:GetCooldownTimeRemainingMs()
+    if self.timeCooldownRecordedMs and self.cooldownRemainingMs then
+        local timeOffsetMs = GetFrameTimeMilliseconds() - self.timeCooldownRecordedMs
+        return self.cooldownRemainingMs - timeOffsetMs
+    end
+    return 0
+end
+
+function ZO_GamepadEntryData:IsOnCooldown()
+    return self:GetCooldownDurationMs() > 0 and self:GetCooldownTimeRemainingMs() > 0
 end
 
 function ZO_GamepadEntryData:AddIconSubtype(subtypeName, texture)
@@ -329,4 +340,8 @@ end
 
 function ZO_GamepadEntryData:SetModifyTextType(modifyTextType)
     self.modifyTextType = modifyTextType
+end
+
+function ZO_GamepadEntryData:SetIsHiddenByWardrobe(isHidden)
+	self.isHiddenByWardrobe = isHidden
 end

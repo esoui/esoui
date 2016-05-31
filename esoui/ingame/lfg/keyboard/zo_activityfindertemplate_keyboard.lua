@@ -21,11 +21,17 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
     self.lfmPromptBodyLabel = self.lfmPromptSection:GetNamedChild("Body")
 
     self.filterControl = self.control:GetNamedChild("Filter")
-    self.notLeaderLabel = self.control:GetNamedChild("NotLeader")
     self.joinQueueButton = self.control:GetNamedChild("QueueButton")
+    self.lockReasonLabel = self.control:GetNamedChild("LockReason")
+
+    local function OnLockReasonLabelUpdate()
+        if self.lockReasonTextFunction then
+            self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, self.lockReasonTextFunction()))
+        end
+    end
+    self.lockReasonLabel:SetHandler("OnUpdate", OnLockReasonLabelUpdate)
 
     ZO_ActivityFinderTemplate_Shared.InitializeControls(self, "ZO_ActivityFinderTemplateRewardTemplate_Keyboard")
-    self.lockReasonLabel = self.singularSection:GetNamedChild("LockReason")
     
     self:InitializeNavigationList()
 end
@@ -122,40 +128,27 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
     if not shouldShowLFMPrompt then
         self:ResetLFMPrompt()
     end
-
-    if not IsUnitSoloOrGroupLeader("player") then
-        self:HidePrimaryControls()
-        self.notLeaderLabel:SetHidden(false)
-        return
-    else
-        self:ResetNotLeaderWarning()
-    end
+    
+    local lockReasonText = self:GetGlobalLockText()
 
     local filterData = self.filterComboBox:GetSelectedItemData().data
     if filterData.singular then
         local activityType
-        local lockReasonText
+        local individualLockReasonText
         if filterData.random then
             activityType = filterData.activityType
             ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetActivityTypeSelected(activityType, true)
-            lockReasonText = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLockReasonForActivityType(activityType)
+            individualLockReasonText = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLockReasonForActivityType(activityType)
         else
             activityType = filterData.location.activityType
             ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetLocationSelected(filterData.location, true)
             if filterData.location.isLocked then
-                lockReasonText = filterData.location.lockReasonText
+                individualLockReasonText = filterData.location.lockReasonText
             end
         end
 
-        local levelLockText = self:GetLevelLockTextByActivity(activityType)
-        if levelLockText then
-            lockReasonText = levelLockText
-        end
-
-        if lockReasonText then
-            self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, lockReasonText))
-        else
-            self.lockReasonLabel:SetText("")
+        if not lockReasonText then
+            lockReasonText = individualLockReasonText
         end
     else
         ZO_ClearTable(self.lfgActivityIndexToTreeNode)
@@ -180,6 +173,19 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
         end
 
         self.navigationTree:Commit()
+    end
+
+    if lockReasonText then
+        --if the text is a function, that means theres a timer involved that we want to refresh on update
+        if type(lockReasonText) == "function" then
+            self.lockReasonTextFunction = lockReasonText
+        else
+            self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, lockReasonText))
+            self.lockReasonTextFunction = nil
+        end
+        self.lockReasonLabel:SetHidden(false)
+    else
+        self.lockReasonLabel:SetHidden(true)
     end
 
     self:RefreshJoinQueueButton()
@@ -335,13 +341,6 @@ end
 function ZO_ActivityFinderTemplate_Keyboard:ResetLFMPrompt()
     if not self.lfmPromptSection:IsHidden() then
         self.lfmPromptSection:SetHidden(true)
-        self:ShowPrimaryControls()
-    end
-end
-
-function ZO_ActivityFinderTemplate_Keyboard:ResetNotLeaderWarning()
-    if not self.notLeaderLabel:IsHidden() then
-        self.notLeaderLabel:SetHidden(true)
         self:ShowPrimaryControls()
     end
 end

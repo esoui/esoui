@@ -332,5 +332,5 @@ function ZO_SharedSmithingImprovement_GetPrimaryFilterType(...)
 end
 
 function ZO_SharedSmithingImprovement_DoesItemPassFilter(bagId, slotIndex, filterType)
-    return ZO_SharedSmithingImprovement_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex)) == filterType
+    return ZO_SharedSmithingImprovement_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex)) == filterType and not IsItemPlayerLocked(bagId, slotIndex)
 end

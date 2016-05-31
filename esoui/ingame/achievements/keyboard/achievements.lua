@@ -22,7 +22,7 @@ local ACHIEVEMENT_REWARD_LABEL_WIDTH = 230
 local ACHIEVEMENT_REWARD_LABEL_HEIGHT = 20
 local ACHIEVEMENT_REWARD_ICON_HEIGHT = 45
 
-local ACHIEVEMENT_DATE_LABEL_EXPECTED_WIDTH = 80
+local ACHIEVEMENT_DATE_LABEL_EXPECTED_WIDTH = 60
 
 local NUM_RECENT_ACHIEVEMENTS_TO_SHOW = 6
 
@@ -367,7 +367,7 @@ function Achievement:AddTitleReward(name, completed)
     local title = self:GetPooledLabel(nil, completed)
     title:SetText(name) -- already localized
     
-    local titlePrefix = self:GetPooledLabel(PREFIX_LABEL)
+    local titlePrefix = self:GetPooledLabel(PREFIX_LABEL, completed)
     titlePrefix:SetText(GetString(SI_ACHIEVEMENTS_TITLE))
     title.prefix = titlePrefix
 end
@@ -1049,18 +1049,20 @@ function Achievements:ShowAchievement(achievementId)
     else
         self.queuedShowAchievement = nil
 
-        local categoryIndex, subCategoryIndex, _, idOffset = GetCategoryInfoFromAchievementId(achievementId)
+        local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
 
         if self:OpenCategory(categoryIndex, subCategoryIndex) then
-            local parentAchievementIndex = achievementId - idOffset
+            -- convert the given achievement id into one that exists in the list of achievements
+            -- this is mostly for achievements in a line
+            local foundAchievementId = GetAchievementId(categoryIndex, subCategoryIndex, achievementIndex)
 
             -- Reset filters if this achievement isn't showing
-            if not self.achievements[parentAchievementIndex] then
+            if not self.achievements[foundAchievementId] then
                 self:ResetFilters()
             end
 
-            self.achievements[parentAchievementIndex]:Expand()
-            self.queuedScrollToAchievement = parentAchievementIndex
+            self.achievements[foundAchievementId]:Expand()
+            self.queuedScrollToAchievement = foundAchievementId
             return true
         end
     end

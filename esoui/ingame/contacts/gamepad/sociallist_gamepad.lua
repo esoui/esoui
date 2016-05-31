@@ -1,9 +1,9 @@
 --Layout consts, defining the widths of the list's columns as provided by design--
-ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_SOCIAL_LIST_CLASS_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_SOCIAL_LIST_ALLIANCE_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_SOCIAL_LIST_LEVEL_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
-ZO_GAMEPAD_SOCIAL_LIST_VETERAN_ICON_OFFSET_X = -5
+ZO_GAMEPAD_SOCIAL_LIST_STATUS_WIDTH = 100 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_SOCIAL_LIST_CLASS_WIDTH = 100 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_SOCIAL_LIST_ALLIANCE_WIDTH = 110 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_SOCIAL_LIST_LEVEL_WIDTH = 140 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_SOCIAL_LIST_CHAMPION_POINTS_ICON_OFFSET_X = 20
 
 -----------------
 -- Social List
@@ -92,6 +92,25 @@ function ZO_GamepadSocialListPanel:InitializeKeybinds()
     if addKeybind then
         self:AddUniversalKeybind(addKeybind)
     end
+
+	local hideOfflineKeybind = 
+	{
+		alignment = KEYBIND_STRIP_ALIGN_LEFT,
+		name = function()
+			if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
+				return GetString(SI_SOCIAL_LIST_SHOW_OFFLINE)
+			else
+				return GetString(SI_SOCIAL_LIST_HIDE_OFFLINE)
+			end
+		end,
+		keybind = "UI_SHORTCUT_RIGHT_STICK",
+		callback = function()
+			SetSetting(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE, tostring(not GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)))
+			self:RefreshFilters()
+			self:UpdateKeybinds()
+		end,
+	}
+	self:AddUniversalKeybind(hideOfflineKeybind)
 end
 
 function ZO_GamepadSocialListPanel:InitializeDropdownFilter()
@@ -127,10 +146,13 @@ function ZO_GamepadSocialListPanel:FilterScrollList()
     ZO_ClearNumericallyIndexedTable(scrollData)
 
     local searchTerm = self:GetCurrentSearch()
+	local hideOffline = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
     
     for _, data in ipairs(self.masterList) do
         if(searchTerm == "" or self:IsMatch(searchTerm, data)) then
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, data))
+			if not hideOffline or data.online then
+				table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, data))
+			end
         end
     end
 end

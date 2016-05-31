@@ -216,13 +216,12 @@ ESO_Dialogs["DELETE_SELECTED_CHARACTER_NO_DELETES_LEFT_GAMEPAD"] =
         end,
     }
 
-ESO_Dialogs["CHARACTER_SELECT_DELETING"] = 
+ESO_Dialogs["CHARACTER_SELECT_DELETING"] =
 {
     mustChoose = true,
-    setup = function()
-        local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.COOLDOWN)
-        dialog.setupFunc(dialog)
-        DeleteCharacter(dialog.data.characterId)
+    setup = function(dialog, data)
+        dialog:setupFunc()
+        DeleteCharacter(data.characterId)
     end,
     canQueue = true,
     gamepadInfo =
@@ -255,9 +254,8 @@ ESO_Dialogs["CHARACTER_SELECT_LOGIN"] =
 {
     canQueue = true,
     mustChoose = true,
-    setup = function()
-        local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.COOLDOWN)
-        dialog.setupFunc(dialog)
+    setup = function(dialog)
+        dialog:setupFunc()
     end,
 
     gamepadInfo =
@@ -282,9 +280,8 @@ ESO_Dialogs["CHARACTER_CREATE_CREATING"] =
 {
     canQueue = true,
     mustChoose = true,
-    setup = function()
-        local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.COOLDOWN)
-        dialog.setupFunc(dialog)
+    setup = function(dialog)
+        dialog:setupFunc()
     end,
     updateFn =  function(dialog, currentTime)
                     if dialog.isGamepad and not ZO_CharacterCreate_Gamepad_IsCreating() then
@@ -310,52 +307,6 @@ ESO_Dialogs["CHARACTER_CREATE_CREATING"] =
     {
         text = GetString(SI_CREATE_CHARACTER_GAMEPAD_CREATING_CHARACTER),
     },
-}
-
-ESO_Dialogs["CHARACTER_SELECT_RENAMING"] = 
-{
-    canQueue = true,
-    mustChoose = true,
-    setup = function()
-        local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.COOLDOWN)
-        dialog.setupFunc(dialog)
-        AttemptCharacterRename(dialog.data.characterId, dialog.data.newName)
-    end,
-    updateFn =  function(dialog, currentTime)
-                    if dialog.isGamepad and not ZO_CharacterSelect_Gamepad_IsRenaming() then
-                        if dialog.fragment:GetState() == SCENE_FRAGMENT_SHOWN then -- ReleaseDialog only works correctly if the dialog is actually shown
-                            ZO_Dialogs_ReleaseDialog("CHARACTER_SELECT_RENAMING")
-                        end
-                    end
-                end,
-
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.COOLDOWN,
-    },
-    title =
-    {
-        text = SI_CHARACTER_SELECT_GAMEPAD_RENAMING,
-    },
-    mainText = 
-    {
-        text = "",
-    },
-    loading = 
-    {
-        text = GetString(SI_CHARACTER_SELECT_GAMEPAD_RENAMING_CHARACTER),
-    },
-
-    finishedCallback = function()
-        if ZO_CharacterSelect_Gamepad.renamingError then
-            -- Show the fact that the character could not be renamed.
-            ZO_Dialogs_ShowGamepadDialog("CHARACTER_SELECT_FAILED_REASON", nil, {mainTextParams = {ZO_CharacterSelect_Gamepad.renamingError}})
-        else
-            ZO_CharacterSelect_Gamepad_ClearKeybindStrip()
-            ZO_CharacterSelect_Gamepad.refresh = true
-            RequestCharacterList()
-        end
-    end,
 }
 
 ESO_Dialogs["CHARACTER_CREATE_FAILED_REASON"] = 
@@ -389,38 +340,6 @@ ESO_Dialogs["CHARACTER_CREATE_FAILED_REASON"] =
             ZO_CharacterCreate_Gamepad_ShowFinishScreen()
         end
     end
-}
-
-ESO_Dialogs["CHARACTER_SELECT_FAILED_REASON"] = 
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_PROMPT_TITLE_ERROR,
-    },
-    mainText = 
-    {
-        text = SI_ERROR_REASON,
-        align = TEXT_ALIGN_CENTER,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_OK,
-            keybind = "DIALOG_NEGATIVE",
-            clickSound = SOUNDS.DIALOG_ACCEPT,
-        }
-    },
-    finishedCallback = function()
-        ZO_CharacterSelect_Gamepad_ClearKeybindStrip()
-        ZO_CharacterSelect_Gamepad.refresh = true
-        RequestCharacterList()
-    end,
 }
 
 ESO_Dialogs["CHARACTER_CREATE_SKIP_TUTORIAL"] = 
@@ -862,4 +781,295 @@ ESO_Dialogs["BAD_CLIENT_VERSION"] =
                         end
         },
     }
+}
+
+-- Dialogs for create/link account flow on PC --
+
+ESO_Dialogs["LINKED_LOGIN_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_DIALOG_TITLE_LOGGING_IN,
+    },
+    mainText = 
+    {
+        text = SI_LOGIN_REQUESTED,
+        align = TEXT_ALIGN_CENTER,
+    },
+    mustChoose = true,
+    showLoadingIcon = true,
+    -- Can't cancel this login...happens automatically from the create/link account flow on PC
+}
+
+ESO_Dialogs["CREATING_ACCOUNT_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_KEYBOARD_CREATEACCOUNT_DIALOG_HEADER,
+    },
+    mainText =
+    {
+        text = SI_CREATEACCOUNT_CREATING_ACCOUNT,
+        align = TEXT_ALIGN_CENTER,
+    },
+    mustChoose = true,
+    showLoadingIcon = true,
+    -- Must be cleared from an event
+}
+
+ESO_Dialogs["CREATE_ACCOUNT_SUCCESS_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_CREATED_DIALOG_HEADER,
+    },
+    mainText =
+    {
+        text = SI_KEYBOARD_CREATEACCOUNT_SUCCESS_DIALOG_BODY_FORMAT,
+    },
+    noChoiceCallback = function()
+            LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()
+        end,
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function()
+                    LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()
+                end,
+        },
+    },
+}
+
+ESO_Dialogs["CREATE_ACCOUNT_ERROR_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_CREATEACCOUNT_ERROR_HEADER,
+    },
+    mainText =
+    {
+        text = SI_CREATEACCOUNT_FAILURE_MESSAGE,
+    },
+    buttons =
+    {
+        {
+            text = SI_OK,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    },
+}
+
+ESO_Dialogs["LINKING_ACCOUNTS_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_KEYBOARD_LINKACCOUNT_DIALOG_HEADER,
+    },
+    mainText =
+    {
+        text = SI_LINKACCOUNT_LINKING_ACCOUNT,
+        align = TEXT_ALIGN_CENTER,
+    },
+    mustChoose = true,
+    showLoadingIcon = true,
+    -- Must be cleared from an event
+}
+
+ESO_Dialogs["LINKING_ACCOUNTS_SUCCESS_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_HEADER,
+    },
+    mainText =
+    {
+        text = SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_DMM,
+    },
+    noChoiceCallback = function()
+            LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()
+        end,
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function()
+                    LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()
+                end,
+        },
+    },
+}
+
+ESO_Dialogs["LINKING_ACCOUNTS_ERROR_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_LINKACCOUNT_ERROR_HEADER,
+    },
+    mainText =
+    {
+        text = SI_LINKACCOUNT_FAILURE_MESSAGE,
+    },
+    buttons =
+    {
+        {
+            text = SI_OK,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    }, 
+}
+
+ESO_Dialogs["LINKED_LOGIN_ERROR_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_DIALOG_TITLE_LOGIN_ERROR,
+    },
+    mainText=
+    {
+        text = SI_KEYBOARD_LINKED_LOGIN_ERROR_MESSAGE,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+            keybind = "DIALOG_NEGATIVE",
+        }
+    }
+}
+
+-- Character Rename Dialogs
+
+ESO_Dialogs["CHARACTER_SELECT_CHARACTER_RENAMING"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    setup = function(dialog, data)
+        dialog:setupFunc()
+    end,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.COOLDOWN,
+    },
+    title =
+    {
+        text = SI_RENAME_CHARACTER_RENAMING_DIALOG_HEADER,
+    },
+    mainText =
+    {
+        text = function()
+            if not IsInGamepadPreferredMode() then
+                return GetString(SI_RENAME_CHARACTER_RENAMING_DIALOG_BODY)
+            else
+                return ""
+            end
+        end,
+        align = TEXT_ALIGN_CENTER,
+    },
+    loading = 
+    {
+        text = GetString(SI_RENAME_CHARACTER_RENAMING_DIALOG_BODY),
+    },
+    showLoadingIcon = true,
+    -- Must be cleared from an event
+}
+
+ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_ERROR"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title = 
+    {
+        text = SI_SERVICES_DIALOG_HEADER_FORMAT,
+    },
+    mainText = 
+    {
+        text = SI_SERVICES_DIALOG_BODY_FORMAT,
+    },
+    buttons = 
+    {
+        {
+            text = SI_RENAME_CHARACTER_BACK_KEYBIND,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                            if dialog.data and dialog.data.callback then
+                                dialog.data.callback()
+                            end
+                        end,
+        },
+    },
+}
+
+ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_SUCCESS"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title = 
+    {
+        text = SI_RENAME_CHARACTER_SUCCESS_HEADER,
+    },
+    mainText = 
+    {
+        text = SI_RENAME_CHARACTER_SUCCESS_BODY,
+    },
+    buttons = 
+    {
+        {
+            text = function()
+                if IsInGamepadPreferredMode() then
+                    return GetString(SI_RENAME_CHARACTER_BACK_KEYBIND)
+                else
+                    return GetString(SI_DIALOG_CLOSE)
+                end
+            end,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                if dialog.data and dialog.data.callback then
+                    dialog.data.callback()
+                end
+            end,
+        },
+    },
+}
+
+-- Service Dialogs
+
+ESO_Dialogs["INELIGIBLE_SERVICE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title = 
+    {
+        text = SI_SERVICE_ERROR_DIALOG_CHARACTER_INELIGIBLE_HEADER,
+    },
+    mainText = 
+    {
+        text = SI_SERVICE_ERROR_DIALOG_CHARACTER_INELIGIBLE_BODY,
+    },
+    buttons = 
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    },
 }

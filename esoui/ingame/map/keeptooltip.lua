@@ -10,6 +10,7 @@ local KEEP_TOOLTIP_ACCESSIBLE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLO
 local KEEP_TOOLTIP_NOT_ACCESSIBLE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_NOT_ACCESSIBLE))
 local KEEP_TOOLTIP_AT_KEEP = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_AT_KEEP))
 local KEEP_TOOLTIP_OWNER = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_OWNER))
+local KEEP_TOOLTIP_UNCLAIMED = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_UNCLAIMED))
 local IMPERIAL_CITY_TOOLTIP_COLLECTIBLE_LOCKED = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE))
 
 local SMALL_KEEP_ICON_STRING = zo_iconFormatInheritColor("EsoUI/Art/AvA/AvA_tooltipIcon_keep.dds", 32, 32)
@@ -59,6 +60,22 @@ local function Reset(self)
     self.historyPercent = 1.0
 end
 
+local KEYBOARD_TEL_VAR_ICON_TEXT = zo_iconFormat("EsoUI/Art/currency/currency_telvar.dds", 16, 16)
+local GAMEPAD_TEL_VAR_ICON_TEXT = zo_iconFormat("EsoUI/Art/currency/currency_telvar_32.dds", 24, 24)
+local DISTRICT_BONUS_VALUE_FORMAT = GetString(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_FORMAT)
+local DISTRICT_BONUS_RESTRICTION_TEXT = GetString(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_RESTRICTION_TEXT)
+
+local function GetDistrictTelVarBonusText(keepId, battlegroundContext, keepAlliance)
+    local telVarBonus = GetDistrictOwnershipTelVarBonusPercent(keepId, battlegroundContext)
+    if telVarBonus > 0 then
+        local telVarBonusText = zo_strformat(DISTRICT_BONUS_VALUE_FORMAT, telVarBonus)
+        local captured = keepAlliance == GetUnitAlliance("player")
+        local color = captured and KEEP_TOOLTIP_ACCESSIBLE or KEEP_TOOLTIP_UNCLAIMED
+        return color:Colorize(telVarBonusText)
+    end
+    return nil
+end
+
 -- Keep Layout --
 -----------------
 local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPercent)
@@ -68,7 +85,6 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
     self.historyPercent = historyPercent
 
     local keepName = GetKeepName(keepId)
-    local isHistorical = historyPercent < 1.0
 
     if(keepName) then
         local nameControl = GetControl(self, "Name")
@@ -90,21 +106,25 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
         local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceColor:Colorize(allianceName))
         AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
 
-        local keepType = GetKeepType(keepId)
+        local notHistorical = historyPercent >= 1.0
+        if notHistorical then
+            local keepType = GetKeepType(keepId)
 
-        --Guild Owner Name
-        if(isHistorical == false) then
+            --Guild Owner Name
             if(IsKeepTypeClaimable(keepType)) then
                 local guildName = GetClaimedKeepGuildName(keepId, battlegroundContext)
+                local color = KEEP_TOOLTIP_NAME
                 if(guildName == "") then
-                    guildName = GetString(SI_KEEP_UNCLAIMED)
+                    guildName = GetString(SI_KEEP_UNCLAIMED_GUILD)
+                    color = KEEP_TOOLTIP_UNCLAIMED
                 end
+                guildName = color:Colorize(guildName)
                 text = zo_strformat(GetString(SI_TOOLTIP_KEEP_GUILD_OWNER), guildName)
                 AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
             end
 
             -- siege weapons
-            if(keepType ~= KEEPTYPE_ARTIFACT_GATE) then
+            if(keepType ~= KEEPTYPE_ARTIFACT_GATE and keepType ~= KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
                 local playerAlliance = GetUnitAlliance("player")
                 local playerAllianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(playerAlliance))
                 local maxSiegeWeapons = GetMaxKeepSieges(keepId, battlegroundContext)
@@ -142,6 +162,16 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                     if(artifactState ~= OBJECTIVE_CONTROL_STATE_FLAG_AT_BASE) then
                         AddLine(self, GetString(SI_TOOLTIP_ARTIFACT_TAKEN), KEEP_TOOLTIP_ATTACK_LINE)
                     end
+                end
+            end
+            
+            --Tel Var Bonus Info
+            if(keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
+                local telVarBonusText = GetDistrictTelVarBonusText(keepId, battlegroundContext, alliance)
+                if telVarBonusText then
+                    local finalBonusText = zo_strformat(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT, telVarBonusText, KEYBOARD_TEL_VAR_ICON_TEXT)
+                    AddLine(self, finalBonusText, KEEP_TOOLTIP_NORMAL_LINE)
+                    AddLine(self, DISTRICT_BONUS_RESTRICTION_TEXT, KEEP_TOOLTIP_NORMAL_LINE)
                 end
             end
 
@@ -217,7 +247,6 @@ end
 
 local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, historyPercent)
     local keepName = GetKeepName(keepId)
-    local isHistorical = historyPercent < 1.0
 
     local keepSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("mapKeepSection"))
 
@@ -279,13 +308,14 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
             local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(keepAlliance))
             LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), allianceIcon, allianceName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
         end
-
-        --Guild Owner Name
-        if not isHistorical then
+        
+        local notHistorical = historyPercent >= 1.0
+        if notHistorical then
+            --Guild Owner Name
             if IsKeepTypeClaimable(keepType) then
                 local guildName = GetClaimedKeepGuildName(keepId, battlegroundContext)
                 if guildName == "" then
-                    LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_GUILD_OWNER), nil, GetString(SI_KEEP_UNCLAIMED), self.tooltip:GetStyle("mapLocationKeepUnclaimed"))
+                    LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_GUILD_OWNER), nil, GetString(SI_KEEP_UNCLAIMED_GUILD), self.tooltip:GetStyle("mapLocationKeepUnclaimed"))
                 else
                     LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_GUILD_OWNER), nil, guildName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
                 end
@@ -348,6 +378,19 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                     end
                     self:LayoutIconStringLine(artifactSection, nil, text, colorStyle, self.tooltip:GetStyle("mapLocationKeepElderScrollInfo"))
                     keepSection:AddSection(artifactSection)
+                end
+            end
+
+            --Tel Var Bonus Info
+            if(keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
+                local telVarBonusText = GetDistrictTelVarBonusText(keepId, battlegroundContext, keepAlliance)
+                if telVarBonusText then
+                    local finalBonusText = zo_strformat(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT_FORMAT, telVarBonusText, GAMEPAD_TEL_VAR_ICON_TEXT)
+                    local cityBonusSection = keepSection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
+                    self:LayoutIconStringLine(cityBonusSection, nil, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_HEADER), self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
+                    self:LayoutIconStringLine(cityBonusSection, nil, finalBonusText, self.tooltip:GetStyle("mapLocationKeepClaimed"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+                    self:LayoutIconStringLine(cityBonusSection, nil, DISTRICT_BONUS_RESTRICTION_TEXT, self.tooltip:GetStyle("mapLocationKeepClaimed"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+                    keepSection:AddSection(cityBonusSection)
                 end
             end
         end

@@ -25,6 +25,18 @@ function ZO_SocialListKeyboard:SharedSocialSetup(control, data)
     ZO_SocialList_SharedSocialSetup(control, data)
 end
 
+function ZO_SocialListKeyboard:UpdateHideOfflineCheckBox(checkBox)
+	local hideOfflineSetting = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
+	if hideOfflineSetting ~= ZO_CheckButton_IsChecked(checkBox) then
+		if hideOfflineSetting then
+			ZO_CheckButton_SetChecked(checkBox)
+		else
+			ZO_CheckButton_SetUnchecked(checkBox)
+		end
+		self:RefreshFilters()
+	end
+end
+
 --XML
 
 function ZO_SocialListKeyboard:Note_OnMouseEnter(control)
@@ -55,13 +67,34 @@ function ZO_SocialListKeyboard:DisplayName_OnMouseEnter(control)
         local textWidth = control:GetTextDimensions()
         InformationTooltip:ClearAnchors()
         InformationTooltip:SetAnchor(BOTTOM, control, TOPLEFT, textWidth * 0.5, 0)
-        SetTooltipText(InformationTooltip, data.characterName)
+        SetTooltipText(InformationTooltip, ZO_FormatUserFacingCharacterName(data.characterName))
     end
 
     self:EnterRow(row)
 end
 
 function ZO_SocialListKeyboard:DisplayName_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    local row = control:GetParent()
+    self:ExitRow(row)
+end
+
+function ZO_SocialListKeyboard:CharacterName_OnMouseEnter(control)
+    local row = control:GetParent()
+    local data = ZO_ScrollList_GetData(row)
+    
+    if data.displayName then
+        InitializeTooltip(InformationTooltip)
+        local textWidth = control:GetTextDimensions()
+        InformationTooltip:ClearAnchors()
+        InformationTooltip:SetAnchor(BOTTOM, control, TOPLEFT, textWidth * 0.5, 0)
+        SetTooltipText(InformationTooltip, data.displayName)
+    end
+
+    self:EnterRow(row)
+end
+
+function ZO_SocialListKeyboard:CharacterName_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
     local row = control:GetParent()
     self:ExitRow(row)
@@ -127,11 +160,17 @@ function ZO_SocialListKeyboard:Class_OnMouseExit(control)
     self:ExitRow(control:GetParent())
 end
 
-function ZO_SocialListKeyboard:Veteran_OnMouseEnter(control)
+function ZO_SocialListKeyboard:Champion_OnMouseEnter(control)
     local row = control:GetParent()
     self:EnterRow(row)
 end
 
-function ZO_SocialListKeyboard:Veteran_OnMouseExit(control)
+function ZO_SocialListKeyboard:Champion_OnMouseExit(control)
     self:ExitRow(control:GetParent())
+end
+
+function ZO_SocialListKeyboard:HideOffline_OnClicked()
+	SetSetting(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE, tostring(not GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)))
+	self:RefreshFilters()
+	self:UpdateKeybinds()
 end

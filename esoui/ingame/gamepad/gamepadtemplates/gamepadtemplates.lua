@@ -98,6 +98,7 @@ function ZO_GamepadQuantitySpinner:AttachAndShowSpinner(list, targetControl)
     self:SetAnchor(BOTTOMRIGHT, targetControl, BOTTOMRIGHT, 0, 8)
     self.anchoredToList = list
     self.ignoreInvalidCost = false
+	self.anchoredToList:SetMouseEnabled(false)
 end
 
 local function OnSelectedDataChanged(list, selectedData)
@@ -131,6 +132,7 @@ function ZO_GamepadQuantitySpinner:DetachFromListEntry()
         if targetData then
             targetData.gamepadQuantitySpinner = nil
         end
+		self.anchoredToList:SetMouseEnabled(true)
         self.anchoredToList = nil
     end
 end

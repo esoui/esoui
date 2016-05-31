@@ -158,15 +158,15 @@ end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfoByActivity(activityType)
     local isLevelLocked = false
-    local lowestLevelLimit, lowestRankLimit
+    local lowestLevelLimit, lowestChampionPointLimit
 
     local maxLevel = GetMaxLevel()
 
     local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
     for _, location in ipairs(locationData) do
         if location.levelMin == maxLevel then --This is a veteran activity
-            if not lowestRankLimit or location.veteranRankMin < lowestRankLimit then
-                lowestRankLimit = location.veteranRankMin
+            if not lowestChampionPointLimit or location.championPointsMin < lowestChampionPointLimit then
+                lowestChampionPointLimit = location.championPointsMin
             end
         else
             if not lowestLevelLimit or location.levelMin < lowestLevelLimit then
@@ -179,28 +179,28 @@ function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfoByActivity(activityTyp
         if GetUnitLevel("player") < lowestLevelLimit  then
             isLevelLocked = true
         end
-    elseif lowestRankLimit then
-        if GetUnitVeteranRank("player") < lowestRankLimit then
+    elseif lowestChampionPointLimit then
+        if not CanUnitGainChampionPoints("player") or GetPlayerChampionPointsEarned() < lowestChampionPointLimit then
             isLevelLocked = true
         end
     end
 
-    return isLevelLocked, lowestLevelLimit, lowestRankLimit
+    return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit
 end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfo()
     local isLevelLocked = true
-    local lowestLevelLimit, lowestRankLimit
+    local lowestLevelLimit, lowestChampionPointLimit
 
     local modes = self.dataManager:GetFilterModeData()
     for _, activityType in ipairs(modes:GetActivityTypes()) do
-        local locked, level, rank = self:GetLevelLockInfoByActivity(activityType)
+        local locked, level, championPoints = self:GetLevelLockInfoByActivity(activityType)
         if level and (not lowestLevelLimit or level < lowestLevelLimit) then
             lowestLevelLimit = level
         end
 
-        if rank and (not lowestRankLimit or rank < lowestRankLimit) then
-            lowestRankLimit = rank
+        if championPoints and (not lowestChampionPointLimit or championPoints < lowestChampionPointLimit) then
+            lowestChampionPointLimit = championPoints
         end
 
         if not locked then
@@ -208,18 +208,64 @@ function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfo()
         end
     end
 
-    return isLevelLocked, lowestLevelLimit, lowestRankLimit
+    return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit
+end
+
+function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
+    local isGloballyLocked = false
+    local globalLockReasons =
+    {
+        isActivityQueueOnCooldown = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityQueueOnCooldown(),
+        isLockedByNotLeader = not IsUnitSoloOrGroupLeader("player"),
+    }
+
+    for i, reason in pairs(globalLockReasons) do
+        if reason == true then
+            isGloballyLocked = true
+            break
+        end
+    end
+
+    return isGloballyLocked, globalLockReasons
+end
+
+local function ActivityQueueCooldownTextCallback()
+    local expireTimeS = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetActivityQueueCooldownExpireTimeS()
+    local timeRemainingS = zo_max(expireTimeS - GetFrameTimeSeconds(), 0)
+    local formattedTimeText = ZO_FormatTime(timeRemainingS, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+    return zo_strformat(SI_LFG_LOCK_REASON_QUEUE_COOLDOWN_VERBOSE, formattedTimeText)
+end
+
+function ZO_ActivityFinderTemplate_Shared:GetGlobalLockText()
+    local isGloballyLocked, globalLockReasons = self:GetGlobalLockInfo()
+    local lockReasonText
+    if isGloballyLocked then
+        if globalLockReasons.isActivityQueueOnCooldown then
+            lockReasonText = ActivityQueueCooldownTextCallback
+        elseif globalLockReasons.isLockedByNotLeader then
+            lockReasonText = GetString(SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT)
+        end
+    end
+    return lockReasonText
 end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockTextByActivity(activityType)
-    local isLocked, levelMin, rankMin = self:GetLevelLockInfoByActivity(activityType)
+    local isLocked, levelMin, championPointsMin = self:GetLevelLockInfoByActivity(activityType)
     local lockReasonText
     if isLocked then
         if levelMin then
             lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_LEVEL_REQUIREMENT, levelMin)
-        elseif rankMin then
-            lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_RANK_REQUIREMENT, rankMin)
+        elseif championPointsMin then
+            lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_CHAMPION_REQUIREMENT, championPointsMin)
         end
     end
     return lockReasonText
+end
+
+function ZO_ActivityFinderTemplate_Shared:GetLockTextByActivity(activityType)
+    local lockText = self:GetGlobalLockText()
+    if not lockText then
+        lockText = self:GetLevelLockTextByActivity(activityType)
+    end
+    return lockText
 end

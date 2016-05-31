@@ -14,6 +14,7 @@ local ENTRY_TYPES = {
     TRAVEL_TO_CAMPAIGN = 6,
     LEAVE_QUEUE = 7,
     SET_HOME = 8,
+    ABANDON_CAMPAIGN = 9,
 }
 
 local CONTENT_TYPES = 
@@ -27,6 +28,7 @@ local CONTENT_TYPES =
 local ICON_ENTER = "EsoUI/Art/Campaign/Gamepad/gp_campaign_menuIcon_enter.dds"
 local ICON_TRAVEL = "EsoUI/Art/Campaign/Gamepad/gp_campaign_menuIcon_travel.dds"
 local ICON_LEAVE = "EsoUI/Art/Campaign/Gamepad/gp_campaign_menuIcon_leave.dds"
+local ICON_ABANDON = "EsoUI/Art/Campaign/Gamepad/gp_campaign_menuIcon_abandon.dds"
 local ICON_HOME = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_home.dds"
 local ICON_GUEST = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_guest.dds"
 local ICON_BONUS = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_bonus.dds"
@@ -51,7 +53,7 @@ function ZO_CampaignBrowser_Gamepad:Initialize(control)
     GAMEPAD_AVA_ROOT_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HUB_SCENE_NAME, SCENE_MANAGER)
     GAMEPAD_AVA_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-           if(self.currentMode == CAMPAIGN_BROWSER_MODES.BONUSES) then
+            if(self.currentMode == CAMPAIGN_BROWSER_MODES.BONUSES) then
                 self.currentMode = CAMPAIGN_BROWSER_MODES.CAMPAIGNS
             end
                 
@@ -360,28 +362,28 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
             -- Data 1
             headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER)
             headerData.data1Text = function(control)
-                                        local _, _, numHomeHeld, numTotalHome = GetAvAKeepScore(self.campaignId, GetUnitAlliance("player"))
+                                        local _, _, numHomeHeld, numTotalHome = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
                                         return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER_INFO), numHomeHeld, numTotalHome)
             end
 
             -- Data 2
             headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_ENEMY_KEEPS_HEADER)
             headerData.data2Text = function(control)
-                                        local _, enemyKeepsHeld = GetAvAKeepScore(self.campaignId, GetUnitAlliance("player"))
+                                        local _, enemyKeepsHeld = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
                                         return enemyKeepsHeld
             end
 
             -- Data 3
             headerData.data3HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_DEFENSIVE_SCROLLS_HEADER)
             headerData.data3Text = function(control)
-                                        local _, enemyScrollsHeld = GetAvAArtifactScore(self.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
+                                        local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
                                         return enemyScrollsHeld
             end
 
             -- Data 4
             headerData.data4HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_OFFENSIVE_SCROLLS_HEADER)
             headerData.data4Text = function(control)
-                                        local _, enemyScrollsHeld = GetAvAArtifactScore(self.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
+                                        local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
                                         return enemyScrollsHeld
             end
 
@@ -473,11 +475,12 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     elseif(selectedData.entryType == ENTRY_TYPES.SET_HOME) then
                         self:DoHome(selectedData)
                     elseif(selectedData.entryType == ENTRY_TYPES.BONUSES) then
-                        self.campaignList:DeactivateWithoutChangedCallback()
-                        GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:ClearFocus()
+						self:DeactivateCurrentList()
                         CAMPAIGN_BONUSES_GAMEPAD:Activate()
                         self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.BONUSES)
                         PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+                    elseif(selectedData.entryType == ENTRY_TYPES.ABANDON_CAMPAIGN) then
+                        self:DoAbandon(selectedData)
                     end
                 end
             end,
@@ -497,6 +500,8 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                         if self.currentMode == CAMPAIGN_BROWSER_MODES.CAMPAIGNS then
                             return true
                         end
+                    elseif(selectedData.entryType == ENTRY_TYPES.ABANDON_CAMPAIGN) then
+                        return true
                     end
 
                     return false
@@ -509,6 +514,8 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                 local selectedData = self:GetTargetData()
                 if(selectedData) then
                     if selectedData.entryType == ENTRY_TYPES.ENTER_CAMPAIGN and self:IsQueued(selectedData) then
+                        return false
+                    elseif selectedData.entryType == ENTRY_TYPES.ABANDON_CAMPAIGN and self:IsQueued(selectedData) then
                         return false
                     end
                 end
@@ -523,8 +530,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 if(self.currentMode == CAMPAIGN_BROWSER_MODES.BONUSES) then
                     CAMPAIGN_BONUSES_GAMEPAD:Deactivate()
-                    GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:TakeFocus()
-                    self.campaignList:ActivateWithoutChangedCallback()
+                    self:ActivateCurrentList()
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGNS)
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 else
@@ -659,7 +665,7 @@ function ZO_CampaignBrowser_Gamepad:DoHome(data)
     if(data.type == self.campaignBrowser:GetCampaignType()) then
         local lockTimeLeft = GetCampaignReassignCooldown()
         if(lockTimeLeft > 0)  then
-            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = true } )
+            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = true, id = data.id } )
         else
             ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_SET_HOME_REVIEW_DIALOG, { id = data.id }, { mainTextParams = self:GetTextParamsForSetHomeDialog() })
         end
@@ -682,6 +688,24 @@ function ZO_CampaignBrowser_Gamepad:DoLeave(data)
             elseif(state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
                 ConfirmCampaignEntry(data.id, groupQueue, false)
             end
+        end
+    end
+end
+
+function ZO_CampaignBrowser_Gamepad:DoAbandon(data)
+    if(data.id == GetAssignedCampaignId()) then
+        local lockTimeLeft = GetCampaignUnassignCooldown()
+        if(lockTimeLeft > 0)  then
+            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = true, isAbandoning = true, id = data.id } )
+        else
+            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG, { id = data.id }, { mainTextParams = self:GetTextParamsForAbandonHomeDialog() })
+        end
+    elseif (data.id == GetGuestCampaignId()) then
+        local lockTimeLeft = GetCampaignGuestCooldown()
+        if(lockTimeLeft > 0)  then
+            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_LOCKED_DIALOG, { isHome = false, isAbandoning = true, id = data.id } )
+        else
+            ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_GUEST_DIALOG)
         end
     end
 end
@@ -801,6 +825,9 @@ function ZO_CampaignBrowser_Gamepad:AddAssignedCampaignsToList()
             -- EMPERORSHIP
             self:AddCampaignDataToList(data, GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_EMPERORSHIP), ICON_EMPEROR, CONTENT_TYPES.EMPERORSHIP, ENTRY_TYPES.EMPERORSHIP)
 
+            -- ABANDON
+            self:AddCampaignDataToList(data, GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN), ICON_ABANDON, CONTENT_TYPES.CAMPAIGN, ENTRY_TYPES.ABANDON_CAMPAIGN)
+
             -- Store current state so we can use it to check for changes in OnUpdate
             self.lastStates[i].groupState = data.queuedGroupState
             self.lastStates[i].soloState = data.queuedIndividualState
@@ -859,12 +886,21 @@ function ZO_CampaignBrowser_Gamepad:BuildCampaignList()
     end
 end
 
-function ZO_CampaignBrowser_Gamepad:GetPriceMessage(cost, hasEnough)
-    if hasEnough then
-        return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE), cost)
+function ZO_CampaignBrowser_Gamepad:GetPriceMessage(cost, hasEnough, useGold)
+    if useGold then
+        if hasEnough then
+            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_GOLD_PRICE), cost)
+        else
+            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_GOLD_PRICE_NOT_ENOUGH), cost)
+        end
     else
-        return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE_NOT_ENOUGH), cost)
-    end 
+        if hasEnough then
+            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE), cost)
+        else
+            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE_NOT_ENOUGH), cost)
+        end 
+    end
+
 end
 
 function ZO_CampaignBrowser_Gamepad:GetTextParamsForSetHomeDialog()
@@ -881,6 +917,22 @@ function ZO_CampaignBrowser_Gamepad:GetTextParamsForSetHomeDialog()
     else
         local priceMessage = self:GetPriceMessage(nowCost, hasEnough)
         costMessage = zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN_COST), priceMessage)
+    end
+
+    return {warning, costMessage}
+end
+
+function ZO_CampaignBrowser_Gamepad:GetTextParamsForAbandonHomeDialog()
+    local homeCampaignId = GetAssignedCampaignId()
+    local warning = zo_strformat(GetString(SI_ABANDON_HOME_CAMPAIGN_QUERY), GetCampaignName(homeCampaignId))
+
+    local alliancePointCost = ZO_AbandonHomeCampaign_GetCost()
+    local isFree = alliancePointCost == 0
+    local costMessage
+    if isFree then
+        costMessage = GetString(SI_ABANDON_HOME_CAMPAIGN_FREE)
+    else
+        costMessage = ""
     end
 
     return {warning, costMessage}

@@ -55,8 +55,14 @@ function ZO_PlayerEmoteQuickslot:PopulateMenu()
             local emoteInfo = PLAYER_EMOTE_MANAGER:GetEmoteItemInfo(id)
             found = emoteInfo ~= nil
             if found then
-                icon = PLAYER_EMOTE_MANAGER:GetEmoteIconForCategory(emoteInfo.emoteCategory)
-                name = emoteInfo.displayName
+				if emoteInfo.isOverriddenByPersonality then
+					icon = GAMEPAD_PLAYER_EMOTE:GetPersonalityEmoteIconForCategory(emoteInfo.emoteCategory)				
+					name = ZO_PERSONALITY_EMOTES_COLOR:Colorize(emoteInfo.displayName)
+				else
+					icon = GAMEPAD_PLAYER_EMOTE:GetEmoteIconForCategory(emoteInfo.emoteCategory)
+					name = emoteInfo.displayName
+				end
+
                 callback = function() PlayEmoteByIndex(emoteInfo.emoteIndex) end
             end
         elseif type == ACTION_TYPE_QUICK_CHAT then

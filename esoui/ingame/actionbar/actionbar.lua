@@ -250,6 +250,8 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             PlayUltimateFillAnimation(ultimateButton, ultimateFillLeftTexture, ultimateFillRightTexture, percentComplete, setProgressNoAnim)
             ultimateButton:AnchorKeysOut()
         end
+
+		ultimateButton:UpdateUltimateNumber()
     else
         --stop animation
         ultimateReadyBurstTexture:SetHidden(true)

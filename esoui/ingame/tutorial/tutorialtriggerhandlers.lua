@@ -82,6 +82,14 @@ local TutorialTriggerHandlers = {
            TriggerTutorial(TUTORIAL_TRIGGER_SCALEABLE_REGION_ENTERED)
         end
 
+        if DoesCurrentZoneAllowBattleLevelScaling() then
+            if IsUnitChampionBattleLeveled("player") then
+                TriggerTutorial(TUTORIAL_TRIGGER_BATTLE_LEVEL_ZONE_ENTERED_VETERAN)
+            elseif IsUnitBattleLeveled("player") then
+                TriggerTutorial(TUTORIAL_TRIGGER_BATTLE_LEVEL_ZONE_ENTERED)
+            end
+        end
+
         if IsInOutlawZone() then
             TriggerTutorial(TUTORIAL_TRIGGER_REFUGE_ENTERED)
         end

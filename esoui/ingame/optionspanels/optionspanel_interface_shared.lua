@@ -49,10 +49,6 @@ function ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized(self)
     ZO_OptionsWindow_InitializeControl(self)
 end
 
-local function AreHealthbarsEnabled()
-    return tonumber(GetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS)) ~= 0
-end
-
 local function IsSCTEnabled()
     return tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED)) ~= 0
 end
@@ -120,6 +116,36 @@ local ZO_OptionsPanel_Interface_ControlData =
     --UI Settings
     [SETTING_TYPE_UI] =
     {
+        [UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_INTERFACE,
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD,
+            text = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_KEYBOARD,
+            tooltipText = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP_KEYBOARD,
+            valid = {PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID, PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER,},
+            valueStrings =
+            {
+                function() return zo_strformat(GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID), ZO_GetPlatformAccountLabel()) end,
+                function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER) end
+            }
+        },
+        [UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_INTERFACE,
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
+            text = SI_GAMEPAD_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME,
+            tooltipText = SI_GAMEPAD_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP,
+            valid = {PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID, PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER,},
+            valueStrings =
+            {
+                function() return zo_strformat(GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID), ZO_GetPlatformAccountLabel()) end,
+                function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER) end
+            }
+        },
         --Options_Interface_ShowActionBar
         [UI_SETTING_SHOW_ACTION_BAR] =
         {
@@ -132,6 +158,18 @@ local ZO_OptionsPanel_Interface_ControlData =
             valid = {ACTION_BAR_SETTING_CHOICE_OFF, ACTION_BAR_SETTING_CHOICE_AUTOMATIC, ACTION_BAR_SETTING_CHOICE_ON,},
             valueStringPrefix = "SI_ACTIONBARSETTINGCHOICE",
         },
+		--Options_Interface_ResourceNumbers
+		[UI_SETTING_RESOURCE_NUMBERS] =
+		{
+			controlType = OPTIONS_FINITE_LIST,
+			system = SETTING_TYPE_UI,
+			panel = SETTING_PANEL_INTERFACE,
+			settingId = UI_SETTING_RESOURCE_NUMBERS,
+			text = SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS,
+			tooltipText = SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS_TOOLTIP,
+			valid = {RESOURCE_NUMBERS_SETTING_OFF, RESOURCE_NUMBERS_SETTING_NUMBER_ONLY, RESOURCE_NUMBERS_SETTING_PERCENT_ONLY, RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT},
+			valueStringPrefix = "SI_RESOURCENUMBERSSETTING",
+		},
         --Options_Interface_ShowRaidLives
         [UI_SETTING_SHOW_RAID_LIVES] =
         {
@@ -144,6 +182,16 @@ local ZO_OptionsPanel_Interface_ControlData =
             valid = {RAID_LIFE_VISIBILITY_CHOICE_OFF, RAID_LIFE_VISIBILITY_CHOICE_AUTOMATIC, RAID_LIFE_VISIBILITY_CHOICE_ON,},
             valueStringPrefix = "SI_RAIDLIFEVISIBILITYCHOICE",
         },
+		--Options_Interface_UltimateNumber
+		[UI_SETTING_ULTIMATE_NUMBER] =
+		{
+			controlType = OPTIONS_CHECKBOX,
+			system = SETTING_TYPE_UI,
+			panel = SETTING_PANEL_INTERFACE,
+			settingId = UI_SETTING_ULTIMATE_NUMBER,
+			text = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER,
+			tooltipText = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER_TOOLTP,
+		},
         --UI_Settings_ShowQuestTracker
         [UI_SETTING_SHOW_QUEST_TRACKER] =
         {
@@ -153,18 +201,6 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_SHOW_QUEST_TRACKER,
             tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_TRACKER_TOOLTIP,
-        },
-        --Options_Interface_QuestBestowers
-        [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS,
-            tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS_TOOLTIP,
-            events = {[true] = "Bestowers_On", [false] = "Bestowers_Off",},
-            gamepadHasEnabledDependencies = true,
         },
         --Options_Interface_FramerateCheck
         [UI_SETTING_SHOW_FRAMERATE] =
@@ -238,7 +274,28 @@ local ZO_OptionsPanel_Interface_ControlData =
                 ["CompassActiveQuests_On"]    = ZO_Options_HideAssociatedWarning,
             },
         },
+        --UI_Settings_ShowWeaponIndicator
+        [UI_SETTING_SHOW_WEAPON_INDICATOR] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_WEAPON_INDICATOR,
+            tooltipText = SI_WEAPON_INDICATOR_SETTINGS_TOOLTIP,
+        },
+        --UI_Settings_ShowArmorIndicator
+        [UI_SETTING_SHOW_ARMOR_INDICATOR] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_ARMOR_INDICATOR,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_ARMOR_INDICATOR,
+            tooltipText = SI_ARMOR_INDICATOR_SETTINGS_TOOLTIP,
+        },
     },
+
     [SETTING_TYPE_ACTIVE_COMBAT_TIP] =
     {
         --Options_Interface_ActiveCombatTips
@@ -252,247 +309,6 @@ local ZO_OptionsPanel_Interface_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL_TOOLTIP,
             valid = {ACT_SETTING_OFF, ACT_SETTING_AUTO, ACT_SETTING_ALWAYS,},
             valueStringPrefix = "SI_ACTIVECOMBATTIPSETTING",
-        },
-    },
-
-    --Nameplates
-    [SETTING_TYPE_NAMEPLATES] =
-    {
-        --Options_Interface_AllHB
-        [NAMEPLATE_TYPE_ALL_HEALTHBARS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ALL_HEALTHBARS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_HEALTHBARS_ALL,
-            tooltipText = SI_INTERFACE_OPTIONS_HEALTHBARS_ALL_TOOLTIP,
-            events = {[false] = "AllHealthBars_Off", [true] = "AllHealthBars_On", },
-            gamepadHasEnabledDependencies = true,
-        },
-        --Options_Interface_PlayerHB
-        [NAMEPLATE_TYPE_PLAYER_HEALTHBAR] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_PLAYER_HEALTHBAR,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_HEALTHBARS_PLAYER,
-            tooltipText = SI_INTERFACE_OPTIONS_HEALTHBARS_PLAYER_TOOLTIP,
-            valid = {NAMEPLATE_CHOICE_OFF, NAMEPLATE_CHOICE_ON, NAMEPLATE_CHOICE_HURT,},
-            valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
-            eventCallbacks =
-            {
-                ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,
-                ["AllHealthBars_On"]    = ZO_Options_SetOptionActive,
-            },
-            gamepadIsEnabledCallback = AreHealthbarsEnabled,
-        },
-        --Options_Interface_FriendlyNPCHB
-        [NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_HEALTHBARS_FRIENDLY_NPC,
-            tooltipText = SI_INTERFACE_OPTIONS_HEALTHBARS_FRIENDLY_NPC_TOOLTIP,
-            valid = {NAMEPLATE_CHOICE_OFF, NAMEPLATE_CHOICE_ON,},
-            valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
-            eventCallbacks =
-            {
-                ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,
-                ["AllHealthBars_On"]    = ZO_Options_SetOptionActive,
-            },
-            gamepadIsEnabledCallback = AreHealthbarsEnabled,
-        },
-        --Options_Interface_FriendlyPlayerHB
-        [NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_HEALTHBARS_FRIENDLY_PLAYER,
-            tooltipText = SI_INTERFACE_OPTIONS_HEALTHBARS_FRIENDLY_PLAYER_TOOLTIP,
-            valid = {NAMEPLATE_CHOICE_OFF, NAMEPLATE_CHOICE_ON, NAMEPLATE_CHOICE_HURT,},
-            valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
-            eventCallbacks =
-            {
-                ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,
-                ["AllHealthBars_On"]    = ZO_Options_SetOptionActive,
-            },
-            gamepadIsEnabledCallback = AreHealthbarsEnabled,
-        },
-        --Options_Interface_EnemyNPCHB
-        [NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_HEALTHBARS_ENEMY_NPC,
-            tooltipText = SI_INTERFACE_OPTIONS_HEALTHBARS_ENEMY_NPC_TOOLTIP,
-            valid = {NAMEPLATE_CHOICE_OFF, NAMEPLATE_CHOICE_ON, NAMEPLATE_CHOICE_HURT,},
-            valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
-            eventCallbacks =
-            {
-                ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,
-                ["AllHealthBars_On"]    = ZO_Options_SetOptionActive,
-            },
-            gamepadIsEnabledCallback = AreHealthbarsEnabled,
-        },
-        --Options_Interface_EnemyPlayerHB
-        [NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_HEALTHBAR_ENEMY_PLAYER,
-            tooltipText = SI_INTERFACE_OPTIONS_HEALTHBAR_ENEMY_PLAYER_TOOLTIP,
-            valid = {NAMEPLATE_CHOICE_OFF, NAMEPLATE_CHOICE_ON, NAMEPLATE_CHOICE_HURT,},
-            valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
-            eventCallbacks =
-            {
-                ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,
-                ["AllHealthBars_On"]    = ZO_Options_SetOptionActive,
-            },
-            gamepadIsEnabledCallback = AreHealthbarsEnabled,
-        },
-        --Options_Interface_AllianceIndicators
-        [NAMEPLATE_TYPE_ALLIANCE_INDICATORS] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_ALLIANCE_INDICATORS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_NAMEPLATES_ALLIANCE_INDICATORS,
-            tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_ALLIANCE_INDICATORS_TOOLTIP,
-            valid = {NAMEPLATE_CHOICE_OFF, NAMEPLATE_CHOICE_ALLY, NAMEPLATE_CHOICE_ENEMY, NAMEPLATE_CHOICE_ALL},
-            valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
-        },
-        --Options_Interface_GroupIndicators
-        [NAMEPLATE_TYPE_GROUP_INDICATORS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_GROUP_INDICATORS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_NAMEPLATES_GROUP_INDICATORS,
-            tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_GROUP_INDICATORS_TOOLTIP,
-        },
-        --Options_Interface_ResurrectIndicators
-        [NAMEPLATE_TYPE_RESURRECT_INDICATORS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_RESURRECT_INDICATORS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_NAMEPLATES_RESURRECT_INDICATORS,
-            tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_RESURRECT_INDICATORS_TOOLTIP,
-        },
-        --Options_Interface_FollowerIndicators
-        [NAMEPLATE_TYPE_FOLLOWER_INDICATORS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_NAMEPLATES,
-            settingId = NAMEPLATE_TYPE_FOLLOWER_INDICATORS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_NAMEPLATES_FOLLOWER_INDICATORS,
-            tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_FOLLOWER_INDICATORS_TOOLTIP,
-        },
-    },
-
-    --InWorld
-    [SETTING_TYPE_IN_WORLD] =
-    {
-        --Options_Interface_GlowThickness
-        [IN_WORLD_UI_SETTING_GLOW_THICKNESS] =
-        {
-            controlType = OPTIONS_SLIDER,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_GLOW_THICKNESS,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_GLOWS_THICKNESS,
-            tooltipText = SI_INTERFACE_OPTIONS_GLOWS_THICKNESS_TOOLTIP,
-        
-            valueFormat = "%f",
-            showValue = true,
-            showValueMin = 0,
-            showValueMax = 100,
-        },
-        --Options_Interface_TargetGlowCheck
-        [IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_IN_WORLD,
-            panel = SETTING_PANEL_INTERFACE,
-            settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED,
-            text = SI_INTERFACE_OPTIONS_TARGET_GLOWS_ENABLED,
-            tooltipText = SI_INTERFACE_OPTIONS_TARGET_GLOWS_ENABLED_TOOLTIP,
-            events = {[true] = "TargetGlowEnabled_On", [false] = "TargetGlowEnabled_Off",},
-            gamepadHasEnabledDependencies = true,
-        },
-        --Options_Interface_TargetGlowIntensity
-        [IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY] =
-        {
-            controlType = OPTIONS_SLIDER,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_TARGET_GLOWS_INTENSITY,
-            tooltipText = SI_INTERFACE_OPTIONS_TARGET_GLOWS_INTENSITY_TOOLTIP,
-        
-            valueFormat = "%f",
-            showValue = true,
-            showValueMin = 0,
-            showValueMax = 100,
-        
-            eventCallbacks =
-            {
-                ["TargetGlowEnabled_On"]    = ZO_Options_SetOptionActive,
-                ["TargetGlowEnabled_Off"]   = ZO_Options_SetOptionInactive,
-            },
-            gamepadIsEnabledCallback = function() 
-                                            return tonumber(GetSetting(SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED)) ~= 0
-                                        end,
-        },
-        --Options_Interface_InteractableGlowCheck
-        [IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_IN_WORLD,
-            panel = SETTING_PANEL_INTERFACE,
-            settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED,
-            text = SI_INTERFACE_OPTIONS_INTERACTABLE_GLOWS_ENABLED,
-            tooltipText = SI_INTERFACE_OPTIONS_INTERACTABLE_GLOWS_ENABLED_TOOLTIP,
-            events = {[true] = "InteractableGlowEnabled_On", [false] = "InteractableGlowEnabled_Off",},
-            gamepadHasEnabledDependencies = true,
-        },
-        --Options_Interface_InteractableGlowIntensity
-        [IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY] =
-        {
-            controlType = OPTIONS_SLIDER,
-            system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_INTERACTABLE_GLOWS_INTENSITY,
-            tooltipText = SI_INTERFACE_OPTIONS_INTERACTABLE_GLOWS_INTENSITY_TOOLTIP,
-        
-            valueFormat = "%f",
-            showValue = true,
-            showValueMin = 0,
-            showValueMax = 100,
-        
-            eventCallbacks =
-            {
-                ["InteractableGlowEnabled_On"]    = ZO_Options_SetOptionActive,
-                ["InteractableGlowEnabled_Off"]   = ZO_Options_SetOptionInactive,
-            },
-            gamepadIsEnabledCallback = function() 
-                                            return tonumber(GetSetting(SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED)) ~= 0
-                                        end,
         },
     },
 
@@ -564,8 +380,8 @@ local ZO_OptionsPanel_Interface_ControlData =
 
             eventCallbacks =
             {
-            ["ChatBubbles_Off"]   = ZO_Options_SetOptionInactive,
-            ["ChatBubbles_On"]    = ZO_Options_SetOptionActive,
+                ["ChatBubbles_Off"]   = ZO_Options_SetOptionInactive,
+                ["ChatBubbles_On"]    = ZO_Options_SetOptionActive,
             },
         },
     },

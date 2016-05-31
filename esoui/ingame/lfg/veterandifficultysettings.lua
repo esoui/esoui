@@ -22,7 +22,7 @@ local function UpdateVeteranStateVisuals(self, isVeteranDifficulty)
         self.veteranModeButton:SetHidden(false)
         self.difficultyLabel:SetHidden(true)
 
-        local isVeteran = GetUnitVeteranRank("player") > 0
+        local isChampion = CanUnitGainChampionPoints("player")
 
         --Normal mode button
         local normalButtonPressed = not isVeteranDifficulty
@@ -33,7 +33,7 @@ local function UpdateVeteranStateVisuals(self, isVeteranDifficulty)
 
         --Veteran mode button
         local veteranButtonPressed = isVeteranDifficulty
-        local veteranButtonEnabled = isVeteran
+        local veteranButtonEnabled = isChampion
         local veteranButtonState = DetermineButtonState(veteranButtonPressed, veteranButtonEnabled)
         local veteranButtonLocked = veteranButtonPressed --enforce a button always being selected by locking down the pressed one
         self.veteranModeButton:SetState(veteranButtonState, veteranButtonLocked)
@@ -75,7 +75,7 @@ function ZO_VeteranDifficultySettings_OnInitialized(self)
         Refresh()
     end
 
-    local function OnVeteranRankChanged(eventId, unitTag, veteranRank)
+    local function OnChampionPointsChanged(eventId, unitTag, championPoints)
         Refresh(unitTag)
     end
 
@@ -110,7 +110,7 @@ function ZO_VeteranDifficultySettings_OnInitialized(self)
     end
 
     self:RegisterForEvent(EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
-    self:RegisterForEvent(EVENT_VETERAN_RANK_UPDATE, OnVeteranRankChanged)
+    self:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, OnChampionPointsChanged)
     self:RegisterForEvent(EVENT_LEADER_UPDATE, OnLeaderUpdate)
     self:RegisterForEvent(EVENT_GROUP_UPDATE, OnGroupUpdate)
     self:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)

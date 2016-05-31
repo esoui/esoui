@@ -1,32 +1,38 @@
 
 local function AddHeader(self, displayName)
-    local headerSection = self:AcquireSection(self:GetStyle("socialTitle"))  
+    local headerSection = self:AcquireSection(self:GetStyle("socialTitle"))
     headerSection:AddLine(displayName)
     self:AddSection(headerSection)
 end
 
 local function AddNote(self, note)
      if note and note ~= "" then
-        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))                    
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
         bodySection:AddLine(note, self:GetStyle("bodyDescription"))
         self:AddSection(bodySection)
     end
 end
 
-local function TryAddOffline(self, offline)
+local function TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
     if offline then
         local offlineSection = self:AcquireSection(self:GetStyle("bodySection"))
         offlineSection:AddLine(GetString(SI_GAMEPAD_CONTACTS_STATUS_OFFLINE), self:GetStyle("socialOffline"))
         self:AddSection(offlineSection)
+
+        local lastOnlineSection = self:AcquireSection(self:GetStyle("socialStatsSection"))
+        local lastOnlinePair = lastOnlineSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        lastOnlinePair:SetStat(GetString(SI_GAMEPAD_SOCIAL_LIST_LAST_ONLINE), self:GetStyle("statValuePairStat"))
+        lastOnlinePair:SetValue(ZO_FormatDurationAgo(secsSinceLogoff + GetFrameTimeSeconds() - timeStamp), self:GetStyle("socialStatsValue"))
+        lastOnlineSection:AddStatValuePair(lastOnlinePair)
+
+        self:AddSection(lastOnlineSection)
     end
 end
 
-local FORMATTED_VETERAN_RANK_ICON = zo_iconFormat(GetGamepadVeteranRankIcon(), 48, 48)
-
-local function AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, veteranRank, alliance, zone)
+local function AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, championPoints, alliance, zone)
     if characterName then
         local characterSection = self:AcquireSection(self:GetStyle("charaterNameSection"))
-        characterSection:AddLine(characterName, self:GetStyle("socialStatsValue"))
+        characterSection:AddLine(ZO_FormatUserFacingCharacterName(characterName), self:GetStyle("socialStatsValue"))
         self:AddSection(characterSection)
     end
     
@@ -35,10 +41,8 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
     if level then
         local levelPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
         levelPair:SetStat(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL), self:GetStyle("statValuePairStat"))
-        local levelString = level
-        if veteranRank and veteranRank ~= 0 then
-            levelString = zo_strformat(SI_GAMEPAD_CONTACTS_VETERAN_RANK_FORMAT, FORMATTED_VETERAN_RANK_ICON, veteranRank)
-        end
+        local ICON_SIZE = 40
+        local levelString = GetLevelOrChampionPointsString(level, championPoints, ICON_SIZE)
         levelPair:SetValue(levelString, self:GetStyle("socialStatsValue"))
         statsSection:AddStatValuePair(levelPair)
     end
@@ -77,16 +81,16 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
     self:AddSection(statsSection)
 end
 
-function ZO_Tooltip:LayoutFriend(displayName, characterName, class, gender, level, veteranRank, alliance, zone, offline)
+function ZO_Tooltip:LayoutFriend(displayName, characterName, class, gender, level, championPoints, alliance, zone, offline, secsSinceLogoff, timeStamp)
     AddHeader(self, displayName)
-    AddCharacterInfo(self, characterName, class, gender, nil, nil, level, veteranRank, alliance, zone)
-    TryAddOffline(self, offline)
+    AddCharacterInfo(self, characterName, class, gender, nil, nil, level, championPoints, alliance, zone)
+    TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
 end
 
 
-function ZO_Tooltip:LayoutGuildMember(displayName, characterName, class, gender, guildId, guildRankIndex, note, level, veteranRank, alliance, zone, offline)
+function ZO_Tooltip:LayoutGuildMember(displayName, characterName, class, gender, guildId, guildRankIndex, note, level, championPoints, alliance, zone, offline, secsSinceLogoff, timeStamp)
     AddHeader(self, displayName)
-    AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, veteranRank, alliance, zone)
+    AddCharacterInfo(self, characterName, class, gender, guildId, guildRankIndex, level, championPoints, alliance, zone)
     AddNote(self, note)
-    TryAddOffline(self, offline)
+    TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
 end

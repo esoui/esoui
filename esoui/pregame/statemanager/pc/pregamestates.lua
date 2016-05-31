@@ -6,7 +6,7 @@ local pregameStates =
             PregameStateManager_UpdateRealmName()
             SuppressWorldList()
             Pregame_ShowScene("gameMenuCharacterSelect")
-            if not HasAgreedToPEGI() then
+            if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                 ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
             end
         end,
@@ -36,8 +36,8 @@ local pregameStates =
     ["AccountLogin"] =
     {
         OnEnter = function(allowAnimation)
-            ZO_Login_InitializeCredentialEditBoxes()
-            ZO_Login_BeginSlideShow()
+            LOGIN_KEYBOARD:InitializeCredentialEditBoxes()
+            PREGAME_SLIDESHOW_KEYBOARD:BeginSlideShow()
             PregameLogout()
             RegisterForLoadingUpdates()
 

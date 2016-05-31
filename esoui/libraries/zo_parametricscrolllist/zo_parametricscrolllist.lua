@@ -280,6 +280,13 @@ end
 
 function ZO_ParametricScrollList:SetActive(active, fireActivatedCallback)
     if self.active ~= active then
+        --If the list is still animating when it is deactivated then complete the animation instantly before deactivating.
+        --Otherwise, things can happen like selected index changing which the list is deactivated
+        if not active and self:IsMoving() then
+            self:UpdateAnchors(self.targetSelectedIndex)
+            self:SetMoving(false)
+        end
+        
         self.active = active
 
         if self.active and self.directionalInputEnabled then
@@ -724,6 +731,10 @@ end
 
 function ZO_ParametricScrollList:SetPlaySoundFunction(fn)
     self.onPlaySoundFunction = fn
+end
+
+function ZO_ParametricScrollList:SetMouseEnabled(mouseEnabled)
+	self.control:SetMouseEnabled(mouseEnabled)
 end
 
 --[[ Private API ]]--

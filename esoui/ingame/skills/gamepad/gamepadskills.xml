@@ -50,14 +50,14 @@
         </Control>
 
         <Control name="ZO_GamepadSkillsActionBarTemplate" virtual="true">
-            <Dimensions x="466" y="130" />
+            <Dimensions x="466" y="90" />
             <Controls>                
                 <Label name="$(parent)Header" modifyTextType="UPPERCASE" text="SI_GAMEPAD_SKILLS_ACTIONBAR_HEADER" inherits="ZO_GamepadMenuEntryHeaderTemplate">
-                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="15"/>
+                    <Anchor point="TOP"/>
                 </Label>
 
                 <Control name="$(parent)Button1" inherits="ZO_GamepadSkillsActionButtonTemplate">
-                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="54"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="54"/>
                 </Control>
 
                 <Control name="$(parent)Button2" inherits="ZO_GamepadSkillsActionButtonTemplate">
@@ -132,7 +132,7 @@
                 
                 <Scroll name="$(parent)BuildPlanner">
                     <Anchor point="TOPLEFT" offsetY="-6" />
-                    <Anchor point="BOTTOMRIGHT" offsetY="-6" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)Container" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>            

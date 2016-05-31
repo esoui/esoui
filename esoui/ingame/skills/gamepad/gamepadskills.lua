@@ -408,7 +408,8 @@ function ZO_GamepadSkills:InitializeAssignableActionBar()
     actionBarControl:SetAnchor(TOP, self.header:GetNamedChild("Message"), BOTTOM, 0, Y_OFFSET)
     --Bg is child of Toplevel so it isn't cut off by scroll mask.
     local actionBarBg = self.control:GetNamedChild("Bg")
-    actionBarBg:SetAnchorFill(actionBarControl)
+    actionBarBg:SetAnchor(TOPLEFT, actionBarControl, TOPLEFT, 0, -12)
+    actionBarBg:SetAnchor(BOTTOMRIGHT, actionBarControl, BOTTOMRIGHT, 0, 30)
 
     self.assignableActionBar = ZO_AssignableActionBar:New(actionBarControl)
     actionBarControl:SetHandler("OnEffectivelyHidden", function() self.assignableActionBar:Deactivate() end)
@@ -559,7 +560,7 @@ function ZO_GamepadSkills:InitializeBuildPlanner()
     self.buildPlannerList:SetOnSelectedDataChangedCallback(RefreshSelectedTooltip)
 
     local X_OFFSET = 30
-    local Y_OFFSET = 0
+    local Y_OFFSET = 15
     buildPlannerControl:ClearAnchors()
     buildPlannerControl:SetAnchor(TOPLEFT, self.header, BOTTOMLEFT, -X_OFFSET, Y_OFFSET)
     buildPlannerControl:SetAnchor(BOTTOMRIGHT, buildPlannerControl:GetParent(), TOPRIGHT, X_OFFSET, ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET)
@@ -747,7 +748,6 @@ function ZO_GamepadSkills:RefreshLineFilterList(refreshPreviewList)
 
         if refreshPreviewList then
             data:SetAlphaChangeOnSelection(false) --only set for preview
-            data:SetHeightScaleOnSelection(false)
             data:SetNameColors(ZO_NORMAL_TEXT, ZO_NORMAL_TEXT)
             data.isPreview = true
         end
@@ -925,11 +925,11 @@ do
         })
     end
 
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     local function MorphConfirmSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         local RANK = 1
-        local name, icon = GetAbilityProgressionAbilityInfo(dialog.data.progressionIndex, data.choiceIndex, RANK)
+        local name, icon = GetAbilityProgressionAbilityInfo(parametricDialog.data.progressionIndex, data.choiceIndex, RANK)
         data.text = zo_strformat(SI_ABILITY_NAME, name)
         if data:GetNumIcons() == 0 then
             data:AddIcon(icon)
@@ -937,7 +937,7 @@ do
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
-    local function MorphConfirmCallback()
+    local function MorphConfirmCallback(dialog)
         local data = dialog.entryList:GetTargetData()
         ZO_Skills_MorphAbility(dialog.data.progressionIndex, data.choiceIndex)
     end
@@ -946,18 +946,18 @@ do
         
         ZO_Dialogs_RegisterCustomDialog("GAMEPAD_SKILLS_MORPH_CONFIRMATION",
         {
-            gamepadInfo = 
+            gamepadInfo =
             {
                 dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
                 allowRightStickPassThrough = true,
             },
 
-            setup = function()
+            setup = function(dialog)
                 local availablePoints = GetAvailableSkillPoints()
 
                 skillPointData.data1.value = availablePoints
                 ZO_GenericGamepadDialog_ShowTooltip(dialog)
-                dialog.setupFunc(dialog, nil, skillPointData)
+                dialog:setupFunc(nil, skillPointData)
             end,
 
             title =
@@ -972,28 +972,28 @@ do
             parametricList =
             {
                 -- Morph 1
-                {                
+                {
                     template = "ZO_GamepadSimpleAbilityEntryTemplate",
-                    templateData = 
-                    {             
+                    templateData =
+                    {
                         setup = MorphConfirmSetup,
                         choiceIndex = 1,
-                    },               
+                    },
                 },
                 -- Morph 2
-                {             
+                {
                     template = "ZO_GamepadSimpleAbilityEntryTemplate",
-                    templateData = 
-                    {             
+                    templateData =
+                    {
                         setup = MorphConfirmSetup,
                         choiceIndex = 2,
-                    },               
+                    },
                 },
             },
 
-            parametricListOnSelectionChangedCallback = function()
-                                                            local data = dialog.entryList:GetTargetData()
-                                                            GAMEPAD_TOOLTIPS:LayoutAbilityMorph(GAMEPAD_LEFT_DIALOG_TOOLTIP, dialog.data.progressionIndex, data.choiceIndex)
+            parametricListOnSelectionChangedCallback = function(list)
+                                                            local targetData = list:GetTargetData()
+                                                            GAMEPAD_TOOLTIPS:LayoutAbilityMorph(GAMEPAD_LEFT_DIALOG_TOOLTIP, parametricDialog.data.progressionIndex, targetData.choiceIndex)
                                                        end,
             buttons =
             {
@@ -1005,7 +1005,7 @@ do
                 {
                     keybind = "DIALOG_NEGATIVE",
                     text = SI_DIALOG_CANCEL,
-                    callback =  function()
+                    callback =  function(dialog)
                                     self:RefreshSelectedTooltip()
                                 end,
                 },
@@ -1016,10 +1016,10 @@ end
 
 do
 
-    local dialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
+    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
     function ZO_GamepadSkills:UpdatePendingStatBonuses(derivedStat, pendingBonus)
-        local data = dialog.entryList:GetTargetData()
+        local data = parametricDialog.entryList:GetTargetData()
         local attributeType = data.attributeType
         if not pendingBonus then
             local perPointBonus = GetAttributeDerivedStatPerPointValue(attributeType, STAT_TYPES[attributeType])
@@ -1037,8 +1037,8 @@ do
     end
 
     function ZO_GamepadSkills:SetAvailablePoints(points)
-        dialog.headerData.data1Text = points
-        ZO_GamepadGenericHeader_Refresh(dialog.header, dialog.headerData)
+        parametricDialog.headerData.data1Text = points
+        ZO_GamepadGenericHeader_Refresh(parametricDialog.header, parametricDialog.headerData)
     end
 
     function ZO_GamepadSkills:GetAvailablePoints()
@@ -1090,7 +1090,7 @@ do
             setup = function(dialog)
                 attributePointData.data1.value = self:GetAvailablePoints()
                 ZO_GenericGamepadDialog_ShowTooltip(dialog)
-                dialog.setupFunc(dialog, nil, attributePointData)
+                dialog:setupFunc(nil, attributePointData)
             end,
             title =
             {
@@ -1110,7 +1110,7 @@ do
                         screen = self,
                     },
                     text = GetString("SI_ATTRIBUTES", ATTRIBUTE_MAGICKA),
-                    icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_magickaIcon.dds",               
+                    icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_magickaIcon.dds",
                 },
                 -- health
                 {
@@ -1122,7 +1122,7 @@ do
                         screen = self,
                     },
                     text = GetString("SI_ATTRIBUTES", ATTRIBUTE_HEALTH),
-                    icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_healthIcon.dds",                 
+                    icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_healthIcon.dds",
                 },
                 -- stamina
                 {
@@ -1134,7 +1134,7 @@ do
                         screen = self,
                     },
                     text = GetString("SI_ATTRIBUTES", ATTRIBUTE_STAMINA),
-                    icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_staminaIcon.dds",              
+                    icon = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_staminaIcon.dds",
                 },
             },
 

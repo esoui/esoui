@@ -19,6 +19,8 @@ function ZO_KeyboardFriendsListManager:Initialize(control)
     self:SetEmptyText(GetString(SI_FRIENDS_LIST_PANEL_NO_FRIENDS_MESSAGE))
     self.sortHeaderGroup:SelectHeaderByKey("status")
 
+    self.emptyRowMessage = GetControl(self.emptyRow, "Message")
+
     ZO_ScrollList_AddDataType(self.list, FRIEND_DATA, "ZO_FriendsListRow", 30, function(control, data) self:SetupRow(control, data) end)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
 
@@ -26,6 +28,8 @@ function ZO_KeyboardFriendsListManager:Initialize(control)
     self.searchBox:SetHandler("OnTextChanged", function() self:OnSearchTextChanged() end)
 
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareFriends(listEntry1, listEntry2) end
+
+	self.hideOfflineCheckBox = GetControl(control, "HideOffline")
         
     FRIENDS_LIST_SCENE = ZO_Scene:New("friendsList", SCENE_MANAGER)
     FRIENDS_LIST_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
@@ -33,6 +37,7 @@ function ZO_KeyboardFriendsListManager:Initialize(control)
                                                                 self:PerformDeferredInitialization()
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.staticKeybindStripDescriptor)
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+																self:UpdateHideOfflineCheckBox(self.hideOfflineCheckBox)
                                                             elseif(newState == SCENE_HIDDEN) then      
                                                                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.staticKeybindStripDescriptor)                                                          
                                                                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -106,7 +111,7 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
                 end
                 return false
             end
-        },  
+        },
     }    
 end
 
@@ -157,14 +162,29 @@ function ZO_KeyboardFriendsListManager:FilterScrollList()
     ZO_ClearNumericallyIndexedTable(scrollData)
     
     local searchTerm = self:GetSearchTerm()
+	local hideOffline = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
 
     local masterList = FRIENDS_LIST_MANAGER:GetMasterList()
     for i = 1, #masterList do
         local data = masterList[i]
         if(searchTerm == "" or FRIENDS_LIST_MANAGER:IsMatch(searchTerm, data)) then
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(FRIEND_DATA, data))
+			if not hideOffline or data.online then
+				table.insert(scrollData, ZO_ScrollList_CreateDataEntry(FRIEND_DATA, data))
+			end
         end
-    end    
+    end
+	
+	local emptyText = ""
+	if #masterList > 0 then
+		if searchTerm ~= "" then
+			emptyText = GetString(SI_SORT_FILTER_LIST_NO_RESULTS)
+		else
+			emptyText = GetString(SI_FRIENDS_LIST_ALL_FRIENDS_OFFLINE)
+		end
+	else
+		emptyText = GetString(SI_FRIENDS_LIST_PANEL_NO_FRIENDS_MESSAGE)
+	end
+	self.emptyRowMessage:SetText(emptyText) 
 end
 
 function ZO_KeyboardFriendsListManager:SortScrollList()
@@ -296,14 +316,18 @@ function ZO_FriendsListRowClass_OnMouseExit(control)
     FRIENDS_LIST:Class_OnMouseExit(control)
 end
 
-function ZO_FriendsListRowVeteran_OnMouseEnter(control)
-    FRIENDS_LIST:Veteran_OnMouseEnter(control)
+function ZO_FriendsListRowChampion_OnMouseEnter(control)
+    FRIENDS_LIST:Champion_OnMouseEnter(control)
 end
 
-function ZO_FriendsListRowVeteran_OnMouseExit(control)
-    FRIENDS_LIST:Veteran_OnMouseExit(control)
+function ZO_FriendsListRowChampion_OnMouseExit(control)
+    FRIENDS_LIST:Champion_OnMouseExit(control)
 end
 
 function ZO_FriendsList_OnInitialized(self)
     FRIENDS_LIST = ZO_KeyboardFriendsListManager:New(self)
+end
+
+function ZO_FriendsList_ToggleHideOffline(self)
+    FRIENDS_LIST:HideOffline_OnClicked()
 end

@@ -1,34 +1,34 @@
-ZO_ValidNameInstructions = ZO_Object:Subclass()
+-- Valid Text Instructions Base Class --
 
-function ZO_ValidNameInstructions:New(...)
+ZO_ValidTextInstructions = ZO_Object:Subclass()
+
+function ZO_ValidTextInstructions:New(...)
     local instructions = ZO_Object.New(self)
     instructions:Initialize(...)
     return instructions
 end
 
-function ZO_ValidNameInstructions:Initialize(control, template)
+function ZO_ValidTextInstructions:Initialize(control, template)
     self.m_control = control
     self.m_ruleToControl = {}
-    self.m_template = template or "ZO_NameInstructionLine"
+    self.m_template = template or "ZO_TextInstructionLine"
 
-    self:AddInstruction(NAME_RULE_TOO_SHORT)
-    self:AddInstruction(NAME_RULE_CANNOT_START_WITH_SPACE)
-    self:AddInstruction(NAME_RULE_MUST_END_WITH_LETTER)
-    self:AddInstruction(NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS)
-    self:AddInstruction(NAME_RULE_NO_NUMBERS)
-    self:AddInstruction(NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS)
-    self:AddInstruction(NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS)
-    self:AddInstruction(NAME_RULE_INVALID_CHARACTERS)
+    self:AddInstructions()
 end
 
-function ZO_ValidNameInstructions:GetControl()
+function ZO_ValidTextInstructions:GetControl()
     return self.m_control
 end
 
-function ZO_ValidNameInstructions:AddInstruction(instructionEnum)
+function ZO_ValidTextInstructions:AddInstructions()
+    -- Must be overridden
+    assert(false)
+end
+
+function ZO_ValidTextInstructions:AddInstruction(instructionEnum)
     self.instructionLineCounter = (self.instructionLineCounter or 0) + 1
     local instruction = CreateControlFromVirtual("$(parent)NameInstructionLine" .. instructionEnum .. self.instructionLineCounter, self.m_control, self.m_template)
-    instruction:SetText(GetString("SI_NAMINGERROR", instructionEnum))
+    instruction:SetText(GetString(self.violationPrefix, instructionEnum))
     instruction.m_rule = instructionEnum
 
     if(self.m_anchorTo) then
@@ -51,7 +51,7 @@ local function HasViolatedRule(rule, ruleViolations)
     return false
 end
 
-function ZO_ValidNameInstructions:UpdateViolations(ruleViolations)
+function ZO_ValidTextInstructions:UpdateViolations(ruleViolations)
     for rule, instructionLine in pairs(self.m_ruleToControl) do
         if(HasViolatedRule(rule, ruleViolations)) then
             instructionLine:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED))
@@ -61,11 +61,11 @@ function ZO_ValidNameInstructions:UpdateViolations(ruleViolations)
     end
 end
 
-function ZO_ValidNameInstructions:SetPreferredAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+function ZO_ValidTextInstructions:SetPreferredAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
     self.m_preferredAnchor = ZO_Anchor:New(point, relativeTo, relativePoint, offsetX, offsetY)
 end
 
-function ZO_ValidNameInstructions:Show(editControl, ruleViolations)
+function ZO_ValidTextInstructions:Show(editControl, ruleViolations)
     if(self.m_preferredAnchor) then
         self.m_preferredAnchor:Set(self.m_control)
     elseif editControl then
@@ -77,8 +77,29 @@ function ZO_ValidNameInstructions:Show(editControl, ruleViolations)
     self:UpdateViolations(ruleViolations)
 end
 
-function ZO_ValidNameInstructions:Hide()
+function ZO_ValidTextInstructions:Hide()
     self.m_control:SetHidden(true)
+end
+
+-- Valid Name Instructions --
+
+ZO_ValidNameInstructions = ZO_ValidTextInstructions:Subclass()
+
+function ZO_ValidNameInstructions:New(...)
+    return ZO_ValidTextInstructions.New(self, ...)
+end
+
+function ZO_ValidNameInstructions:AddInstructions()
+    self.violationPrefix = "SI_NAMINGERROR"
+
+    self:AddInstruction(NAME_RULE_TOO_SHORT)
+    self:AddInstruction(NAME_RULE_CANNOT_START_WITH_SPACE)
+    self:AddInstruction(NAME_RULE_MUST_END_WITH_LETTER)
+    self:AddInstruction(NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS)
+    self:AddInstruction(NAME_RULE_NO_NUMBERS)
+    self:AddInstruction(NAME_RULE_NO_ADJACENT_PUNCTUATION_CHARACTERS)
+    self:AddInstruction(NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS)
+    self:AddInstruction(NAME_RULE_INVALID_CHARACTERS)
 end
 
 local NAME_RULES_TABLE = nil
@@ -117,4 +138,24 @@ function ZO_ValidNameInstructions_GetViolationString(name, ruleViolations, hideU
     end
 
     return invalidNameString
+end
+
+-- Valid AccoutName Instructions --
+
+ZO_ValidAccountNameInstructions = ZO_ValidTextInstructions:Subclass()
+
+function ZO_ValidAccountNameInstructions:New(...)
+    return ZO_ValidTextInstructions.New(self, ...)
+end
+
+function ZO_ValidAccountNameInstructions:AddInstructions()
+    self.violationPrefix = "SI_ACCOUNTNAMINGERROR"
+
+    self:AddInstruction(ACCOUNT_NAME_RULE_INCORRECT_LENGTH)
+    self:AddInstruction(ACCOUNT_NAME_RULE_TOO_MANY_IDENTICAL_ADJACENT_CHARACTERS)
+    self:AddInstruction(ACCOUNT_NAME_RULE_TOO_MANY_PUNCTUATION_CHARACTERS)
+    self:AddInstruction(ACCOUNT_NAME_RULE_MUST_START_WITH_LETTER)
+    self:AddInstruction(ACCOUNT_NAME_RULE_MUST_END_WITH_NUMBER_OR_LETTER)
+    self:AddInstruction(ACCOUNT_NAME_RULE_NO_SPACES)
+    self:AddInstruction(ACCOUNT_NAME_RULE_INVALID_CHARACTERS)
 end

@@ -128,8 +128,8 @@ function RaidLifeDisplay:RefreshDisplay()
     self.reviveCounter:SetText(zo_strformat(SI_REVIVE_COUNTER_REVIVES_USED, self.count, maxCount))
     self:UpdateTotalScore()
     if self.count == 0 then
-        self.reviveCounter:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
-        self.icon:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        self.reviveCounter:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        self.icon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
     else
         self.reviveCounter:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
         self.icon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())

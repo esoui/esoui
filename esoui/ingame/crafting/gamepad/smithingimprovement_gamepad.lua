@@ -97,6 +97,8 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self:ClearBoosterRowHighlight()
 
             self.selectedItem = nil
+
+            self:Refresh()
         end
     end)
 
@@ -109,8 +111,8 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             -- LB / RB handling for switching filters on improvement screen
             local tabBarEntries = {}
 
-            self:AddEntry(GetString(SI_CHARACTER_EQUIP_SECTION_WEAPONS), ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS, CanSmithingWeaponPatternsBeCraftedHere(), tabBarEntries)
-            self:AddEntry(GetString(SI_CHARACTER_EQUIP_SECTION_APPAREL), ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR, CanSmithingApparelPatternsBeCraftedHere(), tabBarEntries)
+            self:AddEntry(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS), ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS, CanSmithingWeaponPatternsBeCraftedHere(), tabBarEntries)
+            self:AddEntry(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL), ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR, CanSmithingApparelPatternsBeCraftedHere(), tabBarEntries)
 
             local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(GetCraftingInteractionType())
 

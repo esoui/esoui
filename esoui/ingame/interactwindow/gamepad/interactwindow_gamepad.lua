@@ -81,7 +81,7 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
 	end
 end
 
-local MAX_CURRENCY_CONTROLS = 3 --JKTODO: Does this need to be 4 now that we have Telvar stones?
+local MAX_CURRENCY_CONTROLS = 3
 
 local function ReleaseChatterOptionControl(control)
     control:SetHandler("OnUpdate", nil)
@@ -293,6 +293,15 @@ function ZO_GamepadInteraction:UpdateClemencyOnTimeComplete(control, data)
     control:SetText(control.optionText)
     data.optionUsable = true
     control.optionType = CHATTER_TALK_CHOICE_USE_CLEMENCY
+    control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    self:RefreshList()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    control:SetText(control.optionText)
+    data.optionUsable = true
+    control.optionType = CHATTER_TALK_CHOICE_USE_SHADOWY_CONNECTIONS
     control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     self:RefreshList()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

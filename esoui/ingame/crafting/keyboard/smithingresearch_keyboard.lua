@@ -216,7 +216,7 @@ function ZO_SmithingResearchSelect:SetupDialog(craftingType, researchLineIndex, 
     listDialog:ClearList()
 
     local function IsResearchableItem(bagId, slotIndex)
-        return CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
+        return CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingType, researchLineIndex, traitIndex) and not IsItemPlayerLocked(bagId, slotIndex)
     end
 
     local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsResearchableItem))

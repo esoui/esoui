@@ -1,3 +1,5 @@
+DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y = 105
+
 do
     local function UpdateInventorySlots(infoBar)
         local slotsLabel = infoBar:GetNamedChild("FreeSlots")

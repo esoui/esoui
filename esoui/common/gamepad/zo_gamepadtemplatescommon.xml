@@ -6,8 +6,8 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
+    
     <Controls>
-
         <Label name="ZO_GamepadMenuEntryHeaderFontTemplate" font="ZoFontGamepadBold22" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
         <Label name="ZO_GamepadMenuEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
@@ -206,6 +206,11 @@
             <Anchor point="BOTTOMRIGHT" offsetX="1" offsetY="5"/>
         </Label>
 
+        <Texture name="ZO_GamepadMenuEntryPlayerLockedTemplate" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds" tier="HIGH" inheritScale="false" virtual="true" hidden="true">
+            <Dimensions x="32" y="32"/>
+            <Anchor point="BOTTOMRIGHT" />
+        </Texture>
+
         <Label name="ZO_GamepadMenuEntryLabelTemplate" font="ZoFontGamepad34" verticalAlignment="CENTER" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
             <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
@@ -308,6 +313,7 @@
                 <Texture name="$(parent)Icon" inherits="ZO_MultiIcon ZO_GamepadMenuEntryIconTemplate" hidden="true">
                     <Controls>
                         <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" excludeFromResizeToFitExtents="true"/>
+                        <Texture name="$(parent)PlayerLockedIcon" inherits="ZO_GamepadMenuEntryPlayerLockedTemplate" />
                     </Controls>
                 </Texture>
             </Controls>
@@ -480,21 +486,6 @@
             </Controls>
         </Control>
 
-        <Slider name="ZO_GamepadSlider" mouseEnabled="true" orientation="HORIZONTAL" virtual="true">
-            <Dimensions x="150" y="16" />
-            <ThumbTexture
-                textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_scrollThumb.dds"
-                thumbWidth="32"
-                thumbHeight="32"
-            />
-
-            <Controls>
-                <Texture name="$(parent)Left" inherits="ZO_GamepadWhiteFrameLeftArrowMedium" tier="LOW" />
-                <Texture name="$(parent)Right" inherits="ZO_GamepadWhiteFrameRightArrowMedium" tier="LOW" />
-                <Texture name="$(parent)Center" inherits="ZO_GamepadWhiteFrameCenterMedium" tier="LOW" />
-            </Controls>
-        </Slider>
-        
         <!-- These templates are used to make the horizontal scroll list entries seen in ZO_GamepadOptions and GameStartup_Gamepad -->
         <Label name="ZO_GamepadHorizontalListEntry" font="ZoFontGamepad27" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" virtual="true" maxLineCount="1">
             <Dimensions x="320"/>
@@ -559,7 +550,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
+        <Control name="ZO_Gamepad_Dropdown_Item_Indented" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
 
@@ -567,12 +558,10 @@
                     return self.dropdown:GetHeight()
                 end
             </OnInitialized>
-            <Anchor point="TOPLEFT"/>
-            <Anchor point="TOPRIGHT"/>
             <Controls>
                 <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
-                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                 </Control>
             </Controls>
         </Control>

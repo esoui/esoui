@@ -469,7 +469,7 @@ end
 local function ItemFilterFunction(entryData)
     local bagId = entryData.bagId
     local slotIndex = entryData.slotIndex
-    return CanQueueItemAttachment(bagId, slotIndex) or IsItemAttached(bagId, slotIndex)
+    return (CanQueueItemAttachment(bagId, slotIndex) or IsItemAttached(bagId, slotIndex)) and not entryData.isPlayerLocked
 end
 
 local SETUP_LOCALLY = true

@@ -88,7 +88,7 @@ do
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
             isNewCallback =
                 function()
-                    return GAMEPAD_NOTIFICATIONS and GAMEPAD_NOTIFICATIONS:GetNumCollectionsNotifications() > 0 or false
+                    return (GAMEPAD_NOTIFICATIONS and GAMEPAD_NOTIFICATIONS:GetNumCollectionsNotifications() > 0) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending())
                 end,
         },
         [MENU_MAIN_ENTRIES.INVENTORY] =
@@ -98,7 +98,7 @@ do
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_inventory.dds",
             isNewCallback =
                 function()
-                    return SHARED_INVENTORY:AreAnyItemsNew(nil, nil, BAG_BACKPACK)
+                    return SHARED_INVENTORY:AreAnyItemsNew(nil, nil, BAG_BACKPACK, BAG_VIRTUAL)
                 end,
         },
         [MENU_MAIN_ENTRIES.CHARACTER] =
@@ -184,7 +184,7 @@ do
                     icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_cadwell.dds",
                     isVisibleCallback =
                         function()
-                            return GetPlayerDifficultyLevel() > PLAYER_DIFFICULTY_LEVEL_FIRST_ALLIANCE
+                            return GetCadwellProgressionLevel() > CADWELL_PROGRESSION_LEVEL_BRONZE
                         end,
                 },
                 [MENU_JOURNAL_ENTRIES.LORE_LIBRARY] =
@@ -403,7 +403,7 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
 
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function() self:RefreshLists() end)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-    control:RegisterForEvent(EVENT_DIFFICULTY_LEVEL_CHANGED, function() self:RefreshLists() end)
+    control:RegisterForEvent(EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED, function() self:RefreshLists() end)
 
     PLAYER_SUBMENU_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then

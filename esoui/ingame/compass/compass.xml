@@ -831,6 +831,62 @@
                                 minAlpha="0.75"
                                 layer="OVERLAY"
                     />
+                    <CompassPinType name="IMPERIAL_DISTRICT_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_imperialDistrict_Neutral.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="IMPERIAL_DISTRICT_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_imperialDistrict_Aldmeri.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                   />
+                    <CompassPinType name="IMPERIAL_DISTRICT_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_imperialDistrict_Ebonheart.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="IMPERIAL_DISTRICT_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_imperialDistrict_Daggerfall.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="AVA_TOWN_NEUTRAL"
+                                pinTexture="EsoUI/Art/Compass/AvA_town_Neutral.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="AVA_TOWN_ALDMERI_DOMINION"
+                                pinTexture="EsoUI/Art/Compass/AvA_town_Aldmeri.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                   />
+                    <CompassPinType name="AVA_TOWN_EBONHEART_PACT"
+                                pinTexture="EsoUI/Art/Compass/AvA_town_Ebonheart.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
+                    <CompassPinType name="AVA_TOWN_DAGGERFALL_COVENANT"
+                                pinTexture="EsoUI/Art/Compass/AvA_town_Daggerfall.dds"
+                                leadingAlphaCoefficient="-10.0"
+                                alphaCoefficient="-4.25"
+                                leadingScaleCoefficient="-8.5"
+                                scaleCoefficient="-8.5"
+                    />
                 </Compass>
             </Controls>
         </Control>

@@ -243,6 +243,21 @@ local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
     return buttonOrEtherealDescriptor
 end
 
+local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
+    local value
+    if keybindButtonDescriptor[key] == nil then
+        value = keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor[key]
+    else
+        value = keybindButtonDescriptor[key]
+    end
+
+    if type(value) == "function" then
+        return value(keybindButtonDescriptor, keybindButtonDescriptor.keybindButtonGroupDescriptor)
+    end
+
+    return value
+end
+
 local function AddKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
     if not state.keybindGroups[keybindButtonGroupDescriptor] then
         state.keybindGroups[keybindButtonGroupDescriptor] = keybindButtonGroupDescriptor
@@ -336,8 +351,22 @@ function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
     local existingButtonOrEtheralDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
     if existingButtonOrEtheralDescriptor then
         local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtheralDescriptor)
-        local existingSceneName = existingDescriptor and existingDescriptor.addedForSceneName or ""
-        local context = string.format("Duplicate Keybind: %s. Before: %s. After: %s.", keybindButtonDescriptor.keybind, existingSceneName, currentSceneName)
+        local existingSceneName = ""
+        local existingDescriptorName = ""
+        if existingDescriptor then
+            --We tried to re-add the same exact button, just return
+            if existingDescriptor == keybindButtonDescriptor then
+                return
+            end
+
+            existingSceneName = existingDescriptor.addedForSceneName
+            local descriptorName = GetValueFromRawOrFunction(existingDescriptor, "name")
+            if descriptorName then
+                existingDescriptorName = descriptorName
+            end
+        end
+        local newDescriptorName = GetValueFromRawOrFunction(keybindButtonDescriptor, "name") or ""
+        local context = string.format("Duplicate Keybind: %s. Before: %s (%s). After: %s (%s).", keybindButtonDescriptor.keybind, existingSceneName, existingDescriptorName, currentSceneName, newDescriptorName)
         assert(false, context)
     end
 
@@ -553,21 +582,6 @@ end
 
 function ZO_KeybindStrip:HasKeybindButtonGroup(keybindButtonGroupDescriptor)
     return self.keybindGroups[keybindButtonGroupDescriptor] ~= nil
-end
-
-local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
-    local value
-    if keybindButtonDescriptor[key] == nil then
-        value = keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor[key]
-    else
-        value = keybindButtonDescriptor[key]
-    end
-
-    if type(value) == "function" then
-        return value(keybindButtonDescriptor, keybindButtonDescriptor.keybindButtonGroupDescriptor)
-    end
-
-    return value
 end
 
 function ZO_KeybindStrip:FilterSceneHiding(keybindButtonDescriptor)

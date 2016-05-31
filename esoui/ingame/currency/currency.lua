@@ -176,30 +176,12 @@ function ZO_CurrencyControl_SetCurrencyData(control, currencyType, amount, showA
     end
 end
 
-local CURRENCY_SUFFIXES = {
-                           "",  -- No suffix for currency amounts less than 10000
-                           GetString(SI_CURRENCY_SUFFIX_ONE_THOUSAND),
-                           GetString(SI_CURRENCY_SUFFIX_ONE_MILLION),
-                           GetString(SI_CURRENCY_SUFFIX_ONE_BILLION),
-                          }
+local CURRENCY_NO_ABBREVIATION_THRESHOLD = zo_pow(10, GetDigitGroupingSize() + 1)
+local USE_UPPERCASE_NUMBER_SUFFIXES = true
 
 function ZO_CurrencyControl_FormatCurrency(amount, useShortFormat)
-    if useShortFormat then
-        if amount > 9999 then
-            local suffix = 1
-            local shortAmount = amount
-            while shortAmount > 999 do
-                shortAmount = shortAmount / 1000
-                suffix = suffix + 1
-            end
-
-            -- Round the number to two decimal places.
-            shortAmount = math.floor(shortAmount * 100 + 0.5) / 100
-
-            return ZO_LocalizeDecimalNumber(shortAmount)..CURRENCY_SUFFIXES[suffix]
-        else
-            return amount
-        end
+    if useShortFormat and amount >= CURRENCY_NO_ABBREVIATION_THRESHOLD then
+        return ZO_AbbreviateNumber(amount, NUMBER_ABBREVIATION_PRECISION_HUNDREDTHS, USE_UPPERCASE_NUMBER_SUFFIXES)
     else
         return ZO_CommaDelimitNumber(amount)
     end

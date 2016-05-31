@@ -20,20 +20,20 @@ function ZO_ItemSlotActionsController:Initialize(alignmentOverride, additionalMo
                 return slotActions:GetRawActionName(self.selectedAction)
             end
 
-            return self.actionName or "" 
+            return self.actionName or ""
         end,
         keybind = "UI_SHORTCUT_PRIMARY",
         order = 500,
         callback = function()
-            if(self.selectedAction) then
+            if self.selectedAction then
                 self:DoSelectedAction()
             else
                 slotActions:DoPrimaryAction()
             end
         end,
-        visible = function() 
-            return slotActions:CheckPrimaryActionVisibility() or self:HasSelectedAction()
-        end,
+        visible =   function()
+                        return slotActions:CheckPrimaryActionVisibility() or self:HasSelectedAction()
+                    end,
     }
 
     local function PrimaryCommandHasBind()
@@ -66,11 +66,13 @@ function ZO_ItemSlotActionsController:Initialize(alignmentOverride, additionalMo
                 end,
                 keybind = additionalMouseOverbinds[i],
                 callback = function() slotActions:DoKeybindAction(i) end,
-                visible = function() return slotActions:CheckKeybindActionVisibility(i) end,
+                visible =   function()
+                                return slotActions:CheckKeybindActionVisibility(i)
+                            end,
             }
 
-            mouseOverCommandIsVisible = function() 
-                return slotActions:GetKeybindActionName(i) ~= nil 
+            mouseOverCommandIsVisible = function()
+                return slotActions:GetKeybindActionName(i) ~= nil
             end
 
             self:AddSubCommand(mouseOverCommand, mouseOverCommandIsVisible)
@@ -100,7 +102,7 @@ function ZO_ItemSlotActionsController:SetInventorySlot(inventorySlot)
     self.inventorySlot = inventorySlot
 
     for i, command in ipairs(self) do
-        if(command.activateCallback) then
+        if command.activateCallback then
             command.activateCallback(inventorySlot)
         end
     end
@@ -114,7 +116,6 @@ end
 
 function ZO_ItemSlotActionsController:SetSelectedAction(action)
     self.selectedAction = action
-    self:RefreshKeybindStrip()
 end
 
 function ZO_ItemSlotActionsController:HasSelectedAction()

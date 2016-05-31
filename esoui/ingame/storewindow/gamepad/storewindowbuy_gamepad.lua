@@ -123,6 +123,7 @@ function ZO_GamepadStoreBuy:CanBuy()
             if IsCollectibleUnlocked(collectibleId) then
                 return false, GetString("SI_STOREFAILURE", STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE) -- "You already have that collectible"
             end
+            return true --Always allow the purchase of collectibles, regardless of bag space
         end
         return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
     else

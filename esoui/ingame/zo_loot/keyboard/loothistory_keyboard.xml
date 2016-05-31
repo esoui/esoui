@@ -7,15 +7,26 @@
                 <Texture name="$(parent)Icon" override="true">
                     <Controls>
                         <Label name="$(parent)StackCount" override="true" font="ZoFontGameOutline" />
+                        
+                        <Texture name="$(parent)CraftBagIcon" textureFile="EsoUI/Art/HUD/lootHistory_icon_craftBag.dds" override="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>
+                        </Texture>
                     </Controls>
                 </Texture>
 
                 <Label name="$(parent)Label" override="true" font="ZoFontGameShadow" />
               
-                <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds" override="true">
+                    <TextureCoords left="0" right="1" top="0" bottom=".78125" />
                     <Anchor point="TOPLEFT" offsetX="-50"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="50"/>
-                    <TextureCoords left="0" right="1" top="0" bottom=".78125" />
+                    <Controls>
+                        <Texture name="$(parent)CraftBagHighlight" textureFile="EsoUI/Art/HUD/lootHistory_highlight.dds" override="true">
+                            <TextureCoords left="0" right="1" top="0" bottom=".75" />
+                            <Dimensions x="128" y="50" />
+                            <Anchor point="TOPLEFT" offsetX="-20"/>
+                        </Texture>
+                    </Controls>
                 </Texture>
             </Controls>
         </Control>
@@ -25,6 +36,11 @@
             <OnInitialized>
                 ZO_LootHistory_Keyboard_OnInitialized(self)
             </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_LOOT_HISTORY_ENTRY_SPACING_Y" />
+                </Control>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

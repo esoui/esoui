@@ -31,11 +31,12 @@ CHATTER_OPTION_ERROR =
 ----------------
 
 local function OnQuestCompleteFailedInventoryFull()
-    TriggerTutorial(TUTORIAL_TRIGGER_QUEST_COMPLETE_INVENTORY_FULL)
+    TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
 end
 
 local function OnConversationFailedInventoryFull()
+    TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL))
 end
 
@@ -274,6 +275,17 @@ function ZO_SharedInteraction:UpdateClemencyChatterOption(control, data)
     end
 end
 
+function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, data)
+    local timeRemaining = GetTimeToShadowyConnectionsResetInSeconds()
+
+    if timeRemaining == 0 and not data.optionUsable then
+        self:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    elseif timeRemaining > 0 then
+        local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_SHADOWY_CONNECTIONS_COOLDOWN, control.optionText, ZO_FormatTimeLargestTwo(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+        control:SetText(formattedString)
+    end
+end
+
 function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
     optionType = optionType or CHATTER_START_TALK
 
@@ -329,6 +341,18 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             else
                 chatterData.labelUpdateFunction = function(control) 
                                                     self:UpdateClemencyChatterOption(control, chatterData)
+                                                  end
+                chatterData.optionUsable = false
+            end
+        elseif optionType == CHATTER_TALK_CHOICE_SHADOWY_CONNECTIONS_UNAVAILABLE then
+            local timeRemaining = GetTimeToShadowyConnectionsResetInSeconds()
+
+            if timeRemaining <= 0 then
+                -- We're not on cooldown, but the option is otherwise unusable (most likely, the player hasn't unlocked this passive)
+                chatterData.optionUsable = false
+            else
+                chatterData.labelUpdateFunction = function(control) 
+                                                    self:UpdateShadowyConnectionsChatterOption(control, chatterData)
                                                   end
                 chatterData.optionUsable = false
             end
@@ -563,9 +587,9 @@ function ZO_SharedInteraction:ShowQuestRewards(journalQuestIndex)
 end
 
 function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
-    --Should be overrideen
+    --Should be overridden
 end
 
-function ZO_SharedInteraction:UpdateClemencyOnTimeWaiting(control, timeSeconds)
-    --Should be overrideen
+function ZO_SharedInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    --Should be overridden
 end

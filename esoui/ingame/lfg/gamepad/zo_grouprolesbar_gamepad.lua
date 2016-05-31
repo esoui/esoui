@@ -52,7 +52,8 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
         
         local roleType = control.data.role
         local roleData = ZO_GAMEPAD_LFG_OPTION_INFO[roleType]
-        GAMEPAD_TOOLTIPS:LayoutGroupRole(GAMEPAD_LEFT_TOOLTIP, roleData.optionName, roleData.tooltip)
+        local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(roleType)
+        GAMEPAD_TOOLTIPS:LayoutGroupRole(GAMEPAD_LEFT_TOOLTIP, roleData.optionName, roleData.tooltip, lowestAverage)
     end
     local function OnUnselected(control)
         control.selectedFrame:SetHidden(true)

@@ -23,6 +23,12 @@
                 <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinT1" verticalAlignment="CENTER" mouseEnabled="true">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Rank" offsetX="5" />
                     <Dimensions x="315" y="30" />
+                    <OnMouseEnter>
+                        ZO_CampaignEmperorName_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignEmperorName_OnMouseExit(self)
+                    </OnMouseExit>
                 </Label>
                 <Texture name="$(parent)Alliance" layer="OVERLAY">
                     <Dimensions x="32" y="32"/>

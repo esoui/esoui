@@ -20,21 +20,23 @@ end
 local function InitializeSlots()
     slots =
     {
-        [EQUIP_SLOT_HEAD]       = ZO_CharacterEquipmentSlotsHead,
-        [EQUIP_SLOT_NECK]       = ZO_CharacterEquipmentSlotsNeck,
-        [EQUIP_SLOT_CHEST]      = ZO_CharacterEquipmentSlotsChest,
-        [EQUIP_SLOT_SHOULDERS]  = ZO_CharacterEquipmentSlotsShoulder,
-        [EQUIP_SLOT_MAIN_HAND]  = ZO_CharacterEquipmentSlotsMainHand,
-        [EQUIP_SLOT_OFF_HAND]   = ZO_CharacterEquipmentSlotsOffHand,
-        [EQUIP_SLOT_WAIST]      = ZO_CharacterEquipmentSlotsBelt,
-        [EQUIP_SLOT_LEGS]       = ZO_CharacterEquipmentSlotsLeg,
-        [EQUIP_SLOT_FEET]       = ZO_CharacterEquipmentSlotsFoot,
-        [EQUIP_SLOT_COSTUME]    = ZO_CharacterEquipmentSlotsCostume,
-        [EQUIP_SLOT_RING1]      = ZO_CharacterEquipmentSlotsRing1,
-        [EQUIP_SLOT_RING2]      = ZO_CharacterEquipmentSlotsRing2,
-        [EQUIP_SLOT_HAND]       = ZO_CharacterEquipmentSlotsGlove,
-        [EQUIP_SLOT_BACKUP_MAIN]= ZO_CharacterEquipmentSlotsBackupMain,
-        [EQUIP_SLOT_BACKUP_OFF] = ZO_CharacterEquipmentSlotsBackupOff,
+        [EQUIP_SLOT_HEAD]           = ZO_CharacterEquipmentSlotsHead,
+        [EQUIP_SLOT_NECK]           = ZO_CharacterEquipmentSlotsNeck,
+        [EQUIP_SLOT_CHEST]          = ZO_CharacterEquipmentSlotsChest,
+        [EQUIP_SLOT_SHOULDERS]      = ZO_CharacterEquipmentSlotsShoulder,
+        [EQUIP_SLOT_MAIN_HAND]      = ZO_CharacterEquipmentSlotsMainHand,
+        [EQUIP_SLOT_OFF_HAND]       = ZO_CharacterEquipmentSlotsOffHand,
+        [EQUIP_SLOT_POISON]         = ZO_CharacterEquipmentSlotsPoison,
+        [EQUIP_SLOT_WAIST]          = ZO_CharacterEquipmentSlotsBelt,
+        [EQUIP_SLOT_LEGS]           = ZO_CharacterEquipmentSlotsLeg,
+        [EQUIP_SLOT_FEET]           = ZO_CharacterEquipmentSlotsFoot,
+        [EQUIP_SLOT_COSTUME]        = ZO_CharacterEquipmentSlotsCostume,
+        [EQUIP_SLOT_RING1]          = ZO_CharacterEquipmentSlotsRing1,
+        [EQUIP_SLOT_RING2]          = ZO_CharacterEquipmentSlotsRing2,
+        [EQUIP_SLOT_HAND]           = ZO_CharacterEquipmentSlotsGlove,
+        [EQUIP_SLOT_BACKUP_MAIN]    = ZO_CharacterEquipmentSlotsBackupMain,
+        [EQUIP_SLOT_BACKUP_OFF]     = ZO_CharacterEquipmentSlotsBackupOff,
+        [EQUIP_SLOT_BACKUP_POISON]  = ZO_CharacterEquipmentSlotsBackupPoison,
     }
 
     heldSlotLinkage =
@@ -86,7 +88,7 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
         iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(slotId)
     end
 
-    local disabled = ((slotId == EQUIP_SLOT_BACKUP_MAIN) or (slotId == EQUIP_SLOT_BACKUP_OFF)) and GetUnitLevel("player") < GetWeaponSwapUnlockedLevel()
+    local disabled = ((slotId == EQUIP_SLOT_BACKUP_MAIN) or (slotId == EQUIP_SLOT_BACKUP_OFF) or (slotId == EQUIP_SLOT_BACKUP_POISON)) and GetUnitLevel("player") < GetWeaponSwapUnlockedLevel()
 
     slotControl:SetMouseEnabled(not disabled)
 
@@ -102,7 +104,18 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
         iconControl:SetTexture(ZO_Character_GetEmptyEquipSlotTexture(slotId))
     end
 
-    slotControl.stackCount = slotHasItem and 1 or 0
+    local stackCountLabel = GetControl(slotControl, "StackCount")
+    if slotId == EQUIP_SLOT_POISON or slotId == EQUIP_SLOT_BACKUP_POISON then
+        slotControl.stackCount = select(2, GetItemInfo(BAG_WORN, slotId))
+        if (slotControl.stackCount > 1) then
+            stackCountLabel:SetText(ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES))
+        else
+            stackCountLabel:SetText("")
+        end
+    else
+        slotControl.stackCount = slotHasItem and 1 or 0
+        stackCountLabel:SetText("")
+    end
 
     if(not disabled and copyFromLinkedFn) then
         iconControl:SetDesaturation(0)
@@ -154,6 +167,7 @@ end
 local function RefreshBackUpWeaponSlotStates()
     RefreshSingleSlot(EQUIP_SLOT_BACKUP_MAIN, ZO_CharacterEquipmentSlotsBackupMain)
     RefreshSingleSlot(EQUIP_SLOT_BACKUP_OFF, ZO_CharacterEquipmentSlotsBackupOff)
+    RefreshSingleSlot(EQUIP_SLOT_BACKUP_POISON, ZO_CharacterEquipmentSlotsBackupPoison)
 end
 
 local function OnUnitCreated(eventCode, unitTag)
@@ -285,7 +299,7 @@ local function OnPlayerActivated()
     isDeadReadOnly = IsUnitDead("player")
 end
 
-function ZO_Character_Initialize()
+function ZO_Character_Initialize(control)
     InitializeSlots()
 
     ZO_Character:RegisterForEvent(EVENT_UNIT_CREATED, OnUnitCreated)
@@ -309,9 +323,11 @@ function ZO_Character_Initialize()
 
         ZO_CharacterEquipmentSlotsMainHandHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_MAIN)
         ZO_CharacterEquipmentSlotsOffHandHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_MAIN)
+        ZO_CharacterEquipmentSlotsPoisonHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_MAIN)
 
         ZO_CharacterEquipmentSlotsBackupMainHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_BACKUP)
         ZO_CharacterEquipmentSlotsBackupOffHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_BACKUP)
+        ZO_CharacterEquipmentSlotsBackupPoisonHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_BACKUP)
     end
 
     local function OnLevelUpdate(_, unitTag)
@@ -325,9 +341,11 @@ function ZO_Character_Initialize()
     ZO_Character:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
     OnActiveWeaponPairChanged(nil, GetActiveWeaponPairInfo())
 
+	local apparelHiddenLabel = control:GetNamedChild("ApparelHidden")
+	apparelHiddenLabel:SetText(ZO_SELECTED_TEXT:Colorize(GetString(SI_HIDDEN_GENERAL)))
+
     OnUnitCreated(nil, "player")
 end
-
 
 local DEFAULT_STAT_SPACING = 5
 local STAT_GROUP_SPACING = 25

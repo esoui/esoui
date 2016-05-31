@@ -49,10 +49,10 @@
                 </Label>
                 <Label name="$(parent)Zone" inherits="ZO_FriendsListRowLabel">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DisplayName" offsetX="18"/>
-                    <Dimensions x="300" y="20"/>
+                    <Dimensions x="290" y="20"/>
                 </Label>
                 <Texture name="$(parent)ClassIcon" mouseEnabled="true" layer="OVERLAY">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="18"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="28"/>
                     <Dimensions x="32" y="32"/>
                     <OnMouseEnter>
                         ZO_FriendsListRowClass_OnMouseEnter(self)
@@ -61,19 +61,19 @@
                         ZO_FriendsListRowClass_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
-                <Texture name="$(parent)Veteran" mouseEnabled="true" layer="OVERLAY">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="14" />
-                    <Dimensions x="32" y="32"/>
+                <Texture name="$(parent)Champion" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="20" offsetY="2"/>
+                    <Dimensions x="22" y="22"/>
                     <OnMouseEnter>
-                        ZO_FriendsListRowVeteran_OnMouseEnter(self)
+                        ZO_FriendsListRowChampion_OnMouseEnter(self)
                     </OnMouseEnter>
                     <OnMouseExit>
-                        ZO_FriendsListRowVeteran_OnMouseExit(self)
+                        ZO_FriendsListRowChampion_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
-                <Label name="$(parent)Level" inherits="ZO_FriendsListRowLabel" horizontalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="14"/>
-                    <Dimensions x="75" y="20"/>
+                <Label name="$(parent)Level" inherits="ZO_FriendsListRowLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="39"/>
+                    <Dimensions x="45" y="20"/>
                 </Label>
                 <Button name="$(parent)Note">
                     <Textures
@@ -116,6 +116,14 @@
                 <Label name="$(parent)SearchLabel" text="SI_FRIENDS_LIST_PANEL_SEARCH" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search" offsetY="-2"/>
                 </Label>
+
+                <Button name="$(parent)HideOffline" inherits="ZO_CheckButton">
+                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-65" offsetY="35" />
+                    <OnInitialized>
+                        ZO_CheckButton_SetLabelText(self, GetString(SI_SOCIAL_LIST_HIDE_OFFLINE))
+                        ZO_CheckButton_SetToggleFunction(self, ZO_FriendsList_ToggleHideOffline)
+                    </OnInitialized>
+                </Button>
 
                 <Control name="$(parent)Headers">
                     <Anchor point="TOPLEFT" offsetX="30" offsetY="67"/>
@@ -165,7 +173,7 @@
                                 ZO_SortHeader_InitializeArrowHeader(self, "level", ZO_SORT_ORDER_UP)
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_LEVEL))
                             </OnInitialized>
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Class" offsetX="50"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Class" offsetX="62"/>
                             <Dimensions x="16" y="32" />
                         </Control>
                     </Controls>

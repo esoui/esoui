@@ -134,7 +134,8 @@ function ZO_MarketAnnouncement_Base:UpdateLabels(productData)
     local marketProduct = productData.marketProduct
     if marketProduct then
         local name, description = marketProduct:GetMarketProductInfo()
-        self:SetProductDescription(description)
+        local formattedDescription = zo_strformat(SI_MARKET_TEXT_FORMATTER, description)
+        self:SetProductDescription(formattedDescription)
         self:UpdatePositionLabel(productData.index)
     end
 end
@@ -155,7 +156,8 @@ do
     local MARKET_PRODUCT_SORT_KEYS =
         {
             isLimitedTime = {tiebreaker = "timeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-            timeLeft = {isNumeric = true, tiebreaker = "isNew", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+            timeLeft = {isNumeric = true, tiebreaker = "containsDLC", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+            containsDLC = { tiebreaker = "isNew", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
             isNew = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
             name = {},
         }
@@ -178,6 +180,7 @@ do
 
                     local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
                     local timeLeft = marketProduct:GetTimeLeftInSeconds()
+                    local containsDLC = DoesMarketProductContainDLC(productId)
                     -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
                     local isLimitedTime = timeLeft > 0 and timeLeft <= ZO_ONE_MONTH_IN_SECONDS
                     local productInfo = {
@@ -186,6 +189,7 @@ do
                                             timeLeft = isLimitedTime and timeLeft or 0,
                                             isNew = isNew,
                                             name = name,
+                                            containsDLC = containsDLC,
                                         }
 
                     table.insert(productInfoTable, productInfo)

@@ -15,7 +15,7 @@
                 </Texture>
 
                 <Label name="$(parent)Label" font="ZoFontGamepad34" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
 
                 <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate">

@@ -54,7 +54,7 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
             end
 
             local function IsResearchableItem(bagId, slotIndex)
-                return CanItemBeSmithingTraitResearched(bagId, slotIndex, self.confirmCraftingType, self.confirmResearchLineIndex, self.confirmTraitIndex)
+                return CanItemBeSmithingTraitResearched(bagId, slotIndex, self.confirmCraftingType, self.confirmResearchLineIndex, self.confirmTraitIndex) and not IsItemPlayerLocked(bagId, slotIndex)
             end
 
             local confirmPanel = self.panelContent:GetNamedChild("Confirm")

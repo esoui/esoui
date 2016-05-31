@@ -8,7 +8,9 @@ EsoUI\Ingame\Globals\Paths.xml
 EsoUI\Ingame\Globals\AutoComplete.lua
 EsoUI\Ingame\Globals\InGameDialogs.lua
 EsoUI\Ingame\Globals\Globals.lua
+EsoUI\Ingame\Globals\CommonInventoryFunctions.lua
 EsoUI\Ingame\Globals\Gamepad\ZO_GamepadSocialLayoutConstants.lua
+EsoUI\Ingame\Globals\ZO_ChampionRankUtils.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
@@ -127,6 +129,8 @@ EsoUI\Ingame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Gameplay_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Interface_Shared.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.xml
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Nameplates_Shared.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Nameplates_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Social_Shared.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Social_Keyboard.xml
 
@@ -143,6 +147,10 @@ EsoUI\Ingame\Inventory\InventoryLandingArea.lua
 EsoUI\Ingame\Inventory\InventoryLandingArea.xml
 EsoUI\Ingame\Inventory\Stack.lua
 EsoUI\Ingame\Inventory\Stack.xml
+EsoUI\Ingame\Inventory\ItemTransferDialog_Base.lua
+EsoUI\Ingame\Inventory\Keyboard\ItemTransferDialog_Keyboard.lua
+EsoUI\Ingame\Inventory\Keyboard\ItemTransferDialog_Keyboard.xml
+EsoUI\Ingame\Inventory\Gamepad\ItemTransferDialog_Gamepad.lua
 
 EsoUI\Ingame\Contacts\Notifications_Common.lua
 EsoUI\Ingame\Contacts\Keyboard\Notifications_Keyboard.lua
@@ -322,8 +330,8 @@ EsoUI\Ingame\Quickslot\Quickslot.lua
 EsoUI\Ingame\Quickslot\Quickslot.xml
 EsoUI\Ingame\Quickslot\Gamepad\GamepadQuickslot.lua
 EsoUI\Ingame\Quickslot\Gamepad\GamepadQuickslot.xml
-EsoUI\Ingame\Inventory\InventoryScene.lua
-EsoUI\Ingame\Inventory\InventoryScene.xml
+EsoUI\Ingame\Inventory\InventoryMenuBar.lua
+EsoUI\Ingame\Inventory\InventoryMenuBar.xml
 
 EsoUI\Ingame\Inventory\Gamepad\GamepadInventory.lua
 EsoUI\Ingame\Inventory\Gamepad\GamepadInventory.xml
@@ -493,6 +501,9 @@ EsoUI\Ingame\HUD\HUDInfamyMeter.xml
 EsoUI\Ingame\HUD\HUDTelvarMeter.lua
 EsoUI\Ingame\HUD\HUDTelvarMeter.xml
 
+EsoUI\Ingame\HUD\HUDEquipmentStatus.lua
+EsoUI\Ingame\HUD\HUDEquipmentStatus.xml
+
 EsoUI\Ingame\Stats\Keyboard\ZO_Stats_Keyboard.lua
 EsoUI\Ingame\Stats\Keyboard\ZO_Stats_Keyboard.xml
 EsoUI\Ingame\Stats\Gamepad\ZO_Stats_Gamepad.lua
@@ -551,9 +562,6 @@ EsoUI\Ingame\Help\Gamepad\Help_Legal_Gamepad.xml
 
 EsoUI\Ingame\Lockpick\Lockpick.lua
 EsoUI\Ingame\Lockpick\Lockpick.xml
-
-EsoUI\Ingame\Feedback\Keyboard\Feedback_Keyboard.lua
-EsoUI\Ingame\Feedback\Keyboard\Feedback_Keyboard.xml
 
 EsoUI\Ingame\Crafting\CraftingUtils.lua
 EsoUI\Ingame\Crafting\CraftingUtils.xml
@@ -645,6 +653,8 @@ EsoUI\Ingame\PlayerEmote\PlayerEmoteQuickslot.lua
 EsoUI\Ingame\PlayerEmote\PlayerEmoteQuickslot.xml
 EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.lua
 EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.xml
+EsoUI\Ingame\PlayerEmote\Keyboard\PlayerEmote_Keyboard.lua
+EsoUI\Ingame\PlayerEmote\Keyboard\PlayerEmote_Keyboard.xml
 
 EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.lua
 EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.xml
@@ -805,6 +815,7 @@ EsoUI\Ingame\Campaign\CampaignScoring_Shared.xml
 EsoUI\Ingame\Campaign\CampaignBonuses_Shared.lua
 
 EsoUI\Ingame\Campaign\CampaignDataRegistration.lua
+EsoUI\Ingame\Campaign\CampaignBrowserDialogs_Shared.lua
 EsoUI\Ingame\Campaign\CampaignBrowserDialogs.lua
 EsoUI\Ingame\Campaign\CampaignBrowserDialogs.xml
 EsoUI\Ingame\Campaign\CampaignBrowser.lua
@@ -864,8 +875,6 @@ EsoUI\Ingame\Inventory\Gamepad\GuildBankError_Gamepad.xml
 
 EsoUI\Ingame\DeathRecap\DeathRecap.lua
 EsoUI\Ingame\DeathRecap\DeathRecap.xml
-
-EsoUI\Ingame\Durability\DurabilityWarner.lua
 
 EsoUI\Ingame\FloatingMarkers\FloatingMarkers.lua
 

@@ -29,7 +29,7 @@
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                                     <Controls>
-                                        <Label name="$(parent)Confirmation" font="ZoFontGamepadCondensed42" text="SI_CONSOLE_LINKACCOUNT_CONFIRM_1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                        <Label name="$(parent)Confirmation" font="ZoFontGamepadCondensed42" text="SI_LINKACCOUNT_CONFIRM_1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                             <Anchor point="TOPLEFT"/>
                                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                                         </Label>

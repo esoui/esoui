@@ -313,7 +313,7 @@
             <NormalOffset x="-1" y="17" />
             <PressedOffset x="-1" y="19" />
             <Controls>
-                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/CharacterWindow/swap_lock.dds" hidden="true">
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" hidden="true">
                     <Dimensions x="26" y="26" />
                     <Anchor point="CENTER" offsetX="-2" offsetY="0" />
                 </Texture>
@@ -325,7 +325,7 @@
             <NormalOffset x="1" y="17" />
             <PressedOffset x="1" y="19" />
             <Controls>
-                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/CharacterWindow/swap_lock.dds" hidden="true">
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" hidden="true">
                     <Dimensions x="26" y="26" />
                     <Anchor point="CENTER" offsetX="2" offsetY="0" />
                 </Texture>

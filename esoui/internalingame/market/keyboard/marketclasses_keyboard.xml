@@ -77,17 +77,15 @@
                     <AnchorFill/>
                 </Backdrop>
                 
-                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" mouseEnabled="true" override="true">
+                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" maxLineCount="3" wrapMode="ELLIPSIS" mouseEnabled="true" override="true">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/>
                     <OnMouseEnter>
                         ZO_MarketProduct_OnMouseEnter(self:GetParent())
-                        ZO_Tooltips_ShowTruncatedTextTooltip(self)
                     </OnMouseEnter>
             
                     <OnMouseExit>
                         ZO_MarketProduct_OnMouseExit(self:GetParent())
-                        ZO_Tooltips_HideTruncatedTextTooltip()
                     </OnMouseExit>
                     
                     <OnMouseUp>
@@ -140,6 +138,15 @@
                         </Control>
                     </Controls>
                 </Label>
+                
+                <Label name="$(parent)BundledProducts" font="ZoFontHeader3" override="true">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-15" offsetY="-6"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontWinH4" override="true" />
+                    </Controls>
+                </Label>
+                
+                <Texture name="$(parent)BundleIndicator" textureFile="EsoUI/Art/Market/Keyboard/market_bundleFlag.dds" override="true" />
             </Controls>
         </Control>
         
@@ -166,31 +173,6 @@
                 <Label name="$(parent)Title" override="true">
                     <Anchor point="TOPLEFT" offsetX="20" offsetY="10"/>
                     <Anchor point="TOPRIGHT" offsetX="-316" offsetY="10"/>
-                </Label>
-                
-                <Label name="$(parent)Description" inherits="ZO_MarketDefaultLabel" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" wrapMode="ELLIPSIS" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-290" offsetY="-70"/>
-                    
-                    <OnMouseEnter>
-                        ZO_MarketProduct_OnMouseEnter(self:GetParent())
-                        ZO_Tooltips_ShowTruncatedTextTooltip(self)
-                    </OnMouseEnter>
-            
-                    <OnMouseExit>
-                        ZO_MarketProduct_OnMouseExit(self:GetParent())
-                        ZO_Tooltips_HideTruncatedTextTooltip()
-                    </OnMouseExit>
-                    
-                    <OnMouseUp>
-                        if upInside then
-                            self:GetParent().marketProduct:OnClicked(button)
-                        end
-                    </OnMouseUp>
-            
-                    <OnMouseDoubleClick>
-                        self:GetParent().marketProduct:OnDoubleClicked(button)
-                    </OnMouseDoubleClick>
                 </Label>
             </Controls>
         </Control>

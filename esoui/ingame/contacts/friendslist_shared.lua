@@ -10,12 +10,13 @@ FRIEND_DATA = 1
 FRIENDS_LIST_ENTRY_SORT_KEYS =
 {
     ["displayName"] = { },
+    ["characterName"] = { },
     ["status"]  = { tiebreaker = "normalizedLogoffSort", isNumeric = true  },
     ["class"]  = { tiebreaker = "displayName" },
     ["formattedZone"]  = { tiebreaker = "displayName" },
     ["alliance"] = { tiebreaker = "displayName" },
-    ["veteranRank"] = { tiebreaker = "displayName", isNumeric = true},
-    ["level"] = { tiebreaker = "veteranRank", isNumeric = true },
+    ["championPoints"] = { tiebreaker = "displayName", isNumeric = true},
+    ["level"] = { tiebreaker = "championPoints", isNumeric = true },
     ["normalizedLogoffSort"] = { tiebreaker = "displayName", isNumeric = true },
 }
 
@@ -48,7 +49,7 @@ function ZO_FriendsList:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_DISPLAY_NAME_CHANGED, function(_, oldDisplayName, newDisplayName) self:OnFriendDisplayNameChanged(oldDisplayName, newDisplayName) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_CHARACTER_ZONE_CHANGED, function(_, displayName, characterName, zoneName) self:OnFriendCharacterZoneChanged(displayName, characterName, zoneName) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_CHARACTER_LEVEL_CHANGED, function(_, displayName, characterName, level) self:OnFriendCharacterLevelChanged(displayName, characterName, level) end)
-    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_CHARACTER_VETERAN_RANK_CHANGED, function(_, displayName, characterName, veteranRank) self:OnFriendCharacterVeteranRankChanged(displayName, characterName, veteranRank) end)
+    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED, function(_, displayName, characterName, championPoints) self:OnFriendCharacterChampionPointsChanged(displayName, characterName, championPoints) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_NOTE_UPDATED, function(_, displayName, note) self:OnFriendNoteUpdated(displayName, note) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnFriendPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
 end
@@ -67,7 +68,7 @@ function ZO_FriendsList:SetupEntry(control, data, selected)
 end
 
 function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
-    local hasCharacter, characterName, zone, class, alliance, level, veteranRank = GetFriendCharacterInfo(friendIndex)
+    local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
        
     local data = 
     {
@@ -77,7 +78,7 @@ function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
         characterName = zo_strformat(SI_UNIT_NAME, characterName), 
         gender = GetGenderFromNameDescriptor(characterName),
         level = level, 
-        veteranRank = veteranRank, 
+        championPoints = championPoints, 
         class = class, 
         formattedZone = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone), 
         alliance = alliance, 
@@ -91,7 +92,7 @@ function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
 end
 
 function ZO_FriendsList:UpdateFriendData(data, friendIndex)
-    local hasCharacter, characterName, zone, class, alliance, level, veteranRank = GetFriendCharacterInfo(friendIndex)
+    local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
     
     data.friendIndex = friendIndex
     data.hasCharacter = hasCharacter
@@ -102,7 +103,7 @@ function ZO_FriendsList:UpdateFriendData(data, friendIndex)
     data.alliance = alliance
     data.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
     data.level = level
-    data.veteranRank = veteranRank
+    data.championPoints = championPoints
 end
 
 function ZO_FriendsList:BuildMasterList()
@@ -211,10 +212,10 @@ function ZO_FriendsList:OnFriendCharacterLevelChanged(displayName, characterName
     end
 end
 
-function ZO_FriendsList:OnFriendCharacterVeteranRankChanged(displayName, characterName, veteranRank)
+function ZO_FriendsList:OnFriendCharacterChampionPointsChanged(displayName, characterName, championPoints)
     local data = self:FindDataByDisplayName(displayName)
     if(data) then
-        data.veteranRank = veteranRank
+        data.championPoints = championPoints
         self:RefreshSort()
     end
 end
@@ -241,7 +242,7 @@ function ZO_FriendsList:OnFriendPlayerStatusChanged(displayName, characterName, 
             self:OnNumOnlineChanged()
         end
 
-        self:RefreshSort()
+        self:RefreshFilters()
     end
 end
 

@@ -1,6 +1,9 @@
 ZO_KEYBOARD_MARKET_SCENE_NAME  = "market"
 local MARKET_LABELED_GROUP_LABEL_TEMPLATE = "ZO_Market_GroupLabel"
 
+ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS = "previous"
+ZO_MARKET_PREVIEW_DIRECTION_NEXT = "next"
+
 --
 --[[ Market ]]--
 --
@@ -20,7 +23,10 @@ function Market:Initialize(control)
     self.messageLoadingIcon = self.control:GetNamedChild("MessageLoadingIcon")
     self.rotationControl = self.control:GetNamedChild("RotationArea")
     self.noMatchesMessage = self.contentsControl:GetNamedChild("NoMatchMessage")
-    self.searchBox = self.contentsControl:GetNamedChild("Search"):GetNamedChild("Box");
+    self.searchBox = self.contentsControl:GetNamedChild("Search"):GetNamedChild("Box")
+    self.previewVariationLeftArrow = self.control:GetNamedChild("PreviewVariationLeftArrow")
+    self.previewVariationRightArrow = self.control:GetNamedChild("PreviewVariationRightArrow")
+    self.variationLabel = self.control:GetNamedChild("VariationLabel")
 
     local subscriptionControl = self.contentsControl:GetNamedChild("SubscriptionPage")
     self.subscriptionPage = subscriptionControl
@@ -77,6 +83,7 @@ function Market:InitializeKeybindDescriptors()
                             return self:IsReadyToPreview()
                         end,
             callback =  function()
+                            self.selectedMarketProduct.variation = 1
                             self:BeginPreview()
                             self:SetCanBeginPreview(false, GetFrameTimeSeconds())
                         end,
@@ -103,7 +110,6 @@ function Market:InitializeKeybindDescriptors()
         },
     }
 end
-
 
 do
     -- Map from enum to keyboard specific strings
@@ -624,8 +630,7 @@ function Market:LayoutMarketProducts(...)
         local id = select(i, ...)
         if self:ShouldAddMarketProduct(filterType, id) then
             hasShownProduct = true
-            local numAttachments = GetMarketProductNumCollectibles(id) + GetMarketProductNumItems(id)
-            local isBundle = numAttachments > 1
+            local isBundle = GetMarketProductType(id) == MARKET_PRODUCT_TYPE_BUNDLE
 
             local pool = isBundle and self.marketProductBundlePool or self.marketProductPool
             local marketProduct = pool:AcquireObject()
@@ -728,7 +733,17 @@ do
         self.canBeginPreview = canBeginPreview
         self.nextPreviewChangeTime = lastChangeTimeSeconds + PREVIEW_WAIT_TIME_SECONDS
         self:RefreshKeybinds()
+
+        if canBeginPreview then
+            self.variationLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+        else
+            self.variationLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
+        end
     end
+end
+
+function Market:GetCanBeginPreview()
+    return self.canBeginPreview
 end
 
 do
@@ -755,6 +770,7 @@ do
 end
 
 function Market:OnShown()
+    BeginPreviewMode()
     self:AddKeybinds()
     ZO_Market_Shared.OnShown(self)
 
@@ -808,6 +824,37 @@ function Market:ResetSearch()
     self.searchBox:SetText("")
 end
 
+function Market:EndCurrentPreview()
+    ZO_Market_Shared.EndCurrentPreview(self)
+    self:SetCurrentMultiVariationPreviewProduct(nil)
+end
+
+function Market:SetCurrentMultiVariationPreviewProduct(marketProduct)
+    self.currentMultiVariationPreviewProduct = marketProduct
+
+    local hideMultiVariationControls = marketProduct == nil
+    self.previewVariationLeftArrow:SetHidden(hideMultiVariationControls)
+    self.previewVariationRightArrow:SetHidden(hideMultiVariationControls)
+    self.variationLabel:SetHidden(hideMultiVariationControls)
+
+    if marketProduct then
+        self.variationLabel:SetText(marketProduct:GetPreviewVariationDisplayName())
+    end
+end
+
+function Market:CyclePreviewVariations(direction)
+    if self.currentMultiVariationPreviewProduct then
+        if direction == ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS then
+            self.currentMultiVariationPreviewProduct:PreviewPreviousVariation()
+        else
+            self.currentMultiVariationPreviewProduct:PreviewNextVariation()
+        end
+
+        self.variationLabel:SetText(self.currentMultiVariationPreviewProduct:GetPreviewVariationDisplayName())
+        self:SetCanBeginPreview(false, GetFrameTimeSeconds())
+    end
+end
+
 --
 --[[ XML Handlers ]]--
 --
@@ -850,4 +897,10 @@ end
 
 function ZO_MarketCurrencyBuySubscription_OnClicked(control)
     ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+end
+
+function ZO_Market_PreviewArrowOnMouseClicked(control, direction)
+    if MARKET:GetCanBeginPreview() then
+        MARKET:CyclePreviewVariations(direction)
+    end
 end

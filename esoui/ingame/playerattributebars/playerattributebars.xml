@@ -130,6 +130,8 @@
                                 <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" />
                             </Controls>
                         </Control>
+
+                        <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeBarText" />
                     </Controls>
                 </Control>
                 <Control name="$(parent)Werewolf" inherits="ZO_PlayerAttributeContainerSmall">
@@ -185,6 +187,8 @@
                                 <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" />
                             </Controls>
                         </Control>
+
+                        <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeBarText" />
                     </Controls>
                 </Control>
                 <Control name="$(parent)SiegeHealth" inherits="ZO_PlayerAttributeContainerSmall">
@@ -240,6 +244,8 @@
                                 <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" />
                             </Controls>
                         </Control>
+
+                        <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeBarText" />
                     </Controls>
                 </Control>
 

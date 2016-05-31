@@ -25,79 +25,113 @@ function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP, atM
     self:AddStatusBar(bar)
 end
 
-function ZO_Tooltip:AddAbilityStats(abilityId)
-    local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
+do
+    local TANK_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_tank_down_no_glow_64.dds", 48, 48)
+    local HEALER_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/Gamepad/LFG_healer_down_no_glow_64.dds", 48, 48)
+    local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/Gamepad/LFG_dps_down_no_glow_64.dds", 48, 48)
+    local g_roleIconTable = {}
 
-    --Cast Time
-    local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId)
-    local castTimePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-    if(channeled) then
-        castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CHANNEL_TIME_LABEL), self:GetStyle("statValuePairStat"))
-        castTimePair:SetValue(ZO_FormatTimeMilliseconds(channelTime, TIME_FORMAT_STYLE_CHANNEL_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
-    else
-        castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CAST_TIME_LABEL), self:GetStyle("statValuePairStat"))
-        castTimePair:SetValue(ZO_FormatTimeMilliseconds(castTime, TIME_FORMAT_STYLE_CAST_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
-    end
-    statsSection:AddStatValuePair(castTimePair)
+    function ZO_Tooltip:AddAbilityStats(abilityId)
+        local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
 
-    --Target
-    local targetDescription = GetAbilityTargetDescription(abilityId)
-    if(targetDescription) then
-        local targetPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        targetPair:SetStat(GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_LABEL), self:GetStyle("statValuePairStat"))
-        targetPair:SetValue(targetDescription, self:GetStyle("statValuePairValue"))
-        statsSection:AddStatValuePair(targetPair)
-    end
-
-    --Range
-    local minRangeCM, maxRangeCM = GetAbilityRange(abilityId)
-    if(maxRangeCM > 0) then
-        local rangePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        rangePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RANGE_LABEL), self:GetStyle("statValuePairStat"))
-        if(minRangeCM == 0) then
-            rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RANGE, FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("statValuePairValue"))
+        --Cast Time
+        local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId)
+        local castTimePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        if(channeled) then
+            castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CHANNEL_TIME_LABEL), self:GetStyle("statValuePairStat"))
+            castTimePair:SetValue(ZO_FormatTimeMilliseconds(channelTime, TIME_FORMAT_STYLE_CHANNEL_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
         else
-            rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_MIN_TO_MAX_RANGE, FormatFloatRelevantFraction(minRangeCM / 100), FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("statValuePairValue"))
+            castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CAST_TIME_LABEL), self:GetStyle("statValuePairStat"))
+            castTimePair:SetValue(ZO_FormatTimeMilliseconds(castTime, TIME_FORMAT_STYLE_CAST_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
         end
-        statsSection:AddStatValuePair(rangePair)
-    end
+        statsSection:AddStatValuePair(castTimePair)
 
-    --Radius/Distance
-    local radiusCM = GetAbilityRadius(abilityId)
-    local angleDistanceCM = GetAbilityAngleDistance(abilityId)
-    if(radiusCM > 0) then
-        local radiusDistancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        if(angleDistanceCM > 0) then
-            radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_AREA_LABEL), self:GetStyle("statValuePairStat"))
-            -- Angle distance is the distance to the left and right of the caster, not total distance. So we're multiplying by 2 to accurately reflect that in the UI.
-            radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_AOE_DIMENSIONS, FormatFloatRelevantFraction(radiusCM / 100), FormatFloatRelevantFraction(angleDistanceCM * 2 / 100)), self:GetStyle("statValuePairValue"))
-        else
-            radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RADIUS_LABEL), self:GetStyle("statValuePairStat"))
-            radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RADIUS, FormatFloatRelevantFraction(radiusCM / 100)), self:GetStyle("statValuePairValue")) 
+        --Target
+        local targetDescription = GetAbilityTargetDescription(abilityId)
+        if(targetDescription) then
+            local targetPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            targetPair:SetStat(GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_LABEL), self:GetStyle("statValuePairStat"))
+            targetPair:SetValue(targetDescription, self:GetStyle("statValuePairValue"))
+            statsSection:AddStatValuePair(targetPair)
         end
-        statsSection:AddStatValuePair(radiusDistancePair)
-    end
 
-    --Duration
-    local durationMS = GetAbilityDuration(abilityId)
-    if(durationMS > 0) then
-        local durationPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        durationPair:SetStat(GetString(SI_ABILITY_TOOLTIP_DURATION_LABEL), self:GetStyle("statValuePairStat"))
-        durationPair:SetValue(ZO_FormatTimeMilliseconds(durationMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
-        statsSection:AddStatValuePair(durationPair)
-    end
+        --Range
+        local minRangeCM, maxRangeCM = GetAbilityRange(abilityId)
+        if(maxRangeCM > 0) then
+            local rangePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            rangePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RANGE_LABEL), self:GetStyle("statValuePairStat"))
+            if(minRangeCM == 0) then
+                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RANGE, FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("statValuePairValue"))
+            else
+                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_MIN_TO_MAX_RANGE, FormatFloatRelevantFraction(minRangeCM / 100), FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("statValuePairValue"))
+            end
+            statsSection:AddStatValuePair(rangePair)
+        end
 
-    --Cost
-    local cost, mechanic = GetAbilityCost(abilityId)
-    if(cost > 0) then
-        local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
-        local mechanicName = GetString("SI_COMBATMECHANICTYPE", mechanic)
-        costPair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST, cost, mechanicName), self:GetStyle("statValuePairValue"))
-        statsSection:AddStatValuePair(costPair)
-    end
+        --Radius/Distance
+        local radiusCM = GetAbilityRadius(abilityId)
+        local angleDistanceCM = GetAbilityAngleDistance(abilityId)
+        if(radiusCM > 0) then
+            local radiusDistancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            if(angleDistanceCM > 0) then
+                radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_AREA_LABEL), self:GetStyle("statValuePairStat"))
+                -- Angle distance is the distance to the left and right of the caster, not total distance. So we're multiplying by 2 to accurately reflect that in the UI.
+                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_AOE_DIMENSIONS, FormatFloatRelevantFraction(radiusCM / 100), FormatFloatRelevantFraction(angleDistanceCM * 2 / 100)), self:GetStyle("statValuePairValue"))
+            else
+                radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RADIUS_LABEL), self:GetStyle("statValuePairStat"))
+                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RADIUS, FormatFloatRelevantFraction(radiusCM / 100)), self:GetStyle("statValuePairValue")) 
+            end
+            statsSection:AddStatValuePair(radiusDistancePair)
+        end
 
-    self:AddSection(statsSection)
+        --Duration
+        local durationMS = GetAbilityDuration(abilityId)
+        if(durationMS > 0) then
+            local durationPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            durationPair:SetStat(GetString(SI_ABILITY_TOOLTIP_DURATION_LABEL), self:GetStyle("statValuePairStat"))
+            durationPair:SetValue(ZO_FormatTimeMilliseconds(durationMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
+            statsSection:AddStatValuePair(durationPair)
+        end
+
+        --Cost
+        local cost, mechanic = GetAbilityCost(abilityId)
+        if(cost > 0) then
+            local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
+            local mechanicName = GetString("SI_COMBATMECHANICTYPE", mechanic)
+            local costString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST, cost, mechanicName)
+            if(mechanic == POWERTYPE_MAGICKA) then
+                costPair:SetValue(costString, self:GetStyle("statValuePairMagickaValue"))
+            elseif(mechanic == POWERTYPE_STAMINA) then
+                costPair:SetValue(costString, self:GetStyle("statValuePairStaminaValue"))
+            else
+                costPair:SetValue(costString, self:GetStyle("statValuePairValue"))
+            end
+            statsSection:AddStatValuePair(costPair)
+        end
+
+        --Roles
+        local isTankRole, isHealerRole, isDamageRole = GetAbilityRoles(abilityId)
+        if isTankRole then
+            table.insert(g_roleIconTable, TANK_ROLE_ICON)
+        end
+        if isHealerRole then
+            table.insert(g_roleIconTable, HEALER_ROLE_ICON)
+        end
+        if isDamageRole then
+            table.insert(g_roleIconTable, DAMAGE_ROLE_ICON)
+        end
+        if(#g_roleIconTable > 0) then
+            local rolesPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            rolesPair:SetStat(GetString(SI_ABILITY_TOOLTIP_ROLE_LABEL), self:GetStyle("statValuePairStat"))
+            local finalIconText = table.concat(g_roleIconTable, " ")
+            rolesPair:SetValue(finalIconText, self:GetStyle("statValuePairValue"))
+            statsSection:AddStatValuePair(rolesPair)
+            ZO_ClearNumericallyIndexedTable(g_roleIconTable)
+        end
+
+        self:AddSection(statsSection)
+    end
 end
 
 function ZO_Tooltip:AddAbilityDescription(abilityId, pendingChampionPoints)
@@ -301,7 +335,7 @@ do
     function ZO_Tooltip:LayoutAttributeInfo(attributeType, pendingBonus)
         -- We don't show any attribute stat increases while in battle leveled zones because
         -- it doesn't make any sense based on how battle leveling now works
-        if not (IsUnitVetBattleLeveled("player") or IsUnitBattleLeveled("player")) then
+        if not (IsUnitChampionBattleLeveled("player") or IsUnitBattleLeveled("player")) then
             local statType = STAT_TYPES[attributeType]
             local statsSection = self:AcquireSection(self:GetStyle("attributeStatsSection"))
             local attributePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))

@@ -23,7 +23,7 @@ local ZO_OptionsPanel_Camera_ControlData =
             text = SI_INTERFACE_OPTIONS_CAMERA_INVERT_Y,
             tooltipText = SI_INTERFACE_OPTIONS_CAMERA_INVERT_Y_TOOLTIP,
         },
-        --Options_Camera_InvertY
+        --Options_Camera_FOVChangesAllowed
         [CAMERA_SETTING_FOV_CHANGES_ALLOWED] =
         {
             controlType = OPTIONS_CHECKBOX,
@@ -32,6 +32,16 @@ local ZO_OptionsPanel_Camera_ControlData =
             panel = SETTING_PANEL_CAMERA,
             text = SI_INTERFACE_OPTIONS_CAMERA_FOV_CHANGES,
             tooltipText = SI_INTERFACE_OPTIONS_CAMERA_FOV_CHANGES_TOOLTIP,
+        },
+		--Options_Camera_AssassinationCamera
+        [CAMERA_SETTING_ASSASSINATION_CAMERA] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_ASSASSINATION_CAMERA,
+            panel = SETTING_PANEL_CAMERA,
+            text = SI_INTERFACE_OPTIONS_CAMERA_ASSASSINATION_CAMERA,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_ASSASSINATION_CAMERA_TOOLTIP,
         },
         --Options_Camera_CameraSensitivityFirstPerson
         [CAMERA_SETTING_SENSITIVITY_FIRST_PERSON] =

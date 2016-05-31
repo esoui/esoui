@@ -74,10 +74,6 @@ function CampaignBrowser:InitializeTree()
 
     local function RulesetTypeHeaderSetup(node, control, rulesetType, open)
         RulesetTypeSetup(control, rulesetType, open)
-        
-        if(open) then
-            self.tree:SelectFirstChild(node)
-        end
     end
     self.tree:AddTemplate("ZO_RulesetTypeHeader", RulesetTypeHeaderSetup, nil, nil, nil, 0)
 
@@ -120,7 +116,7 @@ function CampaignBrowser:InitializeTree()
         end
     end
     local function RulesetEntryEquality(left, right)
-        return left == right
+        return left.rulesetId == right.rulesetId
     end
     self.tree:AddTemplate("ZO_RulesetEntry", RulesetEntrySetup, RulesetEntrySelected, RulesetEntryEquality)
 
@@ -176,6 +172,28 @@ function CampaignBrowser:DoHome()
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
         if(data.type == self.campaignBrowser:GetCampaignType()) then
             SELECT_HOME_CAMPAIGN_DIALOG:Show(data)
+        end
+    end
+end
+
+function CampaignBrowser:CanAbandon()
+    if(self.mouseOverRow) then
+        local data = ZO_ScrollList_GetData(self.mouseOverRow)
+        local isQueued = IsQueuedForCampaign(data.id, data.isGroup)
+        local isCurrentCampaign = data.id == GetAssignedCampaignId() or data.id == GetGuestCampaignId()
+        if (isCurrentCampaign and not isQueued) then
+            return true
+        end
+    end
+end
+
+function CampaignBrowser:DoAbandon()
+    if(self.mouseOverRow) then
+        local data = ZO_ScrollList_GetData(self.mouseOverRow)
+        if (data.id == GetAssignedCampaignId()) then
+            ABANDON_HOME_CAMPAIGN_DIALOG:Show(data)
+        elseif (data.id == GetGuestCampaignId()) then
+            ABANDON_GUEST_CAMPAIGN_DIALOG:Show(data)
         end
     end
 end
@@ -239,6 +257,35 @@ function CampaignBrowser:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+        
+        --Leave/Abandon
+        {
+            name = function()
+                if(self.mouseOverRow) then
+                    if self:CanLeave() then
+                        return GetString(SI_CAMPAIGN_BROWSER_LEAVE_QUEUE)
+                    elseif self:CanAbandon() then
+                        return GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN)
+                    end
+                end
+            end,
+
+            keybind = "UI_SHORTCUT_NEGATIVE",
+        
+            callback = function()
+                if(self.mouseOverRow) then
+                    if self:CanLeave() then
+                        self:DoLeave()
+                    elseif self:CanAbandon() then
+                        self:DoAbandon()
+                    end
+                end
+            end,
+
+            visible = function()
+                return self:CanLeave() or self:CanAbandon()
+            end
+        },
 
         -- Guest
         {
@@ -296,21 +343,6 @@ function CampaignBrowser:InitializeKeybindDescriptors()
 
             visible = function()
                 return self:CanQueue() or self:CanEnter()
-            end
-        },
-
-        --Leave
-        {
-            name = GetString(SI_CAMPAIGN_BROWSER_LEAVE_QUEUE),
-
-            keybind = "UI_SHORTCUT_NEGATIVE",
-        
-            callback = function()
-                self:DoLeave()
-            end,
-
-            visible = function()
-                return self:CanLeave()
             end
         },
     }
@@ -452,8 +484,6 @@ function CampaignBrowser:BuildCategories()
                     self.tree:AddNode("ZO_RulesetEntry", {rulesetId = rulesetId, noHeader = false}, parent, SOUNDS.DEFAULT_CLICK)
                 end
             end
-            
-
         end
     end
 
@@ -701,6 +731,9 @@ function CampaignBrowser:Row_OnMouseUp(control, button, upInside)
         end
         if(self:CanGuest()) then
             AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_CHOOSE_GUEST_CAMPAIGN), function() self:DoGuest() end)
+        end
+        if(self:CanAbandon()) then
+            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN), function() self:DoAbandon() end)
         end
         
         self:ShowMenu(control)

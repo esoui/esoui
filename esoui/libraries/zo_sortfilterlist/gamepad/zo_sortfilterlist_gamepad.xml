@@ -1,13 +1,8 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_SortFilterListEmptyRow_Gamepad" virtual="true">
-            <Anchor point="TOPLEFT"/>
-            <Anchor point="TOPRIGHT"/>
-            <Dimensions y="30"/>
+        <Control name="ZO_SortFilterListEmptyRow_Gamepad" inherits="ZO_SortFilterListEmptyRow" virtual="true">
             <Controls>
-                <Label name="$(parent)Message" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="CENTER"/>
-                </Label>
+                <Label name="$(parent)Message" override="true" font="ZoFontGamepadCondensed42" />
             </Controls>
         </Control>
     </Controls>

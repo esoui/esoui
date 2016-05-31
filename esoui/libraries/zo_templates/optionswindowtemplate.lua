@@ -173,11 +173,20 @@ local function OptionsScrollListSelectionChanged(selectedData, oldData, reselect
         local control = selectedData.parentControl
         SetSettingFromControl(control, value)
 
-        local callback = selectedData.parentControl.data.scrollListChangedCallback
+        local optionsData = selectedData.parentControl.data
+        local callback = optionsData.scrollListChangedCallback
         if callback then
             callback()
         end
+
+        if optionsData.gamepadHasEnabledDependencies then
+            SYSTEMS:GetGamepadObject("options"):OnOptionWithDependenciesChanged()
+        end
     end
+end
+
+local function GetValueString(data)
+    return type(data) == "function" and data() or GetString(data)
 end
 
 local DEFAULT_SLIDER_VALUE_STEP_PERCENT = 6.66
@@ -194,9 +203,9 @@ local updateControlFromSettings =
                                 if data.itemText then
                                     dropdown:SetSelectedItem(data.itemText[GetValidIndexFromCurrentChoice(data.valid, currentChoice)])
                                 elseif data.valueStringPrefix and isValidNumber then
-                                        dropdown:SetSelectedItem(GetString(data.valueStringPrefix, currentChoice))
+                                    dropdown:SetSelectedItem(GetString(data.valueStringPrefix, currentChoice))
                                 elseif data.valueStrings then
-                                    dropdown:SetSelectedItem(GetString(data.valueStrings[currentChoice]))                                
+                                    dropdown:SetSelectedItem(GetValueString(data.valueStrings[GetValidIndexFromCurrentChoice(data.valid, currentChoice)]))                                
                                 else
                                     dropdown:SetSelectedItem(tostring(currentChoice))
                                 end
@@ -229,7 +238,7 @@ local updateControlFromSettings =
                                     elseif data.valueStringPrefix then
                                         targetChild:SetText(GetString(data.valueStringPrefix, data.valid[index]))
                                     elseif data.valueStrings then
-                                        targetChild:SetText(GetString(data.valueStrings[currentChoice]))                             
+                                        targetChild:SetText(GetValueString(data.valueStrings[index]))                             
                                     else
                                         targetChild:SetText(currentChoice)
                                     end
@@ -380,7 +389,7 @@ local function OptionsDropdown_SelectChoice(control, index)
         elseif data.valueStringPrefix then
             dropdown:SetSelectedItem(GetString(data.valueStringPrefix, value))
         elseif data.valueStrings then
-            dropdown:SetSelectedItem(GetString(data.valueStrings[value]))
+            dropdown:SetSelectedItem(GetValueString(data.valueStrings[index]))
         else
             dropdown:SetSelectedItem(valueString)
         end
@@ -546,7 +555,7 @@ function ZO_Options_SetupDropdown(control)
         elseif data.valueStringPrefix then
             optionString = GetString(data.valueStringPrefix, data.valid[index])
         elseif data.valueStrings then
-            optionString = GetString(data.valueStrings[data.valid[index]])
+            optionString = GetValueString(data.valueStrings[index])
         else
             optionString = tostring(data.valid[index])
         end
@@ -574,6 +583,8 @@ function ZO_Options_SetupScrollList(control, selected)
             entryText = GetString(control.data.gamepadValidStringOverrides[i])
         elseif(control.data.valueStringPrefix) then
             entryText = GetString(control.data.valueStringPrefix, control.data.valid[i])
+        elseif(control.data.valueStrings) then
+            entryText = GetValueString(control.data.valueStrings[i])
         else
             entryText = control.data.valid[i]
         end

@@ -290,7 +290,11 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
 					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
 				end
             elseif ZO_Enchanting_IsSceneShowing() then
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
+                if not ZO_Enchanting_IsInCreationMode() then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
+                else
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_GLYPH_CREATED)
+                end
             end
         else
             local gainedBooster = DidLastCraftGainBooster(numItemsGained)

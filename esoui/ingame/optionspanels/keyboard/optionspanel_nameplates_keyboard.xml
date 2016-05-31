@@ -1,0 +1,437 @@
+<GuiXml>
+    <Controls>
+        <!-- Begin Nameplates -->
+
+        <Control name="Options_Nameplates_NameplatesSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_NAMEPLATES, SI_INTERFACE_OPTIONS_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_AllNameplates" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_NameplatesSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_ShowPlayerTitles" inherits="ZO_Options_Checkbox">
+            <Dimensions x="490"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_AllNameplates" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_SHOW_PLAYER_TITLES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_ShowPlayerGuilds" inherits="ZO_Options_Checkbox">
+            <Dimensions x="490"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_ShowPlayerTitles" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_SHOW_PLAYER_GUILDS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_Player" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_ShowPlayerGuilds" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_PLAYER_NAMEPLATE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_PlayerDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_Player" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_PLAYER_NAMEPLATE_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_GroupMember" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_PlayerDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_GROUP_MEMBER_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_GroupMemberDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_GroupMember" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_GROUP_MEMBER_NAMEPLATES_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyNPC" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_GroupMemberDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_NPC_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyNPCDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyNPC" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_NPC_NAMEPLATES_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyPlayer" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyNPCDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_PLAYER_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyPlayerDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyPlayer" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_PLAYER_NAMEPLATES_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_NeutralNPC" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyPlayerDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_NEUTRAL_NPC_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_NeutralNPCDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_NeutralNPC" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_NEUTRAL_NPC_NAMEPLATES_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyNPC" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_NeutralNPCDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_NPC_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyNPCDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyNPC" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_NPC_NAMEPLATES_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyPlayer" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyNPCDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_PLAYER_NAMEPLATES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyPlayerDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyPlayer" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_PLAYER_NAMEPLATES_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <!-- End Nameplates -->
+
+        <!-- Begin Healthbars -->
+
+        <Control name="Options_Nameplates_HealthbarsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyPlayerDimmed" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_NAMEPLATES, SI_INTERFACE_OPTIONS_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_AllHB" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_HealthbarsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_HealthbarAlignment" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_AllHB" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_HEALTHBAR_ALIGNMENT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Nameplates_HealthbarChaseBar" inherits="ZO_Options_Checkbox">
+            <Dimensions x="490"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_HealthbarAlignment" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_HEALTHBAR_CHASE_BAR)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_HealthbarFrameBorder" inherits="ZO_Options_Checkbox">
+            <Dimensions x="490"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_HealthbarChaseBar" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_HEALTHBAR_FRAME_BORDER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_PlayerHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_HealthbarFrameBorder" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_PLAYER_HEALTHBAR)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_PlayerHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_PlayerHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_PLAYER_HEALTHBAR_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_GroupMemberHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_PlayerHBDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_GROUP_MEMBER_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_GroupMemberHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_GroupMemberHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_GROUP_MEMBER_HEALTHBARS_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyNPCHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_GroupMemberHBDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyNPCHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyNPCHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_NPC_HEALTHBARS_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyPlayerHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyNPCHBDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FriendlyPlayerHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyPlayerHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_NeutralNPCHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FriendlyPlayerHBDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_NEUTRAL_NPC_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_NeutralNPCHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_NeutralNPCHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_NEUTRAL_NPC_HEALTHBARS_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyNPCHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_NeutralNPCHBDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyNPCHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyNPCHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_NPC_HEALTHBARS_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyPlayerHB" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyNPCHBDimmed" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_EnemyPlayerHBDimmed" inherits="ZO_Options_Dropdown">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyPlayerHB" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ENEMY_PLAYER_HEALTHBARS_HIGHLIGHT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <!-- End Healthbars -->
+        
+        <!-- Begin Indicators -->
+
+        <Control name="Options_Nameplates_IndicatorsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_EnemyPlayerHBDimmed" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_NAMEPLATES, SI_INTERFACE_OPTIONS_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_AllianceIndicators" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_IndicatorsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALLIANCE_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_GroupIndicators" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_AllianceIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_GROUP_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_ResurrectIndicators" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_GroupIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_RESURRECT_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_FollowerIndicators" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_ResurrectIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_FOLLOWER_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_QuestBestowers" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FollowerIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <!-- End Indicators -->
+        
+        <!-- Begin Glows -->
+
+        <Control name="Options_Nameplates_GlowThickness" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_QuestBestowers" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_GLOW_THICKNESS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_TargetGlowCheck" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_GlowThickness" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_TargetGlowIntensity" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_TargetGlowCheck" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_InteractableGlowCheck" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_TargetGlowIntensity" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Nameplates_InteractableGlowIntensity" inherits="ZO_Options_Slider">
+            <Dimensions x="490" y="26" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_InteractableGlowCheck" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <!-- End Glows -->
+    </Controls>    
+</GuiXml>

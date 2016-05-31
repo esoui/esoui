@@ -150,6 +150,8 @@
             </Controls>
         </Control>
 
+        <EditBox name="ZO_TradingHouse_LevelBox" font="ZoFontWinT1" maxInputCharacters="3" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" virtual="true" />
+
         <Control name="TradingHouseDualComboFilter" hidden="true" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(parent)ItemCategory" relativePoint="BOTTOMLEFT" offsetY="10" />
             <Controls>
@@ -240,9 +242,9 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)MinPrice" relativePoint="BOTTOMLEFT" offsetY="10" />
 
                             <Textures
-                                normal="EsoUI/Art/LFG/LFG_veteranDungeon_disabled.dds"
-                                pressed="EsoUI/Art/LFG/LFG_veteranDungeon_down.dds"
-                                mouseOver="EsoUI/Art/LFG/LFG_veteranDungeon_over.dds"
+                                normal="EsoUI/Art/LFG/LFG_championDungeon_disabled.dds"
+                                pressed="EsoUI/Art/LFG/LFG_championDungeon_down.dds"
+                                mouseOver="EsoUI/Art/LFG/LFG_championDungeon_over.dds"
                             />
 
                             <OnClicked>
@@ -259,7 +261,7 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)LevelRangeToggle" relativePoint="BOTTOMLEFT" offsetY="5" />
 
                             <Controls>
-                                <EditBox name="$(parent)Box" font="ZoFontWinT1" maxInputCharacters="2" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop">
+                                <EditBox name="$(parent)Box" inherits="ZO_TradingHouse_LevelBox">
                                     <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
                                     <Anchor point="BOTTOMRIGHT" />
                                 </EditBox>
@@ -276,7 +278,7 @@
                             <Anchor point="LEFT" relativeTo="$(parent)LevelRangeDivider" relativePoint="RIGHT" offsetX="4" />
 
                             <Controls>
-                                <EditBox name="$(parent)Box" font="ZoFontWinT1" maxInputCharacters="2" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop">
+                                <EditBox name="$(parent)Box" inherits="ZO_TradingHouse_LevelBox">
                                     <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
                                     <Anchor point="BOTTOMRIGHT" />
                                 </EditBox>

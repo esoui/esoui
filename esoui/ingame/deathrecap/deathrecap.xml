@@ -150,7 +150,12 @@
                 <Control name="$(parent)Text">
                     <Anchor point="TOPLEFT"/>
                     <Controls>
-                        <Label name="$(grandparent)AttackerName" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                        <Label name="$(grandparent)AttackerName" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS">
+                            <!-- On console, we can't truncate the display name -->
+                            <OnInitialized>
+                                self:SetMaxLineCount(IsConsoleUI() and 0 or 1)
+                            </OnInitialized>
+                        </Label>
                         <Label name="$(grandparent)AttackName" font="ZoFontGameBold" modifyTextType="UPPERCASE"/>
                         <Label name="$(grandparent)DamageLabel" font="ZoFontGameBold" modifyTextType="UPPERCASE" text="SI_DEATH_RECAP_DAMAGE_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="RIGHT" relativePoint="TOPLEFT" offsetX="623" offsetY="38"/>

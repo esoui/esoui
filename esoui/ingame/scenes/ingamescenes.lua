@@ -17,9 +17,9 @@ marketScene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
 marketScene:AddFragment(FRAME_PLAYER_FRAGMENT)
 marketScene:AddFragment(FRAME_EMOTE_FRAGMENT_INVENTORY)
 marketScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
-marketScene:AddFragment(ITEM_PREVIEW_FRAGMENT)
 marketScene:AddFragment(MARKET_WINDOW_SOUNDS)
 marketScene:AddFragment(MARKET_PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+marketScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 
 -------------------
 --Crown Store Announcement Scene
@@ -32,7 +32,7 @@ announcementScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYB
 --Inventory Scene
 -------------------
 
-local inventoryScene = SCENE_MANAGER:GetScene("inventory")
+local inventoryScene = ZO_Scene:New("inventory", SCENE_MANAGER)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
 inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)

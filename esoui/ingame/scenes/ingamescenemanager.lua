@@ -204,7 +204,11 @@ end
 
 function ZO_IngameSceneManager:OnMountStateChanged()
     -- The market screen causes a dismount and blocks mounting so we need to ignore this on that screen
-    if not (self:IsShowing("market") or self:IsShowing("gamepad_market_preview")) then
+    if not (self:IsShowing("market") or
+	        self:IsShowing("gamepad_market_pre_scene") or
+			self:IsShowing("gamepad_market") or
+			self:IsShowing("gamepad_market_preview"))
+	then
         self:SetInUIMode(false)
     end
 end

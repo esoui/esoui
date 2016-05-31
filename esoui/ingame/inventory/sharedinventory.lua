@@ -33,11 +33,10 @@ function ZO_SharedInventoryManager:Initialize()
         RefreshAll = function()
             self:RefreshInventory(BAG_BACKPACK)
             self:RefreshInventory(BAG_WORN)
-            -- Only update the bank bag when we are actually banking
-            -- this assumes that, outside of banking, full inventory updates don't actually modify the bank
-            if GetInteractionType() == INTERACTION_BANK then
-                self:RefreshInventory(BAG_BANK)
-            end
+            self:RefreshInventory(BAG_VIRTUAL)
+            -- with the addition of Craft Bags the bank bag could be modified by the automatic transfer
+            -- of bank contents to the Craft Bag on joining a region
+            self:RefreshInventory(BAG_BANK)
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -78,7 +77,7 @@ function ZO_SharedInventoryManager:Initialize()
 
         self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
 
-        if bagId == BAG_BACKPACK then
+        if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
             if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID then
                 PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
             end
@@ -86,23 +85,23 @@ function ZO_SharedInventoryManager:Initialize()
             PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
         end
 
-        if(bagId == BAG_WORN and eventCode == EVENT_INVENTORY_SINGLE_SLOT_UPDATE) then
+        if bagId == BAG_WORN and eventCode == EVENT_INVENTORY_SINGLE_SLOT_UPDATE then
             local _, slotHasItem = GetEquippedItemInfo(slotIndex)
 
-            if(updateReason ~= INVENTORY_UPDATE_REASON_DURABILITY_CHANGE and updateReason ~= INVENTORY_UPDATE_REASON_DYE_CHANGE) then
-                if(slotHasItem) then
+            if updateReason == INVENTORY_UPDATE_REASON_DEFAULT then
+                if slotHasItem then
                     PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_EQUIP)
                 else
                     PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_UNEQUIP)
                 end
             end
-		
-		    if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then 
-			    local effectivenessReduced = IsArmorEffectivenessReduced(bagId, slotIndex)
-			    if effectivenessReduced then 
-				    TriggerTutorial(TUTORIAL_TRIGGER_DAMAGED_EQUIPMENT_REDUCING_EFFECTIVENESS)
-			    end
-		    end
+
+            if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then 
+                local effectivenessReduced = IsArmorEffectivenessReduced(bagId, slotIndex)
+                if effectivenessReduced then 
+                    TriggerTutorial(TUTORIAL_TRIGGER_DAMAGED_EQUIPMENT_REDUCING_EFFECTIVENESS)
+                end
+            end
         end
 
         self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex)
@@ -368,17 +367,10 @@ function ZO_SharedInventoryManager:PerformFullUpdateOnBagCache(bagId)
     local bagCache = self:GetBagCache(bagId)
     ZO_ClearTable(bagCache)
 
-    if bagId == BAG_GUILDBANK then
-        local slotIndex = GetNextGuildBankSlotId()
-        while slotIndex do
-            self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
-            slotIndex = GetNextGuildBankSlotId(slotIndex)
-        end
-    else
-        local bagSlots = GetBagSize(bagId)
-        for slotIndex = 0, bagSlots - 1 do
-            self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
-        end
+    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+    while slotIndex do
+        self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
+        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
     end
 end
 
@@ -438,10 +430,9 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
         slot.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, slot.rawName)
     end
     slot.requiredLevel = GetItemRequiredLevel(bagId, slotIndex)
-    slot.requiredVeterankRank = GetItemRequiredVeteranRank(bagId, slotIndex)
 
     if not wasSameItemInSlotBefore then
-        slot.itemType = GetItemType(bagId, slotIndex)
+        slot.itemType, slot.specializedItemType = GetItemType(bagId, slotIndex)
         slot.uniqueId = GetItemUniqueId(bagId, slotIndex)
     end
     
@@ -457,6 +448,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.locked = locked                                                      --equipped they are no longer equippable, but we don't want to color these items red
     slot.quality = quality                                                    --in GamepadInventory once they are equipped, because that doesn't make any sense.
     slot.equipType = equipType
+    slot.isPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
     slot.isJunk = IsItemJunk(bagId, slotIndex)
     slot.statValue = GetItemStatValue(bagId, slotIndex) or 0
     slot.itemInstanceId = newItemInstanceId
@@ -464,10 +456,6 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.stolen = IsItemStolen(bagId, slotIndex)
     slot.filterData = { GetItemFilterTypeInfo(bagId, slotIndex) }
     slot.condition = GetItemCondition(bagId, slotIndex)
-
-    if slot.stolen then
-       TriggerTutorial(TUTORIAL_TRIGGER_ITEM_STOLEN)
-    end
 
     if wasSameItemInSlotBefore and slot.age ~= 0 then
         -- don't modify the age, keep it the same relative sort - for now?

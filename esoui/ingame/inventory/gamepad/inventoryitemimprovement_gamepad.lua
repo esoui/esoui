@@ -182,27 +182,18 @@ end
 
 function ZO_InventoryItemImprovement_Gamepad:AddItemKitSubLabelsToCurrentEntry(itemLink)
     local requiredLevel = GetItemLinkRequiredLevel(itemLink)
-    local requiredVeteranRank = GetItemLinkRequiredVeteranRank(itemLink)
+    local requiredChampionPoints = GetItemLinkRequiredChampionPoints(itemLink)
 
-    if requiredVeteranRank > 0 then
-        local failed = requiredVeteranRank > GetUnitVeteranRank("player")
-        local rankString = failed and ZO_ERROR_COLOR:Colorize(requiredVeteranRank) or ZO_DEFAULT_ENABLED_COLOR:Colorize(requiredVeteranRank)
-        self:AddSubLabel(GetString(SI_ITEM_FORMAT_STR_RANK))
-        self:AddSubLabel(rankString)
+    if requiredChampionPoints > 0 then
+        local failed = requiredChampionPoints > GetPlayerChampionPointsEarned()
+        local pointsString = failed and ZO_ERROR_COLOR:Colorize(requiredChampionPoints) or ZO_DEFAULT_ENABLED_COLOR:Colorize(requiredChampionPoints)
+        self:AddSubLabel(zo_iconFormat(GetChampionPointsIcon(), "40", "40"))
+        self:AddSubLabel(pointsString)
     elseif requiredLevel > 0 then
         local failed = requiredLevel > GetUnitLevel("player")
         local levelString = failed and ZO_ERROR_COLOR:Colorize(requiredLevel) or ZO_DEFAULT_ENABLED_COLOR:Colorize(requiredLevel)
         self:AddSubLabel(GetString(SI_ITEM_FORMAT_STR_LEVEL))
         self:AddSubLabel(levelString)
-    else
-        self:AddEmptySubLabel()
-        self:AddEmptySubLabel()
-    end
-
-    local value = GetItemLinkValue(itemLink)
-    if value > 0 then
-        self:AddSubLabel(GetString(SI_ITEM_FORMAT_STR_VALUE))
-        self:AddSubLabel(ZO_DEFAULT_ENABLED_COLOR:Colorize(value))
     else
         self:AddEmptySubLabel()
         self:AddEmptySubLabel()

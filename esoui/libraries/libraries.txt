@@ -25,9 +25,9 @@ EsoUI\Libraries\Utility\ZO_Hook.lua
 EsoUI\Libraries\Utility\ZO_Easing.lua
 EsoUI\Libraries\Utility\ZO_GamepadUtils.lua
 EsoUI\Libraries\Utility\ZO_PrioritizedVisibility.lua
-EsoUI\Libraries\Utility\ZO_VeteranRankUtils.lua
 EsoUI\Libraries\Utility\ZO_ScrollAnimationUtils.lua
 EsoUI\Libraries\Utility\ZO_PlatformUtils.lua
+ESOUI\Libraries\Utility\ZO_PrimaryPlayerName.lua
 
 EsoUI\Libraries\Globals\GlobalVars.lua
 EsoUI\Libraries\Globals\Globals.lua
@@ -83,15 +83,6 @@ EsoUI\Libraries\ZO_KeybindButton\ZO_KeybindButton.xml
 
 EsoUI\Libraries\ZO_DirectionalInput\ZO_DirectionalInput.lua
 
-EsoUI\Libraries\ZO_Dialog\ZO_SharedDialog.xml
-EsoUI\Libraries\ZO_Dialog\ZO_Dialog.lua
-EsoUI\Libraries\ZO_Dialog\ZO_Dialog.xml
-EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.lua
-EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.xml
-EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.lua
-EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.xml
-EsoUI\Libraries\ZO_TimeLockedDialog\ZO_TimeLockedDialog.lua
-
 EsoUI\Libraries\ZO_ContextMenus\ZO_ContextMenus.lua
 EsoUI\Libraries\ZO_ContextMenus\ZO_ContextMenus.xml
 EsoUI\Libraries\ZO_ComboBox\ZO_ComboBox_Base.lua
@@ -117,6 +108,17 @@ EsoUI\Libraries\ZO_Spinner\ZO_Spinner.lua
 EsoUI\Libraries\ZO_Spinner\ZO_Spinner.xml
 EsoUI\Libraries\ZO_Spinner\Gamepad\ZO_Spinner_Gamepad.lua
 EsoUI\Libraries\ZO_Spinner\Gamepad\ZO_Spinner_Gamepad.xml
+EsoUI\Libraries\ZO_GamepadSlider\ZO_GamepadSlider.lua
+EsoUI\Libraries\ZO_GamepadSlider\ZO_GamepadSlider.xml
+
+EsoUI\Libraries\ZO_Dialog\ZO_SharedDialog.xml
+EsoUI\Libraries\ZO_Dialog\ZO_Dialog.lua
+EsoUI\Libraries\ZO_Dialog\ZO_Dialog.xml
+EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.lua
+EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.xml
+EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.lua
+EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.xml
+EsoUI\Libraries\ZO_TimeLockedDialog\ZO_TimeLockedDialog.lua
 
 EsoUI\Libraries\ZO_ColorPicker\ZO_ColorPicker.lua
 EsoUI\Libraries\ZO_ColorPicker\ZO_ColorPicker.xml
@@ -211,6 +213,8 @@ EsoUI\Libraries\ZO_SceneNodeRing\ZO_SceneNodeRing.lua
 EsoUI\Libraries\ZO_LerpInterpolator\ZO_LerpInterpolator.lua
 EsoUI\Libraries\ZO_MouseInputGroup\ZO_MouseInputGroup.lua
 EsoUI\Libraries\ZO_MouseInputGroup\ZO_MouseInputGroup.xml
+EsoUI\Libraries\ZO_PixelUnits\ZO_PixelUnits.lua
+EsoUI\Libraries\ZO_PixelUnits\ZO_PixelUnits.xml
 
 EsoUI\Libraries\ZO_PlatformStyle\ZO_PlatformStyle.lua
 EsoUI\Libraries\ZO_ButtonTabBar\Gamepad\ZO_GamepadButtonTabBar.lua

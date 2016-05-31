@@ -64,7 +64,7 @@ end
 
 do
     local DIGIT_GROUP_REPLACER = GetString(SI_DIGIT_GROUP_SEPARATOR)
-    local DIGIT_GROUP_REPLACER_THRESHOLD = 1000
+    local DIGIT_GROUP_REPLACER_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
     local DIGIT_GROUP_DECIMAL_REPLACER = GetString(SI_DIGIT_GROUP_DECIMAL_SEPARATOR)
     
     function ZO_CommaDelimitNumber(amount)
@@ -72,7 +72,7 @@ do
             return tostring(amount)
         end
 
-        return FormatIntegerWithDigitGrouping(amount, DIGIT_GROUP_REPLACER)
+        return FormatIntegerWithDigitGrouping(amount, DIGIT_GROUP_REPLACER, GetDigitGroupingSize())
     end
 
     function ZO_LocalizeDecimalNumber(amount)

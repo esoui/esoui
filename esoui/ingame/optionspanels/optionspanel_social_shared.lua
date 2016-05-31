@@ -53,6 +53,7 @@ do
         [CHAT_CATEGORY_ZONE_ENGLISH] = CHAT_CHANNEL_ZONE_LANGUAGE_1,
         [CHAT_CATEGORY_ZONE_FRENCH] = CHAT_CHANNEL_ZONE_LANGUAGE_2,
         [CHAT_CATEGORY_ZONE_GERMAN] = CHAT_CHANNEL_ZONE_LANGUAGE_3,
+        [CHAT_CATEGORY_ZONE_JAPANESE] = CHAT_CHANNEL_ZONE_LANGUAGE_4,
         [CHAT_CATEGORY_WHISPER_INCOMING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_WHISPER_OUTGOING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_PARTY] = CHAT_CHANNEL_PARTY,
@@ -141,9 +142,13 @@ do
     function ZO_OptionsPanel_Social_InitializeTextSizeControl(control)
         local data = control.data
         GetControl(control, "Name"):SetText(GetString(data.text))
-        GetControl(control, "Slider"):SetMinMax(data.minValue, data.maxValue)
-        GetControl(control, "Slider"):SetValueStep(1)
-        GetControl(control, "Slider"):SetHandler("OnValueChanged", OnSliderChanged)
+        local slider = GetControl(control, "Slider")
+        --Need to override the existing value changed handler first so it doesn't run when we do the SetMinMax
+        slider:SetHandler("OnValueChanged", nil)
+        slider:SetMinMax(data.minValue, data.maxValue)
+        slider:SetValueStep(1)
+        slider:SetValue(GetChatFontSize())
+        slider:SetHandler("OnValueChanged", OnSliderChanged)
     end
 end
 
@@ -327,6 +332,15 @@ local ZO_OptionsPanel_Social_ControlData =
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_GERMAN,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_GERMAN_COLOR_TOOLTIP,
+        },
+        --Options_Social_ChatColor_Zone_Japan
+        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN] = 
+        {
+            controlType = OPTIONS_CUSTOM,
+            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            panel = SETTING_PANEL_SOCIAL,
+            chatChannelCategory = CHAT_CATEGORY_ZONE_JAPANESE,
+            tooltipText = SI_SOCIAL_OPTIONS_ZONE_JAPANESE_COLOR_TOOLTIP,
         },
         --Options_Social_ChatColor_NPC
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC] = 

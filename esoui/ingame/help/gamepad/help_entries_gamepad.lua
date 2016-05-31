@@ -50,7 +50,7 @@ end
 function HelpTutorialsEntriesGamepad:AddHelpEntry(categoryIndex, helpIndex)
     local helpName, _, _, _, _, _, showOption = GetHelpInfo(categoryIndex, helpIndex)
 
-    if showOption == TUTORIAL_SHOW_OPTIONS_ALL or showOption == TUTORIAL_SHOW_OPTIONS_GAMEPAD then
+    if IsGamepadHelpOption(showOption) then
         local entryData = ZO_GamepadEntryData:New(helpName)
         entryData.helpIndex = helpIndex
         self.itemList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)

@@ -327,7 +327,7 @@ function ZO_CraftingUtils_IsTraitAppliedToWeapons(traitType)
         or traitType == ITEM_TRAIT_TYPE_WEAPON_DEFENDING
         or traitType == ITEM_TRAIT_TYPE_WEAPON_TRAINING
         or traitType == ITEM_TRAIT_TYPE_WEAPON_SHARPENED
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_WEIGHTED
+        or traitType == ITEM_TRAIT_TYPE_WEAPON_DECISIVE
         or traitType == ITEM_TRAIT_TYPE_WEAPON_INTRICATE
         or traitType == ITEM_TRAIT_TYPE_WEAPON_ORNATE
 		or traitType == ITEM_TRAIT_TYPE_WEAPON_NIRNHONED
@@ -340,7 +340,7 @@ function ZO_CraftingUtils_IsTraitAppliedToArmor(traitType)
         or traitType == ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED
         or traitType == ITEM_TRAIT_TYPE_ARMOR_TRAINING
         or traitType == ITEM_TRAIT_TYPE_ARMOR_INFUSED
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_EXPLORATION
+        or traitType == ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS
         or traitType == ITEM_TRAIT_TYPE_ARMOR_DIVINES
         or traitType == ITEM_TRAIT_TYPE_ARMOR_ORNATE
         or traitType == ITEM_TRAIT_TYPE_ARMOR_INTRICATE
@@ -444,7 +444,7 @@ ZO_CRAFTING_TOOLTIP_STYLES = ZO_DeepTableCopy(ZO_TOOLTIP_STYLES)
 for key,value in pairs(ZO_CRAFTING_TOOLTIP_STYLES) do
     value["horizontalAlignment"] = TEXT_ALIGN_CENTER
 
-    if key ~= "topSection" and key ~= "topSubsectionItemDetails" then
+    if key ~= "topSection" then
         value["layoutPrimaryDirectionCentered"] = true
     end
 end

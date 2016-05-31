@@ -2,7 +2,7 @@
     <Controls>
         <Button name="ZO_ProvisionerIngredientBarSlotTemplate" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)IngredientName" font="ZoFontGamepad34" horizontalAlignment="CENTER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="2">
+                <Label name="$(parent)IngredientName" font="ZoFontGamepad34" horizontalAlignment="CENTER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="2" wrapMode="ELLIPSIS">
                     <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" />
                     <Dimensions x="132"/>
                 </Label>

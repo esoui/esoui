@@ -7,9 +7,9 @@
         <TopLevelControl name="ZO_GamepadDialogBase" inherits="ZO_GenericGamepadDialogBase" />
         <TopLevelControl name="ZO_GamepadDialogPara" inherits="ZO_GenericParametricListGamepadDialogTemplate" />
         <TopLevelControl name="ZO_GamepadDialogCool" inherits="ZO_GenericCooldownGamepadDialogTemplate" />
-        <TopLevelControl name="ZO_GamepadDialogTransaction" inherits="ZO_GenericTransactionGamepadDialogTemplate" />
         <TopLevelControl name="ZO_GamepadDialogCentered" inherits="ZO_GenericCenteredGamepadDialogTemplate" />
         <TopLevelControl name="ZO_GamepadDialogStaticList" inherits="ZO_GenericGamepadStaticListDialogTemplate" />
+        <TopLevelControl name="ZO_GamepadDialogItemSlider" inherits="ZO_GenericGamepadItemSliderDialogTemplate" />
 
         <TopLevelControl name="ZO_GamepadDialogBackgroundFade" tier="MEDIUM" layer="OVERLAY" hidden="true">
             <AnchorFill />

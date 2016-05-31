@@ -68,6 +68,14 @@ function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
                                     end
         local onChanged = (slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) and onUltimateChanged or nil
         ZO_Keybindings_RegisterLabelForBindingUpdate(newB.buttonText, "ACTION_BUTTON_".. slotNum, HIDE_UNBOUND, "GAMEPAD_ACTION_BUTTON_".. slotNum, onChanged)
+
+		if slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+			slotCtrl:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
+														if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_ULTIMATE_NUMBER then
+															newB:RefreshUltimateNumberVisibility()
+														end
+													end)
+		end
     end
 
     return newB
@@ -135,7 +143,12 @@ end
 
 local function SetupAbilitySlot(slotObject, slotId)
     SetupActionSlotWithBg(slotObject, slotId)
-    slotObject:SetupCount(nil)
+
+	if slotId == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+		slotObject:RefreshUltimateNumberVisibility()
+	else
+		slotObject:SetupCount(nil)
+	end
 end
 
 local function SetupItemSlot(slotObject, slotId)
@@ -209,6 +222,19 @@ function ActionButton:Clear()
     self.button.actionId = nil
     self.cooldownEdge:SetHidden(true)
     self.countText:SetText("")
+end
+
+function ActionButton:RefreshUltimateNumberVisibility()
+	if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER) then
+		self.countText:SetHidden(false)
+		self:UpdateUltimateNumber()
+	else
+		self:SetupCount(nil)
+	end
+end
+
+function ActionButton:UpdateUltimateNumber()
+	self.countText:SetText(GetUnitPower("player", POWERTYPE_ULTIMATE))
 end
 
 function ActionButton:UpdateActivationHighlight()

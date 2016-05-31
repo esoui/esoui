@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ItemTransferDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_ItemTransferDialog_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Button name="$(parent)Slot" inherits="ZO_ItemSlot">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
+                </Button>
+
+                <Control name="$(parent)Spinner" inherits="ZO_EditSpinner">
+                    <Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="20" />
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Transfer" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

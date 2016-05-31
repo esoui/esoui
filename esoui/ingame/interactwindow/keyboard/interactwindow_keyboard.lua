@@ -271,7 +271,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 confirmError = self:TryGetMaxCurrencyWarningText(reward.rewardType, reward.amount)
             else
                 local control = self.givenRewardPool:AcquireObject()
-                control.index = i
+                control.index = reward.index
                 control.itemType = reward.itemType
                 if control.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
                     control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
@@ -319,6 +319,14 @@ function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
     control:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
 end
 
+function ZO_SharedInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
+    control:SetText(control.optionText)
+    control.enabled = true
+    data.optionUsable = true
+    control.optionType = CHATTER_TALK_CHOICE_USE_SHADOWY_CONNECTIONS
+    control:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
+end
+
 --XML Handlers
 --------------
 
@@ -362,8 +370,7 @@ function ZO_QuestReward_MouseEnter(control)
             ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2)
         elseif control.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
             InitializeTooltip(ItemTooltip, control, RIGHT, -5, 0, LEFT)
-            local ADD_NICKNAME, SHOW_HINT = false, false
-            ItemTooltip:SetCollectible(control.itemId, ADD_NICKNAME, SHOW_HINT)
+            ItemTooltip:SetCollectible(control.itemId)
         end
     end
 end

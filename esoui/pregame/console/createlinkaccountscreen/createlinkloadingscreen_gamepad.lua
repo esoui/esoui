@@ -123,11 +123,11 @@ do
 end
 
 local function OnCreateAccountFailure(eventId, failureReason)
-    PREGAME_INITIAL_SCREEN_CONSOLE:ShowError(GetString(SI_CONSOLE_ERROR_GENERIC), zo_strformat(SI_CONSOLE_CREATEACCOUNT_FAILURE_MESSAGE, failureReason))
+    PREGAME_INITIAL_SCREEN_CONSOLE:ShowError(GetString(SI_CONSOLE_ERROR_GENERIC), zo_strformat(SI_CREATEACCOUNT_FAILURE_MESSAGE, failureReason))
 end
 
 local function OnLinkAccountFailure(eventId, failureReason)
-    PREGAME_INITIAL_SCREEN_CONSOLE:ShowError(GetString(SI_CONSOLE_ERROR_GENERIC), zo_strformat(SI_CONSOLE_LINKACCOUNT_FAILURE_MESSAGE, failureReason))
+    PREGAME_INITIAL_SCREEN_CONSOLE:ShowError(GetString(SI_CONSOLE_ERROR_GENERIC), zo_strformat(SI_LINKACCOUNT_FAILURE_MESSAGE, failureReason))
 end
 
 local function OnServerMaintenance(eventID, requeryTime)
@@ -181,6 +181,12 @@ end
 local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debugInfo)
     local dialogTitle = ""
     local dialogText = ""
+
+    if loginError == LOGIN_AUTH_ERROR_SERVER_PSN_FREE_TRIAL_END then
+        local MUST_PURCHASE_GAME = true
+        PregameStateManager_SetState("GameStartup", MUST_PURCHASE_GAME)
+        return
+    end
 
     if(loginError ~= LOGIN_AUTH_ERROR_NO_ERROR) then
         dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED)

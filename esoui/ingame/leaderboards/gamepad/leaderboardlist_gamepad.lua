@@ -99,7 +99,7 @@ end
 function LeaderboardList_Gamepad:SetupLeaderboardPlayerEntry(control, data)
     ZO_LeaderboardsManager_Shared.SetupLeaderboardPlayerEntry(GAMEPAD_LEADERBOARDS, control, data)
 
-    control.characterNameLabel:SetText(data.characterName)
+    control.characterNameLabel:SetText(ZO_FormatUserFacingCharacterName(data.characterName))
 
     local nameColor = data.recolorName and PLAYER_NAME_COLOR or NAME_COLOR
 

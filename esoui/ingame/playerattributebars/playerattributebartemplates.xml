@@ -12,6 +12,9 @@
             <Anchor point="CENTER"/>
         </Label>
 
+        <Label name="ZO_PlayerAttributeResourceNumbers_Keyboard_Template" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" virtual="true" />
+        <Label name="ZO_PlayerAttributeResourceNumbers_Gamepad_Template" font="ZoFontGamepadBold18" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" virtual="true" />
+
         <StatusBar name="ZO_PlayerAttributeStatusBar" level="500" virtual="true" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_fill.dds">
             <Dimensions y="17" />
             <Anchor point="LEFT" />

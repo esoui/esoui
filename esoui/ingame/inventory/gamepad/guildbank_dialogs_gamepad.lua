@@ -43,7 +43,7 @@ local function SetupGuildSelectionDialog(dialog)
         table.insert(dialog.info.parametricList, listItem)
     end
 
-    dialog.setupFunc(dialog)
+    dialog:setupFunc()
     dialog.entryList:SetSelectedDataByEval(IsActiveGuild)
 end
 

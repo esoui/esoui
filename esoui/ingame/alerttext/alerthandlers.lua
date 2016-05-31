@@ -40,6 +40,7 @@ local CombatEventToSoundId =
     [ACTION_RESULT_NO_WEAPONS_TO_SWAP_TO] = SOUNDS.ABILITY_WEAPON_SWAP_FAIL,
     [ACTION_RESULT_CANT_SWAP_WHILE_CHANGING_GEAR] = SOUNDS.ABILITY_WEAPON_SWAP_FAIL,
     [ACTION_RESULT_MOUNTED] = SOUNDS.ABILITY_NOT_READY,
+    [ACTION_RESULT_INVALID_JUSTICE_TARGET] = SOUNDS.ABILITY_INVALID_JUSTICE_TARGET,
     [ACTION_RESULT_NOT_ENOUGH_INVENTORY_SPACE] = SOUNDS.NEGATIVE_CLICK,
     [ACTION_RESULT_IN_HIDEYHOLE] = SOUNDS.ABILITY_CASTER_STUNNED,
 }
@@ -53,6 +54,31 @@ local ExperienceReasonToSoundId =
 local TrialEventMappings = 
 {
     [TRIAL_RESTRICTION_CANNOT_USE_GUILDS] = true,
+}
+
+local GroupElectionResultToSoundId =
+{
+    [GROUP_ELECTION_RESULT_ELECTION_WON] = SOUNDS.GROUP_ELECTION_RESULT_WON,
+    [GROUP_ELECTION_RESULT_ELECTION_LOST] = SOUNDS.GROUP_ELECTION_RESULT_LOST,
+    [GROUP_ELECTION_RESULT_ABANDONED] = SOUNDS.GROUP_ELECTION_RESULT_LOST,
+}
+
+ZO_GroupElectionResultToAlertTextOverrides =
+{
+    [GROUP_ELECTION_RESULT_ELECTION_WON] =
+    {
+        [ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK] = GetString(SI_GROUP_ELECTION_READY_CHECK_PASSED),
+    },
+    [GROUP_ELECTION_RESULT_ELECTION_LOST] =
+    {
+        [ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK] = GetString(SI_GROUP_ELECTION_READY_CHECK_FAILED),
+    },
+}
+
+ZO_GroupElectionDescriptorToRequestAlertText =
+{
+    [ZO_GROUP_ELECTION_DESCRIPTORS.NONE] = GetString(SI_GROUP_ELECTION_REQUESTED),
+    [ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK] = GetString(SI_GROUP_ELECTION_READY_CHECK_REQUESTED),
 }
 --Return format is
 --  Category - The alert category to send the alert to
@@ -83,14 +109,6 @@ local AlertHandlers = {
             local soundId = ExperienceReasonToSoundId[reason]
             if(soundId) then
                 return ALERT, nil, soundId
-            end
-        end
-    end,
-
-    [EVENT_VETERAN_POINTS_UPDATE] = function(unitTag, exp, maxExp, reason)
-        if(unitTag == "player") then
-            if(reason == PROGRESS_REASON_OVERLAND_BOSS_KILL) then
-                return ALERT, nil, SOUNDS.OVERLAND_BOSS_KILL
             end
         end
     end,
@@ -201,7 +219,7 @@ local AlertHandlers = {
 
     [EVENT_RESURRECT_RESULT] = function(targetCharacterName, reason, targetDisplayName)
         if reason ~= RESURRECT_RESULT_SUCCESS then
-            local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(targetDisplayName) or targetCharacterName
+            local nameToShow = ZO_GetPrimaryPlayerName(targetDisplayName, targetCharacterName)
             if reason ~= RESURRECT_RESULT_DECLINED then
                 return ERROR, zo_strformat(GetString("SI_RESURRECTRESULT", reason), nameToShow), SOUNDS.GENERAL_ALERT_ERROR
             else
@@ -259,7 +277,7 @@ local AlertHandlers = {
     end,
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
-        local nameToUse = ZO_GetPlatformUserFacingName(characterName, displayName)
+        local nameToUse = ZO_GetPrimaryPlayerName(displayName, characterName)
         if(response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED) then
             if(ShouldShowGroupErrorInAlert(response)) then
                 local alertMessage = nameToUse ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToUse) or GetString(SI_PLAYER_BUSY)
@@ -288,40 +306,48 @@ local AlertHandlers = {
         currentGroupLeaderDisplayName = ""
     end,
 
-    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, displayName)
+    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
         local message = nil
         local sound = nil
-
-        local nameToShow = ZO_GetPlatformUserFacingName(characterName, displayName)
-
+        
+        local primaryNameToShow = ZO_GetPrimaryPlayerName(displayName, characterName)
+        local secondaryNameToShow = ZO_GetSecondaryPlayerName(displayName, characterName)
+        local hasValidNames = primaryNameToShow ~= "" and secondaryNameToShow ~= ""
+        local useDefaultReasonText = false
         if reason == GROUP_LEAVE_REASON_DISBAND then
             if isLeader and not isLocalPlayer then
-                if nameToShow ~= "" then
-                    message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_DISBANDED, nameToShow)
-                end
+                useDefaultReasonText = true
             end
 
             sound = SOUNDS.GROUP_DISBAND
         elseif reason == GROUP_LEAVE_REASON_KICKED then
-            if isLocalPlayer then
-                message = SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED
+            if actionRequiredVote then
+                if isLocalPlayer then
+                    message = SI_GROUP_ELECTION_KICK_PLAYER_PASSED
+                elseif hasValidNames then
+                    message = zo_strformat(SI_GROUP_ELECTION_KICK_MEMBER_PASSED, primaryNameToShow, secondaryNameToShow)
+                end
             else
-                if nameToShow ~= "" then
-                    message = zo_strformat(GetString("SI_GROUPLEAVEREASON", reason), nameToShow)
+                if isLocalPlayer then
+                    message = SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED
+                else
+                    useDefaultReasonText = true
                 end
             end
 
             sound = SOUNDS.GROUP_KICK
         elseif reason == GROUP_LEAVE_REASON_VOLUNTARY then
             if not isLocalPlayer then
-                if nameToShow ~= "" then
-                    message = zo_strformat(GetString("SI_GROUPLEAVEREASON", reason), nameToShow)
-                end
+                useDefaultReasonText = true
             end
 
             sound = SOUNDS.GROUP_LEAVE
         elseif reason == GROUP_LEAVE_REASON_DESTROYED then
             --do nothing, we don't want to show additional alerts for this case
+        end
+
+        if useDefaultReasonText and hasValidNames then
+            message = zo_strformat(GetString("SI_GROUPLEAVEREASON", reason), primaryNameToShow, secondaryNameToShow)
         end
 
         if isLocalPlayer then
@@ -339,7 +365,7 @@ local AlertHandlers = {
         currentGroupLeaderRawName = leaderRawName
         currentGroupLeaderDisplayName = GetUnitDisplayName(leaderTag)
 
-        local leaderNameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(currentGroupLeaderDisplayName) or leaderRawName
+        local leaderNameToShow = ZO_GetPrimaryPlayerName(currentGroupLeaderDisplayName, currentGroupLeaderRawName)
 
         if showAlert then
             return ALERT, zo_strformat(SI_GROUP_NOTIFICATION_GROUP_LEADER_CHANGED, leaderNameToShow), SOUNDS.GROUP_PROMOTE
@@ -373,12 +399,12 @@ local AlertHandlers = {
     end,
 
     [EVENT_TRADE_INVITE_CONSIDERING] = function(inviterCharacterName, inviterDisplayName)
-        local name = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(inviterDisplayName) or inviterCharacterName
+        local name = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
         return ALERT, zo_strformat(SI_TRADE_INVITE, name)
     end,
 
     [EVENT_TRADE_INVITE_WAITING] = function(inviteeCharacterName, inviteeDisplayName)
-        local name = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(inviteeDisplayName) or inviteeCharacterName
+        local name = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
         return ALERT, zo_strformat(SI_TRADE_INVITE_CONFIRM, name)
     end,
 
@@ -450,7 +476,7 @@ local AlertHandlers = {
 
     [EVENT_PLEDGE_OF_MARA_RESULT] = function(result, characterName, displayName)
         if(result ~= PLEDGE_OF_MARA_RESULT_PLEDGED and result ~= PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE) then
-            local userFacingDisplayName = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or characterName
+            local userFacingDisplayName = ZO_GetPrimaryPlayerName(displayName, characterName)
             return ERROR, zo_strformat(GetString("SI_PLEDGEOFMARARESULT", result), userFacingDisplayName), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
@@ -485,9 +511,9 @@ local AlertHandlers = {
 
     [EVENT_PLAYER_ACTIVATED] = function()
         if DoesCurrentZoneAllowScalingByLevel() and IsUnitGrouped("player") then
-            local isVetBattleLeveled = IsUnitVetBattleLeveled("player")
-            if isVetBattleLeveled then
-                local level = GetUnitVetBattleLevel("player")
+            local isChampionBattleLeveled = IsUnitChampionBattleLeveled("player")
+            if isChampionBattleLeveled then
+                local level = GetUnitChampionBattleLevel("player")
                 return ALERT, zo_strformat(SI_ENTERED_SCALED_ZONE, level)
             end
         end
@@ -539,6 +565,7 @@ local AlertHandlers = {
 
     [EVENT_INVENTORY_IS_FULL] = function(numSlotsRequested, numSlotsFree)
         if numSlotsRequested == 1 then
+            TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
             return ERROR, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL), SOUNDS.GENERAL_ALERT_ERROR
         else
             return ERROR, zo_strformat(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE, numSlotsRequested - numSlotsFree), SOUNDS.GENERAL_ALERT_ERROR
@@ -573,6 +600,13 @@ local AlertHandlers = {
 
     [EVENT_CAMPAIGN_ASSIGNMENT_RESULT] = function(result)
         local resultString = GetString("SI_CAMPAIGNREASSIGNMENTERRORREASON", result)
+        if resultString ~= "" then
+            return ERROR, resultString, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_CAMPAIGN_UNASSIGNMENT_RESULT] = function(result)
+        local resultString = GetString("SI_UNASSIGNCAMPAIGNRESULT", result)
         if resultString ~= "" then
             return ERROR, resultString, SOUNDS.GENERAL_ALERT_ERROR
         end
@@ -678,6 +712,65 @@ local AlertHandlers = {
 
     [EVENT_TUTORIALS_RESET] = function()
         return ALERT, GetString(SI_TUTORIALS_RESET)
+    end,
+
+    [EVENT_GROUP_ELECTION_FAILED] = function(failureType, descriptor)
+        if failureType ~= GROUP_ELECTION_FAILURE_NONE then
+            return ERROR, GetString("SI_GROUPELECTIONFAILURE", failureType), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_GROUP_ELECTION_RESULT] = function(resultType, descriptor)
+        if resultType ~= GROUP_ELECTION_RESULT_IN_PROGRESS and resultType ~= GROUP_ELECTION_RESULT_NOT_APPLICABLE then
+            resultType = ZO_GetSimplifiedGroupElectionResultType(resultType)
+            local alertText
+
+            --Try to find override messages based on the descriptor
+            local alertTextOverrideLookup = ZO_GroupElectionResultToAlertTextOverrides[resultType]
+            if alertTextOverrideLookup then
+                alertText = alertTextOverrideLookup[descriptor]
+            end
+
+            --No override found
+            if not alertText then
+                local electionType, _, _, targetUnitTag = GetGroupElectionInfo()
+                if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
+                    if resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
+                        local primaryName = ZO_GetPrimaryPlayerNameFromUnitTag(targetUnitTag)
+                        local secondaryName = ZO_GetSecondaryPlayerNameFromUnitTag(targetUnitTag)
+                        alertText = zo_strformat(SI_GROUP_ELECTION_KICK_MEMBER_FAILED, primaryName, secondaryName)
+                    else
+                        --Successful kicks are handled in the GROUP_MEMBER_LEFT alert
+                        return
+                    end
+                end
+            end
+
+            --No specific behavior found, so just do the generic alert for the result
+            if not alertText then
+                alertText = GetString("SI_GROUPELECTIONRESULT", resultType)
+            end
+
+            if alertText ~= "" then
+                if type(alertText) == "function" then
+                    alertText = alertText()
+                end
+                return ALERT, alertText, GroupElectionResultToSoundId[resultType]
+            end
+        end
+    end,
+
+    [EVENT_GROUP_ELECTION_REQUESTED] = function(descriptor)
+        local alertText
+        if descriptor then
+            alertText = ZO_GroupElectionDescriptorToRequestAlertText[descriptor]
+        end
+
+        if not alertText then
+            alertText = ZO_GroupElectionDescriptorToRequestAlertText[ZO_GROUP_ELECTION_DESCRIPTORS.NONE]
+        end
+
+        return ALERT, alertText, SOUNDS.GROUP_ELECTION_REQUESTED
     end,
 }
 

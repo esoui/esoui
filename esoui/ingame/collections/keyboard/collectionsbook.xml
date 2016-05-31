@@ -2,7 +2,7 @@
     <Controls>
         <Control name="ZO_CollectibleIconHeader" inherits="ZO_IconHeader" virtual="true">
             <Controls>
-                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
                     <Dimensions x="32" y="32" />
                     <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
                 </Texture>
@@ -23,16 +23,75 @@
 
         <Label name="ZO_CollectibleSubCategory" inherits="ZO_JournalSubCategory" virtual="true" >
             <Controls>
-                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
                     <Dimensions x="24" y="24" />
                     <Anchor point="RIGHT" relativePoint="LEFT" />
                 </Texture>
             </Controls>
         </Label>
         
-        <Control name="ZO_CollectableStickerBase" virtual="true">
-            <Dimensions x="170" y="125" />
+        <Control name="ZO_CollectibleSticker" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_COLLECTIBLE_STICKER_SINGLE_WIDTH" y="ZO_COLLECTIBLE_STICKER_SINGLE_HEIGHT" />
+
+            <OnInitialized>
+                self.parent = self:GetParent()
+                self.title = self:GetNamedChild("Title")
+                self.highlight = self:GetNamedChild("Highlight")
+                self.icon = self:GetNamedChild("Icon")
+                self.multiIcon = self:GetNamedChild("MultiIcon")
+                self.cornerTag = self:GetNamedChild("CornerTag")
+
+                self.cooldownIcon = self:GetNamedChild("CooldownIcon")
+                self.cooldownIconDesaturated = self:GetNamedChild("CooldownIconDesaturated")
+                self.cooldownTime = self:GetNamedChild("CooldownTime")
+                self.cooldownEdge = self:GetNamedChild("CooldownEdge")
+                self.iconAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("JournalProgressIconSlotMouseOverAnimation", self.icon)
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                if self.collectible then
+                    self.collectible:OnMouseEnter()
+                end
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                if self.collectible then
+                    self.collectible:OnMouseExit()
+                end
+            </OnMouseExit>
+
+            <OnMouseUp>
+                if upInside and self.collectible then
+                    self.collectible:OnClicked(button)
+                end
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                if self.collectible then
+                    self.collectible:OnMouseDoubleClick(button)
+                end
+            </OnMouseDoubleClick>
+
+            <OnEffectivelyHidden>
+                if self.collectible then
+                    self.collectible:OnEffectivelyHidden()
+                end
+            </OnEffectivelyHidden>
+
+            <OnUpdate>
+                if self.collectible then
+                    self.collectible:OnUpdate()
+                end
+            </OnUpdate>
+
             <Controls>
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" hidden="true" layer="BACKGROUND" level="1">
+                    <AnchorFill />
+                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
+                </Texture>
+                
+                <Backdrop name="$(parent)BG" inherits="ZO_CenterlessBackdrop" level="0"/>
+                
                 <Texture name="$(parent)Icon" level="3" hidden="true">
                     <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
                     <Dimensions x="52" y="52"/>
@@ -72,43 +131,24 @@
                 <Label name="$(parent)CooldownTime" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" verticalAlignment="CENTER" hidden="true">
                     <Anchor point="TOPLEFT"  offsetX="4" offsetY="4" />
                 </Label>
-                
             </Controls>
         </Control>
 
-        <Control name="ZO_CollectableSticker" inherits="ZO_CollectableStickerBase" mouseEnabled="true" virtual="true">
-            <OnMouseEnter>
-                self.collectible:OnMouseEnter()
-            </OnMouseEnter>
+        <Control name="ZO_CollectibleStickerRow" virtual="true">
+            <Dimensions x="ZO_COLLECTIBLE_STICKER_ROW_WIDTH" y="ZO_COLLECTIBLE_STICKER_ROW_HEIGHT" />
 
-            <OnMouseExit>
-                self.collectible:OnMouseExit()
-            </OnMouseExit>
-
-            <OnMouseUp>
-                if upInside then
-                    self.collectible:OnClicked(button)
-                end
-            </OnMouseUp>
-
-            <OnMouseDoubleClick>
-                self.collectible:OnMouseDoubleClick(button)
-            </OnMouseDoubleClick>
-
-            <OnEffectivelyHidden>
-                self.collectible:OnEffectivelyHidden()
-            </OnEffectivelyHidden>
-
-            <OnUpdate>
-                self.collectible:OnUpdate()
-            </OnUpdate>
-            
             <Controls>
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" hidden="true" layer="BACKGROUND" level="1">
-                    <AnchorFill />
-                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
-                </Texture>
-                <Backdrop name="$(parent)BG" inherits="ZO_CenterlessBackdrop" level="0"/>
+                <Control name="$(parent)Sticker2" inherits="ZO_CollectibleSticker">
+                    <Anchor point="CENTER" />
+                </Control>
+
+                <Control name="$(parent)Sticker1" inherits="ZO_CollectibleSticker">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Sticker2" relativePoint="LEFT" offsetX="-ZO_COLLECTIBLE_PADDING" />
+                </Control>
+
+                <Control name="$(parent)Sticker3" inherits="ZO_CollectibleSticker">
+                    <Anchor point="LEFT" relativeTo="$(parent)Sticker2" relativePoint="RIGHT" offsetX="ZO_COLLECTIBLE_PADDING" />
+                </Control>
             </Controls>
         </Control>
         
@@ -126,6 +166,8 @@
                             <Anchor point="BOTTOMLEFT" offsetX="-28" />
                         </Control>
                         
+                        <Control name="$(parent)ContentList" override="true" hidden="true" />
+
                         <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Anchor point="TOPLEFT" offsetX="9" offsetY="28" />
                             <Dimensions x="240"/>
@@ -166,6 +208,11 @@
                             </Controls>
                         </Control>
                     </Controls>
+                </Control>
+                
+                <Control name="$(parent)List" inherits="ZO_ScrollList" hidden="false">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContentsContentList" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ContentsContentList" />
                 </Control>
             </Controls>
         </TopLevelControl>

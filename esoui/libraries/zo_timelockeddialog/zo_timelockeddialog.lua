@@ -16,11 +16,8 @@ function ZO_TimeLockedDialog:Initialize(dialogName, dialogInfo, cooldownFunction
     local function SetupTimeLockedDialog(dialog, data)
         self:InitializeDialog(data)
     end
-    
-    dialogInfo.setup = SetupTimeLockedDialog
-    ZO_Dialogs_RegisterCustomDialog(dialogName, dialogInfo)
 
-    function self.onUpdate(control, time)
+    local function UpdateTimeLockedDialog(control, time)
         local isLocked = self:IsLocked()
         if(isLocked) then
             time = zo_floor(time)
@@ -35,7 +32,13 @@ function ZO_TimeLockedDialog:Initialize(dialogName, dialogInfo, cooldownFunction
         end
 
         self.wasLocked = isLocked
-    end                            
+    end
+    
+    dialogInfo.setup = SetupTimeLockedDialog
+    dialogInfo.updateFn = UpdateTimeLockedDialog
+
+    ZO_Dialogs_RegisterCustomDialog(dialogName, dialogInfo)
+                       
 end
 
 function ZO_TimeLockedDialog:IsLocked()
@@ -60,7 +63,6 @@ end
 
 function ZO_TimeLockedDialog:Hide()
     self.data = nil
-    self.control:SetHandler("OnUpdate", nil)
     ZO_Dialogs_ReleaseDialogOnButtonPress(self.dialogName)
 end
 
@@ -68,7 +70,6 @@ function ZO_TimeLockedDialog:InitializeDialog(data)
     self.data = data
     self.wasLocked = self:IsLocked()
     self.lastUpdateTime = 0
-    self.control:SetHandler("OnUpdate", self.onUpdate)
     self:Refresh()
 end
 

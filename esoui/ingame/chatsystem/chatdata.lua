@@ -27,6 +27,7 @@ local MultiLevelEventToCategoryMappings = {
         [CHAT_CHANNEL_ZONE_LANGUAGE_1] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_1),
         [CHAT_CHANNEL_ZONE_LANGUAGE_2] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_2),
         [CHAT_CHANNEL_ZONE_LANGUAGE_3] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_3),
+        [CHAT_CHANNEL_ZONE_LANGUAGE_4] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_4),
         [CHAT_CHANNEL_WHISPER] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER),
         [CHAT_CHANNEL_WHISPER_SENT] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER_SENT),
         [CHAT_CHANNEL_PARTY] = GetChannelCategoryFromChannel(CHAT_CHANNEL_PARTY),
@@ -125,6 +126,14 @@ local ChannelInfo =
         playerLinkable = true,
         channelLinkable = false,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE_GERMAN)
+    },
+    [CHAT_CHANNEL_ZONE_LANGUAGE_4] =
+    {
+        format = SI_CHAT_MESSAGE_ZONE_JAPANESE,
+        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_JAPANESE),
+        playerLinkable = true,
+        channelLinkable = false,
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE_JAPANESE)
     },
     [CHAT_CHANNEL_PARTY] =
     {

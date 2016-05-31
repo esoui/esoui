@@ -1,15 +1,13 @@
 ﻿local FLOW_UNINITIALIZED = 0
-local FLOW_UNLOCKED = 1
-local FLOW_OWNED = 2
-local FLOW_CONFIRMATION = 3
-local FLOW_PURCHASING = 4
-local FLOW_SUCCESS = 5
-local FLOW_FAILED = 6
+local FLOW_WARNING = 1
+local FLOW_CONFIRMATION = 2
+local FLOW_PURCHASING = 3
+local FLOW_SUCCESS = 4
+local FLOW_FAILED = 5
 
 local DIALOG_FLOW = 
 {
-    [FLOW_UNLOCKED] = "GAMEPAD_MARKET_PARTS_UNLOCKED",
-    [FLOW_OWNED] = "GAMEPAD_MARKET_BUNDLE_PARTS_OWNED",
+    [FLOW_WARNING] = "GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE",
     [FLOW_CONFIRMATION] = "GAMEPAD_MARKET_PURCHASE_CONFIRMATION",
     [FLOW_PURCHASING] = "GAMEPAD_MARKET_PURCHASING",
     [FLOW_SUCCESS] = "GAMEPAD_MARKET_PURCHASE_SUCCESS",
@@ -97,7 +95,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     local buyPlusButtons = {}
     
     local consoleStoreName
-    local insufficientFundsMainText
     local buyCrownsMainText
     local buyPlusMainText
 
@@ -119,10 +116,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         insufficientFundsButtons[1] = openURLButton
         buyCrownsButtons[1] = openURLButton
 
-        insufficientFundsMainText = SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK
-        self.insufficientCrownsData = ZO_BUY_CROWNS_URL_TYPE
-        self.insufficientCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT) } }
-        
         buyCrownsMainText = SI_CONFIRM_OPEN_URL_TEXT
         g_buyCrownsData = ZO_BUY_CROWNS_URL_TYPE
         g_buyCrownsTextParams = ZO_BUY_CROWNS_FRONT_FACING_ADDRESS
@@ -131,12 +124,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     end
 
     if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
-        local consoleTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName } }
-        insufficientFundsMainText = SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL
-        self.insufficientCrownsTextParams = consoleTextParams
-
         buyCrownsMainText = SI_GAMEPAD_MARKET_BUY_CROWNS_TEXT_LABEL
-        g_buyCrownsTextParams = consoleTextParams
+        g_buyCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName } }
         
         local OpenConsoleStoreToPurchaseCrowns = function()
             ShowConsoleStoreUI()
@@ -173,7 +162,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     buyCrownsButtons[2] = defaultMarketBackButton
     table.insert(buyPlusButtons, defaultMarketBackButton)
 
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_INSUFFICIENT_CROWNS",
+    ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] = 
     {
         gamepadInfo =
         {
@@ -181,86 +170,17 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         title =
         {
-            text = SI_MARKET_INSUFFICIENT_FUNDS_TITLE
+            text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
         },
         mainText =
         {
-            text = insufficientFundsMainText
-        },
-        buttons = insufficientFundsButtons,
-        noChoiceCallback = EndPurchaseNoChoice,
-        finishedCallback =  function()
-                                OnMarketEndPurchase()
-                            end,
-    })
-
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_INVENTORY_FULL",
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        setup = function(dialog, ...)
-                    dialog.setupFunc(dialog, ...)
-                end,
-        title =
-        {
-            text = SI_MARKET_INVENTORY_FULL_TITLE,
-        },
-        mainText =
-        {
-            text = SI_MARKET_INVENTORY_FULL_TEXT,
-        },
-        buttons = { defaultMarketBackButton },
-        noChoiceCallback = EndPurchaseNoChoice,
-        finishedCallback =  function()
-                                OnMarketEndPurchase()
-                            end,
-    })
-
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_UNABLE_TO_PURCHASE",
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        setup = function(dialog, ...)
-                    dialog.setupFunc(dialog, ...)
-                end,
-        title =
-        {
-            text = SI_MARKET_UNABLE_TO_PURCHASE_TITLE,
-        },
-        mainText =
-        {
-            text = SI_MARKET_UNABLE_TO_PURCHASE_TEXT,
-        },
-        buttons = { defaultMarketBackButton },
-        noChoiceCallback = EndPurchaseNoChoice,
-        finishedCallback =  function()
-                                OnMarketEndPurchase()
-                            end,
-    })
-
-    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_OWNED],
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        title =
-        {
-            text = SI_MARKET_BUNDLE_PARTS_OWNED_TITLE
-        },
-        mainText =
-        {
-            text = SI_MARKET_BUNDLE_PARTS_OWNED_TEXT
+            text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
         },
         buttons =
         {
             [1] =
             {
-                text = SI_MARKET_BUNDLE_PARTS_OWNED_CONTINUE,
+                text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
                 callback = function() self.doMoveToNextFlowPosition = true end
             },
             [2] =
@@ -269,50 +189,59 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 callback = EndPurchase
             },
         },
-        mustChoose = true,
-        finishedCallback = function() 
-                               if not self.doMoveToNextFlowPosition then
-                                    OnMarketEndPurchase()
-                                end
-                               self:MoveToNextFlowPosition()
-                           end
-    })
 
-    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_UNLOCKED],
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        title =
-        {
-            text = SI_MARKET_BUNDLE_PARTS_UNLOCKED_TITLE
-        },
-        mainText =
-        {
-            text = SI_MARKET_BUNDLE_PARTS_UNLOCKED_TEXT
-        },
-        buttons =
-        {
-            [1] =
-            {
-                text = SI_MARKET_BUNDLE_PARTS_UNLOCKED_CONTINUE,
-                callback = function() self.doMoveToNextFlowPosition = true end
-            },
-            [2] =
-            {
-                text = SI_DIALOG_EXIT,
-                callback = EndPurchase
-            },
-        },
-        mustChoose = true,
         finishedCallback = function() 
                                 if not self.doMoveToNextFlowPosition then
                                     OnMarketEndPurchase()
                                 end
                                 self:MoveToNextFlowPosition() 
                            end
-    })
+    }
+
+    ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+        },
+        mainText =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
+        },
+        buttons = insufficientFundsButtons,
+        noChoiceCallback = EndPurchaseNoChoice,
+        finishedCallback =  function()
+                                OnMarketEndPurchase()
+                            end,
+    }
+
+    ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+        },
+        mainText =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
+        },
+        buttons = { defaultMarketBackButton },
+        noChoiceCallback = EndPurchaseNoChoice,
+        finishedCallback =  function()
+                                OnMarketEndPurchase()
+                            end,
+        setup = function(dialog, ...)
+                    dialog.setupFunc(dialog, ...)
+                end,
+    }
 
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_CONFIRMATION],
     {
@@ -386,9 +315,13 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         buttons = buyPlusButtons
     })
 
-    local function OnMarketPurchaseResult(_, result)
+    local function OnMarketPurchaseResult(_, result, tutorialTrigger)
         EVENT_MANAGER:UnregisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT)
         self.result = result
+
+        if tutorialTrigger ~= TUTORIAL_TRIGGER_NONE then
+            self.triggerTutorialOnPurchase = tutorialTrigger
+        end
     end
 
     local LOADING_DELAY = 500 -- delay is in milliseconds
@@ -403,6 +336,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 else
                     if self.marketProduct:GetNumAttachedCollectibles() > 0 then
                         self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
+                    elseif IsMarketInstantUnlockServiceToken(GetMarketProductInstantUnlockType(self.marketProductId)) then
+                        self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE, self.itemName)                        
                     else
                         self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
                     end
@@ -420,7 +355,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     end
 
     local function MarketPurchasingDialogSetup(dialog, data)
-        dialog.setupFunc(dialog)
+        dialog:setupFunc()
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(data, ...) end)
         BuyMarketProduct(self.marketProductId)
     end
@@ -493,6 +428,23 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 text = SI_MARKET_BACK_TO_STORE_KEYBIND_LABEL,
                 callback = EndPurchase,
             },
+            {
+                keybind = "DIALOG_TERTIARY",
+                text = SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL,
+                visible = function(dialog)
+                        local isVisible = false
+
+                        if self.result and self.result == MARKET_PURCHASE_RESULT_SUCCESS then
+                            isVisible = IsMarketInstantUnlockServiceToken(GetMarketProductInstantUnlockType(self.marketProductId))
+                        end
+
+                        return isVisible
+                    end,
+                callback = function()
+                        EndPurchase()
+                        Logout()
+                    end,
+            },
         },
         canQueue = true,
         mustChoose = true,
@@ -539,28 +491,25 @@ do
     local BULLET_ICON_SIZE = 32
     local LABEL_FONT = "ZoFontGamepadCondensed42"
 
-    local function CreateMarketAttachmentListEntry(productId, attachmentType, attachmentIndex)
-        local name
-        if attachmentType == ATTACHMENT_TYPE_ITEM then
-            local itemIcon, itemName, quality, requiredLevel, itemCount = select(2, GetMarketProductItemInfo(productId, attachmentIndex))
-            if itemCount > 1 then
-                name = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, itemCount)
+    local function CreateMarketPurchaseListEntry(marketProductId)
+        local name = GetMarketProductDisplayName(marketProductId)
+        local formattedName
+        if GetMarketProductType(marketProductId) == MARKET_PRODUCT_TYPE_ITEM then
+            local stackSize = GetMarketProductItemStackCount(marketProductId)
+            if stackSize > 1 then
+                formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, name, stackSize)
             else
-                name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, itemName)
+                formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
             end
-        elseif attachmentType == ATTACHMENT_TYPE_COLLECTIBLE then
-            local collectibleIcon, collectibleName = select(2, GetMarketProductCollectibleInfo(productId, attachmentIndex))
-            name = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName)
-        elseif attachmentType == ATTACHMENT_TYPE_INSTANT_UNLOCK then
-            --relying on the fact that the "name" of the instant unlock is the same as the market product (same as in the tooltip)
-            name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductInfo(productId))
+        else
+            formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
         end
 
         local entryTable = {
                                 icon = BULLET_ICON,
                                 iconColor = ZO_NORMAL_TEXT,
                                 iconSize = BULLET_ICON_SIZE,
-                                label = name,
+                                label = formattedName,
                                 labelFont = LABEL_FONT,
                             }
 
@@ -572,12 +521,14 @@ do
         local marketProductId = self.marketProductId
         local productName, description, cost, discountedCost, discountPercent, productIcon = marketProduct:GetMarketProductInfo()
         local isBundle = marketProduct:IsBundle()
-        self.hasItems = GetMarketProductNumItems(marketProductId) > 0
+        self.hasItems = marketProduct:GetNumAttachedItems() > 0
         self.stackCount = 0
 
         local formattedProductName
         if not isBundle then
-            self.stackCount = select(6, GetMarketProductItemInfo(self.marketProductId, 1))
+             if marketProduct:GetProductType() == MARKET_PRODUCT_TYPE_ITEM then
+                self.stackCount = GetMarketProductItemStackCount(marketProductId)
+            end
             dialog.listHeader = nil
         else
             dialog.listHeader = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, productName)
@@ -594,21 +545,15 @@ do
         local itemInfo = dialog.info.itemInfo
         ZO_ClearNumericallyIndexedTable(itemInfo)
 
-        for itemIndex = 1, marketProduct:GetNumAttachedItems() do
-            local entryTable = CreateMarketAttachmentListEntry(marketProductId, ATTACHMENT_TYPE_ITEM, itemIndex)
-
-            table.insert(itemInfo, entryTable)
-        end
-
-        for collectibleIndex = 1, marketProduct:GetNumAttachedCollectibles() do
-            local entryTable = CreateMarketAttachmentListEntry(marketProductId, ATTACHMENT_TYPE_COLLECTIBLE, collectibleIndex)
-
-            table.insert(itemInfo, entryTable)
-        end
-
-        if marketProduct:HasInstantUnlock() then
-            local entryTable = CreateMarketAttachmentListEntry(marketProductId, ATTACHMENT_TYPE_INSTANT_UNLOCK, 1)
-
+        if isBundle then
+            local numChildren = marketProduct:GetNumChildren()
+            for childIndex = 1, numChildren do
+                local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
+                local entryTable = CreateMarketPurchaseListEntry(childMarketProductId)
+                table.insert(itemInfo, entryTable)
+            end
+        else
+            local entryTable = CreateMarketPurchaseListEntry(marketProductId)
             table.insert(itemInfo, entryTable)
         end
 
@@ -653,22 +598,20 @@ do
         self.onPurchaseSuccessCallback = onPurchaseSuccessCallback
         self.onPurchaseEndCallback = onPurchaseEndCallback
 
+        local hasErrors, dialogParams, promptBuyCrowns, allowContinue = ZO_MARKET_SINGLETON:GetMarketProductPurchaseErrorInfo(marketProduct:GetId())
+
         PlaySound(SOUNDS.MARKET_PURCHASE_SELECTED)
-        local expectedPurchaseResult = CouldPurchaseMarketProduct(self.marketProductId)
-        if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
-            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_INSUFFICIENT_CROWNS", self.insufficientCrownsData, self.insufficientCrownsTextParams)
-        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
-            local spaceNeeded = GetSpaceNeededToPurchaseMarketProduct(self.marketProductId)
-            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_INVENTORY_FULL", inventoryFullData, { mainTextParams = { spaceNeeded } })
-        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_UNLOCKED_BACKPACK_UPGRADES or expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_UNLOCKED_BANK_UPGRADES then
-            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_UNABLE_TO_PURCHASE", nil, { mainTextParams = { GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult) } })
-        elseif marketProduct:HasSubscriptionUnlockedAttachments() then
-            self:SetFlowPosition(FLOW_UNLOCKED)
-        elseif marketProduct:HasBeenPartiallyPurchased() then
-            self:SetFlowPosition(FLOW_OWNED)
+
+        if promptBuyCrowns then
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
+        elseif not allowContinue then
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", nil, dialogParams)
+        elseif hasErrors then
+            self:SetFlowPosition(FLOW_WARNING, dialogParams)
         else
             self:SetFlowPosition(FLOW_CONFIRMATION)
         end
+
         OnMarketStartPurchase(self.marketProductId)
     end
 end
@@ -677,7 +620,7 @@ function ZO_GamepadMarketPurchaseManager:EndPurchase(isNoChoice)
     local reachedConfirmationScene = self.flowPosition >= FLOW_CONFIRMATION
     local consumablePurchaseSuccessful = self.hasItems and self.flowPosition == FLOW_SUCCESS
     if self.onPurchaseEndCallback then
-        self.onPurchaseEndCallback(reachedConfirmationScene, consumablePurchaseSuccessful)
+        self.onPurchaseEndCallback(reachedConfirmationScene, consumablePurchaseSuccessful, self.triggerTutorialOnPurchase)
     end
 
     -- Hiding the purchase scene after a no choice dialog exit results in the start button no longer working
@@ -699,11 +642,12 @@ function ZO_GamepadMarketPurchaseManager:ResetState()
     self.onPurchaseSuccessCallback = nil
     self.onPurchaseEndCallback = nil
     self.hasItems = false
+    self.triggerTutorialOnPurchase = nil
     self.flowPosition = FLOW_UNINITIALIZED
     self.doMoveToNextFlowPosition = false
 end
 
-function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position)
+function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position, dialogParams)
     self.flowPosition = position
 
     if position == FLOW_CONFIRMATION then
@@ -712,15 +656,14 @@ function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position)
         local name = self.marketProduct:GetMarketProductInfo()
         ZO_Dialogs_ShowGamepadDialog(DIALOG_FLOW[position], nil, {titleParams = {name}, mainTextParams = {ZO_SELECTED_TEXT:Colorize(name)}})
     else
-        ZO_Dialogs_ShowGamepadDialog(DIALOG_FLOW[position])
+        ZO_Dialogs_ShowGamepadDialog(DIALOG_FLOW[position], nil, dialogParams)
     end
 end
 
 do
     local FLOW_MAPPING =
     {
-        [FLOW_UNLOCKED] = FLOW_CONFIRMATION,
-        [FLOW_OWNED] = FLOW_CONFIRMATION,
+        [FLOW_WARNING] = FLOW_CONFIRMATION,
         [FLOW_CONFIRMATION] = FLOW_PURCHASING,
         [FLOW_PURCHASING] = FLOW_SUCCESS,
     }

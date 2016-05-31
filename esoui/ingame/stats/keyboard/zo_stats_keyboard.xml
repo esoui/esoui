@@ -26,10 +26,10 @@
             <Dimensions x="607"/>
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" offsetY="2" />
+                    <Anchor point="LEFT" offsetY="5" />
                 </Label>
                 <Label name="$(parent)AttributePointsValue" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="RIGHT" offsetY="2"/>
+                    <Anchor point="RIGHT" offsetY="5"/>
                 </Label>
                 <Label name="$(parent)AttributePointsLabel" font="ZoFontHeader2" text="SI_STATS_AVAILABLE_POINTS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="RIGHT" relativeTo="$(parent)AttributePointsValue" relativePoint="LEFT" offsetX="-3"/>
@@ -354,9 +354,9 @@
                                 <Label name="$(parent)Level" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_STAT_VALUE:STAT_VALUE_COLOR_BATTLE_LEVELED">
                                     <Anchor point="RIGHT"/>
                                 </Label>
-                                <Texture name="$(parent)LevelTypeIcon" textureFile="EsoUI/Art/Progression/veteranIcon_small.dds">
+                                <Texture name="$(parent)LevelTypeIcon" textureFile="EsoUI/Art/Champion/champion_icon.dds">
                                     <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT"/>
-                                    <TextureCoords left="0.125" top="0.125" right="0.875" bottom="0.875"/>
+                                    <TextureCoords left="0" top="0" right="1" bottom="1"/>
                                      <!--The width is handled in code based on whenever or not you are Vet BattleRanked-->
                                     <Dimensions x="0" y="24"/>
                                 </Texture>

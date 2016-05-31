@@ -1,19 +1,21 @@
-local MAX_SUMMARY_CATEGORIES = 10
-local SUMMARY_CATEGORY_BAR_HEIGHT = 16
-local SUMMARY_CATEGORY_PADDING = 50
-local COLLECTIBLE_PADDING = 10
-local COLLECTIBLE_STICKER_SINGLE_WIDTH = 170
-local COLLECTIBLE_STICKER_SINGLE_HEIGHT = 125
+ZO_COLLECTIBLE_PADDING = 10
+ZO_COLLECTIBLE_STICKER_SINGLE_WIDTH = 175
+ZO_COLLECTIBLE_STICKER_SINGLE_HEIGHT = 125
 local COLLECTIBLE_STICKER_ROW_STRIDE = 3
-local MAX_COLLECTIBLE_ROW_WIDTH = (COLLECTIBLE_STICKER_SINGLE_WIDTH + COLLECTIBLE_PADDING) * COLLECTIBLE_STICKER_ROW_STRIDE
+ZO_COLLECTIBLE_STICKER_ROW_WIDTH = (ZO_COLLECTIBLE_STICKER_SINGLE_WIDTH + ZO_COLLECTIBLE_PADDING) * COLLECTIBLE_STICKER_ROW_STRIDE
+ZO_COLLECTIBLE_STICKER_ROW_HEIGHT = ZO_COLLECTIBLE_STICKER_SINGLE_HEIGHT + ZO_COLLECTIBLE_PADDING
 local RETAIN_SCROLL_POSITION = true
-local DONT_RETAIN_SCROLL_POSITION = true
+local DONT_RETAIN_SCROLL_POSITION = false
 local ACTIVE_ICON = "EsoUI/Art/Inventory/inventory_icon_equipped.dds"
+local HIDDEN_ICON = "EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds"
+local VISIBLE_ICON = "EsoUI/Art/Inventory/inventory_icon_visible.dds"
 local NOTIFICATIONS_PROVIDER = NOTIFICATIONS:GetCollectionsProvider()
+local STICKER_ROW_DATA = 1
 
 --Descriptive defaults for readibility in function calls
 local FORCE_HIDE_PROGRESS_TEXT = true
 local DONT_HIDE_LOCKED = false
+local DONT_ANIMATE = true
 
 local function GetTextColor(enabled, normalColor, disabledColor)
     if enabled then
@@ -26,6 +28,8 @@ local function ApplyTextColorToLabel(label, ...)
     label:SetColor(GetTextColor(...))
 end
 
+local g_currentMouseTarget = nil
+
 --[[Collectible]]--
 -------------------
 --[[ Initialization ]]--
@@ -35,98 +39,102 @@ local Collectible = ZO_Object:Subclass()
 function Collectible:New(...)
     local collectible = ZO_Object.New(self)
     collectible:Initialize(...)
-    
     return collectible
 end
 
-function Collectible:Initialize(control, gridDimensions)
-    control.collectible = self
-    self.control = control
-    self.gridDimensions = gridDimensions
-
-    self.title = control:GetNamedChild("Title")
-    self.highlight = control:GetNamedChild("Highlight")
-    self.icon = control:GetNamedChild("Icon")
-    self.multiIcon = control:GetNamedChild("MultiIcon")
-    self.cornerTag = control:GetNamedChild("CornerTag")
-    
-    self.cooldownIcon = control:GetNamedChild("CooldownIcon")
-    self.cooldownIconDesaturated = control:GetNamedChild("CooldownIconDesaturated")
-    self.cooldownTime = control:GetNamedChild("CooldownTime")
-    self.cooldownEdge = control:GetNamedChild("CooldownEdge")
+function Collectible:Initialize(collectibleId)
+    self.collectibleId = collectibleId
+    self.isUsable = false
     self.isCooldownActive = false
-    self.maxIconHeight = self.icon:GetHeight()
     self.cooldownDuration = 0
     self.cooldownStartTime = 0
 
-    self.iconAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("JournalProgressIconSlotMouseOverAnimation", self.icon)
-    
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
+    if collectibleId then
+        local name, description, icon, lockedIcon, unlocked, purchasable, isActive, categoryType = self:GetCollectibleInfo()
+
+        self.name = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, name)
+        self.unlockedIcon = icon
+        self.lockedIcon = lockedIcon
+        self.unlocked = unlocked
+        self.purchasable = purchasable
+        self.active = isActive
+        self.categoryType = categoryType
+
+        COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
+    end
 end
 
-function Collectible:Show(collectibleId, previousControl)
-    self.collectibleId = collectibleId
-    local name, description, icon, lockedIcon, unlocked, purchasable, isActive, categoryType = self:GetCollectibleInfo()
-    local effectiveIcon = unlocked and icon or lockedIcon
-    
+function Collectible:RefreshInfo()
+    local unlocked, _, isActive = select(5, self:GetCollectibleInfo())
     self.unlocked = unlocked
-    self.purchasable = purchasable
-    self.title:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, name))
-    self.icon:SetTexture(effectiveIcon)
-    ApplyTextColorToLabel(self.title, unlocked, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
-    
-    self.cooldownIcon:SetTexture(effectiveIcon)
-    self.cooldownIconDesaturated:SetTexture(effectiveIcon)
-    self.cooldownIconDesaturated:SetDesaturation(1)
-    self.cooldownTime:SetText("")
-
-    self.title:SetHidden(false)
-    self.icon:SetHidden(false)
-    self:SetAnchor(previousControl)
-    self.control:SetHidden(false)
-
-    self.categoryType = categoryType
-    
     self.active = isActive
-    self:RefreshMultiIcon()
-    self:SetBlockedState(IsCollectibleCategoryBlocked(categoryType))
+    self.isUsable = IsCollectibleUsable(self.collectibleId)
+end
 
-    self.isUsable = IsCollectibleUsable(collectibleId)
+function Collectible:Show(control)
+    self.control = control
+    if self.collectibleId then
+        control.collectible = self
 
-    if self.isCurrentMouseTarget then
-        self:ShowKeybinds()
+        self:RefreshInfo()
+
+        self.maxIconHeight = control.icon:GetHeight()
+
+        control.title:SetText(self.name)
+        local effectiveIcon = self.unlocked and self.unlockedIcon or self.lockedIcon
+        control.icon:SetTexture(effectiveIcon)
+        ApplyTextColorToLabel(control.title, self.unlocked, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
+
+        control.cooldownIcon:SetTexture(effectiveIcon)
+        control.cooldownIconDesaturated:SetTexture(effectiveIcon)
+        control.cooldownIconDesaturated:SetDesaturation(1)
+        control.cooldownTime:SetText("")
+
+        control.title:SetHidden(false)
+        control.icon:SetHidden(false)
+
+        self:RefreshVisualLayer()
+        self:SetBlockedState(IsCollectibleCategoryBlocked(categoryType))
+
+        if self:IsCurrentMouseTarget() then
+            self:ShowKeybinds()
+        end
+
+        self:OnUpdateCooldowns()
+    else
+        control.title:SetHidden(true)
+        control.icon:SetHidden(true)
+        control.multiIcon:ClearIcons()
+        control.cornerTag:SetHidden(true)
+        self:EndCooldown()
+        control.collectible = nil
     end
+    self:RefreshMouseoverVisuals(DONT_ANIMATE)
+end
 
-    self:OnUpdateCooldowns()
+function Collectible:RefreshVisualLayer()
+    self:RefreshTooltip()
+    self:RefreshMultiIcon()
 end
 
 function Collectible:RefreshMultiIcon()
-    self.multiIcon:ClearIcons()
+    local control = self.control
+    control.multiIcon:ClearIcons()
 
     if self.active then
-       self.multiIcon:AddIcon(ACTIVE_ICON)
+        control.multiIcon:AddIcon(ACTIVE_ICON)
+
+        if WouldCollectibleBeHidden(self.collectibleId) then
+            control.multiIcon:AddIcon(HIDDEN_ICON)
+        end
     end
 
     self.notificationId = NOTIFICATIONS_PROVIDER:GetNotificationIdForCollectible(self.collectibleId)
     if self.notificationId then
-        self.multiIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+        control.multiIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
     end
 
-    self.multiIcon:Show()
-end
-
-function Collectible:ShowBlank(previousControl)
-    self.collectibleId = nil
-    self.purchasable = false
-    self.title:SetHidden(true)
-    self.icon:SetHidden(true)
-    self:SetAnchor(previousControl)
-    self.control:SetHidden(false)
-    self.multiIcon:ClearIcons()
-    self.cornerTag:SetHidden(true)
-    if self.isCooldownActive then
-        self:EndCooldown()
-    end
+    control.multiIcon:Show()
 end
 
 function Collectible:GetId()
@@ -137,66 +145,53 @@ function Collectible:GetCollectibleInfo()
     return GetCollectibleInfo(self.collectibleId)
 end
 
-function Collectible:SetAnchor(previousControl)
-    self.control:ClearAnchors()
-    local width = self.control:GetWidth()
-    local height = self.control:GetHeight()
-    if not previousControl then
-        self.control:SetAnchor(TOPLEFT, nil, TOPLEFT, COLLECTIBLE_PADDING, 0)
-        self.right = width + COLLECTIBLE_PADDING
-        self.bottom = height
-    else
-        --We assume that collectibles will be sorted largest to smallest, to avoid weird Tetris combinations
-        if previousControl.right + width > MAX_COLLECTIBLE_ROW_WIDTH then
-            self.control:SetAnchor(TOPLEFT, nil, TOPLEFT, COLLECTIBLE_PADDING, previousControl.bottom + COLLECTIBLE_PADDING)
-            self.right = width + COLLECTIBLE_PADDING
-            self.bottom = previousControl.bottom + height + COLLECTIBLE_PADDING
-        else
-            self.control:SetAnchor(TOPLEFT, previousControl.control, TOPRIGHT, COLLECTIBLE_PADDING, 0)
-            self.right = previousControl.right + width + COLLECTIBLE_PADDING
-            self.bottom = previousControl.bottom
-        end
-    end
-end
-
 function Collectible:GetControl()
     return self.control
 end
 
-function Collectible:Reset()
-    self.control:SetHidden(true)
-end
-
-function Collectible:SetHighlightHidden(hidden)
-    self.highlight:SetHidden(false) -- let alpha take care of the actual hiding
-    if not self.highlightAnimation then
-        self.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("JournalProgressHighlightAnimation", self.highlight)
+function Collectible:SetHighlightHidden(hidden, dontAnimate)
+    local control = self.control
+    control.highlight:SetHidden(false) -- let alpha take care of the actual hiding
+    if not control.highlightAnimation then
+        control.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("JournalProgressHighlightAnimation", control.highlight)
     end
 
-    if(hidden) then
-        ApplyTextColorToLabel(self.title, self.unlocked, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
-        self.iconAnimation:PlayBackward()
-        self.highlightAnimation:PlayBackward()
+    if hidden then
+        ApplyTextColorToLabel(control.title, self.unlocked, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
+        if dontAnimate then
+            control.iconAnimation:PlayInstantlyToStart()
+            control.highlightAnimation:PlayInstantlyToStart()
+        else
+            control.iconAnimation:PlayBackward()
+            control.highlightAnimation:PlayBackward()
+        end
     else
-        ApplyTextColorToLabel(self.title, self.unlocked, ZO_HIGHLIGHT_TEXT, ZO_SELECTED_TEXT)
-        self.highlightAnimation:PlayForward()
-        if self.isCooldownActive ~= true then
-            self.iconAnimation:PlayForward()
+        ApplyTextColorToLabel(control.title, self.unlocked, ZO_HIGHLIGHT_TEXT, ZO_SELECTED_TEXT)
+        if dontAnimate then
+            control.highlightAnimation:PlayInstantlyToEnd()
+            if self.isCooldownActive ~= true then
+                control.iconAnimation:PlayInstantlyToEnd()
+            end
+        else
+            control.highlightAnimation:PlayForward()
+            if self.isCooldownActive ~= true then
+                control.iconAnimation:PlayForward()
+            end
         end
     end
 end
 
 function Collectible:GetInteractionTextEnum()
     local textEnum
-    if self.isCooldownActive ~= true and self.isBlocked ~= true then
+    if self.active then
+        if self.categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or self.categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT then
+            textEnum = SI_COLLECTIBLE_ACTION_DISMISS
+        else
+            textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
+        end
+    elseif self.isCooldownActive ~= true and self.isBlocked ~= true then
         if self.categoryType == COLLECTIBLE_CATEGORY_TYPE_TROPHY then
             textEnum = SI_COLLECTIBLE_ACTION_USE
-        elseif self.active then
-            if self.categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or self.categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT then
-                textEnum = SI_COLLECTIBLE_ACTION_DISMISS
-            else
-                textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
-            end
         else
             textEnum = SI_COLLECTIBLE_ACTION_SET_ACTIVE
         end
@@ -276,33 +271,50 @@ function Collectible:HideKeybinds()
     KEYBIND_STRIP:RemoveKeybindButton(g_keybindRenameCollectible)
 end
 
-function Collectible:OnMouseEnter()
-    if self.collectibleId then
-        self:SetHighlightHidden(false)
-        InitializeTooltip(ItemTooltip, self.control, RIGHT, -5, 0, LEFT)
-        ItemTooltip:SetCollectible(self.collectibleId, true)
-        self.isCurrentMouseTarget = true
-        self:ShowKeybinds()
-        if self.purchasable then
-            self.cornerTag:SetHidden(false)
+do
+    local SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON = true, true, true
+    function Collectible:OnMouseEnter()
+        if self.collectibleId then
+            InitializeTooltip(ItemTooltip, self.control.parent, RIGHT, -5, 0, LEFT)
+            ItemTooltip:SetCollectible(self.collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
+            g_currentMouseTarget = self
+            self:ShowKeybinds()
+            self:RefreshMouseoverVisuals()
+        end
+    end
+
+    function Collectible:RefreshTooltip()
+        if self:IsCurrentMouseTarget() then
+            ClearTooltip(ItemTooltip)
+            InitializeTooltip(ItemTooltip, self.parentRow, RIGHT, -5, 0, LEFT)
+            ItemTooltip:SetCollectible(self.collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
         end
     end
 end
 
 function Collectible:OnMouseExit()
     if self.collectibleId then
-        self:SetHighlightHidden(true)
         ClearTooltip(ItemTooltip)
         self:HideKeybinds()
-        self.isCurrentMouseTarget = false
-        if self.purchasable then
-            self.cornerTag:SetHidden(true)
-        end
+        g_currentMouseTarget = nil
+        self:RefreshMouseoverVisuals()
 
         if self.notificationId then
             RemoveCollectibleNotification(self.notificationId)
         end
     end
+end
+
+function Collectible:RefreshMouseoverVisuals(dontAnimate)
+    local areVisualsHidden = not self:IsCurrentMouseTarget()
+    self:SetHighlightHidden(areVisualsHidden, dontAnimate)
+    if self.purchasable then
+        self.control.cornerTag:SetHidden(areVisualsHidden)
+    end
+end
+
+function Collectible:IsCurrentMouseTarget()
+    return g_currentMouseTarget == self
 end
 
 function Collectible:OnClicked(button)
@@ -348,25 +360,27 @@ function Collectible:OnUpdateCooldowns()
 end
 
 function Collectible:BeginCooldown()
+    local control = self.control
     self.isCooldownActive = true
-    self.cooldownIcon:SetHidden(false)
-    self.cooldownIconDesaturated:SetHidden(false)
-    self.cooldownTime:SetHidden(false)
-    self.cooldownEdge:SetHidden(false)
+    control.cooldownIcon:SetHidden(false)
+    control.cooldownIconDesaturated:SetHidden(false)
+    control.cooldownTime:SetHidden(false)
+    control.cooldownEdge:SetHidden(false)
     self:SetHighlightHidden(true)
     self:HideKeybinds()
 end
 
 function Collectible:EndCooldown()
+    local control = self.control
     self.isCooldownActive = false
-    self.cooldownIcon:SetTextureCoords(0, 1, 0, 1)
-    self.cooldownIcon:SetHeight(self.maxIconHeight)
-    self.cooldownIcon:SetHidden(true)
-    self.cooldownIconDesaturated:SetHidden(true)
-    self.cooldownTime:SetHidden(true)
-    self.cooldownEdge:SetHidden(true)
-    self.cooldownTime:SetText("")
-    if self.isCurrentMouseTarget then
+    control.cooldownIcon:SetTextureCoords(0, 1, 0, 1)
+    control.cooldownIcon:SetHeight(self.maxIconHeight)
+    control.cooldownIcon:SetHidden(true)
+    control.cooldownIconDesaturated:SetHidden(true)
+    control.cooldownTime:SetHidden(true)
+    control.cooldownEdge:SetHidden(true)
+    control.cooldownTime:SetText("")
+    if self:IsCurrentMouseTarget() then
         self:ShowKeybinds()
         self:SetHighlightHidden(false)
     end
@@ -379,33 +393,35 @@ function Collectible:UpdateCooldownEffect()
     local height = zo_ceil(self.maxIconHeight * percentCompleted)
     local textureCoord = 1 - (height / self.maxIconHeight)
 
-    self.cooldownIcon:SetHeight(height)
-    self.cooldownIcon:SetTextureCoords(0, 1, textureCoord, 1)
+    local control = self.control
+    control.cooldownIcon:SetHeight(height)
+    control.cooldownIcon:SetTextureCoords(0, 1, textureCoord, 1)
 
     if not self.active then
         local secondsRemaining = cooldown / 1000
         if (secondsRemaining < 10) then
-            self.cooldownTime:SetText(ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING))
+            control.cooldownTime:SetText(ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING))
         else
-            self.cooldownTime:SetText(ZO_FormatTimeLargestTwo(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+            control.cooldownTime:SetText(ZO_FormatTimeLargestTwo(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
         end
     else
-        self.cooldownTime:SetText("")
+        control.cooldownTime:SetText("")
     end
 end
 
 function Collectible:SetBlockedState(isBlocked)
     local desaturation = isBlocked and 1 or 0
-    self.icon:SetDesaturation(desaturation)
-    self.highlight:SetDesaturation(desaturation)
+    self.control.icon:SetDesaturation(desaturation)
+    self.control.highlight:SetDesaturation(desaturation)
     self.isBlocked = isBlocked
 end
+
 
 --[[ Collection ]]--
 --------------------
 --[[ Initialization ]]--
 ------------------------
-local CollectionsBook = ZO_JournalProgressBook_Common:Subclass()
+local CollectionsBook = ZO_Object.MultiSubclass(ZO_JournalProgressBook_Common, ZO_SortFilterList)
 
 function CollectionsBook:New(...)
     return ZO_JournalProgressBook_Common.New(self, ...)
@@ -420,10 +436,13 @@ do
     }
 
     function CollectionsBook:Initialize(control)
+        ZO_SortFilterList.Initialize(self, control)
         ZO_JournalProgressBook_Common.Initialize(self, control)
 
         self.searchString = ""
         self.searchResults = {}
+        self.blankCollectibleObject = Collectible:New() --Used to blank out tile controls with no collectibleId
+        self.collectibleObjectList = {}
 
         self:InitializeSummary(control)
         self:InitializeFilters(filterData)
@@ -434,8 +453,9 @@ do
         local collectionsBookScene = ZO_Scene:New("collectionsBook", SCENE_MANAGER)
         collectionsBookScene:RegisterCallback("StateChange",
             function(oldState, newState)
-                if newState == SCENE_SHOWN then
-                    ZO_Scroll_ResetToTop(self.contentList)
+                if newState == SCENE_SHOWING then
+                    ZO_Scroll_ResetToTop(self.list)
+                    self:UpdateCollectionVisualLayer()
                 end
             end)
 
@@ -449,7 +469,7 @@ function CollectionsBook:InitializeControls()
     ZO_JournalProgressBook_Common.InitializeControls(self)
 
     self.contentSearch = self.contents:GetNamedChild("Search")
-    self.scrollbar = self.contentList:GetNamedChild("ScrollBar")
+    self.scrollbar = self.list:GetNamedChild("ScrollBar")
     self.noMatches = self.contents:GetNamedChild("NoMatchMessage")
 end
 
@@ -462,15 +482,17 @@ function CollectionsBook:InitializeEvents()
         ZO_ClearTable(self.searchResults)
         for i = 1, select("#", ...), SEARCH_DATA_STRIDE do
             local categoryIndex, subcategoryIndex, collectibleIndex = select(i, ...)
-            if not self.searchResults[categoryIndex] then
-                self.searchResults[categoryIndex] = {}
-            end
-            local effectiveSubCategory = subcategoryIndex or "root"
-            if not self.searchResults[categoryIndex][effectiveSubCategory] then
-                self.searchResults[categoryIndex][effectiveSubCategory] = {}
-            end
+            if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
+                if not self.searchResults[categoryIndex] then
+                    self.searchResults[categoryIndex] = {}
+                end
+                local effectiveSubCategory = subcategoryIndex or "root"
+                if not self.searchResults[categoryIndex][effectiveSubCategory] then
+                    self.searchResults[categoryIndex][effectiveSubCategory] = {}
+                end
 
-            self.searchResults[categoryIndex][effectiveSubCategory][collectibleIndex] = true
+                self.searchResults[categoryIndex][effectiveSubCategory][collectibleIndex] = true
+            end
         end
     end
 
@@ -484,6 +506,7 @@ function CollectionsBook:InitializeEvents()
     end
 
     self.control:RegisterForEvent(EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, OnSearchResultsReady)
+    self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function() self:UpdateCollectionVisualLayer() end)
 
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
@@ -511,52 +534,39 @@ function CollectionsBook:InitializeCategoryTemplates()
     self.subCategoryTemplate = "ZO_CollectibleSubCategory"
 end
 
-function CollectionsBook:InitializeSummary(control)
-    ZO_JournalProgressBook_Common.InitializeSummary(self, control, GetString(SI_COLLECTIONS_BOOK_OVERALL))
+function CollectionsBook:InitializeChildIndentAndSpacing()
+    self.childIndent = 76 -- Accounting for the extra space of the status icon (adding half of the width of the icon)
+    self.childSpacing = 0
 end
 
 function CollectionsBook:InitializeStickerGrid(control)
-    local function CreateSticker(objectPool)
-        local collectibleSticker = ZO_ObjectPool_CreateControl("ZO_CollectableSticker", objectPool, self.contentListScrollChild)
-        collectibleSticker.owner = self
-        return Collectible:New(collectibleSticker, { 1, 1 }) --TODO: Implement stickers of varied dimensions in defs
-    end
-    
-    local function ResetSticker(collectibleSticker)
-        collectibleSticker:Reset()
+    local function SetupRow(control, data)
+        for i = 1, COLLECTIBLE_STICKER_ROW_STRIDE do
+            local stickerControl = control:GetNamedChild("Sticker" .. i)
+
+            local id = data[i]
+            local collectibleObject
+            if id then
+                collectibleObject = self.collectibleObjectList[id]
+                if not collectibleObject then
+                    collectibleObject = Collectible:New(id)
+                    self.collectibleObjectList[id] = collectibleObject
+                end
+            else
+                collectibleObject = self.blankCollectibleObject
+            end
+            collectibleObject:Show(stickerControl)
+        end
     end
 
-    self.collectibleStickerPool = ZO_ObjectPool:New(CreateSticker, ResetSticker)
+    ZO_ScrollList_AddDataType(self.list, STICKER_ROW_DATA, "ZO_CollectibleStickerRow", ZO_COLLECTIBLE_STICKER_ROW_HEIGHT, SetupRow)
 end
 
 --[[ Summary ]]--
------------------
-function CollectionsBook:ShowSummary(categoryContentList)
-    ZO_JournalProgressBook_Common.ShowSummary(self)
-end
-
-function CollectionsBook:UpdateSummary()
-    self.summaryStatusBarPool:ReleaseAllObjects()
-
-    self:UpdateStatusBar(self.summaryTotal, nil, GetUnlockedCollectiblesCount(), GetTotalCollectiblesCount(), 0, nil, true)
-        
-    local numCategories = zo_min(self:GetNumCategories(), MAX_SUMMARY_CATEGORIES)
-
-    local yOffset = SUMMARY_CATEGORY_PADDING
-    for i = 1, numCategories do
-        local name, _, numCollectibles, unlockedCollectibles, totalCollectibles = self:GetCategoryInfo(i)
-
-        local statusBar = self.summaryStatusBarPool:AcquireObject()
-        self:UpdateStatusBar(statusBar, zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, name), unlockedCollectibles, totalCollectibles, numCollectibles, DONT_HIDE_LOCKED, FORCE_HIDE_PROGRESS_TEXT)
-        statusBar:ClearAnchors()
-
-        if i % 2 == 0 then
-            statusBar:SetAnchor(TOPRIGHT, self.summaryTotal, BOTTOMRIGHT, 0, yOffset)
-            yOffset = yOffset + SUMMARY_CATEGORY_PADDING + SUMMARY_CATEGORY_BAR_HEIGHT
-        else
-            statusBar:SetAnchor(TOPLEFT, self.summaryTotal, BOTTOMLEFT, 0, yOffset)
-        end
-    end
+--------------------
+function CollectionsBook:HideSummary()
+    --Collections doesn't use the content list, so override here so the base doesn't try to show it
+    self.summaryInset:SetHidden(true)
 end
 
 --[[ Categories ]]--
@@ -585,11 +595,11 @@ function CollectionsBook:BuildCategories()
     self.nodeLookupData = {}
         
     local function AddCategoryByCategoryIndex(categoryIndex)
-        local name, numSubCategories, _, _, _, hidesUnearned, categoryType = self:GetCategoryInfo(categoryIndex)
+        local name, numSubCategories, _, _, _, hidesUnearned = self:GetCategoryInfo(categoryIndex)
         --DLC is handled by the DLC book now
-        if categoryType ~= COLLECTIBLE_CATEGORY_TYPE_DLC then
+        if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
             local normalIcon, pressedIcon, mouseoverIcon = self:GetCategoryIcons(categoryIndex)
-            self:AddTopLevelCategory(categoryIndex, zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, name), numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
+            self:AddTopLevelCategory(categoryIndex, zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY, name), numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
         end
     end
 
@@ -632,7 +642,7 @@ function CollectionsBook:AddTopLevelCategory(categoryIndex, name, numSubCategori
         for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
             if subcategoryIndex ~= "root" then
                 local subCategoryName, subCategoryEntries, _, _, hidesUnearned = self:GetSubCategoryInfo(categoryIndex, subcategoryIndex)
-                self:AddCategory(lookup, tree, self.subCategoryTemplate, parent, subcategoryIndex, zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, subCategoryName), nil, normalIcon, pressedIcon, mouseoverIcon)
+                self:AddCategory(lookup, tree, self.subCategoryTemplate, parent, subcategoryIndex, zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY, subCategoryName), nil, normalIcon, pressedIcon, mouseoverIcon)
             end
         end
     end
@@ -653,13 +663,67 @@ function CollectionsBook:UpdateCategoryStatus(categoryNode)
     else
         categoryIndex = categoryData.categoryIndex
     end
+    
+    self:UpdateCategoryStatusIcon(categoryNode)
+end
+
+function CollectionsBook:UpdateAllCategoryStatusIcons()
+    for _, lookupData in pairs(self.nodeLookupData) do
+        local categoryNode = lookupData.node
+        if NonContiguousCount(lookupData.subCategories) == 0 then
+            self:UpdateCategoryStatusIcon(categoryNode)
+        else
+            for _, subcategoryNode in pairs(lookupData.subCategories) do
+                self:UpdateCategoryStatusIcon(subcategoryNode)
+            end
+        end
+    end
+end
+
+function CollectionsBook:UpdateCategoryStatusIcon(categoryNode)
+    local categoryData = categoryNode.data
+    local categoryControl = categoryNode.control
+
+    local categoryIndex
+    local subcategoryIndex
+    if categoryData.parentData then
+        categoryIndex = categoryData.parentData.categoryIndex
+        subcategoryIndex = categoryData.isFakedSubcategory and ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX or categoryData.categoryIndex
+    else
+        categoryIndex = categoryData.categoryIndex
+    end
 
     if not categoryControl.statusIcon then
         categoryControl.statusIcon = categoryControl:GetNamedChild("StatusIcon")
     end
 
-    local showNewStatus = self:HasAnyNotifications(categoryIndex, subcategoryIndex)
-    categoryControl.statusIcon:SetHidden(not showNewStatus)
+    categoryControl.statusIcon:ClearIcons()
+
+    if self:HasAnyNotifications(categoryIndex, subcategoryIndex) then
+        categoryControl.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+    end
+
+    local numCollectbles = self:GetCategoryInfoFromData(categoryData, categoryData.parentData)
+    if self:DoesCollectibleListHaveVisibleCollectible(self:GetCollectibleIds(categoryIndex, subcategoryIndex, numCollectbles)) then
+        categoryControl.statusIcon:AddIcon(VISIBLE_ICON)
+    end
+
+    categoryControl.statusIcon:Show()
+end
+
+function CollectionsBook:DoesCollectibleListHaveVisibleCollectible(...)
+    for i=1, select("#", ...) do
+        local id = select(i, ...)
+
+        if DoesCollectibleHaveVisibleAppearance(id) then
+            local isActive = select(7, GetCollectibleInfo(id))
+            if isActive and not WouldCollectibleBeHidden(id) then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 function CollectionsBook:UpdateAllCategoryStatuses()
@@ -740,39 +804,33 @@ do
     end
 
     function CollectionsBook:LayoutCollection(...)
-        self.collectibleStickerPool:ReleaseAllObjects()
-        self.collectibles = {}
-        ZO_Scroll_ResetToTop(self.contentList)
+        ZO_Scroll_ResetToTop(self.list)
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
+        ZO_ClearNumericallyIndexedTable(scrollData)
 
-        local numStickersCreated = 0
-        local previous
-        for i=1, select("#", ...) do
-            local id = select(i, ...)
-            if(ShouldAddCollectible(self.categoryFilter.filterType, id)) then
-                local collectible = self.collectibleStickerPool:AcquireObject()
-                self.collectibles[id] = collectible
-                collectible:Show(id, previous)
-                previous = collectible
-                numStickersCreated = numStickersCreated + 1
+        local rowData = {}
+        for currentIndex = 1, select("#", ...) do
+            local id = select(currentIndex, ...)
+            if ShouldAddCollectible(self.categoryFilter.filterType, id) then
+                table.insert(rowData, id)
+                if #rowData == COLLECTIBLE_STICKER_ROW_STRIDE then
+                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(STICKER_ROW_DATA, rowData))
+                    rowData = {}
+                end
             end
         end
+
+        if #rowData > 0 then
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(STICKER_ROW_DATA, rowData))
+        end
+
         --Fill out the rest of the grid
-        local minRows = zo_floor(self.contentList:GetHeight() / (COLLECTIBLE_STICKER_SINGLE_HEIGHT + COLLECTIBLE_PADDING))
-        local minStickers = minRows * COLLECTIBLE_STICKER_ROW_STRIDE
-        if numStickersCreated > minStickers then
-            --Round out the last row
-            local remainder = numStickersCreated % COLLECTIBLE_STICKER_ROW_STRIDE
-            if remainder > 0 then
-                extra = COLLECTIBLE_STICKER_ROW_STRIDE - remainder
-                minStickers = numStickersCreated + extra
-            end
+        local minRows = zo_floor(self.list:GetHeight() / (ZO_COLLECTIBLE_STICKER_SINGLE_HEIGHT + ZO_COLLECTIBLE_PADDING))
+        for i = #scrollData + 1, minRows do
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(STICKER_ROW_DATA, {}))
         end
 
-        for i = numStickersCreated + 1, minStickers do
-            local collectible = self.collectibleStickerPool:AcquireObject()
-            collectible:ShowBlank(previous)
-            previous = collectible
-        end
+        self:CommitScrollList()
     end
 end
 
@@ -785,19 +843,11 @@ function CollectionsBook:UpdateCollectionLater()
 end
 
 function CollectionsBook:UpdateCollection()
-    self.collectibleStickerPool:ReleaseAllObjects()
-    self.collectibles = {}
     self:BuildCategories()
-    if self.searchString == "" or NonContiguousCount(self.searchResults) > 0 then
-        self.categoryInset:SetHidden(false)
-        self.noMatches:SetHidden(true)
-        self:UpdateSummary()
-    else
-        self.categoryInset:SetHidden(true)
-        self.noMatches:SetHidden(false)
-        self.contentList:SetHidden(true)
-        self.summaryInset:SetHidden(true)
-    end
+    local foundNoMatches = self.searchString ~= "" and NonContiguousCount(self.searchResults) == 0
+    self.categoryInset:SetHidden(foundNoMatches)
+    self.noMatches:SetHidden(not foundNoMatches)
+    self.list:SetHidden(foundNoMatches)
 end
 
 function CollectionsBook:OnCollectibleUpdated(collectibleId)
@@ -812,13 +862,9 @@ function CollectionsBook:UpdateCollectible(collectibleId)
     if categoryNode then
         self:UpdateCategoryStatus(categoryNode)
 
-        if self:IsSummaryOpen() then
-            self:UpdateSummary()
-        else
-            local data = self.categoryTree:GetSelectedData()
-            if data.node == categoryNode then
-                self:UpdateCategoryLabels(data, RETAIN_SCROLL_POSITION)
-            end
+        local data = self.categoryTree:GetSelectedData()
+        if data.node == categoryNode then
+            self:UpdateCategoryLabels(data, RETAIN_SCROLL_POSITION)
         end
     end
 end
@@ -832,7 +878,7 @@ end
 function CollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subcategoryIndex)
     self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories before we select a category
 
-    if DLC_BOOK_KEYBOARD:IsCategoryIndexDLC(categoryIndex) then
+    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
         DLC_BOOK_KEYBOARD:BrowseToCollectible(collectibleId)
     else
         --Select the category or subcategory of the collectible
@@ -845,6 +891,11 @@ function CollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subca
 
         SCENE_MANAGER:Show("collectionsBook")
     end
+end
+
+function CollectionsBook:UpdateCollectionVisualLayer()
+    self:RefreshVisible()
+    self:UpdateAllCategoryStatusIcons()
 end
 
 --[[Search]]--

@@ -164,9 +164,16 @@ end
 
 function PregameInitialScreen_Console:ResetScreenState() 
     self:ClearError()
+
+    local KEYBINDS_REMOVED = false
+    local KEYBINDS_ADDED = true
+
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    PREGAME_INITIAL_SCREEN_CONSOLE_SCENE:FireCallbacks("ResetScreenState", KEYBINDS_REMOVED)
+
     self.currentKeybindStripDescriptor = self.pressAnyKeybindsDescriptor
     KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindStripDescriptor)
+    PREGAME_INITIAL_SCREEN_CONSOLE_SCENE:FireCallbacks("ResetScreenState", KEYBINDS_ADDED)
     self:PlayPressAnyButtonAnimationFromStart()
 end
 

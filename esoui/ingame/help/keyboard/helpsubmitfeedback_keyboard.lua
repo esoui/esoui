@@ -319,7 +319,9 @@ end
 --Global XML
 
 function ZO_HelpSubmitFeedback_Keyboard_OnInitialized(self)
-    HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD = HelpSubmitFeedback_Keyboard:New(self)
+    if IsSubmitFeedbackSupported() then
+        HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD = HelpSubmitFeedback_Keyboard:New(self)
+    end
 end
 
 function ZO_HelpSubmitFeedback_Keyboard_AttemptToSendFeedback()

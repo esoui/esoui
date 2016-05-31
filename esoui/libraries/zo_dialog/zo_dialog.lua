@@ -12,15 +12,6 @@ local QUEUED_DIALOG_INDEX_NAME = 1
 local QUEUED_DIALOG_INDEX_DATA = 2
 local QUEUED_DIALOG_INDEX_PARAMS = 3
 
-GAMEPAD_DIALOGS = {
-    BASIC = 1,
-    PARAMETRIC = 2,
-    COOLDOWN = 3,
-    TRANSACTION = 4,
-    CENTERED = 5,
-    STATIC_LIST = 6,
-}
-
 local function QueueDialog(name, data, params, isGamepad, dialogInfo)
     if name and dialogInfo and dialogInfo.onlyQueueOnce then
         -- If the dialog is already queued and can only be queued once, don't requeue it
@@ -117,10 +108,10 @@ local function GetDialog(isGamepad)
 end
 
 local function GetFormattedDialogText(text, params)
-    if(text) then
-        if(params and #params > 0) then
-            text = zo_strformat(text, unpack(params))        
-        elseif(type(text) == "number") then
+    if text then
+        if params and #params > 0 then
+            text = zo_strformat(text, unpack(params))
+        elseif type(text) == "number" then
             text = GetString(text)
         end
     else
@@ -130,23 +121,26 @@ local function GetFormattedDialogText(text, params)
     return text
 end
 
-local function GetFormattedText(textTable, params)
-    if(not textTable) then
+local function GetFormattedText(dialog, textTable, params)
+    if not textTable then
         return
     end
 
-    if(params and type(textTable.timer) == "number" and type(params[textTable.timer]) == "number") then
+    local timer = textTable.timer
+    if params and type(timer) == "number" and type(params[timer]) == "number" then
+        local timerParam = params[timer]
         if textTable.verboseTimer then
-            params[textTable.timer] = ZO_FormatTimeMilliseconds(params[textTable.timer], TIME_FORMAT_STYLE_DESCRIPTIVE)
+            timerParam = ZO_FormatTimeMilliseconds(timerParam, TIME_FORMAT_STYLE_DESCRIPTIVE)
         else
-            params[textTable.timer] = ZO_FormatTimeMilliseconds(params[textTable.timer], TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS)
+            timerParam = ZO_FormatTimeMilliseconds(timerParam, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS)
         end
+        params[timer] = timerParam
     end
     
     local textOrCallback = textTable.text
     local finalText
-    if(type(textOrCallback) == "function") then
-        finalText = textOrCallback()
+    if type(textOrCallback) == "function" then
+        finalText = textOrCallback(dialog)
     else
         finalText = textOrCallback
     end
@@ -156,8 +150,8 @@ local function GetFormattedText(textTable, params)
     return formattedText
 end
 
-local function SetDialogTextFormatted(textControl, textTable, params)
-    local formattedText = GetFormattedText(textTable, params)
+local function SetDialogTextFormatted(dialog, textControl, textTable, params)
+    local formattedText = GetFormattedText(dialog, textTable, params)
 
     if not textControl or not formattedText then
         return
@@ -166,7 +160,7 @@ local function SetDialogTextFormatted(textControl, textTable, params)
     textControl:SetText(formattedText)
     textControl:SetHidden(false)
 
-    if(textTable.align) then
+    if textTable.align then
         textControl:SetHorizontalAlignment(textTable.align)
     end
 
@@ -270,7 +264,7 @@ function ZO_Dialogs_ShowPlatformDialog(...)
 end
 
 local function RefreshMainText(dialog, dialogInfo, textParams)
-    if(not textParams) then
+    if not textParams then
         textParams = {}
     end
 
@@ -278,15 +272,15 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
 
     local isGenericGamepadDialog = (dialog.isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType) -- There is a legacy gamepad dialog still in use (for now).
     if isGenericGamepadDialog then
-        local title = GetFormattedText(dialogInfo.title, textParams.titleParams)
-        mainText = GetFormattedText(dialogInfo.mainText, textParams.mainTextParams)
+        local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
+        mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
         ZO_GenericGamepadDialog_BaseSetup(dialog, title, mainText)
     else
         textControl = dialog:GetNamedChild("Text")
         mainText = dialogInfo.mainText
-        if(textControl) then
-            if(mainText) then
-                if(type(mainText) == "function") then
+        if textControl then
+            if mainText then
+                if type(mainText) == "function" then
                     dialog.mainText = mainText(dialog)
                 else
                     dialog.mainText = mainText
@@ -298,7 +292,7 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
                     textControl:SetLineSpacing(0)
                 end
 
-                SetDialogTextFormatted(textControl, dialog.mainText, textParams.mainTextParams)
+                SetDialogTextFormatted(dialog, textControl, dialog.mainText, textParams.mainTextParams)
             else
                 textControl:SetText(nil)
                 textControl:SetHidden(true)
@@ -407,28 +401,28 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     ------------------------------
     local dialog
 
-    local isGenericGamepadDialog = (isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType) -- There is a legacy gamepad dialog still in use (for now).
+    local isGenericGamepadDialog = isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType -- There is a legacy gamepad dialog still in use (for now).
 
-    if(isGenericGamepadDialog) then
+    if isGenericGamepadDialog then
         dialog = ZO_GenericGamepadDialog_GetControl(dialogInfo.gamepadInfo.dialogType)
 
-        if(not dialog) then
+        if not dialog then
             return nil
         end
-    elseif(dialogInfo.customControl) then
-        if(type(dialogInfo.customControl) == "function") then
+    elseif dialogInfo.customControl then
+        if type(dialogInfo.customControl) == "function" then
             dialog = dialogInfo.customControl()
         else
-            dialog = dialogInfo.customControl 
+            dialog = dialogInfo.customControl
         end
 
-        if(not dialog) then
+        if not dialog then
             return nil
         end
     else
         dialog = GetDialog(isGamepad)
 
-        if(not dialog) then
+        if not dialog then
             -- Dialog can't be created right now, so place it in a queue to be created later
             QueueDialog(name, data, textParams, isGamepad)
             return nil
@@ -458,9 +452,9 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     end
 
     if title then
-        SetDialogTextFormatted(titleControl, title, textParams.titleParams)
+        SetDialogTextFormatted(dialog, titleControl, title, textParams.titleParams)
     elseif titleControl and isGamepad then
-        SetDialogTextFormatted(titleControl, "")
+        SetDialogTextFormatted(dialog, titleControl, "")
     end
 
     --Buttons
@@ -490,6 +484,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                     button:SetText(textParams.buttonTextOverrides[i])    
                 elseif(type(buttonInfo.text) == "number") then
                     button:SetText(GetString(buttonInfo.text))
+                elseif(type(buttonInfo.text) == "function") then
+                    button:SetText(buttonInfo.text(dialog))
                 else
                     button:SetText(buttonInfo.text)
                 end
@@ -533,15 +529,15 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     end
 
     --Custom Init
-    if(dialogInfo.customControl or isGenericGamepadDialog) then
+    if dialogInfo.customControl or isGenericGamepadDialog then
         RefreshMainText(dialog, dialogInfo, textParams)
         if dialogInfo.setup then
             dialogInfo.setup(dialog, data)
         end
-    else        
+    else
         local mainText, textControl = RefreshMainText(dialog, dialogInfo, textParams)
 
-        if(not mainText) then
+        if not mainText then
             return nil
         end   
         
@@ -948,12 +944,12 @@ end
 
 -- If textTable is nil, the default mainText table (defined in the ESO_Dialogs table) is used
 function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
-    if(dialog) then
+    if dialog then
         if dialog.isGamepad then
             if dialog.info and dialog.headerData then
                 textTable = textTable or dialog.info.mainText
 
-                local mainText = GetFormattedText(textTable, params)
+                local mainText = GetFormattedText(dialog, textTable, params)
                 if mainText and mainText ~= "" then
                     ZO_GenericGamepadDialog_BaseSetup(dialog, dialog.headerData.titleText, mainText)
                 end
@@ -964,19 +960,19 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
                 dialog.mainText = textTable
             end
         
-            SetDialogTextFormatted(textControl, dialog.mainText, params)
+            SetDialogTextFormatted(dialog, textControl, dialog.mainText, params)
         end
     end
 end
 
 function ZO_Dialogs_UpdateDialogTitleText(dialog, textTable, params)
-    if(dialog) then
+    if dialog then
         local titleControl = dialog:GetNamedChild("Title")
-        if(titleControl) then
+        if titleControl then
             dialog.title = textTable
         end
         
-        SetDialogTextFormatted(titleControl, dialog.title, params)
+        SetDialogTextFormatted(dialog, titleControl, dialog.title, params)
     end
 end
 
@@ -1026,10 +1022,10 @@ end
 
 -- Update the text underneath a button...if textTable is nil, this extra text control is hidden
 function ZO_Dialogs_UpdateButtonExtraText(dialog, buttonNumber, textTable, params)
-    if(dialog and buttonNumber) then
+    if dialog and buttonNumber then
         local textControl = dialog:GetNamedChild("ButtonExtraText"..buttonNumber)
-        if(textTable) then
-            SetDialogTextFormatted(textControl, textTable, params)
+        if textTable then
+            SetDialogTextFormatted(dialog, textControl, textTable, params)
             textControl:SetHidden(false)
         else
             textControl:SetHidden(true)

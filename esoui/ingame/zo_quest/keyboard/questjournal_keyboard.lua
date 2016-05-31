@@ -10,11 +10,6 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
     self.control = control
     self.sceneName = "questJournal"
 
-    self:RegisterIconTexture(INSTANCE_DISPLAY_TYPE_NONE, "EsoUI/Art/Journal/journal_Quest_Selected.dds")
-    self:RegisterIconTexture(INSTANCE_DISPLAY_TYPE_SOLO, "EsoUI/Art/Journal/journal_Quest_Instance.dds")
-    self:RegisterIconTexture(INSTANCE_DISPLAY_TYPE_GROUP, "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
-    self:RegisterIconTexture(INSTANCE_DISPLAY_TYPE_RAID, "EsoUI/Art/Journal/journal_Quest_Trial.dds")
-
     self.questCount = control:GetNamedChild("QuestCount")
     self.titleText = control:GetNamedChild("TitleText")
     self.levelText = control:GetNamedChild("LevelText")
@@ -32,6 +27,48 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
             
     --Quest tracker depends on this data for finding the next quest to focus.
     self:RefreshQuestList()
+end
+
+function ZO_QuestJournal_Keyboard:RegisterIcons()
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,         "EsoUI/Art/Journal/journal_Quest_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP,        "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,  "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,         "EsoUI/Art/Journal/journal_Quest_Trial.dds")
+
+    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_NONE,         "EsoUI/Art/Journal/journal_Quest_Dungeon.dds")
+end
+
+function ZO_QuestJournal_Keyboard:RegisterTooltips()
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,         SI_QUEST_JOURNAL_SOLO_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP,        SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,         SI_QUEST_JOURNAL_RAID_TOOLTIP)
+    -- nothing should be marked as GROUP_DELVE, but just in case treat it like GROUP
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,  SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+
+    self:RegisterTooltipText(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_NONE,         SI_QUEST_JOURNAL_PUBLIC_DUNGEON_TOOLTIP)
+end
+
+function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected)
+    local texture = GetControl(iconControl, "Icon")
+    texture.selected = selected
+    
+    if selected then
+        texture:SetTexture("EsoUI/Art/Journal/journal_Quest_Selected.dds")
+        texture:SetAlpha(1)
+        texture:SetHidden(false)
+    else
+        local texturePath = self:GetIconTexture(iconData.questType, iconData.displayType)
+
+        if texturePath then
+            texture:SetTexture(texturePath)
+            texture.tooltipText = self:GetTooltipText(iconData.questType, iconData.displayType)
+        
+            texture:SetAlpha(0.50)
+            texture:SetHidden(false)
+        else
+            texture:SetHidden(true)
+        end
+    end
 end
 
 function ZO_QuestJournal_Keyboard:InitializeQuestList()
@@ -58,19 +95,10 @@ function ZO_QuestJournal_Keyboard:InitializeQuestList()
         control:SetText(data.name)
         control.con = GetCon(data.level)
         control.questIndex = data.questIndex
-        control:SetSelected(false)
-        
-        local texture = GetControl(control, "Icon")
-        texture.selected = false
-        texture:SetTexture(self:GetIconTexture(data.displayType))
-        texture.tooltipText = self:GetTooltipText(data.displayType)
 
-        if data.displayType == INSTANCE_DISPLAY_TYPE_NONE then
-            texture:SetHidden(true)
-        else
-            texture:SetAlpha(0.50)
-            texture:SetHidden(false)
-        end
+        local NOT_SELECTED = false
+        control:SetSelected(NOT_SELECTED)
+        self:SetIconTexture(control, data, NOT_SELECTED)
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
@@ -84,22 +112,9 @@ function ZO_QuestJournal_Keyboard:InitializeQuestList()
             end
         end
 
-        local texture = GetControl(control, "Icon")
-        texture.selected = selected
-        if selected then
-            texture:SetTexture("EsoUI/Art/Journal/journal_Quest_Selected.dds")
-            texture:SetAlpha(1.00)
-            texture:SetHidden(false)
-        else
-            texture:SetTexture(self:GetIconTexture(data.displayType))
-            if data.displayType == INSTANCE_DISPLAY_TYPE_NONE then
-                texture:SetHidden(true)
-            else
-                texture:SetAlpha(0.50)
-                texture:SetHidden(false)
-            end
-        end
+        self:SetIconTexture(control, data, selected)
     end
+
     local function TreeEntryEquality(left, right)
         return left.name == right.name
     end
@@ -304,21 +319,23 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
 
     self.questInfoContainer:SetHidden(false)
     self.questStepContainer:SetHidden(false)
-    if QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() == questData.questIndex then
-        self.questIcon:SetHidden(false)
-    else
-        self.questIcon:SetHidden(true)
-    end
 
     local questIndex = questData.questIndex
-    local questName, bgText, stepText, stepType, stepOverrideText, completed, tracked, _, _, _, instanceDisplayType = GetJournalQuestInfo(questIndex)
+    local questName, bgText, stepText, stepType, stepOverrideText, completed, tracked, _, _, questType, instanceDisplayType = GetJournalQuestInfo(questIndex)
     local conColorDef = ZO_ColorDef:New(GetConColor(questData.level))
     local repeatableType = GetJournalQuestRepeatType(questIndex)
 
     self.titleText:SetText(zo_strformat(SI_QUEST_JOURNAL_QUEST_NAME_FORMAT, questName))
     self.levelText:SetText(zo_strformat(SI_QUEST_JOURNAL_QUEST_LEVEL, conColorDef:Colorize(tostring(questData.level))))
-    self.questIcon.tooltipText = self:GetTooltipText(instanceDisplayType)
-    self.questIcon:SetTexture(self:GetIconTexture(instanceDisplayType))
+
+    local texturePath = self:GetIconTexture(questType, instanceDisplayType)
+    if texturePath then
+        self.questIcon:SetHidden(false)
+        self.questIcon.tooltipText = self:GetTooltipText(questType, instanceDisplayType)
+        self.questIcon:SetTexture(texturePath)
+    else
+        self.questIcon:SetHidden(true)
+    end
 
     if repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE then
         self.repeatableText:SetText(GetString(SI_QUEST_JOURNAL_REPEATABLE_TEXT))

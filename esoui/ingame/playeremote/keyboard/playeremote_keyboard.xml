@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_PlayerEmote_Keyboard_EmoteText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Dimensions x="165" />
+        </Label>
+
+        <TopLevelControl name="ZO_PlayerEmote_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_PlayerEmote_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Categories">
+                    <Dimensions x="290" />
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="68"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                </Control>
+
+                <Control name="$(parent)EmoteContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

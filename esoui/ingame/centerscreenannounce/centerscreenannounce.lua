@@ -729,8 +729,8 @@ local setupFunctions =
         TrySettingDynamicText(self.breakdownIconLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT])
 
         if raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT] == 0 then
-            self.breakdownIconLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
-            self.breakdownIcon:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            self.breakdownIconLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+            self.breakdownIcon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
         else
             self.breakdownIconLabel:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
             self.breakdownIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())

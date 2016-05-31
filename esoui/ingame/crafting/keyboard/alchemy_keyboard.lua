@@ -154,7 +154,7 @@ function ZO_Alchemy:OnItemReceiveDrag(slotControl, bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
     if usedInCraftingType == CRAFTING_TYPE_ALCHEMY then
         if self.solventSlot:IsSlotControl(slotControl) then
-            if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
+            if IsAlchemySolvent(craftingSubItemType) and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
                 if not self.solventSlot:IsItemId(GetItemInstanceId(bagId, slotIndex)) then
                     if self.solventSlot:HasItem() then
                         PickupInventoryItem(self.solventSlot:GetBagAndSlot())
@@ -195,9 +195,25 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.noSolventOrReagentsLabel = control:GetNamedChild("NoSolventOrReagentsLabel")
 
+    local function IngredientSortOrder(bagId, slotIndex)
+        local itemType, _, requiredLevel, requiredVetRank = select(2, GetItemCraftingInfo(bagId, slotIndex))
+        if requiredVetRank then
+            requiredLevel = requiredLevel + requiredVetRank
+        end
+
+        if itemType == ITEMTYPE_POISON_BASE then
+            return requiredLevel + 1 -- Kludge to make the poison of a required level always show up right after the potion of that level, regardless of what they're named
+        else
+            return requiredLevel
+        end
+    end
+
+    self:SetCustomSortHeader("", IngredientSortOrder)
+    self.sortKey = "custom"
+
     self:SetFilters{
         self:CreateNewTabFilterData(ITEMTYPE_REAGENT, GetString(SI_ALCHEMY_REAGENTS_TAB), "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_up.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_down.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_over.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_disabled.dds"),
-        self:CreateNewTabFilterData(ITEMTYPE_ALCHEMY_BASE, GetString(SI_ALCHEMY_SOLVENT_TAB), "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_up.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_down.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_over.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_disabled.dds"),
+        self:CreateNewTabFilterData(IsAlchemySolvent, GetString(SI_ALCHEMY_SOLVENT_TAB), "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_up.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_down.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_over.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_solvent_disabled.dds"),
         self:CreateNewTabFilterData(nil, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
     }
 
@@ -219,12 +235,13 @@ function ZO_AlchemyInventory:AddListDataTypes()
         local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(data.bagId, data.slotIndex)
 
         if not rankRequirement or rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
-            local resultingItemLevel, veteranRequiredLevel = select(4, GetItemCraftingInfo(data.bagId, data.slotIndex))
+            local craftingSubItemType, _, resultingItemLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(data.bagId, data.slotIndex))
+            local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
-            if veteranRequiredLevel and veteranRequiredLevel > 0 then
-                levelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_POTION_OF_VETERAN_RANK, veteranRequiredLevel))
+            if requiredChampionPoints and requiredChampionPoints > 0 then
+                levelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, requiredChampionPoints, itemTypeString))
             else
-                levelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_POTION_OF_LEVEL, resultingItemLevel))
+                levelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_LEVEL, resultingItemLevel, itemTypeString))
             end
 
             levelLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_ACCENT))
@@ -242,15 +259,17 @@ function ZO_AlchemyInventory:AddListDataTypes()
             if i > numTraits then
                 traitControl:SetHidden(true)
             else
-                local traitName, traitIcon, traitMatchIcon, _, traitConflictIcon = ZO_Alchemy_GetTraitInfo(i, ...)
+                traitControl:SetHidden(false)
+
+                local traitName, normalTraitIcon, traitMatchIcon, _, traitConflictIcon = ZO_Alchemy_GetTraitInfo(i, ...)
 
                 if traitName and traitName ~= "" then
                     traitControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_ACCENT))
                     traitControl.label:SetText(traitName)
 
-                    ALCHEMY:SetupTraitIcon(traitControl.icon, traitName, traitIcon, traitMatchIcon, traitConflictIcon)
+                    ALCHEMY:SetupTraitIcon(traitControl.icon, traitName, normalTraitIcon, traitMatchIcon, traitConflictIcon)
                     ZO_ItemSlot_SetupIconUsableAndLockedColor(traitControl.icon, true, locked)
-                    traitControl:SetHidden(false)
+                    traitControl.icon:SetHidden(false)
                 else
                     traitControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_INACTIVE_BONUS))
                     traitControl.label:SetText(GetString(SI_CRAFTING_UNKNOWN_NAME))
@@ -275,7 +294,7 @@ end
 
 function ZO_AlchemyInventory:GetScrollDataType(bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
-    if craftingSubItemType == ITEMTYPE_ALCHEMY_BASE then
+    if IsAlchemySolvent(craftingSubItemType) then
         return SCROLL_DATA_TYPE_SOLVENT
     elseif craftingSubItemType == ITEMTYPE_REAGENT then
         return SCROLL_DATA_TYPE_REAGENT
@@ -288,7 +307,7 @@ function ZO_AlchemyInventory:ChangeFilter(filterData)
 
     if self.filterType == ITEMTYPE_REAGENT then
         self.noSolventOrReagentsLabel:SetText(GetString(SI_ALCHEMY_NO_REAGENTS))
-    elseif self.filterType == ITEMTYPE_ALCHEMY_BASE then
+    elseif self.filterType == IsAlchemySolvent then
         self.noSolventOrReagentsLabel:SetText(GetString(SI_ALCHEMY_NO_SOLVENTS))
     else
         self.noSolventOrReagentsLabel:SetText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))

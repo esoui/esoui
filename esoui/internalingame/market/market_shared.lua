@@ -23,6 +23,7 @@ end
 
 function Market_Singleton:Initialize()
     self:InitializeEvents()
+    self:InitializePlatformErrors()
 end
 
 function Market_Singleton:InitializeEvents()
@@ -80,6 +81,70 @@ end
 
 function Market_Singleton:RequestOpenMarket()
     OpenMarket()
+end
+
+function Market_Singleton:InitializePlatformErrors()
+    local consoleStoreName
+    local uiPlatform = GetUIPlatform()
+
+    if uiPlatform == UI_PLATFORM_PS4 then
+        consoleStoreName = GetString(SI_GAMEPAD_MARKET_PLAYSTATION_STORE)
+    elseif uiPlatform == UI_PLATFORM_XBOX then
+        consoleStoreName = GetString(SI_GAMEPAD_MARKET_XBOX_STORE)
+    else -- PC Gamepad insufficient crowns and buy crowns dialog data
+        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT))
+    end
+
+    if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
+        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName)
+    end
+
+end
+
+function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId)
+    local expectedPurchaseResult = CouldPurchaseMarketProduct(marketProductId)
+
+    local name = GetMarketProductDisplayName(marketProductId)
+    local mainText = ""
+    local errorStrings = {}
+    local promptBuyCrowns = false
+    local allowContinue = true
+
+    if DoesMarketProductHaveSubscriptionUnlockedAttachments(marketProductId) then
+        table.insert(errorStrings, zo_strformat(SI_MARKET_BUNDLE_PARTS_UNLOCKED_TEXT, name))
+    end
+
+    if IsMarketProductPartiallyPurchased(marketProductId)  then
+        table.insert(errorStrings, GetString(SI_MARKET_BUNDLE_PARTS_OWNED_TEXT))
+    end
+
+    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
+        allowContinue = false
+        table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
+        promptBuyCrowns = true
+        table.insert(errorStrings, self.insufficientFundsMainText)
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
+        local slotsRequired = GetSpaceNeededToPurchaseMarketProduct(marketProductId)
+        allowContinue = false
+        table.insert(errorStrings, zo_strformat(SI_MARKET_INVENTORY_FULL_TEXT, slotsRequired))
+    end
+
+    for i=1, #errorStrings do
+        if i == 1 then
+            mainText = errorStrings[i]
+        else
+            mainText = mainText .. "\n\n" .. errorStrings[i]
+        end
+    end
+
+    local dialogParams = { 
+                            titleParams = { name }, 
+                            mainTextParams = { mainText }
+                         }
+    local hasErrors = #errorStrings > 0
+
+    return hasErrors, dialogParams, promptBuyCrowns, allowContinue
 end
 
 ZO_MARKET_SINGLETON = Market_Singleton:New()
@@ -270,7 +335,7 @@ function ZO_Market_Shared:OnMarketOpen()
 end
 
 function ZO_Market_Shared:OnCategorySelected(data)
-    EndCurrentMarketPreview()
+    self:EndCurrentPreview()
     self:ClearLabeledGroups()
     
     self.currentCategoryData = data
@@ -362,7 +427,7 @@ function ZO_Market_Shared:GetPreviewState()
     if marketProduct ~= nil then -- User is hovering over a MarketProduct
         canPreview = marketProduct:HasPreview() and IsCharacterPreviewingAvailable()
 
-        if isPreviewing and marketProduct:IsPreviewingActiveCollectible() then
+        if isPreviewing and marketProduct:IsActivelyPreviewing() then
             isActivePreview = true
         end
     end

@@ -494,7 +494,7 @@ do
                 local formatId = pinTypeToFormatId[bestPinType]
                 --The first 3 types are the player pins (self, group, leader)
                 if bestPinType < 3 then
-                    bestPinDescription = ZO_FormatUserFacingDisplayName(bestPinDescription)
+                    bestPinDescription = ZO_FormatUserFacingCharacterOrDisplayName(bestPinDescription)
                 end
                 if(formatId) then
                     self.centerOverPinLabel:SetText(zo_strformat(formatId, bestPinDescription))

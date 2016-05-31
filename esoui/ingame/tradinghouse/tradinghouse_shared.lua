@@ -27,7 +27,7 @@ function ZO_TradingHouse_CreateItemData(index, fn)
             currencyType = currencyType or CURT_MONEY
         }
 
-		return result
+        return result
     end
 end
 
@@ -39,7 +39,7 @@ local TRADING_HOUSE_DESIRED_FILTER_ORDERING =
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_GLYPHS_AND_GEMS,
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_CRAFTING,
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_GUILD_ITEMS,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_FOOD_AND_POTIONS,
+    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_CONSUMABLES,
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_OTHER,
 }
 
@@ -384,7 +384,7 @@ function ZO_TradingHouse_Shared:DoSearch()
 end
 
 function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
-    local icon, name, quality, stackCount, requiredLevel, requiredVR, purchasePrice, currencyType = fn(index)
+    local icon, name, quality, stackCount, requiredLevel, requiredCP, purchasePrice, currencyType = fn(index)
     if(name ~= "") then
         local result =
         {
@@ -396,7 +396,7 @@ function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
             sellerName = GetString(SI_GUILD_HERALDRY_SELLER_NAME),
             timeRemaining = 0,
             requiredLevel = requiredLevel,
-            requiredVR = requiredVR,
+            requiredCP = requiredCP,
             purchasePrice = purchasePrice,
             currencyType = currencyType
         }
@@ -420,8 +420,8 @@ function ZO_TradingHouse_Shared:ShouldAddGuildSpecificItemToList(itemData)
             if (setter.m_min and itemData.requiredLevel < setter.m_min) or (setter.m_max and itemData.requiredLevel > setter.m_max) then
                 return false
             end
-        elseif filterType == TRADING_HOUSE_FILTER_TYPE_VETERAN_LEVEL then
-            if (setter.m_min and itemData.requiredVR < setter.m_min) or (setter.m_max and itemData.requiredVR > setter.m_max) then
+        elseif filterType == TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS then
+            if (setter.m_min and itemData.requiredCP < setter.m_min) or (setter.m_max and itemData.requiredCP > setter.m_max) then
                 return false
             end
         elseif filterType == TRADING_HOUSE_FILTER_TYPE_QUALITY then
@@ -535,7 +535,7 @@ function ZO_TradingHouseSearch:Initialize()
         [TRADING_HOUSE_FILTER_TYPE_QUALITY] = { values = {}, isRange = true, },
         [TRADING_HOUSE_FILTER_TYPE_LEVEL] = { values = {}, isRange = true, },
         [TRADING_HOUSE_FILTER_TYPE_PRICE] = { values = {}, isRange = true, },
-        [TRADING_HOUSE_FILTER_TYPE_VETERAN_LEVEL] = { values = {}, isRange = true, },
+        [TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS] = { values = {}, isRange = true, },
         [TRADING_HOUSE_FILTER_TYPE_ENCHANTMENT] = { values = {}, isRange = false, },
     }
 

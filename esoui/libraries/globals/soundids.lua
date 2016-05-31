@@ -149,6 +149,7 @@ SOUNDS = {
     ABILITY_CASTER_LEVITATED        = "Ability_CasterLevitated",
     ABILITY_WEAPON_SWAP_FAIL        = "weapon_swap_fail",
     ABILITY_WEAPON_SWAP_SUCCESS     = "weapon_swap_success",
+    ABILITY_INVALID_JUSTICE_TARGET  = "Ability_InvalidJusticeTarget",
 
     -- General Failed Requirement
     GENERAL_FAILED_REQUIREMENTS     = "General_FailedRequirements",
@@ -162,6 +163,7 @@ SOUNDS = {
     QUEST_SHARE_ACCEPTED            = "QuestShare_Accepted",
     QUEST_SHARE_DECLINED            = "QuestShare_Declined",
     DEFER_NOTIFICATION              = "Defer_Notification",
+    NEW_TIMED_NOTIFICATION          = "New_NotificationTimed",
 
     -- Scripted World Event sounds
     SCRIPTED_WORLD_EVENT_INVITED    = "Quest_Shared",
@@ -226,6 +228,8 @@ SOUNDS = {
     INVENTORY_ITEM_REPAIR           = "InventoryItem_Repair",
     INVENTORY_ITEM_JUNKED           = "InventoryItem_MarkAsJunk",
     INVENTORY_ITEM_UNJUNKED         = "InventoryItem_NotJunk",
+    INVENTORY_ITEM_LOCKED           = "Lock_Value",
+    INVENTORY_ITEM_UNLOCKED         = "Unlock_Value",
 
     --Collection sounds
     COLLECTIBLE_UNLOCKED            = "Collectible_Unlocked",
@@ -276,6 +280,12 @@ SOUNDS = {
     LFG_JUMP_DUNGEON                = "LFG_Jump_Dungeon",
     LFG_FIND_REPLACEMENT            = "LFG_Find_Replacement",
     LFG_COMPLETE_ANNOUNCEMENT       = "LFG_Complete_Announcement",
+
+    --Group election sounds
+    GROUP_ELECTION_REQUESTED        = "GroupElection_Requested",
+    GROUP_ELECTION_VOTE_SUBMITTED   = "GroupElection_VotedSubmitted",
+    GROUP_ELECTION_RESULT_WON       = "GroupElection_ResultWon",
+    GROUP_ELECTION_RESULT_LOST      = "GroupElection_ResultLost",
 
     --Battleground sounds
     FLAG_ASSAULTED_ALLIANCE1        = "Flag_AssaultedByAlliance1",
@@ -328,7 +338,7 @@ SOUNDS = {
 
     --Level sounds
     LEVEL_UP                        = "LevelUp",
-    VETERAN_RANK_UP                 = "VeteranRankUp",
+    CHAMPION_POINTS_INCREASED       = "ChampionPointsIncreased",
     DUNGEON_DIFFICULTY_VETERAN      = "DungeonDifficultySetToVeteran",
     DUNGEON_DIFFICULTY_NORMAL       = "DungeonDifficultySetToNormal",
     RANK_UP                         = "RankUp",
@@ -339,7 +349,7 @@ SOUNDS = {
     ENLIGHTENED_STATE_GAINED        = "EnlightenedState_Gained",
     ENLIGHTENED_STATE_LOST          = "EnlightenedState_Lost",
 
-    -- Experience/Veteran Point sounds
+    -- Experience/Champion Point sounds
     OVERLAND_BOSS_KILL              = "Overland_Boss_Kill",
     SCRIPTED_EVENT_COMPLETION       = "ScriptedEvent_Completion",
 
@@ -785,6 +795,9 @@ SOUNDS = {
     VOICE_CHAT_MENU_CHANNEL_JOINED              = "Voice_Chat_Menu_Channel_Joined",
     VOICE_CHAT_MENU_CHANNEL_LEFT                = "Voice_Chat_Menu_Channel_Left",
     VOICE_CHAT_MENU_CHANNEL_MADE_ACTIVE         = "Voice_Chat_Menu_Channel_Made_Active",
-
     VOICE_CHAT_ALERT_CHANNEL_MADE_ACTIVE        = "Voice_Chat_Alert_Channel_Made_Active",
+
+    -- HUD Sounds
+    HUD_ARMOR_BROKEN                        = "HUD_ArmorBroken",
+    HUD_WEAPON_DEPLETED                     = "HUD_WeaponDepleted",
 }

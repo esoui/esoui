@@ -1,5 +1,37 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_CampaignChangeCost" resizeToFitDescendents="true" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Free" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="350"/>
+                </Label>
+                <Control name="$(parent)AlliancePoints">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="350"/>
+                    <Controls>
+                        <Control name="$(parent)Labels" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT"/>
+                            <Controls>
+                                <Label name="$(parent)Balance" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_SELECT_HOME_CAMPAIGN_BALANCE_LABEL">
+                                    <Anchor point="TOPLEFT"/>
+                                </Label>
+                                <Label name="$(parent)Price" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_SELECT_HOME_CAMPAIGN_COST_LABEL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Balance" relativePoint="BOTTOMLEFT" offsetY="4"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                        <Label name="$(parent)Balance" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Labels" relativePoint="TOPRIGHT" offsetX="120"/>
+                        </Label>
+                        <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="3"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
         <TopLevelControl name="ZO_SelectGuestCampaignDialog" inherits="ZO_DialogBase" hidden="true">
             <OnInitialized>
                 ZO_SelectGuestCampaignDialog_OnInitialized(self)
@@ -45,9 +77,6 @@
             <OnInitialized>
                 ZO_SelectHomeCampaignDialog_OnInitialized(self)
             </OnInitialized>
-            <OnShow>
-                ZO_SelectHomeCampaignDialog_OnShow()
-            </OnShow>
             <Controls>
                 <Control name="$(parent)Locked" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">                    
                     <Controls>
@@ -92,39 +121,108 @@
                         </Label>
                         
                         <!-- Cost -->
-                        <Control name="$(parent)Cost" resizeToFitDescendents="true">
+                        <Control name="$(parent)Cost" inherits="ZO_CampaignChangeCost" resizeToFitDescendents="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SetOnEnd" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="-20"/>
                             <Controls>
-                                <Label name="$(parent)Free" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_SELECT_HOME_CAMPAIGN_FREE">
-                                    <Anchor point="TOPLEFT"/>
-                                    <Dimensions x="350"/>
-                                </Label>
-                                <Control name="$(parent)AlliancePoints">
-                                    <Anchor point="TOPLEFT"/>
-                                    <Dimensions x="350"/>
-                                    <Controls>
-                                        <Control name="$(parent)Labels" resizeToFitDescendents="true">
-                                            <Anchor point="TOPLEFT"/>
-                                            <Controls>
-                                                <Label name="$(parent)Balance" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_SELECT_HOME_CAMPAIGN_BALANCE_LABEL">
-                                                    <Anchor point="TOPLEFT"/>
-                                                </Label>
-                                                <Label name="$(parent)Price" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_SELECT_HOME_CAMPAIGN_COST_LABEL">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Balance" relativePoint="BOTTOMLEFT" offsetY="4"/>
-                                                </Label>
-                                            </Controls>
-                                        </Control>                                     
-                                        <Label name="$(parent)Balance" inherits="ZO_CurrencyTemplate">
-                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Labels" relativePoint="TOPRIGHT" offsetX="120"/>
-                                        </Label>
-                                        <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate">
-                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="3"/>
-                                        </Label>
-                                    </Controls>
-                                </Control>
+                                <Label name="$(parent)Free" override="true" text="SI_SELECT_HOME_CAMPAIGN_FREE" />
                             </Controls>
-                        </Control>                       
+                        </Control>
                         
+                        <Control name="$(parent)Exit" inherits="ZO_DialogButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                        </Control>
+                        <Control name="$(parent)Accept" inherits="ZO_DialogButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Exit" relativePoint="TOPLEFT" offsetX="-15"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_AbandonGuestCampaignDialog" inherits="ZO_DialogBase" hidden="true">
+            <OnInitialized>
+                ZO_AbandonGuestCampaignDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Locked" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Message" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Control name="$(parent)Exit" inherits="ZO_DialogButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Unlocked" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Query" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Control name="$(parent)Exit" inherits="ZO_DialogButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Query" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                        </Control>
+                        <Control name="$(parent)Accept" inherits="ZO_DialogButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Exit" relativePoint="TOPLEFT" offsetX="-15"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_AbandonHomeCampaignDialog" inherits="ZO_DialogBase" hidden="true">
+            <OnInitialized>
+                ZO_AbandonHomeCampaignDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Locked" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Message" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Control name="$(parent)Exit" inherits="ZO_DialogButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Unlocked" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Query" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+
+                        <!-- Radio Buttons --> 
+                        <Button name="$(parent)UseAlliancePointsButton" inherits="ZO_RadioButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Query" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="15"/>
+                            <OnClicked>
+                                ZO_AbandonHomeCampaignDialogUseAlliancePoints_OnClicked(control)
+                            </OnClicked>
+                        </Button>
+                        <Label name="$(parent)UseAlliancePointsLabel" font="ZoFontGame" text="SI_ABANDON_HOME_CAMPAIGN_USE_ALLIANCE_POINTS">
+                            <Anchor point="LEFT" relativeTo="$(parent)UseAlliancePointsButton" relativePoint="RIGHT" offsetX="3"/>
+                        </Label>
+                        <Button name="$(parent)UseGoldButton" inherits="ZO_RadioButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)UseAlliancePointsButton" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <OnClicked>
+                                ZO_AbandonHomeCampaignDialogUseGold_OnClicked(control)
+                            </OnClicked>
+                        </Button>
+                        <Label name="$(parent)UseGoldLabel" font="ZoFontGame" text="SI_ABANDON_HOME_CAMPAIGN_USE_GOLD">
+                            <Anchor point="LEFT" relativeTo="$(parent)UseGoldButton" relativePoint="RIGHT" offsetX="3"/>
+                        </Label>
+
+                        <!-- Cost -->
+                        <Control name="$(parent)Cost" inherits="ZO_CampaignChangeCost" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)UseGoldButton" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="-20"/>
+                            <Controls>
+                                <Label name="$(parent)Free" override="true" text="SI_ABANDON_HOME_CAMPAIGN_FREE" />
+                            </Controls>
+                        </Control>
+
                         <Control name="$(parent)Exit" inherits="ZO_DialogButton">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="23" />
                         </Control>

@@ -118,6 +118,10 @@ function ZO_MetaPool:GetExistingObject(objectKey)
     return self.activeObjects[key]
 end
 
+function ZO_MetaPool:GetActiveObjectCount()
+    return NonContiguousCount(self.activeObjects)
+end
+
 function ZO_MetaPool:ReleaseAllObjects()
     for key, _ in pairs(self.activeObjects) do
         self.sourcePool:ReleaseObject(key)

@@ -45,6 +45,7 @@ function CMapHandlers:InitializeEvents()
     end
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_GATE_STATE_CHANGED, RefreshKeeps)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEPS_INITIALIZED, RefreshKeeps)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_CURRENT_SUBZONE_LIST_CHANGED, RefreshKeeps)
 
     local function RefreshAvAObjectives()
         self.refresh:RefreshAll("avaObjectives")
@@ -71,14 +72,16 @@ end
 
 function CMapHandlers:AddKeep(keepId, bgContext)
     local pinType = GetKeepPinInfo(keepId, bgContext)
-	if(pinType ~= MAP_PIN_TYPE_INVALID) then
-		self:AddMapPin(pinType, keepId)
+    if pinType ~= MAP_PIN_TYPE_INVALID then
+        if DoesKeepPassCompassVisibilitySubzoneCheck(keepId, bgContext) then
+            self:AddMapPin(pinType, keepId)
 
-        local keepUnderAttack = GetKeepUnderAttack(keepId, bgContext)
-		if(keepUnderAttack) then
-            local keepUnderAttackPinType = ZO_WorldMap_GetUnderAttackPinForKeepPin(pinType)
-			self:AddMapPin(keepUnderAttackPinType, keepId)
-		end
+            local keepUnderAttack = GetKeepUnderAttack(keepId, bgContext)
+            if(keepUnderAttack) then
+                local keepUnderAttackPinType = ZO_WorldMap_GetUnderAttackPinForKeepPin(pinType)
+                self:AddMapPin(keepUnderAttackPinType, keepId)
+            end
+        end
     end
 end
 
@@ -86,9 +89,9 @@ function CMapHandlers:RefreshKeeps()
     RemoveMapPinsInRange(MAP_PIN_TYPE_KEEP_NEUTRAL, MAP_PIN_TYPE_KEEP_ATTACKED_SMALL)
     local numKeeps = GetNumKeeps()
     for i = 1, numKeeps do
-		local keepId, bgContext = GetKeepKeysByIndex(i)
+        local keepId, bgContext = GetKeepKeysByIndex(i)
         if(IsLocalBattlegroundContext(bgContext)) then
-		    self:AddKeep(keepId, bgContext)
+            self:AddKeep(keepId, bgContext)
         end
     end
 end
@@ -96,7 +99,7 @@ end
 function CMapHandlers:RefreshKeep(keepId, bgContext)
     RemoveMapPinsInRange(MAP_PIN_TYPE_KEEP_NEUTRAL, MAP_PIN_TYPE_KEEP_ATTACKED_SMALL, keepId)
     if(IsLocalBattlegroundContext(bgContext)) then
-		self:AddKeep(keepId, bgContext)
+        self:AddKeep(keepId, bgContext)
     end
 end
 
@@ -151,17 +154,22 @@ function CMapHandlers:AddMapPin(pinType, keepId, objectiveId)
 end
 
 function CMapHandlers:ValidateAVAPinAllowed(pinType)
-    if IsInCyrodiil() then
-        return true
-    else
-        local isAvAObjective = ZO_MapPin.AVA_OBJECTIVE_PIN_TYPES[pinType] or ZO_MapPin.AVA_SPAWN_OBJECTIVE_PIN_TYPES[pinType]
-        local isAvARespawn = ZO_MapPin.AVA_RESPAWN_PIN_TYPES[pinType]
-        local isForwardCamp = ZO_MapPin.FORWARD_CAMP_PIN_TYPES[pinType]
-        local isFastTravelKeep = ZO_MapPin.FAST_TRAVEL_KEEP_PIN_TYPES[pinType]
-        local isKeep = ZO_MapPin.KEEP_PIN_TYPES[pinType]
+    local isAvAObjective = ZO_MapPin.AVA_OBJECTIVE_PIN_TYPES[pinType] or ZO_MapPin.AVA_SPAWN_OBJECTIVE_PIN_TYPES[pinType]
+    local isAvARespawn = ZO_MapPin.AVA_RESPAWN_PIN_TYPES[pinType]
+    local isForwardCamp = ZO_MapPin.FORWARD_CAMP_PIN_TYPES[pinType]
+    local isFastTravelKeep = ZO_MapPin.FAST_TRAVEL_KEEP_PIN_TYPES[pinType]
+    local isKeep = ZO_MapPin.KEEP_PIN_TYPES[pinType]
+    local isDistrict = ZO_MapPin.DISTRICT_PIN_TYPES[pinType]
 
-        return not (isAvAObjective or isAvARespawn or isForwardCamp or isFastTravelKeep or isKeep)
+    if isAvAObjective or isAvARespawn or isForwardCamp or isFastTravelKeep or isKeep or isDistrict then
+        if IsInCyrodiil() then
+            return isAvAObjective or isAvARespawn or isForwardCamp or isFastTravelKeep or isKeep
+        elseif IsInImperialCity() then
+            return isDistrict or isAvARespawn
+        end
+        return false
     end
+    return true
 end
 
 C_MAP_HANDLERS = CMapHandlers:New()

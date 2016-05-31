@@ -149,8 +149,9 @@ local PregameStates =
                 ZO_CharacterCreate_Gamepad_Reset()
             else
                 Pregame_ShowScene("gameMenuCharacterCreate")
-                ZO_CharacterCreate_Reset()
-                if not HasAgreedToPEGI() then
+				ZO_CharacterCreate_Reset()
+                -- PEGI update currently only needs to be shown on PC
+                if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                     ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
                 end
             end
@@ -251,7 +252,9 @@ local PregameStates =
             
             -- TODO: Determine if these videos need localization or subtitles...
             SetVideoCancelAllOnCancelAny(false)
+
             PlayVideo("Video/Bethesda_logo.bik", QUEUE_VIDEO, skipMode)
+
             ZO_PlayVideoAndAdvance("Video/ZOS_logo.bik", QUEUE_VIDEO, skipMode)
         end,
 
@@ -289,6 +292,26 @@ local PregameStates =
 
         OnEnter = function()
             SCENE_MANAGER:Show("havokSplash")
+        end,
+
+        GetStateTransitionData = function()
+            return "ShowDMMVideo"
+        end,
+
+        OnExit = function()
+        end,
+    },
+
+    ["ShowDMMVideo"] =
+    {
+        ShouldAdvance = function()
+            local serviceType = GetPlatformServiceType()
+            return not(serviceType == PLATFORM_SERVICE_TYPE_DMM and (ZO_Pregame_MustPlayVideos() or ZO_Pregame_AllowVideosToPlay()))
+        end,
+
+        OnEnter = function()
+            local skipMode = ZO_Pregame_MustPlayVideos() and VIDEO_SKIP_MODE_NO_SKIP or VIDEO_SKIP_MODE_ALLOW_SKIP
+            ZO_PlayVideoAndAdvance("Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()

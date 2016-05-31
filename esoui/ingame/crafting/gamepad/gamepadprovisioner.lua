@@ -490,7 +490,7 @@ local function SetupSharedProvisionRecipeEntry(control, data, selected)
 end
 
 function ZO_GamepadProvisionRecipeEntryTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    ZO_GamepadSubMenuEntryTemplate_Setup(control, data.recipeName, data.iconFile, data.iconFile, nil, selected, activated, data.stackCount)
+    ZO_GamepadMenuEntryTemplate_Setup(control, data.recipeName, data.iconFile, data.iconFile, nil, selected, activated, data.stackCount)
     SetupSharedProvisionRecipeEntry(control, data, selected)
 end
 

@@ -93,7 +93,7 @@ function ZO_GamepadTradingHouse_Sell:InitializeList()
     self.itemList = ZO_GamepadInventoryList:New(self.listControl, BAG_BACKPACK, SLOT_TYPE_ITEM, OnSelectionChanged, ENTRY_SETUP_CALLBACK, 
                                                     CATEGORIZATION_FUNCTION, SORT_FUNCTION, USE_TRIGGERS, "ZO_TradingHouse_Sell_Item_Gamepad", SellItemSetupFunction)
 
-    self.itemList:SetItemFilterFunction(function(slot) return slot.quality ~= ITEM_QUALITY_TRASH and not slot.stolen end)
+    self.itemList:SetItemFilterFunction(function(slot) return slot.quality ~= ITEM_QUALITY_TRASH and not slot.stolen and not slot.isPlayerLocked end)
     self.itemList:GetParametricList():SetAlignToScreenCenter(true)
 end
 

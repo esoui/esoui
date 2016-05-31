@@ -41,6 +41,14 @@
                         </Control>
                     </Controls>
                 </Label>
+                
+                <Label name="$(parent)BundledProducts" font="ZoFontHeader3" override="true">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-10"/>
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontHeader3" override="true" />
+                    </Controls>
+                </Label>
+                
             </Controls>
         </Control>
 

@@ -117,6 +117,12 @@ function ZO_PreferredRolesButton_OnMouseEnter(control)
     InformationTooltip:AddLine(GetString("SI_LFGROLE", control.role), "", r, g, b)
     InformationTooltip:AddLine(PREFERRED_ROLES.roles[control.role].tooltip, "", r, g, b)
     InformationTooltip:AddLine(GetString(SI_GROUP_PREFERRED_ROLE_DESCRIPTION), "", r, g, b)
+    local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(control.role)
+    if lowestAverage > 0 then
+        local textLowestAverageTime = ZO_GetSimplifiedTimeEstimateText(lowestAverage * 1000)
+        InformationTooltip:AddLine(zo_strformat(SI_ACTIVITY_FINDER_DUNGEON_AVERAGE_ROLE_TIME_FORMAT, textLowestAverageTime), "", r, g, b) 
+    end
+
     local currentState = control:GetState()
     if currentState == BSTATE_DISABLED or currentState == BSTATE_DISABLED_PRESSED then
         InformationTooltip:AddLine(zo_strformat(SI_GROUP_LIST_PANEL_DISABLED_ROLE_TOOLTIP, tooltipText), "", ZO_ColorDef:New("ff0000"):UnpackRGB())

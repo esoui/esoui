@@ -1,48 +1,62 @@
 local GuildSelector = ZO_Object:Subclass()
 
-function GuildSelector:New(control)
+function GuildSelector:New(...)
     local selector = ZO_Object.New(self)
+    selector:Initialize(...)
+    return selector
+end
 
-    selector.control = control
+function GuildSelector:Initialize(control)
+    self.control = control
     local comboBoxControl = GetControl(control, "ComboBox")
-    selector.comboBox = ZO_ComboBox_ObjectFromContainer(comboBoxControl)
-    selector.comboBox:SetSortsItems(false)
-    selector.comboBox:SetSelectedItemFont("ZoFontWindowTitle")
-    selector.comboBox:SetDropdownFont("ZoFontHeader2")
-    selector.comboBox:SetSpacing(8)
+    self.comboBox = ZO_ComboBox_ObjectFromContainer(comboBoxControl)
+    self.comboBox:SetSortsItems(false)
+    self.comboBox:SetSelectedItemFont("ZoFontWindowTitle")
+    self.comboBox:SetDropdownFont("ZoFontHeader2")
+    self.comboBox:SetSpacing(8)
+    local comboBoxLabel = comboBoxControl:GetNamedChild("SelectedItemText")
 
-    selector.allianceIconControl = GetControl(control, "GuildIcon")
+    self.allianceIconControl = GetControl(control, "GuildIcon")
     
-    selector.scenesCreated = false
-    selector.OnGuildChanged =   function(_, entryText, entry)
-                                    local changeGuildCallback = function(params)
-                                                                    GUILD_SELECTOR:SelectGuild(params.entry)
-                                                                end
-                                    local changeGuildParams = { entry = entry, }
-                                    local forcePreviousGuildNameInSelector = true
+    self.scenesCreated = false
+    self.OnGuildChanged =   function(_, entryText, entry)
+                                local changeGuildCallback = function(params)
+                                                                self:SelectGuild(params.entry)
+                                                            end
+                                local changeGuildParams = { entry = entry, }
+                                local forcePreviousGuildNameInSelector = true
 
-                                    if GUILD_RANKS:CanSave() then
-                                        if selector.guildId ~= entry.guildId then
-                                            GUILD_RANKS:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
-                                        end
-                                    elseif GUILD_HERALDRY:CanSave() then
-                                        if selector.guildId ~= entry.guildId then
-                                            GUILD_HERALDRY:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
-                                        end
-                                    else
-                                        forcePreviousGuildNameInSelector = false
-                                        selector:SelectGuild(entry)
+                                if GUILD_RANKS:CanSave() then
+                                    if self.guildId ~= entry.guildId then
+                                        GUILD_RANKS:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
                                     end
-
-                                    if forcePreviousGuildNameInSelector then
-                                        -- Force the combo box to not change guild text until the callback is adequately addressed
-                                        selector.comboBox:SetSelectedItem(selector.currentGuildText)
+                                elseif GUILD_HERALDRY:CanSave() then
+                                    if self.guildId ~= entry.guildId then
+                                        GUILD_HERALDRY:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
                                     end
+                                else
+                                    forcePreviousGuildNameInSelector = false
+                                    self:SelectGuild(entry)
                                 end
 
-    EVENT_MANAGER:RegisterForEvent("GuildsSelector", EVENT_GUILD_DATA_LOADED, function() selector:InitializeGuilds() end)
+                                if forcePreviousGuildNameInSelector then
+                                    -- Force the combo box to not change guild text until the callback is adequately addressed
+                                    self.comboBox:SetSelectedItem(self.currentGuildText)
+                                end
+                            end
 
-    selector.guildWindows =
+    EVENT_MANAGER:RegisterForEvent("GuildsSelector", EVENT_GUILD_DATA_LOADED, function() self:InitializeGuilds() end)
+
+    local function OnSceneGroupBarLabelTextChanged(labelControl)
+        local menuLeft = labelControl:GetLeft()
+        local comboLeft = comboBoxLabel:GetLeft()
+        local workingWidth = menuLeft - comboLeft
+        comboBoxLabel:SetDimensionConstraints(0, 0, workingWidth - 50, 0)
+    end
+
+    MAIN_MENU_KEYBOARD:RegisterCallback("OnSceneGroupBarLabelTextChanged", OnSceneGroupBarLabelTextChanged)
+
+    self.guildWindows =
     {
         GUILD_HOME,
         GUILD_ROSTER_MANAGER,
@@ -52,7 +66,7 @@ function GuildSelector:New(control)
         GUILD_HERALDRY,
     }
 
-    selector.guildRelatedScenes =
+    self.guildRelatedScenes =
     {
         "guildHome",
         "guildRoster",
@@ -60,8 +74,6 @@ function GuildSelector:New(control)
         "guildHistory",
         "guildHeraldry",
     }
-
-    return selector
 end
 
 function GuildSelector:SetGuildWindowsToId(guildId)

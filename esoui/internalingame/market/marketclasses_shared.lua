@@ -70,6 +70,7 @@ end
 function ZO_MarketProductBase:Initialize(control, owner)
     self.owner = owner
     self.marketProductId = 0
+    self.variation = 1
     self.activeMarketProductIcon = nil
 
     if control then
@@ -96,6 +97,8 @@ function ZO_MarketProductBase:InitializeControls(control)
         self.rightCalloutBackground = self.textCalloutBackground:GetNamedChild("Right")
         self.centerCalloutBackground = self.textCalloutBackground:GetNamedChild("Center")
     end
+    self.bundledProductsLabel = control:GetNamedChild("BundledProducts")
+    self.bundleIndicator = control:GetNamedChild("BundleIndicator")
 end
 
 function ZO_MarketProductBase:GetId()
@@ -103,7 +106,19 @@ function ZO_MarketProductBase:GetId()
 end
 
 function ZO_MarketProductBase:GetMarketProductInfo()
-    return GetMarketProductInfo(self:GetId())
+    return GetMarketProductInfo(self.marketProductId)
+end
+
+function ZO_MarketProductBase:GetMarketProductType()
+    return GetMarketProductType(self.marketProductId)
+end
+
+function ZO_MarketProductBase:GetNumChildren()
+    return GetMarketProductNumChildren(self.marketProductId)
+end
+
+function ZO_MarketProductBase:GetChildMarketProductId(childIndex)
+    return GetMarketProductChildId(self.marketProductId, childIndex)
 end
 
 function ZO_MarketProductBase:GetNumAttachedCollectibles()
@@ -114,16 +129,8 @@ function ZO_MarketProductBase:GetNumAttachedItems()
     return GetMarketProductNumItems(self.marketProductId)
 end
 
-function ZO_MarketProductBase:GetNumAttachments()
-    return self:GetNumAttachedCollectibles() + self:GetNumAttachedItems()
-end
-
-function ZO_MarketProductBase:GetInstantUnlockType()
-    return GetMarketProductInstantUnlockType(self.marketProductId)
-end
-
-function ZO_MarketProductBase:HasInstantUnlock()
-    return self:GetInstantUnlockType() ~= MARKET_INSTANT_UNLOCK_NONE
+function ZO_MarketProductBase:GetProductType()
+    return GetMarketProductType(self.marketProductId)
 end
 
 function ZO_MarketProductBase:GetTimeLeftInSeconds()
@@ -223,8 +230,7 @@ do
         else
             self.previousCost:SetHidden(true)
             if self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
-                --There can only be one where completion is concerned
-                local errorStringId = GetMarketProductReqListErrorStringIds(self.marketProductId)
+                local errorStringId = GetMarketProductCompleteErrorStringId(self.marketProductId)
                 self.purchaseLabelControl:SetText(GetErrorString(errorStringId))
             elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
                 self.purchaseLabelControl:SetText(GetString(SI_MARKET_INSTANT_UNLOCK_INELIGIBLE_LABEL))
@@ -238,6 +244,22 @@ do
         end
 
         self.textCallout:SetHidden(hideCallouts)
+
+        local isBundle = self:IsBundle()
+        if isBundle then
+            local numBundledProducts = GetMarketProductNumBundledProducts(self.marketProductId)
+            self.bundledProductsLabel:SetText(numBundledProducts)
+            -- hide the label if the result is 0 or 1 (which means either an empty bundle or what should be a single product...)
+            if numBundledProducts > 1 then
+                self.bundledProductsLabel:SetHidden(false)
+            else
+                self.bundledProductsLabel:SetHidden(true)
+            end
+        else
+            self.bundledProductsLabel:SetHidden(true)
+        end
+
+        self.bundleIndicator:SetHidden(not isBundle)
 
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, FOCUSED, self.purchaseState)
     end
@@ -331,24 +353,20 @@ function ZO_MarketProductBase:HasActiveIcon()
     return self.activeMarketProductIcon ~= nil
 end
 
-function ZO_MarketProductBase:IsActiveIconCollectible()
-    return self:HasActiveIcon() and self.activeMarketProductIcon:IsCollectible()
-end
-
 function ZO_MarketProductBase:SetTitle(title)
     self.title:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title))
 end
 
 -- MarketProduct Preview functions
 
-function ZO_MarketProductBase:PreviewCollectible(index)
-    PreviewMarketProductCollectible(self:GetId(), index)
-    self.owner:RefreshActions()
-    PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
+function ZO_MarketProductBase:HasPreview()
+    return CanPreviewMarketProduct(self.marketProductId)
 end
 
-function ZO_MarketProductBase:IsPreviewingCollectible(index)
-    return IsMarketProductCollectibleBeingPreviewed(self:GetId(), index)
+function ZO_MarketProductBase:Preview()
+    PreviewMarketProduct(self.marketProductId, self.variation)
+    self.owner:RefreshActions()
+    PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
 end
 
 function ZO_MarketProductBase:EndPreview()
@@ -356,16 +374,41 @@ function ZO_MarketProductBase:EndPreview()
     self.owner:RefreshActions()
 end
 
-do
-    local IS_COLLECTIBLE_PREVIEWABLE = {
-        [COLLECTIBLE_CATEGORY_TYPE_MOUNT] = true,
-        [COLLECTIBLE_CATEGORY_TYPE_VANITY_PET] = true,
-        [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = true,
-    }
+function ZO_MarketProductBase:GetPreviewVariationDisplayName()
+    local previewVariationDisplayName = GetMarketProductPreviewVariationDisplayName(self.marketProductId, self.variation)
 
-    function ZO_MarketProductBase:CanPreviewCollectible(index)
-        local collectibleType = select(4, GetMarketProductCollectibleInfo(self:GetId(), index))
-        return IS_COLLECTIBLE_PREVIEWABLE[collectibleType] == true
+    if previewVariationDisplayName == "" then
+        return self.variation
+    else
+        return previewVariationDisplayName
+    end
+end
+
+function ZO_MarketProductBase:GetNumPreviewVariations()
+    return GetNumMarketProductPreviewVariations(self.marketProductId)
+end
+
+function ZO_MarketProductBase:PreviewNextVariation()
+    if self:HasPreview() and self:GetNumPreviewVariations() > 0 then
+        self.variation = self.variation + 1
+
+        if self.variation > self:GetNumPreviewVariations() then
+            self.variation = 1
+        end
+
+        self:Preview()
+    end
+end
+
+function ZO_MarketProductBase:PreviewPreviousVariation()
+    if self:HasPreview() and self:GetNumPreviewVariations() > 0 then
+        self.variation = self.variation - 1
+        
+        if self.variation < 1 then
+            self.variation = self:GetNumPreviewVariations()
+        end
+
+        self:Preview()
     end
 end
 
@@ -379,26 +422,8 @@ function ZO_MarketProductBase:PerformLayout(name, description, cost, discountedC
     -- to be overridden
 end
 
-function ZO_MarketProductBase:IsPreviewingActiveCollectible()
-    -- to be overridden
-end
-
-function ZO_MarketProductBase:HasPreview()
-    -- to be overridden
-end
-
-function ZO_MarketProductBase:Preview()
-    -- to be overridden
-end
-
 function ZO_MarketProductBase:IsBundle()
-    -- to be overridden, default behavior
-    return self:GetNumAttachments() > 1
-end
-
-function ZO_MarketProductBase:IsBundleAttachment()
-    -- to be overridden, default behavior
-    return false
+    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
 end
 
 function ZO_MarketProductBase:IsBlank()

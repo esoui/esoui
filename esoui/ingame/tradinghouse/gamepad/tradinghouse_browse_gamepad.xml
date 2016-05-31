@@ -42,12 +42,11 @@
                 self.slider = self:GetNamedChild("Slider")
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)SliderValue" inherits="ZO_GamepadMenuEntryLabelTemplate" font="ZoFontGamepad42" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM">
-                    <Dimensions x="50"/>
+                <Label name="$(parent)SliderValue" font="ZoFontGamepad42">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" relativePoint="TOPRIGHT"/>
                 </Label>
                 
-                <Label name="$(parent)SliderLabel" inherits="ZO_GamepadMenuEntryLabelTemplate" font="ZoFontGamepad27" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" verticalAlignment="BOTTOM">
+                <Label name="$(parent)SliderLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE" verticalAlignment="BOTTOM">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" relativePoint="TOPLEFT"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SliderValue" relativePoint="BOTTOMLEFT" offsetX="-10"/>
                 </Label>

@@ -47,6 +47,12 @@
                 <Label name="$(parent)Name" inherits="ZO_LeaderboardsRowLabel" font="ZoFontWinT1" mouseEnabled="true">
                     <Dimensions x="220" />
                     <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" />
+                    <OnMouseEnter>
+                        ZO_LeaderboardsRowName_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_LeaderboardsRowName_OnMouseExit(self)
+                    </OnMouseExit>
                 </Label>
                 
                 <Texture name="$(parent)Class" mouseEnabled="true" layer="OVERLAY">
@@ -172,7 +178,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-32"/>
                 </Control>
 
-                <Control name="$(parent)EmptyRow" inherits="ZO_SortFilterListEmptyRow" hidden="true">
+                <Control name="$(parent)EmptyRow" inherits="ZO_SortFilterListEmptyRow_Keyboard" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)List" offsetY="5" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" offsetY="5" />
 

@@ -74,6 +74,11 @@ function ZO_GamepadGuildInfo:PerformDeferredInitialization()
     self.traderIcon:SetTexture(ICON_TRADER)
     self.traderName = trader:GetNamedChild("Name")
 
+    local guildMasterContainer = scrollChild:GetNamedChild("GuildMaster")
+    local guildMasterTitle = guildMasterContainer:GetNamedChild("Title")
+    guildMasterTitle:SetText(GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_MASTER_LABEL))
+    self.guildMasterBodyLabel = guildMasterContainer:GetNamedChild("Body")
+
     local motdContainer = scrollChild:GetNamedChild("MOTD")
     local motdTitle = motdContainer:GetNamedChild("Title")
     motdTitle:SetText(GetString(SI_GUILD_MOTD_HEADER))
@@ -95,7 +100,8 @@ end
 function ZO_GamepadGuildInfo:RefreshScreen()
     self:RefreshKeepOwnership()
     self:RefreshTraderOwnership()
-    self:RefreshMOD()
+    self:RefreshGuildMaster()
+    self:RefreshMOTD()
     self:RefreshDescription()
     self:RefreshPrivileges()
     self:RefreshHeader()
@@ -137,15 +143,12 @@ end
 function ZO_GamepadGuildInfo:InitializeFooter()
     self.footerData = {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_LABEL),
-        data2HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_MASTER_LABEL),
     }
 end
 
 function ZO_GamepadGuildInfo:RefreshFooter()
-    local numGuildMembers, numOnline, guildMasterName = GetGuildInfo(self.guildId)
-
+    local numGuildMembers, numOnline = GetGuildInfo(self.guildId)
     self.footerData.data1Text = zo_strformat(GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_FORMAT), numOnline, numGuildMembers)
-    self.footerData.data2Text = ZO_FormatUserFacingDisplayName(guildMasterName)
 
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
 end
@@ -154,7 +157,12 @@ end
 -- Messages --
 --------------
 
-function ZO_GamepadGuildInfo:RefreshMOD()
+function ZO_GamepadGuildInfo:RefreshGuildMaster()
+    local guildMaster = select(3, GetGuildInfo(self.guildId))
+    self.guildMasterBodyLabel:SetText(ZO_FormatUserFacingDisplayName(guildMaster))
+end
+
+function ZO_GamepadGuildInfo:RefreshMOTD()
     local text = GetGuildMotD(self.guildId)
 
     if(text == "") then

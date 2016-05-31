@@ -17,19 +17,6 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
     self.sceneName = "gamepad_quest_journal"
     self.optionsSceneName = "gamepad_quest_journal_options"
 
-    self:RegisterIconTexture(QUEST_TYPE_AVA, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_AvA.dds")
-    self:RegisterIconTexture(QUEST_TYPE_AVA_GRAND, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
-    self:RegisterIconTexture(QUEST_TYPE_AVA_GROUP, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_AvAGroup.dds")
-    self:RegisterIconTexture(QUEST_TYPE_CLASS, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
-    self:RegisterIconTexture(QUEST_TYPE_CRAFTING, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_crafting.dds")
-    self:RegisterIconTexture(QUEST_TYPE_DUNGEON, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
-    self:RegisterIconTexture(QUEST_TYPE_GROUP, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_group.dds")
-    self:RegisterIconTexture(QUEST_TYPE_GUILD, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_guild.dds")
-    self:RegisterIconTexture(QUEST_TYPE_MAIN_STORY, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_mainStory.dds")
-    self:RegisterIconTexture(QUEST_TYPE_NONE, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
-    self:RegisterIconTexture(QUEST_TYPE_QA_TEST, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
-    self:RegisterIconTexture(QUEST_TYPE_RAID, "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")
-
     self.questList = self:GetMainList()
     self.questList:SetNoItemText(GetString(SI_GAMEPAD_QUEST_JOURNAL_NO_QUESTS))
     self.optionsList = self:AddList("Options")
@@ -72,11 +59,11 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
         titleText = function()
             local questData = self:GetSelectedQuestData()
             if questData then
-                local questName, _, _, _, _, _, _, _, _, questType = GetJournalQuestInfo(questData.questIndex)
+                local questName, _, _, _, _, _, _, _, _, questType, instanceDisplayType = GetJournalQuestInfo(questData.questIndex)
 
                 local conColorDef = ZO_ColorDef:New(GetConColor(questData.level))
                 questName = conColorDef:Colorize(questName)
-                local questIcon = zo_iconFormat(self:GetIconTexture(questType), 48, 48)
+                local questIcon = zo_iconFormat(self:GetIconTexture(questType, instanceDisplayType), 48, 48)
                 if QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() == questData.questIndex then
                     questName = zo_strformat(SI_GAMEPAD_SELECTED_QUEST_JOURNAL_QUEST_NAME_FORMAT, FORMATTED_SELECTED_QUEST_ICON, questIcon, questName)
                 else
@@ -117,38 +104,57 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
     ZO_QuestJournal_Shared.Initialize(self, control)
 end
 
-do
+function ZO_QuestJournal_Gamepad:RegisterIcons()
+    self:RegisterIconTexture(QUEST_TYPE_AVA,        ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_AvA.dds")
+    self:RegisterIconTexture(QUEST_TYPE_AVA_GRAND,  ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
+    self:RegisterIconTexture(QUEST_TYPE_AVA_GROUP,  ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_AvAGroup.dds")
+    self:RegisterIconTexture(QUEST_TYPE_CLASS,      ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
+    self:RegisterIconTexture(QUEST_TYPE_CRAFTING,   ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_crafting.dds")
+    self:RegisterIconTexture(QUEST_TYPE_GROUP,      ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_group.dds")
+    self:RegisterIconTexture(QUEST_TYPE_GUILD,      ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_guild.dds")
+    self:RegisterIconTexture(QUEST_TYPE_MAIN_STORY, ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_mainStory.dds")
+    self:RegisterIconTexture(QUEST_TYPE_NONE,       ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
+    self:RegisterIconTexture(QUEST_TYPE_QA_TEST,    ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds")
+    self:RegisterIconTexture(QUEST_TYPE_RAID,       ZO_ANY_INSTANCE_DISPLAY_TYPE,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")
+    
+    -- Ensure that we display the correct dungeon icon based on the type of instance it is
+    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_NONE,         "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
+    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_SOLO,         "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
+    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_GROUP,        "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds")
+    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_GROUP_DELVE,  "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds")
+    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_RAID,         "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")    
+end
+
+function ZO_QuestJournal_Gamepad:RegisterTooltips()
     local ICON_SIZE = 48
     local groupIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_group.dds", ICON_SIZE, ICON_SIZE)
     local raidIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds", ICON_SIZE, ICON_SIZE)
     local soloIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_normal.dds", ICON_SIZE, ICON_SIZE)
+    local publicDungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds", ICON_SIZE, ICON_SIZE)
 
-    local instanceDisplayStrings = {
-        [INSTANCE_DISPLAY_TYPE_GROUP] = zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP, groupIcon),
-        [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "",
-        [INSTANCE_DISPLAY_TYPE_NONE] = "",
-        [INSTANCE_DISPLAY_TYPE_RAID] = zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_RAID, raidIcon),
-        [INSTANCE_DISPLAY_TYPE_SOLO] = zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon),
-    }
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,     zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP,    zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP, groupIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,     zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_RAID, raidIcon))
 
-    function ZO_QuestJournal_Gamepad:GetQuestDataString()
-        local repeatableText, instanceDisplayTypeText
-        local questData = self:GetSelectedQuestData()
+    self:RegisterTooltipText(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_NONE,     zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_PUBLIC_DUNGEON, publicDungeonIcon))
+end
 
-        if questData then
-            local repeatableType = GetJournalQuestRepeatType(questData.questIndex)
-            if repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE then
-                repeatableText = GetString(SI_GAMEPAD_QUEST_JOURNAL_REPEATABLE_TEXT)
-            end
+function ZO_QuestJournal_Gamepad:GetQuestDataString()
+    local repeatableText, instanceDisplayTypeText
+    local questData = self:GetSelectedQuestData()
 
-            if questData.dataSource then
-                local instanceDisplayType = questData.dataSource.displayType
-                instanceDisplayTypeText = instanceDisplayStrings[instanceDisplayType]
-            end
+    if questData then
+        local repeatableType = GetJournalQuestRepeatType(questData.questIndex)
+        if repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE then
+            repeatableText = GetString(SI_GAMEPAD_QUEST_JOURNAL_REPEATABLE_TEXT)
         end
 
-        return repeatableText, instanceDisplayTypeText
+        if questData.dataSource then
+            instanceDisplayTypeText = self:GetTooltipText(questData.dataSource.questType, questData.dataSource.displayType)
+        end
     end
+
+    return repeatableText, instanceDisplayTypeText
 end
 
 function ZO_QuestJournal_Gamepad:PerformDeferredInitialization()
@@ -531,7 +537,7 @@ function ZO_QuestJournal_Gamepad:RefreshQuestList()
 
     local lastCategoryName
     for i, quest in ipairs(self.questMasterList) do
-        local entry = ZO_GamepadEntryData:New(quest.name, self:GetIconTexture(quest.questType))
+        local entry = ZO_GamepadEntryData:New(quest.name, self:GetIconTexture(quest.questType, quest.displayType))
         entry:SetDataSource(quest)
         entry:SetIconTintOnSelection(true)
 

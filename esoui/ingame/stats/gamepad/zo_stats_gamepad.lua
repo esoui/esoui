@@ -18,8 +18,9 @@ local GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME = "GAMEPAD_STATS_COMMIT_POINTS"
 
 local GAMEPAD_STATS_DISPLAY_MODE = {
     CHARACTER = 1,
-    EFFECTS = 2,
-    TITLE = 3,
+    ATTRIBUTES = 2,
+    EFFECTS = 3,
+    TITLE = 4,
 }
 
 local GAMEPAD_ATTRIBUTE_ICONS = {
@@ -191,7 +192,8 @@ function ZO_GamepadStats:PerformDeferredInitializationRoot()
     
     self.infoPanel = self.control:GetNamedChild("RightPane"):GetNamedChild("InfoPanel")
 
-    self:InitializeCharacterStats()
+    self:InitializeCharacterPanel()
+    self:InitializeAttributesPanel()
     self:InitializeCharacterEffects()
 
     self:InitializeHeader()
@@ -203,7 +205,7 @@ function ZO_GamepadStats:InitializeBattleLevelHeader()
     local battleLevelHeader = self.control:GetNamedChild("RightPane"):GetNamedChild("BattleLevelHeader")
 
     self.levelTypeIcon = battleLevelHeader:GetNamedChild("LevelTypeIcon")
-    self.levelTypeIcon:SetTexture(GetGamepadVeteranRankIcon())
+    self.levelTypeIcon:SetTexture(GetGamepadChampionPointsIcon())
 
     self.levelLabel = battleLevelHeader:GetNamedChild("Level")
 
@@ -212,19 +214,19 @@ end
 
 function ZO_GamepadStats:RefreshBattleLevelHeader()       
     local isBattleLeveled = IsUnitBattleLeveled("player")
-    local isVetBattleLeveled = IsUnitVetBattleLeveled("player")
+    local isChampionBattleLeveled = IsUnitChampionBattleLeveled("player")
 
-    if isVetBattleLeveled then
+    if isChampionBattleLeveled then
         self.levelTypeIcon:SetWidth(32)
         self.levelTypeIcon:SetHidden(false)
-        self.levelLabel:SetText(GetUnitVetBattleLevel("player"))
+        self.levelLabel:SetText(GetUnitChampionBattleLevel("player"))
     elseif isBattleLeveled then
         self.levelTypeIcon:SetWidth(0)
         self.levelTypeIcon:SetHidden(true)
         self.levelLabel:SetText(GetUnitBattleLevel("player"))
     end
 
-    self.battleLevelHeader:SetHidden(not (isBattleLeveled or isVetBattleLeveled))
+    self.battleLevelHeader:SetHidden(not (isBattleLeveled or isChampionBattleLeveled))
 end
 
 function ZO_GamepadStats:InitializeKeybindStripDescriptors()
@@ -283,7 +285,9 @@ function ZO_GamepadStats:SetAddedPoints(attributeType, addedPoints)
     self.attributeData[attributeType].addedPoints = addedPoints
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-    self:RefreshCharacterStats()
+    if not self.attributesPanel.hidden then
+        self:RefreshAttributesPanel()
+    end
 end
 
 function ZO_GamepadStats:GetAddedPoints(attributeType)
@@ -307,21 +311,27 @@ function ZO_GamepadStats:PurchaseAttributes()
         end
 
 function ZO_GamepadStats:UpdateScreenVisibility()
-    local isStatsHidden = true
+    local isAttributesHidden = true
+    local isCharacterHidden = true
     local isEffectsHidden = true
 
-    if(self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.CHARACTER or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE) then
-        isStatsHidden = false
-        self:RefreshCharacterStats()
-    elseif(self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS) then
+    if self.displayMode ~= GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
+        if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.CHARACTER then
+            isCharacterHidden = false
+            self:RefreshCharacterPanel()
+        else 
+            isAttributesHidden = false
+            self:RefreshAttributesPanel()
+        end
+    else
         isEffectsHidden = (self.numActiveEffects == 0)
-        if(not isEffectsHidden) then
+        if not isEffectsHidden then
             self:RefreshCharacterEffects()    
         end
     end
 
-    self.characterStats:SetHidden(isStatsHidden)
-    
+    self.characterStatsPanel:SetHidden(isCharacterHidden)
+    self.attributesPanel:SetHidden(isAttributesHidden)
     self.characterEffects:SetHidden(isEffectsHidden)
 
     local hideQuadrant2Background = isStatsHidden and isEffectsHidden
@@ -337,7 +347,7 @@ end
 function ZO_GamepadStats:RefreshConfirmScreen()
     self:RefreshCommitPointsConfirmList()
 
-    self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.CHARACTER
+    self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
     
     self:UpdateScreenVisibility()
 end
@@ -460,6 +470,9 @@ do
         self.mainList:AddDataTemplate("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         self.mainList:AddDataTemplateWithHeader("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
+        self.mainList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_GamepadStatCharacterRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        self.mainList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_GamepadStatCharacterRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+
         self.mainList:AddDataTemplate("ZO_GamepadEffectAttributeRow", SetupEffectAttributeRow, ZO_GamepadMenuEntryTemplateParametricListFunction)
         self.mainList:AddDataTemplateWithHeader("ZO_GamepadEffectAttributeRow", SetupEffectAttributeRow, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
@@ -469,6 +482,12 @@ do
         self.titleEntry.statsObject = self
         self.titleEntry:SetHeader(GetString(SI_STATS_TITLE))
 
+        --Character Entry
+        self.characterEntry = ZO_GamepadEntryData:New("")
+        self.characterEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.CHARACTER
+        self.characterEntry.statsObject = self
+        self.characterEntry:SetHeader(GetString(SI_STATS_CHARACTER))
+
         --Attribute Entries
         self.attributeEntries = {}
         for index, attributeType in ipairs(GAMEPAD_ATTRIBUTE_ORDERING) do
@@ -476,7 +495,7 @@ do
             local data = ZO_GamepadEntryData:New(GetString("SI_ATTRIBUTES", attributeType), icon)
             data.screen = self
             data.attributeType = attributeType
-            data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.CHARACTER
+            data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
         
             if index == 1 then
                 data:SetHeader(GetString(SI_STATS_ATTRIBUTES))
@@ -524,6 +543,9 @@ function ZO_GamepadStats:RefreshMainList()
             self.mainList:AddEntry("ZO_GamepadStatAttributeRow", attributeEntry)
         end
     end
+
+    -- Character Info
+    self.mainList:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", self.characterEntry)
     
     -- Active Effects
     self.numActiveEffects = 0
@@ -628,18 +650,69 @@ end
 -- Character Stats --
 ---------------------
 
-function ZO_GamepadStats:InitializeCharacterStats()
-    self.characterStats = self.infoPanel:GetNamedChild("CharacterStatsPanel")
+function ZO_GamepadStats:InitializeCharacterPanel()
+    self.characterStatsPanel = self.infoPanel:GetNamedChild("CharacterStatsPanel")
 
     -- Left Column
 
-    local leftColumn = self.characterStats:GetNamedChild("LeftColumn")
+    local leftColumn = self.characterStatsPanel:GetNamedChild("LeftColumn")
 
     self.race = leftColumn:GetNamedChild("Race")
     self.class = leftColumn:GetNamedChild("Class")
 
-    self.championRankHeader = leftColumn:GetNamedChild("ChampionRankHeader")
-    self.championRank = leftColumn:GetNamedChild("ChampionRank")
+    self.championPointsHeader = leftColumn:GetNamedChild("ChampionPointsHeader")
+    self.championPoints = leftColumn:GetNamedChild("ChampionPoints")
+
+    self.ridingSpeed = leftColumn:GetNamedChild("RidingSpeed")
+    self.ridingCapacity = leftColumn:GetNamedChild("RidingCapacity")
+
+    -- Right Column
+
+    local rightColumn = self.characterStatsPanel:GetNamedChild("RightColumn")
+
+    self.alliance = rightColumn:GetNamedChild("Alliance")
+    self.rankIcon = rightColumn:GetNamedChild("RankIcon")
+    self.rank = rightColumn:GetNamedChild("Rank")
+
+    self.ridingStamina = rightColumn:GetNamedChild("RidingStamina")
+    self.ridingTrainingHeader = rightColumn:GetNamedChild("RidingTrainingHeader")
+    self.ridingTrainingReady = rightColumn:GetNamedChild("RidingTrainingReady")
+    self.ridingTrainingTimer = rightColumn:GetNamedChild("RidingTrainingTimer")
+
+    -- XP Bar
+    self.experienceProgress = self.characterStatsPanel:GetNamedChild("ExperienceProgress")
+    self.experienceBarControl = self.characterStatsPanel:GetNamedChild("ExperienceBar")
+    self.enlightenedBarControl = self.experienceBarControl:GetNamedChild("EnlightenedBar")
+    self.experienceBar = ZO_WrappingStatusBar:New(self.experienceBarControl)
+    self.enlightenmentText = self.characterStatsPanel:GetNamedChild("Enlightenment")
+
+    local function OnTimerUpdate()
+        local timeUntilCanBeTrained = GetTimeUntilCanBeTrained()
+        if timeUntilCanBeTrained == 0 then
+            self:RefreshCharacterPanel()
+        else
+            local timeLeft = ZO_FormatTimeMilliseconds(timeUntilCanBeTrained, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
+            self.ridingTrainingTimer:SetText(timeLeft)
+        end
+    end
+
+    self.ridingTrainingTimer:SetHandler("OnUpdate", OnTimerUpdate)
+
+    local function OnCharacterUpdate(_, currentFrameTimeSeconds)
+        if self.nextCharacterRefreshSeconds < currentFrameTimeSeconds then
+            self:RefreshCharacterPanel()
+        end    
+    end
+
+    self.characterStatsPanel:SetHandler("OnUpdate", OnCharacterUpdate)
+end
+
+function ZO_GamepadStats:InitializeAttributesPanel()
+    self.attributesPanel = self.infoPanel:GetNamedChild("AttributesPanel")
+
+    -- Left Column
+
+    local leftColumn = self.attributesPanel:GetNamedChild("LeftColumn")
 
     self.maxMagickaHeader = leftColumn:GetNamedChild("MaxMagickaHeader")
     self.maxHealthHeader = leftColumn:GetNamedChild("MaxHealthHeader")
@@ -664,15 +737,10 @@ function ZO_GamepadStats:InitializeCharacterStats()
     self.spellResistance = leftColumn:GetNamedChild("SpellResistance")
     self.critResistance = leftColumn:GetNamedChild("CritResistance")
 
-    self.ridingSpeed = leftColumn:GetNamedChild("RidingSpeed")
-    self.ridingCapacity = leftColumn:GetNamedChild("RidingCapacity")
+    -- Right Column
 
-    local rightColumn = self.characterStats:GetNamedChild("RightColumn")
+    local rightColumn = self.attributesPanel:GetNamedChild("RightColumn")
 
-    self.alliance = rightColumn:GetNamedChild("Alliance")
-    self.rankIcon = rightColumn:GetNamedChild("RankIcon")
-    self.rank = rightColumn:GetNamedChild("Rank")
-    
     self.magickaRecoveryHeader = rightColumn:GetNamedChild("MagickaRecoveryHeader")
     self.healthRecoveryHeader = rightColumn:GetNamedChild("HealthRecoveryHeader")
     self.staminaRecoveryHeader = rightColumn:GetNamedChild("StaminaRecoveryHeader")
@@ -689,32 +757,17 @@ function ZO_GamepadStats:InitializeCharacterStats()
     self.weaponCritical = rightColumn:GetNamedChild("WeaponCritical")
     self.armor = rightColumn:GetNamedChild("Armor")
 
-    self.ridingStamina = rightColumn:GetNamedChild("RidingStamina")
-    self.ridingTrainingHeader = rightColumn:GetNamedChild("RidingTrainingHeader")
-    self.ridingTrainingReady = rightColumn:GetNamedChild("RidingTrainingReady")
-    self.ridingTrainingTimer = rightColumn:GetNamedChild("RidingTrainingTimer")
+    self.nextAttributeRefreshSeconds = 0
+    self.nextCharacterRefreshSeconds = 0
 
-    local function OnTimerUpdate()
-        local timeUntilCanBeTrained = GetTimeUntilCanBeTrained()
-        if timeUntilCanBeTrained == 0 then
-            self:RefreshCharacterStats()
-        else
-            local timeLeft = ZO_FormatTimeMilliseconds(timeUntilCanBeTrained, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
-            self.ridingTrainingTimer:SetText(timeLeft)
-        end
-    end
-
-    self.ridingTrainingTimer:SetHandler("OnUpdate", OnTimerUpdate)
-
-    self.nextStatsRefreshSeconds = 0
-    local function OnStatUpdate(_, currentFrameTimeSeconds)
-        if self.nextStatsRefreshSeconds < currentFrameTimeSeconds then
-            self:RefreshCharacterStats()
+    local function OnAttributesUpdate(_, currentFrameTimeSeconds)
+        if self.nextAttributeRefreshSeconds < currentFrameTimeSeconds then
+            self:RefreshAttributesPanel()
         end    
     end
 
-    self.characterStats:SetHandler("OnUpdate", OnStatUpdate)
-    self.headers = {
+    self.attributesPanel:SetHandler("OnUpdate", OnAttributesUpdate)
+    self.attributesHeaders = {
         -- Left Column
         { label = self.maxMagickaHeader, stat = STAT_MAGICKA_MAX },
         { label = self.maxHealthHeader, stat = STAT_HEALTH_MAX },
@@ -803,23 +856,10 @@ local function GetStatText(statType)
     return statText
 end
 
-function ZO_GamepadStats:RefreshCharacterStats()
-    self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
+function ZO_GamepadStats:RefreshAttributesPanel()
+    self.nextAttributeRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
 
-    -- Left & Right Column
-    local unitRace = GetUnitRace("player")
-    local unitClass = GetUnitClass("player")
-    self.race:SetText(zo_strformat(GetString(SI_STAT_GAMEPAD_RACE_NAME), unitRace))
-    self.class:SetText(zo_strformat(GetString(SI_STAT_GAMEPAD_CLASS_NAME), unitClass))
-
-    local hasChampionRank = IsChampionSystemUnlocked()
-    self.championRankHeader:SetHidden(not hasChampionRank)
-    self.championRank:SetHidden(not hasChampionRank)
-    if hasChampionRank then
-        self.championRank:SetText(GetPlayerChampionPointsEarned())
-    end
-
-    for i, header in ipairs(self.headers) do
+    for i, header in ipairs(self.attributesHeaders) do
         header.label:SetText(GetStatText(header.stat))
     end
 
@@ -830,7 +870,26 @@ function ZO_GamepadStats:RefreshCharacterStats()
     for i, value in ipairs(self.bonusValues) do
         self:SetBonusText(value.stat, value.label)
     end
-    
+
+    self:RefreshContentHeader(GetString(SI_STATS_ATTRIBUTES))
+end
+
+function ZO_GamepadStats:RefreshCharacterPanel()
+    self.nextCharacterRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
+
+    -- Left & Right Column
+    local unitRace = GetUnitRace("player")
+    local unitClass = GetUnitClass("player")
+    self.race:SetText(zo_strformat(GetString(SI_STAT_GAMEPAD_RACE_NAME), unitRace))
+    self.class:SetText(zo_strformat(GetString(SI_STAT_GAMEPAD_CLASS_NAME), unitClass))
+
+    local hasChampionPoints = IsChampionSystemUnlocked()
+    self.championPointsHeader:SetHidden(not hasChampionPoints)
+    self.championPoints:SetHidden(not hasChampionPoints)
+    if hasChampionPoints then
+        self.championPoints:SetText(GetPlayerChampionPointsEarned())
+    end
+
     -- Right Pane
     local allianceName = GetAllianceName(GetUnitAlliance("player"))
     self.alliance:SetText(zo_strformat(SI_ALLIANCE_NAME, allianceName))
@@ -845,8 +904,6 @@ function ZO_GamepadStats:RefreshCharacterStats()
     end
     self.rank:SetText(zo_strformat(SI_STAT_RANK_NAME_FORMAT, rankName))
 
-    self:RefreshContentHeader(GetString(SI_STATS_ATTRIBUTES))
-
     --Riding skill
     local speedBonus, _, staminaBonus, _, inventoryBonus = STABLE_MANAGER:GetStats()
     self.ridingSpeed:SetText(zo_strformat(SI_MOUNT_ATTRIBUTE_SPEED_FORMAT, speedBonus))
@@ -858,6 +915,72 @@ function ZO_GamepadStats:RefreshCharacterStats()
     self.ridingTrainingHeader:SetHidden(ridingSkillMaxedOut)
     self.ridingTrainingTimer:SetHidden(ridingSkillMaxedOut or readyToTrain)
     self.ridingTrainingReady:SetHidden(ridingSkillMaxedOut or not readyToTrain)
+
+    
+    local currentLevel
+    local currentXP
+    local totalXP
+    local hideEnlightenment = true
+    if CanUnitGainChampionPoints("player") then
+        currentLevel = GetPlayerChampionPointsEarned()
+        currentXP = GetPlayerChampionXP()
+        totalXP = GetNumChampionXPInChampionPoint(currentLevel)
+        hideEnlightenment = false
+    else
+        currentLevel = GetUnitLevel("player")
+        currentXP = GetUnitXP("player")
+        totalXP = GetNumExperiencePointsInLevel(currentLevel)
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_XP_BAR_GRADIENT_COLORS)
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl:GetNamedChild("EnlightenedBar"), ZO_XP_BAR_GRADIENT_COLORS)
+    end
+
+    if not totalXP then -- this is for the end of the line
+        totalXP = 1
+        currentXP = 1
+        hideEnlightenment = true
+        self.experienceProgress:SetText(GetString(SI_EXPERIENCE_LIMIT_REACHED))
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_CP_BAR_GRADIENT_COLORS[GetChampionPointAttributeForRank(currentLevel)])
+    else
+        local percentageXP = zo_floor(currentXP / totalXP * 100)
+        self.experienceProgress:SetText(zo_strformat(SI_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(currentXP), ZO_CommaDelimitNumber(totalXP), percentageXP))
+    end
+    self.experienceBar:SetValue(currentLevel, currentXP, totalXP, BAR_NO_WRAP)
+
+    self.enlightenmentText:SetHidden(hideEnlightenment)
+    if not hideEnlightenment then
+        if GetNumChampionXPInChampionPoint(currentLevel) ~= nil then
+            currentLevel = currentLevel + 1
+        end
+        local nextPoint = GetChampionPointAttributeForRank(currentLevel)
+        if totalXP then
+            local poolSize = self:GetEnlightenedPool()
+            self.enlightenedBarControl:SetHidden(false)
+            self.enlightenedBarControl:SetMinMax(0, totalXP)
+            self.enlightenedBarControl:SetValue(zo_min(totalXP, currentXP + poolSize))
+            if poolSize > 0 then
+                self.enlightenmentText:SetHidden(false)
+                self.enlightenmentText:SetText(zo_strformat(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP, ZO_CommaDelimitNumber(poolSize)))
+            else
+                self.enlightenmentText:SetHidden(true)
+            end
+        else
+            self.enlightenmentText:SetHidden(false)
+            self.enlightenmentText:SetText(GetString(SI_EXPERIENCE_CHAMPION_ENLIGHTENED_TOOLTIP_MAXED))
+        end
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl, ZO_CP_BAR_GRADIENT_COLORS[nextPoint])
+        ZO_StatusBar_SetGradientColor(self.experienceBarControl:GetNamedChild("EnlightenedBar"), ZO_CP_BAR_GRADIENT_COLORS[nextPoint])
+    else
+        self.enlightenedBarControl:SetHidden(true)
+    end
+    self:RefreshContentHeader(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION))
+end
+
+function ZO_GamepadStats:GetEnlightenedPool()
+    if IsEnlightenedAvailableForCharacter() then
+        return GetEnlightenedPool() * (GetEnlightenedMultiplier() + 1)
+    else
+        return 0
+    end
 end
 
 function ZO_GamepadStats_OnInitialize(control)
@@ -880,6 +1003,16 @@ function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringReb
     data.statsObject:UpdateTitleDropdownTitles(control.dropdown)
 
     control.dropdown:SetDeactivatedCallback(data.statsObject.OnTitleDropdownDeactivated, data.statsObject)
+end
+
+-------------------------------------
+-- Description Title Attribute Row --
+-------------------------------------
+
+function ZO_GamepadStatCharacterRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+
+    control:GetNamedChild("Label"):SetText(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION))
 end
 
 ------------------------
@@ -923,6 +1056,3 @@ function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDurin
 
     SetAttributeText(control.pointLimitedSpinner:GetPoints(), addedPoints)
 end
-
-
-

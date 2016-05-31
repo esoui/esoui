@@ -79,7 +79,8 @@ function DLCBook_Keyboard:InitializeNavigationList()
 
         control.statusIcon = control:GetNamedChild("StatusIcon")
         data.notificationId = NOTIFICATIONS_PROVIDER:GetNotificationIdForCollectible(data.collectibleId)
-        control.statusIcon:SetHidden(data.notificationId == nil)
+        local isNew = data.notificationId or COLLECTIONS_BOOK_SINGLETON:IsDLCIdQuestPending(data.collectibleId)
+        control.statusIcon:SetHidden(not isNew)
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
@@ -252,11 +253,6 @@ function DLCBook_Keyboard:BrowseToCollectible(collectibleId)
     SCENE_MANAGER:Show("dlcBook")
 end
 
-function DLCBook_Keyboard:IsCategoryIndexDLC(categoryIndex)
-    local categoryType = select(7, GetCollectibleCategoryInfo(categoryIndex))
-    return categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC
-end
-
 ----------
 --Events--
 ----------
@@ -268,12 +264,16 @@ function DLCBook_Keyboard:OnCollectibleUpdated(collectibleId, justUnlocked)
         local node = self.collectibleIdToTreeNode[collectibleId]
         if node then
             local data = node:GetData()
-            data.active = select(7, GetCollectibleInfo(collectibleId))
 
+            local wasActive = data.active
+            data.active = select(7, GetCollectibleInfo(collectibleId))
             local unlockState = GetCollectibleUnlockStateById(collectibleId)
             if data.unlockState ~= unlockState then
                 self:RefreshList()
             else
+                if data.active ~= wasActive then
+                    node:RefreshControl()
+                end
                 self:RefreshDetails()
             end
         end

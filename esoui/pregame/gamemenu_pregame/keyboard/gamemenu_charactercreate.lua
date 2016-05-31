@@ -9,7 +9,7 @@ local function SelectStartingGear()
     SCENE_MANAGER:AddFragment(CHARACTER_CREATE_FRAGMENT)
 end
 
-local function SelectVeteranGear()
+local function SelectChampionGear()
     SelectClothing(DRESSING_OPTION_WARDROBE_1)
     SCENE_MANAGER:AddFragment(CHARACTER_CREATE_FRAGMENT)
 end
@@ -27,8 +27,8 @@ local function AddPreviewEntries(entryTable)
     local startingGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_STARTING_GEAR), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectStartingGear, unselectedCallback = HideCharacterCreate}
     table.insert(entryTable, startingGearOption)
 
-    local veteranGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_WARDROBE_1), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectVeteranGear, unselectedCallback = HideCharacterCreate}
-    table.insert(entryTable, veteranGearOption)
+    local championGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_WARDROBE_1), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectChampionGear, unselectedCallback = HideCharacterCreate}
+    table.insert(entryTable, championGearOption)
 
     local nudeOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_NUDE), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectNoGear, unselectedCallback = HideCharacterCreate}
     table.insert(entryTable, nudeOption)

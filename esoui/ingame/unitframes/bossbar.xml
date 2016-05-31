@@ -13,6 +13,7 @@
                         <StatusBar name="$(parent)BarRight">
                             <Dimensions y="23"/>
                         </StatusBar>
+                        <Label name="$(parent)Text" font="ZoFontWinH3"/>
                     </Controls>
                 </Control>
 
@@ -41,6 +42,7 @@
                         <StatusBar name="$(parent)BarRight">
                             <Dimensions y="14"/>
                         </StatusBar>
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold18"/>
                     </Controls>
                 </Control>
 
@@ -77,6 +79,10 @@
                                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
                             </Controls>
                         </StatusBar>
+                        <Label name="$(parent)Text" horizontalAlignment="CENTER">
+                            <Anchor point="LEFT"/>
+                            <Anchor point="RIGHT"/>
+                        </Label>
                     </Controls>
                 </Control>
 

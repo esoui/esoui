@@ -16,9 +16,54 @@ FORCE_INIT_SMOOTH_STATUS_BAR = true
 
 do
     local g_updatingBars = {}
-    local g_customApproachAmounts = {}
+    local g_animationPool
+    local DEFAULT_ANIMATION_TIME_MS = 500
 
-    function ZO_StatusBar_SmoothTransition(self, value, max, forceInit, onStopCallback, customApproachAmount)
+    local function OnAnimationTransitionUpdate(animation, progress)
+        local bar = animation.bar
+        local initialValue = animation.initialValue
+        local endValue = animation.endValue
+        if progress < 1 then
+            local newBarValue = zo_lerp(initialValue, endValue, progress)
+            bar:SetValue(newBarValue)
+        end
+    end
+
+    local function OnStopAnimation(animation)
+        local animationKey = animation.key
+        local bar = animation:GetFirstAnimation().bar
+        bar.animation = nil
+        g_animationPool:ReleaseObject(animationKey)
+        if bar.onStopCallback then
+            bar.onStopCallback(bar)
+        end
+    end
+
+    local function AcquireAnimation()
+        if not g_animationPool then
+            local function Factory(objectPool)
+                local animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_StatusBarGrowTemplate")
+                animation:GetFirstAnimation():SetUpdateFunction(OnAnimationTransitionUpdate)
+                animation:SetHandler("OnStop", function(animation) OnStopAnimation(animation)  end)
+                return animation
+            end
+
+            local function Reset(object)
+                local customAnimation = object:GetFirstAnimation()
+                customAnimation.bar = nil
+                customAnimation.initialValue = nil
+                customAnimation.endValue = nil
+            end
+
+            g_animationPool = ZO_ObjectPool:New(Factory, Reset)
+        end
+
+        local animation, key = g_animationPool:AcquireObject()
+        animation.key = key
+        return animation
+    end
+
+    function ZO_StatusBar_SmoothTransition(self, value, max, forceInit, onStopCallback, customApproachAmountMs)
         local oldValue = self:GetValue()
         self:SetMinMax(0, max)
         local oldMax = self.max or max
@@ -27,51 +72,40 @@ do
 
         if forceInit or max <= 0 then
             self:SetValue(value)
-            g_updatingBars[self] = nil
+            if self.animation then
+                self.animation:Stop()
+            end
+
             if onStopCallback then
                 onStopCallback(self)
             end
         else
             if oldMax > 0 and oldMax ~= max then
                 local maxChange = max / oldMax
-                self:SetValue(oldValue * maxChange)
+                oldValue = oldValue * maxChange
+                self:SetValue(oldValue)
             end
 
-            g_updatingBars[self] = value
-            g_customApproachAmounts[self] = customApproachAmount
-        end
-    end
+            if not self.animation then
+                local updateAnimation = AcquireAnimation()
+                self.animation = updateAnimation
+            else
+                local x = 2
+            end
 
-    function ZO_StatusBar_IsSmoothTransitionPlaying(statusBar)
-        return g_updatingBars[statusBar] ~= nil
+            local customAnimation = self.animation:GetFirstAnimation()
+            customAnimation:SetDuration(customApproachAmountMs or DEFAULT_ANIMATION_TIME_MS)
+            customAnimation.bar = self
+            customAnimation.initialValue = oldValue
+            customAnimation.endValue = value
+            
+            self.animation:PlayFromStart()
+        end
     end
 
     function ZO_StatusBar_GetTargetValue(statusBar)
-        return g_updatingBars[statusBar] or statusBar:GetValue()
+        return statusBar.animation:GetFirstAnimation().endValue or statusBar:GetValue()
     end
-
-    local MIN_PERCENT_BEFORE_FINISHING = .0025
-    local APPROACH_AMOUNT_PER_NORMALIZED_FRAME = .085
-
-    local function OnSmoothTransitionsUpdate()
-        for bar, target in pairs(g_updatingBars) do
-            local current = bar:GetValue()
-
-            if zo_abs(target - current) / bar.max < MIN_PERCENT_BEFORE_FINISHING then
-                bar:SetValue(target)
-                g_updatingBars[bar] = nil
-                g_customApproachAmounts[bar] = nil
-                if bar.onStopCallback then
-                    bar.onStopCallback(bar)
-                end
-            else
-                local approachAmount = g_customApproachAmounts[bar] or APPROACH_AMOUNT_PER_NORMALIZED_FRAME
-                bar:SetValue(zo_deltaNormalizedLerp(current, target, approachAmount))
-            end
-        end
-    end
-
-    EVENT_MANAGER:RegisterForUpdate("ZO_StatusBar_SmoothTransition", 0, OnSmoothTransitionsUpdate)
 end
 
 ZO_WrappingStatusBar = ZO_Object:Subclass()
@@ -115,6 +149,10 @@ function ZO_WrappingStatusBar:Reset()
     self.level = nil
 end
 
+function ZO_WrappingStatusBar:SetAnimationTime(time)
+    self.customAnimationTime = time
+end
+
 function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
     local forceInit = false
     if self.level ~= level then
@@ -131,6 +169,7 @@ function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
         end
 
         self.level = level
+        
         if self.pendingLevels == nil and self.onLevelChangedCallback then
             self.onLevelChangedCallback(self, self.level)
         end
@@ -140,12 +179,12 @@ function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
         self.pendingValue = value
         self.pendingMax = max
         
-        ZO_StatusBar_SmoothTransition(self.statusBar, max, max, nil, self.onAnimationFinishedCallback)
+        ZO_StatusBar_SmoothTransition(self.statusBar, max, max, nil, self.onAnimationFinishedCallback, self.customAnimationTime)
     else
         if forceInit then
             ZO_StatusBar_SmoothTransition(self.statusBar, value, max, true)
         else
-            ZO_StatusBar_SmoothTransition(self.statusBar, value, max, false, self.onCompleteCallback)
+            ZO_StatusBar_SmoothTransition(self.statusBar, value, max, false, self.onCompleteCallback, self.customAnimationTime)
         end
 
         self.pendingValue = nil
@@ -157,7 +196,7 @@ function ZO_WrappingStatusBar:OnAnimationFinished()
     self.pendingLevels = self.pendingLevels - 1
     if self.pendingLevels == 0 then
         ZO_StatusBar_SmoothTransition(self.statusBar, 0, self.pendingMax, FORCE_INIT_SMOOTH_STATUS_BAR)
-        ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingValue, self.pendingMax, nil, self.onCompleteCallback)
+        ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingValue, self.pendingMax, nil, self.onCompleteCallback, self.customAnimationTime)
 
         self.pendingLevels = nil
         self.pendingValue = nil
@@ -168,7 +207,7 @@ function ZO_WrappingStatusBar:OnAnimationFinished()
         end
     else
         ZO_StatusBar_SmoothTransition(self.statusBar, 0, self.pendingMax, FORCE_INIT_SMOOTH_STATUS_BAR)
-        ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingMax, self.pendingMax, nil, self.onAnimationFinishedCallback)
+        ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingMax, self.pendingMax, nil, self.onAnimationFinishedCallback, self.customAnimationTime)
 
         if self.onLevelChangedCallback then
             self.onLevelChangedCallback(self, self.level - self.pendingLevels)

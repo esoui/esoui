@@ -1,4 +1,4 @@
-local MainMenu_Keyboard = ZO_Object:Subclass()
+local MainMenu_Keyboard = ZO_CallbackObject:Subclass()
 
 -- If you disable a category in MainMenu.lua you should also disable it in PlayerMenu.lua
 local CATEGORY_LAYOUT_INFO =
@@ -74,6 +74,14 @@ local CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MainMenu/menuBar_inventory_down.dds",
         disabled = "EsoUI/Art/MainMenu/menuBar_inventory_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_inventory_over.dds",
+
+        indicators = function()
+            if SHARED_INVENTORY then
+                if SHARED_INVENTORY:AreAnyItemsNew(nil, nil, BAG_BACKPACK, BAG_VIRTUAL) then
+                    return { ZO_KEYBOARD_NEW_ICON }
+                end
+            end
+        end,
     },
     [MENU_CATEGORY_CHARACTER] =
     {
@@ -146,7 +154,7 @@ local CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_collections_over.dds",
 
         indicators = function()
-            if COLLECTIONS_BOOK and COLLECTIONS_BOOK:HasAnyNotifications() then
+            if (COLLECTIONS_BOOK and COLLECTIONS_BOOK:HasAnyNotifications()) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending()) then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,
@@ -267,7 +275,7 @@ function MainMenu_Keyboard:SetCategoriesEnabled(categoryFilterFunction, shouldBe
 end
 
 function MainMenu_Keyboard:New(control)
-    local manager = ZO_Object.New(self)
+    local manager = ZO_CallbackObject.New(self)
     manager:Initialize(control)
     return manager
 end
@@ -667,6 +675,7 @@ function MainMenu_Keyboard:ToggleScene(sceneName)
     if(SCENE_MANAGER:IsShowing(sceneName)) then
         SCENE_MANAGER:ShowBaseScene()
     else
+        self:RefreshCategoryBar()
         self:ShowScene(sceneName)
     end
 end
@@ -825,6 +834,12 @@ function MainMenu_Keyboard:OnSceneGroupTabClicked(sceneGroupName)
     end
 end
 
+function MainMenu_Keyboard:OnSceneGroupBarLabelTextChanged()
+    -- SetText will get called before self.sceneGroupBar refrshes its anchors, so the position of the label needs
+    -- to let that update before it notifies anyone of it's new rectangle
+    zo_callLater(function() MAIN_MENU_KEYBOARD:FireCallbacks("OnSceneGroupBarLabelTextChanged", self.sceneGroupBarLabel) end, 10)
+end
+
 --Global XML
 
 function ZO_MainMenuCategoryBarButton_OnMouseEnter(self)
@@ -846,6 +861,10 @@ end
 function ZO_MainMenuCategoryBarButton_OnMouseExit(self)
     ZO_MenuBarButtonTemplate_OnMouseExit(self)
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_MainMenu_OnSceneGroupBarLabelTextChanged()
+    MAIN_MENU_KEYBOARD:OnSceneGroupBarLabelTextChanged()
 end
 
 function ZO_MainMenu_OnInitialized(self)

@@ -17,7 +17,7 @@ local TARGET_UNIT_FRAME = "ZO_TargetUnitFrame"
 
 local untrackedBarTypes =
 {
-    [POWERTYPE_COMBO] = true
+    
 }
 
 local NUM_SUBGROUPS = GROUP_SIZE_MAX / SMALL_GROUP_SIZE_THRESHOLD
@@ -523,6 +523,7 @@ function UnitFrameBar:New(baseBarName, parent, showFrameBarText, style, mechanic
         newFrameBar.showBarText = showFrameBarText
         newFrameBar.style = style
         newFrameBar.mechanic = mechanic
+		newFrameBar.resourceNumbersLabel = parent:GetNamedChild("ResourceNumbers")
 
         if showFrameBarText ~= HIDE_BAR_TEXT then
             newFrameBar.leftText, newFrameBar.rightText = CreateBarTextControls(baseBarName, parent, style, mechanic)
@@ -590,6 +591,10 @@ function UnitFrameBar:UpdateText(updateBarType, updateValue)
             end
         end
     end
+
+	if self.resourceNumbersLabel then
+		self.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(self.currentValue, self.maxValue))
+	end
 end
 
 function UnitFrameBar:SetMouseInside(inside)
@@ -843,7 +848,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
     local DONT_COLOR_RANK_ICON = false
     newFrame.rankIcon = newFrame:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
     newFrame.roleIcon = newFrame:AddFadeComponent("RoleIcon", DONT_COLOR_RANK_ICON)
-    newFrame.veteranIcon = newFrame:AddFadeComponent("VeteranIcon")
+    newFrame.championIcon = newFrame:AddFadeComponent("ChampionIcon")
     newFrame.leftBracket = newFrame:AddFadeComponent("LeftBracket")
     newFrame.leftBracketGlow = GetControl(newFrame.frame, "LeftBracketGlow")
     newFrame.leftBracketUnderlay = GetControl(newFrame.frame, "LeftBracketUnderlay")
@@ -1022,17 +1027,7 @@ function UnitFrame:RefreshControls()
         self.dirty = true
     else
         if(self.hasTarget) then
-            if self.nameLabel then
-                local name
-                if IsInGamepadPreferredMode() and IsUnitPlayer(self.unitTag) then
-                    name = ZO_FormatUserFacingDisplayName(GetUnitDisplayName(self.unitTag)) 
-                else
-                    name = GetUnitName(self.unitTag)
-                end
-
-                self.nameLabel:SetText(name)
-            end
-
+            self:UpdateName()
             self:UpdateUnitReaction()
             self:UpdateLevel()
             self:UpdateCaption()
@@ -1084,6 +1079,10 @@ end
 
 function UnitFrame:GetUnitTag()
     return self.frame.m_unitTag
+end
+
+function UnitFrame:GetPrimaryControl()
+    return self.frame
 end
 
 function UnitFrame:DoAlphaUpdate(isNearby, isOnline, isLeader)
@@ -1172,8 +1171,9 @@ end
 function UnitFrame:UpdateLevel()
     local showLevel = self:ShouldShowLevel()
     local unitLevel
-    if(IsUnitVeteran(self:GetUnitTag())) then
-        unitLevel = GetUnitVeteranRank(self:GetUnitTag())
+    local isChampion = IsUnitChampion(self:GetUnitTag())
+    if isChampion then
+        unitLevel = GetUnitEffectiveChampionPoints(self:GetUnitTag())
     else
         unitLevel = GetUnitLevel(self:GetUnitTag())
     end
@@ -1182,18 +1182,18 @@ function UnitFrame:UpdateLevel()
         if(showLevel and unitLevel > 0) then
             self.levelLabel:SetHidden(false)
             self.levelLabel:SetText(tostring(unitLevel))
-            self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0) 
+            self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0)
         else
             self.levelLabel:SetHidden(true)
             self.nameLabel:SetAnchor(TOPLEFT)
         end
     end
 
-    if(self.veteranIcon) then
-        if(showLevel and IsUnitVeteran(self:GetUnitTag())) then
-            self.veteranIcon:SetHidden(false)
+    if(self.championIcon) then
+        if showLevel and isChampion then
+            self.championIcon:SetHidden(false)
         else
-            self.veteranIcon:SetHidden(true)
+            self.championIcon:SetHidden(true)
         end
     end
 end
@@ -1267,13 +1267,15 @@ function UnitFrame:SetPlatformDifficultyTextures(difficulty)
         local texture = GAMEPAD_DIFFICULTY_BRACKET_TEXTURE[difficulty]
         self.leftBracket:SetTexture(texture)
         self.rightBracket:SetTexture(texture)
-        self.leftBracketGlow:SetTexture(nil)
-        self.rightBracketGlow:SetTexture(nil)
+        self.leftBracketGlow:SetHidden(true)
+        self.rightBracketGlow:SetHidden(true)
     else
         self.leftBracket:SetTexture(DIFFICULTY_BRACKET_LEFT_TEXTURE[difficulty])
         self.rightBracket:SetTexture(DIFFICULTY_BRACKET_RIGHT_TEXTURE[difficulty])
         self.leftBracketGlow:SetTexture(DIFFICULTY_BRACKET_GLOW_LEFT_TEXTURE[difficulty])
         self.rightBracketGlow:SetTexture(DIFFICULTY_BRACKET_GLOW_RIGHT_TEXTURE[difficulty])
+        self.leftBracketGlow:SetHidden(false)
+        self.rightBracketGlow:SetHidden(false)
     end
 end
 
@@ -1324,14 +1326,28 @@ function UnitFrame:UpdateUnitReaction()
     end
 end
 
+function UnitFrame:UpdateName()
+    if self.nameLabel then
+        local name
+        local tag = self.unitTag
+        if IsUnitPlayer(tag) then
+            name = ZO_GetPrimaryPlayerNameFromUnitTag(tag)
+        else
+            name = GetUnitName(tag)
+        end
+        self.nameLabel:SetText(name)
+    end
+end
+
 function UnitFrame:UpdateCaption()
     local captionLabel = self.captionLabel
     if(captionLabel) then
         local caption
-        if(IsUnitPlayer(self:GetUnitTag())) then
-            caption = zo_strformat(GetUnitTitle(self:GetUnitTag()), GetRawUnitName(self:GetUnitTag()))
+        local unitTag = self:GetUnitTag()
+        if(IsUnitPlayer(unitTag)) then
+            caption = ZO_GetSecondaryPlayerNameWithTitleFromUnitTag(unitTag)
         else
-            caption = zo_strformat(SI_TOOLTIP_UNIT_CAPTION, GetUnitCaption(self:GetUnitTag()))
+            caption = zo_strformat(SI_TOOLTIP_UNIT_CAPTION, GetUnitCaption(unitTag))
         end
 
         if(caption ~= "") then
@@ -1637,6 +1653,8 @@ local function CreateTargetFrame()
     visualizer:AddModule(ZO_UnitVisualizer_PowerShieldModule:New(VISUALIZER_ANGLE_POWER_SHIELD_LAYOUT_DATA))
 
     ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
+
+    CALLBACK_MANAGER:FireCallbacks("TargetFrameCreated", targetFrame)
 end
 
 local function CreateGroupMember(frameIndex, unitTag, groupSize)
@@ -1952,7 +1970,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnVeteranRankUpdate(eventCode, unitTag)
+    local function OnChampionPointsUpdate(eventCode, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -1982,6 +2000,11 @@ local function RegisterForEvents()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
 
+    local function OnInterfaceSettingChanged(eventCode)
+        -- Groups do not update every frame (they wait for events), so refresh if the primary name option may have changed
+        RefreshGroups(eventCode)
+    end
+
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_CHANGED, OnTargetChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_FRAME_UPDATE, OnUnitFrameUpdate)
@@ -1998,9 +2021,10 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS, OnGroupMemberConnectedStateChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED, OnUnitDeathStateChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_RANK_POINT_UPDATE, OnRankPointUpdate)
-    ZO_UnitFrames:RegisterForEvent(EVENT_VETERAN_RANK_UPDATE, OnVeteranRankUpdate)
+    ZO_UnitFrames:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, OnChampionPointsUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_TITLE_UPDATE, OnTitleUpdated)
     ZO_UnitFrames:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+    ZO_UnitFrames:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
 
     CALLBACK_MANAGER:RegisterCallback("TargetOfTargetEnabledChanged", OnTargetOfTargetEnabledChanged)
 end

@@ -95,8 +95,8 @@ function DeathRecap:Initialize(control)
     self:ApplyStyle() -- Setup initial visual style based on current mode.
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
 
-    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X = 792
-    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y = 300
+    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X = 793
+    local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y = 366
     ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollContainer:GetNamedChild("ScrollIndicator"), self.control, RIGHT, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y, true)
 end
 
@@ -223,6 +223,10 @@ function DeathRecap:SetupAttacks()
 
     table.sort(attacks, SortAttacks)
 
+    --Cert requires that we show the display name if there's no way other way to get it from character name
+    --But it's not the desire of design to show so much name so we only show the double name if we absolutely must
+    local showBothPlayerNames = IsConsoleUI() and tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD)) == PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER
+
     local prevAttackControl
     for i, attackInfo in ipairs(attacks) do
         local attackControl = self.attackPool:AcquireObject(i)
@@ -243,12 +247,18 @@ function DeathRecap:SetupAttacks()
         local attackerNameControl = attackControl:GetNamedChild("AttackerName")
         local frameControl
         if(DoesKillingAttackHaveAttacker(attackInfo.index)) then
-            local attackerRawName, attackerVeteranRank, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = GetKillingAttackerInfo(attackInfo.index)
+            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = GetKillingAttackerInfo(attackInfo.index)
             
             local attackerNameLine
             if(isPlayer) then
                 local coloredRankIconMarkup = GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
-                local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(attackerDisplayName) or attackerRawName
+
+                local nameToShow
+                if showBothPlayerNames then
+                    nameToShow = ZO_GetPrimaryPlayerNameWithSecondary(attackerDisplayName, attackerRawName)
+                else
+                    nameToShow = ZO_GetPrimaryPlayerName(attackerDisplayName, attackerRawName)
+                end
                 if(minionName == "") then
                     attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME, coloredRankIconMarkup, attackerAvARank, nameToShow)
                 else

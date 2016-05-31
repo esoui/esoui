@@ -8,6 +8,7 @@ do
     function ZO_LogoSplashFragment:New(control)
         local fragment = ZO_FadeSceneFragment.New(self, control, false, 700)
         fragment.control = control
+        control:GetNamedChild("DMMLogo"):SetHidden(GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM)
         return fragment
     end
 

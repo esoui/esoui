@@ -721,7 +721,7 @@
         </Texture>
 
         <Control name="ZO_SceneMenu" virtual="true">
-            <Dimensions y="45"/>
+            <Dimensions y="ZO_SCENE_MENU_HEIGHT"/>
             <Controls>
                 <Control name="$(parent)Bar" inherits="ZO_LabelButtonBar">
                     <Anchor point="TOPRIGHT" offsetY="0"/>

@@ -28,20 +28,34 @@ function ZO_GameStartup_Gamepad:Initialize(control)
                     self:PerformDeferredInitialize()
                     self:PopulateMainList()
                     self:SetCurrentList(self.mainList)
-                    KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
 
-                    --[[ if we don't have an MOTD, kick off RequestAnnouncements and show a loading animation. The loading animation is dismissed in OnAnnouncementsResult() below ]]--
-                    if not self.gotMOTD then
-                        CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", RequestAnnouncements, GetString(SI_CONSOLE_PREGAME_LOADING))
-                    else
+                    if self.mustPurchaseGame then
+                        KEYBIND_STRIP:AddKeybindButtonGroup(self.freeTrialEndKeybindDescriptor)
+
+                        --[[ The player needs to purchase the game, no need to wait on RequestAnnouncements to get something that we're going to overwrite anyway ]]--
+                        local platformStore = ""
+                        if GetUIPlatform() == UI_PLATFORM_PS4 then
+                            platformStore = GetString(SI_FREE_TRIAL_PLATFORM_STORE_PS4)
+                        end
+
+                        self.announcement:SetText(zo_strformat(SI_FREE_TRIAL_EXPIRED_ANNOUNCEMENT, platformStore))
                         self.gotMOTD = false
-                        self.canCancelOrLoadPlatforms = true
+                    else
+                        KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
+
+                        --[[ if we don't have an MOTD, kick off RequestAnnouncements and show a loading animation. The loading animation is dismissed in OnAnnouncementsResult() below ]]--
+                        if not self.gotMOTD then
+                            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", RequestAnnouncements, GetString(SI_CONSOLE_PREGAME_LOADING))
+                        else
+                            self.gotMOTD = false
+                            self.canCancelOrLoadPlatforms = true
+                        end
                     end
 
                 elseif newState == SCENE_HIDDEN then
                     self:Deactivate()
                 
-                    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
+                    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mustPurchaseGame and self.freeTrialEndKeybindDescriptor or self.mainKeybindStripDescriptor)
                 end
             end)
 
@@ -60,6 +74,53 @@ function ZO_GameStartup_Gamepad:Initialize(control)
                     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.initialKeybindStripDescriptor)
                 end
             end)
+
+    local function ReturnToIIS()
+        PregameStateManager_SetState("Disconnect")
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("FREE_TRIAL_INACTIVE", {
+        canQueue = true,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_FREE_TRIAL_PURCHASE_DIALOG_HEADER,
+        },
+        mainText =
+        {
+            text = SI_FREE_TRIAL_PURCHASE_DIALOG_BODY,
+        },
+        noChoiceCallback = function()
+                if IsConsoleUI() then
+                    ReturnToIIS()
+                end
+            end,
+        buttons = 
+        {
+            {
+                text = SI_FREE_TRIAL_PURCHASE_KEYBIND,
+                keybind = "DIALOG_PRIMARY",
+                callback = function()
+                        if IsConsoleUI() then
+                           ShowConsoleESOGameClientUI()
+                           ReturnToIIS()
+                        end
+                    end,
+            },
+            {
+                text = SI_GAMEPAD_BACK_OPTION,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function()
+                        if IsConsoleUI() then
+                            ReturnToIIS()
+                        end
+                    end,
+            },
+        },
+    })
 end
 
 function ZO_GameStartup_Gamepad:PerformDeferredInitialize()
@@ -153,28 +214,53 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
     }
 
     self.initialKeybindStripDescriptor = {
-    alignment = KEYBIND_STRIP_ALIGN_LEFT,
-    -- Select Control
-    {    
-        name = GetString(SI_GAMEPAD_SELECT_OPTION),
-        keybind = "UI_SHORTCUT_PRIMARY",
-        disabledDuringSceneHiding = true,
-        callback = function()
-            local data = self.initialList:GetTargetData()
-            self.serverSelection = data.server
-            SetCVar("IsServerSelected", "true") --Store Server is Selected
-            SetCVar("SelectedServer", self.serverSelection)
-            SavePlayerConsoleProfile()
-            PregameStateManager_AdvanceState()
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", function() LoadPlatformsList(data.server) end, GetString(SI_CONSOLE_PREGAME_LOADING))
-        end,
-        sound = SOUNDS.DIALOG_ACCEPT,
-    },
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- Select Control
+        {    
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            disabledDuringSceneHiding = true,
+            callback = function()
+                local data = self.initialList:GetTargetData()
+                self.serverSelection = data.server
+                SetCVar("IsServerSelected", "true") --Store Server is Selected
+                SetCVar("SelectedServer", self.serverSelection)
+                SavePlayerConsoleProfile()
+                PregameStateManager_AdvanceState()
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", function() LoadPlatformsList(data.server) end, GetString(SI_CONSOLE_PREGAME_LOADING))
+            end,
+            sound = SOUNDS.DIALOG_ACCEPT,
+        },
         --Back
-    KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-            PlaySound(SOUNDS.DIALOG_DECLINE)
-            PregameStateManager_SetState("AccountLogin")
-        end)
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
+                PlaySound(SOUNDS.DIALOG_DECLINE)
+                PregameStateManager_SetState("AccountLogin")
+            end)
+    }
+
+    self.freeTrialEndKeybindDescriptor= {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- Purchase control
+        {
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            disabledDuringSceneHiding = true,
+            callback = function()
+                local platformStore = ""
+
+                if GetUIPlatform() == UI_PLATFORM_PS4 then
+                    platformStore = GetString(SI_FREE_TRIAL_PLATFORM_STORE_PS4)
+                end
+
+                ZO_Dialogs_ShowGamepadDialog("FREE_TRIAL_INACTIVE", nil, { mainTextParams = { platformStore }} )
+            end,
+            sound = SOUNDS.DIALOG_ACCEPT,
+        },
+        -- Back
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
+                PlaySound(SOUNDS.DIALOG_DECLINE)
+                PregameStateManager_SetState("AccountLogin")
+            end),
     }
 end
 
@@ -290,17 +376,22 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
     self:RefreshHeader(GetString(SI_GAME_STARTUP_HEADER))
     self.mainList:Clear()
 
-    local optionString = GetString(SI_GAME_STARTUP_PLAY)
-    if(not IsGateInstalled("BaseGame")) then
-        optionString = GetString(SI_CONSOLE_GAME_DOWNLOAD_UPDATING)
+    if self.mustPurchaseGame then
+        local data = ZO_GamepadEntryData:New(GetString(SI_FREE_TRIAL_MENU_ENTRY_PURCHASE))
+        self.mainList:AddEntry("GameStartupLabelEntry", data)
+    else
+        local optionString = GetString(SI_GAME_STARTUP_PLAY)
+        if(not IsGateInstalled("BaseGame")) then
+            optionString = GetString(SI_CONSOLE_GAME_DOWNLOAD_UPDATING)
+        end
+
+        local data = ZO_GamepadEntryData:New(optionString)
+        data.allowKeybind = true
+        self.mainList:AddEntry("GameStartupLabelEntry", data)
+
+        data = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_SERVER_SELECT))
+        self.mainList:AddEntry("ZO_GamepadHorizontalListRow", data)
     end
-
-    local data = ZO_GamepadEntryData:New(optionString)
-    data.allowKeybind = true
-    self.mainList:AddEntry("GameStartupLabelEntry", data)
-
-    data = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_SERVER_SELECT))
-    self.mainList:AddEntry("ZO_GamepadHorizontalListRow", data)
     
     self.mainList:Commit()
 end
@@ -325,6 +416,10 @@ function ZO_GameStartup_Gamepad:ForceListRebuild()
         -- force a rebuild of the list
         self:PopulateMainList()
     end
+end
+
+function ZO_GameStartup_Gamepad:SetMustPurchaseGame(mustPurchaseGame)
+    self.mustPurchaseGame = mustPurchaseGame
 end
 
 function ZO_GameStartup_Gamepad_Initialize(self)

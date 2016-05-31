@@ -31,8 +31,7 @@ end
 function ZO_CollectionsInventorySingleton:BuildQuickslotData()
     self.quickslotData = {}
 
-    for i = 1, GetNumCollectibleCategories() do
-        local categoryType = select(7, GetCollectibleCategoryInfo(i))
+    for categoryType = COLLECTIBLE_CATEGORY_TYPE_MIN_VALUE, COLLECTIBLE_CATEGORY_TYPE_MAX_VALUE do
         if IsCollectibleCategoryUsable(categoryType) and IsCollectibleCategorySlottable(categoryType) then
             for i = 1, GetTotalCollectiblesByCategoryType(categoryType) do
                 local collectibleId = GetCollectibleIdFromType(categoryType, i)
@@ -40,7 +39,8 @@ function ZO_CollectionsInventorySingleton:BuildQuickslotData()
                 if unlocked then
                     table.insert(self.quickslotData, 
                         {
-                        name = self:GetCollectibleInventoryDisplayName(collectibleId),
+                        name = GetCollectibleName(collectibleId),
+						nickname = GetCollectibleNickname(collectibleId),
                         iconFile = iconFile,
                         collectibleId = collectibleId,
                         categoryType = categoryType,
@@ -60,10 +60,17 @@ function ZO_CollectionsInventorySingleton:GetQuickslotData()
     return self.quickslotData
 end
 
-function ZO_CollectionsInventorySingleton:GetCollectibleInventoryDisplayName(collectibleId)
-    local name = GetCollectibleName(collectibleId)
-    local nickname = GetCollectibleNickname(collectibleId)
-    local displayName = nickname == "" and zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, name) or zo_strformat(SI_COLLECTIONS_INVENTORY_DISPLAY_NAME_FORMAT, name, nickname)
+function ZO_CollectionsInventorySingleton:GetCollectibleInventoryDisplayName(data)
+	local displayName = ""
+	if data then
+		if data.name then 
+			if data.nickname and data.nickname ~= "" then
+				displayName = zo_strformat(SI_COLLECTIONS_INVENTORY_DISPLAY_NAME_FORMAT, data.name, data.nickname)
+			else
+				displayName = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name)
+			end
+		end
+	end
 
     return displayName
 end

@@ -7,6 +7,8 @@ ZO_ENCHANT_DIFF_NONE = "none"
 ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT = "inventory"
 ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT = "bank"
 ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT = "inventoryAndBank"
+ZO_ITEM_TOOLTIP_CRAFTBAG_TITLE_COUNT = "craftbag"
+ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT = "inventoryAndBankAndCraftbag"
 
 --Section Generators
 
@@ -57,11 +59,12 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     end
 end
 
-function ZO_Tooltip:AddTopSection(itemLink)
+function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked)
     local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
     --Item Type Info
-    local itemType = GetItemLinkItemType(itemLink)
+    local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+    local specializedItemTypeText = ZO_GetSpecializedItemTypeText(itemType, specializedItemType)
     local equipType = GetItemLinkEquipType(itemLink)
     if(itemType == ITEMTYPE_SIEGE) then
         local siegeType = GetItemLinkSiegeType(itemLink)
@@ -69,55 +72,61 @@ function ZO_Tooltip:AddTopSection(itemLink)
             topSection:AddLine(GetString("SI_SIEGETYPE", siegeType))
         end
     elseif(itemType == ITEMTYPE_COSTUME) then
-        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString("SI_ITEMTYPE", ITEMTYPE_COSTUME))
+        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText)
     elseif(itemType == ITEMTYPE_RECIPE) then
-        if(IsItemLinkRecipeKnown(itemLink)) then            
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString("SI_ITEMTYPE", ITEMTYPE_RECIPE), GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING))
+        if(IsItemLinkRecipeKnown(itemLink)) then
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING))
         else
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE), GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING))
         end
     elseif(itemType ~= ITEMTYPE_NONE and equipType ~= EQUIP_TYPE_INVALID) then
         local weaponType = GetItemLinkWeaponType(itemLink)
-        if(itemType == ITEMTYPE_ARMOR and weaponType == WEAPONTYPE_NONE) then
+        if itemType == ITEMTYPE_ARMOR and weaponType == WEAPONTYPE_NONE then
             local armorType = GetItemLinkArmorType(itemLink)
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString("SI_EQUIPTYPE", equipType), GetString("SI_ARMORTYPE", armorType))
-        elseif(weaponType ~= WEAPONTYPE_NONE) then
+        elseif weaponType ~= WEAPONTYPE_NONE then
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString("SI_WEAPONTYPE", weaponType), GetString("SI_EQUIPTYPE", equipType))
+        elseif itemType == ITEMTYPE_POISON then
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText)
         end
     elseif(itemType == ITEMTYPE_LURE and IsItemLinkConsumable(itemLink)) then
         self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_SUB_TYPE_BAIT))
     elseif(GetItemLinkBookTitle(itemLink)) then
-        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_SUB_TYPE_BOOK))
+        local itemTypeText = (specializedItemType ~= SPECIALIZED_ITEMTYPE_NONE) and specializedItemTypeText or GetString(SI_ITEM_SUB_TYPE_BOOK)
+        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText)
     elseif(DoesItemLinkStartQuest(itemLink) or DoesItemLinkFinishQuest(itemLink)) then
         self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM))
     else
         local craftingSkillType = GetItemLinkCraftingSkillType(itemLink)
         if(craftingSkillType ~= CRAFTING_TYPE_INVALID) then
             local craftingSkillName = GetCraftingSkillName(craftingSkillType)
-            local itemTypeText = GetString("SI_ITEMTYPE", itemType)
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText, craftingSkillName)
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, craftingSkillName)
         elseif(itemType ~= ITEMTYPE_NONE) then
-            local itemTypeText = GetString("SI_ITEMTYPE", itemType)
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText)
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText)
         end
     end
 
-    self:AddTopLinesToTopSection(topSection, itemLink)
+    self:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked)
 
     self:AddSectionEvenIfEmpty(topSection)
 end
 
-function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink)
+function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked)
     local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
     
-    -- Bound
+    -- Bound and/or Player Locked
+    local boundLabel
+    local bindType = GetItemLinkBindType(itemLink)
     if IsItemLinkBound(itemLink) then
-        topSubsection:AddLine(GetString(SI_ITEM_FORMAT_STR_BOUND), self:GetStyle("bind"))
-    else
-        local bindType = GetItemLinkBindType(itemLink)
-        if bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET then
-            topSubsection:AddLine(GetString("SI_BINDTYPE", bindType), self:GetStyle("bind"))
-        end
+        boundLabel = GetString(SI_ITEM_FORMAT_STR_BOUND)
+    elseif bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET then
+        boundLabel = GetString("SI_BINDTYPE", bindType)
+    end
+
+    if showPlayerLocked then
+        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_lock.dds", 24, 24, boundLabel), self:GetStyle("bind"))
+    elseif boundLabel then
+        topSubsection:AddLine(boundLabel, self:GetStyle("bind"))
     end
 
     -- Stolen
@@ -126,18 +135,17 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink)
     end
 
     --Item counts
-    if IsItemLinkStackable(itemLink) then
-        -- @TODO: Also need to support crafting bag stacks here
-        local bagCount, bankCount = GetItemLinkStacks(itemLink)
-        
-        if bagCount > 0 then
-            topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bag.dds", 24, 24, bagCount))
-        end
-        if bankCount > 0 then
-            topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bank.dds", 24, 24, bankCount))
-        end
+    local bagCount, bankCount, craftBagCount = GetItemLinkStacks(itemLink)
+    if bagCount > 0 then
+        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bag.dds", 24, 24, bagCount))
+    end
 
-        -- @TODO: Add crafting bag stack count here as well
+    if bankCount > 0 then
+        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bank.dds", 24, 24, bankCount))
+    end
+
+    if craftBagCount > 0 then
+        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_craft_bag.dds", 24, 24, craftBagCount))
     end
 
     topSection:AddSectionEvenIfEmpty(topSubsection)
@@ -176,41 +184,52 @@ function ZO_Tooltip:AddBaseStats(itemLink, ignoreLevel)
         end
     end
 
-    --Required Level/Vet Rank
+    --Required Level/Champ Rank
     if(not hideItemLevel) then
         local requiredLevel = GetItemLinkRequiredLevel(itemLink)
-        local requiredVeteranRank = GetItemLinkRequiredVeteranRank(itemLink)
-        if(requiredLevel > 0 or requiredVeteranRank > 0) then
-            local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            if(requiredVeteranRank > 0) then
-                statValuePair:SetStat(GetString(SI_ITEM_FORMAT_STR_RANK), self:GetStyle("statValuePairStat"))
-                local failedStyle = requiredVeteranRank > GetUnitVeteranRank("player") and self:GetStyle("failed")
-                statValuePair:SetValue(requiredVeteranRank, failedStyle, self:GetStyle("statValuePairValue"))
-            else
-                statValuePair:SetStat(GetString(SI_ITEM_FORMAT_STR_LEVEL), self:GetStyle("statValuePairStat"))
-                local failedStyle = requiredLevel > GetUnitLevel("player") and self:GetStyle("failed")
-                statValuePair:SetValue(requiredLevel, failedStyle, self:GetStyle("statValuePairValue"))
+        local requiredChampionPoints = GetItemLinkRequiredChampionPoints(itemLink)
+        if(requiredLevel > 0 or requiredChampionPoints > 0) then
+            if requiredLevel > 0 then
+                local levelStatValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+                levelStatValuePair:SetStat(GetString(SI_ITEM_FORMAT_STR_LEVEL), self:GetStyle("statValuePairStat"))
+                local failedStyle = requiredLevel > GetUnitLevel("player") and self:GetStyle("failed") or nil
+                levelStatValuePair:SetValue(requiredLevel, failedStyle, self:GetStyle("statValuePairValue"))
+                statsSection:AddStatValuePair(levelStatValuePair)
             end
-            statsSection:AddStatValuePair(statValuePair)
+            if requiredChampionPoints > 0 then
+                local championStatValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+                championStatValuePair:SetStat(zo_iconTextFormatNoSpace(GetGamepadChampionPointsIcon(), 32, 32, GetString(SI_ITEM_FORMAT_STR_CHAMPION)), self:GetStyle("statValuePairStat"))
+                local failedStyle = requiredChampionPoints > GetPlayerChampionPointsEarned() and self:GetStyle("failed") or nil
+                championStatValuePair:SetValue(requiredChampionPoints, failedStyle, self:GetStyle("statValuePairValue"))
+                statsSection:AddStatValuePair(championStatValuePair)
+            end
         end
-    end
-
-    --Value
-    local CONSIDER_CONDITION = true
-    local value = GetItemLinkValue(itemLink, not CONSIDER_CONDITION)
-    if(value > 0) then
-        local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        statValuePair:SetStat(GetString(SI_ITEM_FORMAT_STR_VALUE), self:GetStyle("statValuePairStat"))
-        local effectiveValue = GetItemLinkValue(itemLink, CONSIDER_CONDITION)
-        if(effectiveValue == value) then
-            statValuePair:SetValue(value, self:GetStyle("statValuePairValue"))
-        else
-            statValuePair:SetValue(zo_strformat(SI_ITEM_FORMAT_STR_EFFECTIVE_VALUE_OF_MAX, effectiveValue, value), self:GetStyle("statValuePairValue"))
-        end
-        statsSection:AddStatValuePair(statValuePair)
     end
 
     self:AddSection(statsSection)
+end
+
+do
+    local VALUE_ICON_FORMAT = zo_iconFormat("EsoUI/Art/currency/gamepad/gp_gold.dds", "32", "32")
+
+    function ZO_Tooltip:AddItemValue(itemLink, ignoreLevel)
+        local statsSection = self:AcquireSection(self:GetStyle("valueStatsSection"))
+        local hideItemLevel = ignoreLevel or ShouldHideTooltipRequiredLevel(itemLink)
+
+        --Value
+        local CONSIDER_CONDITION = true
+        local value = GetItemLinkValue(itemLink, not CONSIDER_CONDITION)
+        if(value > 0) then
+            local effectiveValue = GetItemLinkValue(itemLink, CONSIDER_CONDITION)
+            local finalValue = value
+            if(effectiveValue ~= value) then
+                finalValue = zo_strformat(SI_ITEM_FORMAT_STR_EFFECTIVE_VALUE_OF_MAX, effectiveValue, value)
+            end
+            local valueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, finalValue, VALUE_ICON_FORMAT)
+            statsSection:AddLine(valueString, self:GetStyle("statValuePairValue"))
+        end
+        self:AddSection(statsSection)
+    end
 end
 
 local MIN_CONDITION_OR_CHARGE = 0
@@ -224,6 +243,25 @@ function ZO_Tooltip:AddEnchantChargeBar(itemLink, forceFullDurability, previewCh
     local maxCharges = GetItemLinkMaxEnchantCharges(itemLink)
     local charges = forceFullDurability and maxCharges or GetItemLinkNumEnchantCharges(itemLink)
     self:AddConditionOrChargeBar(itemLink, charges, maxCharges, previewChargeToAdd)
+end
+
+function ZO_Tooltip:AddPoisonInfo(itemLink, equipSlot)
+    local hasPoison, poisonCount, poisonHeader, poisonItemLink = GetItemPairedPoisonInfo(equipSlot)
+    if(hasPoison) then
+        --Poison Count
+        local poisonCountSection = self:AcquireSection(self:GetStyle("poisonCountSection"))
+        local poisonCountString = zo_iconTextFormatNoSpace("EsoUI/Art/Tooltips/icon_poison.dds", 40, 40, poisonCount)
+        poisonCountSection:AddLine(poisonCountString, self:GetStyle("poisonCount"))
+        self:AddSection(poisonCountSection)
+
+        --Poison Name
+        local equippedPoisonSection = self:AcquireSection(self:GetStyle("equippedPoisonSection"))
+        equippedPoisonSection:AddLine(poisonHeader, self:GetStyle("bodyHeader"))
+        self:AddSection(equippedPoisonSection)
+
+        --Poison Ability
+        self:AddOnUseAbility(poisonItemLink)
+    end
 end
 
 function ZO_Tooltip:AddConditionOrChargeBar(itemLink, value, maxValue, previewValueToAdd)
@@ -252,7 +290,7 @@ function ZO_Tooltip:AcquireItemImprovementStatusBar(itemLink, value, maxValue, v
     return improvementBar
 end
 
-function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode)
+function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot)
     enchantDiffMode = enchantDiffMode or ZO_ENCHANT_DIFF_NONE
     local enchantSection = self:AcquireSection(self:GetStyle("bodySection"))
     local hasEnchant, enchantHeader, enchantDescription = GetItemLinkEnchantInfo(itemLink)
@@ -260,7 +298,12 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode)
         enchantSection:AddLine(enchantHeader, self:GetStyle("bodyHeader"))
         
         if enchantDiffMode == ZO_ENCHANT_DIFF_NONE then
-            enchantSection:AddLine(enchantDescription, self:GetStyle("bodyDescription"))
+            if (IsItemAffectedByPairedPoison(equipSlot)) then
+                local suppressedStyle = self:GetStyle("suppressedAbility")
+                enchantSection:AddLine(GetString(SI_TOOLTIP_ENCHANT_SUPPRESSED_BY_POISON), suppressedStyle, self:GetStyle("bodyDescription"))
+            else
+                enchantSection:AddLine(enchantDescription, self:GetStyle("bodyDescription"))
+            end
         end
     end
     self:AddSection(enchantSection)
@@ -288,10 +331,10 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode)
     end
 end
 
-function ZO_Tooltip:AddItemAbilityScalingRange(section, minLevel, maxLevel, isVeteranRank)
+function ZO_Tooltip:AddItemAbilityScalingRange(section, minLevel, maxLevel, isChampionPoints)
     local text
-    if isVeteranRank then
-        text = zo_strformat(SI_ITEM_ABILITY_SCALING_VETERAN_RANK_RANGE, zo_iconFormat(GetGamepadVeteranRankIcon(), 48, 48), minLevel, maxLevel)
+    if isChampionPoints then
+        text = zo_strformat(SI_ITEM_ABILITY_SCALING_CHAMPION_POINTS_RANGE, zo_iconFormat(GetGamepadChampionPointsIcon(), 40, 40), minLevel, maxLevel)
     else
         text = zo_strformat(SI_ITEM_ABILITY_SCALING_LEVEL_RANGE, minLevel, maxLevel)
     end
@@ -300,7 +343,7 @@ end
 
 function ZO_Tooltip:AddOnUseAbility(itemLink)
     local onUseAbilitySection = self:AcquireSection(self:GetStyle("bodySection"))
-    local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isVeteranRank = GetItemLinkOnUseAbilityInfo(itemLink)
+    local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isChampionPoints = GetItemLinkOnUseAbilityInfo(itemLink)
     if(hasAbility) then
         if(abilityHeader ~= "") then
             onUseAbilitySection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_DESCRIPTION_HEADER, abilityHeader), self:GetStyle("bodyHeader"))
@@ -312,14 +355,14 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
                 onUseAbilitySection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN, abilityDescription, cooldown / 1000), self:GetStyle("bodyDescription"))
             end
             if hasScaling then
-                self:AddItemAbilityScalingRange(onUseAbilitySection, minLevel, maxLevel, isVeteranRank)
+                self:AddItemAbilityScalingRange(onUseAbilitySection, minLevel, maxLevel, isChampionPoints)
             end
         end
     else
         local abilities = {}
         local maxCooldown = 0
         for i = 1, GetMaxTraits() do
-            local hasTraitAbility, traitAbilityDescription, traitCooldown, traitHasScaling, traitMinLevel, traitMaxLevel, traitIsVeteranRank = GetItemLinkTraitOnUseAbilityInfo(itemLink, i)
+            local hasTraitAbility, traitAbilityDescription, traitCooldown, traitHasScaling, traitMinLevel, traitMaxLevel, traitIsChampionPoints = GetItemLinkTraitOnUseAbilityInfo(itemLink, i)
             if(hasTraitAbility) then
                 table.insert(abilities, traitAbilityDescription)
                 if(traitCooldown > maxCooldown) then
@@ -342,7 +385,7 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
             onUseAbilitySection:AddLine(text, self:GetStyle("bodyDescription"))
 
             if traitHasScaling then
-                self:AddItemAbilityScalingRange(onUseAbilitySection, traitMinLevel, traitMaxLevel, traitIsVeteranRank)
+                self:AddItemAbilityScalingRange(onUseAbilitySection, traitMinLevel, traitMaxLevel, traitIsChampionPoints)
             end
         end
     end
@@ -385,6 +428,12 @@ function ZO_Tooltip:AddSet(itemLink, equipped)
         end
         self:AddSection(setSection)
     end
+end
+
+function ZO_Tooltip:AddPoisonSystemDescription()
+    local poisonSystemDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
+    poisonSystemDescriptionSection:AddLine(GetString(SI_POISON_SYSTEM_INFO), self:GetStyle("flavorText"))
+    self:AddSection(poisonSystemDescriptionSection)
 end
 
 function ZO_Tooltip:AddFlavorText(itemLink)
@@ -450,23 +499,29 @@ end
 
 --Layout Functions
 
-function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
-    self:AddTopSection(itemLink)
+function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked)
+    self:AddTopSection(itemLink, showPlayerLocked)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     if(DoesItemLinkHaveArmorDecay(itemLink)) then
         self:AddConditionBar(itemLink, previewValueToAdd)
+    elseif(equipped and IsItemAffectedByPairedPoison(equipSlot)) then
+        self:AddPoisonInfo(itemLink, equipSlot)
     elseif(DoesItemLinkHaveEnchantCharges(itemLink)) then
         self:AddEnchantChargeBar(itemLink, forceFullDurability, previewValueToAdd)
     end
 
-    self:AddEnchant(itemLink, enchantMode)
+    self:AddEnchant(itemLink, enchantMode, equipSlot)
     self:AddOnUseAbility(itemLink)
     self:AddTrait(itemLink)
     self:AddSet(itemLink, equipped)
+    if GetItemLinkItemType(itemLink) == ITEMTYPE_POISON then
+        self:AddPoisonSystemDescription()
+    end
     self:AddFlavorText(itemLink)
     self:AddCreator(itemLink, creatorName)
     self:AddItemTags(itemLink)
+    self:AddItemValue(itemLink)
 end
 
 function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName)
@@ -474,6 +529,7 @@ function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
+    self:AddItemValue(itemLink)
 end
 
 function ZO_Tooltip:LayoutBooster(itemLink, itemName)
@@ -493,26 +549,18 @@ function ZO_Tooltip:LayoutBooster(itemLink, itemName)
 end
 
 do
-    local FORMATTED_VETERAN_RANK_ICON = zo_iconFormat(GetGamepadVeteranRankIcon(), 48, 48)
+    local FORMATTED_CHAMPION_RANK_ICON = zo_iconFormat(GetGamepadChampionPointsIcon(), 40, 40)
     function ZO_Tooltip:LayoutInlineGlyph(itemLink, itemName)
         self:AddItemTitle(itemLink, itemName)
         self:AddEnchant(itemLink)
 
-        local minLevel, maxLevel, minVeteranRank, maxVeteranRank = GetItemLinkGlyphMinMaxLevels(itemLink)
-        if(minLevel or minVeteranRank) then
+        local minLevel, minChampionPoints = GetItemLinkGlyphMinLevels(itemLink)
+        if(minLevel or minChampionPoints) then
             local requirementsSection = self:AcquireSection(self:GetStyle("bodySection"))
-            if minVeteranRank then
-                if minVeteranRank ~= maxVeteranRank then
-                    requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_VETERAN_RANK_GAMEPAD, FORMATTED_VETERAN_RANK_ICON, minVeteranRank, maxVeteranRank), self:GetStyle("bodyDescription"))
-                else
-                    requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_VETERAN_RANK_GAMEPAD, FORMATTED_VETERAN_RANK_ICON, minVeteranRank), self:GetStyle("bodyDescription"))
-                end
+            if minChampionPoints then
+                requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_CHAMPION_POINTS_GAMEPAD, FORMATTED_CHAMPION_RANK_ICON, minChampionPoints), self:GetStyle("bodyDescription"))
             else
-                if minLevel ~= maxLevel then
-                    requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_LEVEL, minLevel, maxLevel), self:GetStyle("bodyDescription"))
-                else
-                    requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_LEVEL, minLevel), self:GetStyle("bodyDescription"))
-                end
+                requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_LEVEL, minLevel), self:GetStyle("bodyDescription"))
             end
             self:AddSection(requirementsSection)
         end
@@ -550,6 +598,7 @@ function ZO_Tooltip:LayoutTool(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
+    self:AddItemValue(itemLink)
 end
 
 function ZO_Tooltip:LayoutSoulGem(itemLink, itemName)
@@ -558,6 +607,7 @@ function ZO_Tooltip:LayoutSoulGem(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
+    self:AddItemValue(itemLink)
 end
 
 function ZO_Tooltip:LayoutAvARepair(itemLink, itemName)
@@ -659,6 +709,7 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName)
     end
     self:AddSection(useToLearnOrKnownSection)
     self:AddItemTags(itemLink)
+    self:AddItemValue(itemLink)
 end
 
 function ZO_Tooltip:LayoutReagent(itemLink, itemName)
@@ -739,13 +790,16 @@ function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName)
     self:AddItemTitle(itemLink, itemName)
 
     local requiredLevel = GetItemLinkRequiredLevel(itemLink)
-    local requiredVeteranRank = GetItemLinkRequiredVeteranRank(itemLink)
-    if(requiredLevel > 0 or requiredVeteranRank > 0) then
+    local requiredChampionPoints = GetItemLinkRequiredChampionPoints(itemLink)
+    local itemType = GetItemLinkItemType(itemLink)
+    local itemTypeString = GetString((itemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
+
+    if(requiredLevel > 0 or requiredChampionPoints > 0) then
         local createsSection = self:AcquireSection(self:GetStyle("bodySection"))
-        if(requiredVeteranRank > 0) then
-            createsSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_CREATES_POTION_OF_VETERAN_RANK, requiredVeteranRank), self:GetStyle("bodyDescription"))
+        if(requiredChampionPoints > 0) then
+            createsSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_CHAMPION_POINTS, requiredChampionPoints, itemTypeString), self:GetStyle("bodyDescription"))
         else
-            createsSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_CREATES_POTION_OF_LEVEL, requiredLevel), self:GetStyle("bodyDescription"))
+            createsSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_LEVEL, requiredLevel, itemTypeString), self:GetStyle("bodyDescription"))
         end
         self:AddSection(createsSection)
     end
@@ -848,18 +902,21 @@ function ZO_Tooltip:LayoutAlchemyPreview(solventBagId, solventSlotIndex, reagent
             self.icon:SetHidden(false)
         end
 
+        self:AddTopSection(itemLink)
         self:AddItemTitle(itemLink)
         self:AddBaseStats(itemLink)
         self:AddOnUseAbility(itemLink)
-
     else
         if self.icon then
             self.icon:SetHidden(true)
         end
         
-        self:AddLine(GetString(SI_ALCHEMY_UNKNOWN_RESULT), self:GetStyle("title"))
+        local solventType = GetItemType(solventBagId, solventSlotIndex)
+        local itemTypeString = GetString(solventType == ITEMTYPE_POTION_BASE and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
+
+        self:AddLine(zo_strformat(SI_ALCHEMY_UNKNOWN_RESULT, itemTypeString), self:GetStyle("title"))
         local alchemySection = self:AcquireSection(self:GetStyle("bodySection"))
-        alchemySection:AddLine(GetString(SI_ALCHEMY_UNKNOWN_EFFECTS), self:GetStyle("bodyDescription"))
+        alchemySection:AddLine(zo_strformat(SI_ALCHEMY_UNKNOWN_EFFECTS, itemTypeString), self:GetStyle("bodyDescription"))
         self:AddSection(alchemySection)
     end
 end
@@ -975,7 +1032,8 @@ do
 
         [ITEMTYPE_REAGENT] = function(self, itemLink, creatorName, itemName) self:LayoutReagent(itemLink, itemName) end,
 
-        [ITEMTYPE_ALCHEMY_BASE] = function(self, itemLink, creatorName, itemName) self:LayoutAlchemyBase(itemLink, itemName) end,
+        [ITEMTYPE_POTION_BASE] = function(self, itemLink, creatorName, itemName) self:LayoutAlchemyBase(itemLink, itemName) end,
+        [ITEMTYPE_POISON_BASE] = function(self, itemLink, creatorName, itemName) self:LayoutAlchemyBase(itemLink, itemName) end,
 
         [ITEMTYPE_INGREDIENT] = function(self, itemLink, creatorName, itemName) self:LayoutIngredient(itemLink, itemName) end,
 
@@ -1004,7 +1062,7 @@ do
 
     --TODO: Get creatorName from itemLink?
     --TODO: Pass in some sort of struct for containing all the additional item tooltip parameters
-    function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
+    function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked)
         local isValidItemLink = itemLink ~= ""
         if isValidItemLink then
             --first do checks that can't be determined from the item type
@@ -1027,7 +1085,10 @@ do
                         if IsItemLinkBook(itemLink) then
                             self:LayoutBook(itemLink)
                         else -- fallback to our default layout
-                            self:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
+                            if equipped == NOT_EQUIPPED then
+                                equipSlot = EQUIP_SLOT_NONE
+                            end
+                            self:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked)
                         end
                     end
                 end
@@ -1038,19 +1099,21 @@ do
     end
 end
 
-function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, customOrBagStackCount)
+function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, customOrBagStackCount, equipSlot, showPlayerLocked)
     local isValidItemLink = itemLink ~= ""
     if isValidItemLink then
         local stackCount
+        local bagCount, bankCount, craftBagCount = GetItemLinkStacks(itemLink)
         if customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT then
-            local bagCount, bankCount = GetItemLinkStacks(itemLink)
             stackCount = bagCount
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT then
-            local bagCount, bankCount = GetItemLinkStacks(itemLink)
             stackCount = bankCount
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT then
-            local bagCount, bankCount = GetItemLinkStacks(itemLink)
             stackCount = bagCount + bankCount
+        elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_CRAFTBAG_TITLE_COUNT then
+            stackCount = craftBagCount
+        elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT then
+            stackCount = bagCount + bankCount + craftBagCount
         else
             stackCount = customOrBagStackCount
         end
@@ -1059,7 +1122,7 @@ function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, fo
         if stackCount and stackCount > 1 then
             itemName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount)
         end
-        return self:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName)
+        return self:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked)
     end
 end
 
@@ -1071,36 +1134,47 @@ do
     local NO_PREVIEW_VALUE = nil
 
     function ZO_Tooltip:LayoutItemWithStackCountSimple(itemLink, customOrBagStackCount)
-        return self:LayoutItemWithStackCount(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, NO_ENCHANT_MODE, NO_PREVIEW_VALUE, customOrBagStackCount)
+        return self:LayoutItemWithStackCount(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, NO_ENCHANT_MODE, NO_PREVIEW_VALUE, customOrBagStackCount, EQUIP_SLOT_NONE)
     end
 end
 
 -- "Specific Layout Functions"
 
-function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, enchantMode, showInventoryAndBagCount)
+function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, enchantMode, showCombinedCount)
     local itemLink = GetItemLink(bagId, slotIndex)
+    local showPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
     local equipped = bagId == BAG_WORN
+    local equipSlot = equipped and slotIndex or EQUIP_SLOT_NONE
+    local showCraftBagCount = ZO_ITEM_TOOLTIP_SHOW_CRAFTBAG_BODY_COUNT
     local stackCount = ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT
-    if showInventoryAndBagCount then
-        stackCount = ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT
+    if showCombinedCount then
+        stackCount = ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT
     else
         if bagId == BAG_BANK then
             stackCount = ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT
         elseif bagId == BAG_BACKPACK then
             stackCount = ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT
+        elseif bagId == BAG_VIRTUAL then
+            showBankCount = ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT
+            showCraftBagCount = ZO_ITEM_TOOLTIP_HIDE_CRAFTBAG_BODY_COUNT
+            stackCount = ZO_ITEM_TOOLTIP_CRAFTBAG_TITLE_COUNT
         elseif equipped then
-            stackCount = 1
+            if slotIndex == EQUIP_SLOT_POISON or slotIndex == EQUIP_SLOT_BACKUP_POISON then
+                stackCount = select(2, GetItemInfo(BAG_WORN, slotIndex))
+            else
+                stackCount = 1
+            end
         end
     end
 
-    return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), nil, enchantMode, nil, stackCount)
+    return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), nil, enchantMode, nil, stackCount, equipSlot, showPlayerLocked)
 end
 
 function ZO_Tooltip:LayoutTradeItem(who, tradeIndex)
     local itemLink = GetTradeItemLink(who, tradeIndex, LINK_STYLE_DEFAULT)
     local equipped = false
     local name, icon, stack, quality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(who, tradeIndex)
-    return self:LayoutItemWithStackCount(itemLink, equipped, creator, nil, nil, nil, stack)
+    return self:LayoutItemWithStackCount(itemLink, equipped, creator, nil, nil, nil, stack, EQUIP_SLOT_NONE)
 end
 
 function ZO_Tooltip:LayoutPendingSmithingItem(patternIndex, materialIndex, materialQuantity, styleIndex, traitIndex)

@@ -12,6 +12,8 @@ end
 function ZO_KeyboardGuildRosterManager:Initialize(control)
     ZO_SocialListKeyboard.Initialize(self, control)
     control:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
+
+	self:SetEmptyText(GetString(SI_SORT_FILTER_LIST_NO_RESULTS))
     
     ZO_ScrollList_AddDataType(self.list, GUILD_MEMBER_DATA, "ZO_KeyboardGuildRosterRow", 30, function(control, data) self:SetupRow(control, data) end)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
@@ -22,11 +24,14 @@ function ZO_KeyboardGuildRosterManager:Initialize(control)
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareGuildMembers(listEntry1, listEntry2) end
     self.sortHeaderGroup:SelectHeaderByKey("status")
 
+	self.hideOfflineCheckBox = GetControl(control, "HideOffline")
+
     GUILD_ROSTER_SCENE = ZO_Scene:New("guildRoster", SCENE_MANAGER)
     GUILD_ROSTER_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
                                                             if(newState == SCENE_SHOWING) then
                                                                 self:PerformDeferredInitialization()
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+																self:UpdateHideOfflineCheckBox(self.hideOfflineCheckBox)
                                                             elseif(newState == SCENE_HIDDEN) then
                                                                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                             end
@@ -121,12 +126,15 @@ function ZO_KeyboardGuildRosterManager:FilterScrollList()
     ZO_ClearNumericallyIndexedTable(scrollData)
 
     local searchTerm = self.searchBox:GetText()
+	local hideOffline = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
 
     local masterList = GUILD_ROSTER_MANAGER:GetMasterList()
     for i = 1, #masterList do
         local data = masterList[i]
         if(searchTerm == "" or GUILD_ROSTER_MANAGER:IsMatch(searchTerm, data)) then
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_MEMBER_DATA, data))
+			if not hideOffline or data.online then
+				table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_MEMBER_DATA, data))
+			end
         end
     end
 end
@@ -329,12 +337,12 @@ function ZO_KeyboardGuildRosterRowClass_OnMouseExit(control)
     GUILD_ROSTER_KEYBOARD:Class_OnMouseExit(control)
 end
 
-function ZO_KeyboardGuildRosterRowVeteran_OnMouseEnter(control)
-    GUILD_ROSTER_KEYBOARD:Veteran_OnMouseEnter(control)
+function ZO_KeyboardGuildRosterRowChampion_OnMouseEnter(control)
+    GUILD_ROSTER_KEYBOARD:Champion_OnMouseEnter(control)
 end
 
-function ZO_KeyboardGuildRosterRowVeteran_OnMouseExit(control)
-    GUILD_ROSTER_KEYBOARD:Veteran_OnMouseExit(control)
+function ZO_KeyboardGuildRosterRowChampion_OnMouseExit(control)
+    GUILD_ROSTER_KEYBOARD:Champion_OnMouseExit(control)
 end
 
 function ZO_KeyboardGuildRosterRowRank_OnMouseEnter(control)
@@ -347,4 +355,8 @@ end
 
 function ZO_KeyboardGuildRoster_OnInitialized(control)
     GUILD_ROSTER_KEYBOARD = ZO_KeyboardGuildRosterManager:New(control)
+end
+
+function ZO_KeyboardGuildRoster_ToggleHideOffline(self)
+	GUILD_ROSTER_KEYBOARD:HideOffline_OnClicked()
 end

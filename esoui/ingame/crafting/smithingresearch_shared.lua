@@ -143,7 +143,7 @@ function ZO_SharedSmithingResearch:GenerateResearchTraitCounts(virtualInventoryL
 
     for itemId, itemInfo in pairs(virtualInventoryList) do
         local traitIndex = GetTraitIndexForItem(itemInfo.bag, itemInfo.index, craftingType, researchLineIndex, numTraits)
-        if traitIndex then
+        if traitIndex and not IsItemPlayerLocked(itemInfo.bag, itemInfo.index) then
             counts = counts or {}
             counts[traitIndex] = (counts[traitIndex] or 0) + 1
         end

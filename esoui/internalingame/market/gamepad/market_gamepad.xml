@@ -149,6 +149,12 @@
             <OnInitialized>
                 ZO_GamepadMarket_Preview_OnInitialize(self)
             </OnInitialized>
+            <Controls>
+                <Label name="$(parent)VariationLabel" font="ZoFontGamepadBold36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="-48" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="208" offsetY="-140" />
+                </Label>
+            </Controls>
         </TopLevelControl>
         
         <Control name="ZO_GamepadMarket_EsoPlusCategoryTemplate" inherits="ZO_GamepadMarket_CategoryTemplate" virtual="true">

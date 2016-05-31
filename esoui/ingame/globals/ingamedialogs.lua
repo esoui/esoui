@@ -130,6 +130,7 @@ ESO_Dialogs["DESTROY_ITEM_PROMPT"] =
         dialogType = GAMEPAD_DIALOGS.BASIC,
         allowRightStickPassThrough = true,
     },
+    canQueue = true,
     title =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
@@ -1513,6 +1514,7 @@ ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
 
 ESO_Dialogs["CONFIRM_CONVERT_IMPERIAL_STYLE"] =
 {
+    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -2601,7 +2603,7 @@ ESO_Dialogs["WAIT_FOR_CONSOLE_CHARACTER_INFO"] =
 ESO_Dialogs["GAMEPAD_GENERIC_WAIT"] = 
 {
     setup = function(dialog)
-        dialog.setupFunc(dialog)
+        dialog:setupFunc()
     end,
     canQueue = true,
     gamepadInfo =
@@ -2910,6 +2912,7 @@ ESO_Dialogs["KEYBIND_STRIP_DISABLED_DIALOG"] =
     buttons =
     {
         {
+            keybind = "DIALOG_NEGATIVE",
             text = SI_OK,
         },
     },

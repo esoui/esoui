@@ -6,10 +6,14 @@ function ZO_TrialAccount_GetInfo()
     if accountTypeId > 0 then
         local settingName = string.format(SETTING_FORMAT, accountTypeId)
         seenVersion = GetCVar(settingName)
-        --If you hit this assert, it means we got an accountTypeId from services that corresponds to a def that we didn't add a setting for.
-        --Add the setting in question to GameSettings.xml
-        assert(seenVersion ~= "")
-        seenVersion = tonumber(seenVersion)
+
+        --If the setting has not been created in GameSettings.xml, we must add it if we want to be able to see the pop-up
+        --Otherwise we just pretend like we've seen it
+        if seenVersion == "" then
+            seenVersion = currentVersion
+        else
+            seenVersion = tonumber(seenVersion)
+        end
     end
     return accountTypeId, title, description, currentVersion, seenVersion
 end

@@ -123,3 +123,28 @@ end
 function ZO_StripGrammarMarkupFromCharacterName(characterName)
     return zo_strformat("<<1>>", characterName)
 end
+
+local ABBREVIATION_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
+
+function ZO_AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+    if amount >= ABBREVIATION_THRESHOLD then
+        local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+
+        return ZO_LocalizeDecimalNumber(shortAmount) .. suffix
+    else
+        return amount
+    end
+end
+
+function ZO_GetSpecializedItemTypeText(itemType, specializedItemType)
+    if specializedItemType == SPECIALIZED_ITEMTYPE_NONE then
+        return GetString("SI_ITEMTYPE", itemType)
+    else
+        return GetString("SI_SPECIALIZEDITEMTYPE", specializedItemType)
+    end
+end
+
+function ZO_GetSpecializedItemTypeTextBySlot(bagId, slotIndex)
+    local itemType, specializedItemType = GetItemType(bagId, slotIndex)
+    return ZO_GetSpecializedItemTypeText(itemType, specializedItemType)
+end

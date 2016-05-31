@@ -8,12 +8,12 @@ ZO_SharedTradeWindow = ZO_Object:Subclass()
 --You just got invited to trade.
 local function OnTradeWindowInviteConsidering(self, eventCode, inviterCharacterName, inviterDisplayName)
     TRADE_WINDOW.state = TRADE_STATE_INVITE_CONSIDERING
-    TRADE_WINDOW.target = IsInGamepadPreferredMode() and inviterDisplayName or inviterCharacterName
+    TRADE_WINDOW.target = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
 end
 
 --You were notified that your target is considering your trade offer.
 local function OnTradeWindowInviteWaiting(self, eventCode, inviteeCharacterName, inviteeDisplayName)
-    TRADE_WINDOW.target = IsInGamepadPreferredMode() and inviteeDisplayName or inviteeCharacterName
+    TRADE_WINDOW.target = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
     TRADE_WINDOW.state = TRADE_STATE_INVITE_WAITING
 end
 

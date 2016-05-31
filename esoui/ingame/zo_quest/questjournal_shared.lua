@@ -2,6 +2,10 @@
 --Quest Journal Shared
 ---------------------
 
+-- Used for indexing into icon/tooltip tables if we don't care what the quest or instance display types are
+ZO_ANY_QUEST_TYPE = "all_quests"
+ZO_ANY_INSTANCE_DISPLAY_TYPE = "all_instances"
+
 ZO_QuestJournal_Shared = ZO_CallbackObject:Subclass()
 
 function ZO_QuestJournal_Shared:New()
@@ -15,13 +19,11 @@ function ZO_QuestJournal_Shared:Initialize(control)
     self.listDirty = true
 
     self.questStrings = {}
+    self.icons = {}
+    self.tooltips = {}
 
-    self:RegisterTooltipText(INSTANCE_DISPLAY_TYPE_NONE, "")
-    self:RegisterTooltipText(INSTANCE_DISPLAY_TYPE_SOLO, SI_QUEST_JOURNAL_SOLO_TOOLTIP)
-    self:RegisterTooltipText(INSTANCE_DISPLAY_TYPE_GROUP, SI_QUEST_JOURNAL_GROUP_TOOLTIP)
-    self:RegisterTooltipText(INSTANCE_DISPLAY_TYPE_RAID, SI_QUEST_JOURNAL_RAID_TOOLTIP)
-    -- nothing should be marked as GROUP_DELVE, but just in case treat it like GROUP
-    self:RegisterTooltipText(INSTANCE_DISPLAY_TYPE_GROUP_DELVE, SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+    self:RegisterIcons()
+    self:RegisterTooltips()
 
     self.bgText = control:GetNamedChild("BGText")
     self.stepText = control:GetNamedChild("StepText")
@@ -43,22 +45,44 @@ function ZO_QuestJournal_Shared:Initialize(control)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function(eventCode, unitTag) self:OnLevelUpdated(unitTag) end)
 end
 
-function ZO_QuestJournal_Shared:RegisterIconTexture(questType, texturePath)
-    self.icons = self.icons or {}
-    self.icons[questType] = texturePath
+local function QuestJournal_Shared_RegisterDataInTable(table, questType, instanceDisplayType, data)
+    local questTableIndex = questType or ZO_ANY_QUEST_TYPE
+    table[questTableIndex] = table[questTableIndex] or {}
+
+    table[questTableIndex][instanceDisplayType or ZO_ANY_INSTANCE_DISPLAY_TYPE] = data
 end
 
-function ZO_QuestJournal_Shared:GetIconTexture(questType)
-    return self.icons[questType]
+local function QuestJournal_Shared_GetDataFromTable(table, questType, instanceDisplayType)
+    local data
+
+    -- Attempt to pull data specifically for this quest type first
+    if table[questType] then
+        data = table[questType][instanceDisplayType] or table[questType][ZO_ANY_INSTANCE_DISPLAY_TYPE]
+    end
+
+    -- If we didn't find specific data for this quest type, try to fetch it for any quest type
+    if data == nil and table[ZO_ANY_QUEST_TYPE] then
+        data = table[ZO_ANY_QUEST_TYPE][instanceDisplayType] or table[ZO_ANY_QUEST_TYPE][ZO_ANY_INSTANCE_DISPLAY_TYPE]
+    end
+
+    return data
 end
 
-function ZO_QuestJournal_Shared:RegisterTooltipText(questType, stringId)
-    self.tooltips = self.tooltips or {}
-    self.tooltips[questType] = GetString(stringId)
+function ZO_QuestJournal_Shared:RegisterIconTexture(questType, instanceDisplayType, texturePath)
+    QuestJournal_Shared_RegisterDataInTable(self.icons, questType, instanceDisplayType, texturePath)
 end
 
-function ZO_QuestJournal_Shared:GetTooltipText(questType)
-    return self.tooltips[questType]
+function ZO_QuestJournal_Shared:GetIconTexture(questType, instanceDisplayType)
+    return QuestJournal_Shared_GetDataFromTable(self.icons, questType, instanceDisplayType)
+end
+
+function ZO_QuestJournal_Shared:RegisterTooltipText(questType, instanceDisplayType, stringIdOrText)
+    local tooltipText = type(stringIdOrText) == "number" and GetString(stringIdOrText) or stringIdOrText
+    QuestJournal_Shared_RegisterDataInTable(self.tooltips, questType, instanceDisplayType, tooltipText)
+end
+
+function ZO_QuestJournal_Shared:GetTooltipText(questType, instanceDisplayType)
+    return QuestJournal_Shared_GetDataFromTable(self.tooltips, questType, instanceDisplayType)
 end
 
 function ZO_QuestJournal_Shared:InitializeQuestList()
@@ -78,6 +102,14 @@ function ZO_QuestJournal_Shared:GetSelectedQuestData()
 end
 
 function ZO_QuestJournal_Shared:RefreshQuestList()
+    -- Should be overridden
+end
+
+function ZO_QuestJournal_Shared:RegisterIcons()
+    -- Should be overridden
+end
+
+function ZO_QuestJournal_Shared:RegisterTooltips()
     -- Should be overridden
 end
 
