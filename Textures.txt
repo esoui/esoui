@@ -1672,7 +1672,10 @@ esoui/art/login/jp_login_logo_left.dds
 esoui/art/login/jp_login_logo_right.dds
 esoui/art/login/link_loginlogo_eso.dds
 esoui/art/login/link_login_dmm.dds
+esoui/art/login/loginbg.dds
 esoui/art/login/loginbg_ourosboros.dds
+esoui/art/login/login_beta_left.dds
+esoui/art/login/login_beta_right.dds
 esoui/art/login/login_divider.dds
 esoui/art/login/login_framingbar.dds
 esoui/art/login/login_linkexisting.dds
@@ -2322,8 +2325,12 @@ esoui/art/reticle/reticleanim-circle.dds
 esoui/art/reticle/reticleanim.dds
 esoui/art/screenadjust/adjust_corner.dds
 esoui/art/screens/gamepad/loadingbar_fill.dds
+esoui/art/screens/loadingbar_fill.dds
 esoui/art/screens/loadscreen_bottommunge_tile.dds
+esoui/art/screens/loadscreen_title.dds
 esoui/art/screens/loadscreen_topmunge_tile.dds
+esoui/art/screens/load_ourosboros.dds
+esoui/art/screens/munge_overlay.dds
 esoui/art/screens_app/gamepad/gp_loading_text_background-1024x256.dds
 esoui/art/screens_app/gamepad/gp_screenapp_ouroboros.dds
 esoui/art/screens_app/gamepad/gp_screensapp_ouroboros.dds
