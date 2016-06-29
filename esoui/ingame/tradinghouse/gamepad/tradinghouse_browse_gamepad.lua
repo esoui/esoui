@@ -10,7 +10,7 @@ local MIN_LEVEL_SLIDER_MODE = 1
 local MAX_LEVEL_SLIDER_MODE = 2
 
 local MINIMUM_PLAYER_LEVEL = 0
-local MINIMUM_CHAMPION_POINTS = 1
+local MINIMUM_CHAMPION_POINTS = 0
 local LEVEL_TYPES = 
 {
     { TRADING_HOUSE_FILTER_TYPE_ALL_LEVEL, nil, SI_GAMEPAD_TRADING_HOUSE_BROWSE_ALL_LEVEL },
@@ -270,26 +270,12 @@ function ZO_GamepadTradingHouse_Browse:SetMaxLevel(maxLevel)
     ZO_TradingHouse_SearchCriteriaChanged(SEARCH_CRITERIA_CHANGED)
 end
 
-function ZO_GamepadTradingHouse_Browse:SetSliderDisabled(slider, disabled)
-    if slider then
-        slider.entry.disabled = disabled
-        slider:SetEnabled(not disabled)
+function ZO_GamepadTradingHouse_Browse:GetLevelStep()
+    if self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS then
+        return 10
+    else
+        return 1
     end
-end
-
-function ZO_GamepadTradingHouse_Browse:SetLevelSlidersDisabled(disabled)
-    self:SetSliderDisabled(self.minSlider, disabled)
-    self:SetSliderDisabled(self.maxSlider, disabled)
-
-    if self.minLevelValueLabel then
-        self.minLevelValueLabel:SetHidden(disabled)
-    end
-
-    if self.maxLevelValueLabel then
-        self.maxLevelValueLabel:SetHidden(disabled)
-    end
-
-    self.itemList:RefreshVisible()
 end
 
 function ZO_GamepadTradingHouse_Browse:GetMinLevelCap()
@@ -551,10 +537,8 @@ function ZO_GamepadTradingHouse_Browse:IntializeComboBoxCallBacks()
 
         if selectionChanged then
             self:UpdateLevelSlidersMinMax()
+            self.itemList:RefreshVisible()
         end
-
-        local disableLevelSliders = self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_ALL_LEVEL
-        self:SetLevelSlidersDisabled(disableLevelSliders)
     end
 end
 
@@ -616,7 +600,7 @@ function ZO_GamepadTradingHouse_Browse:SetupSlider(control, data, selected, rese
     control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, data.disabled))
 
     local slider = control:GetNamedChild("Slider")
-    slider:SetValueStep(1)
+    slider:SetValueStep(self:GetLevelStep())
     self:UpdateSliderMinMax(slider, self:GetMinLevelCap(), self:GetMaxLevelCap())
     slider.sliderMode = data.sliderMode
     slider.entry = data
@@ -635,7 +619,12 @@ function ZO_GamepadTradingHouse_Browse:SetupSlider(control, data, selected, rese
         self.maxLevelValueLabel = valueLabel
         self.maxLevelValueLabel:SetText(self.maxLevel)
         control:GetNamedChild("SliderLabel"):SetText(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MAX_LEVEL))
-    end 
+    end
+
+    local disableLevelSliders = self.levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_ALL_LEVEL
+    slider:SetEnabled(not disableLevelSliders)
+    data.disabled = disableLevelSliders
+    valueLabel:SetHidden(disableLevelSliders)
 
     data.slider = slider
 

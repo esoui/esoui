@@ -34,13 +34,13 @@ function ZO_Dyeing_Swatches_Gamepad:Initialize(owner, control, sharedHighlight, 
     self.selectedDyeRow = 1
     self.selectedDyeCol = 1
     self.swatchesByPosition = {}
-    self.positionByDyeIndex = {}
-    self.unlockedDyeIndices = {}
+    self.positionByDyeDefId = {}
+    self.unlockedDyeDefIds = {}
 
     self.verticalMovementController = verticalController or ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
 
-    self.headerPool = ZO_ControlPool:New("ZO_Dyeing_Gamepad_ColorLabel", control)
+    self.headerPool = ZO_ControlPool:New("ZO_Dye_Gamepad_ColorLabel", control)
     local CAN_SELECT_LOCKED = true
     self.swatchPool = ZO_Dyeing_InitializeSwatchPool(owner, sharedHighlight, control, "ZO_DyeingSwatch_Gamepad", CAN_SELECT_LOCKED, HIGHLIGHT_DIMENSIONS)
 
@@ -204,8 +204,8 @@ function ZO_Dyeing_Swatches_Gamepad:UpdateDirectionalInput()
     end
 end
 
-function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeIndex(dyeIndex)
-    local dyePosition = self.positionByDyeIndex[dyeIndex]
+function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeDefId(dyeDefId)
+    local dyePosition = self.positionByDyeDefId[dyeDefId]
     if dyePosition then
         local previousSwatch = self:GetSelectedSwatch()
 
@@ -231,12 +231,16 @@ function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeIndex(dyeIndex)
     end
 end
 
-function ZO_Dyeing_Swatches_Gamepad:GetSelectedDyeIndex()
+function ZO_Dyeing_Swatches_Gamepad:DoesDyeDefIdExistInPlayerDyes(dyeDefId)
+    return self.positionByDyeDefId[dyeDefId] ~= nil
+end
+
+function ZO_Dyeing_Swatches_Gamepad:GetSelectedDyeDefId()
     local selectedSwatch = self:GetSelectedSwatch()
     if not selectedSwatch then
         return nil
     end
-    return selectedSwatch.dyeIndex
+    return selectedSwatch.dyeDefId
 end
 
 function ZO_Dyeing_Swatches_Gamepad:GetSelectedSwatch()
@@ -251,12 +255,12 @@ function ZO_Dyeing_Swatches_Gamepad:GetSelectedSwatch()
 end
 
 function ZO_Dyeing_Swatches_Gamepad:GetNumUnlockedDyes()
-    return #self.unlockedDyeIndices
+    return #self.unlockedDyeDefIds
 end
 
-function ZO_Dyeing_Swatches_Gamepad:GetRandomUnlockedDyeIndex()
-    if #self.unlockedDyeIndices > 0 then
-        return self.unlockedDyeIndices[zo_random(1, #self.unlockedDyeIndices)]
+function ZO_Dyeing_Swatches_Gamepad:GetRandomUnlockedDyeDefId()
+    if #self.unlockedDyeDefIds > 0 then
+        return self.unlockedDyeDefIds[zo_random(1, #self.unlockedDyeDefIds)]
     end
     return nil
 end
@@ -272,12 +276,12 @@ end
 function ZO_Dyeing_Swatches_Gamepad:RefreshDyeLayout_Internal()
     self.dirty = false
 
-    local selectedDyeIndex = self:GetSelectedDyeIndex()
+    local selectedDyeDefId = self:GetSelectedDyeDefId()
     local previousRowIndex = self.selectedDyeRow
 
-    self.swatchesByPosition, self.positionByDyeIndex, self.unlockedDyeIndices = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
+    self.swatchesByPosition, self.positionByDyeDefId, self.unlockedDyeDefIds = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
 
-    local selectedRowCol = self.positionByDyeIndex[selectedDyeIndex]
+    local selectedRowCol = self.positionByDyeDefId[selectedDyeDefId]
     if selectedRowCol then
         -- The previously selected dye is still in the view, so set it as the selected row and column.
         --  NOTE: We know these coordinates are valid.

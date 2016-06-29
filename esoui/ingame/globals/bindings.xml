@@ -339,6 +339,25 @@
                 </Up>
             </Action>
 
+            <Action name="TOGGLE_NAMEPLATES">
+                <Down>
+                    if GetSetting_Bool(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_NAMEPLATES) then
+                        SetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_NAMEPLATES, "false")
+                    else
+                        SetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_NAMEPLATES, "true")
+                    end
+                </Down>
+            </Action>
+            
+            <Action name="TOGGLE_HEALTHBARS">
+                <Down>
+                    if GetSetting_Bool(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS) then
+                        SetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS, "false")
+                    else
+                        SetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS, "true")
+                    end
+                </Down>
+            </Action>
         </Category>
     </Layer>
     <!-- This layer should not be player facing -->
@@ -415,7 +434,6 @@
 
             <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
             <Action name="UI_SHORTCUT_RIGHT_TRIGGER" hideAction="true" rebindable="false">
@@ -680,7 +698,7 @@
             </Action>
         </Category>
     </Layer>
-    <Layer name="MarketPreviewInterceptLayer">
+    <Layer name="PreviewInterceptLayer">
         <Category>
             <!-- Intercept keybinds for actions that can cause previewing to break -->
             <Action name="INTERCEPT_SHEATHE_WEAPON_TOGGLE" hideAction="true" rebindable="false" inheritsBindFrom="SHEATHE_WEAPON_TOGGLE">

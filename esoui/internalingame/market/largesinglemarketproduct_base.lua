@@ -93,6 +93,9 @@ do
     local NO_NICKNAME = nil
     local IS_PURCHASEABLE = true
     local BLANK_HINT = ""
+    local HIDE_VISUAL_LAYER_INFO = false
+    local NO_COOLDOWN = nil
+    local HIDE_BLOCK_REASON = false
     function ZO_LargeSingleMarketProduct_Base:Show(...)
         ZO_MarketProductBase.Show(self, ...)
         self:UpdateProductStyle()
@@ -100,8 +103,7 @@ do
         local productType = self:GetProductType()
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
             local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
-            local unlockState = GetCollectibleUnlockStateById(collectibleId)
-            self.tooltipLayoutArgs = { NO_CATEGORY_NAME, name, NO_NICKNAME, unlockState, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder }
+            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             self.itemLink = GetMarketProductItemLink(self:GetId())
         end

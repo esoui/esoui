@@ -1,16 +1,11 @@
 <GuiXml>
     <Controls>        
-        <TextBuffer name="ZO_ChatBuffer" font="ZoFontChat" maxHistoryLines="200" mouseEnabled="true" virtual="true" inherits="ZO_ChatBufferTemplate">
+        <TextBuffer name="ZO_ChatBuffer" font="ZoFontChat" inherits="ZO_ChatBufferLinkTemplate" virtual="true">
             <LineFade fadeBegin="25" fadeDuration="2" />
-          
-            <OnLinkMouseUp>
-                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
-            </OnLinkMouseUp>
         </TextBuffer>
         
         <!--This is the only XML chat container, the rest are created dynamically as needed-->
-        <!--Positioned above windows and the dialogs. Below tooltips and menues-->
-        <TopLevelControl name="ZO_ChatWindow" inherits="ZO_ChatContainerTemplate ZO_TextChatTemplate" tier="MEDIUM" level="2">
+        <TopLevelControl name="ZO_ChatWindow" inherits="ZO_ChatWindowTopLevelTemplate">
             <OnInitialized>
                 ZO_ChatSystem_OnInitialized(self)
             </OnInitialized>
@@ -198,63 +193,18 @@
                     </Controls>         
                 </Control>
               
-                <Control name="$(parent)TextEntry"> 
-                    <Dimensions y="30" />
+                <Control name="$(parent)TextEntry" override="true">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Minimize" relativePoint="BOTTOMRIGHT" offsetX="-6" offsetY="-13"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-23" offsetY="-13"/>
                     
                     <Controls>                     
-                        <Label name="$(parent)Label" mouseEnabled="true" font="ZoFontChat" verticalAlignment="CENTER">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="BOTTOMLEFT" />
+                        <Label name="$(parent)Label" override="true" font="ZoFontChat" />
 
-                            <OnMouseUp>
-                                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-                                    ZO_ChannelLabel_MouseUp(self:GetParent())
-                                end
-                            </OnMouseUp>
-                        </Label>
-
-                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="6" />
-                            <Anchor point="TOPRIGHT" />
+                        <Backdrop name="$(parent)Edit" override="true" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Controls>
-                                <EditBox name="$(parent)Box" font="ZoFontEditChat" mouseEnabled="true" maxInputCharacters="350">
+                                <EditBox name="$(parent)Box" override="true" font="ZoFontEditChat" mouseEnabled="true" inherits="ZO_ChatWindowTextEntryEditBoxEvents">
                                     <Anchor point="TOPLEFT" offsetX="4" offsetY="3"/>
                                     <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-3"/>
-                                    <OnEnter>
-                                        ZO_ChatTextEntry_Execute(self:GetParent():GetParent())
-                                    </OnEnter>
-
-                                    <OnMouseDown>
-                                        if not self:HasFocus() then
-                                            StartChatInput()
-                                        end
-                                    </OnMouseDown>
-
-                                    <OnFocusLost>
-                                        ZO_ChatTextEntry_FocusLost(self:GetParent():GetParent())
-                                    </OnFocusLost>
-
-                                    <OnEscape>
-                                        ZO_ChatTextEntry_Escape(self:GetParent():GetParent())
-                                    </OnEscape>
-
-                                    <OnUpArrow>
-                                        ZO_ChatTextEntry_PreviousCommand(self:GetParent():GetParent())
-                                    </OnUpArrow>
-
-                                    <OnDownArrow>
-                                        ZO_ChatTextEntry_NextCommand(self:GetParent():GetParent())
-                                    </OnDownArrow>
-
-                                    <OnTextChanged>
-                                        ZO_ChatTextEntry_TextChanged(self:GetParent():GetParent(), self:GetText())
-                                    </OnTextChanged>
-
-                                    <OnTab>
-                                        ZO_ChatTextEntry_Tab(self:GetParent():GetParent())
-                                    </OnTab>
                                 </EditBox>
                             </Controls>
                         </Backdrop>                    

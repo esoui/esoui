@@ -651,6 +651,7 @@ function ZO_MailSend_Gamepad:EnterSending()
     MAIL_MANAGER_GAMEPAD:SwitchToKeybind(nil) -- Remove keybinds as they are invaild when sending.
     self.loadingLabel:SetText(GetString(SI_GAMEPAD_MAIL_SEND_SENDING))
     self.loadingBox:SetHidden(false)
+    MAIL_MANAGER_GAMEPAD:SetCurrentList(nil)
 end
 
 function ZO_MailSend_Gamepad:EnterOutbox()

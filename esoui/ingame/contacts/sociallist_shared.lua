@@ -96,10 +96,9 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
     level:SetHidden(hideCharacterFields)
     champion:SetHidden(hideCharacterFields)
 
-    if(data.hasCharacter) then
+    if data.hasCharacter then
         zone:SetText(data.formattedZone)
 
-        --TODO: find where the data is being setup and change to champion rank equivilent
         level:SetText(GetLevelOrChampionPointsStringNoIcon(data.level, data.championPoints))
 
         if data.championPoints and data.championPoints > 0 then
@@ -110,7 +109,7 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
 
         if alliance then
             local allianceTexture = textureFunctions.allianceIcon(data.alliance)
-            if(allianceTexture) then
+            if allianceTexture then
                 alliance:SetTexture(allianceTexture)
             else
                 alliance:SetHidden(true)
@@ -118,7 +117,7 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
         end
 
         local classTexture = textureFunctions.classIcon(data.class)
-        if(classTexture) then
+        if classTexture  then
             class:SetTexture(classTexture)
         else
             class:SetHidden(true)

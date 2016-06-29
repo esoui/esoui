@@ -153,7 +153,7 @@ function ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex)
 end
 
 function ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem(bagId, slotIndex)
-    return CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, GetCraftingInteractionType())
+    return CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, GetCraftingInteractionType()) and not IsItemPlayerLocked(bagId, slotIndex)
 end
 
 function ZO_SharedSmithingExtraction_DoesItemPassFilter(bagId, slotIndex, filterType)

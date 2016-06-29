@@ -7,8 +7,6 @@ local GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME = "GAMEPAD_COLLECTIONS_
 local NOTIFICATIONS_PROVIDER = GAMEPAD_NOTIFICATIONS:GetCollectionsProvider()
 local TIME_NEW_PERSISTS_WHILE_SELECTED_MS = 200
 
-local BLOCK_TABBAR_CALLBACK = true
-
 local ZO_GamepadCollectionsBook = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GamepadCollectionsBook:New(...)
@@ -19,51 +17,60 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     GAMEPAD_COLLECTIONS_BOOK_SCENE = ZO_Scene:New("gamepadCollectionsBook", SCENE_MANAGER)
 
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_COLLECTIONS_BOOK_SCENE)
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_COLLECTIONS_BOOK_SCENE)
+    self:SetListsUseTriggerKeybinds(true)
     
-    self.categoryList = {}
-    self.categoryList.list = ZO_Gamepad_ParametricList_Screen.GetMainList(self)
-    self.categoryList.fragment = self:GetListFragment(self.categoryList.list)
-    self.categoryList.keybind = self.categoryKeybindStripDescriptor
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.categoryKeybindStripDescriptor , self.categoryList.list)
-    self.categoryList.headerText = nil
-    self.categoryList.titleText = GetString(SI_MAIN_MENU_COLLECTIONS)
+    self.categoryList =
+        {
+            list = self:GetMainList(),
+            keybind = self.categoryKeybindStripDescriptor,
+            titleText = GetString(SI_MAIN_MENU_COLLECTIONS),
+        }
 
-    self.collectionList = {}
-    self.collectionList.list = self:AddList("Collection")
-    self.collectionList.fragment = self:CreateListFragment("Collection")
-    self.collectionList.keybind = self.collectionKeybindStripDescriptor
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.collectionKeybindStripDescriptor, self.collectionList.list)
-    self.collectionList.headerText = GetString(SI_MAIN_MENU_COLLECTIONS)
-    self.collectionList.titleText = nil
+    self.subcategoryList =
+        {
+            list = self:AddList("SubCategory"),
+            keybind = self.subcategoryKeybindStripDescriptor,
+            -- The title text will be updated to the name of the collections category
+        }
+
+    self.collectionList =
+        {
+            list = self:AddList("Collection"),
+            keybind = self.collectionKeybindStripDescriptor,
+            -- The title text will be updated to the name of the collections category/subcategory
+        }
+
     self.updateList = {}
 
     self.currentList = nil
-
-    self.tabBarEntries = {}
 
     self.trySetClearNewFlagCallback = function(callId)
         self:TrySetClearNewFlag(callId)
     end
 
     self.headerData = {}
-    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+    self:RefreshHeader()
 
     self:InitializeInfoPanel()
     self:InitializeActionsDialog()
     self:InitializeRenameCollectibleDialog()
 
     self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function()
-                                                                    if GAMEPAD_COLLECTIONS_BOOK_SCENE:IsShowing() and self.collectionList.data.categoryIndex then
-                                                                        self:UpdateCollectionListVisualLayer()
+                                                                    if GAMEPAD_COLLECTIONS_BOOK_SCENE:IsShowing() then
+                                                                        if self.currentList ~= nil and self.currentList == self.collectionList then
+                                                                            self:UpdateCollectionListVisualLayer()
+                                                                        end
                                                                     end
                                                                 end)
 
     SYSTEMS:RegisterGamepadObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
 
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectiblesUpdated", function() self:OnCollectionUpdated() end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionNotificationRemoved", function(...) self:OnCollectionNotificationRemoved(...) end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleNewStatusRemoved", function(...) self:OnCollectionNewStatusRemoved(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
     EVENT_MANAGER:RegisterForUpdate("ZO_GamepadCollectionsBook", 250, function() self:UpdateActiveCollectibleCooldownTimer() end)
 end
@@ -89,7 +96,7 @@ function ZO_GamepadCollectionsBook:SetupList(list)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
 
         local entryData = data.data
-        if self:HasAnyNotifications(entryData.categoryIndex) or (COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(entryData.categoryIndex) and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending()) then
+        if self:DoesCategoryHaveAnyNewCollectibles(entryData.categoryIndex, entryData.subcategoryIndex) or (COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(entryData.categoryIndex) and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending()) then
             control.icon:ClearIcons()
             control.icon:AddIcon(entryData.icon)
             control.icon:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
@@ -101,7 +108,7 @@ function ZO_GamepadCollectionsBook:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        data.brandNew = data.data.notificationId ~= nil or COLLECTIONS_BOOK_SINGLETON:IsDLCIdQuestPending(data.collectibleId)
+        data.brandNew = data.data.isNew or COLLECTIONS_BOOK_SINGLETON:IsDLCIdQuestPending(data.collectibleId)
 
         if not data.hasNameBeenFormatted then
             data:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
@@ -119,32 +126,24 @@ function ZO_GamepadCollectionsBook:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
     
     self:ShowList(self.categoryList)
-    if self.browseToCollectibleInfo then
-        self:ViewCategory(self.browseToCollectibleInfo.categoryIndex)
-        self:SelectCollectibleEntry(self.browseToCollectibleInfo.collectibleId)
+    local browseInfo = self.browseToCollectibleInfo
+    if browseInfo ~= nil then
+        if browseInfo.subcategoryIndex then
+            self:ViewSubcategory(browseInfo.categoryIndex, browseInfo.subcategoryIndex)
+        else
+            self:ViewCategory(browseInfo.categoryIndex)
+        end
+        self:SelectCollectibleEntry(browseInfo.collectibleId)
         self.browseToCollectibleInfo = nil
     end
-end
-
-function ZO_GamepadCollectionsBook:OnHiding()
-    ZO_Gamepad_ParametricList_Screen.OnHiding(self)
-    self:DeactivateHeader()
 end
 
 function ZO_GamepadCollectionsBook:OnHide()
     self:HideCurrentList()
 end
 
-function ZO_GamepadCollectionsBook:ActivateHeader()
-    ZO_GamepadGenericHeader_Activate(self.header)
-end
-
-function ZO_GamepadCollectionsBook:DeactivateHeader()
-    ZO_GamepadGenericHeader_Deactivate(self.header)
-end
-
-function ZO_GamepadCollectionsBook:RefreshHeader(blockCallback)
-    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData, blockCallback)
+function ZO_GamepadCollectionsBook:RefreshHeader()
+    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
 function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
@@ -171,6 +170,28 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         },
     }
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.categoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+
+    -- Subcategory Keybind
+    self.subcategoryKeybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        -- Select Subcategory
+        {
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                self:ViewSubcategory()
+            end,
+            visible = function()
+                local entryData = self.currentList.list:GetTargetData()
+                return entryData ~= nil
+            end,
+            sound = SOUNDS.GAMEPAD_MENU_FORWARD,
+        },
+    }
+
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:ShowList(self.categoryList) end)
 
     -- Collection Keybind
     self.collectionKeybindStripDescriptor =
@@ -229,7 +250,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     end
                 end
                 return false
-            end  
+            end
         },
         --Assign to Quick Slot
         {
@@ -272,7 +293,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             visible = function()
                 local entryData = self.currentList.list:GetTargetData()
                 local collectibleData = entryData and entryData.data
-                
+
                 if collectibleData then
                     if IsChatSystemAvailableForCurrentPlatform() then --Every collectible can link to chat
                         return true
@@ -303,7 +324,15 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             end,
         },
     }
-    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.collectionKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:ShowList(self.categoryList) end )
+
+    local function OnCollectionListBack()
+        if self.subcategoryList.list:IsEmpty() then
+            self:ShowList(self.categoryList)
+        else
+            self:ShowList(self.subcategoryList)
+        end
+    end
+    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.collectionKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnCollectionListBack )
 end
 
 --Opens up the provided category, or the current category if no categoryIndex is provided
@@ -312,10 +341,29 @@ function ZO_GamepadCollectionsBook:ViewCategory(categoryIndex)
         self.categoryList.list:SetSelectedIndexWithoutAnimation(categoryIndex)
     end
     local entryData = self.categoryList.list:GetTargetData()
-    self.collectionList.data = entryData.data
+    local categoryIndex = entryData.data.categoryIndex
 
-    local BUILD_SUBCATEGORY_TABS = true
-    self:BuildCollectionList(nil, BUILD_SUBCATEGORY_TABS)
+    self:BuildSubcategoryList(categoryIndex)
+    if self.subcategoryList.list:IsEmpty() then
+        self:BuildCollectionList(categoryIndex)
+        self:ShowList(self.collectionList)
+    else
+        self:ShowList(self.subcategoryList)
+    end
+end
+
+--Opens up the provided subcategory, or the current subcategory if no categoryIndex or subcategoryIndex is provided
+function ZO_GamepadCollectionsBook:ViewSubcategory(categoryIndex, subcategoryIndex)
+    if categoryIndex and subcategoryIndex then
+        self:ViewCategory(categoryIndex)
+        self.subcategoryList.list:SetSelectedIndexWithoutAnimation(subcategoryIndex)
+    end
+
+    local entryData = self.subcategoryList.list:GetTargetData()
+    local categoryIndex = entryData.data.categoryIndex
+    local subcategoryIndex = entryData.data.subcategoryIndex
+
+    self:BuildCollectionList(categoryIndex, subcategoryIndex)
     self:ShowList(self.collectionList)
 end
 
@@ -345,33 +393,23 @@ function ZO_GamepadCollectionsBook:ShowList(list, dontUpdateTitle)
     self.currentList = list
     if list then
         KEYBIND_STRIP:AddKeybindButtonGroup(self.currentList.keybind)
-        SCENE_MANAGER:AddFragment(list.fragment)
-        list.list:Activate()
+        self:SetCurrentList(list.list)
     end
 
     if not dontUpdateTitle then
         self.headerData.titleText = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, list.titleText)
-        self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
+        self:RefreshHeader()
     end
 
     if self.currentList == self.collectionList then
         local targetData = self.collectionList.list:GetTargetData()
         self:RefreshTooltip(targetData)
         self.notificationIdToClear = targetData.data.notificationId
-        if self.notificationIdToClear then
+        if self.notificationIdToClear or targetData.data.isNew then
             self.clearNewStatusOnSelectionChanged = true
         end
-
-        if self.headerData.tabBarEntries == nil and #self.tabBarEntries > 0 then
-            self.headerData.tabBarEntries = self.tabBarEntries
-            self:RefreshHeader()
-            ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, 1)
-            self:ActivateHeader()
-        end
     else
-        self.headerData.tabBarEntries = nil
-        self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
-        self:DeactivateHeader()
+        self:RefreshHeader()
     end
 end
 
@@ -385,6 +423,11 @@ function ZO_GamepadCollectionsBook:HideCurrentList()
             RemoveCollectibleNotification(self.notificationIdToClear)
         end
 
+        local targetData = self.collectionList.list:GetTargetData()
+        if targetData.data.isNew then
+            ClearCollectibleNewStatus(targetData.data.collectibleId)
+        end
+
         self.clearNewStatusOnSelectionChanged = false
         self.notificationIdToClear = nil
         self.clearNewStatusCallId = nil
@@ -392,8 +435,7 @@ function ZO_GamepadCollectionsBook:HideCurrentList()
 
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentList.keybind)
 
-    SCENE_MANAGER:RemoveFragment(self.currentList.fragment)
-    self.currentList.list:Deactivate()
+    self:DisableCurrentList()
     self.currentList = nil
 
     self:RefreshTooltip(nil)
@@ -409,20 +451,30 @@ end
 
 function ZO_GamepadCollectionsBook:OnCollectibleUpdated(collectibleId)
     if not self.control:IsHidden() then
-        if self.currentList == self.collectionList and self.collectionList then
-            self:BuildCollectionList(self.currentSubCategoryIndex)
+        if self.currentList ~= nil and self.currentList == self.collectionList then
+            self:BuildCollectionList(self.currentCategoryIndex, self.currentSubcategoryIndex)
         end
         self.categoryList.list:RefreshVisible()
+        self.subcategoryList.list:RefreshVisible()
     end
 end
 
-function ZO_GamepadCollectionsBook:OnCollectionNotificationRemoved(notificationId, collectibleId)
+function ZO_GamepadCollectionsBook:OnCollectibleStatusUpdated()
     if not self.control:IsHidden() then
         if self.currentList == self.collectionList then
             self.currentList.list:RefreshVisible()
         end
         self.categoryList.list:RefreshVisible()
+        self.subcategoryList.list:RefreshVisible()
     end
+end
+
+function ZO_GamepadCollectionsBook:OnCollectionNotificationRemoved(notificationId, collectibleId)
+    self:OnCollectibleStatusUpdated()
+end
+
+function ZO_GamepadCollectionsBook:OnCollectionNewStatusRemoved(collectibleId)
+    self:OnCollectibleStatusUpdated()
 end
 
 function ZO_GamepadCollectionsBook:BuildCategoryList()
@@ -430,7 +482,7 @@ function ZO_GamepadCollectionsBook:BuildCategoryList()
 
     -- Add the categories entries
     for categoryIndex = 1, GetNumCollectibleCategories() do
-        local categoryName, numSubCategories, numCollectibles, unlockedCollectibles, totalCollectibles, hidesUnearned = GetCollectibleCategoryInfo(categoryIndex)
+        local categoryName, numSubCategories, numCollectibles, unlockedCollectibles = GetCollectibleCategoryInfo(categoryIndex)
         local gamepadIcon = GetCollectibleCategoryGamepadIcon(categoryIndex)
         categoryName = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, categoryName)
 
@@ -438,10 +490,8 @@ function ZO_GamepadCollectionsBook:BuildCategoryList()
         entryData.data = {
             categoryIndex = categoryIndex,
             categoryName = categoryName,
-            categoryType = categoryIndex,
             numCollectibles = numCollectibles,
             unlockedCollectibles = unlockedCollectibles,
-            totalCollectibles = totalCollectibles,
             icon = gamepadIcon,
         }
         entryData:SetIconTintOnSelection(true)
@@ -453,24 +503,78 @@ function ZO_GamepadCollectionsBook:BuildCategoryList()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryList.keybind)
 end
 
-function ZO_GamepadCollectionsBook:BuildCollectionList(subCategoryIndex, buildSubCategoryTabs)
-    self.collectionList.list:Clear()
-    self.collectionList.titleText = nil
+function ZO_GamepadCollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+    if index >= 1 then
+        local id = GetCollectibleId(categoryIndex, subCategoryIndex, index)
+        index = index - 1
+        return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
+    end
+    return ...
+end
 
-    local data = self.collectionList.data
+function ZO_GamepadCollectionsBook:BuildSubcategoryList(categoryIndex)
+    local subcategoryListInfo = self.subcategoryList
+    local subcategoryList = subcategoryListInfo.list
+
+    subcategoryList:Clear()
+
+    local categoryName, numSubCategories, numCollectibles = GetCollectibleCategoryInfo(categoryIndex)
+    subcategoryListInfo.titleText = categoryName
+
+    -- Add the categories entries
+    for subcategoryIndex = 1, numSubCategories do
+        local subCategoryName, subNumCollectibles, subNumUnlockedCollectibles = GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex)
+        local formattedSubcategoryName = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, subCategoryName)
+
+        local icon
+        --[[
+        -- TODO: Show eye icon next to subcategories that have visible active collectibles
+        -- commented out for now for some design investigation
+        if COLLECTIONS_BOOK_SINGLETON.DoesCollectibleListHaveVisibleCollectible(self:GetCollectibleIds(categoryIndex, subcategoryIndex, subNumCollectibles)) then
+            icon = "EsoUI/Art/Inventory/inventory_icon_visible.dds"
+        end
+        --]]
+
+        local entryData = ZO_GamepadEntryData:New(formattedSubcategoryName, icon)
+        entryData.data = {
+            categoryIndex = categoryIndex,
+            subcategoryIndex = subcategoryIndex,
+            categoryName = formattedSubcategoryName,
+            numCollectibles = subNumCollectibles,
+            unlockedCollectibles = subNumUnlockedCollectibles,
+            icon = icon,
+        }
+        entryData:SetIconTintOnSelection(true)
+
+        subcategoryList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+    end
+
+    subcategoryList:Commit()
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(subcategoryListInfo.keybind)
+
+    self.currentCategoryIndex = categoryIndex
+end
+
+function ZO_GamepadCollectionsBook:BuildCollectionList(categoryIndex, subcategoryIndex)
+    local collectionListInfo = self.collectionList
+    local collectionList = collectionListInfo.list
+
+    collectionList:Clear()
+    collectionListInfo.titleText = nil
 
     local unlockedData = {}
     local lockedData = {}
 
-    local categoryName, numSubCategories, numCollectibles = GetCollectibleCategoryInfo(data.categoryIndex)
+    local categoryName, numSubCategories, numCollectibles = GetCollectibleCategoryInfo(categoryIndex)
 
     -- If there are subcategories, but the neutral category doesn't have anything in it, then choose the first subcategory
-    if not subCategoryIndex and numCollectibles == 0 and numSubCategories > 0 then
-        subCategoryIndex = 1
+    if not subcategoryIndex and numCollectibles == 0 and numSubCategories > 0 then
+        subcategoryIndex = 1
     end
 
-    local function BuildCollectibleDataEntry(categoryIndex, subCategoryIndex, collectibleIndex)
-        local entryData = self:BuildCollectibleData(categoryIndex, subCategoryIndex, collectibleIndex)
+    local function BuildCollectibleDataEntry(categoryIndex, subcategoryIndex, collectibleIndex)
+        local entryData = self:BuildCollectibleData(categoryIndex, subcategoryIndex, collectibleIndex)
         if not entryData.data.isPlaceholder then
             if entryData.data.unlocked then
                 table.insert(unlockedData, entryData)
@@ -481,69 +585,35 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(subCategoryIndex, buildSu
     end
 
     -- Looking at a subcategory
-    if subCategoryIndex then
-        local subCategoryName, subNumCollectibles = GetCollectibleSubCategoryInfo(data.categoryIndex, subCategoryIndex)
+    if subcategoryIndex then
+        local subCategoryName, subNumCollectibles = GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex)
         for collectibleIndex = 1, subNumCollectibles do
-            BuildCollectibleDataEntry(data.categoryIndex, subCategoryIndex, collectibleIndex)
+            BuildCollectibleDataEntry(categoryIndex, subcategoryIndex, collectibleIndex)
         end
+        collectionListInfo.titleText = subCategoryName
     else
         -- Add top level collectibles
         for collectibleIndex = 1, numCollectibles do
-            BuildCollectibleDataEntry(data.categoryIndex, nil, collectibleIndex)
+            BuildCollectibleDataEntry(categoryIndex, nil, collectibleIndex)
         end
 
         -- If there are any subcategories, then this is the general tab
         if numSubCategories == 0 then
-            self.collectionList.titleText = data.categoryName
+            collectionListInfo.titleText = categoryName
         end
     end
 
-    self:BuildListFromTable(self.collectionList.list, unlockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
-    self:BuildListFromTable(self.collectionList.list, lockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED))
+    self:BuildListFromTable(collectionList, unlockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
+    self:BuildListFromTable(collectionList, lockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED))
 
-    self.collectionList.list:Commit()
+    collectionList:Commit()
 
-    if buildSubCategoryTabs then
-        self.tabBarEntries = {}
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(collectionListInfo.keybind)
 
-        local function ShowNewList(subCategoryIndex)
-            if self.currentSubCategoryIndex ~= subCategoryIndex then
-                self:BuildCollectionList(subCategoryIndex)
-                self:HideCurrentList()
-                self:ShowList(self.collectionList, true)
-            end
-        end
+    self:RefreshTooltip(collectionList:GetTargetData())
 
-        if numSubCategories > 0 then
-            -- Do we need a general tab?
-            if numCollectibles > 0 then
-                local generalTabData = {
-                    text = GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL),
-                    callback = function()
-                        ShowNewList()
-                    end,
-                }
-                table.insert(self.tabBarEntries, generalTabData)
-            end
-
-            for i = 1, numSubCategories do
-                local subCategoryName = GetCollectibleSubCategoryInfo(data.categoryIndex, i)
-                local tabData = {
-                    text = subCategoryName,
-                    callback = function()
-                        ShowNewList(i)
-                    end,
-                }
-                table.insert(self.tabBarEntries, tabData)
-            end
-        end
-    end
-
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.collectionList.keybind)
-
-    self:RefreshTooltip(self.collectionList.list:GetTargetData())
-
-    self.currentSubCategoryIndex = subCategoryIndex
+    self.currentCategoryIndex = categoryIndex
+    self.currentSubcategoryIndex = subcategoryIndex
 
     self.updateList = unlockedData
 end
@@ -567,9 +637,10 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
     iconFile = unlocked and iconFile or lockedIconFile
     local backgroundFile = GetCollectibleGamepadBackgroundImage(collectibleId)
     local useable = IsCollectibleUsable(collectibleId)
-    local categoryBlocked = IsCollectibleCategoryBlocked(categoryType)
+    local collectibleBlocked = IsCollectibleBlocked(collectibleId)
     local notificationId = self:GetNotificationIdForCollectible(collectibleId)
     local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
+    local isNew = IsCollectibleNew(collectibleId)
 
     if visualLayerHidden and not active then
         visualLayerHidden = false
@@ -593,10 +664,11 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
         active = active,
         visualLayerHidden = visualLayerHidden,
         highestPriorityVisualLayerThatIsShowing = highestPriorityVisualLayerThatIsShowing,
-        blocked = categoryBlocked,
+        blocked = collectibleBlocked,
         isPlaceholder = isPlaceholder,
         notificationId = notificationId,
         hasNameBeenFormatted = false,
+        isNew = isNew,
     }
     entryData.isEquippedInCurrentCategory = active
 
@@ -606,7 +678,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
 
     entryData:InitializeCollectibleVisualData(entryData.data)
 
-    if categoryBlocked == true then
+    if collectibleBlocked then
         entryData:SetIconDesaturation(1)
     else
         entryData:SetIconDesaturation(0)
@@ -639,20 +711,29 @@ function ZO_GamepadCollectionsBook:OnSelectionChanged(list, selectedData, oldSel
         self.notificationIdToClear = nil
         self.clearNewStatusCallId = nil
 
-        if oldSelectedData and oldSelectedData.data.notificationId then
+        if oldSelectedData then
             if self.clearNewStatusOnSelectionChanged then
-                RemoveCollectibleNotification(oldSelectedData.data.notificationId)
-                oldSelectedData.data.notificationId = nil
+                local oldData = oldSelectedData.data
+                if oldData.notificationId ~= nil then
+                    RemoveCollectibleNotification(oldData.notificationId)
+                    oldData.notificationId = nil
+                end
+                ClearCollectibleNewStatus(oldData.collectibleId)
+                oldData.isNew = false
             end
         end
 
         self.clearNewStatusOnSelectionChanged = false
 
-        if selectedData and selectedData.data.notificationId then
-            self.notificationIdToClear = selectedData.data.notificationId
-            self.clearNewStatusCallId = zo_callLater(self.trySetClearNewFlagCallback, TIME_NEW_PERSISTS_WHILE_SELECTED_MS)
+        if selectedData then
+            local newData = selectedData.data
+            self.notificationIdToClear = newData.notificationId
+            if newData.isNew or self.notificationIdToClear ~= nil then
+                self.clearNewStatusCallId = zo_callLater(self.trySetClearNewFlagCallback, TIME_NEW_PERSISTS_WHILE_SELECTED_MS)
+            end
         end
     end
+
     if self.currentList then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentList.keybind)
     end
@@ -666,7 +747,6 @@ end
 
 function ZO_GamepadCollectionsBook:RefreshTooltip(entryData)
     if entryData and entryData.data then
-        local categoryData = self.collectionList.data
         local collectibleData = entryData.data
         if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
             local infoPanel = self.infoPanelControl
@@ -703,12 +783,12 @@ function ZO_GamepadCollectionsBook:RefreshTooltip(entryData)
         else
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
             GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_LEFT_TOOLTIP, true)
-            local categoryName = categoryData.name
 
+            local categoryName = collectibleData.categoryName
             local timeRemainingS = entryData:GetCooldownTimeRemainingMs() / 1000
-            local usageBlockReason = collectibleData.blocked and GetCollectibleCategoryBlockReason(collectibleData.categoryType) or nil
-
-            GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_LEFT_TOOLTIP, categoryName, collectibleData.name, collectibleData.nickname, collectibleData.unlockState, collectibleData.purchasable, collectibleData.description, collectibleData.hint, collectibleData.isPlaceholder, collectibleData.highestPriorityVisualLayerThatIsShowing, collectibleData.visualLayerHidden, timeRemainingS, usageBlockReason)
+            local SHOW_VISUAL_LAYER_INFO = true
+            local SHOW_BLOCK_REASON = true
+            GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_LEFT_TOOLTIP, collectibleData.collectibleId, categoryName, collectibleData.name, collectibleData.nickname, collectibleData.purchasable, collectibleData.description, collectibleData.hint, collectibleData.isPlaceholder, SHOW_VISUAL_LAYER_INFO, timeRemainingS, SHOW_BLOCK_REASON)
         end
     else
         SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
@@ -721,6 +801,7 @@ function ZO_GamepadCollectionsBook:BrowseToCollectible(collectibleId, categoryIn
     self.browseToCollectibleInfo = 
     {
         categoryIndex = categoryIndex,
+        subcategoryIndex = subcategoryIndex,
         collectibleId = collectibleId,
     }
 
@@ -945,6 +1026,14 @@ end
 
 function ZO_GamepadCollectionsBook:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
     return NOTIFICATIONS_PROVIDER:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
+end
+
+function ZO_GamepadCollectionsBook:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
+    return COLLECTIONS_BOOK_SINGLETON.DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
+end
+
+function ZO_GamepadCollectionsBook:HasAnyNewCollectibles()
+    return COLLECTIONS_BOOK_SINGLETON.HasAnyNewCollectibles()
 end
 
 function ZO_GamepadCollectionsBook:GetNotificationIdForCollectible(collectibleId)

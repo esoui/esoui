@@ -383,7 +383,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                             count = count + 1
                         end
                         
-                        self.currentDropdown:SetSelectedItem(self.selectedGuildName)
+                        self.currentDropdown:SetSelectedItemText(self.selectedGuildName)
 
                         control.dropdown:UpdateItems()
 

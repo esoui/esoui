@@ -48,6 +48,7 @@ function HelpCustomerService_Keyboard:InitializeHelpDialogs()
 	ZO_Dialogs_RegisterCustomDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG",
 	{
 		showLoadingIcon = true,
+		modal = false,
 		title =
 		{
 			text = GetString(SI_CUSTOMER_SERVICE_SUBMITTING_TICKET),

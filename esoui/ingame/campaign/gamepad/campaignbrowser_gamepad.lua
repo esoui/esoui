@@ -362,28 +362,28 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
             -- Data 1
             headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER)
             headerData.data1Text = function(control)
-                                        local _, _, numHomeHeld, numTotalHome = GetAvAKeepScore(self.campaignId, GetUnitAlliance("player"))
+                                        local _, _, numHomeHeld, numTotalHome = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
                                         return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER_INFO), numHomeHeld, numTotalHome)
             end
 
             -- Data 2
             headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_ENEMY_KEEPS_HEADER)
             headerData.data2Text = function(control)
-                                        local _, enemyKeepsHeld = GetAvAKeepScore(self.campaignId, GetUnitAlliance("player"))
+                                        local _, enemyKeepsHeld = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
                                         return enemyKeepsHeld
             end
 
             -- Data 3
             headerData.data3HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_DEFENSIVE_SCROLLS_HEADER)
             headerData.data3Text = function(control)
-                                        local _, enemyScrollsHeld = GetAvAArtifactScore(self.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
+                                        local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
                                         return enemyScrollsHeld
             end
 
             -- Data 4
             headerData.data4HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_OFFENSIVE_SCROLLS_HEADER)
             headerData.data4Text = function(control)
-                                        local _, enemyScrollsHeld = GetAvAArtifactScore(self.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
+                                        local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
                                         return enemyScrollsHeld
             end
 

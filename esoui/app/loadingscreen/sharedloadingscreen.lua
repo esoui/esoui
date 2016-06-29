@@ -127,6 +127,7 @@ function LoadingScreen_Base:QueueShow(...)
     if self:IsPreferredScreen() then
         if not self.hasShownFirstTip then
             self.hasShownFirstTip = true
+            self.lastUpdate = GetFrameTimeMilliseconds()
             self:Show(...)
         else
             table.insert(self.pendingLoadingTips, {...})
@@ -135,6 +136,7 @@ function LoadingScreen_Base:QueueShow(...)
 end
 
 function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, instanceType)
+    self.timeShowingTipMS = 0
     self.loadScreenTextureLoaded = false
     self:SizeLoadingTexture()
 
@@ -195,7 +197,6 @@ function LoadingScreen_Base:Hide()
         self.spinnerFadeAnimation:PlayBackward()
     end
 
-    self.timeShowingTipMS = 0
     if #self.pendingLoadingTips > 0 then
         -- App doesn't load libraries, so we don't have ZO_ClearTable, and it seems like a huge waste to bring it all over for this one call
         for index in pairs(self.pendingLoadingTips) do
@@ -208,8 +209,6 @@ end
 function LoadingScreen_Base:UpdateLoadingTip(delta)
     self.timeShowingTipMS = self.timeShowingTipMS + delta
     if #self.pendingLoadingTips > 0 and self.timeShowingTipMS > MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS then
-        self.timeShowingTipMS = 0
-
         local oldestPendingTip = table.remove(self.pendingLoadingTips, 1)
         self:Show(unpack(oldestPendingTip))
     end

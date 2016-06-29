@@ -71,9 +71,9 @@ function LoginManager_Keyboard:AttemptLinkedLogin()
     PregameBeginLinkedLogin()
 end
 
-function LoginManager_Keyboard:AttemptCreateAccount(email, ageValid, emailSignup, country)
+function LoginManager_Keyboard:AttemptCreateAccount(email, ageValid, emailSignup, country, requestedAccountName)
     ZO_Dialogs_ShowDialog("CREATING_ACCOUNT_KEYBOARD")
-    PregameSetAccountCreationInfo(email, ageValid, emailSignup, country)
+    PregameSetAccountCreationInfo(email, ageValid, emailSignup, country, requestedAccountName)
     PregameCreateAccount()
 end
 

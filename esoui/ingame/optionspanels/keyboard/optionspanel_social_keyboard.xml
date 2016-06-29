@@ -72,9 +72,6 @@
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
-            <OnShow>
-                ZO_OptionsPanel_Social_TextSizeOnShow(self)
-            </OnShow>
         </Control>
 
         <Control name="Options_Social_MinAlpha" inherits="ZO_Options_Slider">
@@ -83,9 +80,6 @@
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
-            <OnShow>
-                ZO_OptionsPanel_Social_MinAlphaOnShow(self)
-            </OnShow>
         </Control>
         
         <Control name="Options_Social_UseProfanityFilter" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
@@ -205,8 +199,16 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_NPC" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Zone_Japanese" inherits="Options_Social_ColorOption">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_German" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Social_ChatColor_NPC" inherits="Options_Social_ColorOption">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_Japanese" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC)
                 ZO_OptionsWindow_InitializeControl(self)

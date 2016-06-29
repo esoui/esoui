@@ -133,6 +133,14 @@ function ZO_MarketProductBase:GetProductType()
     return GetMarketProductType(self.marketProductId)
 end
 
+function ZO_MarketProductBase:GetHidesChildProducts()
+    if self:IsBundle() then
+        return GetMarketProductBundleHidesChildProducts(self:GetId())
+    end
+
+    return false
+end
+
 function ZO_MarketProductBase:GetTimeLeftInSeconds()
     return GetMarketProductTimeLeftInSeconds(self.marketProductId)
 end

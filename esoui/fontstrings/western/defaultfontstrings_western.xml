@@ -13,11 +13,22 @@
     <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/TrajanPro-Regular.otf" />
     
     <!-- Sizes -->
+    <String name="KB_8" value="8"/>
+    <String name="KB_9" value="9"/>
+    <String name="KB_10" value="10"/>
+    <String name="KB_11" value="11"/>
+    <String name="KB_12" value="12"/>
     <String name="KB_13" value="13"/>
+    <String name="KB_14" value="14"/>
+    <String name="KB_15" value="15"/>
     <String name="KB_16" value="16"/>
+    <String name="KB_17" value="17"/>
     <String name="KB_18" value="18"/>
+    <String name="KB_19" value="19"/>
     <String name="KB_20" value="20"/>
+    <String name="KB_21" value="21"/>
     <String name="KB_22" value="22"/>
+    <String name="KB_23" value="23"/>
     <String name="KB_24" value="24"/>
     <String name="KB_25" value="25"/>
     <String name="KB_26" value="26"/>

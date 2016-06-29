@@ -1,0 +1,63 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_DyeStamp_Confirmation_Keyboard_TopLevel" mouseEnabled="true" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_DyeStamp_Confirmation_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RotationArea" mouseEnabled="true" level="1">
+                    <!-- Position this control so it's roughly centered over the player character -->
+                    <Anchor point="TOPLEFT" offsetX="592" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-620" offsetY="-85" />
+
+                    <OnMouseEnter>
+                        self.mouseInside = true
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self.mouseInside = false
+                    </OnMouseExit>
+
+                    <OnMouseDown>
+                        if button == MOUSE_BUTTON_INDEX_LEFT and self.canRotate then
+                            self.isRotating = true
+                            BeginItemPreviewSpin()
+                        end
+                    </OnMouseDown>
+
+                    <OnMouseUp>
+                        if button == MOUSE_BUTTON_INDEX_LEFT then
+                            if self.isRotating then
+                                self.isRotating = false
+                                EndItemPreviewSpin()
+                            end
+                        end
+                    </OnMouseUp>
+
+                    <OnEffectivelyHidden>
+                        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+                        if self.isRotating then
+                            self.isRotating = false
+                            EndItemPreviewSpin()
+                        end
+                    </OnEffectivelyHidden>
+
+                    <OnUpdate>
+                        if self.mouseInside and CanSpinPreviewCharacter() then
+                            self.canRotate = true
+                            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
+                        else
+                            if self.canRotate then
+                                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+                                self.canRotate = false
+                            end
+                        end
+                    </OnUpdate>
+                </Control>
+            </Controls>
+
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

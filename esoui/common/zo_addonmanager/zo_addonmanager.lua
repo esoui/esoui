@@ -318,7 +318,7 @@ function ZO_AddOnManager:BuildCharacterDropdown()
         local all = GetString(SI_ADDON_MANAGER_CHARACTER_SELECT_ALL)
         local entry = self.characterDropdown:CreateItemEntry(all, OnCharacterChanged)
         self.characterDropdown:AddItem(entry)
-        self.characterDropdown:SetSelectedItem(all)
+        self.characterDropdown:SetSelectedItemText(all)
 
         self.selectedCharacter = nil
         self.isAllFilterSelected = true

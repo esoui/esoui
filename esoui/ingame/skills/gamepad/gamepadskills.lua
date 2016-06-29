@@ -560,7 +560,7 @@ function ZO_GamepadSkills:InitializeBuildPlanner()
     self.buildPlannerList:SetOnSelectedDataChangedCallback(RefreshSelectedTooltip)
 
     local X_OFFSET = 30
-    local Y_OFFSET = 0
+    local Y_OFFSET = 15
     buildPlannerControl:ClearAnchors()
     buildPlannerControl:SetAnchor(TOPLEFT, self.header, BOTTOMLEFT, -X_OFFSET, Y_OFFSET)
     buildPlannerControl:SetAnchor(BOTTOMRIGHT, buildPlannerControl:GetParent(), TOPRIGHT, X_OFFSET, ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET)
@@ -619,7 +619,7 @@ function ZO_GamepadSkills:InitializeEvents()
 		self:MarkForRefreshVisible()
 	end
 
-    local function OnActiveWeaponPairChanged(eventCode, activeWeaponPair, isActiveWeaponPairLocked)
+    local function OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
         if not self.control:IsHidden() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)

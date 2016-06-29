@@ -217,7 +217,7 @@ function ZO_CreateAccount_Gamepad:AddCheckbox(text, checked, callback)
     option.selectedCallback = ZO_GamepadCheckBoxTemplate_OnClicked
     option:SetFontScaleOnSelection(true)
     option.list = self.optionsList
-    self.optionsList:AddEntry("ZO_CheckBoxTemplate_Gamepad", option)
+    self.optionsList:AddEntry("ZO_CheckBoxTemplate_Pregame_Gamepad", option)
 end
 
 function ZO_CreateAccount_Gamepad:AddButton(text, callback)
@@ -244,7 +244,7 @@ function ZO_CreateAccount_Gamepad:SetupOptionsList()
     self.optionsList:SetAlignToScreenCenter(true)
 
     self.optionsList:AddDataTemplateWithHeader("ZO_PregameGamepadTextEditTemplate", ZO_PregameGamepadTextEditTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_PregameGamepadTextEditHeaderTemplate")
-    self.optionsList:AddDataTemplate("ZO_CheckBoxTemplate_Gamepad", ZO_GamepadCheckBoxListEntryTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.optionsList:AddDataTemplate("ZO_CheckBoxTemplate_Pregame_Gamepad", ZO_GamepadCheckBoxListEntryTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.optionsList:AddDataTemplate("ZO_PregameGamepadButtonWithTextTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     local function SetupCountrySelector(control, data, selected, reselectingDuringRebuild, enabled, active)

@@ -5,7 +5,7 @@
         </Control>
 
         <Control name="ZO_PlayerAttribute_Gamepad_Template" virtual="true">
-            <Anchor point="BOTTOM" offsetY="-154"/>
+            <Anchor point="BOTTOM" offsetY="-105"/>
         </Control>
       
         <Texture name="ZO_PlayerAttributeMagickaWarnerTexture_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_dynamic_magickaGlow.dds" virtual="true" />

@@ -129,7 +129,7 @@
                                                     <Anchor point="TOPRIGHT" relativeTo="BOTTOMRIGHT" />
                                                 </Label>
 
-                                                <Label name="$(parent)Instructions" font="ZoFontGamepad42NoShadow"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                                                <Label name="$(parent)Instructions" font="ZoFontGamepadCondensed42"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
                                                     <Anchor point="TOPLEFT" relativeTo="BOTTOMLEFT" offsetY="70" />
                                                     <Anchor point="TOPRIGHT" relativeTo="BOTTOMRIGHT" offsetY="70" />
                                                 </Label>

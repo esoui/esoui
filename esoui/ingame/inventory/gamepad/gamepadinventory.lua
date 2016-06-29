@@ -108,19 +108,20 @@ function ZO_GamepadInventory:OnDeferredInitialize()
         if ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
             self:OnUpdate() --don't wait for next update loop in case item was destroyed and scene/keybinds need immediate update
         else
-            if currentList == self.categoryList then
-            self:RefreshCategoryList()
-            elseif currentList == self.itemList then
-                if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
-                    KEYBIND_STRIP:UpdateKeybindButton(self.quickslotKeybindStripDescriptor)
-                elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
-                    KEYBIND_STRIP:UpdateKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
+            if self.scene:IsShowing() then
+                if currentList == self.categoryList then
+                    self:RefreshCategoryList()
+                elseif currentList == self.itemList then
+                    if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
+                        KEYBIND_STRIP:UpdateKeybindButton(self.quickslotKeybindStripDescriptor)
+                    elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
+                        KEYBIND_STRIP:UpdateKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
+                    end
                 end
+                RefreshSelectedData() --dialog will refresh selected when it hides, so only do it if it's not showing
+                self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
             end
-            RefreshSelectedData() --dialog will refresh selected when it hides, so only do it if it's not showing
         end
-
-        self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
     end
 
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", OnInventoryUpdated)
@@ -240,53 +241,58 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor)
     GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
     GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
 
-    if listDescriptor == INVENTORY_CATEGORY_LIST then
-        self:OnInventoryShown()
-        self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
+    -- if our scene isn't showing we shouldn't actually switch the lists
+    -- we'll rely on the scene showing to set the list
+    if self.scene:IsShowing() then
+        if listDescriptor == INVENTORY_CATEGORY_LIST then
+            self:OnInventoryShown()
 
-        self:RefreshCategoryList()
-        self:SetCurrentList(self.categoryList)
+            self:RefreshCategoryList()
+            self:SetCurrentList(self.categoryList)
 
-        self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.categoryList:GetTargetData()))
-        self.actionMode = CATEGORY_ITEM_ACTION_MODE
-        self:RefreshHeader()
-        self:ActivateHeader()
-    elseif listDescriptor == INVENTORY_ITEM_LIST then
-        self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
+            self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
 
-        self:RefreshItemList()
-        self:SetCurrentList(self.itemList)
+            self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.categoryList:GetTargetData()))
+            self.actionMode = CATEGORY_ITEM_ACTION_MODE
+            self:RefreshHeader()
+            self:ActivateHeader()
+        elseif listDescriptor == INVENTORY_ITEM_LIST then
+            self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
 
-        if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
-            KEYBIND_STRIP:AddKeybindButton(self.quickslotKeybindStripDescriptor)
-            TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)
-        elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
-            KEYBIND_STRIP:AddKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
+            self:RefreshItemList()
+            self:SetCurrentList(self.itemList)
+
+            if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
+                KEYBIND_STRIP:AddKeybindButton(self.quickslotKeybindStripDescriptor)
+                TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)
+            elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
+                KEYBIND_STRIP:AddKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
+            end
+
+            self:SetSelectedItemUniqueId(self.itemList:GetTargetData())
+            self.actionMode = ITEM_LIST_ACTION_MODE
+            self:RefreshItemActions()
+            self:UpdateRightTooltip()
+            self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
+            self:DeactivateHeader()
+        elseif listDescriptor == INVENTORY_CRAFT_BAG_LIST then
+            self:SetActiveKeybinds(self.craftBagKeybindStripDescriptor)
+
+            self:RefreshCraftBagList()
+            self:SetCurrentList(self.craftBagList)
+
+            self:SetSelectedItemUniqueId(self.craftBagList:GetTargetData())
+            self.actionMode = CRAFT_BAG_ACTION_MODE
+            self:RefreshItemActions()
+            self:RefreshHeader()
+            self:ActivateHeader()
+            self:LayoutCraftBagTooltip(GAMEPAD_RIGHT_TOOLTIP)
+
+            TriggerTutorial(TUTORIAL_TRIGGER_CRAFT_BAG_OPENED)
         end
 
-        self:SetSelectedItemUniqueId(self.itemList:GetTargetData())
-        self.actionMode = ITEM_LIST_ACTION_MODE
-        self:RefreshItemActions()
-        self:UpdateRightTooltip()
-        self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
-        self:DeactivateHeader()
-    elseif listDescriptor == INVENTORY_CRAFT_BAG_LIST then
-        self:SetActiveKeybinds(self.craftBagKeybindStripDescriptor)
-
-        self:RefreshCraftBagList()
-        self:SetCurrentList(self.craftBagList)
-
-        self:SetSelectedItemUniqueId(self.craftBagList:GetTargetData())
-        self.actionMode = CRAFT_BAG_ACTION_MODE
-        self:RefreshItemActions()
-        self:RefreshHeader()
-        self:ActivateHeader()
-        self:LayoutCraftBagTooltip(GAMEPAD_RIGHT_TOOLTIP)
-
-        TriggerTutorial(TUTORIAL_TRIGGER_CRAFT_BAG_OPENED)
+        self:RefreshActiveKeybinds()
     end
-
-    self:RefreshActiveKeybinds()
 end
 
 -------------
@@ -1148,10 +1154,10 @@ function ZO_GamepadInventory:LayoutCraftBagTooltip()
     local title
     local description
     if HasCraftBagAccess() then
-        title = GetString(SI_CRAFT_BAG_STATUS_ESO_PLUS_UNLOCKED)
+        title = GetString(SI_ESO_PLUS_STATUS_UNLOCKED)
         description = GetString(SI_CRAFT_BAG_STATUS_ESO_PLUS_UNLOCKED_DESCRIPTION)
     else
-        title =  GetString(SI_CRAFT_BAG_STATUS_LOCKED)
+        title =  GetString(SI_ESO_PLUS_STATUS_LOCKED)
         description = GetString(SI_CRAFT_BAG_STATUS_LOCKED_DESCRIPTION)
     end
 

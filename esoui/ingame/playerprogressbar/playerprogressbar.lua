@@ -811,7 +811,7 @@ function PlayerProgressBar:SetLevelLabelText(text)
     local barTypeInfo = self:GetBarTypeInfo()
     if barTypeInfo and barTypeInfo.barTypeClass == PPB_CLASS_CP then
         self.championPointsLabel:SetText(text)
-        self.levelLabel:SetText(GetUnitLevel("player"))
+        self.levelLabel:SetText("")
     else
         self.levelLabel:SetText(text)
     end

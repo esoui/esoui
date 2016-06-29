@@ -26,7 +26,7 @@ end
 
 function ZO_LootHistory_Gamepad:InitializeFadingControlBuffer(control)
     local HORIZ_OFFSET = 0
-    local VERTICAL_OFFSET = -160
+    local VERTICAL_OFFSET = -120
     local anchor = ZO_Anchor:New(BOTTOMLEFT, GuiRoot, BOTTOMLEFT, HORIZ_OFFSET, VERTICAL_OFFSET)
     local MAX_ENTRIES = 5
     local CONTAINER_SHOW_TIME_MS = self:GetContainerShowTime()
@@ -43,26 +43,22 @@ function ZO_LootHistory_Gamepad:SetEntryTemplate()
     self.entryTemplate = GAMEPAD_LOOT_HISTORY_ENTRY_TEMPLATE
 end
 
-local function IsLootFromInventory()
-    return SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
+function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
+    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+    return currentSceneName == "gamepadInteract" or currentSceneName == "gamepad_inventory_root" 
+           or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
 end
 
 function ZO_LootHistory_Gamepad:OnLootReceived(...)
-    if not IsLootFromInventory() then
-        ZO_LootHistory_Shared.OnLootReceived(self, ...)
-    end
+    ZO_LootHistory_Shared.OnLootReceived(self, ...)
 end
 
 function ZO_LootHistory_Gamepad:OnGoldUpdate(...)
-    if not IsLootFromInventory() then
-        ZO_LootHistory_Shared.OnGoldUpdate(self, ...)
-    end
+    ZO_LootHistory_Shared.OnGoldUpdate(self, ...)
 end
 
 function ZO_LootHistory_Gamepad:OnTelvarStoneUpdate(...)
-    if not IsLootFromInventory() then
-        ZO_LootHistory_Shared.OnTelvarStoneUpdate(self, ...)
-    end
+    ZO_LootHistory_Shared.OnTelvarStoneUpdate(self, ...)
 end
 
 function ZO_LootHistory_Gamepad_OnInitialized(control)

@@ -80,3 +80,17 @@ VETERAN_POINTS_GAIN = EVENT_EXPERIENCE_GAIN
 VETERAN_POINTS_UPDATE = CHAMPION_POINT_UPDATE
 EVENT_FRIEND_CHARACTER_VETERAN_RANK_CHANGED = EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED
 EVENT_GUILD_MEMBER_CHARACTER_VETERAN_RANK_CHANGED = EVENT_GUILD_MEMBER_CHARACTER_CHAMPION_POINTS_CHANGED
+
+--Traits Changed
+ITEM_TRAIT_TYPE_ARMOR_EXPLORATION = ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS
+ITEM_TRAIT_TYPE_WEAPON_WEIGHTED = ITEM_TRAIT_TYPE_WEAPON_DECISIVE
+
+--Dyeing Changed
+SetPendingEquippedItemDye = function(equipSlot, primary, secondary, accent)
+                                local dyeableSlot = GetEquipSlotFromDyeableSlot(equipSlot)
+                                SetPendingSlotDyes(dyeableSlot, primary, secondary, accent)
+                            end
+GetPendingEquippedItemDye = function(equipSlot)
+                                local dyeableSlot = GetEquipSlotFromDyeableSlot(equipSlot)
+                                return GetPendingSlotDyes(dyeableSlot)
+                            end

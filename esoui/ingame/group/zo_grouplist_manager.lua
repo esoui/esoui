@@ -101,7 +101,7 @@ function ZO_GroupList_Manager:BuildMasterList()
                 formattedZone = zoneName,
                 class = GetUnitClassId(unitTag),
                 level = GetUnitLevel(unitTag),
-                championPoints = GetUnitChampionPoints(unitTag),
+                championPoints = GetUnitEffectiveChampionPoints(unitTag),
                 leader = IsUnitGroupLeader(unitTag),
                 online = unitOnline,
                 isPlayer = AreUnitsEqual(unitTag, "player"),

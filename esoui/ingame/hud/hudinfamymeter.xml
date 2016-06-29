@@ -74,7 +74,7 @@
 
         <Control name="ZO_HUDInfamyMeter_GamepadTemplate" virtual="true" >
             <Dimensions x="INFAMY_METER_WIDTH" y="INFAMY_METER_HEIGHT" />
-            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Anchor point="BOTTOMLEFT" offsetX="5" offsetY="-5" />
             <Controls>
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/HUD/Gamepad/gp_infamy_meter-back-grey_px_per.dds" level="1">
                     <Dimensions x="INFAMY_METER_HEIGHT" y="INFAMY_METER_HEIGHT" />

@@ -215,16 +215,12 @@
                     <Anchor point="BOTTOMRIGHT" />
                 </Control>
 
-                <Control name="$(parent)NoGroupRow" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)List"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List"/>
-                    <Dimensions y="30"/>
+                <Control name="$(parent)NoGroupRow" inherits="ZO_SortFilterListEmptyRow_Keyboard" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" />
+                    
                     <Controls>
-                        <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
-                        
-                        <Label name="$(parent)Message" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GROUP_LIST_PANEL_NO_GROUP_MESSAGE">
-                            <Anchor point="CENTER"/>
-                        </Label>
+                        <Label name="$(parent)Message" override="true" text="SI_GROUP_LIST_PANEL_NO_GROUP_MESSAGE" />
                     </Controls>
                 </Control>
 

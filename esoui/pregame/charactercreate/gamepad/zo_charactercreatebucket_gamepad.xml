@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>
+        
+        <Control name="ZO_CategoryBucket_Gamepad" virtual="true" hidden="true">
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </Control>
+        
+    </Controls>
+</GuiXml>

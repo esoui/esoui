@@ -102,6 +102,7 @@ SOUNDS = {
     CC_ALLIANCE                     = "Click_AllianceButton",
     CC_RANDOMIZE                    = "Click_RandomizeButton",
     CC_CREATE                       = "Click_CreateButton",
+    CC_SAVE                         = "Click_SaveButton",
 
     CC_LOCK_VALUE                   = "Lock_Value",
     CC_UNLOCK_VALUE                 = "Unlock_Value",

@@ -44,7 +44,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_GamepadFriendsList" inherits="ZO_AnchoredToQuadrant123Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+        <TopLevelControl name="ZO_GamepadFriendsList" inherits="ZO_AnchoredToQuadrant_1_2_3_Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
             <OnInitialized>
                 ZO_FriendsList_Gamepad_OnInitialized(self)
             </OnInitialized>

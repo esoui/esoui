@@ -41,7 +41,7 @@ function GuildSelector:Initialize(control)
 
                                 if forcePreviousGuildNameInSelector then
                                     -- Force the combo box to not change guild text until the callback is adequately addressed
-                                    self.comboBox:SetSelectedItem(self.currentGuildText)
+                                    self.comboBox:SetSelectedItemText(self.currentGuildText)
                                 end
                             end
 
@@ -130,10 +130,10 @@ function GuildSelector:InitializeGuilds()
     self.comboBox:AddItem(entry)
 
     if(numGuilds == 0) then
-        self.comboBox:SetSelectedItem(CREATE_WINDOW_TITLE)
+        self.comboBox:SetSelectedItemText(CREATE_WINDOW_TITLE)
         self.OnGuildChanged(nil, CREATE_WINDOW_TITLE, entry)
     else
-        self.comboBox:SetSelectedItem(selectedEntry.selectedText)
+        self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
         self.OnGuildChanged(nil, selectedEntryText, selectedEntry)
     end
 end
@@ -152,8 +152,8 @@ function GuildSelector:SelectGuild(selectedEntry)
     if(selectedEntry) then
         self.currentGuildText = selectedEntry.selectedText
         self.guildId = selectedEntry.guildId
-        self.comboBox:SetSelectedItem(selectedEntry.selectedText)
-		self:SetGuildIcon(selectedEntry.guildId)
+        self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
+        self:SetGuildIcon(selectedEntry.guildId)
 
         if(self.guildId) then       
             if(SCENE_MANAGER:IsShowing("guildCreate")) then

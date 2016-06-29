@@ -1,4 +1,4 @@
-<GuiXml>    
+<GuiXml>
     <Controls>
         <Control name="ZO_CharacterCreateEntry_Gamepad" resizeToFitDescendents="true" virtual="true">
         </Control>
@@ -7,29 +7,10 @@
 
         <Label name="CCLabel_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
-        <Control name="CCCategoryBucket_Gamepad" virtual="true" hidden="true">
-            <Controls>
-                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
-                    <Anchor point="TOPLEFT"/>
-                    <Anchor point="BOTTOMRIGHT"/>
-                </Control>
-            </Controls>
-        </Control>
-
         <Control name="CCSelectorHighlight" excludeFromResizeToFitExtents="true" hidden="true">
             <Dimensions x="64" y="64" />
             <Controls>
                 <Backdrop name="$(parent)Box" inherits="ZO_GamepadWhiteSelectorHighlight" level="2">
-                    <Anchor point="TOP"/>
-                    <Dimensions x="64" y="64" />
-                </Backdrop>
-            </Controls>
-        </Control>
-
-        <Control name="CCSelected" excludeFromResizeToFitExtents="true" hidden="true" virtual="true">
-            <Dimensions x="64" y="64" />
-            <Controls>
-                <Backdrop name="$(parent)Box" inherits="ZO_GamepadGreySelectorHighlight" level="1">
                     <Anchor point="TOP"/>
                     <Dimensions x="64" y="64" />
                 </Backdrop>
@@ -66,10 +47,6 @@
 
                 <Control name="$(parent)3" inherits="RaceSelectorButton_Gamepad">
                     <Anchor point="CENTER" relativeTo="$(parent)2" relativePoint="CENTER" offsetY="100" />
-                </Control>
-
-                <Control name="$(parent)4" inherits="RaceSelectorButton_Gamepad" hidden="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)3" relativePoint="CENTER" offsetY="100" />
                 </Control>
             </Controls>
         </Control>
@@ -127,90 +104,6 @@
             </OnInitialized>
         </Button>
 
-        <Control name="CCSlider_Gamepad" virtual="true" resizeToFitDescendents="true">
-            <OnInitialized>
-                ZO_CharacterCreate_Gamepad_CreateSlider(self, "slider")
-            </OnInitialized>
-
-            <Controls>
-                <Label name="$(parent)Name" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="FF79797A">
-                    <Anchor point="TOP" />
-                </Label>
-
-                <Slider name="$(parent)Slider" inherits="ZO_GamepadSlider">
-                    <Dimensions x="300" y="18" />
-                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="TOP" offsetX="0" offsetY="45" />
-                    <Limits min="0" max="1" />
-
-                    <OnValueChanged>
-                        ZO_CharacterCreate_Gamepad_SetSlider(self, value)
-                    </OnValueChanged>
-                </Slider>
-
-                <Button name="$(parent)Padlock" inherits="CCPadlock_Gamepad">
-                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="5" />
-                </Button>
-            </Controls>
-        </Control>
-
-        <Control name="CCAppearanceSlider_Gamepad" inherits="CCSlider_Gamepad" resizeToFitDescendents="true" virtual="true">
-            <OnInitialized>
-                ZO_CharacterCreate_Gamepad_CreateSlider(self, "icon")
-            </OnInitialized>
-        </Control>
-
-        <Control name="CCVoiceSlider_Gamepad" inherits="CCAppearanceSlider_Gamepad" resizeToFitDescendents="true" virtual="true">
-            <OnInitialized>
-                ZO_CharacterCreate_Gamepad_CreateSlider(self, "named")
-            </OnInitialized>
-        </Control>
-
-        <Control name="CCGenderSlider_Gamepad" inherits="CCSlider_Gamepad" resizeToFitDescendents="true" virtual="true">
-            <OnInitialized>
-                ZO_CharacterCreate_Gamepad_CreateSlider(self, "gender")
-            </OnInitialized>
-        </Control>
-
-        <Control name="CCTriangle_Gamepad" virtual="true">
-            <Anchor point="TOP" />
-            <Controls>
-                <Texture name="$(parent)BG" textureFile="EsoUI/Art/CharacterCreate/Gamepad/selectorTriangle.dds">
-                    <Dimensions x="333" y="333" />
-                    <Anchor point="TOP" />
-                </Texture>
-
-                <Control name="$(parent)Picker" inherits="ZO_TrianglePickerTemplate">
-                    <Dimensions x="272" y="229" />
-                    <Anchor point="TOP" offsetY="55"/>
-
-                    <Controls>
-                        <Button name="$(parent)Thumb" tier="MEDIUM" >
-                            <Dimensions x="32" y="32" />
-                            <Textures
-                                normal="EsoUI/Art/CharacterCreate/Gamepad/triangle_selector_pip.dds"
-                            />
-                        </Button>
-                    </Controls>
-                </Control>
-
-                <Button name="$(parent)Padlock" inherits="CCPadlock_Gamepad">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Picker" relativePoint="TOPRIGHT" offsetX="5" offsetY="-23" />
-                </Button>
-
-                <Label name="$(parent)LabelTop" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="BOTTOM" relativeTo="$(parent)Picker" relativePoint="TOP" offsetY="-5" />
-                </Label>
-
-                <Label name="$(parent)LabelLeft" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMLEFT" offsetY="7" />
-                </Label>
-
-                <Label name="$(parent)LabelRight" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMRIGHT" offsetY="7" />
-                </Label>
-            </Controls>
-        </Control>
-
         <Control name="ZO_PaperdollManipulation_Gamepad" inherits="ZO_PaperdollManipulation_Shared" virtual="true">
             <OnInitialized>
                 ZO_PaperdollManipulation_Gamepad_Initialize(self)
@@ -240,10 +133,6 @@
 
                 <Control name="$(parent)Container" inherits="ZO_AnchoredToQuadrant1Background">
 
-                    <OnUpdate>
-                        ZO_CharacterCreate_GamepadContainer_OnUpdate(self)
-                    </OnUpdate>
-
                     <Controls>
                         <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
 
@@ -260,8 +149,7 @@
 
                         <Control name="$(parent)LoreInfo" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
                             <Controls>
-                                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" level="0">
-                                </Control>
+                                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" level="0" />
 
                                 <Texture name="$(parent)AllianceIcon" textureFile="EsoUI/Art/CharacterCreate/Gamepad/CharacterCreate_altmericon_default.dds" tier="MEDIUM">
                                     <Dimensions x="64" y="64" />
@@ -342,7 +230,7 @@
                             <Anchor point="TOP" />
                         </Label>
 
-                        <Label name="$(parent)SelectionName" inherits="CCLabel_Gamepad" font="ZoFontGamepad27"  horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="FF79797A">
+                        <Label name="$(parent)SelectionName" inherits="CCLabel_Gamepad" font="ZoFontGamepad27" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="FF79797A">
                             <Dimensions x="360" />
                             <Anchor point="TOP" offsetY="53" />
                         </Label>
@@ -358,6 +246,10 @@
                         <Control name="$(parent)Column3" inherits="RaceSelector_Gamepad">
                             <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="120" offsetY="18" />
                         </Control>
+                        
+                        <Button name="$(parent)SingleButton" inherits="RaceSelectorButton_Gamepad">
+                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" />
+                        </Button>
                     </Controls>
                 </Control>
 
@@ -390,20 +282,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
-                <Control name="$(parent)PhysiqueSelection" inherits="CCTriangle_Gamepad">
-                    <OnInitialized>
-                        ZO_CharacterCreate_Gamepad_CreateTriangle(self, SetPhysique, GetPhysique, SI_CREATE_CHARACTER_BODY_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FAT, SI_CREATE_CHARACTER_TRIANGLE_THIN)
-                    </OnInitialized>
-                </Control>
-
-                <Control name="$(parent)FaceSelection" inherits="CCTriangle_Gamepad">
-                    <Anchor point="TOP"/>
-                    <Dimensions x="300" y="300" />
-                    <OnInitialized>
-                        ZO_CharacterCreate_Gamepad_CreateTriangle(self, SetFace, GetFace, SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT, SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN)
-                    </OnInitialized>
-                </Control>                
             </Controls>
         </TopLevelControl>
     </Controls>

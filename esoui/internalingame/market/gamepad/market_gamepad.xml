@@ -8,6 +8,8 @@
         <Label name="ZO_GamepadMarket_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" virtual="true"/>
 
         <Label name="ZO_GamepadMarket_DummyKeybindLabelTemplate" font="ZoFontGamepad34" modifyTextType="UPPERCASE" hidden="true" text="SI_MARKET_BUY_CROWNS"/>
+        
+        <Label name="ZO_GamepadMarket_SubscriptionBenefitLine" font="ZoFontGamepadCondensed36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
         <TopLevelControl name="ZO_GamepadMarket_CrownsFooter" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" verticalAlignment="BOTTOM" hidden="true">
             <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-64"/>
@@ -194,7 +196,7 @@
                 
                 <Control name="$(parent)Benefits" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="40" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                    <Anchor point="BOTTOMRIGHT" />
                     
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontGamepadBold45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE" modifyTextType="UPPERCASE">
@@ -202,10 +204,10 @@
                             <Anchor point="TOPRIGHT" />
                         </Label>
                         
-                        <Label name="$(parent)Text" font="ZoFontGamepadCondensed36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                        <Control name="$(parent)LineContainer">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                        </Label>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>

@@ -74,8 +74,8 @@ local GAMEPAD_CONSTANTS =
 
     GROUP_STRIDE = 3,
 
-    GROUP_FRAME_BASE_OFFSET_X = 105,
-    GROUP_FRAME_BASE_OFFSET_Y = 50,
+    GROUP_FRAME_BASE_OFFSET_X = 70,
+    GROUP_FRAME_BASE_OFFSET_Y = 55,
 
     RAID_FRAME_BASE_OFFSET_X = 100,
     RAID_FRAME_BASE_OFFSET_Y = 50,
@@ -1173,7 +1173,7 @@ function UnitFrame:UpdateLevel()
     local unitLevel
     local isChampion = IsUnitChampion(self:GetUnitTag())
     if isChampion then
-        unitLevel = GetUnitChampionPoints(self:GetUnitTag())
+        unitLevel = GetUnitEffectiveChampionPoints(self:GetUnitTag())
     else
         unitLevel = GetUnitLevel(self:GetUnitTag())
     end

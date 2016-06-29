@@ -121,13 +121,13 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
     --Roster
     local rosterHeaderData = GUILD_ROSTER_GAMEPAD:GetContentHeaderData()
     rosterHeaderData.data1Text = contentHeaderData.titleText
+    rosterHeaderData.data2Text = ZO_FormatUserFacingDisplayName(select(3, GetGuildInfo(self.guildId)))
     ZO_GamepadGenericHeader_Refresh(GUILD_ROSTER_GAMEPAD.contentHeader, rosterHeaderData)
 end
 
 function ZO_GamepadGuildHome:InitializeFooter()
     self.footerData = {
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_LABEL),
-        data2HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_MASTER_LABEL),
     }
 end
 
@@ -140,10 +140,8 @@ function ZO_GamepadGuildHome:SetContentHeaderHidden(hide)
 end
 
 function ZO_GamepadGuildHome:RefreshFooter()
-    local numGuildMembers, numOnline, guildMasterName = GetGuildInfo(self.guildId)
-
+    local numGuildMembers, numOnline = GetGuildInfo(self.guildId)
     self.footerData.data1Text = zo_strformat(GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_FORMAT), numOnline, numGuildMembers)
-    self.footerData.data2Text = ZO_FormatUserFacingDisplayName(guildMasterName)
 
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
 end

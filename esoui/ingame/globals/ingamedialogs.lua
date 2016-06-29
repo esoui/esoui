@@ -1937,7 +1937,7 @@ ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
         {
             text = SI_YES,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ExitWithoutSave()
+                SYSTEMS:GetObject("dyeing").dyeItemsPanel:ExitWithoutSave()
             end
         },
         {
@@ -2048,6 +2048,65 @@ ESO_Dialogs["EXIT_DYE_UI_TO_ACHIEVEMENT"] =
             end
         }  
     }
+}
+
+ESO_Dialogs["SWTICH_DYE_MODE"] =
+{
+    title =
+    {
+        text = SI_DYEING_EXIT_WITH_CHANGES_CONFIRM_TITLE
+    },
+    mainText = 
+    {
+        text = SI_DYEING_SWITCH_WITH_CHANGES_CONFIRM_BODY
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(true)
+            end
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
+                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(false)
+            end
+        },
+    }
+}
+
+ESO_Dialogs["SWTICH_DYE_MODE_BIND"] =
+{
+    title =
+    {
+        text = SI_DYEING_EXIT_WITH_CHANGES_BIND_CONFIRM_TITLE
+    },
+    mainText = 
+    {
+        text = SI_DYEING_SWITCH_WITH_CHANGES_BIND_CONFIRM_BODY
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(true)
+            end
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
+                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(false)
+            end
+        },
+    },
+    noChoiceCallback = function(dialog)
+        SYSTEMS:GetObject("dyeing"):CancelExit()
+    end,
 }
 
 ESO_Dialogs["MAIL_ATTACHMENTS_CHANGED"] =
@@ -2914,6 +2973,35 @@ ESO_Dialogs["KEYBIND_STRIP_DISABLED_DIALOG"] =
         {
             keybind = "DIALOG_NEGATIVE",
             text = SI_OK,
+        },
+    },
+}
+
+ESO_Dialogs["DYE_STAMP_CONFIRM_USE"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_DYE_STAMP_CONFIRMATION_USE_TITLE,
+    },
+    mainText =
+    {
+        text = SI_DYE_STAMP_CONFIRMATION_USE_DESCRIPTION,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                            dialog.data.onAcceptCallback()
+                       end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
         },
     },
 }

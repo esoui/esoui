@@ -245,7 +245,7 @@ function GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
     return GAMEPAD_DUNGEON_DIFFICULTY_ICONS[dungeonDifficulty]
 end
 
-ZO_NO_TEXTURE_FILE = "esoui/art/icons/icon_missing.dds"
+ZO_NO_TEXTURE_FILE = "/esoui/art/icons/icon_missing.dds"
 ZO_KEYBOARD_NEW_ICON = "EsoUI/Art/Miscellaneous/new_icon.dds"
 ZO_GAMEPAD_NEW_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new.dds"
 ZO_GAMEPAD_NEW_ICON_64 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds"

@@ -78,7 +78,7 @@
         </Control>
 
         <Control name="ZO_HUDTelvarMeter_GamepadTemplate" virtual="true" >
-            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Anchor point="BOTTOMLEFT" offsetX="5" offsetY="-5" />
             <Controls>
                 <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_Telvar_Meter_Frame.dds">
                     <TextureCoords left="1" right="0" />

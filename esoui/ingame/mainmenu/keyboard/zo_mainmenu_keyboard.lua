@@ -154,7 +154,7 @@ local CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_collections_over.dds",
 
         indicators = function()
-            if (COLLECTIONS_BOOK and COLLECTIONS_BOOK:HasAnyNotifications()) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending()) then
+            if (COLLECTIONS_BOOK and COLLECTIONS_BOOK:HasAnyNewCollectibles()) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending()) then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,

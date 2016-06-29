@@ -259,15 +259,17 @@ function ZO_AlchemyInventory:AddListDataTypes()
             if i > numTraits then
                 traitControl:SetHidden(true)
             else
-                local traitName, traitIcon, traitMatchIcon, _, traitConflictIcon = ZO_Alchemy_GetTraitInfo(i, ...)
+                traitControl:SetHidden(false)
+
+                local traitName, normalTraitIcon, traitMatchIcon, _, traitConflictIcon = ZO_Alchemy_GetTraitInfo(i, ...)
 
                 if traitName and traitName ~= "" then
                     traitControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_ACCENT))
                     traitControl.label:SetText(traitName)
 
-                    ALCHEMY:SetupTraitIcon(traitControl.icon, traitName, traitIcon, traitMatchIcon, traitConflictIcon)
+                    ALCHEMY:SetupTraitIcon(traitControl.icon, traitName, normalTraitIcon, traitMatchIcon, traitConflictIcon)
                     ZO_ItemSlot_SetupIconUsableAndLockedColor(traitControl.icon, true, locked)
-                    traitControl:SetHidden(false)
+                    traitControl.icon:SetHidden(false)
                 else
                     traitControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_INACTIVE_BONUS))
                     traitControl.label:SetText(GetString(SI_CRAFTING_UNKNOWN_NAME))

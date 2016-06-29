@@ -123,6 +123,7 @@ do
     function ZO_CharacterSelect_OnCharacterListReceivedCommon(eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
         g_mostRecentCharId = mostRecentlyPlayedCharacterId
         g_bestSelectionPriority = 0
+        g_accountChampionPoints = 0
         g_bestSelectionData = nil
 
         g_characterDataList = {}

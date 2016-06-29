@@ -278,6 +278,11 @@ function ZO_InventorySlot_OnPoolReset(inventorySlot)
             highlight.animation:PlayFromEnd(highlight.animation:GetDuration())
         end
     end
+    if buttonPart then
+        if buttonPart and buttonPart.animation then
+            buttonPart.animation:PlayInstantlyToStart()
+        end
+    end
 
     ZO_ObjectPool_DefaultResetControl(inventorySlot)
 end
@@ -684,6 +689,32 @@ local function TryMoveToCraftBag(inventorySlot)
     return true
 end
 
+local function TryPreviewDyeStamp(inventorySlot)
+    -- get item info and pass it to the preview dye stamp view
+    -- there, the player can spin the model and confirm or deny using the stamp
+    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    local itemLink = GetItemLink(bag, index)
+    local dyeStampDefId = GetItemLinkDyeStampDefId(itemLink)
+    local onUseType = GetItemLinkItemUseType(itemLink)
+
+    if onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP then
+        local dyeStampUseResult = CanPlayerUseItemDyeStamp(dyeStampDefId)
+        if dyeStampUseResult ~= DYE_STAMP_USE_RESULT_NONE then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_DYESTAMPUSERESULT", dyeStampUseResult))
+            return
+        end
+    elseif onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP then
+        local dyeStampUseResult = CanPlayerUseCostumeDyeStamp(dyeStampDefId)
+        if dyeStampUseResult ~= DYE_STAMP_USE_RESULT_NONE then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_DYESTAMPUSERESULT", dyeStampUseResult))
+            return
+        end
+    end
+
+    SYSTEMS:GetObject("dyeStamp_Confirmation"):SetTargetItem(bag, index)
+    SYSTEMS:PushScene("dyeStampConfirmation")
+end
+
 -- If called on an item inventory slot, returns the index of the attachment slot that's holding it, or nil if it's not attached.
 local function GetQueuedItemAttachmentSlotIndex(inventorySlot)
     local bag, attachmentIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
@@ -953,7 +984,8 @@ local function CanUseItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local usable, onlyFromActionSlot = IsItemUsable(bag, index)
     local canInteractWithItem = CanInteractWithItem(bag, index)
-    return (usable and (not onlyFromActionSlot) and canInteractWithItem and not hasCooldown)
+    local isDyeStamp = GetItemType(bag, index) == ITEMTYPE_DYE_STAMP -- dye stamps are "usable" but we do not want the player to use them directly from their inventory
+    return usable and not onlyFromActionSlot and canInteractWithItem and not hasCooldown and not isDyeStamp
 end
 
 local function TryUseItem(inventorySlot)
@@ -1617,6 +1649,12 @@ local actionHandlers =
                                     slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(inventorySlot) end, "secondary")
                                 end
                             end,
+    ["preview_dye_stamp"] = function(inventorySlot, slotActions)
+                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                if GetItemType(bag, slot) == ITEMTYPE_DYE_STAMP then
+                                    slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW_DYE_STAMP, function() TryPreviewDyeStamp(inventorySlot) end, "primary")
+                                end
+                            end,
 }
 
 local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
@@ -1626,14 +1664,14 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                    { "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_STORE_BUY] =                     { "buy", "buy_multiple", "link_to_chat", "report_item" },
     [SLOT_TYPE_STORE_BUYBACK] =                 { "buyback", "link_to_chat", "report_item" },
     [SLOT_TYPE_BUY_MULTIPLE] =                  NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
+    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "link_to_chat", "mark_as_locked", "unmark_as_locked", "mark_as_junk", "unmark_as_junk", "report_item" },
     [SLOT_TYPE_GUILD_BANK_ITEM] =               { "guild_bank_withdraw", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =        { "mail_detach", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_ATTACHMENT] =               NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1652,7 +1690,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =              NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =           { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "gamepad_equip", "unequip", "use", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
 }

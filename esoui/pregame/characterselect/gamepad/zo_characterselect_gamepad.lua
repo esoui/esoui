@@ -12,11 +12,7 @@ local ENTRY_TYPE_EXTRA_INFO = 1
 local ENTRY_TYPE_CHARACTER = 2
 local ENTRY_TYPE_CREATE_NEW = 3
 
-local SERVICE_MODE_NONE = 0
-local SERVICE_MODE_NAME_CHANGE = 1
-
 local CREATE_NEW_ICON = "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds"
-local NAME_CHANGE_TOKEN_ICON = "EsoUI/Art/Icons/Token_NameChange.dds"
 
 --[[ Character Select Delete Screen ]]--
 local EXPECTED_ICON_SIZE = 64
@@ -95,7 +91,7 @@ local function ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(key, onDown)
         return
     end
 
-    if (onDown) then
+    if onDown then
         PlaySound(SOUNDS.POSITIVE_CLICK)
     else
         PlaySound(SOUNDS.NEGATIVE_CLICK)
@@ -116,7 +112,7 @@ local function ZO_CharacterSelectDelete_Gamepad_OnKeyChanged(key, onDown)
         end
     end
 
-    if (activated == #CHARACTER_DELETE_KEY_ICONS[false]) then
+    if activated == #CHARACTER_DELETE_KEY_ICONS[false] then
         -- Delete character and exit dialog
         PlaySound(SOUNDS.DIALOG_ACCEPT)
         self.deleting = true
@@ -328,8 +324,8 @@ local function InitKeybindingDescriptor(self)
             disabledDuringSceneHiding = true,
             enabled = function()
                 local requestedServiceMode = ZO_CharacterSelect_Gamepad_GetSelectedServiceMode()
-                if requestedServiceMode == SERVICE_MODE_NAME_CHANGE then
-                    return GetNumCharacterRenameTokens() > 0
+                if requestedServiceMode ~= SERVICE_TOKEN_NONE then
+                    return GetNumServiceTokens(requestedServiceMode) > 0
                 end
 
                 return false
@@ -358,8 +354,16 @@ local function InitKeybindingDescriptor(self)
             end,
             callback = function()
                 -- Perform a different function based on the currently selected service mode
-                if self.serviceMode == SERVICE_MODE_NAME_CHANGE then
+                if self.serviceMode == SERVICE_TOKEN_NAME_CHANGE then
                     ZO_CharacterSelect_Gamepad_BeginRename()
+                elseif self.serviceMode == SERVICE_TOKEN_RACE_CHANGE then
+                    local DONT_RESET_TO_DEFAULT = false
+                    ZO_CHARACTERCREATE_MANAGER:InitializeForRaceChange(g_currentlySelectedCharacterData.dataSource)
+                    PregameStateManager_SetState("CharacterCreate_Barbershop")
+                elseif self.serviceMode == SERVICE_TOKEN_APPEARANCE_CHANGE then
+                    local DONT_RESET_TO_DEFAULT = false
+                    ZO_CHARACTERCREATE_MANAGER:InitializeForAppearanceChange(g_currentlySelectedCharacterData.dataSource)
+                    PregameStateManager_SetState("CharacterCreate_Barbershop")
                 end
             end,
         },
@@ -371,7 +375,7 @@ local function InitKeybindingDescriptor(self)
             callback = function()
                 -- If the back button is pressed before a service token is consumed, return the player back up to the extra info menu
                 local RESET_LIST_TO_DEFAULT = true
-                ZO_CharacterSelect_Gamepad_ChangeServiceMode(SERVICE_MODE_NONE, RESET_LIST_TO_DEFAULT)
+                ZO_CharacterSelect_Gamepad_ChangeServiceMode(SERVICE_TOKEN_NONE, RESET_LIST_TO_DEFAULT)
             end,
         },
     }
@@ -445,7 +449,7 @@ end
 -- Extra Info Functions
 
 local function CanShowExtraInfo(self)
-    return self.serviceMode == SERVICE_MODE_NONE
+    return self.serviceMode == SERVICE_TOKEN_NONE
 end
 
 local function CreateExtraInfoEntry(self, data)
@@ -464,6 +468,7 @@ local function CreateExtraInfoEntry(self, data)
 
     if data.tokenCount then
         control.tokenCount:SetText(data.tokenCount)
+        control.icon:SetDesaturation(data.tokenCount > 0 and 0 or 1)
     end
     control.tokenCount:SetHidden(data.tokenCount == nil)
 
@@ -528,35 +533,63 @@ local function CreateExtraInfoControls(self)
     if showExtraInfo then
         local data = {}
 
+        local function ServiceTokenTooltipFunction(serviceMode, descriptionTextId)
+            self.extraInfoDetails:SetHidden(false)
+
+            local title = zo_strformat(SI_SERVICE_TOOLTIP_HEADER_FORMATTER, GetString("SI_SERVICETOKENTYPE", serviceMode))
+            local body1 = GetString(descriptionTextId)
+            local body2
+            local body2Color
+
+            local numTokens = GetNumServiceTokens(serviceMode)
+            if numTokens ~= 0 then
+                body2 = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, numTokens, GetString("SI_SERVICETOKENTYPE", serviceMode))
+                body2Color = ZO_SUCCEEDED_TEXT
+            else
+                body2 = zo_strformat(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, GetString("SI_SERVICETOKENTYPE", serviceMode))
+                body2Color = ZO_ERROR_COLOR
+            end
+
+            ZO_CharacterSelect_Gamepad_SetExtraInfoDetails(title, body1, nil, body2, body2Color)
+        end
+
         -- Name Change Tokens
         table.insert(data, {
-                                keybindStripDesc = self.charListKeybindStripDescriptorServices,
-                                icon = NAME_CHANGE_TOKEN_ICON,
-                                tokenCount = GetNumCharacterRenameTokens(),
-                                serviceMode = SERVICE_MODE_NAME_CHANGE,
-                                ShowTooltipFunction = function()
-                                        self.extraInfoDetails:SetHidden(false)
-                                        
-                                        local title = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_HEADER)
-                                        local body1 = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
-                                        local body2
-                                        local body2Color
-
-                                        local numTokens = GetNumCharacterRenameTokens()
-                                        if numTokens ~= 0 then
-                                            body2 = zo_strformat(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKENS_AVAILABLE, numTokens)
-                                            body2Color = ZO_SUCCEEDED_TEXT
-                                        else
-                                            body2 = GetString(SI_SERVICE_TOOLTIP_NO_NAME_CHANGE_TOKENS_AVAILABLE)
-                                            body2Color = ZO_ERROR_COLOR
-                                        end
-
-                                        ZO_CharacterSelect_Gamepad_SetExtraInfoDetails(title, body1, nil, body2, body2Color)
-                                    end,
-                                HideTooltipFunction = function()
-                                        self.extraInfoDetails:SetHidden(true)
-                                    end,
-                           })
+            keybindStripDesc = self.charListKeybindStripDescriptorServices,
+            icon = "EsoUI/Art/Icons/Token_NameChange.dds",
+            serviceMode = SERVICE_TOKEN_NAME_CHANGE,
+            tokenCount = GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE),
+            ShowTooltipFunction = function()
+                    ServiceTokenTooltipFunction(SERVICE_TOKEN_NAME_CHANGE, SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
+                end,
+            HideTooltipFunction = function()
+                    self.extraInfoDetails:SetHidden(true)
+                end,
+        })
+        table.insert(data, {
+            keybindStripDesc = self.charListKeybindStripDescriptorServices,
+            icon = "EsoUI/Art/Icons/Token_RaceChange.dds",
+            serviceMode = SERVICE_TOKEN_RACE_CHANGE,
+            tokenCount = GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE),
+            ShowTooltipFunction = function()
+                    ServiceTokenTooltipFunction(SERVICE_TOKEN_RACE_CHANGE, SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
+                end,
+            HideTooltipFunction = function()
+                    self.extraInfoDetails:SetHidden(true)
+                end,
+        })
+        table.insert(data, {
+            keybindStripDesc = self.charListKeybindStripDescriptorServices,
+            icon = "EsoUI/Art/Icons/Token_AppearanceChange.dds",
+            serviceMode = SERVICE_TOKEN_APPEARANCE_CHANGE,
+            tokenCount = GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE),
+            ShowTooltipFunction = function()
+                    ServiceTokenTooltipFunction(SERVICE_TOKEN_APPEARANCE_CHANGE, SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
+                end,
+            HideTooltipFunction = function()
+                    self.extraInfoDetails:SetHidden(true)
+                end,
+        })
 
         -- Add more extra info controls above this line
         for i=1, #data do
@@ -566,8 +599,6 @@ local function CreateExtraInfoControls(self)
 
         CenterExtraInfoControls(self)
     end
-
-    self.extraInfoContainer:SetHidden(true)
 end
 
 function ZO_CharacterSelect_Gamepad_UpdateExtraInfoKeybinds(control)
@@ -577,22 +608,23 @@ function ZO_CharacterSelect_Gamepad_UpdateExtraInfoKeybinds(control)
 end
 
 local function RefreshServiceHeaderVisibility(self)
-    local headerVisible = self.serviceMode ~= SERVICE_MODE_NONE
+    local headerVisible = self.serviceMode ~= SERVICE_TOKEN_NONE
 
     if headerVisible then
         local tokenCount = 0
         local instructions = ""
 
-        if self.serviceMode == SERVICE_MODE_NAME_CHANGE then
-            tokenCount = GetNumCharacterRenameTokens()
-            instructions = GetString(SI_SERVICE_NAME_CHANGE_TOKEN_INSTRUCTIONS)
+        tokenCount = GetNumServiceTokens(self.serviceMode)
+
+        if self.serviceMode ~= SERVICE_TOKEN_NONE then
+            instructions = zo_strformat(SI_SERVICE_TOKEN_INSTRUCTIONS, GetString("SI_SERVICETOKENTYPE", self.serviceMode))
         end
 
-        self.serviceTokensLabel:SetText(tostring(tokenCount))
+        self.serviceTokensLabel:SetText(tokenCount)
         self.serviceInstructions:SetText(instructions)
     end
 
-    self.serviceHeader:SetHidden(true)
+    self.serviceHeader:SetHidden(not headerVisible)
 end
 
 local function SetExtraInfoLabel(self, labelName, text, color)
@@ -624,11 +656,11 @@ local function CreateList(self)
 
     local characterDataList = ZO_CharacterSelect_GetCharacterDataList()
     local slot = 1
-    if(#characterDataList > 0) then
+    if  #characterDataList > 0 then
         local isFirstEntry = true
         
         -- Add Rename characters
-        if self.serviceMode ~= SERVICE_MODE_NAME_CHANGE then
+        if self.serviceMode ~= SERVICE_TOKEN_NAME_CHANGE then
             for i, data in ipairs(characterDataList) do
                 if data.needsRename then
                     local template = "ZO_GamepadMenuEntryTemplateLowercase34"
@@ -657,7 +689,7 @@ local function CreateList(self)
                     template = "ZO_GamepadMenuEntryTemplateLowercase34WithHeader"
                     isFirstEntry = false
 
-                    if self.serviceMode == SERVICE_MODE_NONE and ZO_CharacterSelect_CanShowAdditionalSlotsInfo() then
+                    if self.serviceMode == SERVICE_TOKEN_NONE and ZO_CharacterSelect_CanShowAdditionalSlotsInfo() then
                         data.subHeader = zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining())
                     else
                         data.subHeader = nil
@@ -672,9 +704,9 @@ local function CreateList(self)
 
     end
 
-    if self.serviceMode == SERVICE_MODE_NONE then
+    if self.serviceMode == SERVICE_TOKEN_NONE then
         -- Add Create New
-        if (slot <= ZO_CharacterSelect_Gamepad_GetMaxCharacters()) then
+        if slot <= ZO_CharacterSelect_Gamepad_GetMaxCharacters() then
             local data = { index = slot, type = ENTRY_TYPE_CREATE_NEW, header = GetString(SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_HEADER), icon = CREATE_NEW_ICON, text = GetString(SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_ENTRY)}
             AddCharacterListEntry("ZO_GamepadMenuEntryTemplateWithHeader", data, self.characterList)
         end
@@ -699,8 +731,8 @@ local function DoCharacterSelection(index)
     -- Get character select first random selection loaded in so not waiting for it
     -- when move to Create
     SetSuppressCharacterChanges(true)
-    if(IsPregameCharacterConstructionReady()) then
-        ZO_CharacterCreate_Gamepad_GenerateRandomCharacter()
+    if IsPregameCharacterConstructionReady() then
+        GAMEPAD_CHARACTER_CREATE_MANAGER:GenerateRandomCharacter()
         SelectClothing(DRESSING_OPTION_STARTING_GEAR)
     end
 
@@ -802,7 +834,7 @@ do
             local self = ZO_CharacterSelect_Gamepad
             g_canPlayCharacter = false
 
-            if self.serviceMode ~= SERVICE_MODE_NONE then
+            if self.serviceMode ~= SERVICE_TOKEN_NONE then
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorUseServiceToken)
             elseif selectedData.needsRename then
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorRename)
@@ -916,12 +948,13 @@ local function ZO_CharacterSelect_Gamepad_StateChanged(oldState, newState)
     if newState == SCENE_SHOWING then
         self.active = true
         self.deleting = false
-        self.serviceMode = SERVICE_MODE_NONE
+        local RESET_TO_DEFAULT = true
+        ZO_CharacterSelect_Gamepad_ChangeServiceMode(SERVICE_TOKEN_NONE, RESET_TO_DEFAULT)
 
         ZO_CharacterSelect_GamepadCharacterViewport.Activate()
         SCENE_MANAGER:AddFragment(CHARACTER_SELECT_CHARACTERS_GAMEPAD_FRAGMENT)
 
-        if(PregameIsFullyLoaded()) then
+        if PregameIsFullyLoaded() then
             self.characterList:RefreshVisible()
             self.characterList:Activate()
             self.extraInfoFocus:Deactivate()
@@ -940,6 +973,7 @@ local function ZO_CharacterSelect_Gamepad_StateChanged(oldState, newState)
         ZO_CharacterSelect_GamepadCharacterViewport.StopAllInput()
         ZO_CharacterSelect_GamepadCharacterViewport.Deactivate()
         self.characterList:Deactivate()
+        self.extraInfoFocus:Deactivate()
 
         ZO_CharacterSelect_Gamepad_ClearKeybindStrip()
     end
@@ -961,10 +995,10 @@ local function OnCharacterRenamedSuccessCallback()
 
     -- there are multiple ways to rename a character, some of which do not change the servicemode, so we will
     -- check if this is from a service use or not, and update the appropriate items
-    if self.serviceMode == SERVICE_MODE_NONE then
+    if self.serviceMode == SERVICE_TOKEN_NONE then
         ZO_CharacterSelect_Gamepad_ReturnToCharacterList(ACTIVATE_VIEWPORT)
     else
-        ZO_CharacterSelect_Gamepad_ChangeServiceMode(SERVICE_MODE_NONE, DONT_RESET_TO_DEFAULT)
+        ZO_CharacterSelect_Gamepad_ChangeServiceMode(SERVICE_TOKEN_NONE, DONT_RESET_TO_DEFAULT)
     end
 end
 
@@ -1061,7 +1095,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     self.extraInfoControlPool = ZO_ControlPool:New("ZO_CharacterSelect_ExtraInfo_Entry", self.extraInfoCenterer)
 
     -- Service header controls
-    self.serviceMode = SERVICE_MODE_NONE
+    self.serviceMode = SERVICE_TOKEN_NONE
 
     self.serviceHeader = self:GetNamedChild("Mask"):GetNamedChild("Characters"):GetNamedChild("HeaderContainer"):GetNamedChild("CurrentServiceInfo")
     self.serviceTokensLabel = self.serviceHeader:GetNamedChild("Tokens")
@@ -1153,7 +1187,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
                 if data then
                     if data.renameFromToken then
                         headerData.data1 = {
-                                                value = GetNumCharacterRenameTokens(),
+                                                value = GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE),
                                                 header = GetString(SI_SERVICE_TOKEN_COUNT_TOKENS_HEADER)
                                            }
                     end
@@ -1223,7 +1257,7 @@ function ZO_CharacterSelect_Gamepad_GetSelectedServiceMode()
     local self = ZO_CharacterSelect_Gamepad
 
     local selectedFocus = self.extraInfoFocus:GetFocusItem()
-    local serviceMode = SERVICE_MODE_NONE
+    local serviceMode = SERVICE_TOKEN_NONE
 
     if selectedFocus then
         if selectedFocus.control and selectedFocus.control.data then
@@ -1241,11 +1275,17 @@ function ZO_CharacterSelect_Gamepad_ChangeServiceMode(serviceMode, resetListToDe
         local previousService = self.serviceMode
         self.serviceMode = serviceMode
 
+        self.extraInfoContainer:SetHidden(serviceMode ~= SERVICE_TOKEN_NONE)
+
         -- Update Header Text and rebuild the list to filter out invalid options
         local characterListHeader
 
-        if serviceMode == SERVICE_MODE_NAME_CHANGE then
+        if serviceMode == SERVICE_TOKEN_NAME_CHANGE then
             characterListHeader = GetString(SI_CHARACTER_SELECT_RENAME_CHARACTER_FROM_TOKEN_TITLE)
+        elseif serviceMode == SERVICE_TOKEN_RACE_CHANGE then
+            characterListHeader = GetString(SI_CHARACTER_SELECT_RACE_CHANGE_FROM_TOKEN_TITLE)
+        elseif serviceMode == SERVICE_TOKEN_APPEARANCE_CHANGE then
+            characterListHeader = GetString(SI_CHARACTER_SELECT_APPEARANCE_CHANGE_FROM_TOKEN_TITLE)
         else
             characterListHeader = GetString(SI_CHARACTER_SELECT_GAMEPAD_SELECT_CHARACTER)
         end
@@ -1258,7 +1298,7 @@ function ZO_CharacterSelect_Gamepad_ChangeServiceMode(serviceMode, resetListToDe
         if resetListToDefault then
             self.characterList:SetSelectedIndex(1)
 
-            if serviceMode == SERVICE_MODE_NONE then
+            if serviceMode == SERVICE_TOKEN_NONE then
                 SelectedCharacterChanged(self, self.characterList, { type = ENTRY_TYPE_EXTRA_INFO })
                 self.characterList:Deactivate()
                 self.extraInfoFocus:Activate()

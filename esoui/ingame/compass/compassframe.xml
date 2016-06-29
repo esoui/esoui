@@ -82,7 +82,7 @@
 
         <Control name="ZO_CompassFrame_Gamepad_Template" virtual="true">
             <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
-            <Anchor point="TOP" offsetY="101" />
+            <Anchor point="TOP" offsetY="58" />
 
             <Controls>
                 <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">

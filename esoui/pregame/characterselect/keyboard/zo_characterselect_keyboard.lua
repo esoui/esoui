@@ -70,8 +70,8 @@ local function DoCharacterSelection(index)
     -- Get character select first random selection loaded in so not waiting for it
     -- when move to Create
     SetSuppressCharacterChanges(true)
-    if(IsPregameCharacterConstructionReady()) then
-        ZO_CharacterCreate_GenerateRandomCharacter()
+    if IsPregameCharacterConstructionReady() then
+        KEYBOARD_CHARACTER_CREATE_MANAGER:GenerateRandomCharacter()
         SelectClothing(DRESSING_OPTION_STARTING_GEAR)
     end
 
@@ -166,7 +166,7 @@ local function OnCharacterRenamed(eventCode, charId, result)
 end
 
 function ZO_CharacterSelect_BeginRename(characterData)
-    ZO_Dialogs_ShowDialog("RENAME_CHARACTER_KEYBOARD", { characterData = characterData }, { titleParams = { GetString(dialogTitle) }})
+    ZO_Dialogs_ShowDialog("RENAME_CHARACTER_KEYBOARD", { characterData = characterData })
 end
 
 local function SetupRenameDialog(dialog, data)
@@ -456,7 +456,7 @@ function ServiceTokenIndicator:New(...)
     return object
 end
 
-function ServiceTokenIndicator:Initialize(control, iconTexture)
+function ServiceTokenIndicator:Initialize(control, tokenType, iconTexture)
     self.control = control
     self.icon = control:GetNamedChild("Icon")
     self.tokenCount = control:GetNamedChild("TokenCount")
@@ -466,26 +466,63 @@ function ServiceTokenIndicator:Initialize(control, iconTexture)
         self.icon:SetTexture(iconTexture)
     end
 
-    self.tooltip = ServiceTooltip
+    self.tokenType = tokenType
 
-    control:SetHidden(true)
+    self:SetTokenCount(GetNumServiceTokens(tokenType))
+
+    self.tooltip = ServiceTooltip
+    self.tooltipHeaderText = zo_strformat(SI_SERVICE_TOOLTIP_HEADER_FORMATTER, GetString("SI_SERVICETOKENTYPE", tokenType))
+
+    local function OnTokensUpdated(eventId, tokenType, numTokens)
+        if tokenType == self.tokenType then
+            self:SetTokenCount(numTokens)
+        end
+    end
+
+    control:RegisterForEvent(EVENT_SERVICE_TOKENS_UPDATED, ContextFilter(OnTokensUpdated))
+
+    control:SetHandler("OnMouseUp", function(control, button, upInside)
+        if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
+            self:OnMouseUp(control)
+        end
+    end)
+
+    control:SetHandler("OnMouseEnter", function(control)
+        self:OnMouseEnter(control)
+    end)
+
+    control:SetHandler("OnMouseExit", function(control)
+        self:OnMouseExit(control)
+    end)
 end
 
 function ServiceTokenIndicator:SetTokenCount(numTokens)
     self.tokenCount:SetText(numTokens)
 
     self.enabled = numTokens ~= 0
-
-    if self.enabled then
-        self.icon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-    else
-        self.icon:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
-    end
+    
+    self.icon:SetDesaturation(self.enabled and 0 or 1)
 end
 
 function ServiceTokenIndicator:OnMouseEnter()
     InitializeTooltip(self.tooltip, self.control, BOTTOM, 0, -10, TOP)
     self.highlight:SetHidden(false)
+
+    local bodyText2
+    local bodyText2Color
+
+    local numTokens = GetNumServiceTokens(self.tokenType)
+    if numTokens ~= 0 then
+        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, numTokens, GetString("SI_SERVICETOKENTYPE", self.tokenType))
+        bodyText2Color = ZO_SUCCEEDED_TEXT
+    else
+        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, GetString("SI_SERVICETOKENTYPE", self.tokenType))
+        bodyText2Color = ZO_ERROR_COLOR
+    end
+
+    self:AddHeader(self.tooltipHeaderText)
+    self:AddBodyText(self.tooltipBodyText1)
+    self:AddBodyText(bodyText2, bodyText2Color)
 end
 
 local SET_TO_FULL_SIZE = true
@@ -514,6 +551,10 @@ function ServiceTokenIndicator:OnMouseExit()
     self.highlight:SetHidden(true)
 end
 
+function ServiceTokenIndicator:OnMouseUp()
+    -- to be overriden by subclasses to perform their action
+end
+
 -- Name Change Tokens
 
 local NameChangeTokenIndicator = ServiceTokenIndicator:Subclass()
@@ -523,38 +564,9 @@ function NameChangeTokenIndicator:New(...)
 end
 
 function NameChangeTokenIndicator:Initialize(control)
-    local NAME_CHANGE_TOKEN_TEXTURE = "EsoUI/Art/Icons/Token_NameChange.dds"
-    ServiceTokenIndicator.Initialize(self, control, NAME_CHANGE_TOKEN_TEXTURE)
+    ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_NAME_CHANGE, "EsoUI/Art/Icons/Token_NameChange.dds")
 
-    self.tooltipHeaderText = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_HEADER)
     self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
-
-    local function OnRenameTokensUpdated(eventId, numTokens)
-        self:SetTokenCount(numTokens)
-    end
-
-    control:RegisterForEvent(EVENT_RENAME_TOKENS_UPDATED, ContextFilter(OnRenameTokensUpdated))
-    self:SetTokenCount(GetNumCharacterRenameTokens())
-end
-
-function NameChangeTokenIndicator:OnMouseEnter()
-    ServiceTokenIndicator.OnMouseEnter(self)
-
-    local bodyText2
-    local bodyText2Color
-
-    local numTokens = GetNumCharacterRenameTokens()
-    if numTokens ~= 0 then
-        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKENS_AVAILABLE, numTokens)
-        bodyText2Color = ZO_SUCCEEDED_TEXT
-    else
-        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_NO_NAME_CHANGE_TOKENS_AVAILABLE, numTokens)
-        bodyText2Color = ZO_ERROR_COLOR
-    end
-
-    self:AddHeader(self.tooltipHeaderText)
-    self:AddBodyText(self.tooltipBodyText1)
-    self:AddBodyText(bodyText2, bodyText2Color)
 end
 
 function NameChangeTokenIndicator:OnMouseUp()
@@ -565,7 +577,7 @@ function NameChangeTokenIndicator:OnMouseUp()
             ZO_Dialogs_ShowDialog("INELIGIBLE_SERVICE")
         else
             ZO_CharacterSelect_BeginRename(characterData)
-        end      
+        end
     end
 end
 
@@ -573,14 +585,54 @@ function ZO_NameChangeIndicator_Initialize(control)
     NAME_CHANGE_TOKEN_INDICATOR = NameChangeTokenIndicator:New(control)
 end
 
-function ZO_NameChangeIndicator_OnMouseEnter()
-    NAME_CHANGE_TOKEN_INDICATOR:OnMouseEnter()
+-- Race Change Tokens
+
+local RaceChangeTokenIndicator = ServiceTokenIndicator:Subclass()
+
+function RaceChangeTokenIndicator:New(...)
+    return ServiceTokenIndicator.New(self, ...)
 end
 
-function ZO_NameChangeIndicator_OnMouseExit()
-    NAME_CHANGE_TOKEN_INDICATOR:OnMouseExit()
+function RaceChangeTokenIndicator:Initialize(control)
+    ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_RACE_CHANGE, "EsoUI/Art/Icons/Token_RaceChange.dds")
+
+    self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
 end
 
-function ZO_NameChangeIndicator_OnMouseUp()
-    NAME_CHANGE_TOKEN_INDICATOR:OnMouseUp()
+function RaceChangeTokenIndicator:OnMouseUp()
+    if self.enabled then
+        local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
+        ZO_CHARACTERCREATE_MANAGER:InitializeForRaceChange(characterData)
+        PregameStateManager_SetState("CharacterCreate_Barbershop")
+    end
+end
+
+function ZO_RaceChangeIndicator_Initialize(control)
+    RACE_CHANGE_TOKEN_INDICATOR = RaceChangeTokenIndicator:New(control)
+end
+
+-- Appearance Change Tokens
+
+local AppearanceChangeTokenIndicator = ServiceTokenIndicator:Subclass()
+
+function AppearanceChangeTokenIndicator:New(...)
+    return ServiceTokenIndicator.New(self, ...)
+end
+
+function AppearanceChangeTokenIndicator:Initialize(control)
+    ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_APPEARANCE_CHANGE, "EsoUI/Art/Icons/Token_AppearanceChange.dds")
+
+    self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
+end
+
+function AppearanceChangeTokenIndicator:OnMouseUp()
+    if self.enabled then
+        local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
+        ZO_CHARACTERCREATE_MANAGER:InitializeForAppearanceChange(characterData)
+        PregameStateManager_SetState("CharacterCreate_Barbershop")
+    end
+end
+
+function ZO_AppearanceChangeIndicator_Initialize(control)
+    APPEARANCE_CHANGE_TOKEN_INDICATOR = AppearanceChangeTokenIndicator:New(control)
 end

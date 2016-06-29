@@ -25,7 +25,6 @@ EsoUI\Libraries\Utility\ZO_Hook.lua
 EsoUI\Libraries\Utility\ZO_Easing.lua
 EsoUI\Libraries\Utility\ZO_GamepadUtils.lua
 EsoUI\Libraries\Utility\ZO_PrioritizedVisibility.lua
-EsoUI\Libraries\Utility\ZO_ChampionRankUtils.lua
 EsoUI\Libraries\Utility\ZO_ScrollAnimationUtils.lua
 EsoUI\Libraries\Utility\ZO_PlatformUtils.lua
 ESOUI\Libraries\Utility\ZO_PrimaryPlayerName.lua
@@ -198,6 +197,8 @@ EsoUI\Libraries\ZO_HiddenReasons\ZO_HiddenReasons.lua
 
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.xml
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.lua
+EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadPassiveFocus.lua
+EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadPassiveFocus.xml
 
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.lua
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.xml

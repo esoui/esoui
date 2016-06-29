@@ -132,7 +132,7 @@
                 
                 <Scroll name="$(parent)BuildPlanner">
                     <Anchor point="TOPLEFT" offsetY="-6" />
-                    <Anchor point="BOTTOMRIGHT" offsetY="-6" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)Container" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>            

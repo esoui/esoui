@@ -1,17 +1,21 @@
 local PARTNER_ICON_DMM = "EsoUI/Art/Login/link_Login_DMM.dds"
+local WARNING_COLOR = ZO_ColorDef:New("DC8122")
 
 local function LinkAccountsDialogSetup(dialog, data)
-    GetControl(dialog, "PartnerAccount"):SetText(data.partnerAccount or "")
-    GetControl(dialog, "ESOAccount"):SetText(data.esoAccount or "")
-
+    local partnerAccountName = GetControl(dialog, "PartnerAccount")
     local optionalTextLabel = GetControl(dialog, "OptionalText")
     local partnerIcon = GetControl(dialog, "PartnerIcon")
     local serviceType = GetPlatformServiceType()
         
     if serviceType == PLATFORM_SERVICE_TYPE_DMM then
-        optionalTextLabel:SetText(ZO_ERROR_COLOR:Colorize(GetString(SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING)))
+        optionalTextLabel:SetText(WARNING_COLOR:Colorize(GetString(SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING)))
         partnerIcon:SetTexture(PARTNER_ICON_DMM)
+        partnerAccountName:SetText(GetString(SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM))
+    else
+        partnerAccountName:SetText(data.partnerAccount or "")
     end
+
+    GetControl(dialog, "ESOAccount"):SetText(data.esoAccount or "")
 end
 
 function ZO_LinkAccountsDialog_Initialized(control)

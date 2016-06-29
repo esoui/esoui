@@ -27,6 +27,7 @@ local MultiLevelEventToCategoryMappings = {
         [CHAT_CHANNEL_ZONE_LANGUAGE_1] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_1),
         [CHAT_CHANNEL_ZONE_LANGUAGE_2] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_2),
         [CHAT_CHANNEL_ZONE_LANGUAGE_3] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_3),
+        [CHAT_CHANNEL_ZONE_LANGUAGE_4] = GetChannelCategoryFromChannel(CHAT_CHANNEL_ZONE_LANGUAGE_4),
         [CHAT_CHANNEL_WHISPER] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER),
         [CHAT_CHANNEL_WHISPER_SENT] = GetChannelCategoryFromChannel(CHAT_CHANNEL_WHISPER_SENT),
         [CHAT_CHANNEL_PARTY] = GetChannelCategoryFromChannel(CHAT_CHANNEL_PARTY),
@@ -101,30 +102,6 @@ local ChannelInfo =
         playerLinkable = true,
         channelLinkable = false,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE)
-    },
-    [CHAT_CHANNEL_ZONE_LANGUAGE_1] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_ENGLISH,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_ENGLISH),
-        playerLinkable = true,
-        channelLinkable = false,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_ENGLISH)
-    },
-    [CHAT_CHANNEL_ZONE_LANGUAGE_2] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_FRENCH,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_FRENCH),
-        playerLinkable = true,
-        channelLinkable = false,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_FRENCH)
-    },
-    [CHAT_CHANNEL_ZONE_LANGUAGE_3] =
-    {
-        format = SI_CHAT_MESSAGE_ZONE_GERMAN,
-        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_GERMAN),
-        playerLinkable = true,
-        channelLinkable = false,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE_GERMAN)
     },
     [CHAT_CHANNEL_PARTY] =
     {
@@ -305,6 +282,42 @@ local ChannelInfo =
         deferRequirement = true,
     },
 }
+
+--TODO: Allow these in console when we implement tabs and filters
+if not IsConsoleUI() then
+    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_1] =
+    {
+        format = SI_CHAT_MESSAGE_ZONE_ENGLISH,
+        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_ENGLISH),
+        playerLinkable = true,
+        channelLinkable = false,
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE_ENGLISH)
+    }
+    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_2] =
+    {
+        format = SI_CHAT_MESSAGE_ZONE_FRENCH,
+        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_FRENCH),
+        playerLinkable = true,
+        channelLinkable = false,
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE_FRENCH)
+    }
+    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_3] =
+    {
+        format = SI_CHAT_MESSAGE_ZONE_GERMAN,
+        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_GERMAN),
+        playerLinkable = true,
+        channelLinkable = false,
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE_GERMAN)
+    }
+    ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_4] =
+    {
+        format = SI_CHAT_MESSAGE_ZONE_JAPANESE,
+        name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_JAPANESE),
+        playerLinkable = true,
+        channelLinkable = false,
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE_JAPANESE)
+    }
+end
 
 function ZO_ChatSystem_GetChannelInfo()
     return ChannelInfo

@@ -51,6 +51,12 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BethesdaLogo" relativePoint="TOPRIGHT" offsetX="66" />
                     <TextureCoords left="0.0000" right="0.5566" top="0.0000" bottom="0.5313" />
                 </Texture>
+
+                <Texture name="$(parent)DMMLogo" textureFile="EsoUI/Art/Login/jp_dmm_logo.dds">
+                    <Dimensions x="380" y="48" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ZenimaxMediaLogo" relativePoint="TOPRIGHT" offsetX="66" />
+                    <TextureCoords left="0.0" right="0.7421875" top="0.0000" bottom="0.75" />
+                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

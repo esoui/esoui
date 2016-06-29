@@ -286,6 +286,33 @@
             </Controls>
         </Control>
         
+        <!-- Quadrant 1_2 -->
+
+        <Control name="ZO_GamepadGrid_NavQuadrant_1_2_Anchors" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_QUADRANT_1_2_WIDTH" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET" />
+        </Control>
+
+        <Control name="ZO_SharedGamepadNavQuadrant_1_2_Background_Template" inherits="ZO_Gamepad_BackgroundControl_Rails" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" inherits="ZO_GamepadGrid_BackgroundTexture">
+                    <TextureCoords left="ZO_GAMEPAD_QUADRANT_1_LEFT_COORD" right="ZO_GAMEPAD_QUADRANT_2_RIGHT_COORD" top="0" bottom="ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_1_2_Background" inherits="ZO_GamepadGrid_NavQuadrant_1_2_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template">
+            <Controls>
+                <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_2_Background_Template" />
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_AnchoredToQuadrant_1_2_Background" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_Background"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_Background"/>
+        </Control>
+
         <!-- Quadrant_1_2_3 -->
 
         <Control name="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" virtual="true">
@@ -308,7 +335,7 @@
             </Controls>
         </TopLevelControl>
 
-        <Control name="ZO_AnchoredToQuadrant123Background" virtual="true">
+        <Control name="ZO_AnchoredToQuadrant_1_2_3_Background" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_3_Background"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_3_Background"/>
         </Control>

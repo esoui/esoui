@@ -1,14 +1,15 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GuildInfoGamepad_TextBox" virtual="true">
+        <Control name="ZO_GuildInfoGamepad_TextBox" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Title" inherits="ZO_GamepadHeaderLabelTextTemplate">
                     <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Label>
 
                 <Label name="$(parent)Body" font="ZoFontGamepadCondensed42">
-                    <Anchor point="RIGHT" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                 </Label>
             </Controls>
         </Control>
@@ -121,15 +122,20 @@
                                         <Control name="$(parent)Trader" inherits="ZO_GuildInfoGamepad_InfoIcon">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)Keep" relativePoint="BOTTOMLEFT" offsetY="50"/>
                                         </Control>
+
+                                        <Control name="$(parent)GuildMaster" inherits="ZO_GuildInfoGamepad_TextBox">
+                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trader" relativePoint="BOTTOMLEFT" offsetY="45"/>
+                                        </Control>
                                         
                                         <Control name="$(parent)MOTD" inherits="ZO_GuildInfoGamepad_TextBox">
-                                            <Anchor point="TOPRIGHT" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trader" relativePoint="BOTTOMLEFT" offsetY="130"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)GuildMaster" relativePoint="BOTTOMLEFT" offsetY="25"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildMaster" relativePoint="BOTTOMRIGHT" offsetY="25"/>
                                         </Control>
 
                                         <Control name="$(parent)Description" inherits="ZO_GuildInfoGamepad_TextBox">
-                                            <Anchor point="TOPRIGHT" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)MOTDBody" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)MOTDBody" relativePoint="BOTTOMLEFT" offsetY="25"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)MOTDBody" relativePoint="BOTTOMRIGHT" offsetY="25"/>
                                         </Control>
                                     </Controls>
                                 </Control>

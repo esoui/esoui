@@ -54,7 +54,7 @@ function ZO_GamepadPlayerProgressBarNameLocation_OnInitialized(control)
 end
 
 function ZO_GamepadPlayerProgressBarNameLocationAnchor_Initialize(nameLocation, progressBar)
-    local anchor = ZO_Anchor:New(BOTTOMRIGHT, progressBar.levelLabel, BOTTOMLEFT, 8, 0)
+    local anchor = ZO_Anchor:New(BOTTOMRIGHT, progressBar.championIcon, BOTTOMLEFT, 8, 0)
 
     local control = nameLocation.control
     local fragment = ZO_AnchorSceneFragment:New(control, anchor)

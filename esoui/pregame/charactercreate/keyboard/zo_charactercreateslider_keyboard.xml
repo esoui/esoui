@@ -1,0 +1,118 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CharacterCreateSliderLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+         <Button name="ZO_CharacterCreateSliderPreview_Keyboard" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="32" y="32" />
+
+            <Textures
+                normal="EsoUI/Art/CharacterCreate/characterCreate_audio_up.dds"
+                pressed="EsoUI/Art/CharacterCreate/characterCreate_audio_down.dds"
+                mouseOver="EsoUI/Art/CharacterCreate/characterCreate_audio_over.dds"
+            />
+
+            <OnClicked>
+                ZO_CharacterCreate_PreviewClicked(self)
+            </OnClicked>
+        </Button>
+        
+        <Control name="ZO_CharacterCreateSlider_Keyboard" virtual="true" resizeToFitDescendents="true">
+
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_CharacterCreateSliderLabel_Keyboard" font="ZoFontGameShadow">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Slider name="$(parent)Slider" inherits="ZO_Slider">
+                    <Dimensions x="230" y="16" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+                    <Limits min="0" max="1" />
+
+                    <OnValueChanged>
+                        ZO_CharacterCreateSlider_SetSlider(self, value)
+                    </OnValueChanged>
+                </Slider>
+
+                <Button name="$(parent)Decrement" clickSound="Spinner_Down">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10" />
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
+                    />
+
+                    <OnClicked>
+                        ZO_CharacterCreate_ChangeSlider(GetControl(self:GetParent(), "Slider"), -1)
+                    </OnClicked>
+                </Button>
+                
+                <Button name="$(parent)Increment" mouseOverBlendMode="ADD" clickSound="Spinner_Up">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="4" />
+
+                    <Textures
+                        normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
+                    />
+
+                    <OnClicked>
+                        ZO_CharacterCreate_ChangeSlider(GetControl(self:GetParent(), "Slider"), 1)
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)Padlock" inherits="ZO_CharacterCreateSliderPadlock_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="30" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CharacterCreateColorSlider_Keyboard" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_CharacterCreateSliderLabel_Keyboard" font="ZoFontGameShadow">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Slider" inherits="ZO_ColorSwatchPicker">
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <!-- prevent resizeToFit from making the picker grow if a color on the bottom row is picked -->
+                        <Control name="$(parent)BottomSpacer">
+                            <Dimensions x="1" y="5" />
+                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Padlock" inherits="ZO_CharacterCreateSliderPadlock_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="43" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CharacterCreateDropDownSlider_Keyboard" hidden="true" resizeToFitDescendents="true" virtual="true">
+
+
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Dimensions x="233" />
+                    <Anchor point="TOPLEFT" />
+                </Control>
+
+                <Button name="$(parent)Preview" inherits="ZO_CharacterCreateSliderPreview_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Dropdown" relativePoint="RIGHT" offsetX="2" />
+                </Button>
+
+                <Button name="$(parent)Padlock" inherits="ZO_CharacterCreateSliderPadlock_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Dropdown" relativePoint="RIGHT" offsetX="43" />
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

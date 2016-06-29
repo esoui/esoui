@@ -354,6 +354,11 @@ function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
         local existingSceneName = ""
         local existingDescriptorName = ""
         if existingDescriptor then
+            --We tried to re-add the same exact button, just return
+            if existingDescriptor == keybindButtonDescriptor then
+                return
+            end
+
             existingSceneName = existingDescriptor.addedForSceneName
             local descriptorName = GetValueFromRawOrFunction(existingDescriptor, "name")
             if descriptorName then

@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_DyeingSavedPresetListEntry_Gamepad" virtual="true">
+        <Control name="ZO_DyeSavedPresetEntry" virtual="true">
             <Dimensions x="300" y="102"/>
 
             <OnInitialized>

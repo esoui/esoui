@@ -93,7 +93,9 @@
                 <Label name="$(parent)Level" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
                 </Label>
-
+                
+                <Texture name="$(parent)ChampionIcon" hidden="true" />
+                
                 <StatusBar name="$(parent)Bar">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-12" />
                     <Controls>
@@ -122,6 +124,7 @@
                 <Label name="$(parent)Level" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
                 </Label>
+                <Texture name="$(parent)ChampionIcon" hidden="true" />
                 <StatusBar name="$(parent)Bar" inherits="ZO_PlayerProgressBarTemplate">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ChampionIcon" relativePoint="BOTTOMRIGHT" offsetY="-5" />
                 </StatusBar>
@@ -149,10 +152,12 @@
                 <Label name="$(parent)Level" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
                 </Label>
+                
                 <Texture name="$(parent)ChampionIcon" hidden="true" textureFile="EsoUI/Art/Champion/champion_icon.dds">
-                    <Anchor point="LEFT" relativeTo="$(parent)Level" relativePoint="RIGHT"/>
-                    <Dimensions x="50" y="50"/>
+                    <Dimensions x="50" y="50" />
+                    <Anchor point="TOPLEFT" />
                 </Texture>
+                
                 <StatusBar name="$(parent)Bar" inherits="ZO_PlayerProgressBarTemplate" />
 
                 <Texture name="$(parent)LevelTypeIcon" hidden="true">

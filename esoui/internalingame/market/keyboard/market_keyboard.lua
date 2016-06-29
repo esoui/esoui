@@ -30,11 +30,14 @@ function Market:Initialize(control)
 
     local subscriptionControl = self.contentsControl:GetNamedChild("SubscriptionPage")
     self.subscriptionPage = subscriptionControl
-    self.subscriptionOverviewLabel = subscriptionControl:GetNamedChild("Overview")
-    self.subscriptionStatusLabel = subscriptionControl:GetNamedChild("MembershipInfoStatus")
-    self.subscriptionMembershipBanner = subscriptionControl:GetNamedChild("MembershipInfoBanner")
-    self.subscriptionBenefitsLabel = subscriptionControl:GetNamedChild("BenefitsText")
-    self.subscriptionSubscribeButton = subscriptionControl:GetNamedChild("SubscribeButton")
+    local subscriptionSCrollChild = subscriptionControl:GetNamedChild("ScrollChild")
+    self.subscriptionOverviewLabel = subscriptionSCrollChild:GetNamedChild("Overview")
+    self.subscriptionStatusLabel = subscriptionSCrollChild:GetNamedChild("MembershipInfoStatus")
+    self.subscriptionMembershipBanner = subscriptionSCrollChild:GetNamedChild("MembershipInfoBanner")
+    self.subscriptionBenefitsLineContainer = subscriptionSCrollChild:GetNamedChild("BenefitsLineContainer")
+    self.subscriptionSubscribeButton = subscriptionSCrollChild:GetNamedChild("SubscribeButton")
+
+    self.subscriptionBenefitLinePool = ZO_ControlPool:New("ZO_Market_SubscriptionBenefitLine", control)
 
     self.nextPreviewChangeTime = 0
     self.canBeginPreview = true
@@ -83,6 +86,7 @@ function Market:InitializeKeybindDescriptors()
                             return self:IsReadyToPreview()
                         end,
             callback =  function()
+                            self.selectedMarketProduct.variation = 1
                             self:BeginPreview()
                             self:SetCanBeginPreview(false, GetFrameTimeSeconds())
                         end,
@@ -594,16 +598,32 @@ end
 
 function Market:DisplayEsoPlusOffer()
     self:ClearMarketProducts()
+    self.subscriptionBenefitLinePool:ReleaseAllObjects()
 
     self.subscriptionPage:SetHidden(false)
     self.categoryFilter:SetHidden(true)
     self.categoryFilterLabel:SetHidden(true)
 
-    local overview, benefits, image = GetMarketSubscriptionKeyboardInfo()
+    local overview, image = GetMarketSubscriptionKeyboardInfo()
 
     self.subscriptionOverviewLabel:SetText(overview)
-    self.subscriptionBenefitsLabel:SetText(benefits)
     self.subscriptionMembershipBanner:SetTexture(image)
+
+    local numLines = GetNumKeyboardMarketSubscriptionBenefitLines()
+    local controlToAnchorTo = self.subscriptionBenefitsLineContainer
+    for i = 1, numLines do
+        local line = GetKeyboardMarketSubscriptionBenefitLine(i);
+        local benefitLine = self.subscriptionBenefitLinePool:AcquireObject()
+        benefitLine:SetText(line)
+        benefitLine:ClearAnchors()
+        if i == 1 then
+            benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, TOPLEFT, 0, 4)
+        else
+            benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, BOTTOMLEFT, 0, 4)
+        end
+        benefitLine:SetParent(self.subscriptionBenefitsLineContainer)
+        controlToAnchorTo = benefitLine
+    end
 
     local isSubscribed = IsESOPlusSubscriber()
     local statusText = isSubscribed and SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_ACTIVE or SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_NOT_ACTIVE
@@ -611,6 +631,8 @@ function Market:DisplayEsoPlusOffer()
     self.subscriptionSubscribeButton:SetHidden(isSubscribed)
 
     self.subscriptionStatusLabel:SetText(GetString(statusText))
+
+    ZO_Scroll_OnExtentsChanged(self.subscriptionPage)
 end
 
 local NO_LABELED_GROUP_HEADER = nil

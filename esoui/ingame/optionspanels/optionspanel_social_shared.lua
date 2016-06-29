@@ -53,6 +53,7 @@ do
         [CHAT_CATEGORY_ZONE_ENGLISH] = CHAT_CHANNEL_ZONE_LANGUAGE_1,
         [CHAT_CATEGORY_ZONE_FRENCH] = CHAT_CHANNEL_ZONE_LANGUAGE_2,
         [CHAT_CATEGORY_ZONE_GERMAN] = CHAT_CHANNEL_ZONE_LANGUAGE_3,
+        [CHAT_CATEGORY_ZONE_JAPANESE] = CHAT_CHANNEL_ZONE_LANGUAGE_4,
         [CHAT_CATEGORY_WHISPER_INCOMING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_WHISPER_OUTGOING] = CHAT_CHANNEL_WHISPER,
         [CHAT_CATEGORY_PARTY] = CHAT_CHANNEL_PARTY,
@@ -123,7 +124,10 @@ end
 function ZO_OptionsPanel_Social_TextSizeOnShow(control)
     local currentChoice = GetChatFontSize()
     GetControl(control, "Slider"):SetValue(currentChoice)
-    GetControl(control, "ValueLabel"):SetText(currentChoice)
+    local valueLabel = GetControl(control, "ValueLabel")
+    if valueLabel then
+        valueLabel:SetText(currentChoice)
+    end
 end
 
 function ZO_OptionsPanel_Social_ResetTextSizeToDefault(control)
@@ -133,12 +137,15 @@ end
 
 do
     local function OnSliderChanged(sliderControl, value, eventReason)
-        GetControl(sliderControl:GetParent(), "ValueLabel"):SetText(value)
+        local valueLabel = GetControl(sliderControl:GetParent(), "ValueLabel")
+        if valueLabel then
+            valueLabel:SetText(value)
+        end
         CHAT_SYSTEM:SetFontSize(value)
         SetChatFontSize(value)
     end
 
-    function ZO_OptionsPanel_Social_InitializeTextSizeControl(control)
+    function ZO_OptionsPanel_Social_InitializeTextSizeControl(control, selected)
         local data = control.data
         GetControl(control, "Name"):SetText(GetString(data.text))
         local slider = GetControl(control, "Slider")
@@ -148,6 +155,7 @@ do
         slider:SetValueStep(1)
         slider:SetValue(GetChatFontSize())
         slider:SetHandler("OnValueChanged", OnSliderChanged)
+        ZO_Options_SetupSlider(control, selected)
     end
 end
 
@@ -155,7 +163,10 @@ end
 function ZO_OptionsPanel_Social_MinAlphaOnShow(control)
     local currentChoice = zo_round(CHAT_SYSTEM:GetMinAlpha() * 100)
     GetControl(control, "Slider"):SetValue(currentChoice)
-    GetControl(control, "ValueLabel"):SetText(currentChoice)
+    local valueLabel = GetControl(control, "ValueLabel")
+    if valueLabel then
+        valueLabel:SetText(currentChoice)
+    end
 end
 
 function ZO_OptionsPanel_Social_ResetMinAlphaToDefault(control)
@@ -165,16 +176,21 @@ end
 
 do
     local function OnSliderChanged(sliderControl, value, eventReason)
-        GetControl(sliderControl:GetParent(), "ValueLabel"):SetText(value)
+        local valueLabel = GetControl(sliderControl:GetParent(), "ValueLabel")
+        if valueLabel then
+            valueLabel:SetText(value)
+        end
         CHAT_SYSTEM:SetMinAlpha(value / 100)
     end
 
-    function ZO_OptionsPanel_Social_InitializeMinAlphaControl(control)
+    function ZO_OptionsPanel_Social_InitializeMinAlphaControl(control, selected)
         local data = control.data
         GetControl(control, "Name"):SetText(GetString(data.text))
-        GetControl(control, "Slider"):SetMinMax(data.minValue, data.maxValue)
-        GetControl(control, "Slider"):SetValueStep(1)
-        GetControl(control, "Slider"):SetHandler("OnValueChanged", OnSliderChanged)
+        local slider = GetControl(control, "Slider")
+        slider:SetMinMax(data.minValue, data.maxValue)
+        slider:SetValueStep(1)
+        slider:SetHandler("OnValueChanged", OnSliderChanged)
+        ZO_Options_SetupSlider(control, selected)
     end
 end
 
@@ -229,8 +245,10 @@ local ZO_OptionsPanel_Social_ControlData =
         [OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE] = 
         {
             controlType = OPTIONS_CUSTOM,
+            customControlType = OPTIONS_SLIDER,
             customSetupFunction = ZO_OptionsPanel_Social_InitializeTextSizeControl,
             customResetToDefaultsFunction = ZO_OptionsPanel_Social_ResetTextSizeToDefault,
+            onShow = ZO_OptionsPanel_Social_TextSizeOnShow,
             panel = SETTING_PANEL_SOCIAL,
             text = SI_SOCIAL_OPTIONS_TEXT_SIZE,
             tooltipText = SI_SOCIAL_OPTIONS_TEXT_SIZE_TOOLTIP,
@@ -241,8 +259,10 @@ local ZO_OptionsPanel_Social_ControlData =
         [OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA] = 
         {
             controlType = OPTIONS_CUSTOM,
+            customControlType = OPTIONS_SLIDER,
             customSetupFunction = ZO_OptionsPanel_Social_InitializeMinAlphaControl,
             customResetToDefaultsFunction = ZO_OptionsPanel_Social_ResetMinAlphaToDefault,
+            onShow = ZO_OptionsPanel_Social_MinAlphaOnShow,
             panel = SETTING_PANEL_SOCIAL,
             text = SI_SOCIAL_OPTIONS_MIN_ALPHA,
             tooltipText = SI_SOCIAL_OPTIONS_MIN_ALPHA_TOOLTIP,
@@ -331,6 +351,15 @@ local ZO_OptionsPanel_Social_ControlData =
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_GERMAN,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_GERMAN_COLOR_TOOLTIP,
+        },
+        --Options_Social_ChatColor_Zone_Japan
+        [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN] = 
+        {
+            controlType = OPTIONS_CUSTOM,
+            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            panel = SETTING_PANEL_SOCIAL,
+            chatChannelCategory = CHAT_CATEGORY_ZONE_JAPANESE,
+            tooltipText = SI_SOCIAL_OPTIONS_ZONE_JAPANESE_COLOR_TOOLTIP,
         },
         --Options_Social_ChatColor_NPC
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC] = 

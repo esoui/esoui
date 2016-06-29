@@ -28,7 +28,7 @@
         </Label>
 
         <TopLevelControl name="ZO_AlertTextNotificationGamepad" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
-            <Anchor point="TOPRIGHT" offsetX="-15" offsetY="15" />
+            <Anchor point="TOPRIGHT" offsetX="-15" offsetY="10" />
             <OnInitialized>
                 ZO_AlertTextGamepad_OnInitialized(self)
             </OnInitialized>

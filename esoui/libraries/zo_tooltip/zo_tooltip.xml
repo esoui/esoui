@@ -8,6 +8,9 @@
                     <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
                     <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
                 </Backdrop>
+                <Label name="$(parent)Label">
+                    <Anchor point="LEFT" relativeTo="$(parent)Backdrop" relativePoint="RIGHT" offsetX="5"/>
+                </Label>
             </Controls>
         </Texture>
         <Control name="ZO_TooltipStatValuePair" virtual="true">

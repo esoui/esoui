@@ -66,7 +66,8 @@ function LoginBG_Keyboard:Initialize(control)
     self.gameVersionLabel = control:GetNamedChild("GameVersionLabel")
     self.accountRequired = control:GetNamedChild("AcctRequired")
 
-    local briefVersion, fullVersion = GetESOVersionString()
+    local briefVersion = GetESOVersionString()
+    local fullVersion = GetESOFullVersionString()
     self.gameVersionLabel:SetText(zo_strformat(SI_VERSION, briefVersion))
     self.fullVersion = fullVersion
 

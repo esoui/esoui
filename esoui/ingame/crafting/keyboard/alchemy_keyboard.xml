@@ -50,11 +50,11 @@
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
                     <Dimensions x="270" />
-                    <Anchor point="TOPLEFT" offsetX="77" offsetY="20" />
+                    <Anchor point="TOPLEFT" offsetX="97" offsetY="20" />
                 </Label>
-                <Label name="$(parent)Level" font="ZoFontGameShadow">
-                    <Dimensions x="270" />
-                    <Anchor point="CENTER" offsetX="-40" offsetY="20" />
+                <Label name="$(parent)Level" maxLineCount="1" font="ZoFontGameShadow">
+                    <Dimensions x="350" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
                 </Label>
             </Controls>
         </Control>

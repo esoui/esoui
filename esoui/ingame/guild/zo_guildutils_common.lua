@@ -68,7 +68,7 @@ function ZO_UpdateGuildStatusDropdownSelection(dropdown)
     local status = GetPlayerStatus()
     local statusTexture = GetPlayerStatusIcon(status)
     local text = zo_strformat(SI_GAMEPAD_GUILD_STATUS_SELECTOR_FORMAT, statusTexture, GetString("SI_PLAYERSTATUS", status))
-    dropdown:SetSelectedItem(text)
+    dropdown:SetSelectedItemText(text)
 end
 
 function ZO_UpdateGuildStatusDropdown(dropdown)

@@ -169,6 +169,9 @@ function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
     if IsInteractionPending() then
         EndPendingInteraction()
     end
+    
+    self:HideTopLevels()
+    ZO_Dialogs_ReleaseAllDialogs()
     self:SetInUIMode(false)
 end
 
@@ -421,7 +424,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
     end
 
     local SHOW_BASE_SCENE = true
-    if GUILD_HERALDRY:AttemptSaveIfBlocking() or GUILD_HERALDRY_GAMEPAD:AttemptSaveIfBlocking(SHOW_BASE_SCENE) then
+    if SYSTEMS:GetObject("guild_heraldry"):AttemptSaveIfBlocking(SHOW_BASE_SCENE) then
         return
     end
 

@@ -104,6 +104,7 @@ end
 function GamepadMarketPreview:UpdatePreviewedProduct(marketProduct)
     self.marketProduct = marketProduct
     if IsCharacterPreviewingAvailable() then
+        self.marketProduct.variation = 1
         self.marketProduct:Preview()
     end
 
@@ -264,13 +265,19 @@ function GamepadMarket:SetupSceneGroupCallback()
 end
 
 function GamepadMarket:PerformDeferredInitialization()
-    if self.isInitialized then return end
+    if self.isInitialized then
+        return
+    end
+
     self.isLockedForCategoryRefresh = false
     self.OnGamepadDialogHidden = function()
         self:AnchorCurrentCategoryControlToScrollChild()
     end
     self.subCategoryDataMarketProductIdMap = {} -- Used to map product IDs to product subcategories during category building
     self.subCategoryLabeledGroupTableMap = {} -- Used to lookup subcategory "LabeledGroup" tables during category building
+
+    self.subscriptionBenefitLinePool = ZO_ControlPool:New("ZO_GamepadMarket_SubscriptionBenefitLine", self.control)
+
     self.isInitialized = true
 end
 
@@ -407,8 +414,6 @@ function GamepadMarket:InitializeKeybindDescriptors()
         if triggerTutorialOnPurchase then
             self:SetQueuedTutorial(triggerTutorialOnPurchase)
         end
-
-        self:Activate()
     end
 
     self.keybindStripDescriptors =
@@ -444,12 +449,24 @@ function GamepadMarket:InitializeKeybindDescriptors()
                     end,
             keybind = "UI_SHORTCUT_SECONDARY",
             visible =   function()
-                            return self.selectedMarketProduct ~= nil and not self.selectedMarketProduct:IsBlank()
+                            local marketProduct = self.selectedMarketProduct
+                            if marketProduct ~= nil then
+                                if marketProduct:IsBundle() then
+                                    return not marketProduct:GetHidesChildProducts()
+                                else
+                                    return not self.selectedMarketProduct:IsBlank()
+                                end
+                            end
+                            return false
                         end,
             enabled =   function()
                             local marketProduct = self.selectedMarketProduct
-                            if marketProduct ~= nil and ((marketProduct:HasPreview() and IsCharacterPreviewingAvailable()) or marketProduct:IsBundle()) then
-                                return true
+                            if marketProduct ~= nil then
+                                if marketProduct:HasPreview() and IsCharacterPreviewingAvailable() then
+                                    return true
+                                elseif marketProduct:IsBundle() then
+                                    return true
+                                end
                             end
                             return false
                         end,
@@ -910,12 +927,41 @@ function GamepadMarket:DisplayEsoPlusOffer()
 
     self:ResetGrid()
 
-    local overview, benefits, image = GetMarketSubscriptionGamepadInfo()
+    local overview, image = GetMarketSubscriptionGamepadInfo()
 
     local control = self.currentCategoryData.control
     control:GetNamedChild("Overview"):SetText(overview)
-    control:GetNamedChild("BenefitsText"):SetText(benefits)
     control:GetNamedChild("MembershipInfoBanner"):SetTexture(image)
+    
+    local lineContainer = control:GetNamedChild("BenefitsLineContainer")
+
+    local numLines = GetNumGamepadMarketSubscriptionBenefitLines()
+    local numLeftSideLines = zo_ceil(numLines / 2) -- do it this way so if we have 7 bullets 4 are on the left and 3 on the right
+    local firstRightSideLineIndex = numLeftSideLines + 1
+    local controlToAnchorTo = lineContainer
+    for i = 1, numLines do
+        local line = GetGamepadMarketSubscriptionBenefitLine(i);
+        local benefitLine = self.subscriptionBenefitLinePool:AcquireObject()
+        benefitLine:SetText(line)
+        benefitLine:ClearAnchors()
+        if i == 1 then -- first left side line
+            benefitLine:SetAnchor(TOPLEFT, lineContainer, TOPLEFT, 0, 4)
+            benefitLine:SetAnchor(TOPRIGHT, lineContainer, CENTER, 0, 4)
+        else
+            if i <= numLeftSideLines then
+                benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, BOTTOMLEFT, 0, 4)
+            else
+                if i == firstRightSideLineIndex then
+                    benefitLine:SetAnchor(TOPLEFT, lineContainer, CENTER, 0, 4)
+                    benefitLine:SetAnchor(TOPRIGHT, lineContainer, TOPRIGHT, 0, 4)
+                else
+                    benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, BOTTOMLEFT, 0, 4)
+                end
+            end
+        end
+        benefitLine:SetParent(lineContainer)
+        controlToAnchorTo = benefitLine
+    end
 
     local isSubscribed = IsESOPlusSubscriber()
     local statusText = isSubscribed and SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_ACTIVE or SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_NOT_ACTIVE
@@ -1207,7 +1253,13 @@ do
 
                 if instantUnlockType == MARKET_INSTANT_UNLOCK_RENAME_TOKEN then
                     tokenDescription = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
-                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKENS_AVAILABLE, GetNumCharacterRenameTokens())
+                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_NAME_CHANGE))
+                elseif instantUnlockType == MARKET_INSTANT_UNLOCK_RACE_CHANGE_TOKEN then
+                    tokenDescription = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
+                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
+                elseif instantUnlockType == MARKET_INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
+                    tokenDescription = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
+                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
                 end
 
                 table.insert(tooltipLines, tokenDescription)

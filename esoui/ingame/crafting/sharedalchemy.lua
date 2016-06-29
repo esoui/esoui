@@ -44,11 +44,19 @@ function ZO_SharedAlchemy:Initialize(control)
     self:InitializeInventory()
     self:InitializeTooltip()
     self:InitializeSlots()
-    self:InitializeSharedEvents()    
+    self:InitializeSharedEvents()
 
     ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.skillInfo, CRAFTING_TYPE_ALCHEMY)
 
     self:InitializeScenes()
+
+    local function OnCraftCompleted()
+        if not self.control:IsHidden() then
+            self:UpdateTooltip()
+        end
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftCompleted)
 end
 
 function ZO_SharedAlchemy:InitializeSharedEvents()

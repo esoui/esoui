@@ -161,6 +161,7 @@ end
 function KeyboardMarketProduct:OnClicked(button)
     if(button == MOUSE_BUTTON_INDEX_LEFT) then
         if self.owner:IsReadyToPreview() then
+            self.variation = 1 
             self:Preview()
         end
     elseif(button == MOUSE_BUTTON_INDEX_RIGHT) then
@@ -181,7 +182,11 @@ function KeyboardMarketProduct:OnClicked(button)
             if self:IsActivelyPreviewing() then
                 AddMenuItem(GetString(SI_MARKET_ACTION_END_PREVIEW), function() self:EndPreview() end)
             elseif IsCharacterPreviewingAvailable() then
-                AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), function() self:Preview() end)
+                AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), 
+                                        function() 
+                                            self.variation = 1 
+                                            self:Preview()
+                                        end)
             end
         end
 
@@ -240,20 +245,22 @@ function ZO_MarketProductBundle:CreateIconControlTable(purchased)
 
     self.variations = {}
 
-    for childIndex = 1, numChildren do
-        local childMarketProductId = self:GetChildMarketProductId(childIndex)
-        local marketProductIcon = self:InitializeMarketProductIcon(childMarketProductId, purchased)
-        marketProductIcon:SetDimensions(BUNDLE_ICON_SIZE)
-        marketProductIcon:SetFrameHidden(false)
+    if not self:GetHidesChildProducts() then
+        for childIndex = 1, numChildren do
+            local childMarketProductId = self:GetChildMarketProductId(childIndex)
+            local marketProductIcon = self:InitializeMarketProductIcon(childMarketProductId, purchased)
+            marketProductIcon:SetDimensions(BUNDLE_ICON_SIZE)
+            marketProductIcon:SetFrameHidden(false)
 
-        table.insert(iconControls, marketProductIcon:GetControl())
-        self.variations[childMarketProductId] = 1
+            table.insert(iconControls, marketProductIcon:GetControl())
+            self.variations[childMarketProductId] = 1
+        end
+
+        -- Sort the child tiles alphabetically
+        table.sort(iconControls, function(a,b)
+                                        return a.marketProductIcon:GetDisplayName() < b.marketProductIcon:GetDisplayName()
+                                    end)
     end
-
-    -- Sort the child tiles alphabetically
-    table.sort(iconControls, function(a,b)
-                                    return a.marketProductIcon:GetDisplayName() < b.marketProductIcon:GetDisplayName()
-                                end)
 
     return iconControls
 end
@@ -340,6 +347,7 @@ function ZO_MarketProductBundle:Preview(icon)
 
             if GetNumMarketProductPreviewVariations(attachmentId) > 1 then
                 self.currentPreviewingId = attachmentId
+                self.variations[self.currentPreviewingId] = 1
                 MARKET:SetCurrentMultiVariationPreviewProduct(self)
             else
                 MARKET:SetCurrentMultiVariationPreviewProduct(nil)
@@ -587,7 +595,10 @@ function ZO_MarketProductIcon:OnClicked(button)
         if IsPreviewingMarketProduct(self.marketProductId) then
             AddMenuItem(GetString(SI_MARKET_ACTION_END_PREVIEW), function() marketProduct:EndPreview() end)
         elseif CanPreviewMarketProduct(self.marketProductId) and IsCharacterPreviewingAvailable() then
-            AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), function() marketProduct:Preview(self) end)
+            AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), function() 
+                                                                marketProduct.variation = 1
+                                                                marketProduct:Preview(self) 
+                                                            end)
         end
 
         ShowMenu(self.control)

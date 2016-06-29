@@ -178,6 +178,10 @@
                 ZO_Options_OnMouseExit(self)
             </OnMouseExit>
 
+            <OnShow>
+                ZO_Options_OnShow(self)
+            </OnShow>
+            
             <Controls>
                 <Slider name="$(parent)Slider" inherits="ZO_Slider">
                     <Dimensions x="190" y="16" />

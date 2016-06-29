@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -ue
+
+find esoui/ -type f -name "*.dds" > Textures.txt
+grep -Phor 'EsoUI[^"]+?\.dds' esoui/ >> Textures.txt
+cat Textures.txt | tr '[A-Z]\\' '[a-z]/' | sort -u > 1.txt
+mv 1.txt Textures.txt
+find esoui/ -type f -not -name "*.txt" -not -name "*.xml" -not -name "*.lua" -delete
+version=$(grep -oP '\d\.\d\.\d' README.md)
+apiversion=$(grep -oP 'API \K\d+' README.md)
+today=$(date +"%d %b %Y")
+read -p "Version [$version]: " new_version
+read -p "API Version [$apiversion]: " new_apiversion
+sed -i "s#[0-9]\.[0-9]\.[0-9]#${new_version:-$version}#" README.md
+sed -i "s#API [0-9]\+#API ${new_apiversion:-$apiversion}#" README.md
+sed -i "s# on .\+\?\.# on $today.#" README.md
+git add esoui
+git commit -am "${new_version:-$version}"
+git archive --format zip -o esoui-${new_version:-$version}.zip HEAD

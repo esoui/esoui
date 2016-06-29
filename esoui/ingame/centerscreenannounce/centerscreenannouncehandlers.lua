@@ -715,6 +715,12 @@ do
     end
 end
 
+CSH[EVENT_COLLECTIBLES_UPDATED] = function(numJustUnlocked)
+    if numJustUnlocked > 0 then
+        return CSA_EVENT_COMBINED_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED, GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, numJustUnlocked)
+    end
+end
+
 do
     local TRIAL_SCORE_REASON_TO_ASSETS =
     {
@@ -869,6 +875,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_JUSTICE_NO_LONGER_KOS)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_BROADCAST)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_COLLECTIBLE_UPDATED)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_COLLECTIBLES_UPDATED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_RIDING_SKILL_IMPROVEMENT)
     -- Higher-priority events
 

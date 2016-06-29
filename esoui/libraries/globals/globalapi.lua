@@ -13,6 +13,7 @@ zo_strsub           = string.sub
 zo_strgsub          = string.gsub
 zo_strlen           = string.len
 zo_strmatch         = string.match
+zo_strgmatch        = string.gmatch
 zo_strfind          = string.find
 zo_plainstrfind     = PlainStringFind
 zo_strsplit         = SplitString

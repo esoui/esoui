@@ -70,6 +70,9 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
 		end
 
         control:SetHandler("OnUpdate", data.labelUpdateFunction)
+        if data.labelUpdateFunction then
+            data.labelUpdateFunction(control, data)
+        end
 
 		local icon = GetControl(control, "IconImage")
 

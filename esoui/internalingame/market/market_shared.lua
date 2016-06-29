@@ -23,6 +23,7 @@ end
 
 function Market_Singleton:Initialize()
     self:InitializeEvents()
+    self:InitializePlatformErrors()
 end
 
 function Market_Singleton:InitializeEvents()
@@ -61,6 +62,10 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectibleUpdated(justUnlocked)
     end
 
+    local function OnMarketCollectiblesUpdated(numJustUnlocked)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectiblesUpdated(numJustUnlocked)
+    end
+
     local function OnShowMarketProduct(...)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(...)
     end
@@ -74,12 +79,31 @@ function Market_Singleton:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, function() OnMarketSearchResultsReady() end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, function(eventId, ...) OnShowMarketProduct(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, function(eventId, ...) OnShowMarketAndSearch(...) end)
 end
 
 function Market_Singleton:RequestOpenMarket()
     OpenMarket()
+end
+
+function Market_Singleton:InitializePlatformErrors()
+    local consoleStoreName
+    local uiPlatform = GetUIPlatform()
+
+    if uiPlatform == UI_PLATFORM_PS4 then
+        consoleStoreName = GetString(SI_GAMEPAD_MARKET_PLAYSTATION_STORE)
+    elseif uiPlatform == UI_PLATFORM_XBOX then
+        consoleStoreName = GetString(SI_GAMEPAD_MARKET_XBOX_STORE)
+    else -- PC Gamepad insufficient crowns and buy crowns dialog data
+        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT))
+    end
+
+    if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
+        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName)
+    end
+
 end
 
 function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId)
@@ -104,7 +128,7 @@ function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId)
         table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
         promptBuyCrowns = true
-        table.insert(errorStrings, zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT)))
+        table.insert(errorStrings, self.insufficientFundsMainText)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
         local slotsRequired = GetSpaceNeededToPurchaseMarketProduct(marketProductId)
         allowContinue = false
@@ -265,6 +289,12 @@ end
 
 function ZO_Market_Shared:OnCollectibleUpdated(justUnlocked)
     if justUnlocked then
+        self:UpdateCurrentCategory()
+    end
+end
+
+function ZO_Market_Shared:OnCollectiblesUpdated(numJustUnlocked)
+    if numJustUnlocked > 0 then
         self:UpdateCurrentCategory()
     end
 end

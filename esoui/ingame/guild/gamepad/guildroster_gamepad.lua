@@ -29,6 +29,7 @@ function ZO_GamepadGuildRosterManager:InitializeHeader()
     {
         titleText = GetString(SI_GAMEPAD_GUILD_ROSTER_HEADER),
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_HUB_GUILD_NAME_HEADER),
+        data2HeaderText = GetString(SI_GAMEPAD_GUILD_HEADER_GUILD_MASTER_LABEL),
     }
     ZO_GamepadInteractiveSortFilterList.InitializeHeader(self, contentHeaderData)
 end

@@ -15,6 +15,7 @@ local STICKER_ROW_DATA = 1
 --Descriptive defaults for readibility in function calls
 local FORCE_HIDE_PROGRESS_TEXT = true
 local DONT_HIDE_LOCKED = false
+local DONT_ANIMATE = true
 
 local function GetTextColor(enabled, normalColor, disabledColor)
     if enabled then
@@ -26,6 +27,8 @@ end
 local function ApplyTextColorToLabel(label, ...)
     label:SetColor(GetTextColor(...))
 end
+
+local g_currentMouseTarget = nil
 
 --[[Collectible]]--
 -------------------
@@ -91,9 +94,9 @@ function Collectible:Show(control)
         control.icon:SetHidden(false)
 
         self:RefreshVisualLayer()
-        self:SetBlockedState(IsCollectibleCategoryBlocked(categoryType))
+        self:SetBlockedState(IsCollectibleBlocked(self.collectibleId))
 
-        if self.isCurrentMouseTarget then
+        if self:IsCurrentMouseTarget() then
             self:ShowKeybinds()
         end
 
@@ -106,6 +109,7 @@ function Collectible:Show(control)
         self:EndCooldown()
         control.collectible = nil
     end
+    self:RefreshMouseoverVisuals(DONT_ANIMATE)
 end
 
 function Collectible:RefreshVisualLayer()
@@ -126,7 +130,8 @@ function Collectible:RefreshMultiIcon()
     end
 
     self.notificationId = NOTIFICATIONS_PROVIDER:GetNotificationIdForCollectible(self.collectibleId)
-    if self.notificationId then
+    self.isNew = IsCollectibleNew(self.collectibleId)
+    if self.isNew then
         control.multiIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
     end
 
@@ -145,22 +150,34 @@ function Collectible:GetControl()
     return self.control
 end
 
-function Collectible:SetHighlightHidden(hidden)
+function Collectible:SetHighlightHidden(hidden, dontAnimate)
     local control = self.control
     control.highlight:SetHidden(false) -- let alpha take care of the actual hiding
     if not control.highlightAnimation then
         control.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("JournalProgressHighlightAnimation", control.highlight)
     end
 
-    if(hidden) then
+    if hidden then
         ApplyTextColorToLabel(control.title, self.unlocked, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
-        control.iconAnimation:PlayBackward()
-        control.highlightAnimation:PlayBackward()
+        if dontAnimate then
+            control.iconAnimation:PlayInstantlyToStart()
+            control.highlightAnimation:PlayInstantlyToStart()
+        else
+            control.iconAnimation:PlayBackward()
+            control.highlightAnimation:PlayBackward()
+        end
     else
         ApplyTextColorToLabel(control.title, self.unlocked, ZO_HIGHLIGHT_TEXT, ZO_SELECTED_TEXT)
-        control.highlightAnimation:PlayForward()
-        if self.isCooldownActive ~= true then
-            control.iconAnimation:PlayForward()
+        if dontAnimate then
+            control.highlightAnimation:PlayInstantlyToEnd()
+            if self.isCooldownActive ~= true then
+                control.iconAnimation:PlayInstantlyToEnd()
+            end
+        else
+            control.highlightAnimation:PlayForward()
+            if self.isCooldownActive ~= true then
+                control.iconAnimation:PlayForward()
+            end
         end
     end
 end
@@ -259,19 +276,16 @@ do
     local SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON = true, true, true
     function Collectible:OnMouseEnter()
         if self.collectibleId then
-            self:SetHighlightHidden(false)
             InitializeTooltip(ItemTooltip, self.control.parent, RIGHT, -5, 0, LEFT)
             ItemTooltip:SetCollectible(self.collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
-            self.isCurrentMouseTarget = true
+            g_currentMouseTarget = self
             self:ShowKeybinds()
-            if self.purchasable then
-                self.control.cornerTag:SetHidden(false)
-            end
+            self:RefreshMouseoverVisuals()
         end
     end
 
     function Collectible:RefreshTooltip()
-        if self.isCurrentMouseTarget then
+        if self:IsCurrentMouseTarget() then
             ClearTooltip(ItemTooltip)
             InitializeTooltip(ItemTooltip, self.parentRow, RIGHT, -5, 0, LEFT)
             ItemTooltip:SetCollectible(self.collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
@@ -281,18 +295,31 @@ end
 
 function Collectible:OnMouseExit()
     if self.collectibleId then
-        self:SetHighlightHidden(true)
         ClearTooltip(ItemTooltip)
         self:HideKeybinds()
-        self.isCurrentMouseTarget = false
-        if self.purchasable then
-            self.control.cornerTag:SetHidden(true)
-        end
+        g_currentMouseTarget = nil
+        self:RefreshMouseoverVisuals()
 
         if self.notificationId then
             RemoveCollectibleNotification(self.notificationId)
         end
+
+        if self.isNew then
+            ClearCollectibleNewStatus(self.collectibleId)
+        end
     end
+end
+
+function Collectible:RefreshMouseoverVisuals(dontAnimate)
+    local areVisualsHidden = not self:IsCurrentMouseTarget()
+    self:SetHighlightHidden(areVisualsHidden, dontAnimate)
+    if self.purchasable then
+        self.control.cornerTag:SetHidden(areVisualsHidden)
+    end
+end
+
+function Collectible:IsCurrentMouseTarget()
+    return g_currentMouseTarget == self
 end
 
 function Collectible:OnClicked(button)
@@ -358,7 +385,7 @@ function Collectible:EndCooldown()
     control.cooldownTime:SetHidden(true)
     control.cooldownEdge:SetHidden(true)
     control.cooldownTime:SetText("")
-    if self.isCurrentMouseTarget then
+    if self:IsCurrentMouseTarget() then
         self:ShowKeybinds()
         self:SetHighlightHidden(false)
     end
@@ -487,8 +514,10 @@ function CollectionsBook:InitializeEvents()
     self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function() self:UpdateCollectionVisualLayer() end)
 
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectiblesUpdated", function() self:OnCollectionUpdated() end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionNotificationRemoved", function(...) self:OnCollectionNotificationRemoved(...) end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleNewStatusRemoved", function(...) self:OnCollectionNewStatusRemoved(...) end)
 
     self.refreshGroups = ZO_Refresh:New()
     self.refreshGroups:AddRefreshGroup("FullUpdate",
@@ -504,6 +533,9 @@ function CollectionsBook:InitializeEvents()
             self:UpdateCollectible(collectibleId)
         end,
     })
+
+    -- cache our GetCollectibleIds function so we don't have to make it everytime we check for new collectibles
+    self.getCollectiblesFunction = function(...) return self:GetCollectibleIds(...) end
 end
 
 function CollectionsBook:InitializeCategoryTemplates()
@@ -677,31 +709,16 @@ function CollectionsBook:UpdateCategoryStatusIcon(categoryNode)
 
     categoryControl.statusIcon:ClearIcons()
 
-    if self:HasAnyNotifications(categoryIndex, subcategoryIndex) then
+    if self:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex) then
         categoryControl.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
     end
 
     local numCollectbles = self:GetCategoryInfoFromData(categoryData, categoryData.parentData)
-    if self:DoesCollectibleListHaveVisibleCollectible(self:GetCollectibleIds(categoryIndex, subcategoryIndex, numCollectbles)) then
+    if COLLECTIONS_BOOK_SINGLETON.DoesCollectibleListHaveVisibleCollectible(self:GetCollectibleIds(categoryIndex, subcategoryIndex, numCollectbles)) then
         categoryControl.statusIcon:AddIcon(VISIBLE_ICON)
     end
 
     categoryControl.statusIcon:Show()
-end
-
-function CollectionsBook:DoesCollectibleListHaveVisibleCollectible(...)
-    for i=1, select("#", ...) do
-        local id = select(i, ...)
-
-        if DoesCollectibleHaveVisibleAppearance(id) then
-            local isActive = select(7, GetCollectibleInfo(id))
-            if isActive and not WouldCollectibleBeHidden(id) then
-                return true
-            end
-        end
-    end
-
-    return false
 end
 
 function CollectionsBook:UpdateAllCategoryStatuses()
@@ -735,17 +752,28 @@ end
     end
 
     function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
-        if index >= 1 then
-            if self.searchString ~= "" then
-                local effectiveSubcategoryIndex = subCategoryIndex or "root"
-                if not self.searchResults[categoryIndex][effectiveSubcategoryIndex][index] then
-                    index = index - 1
-                    return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+        if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then -- we ignore the DLC category when viewing the standard collections window
+            if index >= 1 then
+                if self.searchString ~= "" then
+                    local inSearchResults = false
+                    local categoryResults = self.searchResults[categoryIndex]
+                    if categoryResults then
+                        local effectiveSubcategoryIndex = subCategoryIndex or "root"
+                        local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
+                        if subcategoryResults and subcategoryResults[index] then
+                            inSearchResults = true
+                        end
+                    end
+
+                    if not inSearchResults then
+                        index = index - 1
+                        return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+                    end
                 end
+                local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
+                index = index - 1
+                return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
             end
-            local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
-            index = index - 1
-            return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
         end
         return ...
     end
@@ -847,10 +875,18 @@ function CollectionsBook:UpdateCollectible(collectibleId)
     end
 end
 
-function CollectionsBook:OnCollectionNotificationRemoved(notificationId, collectibleId)
+function CollectionsBook:OnCollectibleStatusUpdated(collectibleId)
     self.refreshGroups:RefreshSingle("CollectibleUpdated", collectibleId)
     MAIN_MENU_KEYBOARD:RefreshCategoryBar()
     MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("collectionsSceneGroup")
+end
+
+function CollectionsBook:OnCollectionNotificationRemoved(notificationId, collectibleId)
+    self:OnCollectibleStatusUpdated(collectibleId)
+end
+
+function CollectionsBook:OnCollectionNewStatusRemoved(collectibleId)
+    self:OnCollectibleStatusUpdated(collectibleId)
 end
 
 function CollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subcategoryIndex)
@@ -885,6 +921,14 @@ end
 
 function CollectionsBook:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
     return NOTIFICATIONS_PROVIDER:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
+end
+
+function CollectionsBook:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
+    return COLLECTIONS_BOOK_SINGLETON.DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex, self.getCollectiblesFunction)
+end
+
+function CollectionsBook:HasAnyNewCollectibles()
+    return COLLECTIONS_BOOK_SINGLETON.HasAnyNewCollectibles()
 end
 
 function CollectionsBook:GetNotificationIdForCollectible(collectibleId)

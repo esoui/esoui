@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Backdrop name="ZO_GamepadPassiveFocusHighlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_INSIDE_PADDING" offsetY="-ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_INSIDE_PADDING" />
+            <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_INSIDE_PADDING" offsetY="ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_INSIDE_PADDING" />
+        </Backdrop>
+
+        <Control name="ZO_GamepadPassiveFocusControlWithHighlight" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadPassiveFocusHighlight" hidden="true" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadPassiveFocusDropdown" inherits="ZO_GamepadPassiveFocusControlWithHighlight" virtual="true">
+            <Controls>
+                <Control name="$(parent)Highlight" override="true">
+                    <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_WIDE_PADDING" offsetY="-ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_INSIDE_PADDING" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_WIDE_PADDING" offsetY="ZO_GAMEPAD_PASSIVE_FOCUS_HIGHLIGHT_INSIDE_PADDING" />
+                </Control>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GamepadPassiveFocusEditBox" inherits="ZO_GamepadPassiveFocusControlWithHighlight" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Gamepad">
+                    <AnchorFill />
+                   
+                    <Controls>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop_Gamepad" />
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

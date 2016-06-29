@@ -156,35 +156,12 @@ function ZO_GuildHeraldryManager_Gamepad:IsCurrentBlockingScene()
     return MAIN_MENU_MANAGER:GetBlockingSceneName() == "guildHeraldry_gamepad"
 end
 
-function ZO_GuildHeraldryManager_Gamepad:AttemptSaveIfBlocking(showBaseScene)
-    local attemptedSave = false
-
-    if self:IsCurrentBlockingScene() then
-        self:AttemptSaveAndExit(showBaseScene)
-        attemptedSave = true
-    end
-
-    return attemptedSave
-end
-
 function ZO_GuildHeraldryManager_Gamepad:AttemptSaveAndExit(showBaseScene)
-    local blocked = false
-
-    if HasPendingHeraldryChanges() and not self.pendingTransaction then
-        self:SetPendingExit(true)
-        if not IsCreatingHeraldryForFirstTime() then
-            local pendingCost = GetPendingHeraldryCost()
-            local heraldryFunds = GetHeraldryGuildBankedMoney()
-            if heraldryFunds and pendingCost <= heraldryFunds then
-                self:ConfirmHeraldryApplyChanges()
-                blocked = true
-            end
-        end
+    if self.pendingTransaction then
+        return
     end
 
-    if not blocked then
-        self:ConfirmExit(showBaseScene)
-    end
+    ZO_GuildHeraldryManager_Shared.AttemptSaveAndExit(self, showBaseScene)
 end
 
 function ZO_GuildHeraldryManager_Gamepad:ConfirmExit(showBaseScene)
@@ -1159,4 +1136,5 @@ end
 
 function ZO_GuildHeraldry_Gamepad_OnInitialized(control)
     GUILD_HERALDRY_GAMEPAD = ZO_GuildHeraldryManager_Gamepad:New(control)
+    SYSTEMS:RegisterGamepadObject("guild_heraldry", GUILD_HERALDRY_GAMEPAD)
 end

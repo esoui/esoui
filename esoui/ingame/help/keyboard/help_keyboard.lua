@@ -181,7 +181,7 @@ end
 
 function ZO_HelpManager:AddTrialEntry()
     local accountTypeId, title, description = GetTrialInfo();
-    if accountTypeId ~= 0 then
+    if accountTypeId ~= 0 and title ~= "" and description ~= "" then
         local parent
         self.trialIndex = GetNumHelpCategories() + 1
         self.trialDescription = description

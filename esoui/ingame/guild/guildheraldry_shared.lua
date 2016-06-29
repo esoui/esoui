@@ -482,7 +482,38 @@ function ZO_GuildHeraldryManager_Shared:IsPendingExit()
     return self.isPendingExit
 end
 
-function ZO_GuildHeraldryManager_Shared:ConfirmExit()
+function ZO_GuildHeraldryManager_Shared:AttemptSaveIfBlocking(showBaseScene)
+    local attemptedSave = false
+
+    if self:IsCurrentBlockingScene() then
+        self:AttemptSaveAndExit(showBaseScene)
+        attemptedSave = true
+    end
+
+    return attemptedSave
+end
+
+function ZO_GuildHeraldryManager_Shared:AttemptSaveAndExit(showBaseScene)
+    local blocked = false
+
+    if HasPendingHeraldryChanges() then
+        self:SetPendingExit(true)
+        if not IsCreatingHeraldryForFirstTime() then
+            local pendingCost = GetPendingHeraldryCost()
+            local heraldryFunds = GetHeraldryGuildBankedMoney()
+            if heraldryFunds and pendingCost <= heraldryFunds then
+                self:ConfirmHeraldryApplyChanges()
+                blocked = true
+            end
+        end
+    end
+
+    if not blocked then
+        self:ConfirmExit(showBaseScene)
+    end
+end
+
+function ZO_GuildHeraldryManager_Shared:ConfirmExit(showBaseScene)
     -- Should be overridden by child classes
 end
 

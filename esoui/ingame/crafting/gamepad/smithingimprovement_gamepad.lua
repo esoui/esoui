@@ -97,6 +97,8 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self:ClearBoosterRowHighlight()
 
             self.selectedItem = nil
+
+            self:Refresh()
         end
     end)
 

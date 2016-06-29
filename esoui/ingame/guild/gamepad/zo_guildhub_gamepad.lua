@@ -504,7 +504,6 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                         end
 
                         local function OnDropdownDeactivated()
-                            PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
                             KEYBIND_STRIP:PopKeybindGroupState()
                         end
 
@@ -516,7 +515,6 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                     
                     callback = function()
                         KEYBIND_STRIP:PushKeybindGroupState() -- This is just to hide the keybinds (don't need to store the state)
-                        RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
                         self.allianceDropDown:Activate()
                         self.allianceDropDown:SetHighlightedItem(self.selectedAllianceIndex)
                     end

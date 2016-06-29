@@ -34,11 +34,9 @@ function ZO_SharedInventoryManager:Initialize()
             self:RefreshInventory(BAG_BACKPACK)
             self:RefreshInventory(BAG_WORN)
             self:RefreshInventory(BAG_VIRTUAL)
-            -- Only update the bank bag when we are actually banking
-            -- this assumes that, outside of banking, full inventory updates don't actually modify the bank
-            if GetInteractionType() == INTERACTION_BANK then
-                self:RefreshInventory(BAG_BANK)
-            end
+            -- with the addition of Craft Bags the bank bag could be modified by the automatic transfer
+            -- of bank contents to the Craft Bag on joining a region
+            self:RefreshInventory(BAG_BANK)
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -109,7 +107,7 @@ function ZO_SharedInventoryManager:Initialize()
         self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex)
     end
 
-    local function OnGuldBankUpdated()
+    local function OnGuildBankUpdated()
         self.refresh:RefreshAll("guild_bank")
         self:FireCallbacks("FullInventoryUpdate", BAG_GUILDBANK)
     end
@@ -118,12 +116,12 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySlotUpdated)
 
 
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_GUILD_BANK, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_GUILD_BANK, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_SELECTED, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_DESELECTED, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEMS_READY, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuldBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_GUILD_BANK, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_GUILD_BANK, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_SELECTED, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_DESELECTED, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEMS_READY, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankUpdated)
 
     local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex)
         self.refresh:RefreshSingle("inventory", BAG_GUILDBANK, slotIndex)
@@ -204,25 +202,19 @@ end
 function ZO_SharedInventoryManager:GenerateFullSlotData(optFilterFunction, ...)
     self.refresh:UpdateRefreshGroups()
 
-    local numBagIds = select("#", ...)
-    if numBagIds > 1 then
-        local combinedCache = {}
-        for i = 1, select("#", ...) do
-            local bagId = select(i, ...)
-            local bagCache = self:GetOrCreateBagCache(bagId)
+    local filteredItems = {}
+    for i = 1, select("#", ...) do
+        local bagId = select(i, ...)
+        local bagCache = self:GetOrCreateBagCache(bagId)
 
-            for slotIndex, itemData in pairs(bagCache) do
-                if not optFilterFunction or optFilterFunction(itemData) then
-                    combinedCache[#combinedCache + 1] = itemData
-                end
+        for slotIndex, itemData in pairs(bagCache) do
+            if not optFilterFunction or optFilterFunction(itemData) then
+                filteredItems[#filteredItems + 1] = itemData
             end
         end
-
-        return combinedCache
     end
 
-    local bagId = ...
-    return self:GetOrCreateBagCache(bagId)
+    return filteredItems
 end
 
 function ZO_SharedInventoryManager:GenerateSingleSlotData(bagId, slotIndex)
@@ -458,6 +450,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.stolen = IsItemStolen(bagId, slotIndex)
     slot.filterData = { GetItemFilterTypeInfo(bagId, slotIndex) }
     slot.condition = GetItemCondition(bagId, slotIndex)
+    slot.isPlaceableFurniture = IsItemPlaceableFurniture(bagId, slotIndex)
 
     if wasSameItemInSlotBefore and slot.age ~= 0 then
         -- don't modify the age, keep it the same relative sort - for now?

@@ -203,7 +203,7 @@ function ZO_GuildRanks_Shared:InitializeAddRankDialog(dialogName)
                 entry.rankIndex = i
                 dialog.copyComboBox:AddItem(entry)
             end
-            dialog.copyComboBox:SetSelectedItem(GetString(SI_GUILD_RANKS_COPY_NONE))
+            dialog.copyComboBox:SetSelectedItemText(GetString(SI_GUILD_RANKS_COPY_NONE))
             dialog.copyComboBox.selectedRankIndex = nil
         end,
         customControl = control,

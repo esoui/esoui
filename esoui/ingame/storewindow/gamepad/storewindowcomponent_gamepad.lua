@@ -98,7 +98,7 @@ end
 
 function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mode, currencyType)
     local options = self:GetCurrencyOptions()
-    local invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_MONEY) or false
+    local invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(currencyType) or false
     local priceControl = control:GetNamedChild("Price")
 
     local storeUsesAP, storeUsesTelvarStones = select(2, GetStoreCurrencyTypes())

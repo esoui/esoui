@@ -343,27 +343,29 @@
         -->
         <Control name="ZO_CheckBoxTemplate_Gamepad" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
-                ZO_GamepadCheckBoxTemplate_OnInitialized(self)
-
-                local checkBox = self:GetNamedChild("CheckBox")
-                local label = self:GetNamedChild("Label")
-
-                local offsetX = select(5, label:GetAnchor(0))
-                label:SetWidth(ZO_GAMEPAD_CONTENT_WIDTH - checkBox:GetWidth() - offsetX)
-
-                self.GetHeight = function(control)
-                    return zo_max(checkBox:GetHeight(), label:GetTextHeight())
-                end
+                ZO_GamepadCheckBoxTemplate_OnInitialized(self, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT)
             </OnInitialized>
 
             <Controls>
                 <Button name="$(parent)CheckBox" inherits="ZO_GamepadCheckButton">
-                    <Anchor point="LEFT"/>
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
                 </Button>
 
                 <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
                     <Anchor point="LEFT" relativeTo="$(parent)CheckBox" relativePoint="RIGHT" offsetX="5"/>
                 </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_CheckBoxTemplate_Pregame_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_GamepadCheckBoxTemplate_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Button name="$(parent)CheckBox" inherits="ZO_GamepadCheckButton" override="true">
+                    <Anchor point="LEFT" />
+                </Button>
             </Controls>
         </Control>
 

@@ -67,9 +67,11 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
 
     self.isMoving = false
     self.animationEnabled = true
+    self.soundEnabled = true
     self.directionalInputEnabled = true
     self.validateGradient = true
     self.validGradientDirty = true
+    self.anchorOppositeSide = false
 
     self:SetActive(false)
     self.enabled = true
@@ -232,6 +234,10 @@ function ZO_ParametricScrollList:SetDrawScrollArrows(drawScrollArrows)
     self.drawScrollArrows = drawScrollArrows
 end
 
+function ZO_ParametricScrollList:SetAnchorOppositeSide(anchorOppositeSide)
+    self.anchorOppositeSide = true
+end
+
 function ZO_ParametricScrollList:UpdateScrollArrows()
     if(self.drawScrollArrows) then 
         local selectedIndex = self:CalculateSelectedIndexOffsetWithDrag()
@@ -280,6 +286,13 @@ end
 
 function ZO_ParametricScrollList:SetActive(active, fireActivatedCallback)
     if self.active ~= active then
+        --If the list is still animating when it is deactivated then complete the animation instantly before deactivating.
+        --Otherwise, things can happen like selected index changing which the list is deactivated
+        if not active and self:IsMoving() then
+            self:UpdateAnchors(self.targetSelectedIndex)
+            self:SetMoving(false)
+        end
+        
         self.active = active
 
         if self.active and self.directionalInputEnabled then
@@ -709,6 +722,10 @@ function ZO_ParametricScrollList:GetTargetData()
     return self:GetDataForDataIndex(targetIndex)
 end
 
+function ZO_ParametricScrollList:GetTargetIndex()
+    return self:CalculateSelectedIndexOffsetWithDrag()
+end
+
 function ZO_ParametricScrollList:GetTargetControl()
     local targetIndex = self:CalculateSelectedIndexOffsetWithDrag()
     return self.dataIndexToControl[targetIndex]
@@ -797,11 +814,22 @@ end
 
 function ZO_ParametricScrollList:UpdateDirectionalInput()
     local result = self.movementController:CheckMovement()
+
+    if self.customDirectionalInputHandler and self.customDirectionalInputHandler(result) then
+        return
+    end
+
     if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
         self:MoveNext()
     elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
         self:MovePrevious()
     end
+end
+
+--Will fire a callback with the directional input result
+--Optionally you can return true to consume the result before the list processes it
+function ZO_ParametricScrollList:SetCustomDirectionInputHandler(handler)
+    self.customDirectionalInputHandler = handler
 end
 
 function ZO_ParametricScrollList:SetHideUnselectedControls(state)
@@ -823,9 +851,14 @@ function ZO_ParametricScrollList:GetDesiredEntryAnchors()
     if self.entryAnchors then
        return self.entryAnchors[1], self.entryAnchors[2]
     elseif self.mode == PARAMETRIC_SCROLL_LIST_VERTICAL then
-        return TOP, CENTER
+        if self.anchorOppositeSide then
+            return BOTTOM, CENTER
+        else
+            return TOP, CENTER
+        end
+    else
+        return TOP, TOP
     end
-    return TOP, TOP
 end
 
 function ZO_ParametricScrollList:GetEntryFixedCenterOffset()
@@ -852,7 +885,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
     local selectedDataChanged = self.selectedIndex ~= newSelectedDataIndex
     local oldSelectedData = self.selectedData
 
-    if not self.jumping and selectedDataChanged and oldSelectedData then
+    if self.soundEnabled and not self.jumping and selectedDataChanged and oldSelectedData then
         if newSelectedDataIndex > self.selectedIndex then
             self.onPlaySoundFunction(ZO_PARAMETRIC_MOVEMENT_TYPES.MOVE_NEXT)
         else
@@ -889,7 +922,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
     if(not self.hideUnselectedControls) then
         -- Layout items before the center
         do
-            local prevControlOffsets = centerOffset + preCenterPadding + centerSelectedOffset * (1 - baseOffset)
+            local prevControlOffsets = centerOffset - (self.anchorOppositeSide and centerControlDimension or 0) + preCenterPadding + centerSelectedOffset * (1 - baseOffset)
             local startOfScrollContainer = GetStartOfControl(self.mode, self.control)
             for dataIndex = newSelectedDataIndex - 1, 1, -1 do
                 local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED)
@@ -906,9 +939,9 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
                     parametricFunction(control, distanceFromCenter, baseOffset)
                 end
 
-                prevControlOffsets = prevControlOffsets - controlDimension - parametricOffset - postPadding
+                prevControlOffsets = prevControlOffsets - (self.anchorOppositeSide and 0 or controlDimension) - parametricOffset - postPadding
                 self:SetAnchorForEntryControl(control, entryAnchor1, entryAnchor2, TransformAnchorOffsetsForMode(self.mode, prevControlOffsets + fixedCenterOffset, 0))
-                prevControlOffsets = prevControlOffsets - prePadding
+                prevControlOffsets = prevControlOffsets - prePadding - (self.anchorOppositeSide and controlDimension or 0) 
 
                 if GetStartOfControl(self.mode, control) <= startOfScrollContainer then
                     break
@@ -918,7 +951,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
 
         -- Layout items after the center
         do
-            local prevControlOffsets = centerOffset + centerControlDimension + postCenterPadding + centerSelectedOffset * (1 - baseOffset)
+            local prevControlOffsets = centerOffset + (self.anchorOppositeSide and 0 or centerControlDimension) + postCenterPadding + centerSelectedOffset * (1 - baseOffset)
             local endOfScrollContainer = GetEndOfControl(self.mode, self.control)
             for dataIndex = newSelectedDataIndex + 1, #self.dataList do
                 local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED)
@@ -930,8 +963,6 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
 
                 local prePadding, postPadding = self:GetPaddingForDataIndex(dataIndex, distanceFromCenter, baseOffset)
 
-                self:SetAnchorForEntryControl(control, entryAnchor1, entryAnchor2, TransformAnchorOffsetsForMode(self.mode, prevControlOffsets + parametricOffset + prePadding + additionalBottomParametricOffset + fixedCenterOffset, 0))
-
                 local parametricFunction = self:GetParametricFunctionForDataIndex(dataIndex)
                 if parametricFunction then
                     parametricFunction(control, distanceFromCenter, baseOffset)
@@ -939,7 +970,11 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
 
                 local controlDimension = GetControlDimensionForMode(self.mode, control)
 
-                prevControlOffsets = prevControlOffsets + controlDimension + parametricOffset + prePadding + postPadding + additionalBottomParametricOffset
+                prevControlOffsets = prevControlOffsets + parametricOffset + prePadding + additionalBottomParametricOffset + (self.anchorOppositeSide and controlDimension or 0)
+
+                self:SetAnchorForEntryControl(control, entryAnchor1, entryAnchor2, TransformAnchorOffsetsForMode(self.mode, prevControlOffsets + fixedCenterOffset, 0))
+                
+                prevControlOffsets = prevControlOffsets + (self.anchorOppositeSide and 0 or controlDimension) + postPadding
 
                 if GetEndOfControl(self.mode, control) >= endOfScrollContainer then
                     break
@@ -1270,6 +1305,10 @@ end
 
 function ZO_ParametricScrollList:SetJumping(isJumping)
     self.jumping = isJumping
+end
+
+function ZO_ParametricScrollList:SetSoundEnabled(isSoundEnabled)
+    self.soundEnabled = isSoundEnabled
 end
 
 --in case you don't want your list to default to the first entry in the list!

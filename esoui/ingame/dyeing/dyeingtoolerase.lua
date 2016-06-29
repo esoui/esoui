@@ -18,9 +18,9 @@ function ZO_DyeingToolErase:HasSwatchSelection()
     return false
 end
 
-function ZO_DyeingToolErase:OnEquipSlotLeftClicked(equipSlot, dyeChannel)
-    SetPendingEquippedItemDye(equipSlot, zo_replaceInVarArgs(dyeChannel, nil, GetPendingEquippedItemDye(equipSlot)))
-    self.owner:OnPendingDyesChanged(equipSlot)
+function ZO_DyeingToolErase:OnLeftClicked(dyeableSlot, dyeChannel)
+    SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, nil, GetPendingSlotDyes(dyeableSlot)))
+    self.owner:OnPendingDyesChanged(dyeableSlot)
     PlaySound(SOUNDS.DYEING_TOOL_ERASE_USED)
 end
 
@@ -30,6 +30,6 @@ function ZO_DyeingToolErase:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
     PlaySound(SOUNDS.DYEING_TOOL_ERASE_USED)
 end
 
-function ZO_DyeingToolErase:GetCursorType(equipSlot, dyeChannel)
+function ZO_DyeingToolErase:GetCursorType(dyeableSlot, dyeChannel)
     return MOUSE_CURSOR_ERASE
 end

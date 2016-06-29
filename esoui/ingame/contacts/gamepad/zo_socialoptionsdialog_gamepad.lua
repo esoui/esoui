@@ -111,25 +111,29 @@ function ZO_SocialOptionsDialogGamepad:SetupOptions(socialData)
     ZO_ClearTable(self.conditionResults)
 end
 
-function ZO_SocialOptionsDialogGamepad:AddSocialOptionsKeybind(descriptor, callback, keybind, name, sound)
+function ZO_SocialOptionsDialogGamepad:AddSocialOptionsKeybind(descriptor, callback, keybind, name, sound, enabledCallback)
     descriptor[#descriptor + 1] =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         name =      name or GetString(SI_GAMEPAD_SELECT_OPTION),
         keybind =   keybind or "UI_SHORTCUT_PRIMARY",
-        enabled =   function()
+        enabled =   enabledCallback or function()
                         return self:HasAnyShownOptions()
                     end,
         sound =     sound or SOUNDS.GAMEPAD_MENU_FORWARD,
         callback =  callback or function()
-                                    return self:ShowOptionsDialog()
-                                end,
+                        return self:ShowOptionsDialog()
+                    end,
     }
 end
 
 --Shared Options
 function ZO_SocialOptionsDialogGamepad:SelectedDataIsPlayer()
     return self.socialData.displayName == GetDisplayName()
+end
+
+function ZO_SocialOptionsDialogGamepad:SelectedDataIsNotPlayer()
+    return not self:SelectedDataIsPlayer()
 end
 
 function ZO_SocialOptionsDialogGamepad:SelectedDataIsLoggedIn()
@@ -159,7 +163,7 @@ function ZO_SocialOptionsDialogGamepad:BuildSendMailOption()
         elseif IsUnitInCombat("player") then
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_IN_COMBAT)
         else
-            MAIL_MANAGER_GAMEPAD:GetSend():ComposeMailTo(self.socialData.displayName)
+            MAIL_MANAGER_GAMEPAD:GetSend():ComposeMailTo(ZO_FormatUserFacingCharacterOrDisplayName(self.socialData.displayName))
         end
     end
     return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_SEND_MAIL, nil, Callback)
@@ -175,7 +179,7 @@ function ZO_SocialOptionsDialogGamepad:BuildWhisperOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOption()
-    return not self:SelectedDataIsPlayer()
+    return not self:SelectedDataIsPlayer() and IsUnitSoloOrGroupLeader("player")
 end
 function ZO_SocialOptionsDialogGamepad:GetInviteToGroupCallback()
     return function()
@@ -256,6 +260,10 @@ function ZO_SocialOptionsDialogGamepad:BuildIgnoreOption()
         return self:BuildOptionEntry(nil, stringId, callback)
     end
     return nil
+end
+
+function ZO_SocialOptionsDialogGamepad:ShouldAddRemoveFriendOption()
+    return not IsConsoleUI() and IsFriend(DecorateDisplayName(self.socialData.displayName))
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildRemoveFriendOption()

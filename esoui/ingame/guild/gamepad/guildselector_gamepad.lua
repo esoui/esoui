@@ -40,7 +40,7 @@ end
 function ZO_GuildSelector_Gamepad:SelectGuild(selectedEntry)
     if selectedEntry then
         self.guildId = selectedEntry.guildId
-        self.control:SetSelectedItem(selectedEntry.selectedText)
+        self.control:SetSelectedItemText(selectedEntry.selectedText)
 
         if self.OnSelectionChanged then
             self.OnSelectionChanged(selectedEntry)

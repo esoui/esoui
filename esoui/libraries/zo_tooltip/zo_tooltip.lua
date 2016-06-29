@@ -322,6 +322,17 @@ function ZO_TooltipSection.InitializeStaticPools(class)
 
     class.texturePool = ZO_ControlPool:New("ZO_TooltipTexture", GuiRoot, "Texture")
     class.colorPool = ZO_ControlPool:New("ZO_TooltipColorSwatch", GuiRoot, "Color")
+    class.colorPool:SetCustomFactoryBehavior(function(control)
+        control.label = control:GetNamedChild("Label")
+        control.backdrop = control:GetNamedChild("Backdrop")
+        control.Reset = function()
+            control.label:SetText("")
+            control:SetColor(1, 1, 1, 1)
+        end
+    end)
+    class.colorPool:SetCustomResetBehavior(function(control)
+        control:Reset()
+    end)
 
     class.statValuePairPool = ZO_ControlPool:New("ZO_TooltipStatValuePair", GuiRoot, "StatValuePair")
     class.statValuePairPool:SetCustomFactoryBehavior(function(control)
@@ -603,9 +614,9 @@ end
 --Layout
 
 --where ... is the list of styles
-function ZO_TooltipSection:ShouldAdvanceSecondaryCursor(primarySize)
+function ZO_TooltipSection:ShouldAdvanceSecondaryCursor(primarySize, spacingSize)
     if(self:IsPrimaryDimensionFixed()) then
-        return self.primaryCursor + primarySize > self.innerPrimaryDimension
+        return self.primaryCursor + spacingSize + primarySize > self.innerPrimaryDimension
     end
     return false
 end
@@ -614,7 +625,7 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
     control:SetParent(self.contentsControl)
     local spacing = self:GetNextSpacing(...)
     control:ClearAnchors()
-    if(self:ShouldAdvanceSecondaryCursor(primarySize)) then
+    if(self:ShouldAdvanceSecondaryCursor(primarySize, spacing)) then
         local advanceAmount = self.maxSecondarySizeOnLine + (self:GetProperty("childSecondarySpacing") or 0)
         self.secondaryCursor = self.secondaryCursor + advanceAmount
         if(not self:IsSecondaryDimensionFixed()) then
@@ -773,20 +784,28 @@ end
 
 --where ... is the list of styles
 function ZO_TooltipSection:AddColorSwatch(r, g, b, a, ...)
-    local texture = self.colorPool:AcquireObject()
-    texture:SetColor(r, g, b, a)
+   self:AddColorAndTextSwatch(r, g, b, a, "", ...)
+end
 
-    local backdrop = texture:GetNamedChild("Backdrop")
+--where ... is the list of styles
+function ZO_TooltipSection:AddColorAndTextSwatch(r, g, b, a, text, ...)
+    local control = self.colorPool:AcquireObject()
+
+    control:SetColor(r, g, b, a)
+
     local edgeTextureFile = self:GetProperty("edgeTextureFile", ...)
     local edgeTextureWidth = self:GetProperty("edgeTextureWidth", ...)
     local edgeTextureHeight = self:GetProperty("edgeTextureHeight", ...)
     if edgeTextureFile and edgeTextureWidth and edgeTextureHeight then
-        backdrop:SetHidden(false)
-        backdrop:SetEdgeTexture(edgeTextureFile, edgeTextureWidth, edgeTextureHeight)
+        control.backdrop:SetHidden(false)
+        control.backdrop:SetEdgeTexture(edgeTextureFile, edgeTextureWidth, edgeTextureHeight)
     else
-        backdrop:SetHidden(true)
+        control.backdrop:SetHidden(true)
     end
-    self:BasicTextureSetup(texture, ...)
+
+    self:FormatLabel(control.label, zo_strformat(SI_ITEM_FORMAT_STR_COLOR_NAME, text), ...)
+
+    self:BasicTextureSetup(control, ...)
 end
 
 function ZO_TooltipSection:AddSectionEvenIfEmpty(section)
@@ -917,4 +936,3 @@ end
 function ZO_Tooltip:GetStyle(styleName)
     return self.styleNamespace[styleName]
 end
-

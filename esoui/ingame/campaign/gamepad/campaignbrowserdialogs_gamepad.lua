@@ -206,7 +206,7 @@ local function InitializeCampaignLockedDialog(screen)
                 if dialog.data.isAbandoning then
                     local timeLeft = GetCampaignUnassignCooldown()
                     if timeLeft <= 0 then
-                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG, { id = dialog.data.id }, { mainTextParams = self:GetTextParamsForAbandonHomeDialog() })
+                        ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CAMPAIGN_ABANDON_HOME_CONFIRM_DIALOG, { id = dialog.data.id }, { mainTextParams = screen:GetTextParamsForAbandonHomeDialog() })
                         ZO_Dialogs_ReleaseDialog("GAMEPAD_CAMPAIGN_LOCKED_DIALOG")
                     end
                 else

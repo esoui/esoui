@@ -380,8 +380,15 @@ GAMEPAD_SETTINGS_DATA =
     {
         {
             panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_LANGUAGE,
+            settingId = LANGUAGE_SETTING_USE_PROFANITY_FILTER,
+        },
+
+        {
+            panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS,
+            header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
         },
     },
     [SETTING_PANEL_INTERFACE] =
@@ -449,6 +456,16 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_NEUTRAL_NPC_NAMEPLATES,
+            panel = SETTING_PANEL_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_NEUTRAL_NPC_NAMEPLATES_HIGHLIGHT,
+            panel = SETTING_PANEL_NAMEPLATES,
+        },
+        {
+            system = SETTING_TYPE_NAMEPLATES,
             settingId = NAMEPLATE_TYPE_ENEMY_NPC_NAMEPLATES,
             panel = SETTING_PANEL_NAMEPLATES,
         },
@@ -484,6 +501,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_NAMEPLATES,
             system = SETTING_TYPE_NAMEPLATES,
             settingId = NAMEPLATE_TYPE_HEALTHBAR_CHASE_BAR,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_HEALTHBAR_FRAME_BORDER,
         },
         {
             panel = SETTING_PANEL_NAMEPLATES,
@@ -524,6 +546,16 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_NAMEPLATES,
             system = SETTING_TYPE_NAMEPLATES,
             settingId = NAMEPLATE_TYPE_FRIENDLY_PLAYER_HEALTHBARS_HIGHLIGHT,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_NEUTRAL_NPC_HEALTHBARS,
+        },
+        {
+            panel = SETTING_PANEL_NAMEPLATES,
+            system = SETTING_TYPE_NAMEPLATES,
+            settingId = NAMEPLATE_TYPE_NEUTRAL_NPC_HEALTHBARS_HIGHLIGHT,
         },
         {
             panel = SETTING_PANEL_NAMEPLATES,
@@ -613,6 +645,17 @@ if IsConsoleUI() then
         system = SETTING_TYPE_CUSTOM,
         settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
     })
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 1, {
+        panel = SETTING_PANEL_SOCIAL,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_GAMEPAD_TEXT_SIZE,
+        header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+    })
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 2, {
+        panel = SETTING_PANEL_SOCIAL,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED,
+    })
 else
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_GAMEPLAY], 1, {
         panel = SETTING_PANEL_GAMEPLAY,
@@ -655,6 +698,17 @@ else
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_CUSTOM,
         settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED,
+    })
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 1, {
+        panel = SETTING_PANEL_SOCIAL,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA,
+        header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+    })
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 2, {
+        panel = SETTING_PANEL_SOCIAL,
+        system = SETTING_TYPE_CUSTOM,
+        settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE,
     })
 end
 

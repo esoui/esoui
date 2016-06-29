@@ -78,10 +78,10 @@ function ZO_InventoryMenuBar:LayoutCraftBagTooltip(tooltip)
     local title
     local description
     if HasCraftBagAccess() then
-        title = zo_strformat(SI_INVENTORY_CRAFT_BAG_STATUS, ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_CRAFT_BAG_STATUS_ESO_PLUS_UNLOCKED)))
+        title = zo_strformat(SI_INVENTORY_CRAFT_BAG_STATUS, ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_UNLOCKED)))
         description = GetString(SI_CRAFT_BAG_STATUS_ESO_PLUS_UNLOCKED_DESCRIPTION)
     else
-        title = zo_strformat(SI_INVENTORY_CRAFT_BAG_STATUS, ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_CRAFT_BAG_STATUS_LOCKED)))
+        title = zo_strformat(SI_INVENTORY_CRAFT_BAG_STATUS, ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_LOCKED)))
         description = GetString(SI_CRAFT_BAG_STATUS_LOCKED_DESCRIPTION)
     end
     SetTooltipText(tooltip, title)

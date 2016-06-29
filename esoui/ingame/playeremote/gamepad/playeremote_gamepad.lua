@@ -359,19 +359,6 @@ function ZO_GamepadPlayerEmote:OnSelectionChanged()
 		end
 	end
 	KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
-
-	local targetControl = self.itemList:GetTargetControl()
-	if targetControl.subLabel then
-		local personalityId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY)
-		local personalityName = GetCollectibleInfo(personalityId)
-		if personalityName ~= "" then
-			targetControl.subLabel:SetHidden(false)
-			targetControl.subLabel:SetText(ZO_PERSONALITY_EMOTES_COLOR:Colorize(personalityName))
-		else
-			targetControl.subLabel:SetHidden(true)
-			targetControl.subLabel:SetText(nil)
-		end
-	end
 end
 
 function ZO_GamepadPlayerEmote:SetupList(list)
@@ -408,7 +395,8 @@ function ZO_GamepadPlayerEmote:CreateCategoryList()
 end
 
 function ZO_GamepadPlayerEmote:InitializeHeader()
-    self.headerData = {titleText = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES)}
+    self.headerData = { titleText = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES) }
+
     local rightPane = self.control:GetNamedChild("RightPane")
     local contentContainer = rightPane:GetNamedChild("Container"):GetNamedChild("ContentHeader")
     self.contentHeader = contentContainer:GetNamedChild("Header")
@@ -468,6 +456,16 @@ function ZO_GamepadPlayerEmote:PerformUpdate()
 end
 
 function ZO_GamepadPlayerEmote:RefreshHeader()
+    local personalityId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY)
+    local personalityName = GetCollectibleInfo(personalityId)
+    if personalityName ~= "" then
+        self.headerData.data1HeaderText = "personality"
+        self.headerData.data1Text = ZO_PERSONALITY_EMOTES_COLOR:Colorize(personalityName)
+    else
+        self.headerData.data1HeaderText = nil
+        self.headerData.data1Text = nil
+    end
+
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
 end

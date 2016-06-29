@@ -411,8 +411,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
         local role = GetGroupMemberAssignedRole("player")
 
-        --No prompt for AVA types
-        if activityType == LFG_ACTIVITY_AVA then
+        -- No prompt for AVA types
+        -- Also add a null check for an edge case that should someday soon get fixed
+        if activityType == LFG_ACTIVITY_AVA or not activityType or not activityIndex or not timeRemainingSeconds then
             return
         end
 
@@ -706,19 +707,17 @@ function ZO_PlayerToPlayer:ShowRadialNotificationMenu(data)
     self.showingNotificationMenu = true
 end
 
-local function GetPlatformName(characterName, displayName)
-    return IsInGamepadPreferredMode() and displayName or characterName
-end
-
-function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel)
-    local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true }
+-- inviter name is the decorated name that is choosen based on player preferences
+-- where display and character name are descrete strings that are used to determine the creator of the entry
+function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel, displayName, characterName)
+    local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true, displayName = displayName, characterName = characterName}
     zo_binaryinsert(data, incomingType, self.incomingQueue)
     return data
 end
 
 function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback)
-    local name = ZO_GetPrimaryPlayerName(displayName, characterName)
-    local data = self:AddIncomingEntry(interactType, name, targetLabel)
+    local name = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+    local data = self:AddIncomingEntry(interactType, name, targetLabel, displayName, characterName)
     data.acceptCallback = acceptCallback
     data.declineCallback = declineCallback
     data.deferDecisionCallback = deferDecisionCallback
@@ -729,7 +728,7 @@ function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName,
 end
 
 function ZO_PlayerToPlayer:AddDialogToIncomingQueue(incomingType, characterName, displayName, targetLabel, dialogName, mainTextParams)
-    local name = GetPlatformName(characterName, displayName)
+    local name = ZO_GetPrimaryPlayerNameWithSecondary(characterName, displayName)
     local data = self:AddIncomingEntry(incomingType, name, targetLabel)
     data.dialogName = dialogName
     data.mainTextParams = mainTextParams
@@ -739,22 +738,29 @@ function ZO_PlayerToPlayer:AddDialogToIncomingQueue(incomingType, characterName,
     return data
 end
 
-function ZO_PlayerToPlayer:ExistsInQueue(incomingType, characterName, displayName)
-    local name = GetPlatformName(characterName, displayName)
-    for i, incomingEntry in ipairs(self.incomingQueue) do
-        if incomingEntry.incomingType == incomingType and incomingEntry.inviterName == name then
-            return true
-        end
+do
+    local function DoesDataMatch(firstEntry, secondEntryType, secondCharacterName, secondDisplayName)
+        local removeWithoutName = characterName == nil and displayName == nil
+        local doesCharacterNameMatch = not secondCharacterName or firstEntry.characterName == secondCharacterName
+        local doesDisplayNameMatch = not secondDisplayName or firstEntry.displayName == secondDisplayName
+        local doesTypesMatch = firstEntry.incomingType == secondEntryType
+        return removeWithoutName or (doesCharacterNameMatch and doesDisplayNameMatch and doesTypesMatch)
     end
 
-    return false
-end
+    function ZO_PlayerToPlayer:ExistsInQueue(incomingType, characterName, displayName)
+        local name = ZO_GetPrimaryPlayerNameWithSecondary(characterName, displayName)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
+                return true
+            end
+        end
 
-function ZO_PlayerToPlayer:RemoveFromIncomingQueue(incomingType, characterName, displayName)
-    local name = GetPlatformName(characterName, displayName)
-    for i, incomingEntry in ipairs(self.incomingQueue) do
-        if incomingEntry.incomingType == incomingType then
-            if name == nil or incomingEntry.inviterName == name then
+        return false
+    end
+
+    function ZO_PlayerToPlayer:RemoveFromIncomingQueue(incomingType, characterName, displayName)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
                 table.remove(self.incomingQueue, i)
                 if i == 1 and self.responding then
                     self:StopInteraction()

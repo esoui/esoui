@@ -199,15 +199,6 @@ function ZO_InventoryItemImprovement_Gamepad:AddItemKitSubLabelsToCurrentEntry(i
         self:AddEmptySubLabel()
     end
 
-    local value = GetItemLinkValue(itemLink)
-    if value > 0 then
-        self:AddSubLabel(GetString(SI_ITEM_FORMAT_STR_VALUE))
-        self:AddSubLabel(ZO_DEFAULT_ENABLED_COLOR:Colorize(value))
-    else
-        self:AddEmptySubLabel()
-        self:AddEmptySubLabel()
-    end
-
     self:AddSubLabel(GetItemLinkFlavorText(itemLink))
 end
 

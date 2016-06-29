@@ -27,8 +27,8 @@ end
 
 do
     local TANK_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_tank_down_no_glow_64.dds", 48, 48)
-    local HEALER_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/Gamepad/LFG_healer_down_no_glow_64.dds", 48, 48)
-    local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/Gamepad/LFG_dps_down_no_glow_64.dds", 48, 48)
+    local HEALER_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_healer_down_no_glow_64.dds", 48, 48)
+    local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_dps_down_no_glow_64.dds", 48, 48)
     local g_roleIconTable = {}
 
     function ZO_Tooltip:AddAbilityStats(abilityId)
@@ -124,7 +124,7 @@ do
         if(#g_roleIconTable > 0) then
             local rolesPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             rolesPair:SetStat(GetString(SI_ABILITY_TOOLTIP_ROLE_LABEL), self:GetStyle("statValuePairStat"))
-            local finalIconText = table.concat(g_roleIconTable, " ")
+            local finalIconText = table.concat(g_roleIconTable, "")
             rolesPair:SetValue(finalIconText, self:GetStyle("statValuePairValue"))
             statsSection:AddStatValuePair(rolesPair)
             ZO_ClearNumericallyIndexedTable(g_roleIconTable)

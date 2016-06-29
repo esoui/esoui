@@ -6,7 +6,7 @@ local pregameStates =
             PregameStateManager_UpdateRealmName()
             SuppressWorldList()
             Pregame_ShowScene("gameMenuCharacterSelect")
-            if not HasAgreedToPEGI() then
+            if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                 ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
             end
         end,

@@ -114,7 +114,7 @@
                 ZO_CreateGuildDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)NameInstructions" inherits="ZO_NameInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true"/>
+                <Control name="$(parent)NameInstructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true"/>
                 
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" font="ZoFontHeader2" text="SI_GUILD_CREATE_DIALOG_NAME_HEADER"/>
 

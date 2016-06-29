@@ -178,7 +178,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-32"/>
                 </Control>
 
-                <Control name="$(parent)EmptyRow" inherits="ZO_SortFilterListEmptyRow" hidden="true">
+                <Control name="$(parent)EmptyRow" inherits="ZO_SortFilterListEmptyRow_Keyboard" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)List" offsetY="5" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" offsetY="5" />
 

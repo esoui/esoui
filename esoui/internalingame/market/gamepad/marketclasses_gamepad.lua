@@ -111,7 +111,7 @@ function ZO_GamepadMarketProductBundleAttachment:Show(...)
 
     -- hide all the price info
     self.cost:SetHidden(true)
-    self.previousCostStrikethrough:SetHidden(true)
+    self.previousCost:SetHidden(true)
     self.textCallout:SetHidden(true)
 end
 

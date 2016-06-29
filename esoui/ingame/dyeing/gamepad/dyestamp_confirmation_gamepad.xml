@@ -1,0 +1,10 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_DyeStamp_Confirmation_Gamepad_TopLevel" mouseEnabled="true" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_DyeStamp_Confirmation_Gamepad_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

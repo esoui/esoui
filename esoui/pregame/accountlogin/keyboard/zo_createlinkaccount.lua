@@ -23,6 +23,9 @@ function CreateLinkAccount_Keyboard:Initialize(control)
 
     -- Create Account controls
     self.newAccountContainer = control:GetNamedChild("NewAccount")
+    self.accountNameEntry = self.newAccountContainer:GetNamedChild("AccountNameEntry")
+    self.accountNameEntryEdit = self.accountNameEntry:GetNamedChild("Edit")
+    self.accountNameInstructionsControl = self.accountNameEntry:GetNamedChild("Instructions")
     self.countryLabel = self.newAccountContainer:GetNamedChild("CountryLabel")
     self.countryDropdown = self.newAccountContainer:GetNamedChild("CountryDropdown")
     self.countryDropdownDefaultText = self.countryDropdown:GetNamedChild("DefaultText")
@@ -39,6 +42,11 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.countryComboBox = ZO_ComboBox_ObjectFromContainer(self.countryDropdown)
     self.countryComboBox:SetSortsItems(false)
 
+    self.accountNameEntryEdit:SetMaxInputChars(ACCOUNT_NAME_MAX_LENGTH)
+    self.emailEntryEdit:SetMaxInputChars(MAX_EMAIL_LENGTH)
+
+    self:SetupAccountNameInstructions()
+
     -- Link Account controls
     self.linkAccountContainer = control:GetNamedChild("LinkAccount")
     self.accountName = self.linkAccountContainer:GetNamedChild("AccountName")
@@ -50,6 +58,9 @@ function CreateLinkAccount_Keyboard:Initialize(control)
 
     self.ageLabel:SetText(zo_strformat(SI_CREATEACCOUNT_AGE, MINIMUM_AGE))
     self.mode = SETUP_MODE_NONE
+
+    self.accountNameEdit:SetMaxInputChars(MAX_EMAIL_LENGTH)
+    self.passwordEdit:SetMaxInputChars(MAX_PASSWORD_LENGTH)
 
     self:HideCheckboxesIfNecessary()
 
@@ -126,8 +137,12 @@ function CreateLinkAccount_Keyboard:ChangeMode(newMode)
     self.linkAccountContainer:SetHidden(newMode ~= SETUP_MODE_LINK)
 end
 
+function CreateLinkAccount_Keyboard:IsRequestedAccountNameValid()
+    return self.accountNameValid
+end
+
 function CreateLinkAccount_Keyboard:CanCreateAccount()
-    return self.emailEntryEdit:GetText() ~= "" and ZO_CheckButton_IsChecked(self.ageCheckbox) and self.selectedCountry ~= nil
+    return self.emailEntryEdit:GetText() ~= "" and ZO_CheckButton_IsChecked(self.ageCheckbox) and self.selectedCountry ~= nil and self:IsRequestedAccountNameValid()
 end
 
 function CreateLinkAccount_Keyboard:CanLinkAccount()
@@ -140,8 +155,9 @@ function CreateLinkAccount_Keyboard:AttemptCreateAccount()
         local ageValid = ZO_CheckButton_IsChecked(self.ageCheckbox)
         local emailSignup = ZO_CheckButton_IsChecked(self.subscribeCheckbox)
         local country = self.selectedCountry.countryCode
+        local requestedAccountName = self.accountNameEntryEdit:GetText()
 
-        LOGIN_MANAGER_KEYBOARD:AttemptCreateAccount(email, ageValid, emailSignup, country)
+        LOGIN_MANAGER_KEYBOARD:AttemptCreateAccount(email, ageValid, emailSignup, country, requestedAccountName)
     end
 end
 
@@ -170,6 +186,14 @@ end
 
 function CreateLinkAccount_Keyboard:GetPasswordEdit()
     return self.passwordEdit
+end
+
+function CreateLinkAccount_Keyboard:GetAccountNameEntryEdit()
+    return self.accountNameEntryEdit
+end
+
+function CreateLinkAccount_Keyboard:GetEmailEntryEdit()
+    return self.emailEntryEdit
 end
 
 function CreateLinkAccount_Keyboard:HideCheckboxesIfNecessary()
@@ -221,6 +245,35 @@ function CreateLinkAccount_Keyboard:HideCountryDropdown()
     self.emailLabel:SetAnchor(point, relTo, relPoint, offsetX, offsetY)
 end
 
+function CreateLinkAccount_Keyboard:SetupAccountNameInstructions()
+    if not self.accountNameInstructions then
+        local ACCOUNT_NAME_INSTRUCTIONS_OFFSET_X = 15
+        local ACCOUNT_NAME_INSTRUCTIONS_OFFSET_Y = 0
+
+        self.accountNameInstructions = ZO_ValidAccountNameInstructions:New(self.accountNameInstructionsControl)
+        self.accountNameInstructions:SetPreferredAnchor(LEFT, self.accountNameEntryEdit, RIGHT, ACCOUNT_NAME_INSTRUCTIONS_OFFSET_X, ACCOUNT_NAME_INSTRUCTIONS_OFFSET_Y)
+    end
+end
+
+function CreateLinkAccount_Keyboard:ValidateAccountName()
+    local requestedAccountName = self.accountNameEntryEdit:GetText()
+    local accountNameViolations = { IsValidAccountName(requestedAccountName) }
+    
+    self.accountNameValid = #accountNameViolations == 0
+
+    if self.accountNameValid then
+        self:HideAccountNameInstructions()
+    else
+        self.accountNameInstructions:Show(self.accountNameEntryEdit, accountNameViolations)
+    end
+
+    self:UpdateCreateAccountButton()
+end
+
+function CreateLinkAccount_Keyboard:HideAccountNameInstructions()
+    self.accountNameInstructions:Hide()
+end
+
 -- XML Handlers --
 
 function ZO_CreateLinkAccount_Initialize(control)
@@ -259,6 +312,14 @@ function ZO_CreateLinkAccount_AccountNameEdit_TakeFocus()
     CREATE_LINK_ACCOUNT_KEYBOARD:GetAccountNameEdit():TakeFocus()
 end
 
+function ZO_CreateLinkAccount_AccountNameEdit_TakeFocus()
+    CREATE_LINK_ACCOUNT_KEYBOARD:GetAccountNameEntryEdit():TakeFocus()
+end
+
+function ZO_CreateLinkAccount_EmailEdit_TakeFocus()
+    CREATE_LINK_ACCOUNT_KEYBOARD:GetEmailEntryEdit():TakeFocus()
+end
+
 function ZO_CreateLinkAccount_UpdateCreateAccountButton()
     CREATE_LINK_ACCOUNT_KEYBOARD:UpdateCreateAccountButton()
 end
@@ -272,4 +333,12 @@ function ZO_CreateLinkAccount_ToggleCheckButtonFromLabel(labelControl)
     local checkButton = labelControl:GetParent()
 
     ZO_CheckButton_SetCheckState(checkButton, not ZO_CheckButton_IsChecked(checkButton))
+end
+
+function ZO_CreateLinkAccount_CheckAccountNameValidity()
+    CREATE_LINK_ACCOUNT_KEYBOARD:ValidateAccountName()
+end
+
+function ZO_CreateLinkAccount_OnAccountNameFocusLost()
+    CREATE_LINK_ACCOUNT_KEYBOARD:HideAccountNameInstructions()
 end

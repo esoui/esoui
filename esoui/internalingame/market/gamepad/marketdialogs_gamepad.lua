@@ -95,7 +95,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     local buyPlusButtons = {}
     
     local consoleStoreName
-    local insufficientFundsMainText
     local buyCrownsMainText
     local buyPlusMainText
 
@@ -117,10 +116,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         insufficientFundsButtons[1] = openURLButton
         buyCrownsButtons[1] = openURLButton
 
-        insufficientFundsMainText = SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK
-        self.insufficientCrownsData = ZO_BUY_CROWNS_URL_TYPE
-        self.insufficientCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT) } }
-        
         buyCrownsMainText = SI_CONFIRM_OPEN_URL_TEXT
         g_buyCrownsData = ZO_BUY_CROWNS_URL_TYPE
         g_buyCrownsTextParams = ZO_BUY_CROWNS_FRONT_FACING_ADDRESS
@@ -129,15 +124,11 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     end
 
     if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
-        local consoleTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName } }
-        insufficientFundsMainText = SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL
-        self.insufficientCrownsTextParams = consoleTextParams
-
         buyCrownsMainText = SI_GAMEPAD_MARKET_BUY_CROWNS_TEXT_LABEL
-        g_buyCrownsTextParams = consoleTextParams
+        g_buyCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName } }
         
         local OpenConsoleStoreToPurchaseCrowns = function()
-            ShowConsoleStoreUI()
+            ShowConsoleESOCrownPacksUI()
             self:EndPurchase()
         end
 
@@ -555,11 +546,13 @@ do
         ZO_ClearNumericallyIndexedTable(itemInfo)
 
         if isBundle then
-            local numChildren = marketProduct:GetNumChildren()
-            for childIndex = 1, numChildren do
-                local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
-                local entryTable = CreateMarketPurchaseListEntry(childMarketProductId)
-                table.insert(itemInfo, entryTable)
+            if not marketProduct:GetHidesChildProducts() then
+                local numChildren = marketProduct:GetNumChildren()
+                for childIndex = 1, numChildren do
+                    local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
+                    local entryTable = CreateMarketPurchaseListEntry(childMarketProductId)
+                    table.insert(itemInfo, entryTable)
+                end
             end
         else
             local entryTable = CreateMarketPurchaseListEntry(marketProductId)

@@ -98,7 +98,7 @@ local KEYBOARD_STYLES = {
 
 local GAMEPAD_STYLES =  {
                             textTemplate = "ZO_Subtitles_Text_Gamepad_Template",
-                            textWidth = 1200,
+                            textWidth = 890,
                             textOffsetY = -322,
                         }
 

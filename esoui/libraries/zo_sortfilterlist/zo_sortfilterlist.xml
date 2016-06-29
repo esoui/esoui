@@ -1,14 +1,21 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_SortFilterListEmptyRow" virtual="true">
+        <Control name="ZO_SortFilterListEmptyRow" hidden="true" virtual="true">
             <Anchor point="TOPLEFT"/>
             <Anchor point="TOPRIGHT"/>
-            <Dimensions y="30"/>
+            <Controls>
+                <Label name="$(parent)Message" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SortFilterListEmptyRow_Keyboard" inherits="ZO_SortFilterListEmptyRow" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
-                <Label name="$(parent)Message" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
-                    <Anchor point="CENTER"/>
-                </Label>
+
+                <Label name="$(parent)Message" override="true" font="ZoFontGame" />
             </Controls>
         </Control>
     </Controls>

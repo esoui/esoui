@@ -38,21 +38,23 @@ SLASH_COMMANDS[GetString(SI_SLASH_STUCK)] = function(txt)
 	end
 end
 
-SLASH_COMMANDS[GetString(SI_SLASH_REPORT_BUG)] = function(args)
-	if IsInGamepadPreferredMode() then
-		ShowGamepadHelpScreen()
-	else
-		HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT)
-	end
-end
+if IsSubmitFeedbackSupported() then
+    SLASH_COMMANDS[GetString(SI_SLASH_REPORT_BUG)] = function(args)
+	    if IsInGamepadPreferredMode() then
+		    ShowGamepadHelpScreen()
+	    else
+		    HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT)
+	    end
+    end
 
-SLASH_COMMANDS[GetString(SI_SLASH_REPORT_FEEDBACK)] = function(args)
-	if IsInGamepadPreferredMode() then
-		ShowGamepadHelpScreen()
-	else
-		HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT)
-		HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD:ClearFields()
-	end
+    SLASH_COMMANDS[GetString(SI_SLASH_REPORT_FEEDBACK)] = function(args)
+	    if IsInGamepadPreferredMode() then
+		    ShowGamepadHelpScreen()
+	    else
+		    HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD_FRAGMENT)
+		    HELP_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_KEYBOARD:ClearFields()
+	    end
+    end
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_REPORT_HELP)] = function(args)

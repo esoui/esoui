@@ -283,8 +283,7 @@ do
 end
 
 function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual)
-    -- If the loot stream is not available (obscured by a menu), do not display or queue this item
-    if not self.hidden then
+    if not self.hidden or self:CanShowItemsInHistory() then
         local itemName
         local icon
         local color
@@ -364,6 +363,11 @@ end
 
 function ZO_LootHistory_Shared:InitializeFadingControlBuffer(control)
 end
+
+function ZO_LootHistory_Shared:CanShowItemsInHistory()
+    return false -- default value
+end
+
 
 -- global functions
 

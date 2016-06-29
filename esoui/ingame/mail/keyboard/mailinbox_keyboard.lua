@@ -7,57 +7,61 @@ local MAIL_INBOX_ROW_HEIGHT = 50
 local MAIL_DATA = 1
 local EMPTY_MAIL_DATA = 2
 
-function MailInbox:New(control)
-    local manager = ZO_SortFilterList.New(self, control)
-    manager.messageControl = GetControl(control, "Message")
-    manager.unreadLabel = GetControl(control, "UnreadLabel")
-    manager.sentMoneyControl = GetControl(manager.messageControl, "SentMoney")
-    manager.codControl = GetControl(manager.messageControl, "COD")
-    manager:SetAlternateRowBackgrounds(true)
+function MailInbox:New(...)
+    return ZO_SortFilterList.New(self, ...)
+end
 
-    manager.sortFunction = function(listEntry1, listEntry2) return manager:CompareInboxEntries(listEntry1, listEntry2) end
-    manager.reportedMailIds = {}
+function MailInbox:Initialize(control)
+    ZO_SortFilterList.Initialize(self, control)
 
-    ZO_ScrollList_AddDataType(manager.list, MAIL_DATA, "ZO_MailInboxRow", MAIL_INBOX_ROW_HEIGHT, function(control, data) manager:SetupInboxEntry(control, data) end, nil, SOUNDS.MAIL_ITEM_SELECTED)
-    ZO_ScrollList_SetEqualityFunction(manager.list, MAIL_DATA, function(data1, data2) return AreId64sEqual(data1.mailId, data2.mailId) end)   
-    ZO_ScrollList_AddDataType(manager.list, EMPTY_MAIL_DATA, "ZO_MailEmptyInboxRow", MAIL_INBOX_ROW_HEIGHT, function(control, data) manager:SetupRow(control, data) end)
-    ZO_ScrollList_SetTypeSelectable(manager.list, EMPTY_MAIL_DATA, false)
-    ZO_ScrollList_EnableHighlight(manager.list, "ZO_ThinListHighlight")
-    ZO_ScrollList_EnableSelection(manager.list, "ZO_ThinListHighlight", function(previouslySelected, selected, reselectingDuringRebuild) manager:OnSelectionChanged(previouslySelected, selected, reselectingDuringRebuild) end)
-    ZO_ScrollList_SetDeselectOnReselect(manager.list, false)
-    ZO_ScrollList_SetAutoSelect(manager.list, true)
+    self.messageControl = control:GetNamedChild("Message")
+    self.unreadLabel = control:GetNamedChild("UnreadLabel")
+    self.fromControl = self.messageControl:GetNamedChild("From")
+    self.sentMoneyControl = self.messageControl:GetNamedChild("SentMoney")
+    self.codControl = self.messageControl:GetNamedChild("COD")
+    self:SetAlternateRowBackgrounds(true)
+
+    self.sortFunction = function(listEntry1, listEntry2) return self:CompareInboxEntries(listEntry1, listEntry2) end
+    self.reportedMailIds = {}
+
+    ZO_ScrollList_AddDataType(self.list, MAIL_DATA, "ZO_MailInboxRow", MAIL_INBOX_ROW_HEIGHT, function(control, data) self:SetupInboxEntry(control, data) end, nil, SOUNDS.MAIL_ITEM_SELECTED)
+    ZO_ScrollList_SetEqualityFunction(self.list, MAIL_DATA, function(data1, data2) return AreId64sEqual(data1.mailId, data2.mailId) end)   
+    ZO_ScrollList_AddDataType(self.list, EMPTY_MAIL_DATA, "ZO_MailEmptyInboxRow", MAIL_INBOX_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
+    ZO_ScrollList_SetTypeSelectable(self.list, EMPTY_MAIL_DATA, false)
+    ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
+    ZO_ScrollList_EnableSelection(self.list, "ZO_ThinListHighlight", function(previouslySelected, selected, reselectingDuringRebuild) self:OnSelectionChanged(previouslySelected, selected, reselectingDuringRebuild) end)
+    ZO_ScrollList_SetDeselectOnReselect(self.list, false)
+    ZO_ScrollList_SetAutoSelect(self.list, true)
 
     MAIL_INBOX_SCENE = ZO_Scene:New("mailInbox", SCENE_MANAGER)
     MAIL_INBOX_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if(newState == SCENE_SHOWING) then
-            KEYBIND_STRIP:AddKeybindButtonGroup(manager.selectionKeybindStripDescriptor)
-            if(manager.inboxDirty) then
-                manager:RefreshData()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.selectionKeybindStripDescriptor)
+            if(self.inboxDirty) then
+                self:RefreshData()
             end
         elseif(newState == SCENE_HIDING) then
             CURRENCY_INPUT:Hide()
         elseif(newState == SCENE_HIDDEN) then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.selectionKeybindStripDescriptor)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.selectionKeybindStripDescriptor)
         elseif(newState == SCENE_SHOWN) then
             if self.dirtyMail then
-                OnMailReadable(self.dirtyMail)
+                self:OnMailReadable(self.dirtyMail)
             end
         end
     end)
 
-    control:RegisterForEvent(EVENT_MAIL_INBOX_UPDATE, function() manager:OnInboxUpdate() end)
-    control:RegisterForEvent(EVENT_MAIL_READABLE, function(_, mailId) manager:OnMailReadable(mailId) end)
-    control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, function(_, mailId) manager:OnTakeAttachedItemSuccess(mailId) end)
-    control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, function(_, mailId) manager:OnTakeAttachedMoneySuccess(mailId) end)
-    control:RegisterForEvent(EVENT_MAIL_REMOVED, function(_, mailId) manager:OnMailRemoved(mailId) end)
-    control:RegisterForEvent(EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) manager:OnMailNumUnreadChanged(numUnread) end)
+    control:RegisterForEvent(EVENT_MAIL_INBOX_UPDATE, function() self:OnInboxUpdate() end)
+    control:RegisterForEvent(EVENT_MAIL_READABLE, function(_, mailId) self:OnMailReadable(mailId) end)
+    control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, function(_, mailId) self:OnTakeAttachedItemSuccess(mailId) end)
+    control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, function(_, mailId) self:OnTakeAttachedMoneySuccess(mailId) end)
+    control:RegisterForEvent(EVENT_MAIL_REMOVED, function(_, mailId) self:OnMailRemoved(mailId) end)
+    control:RegisterForEvent(EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnMailNumUnreadChanged(numUnread) end)
 
-    manager:SetNumUnread(GetNumUnreadMail())
+    self:SetNumUnread(GetNumUnreadMail())
 
-    manager:InitializeKeybindDescriptors()
-    manager:CreateAttachmentSlots()
-
-    return manager
+    self:InitializeKeybindDescriptors()
+    self:CreateAttachmentSlots()
 end
 
 function MailInbox:InitializeKeybindDescriptors()
@@ -391,6 +395,7 @@ end
 function MailInbox:OnInboxUpdate()
     if(SCENE_MANAGER:IsShowing("mailInbox")) then
         self:RefreshData()
+        self:RefreshMailFrom()
     else
         self.inboxDirty = true
     end
@@ -420,12 +425,24 @@ function MailInbox:OnMailReadable(mailId)
     ZO_MailInboxShared_PopulateMailData(mailData, mailId)
     ZO_ScrollList_RefreshVisible(self.list, mailData)
 
-    ZO_MailInboxShared_UpdateInbox(mailData, GetControl(self.messageControl, "From"), GetControl(self.messageControl, "Subject"), GetControl(self.messageControl, "Expires"), GetControl(self.messageControl, "Received"), GetControl(self.messageControl, "Body"))
+    ZO_MailInboxShared_UpdateInbox(mailData, self.fromControl, GetControl(self.messageControl, "Subject"), GetControl(self.messageControl, "Expires"), GetControl(self.messageControl, "Received"), GetControl(self.messageControl, "Body"))
+    self:RefreshMailFrom()
     ZO_Scroll_ResetToTop(GetControl(self.messageControl, "Pane"))
 
     self:RefreshMoneyControls()
     self:RefreshAttachmentsHeaderShown()
     self:RefreshAttachmentSlots()
+end
+
+function MailInbox:RefreshMailFrom()
+    if self.mailId then
+        local mailData = self:GetMailData(self.mailId)
+        if mailData.senderCharacterName ~= "" then
+            local fromName = ZO_GetPrimaryPlayerName(mailData.senderDisplayName, mailData.senderCharacterName)
+            self.fromControl:SetText(fromName)
+            mailData.senderTooltipName = ZO_GetSecondaryPlayerName(mailData.senderDisplayName, mailData.senderCharacterName)
+        end
+    end
 end
 
 function MailInbox:RefreshAttachmentSlots()
@@ -506,12 +523,9 @@ end
 
 function MailInbox:MessageFrom_OnMouseEnter(control)
     local mailData = self:GetMailData(self.mailId)
-    if(mailData) then
-        local senderCharacterName = mailData.senderCharacterName
-        if(senderCharacterName ~= "") then
-            InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5)
-            SetTooltipText(InformationTooltip, ZO_FormatUserFacingCharacterName(senderCharacterName))
-        end
+    if mailData and mailData.senderTooltipName then
+        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5)
+        SetTooltipText(InformationTooltip, mailData.senderTooltipName)
     end
 end
 

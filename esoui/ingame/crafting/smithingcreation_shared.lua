@@ -281,7 +281,7 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListControl, list
 
         local patternIndex = data.patternIndex
         local materialOverride = self:GetSelectedMaterialIndex()
-        local materialQuantityOverride = self:GetSelectedMaterialQuantity()
+        local materialQuantityOverride = select(3, GetSmithingPatternMaterialItemInfo(patternIndex, materialOverride))
         local styleOverride = self.styleList:GetSelectedData() and self.styleList:GetSelectedData().itemStyle
         local traitOverride = self.traitList:GetSelectedData() and self.traitList:GetSelectedData().traitType
 

@@ -652,8 +652,14 @@ local AlertHandlers = {
         end
     end,
 
+    [EVENT_DYE_STAMP_USE_FAIL] = function(reason)
+        if reason ~= DYE_STAMP_USE_RESULT_NONE then
+            return ALERT, GetString("SI_DYESTAMPUSERESULT", reason)
+        end
+    end,
+
     [EVENT_SAVE_GUILD_RANKS_RESPONSE] = function(guildId, result)
-        if(result ~= SOCIAL_RESULT_NO_ERROR) then
+        if result ~= SOCIAL_RESULT_NO_ERROR then
             return ERROR, GetString("SI_SOCIALACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,

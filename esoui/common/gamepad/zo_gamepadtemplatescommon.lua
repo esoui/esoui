@@ -571,9 +571,17 @@ function ZO_GamepadOnDefaultScrollListActivatedChanged(list, activated)
 end
 
 -- Checkbox
-function ZO_GamepadCheckBoxTemplate_OnInitialized(control)
+function ZO_GamepadCheckBoxTemplate_OnInitialized(control, offsetX)
+    offsetX = offsetX or 0
     control.checkBox = control:GetNamedChild("CheckBox")
     control.label = control:GetNamedChild("Label")
+
+    local labelOffsetX = select(5, control.label:GetAnchor(0))
+    control.label:SetWidth(ZO_GAMEPAD_CONTENT_WIDTH - control.checkBox:GetWidth() - labelOffsetX - offsetX)
+
+    control.GetHeight = function(control)
+        return zo_max(control.checkBox:GetHeight(), control.label:GetTextHeight())
+    end
 end
 
 function ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)

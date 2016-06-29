@@ -332,7 +332,7 @@ function SharedChatContainer:LoadWindowSettings(window)
     local tabIndex = window.tab.index
 
     local _, locked, interactable, _, areTimestampsEnabled = GetChatContainerTabInfo(self.id, tabIndex)
-    local fontSize = GetChatFontSize()
+    local fontSize = CHAT_SYSTEM:GetFontSizeFromSetting()
 
     self:SetLocked(tabIndex, locked)
     self:SetInteractivity(tabIndex, interactable)
@@ -1001,6 +1001,7 @@ end
 
 function SharedChatContainer:AddDebugMessage(formattedEventText)
     self:AddEventMessageToWindow(self.windows[1], formattedEventText, CHAT_CATEGORY_SYSTEM)
+    CALLBACK_MANAGER:FireCallbacks("OnFormattedChatEvent", formattedEventText, CHAT_CATEGORY_SYSTEM)
 end
 
 function SharedChatContainer:AddWindow(name)
@@ -1282,7 +1283,8 @@ function SharedChatContainer:GetChatFontFormatString(fontSize)
         shadowStyle = "soft-shadow-thin"
     end
 
-    return ("%s|%s|%s"):format(face, fontSize, shadowStyle)
+    local fontSizeString = CHAT_SYSTEM:GetFontSizeString(fontSize)
+    return ("%s|%s|%s"):format(face, fontSizeString, shadowStyle)
 end
 
 function SharedChatContainer:GetChatFont()
@@ -1308,7 +1310,7 @@ function SharedChatSystem:Initialize(control, platformSettings)
 
     self.textEntry = TextEntry:New(self, control:GetNamedChild("TextEntry"), platformSettings.chatEditBufferTop, platformSettings.chatEditBufferBottom)
 
-    local fontSize = GetChatFontSize()
+    local fontSize = self:GetFontSizeFromSetting()
     local textEntryFont = self:GetTextEntryFontString(fontSize)
     self:SetTextEntryFont(textEntryFont)
 
@@ -1604,7 +1606,7 @@ function SharedChatSystem:OnChatEvent(event, ...)
     if self.categories[category] then
         local formatter = ChatEventFormatters[event]
         if formatter then
-            local formattedEventText, targetChannel = formatter(...)
+            local formattedEventText, targetChannel, fromDisplayName, rawMessageText = formatter(...)
             if formattedEventText then
                 if targetChannel then
                     self:HandleNewTargetOnChannel(event, targetChannel, ...)
@@ -1612,6 +1614,8 @@ function SharedChatSystem:OnChatEvent(event, ...)
                 for container in pairs(self.categories[category]) do
                     container:OnChatEvent(event, formattedEventText, category)
                 end
+
+                CALLBACK_MANAGER:FireCallbacks("OnFormattedChatEvent", formattedEventText, category, targetChannel, fromDisplayName, rawMessageText)
             end
         end
     end
@@ -1957,19 +1961,27 @@ end
 
 STUB_SETTING_KEEP_MINIMIZED = false
 
-function SharedChatSystem:StartTextEntry(text, channel, target)
+function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindow)
     if not self.currentChannel or channel then
         self:SetChannel(channel or CHAT_CHANNEL_SAY, target)   
     end
 
     self.textEntry:Open(text)
-    if(self.isMinimized) then
-        self:Maximize()
-        self.shouldMinimizeAfterEntry = STUB_SETTING_KEEP_MINIMIZED
-    else
-        self.primaryContainer:FadeIn()
-        self.shouldMinimizeAfterEntry = false
+
+    if not dontShowHUDWindow then
+        if(self.isMinimized) then
+            self:Maximize()
+            self.shouldMinimizeAfterEntry = STUB_SETTING_KEEP_MINIMIZED
+        else
+            self.primaryContainer:FadeIn()
+            self.shouldMinimizeAfterEntry = false
+        end
     end
+end
+
+function SharedChatSystem:AutoSendTextEntry(text, channel, target, dontShowHUDWindow)
+    self:StartTextEntry(text, channel, target, dontShowHUDWindow)
+    self:SubmitTextEntry()
 end
 
 function SharedChatSystem:ReplyToLastTarget(channelType)
@@ -2010,6 +2022,15 @@ function SharedChatSystem:SetChannel(newChannel, channelTarget)
 
 	--Check for trial limitations
     GetTrialChatIsRestrictedAndWarn(newChannel, channelTarget)
+    CALLBACK_MANAGER:FireCallbacks("OnChatSetChannel")
+end
+
+function SharedChatSystem:GetCurrentChannelData()
+    if not self.currentChannel then
+        self:SetChannel(CHAT_CHANNEL_SAY)
+    end
+    local channelData = self.channelData[self.currentChannel]
+    return channelData, self.currentTarget
 end
 
 function SharedChatSystem:SetContainerExtents(minWidth, maxWidth, minHeight, maxHeight)
@@ -2045,9 +2066,9 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
 
     if not localPlayerIsGrouped or (localPlayerIsGroupLeader and not otherPlayerIsInPlayersGroup) then
         AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_GROUP), function() 
-            local SENT_FROM_CHAT = false
-            local DISPLAY_INVITED_MESSAGE = true
-            TryGroupInviteByName(playerName, SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) end)
+        local SENT_FROM_CHAT = false
+        local DISPLAY_INVITED_MESSAGE = true
+        TryGroupInviteByName(playerName, SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) end)
     elseif otherPlayerIsInPlayersGroup and localPlayerIsGroupLeader then
         AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_REMOVE_GROUP), function() GroupKickByName(rawName) end)
     end
@@ -2150,20 +2171,9 @@ function SharedChatSystem:SetFontSize(fontSize)
     self:SetTextEntryFont(textEntryFont)
 end
 
-function SharedChatSystem:SetAllFonts(font)
-	for containerIndex=1, #self.containers do
-        local container = self.containers[containerIndex]
-        for tabIndex = 1, #container.windows do
-			container.windows[tabIndex].buffer:SetFont(font)
-        end
-    end
-
-    self:SetTextEntryFont(font)
-end
-
 function SharedChatSystem:ResetFontSizeToDefault()
     ResetChatFontSizeToDefault()
-    local fontSize = GetChatFontSize()
+    local fontSize = self:GetFontSizeFromSetting()
     self:SetFontSize(fontSize)
 end
 
@@ -2272,10 +2282,11 @@ end
 
 function SharedChatSystem:GetTextEntryFontString(fontSize)
     local face, _, options = self:GetFont():GetFontInfo()
+    local fontSizeString = self:GetFontSizeString(fontSize)
     if options ~= "" then
-        return ("%s|%s|%s"):format(face, fontSize, options)
+        return ("%s|%s|%s"):format(face, fontSizeString, options)
     end
-    return ("%s|%s"):format(face, fontSize) 
+    return ("%s|%s"):format(face, fontSizeString)
 end
 
 function SharedChatSystem:OnNumOnlineFriendsChanged()
@@ -2307,18 +2318,23 @@ function SharedChatSystem:GetFont()
     -- Should  be overridden
 end
 
---[[ Global/XML Handlers ]]--
-function ZO_ChatSystem_OnMinMaxClicked()
-	if(CHAT_SYSTEM:IsMinimized()) then
-		CHAT_SYSTEM:Maximize()
-	else
-		CHAT_SYSTEM:Minimize()
-	end
+function SharedChatSystem:GetFontSizeString()
+    -- Should  be overridden
 end
 
-function StartChatInput(text, channel, target, showVirtualKeyboard)
+function SharedChatSystem:GetFontSizeFromSetting()
+    -- Should  be overridden
+end
+
+function StartChatInput(text, channel, target)
     if IsChatSystemAvailableForCurrentPlatform() then
-        CHAT_SYSTEM:StartTextEntry(text, channel, target, showVirtualKeyboard)
+        CHAT_SYSTEM:StartTextEntry(text, channel, target)
+    end
+end
+
+function AutoSendChatInput(text, channel, target, dontShowHUDWindow)
+    if IsChatSystemAvailableForCurrentPlatform() then
+        CHAT_SYSTEM:AutoSendTextEntry(text, channel, target, dontShowHUDWindow)
     end
 end
 

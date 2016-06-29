@@ -173,10 +173,10 @@ local function OptionsScrollListSelectionChanged(selectedData, oldData, reselect
         local control = selectedData.parentControl
         SetSettingFromControl(control, value)
 
-        local optionsData = selectedData.parentControl.data
+        local optionsData = control.data
         local callback = optionsData.scrollListChangedCallback
         if callback then
-            callback()
+            callback(selectedData, oldData)
         end
 
         if optionsData.gamepadHasEnabledDependencies then
@@ -201,13 +201,13 @@ local updateControlFromSettings =
                                 local dropdownControl = GetControl(control, "Dropdown")
                                 local dropdown = ZO_ComboBox_ObjectFromContainer(dropdownControl)
                                 if data.itemText then
-                                    dropdown:SetSelectedItem(data.itemText[GetValidIndexFromCurrentChoice(data.valid, currentChoice)])
+                                    dropdown:SetSelectedItemText(data.itemText[GetValidIndexFromCurrentChoice(data.valid, currentChoice)])
                                 elseif data.valueStringPrefix and isValidNumber then
-                                    dropdown:SetSelectedItem(GetString(data.valueStringPrefix, currentChoice))
+                                    dropdown:SetSelectedItemText(GetString(data.valueStringPrefix, currentChoice))
                                 elseif data.valueStrings then
-                                    dropdown:SetSelectedItem(GetValueString(data.valueStrings[GetValidIndexFromCurrentChoice(data.valid, currentChoice)]))                                
+                                    dropdown:SetSelectedItemText(GetValueString(data.valueStrings[GetValidIndexFromCurrentChoice(data.valid, currentChoice)]))                                
                                 else
-                                    dropdown:SetSelectedItem(tostring(currentChoice))
+                                    dropdown:SetSelectedItemText(tostring(currentChoice))
                                 end
                                 return currentChoice
                             end,
@@ -385,13 +385,13 @@ local function OptionsDropdown_SelectChoice(control, index)
         local dropdownControl = GetControl(control, "Dropdown")
         local dropdown = ZO_ComboBox_ObjectFromContainer(dropdownControl)
         if data.itemText then
-            dropdown:SetSelectedItem(data.itemText[index])
+            dropdown:SetSelectedItemText(data.itemText[index])
         elseif data.valueStringPrefix then
-            dropdown:SetSelectedItem(GetString(data.valueStringPrefix, value))
+            dropdown:SetSelectedItemText(GetString(data.valueStringPrefix, value))
         elseif data.valueStrings then
-            dropdown:SetSelectedItem(GetValueString(data.valueStrings[index]))
+            dropdown:SetSelectedItemText(GetValueString(data.valueStrings[index]))
         else
-            dropdown:SetSelectedItem(valueString)
+            dropdown:SetSelectedItemText(valueString)
         end
 
         if data.events and data.events[value] then
@@ -667,4 +667,11 @@ end
 
 function ZO_Options_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_Options_OnShow(control)
+    local data = control.data
+    if data and data.onShow then
+        data.onShow(control)
+    end
 end

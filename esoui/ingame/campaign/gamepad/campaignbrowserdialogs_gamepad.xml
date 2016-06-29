@@ -22,13 +22,17 @@
             <Controls>
                 <Label name="$(parent)Label" override="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel2" relativePoint="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel1" relativePoint="TOPLEFT"/>
                 </Label>
             </Controls>
         </Control>
 
         <Control name="ZO_CampaignBrowserDialogsGamepadMenuEntryExtraInfo" inherits="ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon" virtual="true">
             <Controls>
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
                 <Label name="$(parent)SubLabel1" font="ZoFontGamepad34" override="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
                 </Label>
