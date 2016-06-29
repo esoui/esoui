@@ -9,7 +9,7 @@ mv 1.txt Textures.txt
 find esoui/ -type f -not -name "*.txt" -not -name "*.xml" -not -name "*.lua" -delete
 version=$(grep -oP '\d\.\d\.\d' README.md)
 apiversion=$(grep -oP 'API \K\d+' README.md)
-today=$(date +"%d %b %Y")
+today=$(date +"%B %d %Y")
 read -p "Version [$version]: " new_version
 read -p "API Version [$apiversion]: " new_apiversion
 sed -i "s#[0-9]\.[0-9]\.[0-9]#${new_version:-$version}#" README.md
