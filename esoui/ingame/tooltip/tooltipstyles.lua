@@ -430,7 +430,6 @@ ZO_TOOLTIP_STYLES =
     worldMapTooltip =
     {
         width = 375,
-        paddingRight = 30,
         paddingTop = 32,
         childSpacing = 10,
         fontFace = "$(GAMEPAD_MEDIUM_FONT)",
@@ -467,6 +466,7 @@ ZO_TOOLTIP_STYLES =
     {
         paddingTop = 20,
         paddingBottom = 20,
+        widthPercent = 100,
     },
     mapLocationTooltipContentHeader =
     {
@@ -495,6 +495,11 @@ ZO_TOOLTIP_STYLES =
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "down",
         childSpacing = 20,
+        widthPercent = 100,
+    },
+    mapLocationTooltipContentLabel =
+    {
+        widthPercent = 80,
     },
     mapLocationTooltipDoubleContentSection =
     {
@@ -509,7 +514,7 @@ ZO_TOOLTIP_STYLES =
     mapLocationTooltipContentRightLabel =
     {
         horizontalAlignment = TEXT_ALIGN_LEFT,
-        width = 0,
+        widthPercent = 60,
     },
     mapLocationHeaderTextSection =
     {
@@ -528,6 +533,7 @@ ZO_TOOLTIP_STYLES =
     mapLocationTooltipNameSection =
     {
         paddingLeft = 60,
+        widthPercent = 100,
     },
     mapLocationTooltipContentName =
     {
@@ -555,18 +561,22 @@ ZO_TOOLTIP_STYLES =
     {
         paddingTop = -30,
         childSpacing = 20,
+        widthPercent = 100,
     },
     mapGroupsSection =
     {
         childSpacing = 10,
+        widthPercent = 100,
     },
     mapLocationGroupSection =
     {
         childSpacing = 10,
+        widthPercent = 100,
     },
     mapLocationEntrySection =
     {
         childSpacing = -5,
+        widthPercent = 100,
     },
     mapKeepUnderAttack =
     {

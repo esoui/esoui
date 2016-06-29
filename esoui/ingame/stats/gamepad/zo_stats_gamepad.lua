@@ -670,7 +670,7 @@ function ZO_GamepadStats:InitializeCharacterPanel()
 
     local rightColumn = self.characterStatsPanel:GetNamedChild("RightColumn")
 
-    self.alliance = rightColumn:GetNamedChild("Alliance")
+    self.alliance = rightColumn:GetNamedChild("AllianceData")
     self.rankIcon = rightColumn:GetNamedChild("RankIcon")
     self.rank = rightColumn:GetNamedChild("Rank")
 

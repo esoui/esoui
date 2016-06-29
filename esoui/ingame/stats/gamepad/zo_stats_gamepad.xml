@@ -18,6 +18,19 @@
             <Dimensions y="40" />
         </Label>
 
+        <Control name="ZO_GamepadStatsHeaderDataPairTemplate" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions y="40" />
+                </Label>
+                <Label name="$(parent)Data" font="ZoFontGamepad34" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point ="TOPLEFT" relativeTo="$(parent)Header" relativePoint="TOPRIGHT" offsetX="25"/>
+                </Label>
+            </Controls>
+        </Control>
+
         <Label name="ZO_GamepadStatsDescTemplate" font="ZoFontGamepad34" verticalAlignment="TOP" horizontalAlignment="LEFT" virtual="true" />
 
         <Control name="ZO_GamepadStatTitleRow" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true"/>
@@ -324,13 +337,21 @@
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)LeftColumn" relativePoint="TOPRIGHT" offsetX="40" />
 
                                             <Controls>
-                                                <!-- Headers -->
-                                                <Label name="$(parent)AllianceHeader" text="SI_STAT_GAMEPAD_ALLIANCE_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
+
+                                                <!-- Header/Value Pairs to allow expansion for multiple lines if needed-->
+
+                                                <Control name="$(parent)Alliance" inherits="ZO_GamepadStatsHeaderDataPairTemplate" >
                                                     <Anchor point="TOPLEFT" />
-                                                </Label>
+                                                    <Anchor point="TOPRIGHT" />
+                                                    <Controls>
+                                                        <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_ALLIANCE_LABEL" override="true" />
+                                                    </Controls>
+                                                </Control>
+                                                
+                                                <!-- Headers -->
 
                                                 <Label name="$(parent)RankHeader" text="SI_STAT_GAMEPAD_RANK_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceHeader" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" />
                                                 </Label>
 
                                                 <Label name="$(parent)BountyHeader" text="SI_STAT_GAMEPAD_BOUNTY_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
@@ -346,9 +367,6 @@
                                                 </Label>
 
                                                 <!-- Values -->
-                                                <Label name="$(parent)Alliance" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="2" />
-                                                </Label>
 
                                                 <Label name="$(parent)Rank" inherits="ZO_GamepadStatsDataTemplate">
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMRIGHT" />

@@ -19,7 +19,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutIconStringLine(baseSection
 
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
     lineSection:AddTexture(icon, iconStyle, ...)
-    lineSection:AddLine(string, ...)
+    lineSection:AddLine(string, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
     baseSection:AddSection(lineSection)
 end
 
@@ -33,13 +33,13 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutLargeIconStringLine(baseSe
 
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
     lineSection:AddTexture(icon, iconStyle, ...)
-    lineSection:AddLine(string, ...)
+    lineSection:AddLine(string, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
     baseSection:AddSection(lineSection)
 end
 
 function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutStringLine(baseSection, string, ...)
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
-    lineSection:AddLine(string, ...)
+    lineSection:AddLine(string, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
     baseSection:AddSection(lineSection)
 end
 
@@ -69,7 +69,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutGroupHeader(baseSection, i
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
     lineSection:AddTexture(icon, iconStyle)
     local textSection = lineSection:AcquireSection(self.tooltip:GetStyle("mapLocationHeaderTextSection"))
-    textSection:AddLine(string, ...)
+    textSection:AddLine(string, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
     lineSection:AddSection(textSection)
     baseSection:AddSection(lineSection)
 end
