@@ -23,6 +23,10 @@ CHARACTER_CREATE_MODE_CREATE = "create"
 CHARACTER_CREATE_MODE_EDIT_RACE = "raceChange"
 CHARACTER_CREATE_MODE_EDIT_APPEARANCE = "appearanceChange"
 
+CHARACTER_CREATE_SELECTOR_RACE = "race"
+CHARACTER_CREATE_SELECTOR_CLASS = "class"
+CHARACTER_CREATE_SELECTOR_ALLIANCE = "alliance"
+
 --[[ Character Create Manager]]--
 
 ZO_CHARACTER_CREATE_SYSTEM_NAME = "CHARACTER_CREATE"
@@ -452,6 +456,22 @@ function ZO_CharacterCreate_Base:SaveCharacterChanges()
 
     local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
     ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_SAVE_CHANGES", { tokenType = tokenType }, {mainTextParams = { tokenString }})
+end
+
+function ZO_CharacterCreate_Base:ExitToState(stateName)
+    local createMode = self:GetCharacterCreateMode()
+    if createMode == CHARACTER_CREATE_MODE_CREATE then
+        PregameStateManager_SetState(stateName)
+    else
+        local tokenType
+        if createMode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
+            tokenType = SERVICE_TOKEN_APPEARANCE_CHANGE
+        elseif createMode == CHARACTER_CREATE_MODE_EDIT_RACE then
+            tokenType = SERVICE_TOKEN_RACE_CHANGE
+        end
+        local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
+        ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_REVERT_CHANGES", { newState = stateName }, {mainTextParams = { tokenString }})
+    end
 end
 
 function ZO_CharacterCreate_Base:Reset()

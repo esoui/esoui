@@ -781,6 +781,21 @@
         </Category>
     </Layer>
     <!-- Not player facing -->
+    <Layer name="GamepadChatSystem" allowFallthrough="false">
+        <Category>
+            <Action name="SUBMIT_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>CHAT_SYSTEM:SubmitTextEntry()</Down>
+            </Action>
+            <Action name="CANCEL_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+                <Down>CHAT_SYSTEM:CloseTextEntry(true)</Down> <!--Retain text-->
+            </Action>
+            <Action name="EXIT_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_EXIT">
+                <Down>CHAT_SYSTEM:CloseTextEntry()</Down>
+            </Action>
+            <AllowAction name="START_CHAT_ENTER"/>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
     <Layer name="GameMenu">
         <Category>
             <Action name="GAME_MENU_DO_NOTHING" hideAction="true" inheritsBindFrom="UI_SHORTCUT_EXIT">

@@ -1,3 +1,5 @@
+ZO_TRADE_BOP_ICON = "EsoUI/Art/Inventory/inventory_Tradable_icon.dds"
+
 ZO_SharedInventoryManager = ZO_CallbackObject:Subclass()
 
 function ZO_SharedInventoryManager:New(...)
@@ -443,6 +445,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.quality = quality                                                    --in GamepadInventory once they are equipped, because that doesn't make any sense.
     slot.equipType = equipType
     slot.isPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
+    slot.isBoPTradeable = IsItemBoPAndTradeable(bagId, slotIndex)
     slot.isJunk = IsItemJunk(bagId, slotIndex)
     slot.statValue = GetItemStatValue(bagId, slotIndex) or 0
     slot.itemInstanceId = newItemInstanceId

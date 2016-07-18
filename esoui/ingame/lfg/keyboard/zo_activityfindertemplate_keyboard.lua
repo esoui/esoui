@@ -210,8 +210,6 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshFilters()
             if not isLocked then
                 local activityName = zo_strformat(SI_ACTIVITY_FINDER_RANDOM_TITLE_FORMAT, GetString("SI_LFGACTIVITY", activityType))
                 local minGroupSize, maxGroupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupSizeRangeForActivityType(activityType)
-                level = true
-                rank = true
                 local entry = ZO_ComboBox:CreateItemEntry(activityName, OnFilterChanged)
                 entry.data =
                 {

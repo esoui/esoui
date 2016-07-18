@@ -313,7 +313,10 @@
                 <Texture name="$(parent)Icon" inherits="ZO_MultiIcon ZO_GamepadMenuEntryIconTemplate" hidden="true">
                     <Controls>
                         <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" excludeFromResizeToFitExtents="true"/>
-                        <Texture name="$(parent)PlayerLockedIcon" inherits="ZO_GamepadMenuEntryPlayerLockedTemplate" />
+                        <Texture name="$(parent)SubStatusIcon" inherits="ZO_MultiIcon" tier="HIGH" inheritScale="false">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Texture>
                     </Controls>
                 </Texture>
             </Controls>

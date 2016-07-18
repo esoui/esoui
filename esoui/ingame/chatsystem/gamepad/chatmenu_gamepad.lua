@@ -143,8 +143,15 @@ function ZO_ChatMenu_Gamepad:InitializeTextEdit()
         self:FocusTextInput()
     end
 
+    local function TextEditTextChanged()
+        if self.textInputAreaFocalArea:IsFocused() and not self.channelDropdown:IsActive() then
+            self.textInputAreaFocalArea:UpdateKeybinds()
+        end
+    end
+
     textEdit:SetHandler("OnFocusGained", TextEditFocusGained)
     textEdit:SetHandler("OnFocusLost", TextEditFocusLost)
+    textEdit:SetHandler("OnTextChanged", TextEditTextChanged)
 
     local textEditData = {
         callback = function()
@@ -235,6 +242,7 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_GUILD_SELF_JOINED_GUILD, RefreshChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_SELF_LEFT_GUILD, RefreshChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
+    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, RefreshChannelDropdown)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
@@ -382,14 +390,16 @@ function ZO_ChatMenu_Gamepad:OnHiding()
 end
 
 function ZO_ChatMenu_Gamepad:FocusTextInput()
-    if self.currentFocalArea ~= self.textInputAreaFocalArea then
-        if self.currentFocalArea then
-            self.currentFocalArea:Deactivate()
+    if self.scene:IsShowing() then
+        if self.currentFocalArea ~= self.textInputAreaFocalArea then
+            if self.currentFocalArea then
+                self.currentFocalArea:Deactivate()
+            end
+            self.currentFocalArea = self.textInputAreaFocalArea
         end
-        self.currentFocalArea = self.textInputAreaFocalArea
+        self.currentFocalArea:Activate()
+        self.textInputFocusSwitcher:SetFocusToMatchingEntry(self.textEdit)
     end
-    self.currentFocalArea:Activate()
-    self.textInputFocusSwitcher:SetFocusToMatchingEntry(self.textEdit)
 end
 
 function ZO_ChatMenu_Gamepad:UpdateDirectionalInput()
@@ -501,7 +511,7 @@ do
         self.textEdit:SetColor(r, g, b)
 
         --Set the dropdown width to be wide enough to fit the text
-        local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(channelText))
+        local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(channelText)) / GetUIGlobalScale()
         self.channelControl:SetWidth(zo_max(self.channelDropdown.minimumWidth, stringWidth))
     end
 end
@@ -543,7 +553,7 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
             local entry = ZO_ComboBox:CreateItemEntry(coloredSwitchText, OnChannelSelected)
             entry.data = channelData
             channelDropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-            local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(switch))
+            local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(switch)) / GetUIGlobalScale()
             channelDropdown.minimumWidth = zo_max(stringWidth, channelDropdown.minimumWidth)
         end
     end

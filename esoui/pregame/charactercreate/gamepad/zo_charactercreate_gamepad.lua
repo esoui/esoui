@@ -262,10 +262,12 @@ function ZO_CharacterCreate_Gamepad:OnStateChanged(oldState, newState)
         ZO_CharacterCreate_GamepadCharacterViewport.Activate()
         SCENE_MANAGER:AddFragment(CHARACTER_CREATE_GAMEPAD_CONTAINER_FRAGMENT)
 
-        self:RefreshKeybindStrip()
-
         ZO_GamepadGenericHeader_Activate(self.header)
         GAMEPAD_BUCKET_MANAGER:Activate()
+
+        -- Refresh the keybind strip after we activate our bucket since
+        -- that may change our focus control which will impact the keybinds
+        self:RefreshKeybindStrip()
     elseif newState == SCENE_HIDDEN then
         self.scene:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
         ZO_CharacterCreate_GamepadCharacterViewport.Deactivate()
@@ -333,8 +335,7 @@ end
 do
     local function ReturnToCharacterSelect()
         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
-        PregameStateManager_SetState("CharacterSelect")
-        Pregame_ShowScene("gamepadCharacterSelect")
+        GAMEPAD_CHARACTER_CREATE_MANAGER:ExitToState("CharacterSelect")
     end
 
     function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
@@ -1335,17 +1336,17 @@ end
 function ZO_CharacterCreate_Gamepad_OnSelectorPressed(button)
     local selectorHandlers =
     {
-        ["race"] =  function(button)
+        [CHARACTER_CREATE_SELECTOR_RACE] =  function(button)
                         GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
                         GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
                     end,
 
-        ["class"] = function(button)
+        [CHARACTER_CREATE_SELECTOR_CLASS] = function(button)
                         CharacterCreateSetClass(button.defId)
                         GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
                     end,
 
-        ["alliance"] =  function(button)
+        [CHARACTER_CREATE_SELECTOR_ALLIANCE] =  function(button)
                             GAMEPAD_CHARACTER_CREATE_MANAGER:SetAlliance(button.defId, "preventRaceChange")
                             local oldPosition = ZO_CharacterCreate_GamepadRace.sliderObject:GetSelectedIndex()
 

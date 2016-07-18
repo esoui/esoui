@@ -238,7 +238,11 @@ function ZO_RenameCharacterDialog_OnInitialized(self)
                             dialog.attemptRenameButton:SetEnabled(true)
                         end
 
-                        dialog.nameEdit:SetText(CorrectCharacterNameCase(nameText))
+                        local correctedName = CorrectCharacterNameCase(nameText)
+                        if correctedName ~= nameText then
+                            -- only set the text if it's actually changed
+                            dialog.nameEdit:SetText(correctedName)
+                        end
                    end,
     })
 end

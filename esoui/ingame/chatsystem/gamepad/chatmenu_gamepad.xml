@@ -69,7 +69,7 @@
                                     <Controls>
                                         <Backdrop name="$(parent)Edit" override="true">
                                             <Controls>
-                                                <Control name="$(parent)Box" override="true" maxInputCharacters="350" />
+                                                <EditBox name="$(parent)Box" override="true" maxInputCharacters="MAX_TEXT_CHAT_INPUT_CHARACTERS" />
                                             </Controls>
                                         </Backdrop>
                                     </Controls>

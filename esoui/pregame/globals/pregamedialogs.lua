@@ -1176,3 +1176,38 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
         },
     },
 }
+
+ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CHARACTER_EDIT_REVERT_CHANGES_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CHARACTER_EDIT_REVERT_CHANGES_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_YES,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            PregameStateManager_SetState(dialog.data.newState)
+                        end,
+        },
+
+        {
+            text = SI_DIALOG_NO,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
+}

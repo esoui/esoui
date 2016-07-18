@@ -1001,17 +1001,17 @@ end
 function ZO_CharacterCreate_OnSelectorClicked(button)
     local selectorClickHandlers =
     {
-        ["race"] =  function(button)
+        [CHARACTER_CREATE_SELECTOR_RACE] =  function(button)
                         KEYBOARD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
                         KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
                     end,
 
-        ["class"] = function(button)
+        [CHARACTER_CREATE_SELECTOR_CLASS] = function(button)
                         CharacterCreateSetClass(button.defId)
                         KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
                     end,
 
-        ["alliance"] =  function(button)
+        [CHARACTER_CREATE_SELECTOR_ALLIANCE] =  function(button)
                             KEYBOARD_CHARACTER_CREATE_MANAGER:SetAlliance(button.defId)
                             KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
                         end,
@@ -1032,6 +1032,44 @@ function ZO_CharacterCreate_MouseEnterNamedSelector(button)
     elseif button.nameFn then
 		local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
         SetTooltipText(InformationTooltip, zo_strformat(button.tooltipFormatter, button.nameFn(CharacterCreateGetGender(characterMode), button.defId)))
+    end
+
+    local characterCreateMode = KEYBOARD_CHARACTER_CREATE_MANAGER:GetCharacterCreateMode()
+    if characterCreateMode ~= CHARACTER_CREATE_MODE_CREATE then
+        if button:GetState() == BSTATE_DISABLED or button:GetState() == BSTATE_DISABLED_PRESSED then
+            local selectorType = button.selectorType
+
+            local addDisableReason = false
+            local tokenType
+            if characterCreateMode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
+                tokenType = SERVICE_TOKEN_APPEARANCE_CHANGE
+                addDisableReason = selectorType == CHARACTER_CREATE_SELECTOR_RACE or selectorType == CHARACTER_CREATE_SELECTOR_CLASS or selectorType == CHARACTER_CREATE_SELECTOR_ALLIANCE
+            elseif characterCreateMode == CHARACTER_CREATE_MODE_EDIT_RACE then
+                tokenType = SERVICE_TOKEN_RACE_CHANGE
+                addDisableReason = selectorType == CHARACTER_CREATE_SELECTOR_CLASS or selectorType == CHARACTER_CREATE_SELECTOR_ALLIANCE
+            end
+
+            if addDisableReason then
+                local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
+                InformationTooltip:AddLine(zo_strformat(SI_CREATE_CHARACTER_SELECTOR_TOKEN_DISABLED, tokenString), "", ZO_NORMAL_TEXT:UnpackRGB())
+            end
+        end
+    end
+
+    if (button:GetState() == BSTATE_DISABLED or button:GetState() == BSTATE_DISABLED_PRESSED) and button.selectorType == CHARACTER_CREATE_SELECTOR_RACE then
+        local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+        local currentAlliance = CharacterCreateGetAlliance(characterMode)
+
+        if button.alliance == ALLIANCE_NONE then
+            if not CanPlayAsImperial() then
+                InformationTooltip:AddLine(zo_strformat(SI_CHARACTER_MODIFY_FAIL_REQUIREMENT, GetPlayAsImperialName()), "", ZO_NORMAL_TEXT:UnpackRGB())
+            end
+        elseif button.alliance ~= currentAlliance then
+            if not CanPlayAnyRaceAsAnyAlliance() then
+                InformationTooltip:AddLine(zo_strformat(SI_CHARACTER_MODIFY_FAIL_REQUIREMENT, GetPlayAsAnyRaceName()), "", ZO_NORMAL_TEXT:UnpackRGB())
+            end
+        end
+        
     end
 end
 

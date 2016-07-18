@@ -563,7 +563,7 @@ function ZO_GamepadSkills:InitializeBuildPlanner()
     local Y_OFFSET = 15
     buildPlannerControl:ClearAnchors()
     buildPlannerControl:SetAnchor(TOPLEFT, self.header, BOTTOMLEFT, -X_OFFSET, Y_OFFSET)
-    buildPlannerControl:SetAnchor(BOTTOMRIGHT, buildPlannerControl:GetParent(), TOPRIGHT, X_OFFSET, ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET)
+    buildPlannerControl:SetAnchor(BOTTOMRIGHT, buildPlannerControl:GetParent(), BOTTOMRIGHT, X_OFFSET, 0)
 end
 
 function ZO_GamepadSkills:OnUpdate(currentFrameTimeSeconds)

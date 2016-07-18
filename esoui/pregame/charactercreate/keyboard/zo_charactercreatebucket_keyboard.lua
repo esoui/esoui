@@ -129,11 +129,11 @@ function ZO_CharacterCreateBucket_Keyboard:CreateTabControl(windowData)
     end)
 
     tabControl:SetHandler("OnMouseEnter", function(tabControl)
-        self.manager:MouseOverBucket(tabControl)
+        self:MouseEnter()
     end)
 
     tabControl:SetHandler("OnMouseExit", function(tabControl)
-        self.manager:MouseExitBucket(tabControl)
+        self:MouseExit()
     end)
 
     return tabControl
@@ -396,15 +396,6 @@ function ZO_CharacterCreateBucketManager_Keyboard:EnableBucketTab(bucketCategory
     tabControl:SetEnabled(enabled)
     tabControl:SetDesaturation(saturation)
 end
-
-function ZO_CharacterCreateBucketManager_Keyboard:MouseOverBucket(bucketTab)
-    self:BucketForChildControl(bucketTab):MouseEnter()
-end
-
-function ZO_CharacterCreateBucketManager_Keyboard:MouseExitBucket(bucketTab)
-    self:BucketForChildControl(bucketTab):MouseExit()
-end
-
 
 function ZO_CharacterCreateBucketManager_Keyboard:AddSubCategories()
     for _, bucket in pairs(self.buckets) do

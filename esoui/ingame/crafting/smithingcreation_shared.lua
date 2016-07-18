@@ -771,8 +771,8 @@ function ZO_SharedSmithingCreation:RefreshMaterialList(patternData)
     end
 end
 
-function ZO_SharedSmithingCreation:DoesStylePassFilter(styleIndex)
-    if self.savedVars.haveKnowledgeChecked then
+function ZO_SharedSmithingCreation:DoesStylePassFilter(styleIndex, alwaysHideIfLocked)
+    if self.savedVars.haveKnowledgeChecked or alwaysHideIfLocked then
         if not IsSmithingStyleKnown(styleIndex, self:GetSelectedPatternIndex()) then
             return false
         end
@@ -811,8 +811,8 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
     self.styleList:Clear()
 
     for styleIndex = 1, GetNumSmithingStyleItems() do
-        local name, icon, sellPrice, meetsUsageRequirement, itemStyle, quality = GetSmithingStyleItemInfo(styleIndex)
-        if meetsUsageRequirement and self:DoesStylePassFilter(styleIndex) then
+        local name, icon, sellPrice, meetsUsageRequirement, itemStyle, quality, alwaysHideIfLocked = GetSmithingStyleItemInfo(styleIndex)
+        if meetsUsageRequirement and self:DoesStylePassFilter(styleIndex, alwaysHideIfLocked) then
             self.styleList:AddEntry({ craftingType = GetCraftingInteractionType(), styleIndex = styleIndex, name = name, itemStyle = itemStyle, icon = icon, quality = quality })
         end
     end

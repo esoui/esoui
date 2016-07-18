@@ -112,7 +112,7 @@ end
 function ZO_Tooltip:LayoutAchievementRewards(achievementId)
     local hasRewardItem, itemName, iconTextureName, quality = GetAchievementRewardItem(achievementId)
     local hasRewardTitle, titleName = GetAchievementRewardTitle(achievementId)
-    local hasRewardDye, dyeDefId = GetAchievementRewardDye(achievementId)
+    local hasRewardDye, dyeId = GetAchievementRewardDye(achievementId)
     local hasRewardCollectible, collectibleId = GetAchievementRewardCollectible(achievementId)
     local hasReward = hasRewardItem or hasRewardTitle or hasRewardDye or hasRewardCollectible
 
@@ -149,7 +149,7 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
         rewardsEntrySection:AddLine(GetString(SI_GAMEPAD_ACHIEVEMENTS_DYE), self:GetStyle("achievementRewardsTitle"))
 
         local swatchStyle = self:GetStyle("dyeSwatchStyle")
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeDefInfoById(dyeDefId)
+        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeInfoById(dyeId)
         rewardsEntrySection:AddColorAndTextSwatch(r, g, b, 1, dyeName, swatchStyle)
 
         rewardsSection:AddSection(rewardsEntrySection)

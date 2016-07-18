@@ -265,6 +265,10 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
 end
 
 function ZO_GamepadChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindow)
+    if ZO_Dialogs_IsShowingDialog() then
+        return
+    end
+
     if not dontShowHUDWindow then
         --As a convenience, auto enable the HUD if the user uses any shortcut to start chatting in the HUD
         SetSetting(SETTING_TYPE_UI, UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED, "true")
@@ -281,12 +285,14 @@ end
 function ZO_GamepadChatSystem:CloseTextEntry(keepText)
     SharedChatSystem.CloseTextEntry(self, keepText)
     ZO_GamepadEditBox_FocusLost(self.textEntry:GetEditControl())
+    RemoveActionLayerByName("GamepadChatSystem")
     DIRECTIONAL_INPUT:Deactivate(self.UIModeInputEater)
     self.eatingInput = false
 end
 
 function ZO_GamepadChatSystem:OnTextEntryFocusGained()
     DIRECTIONAL_INPUT:Activate(self.UIModeInputEater, self.control)
+    PushActionLayerByName("GamepadChatSystem")
     ZO_GamepadEditBox_FocusGained(self.textEntry:GetEditControl())
 end
 

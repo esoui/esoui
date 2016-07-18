@@ -22,7 +22,7 @@ function ZO_DyeingToolFill:OnLeftClicked(_, dyeChannel)
     local currentMode = self.owner:GetMode()
     local slots = ZO_Dyeing_GetSlotsForMode(currentMode)
     for i, dyeableSlotData in ipairs(slots) do
-        SetPendingSlotDyes(dyeableSlotData.dyeableSlot, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeDefId(), GetPendingSlotDyes(dyeableSlotData.dyeableSlot)))
+        SetPendingSlotDyes(dyeableSlotData.dyeableSlot, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), GetPendingSlotDyes(dyeableSlotData.dyeableSlot)))
     end
 
     self.owner:OnPendingDyesChanged(nil)
@@ -32,7 +32,7 @@ end
 
 function ZO_DyeingToolFill:OnSavedSetLeftClicked(_, dyeChannel)
     for dyeSetIndex = 1, GetNumSavedDyeSets() do
-        SetSavedDyeSetDyes(dyeSetIndex, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeDefId(), GetSavedDyeSetDyes(dyeSetIndex)))
+        SetSavedDyeSetDyes(dyeSetIndex, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), GetSavedDyeSetDyes(dyeSetIndex)))
     end
 
     self.owner:OnSavedSetSlotChanged(nil)

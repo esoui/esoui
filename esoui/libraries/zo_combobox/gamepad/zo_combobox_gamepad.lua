@@ -303,7 +303,11 @@ function ZO_GamepadComboBoxDropdown:Initialize(control)
     self.padding = 0
     self.borderPadding = ZO_GAMEPAD_COMBO_BOX_PADDING
     self.minY = 70
-    self.maxY = 950
+    local function RefreshMaxY()
+        self.maxY = GuiRoot:GetHeight() + ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET
+    end
+    RefreshMaxY()
+    EVENT_MANAGER:RegisterForEvent("GamepadComboBoxDropdown", EVENT_SCREEN_RESIZED, RefreshMaxY)
 end
 
 function ZO_GamepadComboBoxDropdown:SetPadding(padding)

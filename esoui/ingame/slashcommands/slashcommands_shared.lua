@@ -1,19 +1,24 @@
 SLASH_COMMANDS = {}
 
-SLASH_COMMANDS[GetString(SI_SLASH_SCRIPT)] = function (txt)
-    local f = assert(zo_loadstring(txt))
-    f()
-end
-
-SLASH_COMMANDS[GetString(SI_SLASH_CHATLOG)] = function(txt)
-    SetChatLogEnabled(not IsChatLogEnabled())
-
-    if(IsChatLogEnabled()) then
-        CHAT_SYSTEM:AddMessage(GetString(SI_CHAT_LOG_ENABLED))
-    else
-        CHAT_SYSTEM:AddMessage(GetString(SI_CHAT_LOG_DISABLED))
+if not IsConsoleUI() or IsInternalBuild() then
+    SLASH_COMMANDS[GetString(SI_SLASH_SCRIPT)] = function (txt)
+        local f = assert(zo_loadstring(txt))
+        f()
     end
 end
+
+if not IsConsoleUI() then
+    SLASH_COMMANDS[GetString(SI_SLASH_CHATLOG)] = function(txt)
+        SetChatLogEnabled(not IsChatLogEnabled())
+
+        if(IsChatLogEnabled()) then
+            CHAT_SYSTEM:AddMessage(GetString(SI_CHAT_LOG_ENABLED))
+        else
+            CHAT_SYSTEM:AddMessage(GetString(SI_CHAT_LOG_DISABLED))
+        end
+    end
+end
+
 
 SLASH_COMMANDS[GetString(SI_SLASH_GROUP_INVITE)] = function(txt)
     GroupInviteByName(txt)

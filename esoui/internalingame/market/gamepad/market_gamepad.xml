@@ -196,7 +196,7 @@
                 
                 <Control name="$(parent)Benefits" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="40" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" />
                     
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontGamepadBold45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE" modifyTextType="UPPERCASE">

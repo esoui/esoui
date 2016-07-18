@@ -414,6 +414,13 @@ function GamepadMarket:InitializeKeybindDescriptors()
         if triggerTutorialOnPurchase then
             self:SetQueuedTutorial(triggerTutorialOnPurchase)
         end
+
+        -- We push the purchase scene when we reach the confirmation step
+        -- So when we show the market again we will reactivate. 
+        -- Otherwise, we need to reactivate since we are just hiding a dialog.
+        if not reachedConfirmationScene then
+            self:Activate()
+        end
     end
 
     self.keybindStripDescriptors =
@@ -932,8 +939,10 @@ function GamepadMarket:DisplayEsoPlusOffer()
     local control = self.currentCategoryData.control
     control:GetNamedChild("Overview"):SetText(overview)
     control:GetNamedChild("MembershipInfoBanner"):SetTexture(image)
-    
+
     local lineContainer = control:GetNamedChild("BenefitsLineContainer")
+
+    self.subscriptionBenefitLinePool:ReleaseAllObjects()
 
     local numLines = GetNumGamepadMarketSubscriptionBenefitLines()
     local numLeftSideLines = zo_ceil(numLines / 2) -- do it this way so if we have 7 bullets 4 are on the left and 3 on the right
@@ -948,14 +957,18 @@ function GamepadMarket:DisplayEsoPlusOffer()
             benefitLine:SetAnchor(TOPLEFT, lineContainer, TOPLEFT, 0, 4)
             benefitLine:SetAnchor(TOPRIGHT, lineContainer, CENTER, 0, 4)
         else
+            --rest of the left side
             if i <= numLeftSideLines then
                 benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, BOTTOMLEFT, 0, 4)
+                benefitLine:SetAnchor(TOPRIGHT, controlToAnchorTo, BOTTOMRIGHT, 0, 4)
             else
+                -- right side layout
                 if i == firstRightSideLineIndex then
                     benefitLine:SetAnchor(TOPLEFT, lineContainer, CENTER, 0, 4)
                     benefitLine:SetAnchor(TOPRIGHT, lineContainer, TOPRIGHT, 0, 4)
                 else
                     benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, BOTTOMLEFT, 0, 4)
+                    benefitLine:SetAnchor(TOPRIGHT, controlToAnchorTo, BOTTOMRIGHT, 0, 4)
                 end
             end
         end

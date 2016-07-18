@@ -9,12 +9,14 @@ ZO_SharedTradeWindow = ZO_Object:Subclass()
 local function OnTradeWindowInviteConsidering(self, eventCode, inviterCharacterName, inviterDisplayName)
     TRADE_WINDOW.state = TRADE_STATE_INVITE_CONSIDERING
     TRADE_WINDOW.target = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+    TRADE_WINDOW.partnerUndecoratedDisplayName = UndecorateDisplayName(inviterDisplayName)
 end
 
 --You were notified that your target is considering your trade offer.
 local function OnTradeWindowInviteWaiting(self, eventCode, inviteeCharacterName, inviteeDisplayName)
     TRADE_WINDOW.target = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
     TRADE_WINDOW.state = TRADE_STATE_INVITE_WAITING
+    TRADE_WINDOW.partnerUndecoratedDisplayName = UndecorateDisplayName(inviteeDisplayName)
 end
 
 --Either you or they declined an offer

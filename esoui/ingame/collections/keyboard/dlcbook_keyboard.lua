@@ -251,7 +251,7 @@ end
 
 function DLCBook_Keyboard:BrowseToCollectible(collectibleId)
     self:FocusDLCWithCollectibleId(collectibleId)
-    SCENE_MANAGER:Show("dlcBook")
+    MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "dlcBook")
 end
 
 ----------

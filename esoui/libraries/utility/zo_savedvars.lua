@@ -54,10 +54,66 @@ end
 
 function ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     displayName = displayName or GetDisplayName()
-    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, "$AccountWide")
+    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName)
 end
 
 local CreateExposedInterface
+
+local function SearchPath(t, ...)
+    local current = t
+    for i = 1, select("#", ...) do
+        local key = select(i, ...)
+        if key ~= nil then
+            if not current[key] then
+                return nil
+            end
+            current = current[key]
+        end
+    end
+    return current
+end
+
+local function CreatePath(t, ...)
+    local current = t
+    local container
+    local containerKey
+    for i=1, select("#", ...) do
+        local key = select(i, ...)
+        if key ~= nil then
+            if not current[key] then
+                current[key] = {}
+            end
+            container = current
+            containerKey = key
+            current = current[key]
+        end
+    end
+
+    return current, container, containerKey
+end
+
+local function SetPath(t, value, ...)
+    if value ~= nil then
+        CreatePath(t, ...)
+    end
+    local current = t
+    local parent
+    local lastKey
+    for i = 1, select("#", ...) do
+        local key = select(i, ...)
+        if key ~= nil then
+            lastKey = key
+            parent = current
+            if current == nil then
+                return
+            end
+            current = current[key]
+        end
+    end
+    if parent ~= nil then
+        parent[lastKey] = value
+    end
+end
 
 function GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, characterName)
     if type(savedVariableTable) ~= "table" then
@@ -82,7 +138,23 @@ function GetNewSavedVars(savedVariableTable, version, namespace, defaults, profi
         error("Profile must be a string or nil")
     end
 
-    return CreateExposedInterface(savedVariableTable, version, namespace, defaults, profile, displayName, characterName)
+    local finalKey
+    if characterName then
+        finalKey = characterName
+
+        if NAME_CHANGE:DidNameChange() then
+            local oldCharacterName = NAME_CHANGE:GetOldCharacterName()
+            local oldNameTable = SearchPath(savedVariableTable, profile, displayName, oldCharacterName, namespace)
+            if oldNameTable then
+                SetPath(savedVariableTable, oldNameTable, profile, displayName, characterName, namespace)
+                SetPath(savedVariableTable, nil, profile, displayName, oldCharacterName, namespace)
+            end
+        end
+    else
+        finalKey = "$AccountWide"
+    end
+
+    return CreateExposedInterface(savedVariableTable, version, namespace, defaults, profile, displayName, finalKey)
 end
 
 local CopyDefaults
@@ -145,25 +217,6 @@ function CopyDefaults(sv, defaults)
     end
 
     return sv
-end
-
-local function CreatePath(t, ...)
-    local current = t
-    local container
-    local containerKey
-    for i=1, select("#", ...) do
-        local key = select(i, ...)
-        if key ~= nil then
-            if not current[key] then
-                current[key] = {}
-            end
-            container = current
-            containerKey = key
-            current = current[key]
-        end
-    end
-
-    return current, container, containerKey
 end
 
 local function InitializeRawTable(rawSavedTable, profile, namespace, displayName, playerName)

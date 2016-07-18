@@ -29,7 +29,7 @@
         <Button name="RaceSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_RaceButton">
             <Dimensions x="64" y="64" />
             <OnInitialized>
-                self.selectorType = "race"
+                self.selectorType = CHARACTER_CREATE_SELECTOR_RACE
                 self.tooltipFormatter = SI_CREATE_CHARACTER_RACE_SELECTOR_TOOLTIP
             </OnInitialized>
         </Button>
@@ -55,7 +55,7 @@
         <Button name="AllianceSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_AllianceButton">
             <Dimensions x="64" y="64" />
             <OnInitialized>
-                self.selectorType = "alliance"
+                self.selectorType = CHARACTER_CREATE_SELECTOR_ALLIANCE
                 self.tooltipFormatter = SI_CREATE_CHARACTER_ALLIANCE_SELECTOR_TOOLTIP
             </OnInitialized>
         </Button>

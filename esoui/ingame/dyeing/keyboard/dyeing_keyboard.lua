@@ -47,9 +47,9 @@ function ZO_Dyeing:Initialize(control)
             MAIN_MENU_MANAGER:SetBlockingScene("dyeing", OnBlockingSceneActivated)
             TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
             local selectedTabType = ZO_MenuBar_GetSelectedDescriptor(self.tabs)
+            self:UpdateOptionControls()
 
             InitializePendingDyes(self.mode)
-
 
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -81,14 +81,17 @@ function ZO_Dyeing:Initialize(control)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_UNLOCKED_DYES_UPDATED, function() self:DirtyDyeLayout() end)
+    local function UpdateDyeLayout()
+        self:DirtyDyeLayout()
+    end
+    self.control:RegisterForEvent(EVENT_UNLOCKED_DYES_UPDATED, UpdateDyeLayout)
+    ZO_DYEING_MANAGER:RegisterForDyeListUpdates(UpdateDyeLayout)
 
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
             self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "Dyeing", ZO_DYEING_SAVED_VARIABLES_DEFAULTS)
 
-            ZO_CheckButton_SetCheckState(self.showLockedCheckBox, self.savedVars.showLocked)
-            self.sortDropDown:SelectItem(self.savedVars.sortStyle == ZO_DYEING_SORT_STYLE_RARITY and self.sortByRarityEntry or self.sortByHueEntry)
+            self:UpdateOptionControls()
 
             self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
         end
@@ -211,9 +214,9 @@ function ZO_Dyeing:OnToolChanged(tool)
 
         if self.activeTool:HasSwatchSelection() then
             local TOOL_CHANGE = true
-            self:SetSelectedDyeDefId(self.selectedDyeDefId or self.lastSelectedDyeDefId or self.unlockedDyeDefIds[1], nil, TOOL_CHANGE)
+            self:SetSelectedDyeId(self.selectedDyeId or self.lastSelectedDyeId or self.unlockedDyeIds[1], nil, TOOL_CHANGE)
         else
-            self:SetSelectedDyeDefId(nil)
+            self:SetSelectedDyeId(nil)
         end
 
         if self.activeTool:HasSavedSetSelection() then
@@ -374,7 +377,7 @@ function ZO_Dyeing:InitializeSortsAndFilters()
     local function OnFilterChanged(checkButton, isChecked)
         if self.savedVars.showLocked ~= isChecked then
             self.savedVars.showLocked = isChecked
-            self:DirtyDyeLayout()
+            ZO_DYEING_MANAGER:UpdateAllDyeLists()
         end
     end
 
@@ -385,7 +388,7 @@ function ZO_Dyeing:InitializeSortsAndFilters()
     local function SetSortStyle(_, _, entry)
         if entry.sortStyleType ~= self.savedVars.sortStyle then
             self.savedVars.sortStyle = entry.sortStyleType
-            self:DirtyDyeLayout()
+            ZO_DYEING_MANAGER:UpdateAllDyeLists()
         end
     end
 
@@ -401,6 +404,11 @@ function ZO_Dyeing:InitializeSortsAndFilters()
     self.sortDropDown:AddItem(self.sortByHueEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
 
     self.sortDropDown:UpdateItems()
+end
+
+function ZO_Dyeing:UpdateOptionControls()
+    self.sortDropDown:SelectItem(self.savedVars.sortStyle == ZO_DYEING_SORT_STYLE_RARITY and self.sortByRarityEntry or self.sortByHueEntry)
+    ZO_CheckButton_SetCheckState(self.showLockedCheckBox, self.savedVars.showLocked)
 end
 
 function ZO_Dyeing:InitializeKeybindStripDescriptors()
@@ -473,12 +481,12 @@ do
             self:GetCurrentSheet():ToggleDyeableSlotHightlight(highlightSlot, true, highlightDyeChannel)
             WINDOW_MANAGER:SetMouseCursor(self.activeTool:GetCursorType(dyeableSlot, dyeChannel))
         end
-        local dyeDefId = select(dyeChannel, GetPendingSlotDyes(dyeableSlot))
-        local swatch = self.dyeDefIdToSwatch[dyeDefId]
+        local dyeId = select(dyeChannel, GetPendingSlotDyes(dyeableSlot))
+        local swatch = self.dyeIdToSwatch[dyeId]
         if swatch then
             ZO_Dyeing_CreateTooltipOnMouseEnter(swatch, swatch.dyeName, swatch.known, swatch.achievementId)
         else
-            local dyeName, _, _, _, achievementId = GetDyeDefInfoById(dyeDefId)
+            local dyeName, _, _, _, achievementId = GetDyeInfoById(dyeId)
             if dyeName ~= "" then
                 ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, NON_PLAYER_DYE_NOT_KNOWN, achievementId, IS_NON_PLAYER_DYE)
             end
@@ -501,13 +509,13 @@ do
                 WINDOW_MANAGER:SetMouseCursor(self.activeTool:GetCursorType(dyeSetIndex, dyeChannel))
             end
         end
-        local dyeDefId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
-        local swatch = self.dyeDefIdToSwatch[dyeDefId]
+        local dyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
+        local swatch = self.dyeIdToSwatch[dyeId]
         if swatch then
             ZO_Dyeing_CreateTooltipOnMouseEnter(swatch, swatch.dyeName, swatch.known, swatch.achievementId)
         else
             -- Technically should never be able to get here, but you never know
-            local dyeName, _, _, _, achievementId = GetDyeDefInfoById(dyeDefId)
+            local dyeName, _, _, _, achievementId = GetDyeInfoById(dyeId)
             ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, NON_PLAYER_DYE_NOT_KNOWN, achievementId, IS_NON_PLAYER_DYE)
         end
     end
@@ -522,8 +530,8 @@ function ZO_Dyeing:OnSavedSetDyeSlotExit(dyeSetIndex, dyeChannel)
     ZO_Dyeing_ClearTooltipOnMouseExit()
 end
 
-function ZO_Dyeing:GetSelectedDyeDefId()
-    return self.selectedDyeDefId
+function ZO_Dyeing:GetSelectedDyeId()
+    return self.selectedDyeId
 end
 
 function ZO_Dyeing:GetSelectedSavedSetIndex()
@@ -630,13 +638,13 @@ function ZO_Dyeing:CancelExit()
 end
 
 function ZO_Dyeing:UniformRandomize()
-    ZO_Dyeing_UniformRandomize(self.mode, function() return self:GetRandomUnlockedDyeDefId() end)
+    ZO_Dyeing_UniformRandomize(self.mode, function() return self:GetRandomUnlockedDyeId() end)
     self:OnPendingDyesChanged()
 end
 
-function ZO_Dyeing:GetRandomUnlockedDyeDefId()
-    if #self.unlockedDyeDefIds > 0 then
-        return self.unlockedDyeDefIds[zo_random(1, #self.unlockedDyeDefIds)]
+function ZO_Dyeing:GetRandomUnlockedDyeId()
+    if #self.unlockedDyeIds > 0 then
+        return self.unlockedDyeIds[zo_random(1, #self.unlockedDyeIds)]
     end
     return nil
 end
@@ -647,8 +655,8 @@ function ZO_Dyeing:UndoPendingChanges()
     PlaySound(SOUNDS.DYEING_UNDO_CHANGES)
 end
 
-function ZO_Dyeing:SwitchToDyeingWithDyeDefId(dyeDefId, suppressSounds)
-    local swatch = self.dyeDefIdToSwatch[dyeDefId]
+function ZO_Dyeing:SwitchToDyeingWithDyeId(dyeId, suppressSounds)
+    local swatch = self.dyeIdToSwatch[dyeId]
     if swatch then -- super edge case check (most likely only an internal issue) for having a non-player dye in your saved sets
         self.suppressSounds = suppressSounds
 
@@ -657,34 +665,34 @@ function ZO_Dyeing:SwitchToDyeingWithDyeDefId(dyeDefId, suppressSounds)
             ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
             toolChanged = true
         end
-        self:SetSelectedDyeDefId(dyeDefId, nil, toolChanged)
+        self:SetSelectedDyeId(dyeId, nil, toolChanged)
 
-        ZO_Scroll_ScrollControlIntoCentralView(self.pane, self.dyeDefIdToSwatch[dyeDefId])
+        ZO_Scroll_ScrollControlIntoCentralView(self.pane, self.dyeIdToSwatch[dyeId])
 
         self.suppressSounds = false
     end
 end
 
-function ZO_Dyeing:DoesDyeDefIdExistInPlayerDyes(dyeDefId)
-    return self.dyeDefIdToSwatch[dyeDefId] ~= nil
+function ZO_Dyeing:DoesDyeIdExistInPlayerDyes(dyeId)
+    return self.dyeIdToSwatch[dyeId] ~= nil
 end
 
-function ZO_Dyeing:SetSelectedDyeDefId(dyeDefId, becauseOfRebuild, becauseToolChange)
-    if self.selectedDyeDefId ~= dyeDefId or becauseOfRebuild then
+function ZO_Dyeing:SetSelectedDyeId(dyeId, becauseOfRebuild, becauseToolChange)
+    if self.selectedDyeId ~= dyeId or becauseOfRebuild then
         if not becauseOfRebuild then
-            local oldSwatch = self.dyeDefIdToSwatch[self.selectedDyeDefId]
+            local oldSwatch = self.dyeIdToSwatch[self.selectedDyeId]
             if oldSwatch then
                 oldSwatch:SetSelected(false)
             end
         end
 
-        if self.selectedDyeDefId then
-            self.lastSelectedDyeDefId = self.selectedDyeDefId
+        if self.selectedDyeId then
+            self.lastSelectedDyeId = self.selectedDyeId
         end
 
-        self.selectedDyeDefId = dyeDefId
+        self.selectedDyeId = dyeId
 
-        local newSwatch = self.activeTool:HasSwatchSelection() and self.dyeDefIdToSwatch[self.selectedDyeDefId]
+        local newSwatch = self.activeTool:HasSwatchSelection() and self.dyeIdToSwatch[self.selectedDyeId]
         if newSwatch then
             local skipAnim = becauseOfRebuild
             local skipSound = becauseOfRebuild or becauseToolChange
@@ -738,22 +746,22 @@ end
 function ZO_Dyeing:LayoutDyes()
     self.dyeLayoutDirty = false
 
-    local _, _, unlockedDyeDefIds, dyeDefIdToSwatch = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS, self.pane)
-    self.unlockedDyeDefIds = unlockedDyeDefIds
-    self.dyeDefIdToSwatch = dyeDefIdToSwatch
+    local _, _, unlockedDyeIds, dyeIdToSwatch = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS, self.pane)
+    self.unlockedDyeIds = unlockedDyeIds
+    self.dyeIdToSwatch = dyeIdToSwatch
 
-    local anyDyesToSwatch = (next(dyeDefIdToSwatch) ~= nil)
+    local anyDyesToSwatch = (next(dyeIdToSwatch) ~= nil)
     self.noDyesLabel:SetHidden(anyDyesToSwatch)
-    if self.selectedDyeDefId then
-        self:SetSelectedDyeDefId(self.selectedDyeDefId, true)
+    if self.selectedDyeId then
+        self:SetSelectedDyeId(self.selectedDyeId, true)
     end
 end
 
 function ZO_Dyeing:RefreshSavedSet(dyeSetIndex)
     local savedSetSwatch = self.savedSets[dyeSetIndex]
     for dyeChannel, dyeControl in ipairs(savedSetSwatch.dyeControls) do
-        local currentDyeDefId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
-        ZO_DyeingUtils_SetSlotDyeSwatchDyeDefId(dyeChannel, dyeControl, currentDyeDefId)
+        local currentDyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
+        ZO_DyeingUtils_SetSlotDyeSwatchDyeId(dyeChannel, dyeControl, currentDyeId)
     end
 end
 

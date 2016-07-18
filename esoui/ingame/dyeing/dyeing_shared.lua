@@ -148,7 +148,7 @@ function ZO_Dyeing_InitializeSwatchPool(owner, sharedHighlight, parentControl, t
         if upInside then
             if button == MOUSE_BUTTON_INDEX_LEFT then
                 if not swatch.locked then
-                    owner:SwitchToDyeingWithDyeDefId(swatch.dyeDefId)
+                    owner:SwitchToDyeingWithDyeId(swatch.dyeId)
                 end
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
                 local achievementName = GetAchievementInfo(swatch.achievementId)
@@ -210,8 +210,8 @@ function ZO_Dyeing_RefreshDyeableSlotControlDyes_Colors(slotControl, dyeableSlot
     for dyeChannel, dyeControl in ipairs(slotControl.dyeControls) do
         if isDyeable then
             dyeControl:SetHidden(false)
-            local currentDyeDefId = select(dyeChannel, ...)
-            ZO_DyeingUtils_SetSlotDyeSwatchDyeDefId(dyeChannel, dyeControl, currentDyeDefId, isChannelDyeableTable[dyeChannel])
+            local currentDyeId = select(dyeChannel, ...)
+            ZO_DyeingUtils_SetSlotDyeSwatchDyeId(dyeChannel, dyeControl, currentDyeId, isChannelDyeableTable[dyeChannel])
         else
             dyeControl:SetHidden(true)
         end
@@ -235,11 +235,11 @@ function ZO_Dyeing_GetActiveOffhandDyeableSlot()
     return DYEABLE_SLOT_OFF_HAND
 end
 
-function ZO_DyeingUtils_SetSlotDyeSwatchDyeDefId(dyeChannel, dyeControl, dyeDefId, isDyeable)   
+function ZO_DyeingUtils_SetSlotDyeSwatchDyeId(dyeChannel, dyeControl, dyeId, isDyeable)   
     local isEmptyFrame, hideMunge, hideBackground, hideInvalid
     --We have a dye and the channel is dyeable
-    if dyeDefId and isDyeable ~= false then
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey = GetDyeDefInfoById(dyeDefId)
+    if dyeId ~= INVALID_DYE_ID and isDyeable ~= false then
+        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey = GetDyeInfoById(dyeId)
         dyeControl.swatchTexture:SetColor(r, g, b, 1)
         isEmptyFrame = false
         hideMunge = false
@@ -288,10 +288,10 @@ function ZO_DyeingUtils_GetHeaderTextFromSortType(sortStyleType, rarityOrHueCate
     end
 end
 
-function ZO_Dyeing_UniformRandomize(mode, getRandomUnlockedDyeDefIdFunction)
-    local primaryDyeDefId = getRandomUnlockedDyeDefIdFunction()
-    local secondaryDyeDefId = getRandomUnlockedDyeDefIdFunction()
-    local accentDyeDefId = getRandomUnlockedDyeDefIdFunction()
+function ZO_Dyeing_UniformRandomize(mode, getRandomUnlockedDyeIdFunction)
+    local primaryDyeId = getRandomUnlockedDyeIdFunction()
+    local secondaryDyeId = getRandomUnlockedDyeIdFunction()
+    local accentDyeId = getRandomUnlockedDyeIdFunction()
     
     local slots = ZO_Dyeing_GetSlotsForMode(mode)
     local activeDyeableSlot = ZO_Dyeing_GetActiveOffhandDyeableSlot()
@@ -301,7 +301,11 @@ function ZO_Dyeing_UniformRandomize(mode, getRandomUnlockedDyeDefIdFunction)
         --don't randomly dye the shield in your other weapon set
         if (dyeableSlot ~= DYEABLE_SLOT_OFF_HAND and dyeableSlot ~= DYEABLE_SLOT_BACKUP_OFF)
             or dyeableSlot == activeDyeableSlot then
-                SetPendingSlotDyes(dyeableSlot, primaryDyeDefId, secondaryDyeDefId, accentDyeDefId)
+                local isPrimaryChannelDyeable, isSecondaryChannelDyeable, isAccentChannelDyeable = AreDyeableSlotDyeChannelsDyeable(dyeableSlot)
+                local finalPrimaryDyeId = isPrimaryChannelDyeable and primaryDyeId or INVALID_DYE_ID
+                local finalSecondaryDyeId = isSecondaryChannelDyeable and secondaryDyeId or INVALID_DYE_ID
+                local finalAccentDyeId = isAccentChannelDyeable and accentDyeId or INVALID_DYE_ID
+                SetPendingSlotDyes(dyeableSlot, finalPrimaryDyeId, finalSecondaryDyeId, finalAccentDyeId)
         end
     end
 
@@ -493,12 +497,12 @@ end
 
 function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPool, layoutOptions, container)
     local activeSwatches = {}
-    local swatchByDyeDefId = {}
+    local swatchByDyeId = {}
 
     swatchPool:ReleaseAllObjects()
 
     for i=1, GetNumDyes() do
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey, dyeDefId = GetDyeInfo(i)
+        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey, dyeId = GetDyeInfo(i)
 
         if known or includeLocked then
             local parentCategory = GetOrCreateDyeParentCategory(sortStyle, activeSwatches, rarity, hueCategory)
@@ -508,12 +512,12 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
             swatch.sortKey = sortKey
             swatch.dyeName = dyeName
             swatch.known = known
-            swatch.dyeDefId = dyeDefId
+            swatch.dyeId = dyeId
             swatch.achievementId = achievementId
             swatch:SetLocked(not known)
 
             table.insert(parentCategory, swatch)
-            swatchByDyeDefId[dyeDefId] = swatch
+            swatchByDyeId[dyeId] = swatch
         end
     end
 
@@ -530,8 +534,8 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
     local lastHeader
 
     local swatchesByPosition = {}
-    local positionByDyeDefId = {}
-    local unlockedDyeDefIds = {}
+    local positionByDyeId = {}
+    local unlockedDyeIds = {}
 
     local stride
     local padding = layoutOptions.padding
@@ -568,13 +572,13 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
             end
             table.insert(currentRowTable, swatch)
 
-            positionByDyeDefId[swatch.dyeDefId] = {#swatchesByPosition, #currentRowTable}
+            positionByDyeId[swatch.dyeId] = {#swatchesByPosition, #currentRowTable}
 
             swatch.effectiveTop = totalHeaderOffsetY + offsetY - halfSelectedSwatchHeight
             swatch.effectiveBottom = totalHeaderOffsetY + offsetY + swatchHeight + halfSelectedSwatchHeight + header:GetHeight()
 
             if not swatch:IsLocked() then
-                table.insert(unlockedDyeDefIds, swatch.dyeDefId)
+                table.insert(unlockedDyeIds, swatch.dyeId)
             end
         end
 
@@ -583,7 +587,7 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
         lastHeader = header
     end
 
-    return swatchesByPosition, positionByDyeDefId, unlockedDyeDefIds, swatchByDyeDefId
+    return swatchesByPosition, positionByDyeId, unlockedDyeIds, swatchByDyeId
 end
 
 function ZO_DyeingSwatch_OnMouseEnter(swatch)
@@ -644,3 +648,24 @@ local DYEABLE_SLOT_TEXTURES =
 function ZO_Character_GetEmptyDyeableSlotTexture(dyeableSlot)
     return DYEABLE_SLOT_TEXTURES[dyeableSlot]
 end
+
+--
+--[[ Dyeing Singleton ]]--
+--
+
+local Dyeing_Manager = ZO_CallbackObject:Subclass()
+
+function Dyeing_Manager:New(...)
+    local dyeing = ZO_CallbackObject.New(self)
+    return dyeing
+end
+
+function Dyeing_Manager:RegisterForDyeListUpdates(callback)
+    self:RegisterCallback("UpdateDyeLists", callback)
+end
+
+function Dyeing_Manager:UpdateAllDyeLists()
+    self:FireCallbacks("UpdateDyeLists")
+end
+
+ZO_DYEING_MANAGER = Dyeing_Manager:New()

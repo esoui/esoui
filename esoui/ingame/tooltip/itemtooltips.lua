@@ -1,5 +1,7 @@
 local FORCE_FULL_DURABILITY = true
 local NOT_EQUIPPED = false
+local DONT_SHOW_PLAYER_LOCKED = false
+
 ZO_ENCHANT_DIFF_ADD = "add"
 ZO_ENCHANT_DIFF_REMOVE = "remove"
 ZO_ENCHANT_DIFF_NONE = "none"
@@ -59,7 +61,7 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     end
 end
 
-function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked)
+function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
     local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
     --Item Type Info
@@ -106,21 +108,25 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked)
         end
     end
 
-    self:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked)
+    self:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked, tradeBoPData)
 
     self:AddSectionEvenIfEmpty(topSection)
 end
 
-function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked)
+function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked, tradeBoPData)
     local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
     
     -- Bound and/or Player Locked
     local boundLabel
-    local bindType = GetItemLinkBindType(itemLink)
-    if IsItemLinkBound(itemLink) then
-        boundLabel = GetString(SI_ITEM_FORMAT_STR_BOUND)
-    elseif bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET then
-        boundLabel = GetString("SI_BINDTYPE", bindType)
+    if tradeBoPData then
+        boundLabel = zo_iconFormat(ZO_TRADE_BOP_ICON, 24, 24)
+    else
+        local bindType = GetItemLinkBindType(itemLink)
+        if IsItemLinkBound(itemLink) then
+            boundLabel = GetString(SI_ITEM_FORMAT_STR_BOUND)
+        elseif bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET then
+            boundLabel = GetString("SI_BINDTYPE", bindType)
+        end
     end
 
     if showPlayerLocked then
@@ -510,8 +516,8 @@ end
 
 --Layout Functions
 
-function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPTimer, tradeBoPNamesString)
-    self:AddTopSection(itemLink, showPlayerLocked)
+function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData)
+    self:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     if(DoesItemLinkHaveArmorDecay(itemLink)) then
@@ -532,6 +538,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddFlavorText(itemLink)
     self:AddCreator(itemLink, creatorName)
     self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
 end
 
@@ -580,15 +587,16 @@ do
     end
 end
 
-function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName)
-    self:AddTopSection(itemLink)
+function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:LayoutInlineGlyph(itemLink, itemName)
     self:AddCreator(itemLink, creatorName)
     self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
 end
 
-function ZO_Tooltip:LayoutSiege(itemLink, itemName)
-    self:AddTopSection(itemLink)
+function ZO_Tooltip:LayoutSiege(itemLink, itemName, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:AddItemTitle(itemLink, itemName)
     local maxHP = GetItemLinkSiegeMaxHP(itemLink)
     if(maxHP > 0) then
@@ -601,14 +609,16 @@ function ZO_Tooltip:LayoutSiege(itemLink, itemName)
     end
     self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
 end
 
-function ZO_Tooltip:LayoutTool(itemLink, itemName)
-    self:AddTopSection(itemLink)
+function ZO_Tooltip:LayoutTool(itemLink, itemName, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
 end
 
@@ -629,9 +639,9 @@ function ZO_Tooltip:LayoutAvARepair(itemLink, itemName)
 end
 
 do
-    local function AddDyeSwatchSection(dyeDefId, section, entryStyle, swatchStyle)
+    local function AddDyeSwatchSection(dyeId, section, entryStyle, swatchStyle)
         local entrySection = section:AcquireSection()
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeDefInfoById(dyeDefId)
+        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeInfoById(dyeId)
         entrySection:AddColorAndTextSwatch(r, g, b, 1, dyeName, swatchStyle)
         section:AddSection(entrySection)
     end
@@ -649,7 +659,7 @@ do
         self:AddSection(descriptionSection)
 
         -- list of dyes in stamp
-        local primaryDefId, secondaryDefId, accentDefId = GetItemLinkDyeDefIds(itemLink)
+        local primaryDefId, secondaryDefId, accentDefId = GetItemLinkDyeIds(itemLink)
         local dyesSection = self:AcquireSection(self:GetStyle("dyesSection"))
         local swatchStyle = self:GetStyle("dyeSwatchStyle")
         local entryStyle = self:GetStyle("dyeSwatchEntrySection")
@@ -663,17 +673,19 @@ do
         self:AddFlavorText(itemLink)
         self:AddItemTags(itemLink)
 
-        local dyeStampDefId = GetItemLinkDyeStampDefId(itemLink)
+        local dyeStampId = GetItemLinkDyeStampId(itemLink)
         local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
-        if onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP then
-            local useResult = CanPlayerUseItemDyeStamp(dyeStampDefId)
+        if not IsCharacterPreviewingAvailable() then
+            errorSection:AddLine(GetString(SI_DYE_STAMP_NOT_USABLE_NOW), self:GetStyle("dyeStampError"))
+        elseif onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP then
+            local useResult = CanPlayerUseItemDyeStamp(dyeStampId)
             if useResult == DYE_STAMP_USE_RESULT_NO_ACTIVE_ITEMS then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_REQUIRES_EQUIPMENT), self:GetStyle("dyeStampError"))
             elseif useResult == DYE_STAMP_USE_RESULT_NO_VALID_ITEMS then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_SAME_DYE_DATA), self:GetStyle("dyeStampError"))
             end
         elseif onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP then
-            local useResult = CanPlayerUseCostumeDyeStamp(dyeStampDefId)
+            local useResult = CanPlayerUseCostumeDyeStamp(dyeStampId)
             if useResult == DYE_STAMP_USE_RESULT_NO_ACTIVE_COLLECTIBLES then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_REQUIRES_COLLECTIBLE), self:GetStyle("dyeStampError"))
             elseif useResult == DYE_STAMP_USE_RESULT_NO_VALID_COLLECTIBLES then
@@ -684,8 +696,8 @@ do
     end
 end
 
-function ZO_Tooltip:LayoutBook(itemLink)
-    self:AddTopSection(itemLink)
+function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:AddItemTitle(itemLink)
     local knownSection = self:AcquireSection(self:GetStyle("bodySection"))
     if(IsItemLinkBookKnown(itemLink)) then
@@ -696,6 +708,7 @@ function ZO_Tooltip:LayoutBook(itemLink)
     self:AddSection(knownSection)
     self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
 end
 
 function ZO_Tooltip:LayoutLure(itemLink, itemName)
@@ -712,8 +725,8 @@ function ZO_Tooltip:LayoutQuestStartOrFinishItem(itemLink, itemName)
     self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName)
-    self:AddTopSection(itemLink)
+function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:AddItemTitle(itemLink, itemName)
     local IGNORE_LEVEL = true
     self:AddBaseStats(itemLink, IGNORE_LEVEL)
@@ -776,6 +789,7 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName)
     end
     self:AddSection(useToLearnOrKnownSection)
     self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
 end
 
@@ -1070,13 +1084,14 @@ function ZO_Tooltip:LayoutUniversalStyleItem(itemLink)
     self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutTradeBoPInfo(tradeBoPTimer, tradeBoPNamesString)
-    if tradeBoPTimer and tradeBoPNamesString then
+function ZO_Tooltip:LayoutTradeBoPInfo(tradeBoPData)
+    if tradeBoPData then
+        local timeRemaining = tradeBoPData.timeRemaining
         local tradeBoPSection = self:AcquireSection(self:GetStyle("bodySection"), self:GetStyle("itemTradeBoPSection"))
 
         local formattedTimeRemaining
-        if tradeBoPTimer > ZO_ONE_MINUTE_IN_SECONDS then
-            formattedTimeRemaining = zo_round(tradeBoPTimer / ZO_ONE_MINUTE_IN_SECONDS) * ZO_ONE_MINUTE_IN_SECONDS
+        if timeRemaining > ZO_ONE_MINUTE_IN_SECONDS then
+            formattedTimeRemaining = zo_round(timeRemaining / ZO_ONE_MINUTE_IN_SECONDS) * ZO_ONE_MINUTE_IN_SECONDS
             formattedTimeRemaining = ZO_FormatTime(formattedTimeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
         else
             formattedTimeRemaining = GetString(SI_STR_TIME_LESS_THAN_MINUTE)
@@ -1088,7 +1103,7 @@ function ZO_Tooltip:LayoutTradeBoPInfo(tradeBoPTimer, tradeBoPNamesString)
         tradeBoPSection:AddStatValuePair(statValuePairTimer)
 
         tradeBoPSection:AddLine(GetString(SI_ITEM_FORMAT_STR_TRADE_BOP_PLAYERS_HEADER), self:GetStyle("statValuePairStat"), self:GetStyle("itemTradeBoPHeader"))
-        tradeBoPSection:AddLine(tradeBoPNamesString, self:GetStyle("statValuePairValue"), self:GetStyle("fullWidth"))
+        tradeBoPSection:AddLine(tradeBoPData.namesString, self:GetStyle("statValuePairValue"), self:GetStyle("fullWidth"))
 
         self:AddSection(tradeBoPSection)
     end
@@ -1111,51 +1126,51 @@ end
 do
     local LAYOUT_FUNCTIONS =
     {
-        [ITEMTYPE_RECIPE] = function(self, itemLink, creatorName, itemName) self:LayoutProvisionerRecipe(itemLink, itemName) end,
+        [ITEMTYPE_RECIPE] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData) end,
 
-        [ITEMTYPE_BLACKSMITHING_BOOSTER] = function(self, itemLink, creatorName, itemName) self:LayoutBooster(itemLink, itemName) end,
-        [ITEMTYPE_WOODWORKING_BOOSTER] = function(self, itemLink, creatorName, itemName) self:LayoutBooster(itemLink, itemName) end,
-        [ITEMTYPE_CLOTHIER_BOOSTER] = function(self, itemLink, creatorName, itemName) self:LayoutBooster(itemLink, itemName) end,
+        [ITEMTYPE_BLACKSMITHING_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutBooster(itemLink, itemName) end,
+        [ITEMTYPE_WOODWORKING_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutBooster(itemLink, itemName) end,
+        [ITEMTYPE_CLOTHIER_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutBooster(itemLink, itemName) end,
 
-        [ITEMTYPE_GLYPH_WEAPON] = function(self, itemLink, creatorName, itemName) self:LayoutGlyph(itemLink, creatorName, itemName) end,
-        [ITEMTYPE_GLYPH_ARMOR] = function(self, itemLink, creatorName, itemName) self:LayoutGlyph(itemLink, creatorName, itemName) end,
-        [ITEMTYPE_GLYPH_JEWELRY] = function(self, itemLink, creatorName, itemName) self:LayoutGlyph(itemLink, creatorName, itemName) end,
+        [ITEMTYPE_GLYPH_WEAPON] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData) end,
+        [ITEMTYPE_GLYPH_ARMOR] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData) end,
+        [ITEMTYPE_GLYPH_JEWELRY] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData) end,
 
-        [ITEMTYPE_REAGENT] = function(self, itemLink, creatorName, itemName) self:LayoutReagent(itemLink, itemName) end,
+        [ITEMTYPE_REAGENT] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutReagent(itemLink, itemName) end,
 
-        [ITEMTYPE_POTION_BASE] = function(self, itemLink, creatorName, itemName) self:LayoutAlchemyBase(itemLink, itemName) end,
-        [ITEMTYPE_POISON_BASE] = function(self, itemLink, creatorName, itemName) self:LayoutAlchemyBase(itemLink, itemName) end,
+        [ITEMTYPE_POTION_BASE] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutAlchemyBase(itemLink, itemName) end,
+        [ITEMTYPE_POISON_BASE] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutAlchemyBase(itemLink, itemName) end,
 
-        [ITEMTYPE_INGREDIENT] = function(self, itemLink, creatorName, itemName) self:LayoutIngredient(itemLink, itemName) end,
+        [ITEMTYPE_INGREDIENT] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutIngredient(itemLink, itemName) end,
 
-        [ITEMTYPE_STYLE_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutStyleMaterial(itemLink, itemName) end,
+        [ITEMTYPE_STYLE_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutStyleMaterial(itemLink, itemName) end,
 
-        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutRawMaterial(itemLink, itemName) end,
-        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutRawMaterial(itemLink, itemName) end,
-        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutRawMaterial(itemLink, itemName) end,
+        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutRawMaterial(itemLink, itemName) end,
+        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutRawMaterial(itemLink, itemName) end,
+        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutRawMaterial(itemLink, itemName) end,
 
-        [ITEMTYPE_BLACKSMITHING_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutMaterial(itemLink, itemName) end,
-        [ITEMTYPE_CLOTHIER_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutMaterial(itemLink, itemName) end,
-        [ITEMTYPE_WOODWORKING_MATERIAL] = function(self, itemLink, creatorName, itemName) self:LayoutMaterial(itemLink, itemName) end,
+        [ITEMTYPE_BLACKSMITHING_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutMaterial(itemLink, itemName) end,
+        [ITEMTYPE_CLOTHIER_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutMaterial(itemLink, itemName) end,
+        [ITEMTYPE_WOODWORKING_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutMaterial(itemLink, itemName) end,
 
-        [ITEMTYPE_ARMOR_TRAIT] = function(self, itemLink, creatorName, itemName) self:LayoutArmorTrait(itemLink, itemName) end,
+        [ITEMTYPE_ARMOR_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutArmorTrait(itemLink, itemName) end,
 
-        [ITEMTYPE_WEAPON_TRAIT] = function(self, itemLink, creatorName, itemName) self:LayoutWeaponTrait(itemLink, itemName) end,
+        [ITEMTYPE_WEAPON_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutWeaponTrait(itemLink, itemName) end,
 
-        [ITEMTYPE_SIEGE] = function(self, itemLink, creatorName, itemName) self:LayoutSiege(itemLink, itemName) end,
+        [ITEMTYPE_SIEGE] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutSiege(itemLink, itemName, tradeBoPData) end,
 
-        [ITEMTYPE_TOOL] = function(self, itemLink, creatorName, itemName) self:LayoutTool(itemLink, itemName) end,
+        [ITEMTYPE_TOOL] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutTool(itemLink, itemName, tradeBoPData) end,
 
-        [ITEMTYPE_SOUL_GEM] = function(self, itemLink, creatorName, itemName) self:LayoutSoulGem(itemLink, itemName) end,
+        [ITEMTYPE_SOUL_GEM] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutSoulGem(itemLink, itemName) end,
 
-        [ITEMTYPE_AVA_REPAIR] = function(self, itemLink, creatorName, itemName) self:LayoutAvARepair(itemLink, itemName) end,
+        [ITEMTYPE_AVA_REPAIR] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutAvARepair(itemLink, itemName) end,
 
-        [ITEMTYPE_DYE_STAMP] = function(self, itemLink, creatorName, itemName) self:LayoutDyeStamp(itemLink, itemName) end,
+        [ITEMTYPE_DYE_STAMP] = function(self, itemLink, creatorName, itemName, tradeBoPData) self:LayoutDyeStamp(itemLink, itemName) end,
     }
 
     --TODO: Get creatorName from itemLink?
     --TODO: Pass in some sort of struct for containing all the additional item tooltip parameters
-    function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPTimer, tradeBoPNamesString)
+    function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData)
         local isValidItemLink = itemLink ~= ""
         if isValidItemLink then
             --first do checks that can't be determined from the item type
@@ -1173,28 +1188,26 @@ do
                 else
                     local layoutFunction = LAYOUT_FUNCTIONS[itemType]
                     if layoutFunction then
-                        layoutFunction(self, itemLink, creatorName, itemName)
+                        layoutFunction(self, itemLink, creatorName, itemName, tradeBoPData)
                     else
                         if IsItemLinkBook(itemLink) then
-                            self:LayoutBook(itemLink)
+                            self:LayoutBook(itemLink, tradeBoPData)
                         else -- fallback to our default layout
                             if equipped == NOT_EQUIPPED then
                                 equipSlot = EQUIP_SLOT_NONE
                             end
-                            self:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked)
+                            self:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData)
                         end
                     end
                 end
             end
-
-            self:LayoutTradeBoPInfo(tradeBoPTimer, tradeBoPNamesString)
         end
 
         return isValidItemLink
     end
 end
 
-function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, customOrBagStackCount, equipSlot, showPlayerLocked, tradeBoPTimer, tradeBoPNamesString)
+function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, customOrBagStackCount, equipSlot, showPlayerLocked, tradeBoPData)
     local isValidItemLink = itemLink ~= ""
     if isValidItemLink then
         local stackCount
@@ -1217,7 +1230,7 @@ function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, fo
         if stackCount and stackCount > 1 then
             itemName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount)
         end
-        return self:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPTimer, tradeBoPNamesString)
+        return self:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, enchantMode, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData)
     end
 end
 
@@ -1262,21 +1275,30 @@ function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, enchantMode, showCombinedCou
         end
     end
 
-    --TODO: Trade BoP
-    local tradeBoPTimeRemaining, tradeBoPEligibleNamesString
+    local tradeBoPData
     if IsItemBoPAndTradeable(bagId, slotIndex) then
-        tradeBoPTimeRemaining = GetItemBoPTimeRemainingSeconds(bagId, slotIndex)
-        tradeBoPEligibleNamesString = GetItemBoPTradeableDisplayNamesString(bagId, slotIndex)
+        tradeBoPData =
+        {
+            timeRemaining = GetItemBoPTimeRemainingSeconds(bagId, slotIndex),
+            namesString = GetItemBoPTradeableDisplayNamesString(bagId, slotIndex),
+        }
     end
-    return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), nil, enchantMode, nil, stackCount, equipSlot, showPlayerLocked, tradeBoPTimeRemaining, tradeBoPEligibleNamesString)
+    return self:LayoutItemWithStackCount(itemLink, equipped, GetItemCreatorName(bagId, slotIndex), nil, enchantMode, nil, stackCount, equipSlot, showPlayerLocked, tradeBoPData)
 end
 
 function ZO_Tooltip:LayoutTradeItem(who, tradeIndex)
     local itemLink = GetTradeItemLink(who, tradeIndex, LINK_STYLE_DEFAULT)
     local equipped = false
     local name, icon, stack, quality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(who, tradeIndex)
-    --TODO: Trade BoP
-    return self:LayoutItemWithStackCount(itemLink, equipped, creator, nil, nil, nil, stack, EQUIP_SLOT_NONE)
+    local tradeBoPData
+    if IsTradeItemBoPAndTradeable(who, tradeIndex) then
+        tradeBoPData =
+        {
+            timeRemaining = GetTradeItemBoPTimeRemainingSeconds(who, tradeIndex),
+            namesString = GetTradeItemBoPTradeableDisplayNamesString(who, tradeIndex),
+        }
+    end
+    return self:LayoutItemWithStackCount(itemLink, equipped, creator, nil, nil, nil, stack, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
 end
 
 function ZO_Tooltip:LayoutPendingSmithingItem(patternIndex, materialIndex, materialQuantity, styleIndex, traitIndex)

@@ -459,8 +459,8 @@ function ZO_GamepadPlayerEmote:RefreshHeader()
     local personalityId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY)
     local personalityName = GetCollectibleInfo(personalityId)
     if personalityName ~= "" then
-        self.headerData.data1HeaderText = "personality"
-        self.headerData.data1Text = ZO_PERSONALITY_EMOTES_COLOR:Colorize(personalityName)
+        self.headerData.data1HeaderText = GetString(SI_GAMEPAD_EMOTE_PERSONALITY_OVERRIDE_HEADER)
+        self.headerData.data1Text = ZO_PERSONALITY_EMOTES_COLOR:Colorize(zo_strformat(SI_GAMEPAD_SOCIAL_PERSONALITY, personalityName))
     else
         self.headerData.data1HeaderText = nil
         self.headerData.data1Text = nil

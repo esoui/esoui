@@ -611,7 +611,6 @@ esoui/art/charactercreate/charactercreate_zoom+_disabled.dds
 esoui/art/charactercreate/charactercreate_zoom+_down.dds
 esoui/art/charactercreate/charactercreate_zoom+_over.dds
 esoui/art/charactercreate/charactercreate_zoom+_up.dds
-esoui/art/charactercreate/gamepad/charactercreate_altmericon_default.dds
 esoui/art/charactercreate/gamepad/selectortriangle.dds
 esoui/art/charactercreate/gamepad/triangle_selector_pip.dds
 esoui/art/charactercreate/rotate_left_down.dds
@@ -1550,6 +1549,7 @@ esoui/art/inventory/inventory_tabicon_weapons_disabled.dds
 esoui/art/inventory/inventory_tabicon_weapons_down.dds
 esoui/art/inventory/inventory_tabicon_weapons_over.dds
 esoui/art/inventory/inventory_tabicon_weapons_up.dds
+esoui/art/inventory/inventory_tradable_icon.dds
 esoui/art/inventory/inventory_weapons_tabicon_active.dds
 esoui/art/inventory/inventory_weapons_tabicon_inactive.dds
 esoui/art/inventory/newitem_icon.dds

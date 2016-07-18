@@ -18,7 +18,7 @@
         </Control>
 
         <Label name="ZO_DLCBookNavigationEntry_Keyboard"  inherits="ZO_SelectableTooltipIfTruncatedLabel ZO_TreeEntry" font="ZoFontHeader" verticalAlignment="CENTER" virtual="true">
-            <Dimensions x="220" y="22" />
+            <Dimensions x="210" y="22" />
 
             <Controls>
                 <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">

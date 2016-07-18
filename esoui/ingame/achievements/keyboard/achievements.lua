@@ -372,8 +372,8 @@ function Achievement:AddTitleReward(name, completed)
     title.prefix = titlePrefix
 end
 
-function Achievement:AddDyeReward(dyeDefId, completed)
-    local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey = GetDyeDefInfoById(dyeDefId)
+function Achievement:AddDyeReward(dyeId, completed)
+    local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey = GetDyeInfoById(dyeId)
 
     local dyeSwatch, key = self.dyeSwatchPool:AcquireObject()
     dyeSwatch.key = key
@@ -532,9 +532,9 @@ local function AddRewards(self, achievementId)
     end
 
     -- get dye reward
-    local hasRewardDye, dyeDefId = GetAchievementRewardDye(achievementId)
+    local hasRewardDye, dyeId = GetAchievementRewardDye(achievementId)
     if hasRewardDye then
-        self:AddDyeReward(dyeDefId, completed)
+        self:AddDyeReward(dyeId, completed)
     end
 
     -- get collectible reward

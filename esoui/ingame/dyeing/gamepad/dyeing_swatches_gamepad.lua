@@ -34,8 +34,8 @@ function ZO_Dyeing_Swatches_Gamepad:Initialize(owner, control, sharedHighlight, 
     self.selectedDyeRow = 1
     self.selectedDyeCol = 1
     self.swatchesByPosition = {}
-    self.positionByDyeDefId = {}
-    self.unlockedDyeDefIds = {}
+    self.positionByDyeId = {}
+    self.unlockedDyeIds = {}
 
     self.verticalMovementController = verticalController or ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
@@ -204,8 +204,8 @@ function ZO_Dyeing_Swatches_Gamepad:UpdateDirectionalInput()
     end
 end
 
-function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeDefId(dyeDefId)
-    local dyePosition = self.positionByDyeDefId[dyeDefId]
+function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeId(dyeId)
+    local dyePosition = self.positionByDyeId[dyeId]
     if dyePosition then
         local previousSwatch = self:GetSelectedSwatch()
 
@@ -231,16 +231,16 @@ function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeDefId(dyeDefId)
     end
 end
 
-function ZO_Dyeing_Swatches_Gamepad:DoesDyeDefIdExistInPlayerDyes(dyeDefId)
-    return self.positionByDyeDefId[dyeDefId] ~= nil
+function ZO_Dyeing_Swatches_Gamepad:DoesDyeIdExistInPlayerDyes(dyeId)
+    return self.positionByDyeId[dyeId] ~= nil
 end
 
-function ZO_Dyeing_Swatches_Gamepad:GetSelectedDyeDefId()
+function ZO_Dyeing_Swatches_Gamepad:GetSelectedDyeId()
     local selectedSwatch = self:GetSelectedSwatch()
     if not selectedSwatch then
-        return nil
+        return INVALID_DYE_ID
     end
-    return selectedSwatch.dyeDefId
+    return selectedSwatch.dyeId
 end
 
 function ZO_Dyeing_Swatches_Gamepad:GetSelectedSwatch()
@@ -255,12 +255,12 @@ function ZO_Dyeing_Swatches_Gamepad:GetSelectedSwatch()
 end
 
 function ZO_Dyeing_Swatches_Gamepad:GetNumUnlockedDyes()
-    return #self.unlockedDyeDefIds
+    return #self.unlockedDyeIds
 end
 
-function ZO_Dyeing_Swatches_Gamepad:GetRandomUnlockedDyeDefId()
-    if #self.unlockedDyeDefIds > 0 then
-        return self.unlockedDyeDefIds[zo_random(1, #self.unlockedDyeDefIds)]
+function ZO_Dyeing_Swatches_Gamepad:GetRandomUnlockedDyeId()
+    if #self.unlockedDyeIds > 0 then
+        return self.unlockedDyeIds[zo_random(1, #self.unlockedDyeIds)]
     end
     return nil
 end
@@ -276,25 +276,21 @@ end
 function ZO_Dyeing_Swatches_Gamepad:RefreshDyeLayout_Internal()
     self.dirty = false
 
-    local selectedDyeDefId = self:GetSelectedDyeDefId()
+    local selectedDyeId = self:GetSelectedDyeId()
     local previousRowIndex = self.selectedDyeRow
 
-    self.swatchesByPosition, self.positionByDyeDefId, self.unlockedDyeDefIds = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
+    self.swatchesByPosition, self.positionByDyeId, self.unlockedDyeIds = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
 
-    local selectedRowCol = self.positionByDyeDefId[selectedDyeDefId]
+    local selectedRowCol = self.positionByDyeId[selectedDyeId]
     if selectedRowCol then
         -- The previously selected dye is still in the view, so set it as the selected row and column.
         --  NOTE: We know these coordinates are valid.
         self.selectedDyeRow = selectedRowCol[1]
         self.selectedDyeCol = selectedRowCol[2]
     else
-        -- The selected dye is no longer in the view. Clamp to ensure we have a valid selected row and column.
-        self.selectedDyeRow = zo_clamp(self.selectedDyeRow, 1, #self.swatchesByPosition)
-        if #self.swatchesByPosition == 0 then
-            self.selectedDyeCol = 0
-        else
-            self.selectedDyeCol = zo_clamp(self.selectedDyeCol, 1, #self.swatchesByPosition[self.selectedDyeRow])
-        end
+        -- The selected dye no longer exists, default to the first position
+        self.selectedDyeRow = 1
+        self.selectedDyeCol = 1
     end
 
     -- Highlight the current selection.

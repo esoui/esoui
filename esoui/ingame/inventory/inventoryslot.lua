@@ -455,7 +455,16 @@ end
 
 local function TryEnchantItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    SYSTEMS:GetObject("enchant"):BeginItemImprovement(bag, index)
+    local function DoEnchant()
+        SYSTEMS:GetObject("enchant"):BeginItemImprovement(bag, index)
+    end
+
+    if IsItemBoPAndTradeable(bag, index) then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_MODIFY_TRADE_BOP", {onAcceptCallback = DoEnchant}, {mainTextParams={GetItemName(bag, index)}})
+    else
+        DoEnchant()
+    end
+    
 end
 
 local function CanConvertItemStyle(inventorySlot)
@@ -694,17 +703,17 @@ local function TryPreviewDyeStamp(inventorySlot)
     -- there, the player can spin the model and confirm or deny using the stamp
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local itemLink = GetItemLink(bag, index)
-    local dyeStampDefId = GetItemLinkDyeStampDefId(itemLink)
+    local dyeStampId = GetItemLinkDyeStampId(itemLink)
     local onUseType = GetItemLinkItemUseType(itemLink)
 
     if onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP then
-        local dyeStampUseResult = CanPlayerUseItemDyeStamp(dyeStampDefId)
+        local dyeStampUseResult = CanPlayerUseItemDyeStamp(dyeStampId)
         if dyeStampUseResult ~= DYE_STAMP_USE_RESULT_NONE then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_DYESTAMPUSERESULT", dyeStampUseResult))
             return
         end
     elseif onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP then
-        local dyeStampUseResult = CanPlayerUseCostumeDyeStamp(dyeStampDefId)
+        local dyeStampUseResult = CanPlayerUseCostumeDyeStamp(dyeStampId)
         if dyeStampUseResult ~= DYE_STAMP_USE_RESULT_NONE then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_DYESTAMPUSERESULT", dyeStampUseResult))
             return
@@ -900,14 +909,22 @@ end
 
 local function TryEquipItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    local equipSucceeds, possibleError = IsEquipable(bag, index)
-    if(equipSucceeds) then
-        ClearCursor()
-        EquipItem(bag, index)
-        return true
-    end
+    local function DoEquip() 
+        local equipSucceeds, possibleError = IsEquipable(bag, index)
+        if(equipSucceeds) then
+            ClearCursor()
+            EquipItem(bag, index)
+            return true
+        end
 
-    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)    
+    end
+    
+    if IsItemBoPAndTradeable(bag, index) then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_TRADE_BOP", {onAcceptCallback = DoEquip}, {mainTextParams = {GetItemName(bag, index)}})
+    else
+        DoEquip()
+    end
 end
 
 local function CanUnequipItem(inventorySlot)
@@ -1651,7 +1668,7 @@ local actionHandlers =
                             end,
     ["preview_dye_stamp"] = function(inventorySlot, slotActions)
                                 local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if GetItemType(bag, slot) == ITEMTYPE_DYE_STAMP then
+                                if GetItemType(bag, slot) == ITEMTYPE_DYE_STAMP and IsCharacterPreviewingAvailable() then
                                     slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW_DYE_STAMP, function() TryPreviewDyeStamp(inventorySlot) end, "primary")
                                 end
                             end,
@@ -2536,21 +2553,24 @@ end
 
 function ZO_InventorySlot_Status_OnMouseEnter(control)
     local slotData = control:GetParent():GetParent().dataEntry.data
-    local isPlayerLocked = slotData.isPlayerLocked
     local isNew = slotData.brandNew
     local isStolen = slotData.stolen
+    local tooltipText
 
-    if (isPlayerLocked) then
+    if slotData.isPlayerLocked then
+        tooltipText = GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP)
+    elseif isNew and isStolen then
+        tooltipText = GetString(SI_INVENTORY_NEW_AND_STOLEN_ITEM_TOOLTIP)
+    elseif isNew then
+        tooltipText = GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP)
+    elseif isStolen then
+        tooltipText = GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP)
+    elseif slotData.isBoPTradeable then
+        tooltipText = GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP)
+    end
+
+    if tooltipText then
         InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP))
-    elseif (isNew and isStolen) then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_NEW_AND_STOLEN_ITEM_TOOLTIP))
-    elseif (isNew) then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP))
-    elseif (isStolen) then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP))
+        SetTooltipText(InformationTooltip, tooltipText)
     end
 end

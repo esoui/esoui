@@ -3,6 +3,8 @@
 
 ## SavedVariables: ZO_Ingame_SavedVariables
 
+EsoUI\Ingame\NameChange\NameChange.lua
+
 EsoUI\Ingame\Globals\strings.lua
 EsoUI\Ingame\Globals\Paths.xml
 EsoUI\Ingame\Globals\AutoComplete.lua
@@ -11,6 +13,7 @@ EsoUI\Ingame\Globals\Globals.lua
 EsoUI\Ingame\Globals\CommonInventoryFunctions.lua
 EsoUI\Ingame\Globals\Gamepad\ZO_GamepadSocialLayoutConstants.lua
 EsoUI\Ingame\Globals\ZO_ChampionRankUtils.lua
+
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 

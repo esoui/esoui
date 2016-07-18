@@ -109,8 +109,8 @@ function ZO_GamepadCollectionsBook:SetupList(list)
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         data.brandNew = data.data.isNew or COLLECTIONS_BOOK_SINGLETON:IsDLCIdQuestPending(data.collectibleId)
-
         if not data.hasNameBeenFormatted then
+            data:SetEnabled(not data.blocked)
             data:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
             data.hasNameBeenFormatted = true
         end
@@ -265,6 +265,14 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local entryData = self.currentList.list:GetTargetData()
                 local categoryType = entryData.categoryType
                 return entryData.data.unlocked and IsCollectibleCategorySlottable(categoryType)
+            end,
+            enabled = function()
+                local entryData = self.currentList.list:GetTargetData()
+                if entryData.isValidForPlayer then
+                    return true
+                else
+                    return false, GetString(SI_COLLECTIONS_INVALID_ERROR)
+                end
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
@@ -641,6 +649,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
     local notificationId = self:GetNotificationIdForCollectible(collectibleId)
     local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
     local isNew = IsCollectibleNew(collectibleId)
+    local isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
 
     if visualLayerHidden and not active then
         visualLayerHidden = false
@@ -669,6 +678,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
         notificationId = notificationId,
         hasNameBeenFormatted = false,
         isNew = isNew,
+        isValidForPlayer = isValidForPlayer,
     }
     entryData.isEquippedInCurrentCategory = active
 

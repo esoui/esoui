@@ -19,13 +19,13 @@ function ZO_DyeingToolErase:HasSwatchSelection()
 end
 
 function ZO_DyeingToolErase:OnLeftClicked(dyeableSlot, dyeChannel)
-    SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, nil, GetPendingSlotDyes(dyeableSlot)))
+    SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, INVALID_DYE_ID, GetPendingSlotDyes(dyeableSlot)))
     self.owner:OnPendingDyesChanged(dyeableSlot)
     PlaySound(SOUNDS.DYEING_TOOL_ERASE_USED)
 end
 
 function ZO_DyeingToolErase:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
-    SetSavedDyeSetDyes(dyeSetIndex, zo_replaceInVarArgs(dyeChannel, nil, GetSavedDyeSetDyes(dyeSetIndex)))
+    SetSavedDyeSetDyes(dyeSetIndex, zo_replaceInVarArgs(dyeChannel, INVALID_DYE_ID, GetSavedDyeSetDyes(dyeSetIndex)))
     self.owner:OnSavedSetSlotChanged(dyeSetIndex)
     PlaySound(SOUNDS.DYEING_TOOL_ERASE_USED)
 end

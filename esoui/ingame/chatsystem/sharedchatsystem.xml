@@ -293,7 +293,7 @@
                             <Anchor point="TOPRIGHT" />
 
                             <Controls>
-                                <EditBox name="$(parent)Box" maxInputCharacters="350" />
+                                <EditBox name="$(parent)Box" maxInputCharacters="MAX_TEXT_CHAT_INPUT_CHARACTERS" />
                             </Controls>
                         </Backdrop>
                     </Controls>

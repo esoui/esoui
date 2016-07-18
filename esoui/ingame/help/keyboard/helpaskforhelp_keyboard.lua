@@ -1,3 +1,13 @@
+local function SetSpecificItemTarget(text)
+    local savedItemLink = HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:GetSavedItemLink()
+    if savedItemLink then
+        SetCustomerServiceTicketItemTargetByLink(savedItemLink)
+    else
+        SetCustomerServiceTicketItemTarget(text)
+    end
+end
+
+
 local HELP_ASK_FOR_HELP_CATEGORY_INFO =
 {
 	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE] =
@@ -15,7 +25,7 @@ local HELP_ASK_FOR_HELP_CATEGORY_INFO =
 	{
 		ticketCategory = TICKET_CATEGORY_ITEM_ISSUE,
 		detailsTitle = GetString(SI_CUSTOMER_SERVICE_ITEM_NAME),
-		detailsRegistrationFunction = SetCustomerServiceTicketItemTarget,
+		detailsRegistrationFunction = SetSpecificItemTarget,
 	},
 	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] =
 	{
@@ -207,6 +217,7 @@ end
 
 function HelpAskForHelp_Keyboard:UpdateDetailsComponents()
 	self.details:SetText("")
+    self.savedItemLink = nil
 
 	local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
 
@@ -330,6 +341,10 @@ function HelpAskForHelp_Keyboard:SelectSubcategory(subcategory)
 	end
 end
 
+function HelpAskForHelp_Keyboard:GetSavedItemLink()
+    return self.savedItemLink
+end
+
 function HelpAskForHelp_Keyboard:SetDetailsText(text)
 	self.details:SetText(text)
 end
@@ -337,6 +352,7 @@ end
 function HelpAskForHelp_Keyboard:SetDetailsFromItemLink(itemLink)
 	self:ClearFields()
 	self:SelectCategory(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITEM_ISSUE)
+    self.savedItemLink = itemLink
 	self:SetDetailsText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(itemLink)))
 end
 

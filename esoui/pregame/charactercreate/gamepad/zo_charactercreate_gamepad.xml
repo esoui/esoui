@@ -25,7 +25,7 @@
             <Controls>
                 <Button name="$(parent)Button" inherits="SelectorButton_Gamepad" clickSound="Click_RaceButton">
                     <OnInitialized>
-                        self.selectorType = "race"
+                        self.selectorType = CHARACTER_CREATE_SELECTOR_RACE
                     </OnInitialized>
                     <Anchor point="CENTER" />
                     <Dimensions x="64" y="64" />
@@ -54,7 +54,7 @@
         <Button name="AllianceSelectorButton_Gamepad" inherits="SelectorButton_Gamepad" virtual="true" clickSound="Click_AllianceButton">
             <Dimensions x="64" y="64" />
             <OnInitialized>
-                self.selectorType = "alliance"
+                self.selectorType = CHARACTER_CREATE_SELECTOR_ALLIANCE
             </OnInitialized>
         </Button>
 
@@ -79,7 +79,7 @@
         <Button name="ClassSelectorButton_Gamepad" inherits="SelectorButton_Gamepad" virtual="true" clickSound="Click_ClassButton">
             <Dimensions x="64" y="64" />
             <OnInitialized>
-                self.selectorType = "class"
+                self.selectorType = CHARACTER_CREATE_SELECTOR_CLASS
             </OnInitialized>
         </Button>
 
@@ -151,7 +151,7 @@
                             <Controls>
                                 <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" level="0" />
 
-                                <Texture name="$(parent)AllianceIcon" textureFile="EsoUI/Art/CharacterCreate/Gamepad/CharacterCreate_altmericon_default.dds" tier="MEDIUM">
+                                <Texture name="$(parent)AllianceIcon" tier="MEDIUM">
                                     <Dimensions x="64" y="64" />
                                     <Anchor point="CENTER" relativePoint="TOP" offsetY="138" />
                                 </Texture>
@@ -165,7 +165,7 @@
                                     <Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="55" />
                                 </Label>
 
-                                <Texture name="$(parent)RaceIcon" textureFile="EsoUI/Art/CharacterCreate/Gamepad/CharacterCreate_altmericon_default.dds" tier="MEDIUM">
+                                <Texture name="$(parent)RaceIcon" tier="MEDIUM">
                                     <Dimensions x="64" y="64" />
                                     <Anchor point="TOP" relativeTo="$(parent)AllianceIcon" relativePoint="TOP"/>
                                 </Texture>
@@ -179,7 +179,7 @@
                                     <Anchor point="TOP" relativeTo="$(parent)AllianceDescription" relativePoint="TOP"/>
                                 </Label>
 
-                                <Texture name="$(parent)ClassIcon" textureFile="EsoUI/Art/CharacterCreate/Gamepad/CharacterCreate_altmericon_default.dds" tier="MEDIUM">
+                                <Texture name="$(parent)ClassIcon" tier="MEDIUM">
                                     <Dimensions x="64" y="64" />
                                     <Anchor point="TOP" relativeTo="$(parent)AllianceIcon" relativePoint="TOP"/>
                                 </Texture>

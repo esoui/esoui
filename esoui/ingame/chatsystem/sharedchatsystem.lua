@@ -1961,20 +1961,34 @@ end
 
 STUB_SETTING_KEEP_MINIMIZED = false
 
+ZO_CHAT_BLOCKING_SCENE_NAMES =
+{
+    ["gamepad_market_pre_scene"] = true,
+    ["gamepad_market"] = true,
+    ["gamepad_market_preview"] = true,
+}
+
 function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindow)
-    if not self.currentChannel or channel then
-        self:SetChannel(channel or CHAT_CHANNEL_SAY, target)   
-    end
+    if IsPlayerActivated() then
+        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+        if currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName] then
+            return
+        end
 
-    self.textEntry:Open(text)
+        if not self.currentChannel or channel then
+            self:SetChannel(channel or CHAT_CHANNEL_SAY, target)   
+        end
 
-    if not dontShowHUDWindow then
-        if(self.isMinimized) then
-            self:Maximize()
-            self.shouldMinimizeAfterEntry = STUB_SETTING_KEEP_MINIMIZED
-        else
-            self.primaryContainer:FadeIn()
-            self.shouldMinimizeAfterEntry = false
+        self.textEntry:Open(text)
+
+        if not dontShowHUDWindow then
+            if(self.isMinimized) then
+                self:Maximize()
+                self.shouldMinimizeAfterEntry = STUB_SETTING_KEEP_MINIMIZED
+            else
+                self.primaryContainer:FadeIn()
+                self.shouldMinimizeAfterEntry = false
+            end
         end
     end
 end

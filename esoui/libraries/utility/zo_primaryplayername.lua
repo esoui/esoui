@@ -1,12 +1,12 @@
 ﻿USE_INTERNAL_FORMAT = true
 
-local function ShouldPreferUserId()
+function ZO_ShouldPreferUserId()
     local setting = IsInGamepadPreferredMode() and UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD or UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD
     return tonumber(GetSetting(SETTING_TYPE_UI, setting)) == PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID
 end
 
 function ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, useInternalFormat)
-    if ShouldPreferUserId() then
+    if ZO_ShouldPreferUserId() then
         local displayName = GetUnitDisplayName(unitTag)
         return useInternalFormat and displayName or ZO_FormatUserFacingDisplayName(displayName)
     else
@@ -16,7 +16,7 @@ function ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, useInternalFormat)
 end
 
 function ZO_GetSecondaryPlayerNameFromUnitTag(unitTag, useInternalFormat)
-    if not ShouldPreferUserId() then
+    if not ZO_ShouldPreferUserId() then
         local displayName = GetUnitDisplayName(unitTag)
         return useInternalFormat and displayName or ZO_FormatUserFacingDisplayName(displayName)
     else
@@ -26,7 +26,7 @@ function ZO_GetSecondaryPlayerNameFromUnitTag(unitTag, useInternalFormat)
 end
 
 function ZO_GetPrimaryPlayerName(displayName, characterName, useInternalFormat)
-    if ShouldPreferUserId() then
+    if ZO_ShouldPreferUserId() then
         return useInternalFormat and displayName or ZO_FormatUserFacingDisplayName(displayName)
     else
 		return useInternalFormat and characterName or ZO_FormatUserFacingCharacterName(characterName)
@@ -34,7 +34,7 @@ function ZO_GetPrimaryPlayerName(displayName, characterName, useInternalFormat)
 end
 
 function ZO_GetSecondaryPlayerName(displayName, characterName, useInternalFormat)
-    if not ShouldPreferUserId() then
+    if not ZO_ShouldPreferUserId() then
         return useInternalFormat and displayName or ZO_FormatUserFacingDisplayName(displayName)
     else
 		return useInternalFormat and characterName or ZO_FormatUserFacingCharacterName(characterName)

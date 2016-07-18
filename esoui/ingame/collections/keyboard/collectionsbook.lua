@@ -60,7 +60,13 @@ function Collectible:Initialize(collectibleId)
         self.active = isActive
         self.categoryType = categoryType
 
-        COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
+        COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns",
+                                                    function(...)
+                                                        -- don't try to update the control if we aren't the current collectible it's showing
+                                                        if self.control and self.control.collectible == self then
+                                                            self:OnUpdateCooldowns(...)
+                                                        end
+                                                    end)
     end
 end
 
@@ -351,17 +357,14 @@ function Collectible:OnUpdateCooldowns()
     if self.isUsable then
         local remaining, duration = GetCollectibleCooldownAndDuration(self.collectibleId)
         if remaining > 0 and duration > 0 then
-            if self.isCooldownActive == false then
-                self.cooldownDuration = duration
-                self.cooldownStartTime = GetFrameTimeMilliseconds() - (duration - remaining)
-                self:BeginCooldown()
-            end
-        elseif self.isCooldownActive == true then
-           self:EndCooldown()
+            self.cooldownDuration = duration
+            self.cooldownStartTime = GetFrameTimeMilliseconds() - (duration - remaining)
+            self:BeginCooldown()
+            return
         end
-    elseif self.isCooldownActive == true then
-        self:EndCooldown()
     end
+
+    self:EndCooldown()
 end
 
 function Collectible:BeginCooldown()
@@ -437,6 +440,7 @@ do
     {
         SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED,
+        SI_COLLECTIONS_BOOK_FILTER_SHOW_USABLE,
         SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED,
     }
 
@@ -788,6 +792,15 @@ end
         
         if retainScrollPosition then
             self.scrollbar:SetValue(position)
+
+            if(g_currentMouseTarget ~= nil) then
+                g_currentMouseTarget:OnMouseExit()
+            end
+
+            local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+            if (mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl.collectible) then
+                mouseOverControl.collectible:OnMouseEnter()
+            end
         end
     end
 
@@ -796,11 +809,17 @@ do
         local unlocked, _, _, _, _, isPlaceholder = select(5 , GetCollectibleInfo(id))
         if not isPlaceholder then
             if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL then
-                return true 
+                return true
             end
 
-            if(unlocked) then
-                return filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED
+            if unlocked then
+                if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED then
+                    return true
+                elseif filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_USABLE then
+                    return IsCollectibleValidForPlayer(id)
+                else
+                    return false
+                end
             else
                 return filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED
             end
@@ -903,7 +922,7 @@ function CollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subca
 
         --TODO: Scroll the collectibles list to show the collectible
 
-        SCENE_MANAGER:Show("collectionsBook")
+        MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "collectionsBook")
     end
 end
 

@@ -139,7 +139,7 @@
                                 </Control>
                                 <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET" />
+                                    <Anchor point="BOTTOMRIGHT" />
                                 </Control>
                             </Controls>
                         </Control>

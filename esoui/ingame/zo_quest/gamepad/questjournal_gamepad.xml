@@ -50,7 +50,7 @@
 
                                 <Control name="$(parent)Content">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)GenericHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
-                                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET"/>
+                                    <Anchor point="BOTTOMRIGHT" />
                                 </Control>
                             </Controls>
                         </Control>

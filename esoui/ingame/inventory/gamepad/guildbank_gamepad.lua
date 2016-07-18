@@ -357,7 +357,8 @@ end
 do
     local function DepositItemFilter(itemData)
         return not itemData.stolen and 
-               not IsItemBound(itemData.bagId, itemData.slotIndex) and 
+               not IsItemBound(itemData.bagId, itemData.slotIndex) and
+               not IsItemBoPAndTradeable(itemData.bagId, itemData.slotIndex) and
                not (itemData.itemType == ITEMTYPE_TROPHY) and
                not itemData.isPlayerLocked
     end

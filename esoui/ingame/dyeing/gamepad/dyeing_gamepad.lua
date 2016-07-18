@@ -133,9 +133,11 @@ end
 local function ZO_DyeingGamepadRootEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     if data.mode == DYE_MODE_COLLECTIBLE and not CanUseCollectibleDyeing() then
-        control.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
-    else
-        control.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        if selected then
+            control.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+        else
+            control.label:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGBA())
+        end
     end
 end
 
@@ -322,7 +324,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_DYEING_RANDOMIZE),
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             callback = function()
-                            ZO_Dyeing_UniformRandomize(self.mode, function() return self.dyesList:GetRandomUnlockedDyeDefId() end)
+                            ZO_Dyeing_UniformRandomize(self.mode, function() return self.dyesList:GetRandomUnlockedDyeId() end)
                             self:OnPendingDyesChanged()
                             self:SetupRandomizeSwatch()
                         end,
@@ -373,7 +375,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
 
     local function SelectNewSort(style)
         self.savedVars.sortStyle = style
-        self.dyesList:RefreshDyeLayout()
+        ZO_DYEING_MANAGER:UpdateAllDyeLists()
         self.rightPaneDyesList:RefreshDyeLayout()
     end
 
@@ -423,7 +425,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeOptionsDialog()
             local showLocked = not self.savedVars.showLocked
             self.savedVars.showLocked = showLocked
             showLockedEntry.checked = self.savedVars.showLocked
-            self.dyesList:RefreshDyeLayout()
+            ZO_DYEING_MANAGER:UpdateAllDyeLists()
             self.rightPaneDyesList:RefreshDyeLayout()
         end
 
@@ -483,8 +485,8 @@ function ZO_Dyeing_Slots_Panel_Gamepad:RefreshSavedSet(dyeSetIndex)
 
     local savedSetSwatch = self.savedSets[dyeSetIndex]
     for dyeChannel, dyeControl in ipairs(savedSetSwatch.dyeControls) do
-        local currentDyeDefId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
-        ZO_DyeingUtils_SetSlotDyeSwatchDyeDefId(dyeChannel, dyeControl, currentDyeDefId)
+        local currentDyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
+        ZO_DyeingUtils_SetSlotDyeSwatchDyeId(dyeChannel, dyeControl, currentDyeId)
     end
 
     if selectedSavedSet == dyeSetIndex then
@@ -636,6 +638,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:PerformDeferredInitialization()
     local dyesSharedHighlight = dyesControl:GetNamedChild("SharedHighlight")
     self.dyesList = ZO_Dyeing_Swatches_Gamepad:New(self, self.swatchesContainer, dyesSharedHighlight, self.savedVars, function(...) self:OnDyeSelectionChanged(...) end, function(...) self:OnDyeListMoveOut(...) end, self.savedSetsMovementOutController)
     self.control:RegisterForEvent(EVENT_UNLOCKED_DYES_UPDATED, function() self:UpdateUnlockedDyes() end)
+    ZO_DYEING_MANAGER:RegisterForDyeListUpdates(function() self.dyesList:RefreshDyeLayout() end)
 
     --Preset stuff
     self.rightPaneSwatches = self.control:GetNamedChild("RightPane"):GetNamedChild("PresetDyesContainer")
@@ -772,8 +775,8 @@ end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:RefreshPresetListEntry(control, dyeSetIndex)
     for dyeChannel, dyeControl in ipairs(control.dyeControls) do
-        local currentDyeDefId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
-        ZO_DyeingUtils_SetSlotDyeSwatchDyeDefId(dyeChannel, dyeControl, currentDyeDefId)
+        local currentDyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
+        ZO_DyeingUtils_SetSlotDyeSwatchDyeId(dyeChannel, dyeControl, currentDyeId)
     end
 end
 
@@ -932,23 +935,23 @@ function ZO_Dyeing_Slots_Panel_Gamepad:GetSelectedSavedSetIndex()
     return selectedSavedSet and selectedSavedSet.control.savedSetIndex
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:GetSelectedDyeDefId()
+function ZO_Dyeing_Slots_Panel_Gamepad:GetSelectedDyeId()
     if self.selectionMode == SELECTION_SAVED_SWATCH then
-        return self.rightPaneDyesList:GetSelectedDyeDefId()
+        return self.rightPaneDyesList:GetSelectedDyeId()
     else
-        return self.dyesList:GetSelectedDyeDefId()
+        return self.dyesList:GetSelectedDyeId()
     end
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:SwitchToDyeingWithDyeDefId(...)
-    self.dyesList:SwitchToDyeingWithDyeDefId(...)
+function ZO_Dyeing_Slots_Panel_Gamepad:SwitchToDyeingWithDyeId(...)
+    self.dyesList:SwitchToDyeingWithDyeId(...)
     self:SwitchToTab(DYE_TAB_INDEX)
     self:SwitchToActiveRadialMenuMode(RETAIN_SELECTIONS)
     self:SetupCenterSwatch()
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:DoesDyeDefIdExistInPlayerDyes(dyeDefId)
-    return self.dyesList:DoesDyeDefIdExistInPlayerDyes(dyeDefId)
+function ZO_Dyeing_Slots_Panel_Gamepad:DoesDyeIdExistInPlayerDyes(dyeId)
+    return self.dyesList:DoesDyeIdExistInPlayerDyes(dyeId)
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:SetSelectedSavedSetIndex(dyeSetIndex)
@@ -1299,9 +1302,9 @@ function ZO_Dyeing_Slots_Panel_Gamepad:OnSavedSetSlotChanged(dyeSetIndex)
     self:RefreshKeybindStrip()
 end
 
-local function GetDyeColor(dyeDefId)
-    if dyeDefId then
-        local r, g, b = GetDyeDefColorsById(dyeDefId)
+local function GetDyeColor(dyeId)
+    if dyeId then
+        local r, g, b = GetDyeColorsById(dyeId)
         return r, g, b, 1
     else
         return 0, 0, 0, 1
@@ -1317,9 +1320,9 @@ end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:SetupCenterSwatch()
     if (self.activeTool == self.dyeTool) or (self.activeTool == self.fillTool) then
-        local dyeDefId = self.dyesList:GetSelectedDyeDefId()
-        if dyeDefId then
-            local r, g, b = GetDyeColor(dyeDefId)
+        local dyeId = self.dyesList:GetSelectedDyeId()
+        if dyeId then
+            local r, g, b = GetDyeColor(dyeId)
             self.centerSwatch:SetColor(r, g, b)
             self.centerSwatch:SetTexture(MONO_COLOR_CENTER_SWATCH)
         else
@@ -1334,8 +1337,8 @@ function ZO_Dyeing_Slots_Panel_Gamepad:SetupCenterSwatch()
         local selectedSavedSetIndex = self:GetSelectedSavedSetIndex()
         if selectedSavedSetIndex then
             for i=1, #self.centerSwatchSaved.dyeControls do
-                local dyeDefId = select(i, GetSavedDyeSetDyes(selectedSavedSetIndex))
-                local r, g, b, a = GetDyeColor(dyeDefId)
+                local dyeId = select(i, GetSavedDyeSetDyes(selectedSavedSetIndex))
+                local r, g, b, a = GetDyeColor(dyeId)
                 local control = self.centerSwatchSaved.dyeControls[i]
                 control:SetColor(r, g, b, a)
             end
@@ -1357,8 +1360,8 @@ function ZO_Dyeing_Slots_Panel_Gamepad:SetupRandomizeSwatch()
     local modeSlotData = ZO_Dyeing_GetSlotsForMode(self.mode)
     local dyeInfo = {GetPendingSlotDyes(modeSlotData[1].dyeableSlot)}
     for i = 1, #self.centerSwatchSaved.dyeControls do
-        local dyeDefId = dyeInfo[i]
-        local r, g, b, a = GetDyeColor(dyeDefId)
+        local dyeId = dyeInfo[i]
+        local r, g, b, a = GetDyeColor(dyeId)
         local control = self.centerSwatchSaved.dyeControls[i]
         control:SetColor(r, g, b, a)
     end

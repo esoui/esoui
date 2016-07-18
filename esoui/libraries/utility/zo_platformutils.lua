@@ -1,14 +1,24 @@
-local CHARACTER_NAME_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds"
-local KEYBOARD_UI_ICON_SIZE = 24
-local GAMEPAD_UI_ICON_SIZE = 32
+
 
 function ZO_FormatUserFacingDisplayName(name)
     return IsConsoleUI() and UndecorateDisplayName(name) or name
 end
 
-function ZO_FormatUserFacingCharacterName(name)
-    local iconSize = IsInGamepadPreferredMode() and GAMEPAD_UI_ICON_SIZE or KEYBOARD_UI_ICON_SIZE
-	return zo_iconTextFormat(CHARACTER_NAME_ICON, iconSize, iconSize, name)
+do
+    local CHARACTER_NAME_ICON = "EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds"
+    local CHARACTER_NAME_ICON_SIZE = "70%"
+
+    function ZO_FormatUserFacingCharacterName(name)
+        if name ~= "" then
+            if IsInGamepadPreferredMode()then
+                return zo_iconTextFormat(CHARACTER_NAME_ICON, CHARACTER_NAME_ICON_SIZE, CHARACTER_NAME_ICON_SIZE, name)
+            else
+                return name
+            end
+        else
+            return ""
+        end
+    end
 end
 
 function ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)

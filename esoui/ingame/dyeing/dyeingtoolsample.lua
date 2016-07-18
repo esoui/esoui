@@ -19,13 +19,13 @@ function ZO_DyeingToolSample:HasSwatchSelection()
 end
 
 function ZO_DyeingToolSample:OnLeftClicked(dyeableSlot, dyeChannel)
-    local dyeDefId = select(dyeChannel, GetPendingSlotDyes(dyeableSlot))
-    if dyeDefId then
-        local _, known = GetDyeDefInfoById(dyeDefId)
-        local isPlayerDye = self.owner:DoesDyeDefIdExistInPlayerDyes(dyeDefId)
+    local dyeId = select(dyeChannel, GetPendingSlotDyes(dyeableSlot))
+    if dyeId > INVALID_DYE_ID then
+        local _, known = GetDyeInfoById(dyeId)
+        local isPlayerDye = self.owner:DoesDyeIdExistInPlayerDyes(dyeId)
         if known and isPlayerDye then
             local SUPPRESS_SOUNDS = true
-            self.owner:SwitchToDyeingWithDyeDefId(dyeDefId, SUPPRESS_SOUNDS)
+            self.owner:SwitchToDyeingWithDyeId(dyeId, SUPPRESS_SOUNDS)
             PlaySound(SOUNDS.DYEING_TOOL_SAMPLE_USED)
         elseif not isPlayerDye then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, SI_DYEING_CANNOT_SAMPLE_NON_PLAYER_DYE)
@@ -41,7 +41,7 @@ function ZO_DyeingToolSample:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
     local dyeIndex = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
     if dyeIndex then
         local SUPPRESS_SOUNDS = true
-        self.owner:SwitchToDyeingWithDyeDefId(dyeIndex, SUPPRESS_SOUNDS)
+        self.owner:SwitchToDyeingWithDyeId(dyeIndex, SUPPRESS_SOUNDS)
         PlaySound(SOUNDS.DYEING_TOOL_SAMPLE_USED)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, SI_DYEING_CANNOT_SAMPLE)

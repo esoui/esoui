@@ -14,7 +14,7 @@ end
 
 function ZO_DyeStamp_Confirmation_Base:AddExitKey()
     -- Special exit button
-    exit = 
+    local exit = 
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
         name = GetString(SI_EXIT_BUTTON),

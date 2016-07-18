@@ -15,13 +15,13 @@ function ZO_DyeingToolDye:Activate(fromTool, suppressSounds)
 end
 
 function ZO_DyeingToolDye:OnLeftClicked(dyeableSlot, dyeChannel)
-    SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeDefId(), GetPendingSlotDyes(dyeableSlot)))
+    SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), GetPendingSlotDyes(dyeableSlot)))
     self.owner:OnPendingDyesChanged(dyeableSlot)
     PlaySound(SOUNDS.DYEING_TOOL_DYE_USED)
 end
 
 function ZO_DyeingToolDye:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
-    SetSavedDyeSetDyes(dyeSetIndex, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeDefId(), GetSavedDyeSetDyes(dyeSetIndex)))
+    SetSavedDyeSetDyes(dyeSetIndex, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), GetSavedDyeSetDyes(dyeSetIndex)))
     self.owner:OnSavedSetSlotChanged(dyeSetIndex)
     PlaySound(SOUNDS.DYEING_TOOL_DYE_USED)
 end

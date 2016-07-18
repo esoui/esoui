@@ -8,13 +8,6 @@ local function FormatShutdownTime(timeRemaining)
     return zo_strformat(SI_CHAT_SHUTDOWN_TIME, ZO_FormatTime(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE))
 end
 
-local function CreateFromLink(fromName, channelInfo)
-    if channelInfo.playerLinkable then
-       return ZO_LinkHandler_CreatePlayerLink(fromName)
-    end
-    return fromName
-end
-
 local function CreateChannelLink(channelInfo, overrideName)
     if channelInfo.channelLinkable then
         local channelName = overrideName or GetChannelName(channelInfo.id)
@@ -48,7 +41,17 @@ local ChatEventFormatters = {
 
         if channelInfo and channelInfo.format then
             local channelLink = CreateChannelLink(channelInfo)
-            local fromLink = CreateFromLink(fromName, channelInfo)
+
+            local userFacingName
+            if not IsDecoratedDisplayName(fromName) and fromDisplayName ~= "" then
+                --We have a character name and a display name, so follow the setting
+                userFacingName = ZO_ShouldPreferUserId() and fromDisplayName or fromName
+            else
+                --We either have two display names, or we weren't given a guaranteed display name, so just use the default fromName
+                userFacingName = fromName
+            end
+
+            local fromLink = channelInfo.playerLinkable and ZO_LinkHandler_CreatePlayerLink(userFacingName) or userFacingName
 
             -- Channels with links will not have CS messages
             if channelLink then
@@ -109,7 +112,13 @@ local ChatEventFormatters = {
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         -- Only one name will be sent here, so use that and do not use special formatting since this appears in chat
-        local nameToDisplay = characterName ~= "" and characterName or displayName
+        local nameToDisplay
+        if characterName ~= "" then 
+            nameToDisplay = IsConsoleUI() and ZO_FormatUserFacingCharacterName(characterName) or characterName
+        else
+            nameToDisplay = ZO_FormatUserFacingDisplayName(displayName)
+        end
+
         if(not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response)) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
     

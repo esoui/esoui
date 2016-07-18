@@ -29,7 +29,6 @@ function ZO_DyeStamp_Confirmation_Base:PreviewDyeStamp()
 
     if self.bagId and self.slotIndex then
         local itemLink = GetItemLink(self.bagId, self.slotIndex)
-        local dyeStampDefId = GetItemLinkDyeStampDefId(itemLink)
         SetupDyeStampPreview(self.bagId, self.slotIndex)
         return true
     end

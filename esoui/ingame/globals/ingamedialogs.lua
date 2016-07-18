@@ -1548,6 +1548,7 @@ ESO_Dialogs["QUIT_PREVENTED"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowShowOnNextScene = true,
     },
     title =
     {
@@ -1598,6 +1599,7 @@ ESO_Dialogs["QUIT_DEFERRED"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowShowOnNextScene = true,
     },
     title =
     {
@@ -1638,6 +1640,7 @@ ESO_Dialogs["LOGOUT_DEFERRED"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowShowOnNextScene = true,
     },
     title =
     {
@@ -2444,7 +2447,7 @@ ESO_Dialogs["COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"] =
     {
         defaultText = "",
         maxInputCharacters = COLLECTIBLE_NAME_MAX_LENGTH,
-        textType = TEXT_TYPE_ALPHABETIC,
+        textType = TEXT_TYPE_ALL,
         specialCharacters = {'\'', '-', ' '},
         validatesText = true,
         validator = IsValidCollectibleName,
@@ -2990,6 +2993,66 @@ ESO_Dialogs["DYE_STAMP_CONFIRM_USE"] =
     mainText =
     {
         text = SI_DYE_STAMP_CONFIRMATION_USE_DESCRIPTION,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                            dialog.data.onAcceptCallback()
+                       end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_MODIFY_TRADE_BOP"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_DAILOG_TRADE_BOP_BINDING_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_DAILOG_TRADE_BOP_MODIFYING_ITEM_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                            dialog.data.onAcceptCallback()
+                       end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_EQUIP_TRADE_BOP"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_DAILOG_TRADE_BOP_BINDING_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_DAILOG_TRADE_BOP_EQUIPPING_ITEM_BODY,
     },
     buttons =
     {

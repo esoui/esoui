@@ -24,7 +24,7 @@
 
                         <Label name="$(parent)Content" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)GenericHeader" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_TITLE_INFO_PADDING_Y" />
-                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET"/>
+                            <Anchor point="BOTTOMRIGHT" />
                         </Label>
                     </Controls>
                 </Control>

@@ -441,15 +441,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                         return isVisible
                     end,
                 callback = function()
-                        EndPurchase()
-                        Logout()
+                        self:EndPurchaseAndLogout()
                     end,
             },
         },
         canQueue = true,
         mustChoose = true,
     })
-    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_FAILED], 
+    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_FAILED],
     {
         setup = function(dialog)
 
@@ -631,6 +630,15 @@ function ZO_GamepadMarketPurchaseManager:EndPurchase(isNoChoice)
     end
 
     self:ResetState()
+end
+
+function ZO_GamepadMarketPurchaseManager:EndPurchaseAndLogout()
+    -- since we are trying to logout we don't want to trigger any of the scene changes
+    -- or try to show tutorials, however we want to clean up after ourselves
+    -- in case we don't actually logout
+
+    self:ResetState()
+    Logout()
 end
 
 function ZO_GamepadMarketPurchaseManager:ResetState()
