@@ -250,6 +250,9 @@ end
 function TextEntry:SetChannel(channelData, target)
     local oldChannelText = self.channelLabel:GetText()
     if target then
+        if IsDecoratedDisplayName(target) then
+            target = ZO_FormatUserFacingDisplayName(target)
+        end
         self.channelLabel:SetText(zo_strformat(SI_CHAT_ENTRY_TARGET_FORMAT, GetChannelName(channelData.id), target))
     else
         self.channelLabel:SetText(zo_strformat(SI_CHAT_ENTRY_GENERAL_FORMAT, GetChannelName(channelData.id)))
@@ -1924,6 +1927,7 @@ function SharedChatSystem:OnTextEntryChanged(newText)
             end
 
             self:SetChannel(switch.id, switchArg)
+
             local oldCursorPos = self.textEntry:GetCursorPosition()
 
             spaceStart = spaceStartOverride or spaceStart
@@ -2340,7 +2344,19 @@ function SharedChatSystem:GetFontSizeFromSetting()
     -- Should  be overridden
 end
 
+ZO_CHAT_BLOCKING_SCENE_NAMES =
+    {
+        ["gamepad_market_pre_scene"] = true,
+        ["gamepad_market"] = true,
+        ["gamepad_market_preview"] = true,
+    }
+
 function StartChatInput(text, channel, target)
+    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+    if currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName] then
+        return
+    end
+
     if IsChatSystemAvailableForCurrentPlatform() then
         CHAT_SYSTEM:StartTextEntry(text, channel, target)
     end
@@ -2352,7 +2368,7 @@ function AutoSendChatInput(text, channel, target, dontShowHUDWindow)
     end
 end
 
-function ChatReplyToLastWhisper()   
+function ChatReplyToLastWhisper()
     CHAT_SYSTEM:ReplyToLastTarget(CHAT_CHANNEL_WHISPER)
 end
 

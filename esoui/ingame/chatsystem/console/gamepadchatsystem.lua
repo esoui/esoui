@@ -437,6 +437,16 @@ function ZO_GamepadChatSystem:GetFontSizeFromSetting()
     return GetGamepadChatFontSize()
 end
 
+function ZO_GamepadChatSystem:SetChannel(newChannel, channelTarget)
+    if newChannel == CHAT_CHANNEL_WHISPER or newChannel == CHAT_CHANNEL_WHISPER_SENT then
+        if channelTarget and channelTarget ~= "" then
+            channelTarget = DecorateDisplayName(channelTarget)
+        end
+    end
+
+    SharedChatSystem.SetChannel(self, newChannel, channelTarget)
+end
+
 --[[ XML Functions ]]--
 function ZO_GamepadTextChat_OnInitialize(control)
     CHAT_SYSTEM = ZO_GamepadChatSystem:New(control)

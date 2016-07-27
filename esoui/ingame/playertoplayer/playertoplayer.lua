@@ -1272,7 +1272,8 @@ do
 
         --Whisper--
         if IsChatSystemAvailableForCurrentPlatform() then
-            local function WhisperOption() StartChatInput(nil, CHAT_CHANNEL_WHISPER, primaryNameInternal) end
+            local nameToUse = IsConsoleUI() and currentTargetDisplayName or primaryNameInternal
+            local function WhisperOption() StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse) end
             local whisperFunction = ENABLED_IF_NOT_IGNORED and WhisperOption or AlertIgnored
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], ENABLED_IF_NOT_IGNORED, whisperFunction)
         end

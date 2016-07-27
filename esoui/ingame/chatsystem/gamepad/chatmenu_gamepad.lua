@@ -501,6 +501,8 @@ do
         local channelData, channelTarget = CHAT_SYSTEM:GetCurrentChannelData()
         local channelText
         if channelTarget then
+            --Console can only have display names.  This won't do anything to character names on PC
+            channelTarget = ZO_FormatUserFacingDisplayName(channelTarget)
             channelText = zo_strformat(SI_CHAT_ENTRY_TARGET_FORMAT, GetChannelName(channelData.id), channelTarget)
         else
             channelText = zo_strformat(SI_CHAT_ENTRY_GENERAL_FORMAT, GetChannelName(channelData.id))
