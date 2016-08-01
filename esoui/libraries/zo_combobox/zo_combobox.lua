@@ -20,7 +20,7 @@ function ZO_ComboBox:AddMenuItems()
     do
         -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
         local item = self.m_sortedItems[i]
-        AddMenuItem(item.name, function() ZO_ComboBox_Base_ItemSelectedClickHelper(self, item) end, nil, self.m_font, self.m_normalColor, self.m_highlightColor)
+        AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, nil, self.m_font, self.m_normalColor, self.m_highlightColor)
     end
 end
 
@@ -175,7 +175,7 @@ function ZO_ScrollableComboBox:ShowDropdownOnMouseUp()
 end
 
 function ZO_ScrollableComboBox:SetSelected(index)
-    ZO_ComboBox_Base_ItemSelectedClickHelper(self, self.m_sortedItems[index])
+    self:ItemSelectedClickHelper(self.m_sortedItems[index])
     self:HideDropdown()
 end
 

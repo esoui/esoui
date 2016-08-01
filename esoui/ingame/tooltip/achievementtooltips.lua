@@ -2,6 +2,13 @@ local CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds
 local UNCHECKED_ICON = nil
 local NO_ACHIEVEMENT_ICON = "EsoUI/Art/Achievements/Gamepad/Achievement_EmptyIcon.dds"
 
+function ZO_Tooltip:LayoutAchievementFromLink(achievementLink)
+    local achievementId = GetAchievementIdFromLink(achievementLink)
+    if achievementId > 0 then
+        self:LayoutAchievement(achievementId)
+    end
+end
+
 function ZO_Tooltip:LayoutAchievementSummary()
     for categoryIndex=1, GetNumAchievementCategories() do
         local categoryName, numSubCategories, numAchievements, earnedPoints, totalPoints = GetAchievementCategoryInfo(categoryIndex)
@@ -105,7 +112,7 @@ end
 function ZO_Tooltip:LayoutAchievementRewards(achievementId)
     local hasRewardItem, itemName, iconTextureName, quality = GetAchievementRewardItem(achievementId)
     local hasRewardTitle, titleName = GetAchievementRewardTitle(achievementId)
-    local hasRewardDye, dyeIndex = GetAchievementRewardDye(achievementId)
+    local hasRewardDye, dyeId = GetAchievementRewardDye(achievementId)
     local hasRewardCollectible, collectibleId = GetAchievementRewardCollectible(achievementId)
     local hasReward = hasRewardItem or hasRewardTitle or hasRewardDye or hasRewardCollectible
 
@@ -138,13 +145,12 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
 
     -- Dye
     if hasRewardDye then
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey = GetDyeInfo(dyeIndex)
         local rewardsEntrySection = rewardsSection:AcquireSection(self:GetStyle("achievementRewardsEntrySection"))
         rewardsEntrySection:AddLine(GetString(SI_GAMEPAD_ACHIEVEMENTS_DYE), self:GetStyle("achievementRewardsTitle"))
 
-        local iconStyle = self:GetStyle("achievementRewardsDye")
-        rewardsEntrySection:AddColorSwatch(r, g, b, 1, iconStyle)
-        rewardsEntrySection:AddLine(zo_strformat(SI_ACHIEVEMENTS_DYE_NAME, dyeName), self:GetStyle("achievementRewardsName"))
+        local swatchStyle = self:GetStyle("dyeSwatchStyle")
+        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeInfoById(dyeId)
+        rewardsEntrySection:AddColorAndTextSwatch(r, g, b, 1, dyeName, swatchStyle)
 
         rewardsSection:AddSection(rewardsEntrySection)
     end

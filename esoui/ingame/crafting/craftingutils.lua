@@ -351,20 +351,15 @@ do
     local g_isCrafting = false
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function()
-		g_isCrafting = true
-	end)
+        g_isCrafting = true
+    end)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
-		g_isCrafting = false
-	end)
+        g_isCrafting = false
+    end)
 
     function ZO_CraftingUtils_IsPerformingCraftProcess()
         return g_isCrafting
     end
-end
-
-function GetCraftingSkillName(craftingType)
-    local skillType, skillIndex = GetCraftingSkillLineIndices(craftingType)
-    return GetSkillLineInfo(skillType, skillIndex)
 end
 
 function ZO_CraftingUtils_IsCraftingWindowOpen()

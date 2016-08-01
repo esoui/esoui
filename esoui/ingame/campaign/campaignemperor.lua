@@ -53,14 +53,14 @@ function CampaignEmperor:OnDropdownClicked(control)
 
     if not menuShowing then
         SetMenuSpacing(3)
-        SetMenuPad(20)
+        SetMenuPad(10)
+        SetMenuMinimumWidth(185)
 
         for i = 1, #self.menuEntries do
             local entry = self.menuEntries[i]
             AddMenuItem(entry.textString, entry.callback)
         end
-
-        SetMenuMinimumWidth(185)
+        
         ShowMenu(control)
         ZO_Menu:ClearAnchors()
         ZO_Menu:SetAnchor(TOPRIGHT, control, BOTTOMRIGHT, 0, 3)

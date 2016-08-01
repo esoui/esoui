@@ -38,11 +38,19 @@ function ZO_PlayerEmoteManager:Initialize()
 end
 
 function ZO_PlayerEmoteManager:CompareEmotes(emoteA, emoteB)
-	if IsInGamepadPreferredMode() then
-		return self:GetEmoteItemInfo(emoteA).displayName < self:GetEmoteItemInfo(emoteB).displayName
-	else
-		return self:GetEmoteItemInfo(emoteA).emoteSlashName < self:GetEmoteItemInfo(emoteB).emoteSlashName
-	end
+    if IsInGamepadPreferredMode() then
+        self:CompareEmotesGamepad(emoteA, emoteB)
+    else
+        self:CompareEmotesKeyboard(emoteA, emoteB)
+    end
+end
+
+function ZO_PlayerEmoteManager:CompareEmotesGamepad(emoteA, emoteB)
+    return self:GetEmoteItemInfo(emoteA).displayName < self:GetEmoteItemInfo(emoteB).displayName
+end
+
+function ZO_PlayerEmoteManager:CompareEmotesKeyboard(emoteA, emoteB)
+    return self:GetEmoteItemInfo(emoteA).emoteSlashName < self:GetEmoteItemInfo(emoteB).emoteSlashName
 end
 
 local function CompareCategories(categoryA, categoryB)
@@ -99,8 +107,15 @@ function ZO_PlayerEmoteManager:InitializeEmoteList()
         end
 	end
 
+    local emoteSortFunction
+    if IsInGamepadPreferredMode() then
+        emoteSortFunction = function(...) self:CompareEmotesGamepad(...) end
+    else
+        emoteSortFunction = function(...) self:CompareEmotesKeyboard(...) end
+    end
+
     for _, emoteList in pairs(self.emoteCategories) do
-        table.sort(emoteList, function(emoteA, emoteB) return self:CompareEmotes(emoteA, emoteB) end)
+        table.sort(emoteList, emoteSortFunction)
     end
 
     table.sort(self.emoteCategoryTypes, CompareCategories)
@@ -144,20 +159,25 @@ function ZO_PlayerEmoteManager:RefreshPersonalityEmotes()
         end
 	end
 
-	if not personalityEmoteAdded then
-		if self.emotePersonalityCategoryAdded then
-			for i, categoryType in ipairs(self.emoteCategoryTypes) do
-				if categoryType == EMOTE_CATEGORY_PERSONALITY_OVERRIDE then
-					table.remove(self.emoteCategoryTypes, i)
-					self.emotePersonalityCategoryAdded = false
-					break
-				end
-			end
-		end
-	end
+    if not personalityEmoteAdded and self.emotePersonalityCategoryAdded then
+        for i, categoryType in ipairs(self.emoteCategoryTypes) do
+            if categoryType == EMOTE_CATEGORY_PERSONALITY_OVERRIDE then
+                table.remove(self.emoteCategoryTypes, i)
+                self.emotePersonalityCategoryAdded = false
+                break
+            end
+        end
+    end
 
-	for _, emoteList in pairs(self.emoteCategories) do
-        table.sort(emoteList, function(emoteA, emoteB) return self:CompareEmotes(emoteA, emoteB) end)
+    local emoteSortFunction
+    if IsInGamepadPreferredMode() then
+        emoteSortFunction = function(...) self:CompareEmotesGamepad(...) end
+    else
+        emoteSortFunction = function(...) self:CompareEmotesKeyboard(...) end
+    end
+
+    for _, emoteList in pairs(self.emoteCategories) do
+        table.sort(emoteList, emoteSortFunction)
     end
 
     table.sort(self.emoteCategoryTypes, CompareCategories)

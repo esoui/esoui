@@ -1,0 +1,122 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ChatMenu_Gamepad_MoreBelowAnimation">
+            <Animations>
+                <AlphaAnimation duration="300" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_ChatMenu_Gamepad_LogLine" resizeToFitDescendents="true" inherits="ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <OnInitialized>
+                ZO_ChatMenu_Gamepad_LogLine_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)RootSpacer">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="ZO_CHAT_MENU_GAMEPAD_LOG_LINE_WIDTH" y="4"/>
+                </Control>
+                
+                <Label name="$(parent)Label" font="ZoFontGamepad42">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ChatMenu_GamepadTopLevel" inherits="ZO_AnchoredToQuadrant_1_2_3_Background" hidden="true">
+            <OnInitialized>
+                ZO_ChatMenu_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)TextInput">
+                            <Dimensions y="60" />
+                            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" offsetY="-30" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" offsetY="-30" />
+                            
+                            <Controls>
+                                <Control name="$(parent)Channel" inherits="ZO_GamepadPassiveFocusDropdown">
+                                    <Dimensions y="60" />
+                                    <Anchor point="BOTTOMLEFT" />
+
+                                    <Controls>
+                                        <Control name="$(parent)Dropdown" override="true">
+                                            <Controls>
+                                                <Texture name="$(parent)OpenDropdown" override="true" hidden="true" />
+
+                                                <Label name="$(parent)SelectedItemText" font="ZoFontGamepad36" override="true" horizontalAlignment="RIGHT">
+                                                    <Anchor point="LEFT" />
+                                                    <Anchor point="RIGHT" />
+                                                </Label>
+                                                
+                                                <Label name="$(parent)SelectedItemFakeTextForResizing" font="ZoFontGamepad36" modifyTextType="UPPERCASE" hidden="true">
+                                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectedItemText" />
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)Text" inherits="ZO_GamepadPassiveFocusEditBox">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Channel" relativePoint="BOTTOMRIGHT" offsetX="15" />
+                                    <Anchor point="TOPRIGHT" />
+
+                                    <Controls>
+                                        <Backdrop name="$(parent)Edit" override="true">
+                                            <Controls>
+                                                <EditBox name="$(parent)Box" override="true" maxInputCharacters="MAX_TEXT_CHAT_INPUT_CHARACTERS" />
+                                            </Controls>
+                                        </Backdrop>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)MoreBelow" tier="HIGH" alpha="0">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TextInput" relativePoint="TOPLEFT" offsetY ="-5" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextInput" relativePoint="TOPRIGHT" offsetY ="-5" />
+                            <Dimensions y="38"/>
+                            <Controls>
+                                <Texture name="$(parent)BG" color="000000" alpha="0.8">
+                                    <AnchorFill/>
+                                </Texture>
+
+                                <Texture name="$(parent)LeftArrow" textureFile="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds">
+                                    <Dimensions x="26" y="26"/>
+                                    <Anchor point="LEFT" offsetX="8"/>
+                                </Texture>
+
+                                <Texture name="$(parent)RightArrow" textureFile="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds">
+                                    <Dimensions x="26" y="26"/>
+                                    <Anchor point="RIGHT" offsetX="-8"/>
+                                </Texture>
+
+                                <Label name="$(parent)Label" font="ZoFontGamepad27" text="SI_GAMEPAD_CHAT_MENU_MORE_BELOW">
+                                    <Anchor point="CENTER"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                        
+                        <!--Parametric List Screen will put the log in here automagically-->
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)MoreBelow" relativePoint="TOPRIGHT" offsetY ="2" />
+
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -2,11 +2,11 @@
     <Controls>
         <Control name="ZO_LootHistory_GamepadEntry" inherits="ZO_LootHistory_SharedEntry" virtual="true">
             <Dimensions x="315" y="50" />
-            <Anchor point="BOTTOMLEFT" offsetX="96"/>
+            <Anchor point="BOTTOMLEFT"/>
 
             <Controls>
                 <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="LEFT" offsetX="5" />
+                    <Anchor point="LEFT" offsetX="20" />
                     <Controls>
                         <Label name="$(parent)StackCount" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                         
@@ -21,7 +21,7 @@
                 </Label>
               
                 <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <TextureCoords left="1" right="0" top="0" bottom=".78125" />
+                    <TextureCoords left="0.8" right="0" top="0" bottom=".78125" />
                     <Controls>
                         <Texture name="$(parent)CraftBagHighlight" textureFile="EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds" override="true">
                             <Dimensions y="50"/>
@@ -35,7 +35,7 @@
         </Control>
       
         <TopLevelControl name="ZO_LootHistoryControl_Gamepad" inherits="ZO_LootHistory_Shared" >
-            <Anchor point="BOTTOMLEFT" offsetY="-160"/>
+            <Anchor point="BOTTOMLEFT" offsetY="-120"/>
             <OnInitialized>
                 ZO_LootHistory_Gamepad_OnInitialized(self)
             </OnInitialized>

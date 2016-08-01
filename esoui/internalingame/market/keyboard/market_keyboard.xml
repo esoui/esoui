@@ -16,6 +16,10 @@
         
         <Label name="ZO_Market_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" modifyTextType="UPPERCASE" virtual="true"/>
 
+        <Label name="ZO_Market_SubscriptionBenefitLine" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Dimensions x="475" />
+        </Label>
+
         <TopLevelControl name="ZO_Market" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_Market_OnInitialize(self)
@@ -134,68 +138,58 @@
                             <Anchor point="TOP" relativeTo="$(parent)EntryList"/>
                         </Label>
                         
-                        <Control name="$(parent)SubscriptionPage" resizeToFitDescendents="true" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)EntryList" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)EntryList" />
+                        <Control name="$(parent)SubscriptionPage" inherits="ZO_ScrollContainer" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-10"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
                             
                             <Controls>
-                                <Control name="$(parent)MembershipInfo" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
-                                    
+                                <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>
-                                        <Texture name="$(parent)Banner">
+                                        <Texture name="$(parent)MembershipInfoBanner">
                                             <Dimensions x="636" y="150" />
                                             <!-- 1024x256 image cropped to 636x150 -->
                                             <TextureCoords left="0" right="0.62109375" top="0" bottom="0.5859375"/>
                                             <Anchor point="TOPLEFT" />
                                         </Texture>
-                                        
-                                        <Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Banner" offsetX="140" offsetY="45" />
-                                            <Anchor point="TOPRIGHT" offsetY="45" />
-                                        </Label>
-                                        
-                                        <Label name="$(parent)Label" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL" modifyTextType="UPPERCASE">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+
+                                        <Label name="$(parent)MembershipInfoTitle" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" offsetX="140" offsetY="45" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfoBanner" offsetX="-20" offsetY="45" />
                                         </Label>
 
-                                        <Label name="$(parent)Status" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                            <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="5" />
+                                        <Label name="$(parent)MembershipInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL" modifyTextType="UPPERCASE">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoTitle" relativePoint="BOTTOMLEFT" />
                                         </Label>
-                                    </Controls>
-                                </Control>
-                                
-                                <Label name="$(parent)Overview" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                                </Label>
-                                
-                                <Control name="$(parent)Benefits" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="30" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="30" />
-                                    
-                                    <Controls>
-                                        <Label name="$(parent)Title" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" />
-                                        </Label>
-                                        
-                                        <Label name="$(parent)Text" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                                        </Label>
-                                    </Controls>
-                                </Control>
-                                
-                                <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION">
-                                    <Dimensions x="230" />
-                                    <Anchor point="TOP" relativeTo="$(parent)Benefits" relativePoint="BOTTOM" offsetY="50" />
 
-                                    <OnClicked>
-                                        ZO_MarketCurrencyBuySubscription_OnClicked(self)
-                                    </OnClicked>
-                                </Button>
+                                        <Label name="$(parent)MembershipInfoStatus" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)MembershipInfoLabel" offsetX="5" />
+                                        </Label>
+
+                                        <Label name="$(parent)Overview" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfoBanner" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="10" />
+                                        </Label>
+
+                                        <Label name="$(parent)BenefitsTitle" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                                        </Label>
+
+                                        <Control name="$(parent)BenefitsLineContainer" resizeToFitDescendents="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)BenefitsTitle" relativePoint="BOTTOMLEFT" offsetY="4" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BenefitsTitle" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                                        </Control>
+
+                                        <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION">
+                                            <Dimensions x="230" />
+                                            <Anchor point="TOP" relativeTo="$(parent)BenefitsLineContainer" relativePoint="BOTTOM" offsetY="50" />
+
+                                            <OnClicked>
+                                                ZO_MarketCurrencyBuySubscription_OnClicked(self)
+                                            </OnClicked>
+                                        </Button>
+                                    </Controls>
+                                </Control>
                             </Controls>
                         </Control>
 

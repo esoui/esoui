@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+
+        <Control name="ZO_CharacterCreateTriangleTemplate_Gamepad" virtual="true">
+            <Anchor point="TOP" />
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/CharacterCreate/Gamepad/selectorTriangle.dds">
+                    <Dimensions x="333" y="333" />
+                    <Anchor point="TOP" />
+                </Texture>
+
+                <Control name="$(parent)Picker" inherits="ZO_TrianglePickerTemplate">
+                    <Dimensions x="272" y="229" />
+                    <Anchor point="TOP" offsetY="55"/>
+
+                    <Controls>
+                        <Button name="$(parent)Thumb" tier="MEDIUM" >
+                            <Dimensions x="32" y="32" />
+                            <Textures
+                                normal="EsoUI/Art/CharacterCreate/Gamepad/triangle_selector_pip.dds"
+                            />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Padlock" inherits="CCPadlock_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Picker" relativePoint="TOPRIGHT" offsetX="5" offsetY="-23" />
+                </Button>
+
+                <Label name="$(parent)LabelTop" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Picker" relativePoint="TOP" offsetY="-5" />
+                </Label>
+
+                <Label name="$(parent)LabelLeft" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMLEFT" offsetY="7" />
+                </Label>
+
+                <Label name="$(parent)LabelRight" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMRIGHT" offsetY="7" />
+                </Label>
+            </Controls>
+        </Control>
+
+    </Controls>
+</GuiXml>

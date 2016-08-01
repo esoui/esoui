@@ -289,6 +289,8 @@ function ZO_GamepadProvisioner:SetDetailsEnabled(enabled)
 end
 
 function ZO_GamepadProvisioner:RefreshRecipeList()
+    -- This function is called from inventory update events, which is when we need to update the header with the player's current and total inventory slots
+    ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
     self.recipeList:Clear()
 
 	-- first construct the full table of filtered recipes
@@ -435,8 +437,6 @@ end
 function ZO_GamepadProvisioner:Create()
     local targetData = self.recipeList:GetTargetData()
     CraftProvisionerItem(targetData.recipeListIndex, targetData.recipeIndex)
-
-    ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
 end
 
 function ZO_GamepadProvisioner_Initialize(control)

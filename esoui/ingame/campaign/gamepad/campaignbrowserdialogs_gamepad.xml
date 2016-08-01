@@ -4,7 +4,7 @@
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
                 self.subLabelCount = 1
-                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabelWithSideLabel(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" font="ZoFontGamepad42" excludeFromResizeToFitExtents="true">

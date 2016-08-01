@@ -28,7 +28,7 @@ end
 function PregameStateManager_UpdateRealmName()
     local worldName = GetWorldName()
 
-    if(worldName == "") then
+    if worldName == "" then
         worldName = "Unknown Realm"
     end
 
@@ -37,22 +37,23 @@ function PregameStateManager_UpdateRealmName()
 end
 
 function AttemptQuickLaunch()
-    if(GetCVar("QuickLaunch") == "1") then
+    if GetCVar("QuickLaunch") == "1" then
         local acctName = GetCVar("AccountName")
         local acctPwd = GetCVar("AccountPassword")
 
-        if(acctName ~= "" and acctPwd ~= "") then
+        if acctName ~= "" and acctPwd ~= "" then
             PregameLogin(acctName, acctPwd)
         end
     end
 end
 
 function AttemptToFireCharacterConstructionReady()
-    if(not ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY and IsPregameCharacterConstructionReady() and ZO_PREGAME_CHARACTER_LIST_RECEIVED) then
+    if not ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY and IsPregameCharacterConstructionReady() and ZO_PREGAME_CHARACTER_LIST_RECEIVED then
         ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY = true
         CALLBACK_MANAGER:FireCallbacks("OnCharacterConstructionReady")
     end
 end
+
 local PregameStates =
 {
     ["CharacterSelect_FromIngame"] =
@@ -95,6 +96,7 @@ local PregameStates =
     ["CharacterSelect_FromCinematic"] =
     {
         OnEnter = function(allowAnimation)
+            ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
             if IsInGamepadPreferredMode() then
                 GAMEPAD_OPTIONS:SetGamepadOptionsInputBlocked(false)
             end
@@ -144,16 +146,35 @@ local PregameStates =
     ["CharacterCreate"] =
     {
         OnEnter = function(allowAnimation)
-            if (IsInGamepadPreferredMode() or IsConsoleUI()) then  -- TODO integrate this with PC gamepad
+            ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_CREATION)
+            local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
+            characterCreate:Reset()
+            characterCreate:InitializeForCharacterCreate()
+
+            if IsInGamepadPreferredMode() then
                 Pregame_ShowScene("gamepadCharacterCreate")
-                ZO_CharacterCreate_Gamepad_Reset()
             else
                 Pregame_ShowScene("gameMenuCharacterCreate")
-				ZO_CharacterCreate_Reset()
                 -- PEGI update currently only needs to be shown on PC
                 if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                     ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
                 end
+            end
+        end,
+
+        OnExit = function()
+            ZO_Dialogs_ReleaseDialog("CHARACTER_CREATE_CREATING")
+            SetCharacterCameraZoomAmount(-1) -- zoom all the way out when leaving this state
+        end
+    },
+
+    ["CharacterCreate_Barbershop"] =
+    {
+        OnEnter = function(allowAnimation)
+            if IsInGamepadPreferredMode() then
+                Pregame_ShowScene("gamepadCharacterCreate")
+            else
+                Pregame_ShowScene("gameMenuCharacterCreate")
             end
         end,
 

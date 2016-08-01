@@ -4,6 +4,11 @@
             <OnInitialized>
                 ZO_GameMenu_CharacterCreate_Initialize(self)
             </OnInitialized>
+            <Controls>
+                <Control name="$(parent)NavigationContainer" override="true">
+                    <Dimensions x="340"/>
+                </Control>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

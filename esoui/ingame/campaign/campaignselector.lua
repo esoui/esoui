@@ -58,7 +58,7 @@ function CampaignSelector:RefreshQueryTypes()
     homeEntry.selectedQueryType = BGQUERY_ASSIGNED_CAMPAIGN
     self.comboBox:AddItem(homeEntry)
     if(homeEntry.selectedQueryType == self.selectedQueryType) then
-        self.comboBox:SetSelectedItem(homeCampaignDescription)
+        self.comboBox:SetSelectedItemText(homeCampaignDescription)
         selectedEntry = homeEntry
     end
 
@@ -70,13 +70,13 @@ function CampaignSelector:RefreshQueryTypes()
         localEntry.selectedQueryType = BGQUERY_LOCAL
         self.comboBox:AddItem(localEntry)
         if(localEntry.selectedQueryType == self.selectedQueryType) then
-            self.comboBox:SetSelectedItem(localCampaignDescription)
+            self.comboBox:SetSelectedItemText(localCampaignDescription)
             selectedEntry = localEntry
         end
     end
 
     if(not selectedEntry) then
-        self.comboBox:SetSelectedItem(homeCampaignDescription)
+        self.comboBox:SetSelectedItemText(homeCampaignDescription)
         self.OnQueryTypeChanged(nil, homeCampaignDescription, homeEntry)
     end
 end

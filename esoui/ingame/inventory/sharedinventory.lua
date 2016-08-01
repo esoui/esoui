@@ -1,3 +1,5 @@
+ZO_TRADE_BOP_ICON = "EsoUI/Art/Inventory/inventory_Tradable_icon.dds"
+
 ZO_SharedInventoryManager = ZO_CallbackObject:Subclass()
 
 function ZO_SharedInventoryManager:New(...)
@@ -107,7 +109,7 @@ function ZO_SharedInventoryManager:Initialize()
         self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex)
     end
 
-    local function OnGuldBankUpdated()
+    local function OnGuildBankUpdated()
         self.refresh:RefreshAll("guild_bank")
         self:FireCallbacks("FullInventoryUpdate", BAG_GUILDBANK)
     end
@@ -116,12 +118,12 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySlotUpdated)
 
 
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_GUILD_BANK, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_GUILD_BANK, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_SELECTED, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_DESELECTED, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEMS_READY, OnGuldBankUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuldBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_GUILD_BANK, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_GUILD_BANK, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_SELECTED, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_DESELECTED, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEMS_READY, OnGuildBankUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankUpdated)
 
     local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex)
         self.refresh:RefreshSingle("inventory", BAG_GUILDBANK, slotIndex)
@@ -202,25 +204,19 @@ end
 function ZO_SharedInventoryManager:GenerateFullSlotData(optFilterFunction, ...)
     self.refresh:UpdateRefreshGroups()
 
-    local numBagIds = select("#", ...)
-    if numBagIds > 1 then
-        local combinedCache = {}
-        for i = 1, select("#", ...) do
-            local bagId = select(i, ...)
-            local bagCache = self:GetOrCreateBagCache(bagId)
+    local filteredItems = {}
+    for i = 1, select("#", ...) do
+        local bagId = select(i, ...)
+        local bagCache = self:GetOrCreateBagCache(bagId)
 
-            for slotIndex, itemData in pairs(bagCache) do
-                if not optFilterFunction or optFilterFunction(itemData) then
-                    combinedCache[#combinedCache + 1] = itemData
-                end
+        for slotIndex, itemData in pairs(bagCache) do
+            if not optFilterFunction or optFilterFunction(itemData) then
+                filteredItems[#filteredItems + 1] = itemData
             end
         end
-
-        return combinedCache
     end
 
-    local bagId = ...
-    return self:GetOrCreateBagCache(bagId)
+    return filteredItems
 end
 
 function ZO_SharedInventoryManager:GenerateSingleSlotData(bagId, slotIndex)
@@ -449,6 +445,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.quality = quality                                                    --in GamepadInventory once they are equipped, because that doesn't make any sense.
     slot.equipType = equipType
     slot.isPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
+    slot.isBoPTradeable = IsItemBoPAndTradeable(bagId, slotIndex)
     slot.isJunk = IsItemJunk(bagId, slotIndex)
     slot.statValue = GetItemStatValue(bagId, slotIndex) or 0
     slot.itemInstanceId = newItemInstanceId
@@ -456,6 +453,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.stolen = IsItemStolen(bagId, slotIndex)
     slot.filterData = { GetItemFilterTypeInfo(bagId, slotIndex) }
     slot.condition = GetItemCondition(bagId, slotIndex)
+    slot.isPlaceableFurniture = IsItemPlaceableFurniture(bagId, slotIndex)
 
     if wasSameItemInSlotBefore and slot.age ~= 0 then
         -- don't modify the age, keep it the same relative sort - for now?

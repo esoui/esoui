@@ -134,7 +134,7 @@ end
 
 do
     local function ItemFilter(itemData)
-        return not itemData.stolen and not IsItemBound(itemData.bagId, itemData.slotIndex) and not ZO_IsItemCurrentlyOfferedForTrade(itemData.bagId, itemData.slotIndex) and not itemData.isPlayerLocked
+        return TRADE_WINDOW:CanTradeItem(itemData) and not ZO_IsItemCurrentlyOfferedForTrade(itemData.bagId, itemData.slotIndex)
     end
 
     function ZO_GamepadTradeWindow:InitializeInventoryList()

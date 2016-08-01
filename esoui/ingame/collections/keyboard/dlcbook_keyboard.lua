@@ -125,6 +125,7 @@ end
 function DLCBook_Keyboard:InitializeEvents()
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectiblesUpdated", function() self:OnCollectionUpdated() end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionNotificationRemoved", function(...) self:OnCollectionNotificationRemoved(...) end)
 end
 
@@ -250,7 +251,7 @@ end
 
 function DLCBook_Keyboard:BrowseToCollectible(collectibleId)
     self:FocusDLCWithCollectibleId(collectibleId)
-    SCENE_MANAGER:Show("dlcBook")
+    MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "dlcBook")
 end
 
 ----------

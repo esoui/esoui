@@ -22,14 +22,14 @@ function ZO_DyeingToolSetFill:HasSavedSetSelection()
     return true
 end
 
-function ZO_DyeingToolSetFill:GetHighlightRules(dyeSlot, dyeChannel)
-    return dyeSlot, nil
+function ZO_DyeingToolSetFill:GetHighlightRules(dyeableSlot, dyeChannel)
+    return dyeableSlot, nil
 end
 
-function ZO_DyeingToolSetFill:OnEquipSlotLeftClicked(equipSlot, dyeChannel)
-    SetPendingEquippedItemDye(equipSlot, GetSavedDyeSetDyes(self.owner:GetSelectedSavedSetIndex()))
+function ZO_DyeingToolSetFill:OnLeftClicked(dyeableSlot, dyeChannel)
+    SetPendingSlotDyes(dyeableSlot, GetSavedDyeSetDyes(self.owner:GetSelectedSavedSetIndex()))
 
-    self.owner:OnPendingDyesChanged(equipSlot)
+    self.owner:OnPendingDyesChanged(dyeableSlot)
     PlaySound(SOUNDS.DYEING_TOOL_SET_FILL_USED)
 end
 
@@ -37,6 +37,6 @@ function ZO_DyeingToolSetFill:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
     self.owner:SetSelectedSavedSetIndex(dyeSetIndex)
 end
 
-function ZO_DyeingToolSetFill:GetCursorType(equipSlot, dyeChannel)
+function ZO_DyeingToolSetFill:GetCursorType(dyeableSlot, dyeChannel)
     return MOUSE_CURSOR_FILL_MULTIPLE
 end

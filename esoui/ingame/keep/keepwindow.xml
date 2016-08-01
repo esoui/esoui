@@ -1,0 +1,299 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_MultiLevelStatusBarSection" virtual="true" layer="OVERLAY">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <AnchorFill/>
+                </Label>
+            </Controls>
+        </Texture>
+
+        <Label name="ZO_KeepWindowBonusLine" virtual="true" font="ZoFontGame"/>
+
+        <Button name="ZO_KeepWindowSwitch" inherits="ZO_SwitchButton" virtual="true">
+            <OnMouseEnter>
+                ZO_KeepWindowSwitch_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_KeepWindowSwitch_OnMouseExit()
+            </OnMouseExit>
+            <OnClicked>
+                ZO_KeepWindowSwitch_OnClicked()
+            </OnClicked>
+        </Button>
+
+        <Control name="ZO_MultiLevelStatusBarControl" virtual="true">
+            <Dimensions y="32"/>
+            <Controls>
+                <StatusBar name="$(parent)Projected" inherits="ZO_DefaultStatusBar">
+                    <Anchor point="TOPLEFT" offsetY="2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-2"/>
+                </StatusBar>
+                <StatusBar name="$(parent)Progress" inherits="ZO_DefaultStatusBar" level="1">
+                    <Anchor point="TOPLEFT" offsetY="2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-2"/>
+                </StatusBar>
+                <Control name="$(parent)Sections">
+                    <AnchorFill/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_KeepUpgrade" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Label name="$(parent)Level" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="3"/>
+                </Label>
+                <Control name="$(parent)Status" inherits="ZO_MultiLevelStatusBarControl">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                </Control>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="3" offsetY="65"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-5" offsetY="-4"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_InsetBackdrop">
+                            <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_KeepWindowTab" inherits="ZO_ResizableImageTabButton" virtual="true"/>
+
+        <Label name="ZO_KeepWindowSummmaryHeader" virtual="true" mouseEnabled="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" wrapMode="ELLIPSIS">
+            <Dimensions y="20"/>
+            <OnMouseEnter>
+                ZO_Tooltips_ShowTruncatedTextTooltip(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_Tooltips_HideTruncatedTextTooltip()
+            </OnMouseExit>
+        </Label>
+        
+        <Control name="ZO_KeepWindowSummaryRowHeaders" virtual="true">
+            <Dimensions y="20"/>
+            <Controls>
+                <Label name="$(parent)Resource" font="ZoFontGame" inherits="ZO_KeepWindowSummmaryHeader" text="SI_KEEP_SUMMARY_RESOURCE_HEADER" >
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="150"/>
+                </Label>
+                <Label name="$(parent)Level" font="ZoFontGame" inherits="ZO_KeepWindowSummmaryHeader" text="SI_KEEP_SUMMARY_LEVEL_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Resource" relativePoint="TOPRIGHT"/>
+                    <Dimensions x="150"/>
+                </Label>
+                <Label name="$(parent)Rate" font="ZoFontGame" inherits="ZO_KeepWindowSummmaryHeader" text="SI_KEEP_SUMMARY_RATE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Level" relativePoint="TOPRIGHT"/>
+                    <Dimensions x="150"/>
+                </Label>
+                <Label name="$(parent)Time" font="ZoFontGame" inherits="ZO_KeepWindowSummmaryHeader" text="SI_KEEP_SUMMARY_TIME_TO_UPGRADE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rate" relativePoint="TOPRIGHT"/>
+                    <Dimensions x="196"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_KeepWindowSummaryRow" virtual="true">
+            <Dimensions x="630" y="64"/>
+            <Controls>
+                <Texture name="$(parent)Icon" color="FFFFFF" tier="MEDIUM">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" offsetX="24"/>
+                </Texture>
+                <Texture name="$(parent)LevelIcon" textureFile="EsoUI/Art/AvA/AvA_keepStatus_icon_surplusLevel.dds" tier="MEDIUM">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" offsetX="178" offsetY="16"/>
+                </Texture>
+                <Label name="$(parent)Level" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LevelIcon" relativePoint="TOPRIGHT" offsetX="5" offsetY="4"/>
+                </Label>
+                <Texture name="$(parent)RateIcon" textureFile="EsoUI/Art/AvA/AvA_keepStatus_icon_collectionRate.dds" layer="CONTROLS" mouseEnabled="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" offsetX="328" offsetY="16"/>
+                    <OnMouseEnter>
+                        ZO_KeepWindowSummaryRowRate_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_KeepWindowSummaryRowRate_OnMouseExit()
+                    </OnMouseExit>
+                </Texture>
+                <Label name="$(parent)Rate" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RateIcon" relativePoint="TOPRIGHT" offsetX="5" offsetY="4"/>
+                </Label>
+                <Texture name="$(parent)TimeIcon" textureFile="EsoUI/Art/AvA/AvA_keepStatus_icon_timeToUpgrade.dds" tier="MEDIUM">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" offsetX="478" offsetY="16"/>
+                </Texture>
+                <Label name="$(parent)Time" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TimeIcon" relativePoint="TOPRIGHT" offsetX="5" offsetY="4"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_KeepWindowSummaryRowWithInset" inherits="ZO_KeepWindowSummaryRow" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_InsetBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_KeepWindow" hidden="true" mouseEnabled="true">
+            <Dimensions x="680" y="430"/>
+            <Anchor point="TOPLEFT" offsetX="16" offsetY="100"/>
+
+            <OnInitialized>
+                ZO_KeepWindow_OnInitialized(self)
+            </OnInitialized>
+
+            <OnShow>
+                ZO_KeepWindow_OnShow()
+            </OnShow>
+
+            <OnHide>
+                ZO_KeepWindow_OnHide()
+            </OnHide>
+            
+            <Controls>
+                <!-- Art -->
+                <Control name="$(parent)BG" inherits="ZO_PanelBackground"/>
+
+                <Label name="$(parent)Title" inherits="ZO_WindowTitle"/>
+
+                <Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop">
+                    <Anchor point="TOPLEFT" offsetY="37"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-10"/>
+                </Backdrop>
+
+                <Texture name="$(parent)AllianceOwnerIcon">
+                    <Anchor point="TOPLEFT" offsetX="13" offsetY="50"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+                <Label name="$(parent)AllianceOwnerHeader" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_KEEP_ALLIANCE_OWNER_HEADER">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)AllianceOwnerIcon" offsetX="5" offsetY="-4"/>
+                </Label>
+                <Label name="$(parent)AllianceOwner" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)AllianceOwnerHeader" offsetX="5"/>
+                </Label>
+                <Label name="$(parent)GuildOwnerHeader" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_KEEP_GUILD_OWNER_HEADER">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)AllianceOwnerHeader"/>
+                </Label>
+                <Label name="$(parent)GuildOwner" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)GuildOwnerHeader" offsetX="5"/>
+                </Label>
+
+                <Control name="$(parent)Main" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)SummaryTab" inherits="ZO_KeepWindowTab">
+                            <Anchor point="BOTTOMLEFT" offsetX="13" offsetY="14" />
+                        </Control>
+                        <Control name="$(parent)WoodTab" inherits="ZO_KeepWindowTab">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SummaryTab" relativePoint="TOPRIGHT" offsetX="-7" />
+                        </Control>
+                        <Control name="$(parent)FoodTab" inherits="ZO_KeepWindowTab">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)WoodTab" relativePoint="TOPRIGHT" offsetX="-7" />
+                        </Control>
+                        <Control name="$(parent)OreTab" inherits="ZO_KeepWindowTab">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FoodTab" relativePoint="TOPRIGHT" offsetX="-7" />
+                        </Control>
+                        <Control name="$(parent)Summary" hidden="true">
+                            <Anchor point="TOPLEFT"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowFrame" offsetX="10" offsetY="55"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_KeepWindowFrame" offsetX="-10" offsetY="-10"/>
+                                </Backdrop>
+                                <Control name="$(parent)Headers" inherits="ZO_KeepWindowSummaryRowHeaders">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowAllianceOwnerIcon" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                </Control>
+                                <Control name="$(parent)Wood" inherits="ZO_KeepWindowSummaryRowWithInset">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="19"/>
+                                </Control>
+                                <Control name="$(parent)Food" inherits="ZO_KeepWindowSummaryRowWithInset">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Wood" relativePoint="BOTTOMLEFT" offsetY="26"/>
+                                </Control>
+                                <Control name="$(parent)Ore" inherits="ZO_KeepWindowSummaryRowWithInset">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Food" relativePoint="BOTTOMLEFT" offsetY="26"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Resource" hidden="true">
+                            <Anchor point="TOPLEFT"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowFrame" offsetX="10" offsetY="55"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_KeepWindowFrame" offsetX="-10" offsetY="-10"/>
+                                </Backdrop>
+                                <Button name="$(parent)Switch" inherits="ZO_KeepWindowSwitch">
+                                    <Anchor point="TOPLEFT" offsetX="634" offsetY="49"/>
+                                </Button>
+                                <Control name="$(parent)Headers" inherits="ZO_KeepWindowSummaryRowHeaders">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowAllianceOwnerIcon" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                </Control>
+                                <Control name="$(parent)Summary" inherits="ZO_KeepWindowSummaryRow">
+                                    <Dimensions y="64"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="0" />
+                                </Control>
+                                <Backdrop name="$(parent)SummaryFrame" inherits="ZO_DefaultBackdrop">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowFrame" offsetX="10" offsetY="55" />
+                                    <Anchor point="TOPRIGHT" relativeTo="ZO_KeepWindowFrame" offsetX="-10" offsetY="55" />
+                                    <Dimensions y="97"/>
+                                </Backdrop>
+                                <Control name="$(parent)Upgrade" inherits="ZO_KeepUpgrade">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Summary" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="12"/>
+                                    <Dimensions x="630" y="207"/>
+                                    <Controls>
+                                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                                            <Anchor point="TOPLEFT" offsetX="-13" offsetY="-8"/>
+                                            <Anchor point="BOTTOMRIGHT" offsetX="13" offsetY="8"/>
+                                        </Backdrop>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Resource" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop">
+                            <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowFrame" offsetX="10" offsetY="55"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_KeepWindowFrame" offsetX="-10" offsetY="-10"/>
+                        </Backdrop>
+                        <Button name="$(parent)Switch" inherits="ZO_KeepWindowSwitch">
+                            <Anchor point="TOPLEFT" offsetX="634" offsetY="49"/>
+                        </Button>
+                        <Control name="$(parent)DefensiveTab" inherits="ZO_KeepWindowTab">
+                            <Anchor point="BOTTOMLEFT" offsetX="13" offsetY="14" />
+                        </Control>
+                        <Control name="$(parent)ProductionTab" inherits="ZO_KeepWindowTab">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DefensiveTab" relativePoint="TOPRIGHT" offsetX="-7" />
+                        </Control>
+                        <Control name="$(parent)Defensive">
+                            <Controls>
+                                <Control name="$(parent)Upgrade" inherits="ZO_KeepUpgrade">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowAllianceOwnerIcon" relativePoint="BOTTOMLEFT" offsetX="6" offsetY="20"/>
+                                    <Dimensions x="636" y="298"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Production" hidden="true">
+                            <Controls>
+                                <Control name="$(parent)Upgrade" inherits="ZO_KeepUpgrade">
+                                    <Anchor point="TOPLEFT" relativeTo="ZO_KeepWindowAllianceOwnerIcon" relativePoint="BOTTOMLEFT" offsetX="6" offsetY="20"/>
+                                    <Dimensions x="636" y="298"/>
+                                </Control>
+                            </Controls>
+                        </Control>                       
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>    
+</GuiXml>

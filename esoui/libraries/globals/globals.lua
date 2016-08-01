@@ -148,3 +148,8 @@ function ZO_GetSpecializedItemTypeTextBySlot(bagId, slotIndex)
     local itemType, specializedItemType = GetItemType(bagId, slotIndex)
     return ZO_GetSpecializedItemTypeText(itemType, specializedItemType)
 end
+
+function ZO_GetCraftingSkillName(craftingType)
+    local skillType, skillIndex = GetCraftingSkillLineIndices(craftingType)
+    return GetSkillLineInfo(skillType, skillIndex)
+end

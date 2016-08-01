@@ -197,7 +197,8 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
     control.rankLabel:SetHidden(data.rank == 0)
     control.rankLabel:SetText(data.rank)
 
-    local nameToUse = ZO_GetPlatformUserFacingName(data.characterName, data.displayName)
+    local safeDisplayName = data.displayName ~= "" and data.displayName or GetString(SI_LEADERBOARDS_STAT_NOT_AVAILABLE)
+    local nameToUse = ZO_GetPlatformUserFacingName(data.characterName, safeDisplayName)
     control.nameLabel:SetText(nameToUse)
     control.pointsLabel:SetText(data.points)
 

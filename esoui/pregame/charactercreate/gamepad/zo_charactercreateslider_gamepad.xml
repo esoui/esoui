@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CharacterCreateSlider_Gamepad" virtual="true" resizeToFitDescendents="true">
+
+            <Controls>
+                <Label name="$(parent)Name" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
+                    <Anchor point="TOP" />
+                </Label>
+
+                <Slider name="$(parent)Slider" inherits="ZO_GamepadSlider">
+                    <Dimensions x="300" y="18" />
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="TOP" offsetX="0" offsetY="45" />
+                    <Limits min="0" max="1" />
+
+                    <OnValueChanged>
+                        ZO_CharacterCreateSlider_SetSlider(self, value)
+                    </OnValueChanged>
+                </Slider>
+
+                <Button name="$(parent)Padlock" inherits="CCPadlock_Gamepad">
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="5" />
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

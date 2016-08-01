@@ -4,12 +4,10 @@ local strArgs = {}
 
 function zo_strformat(formatString, ...)
     ZO_ClearNumericallyIndexedTable(strArgs)
-    
-    for i=1, select("#", ...)
-    do
+
+    for i = 1, select("#", ...) do
         local currentArg = select(i, ...)
-        if(type(currentArg) == "number")
-        then
+        if type(currentArg) == "number" then
             local str = ""
             local numFmt = "d"
             local num, frac = math.modf(currentArg)
@@ -17,40 +15,34 @@ function zo_strformat(formatString, ...)
             local width = 0
             local digits = 1
             local unsigned = false
-            if((ESO_NumberFormats[formatString] ~= nil) and (ESO_NumberFormats[formatString][i] ~= nil))
-            then
+            if ESO_NumberFormats[formatString] ~= nil and ESO_NumberFormats[formatString][i] ~= nil then
                 width = ESO_NumberFormats[formatString][i].width or width
                 digits = ESO_NumberFormats[formatString][i].digits or digits
                 unsigned = ESO_NumberFormats[formatString][i].unsigned or unsigned
             end
 
-            if(width > 0)
-            then
+            if width > 0 then
                 str = string.format("0%d", width)
             end
 
-            if(frac ~= 0)
-            then
+            if frac ~= 0 then
                 numFmt = "f"
                 str = str..string.format(".%d", digits)
-            elseif(unsigned == true)
-            then
+            elseif unsigned == true then
                 numFmt = "u"
             end
 
             str = string.format("%%%s%s", str, numFmt)
 
             strArgs[i] = string.format(str, currentArg)
-        elseif(type(currentArg) == "string")
-        then
+        elseif type(currentArg) == "string" then
             strArgs[i] = currentArg
         else
             strArgs[i] = ""
         end
     end
 
-    if(type(formatString) == "number")
-    then
+    if type(formatString) == "number" then
         formatString = GetString(formatString)
     end
 
@@ -68,7 +60,7 @@ do
     local DIGIT_GROUP_DECIMAL_REPLACER = GetString(SI_DIGIT_GROUP_DECIMAL_SEPARATOR)
     
     function ZO_CommaDelimitNumber(amount)
-        if(amount < DIGIT_GROUP_REPLACER_THRESHOLD) then
+        if amount < DIGIT_GROUP_REPLACER_THRESHOLD then
             return tostring(amount)
         end
 
@@ -92,5 +84,31 @@ do
         end
 
         return amountString
+    end
+end
+
+function ZO_GenerateCommaSeparatedList(argumentTable)
+    if argumentTable ~= nil and #argumentTable > 0 then
+        local numArguments = #argumentTable
+        -- start off the list with the first element in the array
+        local listString = argumentTable[1]
+        -- loop through the second through the second to last element adding commas in between
+        -- if there are only two things in the array this loop will be skipped
+        for i = 2, (numArguments - 1) do
+            listString = listString .. GetString(SI_LIST_COMMA_SEPARATOR) .. argumentTable[i]
+        end
+        -- add the last element of the array to the list
+        -- special behavior to add "and" for the last element
+        if numArguments >= 2 then
+            local finalSeparator = SI_LIST_COMMA_AND_SEPARATOR
+            -- if there are only two it doesn't make sense to add ", and "
+            if numArguments == 2 then
+                finalSeparator = SI_LIST_AND_SEPARATOR
+            end
+            listString = listString .. GetString(finalSeparator) .. argumentTable[numArguments]
+        end
+        return listString
+    else
+        return ""
     end
 end

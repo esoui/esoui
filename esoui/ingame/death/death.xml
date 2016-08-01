@@ -25,7 +25,6 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LoadBar" relativePoint="TOPRIGHT" offsetX="-24"/>
                     <Dimensions x="48" y="12"/>
                 </Texture>
-                <Label name="$(parent)RespawnTimerText" font="ZoFontWinH3" />
             </Controls>
         </Control>
 
@@ -33,9 +32,6 @@
             <Dimensions y="12" />
             <Controls>
                 <Texture name="$(parent)LoadBarFill" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_KEYBOARD"/>
-                <Label name="$(parent)RespawnTimerText" font="ZoFontKeybindStripDescription" modifyTextType="NONE">
-                    <Anchor point="BOTTOM" relativeTo="ZO_Death" relativePoint="TOP" offsetY="-10" />
-                </Label>
             </Controls>
         </Control>
         
@@ -43,9 +39,6 @@
             <Dimensions y="155" />
             <Controls>
                 <Texture name="$(parent)LoadBarFill" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_GAMEPAD"/>
-                <Label name="$(parent)RespawnTimerText" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
-                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5" />
-                </Label>
             </Controls>
         </Control>
         
@@ -271,6 +264,19 @@
                         </Control>
                     </Controls>
                 </Control>
+                
+                <Control name="$(parent)CyclicRespawn">
+                    <Controls>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Label name="$(grandparent)RespawnTimerText" font="ZoFontKeybindStripDescription" modifyTextType="NONE">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="-50" offsetY="3"/>
+                                </Label>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Keyboard_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
 
                 <Control name="$(parent)ImperialPvP" inherits="ZO_DeathOneButtonTimer_Keyboard_Template">
                     <Controls>
@@ -339,6 +345,19 @@
                         </Control>
                         <Control name="$(parent)Buttons">
                             <Controls>
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)CyclicRespawn">
+                    <Controls>
+                        <Control name="$(parent)Buttons">
+                            <Controls>
+                                <Label name="$(grandparent)RespawnTimerText" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="-70" offsetY="-4"/>
+                                </Label>
                                 <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathKeybindButton_Gamepad_Template"/>
                             </Controls>
                         </Control>
@@ -448,6 +467,21 @@
                             <Controls>
                                 <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
                                     <Anchor point="TOPLEFT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)CyclicRespawn" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" offsetY="32"/>
+                            <Controls>
+                                <Label name="$(grandparent)RespawnTimerText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" excludeFromResizeToFitExtents="true" />
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_DeathRecapToggleButton">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="140"/>
                                 </Control>
                             </Controls>
                         </Control>

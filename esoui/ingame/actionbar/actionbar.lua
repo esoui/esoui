@@ -469,7 +469,7 @@ local GAMEPAD_CONSTANTS =
 {
     abilitySlotOffsetX = 10,
     ultimateSlotOffsetX = 65,
-    anchor = ZO_Anchor:New(BOTTOM, GuiRoot, BOTTOM, 0, -70),
+    anchor = ZO_Anchor:New(BOTTOM, GuiRoot, BOTTOM, 0, -25),
     width = 606,
     showNormalBindingTextOnUltimate = false,
     showKeybindBG = false,

@@ -142,7 +142,7 @@ end
 function ZO_ComboBox_Base:ClearItems()
     ZO_ComboBox_HideDropdown(self:GetContainer())
     ZO_ClearNumericallyIndexedTable(self.m_sortedItems)
-    self:SetSelectedItem("")
+    self:SetSelectedItemText("")
 	self.m_selectedItemData = nil
     self:OnClearItems()
 end
@@ -177,29 +177,46 @@ function ZO_ComboBox_Base:UpdateItems()
     end
 end
 
-function ZO_ComboBox_Base:SetSelectedItem(itemText)
+--This is used if selection of an entry should go through some other avenue to determine the correct display text (e.g.: Chat System)
+function ZO_ComboBox_Base:SetDontSetSelectedTextOnSelection(dontSetSelectedTextOnSelection)
+    self.dontSetSelectedTextOnSelection = dontSetSelectedTextOnSelection
+end
+
+function ZO_ComboBox_Base:SetSelectedItemText(itemText)
     if(self.m_selectedItemText) then
         self.m_selectedItemText:SetText(itemText)
     end
 end
 
-function ZO_ComboBox_Base_ItemSelectedClickHelper(comboBox, item, ignoreCallback)
-	local oldItem = comboBox.m_selectedItemData
-    comboBox:SetSelectedItem(item.name)
-    comboBox.m_selectedItemData = item
+--Maintain this for addons, but use the better named SetSelectedItemText
+function ZO_ComboBox_Base:SetSelectedItem(itemText)
+    self:SetSelectedItemText(itemText)
+end
+
+function ZO_ComboBox_Base:ItemSelectedClickHelper(item, ignoreCallback)
+    local oldItem = self.m_selectedItemData
+    if self.dontSetSelectedTextOnSelection ~= true then
+        self:SetSelectedItemText(item.name)
+    end
+    self.m_selectedItemData = item
 
     if(item.callback and not ignoreCallback) then
-		local selectionChanged = (oldItem ~= item)
+        local selectionChanged = (oldItem ~= item)
         if not selectionChanged and oldItem and item then
             selectionChanged = item.name ~= oldItem.name
         end
-        item.callback(comboBox, item.name, item, selectionChanged)
+        item.callback(self, item.name, item, selectionChanged)
     end
+end
+
+--Maintain for addons
+function ZO_ComboBox_Base_ItemSelectedClickHelper(comboBox, item, ignoreCallback)
+    comboBox:ItemSelectedClickHelper(item, ignoreCallback)
 end
 
 function ZO_ComboBox_Base:SelectItem(item, ignoreCallback)
     if item then
-        ZO_ComboBox_Base_ItemSelectedClickHelper(self, item, ignoreCallback)
+        self:ItemSelectedClickHelper(item, ignoreCallback)
     end
 end
 

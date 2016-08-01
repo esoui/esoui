@@ -49,7 +49,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_GamepadGuildRoster" hidden="true" inherits="ZO_AnchoredToQuadrant123Background ZO_GamepadInteractiveSortFilterListControl">
+        <TopLevelControl name="ZO_GamepadGuildRoster" hidden="true" inherits="ZO_AnchoredToQuadrant_1_2_3_Background ZO_GamepadInteractiveSortFilterListControl">
             <OnInitialized>
                 ZO_GamepadGuildRoster_Initialize(self)
             </OnInitialized>

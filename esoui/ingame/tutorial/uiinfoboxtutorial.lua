@@ -144,7 +144,7 @@ end
 
 function ZO_UiInfoBoxTutorial:RemoveTutorial(tutorialIndex, seen)
     if self:GetCurrentlyDisplayedTutorialIndex() == tutorialIndex then
-        if not IsUnitInCombat("player") and seen then
+        if seen then
             SetTutorialSeen(tutorialIndex)
         end
 

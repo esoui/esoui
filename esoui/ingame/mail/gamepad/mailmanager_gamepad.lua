@@ -230,11 +230,8 @@ function MailManager_Gamepad:OnStateChanged(oldState, newState)
                 self.inbox.isLoading = true
                 self.inbox:EnterLoading()
             end
-
-            RequestOpenMailbox()
         end
     elseif newState == SCENE_HIDDEN then
-        CloseMailbox()
         self:DisableCurrentList()
         self:SwitchToHeader(nil)
         self:SwitchToKeybind(nil)

@@ -169,6 +169,9 @@ function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
     if IsInteractionPending() then
         EndPendingInteraction()
     end
+    
+    self:HideTopLevels()
+    ZO_Dialogs_ReleaseAllDialogs()
     self:SetInUIMode(false)
 end
 
@@ -202,14 +205,36 @@ function ZO_IngameSceneManager:OnEnterGroundTargetMode()
     self:SetInUIMode(false)
 end
 
-function ZO_IngameSceneManager:OnMountStateChanged()
-    -- The market screen causes a dismount and blocks mounting so we need to ignore this on that screen
-    if not (self:IsShowing("market") or
-	        self:IsShowing("gamepad_market_pre_scene") or
-			self:IsShowing("gamepad_market") or
-			self:IsShowing("gamepad_market_preview"))
-	then
-        self:SetInUIMode(false)
+do
+    local OVERRIDING_SCENE_NAMES =
+    {
+        ["market"] = true,
+        ["gamepad_market_pre_scene"] = true,
+        ["gamepad_market"] = true,
+        ["gamepad_market_preview"] = true,
+        ["dyeStampConfirmationKeyboard"] = true,
+        ["dyeStampConfirmationGamepad"] = true,
+    }
+
+    function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()
+        if self.currentScene then
+            local currentSceneName = self.currentScene:GetName()
+            if OVERRIDING_SCENE_NAMES[currentSceneName] then
+                if self:IsShowing(currentSceneName) then
+                    return true
+                end
+            end
+        end
+
+        return false
+    end
+
+    function ZO_IngameSceneManager:OnMountStateChanged()
+        -- The market screen causes a dismount and blocks mounting so we need to ignore this on that screen
+        if not self:DoesCurrentSceneOverrideMountStateChange()
+	    then
+            self:SetInUIMode(false)
+        end
     end
 end
 
@@ -421,7 +446,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
     end
 
     local SHOW_BASE_SCENE = true
-    if GUILD_HERALDRY:AttemptSaveIfBlocking() or GUILD_HERALDRY_GAMEPAD:AttemptSaveIfBlocking(SHOW_BASE_SCENE) then
+    if SYSTEMS:GetObject("guild_heraldry"):AttemptSaveIfBlocking(SHOW_BASE_SCENE) then
         return
     end
 

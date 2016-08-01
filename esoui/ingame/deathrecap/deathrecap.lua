@@ -423,7 +423,7 @@ function DeathRecap:Animate()
     end
 
     local nestedKBTimeline = self.killingBlowTimeline:GetAnimationTimeline(1)
-    self.killingBlowTimeline:SetAnimationTimelineOffset(nestedKBTimeline, delay - lastRowDuration)
+    self.killingBlowTimeline:SetAnimationTimelineOffset(nestedKBTimeline, zo_max(0, delay - lastRowDuration))
     self.killingBlowTimeline:PlayFromStart()
 
     if GetNumTelvarStonesLost() > 0 then

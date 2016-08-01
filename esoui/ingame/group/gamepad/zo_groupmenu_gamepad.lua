@@ -360,7 +360,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         dropdown:UpdateItems()
 
         local selectedString = isVeteran and SI_GAMEPAD_GROUP_DUNGEON_MODE_VETERAN or SI_GAMEPAD_GROUP_DUNGEON_MODE_NORMAL
-        dropdown:SetSelectedItem(GetString(selectedString))
+        dropdown:SetSelectedItemText(GetString(selectedString))
     end
 
     --Menu

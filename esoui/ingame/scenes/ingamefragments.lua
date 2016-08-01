@@ -685,70 +685,6 @@ local ALWAYS_ANIMATE = true
 ALCHEMY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AlchemyTopLevel)
 ENCHANTING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_EnchantingTopLevel)
 SMITHING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SmithingTopLevel)
-GAMEPAD_SMITHING_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadSmithingTopLevel)
-GAMEPAD_SMITHING_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_SMITHING_MODE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskContainer)
-
-GAMEPAD_SMITHING_REFINE_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskRefinementInventory)
-GAMEPAD_SMITHING_REFINE_FLOATING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSmithingTopLevelRefinement)
-
-GAMEPAD_SMITHING_DECONSTRUCT_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskDeconstructionInventory)
-GAMEPAD_SMITHING_DECONSTRUCT_FLOATING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSmithingTopLevelDeconstruction)
-
-GAMEPAD_SMITHING_CREATION_CREATE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskCreationCreate)
-GAMEPAD_SMITHING_CREATION_OPTIONS_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskCreationOptions)
-GAMEPAD_SMITHING_CREATION_FLOATING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSmithingTopLevelCreation)
-
-GAMEPAD_SMITHING_IMPROVEMENT_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskImprovementInventory)
-GAMEPAD_SMITHING_IMPROVEMENT_FLOATING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSmithingTopLevelImprovement)
-
-GAMEPAD_SMITHING_RESEARCH_RESEARCH_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskResearchResearch)
-GAMEPAD_SMITHING_RESEARCH_CONFIRM_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadSmithingTopLevelMaskResearchConfirm)
-
-GAMEPAD_LORE_LIBRARY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Gamepad_LoreLibrary)
-GAMEPAD_LORE_LIBRARY_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_BOOK_SET_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Gamepad_BookSet)
-GAMEPAD_BOOK_SET_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_LOOT_PICKUP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Gamepad_LootPickup, GAMEPAD_GRID_NAV2)
-GAMEPAD_LOOT_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_LootInventory)
-
-GAMEPAD_ACHIEVEMENTS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Gamepad_Achievements)
-GAMEPAD_ACHIEVEMENTS_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_ACHIEVEMENTS_FOOTER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Gamepad_Achievements_FooterBar)
-
-GAMEPAD_CADWELL_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Gamepad_Cadwell)
-GAMEPAD_CADWELL_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_REPAIR_KITS_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_RepairKits)
-
-GAMEPAD_APPLY_ENCHANT_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_ApplyEnchant)
-
-GAMEPAD_SOUL_GEM_ITEM_CHARGER_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_SoulGemItemCharger)
-
-GAMEPAD_MAIL_MANAGER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailManager_Gamepad)
-
-GAMEPAD_AVA_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevel)
-GAMEPAD_AVA_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_AVA_CAMPAIGN_INFO_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevelCampaignInfo, ALWAYS_ANIMATE)
-GAMPEAD_AVA_RANK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevelAvaRankFooter)
-
-GAMEPAD_GROUP_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMenuGamepad)
-GAMEPAD_GROUP_LFG_OPTIONS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupRoleMenu_Gamepad)
-GAMEPAD_GROUP_LIST_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMenuGamepadGroupList)
-GAMEPAD_GROUP_MEMBERS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMembers_Gamepad)
-
-GAMEPAD_GROUPING_TOOLS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GroupingToolsGamepad)
-GAMEPAD_GROUPING_TOOLS_LOCATION_INFO_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupingToolsGamepadLocationInfo)
-
-GAMEPAD_BUY_BAG_SPACE_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadBuyBagSpaceTopLevel)
-GAMEPAD_BUY_BANK_SPACE_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadBankingBuyBankSpaceTopLevel)
-GAMEPAD_BANKING_WITHDRAW_DEPOSIT_GOLD_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadBankingWithdrawDepositGoldTopLevel)
-
-GAMEPAD_NOTIFICATIONS_FRAGMENT =  ZO_SimpleSceneFragment:New(ZO_GamepadNotifications)
-GAMEPAD_NOTIFICATIONS_FRAGMENT:SetHideOnSceneHidden(true)
 
 SKILLS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_SKILLS)
 STATS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StatsPanel)
@@ -757,13 +693,6 @@ COLLECTIONS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_COLLECTIONS_MENU_ROOT_TI
 JOURNAL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_QUEST_JOURNAL_MENU_JOURNAL)
 HELP_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HELP_TITLE)
 
-GAMEPAD_QUEST_JOURNAL_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_QuestJournal_GamepadTopLevel)
-GAMEPAD_QUEST_JOURNAL_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_LEADERBOARDS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Leaderboards_Gamepad)
-GAMEPAD_LEADERBOARDS_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_LEADERBOARDS_LIST_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LeaderboardList_Gamepad)
-
 CHAMPION_PERKS_CONSTELLATIONS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_ChampionPerks)
 
 PLAYER_MENU_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_MainMenu_Gamepad)
@@ -771,50 +700,20 @@ PLAYER_MENU_FRAGMENT:SetHideOnSceneHidden(true)
 
 OPTIONS_MENU_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadOptionsTopLevelInfoPanel)
 
-GAMEPAD_ALCHEMY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadAlchemyTopLevel)
-
-GAMEPAD_QUICKSLOT_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadQuickslotToplevel)
-GAMEPAD_QUICKSLOT_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_QUICKSLOT_SELECTED_TOOLTIP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadQuickslotToplevelSelectedTooltipContainer)
-
-GAMEPAD_STATS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadStatsTopLevel)
-GAMEPAD_STATS_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadStatsTopLevelRightPane, ALWAYS_ANIMATE)
-
-GAMEPAD_GUILD_HUB_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadGuildHubTopLevel)
-GAMEPAD_GUILD_HUB_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_GUILD_HOME_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadGuildHomeTopLevel)
-GAMEPAD_GUILD_HOME_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_DYEING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DyeingGamepad)
-
-GAMEPAD_INVENTORY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadInventoryTopLevel)
-GAMEPAD_INVENTORY_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_EMOTES_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadPlayerEmoteTopLevel)
-
-GAMEPAD_ENCHANTING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadEnchantingTopLevel)
-GAMEPAD_ENCHANTING_MODE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadEnchantingTopLevelContainerMode)
-GAMEPAD_ENCHANTING_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadEnchantingTopLevelContainerInventory)
-
-GAMEPAD_SKILLS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadSkillsTopLevel)
-GAMEPAD_SKILLS_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSkillsLinePreview)
-
 -- Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
     
 GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
+GAMEPAD_NAV_QUADRANT_1_2_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_Background)
+ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_2_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_4_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_Background, ALWAYS_ANIMATE)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_4_Background, ALWAYS_ANIMATE)
-GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
+GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
 
 -- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
 
@@ -871,6 +770,7 @@ GUILD_SELECTOR_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("Guild")
 MOUSE_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("MouseUIMode")
 GAMEPAD_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("GamepadUIMode")
 GAMEPAD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("GamepadActions")
+HOUSING_EDITOR_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("DebugHousingEditorMode")
 
 --Intercept Layer
 INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SceneChangeInterceptLayer")
@@ -878,8 +778,8 @@ INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
         return IsUnderArrest()
     end)
 
--- Market Preview Intercept Layer
-MARKET_PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("MarketPreviewInterceptLayer")
+-- Preview Intercept Layer
+PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("PreviewInterceptLayer")
 
 --Crafting window keybind intercept layer
 ZO_CraftingWindowKeybindInterceptLayerFragment = ZO_ActionLayerFragment:Subclass()
@@ -904,3 +804,5 @@ CRAFTING_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
 
 --Shared Tutorials
 LOCKPICK_TUTORIAL_FRAGMENT = ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_LOCKPICKING_OPENED)
+
+HOUSING_EDITOR_HUD_FRAGMENT = ZO_HousingEditorHUDFragment:New(ZO_HousingEditorHudTopLevel)

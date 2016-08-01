@@ -362,9 +362,9 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
 
                         local function UpdateDropdownSelection()
                             if(self.selectedRankIndex) then
-                                control.dropdown:SetSelectedItem(self.ranks[self.selectedRankIndex].name)
+                                control.dropdown:SetSelectedItemText(self.ranks[self.selectedRankIndex].name)
                             else
-                                control.dropdown:SetSelectedItem(GetString(SI_GUILD_RANKS_COPY_NONE))
+                                control.dropdown:SetSelectedItemText(GetString(SI_GUILD_RANKS_COPY_NONE))
                             end
                         end
 
@@ -384,13 +384,6 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                         control.dropdown:UpdateItems()
 
                         UpdateDropdownSelection()
-
-                        local function OnDropdownDeactivated()
-                            PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
-                            KEYBIND_STRIP:PopKeybindGroupState()
-                        end
-
-                        control.dropdown:SetDeactivatedCallback(OnDropdownDeactivated)
                     end,
                 },
             },
@@ -431,8 +424,6 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                     if(targetData.nameField and targetControl) then
                         targetControl.editBoxControl:TakeFocus()
                     elseif (targetData.rankSelector) then
-                        KEYBIND_STRIP:PushKeybindGroupState() -- This is just to hide the keybinds (don't need to store the state)
-                        RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
                         self.currentDropdown:Activate()
                         local highlightIndex = 1
                         if(self.selectedRankIndex ~= nil) then

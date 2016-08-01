@@ -128,7 +128,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         g_buyCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName } }
         
         local OpenConsoleStoreToPurchaseCrowns = function()
-            ShowConsoleStoreUI()
+            ShowConsoleESOCrownPacksUI()
             self:EndPurchase()
         end
 
@@ -441,15 +441,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                         return isVisible
                     end,
                 callback = function()
-                        EndPurchase()
-                        Logout()
+                        self:EndPurchaseAndLogout()
                     end,
             },
         },
         canQueue = true,
         mustChoose = true,
     })
-    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_FAILED], 
+    ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_FAILED],
     {
         setup = function(dialog)
 
@@ -546,11 +545,13 @@ do
         ZO_ClearNumericallyIndexedTable(itemInfo)
 
         if isBundle then
-            local numChildren = marketProduct:GetNumChildren()
-            for childIndex = 1, numChildren do
-                local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
-                local entryTable = CreateMarketPurchaseListEntry(childMarketProductId)
-                table.insert(itemInfo, entryTable)
+            if not marketProduct:GetHidesChildProducts() then
+                local numChildren = marketProduct:GetNumChildren()
+                for childIndex = 1, numChildren do
+                    local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
+                    local entryTable = CreateMarketPurchaseListEntry(childMarketProductId)
+                    table.insert(itemInfo, entryTable)
+                end
             end
         else
             local entryTable = CreateMarketPurchaseListEntry(marketProductId)
@@ -629,6 +630,15 @@ function ZO_GamepadMarketPurchaseManager:EndPurchase(isNoChoice)
     end
 
     self:ResetState()
+end
+
+function ZO_GamepadMarketPurchaseManager:EndPurchaseAndLogout()
+    -- since we are trying to logout we don't want to trigger any of the scene changes
+    -- or try to show tutorials, however we want to clean up after ourselves
+    -- in case we don't actually logout
+
+    self:ResetState()
+    Logout()
 end
 
 function ZO_GamepadMarketPurchaseManager:ResetState()

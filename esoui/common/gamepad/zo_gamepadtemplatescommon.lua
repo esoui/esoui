@@ -27,7 +27,7 @@ function ZO_SharedGamepadEntry_OnInitialized(control)
     if control.icon then
         control.highlight = control.icon:GetNamedChild("Highlight")
         control.stackCountLabel = control.icon:GetNamedChild("StackCount")
-        control.playerLockedIcon = control.icon:GetNamedChild("PlayerLockedIcon")
+        control.subStatusIcon = control.icon:GetNamedChild("SubStatusIcon")
     end
     control.checkBox = control:GetNamedChild("CheckBox")
     control.label = control:GetNamedChild("Label")
@@ -133,6 +133,19 @@ do
 end
 
 do
+    local function ComputeHeightWithSideLabel(control)
+        -- clean the dirty sublabel before trying to get the real information from the main label
+        local subLabelControl = control:GetNamedChild("SubLabel1")
+        subLabelControl:GetTextHeight()
+        return control.label:GetTextHeight()
+    end
+
+    function ZO_SharedGamepadEntry_SetHeightFromLabelWithSideLabel(control)
+        control.GetHeight = ComputeHeightWithSideLabel
+    end
+end
+
+do
     local function ComputeHeightFromLabelAndSubLabels(control)
         local height = control.label:GetTextHeight()
         for i = 1, control.subLabelCount do
@@ -215,7 +228,7 @@ end
 
 local USE_LOWERCASE_NUMBER_SUFFIXES = false
 
-local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, playerLockedIcon, data, selected)
+local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIcon, data, selected)
     if icon then
         if data.iconUpdateFn then
             data.iconUpdateFn()
@@ -245,8 +258,17 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, playerLocke
                 end
             end
 
-            if playerLockedIcon then
-                playerLockedIcon:SetHidden(not data.isPlayerLocked)
+            if subStatusIcon then
+                subStatusIcon:ClearIcons()
+
+                if data.isPlayerLocked then
+                    subStatusIcon:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32)
+                end
+
+                if data.isBoPTradeable then
+                    subStatusIcon:AddIcon(ZO_TRADE_BOP_ICON)
+                end
+                subStatusIcon:Show()
             end
 
             ZO_SharedGamepadEntryIconColorize(icon, data, selected)
@@ -396,7 +418,7 @@ function ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDurin
     
     ZO_SharedGamepadEntryLabelSetup(control.label, data, selected)
     
-    ZO_SharedGamepadEntryIconSetup(control.icon, control.stackCountLabel, control.playerLockedIcon, data, selected)
+    ZO_SharedGamepadEntryIconSetup(control.icon, control.stackCountLabel, control.subStatusIcon, data, selected)
 
     if control.highlight then
         if selected and data.highlight then
@@ -571,9 +593,17 @@ function ZO_GamepadOnDefaultScrollListActivatedChanged(list, activated)
 end
 
 -- Checkbox
-function ZO_GamepadCheckBoxTemplate_OnInitialized(control)
+function ZO_GamepadCheckBoxTemplate_OnInitialized(control, offsetX)
+    offsetX = offsetX or 0
     control.checkBox = control:GetNamedChild("CheckBox")
     control.label = control:GetNamedChild("Label")
+
+    local labelOffsetX = select(5, control.label:GetAnchor(0))
+    control.label:SetWidth(ZO_GAMEPAD_CONTENT_WIDTH - control.checkBox:GetWidth() - labelOffsetX - offsetX)
+
+    control.GetHeight = function(control)
+        return zo_max(control.checkBox:GetHeight(), control.label:GetTextHeight())
+    end
 end
 
 function ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)

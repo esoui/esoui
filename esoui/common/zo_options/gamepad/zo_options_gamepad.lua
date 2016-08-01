@@ -639,6 +639,11 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
             local header = setting.header and GetString(setting.header)
             local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
             local controlType = self:GetControlType(data.controlType)
+            
+            if controlType == OPTIONS_CUSTOM then
+                controlType = data.customControlType
+            end
+
             local templateName = TEMPLATE_NAMES[controlType]
             
             local isHeader = header or data.header

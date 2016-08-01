@@ -20,7 +20,7 @@ local function TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
         self:AddSection(offlineSection)
 
         local lastOnlineSection = self:AcquireSection(self:GetStyle("socialStatsSection"))
-        local lastOnlinePair = lastOnlineSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        local lastOnlinePair = lastOnlineSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
         lastOnlinePair:SetStat(GetString(SI_GAMEPAD_SOCIAL_LIST_LAST_ONLINE), self:GetStyle("statValuePairStat"))
         lastOnlinePair:SetValue(ZO_FormatDurationAgo(secsSinceLogoff + GetFrameTimeSeconds() - timeStamp), self:GetStyle("socialStatsValue"))
         lastOnlineSection:AddStatValuePair(lastOnlinePair)
@@ -39,7 +39,7 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
     local statsSection = self:AcquireSection(self:GetStyle("socialStatsSection"))
 
     if level then
-        local levelPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        local levelPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
         levelPair:SetStat(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_LEVEL), self:GetStyle("statValuePairStat"))
         local ICON_SIZE = 40
         local levelString = GetLevelOrChampionPointsString(level, championPoints, ICON_SIZE)
@@ -48,7 +48,7 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
     end
 
     if class then
-        local classPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        local classPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
         classPair:SetStat(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_CLASS), self:GetStyle("statValuePairStat"))
         gender = gender or GENDER_MALE
         local className = zo_strformat(SI_CLASS_NAME, GetClassName(gender, class))
@@ -57,14 +57,14 @@ local function AddCharacterInfo(self, characterName, class, gender, guildId, gui
     end
     
     if alliance then
-        local alliancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        local alliancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
         alliancePair:SetStat(GetString(SI_GAMEPAD_CONTACTS_LIST_HEADER_ALLIANCE), self:GetStyle("statValuePairStat"))
         alliancePair:SetValue(alliance, self:GetStyle("socialStatsValue"))
         statsSection:AddStatValuePair(alliancePair)
     end
 
     if guildRankIndex and guildId then
-        local guildRankPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+        local guildRankPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
         guildRankPair:SetStat(GetString(SI_GAMEPAD_GUILD_ROSTER_RANK_HEADER), self:GetStyle("statValuePairStat"))
         local guildRankName = GetFinalGuildRankName(guildId, guildRankIndex)
         guildRankPair:SetValue(guildRankName, self:GetStyle("socialStatsValue"))

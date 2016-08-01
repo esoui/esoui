@@ -671,8 +671,7 @@ function ZO_GamepadStats:InitializeCharacterPanel()
     local rightColumn = self.characterStatsPanel:GetNamedChild("RightColumn")
 
     self.alliance = rightColumn:GetNamedChild("AllianceData")
-    self.rankIcon = rightColumn:GetNamedChild("RankIcon")
-    self.rank = rightColumn:GetNamedChild("Rank")
+    self.rank = rightColumn:GetNamedChild("RankData")
 
     self.ridingStamina = rightColumn:GetNamedChild("RidingStamina")
     self.ridingTrainingHeader = rightColumn:GetNamedChild("RidingTrainingHeader")
@@ -832,10 +831,9 @@ function ZO_GamepadStats:SetStatValue(statType, label, formatString)
     end
 
     local value = GetPlayerStat(statType, STAT_BONUS_OPTION_APPLY_BONUS, STAT_SOFT_CAP_OPTION_APPLY_SOFT_CAP)
-    local USE_MINIMUM = true
 
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
-        value = GetCriticalStrikeChance(value, USE_MINIMUM)
+        value = GetCriticalStrikeChance(value)
     end
 
     local text = nil
@@ -896,13 +894,14 @@ function ZO_GamepadStats:RefreshCharacterPanel()
 
     local rank, subRank = GetUnitAvARank("player")
     local rankName = GetAvARankName(GetUnitGender("player"), rank)
-    if(rank == 0) then
-        self.rankIcon:SetHidden(true)
+    local rankString
+    if rank == 0 then
+        rankString = zo_strformat(SI_STAT_RANK_NAME_FORMAT, rankName)
     else
-        self.rankIcon:SetHidden(false)
-        self.rankIcon:SetTexture(GetAvARankIcon(rank))
+        local rankIcon = GetAvARankIcon(rank)
+        rankString = zo_iconTextFormatNoSpace(rankIcon, 32, 32, zo_strformat(SI_STAT_RANK_NAME_FORMAT, rankName))
     end
-    self.rank:SetText(zo_strformat(SI_STAT_RANK_NAME_FORMAT, rankName))
+    self.rank:SetText(rankString)
 
     --Riding skill
     local speedBonus, _, staminaBonus, _, inventoryBonus = STABLE_MANAGER:GetStats()

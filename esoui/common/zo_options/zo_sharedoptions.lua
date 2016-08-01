@@ -84,7 +84,7 @@ function ZO_SharedOptions:InitializeControl(control, selected)
         GetControl(control, "Name"):SetText(text)
     elseif controlType == OPTIONS_CUSTOM then
         if data.customSetupFunction then
-            data.customSetupFunction(control)
+            data.customSetupFunction(control, selected)
         end
     end
 end

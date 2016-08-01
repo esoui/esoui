@@ -177,7 +177,7 @@ end
 function ZO_KeybindStrip:ClearKeybindGroupStateStack()
     --remove all keybind buttons and loose buttons as well as any states
     local topStateIndex = self:GetTopKeybindStateIndex()
-    self:RemoveAllKeyButtonGroups(self:GetTopKeybindStateIndex(), topStateIndex)
+    self:RemoveAllKeyButtonGroups(topStateIndex)
     for key, value in pairs(self.keybinds) do
         self:RemoveKeybindButton(value.keybindButtonDescriptor or value, topStateIndex)
     end
@@ -449,7 +449,8 @@ function ZO_KeybindStrip:UpdateKeybindButton(keybindButtonDescriptor, stateIndex
     if buttonOrEtherealDescriptor then
         if type(buttonOrEtherealDescriptor) == "userdata" then
             if buttonOrEtherealDescriptor.keybindButtonDescriptor == keybindButtonDescriptor then
-                self:SetUpButton(buttonOrEtherealDescriptor)
+                local UPDATE_ONLY = true
+                self:SetUpButton(buttonOrEtherealDescriptor, UPDATE_ONLY)
                 if not self.batchUpdating then
                     self:UpdateAnchors()
                 end
@@ -838,10 +839,11 @@ do
         return not visibilityFunction or visibilityFunction(keybindButtonDescriptor, keybindButtonDescriptor.keybindButtonGroupDescriptor)
     end
 
-    function ZO_KeybindStrip:SetUpButton(button)
+    function ZO_KeybindStrip:SetUpButton(button, updateOnly)
         local keybindButtonDescriptor = button.keybindButtonDescriptor
 
         local isVisible = IsVisible(button.keybindButtonDescriptor)
+        local wasVisible = not button:IsHidden()
         local customKeybindControl = GetValueFromRawOrFunction(keybindButtonDescriptor, "customKeybindControl")
         if isVisible then
             if customKeybindControl then
@@ -857,9 +859,15 @@ do
             end
             local keybind = keybindButtonDescriptor.keybind or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonGroupDescriptor.keybindButtonGroupDescriptor.keybind
             
+            local buttonKeybindChanging = button:GetKeybind() ~= keybind
+            local suppressUpdate = (updateOnly and isVisible == wasVisible)
+            -- updateOnly is used only when we are trying to update keybinds from UpdateKeybindButton so we know that this setup is coming from an update
+
             local alwaysPreferGamepadMode = self:SetupButtonStyle(button, self.styleInfo)
 
-            button:SetKeybind(keybind, nil, nil, alwaysPreferGamepadMode)
+            if not suppressUpdate or buttonKeybindChanging then
+                button:SetKeybind(keybind, nil, nil, alwaysPreferGamepadMode)
+            end
 
             local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
             if(enabled == nil) then enabled = true end

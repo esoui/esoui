@@ -36,7 +36,8 @@ function ZO_CollectionsInventorySingleton:BuildQuickslotData()
             for i = 1, GetTotalCollectiblesByCategoryType(categoryType) do
                 local collectibleId = GetCollectibleIdFromType(categoryType, i)
                 local _, _, iconFile, _, unlocked, _, isActive = GetCollectibleInfo(collectibleId)
-                if unlocked then
+                local isValidForPlayer = IsCollectibleValidForPlayer(collectibleId) -- this is added specifically for RC because the Mainline version has stuff we can't merge over yet
+                if unlocked and isValidForPlayer then
                     table.insert(self.quickslotData, 
                         {
                         name = GetCollectibleName(collectibleId),

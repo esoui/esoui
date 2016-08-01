@@ -38,13 +38,40 @@ EsoUI\Pregame\AccountLogin\HavokSplash.xml
 EsoUI\Pregame\KeybindStrip\PregameKeybindStripFragments.lua
 EsoUI\Pregame\Globals\bindings.xml
 
+; Character create
+;
+EsoUI\Pregame\CharacterCreate\ZO_CharacterCreateData.lua
 EsoUI\Pregame\CharacterCreate\ZO_CharacterCreate_Shared.lua
 EsoUI\Pregame\CharacterCreate\ZO_CharacterCreate_Shared.xml
+
+EsoUI\Pregame\CharacterCreate\ZO_CharacterCreateTriangle_Base.lua
+EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreateTriangle_Keyboard.lua
+EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreateTriangle_Keyboard.xml
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateTriangle_Gamepad.lua
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateTriangle_Gamepad.xml
+
+EsoUI\Pregame\CharacterCreate\ZO_CharacterCreateBucket_Base.lua
+EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreateBucket_Keyboard.lua
+EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreateBucket_Keyboard.xml
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateBucket_Gamepad.lua
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateBucket_Gamepad.xml
+
+EsoUI\Pregame\CharacterCreate\ZO_CharacterCreateSlider_Base.lua
+EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreateSlider_Keyboard.lua
+EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreateSlider_Keyboard.xml
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateSlider_Gamepad.lua
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateSlider_Gamepad.xml
+
 EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreate_Keyboard.lua
 EsoUI\Pregame\CharacterCreate\Keyboard\ZO_CharacterCreate_Keyboard.xml
+
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateSelector_Gamepad.lua
+EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreateSelector_Gamepad.xml
 EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreate_Gamepad.lua
 EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreate_Gamepad.xml
 
+; Character Select
+;
 EsoUI\Pregame\CharacterSelect\ZO_CharacterSelect_Common.lua
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.lua
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.xml

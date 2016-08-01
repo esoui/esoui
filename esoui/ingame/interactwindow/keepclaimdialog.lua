@@ -239,8 +239,9 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
     end
 
     local function DeinitDialog()
-        if(self.currentDropdown) then
+        if self.currentDropdown then
             self.currentDropdown:Deactivate()
+            self:SetCurrentDropdown(nil)
         end
 
         INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
@@ -383,12 +384,11 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                             count = count + 1
                         end
                         
-                        self.currentDropdown:SetSelectedItem(self.selectedGuildName)
+                        self.currentDropdown:SetSelectedItemText(self.selectedGuildName)
 
                         control.dropdown:UpdateItems()
 
                         local function OnDropdownDeactivated()
-                            PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
                             KEYBIND_STRIP:PopKeybindGroupState()
                         end
 
@@ -418,7 +418,6 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                 end,
                 callback = function()
                     KEYBIND_STRIP:PushKeybindGroupState() -- This is just to hide the keybinds (don't need to store the state)
-                    RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
                     self.currentDropdown:Activate()
                     UpdateDropdownHighlight()
                 end,

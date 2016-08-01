@@ -64,6 +64,10 @@ function DeathType:UpdateDisplay()
     
 end
 
+function DeathType:UpdateCyclicTimer()
+
+end
+
 local SOUL_GEM_FILLED_TEXT = GetString(SI_SOUL_GEM_FILLED)
 local SOUL_GEM_ICON_MARKUP = "|t32:32:%s|t"
 local SOUL_GEM_ICON_MARKUP_INHERIT_COLOR = "|t32:32:%s:inheritColor|t"
@@ -188,7 +192,7 @@ end
 
 function AvADeath:UpdateDisplay()
     local _, timeUntilAutoReleaseMs = GetDeathInfo()
-    if(timeUntilAutoReleaseMs < 60000) then
+    if(timeUntilAutoReleaseMs > 0 and timeUntilAutoReleaseMs < 60000) then
         if(self.messageHidden) then
             self.messageHidden = false
             self.messageLabel:SetHidden(false)
@@ -245,7 +249,7 @@ end
 
 function ImperialPvPDeath:UpdateDisplay()
     local _, timeUntilAutoReleaseMs = GetDeathInfo()
-    if(timeUntilAutoReleaseMs < 60000) then
+    if(timeUntilAutoReleaseMs > 0 and timeUntilAutoReleaseMs < 60000) then
         if(self.messageHidden) then
             self.messageHidden = false
             self.messageLabel:SetHidden(false)
@@ -259,6 +263,27 @@ function ImperialPvPDeath:UpdateDisplay()
             self.timerCooldown:Stop()
             self.timerCooldown:SetHidden(true)
         end
+    end
+end
+
+--Cyclic Respawn Death Type
+-----------------
+
+local CyclicRespawnDeath = DeathType:Subclass()
+
+function CyclicRespawnDeath:New(control)
+    local cyclicRespawn = DeathType.New(self, control)
+
+    cyclicRespawn.cyclicRespawnLabel = GetControl(control, "RespawnTimerText")
+
+    return cyclicRespawn
+end
+
+function CyclicRespawnDeath:UpdateCyclicTimer(timeLeft)
+    if timeLeft then
+        self.cyclicRespawnLabel:SetText(zo_strformat(SI_DEATH_PROMPT_WAITING_RELEASE, timeLeft))
+    else
+        self.cyclicRespawnLabel:SetText("")
     end
 end
 
@@ -432,6 +457,7 @@ local DEATH_TYPE_IMPERIAL_PVE = "ImperialPvE"
 local DEATH_TYPE_BATTLE_GROUND = "BG"
 local DEATH_TYPE_RESURRECT_PENDING = "Resurrect"
 local DEATH_TYPE_IN_ENCOUNTER = "InEncounter"
+local DEATH_TYPE_CYCLIC_RESPAWN = "CyclicRespawn"
 
 local DEATH_PROMPT_DELAY_MS = 2000
 
@@ -456,6 +482,7 @@ function Death:New(control)
     death.types[DEATH_TYPE_TWO_OPTION] = TwoOptionDeath:New(GetControl(control, "TwoOption"))
     death.types[DEATH_TYPE_RESURRECT_PENDING] = ResurrectPending:New(GetControl(control, "Resurrect"))
     death.types[DEATH_TYPE_IN_ENCOUNTER] = InEncounter:New(GetControl(control, "InEncounter"))
+    death.types[DEATH_TYPE_CYCLIC_RESPAWN] = CyclicRespawnDeath:New(GetControl(control, "CyclicRespawn"))
 
     local function UpdateDisplay()
         death:UpdateDisplay()
@@ -503,7 +530,9 @@ function Death:GetDeathType()
         local isEncounterInProgress, isAVADeath, isBattleGroundDeath, isReleaseOnly, _, _, isRaidDeath, _, respawnQueueDuration = select(5, GetDeathInfo())
         local useCyclicRespawn = respawnQueueDuration > 0
         local deathType
-        if IsInImperialCity() then -- Special snowflake scenario
+        if useCyclicRespawn and IsQueuedForCyclicRespawn() then
+            deathType = DEATH_TYPE_CYCLIC_RESPAWN
+        elseif IsInImperialCity() then -- Special snowflake scenario
 			if isReleaseOnly then
 				deathType = DEATH_TYPE_RELEASE_ONLY
 			else
@@ -549,10 +578,6 @@ function Death:UpdateDisplay()
     local nextType, useCyclicRespawn
     if(self.isPlayerDead) then
         nextType, useCyclicRespawn = self:GetDeathType()
-    end    
-
-    if useCyclicRespawn and not self.cyclicRespawnTimer.isRunning then
-        self:StartCyclicRespawnTimer()
     end
 
     local deathTypeChanged = false
@@ -567,6 +592,10 @@ function Death:UpdateDisplay()
 
         self.currentType = nextType
         deathTypeChanged = true
+    end
+
+    if useCyclicRespawn and not self.cyclicRespawnTimer.isRunning then
+        self:StartCyclicRespawnTimer()
     end
 
     if(self.currentType) then
@@ -635,7 +664,6 @@ end
 function Death:InitializeCyclicRespawnTimer()
     self.cyclicRespawnTimer.isRunning = false
     self.cyclicRespawnTimer.loadBar = GetControl(self.cyclicRespawnTimer, "LoadBar")
-    self.cyclicRespawnTimer.respawningTimeLabel = GetControl(self.cyclicRespawnTimer, "RespawnTimerText")
 end
 
 function Death:StartCyclicRespawnTimer()
@@ -663,9 +691,9 @@ function Death:UpdateCyclicRespawnTimer()
         else
             timeLeft = ZO_FormatTimeLargestTwo(secondsToWait, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
         end
-        self.cyclicRespawnTimer.respawningTimeLabel:SetText(zo_strformat(SI_DEATH_PROMPT_WAITING_RELEASE, timeLeft))
+            self.types[self.currentType]:UpdateCyclicTimer(timeLeft)
     else
-        self.cyclicRespawnTimer.respawningTimeLabel:SetText("")
+        self.types[self.currentType]:UpdateCyclicTimer()
     end
 end
 

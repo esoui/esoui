@@ -105,37 +105,6 @@ function ZO_GuildHeraldryManager_Keyboard:IsCurrentBlockingScene()
     return MAIN_MENU_MANAGER:GetBlockingSceneName() == "guildHeraldry"
 end
 
-function ZO_GuildHeraldryManager_Keyboard:AttemptSaveIfBlocking()
-    local attemptedSave = false
-
-    if self:IsCurrentBlockingScene() then
-        self:AttemptSaveAndExit()
-        attemptedSave = true
-    end
-
-    return attemptedSave
-end
-
-function ZO_GuildHeraldryManager_Keyboard:AttemptSaveAndExit()
-    local blocked = false
-
-    if HasPendingHeraldryChanges() then
-        self:SetPendingExit(true)
-        if not IsCreatingHeraldryForFirstTime() then
-            local pendingCost = GetPendingHeraldryCost()
-            local heraldryFunds = GetHeraldryGuildBankedMoney()
-            if heraldryFunds and pendingCost <= heraldryFunds then
-                self:ConfirmHeraldryApplyChanges()
-                blocked = true
-            end 
-        end
-    end
-
-    if not blocked then
-        self:ConfirmExit()
-    end
-end
-
 function ZO_GuildHeraldryManager_Keyboard:ConfirmExit()
     if self.changeGuildCallback then
         local callback = self.changeGuildCallback
@@ -522,6 +491,7 @@ end
 
 function ZO_GuildHeraldry_OnInitialized(control)
     GUILD_HERALDRY = ZO_GuildHeraldryManager_Keyboard:New(control)
+    SYSTEMS:RegisterKeyboardObject("guild_heraldry", GUILD_HERALDRY)
 end
 
 do

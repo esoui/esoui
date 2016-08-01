@@ -62,6 +62,10 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectibleUpdated(justUnlocked)
     end
 
+    local function OnMarketCollectiblesUpdated(numJustUnlocked)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectiblesUpdated(numJustUnlocked)
+    end
+
     local function OnShowMarketProduct(...)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(...)
     end
@@ -75,6 +79,7 @@ function Market_Singleton:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, function() OnMarketSearchResultsReady() end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, function(eventId, ...) OnShowMarketProduct(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, function(eventId, ...) OnShowMarketAndSearch(...) end)
 end
@@ -284,6 +289,12 @@ end
 
 function ZO_Market_Shared:OnCollectibleUpdated(justUnlocked)
     if justUnlocked then
+        self:UpdateCurrentCategory()
+    end
+end
+
+function ZO_Market_Shared:OnCollectiblesUpdated(numJustUnlocked)
+    if numJustUnlocked > 0 then
         self:UpdateCurrentCategory()
     end
 end

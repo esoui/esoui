@@ -50,7 +50,6 @@
                                         <!-- ESO Account Information. -->
                                         <Texture name="$(parent)ESOIcon" textureFile="EsoUI/Art/Login/Gamepad/loading-Ouroboros.dds" resizeToFitFile="true">
                                             <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMRIGHT" />
-                                            <Dimensions x="125" y="75"/>
                                         </Texture>
                                         <Label name="$(parent)ESOAccount" inherits="ZO_ConfirmLinkAccountScreen_AccountNameLabel">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)ESOIcon" relativePoint="TOPRIGHT" />

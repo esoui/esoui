@@ -75,8 +75,7 @@ function ZO_StatEntry_Keyboard:GetDisplayValue()
     local statType = self.statType
 
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
-        local USE_MINIMUM = true
-        return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value, USE_MINIMUM))
+        return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value))
     else
         return tostring(value)
     end

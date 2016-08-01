@@ -109,6 +109,18 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
+    itemTradeBoPSection =
+    {
+        customSpacing = 80,
+        widthPercent = 100,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+    },
+
+    itemTradeBoPHeader =
+    {
+        fontColor = ZO_TRADE_BOP_COLOR,
+    },
+
     bodyDescription =
     {
         fontSize = "$(GP_42)",
@@ -216,9 +228,9 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_27)",
         height = 32,
     },
-	collectionsTopSection =
-	{
-		customSpacing = 7,
+    collectionsTopSection =
+    {
+        customSpacing = 7,
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "up",
         widthPercent = 100,
@@ -227,7 +239,7 @@ ZO_TOOLTIP_STYLES =
         height = 67,
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
-	},
+    },
     topSubsectionItemDetails =
     {
         layoutPrimaryDirection = "right",
@@ -738,16 +750,6 @@ ZO_TOOLTIP_STYLES =
         uppercase = true,
         fontColorField = GENERAL_COLOR_WHITE,
     },
-    
-    achievementRewardsDye =
-    {
-        customSpacing = 2,
-        width = 38,
-        height = 38,
-        edgeTextureFile = "EsoUI/Art/Miscellaneous/Gamepad/gp_emptyFrame_gold_edge.dds",
-        edgeTextureWidth = 128,
-        edgeTextureHeight = 16,
-    },
 
     achievementSummaryCategorySection =
     {
@@ -994,11 +996,24 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
     },
 
+    collectionsRestrictionsSection =
+    {
+        statValuePairSpacing = 10,
+        childSpacing = 10,
+        customSpacing = 20,
+        widthPercent = 100,
+    },
+
     collectionsStatsValue =
     {
         fontSize = "$(GP_42)",
         customSpacing = 8,
         fontColorField = GENERAL_COLOR_WHITE,
+    },
+
+    collectionsPersonality =
+    {
+        fontColor = ZO_PERSONALITY_EMOTES_COLOR,
     },
 
     -- Gamepad Crown Store Market
@@ -1215,6 +1230,38 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GENERAL_COLOR_WHITE,
     },
+
+    -- Dyes
+    dyesSection =
+    {
+        widthPercent = 100,
+        paddingTop = 30,
+        childSpacing = 10,
+        layoutPrimaryDirection = "down",
+        layoutSecondaryDirection = "right",
+    },
+    dyeSwatchStyle =
+    {
+        customSpacing = 2,
+        width = 38,
+        height = 38,
+        edgeTextureFile = "EsoUI/Art/Miscellaneous/Gamepad/gp_emptyFrame_gold_edge.dds",
+        edgeTextureWidth = 128,
+        edgeTextureHeight = 16,
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    dyeSwatchEntrySection =
+    {
+        widthPercent = 100,
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+    },
+    dyeStampError =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
+    },
 }
 
 local function Style(name)
@@ -1228,7 +1275,7 @@ local ITEM_QUALITY_TO_STYLE =
     [ITEM_QUALITY_MAGIC] = Style("qualityMagic"),
     [ITEM_QUALITY_ARCANE] = Style("qualityArcane"),
     [ITEM_QUALITY_ARTIFACT] = Style("qualityArtifact"),
-	[ITEM_QUALITY_LEGENDARY] = Style("qualityLegendary"),
+    [ITEM_QUALITY_LEGENDARY] = Style("qualityLegendary"),
 }
 
 function ZO_TooltipStyles_GetItemQualityStyle(itemQuality)

@@ -73,4 +73,17 @@ function ZO_TradeManager:IsIdle()
     return self.state == TRADE_STATE_IDLE
 end
 
+function ZO_TradeManager:CanTradeItem(itemData)
+    local bagId, slotIndex = itemData.bagId, itemData.slotIndex
+    if IsItemBound(bagId, slotIndex) or itemData.stolen or itemData.isPlayerLocked then
+        return false
+    end
+            
+    if IsItemBoPAndTradeable(bagId, slotIndex) and not IsDisplayNameInItemBoPAccountTable(bagId, slotIndex, self.partnerUndecoratedDisplayName) then
+        return false
+    end
+
+    return true
+end
+
 TRADE_WINDOW = ZO_TradeManager:New()

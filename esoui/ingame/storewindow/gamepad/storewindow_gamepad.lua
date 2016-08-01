@@ -538,7 +538,17 @@ function ZO_GamepadStoreManager:FailedRepairMessageBox(reason)
 end
 
 function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
-    if selectedData.price > GetCarriedCurrencyAmount(CURT_MONEY) then
+    local currencyType = selectedData.currencyType1
+    local currencyQuantity1 = selectedData.currencyQuantity1
+    if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > GetCarriedCurrencyAmount(currencyType) then
+        if currencyType == CURT_MONEY then
+            return false, GetString(SI_NOT_ENOUGH_MONEY)
+        elseif currencyType == CURT_ALLIANCE_POINTS then
+            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS)
+        elseif currencyType == CURT_TELVAR_STONES then
+            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES)
+        end
+    elseif selectedData.price > 0 and selectedData.price > GetCarriedCurrencyAmount(CURT_MONEY) then
         return false, GetString(SI_NOT_ENOUGH_MONEY)
     elseif GetNumBagFreeSlots(BAG_BACKPACK) == 0 then
         return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)

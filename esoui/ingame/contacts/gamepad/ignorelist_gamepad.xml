@@ -9,7 +9,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_GamepadIgnoreList" inherits="ZO_AnchoredToQuadrant123Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+        <TopLevelControl name="ZO_GamepadIgnoreList" inherits="ZO_AnchoredToQuadrant_1_2_3_Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
             <OnInitialized>
                 ZO_IgnoreList_Gamepad_OnInitialized(self)
             </OnInitialized>

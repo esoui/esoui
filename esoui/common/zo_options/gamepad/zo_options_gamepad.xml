@@ -28,6 +28,11 @@
                 self.label = self:GetNamedChild("Name")
                 self.slider = self:GetNamedChild("Slider")
             </OnInitialized>
+
+            <OnEffectivelyShown>
+                ZO_Options_OnShow(self)
+            </OnEffectivelyShown>
+            
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_GamepadOptionsNameTemplate"/>
 

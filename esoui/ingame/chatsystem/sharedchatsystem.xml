@@ -33,6 +33,12 @@
             </OnMouseEnter>
         </Control>
       
+        <TextBuffer name="ZO_ChatBufferLinkTemplate" inherits="ZO_ChatBufferTemplate" maxHistoryLines="200" mouseEnabled="true" virtual="true">
+            <OnLinkMouseUp>
+                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+            </OnLinkMouseUp>
+        </TextBuffer>
+
         <Control name="ZO_ChatWindowTemplate" hidden="true" virtual="true">
             <Controls>
                 <TextBuffer name="$(parent)Buffer" inherits="ZO_ChatBuffer" linkEnabled="true"/>
@@ -227,5 +233,72 @@
                 </Button>  
             </Controls>
         </Control>
+
+        <EditBox name="ZO_ChatWindowTextEntryEditBoxEvents" virtual="true">
+            <OnEnter>
+                ZO_ChatTextEntry_Execute(self:GetParent():GetParent())
+            </OnEnter>
+
+            <OnMouseDown>
+                if not self:HasFocus() then
+                    StartChatInput()
+                end
+            </OnMouseDown>
+
+            <OnFocusLost>
+                ZO_ChatTextEntry_FocusLost(self:GetParent():GetParent())
+            </OnFocusLost>
+
+            <OnEscape>
+                ZO_ChatTextEntry_Escape(self:GetParent():GetParent())
+            </OnEscape>
+
+            <OnUpArrow>
+                ZO_ChatTextEntry_PreviousCommand(self:GetParent():GetParent())
+            </OnUpArrow>
+
+            <OnDownArrow>
+                ZO_ChatTextEntry_NextCommand(self:GetParent():GetParent())
+            </OnDownArrow>
+
+            <OnTextChanged>
+                ZO_ChatTextEntry_TextChanged(self:GetParent():GetParent(), self:GetText())
+            </OnTextChanged>
+
+            <OnTab>
+                ZO_ChatTextEntry_Tab(self:GetParent():GetParent())
+            </OnTab>
+        </EditBox>
+
+        <!--Positioned above windows and the dialogs. Below tooltips and menues-->
+        <TopLevelControl name="ZO_ChatWindowTopLevelTemplate" inherits="ZO_ChatContainerTemplate ZO_TextChatTemplate" tier="MEDIUM" level="2" virtual="true">
+            <Controls>
+                <Control name="$(parent)TextEntry">
+                    <Dimensions y="30" />
+
+                    <Controls>
+                        <Label name="$(parent)Label" mouseEnabled="true" verticalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" />
+
+                            <OnMouseUp>
+                                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                                    ZO_ChannelLabel_MouseUp(self:GetParent())
+                                end
+                            </OnMouseUp>
+                        </Label>
+
+                        <Backdrop name="$(parent)Edit">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="6" />
+                            <Anchor point="TOPRIGHT" />
+
+                            <Controls>
+                                <EditBox name="$(parent)Box" maxInputCharacters="MAX_TEXT_CHAT_INPUT_CHARACTERS" />
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

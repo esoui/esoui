@@ -1,15 +1,16 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_VoiceChatHUDEntry" virtual="true">
-            <Dimensions x="256" y="64" />
+            <Dimensions x="315" y="52" />
             <Controls>
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/VOIP/Gamepad/gp_VOIP_nameBG.dds">
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <TextureCoords left="1" right="0.2" top="0" bottom=".8" />
                     <AnchorFill/>
                 </Texture>
                 
                 <Texture name="$(parent)Icon">
                     <Dimensions x="32" y="32" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-8" offsetY="-8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-15" offsetY="-11" />
                 </Texture>
 
                 <Label name="$(parent)Text" font="ZoFontGamepad34" verticalAlignment="CENTER" >
@@ -20,7 +21,7 @@
         </Control>
 
         <Control name="ZO_VoiceChatHUD" resizeToFitDescendents="true" virtual="true">
-            <Anchor point="BOTTOMRIGHT" offsetX="-96" offsetY="-134" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-10" />
 
             <Controls>
                 <Control name="$(parent)List" resizeToFitDescendents="true" >

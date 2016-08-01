@@ -81,16 +81,34 @@ local function IncludeOrExcludeResult(results, result, include)
     end
 end
 
+local function IncludeOrExcludePlayersFromRecentPlayerTracker(recentPlayerTracker, results, include)
+    local isDecoratedDisplayName
+    local isConsoleUI = IsConsoleUI()
+    for name in pairs(recentPlayerTracker:GetPlayers()) do
+        isDecoratedDisplayName = IsDecoratedDisplayName(name)
+        if isDecoratedDisplayName then
+            name = ZO_FormatUserFacingDisplayName(name)
+        end
+
+        if not isConsoleUI or isDecoratedDisplayName then
+            IncludeOrExcludeResult(results, name, include)
+        end
+    end
+end
+
 local FlagHandlers = {
     [AUTO_COMPLETE_FLAG_FRIEND] = function(results, input, onlineOnly, include)
         for i=1, GetNumFriends() do
             local displayName, _, playerStatus = GetFriendInfo(i)
             if not onlineOnly or playerStatus ~= PLAYER_STATUS_OFFLINE then
-                IncludeOrExcludeResult(results, displayName, include)
+                --No @ symbols and no character names on console
+                IncludeOrExcludeResult(results, ZO_FormatUserFacingDisplayName(displayName), include)
 
-                local hasCharacter, characterName = GetFriendCharacterInfo(i)
-                if hasCharacter then
-                    IncludeOrExcludeResult(results, zo_strformat("<<1>>", characterName), include)
+                if not IsConsoleUI() then
+                    local hasCharacter, characterName = GetFriendCharacterInfo(i)
+                    if hasCharacter then
+                        IncludeOrExcludeResult(results, zo_strformat("<<1>>", characterName), include)
+                    end
                 end
             end
         end
@@ -103,11 +121,14 @@ local FlagHandlers = {
             for memberIndex = 1, numMembers do
                 local displayName, _, _, playerStatus = GetGuildMemberInfo(guildId, memberIndex)
                 if not onlineOnly or playerStatus ~= PLAYER_STATUS_OFFLINE then
-                    IncludeOrExcludeResult(results, displayName, include)
+                    --No @ symbols and no character names on console
+                    IncludeOrExcludeResult(results, ZO_FormatUserFacingDisplayName(displayName), include)
 
-                    local hasCharacter, characterName = GetGuildMemberCharacterInfo()
-                    if hasCharacter then
-                        IncludeOrExcludeResult(results, zo_strformat("<<1>>", characterName), include)
+                    if not IsConsoleUI() then
+                        local hasCharacter, characterName = GetGuildMemberCharacterInfo()
+                        if hasCharacter then
+                            IncludeOrExcludeResult(results, zo_strformat("<<1>>", characterName), include)
+                        end
                     end
                 end
             end
@@ -115,21 +136,15 @@ local FlagHandlers = {
     end,
 
     [AUTO_COMPLETE_FLAG_RECENT] = function(results, input, onlineOnly, include)
-        for name in pairs(g_recentInteractions:GetPlayers()) do
-            IncludeOrExcludeResult(results, name, include)
-        end
+        IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentInteractions, results, include)
     end,
 
     [AUTO_COMPLETE_FLAG_RECENT_TARGET] = function(results, input, onlineOnly, include)
-        for name in pairs(g_recentTargets:GetPlayers()) do
-            IncludeOrExcludeResult(results, name, include)
-        end
+        IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentTargets, results, include)
     end,
 
     [AUTO_COMPLETE_FLAG_RECENT_CHAT] = function(results, input, onlineOnly, include)
-        for name in pairs(g_recentChat:GetPlayers()) do
-            IncludeOrExcludeResult(results, name, include)
-        end
+        IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentChat, results, include)
     end,
 }
 

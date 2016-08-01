@@ -51,7 +51,7 @@ function ZO_AlertText_Gamepad:Initialize(control)
 
     control:RegisterForEvent(EVENT_SCRIPT_ACCESS_VIOLATION, OnScriptAccessViolation)
     
-    local anchor = ZO_Anchor:New(TOPRIGHT, GuiRoot, TOPRIGHT, -ZO_GAMEPAD_SAFE_ZONE_INSET_X, ZO_GAMEPAD_SAFE_ZONE_INSET_Y)
+    local anchor = ZO_Anchor:New(TOPRIGHT, GuiRoot, TOPRIGHT, -15, 4)
 
     local MAX_DISPLAYED_ENTRIES_GAMEPAD = 2
     local MAX_LINES_PER_ENTRY_GAMEPAD = 4

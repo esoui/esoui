@@ -77,6 +77,9 @@ function ZO_ColorSwatchPicker:Clear()
         g_buttonManager:ReleaseObject(control.m_key)
         control.m_key = nil
         control:SetHidden(true)
+        control:SetState(BSTATE_NORMAL, false)
+        GetControl(control, "Color"):SetDesaturation(0)
+
         self.m_paletteEntries[controlIndex] = nil
     end
 

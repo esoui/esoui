@@ -199,7 +199,7 @@
             
             <Controls>
                 <Scroll name="$(parent)EntryList">
-                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_BOTTOM_OFFSET"/>
+                    <Anchor point="BOTTOMRIGHT" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerScrollChild" relativePoint="BOTTOMLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
                     
                     <Controls>

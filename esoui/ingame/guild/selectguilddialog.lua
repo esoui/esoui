@@ -59,7 +59,7 @@ end
 
 function ZO_SelectGuildDialog:OnGuildSelected(entry)
     self.selectedGuildId = entry.guildId
-    self.guildComboBox:SetSelectedItem(entry.guildText)
+    self.guildComboBox:SetSelectedItemText(entry.guildText)
     if(self.selectedCallback) then
         self.selectedCallback(entry.guildId)
     end

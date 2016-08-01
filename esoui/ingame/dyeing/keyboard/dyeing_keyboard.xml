@@ -57,6 +57,16 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_DyeableSlot" inherits="ZO_ItemSlot_Shared" mouseOverBlendMode="ADD" virtual="true">
+            <OnMouseEnter>
+                ZO_DyeableSlot_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_DyeableSlot_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
         <Control name="ZO_DyeingEquipSlot" virtual="true">
             <Dimensions x="134" y="64" />
 
@@ -66,7 +76,7 @@
             </OnInitialized>
 
             <Controls>
-                <Button name="$(parent)Slot" inherits="ZO_ItemSlot" >
+                <Button name="$(parent)Slot" inherits="ZO_DyeableSlot" >
                     <Dimensions x="64" y="64" />
                     <Anchor point="LEFT" />
 
@@ -186,15 +196,15 @@
                     <OnInitialized>
                       self.slots =
                       {
-                          [EQUIP_SLOT_HEAD] = self:GetNamedChild("Head"),
-                          [EQUIP_SLOT_CHEST] = self:GetNamedChild("Chest"),
-                          [EQUIP_SLOT_SHOULDERS] = self:GetNamedChild("Shoulders"),
-                          [EQUIP_SLOT_WAIST] = self:GetNamedChild("Waist"),
-                          [EQUIP_SLOT_LEGS] = self:GetNamedChild("Legs"),
-                          [EQUIP_SLOT_FEET] = self:GetNamedChild("Feet"),
-                          [EQUIP_SLOT_HAND] = self:GetNamedChild("Hand"),
-                          [EQUIP_SLOT_OFF_HAND] = self:GetNamedChild("Shield"),
-                          [EQUIP_SLOT_BACKUP_OFF] = self:GetNamedChild("OffShield"),
+                          [DYEABLE_SLOT_HEAD] = self:GetNamedChild("Head"),
+                          [DYEABLE_SLOT_CHEST] = self:GetNamedChild("Chest"),
+                          [DYEABLE_SLOT_SHOULDERS] = self:GetNamedChild("Shoulders"),
+                          [DYEABLE_SLOT_WAIST] = self:GetNamedChild("Waist"),
+                          [DYEABLE_SLOT_LEGS] = self:GetNamedChild("Legs"),
+                          [DYEABLE_SLOT_FEET] = self:GetNamedChild("Feet"),
+                          [DYEABLE_SLOT_HAND] = self:GetNamedChild("Hand"),
+                          [DYEABLE_SLOT_OFF_HAND] = self:GetNamedChild("Shield"),
+                          [DYEABLE_SLOT_BACKUP_OFF] = self:GetNamedChild("OffShield"),
                       }
                     </OnInitialized>
 
@@ -244,6 +254,41 @@
                             <Anchor point="TOP" relativeTo="$(parent)Waist" relativePoint="BOTTOM" offsetY="30" />
                         </Control>
                     </Controls>
+                </Control>
+
+                <Control name="$(parent)CollectibleSheet" mouseEnabled="true" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="32" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="-170" />
+                    <Dimensions x="400"/>
+
+                    <OnInitialized>
+                        self.slots =
+                        {
+                            [DYEABLE_SLOT_HAT] = self:GetNamedChild("Head"),
+                            [DYEABLE_SLOT_COSTUME] = self:GetNamedChild("Chest"),
+                        }
+                    </OnInitialized>
+
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_DYEING_COLLECTIBLE_SHEET_HEADER">
+                            <Anchor point="TOPLEFT" offsetX="24" offsetY="52" />
+                        </Label>
+
+                        <Texture name="$(parent)TitleDivider" inherits="ZO_HorizontalDivider">
+                            <Dimensions x="462" y="8" />
+                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="85" />
+                        </Texture>
+
+                        <Control name="$(parent)Head" inherits="ZO_DyeingEquipSlot">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="110" />
+                        </Control>
+
+                        <Control name="$(parent)Chest" inherits="ZO_DyeingEquipSlot">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Head" relativePoint="TOPRIGHT" offsetX="30" />
+                        </Control>
+
+                    </Controls>
+
                 </Control>
             </Controls>
         </TopLevelControl>

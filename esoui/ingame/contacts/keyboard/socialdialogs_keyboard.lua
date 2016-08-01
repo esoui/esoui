@@ -149,7 +149,7 @@ function ZO_CreateGuildDialog_OnInitialized(self)
 
     self.OnAllianceSelected = function(_, entryText, entry)
         self.selectedAlliance = entry.alliance
-        self.allianceComboBox:SetSelectedItem(entry.allianceText)
+        self.allianceComboBox:SetSelectedItemText(entry.allianceText)
     end
 
     self.entries = {}

@@ -23,7 +23,7 @@
         </Control>
         
         <Control name="ZO_HUDEquipmentStatus_Gamepad_Template" virtual="true">
-            <Anchor point="BOTTOM" offsetX="-380" offsetY="-70"/>
+            <Anchor point="BOTTOM" offsetX="-380" offsetY="-22"/>
             <Dimensions x="96" y="48"/>
             <Controls>
                 <Texture name="$(parent)WeaponIndicator" textureFile="EsoUI/Art/HUD/Gamepad/gp_broken_weapon.dds">

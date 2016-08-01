@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_HUDRaidLife_Gamepad_Template" virtual="true">
-            <Anchor point="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            <Anchor point="BOTTOMLEFT" offsetX="5" offsetY="-5"/>
         </Control>
         
         <Control name="ZO_HUDRaidLife_Keyboard_Template" virtual="true">

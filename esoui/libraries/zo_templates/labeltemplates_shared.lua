@@ -206,7 +206,7 @@ do
             local fontLineLimit = fontData.lineLimit or i
             label:SetFont(fontData.font)
             local lines = label:GetNumLines()
-            if lines <= fontLineLimit then
+            if lines <= fontLineLimit and not label:WasTruncated() then
                 break
             end
         end

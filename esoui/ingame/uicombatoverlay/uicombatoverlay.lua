@@ -14,8 +14,8 @@ function UICombatOverlay:New(control)
     control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, Refresh)
     control:RegisterForEvent(EVENT_PLAYER_DEAD, Refresh)
     control:RegisterForEvent(EVENT_PLAYER_ALIVE, Refresh)
+    control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, Refresh)
 
-    overlay:Refresh()
     return overlay
 end
 

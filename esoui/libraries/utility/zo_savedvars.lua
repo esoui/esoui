@@ -1,5 +1,7 @@
 ZO_SavedVars = {}
 local WILD_CARD_KEY = '*'
+ZO_SAVED_VARS_CHARACTER_NAME_KEY = 1
+ZO_SAVED_VARS_CHARACTER_ID_KEY = 2
 
 local GetNewSavedVars
 
@@ -46,20 +48,86 @@ local currentDisplayName
     Note: ZO_SavedVars:NewAccountWide provides the same interface as ZO_SavedVars:New, but is used to save account-wide saved vars.
 --]]
 
-function ZO_SavedVars:New(savedVariableTable, version, namespace, defaults, profile, displayName, characterName)
+function ZO_SavedVars:New(savedVariableTable, version, namespace, defaults, profile, displayName, characterName, characterId, characterKeyType)
     displayName = displayName or GetDisplayName()
     characterName = characterName or GetUnitName("player")
-    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, characterName)
+    characterId = characterId or GetCurrentCharacterId()
+    characterKeyType = characterKeyType or ZO_SAVED_VARS_CHARACTER_NAME_KEY
+    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, characterName, characterId, characterKeyType)
+end
+
+function ZO_SavedVars:NewCharacterNameSettings(savedVariableTable, version, namespace, defaults, profile)
+    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, GetDisplayName(), GetUnitName("player"), GetCurrentCharacterId(), ZO_SAVED_VARS_CHARACTER_NAME_KEY)
+end
+
+function ZO_SavedVars:NewCharacterIdSettings(savedVariableTable, version, namespace, defaults, profile)
+    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, GetDisplayName(), GetUnitName("player"), GetCurrentCharacterId(), ZO_SAVED_VARS_CHARACTER_ID_KEY)
 end
 
 function ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
     displayName = displayName or GetDisplayName()
-    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, "$AccountWide")
+    return GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName)
 end
 
 local CreateExposedInterface
 
-function GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, characterName)
+local function SearchPath(t, ...)
+    local current = t
+    for i = 1, select("#", ...) do
+        local key = select(i, ...)
+        if key ~= nil then
+            if not current[key] then
+                return nil
+            end
+            current = current[key]
+        end
+    end
+    return current
+end
+
+local function CreatePath(t, ...)
+    local current = t
+    local container
+    local containerKey
+    for i=1, select("#", ...) do
+        local key = select(i, ...)
+        if key ~= nil then
+            if not current[key] then
+                current[key] = {}
+            end
+            container = current
+            containerKey = key
+            current = current[key]
+        end
+    end
+
+    return current, container, containerKey
+end
+
+local function SetPath(t, value, ...)
+    if value ~= nil then
+        CreatePath(t, ...)
+    end
+    local current = t
+    local parent
+    local lastKey
+    for i = 1, select("#", ...) do
+        local key = select(i, ...)
+        if key ~= nil then
+            lastKey = key
+            parent = current
+            if current == nil then
+                return
+            end
+            current = current[key]
+        end
+    end
+    if parent ~= nil then
+        parent[lastKey] = value
+    end
+end
+
+function GetNewSavedVars(savedVariableTable, version, namespace, defaults, profile, displayName, characterName, characterId, characterKeyType)
     if type(savedVariableTable) ~= "table" then
         if _G[savedVariableTable] == nil then
             _G[savedVariableTable] = {}
@@ -74,7 +142,7 @@ function GetNewSavedVars(savedVariableTable, version, namespace, defaults, profi
     --namespace is an optional argument
     if defaults == nil and type(namespace) == "table" then
         profile = defaults
-        defaults = namespace
+        defaults = namespace        
         namespace = nil
     end
     profile = profile or "Default"
@@ -82,7 +150,41 @@ function GetNewSavedVars(savedVariableTable, version, namespace, defaults, profi
         error("Profile must be a string or nil")
     end
 
-    return CreateExposedInterface(savedVariableTable, version, namespace, defaults, profile, displayName, characterName)
+    local finalKey
+    if characterName == nil then
+        finalKey = "$AccountWide"
+    else
+        --Look for a table matching the opposite key type and if there is, then copy it over. This allows us to preserve the old
+        --character name based settings mainly.
+        local characterKey = characterKeyType == ZO_SAVED_VARS_CHARACTER_NAME_KEY and characterName or characterId
+        local oppositeCharacterKey = characterKeyType == ZO_SAVED_VARS_CHARACTER_NAME_KEY and characterId or characterName
+
+        local oppositeCharacterKeyTable = SearchPath(savedVariableTable, profile, displayName, oppositeCharacterKey, namespace)
+        if oppositeCharacterKeyTable then
+            SetPath(savedVariableTable, oppositeCharacterKeyTable, profile, displayName, characterKey, namespace)
+            SetPath(savedVariableTable, nil, profile, displayName, oppositeCharacterKey, namespace)
+        end
+
+        --If an old style name based key is still being used then try to upgrade that based on a name change. Less robust.
+        if characterKeyType == ZO_SAVED_VARS_CHARACTER_NAME_KEY and NAME_CHANGE:DidNameChange() then
+            local oldCharacterName = NAME_CHANGE:GetOldCharacterName()
+            local oldNameTable = SearchPath(savedVariableTable, profile, displayName, oldCharacterName, namespace)
+            if oldNameTable then
+                SetPath(savedVariableTable, oldNameTable, profile, displayName, characterName, namespace)
+                SetPath(savedVariableTable, nil, profile, displayName, oldCharacterName, namespace)
+            end
+        end
+
+        finalKey = characterKey
+    end    
+
+    local finalSavedVar = CreateExposedInterface(savedVariableTable, version, namespace, defaults, profile, displayName, finalKey)
+    
+    if characterName and characterKeyType == ZO_SAVED_VARS_CHARACTER_ID_KEY then
+        savedVariableTable[profile][displayName][finalKey]["$LastCharacterName"] = characterName
+    end
+
+    return finalSavedVar
 end
 
 local CopyDefaults
@@ -145,25 +247,6 @@ function CopyDefaults(sv, defaults)
     end
 
     return sv
-end
-
-local function CreatePath(t, ...)
-    local current = t
-    local container
-    local containerKey
-    for i=1, select("#", ...) do
-        local key = select(i, ...)
-        if key ~= nil then
-            if not current[key] then
-                current[key] = {}
-            end
-            container = current
-            containerKey = key
-            current = current[key]
-        end
-    end
-
-    return current, container, containerKey
 end
 
 local function InitializeRawTable(rawSavedTable, profile, namespace, displayName, playerName)

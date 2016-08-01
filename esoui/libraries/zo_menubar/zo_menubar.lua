@@ -277,7 +277,7 @@ function MenuBarButton:Release(upInside, skipAnimation, playerDriven)
 
             local buttonData = self.m_buttonData
             if(buttonData.callback) then
-                buttonData:callback()
+                buttonData:callback(playerDriven)
             end
             
             local clickSound = buttonData.clickSound or self.m_menuBar:GetClickSound()
@@ -702,9 +702,9 @@ end
 --ZO_LabelButtonBar
 
 function ZO_MenuBarTooltipButton_OnMouseEnter(self)
-    if ZO_MenuBarButtonTemplate_OnMouseEnter(self) then
+    local buttonData = ZO_MenuBarButtonTemplate_GetData(self)
+    if ZO_MenuBarButtonTemplate_OnMouseEnter(self) or buttonData.alwaysShowTooltip then
         InitializeTooltip(InformationTooltip, self, BOTTOM, 0, -10)
-        local buttonData = ZO_MenuBarButtonTemplate_GetData(self)
         if buttonData.CustomTooltipFunction then
             buttonData.CustomTooltipFunction(InformationTooltip)
         else
@@ -714,7 +714,8 @@ function ZO_MenuBarTooltipButton_OnMouseEnter(self)
 end
 
 function ZO_MenuBarTooltipButton_OnMouseExit(self)
-    if ZO_MenuBarButtonTemplate_OnMouseExit(self) then
+    local buttonData = ZO_MenuBarButtonTemplate_GetData(self)
+    if ZO_MenuBarButtonTemplate_OnMouseExit(self) or buttonData.alwaysShowTooltip  then
         ClearTooltip(InformationTooltip)
     end
 end

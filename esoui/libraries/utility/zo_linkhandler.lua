@@ -67,6 +67,10 @@ function ZO_LinkHandler_CreateLink(text, color, linkType, ...) --where ... is th
     return ZO_LinkHandler_CreateLinkWithFormat(text, color, linkType, LINK_STYLE_BRACKETS, "|H%d:%s|h[%s]|h", ...)
 end
 
+function ZO_LinkHandler_CreateLinkWithoutBrackets(text, color, linkType, ...) --where ... is the data to encode
+    return ZO_LinkHandler_CreateLinkWithFormat(text, color, linkType, LINK_STYLE_DEFAULT, "|H%d:%s|h%s|h", ...)
+end
+
 function ZO_LinkHandler_ParseLink(link)
     if type(link) == "string" then
         local linkStyle, data, text = link:match("|H(.-):(.-)|h(.-)|h")
@@ -90,11 +94,17 @@ function ZO_LinkHandler_CreateDisplayNameLink(displayName)
     else
         undecoratedDisplayName = UndecorateDisplayName(displayName)
     end
-    return ZO_LinkHandler_CreateLink(displayName, nil, DISPLAY_NAME_LINK_TYPE, undecoratedDisplayName)
+
+    local userFacingDisplayName = IsConsoleUI() and undecoratedDisplayName or displayName
+    return ZO_LinkHandler_CreateLink(userFacingDisplayName, nil, DISPLAY_NAME_LINK_TYPE, undecoratedDisplayName)
 end
 
 function ZO_LinkHandler_CreateCharacterLink(characterName)
-	return ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+    if IsConsoleUI() then
+        return string.format("[%s]", ZO_FormatUserFacingCharacterName(characterName))
+    else
+        return ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)
+    end
 end
 
 function ZO_LinkHandler_CreateChannelLink(channelName)
@@ -102,7 +112,7 @@ function ZO_LinkHandler_CreateChannelLink(channelName)
 end
 
 function ZO_LinkHandler_CreateURLLink(url, displayText)
-	return ZO_LinkHandler_CreateLinkWithFormat(displayText, nil, URL_LINK_TYPE, LINK_STYLE_DEFAULT, "|H%d:%s|h%s|h", url)
+    return ZO_LinkHandler_CreateLinkWithoutBrackets(displayText, nil, URL_LINK_TYPE, url)
 end
 
 local function AppendHelper(thingToAppend, size, nextElement, ...)

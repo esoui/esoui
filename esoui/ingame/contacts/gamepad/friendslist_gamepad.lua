@@ -104,7 +104,7 @@ function FriendsList_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGameOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveFriendOption, function() return not IsConsoleUI() end)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddRemoveFriendOption)
 
     self:AddInviteToGuildOptionTemplates()
 end

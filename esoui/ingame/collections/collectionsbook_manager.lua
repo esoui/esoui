@@ -19,7 +19,9 @@ function CollectionsBook_Singleton:Initialize()
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) self:OnCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTION_UPDATED, function(eventId, ...) self:OnCollectionUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_UPDATED, function(eventId, ...) self:OnCollectiblesUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_NOTIFICATION_REMOVED, function(eventId, ...) self:OnCollectionNotificationRemoved(...) end)
+    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_NEW_STATUS_CLEARED, function(eventId, ...) self:OnCollectibleNewStatusRemoved(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
 
     self:RefreshDLCStates()
@@ -55,8 +57,17 @@ function CollectionsBook_Singleton:OnCollectionUpdated(...)
     self:FireCallbacks("OnCollectionUpdated", ...)
 end
 
+function CollectionsBook_Singleton:OnCollectiblesUpdated(...)
+    self:RefreshDLCStates()
+    self:FireCallbacks("OnCollectiblesUpdated", ...)
+end
+
 function CollectionsBook_Singleton:OnCollectionNotificationRemoved(...)
     self:FireCallbacks("OnCollectionNotificationRemoved", ...)
+end
+
+function CollectionsBook_Singleton:OnCollectibleNewStatusRemoved(...)
+    self:FireCallbacks("OnCollectibleNewStatusRemoved", ...)
 end
 
 function CollectionsBook_Singleton:OnUpdateCooldowns(...)
@@ -78,6 +89,84 @@ function CollectionsBook_Singleton:DoesAnyDLCHaveQuestPending()
         end
     end
     return false
+end
+
+function CollectionsBook_Singleton.DoesCollectibleListHaveVisibleCollectible(...)
+    for i = 1, select("#", ...) do
+        local id = select(i, ...)
+
+        if DoesCollectibleHaveVisibleAppearance(id) then
+            local isActive = select(7, GetCollectibleInfo(id))
+            if isActive and not WouldCollectibleBeHidden(id) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function CollectionsBook_Singleton.DoesCollectibleListHaveNewCollectible(...)
+    for i = 1, select("#", ...) do
+        local id = select(i, ...)
+
+        if IsCollectibleNew(id) then
+            return true
+        end
+    end
+
+    return false
+end
+
+function CollectionsBook_Singleton.GetCategoryCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+    if index >= 1 then
+        local id = GetCollectibleId(categoryIndex, subCategoryIndex, index)
+        index = index - 1
+        return CollectionsBook_Singleton.GetCategoryCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
+    end
+    return ...
+end
+
+function CollectionsBook_Singleton.DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex, getCollectiblesFunction)
+    if getCollectiblesFunction == nil then
+        getCollectiblesFunction = CollectionsBook_Singleton.GetCategoryCollectibleIds
+    end
+
+    if subcategoryIndex == nil then
+        local numSubCategories, numCollectibles, unlockedCollectibles =  select(2, GetCollectibleCategoryInfo(categoryIndex))
+        local hasAnyNew = COLLECTIONS_BOOK_SINGLETON.DoesCollectibleListHaveNewCollectible(getCollectiblesFunction(categoryIndex, subcategoryIndex, numCollectibles))
+        if hasAnyNew then
+            return true
+        end
+        for i = 1, numSubCategories do
+            if CollectionsBook_Singleton.DoesCategoryHaveAnyNewCollectibles(categoryIndex, i, getCollectiblesFunction) then
+                return true
+            end
+        end
+    else
+        local numCollectibles = select(2, GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex))
+        return COLLECTIONS_BOOK_SINGLETON.DoesCollectibleListHaveNewCollectible(getCollectiblesFunction(categoryIndex, subcategoryIndex, numCollectibles))
+    end
+
+    return false
+end
+
+do
+    local ANY_SUBCATEGORY = nil
+    function CollectionsBook_Singleton.HasAnyNewCollectibles(getCollectiblesFunction)
+        if getCollectiblesFunction == nil then
+            getCollectiblesFunction = CollectionsBook_Singleton.GetCategoryCollectibleIds
+        end
+        local numCategories = GetNumCollectibleCategories()
+
+        for categoryIndex = 1, numCategories do
+            if CollectionsBook_Singleton.DoesCategoryHaveAnyNewCollectibles(categoryIndex, ANY_SUBCATEGORY, getCollectiblesFunction) then
+                return true
+            end
+        end
+
+        return false
+    end
 end
 
 function ZO_GetCollectibleCategoryAndName(collectibleId)

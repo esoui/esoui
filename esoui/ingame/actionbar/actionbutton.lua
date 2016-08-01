@@ -225,12 +225,12 @@ function ActionButton:Clear()
 end
 
 function ActionButton:RefreshUltimateNumberVisibility()
-	if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER) then
-		self.countText:SetHidden(false)
-		self:UpdateUltimateNumber()
-	else
-		self:SetupCount(nil)
-	end
+    if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER) and self.hasAction then
+        self.countText:SetHidden(false)
+        self:UpdateUltimateNumber()
+    else
+        self:SetupCount(nil)
+    end
 end
 
 function ActionButton:UpdateUltimateNumber()

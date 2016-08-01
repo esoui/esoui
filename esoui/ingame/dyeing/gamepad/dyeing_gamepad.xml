@@ -1,4 +1,13 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GamepadDyeingFocusAnimation">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0.4" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+
     <Controls>
         <TextureComposite name="ZO_DyeingSwatch_Gamepad" inherits="ZO_DyeingSwatch" textureFile="EsoUI/Art/Dye/Gamepad/swatch_multiTexture.dds" virtual="true">
             <Dimensions x="32" y="32" />
@@ -11,26 +20,21 @@
             <Anchor point="TOP" offsetY="75" />
         </Control>
 
-        <Label name="ZO_Dyeing_Gamepad_ColorLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-        
-        <TopLevelControl name="ZO_DyeingGamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
-            <OnInitialized>
-                ZO_Dyeing_Gamepad_OnInitialized(self)
-            </OnInitialized>
+        <Control name="ZO_GamepadDyeingBelowHeaderAreaAnchors" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_DyeGamepadTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+        </Control>
 
+        <Label name="ZO_Dye_Gamepad_ColorLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_DyeItems_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" virtual="true">
             <Controls>
                 <Scroll name="$(parent)LeftPane" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
-                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer" >
-                            <Anchor point="TOPLEFT"/>
-                            <Anchor point="TOPRIGHT"/>
-                        </Control>
                         <Control name="$(parent)DyeContainer">
                             <AnchorFill />
                             <Controls>
-                                <Control name="$(parent)Dyes">
-                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    <Anchor point="BOTTOMRIGHT"/>
+                                <Control name="$(parent)Dyes" inherits="ZO_GamepadDyeingBelowHeaderAreaAnchors">
                                     <Controls>
                                         <Control name="$(parent)Tooltip">
                                             <Dimensions y="230" />
@@ -94,9 +98,7 @@
                         <Control name="$(parent)PresetContainer" hidden="true">
                             <AnchorFill />
                             <Controls>
-                                <Control name="$(parent)SetPresets" >
-                                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    <Anchor point="BOTTOMRIGHT" />
+                                <Control name="$(parent)SetPresets" inherits="ZO_GamepadDyeingBelowHeaderAreaAnchors">
                                     <Controls>
                                         <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                                             <AnchorFill />
@@ -112,11 +114,11 @@
                     <Controls>
                         <Control name="$(parent)RadialContainer" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>
-                                <Control name="$(parent)EquipmentSheet" inherits="ZO_Dyeing_RadialMenuBase_Gamepad" />
+                                <Control name="$(parent)DyeableSlotsSheet" inherits="ZO_Dyeing_RadialMenuBase_Gamepad" />
                                 
                                 <Texture name="$(parent)CenterSwatch" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_monoPoint.dds" level="2">
                                     <Dimensions x="128" y="128" />
-                                    <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                    <Anchor point="CENTER" relativeTo="$(parent)DyeableSlotsSheet" />
                                     <Controls>
                                         <Texture name="$(parent)Keybind" level="3">
                                             <Anchor point="CENTER"/>
@@ -127,7 +129,7 @@
 
                                 <Control name="$(parent)CenterSwatchSaved" hidden="true">
                                     <Dimensions x="128" y="128" />
-                                    <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                    <Anchor point="CENTER" relativeTo="$(parent)DyeableSlotsSheet" />
                                     <OnInitialized>
                                         self.dyeControls = {
                                             self:GetNamedChild("Primary"),
@@ -138,17 +140,17 @@
                                     <Controls>
                                         <Texture name="$(parent)Primary" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_triPoint.dds" level="2">
                                             <Dimensions x="128" y="128" />
-                                            <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)DyeableSlotsSheet" />
                                         </Texture>
 
                                         <Texture name="$(parent)Secondary" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_triLeft.dds" level="2">
                                             <Dimensions x="128" y="128" />
-                                            <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)DyeableSlotsSheet" />
                                         </Texture>
 
                                         <Texture name="$(parent)Accent" textureFile="EsoUI/Art/Dye/Gamepad/gp_colorSelector_triRight.dds" level="2">
                                             <Dimensions x="128" y="128" />
-                                            <Anchor point="CENTER" relativeTo="$(parent)EquipmentSheet" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)DyeableSlotsSheet" />
                                         </Texture>
 
                                         <Texture name="$(parent)Keybind" level="3">
@@ -160,7 +162,7 @@
 
                                 <Control name="$(parent)TooltipAnchor" hidden="true">
                                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipmentSheet" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DyeableSlotsSheet" relativePoint="BOTTOMLEFT" />
                                 </Control>
                                 
                                 <Control name="$(parent)Tooltip">
@@ -212,6 +214,33 @@
                     </Controls>
                 </Control>
             </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_DyeGamepadTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Dyeing_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Controls>
+                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <Control name="$(parent)DyeItems" inherits="ZO_DyeItems_Gamepad" hidden="true" />
+            </Controls>
         </TopLevelControl>
+        
     </Controls>
 </GuiXml>

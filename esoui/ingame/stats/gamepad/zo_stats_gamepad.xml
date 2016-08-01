@@ -347,15 +347,19 @@
                                                         <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_ALLIANCE_LABEL" override="true" />
                                                     </Controls>
                                                 </Control>
+
+                                                <Control name="$(parent)Rank" inherits="ZO_GamepadStatsHeaderDataPairTemplate" >
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMRIGHT"  />
+                                                    <Controls>
+                                                        <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_RANK_LABEL" override="true" />
+                                                    </Controls>
+                                                </Control>
                                                 
                                                 <!-- Headers -->
 
-                                                <Label name="$(parent)RankHeader" text="SI_STAT_GAMEPAD_RANK_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
                                                 <Label name="$(parent)BountyHeader" text="SI_STAT_GAMEPAD_BOUNTY_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RankHeader" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" />
                                                 </Label>
 
                                                 <Label name="$(parent)RidingStaminaHeader" text="SI_STAT_GAMEPAD_RIDING_HEADER_STAMINA" inherits="ZO_GamepadStatsHeaderTemplate">
@@ -367,14 +371,7 @@
                                                 </Label>
 
                                                 <!-- Values -->
-
-                                                <Label name="$(parent)Rank" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Texture name="$(parent)RankIcon" tier="MEDIUM" resizeToFitFile="true" hidden="true">
-                                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" />
-                                                </Texture>
+                                                
 
                                                 <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay ZO_GamepadStatsDataTemplate">
                                                     <OnInitialized>

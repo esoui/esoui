@@ -342,38 +342,6 @@ ESO_Dialogs["CHARACTER_CREATE_FAILED_REASON"] =
     end
 }
 
-ESO_Dialogs["CHARACTER_CREATE_SKIP_TUTORIAL"] = 
-{
-    canQueue = true,
-    title =
-    {
-        text = SI_PROMPT_TITLE_SKIP_TUTORIAL,
-    },
-    mainText = 
-    {
-        text = SI_PROMPT_BODY_SKIP_TUTORIAL,
-    },
-    mustChoose = true,
-    buttons =
-    {
-        {
-            text = SI_PROMPT_PLAY_TUTORIAL_BUTTON,
-            keybind = "DIALOG_PRIMARY",
-            callback =  function(dialog)
-                            ZO_CharacterCreate_DoCreate(dialog.data.startLocation, CHARACTER_CREATE_DEFAULT_LOCATION)
-                        end,
-        },
-
-        {
-            text = SI_PROMPT_SKIP_TUTORIAL_BUTTON,
-            keybind = "DIALOG_SECONDARY",
-            callback =  function(dialog)
-                            ZO_CharacterCreate_DoCreate(dialog.data.startLocation, CHARACTER_CREATE_SKIP_TUTORIAL)
-                        end,
-        }
-    }
-}
-
 ESO_Dialogs["SERVER_LOCKED"] = 
 {
     title =
@@ -981,12 +949,14 @@ ESO_Dialogs["CHARACTER_SELECT_CHARACTER_RENAMING"] =
         text = GetString(SI_RENAME_CHARACTER_RENAMING_DIALOG_BODY),
     },
     showLoadingIcon = true,
-    -- Must be cleared from an event
+    -- This dialog isn't cleared by the user, but from an event
+    -- The current events that close this dialog are EVENT_CHARACTER_RENAME_RESULT
 }
 
 ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_ERROR"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1016,6 +986,7 @@ ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_ERROR"] =
 ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_SUCCESS"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1072,4 +1043,177 @@ ESO_Dialogs["INELIGIBLE_SERVICE"] =
             keybind = "DIALOG_NEGATIVE",
         },
     },
+}
+
+-- Character Edit Dialogs
+
+ESO_Dialogs["CHARACTER_CREATE_CONFIRM_SAVE_CHANGES"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CHARACTER_EDIT_CONFIRM_CHANGES_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CHARACTER_EDIT_CONFIRM_CHANGES_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_SAVE,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            local tokenType = dialog.data.tokenType
+                            CharacterEditSaveCharacterChanges(tokenType)
+                            ZO_Dialogs_ShowDialog("CHARACTER_CREATE_SAVING_CHANGES")
+                        end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
+}
+
+ESO_Dialogs["CHARACTER_CREATE_SAVING_CHANGES"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    setup = function(dialog, data)
+        dialog:setupFunc()
+    end,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.COOLDOWN,
+    },
+    title =
+    {
+        text = SI_CHARACTER_EDIT_SAVING_CHANGES_TITLE,
+    },
+    mainText =
+    {
+        text = function()
+            if not IsInGamepadPreferredMode() then
+                return GetString(SI_CHARACTER_EDIT_SAVING_CHANGES_BODY)
+            else
+                return ""
+            end
+        end,
+        align = TEXT_ALIGN_CENTER,
+    },
+    loading = 
+    {
+        text = GetString(SI_CHARACTER_EDIT_SAVING_CHANGES_BODY),
+    },
+    showLoadingIcon = true,
+    -- This dialog isn't cleared by the user, but from an event
+    -- The current events that close this dialog are EVENT_CHARACTER_EDIT_SUCCEEDED, EVENT_CHARACTER_EDIT_FAILED
+}
+
+ESO_Dialogs["CHARACTER_CREATE_SAVE_ERROR"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title = 
+    {
+        text = SI_CHARACTER_EDIT_SAVE_ERROR_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_SERVICES_DIALOG_BODY_FORMAT,
+    },
+    buttons = 
+    {
+        {
+            text = SI_RENAME_CHARACTER_BACK_KEYBIND,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                            --just close
+                        end,
+        },
+    },
+}
+
+ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title = 
+    {
+        text = SI_CHARACTER_EDIT_SAVE_SUCCESS_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CHARACTER_EDIT_SAVE_SUCCESS_BODY,
+    },
+    buttons = 
+    {
+        {
+            text = function()
+                if IsInGamepadPreferredMode() then
+                    return GetString(SI_RENAME_CHARACTER_BACK_KEYBIND)
+                else
+                    return GetString(SI_DIALOG_CLOSE)
+                end
+            end,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                PregameStateManager_SetState("CharacterSelect_FromIngame")
+            end,
+        },
+    },
+}
+
+ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CHARACTER_EDIT_REVERT_CHANGES_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CHARACTER_EDIT_REVERT_CHANGES_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_YES,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            PregameStateManager_SetState(dialog.data.newState)
+                        end,
+        },
+
+        {
+            text = SI_DIALOG_NO,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
 }

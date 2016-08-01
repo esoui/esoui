@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_HousingEditorHudTopLevel" hidden="true">
+            <OnInitialized>
+                ZO_HousingEditorHud_OnInitialize(self)
+            </OnInitialized>
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)CenterAnchor">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Button name="$(parent)RotateLeftButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="RIGHT" offsetX="-200"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_LEFT", callbackFunction)
+                            </OnInitialized>
+                        </Button>
+                        <Button name="$(parent)RotateRightButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="LEFT" offsetX="200"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_RIGHT", callbackFunction)
+                            </OnInitialized>
+                        </Button>
+                        <Button name="$(parent)RotateForwardButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="BOTTOM" offsetY="200"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_FORWARD", callbackFunction)
+                            </OnInitialized>
+                        </Button>
+                        <Button name="$(parent)RotateBackButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="TOP" offsetY="-200"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_BACKWARD", callbackFunction)
+                            </OnInitialized>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

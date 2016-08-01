@@ -227,13 +227,26 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
+        
+        -- since we can now have combo boxes in dialogs and in normal ui elements
+        -- we want to make sure our combo box is listening for the proper keybinds
+        -- based on whether or not a dialog is active
         {
             keybind = "UI_SHORTCUT_NEGATIVE",
             name = GetString(SI_GAMEPAD_BACK_OPTION),
             callback = function()
                self:Deactivate()
             end,
+            visible = function() return not ZO_Dialogs_IsShowingDialog() end
+        },
+
+        {
+            keybind = "DIALOG_NEGATIVE",
+            name = GetString(SI_GAMEPAD_BACK_OPTION),
+            callback = function()
+               self:Deactivate()
+            end,
+            visible = ZO_Dialogs_IsShowingDialog
         },
 
         {
@@ -242,6 +255,16 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 self:SelectHighlightedItem()
             end,
+            visible = function() return not ZO_Dialogs_IsShowingDialog() end
+        },
+
+        {
+            keybind = "DIALOG_PRIMARY",
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            callback = function()
+                self:SelectHighlightedItem()
+            end,
+            visible = ZO_Dialogs_IsShowingDialog
         },
     }
 end
@@ -280,7 +303,11 @@ function ZO_GamepadComboBoxDropdown:Initialize(control)
     self.padding = 0
     self.borderPadding = ZO_GAMEPAD_COMBO_BOX_PADDING
     self.minY = 70
-    self.maxY = 950
+    local function RefreshMaxY()
+        self.maxY = GuiRoot:GetHeight() + ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET
+    end
+    RefreshMaxY()
+    EVENT_MANAGER:RegisterForEvent("GamepadComboBoxDropdown", EVENT_SCREEN_RESIZED, RefreshMaxY)
 end
 
 function ZO_GamepadComboBoxDropdown:SetPadding(padding)

@@ -245,20 +245,22 @@ function ZO_MarketProductBundle:CreateIconControlTable(purchased)
 
     self.variations = {}
 
-    for childIndex = 1, numChildren do
-        local childMarketProductId = self:GetChildMarketProductId(childIndex)
-        local marketProductIcon = self:InitializeMarketProductIcon(childMarketProductId, purchased)
-        marketProductIcon:SetDimensions(BUNDLE_ICON_SIZE)
-        marketProductIcon:SetFrameHidden(false)
+    if not self:GetHidesChildProducts() then
+        for childIndex = 1, numChildren do
+            local childMarketProductId = self:GetChildMarketProductId(childIndex)
+            local marketProductIcon = self:InitializeMarketProductIcon(childMarketProductId, purchased)
+            marketProductIcon:SetDimensions(BUNDLE_ICON_SIZE)
+            marketProductIcon:SetFrameHidden(false)
 
-        table.insert(iconControls, marketProductIcon:GetControl())
-        self.variations[childMarketProductId] = 1
+            table.insert(iconControls, marketProductIcon:GetControl())
+            self.variations[childMarketProductId] = 1
+        end
+
+        -- Sort the child tiles alphabetically
+        table.sort(iconControls, function(a,b)
+                                        return a.marketProductIcon:GetDisplayName() < b.marketProductIcon:GetDisplayName()
+                                    end)
     end
-
-    -- Sort the child tiles alphabetically
-    table.sort(iconControls, function(a,b)
-                                    return a.marketProductIcon:GetDisplayName() < b.marketProductIcon:GetDisplayName()
-                                end)
 
     return iconControls
 end
@@ -345,6 +347,7 @@ function ZO_MarketProductBundle:Preview(icon)
 
             if GetNumMarketProductPreviewVariations(attachmentId) > 1 then
                 self.currentPreviewingId = attachmentId
+                self.variations[self.currentPreviewingId] = 1
                 MARKET:SetCurrentMultiVariationPreviewProduct(self)
             else
                 MARKET:SetCurrentMultiVariationPreviewProduct(nil)

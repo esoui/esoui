@@ -1,0 +1,55 @@
+<GuiXml> 
+    <Controls>
+        <Control name="ZO_PlayerFurnitureSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions x="509" y="52" />
+
+            <OnMouseUp>
+                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                    ZO_HousingFurnitureBrowser_Keyboard_OnMouseClick(self)
+                end
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                    ZO_HousingFurnitureBrowser_Keyboard_OnMouseDoubleClick(self)
+                end
+            </OnMouseDoubleClick>
+            
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Button name="$(parent)Button" inherits="ZO_ItemSlot">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26" />
+                </Button>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="274" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Button" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HousingFurnitureBrowser_KeyboardTopLevel" mouseEnabled="true" hidden="true">
+            <OnInitialized>
+                ZO_HousingFurnitureBrowser_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

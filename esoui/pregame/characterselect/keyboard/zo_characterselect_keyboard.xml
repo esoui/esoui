@@ -75,11 +75,14 @@
         </Control>
 
         <TopLevelControl name="ZO_RenameCharacterDialog" inherits="ZO_CustomDialogBase">
-            <DimensionConstraints minX="440" />
             <OnInitialized>
                 ZO_RenameCharacterDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
+                <Label name="$(parent)Title" override="true">
+                    <Dimensions x="440" />
+                </Label>
+                
                 <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
 
                 <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
@@ -178,17 +181,25 @@
                     <OnInitialized>
                         ZO_NameChangeIndicator_Initialize(self)
                     </OnInitialized>
-                    <OnMouseEnter>
-                        ZO_NameChangeIndicator_OnMouseEnter()
-                    </OnMouseEnter>
-                    <OnMouseExit>
-                        ZO_NameChangeIndicator_OnMouseExit()
-                    </OnMouseExit>
-                    <OnMouseUp>
-                        if button == MOUSE_BUTTON_INDEX_LEFT and MouseIsOver(self) then
-                            ZO_NameChangeIndicator_OnMouseUp()
-                        end
-                    </OnMouseUp>
+
+                </Control>
+
+                <Control name="$(parent)RaceChange" inherits="ZO_ServiceTokenIndicator">
+                    <Anchor point="LEFT" relativeTo="$(parent)NameChange" relativePoint="RIGHT" offsetX="10" />
+
+                    <OnInitialized>
+                        ZO_RaceChangeIndicator_Initialize(self)
+                    </OnInitialized>
+                    
+                </Control>
+
+                <Control name="$(parent)AppearanceChange" inherits="ZO_ServiceTokenIndicator">
+                    <Anchor point="LEFT" relativeTo="$(parent)RaceChange" relativePoint="RIGHT" offsetX="10" />
+
+                    <OnInitialized>
+                        ZO_AppearanceChangeIndicator_Initialize(self)
+                    </OnInitialized>
+
                 </Control>
 
                 <Label name="$(parent)ChampionPoints" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

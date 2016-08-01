@@ -117,7 +117,7 @@ function ZO_KeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferred
     keybind = self:GetKeybind()
 
     if keybind then
-        if(hadKeybind) then
+        if hadKeybind then
             ZO_Keybindings_UnregisterLabelForBindingUpdate(self.keyLabel)
         end
         ZO_Keybindings_RegisterLabelForBindingUpdate(self.keyLabel, self.keybind, showUnbound, self.gamepadPreferredKeybind, OnKeybindLabelChanged, alwaysPreferGamepadMode)

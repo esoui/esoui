@@ -278,6 +278,11 @@ function ZO_InventorySlot_OnPoolReset(inventorySlot)
             highlight.animation:PlayFromEnd(highlight.animation:GetDuration())
         end
     end
+    if buttonPart then
+        if buttonPart and buttonPart.animation then
+            buttonPart.animation:PlayInstantlyToStart()
+        end
+    end
 
     ZO_ObjectPool_DefaultResetControl(inventorySlot)
 end
@@ -450,7 +455,16 @@ end
 
 local function TryEnchantItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    SYSTEMS:GetObject("enchant"):BeginItemImprovement(bag, index)
+    local function DoEnchant()
+        SYSTEMS:GetObject("enchant"):BeginItemImprovement(bag, index)
+    end
+
+    if IsItemBoPAndTradeable(bag, index) then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_MODIFY_TRADE_BOP", {onAcceptCallback = DoEnchant}, {mainTextParams={GetItemName(bag, index)}})
+    else
+        DoEnchant()
+    end
+    
 end
 
 local function CanConvertItemStyle(inventorySlot)
@@ -684,6 +698,32 @@ local function TryMoveToCraftBag(inventorySlot)
     return true
 end
 
+local function TryPreviewDyeStamp(inventorySlot)
+    -- get item info and pass it to the preview dye stamp view
+    -- there, the player can spin the model and confirm or deny using the stamp
+    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    local itemLink = GetItemLink(bag, index)
+    local dyeStampId = GetItemLinkDyeStampId(itemLink)
+    local onUseType = GetItemLinkItemUseType(itemLink)
+
+    if onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP then
+        local dyeStampUseResult = CanPlayerUseItemDyeStamp(dyeStampId)
+        if dyeStampUseResult ~= DYE_STAMP_USE_RESULT_NONE then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_DYESTAMPUSERESULT", dyeStampUseResult))
+            return
+        end
+    elseif onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP then
+        local dyeStampUseResult = CanPlayerUseCostumeDyeStamp(dyeStampId)
+        if dyeStampUseResult ~= DYE_STAMP_USE_RESULT_NONE then
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_DYESTAMPUSERESULT", dyeStampUseResult))
+            return
+        end
+    end
+
+    SYSTEMS:GetObject("dyeStamp_Confirmation"):SetTargetItem(bag, index)
+    SYSTEMS:PushScene("dyeStampConfirmation")
+end
+
 -- If called on an item inventory slot, returns the index of the attachment slot that's holding it, or nil if it's not attached.
 local function GetQueuedItemAttachmentSlotIndex(inventorySlot)
     local bag, attachmentIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
@@ -869,14 +909,22 @@ end
 
 local function TryEquipItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    local equipSucceeds, possibleError = IsEquipable(bag, index)
-    if(equipSucceeds) then
-        ClearCursor()
-        EquipItem(bag, index)
-        return true
-    end
+    local function DoEquip() 
+        local equipSucceeds, possibleError = IsEquipable(bag, index)
+        if(equipSucceeds) then
+            ClearCursor()
+            EquipItem(bag, index)
+            return true
+        end
 
-    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)    
+    end
+    
+    if IsItemBoPAndTradeable(bag, index) then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_TRADE_BOP", {onAcceptCallback = DoEquip}, {mainTextParams = {GetItemName(bag, index)}})
+    else
+        DoEquip()
+    end
 end
 
 local function CanUnequipItem(inventorySlot)
@@ -953,7 +1001,8 @@ local function CanUseItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local usable, onlyFromActionSlot = IsItemUsable(bag, index)
     local canInteractWithItem = CanInteractWithItem(bag, index)
-    return (usable and (not onlyFromActionSlot) and canInteractWithItem and not hasCooldown)
+    local isDyeStamp = GetItemType(bag, index) == ITEMTYPE_DYE_STAMP -- dye stamps are "usable" but we do not want the player to use them directly from their inventory
+    return usable and not onlyFromActionSlot and canInteractWithItem and not hasCooldown and not isDyeStamp
 end
 
 local function TryUseItem(inventorySlot)
@@ -1617,6 +1666,12 @@ local actionHandlers =
                                     slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(inventorySlot) end, "secondary")
                                 end
                             end,
+    ["preview_dye_stamp"] = function(inventorySlot, slotActions)
+                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                if GetItemType(bag, slot) == ITEMTYPE_DYE_STAMP and IsCharacterPreviewingAvailable() then
+                                    slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW_DYE_STAMP, function() TryPreviewDyeStamp(inventorySlot) end, "primary")
+                                end
+                            end,
 }
 
 local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
@@ -1626,7 +1681,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                    { "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1652,7 +1707,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =              NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =           { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "gamepad_equip", "unequip", "use", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
 }
@@ -2498,21 +2553,24 @@ end
 
 function ZO_InventorySlot_Status_OnMouseEnter(control)
     local slotData = control:GetParent():GetParent().dataEntry.data
-    local isPlayerLocked = slotData.isPlayerLocked
     local isNew = slotData.brandNew
     local isStolen = slotData.stolen
+    local tooltipText
 
-    if (isPlayerLocked) then
+    if slotData.isPlayerLocked then
+        tooltipText = GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP)
+    elseif isNew and isStolen then
+        tooltipText = GetString(SI_INVENTORY_NEW_AND_STOLEN_ITEM_TOOLTIP)
+    elseif isNew then
+        tooltipText = GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP)
+    elseif isStolen then
+        tooltipText = GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP)
+    elseif slotData.isBoPTradeable then
+        tooltipText = GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP)
+    end
+
+    if tooltipText then
         InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP))
-    elseif (isNew and isStolen) then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_NEW_AND_STOLEN_ITEM_TOOLTIP))
-    elseif (isNew) then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP))
-    elseif (isStolen) then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP))
+        SetTooltipText(InformationTooltip, tooltipText)
     end
 end

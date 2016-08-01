@@ -53,7 +53,7 @@
         </Control>
         
         
-        <Control name="ZO_TradingHouse_ItemList_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true" virtual="true">
+        <Control name="ZO_TradingHouse_ItemList_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true" virtual="true">
             <Controls>
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>

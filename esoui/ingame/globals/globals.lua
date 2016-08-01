@@ -5,12 +5,13 @@ local function OnGlobalMouseUp(eventCode, button, ctrl, alt, shift, command)
 end
 
 local function ShowLogoutDialog(dialogName, deferralTimeMS)
-    if(ZO_Dialogs_IsShowing(dialogName)) then
+    if ZO_Dialogs_IsShowing(dialogName) then
         -- Update the dialog with the new deferral time
         ZO_Dialogs_UpdateDialogMainText(ZO_Dialogs_FindDialog(dialogName), nil, {deferralTimeMS})
     else
         -- Show the initial dialog
-        if(deferralTimeMS) then
+        SCENE_MANAGER:ShowBaseScene()
+        if deferralTimeMS then
             ZO_Dialogs_ShowPlatformDialog(dialogName, { endTime = deferralTimeMS + GetFrameTimeMilliseconds() }, {mainTextParams = {deferralTimeMS}})
         else
             ZO_Dialogs_ShowPlatformDialog(dialogName)

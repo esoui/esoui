@@ -8,13 +8,6 @@ local function FormatShutdownTime(timeRemaining)
     return zo_strformat(SI_CHAT_SHUTDOWN_TIME, ZO_FormatTime(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE))
 end
 
-local function CreateFromLink(fromName, channelInfo)
-    if channelInfo.playerLinkable then
-       return ZO_LinkHandler_CreatePlayerLink(fromName)
-    end
-    return fromName
-end
-
 local function CreateChannelLink(channelInfo, overrideName)
     if channelInfo.channelLinkable then
         local channelName = overrideName or GetChannelName(channelInfo.id)
@@ -43,19 +36,29 @@ local ChatEventFormatters = {
         end
     end,
 
-    [EVENT_CHAT_MESSAGE_CHANNEL] = function(messageType, fromName, text, isFromCustomerService)
+    [EVENT_CHAT_MESSAGE_CHANNEL] = function(messageType, fromName, text, isFromCustomerService, fromDisplayName)
         local channelInfo = ChannelInfo[messageType]
 
         if channelInfo and channelInfo.format then
             local channelLink = CreateChannelLink(channelInfo)
-            local fromLink = CreateFromLink(fromName, channelInfo)
+
+            local userFacingName
+            if not IsDecoratedDisplayName(fromName) and fromDisplayName ~= "" then
+                --We have a character name and a display name, so follow the setting
+                userFacingName = ZO_ShouldPreferUserId() and fromDisplayName or fromName
+            else
+                --We either have two display names, or we weren't given a guaranteed display name, so just use the default fromName
+                userFacingName = fromName
+            end
+
+            local fromLink = channelInfo.playerLinkable and ZO_LinkHandler_CreatePlayerLink(userFacingName) or userFacingName
 
             -- Channels with links will not have CS messages
             if channelLink then
-                return zo_strformat(channelInfo.format, channelLink, fromLink, text), channelInfo.saveTarget
+                return zo_strformat(channelInfo.format, channelLink, fromLink, text), channelInfo.saveTarget, fromDisplayName, text
             end
 
-            return zo_strformat(channelInfo.format, fromLink, text, GetCustomerServiceIcon(isFromCustomerService)), channelInfo.saveTarget
+            return zo_strformat(channelInfo.format, fromLink, text, GetCustomerServiceIcon(isFromCustomerService)), channelInfo.saveTarget, fromDisplayName, text
         end
     end,
 
@@ -67,33 +70,36 @@ local ChatEventFormatters = {
         local wasOnline = oldStatus ~= PLAYER_STATUS_OFFLINE
         local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
 
-        if(not wasOnline and isOnline) then
+        if wasOnline ~= isOnline then
+            local text
             local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(displayName)
-            if(characterName ~= "") then
-                local characterNameLink = ZO_LinkHandler_CreateCharacterLink(characterName)
-                return zo_strformat(SI_FRIENDS_LIST_FRIEND_CHARACTER_LOGGED_ON, displayNameLink, characterNameLink)
+            local characterNameLink = ZO_LinkHandler_CreateCharacterLink(characterName)
+            if isOnline then
+                if characterName ~= "" then
+                    text = zo_strformat(SI_FRIENDS_LIST_FRIEND_CHARACTER_LOGGED_ON, displayNameLink, characterNameLink)
+                else
+                    text = zo_strformat(SI_FRIENDS_LIST_FRIEND_LOGGED_ON, displayNameLink)
+                end
             else
-                return zo_strformat(SI_FRIENDS_LIST_FRIEND_LOGGED_ON, displayNameLink)
+                if characterName ~= "" then
+                    text = zo_strformat(SI_FRIENDS_LIST_FRIEND_CHARACTER_LOGGED_OFF, displayNameLink, characterNameLink)
+                else
+                    text = zo_strformat(SI_FRIENDS_LIST_FRIEND_LOGGED_OFF, displayNameLink)
+                end
             end
-        elseif(wasOnline and not isOnline) then
-            local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(displayName)
-            if(characterName ~= "") then
-                local characterNameLink = ZO_LinkHandler_CreateCharacterLink(characterName)
-                return zo_strformat(SI_FRIENDS_LIST_FRIEND_CHARACTER_LOGGED_OFF, displayNameLink, characterNameLink)
-            else
-                return zo_strformat(SI_FRIENDS_LIST_FRIEND_LOGGED_OFF, displayNameLink)
-            end
+
+            return text, nil, displayName
         end
     end,
 
     [EVENT_IGNORE_ADDED] = function(displayName)
         local link = ZO_LinkHandler_CreateDisplayNameLink(displayName)
-        return zo_strformat(SI_FRIENDS_LIST_IGNORE_ADDED, link)
+        return zo_strformat(SI_FRIENDS_LIST_IGNORE_ADDED, link), nil, displayName
     end,
 
     [EVENT_IGNORE_REMOVED] = function(displayName)
         local link = ZO_LinkHandler_CreateDisplayNameLink(displayName)
-        return zo_strformat(SI_FRIENDS_LIST_IGNORE_REMOVED, link)
+        return zo_strformat(SI_FRIENDS_LIST_IGNORE_REMOVED, link), nil, displayName
     end,
 
     [EVENT_GROUP_TYPE_CHANGED] = function(largeGroup)
@@ -106,11 +112,17 @@ local ChatEventFormatters = {
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         -- Only one name will be sent here, so use that and do not use special formatting since this appears in chat
-        local nameToDisplay = characterName ~= "" and characterName or displayName
+        local nameToDisplay
+        if characterName ~= "" then 
+            nameToDisplay = IsConsoleUI() and ZO_FormatUserFacingCharacterName(characterName) or characterName
+        else
+            nameToDisplay = ZO_FormatUserFacingDisplayName(displayName)
+        end
+
         if(not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response)) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
     
-            return alertMessage
+            return alertMessage, nil, diplayName
         end
     end,
 
@@ -141,6 +153,12 @@ local ChatEventFormatters = {
     [EVENT_TRIAL_FEATURE_RESTRICTED] = function(restrictionType)
         if ZO_ChatSystem_GetTrialEventMappings()[restrictionType] then
             return GetString("SI_TRIALACCOUNTRESTRICTIONTYPE", restrictionType)
+        end
+    end,
+
+    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
+        if reason == GROUP_LEAVE_REASON_KICKED and isLocalPlayer and actionRequiredVote then
+            return GetString(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
         end
     end,
 }

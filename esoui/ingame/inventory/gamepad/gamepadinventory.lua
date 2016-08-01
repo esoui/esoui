@@ -196,7 +196,11 @@ function ZO_GamepadInventory:OnUpdate(currentFrameTimeSeconds)
     if self.updateItemActions then
         self.updateItemActions = nil
         if not ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
-            self:RefreshItemActions()
+            -- don't refresh item actions if we are in the category view
+            -- otherwise we get a keybind conflict
+            if self.actionMode ~= CATEGORY_ITEM_ACTION_MODE then
+                self:RefreshItemActions()
+            end
         end
     end
 end
@@ -567,7 +571,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
             visible = function()
                 local targetData = self.itemList:GetTargetData()
-                return self.selectedItemUniqueId ~= nil and ZO_InventorySlot_CanDestroyItem(targetData)
+                return self.selectedItemUniqueId ~= nil and targetData ~= nil and ZO_InventorySlot_CanDestroyItem(targetData)
             end,
 
             callback = function()
@@ -1154,10 +1158,10 @@ function ZO_GamepadInventory:LayoutCraftBagTooltip()
     local title
     local description
     if HasCraftBagAccess() then
-        title = GetString(SI_CRAFT_BAG_STATUS_ESO_PLUS_UNLOCKED)
+        title = GetString(SI_ESO_PLUS_STATUS_UNLOCKED)
         description = GetString(SI_CRAFT_BAG_STATUS_ESO_PLUS_UNLOCKED_DESCRIPTION)
     else
-        title =  GetString(SI_CRAFT_BAG_STATUS_LOCKED)
+        title =  GetString(SI_ESO_PLUS_STATUS_LOCKED)
         description = GetString(SI_CRAFT_BAG_STATUS_LOCKED_DESCRIPTION)
     end
 
@@ -1267,7 +1271,15 @@ end
 function ZO_GamepadInventory:TryEquipItem(inventorySlot)
     if(self.selectedEquipSlot) then
         local sourceBag, sourceSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        RequestMoveItem(sourceBag, sourceSlot, BAG_WORN, self.selectedEquipSlot, 1)
+        local function DoEquip()
+            RequestMoveItem(sourceBag, sourceSlot, BAG_WORN, self.selectedEquipSlot, 1)
+        end
+
+        if IsItemBoPAndTradeable(sourceBag, sourceSlot) then
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_TRADE_BOP", {onAcceptCallback = DoEquip}, {mainTextParams = {GetItemName(sourceBag, sourceSlot)}})
+        else
+            DoEquip()
+        end
     end
 end
 

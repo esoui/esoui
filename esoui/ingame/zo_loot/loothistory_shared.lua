@@ -128,7 +128,8 @@ do
 
         control.icon:SetTexture(data.icon)
 
-        control.stackCountLabel:SetText(data.stackCount)
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
+        control.stackCountLabel:SetText(ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
         control.stackCountLabel:SetHidden(data.stackCount <= 1)
 
         local hideCraftBagIcons = not data.isCraftBagItem
@@ -159,7 +160,7 @@ do
 
         currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
         if control and control.stackCountLabel then
-            control.stackCountLabel:SetText(currentEntryData.stackCount)
+            control.stackCountLabel:SetText(ZO_AbbreviateNumber(currentEntryData.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
             control.stackCountLabel:SetHidden(false) -- guaranteed to always show because we had at least 1 and we are adding at least 1
             ZO_CraftingResults_Base_PlayPulse(control.stackCountLabel)
         end

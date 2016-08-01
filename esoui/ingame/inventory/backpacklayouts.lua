@@ -105,7 +105,7 @@ BACKPACK_MAIL_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
         hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
         additionalFilter = function (slot)
-            return (not IsItemBound(slot.bagId, slot.slotIndex)) and (not slot.stolen) and (not slot.isPlayerLocked)
+            return (not IsItemBound(slot.bagId, slot.slotIndex)) and (not slot.stolen) and (not slot.isPlayerLocked) and (not IsItemBoPAndTradeable(slot.bagId, slot.slotIndex))
         end,
     })
 
@@ -116,7 +116,7 @@ BACKPACK_PLAYER_TRADE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
         hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true },
         additionalFilter = function (slot)
-            return (not IsItemBound(slot.bagId, slot.slotIndex)) and (not slot.stolen) and (not slot.isPlayerLocked)
+            return TRADE_WINDOW:CanTradeItem(slot)
         end,
         waitUntilInventoryOpensToClearNewStatus = true,
     })

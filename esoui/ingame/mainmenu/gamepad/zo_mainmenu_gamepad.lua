@@ -88,7 +88,7 @@ do
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
             isNewCallback =
                 function()
-                    return (GAMEPAD_NOTIFICATIONS and GAMEPAD_NOTIFICATIONS:GetNumCollectionsNotifications() > 0) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending())
+                    return (GAMEPAD_COLLECTIONS_BOOK and GAMEPAD_COLLECTIONS_BOOK:HasAnyNewCollectibles()) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending())
                 end,
         },
         [MENU_MAIN_ENTRIES.INVENTORY] =
@@ -224,27 +224,22 @@ do
                     name = GetString(SI_MAIN_MENU_GAMEPAD_VOICECHAT),
                     icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_communications.dds",
                     header = GetString(SI_MAIN_MENU_SOCIAL),
-                    isVisibleCallback =
-                        function()
-                            return IsConsoleUI()
-                        end,
+                    isVisibleCallback = IsConsoleUI
                 },
                 [MENU_SOCIAL_ENTRIES.TEXT_CHAT] =
                 {
-                    scene = "gamepad_text_chat",
+                    scene = "gamepadChatMenu",
                     name = GetString(SI_GAMEPAD_TEXT_CHAT),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_communications.dds",
-                    isVisibleCallback =
-                        function()
-                            return IsConsoleUI() and IsChatSystemAvailableForCurrentPlatform()
-                        end,
+                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_textChat.dds",
+                    header = not IsConsoleUI() and GetString(SI_MAIN_MENU_SOCIAL) or nil,
+                    isVisibleCallback = IsChatSystemAvailableForCurrentPlatform
                 },
                 [MENU_SOCIAL_ENTRIES.EMOTES] =
                 {
                     scene = "gamepad_player_emote",
                     name = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES),
                     icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_emotes.dds",
-                    header = not IsConsoleUI() and GetString(SI_MAIN_MENU_SOCIAL) or nil,
+                    header = (not IsConsoleUI() and not IsChatSystemAvailableForCurrentPlatform()) and GetString(SI_MAIN_MENU_SOCIAL) or nil,
                 },
                 [MENU_SOCIAL_ENTRIES.GROUP] =
                 {
@@ -577,13 +572,14 @@ function ZO_MainMenuManager_Gamepad:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_MAIN_MENU_GAMEPAD_VOICECHAT),
             keybind = "UI_SHORTCUT_TERTIARY",
-            visible = function() return IsConsoleUI() end,
             callback = function() SCENE_MANAGER:Push("gamepad_voice_chat") end,
+            visible = IsConsoleUI,
         },
         {
-            name = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES),
+            name = GetString(SI_GAMEPAD_TEXT_CHAT),
             keybind = "UI_SHORTCUT_SECONDARY",
-            callback = function() SCENE_MANAGER:Push("gamepad_player_emote") end,
+            callback = function() SCENE_MANAGER:Push("gamepadChatMenu") end,
+            visible = IsChatSystemAvailableForCurrentPlatform,
         }
     }
 

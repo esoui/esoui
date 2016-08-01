@@ -214,6 +214,9 @@ local function UpdateStatusControl(inventorySlot, slotData)
     if slotData.isPlayerLocked then
         statusControl:AddIcon(ZO_KEYBOARD_LOCKED_ICON)
     end
+    if slotData.isBoPTradeable then
+        statusControl:AddIcon(ZO_TRADE_BOP_ICON)
+    end
 
     statusControl:Show()
 
@@ -359,7 +362,7 @@ local function BaseInventoryFilter(currentFilter, slot)
 end
 
 local function TradingHouseFilter(slot)
-    return not IsItemBound(slot.bagId, slot.slotIndex)
+    return not IsItemBound(slot.bagId, slot.slotIndex) and not IsItemBoPAndTradeable(slot.bagId, slot.slotIndex)
 end
 
 -------------------

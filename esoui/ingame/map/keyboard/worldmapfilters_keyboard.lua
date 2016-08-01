@@ -89,7 +89,7 @@ function WorldMapFilterPanel:LoadInitialState()
         local value = self:GetPinFilter(comboBox.mapPinGroup)
         for _, entry in ipairs(comboBox:GetItems()) do
             if(entry.optionValue == value) then
-                comboBox:SetSelectedItem(entry.name)
+                comboBox:SetSelectedItemText(entry.name)
                 break
             end
         end

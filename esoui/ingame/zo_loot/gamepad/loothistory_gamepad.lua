@@ -26,7 +26,7 @@ end
 
 function ZO_LootHistory_Gamepad:InitializeFadingControlBuffer(control)
     local HORIZ_OFFSET = 0
-    local VERTICAL_OFFSET = -160
+    local VERTICAL_OFFSET = -120
     local anchor = ZO_Anchor:New(BOTTOMLEFT, GuiRoot, BOTTOMLEFT, HORIZ_OFFSET, VERTICAL_OFFSET)
     local MAX_ENTRIES = 5
     local CONTAINER_SHOW_TIME_MS = self:GetContainerShowTime()

@@ -48,14 +48,6 @@ function ChatContainer:ShowRemoveTabDialog(index)
 	SharedChatContainer.ShowRemoveTabDialog(self, index, "CHAT_TAB_REMOVE")
 end
 
-function ChatContainer:SaveSettings()
-    if self.allowSettingsSave and self.system:CanSaveSettings() then
-        self.system:SaveLocalContainerSettings(self, self.control)
-        local bgR, bgG, bgB = self.backdrop:GetCenterColor()
-        SetChatContainerColors(self.id, bgR, bgG, bgB, self.minAlpha, self.maxAlpha)
-    end
-end
-
 function ChatContainer:LoadSettings(settings)
     self.control:ClearAnchors()
     self.control:SetAnchor(settings.point, nil, settings.relPoint, settings.x, settings.y)
@@ -385,9 +377,9 @@ function ZO_ChatSystem:Maximize()
 			container:FadeIn()
 		end
 
-		--hide the minimized bar, fade in the windows
-		PlaySound(SOUNDS.CHAT_MAXIMIZED)
-		self:HideMinBar()
+        --hide the minimized bar, fade in the windows
+        PlaySound(SOUNDS.CHAT_MAXIMIZED)
+        self:HideMinBar()
 
         if(self.newChatFadeAnim and self.newChatFadeAnim:IsPlaying()) then
             self.newChatFadeAnim:Stop()
@@ -400,7 +392,26 @@ function ZO_ChatSystem:GetFont()
     return ZoFontEditChat
 end
 
+function ZO_ChatSystem:GetFontSizeString(fontSize)
+    return string.format("$(KB_%d)", fontSize)
+end
+
+function ZO_ChatSystem:GetFontSizeFromSetting()
+    return GetChatFontSize()
+end
+
 --[[ XML Functions ]]--
+
+
+--[[ Global/XML Handlers ]]--
+function ZO_ChatSystem_OnMinMaxClicked()
+    if CHAT_SYSTEM:IsMinimized() then
+        CHAT_SYSTEM:Maximize()
+    else
+        CHAT_SYSTEM:Minimize()
+    end
+end
+
 function ZO_ChatSystem_OnInitialized(control)
     CHAT_SYSTEM = ZO_ChatSystem:New(control)
 end

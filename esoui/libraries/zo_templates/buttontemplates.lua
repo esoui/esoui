@@ -424,7 +424,14 @@ function ZO_WeaponSwap_OnInitialized(self, hideWhenUnearned)
         self.disabled = disabled
         UpdateWeaponSwapButton(self)
     end
+
+    local function OnWeaponPairLockChanged(event, disabled)
+        self.disabled = disabled
+        UpdateWeaponSwapButton(self)
+    end
+
     self:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
+    self:RegisterForEvent(EVENT_WEAPON_PAIR_LOCK_CHANGED, OnWeaponPairLockChanged)
 
     local function OnLevelUpdate(_, unitTag, level)
         if(unitTag == "player") then

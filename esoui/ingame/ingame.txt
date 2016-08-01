@@ -3,6 +3,8 @@
 
 ## SavedVariables: ZO_Ingame_SavedVariables
 
+EsoUI\Ingame\NameChange\NameChange.lua
+
 EsoUI\Ingame\Globals\strings.lua
 EsoUI\Ingame\Globals\Paths.xml
 EsoUI\Ingame\Globals\AutoComplete.lua
@@ -11,6 +13,7 @@ EsoUI\Ingame\Globals\Globals.lua
 EsoUI\Ingame\Globals\CommonInventoryFunctions.lua
 EsoUI\Ingame\Globals\Gamepad\ZO_GamepadSocialLayoutConstants.lua
 EsoUI\Ingame\Globals\ZO_ChampionRankUtils.lua
+
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
@@ -119,6 +122,8 @@ EsoUI\Ingame\ChatSystem\PC\ChatSystem.lua
 EsoUI\Ingame\ChatSystem\PC\ChatSystem.xml
 EsoUI\Ingame\ChatSystem\Console\GamepadChatSystem.lua
 EsoUI\Ingame\ChatSystem\Console\GamepadChatSystem.xml
+EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.lua
+EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.xml
 
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanels_Keyboard.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Audio_Keyboard.xml
@@ -132,6 +137,7 @@ EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Nameplates_Shared.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Nameplates_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Social_Shared.lua
+EsoUI\Common\OptionsPanels\Console\OptionsPanel_Social_Console.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Social_Keyboard.xml
 
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.lua
@@ -451,13 +457,18 @@ EsoUI\Ingame\Dyeing\Keyboard\Dyeing_Keyboard.lua
 EsoUI\Ingame\Dyeing\Keyboard\Dyeing_Keyboard.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Common_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Common_Gamepad.xml
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Equipment_Gamepad.lua
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Equipment_Gamepad.xml
+EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.lua
+EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Swatches_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
+EsoUI\Ingame\Dyeing\DyeStamp_Confirmation_Shared.lua
+EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.lua
+EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.xml
+EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.lua
+EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.xml
 
 EsoUI\Ingame\Achievements\Achievements_Shared.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.lua
@@ -904,6 +915,15 @@ EsoUI\Ingame\ZO_GuildNameFooter\Gamepad\ZO_GuildNameFooter_Gamepad.xml
 
 EsoUI\Ingame\Subtitles\Subtitles.lua
 EsoUI\Ingame\Subtitles\Subtitles.xml
+
+EsoUI\Ingame\HousingEditor\HousingEditorHud.lua
+EsoUI\Ingame\HousingEditor\HousingEditorHud.xml
+EsoUI\Ingame\HousingEditor\SharedFurnitureManager.lua
+EsoUI\Ingame\HousingEditor\HousingFurnitureBrowser_Base.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.xml
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.lua

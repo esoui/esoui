@@ -1,0 +1,59 @@
+<GuiXml>
+    <Controls>
+
+        <Control name="ZO_CharacterCreateTriangleTemplate_Keyboard" virtual="true">
+            <Dimensions x="332" y="200" />
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/CharacterCreate/selectorTriangle.dds">
+                    <Dimensions x="256" y="256" />
+                    <Anchor point="TOP" />
+                </Texture>
+                
+                <Control name="$(parent)Picker" inherits="ZO_TrianglePickerTemplate">
+                    <Dimensions x="169" y="145" />
+                    <Anchor point="TOP" offsetY="32" />
+
+                    <Controls>
+                        <Button name="$(parent)Thumb" mouseEnabled="false" mouseOverBlendMode="ADD" tier="MEDIUM" >
+                            <Dimensions x="16" y="16" />
+                            <Textures 
+                                normal="EsoUI/Art/CharacterCreate/triangle_selector_pip.dds"
+                                mouseOver="EsoUI/Art/CharacterCreate/triangle_selector_pip_mouseOver.dds"
+                                disabled="EsoUI/Art/CharacterCreate/triangle_selector_pip_disabled.dds"
+                            />
+
+                            <Controls>
+                                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/CharacterCreate/triangle_selector_pip_glow.dds" tier="MEDIUM">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="CENTER" />
+
+                                    <OnInitialized>
+                                        local anim = ZO_AlphaAnimation:New(self)
+                                        anim:PingPong(1, .4, 1000, LOOP_INDEFINITELY)
+                                    </OnInitialized>
+                                </Texture>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Padlock" inherits="ZO_CharacterCreateSliderPadlock_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Picker" relativePoint="TOPRIGHT" offsetX="47" offsetY="-20" />
+                </Button>
+
+                <Label name="$(parent)LabelTop" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Picker" relativePoint="TOP" offsetY="-3" />
+                </Label>
+
+                <Label name="$(parent)LabelLeft" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)LabelRight" inherits="CCLabel" font="ZoFontGameShadow">
+                    <Anchor point="TOP" relativeTo="$(parent)Picker" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+    </Controls>
+</GuiXml>

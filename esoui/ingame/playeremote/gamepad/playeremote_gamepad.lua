@@ -344,8 +344,15 @@ function ZO_GamepadPlayerEmote:OnDeferredInitialize()
     self:InitializeEmoteGrid()
     self:CreateCategoryList()
     self:InitializeRadialMenu()
-	
-	self.control:RegisterForEvent(EVENT_PERSONALITY_CHANGED, function() self:CreateCategoryList() end)
+
+    self.control:RegisterForEvent(EVENT_PERSONALITY_CHANGED,
+                                    function()
+                                        if GAMEPAD_PLAYER_EMOTE_SCENE:IsShowing() then
+                                            self:CreateCategoryList()
+                                        else
+                                            self:MarkDirty()
+                                        end
+                                    end)
 end
 
 function ZO_GamepadPlayerEmote:OnSelectionChanged()
@@ -372,7 +379,7 @@ function ZO_GamepadPlayerEmote:CreateCategoryList()
 
     local quickChatIcon = QUICK_CHAT_MANAGER:GetQuickChatIcon()
     local data = ZO_GamepadEntryData:New(GetString(SI_QUICK_CHAT_EMOTE_MENU_ENTRY_NAME), quickChatIcon)
-	data:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+    data:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
     data:SetIconTintOnSelection(true)
     data.type = ACTION_TYPE_QUICK_CHAT
     self.itemList:AddEntry(GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE, data)
@@ -383,7 +390,7 @@ function ZO_GamepadPlayerEmote:CreateCategoryList()
         if category ~= EMOTE_CATEGORY_INVALID then
             local emoteIcon = self:GetEmoteIconForCategory(category)
             local data = ZO_GamepadEntryData:New(GetString("SI_EMOTECATEGORY", category), emoteIcon)
-			data:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+            data:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
             data:SetIconTintOnSelection(true)
             data.type = ACTION_TYPE_EMOTE
             data.emoteCategory = category
@@ -392,6 +399,12 @@ function ZO_GamepadPlayerEmote:CreateCategoryList()
     end
 
     self.itemList:Commit()
+
+    self.isDirty = false
+end
+
+function ZO_GamepadPlayerEmote:MarkDirty()
+    self.isDirty = true
 end
 
 function ZO_GamepadPlayerEmote:InitializeHeader()
@@ -459,8 +472,8 @@ function ZO_GamepadPlayerEmote:RefreshHeader()
     local personalityId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY)
     local personalityName = GetCollectibleInfo(personalityId)
     if personalityName ~= "" then
-        self.headerData.data1HeaderText = "personality"
-        self.headerData.data1Text = ZO_PERSONALITY_EMOTES_COLOR:Colorize(personalityName)
+        self.headerData.data1HeaderText = GetString(SI_GAMEPAD_EMOTE_PERSONALITY_OVERRIDE_HEADER)
+        self.headerData.data1Text = ZO_PERSONALITY_EMOTES_COLOR:Colorize(zo_strformat(SI_GAMEPAD_SOCIAL_PERSONALITY, personalityName))
     else
         self.headerData.data1HeaderText = nil
         self.headerData.data1Text = nil
@@ -674,6 +687,10 @@ function ZO_GamepadPlayerEmote:AssignSelectedQuickslot()
 end
 
 function ZO_GamepadPlayerEmote:OnShowing()
+    if self.isDirty then
+        self:CreateCategoryList()
+    end
+
     self:ChangeCurrentMode(MODE_CATEGORY_SELECTION)
     TriggerTutorial(TUTORIAL_TRIGGER_EMOTES_MENU_OPENED)
 end

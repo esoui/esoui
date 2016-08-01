@@ -35,6 +35,7 @@ function ZO_ApplyEnchant:Initialize(control)
     {
         customControl = function() return ZO_InventorySlot_GetItemListDialog():GetControl() end,
         setup = function(dialog, data) self:SetupDialog(data.bag, data.index) end,
+        canQueue = true,
 
         title =
         {

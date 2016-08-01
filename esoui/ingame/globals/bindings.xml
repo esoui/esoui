@@ -434,7 +434,6 @@
 
             <Action name="UI_SHORTCUT_EXIT" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
             <Action name="UI_SHORTCUT_RIGHT_TRIGGER" hideAction="true" rebindable="false">
@@ -699,7 +698,7 @@
             </Action>
         </Category>
     </Layer>
-    <Layer name="MarketPreviewInterceptLayer">
+    <Layer name="PreviewInterceptLayer">
         <Category>
             <!-- Intercept keybinds for actions that can cause previewing to break -->
             <Action name="INTERCEPT_SHEATHE_WEAPON_TOGGLE" hideAction="true" rebindable="false" inheritsBindFrom="SHEATHE_WEAPON_TOGGLE">
@@ -779,6 +778,21 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+        </Category>
+    </Layer>
+    <!-- Not player facing -->
+    <Layer name="GamepadChatSystem" allowFallthrough="false">
+        <Category>
+            <Action name="SUBMIT_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>CHAT_SYSTEM:SubmitTextEntry()</Down>
+            </Action>
+            <Action name="CANCEL_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+                <Down>CHAT_SYSTEM:CloseTextEntry(true)</Down> <!--Retain text-->
+            </Action>
+            <Action name="EXIT_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_EXIT">
+                <Down>CHAT_SYSTEM:CloseTextEntry()</Down>
+            </Action>
+            <AllowAction name="START_CHAT_ENTER"/>
         </Category>
     </Layer>
     <!-- Not player facing -->

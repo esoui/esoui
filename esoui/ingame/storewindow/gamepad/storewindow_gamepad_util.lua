@@ -223,35 +223,47 @@ local function GetRepairItems()
     return items
 end
 
-local function GetStolenItems(filterFunction)
-    local items = SHARED_INVENTORY:GenerateFullSlotData(nil, BAG_WORN, BAG_BACKPACK)
+-- optFilterFunction is an optional additional check to make when gathering all the stolen items
+-- ... are bag ids to get items from
+local function GetStolenItems(optFilterFunction, ...)
+    local function IsStolenItem(itemData)
+        local isStolen = itemData.stolen
+
+        if optFilterFunction then
+            return isStolen and optFilterFunction(itemData)
+        else
+            return isStolen
+        end
+    end
+
+    local items = SHARED_INVENTORY:GenerateFullSlotData(IsStolenItem, ...)
     local unequippedItems = {}
 
     --- Setup sort filter
     for i, itemData in ipairs(items) do
-        if filterFunction(itemData) then
-            itemData.isEquipped = false
-            itemData.meetsRequirementsToBuy = true
-            itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
-            itemData.storeGroup = GetItemStoreGroup(itemData)
-            itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
-            table.insert(unequippedItems, itemData)
-        end
+        itemData.isEquipped = false
+        itemData.meetsRequirementsToBuy = true
+        itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
+        itemData.storeGroup = GetItemStoreGroup(itemData)
+        itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
+        table.insert(unequippedItems, itemData)
     end
 
     return unequippedItems
 end
 
+local function IsStolenItemSellable(itemData)
+    return itemData.sellPrice > 0
+end
+
 local function GetStolenSellItems()
-    return GetStolenItems(function(itemData) 
-        return itemData.bagId ~= BAG_WORN and itemData.stolen and itemData.sellPrice > 0
-    end)
+    -- can't sell stolen things from BAG_WORN so just check BACKPACK
+    return GetStolenItems(IsItemStolenAndSellable, BAG_BACKPACK)
 end
 
 local function GetLaunderItems()
-    return GetStolenItems(function(itemData)
-        return itemData.stolen
-    end)
+    local NO_ADDED_FILTER = nil
+    return GetStolenItems(NO_ADDED_FILTER, BAG_WORN, BAG_BACKPACK)
 end
 
 local TRAIN_ORDER = { RIDING_TRAIN_SPEED, RIDING_TRAIN_STAMINA, RIDING_TRAIN_CARRYING_CAPACITY }

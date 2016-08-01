@@ -1,16 +1,4 @@
 <GuiXml>
-    <Animations>
-        <AnimationTimeline name="GamepadInteractiveSortFilterListFocusAlphaFadeAnimation">
-            <Animations>
-                <AlphaAnimation duration="255" startAlpha="0" endAlpha="1">
-                    <EasingFunction>
-                        return ZO_EaseOutQuadratic(progress)
-                    </EasingFunction>
-                </AlphaAnimation>
-            </Animations>
-        </AnimationTimeline>
-    </Animations>
-
     <Controls>
         <Label name="ZO_GamepadInteractiveSortFilterListRowLabel" font="ZoFontGamepad34" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="1" virtual="true"/>
 
