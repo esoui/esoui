@@ -7307,7 +7307,7 @@ h2. Game API
 ** _Returns:_ *integer* _numCharacters_
 
 * GetCharacterInfo(*luaindex* _index_)
-** _Returns:_ *string* _name_, *[Gender|#Gender]* _gender_, *integer* _level_, *integer* _championRank_, *integer* _classId_, *integer* _raceId_, *[Alliance|#Alliance]* _alliance_, *string* _id_, *integer* _locationId_
+** _Returns:_ *string* _name_, *[Gender|#Gender]* _gender_, *integer* _level_, *integer* _classId_, *integer* _raceId_, *[Alliance|#Alliance]* _alliance_, *string* _id_, *integer* _locationId_
 
 * GetNumAttributes()
 ** _Returns:_ *integer* _numAttributes_
