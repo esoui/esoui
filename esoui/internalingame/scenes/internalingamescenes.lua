@@ -40,3 +40,6 @@ announcementScene:AddFragment(MOUSE_UI_MODE_FRAGMENT)
 announcementScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 announcementScene:AddFragment(GAMEPAD_ACTION_LAYER_FRAGMENT)
 announcementScene:AddFragment(ZO_ActionLayerFragment:New("MarketAnnouncement"))
+
+local remoteCrownCratesSceneKeyboard = ZO_RemoteScene:New("crownCrateKeyboard", SCENE_MANAGER)
+local remoteCrownCratesSceneGamepad = ZO_RemoteScene:New("crownCrateGamepad", SCENE_MANAGER)

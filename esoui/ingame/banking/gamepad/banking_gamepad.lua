@@ -78,15 +78,16 @@ local function OnCloseBank()
     end
 end
 
-function ZO_GamepadBanking:Initialize(control)
-    local function OnOpenBank()
-        if IsInGamepadPreferredMode() then
-            SCENE_MANAGER:Show(GAMEPAD_BANKING_SCENE_NAME)
-        end
+local function OnOpenBank()
+    if IsInGamepadPreferredMode() then
+        SCENE_MANAGER:Show(GAMEPAD_BANKING_SCENE_NAME)
     end
+end
 
+function ZO_GamepadBanking:Initialize(control)
     GAMEPAD_BANKING_SCENE = ZO_InteractScene:New(GAMEPAD_BANKING_SCENE_NAME, SCENE_MANAGER, BANKING_INTERACTION)
     ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_BANKING_SCENE)
+    self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT)
 
     self:SetBankedBag(BAG_BANK)
     self:SetCarriedBag(BAG_BACKPACK)
@@ -95,18 +96,13 @@ function ZO_GamepadBanking:Initialize(control)
     self.control:RegisterForEvent(EVENT_CLOSE_BANK, OnCloseBank)
 end
 
-function ZO_GamepadBanking:OnSceneHiding()
-    if self.confirmationMode then
-        self:UpdateSpinnerConfirmation(DEACTIVATE_SPINNER, self.currentItemList)
-    end
-end
-
 function ZO_GamepadBanking:AddKeybinds()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
 function ZO_GamepadBanking:RemoveKeybinds()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
+    KEYBIND_STRIP:RemoveKeybindButton(self.withdrawDepositFundsKeybind)
 end
 
 function ZO_GamepadBanking:OnDeferredInitialization()
@@ -136,7 +132,6 @@ function ZO_GamepadBanking:OnDeferredInitialization()
             self.secondSelectorLabelUsed = true
         end
     end
-
 end
 
 function ZO_GamepadBanking:InitializeLists()
@@ -145,17 +140,31 @@ function ZO_GamepadBanking:InitializeLists()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
     end
 
+    local function OnWithdrawEntryDataCreatedCallback(data)
+        ZO_Inventory_BindSlot(data, SLOT_TYPE_BANK_ITEM, data.itemData.slotIndex, data.itemData.bagId)
+    end
+
+    local function OnDepositEntryDataCreatedCallback(data)
+        ZO_Inventory_BindSlot(data, SLOT_TYPE_ITEM, data.itemData.slotIndex, data.itemData.bagId)
+    end
+
     local function ItemSetupTemplate(...)
         self:SetupItem(...)
     end
 
-    local SETUP_LIST_LOCALLY = true
-    local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBag, SLOT_TYPE_BANK_ITEM, OnSelectedDataCallback, nil, nil, nil, nil, nil, ItemSetupTemplate)
-    self:SetWithdrawList(withdrawList)
+    local function UpdateTargetData(list, selectedData)
+        self:SetSelectedData(selectedData)
+    end
 
-    local depositList = self:AddList("deposit", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_DEPOSIT, self.carriedBag, SLOT_TYPE_ITEM, OnSelectedDataCallback, nil, nil, nil, nil, nil, ItemSetupTemplate)
+    local SETUP_LIST_LOCALLY = true
+    local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBag, SLOT_TYPE_BANK_ITEM, OnSelectedDataCallback, OnWithdrawEntryDataCreatedCallback, nil, nil, nil, nil, ItemSetupTemplate)
+    self:SetWithdrawList(withdrawList)
+    withdrawList:SetOnTargetDataChangedCallback(UpdateTargetData)
+
+    local depositList = self:AddList("deposit", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_DEPOSIT, self.carriedBag, SLOT_TYPE_ITEM, OnSelectedDataCallback, OnDepositEntryDataCreatedCallback, nil, nil, nil, nil, ItemSetupTemplate)
     depositList:SetItemFilterFunction(function(slot) return not slot.stolen end)
     self:SetDepositList(depositList)
+    depositList:SetOnTargetDataChangedCallback(UpdateTargetData)
 end
 
 function ZO_GamepadBanking:SetupItem(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -167,6 +176,22 @@ function ZO_GamepadBanking:SetupItem(control, data, selected, selectedDuringRebu
             control:SetHidden(self.confirmationMode)
         end
     end
+end
+
+function ZO_GamepadBanking:SetSelectedData(inventoryData)
+    -- since SetInventorySlot also adds/removes keybinds, the order which we call these 2 functions is important
+    -- based on whether we are looking at an item or a faux-item
+    if inventoryData and inventoryData.currencyType then
+        self.itemActions:SetInventorySlot(inventoryData)
+        KEYBIND_STRIP:AddKeybindButton(self.withdrawDepositFundsKeybind)
+    else
+        KEYBIND_STRIP:RemoveKeybindButton(self.withdrawDepositFundsKeybind)
+        self.itemActions:SetInventorySlot(inventoryData)
+    end
+end
+
+function ZO_GamepadBanking:ClearSelectedData()
+    self.itemActions:SetInventorySlot(nil)
 end
 
 function ZO_GamepadBanking:GetTelvarStoneMinimumDepositLabel()
@@ -209,96 +234,24 @@ function ZO_GamepadBanking:ShowSelector()
     ZO_BankingCommon_Gamepad.ShowSelector(self)
 end
 
--- spinner functions
-
-function ZO_GamepadBanking:SetSpinnerValue(max, value)
-    self.spinner:SetMinMax(1, max)
-    self.spinner:SetValue(value)
-end
-
-local function CanWithdrawDeposit(inventoryData, bagType)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventoryData)
-    return DoesBagHaveSpaceFor(bagType, bag, index)
-end
-
-function ZO_GamepadBanking:ConfirmWithdrawDeposit(list, bagType)
-    local inventoryData = list:GetTargetData()
-
-    if CanWithdrawDeposit(inventoryData, bagType) then
-        local bag, index = ZO_Inventory_GetBagAndIndex(inventoryData)
-        if self.confirmationMode then
-            local quantity = self.spinner:GetValue()
-            if quantity > 0 then
-                PickupInventoryItem(bag, index, quantity)
-                PlaceInTransfer()
-                self:UpdateSpinnerConfirmation(DEACTIVATE_SPINNER, list)
-            end
-        elseif inventoryData.stackCount > 1 then
-            self:UpdateSpinnerConfirmation(ACTIVATE_SPINNER, list)
-            self:SetSpinnerValue(inventoryData.stackCount, inventoryData.stackCount)
-        else
-            PickupInventoryItem(bag, index)
-            PlaceInTransfer()
-        end
-    end
-end
-
-function ZO_GamepadBanking:UpdateSpinnerConfirmation(activateSpinner, list)
-    self.confirmationMode = activateSpinner
-    if activateSpinner then
-        self.spinner:AttachToTargetListEntry(list:GetParametricList())
-        ZO_GamepadGenericHeader_Deactivate(self.header)
-
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.spinnerKeybindStripDescriptor)
-    else
-        self.spinner:DetachFromListEntry()
-        ZO_GamepadGenericHeader_Activate(self.header)
-
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.spinnerKeybindStripDescriptor)
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
-    end
-
-    list:RefreshVisible()
-    list:SetUseTriggers(not activateSpinner)
-    list:SetDirectionalInputEnabled(not activateSpinner)
-end
-
-function ZO_GamepadBanking:CancelWithdrawDeposit(list)
-    if self.confirmationMode then
-        self:UpdateSpinnerConfirmation(DEACTIVATE_SPINNER, list)
-    else
-        SCENE_MANAGER:HideCurrentScene()
-    end
-end
-
---end spinner functions
-
 function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
-    local withdrawDepositKeybind =
+    self.withdrawDepositFundsKeybind =
     {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         keybind = "UI_SHORTCUT_PRIMARY",
         name = function()
                  local isWithdraw = self.mode == BANKING_GAMEPAD_MODE_WITHDRAW
                  local list = isWithdraw and self.withdrawList or self.depositList
-                 local data = list:GetTargetData()
-                 if data then
-                    if data.currencyType then
-                        return isWithdraw and GetString(SI_BANK_WITHDRAW_GOLD_BIND) or GetString(SI_BANK_DEPOSIT_GOLD_BIND)
-                    else
-                        return isWithdraw and GetString(SI_BANK_WITHDRAW) or GetString(SI_BANK_DEPOSIT)
-                    end
-                end
+                 return isWithdraw and GetString(SI_BANK_WITHDRAW_GOLD_BIND) or GetString(SI_BANK_DEPOSIT_GOLD_BIND)
         end,
         enabled = function() return self:CanInteract() end,
-        callback = function() self:PerformWithdrawDeposit() end
+        callback = function() self:PerformWithdrawDepositFunds() end
     }
 
     self.mainKeybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        withdrawDepositKeybind,
         {
-            keybind = "UI_SHORTCUT_TERTIARY",
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
             name = function()
                 local cost = GetNextBankUpgradePrice()
                 if GetCarriedCurrencyAmount(CURT_MONEY) >= cost then
@@ -322,6 +275,20 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
             end
         },
         {
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            visible = function()
+                local isWithdraw = self.mode == BANKING_GAMEPAD_MODE_WITHDRAW
+                local list = isWithdraw and self.withdrawList or self.depositList
+                local data = list:GetTargetData()
+                return data and data.currencyType == nil
+            end,
+
+            callback = function()
+                self:ShowActions()
+            end,
+        },
+        {
             keybind = "UI_SHORTCUT_LEFT_STICK",
             name = GetString(SI_ITEM_ACTION_STACK_ALL),
             visible = function()
@@ -337,17 +304,10 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
 
     self:SetDepositKeybindDescriptor(self.mainKeybindStripDescriptor)
     self:SetWithdrawKeybindDescriptor(self.mainKeybindStripDescriptor)
+end
 
-    self.spinnerKeybindStripDescriptor = {
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        withdrawDepositKeybind,
-    }
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.spinnerKeybindStripDescriptor,
-                                                    GAME_NAVIGATION_TYPE_BUTTON,
-                                                    function()
-                                                        local list = self.mode == BANKING_GAMEPAD_MODE_WITHDRAW and self.withdrawList or self.depositList
-                                                        self:CancelWithdrawDeposit(list)
-                                                    end)
+function ZO_GamepadBanking:OnCategoryChangedCallback(selectedData)
+    self:SetSelectedData(self:GetCurrentList():GetTargetData())
 end
 
 function ZO_GamepadBanking:GetWithdrawMoneyAmount()
@@ -381,8 +341,10 @@ function ZO_GamepadBanking:CreateEventTable()
     end
 
     local function RefreshLists()
+        self:ClearSelectedData()
         self.depositList:RefreshList()
         self.withdrawList:RefreshList()
+        self:SetSelectedData(self:GetCurrentList():GetTargetData())
     end
 
     local function AlertAndRefreshHeader(currencyType, currentCurrency, oldCurrency, reason)       
@@ -470,22 +432,10 @@ function ZO_GamepadBanking:CanInteract()
                 end
             end
         end
-    elseif self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
-        if GetNumBagFreeSlots(BAG_BACKPACK) > 0 then
-            return true
-        else
-            return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your Inventory is full"
-        end
-    elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
-        if GetNumBagFreeSlots(BAG_BANK) > 0 then
-            return true
-        else
-            return false, GetString(SI_INVENTORY_ERROR_BANK_FULL) -- "Your bank is full"
-        end
     end
 end
 
-function ZO_GamepadBanking:PerformWithdrawDeposit()
+function ZO_GamepadBanking:PerformWithdrawDepositFunds()
     local inventoryData = self.currentItemList:GetTargetData()
     if inventoryData.currencyType then
         if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then 
@@ -494,13 +444,28 @@ function ZO_GamepadBanking:PerformWithdrawDeposit()
             self:SetMaxInputFunction(GetMaxBankDeposit) 
         end
         self:ShowSelector()
-    elseif self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
-        self:ConfirmWithdrawDeposit(self.withdrawList, BAG_BACKPACK)
-    elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
-        self:ConfirmWithdrawDeposit(self.depositList, BAG_BANK)
     end
 end
 
+function ZO_GamepadBanking:ShowActions()
+    self:RemoveKeybinds()
+
+    local function OnActionsFinishedCallback()
+        self:AddKeybinds()
+        -- setting the currently selected data will update the primary keybind
+        local currentData = self:GetCurrentList():GetTargetData()
+        self:SetSelectedData(currentData)
+    end
+
+    local dialogData = 
+    {
+        targetData = self.currentItemList:GetTargetData(),
+        finishedCallback = OnActionsFinishedCallback,
+        itemActions = self.itemActions,
+    }
+
+    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
+end
 -- XML Handlers
 
 function ZO_Banking_Gamepad_Initialize(control)

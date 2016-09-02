@@ -349,8 +349,9 @@ end
 
 CSH[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, championPoints)
     if(not INTERACT_WINDOW:IsShowingInteraction()) then
+        local barParams
         if currentExperience > previousExperience then
-            local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
+            barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
         end
         return CSA_EVENT_LARGE_TEXT, SOUNDS.OBJECTIVE_DISCOVERED, zo_strformat(SI_SUBZONE_NOTIFICATION_DISCOVER, subzoneName), nil, nil, nil, nil, barParams
     end
@@ -819,6 +820,70 @@ CSH[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function()
     return CSA_EVENT_LARGE_TEXT, SOUNDS.LFG_COMPLETE_ANNOUNCEMENT, GetString(SI_ACTIVITY_FINDER_ACTIVITY_COMPLETE_ANNOUNCEMENT_TEXT)
 end
 
+do
+    local QUEUE_IMMEDIATELY = true
+    local SHOW_IMMEDIATELY = true
+    CSH[EVENT_DUEL_COUNTDOWN] = function(startTimeMS)
+        local startSoundPlayed = false
+        local function CountdownTextFunction()
+            local timeLeftMS = startTimeMS - GetFrameTimeMilliseconds()
+            local secondsRemaining = math.ceil(timeLeftMS / 1000)
+            -- make sure we never show the number 0 or less
+            if secondsRemaining <= 0 then 
+                secondsRemaining = 1 
+            end
+            if timeLeftMS <= 500 then
+                -- play the duel start sound near the actual start of the duel
+                if not startSoundPlayed then
+                    PlaySound(SOUNDS.DUEL_START)
+                    startSoundPlayed = true
+                end
+            end
+            return zo_strformat(SI_DUELING_COUNTDOWN_CSA, secondsRemaining)
+        end
+        local displayTime = startTimeMS - GetFrameTimeMilliseconds()
+        return CSA_EVENT_LARGE_TEXT, nil, CountdownTextFunction, nil, nil, nil, nil, nil, displayTime, nil, QUEUE_IMMEDIATELY, SHOW_IMMEDIATELY
+    end
+end
+
+do
+    local DUEL_BOUNDARY_WARNING_LIFESPAN_MS = 2000
+
+    CSH[EVENT_DUEL_NEAR_BOUNDARY] = function()
+        local function CheckBoundary()
+            if IsNearDuelBoundary() then
+                CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_DUEL_NEAR_BOUNDARY, CSA_EVENT_SMALL_TEXT, SOUNDS.DUEL_BOUNDARY_WARNING, GetString(SI_DUELING_NEAR_BOUNDARY_CSA), nil, nil, nil, CheckBoundary, nil, DUEL_BOUNDARY_WARNING_LIFESPAN_MS)
+            end
+        end
+        return CSA_EVENT_SMALL_TEXT, SOUNDS.DUEL_BOUNDARY_WARNING, GetString(SI_DUELING_NEAR_BOUNDARY_CSA), nil, nil, nil, CheckBoundary, nil, DUEL_BOUNDARY_WARNING_LIFESPAN_MS
+    end
+end
+
+CSH[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentDisplayName, opponentCharacterName)
+    local resultString = GetString("SI_DUELRESULT", result)
+    local userFacingName
+    if wasLocalPlayersResult then
+        local playerDisplayName = GetDisplayName()
+        local playerCharacterName = GetUnitName("player")
+        userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(playerDisplayName, playerCharacterName)
+    else
+        userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(opponentDisplayName, opponentCharacterName)
+    end
+    resultString = zo_strformat(resultString, userFacingName)
+
+    local localPlayerWonDuel = (result == DUEL_RESULT_WON and wasLocalPlayersResult) or 
+                                (result == DUEL_RESULT_FORFEIT and not wasLocalPlayersResult)
+    local localPlayerForfeitDuel = (result == DUEL_RESULT_FORFEIT and wasLocalPlayersResult)
+    local resultSound = nil
+    if localPlayerWonDuel then
+        resultSound = SOUNDS.DUEL_WON
+    elseif localPlayerForfeitDuel then
+        resultSound = SOUNDS.DUEL_FORFEIT
+    end
+
+    return CSA_EVENT_SMALL_TEXT, resultSound, resultString
+end
+
 function ZO_CenterScreenAnnounce_GetHandlers()
     return CSH
 end
@@ -877,6 +942,10 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_COLLECTIBLE_UPDATED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_COLLECTIBLES_UPDATED)
     ZO_CenterScreenAnnounce_SetEventPriority(EVENT_RIDING_SKILL_IMPROVEMENT)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_DUEL_FINISHED)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_DUEL_NEAR_BOUNDARY)
+    ZO_CenterScreenAnnounce_SetEventPriority(EVENT_DUEL_COUNTDOWN)
+
     -- Higher-priority events
 
     -- Miscellaneous event handlers

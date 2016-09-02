@@ -2,25 +2,28 @@ MAIN_MENU_CATEGORY_ENABLED = 0
 MAIN_MENU_CATEGORY_DISABLED_WHILE_DEAD = 1
 MAIN_MENU_CATEGORY_DISABLED_WHILE_IN_COMBAT = 2
 MAIN_MENU_CATEGORY_DISABLED_WHILE_REVIVING = 3
+MAIN_MENU_CATEGORY_DISABLED_WHILE_SWIMMING = 4
+MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF = 5
 
 --Main Menu Categories
 
 MENU_CATEGORY_MARKET = 1
-MENU_CATEGORY_INVENTORY = 2
-MENU_CATEGORY_CHARACTER = 3
-MENU_CATEGORY_SKILLS = 4
-MENU_CATEGORY_CHAMPION = 5
-MENU_CATEGORY_JOURNAL = 6
-MENU_CATEGORY_COLLECTIONS = 7
-MENU_CATEGORY_MAP = 8
-MENU_CATEGORY_GROUP = 9
-MENU_CATEGORY_CONTACTS = 10
-MENU_CATEGORY_GUILDS = 11
-MENU_CATEGORY_ALLIANCE_WAR = 12
-MENU_CATEGORY_MAIL = 13
-MENU_CATEGORY_NOTIFICATIONS = 14
-MENU_CATEGORY_HELP = 15
-MENU_CATEGORY_ACTIVITY_FINDER = 16
+MENU_CATEGORY_CROWN_CRATES = 2
+MENU_CATEGORY_INVENTORY = 3
+MENU_CATEGORY_CHARACTER = 4
+MENU_CATEGORY_SKILLS = 5
+MENU_CATEGORY_CHAMPION = 6
+MENU_CATEGORY_JOURNAL = 7
+MENU_CATEGORY_COLLECTIONS = 8
+MENU_CATEGORY_MAP = 9
+MENU_CATEGORY_GROUP = 10
+MENU_CATEGORY_CONTACTS = 11
+MENU_CATEGORY_GUILDS = 12
+MENU_CATEGORY_ALLIANCE_WAR = 13
+MENU_CATEGORY_MAIL = 14
+MENU_CATEGORY_NOTIFICATIONS = 15
+MENU_CATEGORY_HELP = 16
+MENU_CATEGORY_ACTIVITY_FINDER = 17
 
 --
 --[[ MainMenu Singleton ]]--
@@ -40,16 +43,21 @@ function MainMenu_Manager:Initialize()
             isDead = IsUnitDead("player"),
             inCombat = IsUnitInCombat("player"),
             isReviving = IsUnitReincarnating("player"),
+            isWerewolf = IsWerewolf(),
         }
 
     local PLAYER_IS_DEAD = false
     local PLAYER_IS_ALIVE = true
+    local PLAYER_IS_SWIMMING = true
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_DEAD, function() self:OnPlayerAliveStateChanged(PLAYER_IS_DEAD) end)
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_ALIVE, function() self:OnPlayerAliveStateChanged(PLAYER_IS_ALIVE) end)
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_COMBAT_STATE, function(eventCode, inCombat) self:OnPlayerCombatStateChanged(inCombat) end)
+    EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_WEREWOLF_STATE_CHANGED, function(eventCode, isWerewolf) self:OnPlayerWerewolfStateChanged(isWerewolf) end)
 
     local PLAYER_IS_REVIVING = true
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_REINCARNATED, function() self:OnPlayerRevivingStateChanged(not PLAYER_IS_REVIVING) end)
+    EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_SWIMMING, function() self:OnPlayerSwimmingStateChanged(PLAYER_IS_SWIMMING) end)
+    EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_NOT_SWIMMING, function() self:OnPlayerSwimmingStateChanged(not PLAYER_IS_SWIMMING) end)
 
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_ACTIVATED, function() self:RefreshPlayerState() end)
 end
@@ -68,6 +76,16 @@ end
 
 function MainMenu_Manager:OnPlayerRevivingStateChanged(isReviving)
     self.playerStateTable.isReviving = isReviving
+    self:OnPlayerStateUpdate()
+end
+
+function MainMenu_Manager:OnPlayerSwimmingStateChanged(isSwimming)
+    self.playerStateTable.isSwimming = isSwimming
+    self:OnPlayerStateUpdate()
+end
+
+function MainMenu_Manager:OnPlayerWerewolfStateChanged(isWerewolf)
+    self.playerStateTable.isWerewolf = isWerewolf
     self:OnPlayerStateUpdate()
 end
 
@@ -93,6 +111,14 @@ end
 
 function MainMenu_Manager:IsPlayerReviving()
     return self.playerStateTable.isReviving
+end
+
+function MainMenu_Manager:IsPlayerSwimming()
+    return self.playerStateTable.isSwimming
+end
+
+function MainMenu_Manager:IsPlayerWerewolf()
+    return self.playerStateTable.isWerewolf
 end
 
 --[[

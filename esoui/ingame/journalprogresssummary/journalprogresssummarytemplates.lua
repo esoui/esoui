@@ -234,6 +234,14 @@ function ZO_JournalProgressBook_Common:GetSubCategoryInfo(categoryIndex, i)
     --Stubbed for override
 end
 
+function ZO_JournalProgressBook_Common:GetCategoryIndicesFromData(data)
+    if not data.isFakedSubcategory and data.parentData then
+        return data.parentData.categoryIndex, data.categoryIndex
+    end
+        
+    return data.categoryIndex
+end
+
 function ZO_JournalProgressBook_Common:GetCategoryInfoFromData(data, parentData)
     if not data.isFakedSubcategory and parentData then
         return select(2, self:GetSubCategoryInfo(parentData.categoryIndex, data.categoryIndex))

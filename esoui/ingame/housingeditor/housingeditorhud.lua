@@ -36,11 +36,7 @@ end
 function ZO_HousingEditorHud:Initialize(control)
     self.control = control
     
-    local centerAnchor = control:GetNamedChild("CenterAnchor")
-    self.rotateRightButton = centerAnchor:GetNamedChild("RotateRightButton")
-    self.rotateLeftButton = centerAnchor:GetNamedChild("RotateLeftButton")
-    self.rotateForwardButton = centerAnchor:GetNamedChild("RotateForwardButton")
-    self.rotateBackwardButton = centerAnchor:GetNamedChild("RotateBackButton")
+    self.buttonContainer = control:GetNamedChild("ButtonContainer")
 
     HOUSING_EDITOR_HUD_SCENE = ZO_Scene:New("housingEditorHud", SCENE_MANAGER)
     HOUSING_EDITOR_HUD_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
@@ -128,20 +124,18 @@ function ZO_HousingEditorHud:UpdateKeybinds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
 
     local rotationHidden = GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT
-
-    self.rotateRightButton:SetHidden(rotationHidden)
-    self.rotateLeftButton:SetHidden(rotationHidden)
-    self.rotateForwardButton:SetHidden(rotationHidden)
-    self.rotateBackwardButton:SetHidden(rotationHidden)
+    self.buttonContainer:SetHidden(rotationHidden)
 end
 
 do
-    local ROTATE_RIGHT = 1
-    local ROTATE_LEFT = 2
-    local ROTATE_FORWARD = 3
-    local ROTATE_BACKWARD = 4
-    local PUSH_FORWARD = 5
-    local PULL_BACKWARD = 6
+    local ROTATE_YAW_RIGHT = 1
+    local ROTATE_YAW_LEFT = 2
+    local ROTATE_PITCH_FORWARD = 3
+    local ROTATE_PITCH_BACKWARD = 4
+    local ROTATE_ROLL_LEFT = 5
+    local ROTATE_ROLL_RIGHT = 6
+    local PUSH_FORWARD = 7
+    local PULL_BACKWARD = 8
 
     function ZO_HousingEditorHud:InitializeKeybindDescriptors()
         local function PlacementCallback(direction, isUp)
@@ -149,7 +143,7 @@ do
         end
         
         local function IsCurrentlyRotating()
-            for i = ROTATE_RIGHT, PULL_BACKWARD do
+            for i = ROTATE_YAW_RIGHT, PULL_BACKWARD do
                 if self.placementKeyPresses[i] then
                     return true
                 end
@@ -172,10 +166,10 @@ do
         
         self.placementKeyPresses =
         {
-            [ROTATE_RIGHT] = false,
-            [ROTATE_LEFT] = false,
-            [ROTATE_FORWARD] = false,
-            [ROTATE_BACKWARD] = false,
+            [ROTATE_YAW_RIGHT] = false,
+            [ROTATE_YAW_LEFT] = false,
+            [ROTATE_PITCH_FORWARD] = false,
+            [ROTATE_PITCH_BACKWARD] = false,
             [PUSH_FORWARD] = false,
             [PULL_BACKWARD] = false,
         }
@@ -187,7 +181,7 @@ do
                 name = function()
                             local mode = GetHousingEditorMode() 
                             if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                return "[debug] Cancel"
+                                return "[debug] Undo"
                             elseif mode == HOUSING_EDITOR_MODE_SELECTION then
                                 return GetString(SI_EXIT_BUTTON)
                             end
@@ -237,63 +231,100 @@ do
 
             --Tertiary
             {
-                name = "[debug] Snap",
+                name = "[debug] Surface Drag",
                 keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
                 visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
-                callback = function() HousingEditorToggleSnapMode() end,
+                callback = function() HousingEditorToggleSurfaceDragMode() end,
             },
 
             --Secondary
             {
-                name = "[debug] Browse",
+                name =  function() 
+                            local mode = GetHousingEditorMode()
+                            if mode == HOUSING_EDITOR_MODE_PLACEMENT then
+                                return "[debug] Put Away"
+                            elseif mode == HOUSING_EDITOR_MODE_SELECTION then
+                                return "[debug] Browse"
+                            end
+                        end,
                 keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
-                visible = function() return GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED end,
+                visible = function() 
+                            local mode = GetHousingEditorMode()
+                            return mode ~= HOUSING_EDITOR_MODE_DISABLED
+                                     end,
                 callback =  function()
-                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+                                local mode = GetHousingEditorMode()
+                                if mode == HOUSING_EDITOR_MODE_PLACEMENT then
+                                    HousingEditorRequestRemoveFurniture()
+                                else
+                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+                                end
                             end,
             },
 
             --Roll Right
             {
-                name = "[debug] Rotate Right",
+                name = "[debug] Rotate Yaw Right",
                 keybind = "HOUSING_EDITOR_YAW_RIGHT",
                 ethereal = true,
                 handlesKeyUp = true,
                 callback =  function(isUp)
-                                PlacementCallback(ROTATE_RIGHT, isUp)
+                                PlacementCallback(ROTATE_YAW_RIGHT, isUp)
                             end,
             },
 
             --Roll Left
             {
-                name = "[debug] Rotate Left",
+                name = "[debug] Rotate Yaw Left",
                 keybind = "HOUSING_EDITOR_YAW_LEFT",
                 ethereal = true,
                 handlesKeyUp = true,
                 callback =  function(isUp)
-                                PlacementCallback(ROTATE_LEFT, isUp)
+                                PlacementCallback(ROTATE_YAW_LEFT, isUp)
                             end,
             },
 
             --Pitch Right
             {
-                name = "[debug] Rotate Forward",
+                name = "[debug] Pitch Forward",
                 keybind = "HOUSING_EDITOR_PITCH_FORWARD",
                 ethereal = true,
                 handlesKeyUp = true,
                 callback =  function(isUp)
-                                PlacementCallback(ROTATE_FORWARD, isUp)
+                                PlacementCallback(ROTATE_PITCH_FORWARD, isUp)
                             end,
             },
 
             --Pitch Left
             {
-                name = "[debug] Rotate Backward",
+                name = "[debug] Pitch Backward",
                 keybind = "HOUSING_EDITOR_PITCH_BACKWARD",
                 ethereal = true,
                 handlesKeyUp = true,
                 callback =  function(isUp)
-                                PlacementCallback(ROTATE_BACKWARD, isUp)
+                                PlacementCallback(ROTATE_PITCH_BACKWARD, isUp)
+                            end,
+            },
+
+            --Roll Right
+            {
+                name = "[debug] Roll Right",
+                keybind = "HOUSING_EDITOR_ROLL_RIGHT",
+                ethereal = true,
+                handlesKeyUp = true,
+                callback =  function(isUp)
+                                PlacementCallback(ROTATE_ROLL_RIGHT, isUp)
+                            end,
+            },
+
+            --Roll Left
+            {
+                name = "[debug] Roll Left",
+                keybind = "HOUSING_EDITOR_ROLL_LEFT",
+                ethereal = true,
+                handlesKeyUp = true,
+                callback =  function(isUp)
+                                PlacementCallback(ROTATE_ROLL_LEFT, isUp)
                             end,
             },
 
@@ -307,7 +338,7 @@ do
                                 if IsInGamepadPreferredMode() then
                                     PlacementCallback(PUSH_FORWARD, isUp)
                                 else
-                                    HousingEditorPushFixture(5) --mousewheel doesn't need the update loop
+                                    HousingEditorPushFurniture(5) --mousewheel doesn't need the update loop
                                 end
                             end,
             },
@@ -322,8 +353,28 @@ do
                                 if IsInGamepadPreferredMode() then
                                     PlacementCallback(PULL_BACKWARD, isUp)
                                 else
-                                    HousingEditorPushFixture(-5) --mousewheel doesn't need the update loop
+                                    HousingEditorPushFurniture(-5) --mousewheel doesn't need the update loop
                                 end
+                            end,
+            },
+
+            --Align to Surface
+            {
+                name = "[debug] Align",
+                keybind = "HOUSING_EDITOR_ALIGN_TO_SURFACE",
+                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
+                callback =  function()
+                                HousingEditorAlignFurnitureToSurface()
+                            end,
+            },
+
+            --Jump to safe loc
+            {
+                name = "[debug] Jump Safe",
+                keybind = "HOUSING_EDITOR_JUMP_TO_SAFE_LOC",
+                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_SELECTION end,
+                callback =  function()
+                                HousingEditorJumpToSafeLocation()
                             end,
             },
             g_ExitKeybind,
@@ -337,28 +388,36 @@ do
 
     function ZO_HousingEditorHud:OnUpdate(currentFrameTimeMS)
         if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
-            if self.placementKeyPresses[ROTATE_RIGHT] then
-                HousingEditorRotateFixture(AXIS_TYPE_Y, 1.5 * math.pi)
+            if self.placementKeyPresses[ROTATE_YAW_RIGHT] then
+                HousingEditorRotateFurniture(AXIS_TYPE_Y, 1.5 * math.pi)
             end
 
-            if self.placementKeyPresses[ROTATE_LEFT] then
-                HousingEditorRotateFixture(AXIS_TYPE_Y, -1.5 * math.pi)
+            if self.placementKeyPresses[ROTATE_YAW_LEFT] then
+                HousingEditorRotateFurniture(AXIS_TYPE_Y, -1.5 * math.pi)
             end
                 
-            if self.placementKeyPresses[ROTATE_FORWARD] then
-                HousingEditorRotateFixture(AXIS_TYPE_X, -1.5 * math.pi)
+            if self.placementKeyPresses[ROTATE_PITCH_FORWARD] then
+                HousingEditorRotateFurniture(AXIS_TYPE_X, -1.5 * math.pi)
             end
 
-            if self.placementKeyPresses[ROTATE_BACKWARD] then
-                HousingEditorRotateFixture(AXIS_TYPE_X, 1.5 * math.pi)
+            if self.placementKeyPresses[ROTATE_PITCH_BACKWARD] then
+                HousingEditorRotateFurniture(AXIS_TYPE_X, 1.5 * math.pi)
+            end
+
+            if self.placementKeyPresses[ROTATE_ROLL_LEFT] then
+                HousingEditorRotateFurniture(AXIS_TYPE_Z, 1.5 * math.pi)
+            end
+
+            if self.placementKeyPresses[ROTATE_ROLL_RIGHT] then
+                HousingEditorRotateFurniture(AXIS_TYPE_Z, -1.5 * math.pi)
             end
                 
             if self.placementKeyPresses[PUSH_FORWARD] then
-                HousingEditorPushFixture(5)
+                HousingEditorPushFurniture(5)
             end
 
             if self.placementKeyPresses[PULL_BACKWARD] then
-                HousingEditorPushFixture(-5)
+                HousingEditorPushFurniture(-5)
             end
         end
     end

@@ -4,7 +4,6 @@ ZO_GAMEPAD_INVENTORY_SCENE_NAME = "gamepad_inventory_root"
 
 ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG = "GAMEPAD_CONFIRM_DESTROY_ITEM_PROMPT"
 ZO_GAMEPAD_SPLIT_STACK_DIALOG = "GAMEPAD_SPLIT_STACK"
-ZO_GAMEPAD_INVENTORY_ACTION_DIALOG = "GAMEPAD_INVENTORY_ACTIONS_DIALOG"
 
 local CATEGORY_ITEM_ACTION_MODE = 1
 local ITEM_LIST_ACTION_MODE = 2
@@ -82,7 +81,6 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     self:InitializeConfirmDestroyDialog()
 
     self:InitializeItemActions()
-    self:InitializeActionsDialog()
 
     local function RefreshHeader()
         if not self.control:IsHidden() then
@@ -410,92 +408,30 @@ function ZO_GamepadInventory:InitializeSplitStackDialog()
     })
 end
 
-function ZO_GamepadInventory:ActionsDialogSetup(dialog)
-    dialog.entryList:SetOnSelectedDataChangedCallback(  function(list, selectedData)
-                                                            self.itemActions:SetSelectedAction(selectedData and selectedData.action)
-                                                        end)
-
-    local parametricList = dialog.info.parametricList
-    ZO_ClearNumericallyIndexedTable(parametricList)
-
-    self:RefreshItemActions()
-
-    local actions = self.itemActions:GetSlotActions()
-    local numActions = actions:GetNumSlotActions()
-
-    for i = 1, numActions do
-        local action = actions:GetSlotAction(i)
-        local actionName = actions:GetRawActionName(action)
-
-        local entryData = ZO_GamepadEntryData:New(actionName)
-        entryData:SetIconTintOnSelection(true)
-        entryData.action = action
-        entryData.setup = ZO_SharedGamepadEntry_OnSetup
-
-        local listItem =
-        {
-            template = "ZO_GamepadItemEntryTemplate",
-            entryData = entryData,
-        }
-        table.insert(parametricList, listItem)
+function ZO_GamepadInventory:OnActionsDialogFinished()
+    -- make sure to wipe out the keybinds added by actions
+    self:SetActiveKeybinds(self.currentKeybindDescriptor)
+    --restore the selected inventory item
+    if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
+        --if we refresh item actions we will get a keybind conflict
+        local currentList = self:GetCurrentList()
+        if currentList then
+            local targetData = currentList:GetTargetData()
+            if currentList == self.categoryList then
+                targetData = self:GenerateItemSlotData(targetData)
+            end
+            self:SetSelectedItemUniqueId(targetData)
+        end
+    else
+        self:RefreshItemActions()
     end
+    --refresh so keybinds react to newly selected item
+    self:RefreshActiveKeybinds()
 
-    dialog:setupFunc()
-end
-
-function ZO_GamepadInventory:InitializeActionsDialog()
-    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG,
-    {
-        setup = function(...) self:ActionsDialogSetup(...) end,
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
-        },
-        title =
-        {
-            text = SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND,
-        },
-        parametricList = {}, --we'll generate the entries on setup
-        finishedCallback =  function()
-                                -- make sure to wipe out the keybinds added by actions
-                                self:SetActiveKeybinds(self.currentKeybindDescriptor)
-                                --restore the selected inventory item
-                                if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
-                                    --if we refresh item actions we will get a keybind conflict
-                                    local currentList = self:GetCurrentList()
-                                    if currentList then
-                                        local targetData = currentList:GetTargetData()
-                                        if currentList == self.categoryList then
-                                            targetData = self:GenerateItemSlotData(targetData)
-                                        end
-                                        self:SetSelectedItemUniqueId(targetData)
-                                    end
-                                else
-                                    self:RefreshItemActions()
-                                end
-                                --refresh so keybinds react to newly selected item
-                                self:RefreshActiveKeybinds()
-
-                                self:OnUpdate()
-                                if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
-                                    self:RefreshCategoryList()
-                                end
-                            end,
-        buttons =
-        {
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = GetString(SI_DIALOG_CANCEL),
-            },
-            {
-                keybind = "DIALOG_PRIMARY",
-                text = GetString(SI_GAMEPAD_SELECT_OPTION),
-                callback = function(dialog)
-                    self.itemActions:DoSelectedAction()
-                end,
-            },
-        },
-    })
+    self:OnUpdate()
+    if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
+        self:RefreshCategoryList()
+    end
 end
 
 --------------
@@ -525,14 +461,25 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 self:ShowActions()
             end,
         },
-        {
-            
+        {  
             name = GetString(SI_ITEM_ACTION_STACK_ALL),
             keybind = "UI_SHORTCUT_LEFT_STICK",
             order = 1500,
             disabledDuringSceneHiding = true,
             callback = function()
                 StackBag(BAG_BACKPACK)
+            end,
+        },
+        {  
+            name = GetString(SI_ITEM_ACTION_STOW_MATERIALS),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            order = 2000,
+            disabledDuringSceneHiding = true,
+            visible = function()
+                          return IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(BAG_BACKPACK)
+                      end,
+            callback = function()
+                StowAllVirtualItems()
             end,
         },
     }
@@ -721,8 +668,8 @@ function ZO_GamepadInventory:SetSelectedInventoryData(inventoryData)
     end
 
     self:SetSelectedItemUniqueId(inventoryData)
-
     self.itemActions:SetInventorySlot(inventoryData)
+
 end
 
 function ZO_GamepadInventory:ClearSelectedInventoryData()
@@ -1376,7 +1323,13 @@ function ZO_GamepadInventory:ShowActions()
     --if taking action on an item, it is no longer new
     self:MarkSelectedItemAsNotNew()
     self:RemoveKeybinds()
-    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG)
+    self:RefreshItemActions()
+    local dialogData =
+    {
+        finishedCallback = function() self:OnActionsDialogFinished() end,
+        itemActions = self.itemActions
+    }
+    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
     self:TryClearNewStatus()
     self:GetCurrentList():RefreshVisible()
 end

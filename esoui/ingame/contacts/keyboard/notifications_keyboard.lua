@@ -18,6 +18,7 @@ local KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_POINTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
     [NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
+    [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/notificationIcon_duel.dds",
 }
 
 -- Provider Overrides
@@ -249,6 +250,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         collectionsProvider,
         ZO_LFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
+        ZO_DuelInviteProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))

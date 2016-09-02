@@ -8,6 +8,7 @@ function ZO_KeybindStrip_HandleKeybindUp(keybind)
     return KEYBIND_STRIP:TryHandlingKeybindUp(keybind)
 end
 
+ZO_KEYBIND_STRIP_KEYBOARD_VISUAL_HEIGHT = 85
 KEYBIND_STRIP_STANDARD_STYLE = {
     nameFont = "ZoFontKeybindStripDescription",
     nameFontColor = ZO_NORMAL_TEXT,
@@ -18,9 +19,9 @@ KEYBIND_STRIP_STANDARD_STYLE = {
     leftAnchorOffset = 10,
     centerAnchorOffset = 0,
     rightAnchorOffset = -10,
-    drawTier = DT_LOW,
+    drawTier = DT_MEDIUM,
     drawLevel = 1,
-    backgroundDrawTier = DT_LOW,
+    backgroundDrawTier = DT_MEDIUM,
     backgroundDrawLevel = 0,
 }
 
@@ -31,6 +32,7 @@ KEYBIND_STRIP_CHAMPION_KEYBOARD_STYLE.drawLevel = ZO_HIGH_TIER_GAMEPAD_KEYBIND_S
 KEYBIND_STRIP_CHAMPION_KEYBOARD_STYLE.backgroundDrawTier = DT_HIGH
 KEYBIND_STRIP_CHAMPION_KEYBOARD_STYLE.backgroundDrawLevel = ZO_HIGH_TIER_GAMEPAD_KEYBIND_STRIP_BG
 
+ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT = 125
 KEYBIND_STRIP_GAMEPAD_STYLE = {
     nameFont = "ZoFontGamepad34",
     nameFontColor = ZO_SELECTED_TEXT,

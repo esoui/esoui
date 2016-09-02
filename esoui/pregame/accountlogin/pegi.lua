@@ -172,7 +172,7 @@ function ZO_PEGI_AgreementDialog_OnInitialized(self)
 end
 
 function ZO_PEGI_AgreementDeclinedDialog_OnInitialized(self)
-    local customerSupportLink = ZO_LinkHandler_CreateURLLink(GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_HELP), GetString(SI_PEGI_AGREEMENT_LINK_TEXT))
+    local customerSupportLink = ZO_LinkHandler_CreateURLLink(GetURLTextByType(APPROVED_URL_ESO_HELP), GetString(SI_PEGI_AGREEMENT_LINK_TEXT))
     self:GetNamedChild("AgreementText"):SetText(zo_strformat(SI_PEGI_AGREEMENT_DECLINE_TEXT, customerSupportLink))
 
     ZO_Dialogs_RegisterCustomDialog("PEGI_NOTIFICATION_DECLINE",

@@ -22,8 +22,8 @@ function ZO_NotificationProvider:New(notificationManager)
     provider.canShowGamerCard = false
     provider.notificationManager = notificationManager
 
-    provider.pushUpdateCallback = function()
-        provider:PushUpdateToNotificationManager()
+    provider.pushUpdateCallback = function(eventId)
+        provider:PushUpdateToNotificationManager(eventId)
     end
     return provider
 end
@@ -45,8 +45,10 @@ function ZO_NotificationProvider:AddDataEntry(list, i, isHeader)
     self.notificationManager:AddDataEntry(self.list[i].dataType, self.list[i], isHeader)
 end
 
-function ZO_NotificationProvider:PushUpdateToNotificationManager()
-    self.notificationManager:RefreshNotificationList()
+function ZO_NotificationProvider:PushUpdateToNotificationManager(eventId)
+    if not self.notificationManager:GetSuppressNotificationsByEvent(eventId) then
+        self.notificationManager:RefreshNotificationList()
+    end
 end
 
 function ZO_NotificationProvider:RegisterUpdateEvent(event)
@@ -1164,6 +1166,46 @@ function ZO_CraftBagAutoTransferProvider:Decline()
     ClearCraftBagAutoTransferNotification()
 end
 
+--Duel Invite Provider
+-------------------------
+
+ZO_DuelInviteProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_DuelInviteProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_DUEL_INVITE_RECEIVED)
+    provider:RegisterUpdateEvent(EVENT_DUEL_INVITE_REMOVED)
+
+    return provider
+end
+
+function ZO_DuelInviteProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
+    if duelState == DUEL_STATE_INVITE_CONSIDERING then
+        local userFacingInviterName = ZO_GetPrimaryPlayerName(duelPartnerDisplayName, duelPartnerCharacterName)
+        local formattedInviterNames = ZO_GetPrimaryPlayerNameWithSecondary(duelPartnerDisplayName, duelPartnerCharacterName)
+        table.insert(self.list,
+        {
+            dataType = NOTIFICATIONS_REQUEST_DATA,
+            notificationType = NOTIFICATION_TYPE_DUEL,
+            message = zo_strformat(SI_DUEL_INVITE_MESSAGE, formattedInviterNames),
+            shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, userFacingInviterName),
+            characterNameForGamercard = ZO_StripGrammarMarkupFromCharacterName(duelPartnerCharacterName),
+        })
+    end
+end
+
+function ZO_DuelInviteProvider:Accept(data)
+    AcceptDuel()
+end
+
+function ZO_DuelInviteProvider:Decline(data, button, openedFromKeybind)
+    DeclineDuel()
+end
+
 -- Sort List
 -------------------------
 local ENTRY_SORT_KEYS =
@@ -1333,6 +1375,33 @@ end
 
 function ZO_NotificationManager:GetCollectionsProvider()
     return self.collectionsProvider
+end
+
+function ZO_NotificationManager:SuppressNotificationsByEvent(eventId)
+    if not self.suppressNotifications then
+        self.suppressNotifications = {}
+    end
+
+    if not self.suppressNotifications[eventId] then
+        self.suppressNotifications[eventId] = 0
+    end
+
+    self.suppressNotifications[eventId] = self.suppressNotifications[eventId] + 1
+end
+
+function ZO_NotificationManager:GetSuppressNotificationsByEvent(eventId)
+    if self.suppressNotifications and self.suppressNotifications[eventId] then
+        return self.suppressNotifications[eventId] > 0
+    end
+
+    return false
+end
+
+function ZO_NotificationManager:ResumeNotificationsByEvent(eventId)
+    if self.suppressNotifications and self.suppressNotifications[eventId] then
+        self.suppressNotifications[eventId] = self.suppressNotifications[eventId] - 1
+        self:RefreshNotificationList()
+    end
 end
 
 -- Override

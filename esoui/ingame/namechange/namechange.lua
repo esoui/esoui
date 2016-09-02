@@ -14,7 +14,7 @@ function ZO_NameChange:Initialize()
             --initialize all of the id to name mappings on the first login so if they buy a bunch of rename tokens we have all
             --the mappings built for each character
             for i = 1, GetNumCharacters() do
-                local name, _, _, _, _, _, _, characterId = GetCharacterInfo(i)
+                local name, _, _, _, _, _, characterId = GetCharacterInfo(i)
                 if sv[characterId] == nil then
                     --Strip the grammar markup
                     sv[characterId] = zo_strformat("<<1>>", name)

@@ -133,7 +133,7 @@ end
 function ZO_MarketAnnouncement_Base:UpdateLabels(productData)
     local marketProduct = productData.marketProduct
     if marketProduct then
-        local name, description = marketProduct:GetMarketProductInfo()
+        local description = marketProduct:GetMarketProductDescription()
         local formattedDescription = zo_strformat(SI_MARKET_TEXT_FORMATTER, description)
         self:SetProductDescription(formattedDescription)
         self:UpdatePositionLabel(productData.index)
@@ -178,7 +178,7 @@ do
                     local productId = GetMarketAnnouncementProductDefId(i)
                     local marketProduct = self:CreateMarketProduct(productId)
 
-                    local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
+                    local name, description, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
                     local timeLeft = marketProduct:GetTimeLeftInSeconds()
                     local containsDLC = DoesMarketProductContainDLC(productId)
                     -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time

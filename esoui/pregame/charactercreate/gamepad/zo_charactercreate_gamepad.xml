@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_CharacterCreateEntry_Gamepad" resizeToFitDescendents="true" virtual="true">
-        </Control>
+        <Control name="ZO_CharacterCreateEntry_Gamepad" resizeToFitDescendents="true" virtual="true" />
 
         <Control name="ZO_CharacterCreateNameEntry_Gamepad" inherits="ZO_GamepadTextFieldItem ZO_GamepadWhiteSelectorHighlight" virtual="true"/>
 
@@ -17,8 +16,7 @@
             </Controls>
         </Control>
 
-        <Button name="SelectorButton_Gamepad" level="3" hidden="true" virtual="true" clickSound="Click_CC_Selector">
-        </Button>
+        <Button name="SelectorButton_Gamepad" level="3" hidden="true" virtual="true" clickSound="Click_CC_Selector" />
 
         <Control name="RaceSelectorButton_Gamepad" virtual="true">
             <Dimensions x="84" y="84" />
@@ -120,7 +118,7 @@
             </Controls>
         </TopLevelControl>
             
-        <TopLevelControl name="ZO_CharacterCreate_Gamepad" layer="BACKGROUND" hidden="true">
+        <TopLevelControl name="ZO_CharacterCreate_Gamepad" hidden="true">
             <AnchorFill />
 
             <OnInitialized>

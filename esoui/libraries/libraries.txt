@@ -221,4 +221,4 @@ EsoUI\Libraries\ZO_PixelUnits\ZO_PixelUnits.xml
 EsoUI\Libraries\ZO_PlatformStyle\ZO_PlatformStyle.lua
 EsoUI\Libraries\ZO_ButtonTabBar\Gamepad\ZO_GamepadButtonTabBar.lua
 
-
+EsoUI\Libraries\ZO_StateMachine\ZO_StateMachine.lua

@@ -18,6 +18,8 @@ ZO_MARKET_TILE_ICON_IMAGE_LEVEL =   22
 ZO_MARKET_PRODUCT_PURCHASED_DESATURATION = 1
 ZO_MARKET_PRODUCT_NOT_PURCHASED_DESATURATION = 0
 
+ZO_FEATURED_PRESENTATION_INDEX = nil
+
 do
     local function GetTextColor(enabled, normalColor, disabledColor)
         if enabled then
@@ -32,7 +34,7 @@ do
 end
 
 do
-    local MARKET_PRODUCT_COLOR_MAP_UNFOCUSED = 
+    local MARKET_PRODUCT_COLOR_MAP_UNFOCUSED =
     {
             [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_DIMMED_COLOR,
             [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
@@ -40,7 +42,7 @@ do
             [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_DIMMED_COLOR,
     }
 
-    local MARKET_PRODUCT_COLOR_MAP_FOCUSED = 
+    local MARKET_PRODUCT_COLOR_MAP_FOCUSED =
     {
         [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_SELECTED_COLOR,
         [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_COLOR,
@@ -67,11 +69,11 @@ function ZO_MarketProductBase:New(...)
     return marketProduct
 end
 
+local DEFAULT_CURRENCY_ICON_SIZE = 32
 function ZO_MarketProductBase:Initialize(control, owner)
     self.owner = owner
     self.marketProductId = 0
     self.variation = 1
-    self.activeMarketProductIcon = nil
 
     if control then
         self:InitializeControls(control)
@@ -105,8 +107,24 @@ function ZO_MarketProductBase:GetId()
     return self.marketProductId
 end
 
+function ZO_MarketProductBase:SetId(marketProductId)
+    self.marketProductId = marketProductId
+end
+
 function ZO_MarketProductBase:GetMarketProductInfo()
     return GetMarketProductInfo(self.marketProductId)
+end
+
+function ZO_MarketProductBase:GetMarketProductDisplayName()
+    return GetMarketProductDisplayName(self.marketProductId)
+end
+
+function ZO_MarketProductBase:GetMarketProductDescription()
+    return GetMarketProductDescription(self.marketProductId)
+end
+
+function ZO_MarketProductBase:GetMarketProductPricingByPresentation()
+    return GetMarketProductPricingByPresentation(self.marketProductId, self.presentationIndex)
 end
 
 function ZO_MarketProductBase:GetMarketProductType()
@@ -129,6 +147,10 @@ function ZO_MarketProductBase:GetNumAttachedItems()
     return GetMarketProductNumItems(self.marketProductId)
 end
 
+function ZO_MarketProductBase:GetStackCount()
+    return GetMarketProductStackCount(self.marketProductId)
+end
+
 function ZO_MarketProductBase:GetProductType()
     return GetMarketProductType(self.marketProductId)
 end
@@ -139,6 +161,10 @@ function ZO_MarketProductBase:GetHidesChildProducts()
     end
 
     return false
+end
+
+function ZO_MarketProductBase:GetMarketProductCrownCrateId()
+    return GetMarketProductCrownCrateId(self:GetId())
 end
 
 function ZO_MarketProductBase:GetTimeLeftInSeconds()
@@ -184,10 +210,12 @@ end
 do
     local NEW_STRING = GetString(SI_MARKET_TILE_CALLOUT_NEW)
     local FOCUSED = true
-    function ZO_MarketProductBase:LayoutCostAndText(description, cost, discountPercent, discountedCost, isNew)
+    local INHERIT_ICON_COLOR = true
+    local CURRENCY_ICON_SIZE = "100%"
+    function ZO_MarketProductBase:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
         local canPurchase = not self:IsPurchaseLocked()
         local hideCallouts = true
-        local isFree = cost == 0 or discountedCost == 0
+        local isFree = cost == 0 or costAfterDiscount == 0
         self.isFree = isFree
 
         if canPurchase then
@@ -225,7 +253,9 @@ do
             if not isFree then
                 self.previousCost:SetHidden(not onSale)
                 self.previousCostStrikethrough:SetHidden(not onSale)
-                self.cost:SetText(zo_strformat(SI_MARKET_LABEL_CURRENCY_FORMAT_NO_ICON, ZO_CommaDelimitNumber(discountedCost)))
+                local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
+                local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
+                self.cost:SetText(currencyString)
             else
                 self.previousCost:SetHidden(true)
                 self.previousCostStrikethrough:SetHidden(true)
@@ -288,50 +318,56 @@ function ZO_MarketProductBase:UpdateRemainingTimeCalloutText()
     end
 end
 
-function ZO_MarketProductBase:SetId(marketProductId)
-    self.marketProductId = marketProductId
+function ZO_MarketProductBase:GetPresentationIndex()
+    return self.presentationIndex
 end
 
-function ZO_MarketProductBase:Show(marketProductId)
+function ZO_MarketProductBase:Show(marketProductId, presentationIndex)
     if marketProductId ~= nil then
         self:SetId(marketProductId)
     end
 
+    self.presentationIndex = presentationIndex
+
     self.purchaseState = self:GetPurchaseState()
 
-    local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = self:GetMarketProductInfo()
+    local name, description, icon, isNew, isFeatured = self:GetMarketProductInfo()
     local background = self:GetBackground()
 
     self.name = name
     self:SetTitle(name)
-    
-    --PerformLayout will handle running the name through grammar, in case it needs to get applied to a more complicated paramaterized string somewhere
-    self:PerformLayout(description, cost, discountedCost, discountPercent, icon, background, isNew, isFeatured)
 
-    self:LayoutCostAndText(description, cost, discountPercent, discountedCost, isNew)
+    self:PerformLayout(description, icon, background, isNew, isFeatured)
+
+    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = self:GetMarketProductPricingByPresentation()
+    self:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
 
     self:LayoutBackground(background)
 
     self.control:SetHidden(false)
 end
 
-
 function ZO_MarketProductBase:GetControl()
     return self.control
+end
+
+function ZO_MarketProductBase:SetParent(parentControl)
+    self.control:SetParent(parentControl)
 end
 
 function ZO_MarketProductBase:Reset()
     self.control:SetHidden(true)
     self:SetHighlightHidden(true)
     self.textCallout:SetHidden(true)
-    self.activeMarketProductIcon = nil
     self.marketProductId = 0
+    self.onSale = false
+    self.isNew = false
 end
 
 function ZO_MarketProductBase:Refresh()
     local productId = self:GetId()
     if productId > 0 then
-        self:Show(productId)
+        self:Show(productId, self:GetPresentationIndex())
     end
 end
 
@@ -343,7 +379,7 @@ function ZO_MarketProductBase:SetHighlightHidden(hidden)
             self.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("MarketProductHighlightAnimation", self.highlight)
         end
 
-        if(hidden) then
+        if hidden then
             self.highlightAnimation:PlayBackward()
         else
             self.highlightAnimation:PlayForward()
@@ -355,10 +391,6 @@ function ZO_MarketProductBase:PlayHighlightAnimationToEnd()
     if self.highlightAnimation then
         self.highlightAnimation:PlayInstantlyToEnd()
     end
-end
-
-function ZO_MarketProductBase:HasActiveIcon()
-    return self.activeMarketProductIcon ~= nil
 end
 
 function ZO_MarketProductBase:SetTitle(title)
@@ -411,7 +443,7 @@ end
 function ZO_MarketProductBase:PreviewPreviousVariation()
     if self:HasPreview() and self:GetNumPreviewVariations() > 0 then
         self.variation = self.variation - 1
-        
+
         if self.variation < 1 then
             self.variation = self:GetNumPreviewVariations()
         end
@@ -420,13 +452,57 @@ function ZO_MarketProductBase:PreviewPreviousVariation()
     end
 end
 
+do
+    local SERVICE_TOKEN =
+    {
+        buttonText = GetString(SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL),
+        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE),
+        GoToUseProductLocation = Logout,
+    }
+
+    local CROWN_CRATE =
+    {
+        buttonText = GetString(SI_MARKET_OPEN_CROWN_CRATES_KEYBIND_LABEL),
+        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY),
+        GoToUseProductLocation = function()
+            if IsInGamepadPreferredMode() then
+                SCENE_MANAGER:Show("crownCrateGamepad")
+            else
+                SCENE_MANAGER:Show("crownCrateKeyboard")
+            end
+        end,
+    }
+
+    function ZO_MarketProductBase:GetUseProductInfo()
+        local instantUnlockType = GetMarketProductInstantUnlockType(self:GetId())
+        if IsMarketInstantUnlockServiceToken(instantUnlockType) then
+            return SERVICE_TOKEN
+        else
+            local marketProductType = self:GetMarketProductType()
+            if marketProductType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
+                return CROWN_CRATE
+            end
+        end
+    end
+
+    function ZO_MarketProductBase:HasUseProductInfo()
+        return self:GetUseProductInfo() ~= nil
+    end
+
+    function ZO_MarketProductBase:GoToUseProductLocation()
+        local useProductInfo = self:GetUseProductInfo()
+        if useProductInfo then
+            useProductInfo.GoToUseProductLocation()
+        end        
+    end
+end
 -- virtual functions
 
 function ZO_MarketProductBase:Purchase()
     -- to be overridden
 end
 
-function ZO_MarketProductBase:PerformLayout(name, description, cost, discountedCost, discountPercent, icon, background, isNew, isFeatured)
+function ZO_MarketProductBase:PerformLayout(name, description, icon, background, isNew, isFeatured)
     -- to be overridden
 end
 

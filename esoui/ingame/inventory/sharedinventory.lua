@@ -80,7 +80,7 @@ function ZO_SharedInventoryManager:Initialize()
         self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
 
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
-            if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID then
+            if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID and not SYSTEMS:IsShowing("crownCrate") then
                 PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
             end
         elseif GetInteractionType() == INTERACTION_BANK and bagId == BAG_BANK then

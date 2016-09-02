@@ -114,8 +114,16 @@
             </OnInitialized>
         </Control>
 
+        <Control name="Options_Social_AutoDeclineDuelInvites" inherits="ZO_Options_Checkbox ZO_Options_PanelHeader">
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_LeaderboardsNotification" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_UI, UI_SETTING_AUTO_DECLINE_DUEL_INVITES)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
         <Control name="Options_Social_ChatColorsSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Social_LeaderboardsNotification" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Social_AutoDeclineDuelInvites" relativePoint="BOTTOMLEFT" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_SOCIAL, SI_SOCIAL_OPTIONS_CHAT_COLORS)
                 ZO_OptionsWindow_InitializeControl(self)

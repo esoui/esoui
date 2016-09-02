@@ -19,7 +19,7 @@ local HELP_ASK_FOR_HELP_CATEGORY_INFO =
 		ticketCategory = TICKET_CATEGORY_QUEST_ISSUE,
 		detailsTitle = GetString(SI_CUSTOMER_SERVICE_QUEST_NAME),
 		detailsRegistrationFunction = SetCustomerServiceTicketQuestTarget,
-		extraInfo = zo_strformat(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_NO_QUEST_HINT, ZO_LinkHandler_CreateURLLink("", GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_FORUMS))),
+		extraInfo = zo_strformat(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_NO_QUEST_HINT, ZO_LinkHandler_CreateURLLink("", GetURLTextByType(APPROVED_URL_ESO_FORUMS))),
 	},
 	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITEM_ISSUE] =
 	{

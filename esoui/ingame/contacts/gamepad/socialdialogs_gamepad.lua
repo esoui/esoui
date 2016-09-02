@@ -203,6 +203,9 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,
+                callback = function()
+                    ReleaseDialog(dialogName)
+                end,
             },
         }
     })

@@ -859,7 +859,11 @@ ESO_Dialogs["LINKING_ACCOUNTS_SUCCESS_KEYBOARD"] =
     },
     mainText =
     {
-        text = SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_DMM,
+        text = function()
+            local serviceType = GetPlatformServiceType()
+            local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
+            return zo_strformat(GetString(SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_FORMAT), accountTypeName)
+        end,
     },
     noChoiceCallback = function()
             LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()
@@ -956,6 +960,7 @@ ESO_Dialogs["CHARACTER_SELECT_CHARACTER_RENAMING"] =
 ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_ERROR"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -985,6 +990,7 @@ ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_ERROR"] =
 ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_SUCCESS"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1048,6 +1054,7 @@ ESO_Dialogs["INELIGIBLE_SERVICE"] =
 ESO_Dialogs["CHARACTER_CREATE_CONFIRM_SAVE_CHANGES"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1120,6 +1127,7 @@ ESO_Dialogs["CHARACTER_CREATE_SAVING_CHANGES"] =
 ESO_Dialogs["CHARACTER_CREATE_SAVE_ERROR"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1147,6 +1155,7 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_ERROR"] =
 ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1180,6 +1189,7 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
 ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
 {
     canQueue = true,
+    mustChoose = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,

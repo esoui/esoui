@@ -21,6 +21,10 @@ function ZO_InternalIngameSceneManager:OnRemoteScenePush(sceneName)
     -- we don't keep a stack so ignore
 end
 
+function ZO_InternalIngameSceneManager:OnRemoteSceneShow(sceneName)
+    self:InternalIngameShow(sceneName)
+end
+
 function ZO_InternalIngameSceneManager:OnScenesLoaded()
     self:SetBaseScene("empty")
     self:Show("empty")
@@ -86,6 +90,21 @@ function ZO_InternalIngameSceneManager:HideTopLevels()
     end
 
     return topLevelHidden
+end
+
+function ZO_InternalIngameSceneManager:Show(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops)
+    -- remote scenes will have their states changed from the ingame scene manager and messages will tell this manager
+    -- what the scenes should do. Otherwise, treat the scene as normal.
+    local nextScene = self.scenes[sceneName]
+    if nextScene:IsRemoteScene() then
+        ChangeRemoteSceneVisibility(sceneName, REMOTE_SCENE_STATE_CHANGE_TYPE_SHOW, ZO_REMOTE_SCENE_CHANGE_ORIGIN)
+    else
+        self:InternalIngameShow(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops)
+    end
+end
+
+function ZO_InternalIngameSceneManager:InternalIngameShow(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops)
+    ZO_SceneManager.Show(self, sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops)
 end
 
 SCENE_MANAGER = ZO_InternalIngameSceneManager:New()

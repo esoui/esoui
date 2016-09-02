@@ -747,62 +747,54 @@ function CollectionsBook:UpdateCategoryLabels(data, retainScrollPosition)
     self:BuildContentList(data, retainScrollPosition)
 end
 
-    local function GetCategoryIndices(data, parentData)
-        if not data.isFakedSubcategory and parentData then
-            return parentData.categoryIndex, data.categoryIndex
-        end
-        
-        return data.categoryIndex
-    end
-
-    function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
-        if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then -- we ignore the DLC category when viewing the standard collections window
-            if index >= 1 then
-                if self.searchString ~= "" then
-                    local inSearchResults = false
-                    local categoryResults = self.searchResults[categoryIndex]
-                    if categoryResults then
-                        local effectiveSubcategoryIndex = subCategoryIndex or "root"
-                        local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
-                        if subcategoryResults and subcategoryResults[index] then
-                            inSearchResults = true
-                        end
-                    end
-
-                    if not inSearchResults then
-                        index = index - 1
-                        return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+    if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then -- we ignore the DLC category when viewing the standard collections window
+        if index >= 1 then
+            if self.searchString ~= "" then
+                local inSearchResults = false
+                local categoryResults = self.searchResults[categoryIndex]
+                if categoryResults then
+                    local effectiveSubcategoryIndex = subCategoryIndex or "root"
+                    local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
+                    if subcategoryResults and subcategoryResults[index] then
+                        inSearchResults = true
                     end
                 end
-                local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
-                index = index - 1
-                return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
+
+                if not inSearchResults then
+                    index = index - 1
+                    return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+                end
             end
+            local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
+            index = index - 1
+            return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
         end
-        return ...
     end
+    return ...
+end
 
-    function CollectionsBook:BuildContentList(data, retainScrollPosition)
-        local parentData = data.parentData
-        local categoryIndex, subCategoryIndex = GetCategoryIndices(data, parentData)
-        local numCollectibles = self:GetCategoryInfoFromData(data, parentData)
+function CollectionsBook:BuildContentList(data, retainScrollPosition)
+    local parentData = data.parentData
+    local categoryIndex, subCategoryIndex = self:GetCategoryIndicesFromData(data)
+    local numCollectibles = self:GetCategoryInfoFromData(data, parentData)
 
-        local position = self.scrollbar:GetValue()
-        self:LayoutCollection(self:GetCollectibleIds(categoryIndex, subCategoryIndex, numCollectibles))
+    local position = self.scrollbar:GetValue()
+    self:LayoutCollection(self:GetCollectibleIds(categoryIndex, subCategoryIndex, numCollectibles))
         
-        if retainScrollPosition then
-            self.scrollbar:SetValue(position)
+    if retainScrollPosition then
+        self.scrollbar:SetValue(position)
 
-            if(g_currentMouseTarget ~= nil) then
-                g_currentMouseTarget:OnMouseExit()
-            end
+        if(g_currentMouseTarget ~= nil) then
+            g_currentMouseTarget:OnMouseExit()
+        end
 
-            local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-            if (mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl.collectible) then
-                mouseOverControl.collectible:OnMouseEnter()
-            end
+        local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+        if (mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl.collectible) then
+            mouseOverControl.collectible:OnMouseEnter()
         end
     end
+end
 
 do
     local function ShouldAddCollectible(filterType, id)

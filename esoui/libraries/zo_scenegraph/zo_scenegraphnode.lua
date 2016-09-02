@@ -6,16 +6,6 @@ function ZO_SceneGraphNode:New(...)
     return obj
 end
 
-function ZO_SceneGraphNode:InitializeStaticBehavior()
-    --called on the class table, not an instance. one event for all scene nodes
-    self.UICustomScale = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE))
-    EVENT_MANAGER:RegisterForEvent("ZO_SceneGraphNode", EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
-        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_CUSTOM_SCALE then
-            self.UICustomScale = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE))
-        end
-    end)
-end
-
 function ZO_SceneGraphNode:Initialize(sceneGraph, name)
     self.sceneGraph = sceneGraph
     self.name = name
@@ -117,14 +107,19 @@ function ZO_SceneGraphNode:SetScale(scale)
 end
 
 function ZO_SceneGraphNode:ComputeSizeForDepth(x, y, z)
-    local scale = 1 + self.translateZ + z
+    local distanceFromCamera = self.translateZ + z
     local parent = self.parent
     while parent do
-        scale = scale + parent.translateZ
+        distanceFromCamera = distanceFromCamera + parent.translateZ
         parent = parent.parent
     end
+    distanceFromCamera = distanceFromCamera - self.sceneGraph:GetCameraZ()
+    local scale = 1
+    if distanceFromCamera > 0 then
+        scale = 1 / distanceFromCamera
+    end
 
-    return x * scale, y * scale
+    return x / scale, y / scale
 end
 
 function ZO_SceneGraphNode:IsDirty()
@@ -229,6 +224,7 @@ local ANCHOR_TO_NORMALIZED_Y =
 }
 
 function ZO_SceneGraphNode:Render()
+    local customScale = GetUICustomScale()
     if self.controls and #self.controls > 0 then
         for i, control in ipairs(self.controls) do
             local distanceFromCamera = self.finalTranslateZ + self.controlZ[i] - self.sceneGraph:GetCameraZ()
@@ -244,8 +240,8 @@ function ZO_SceneGraphNode:Render()
                 finalX = finalX * depthScale
                 finalY = finalY * depthScale
 
-                finalX = finalX / self.UICustomScale
-                finalY = finalY / self.UICustomScale
+                finalX = finalX / customScale
+                finalY = finalY / customScale
 
                 local anchorPoint = self.controlAnchorPoint[i]
                 control:SetAnchor(anchorPoint, nil, CENTER, finalX, finalY)
@@ -254,7 +250,7 @@ function ZO_SceneGraphNode:Render()
                 else
                     control:SetTextureRotation(0)
                 end
-                control:SetScale((self.finalScale * depthScale * self.controlScale[i]) / self.UICustomScale)
+                control:SetScale((self.finalScale * depthScale * self.controlScale[i]) / customScale)
                 control:SetHidden(self.controlHidden[i])
             else
                 control:SetHidden(true)
@@ -371,5 +367,3 @@ function ZO_SceneGraphNode:SetControlUseRotation(control, useRotation)
         self:SetDirty(true)
     end
 end
-
-ZO_SceneGraphNode:InitializeStaticBehavior()

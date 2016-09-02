@@ -12,8 +12,12 @@ local function IsPlayerInsideJournalQuestConditionGoalArea(journalIndex, stepInd
     conditionIndex = conditionIndex - 1
     return IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION, journalIndex, stepIndex, conditionIndex)
         or IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
+        or IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION, journalIndex, stepIndex, conditionIndex)
+        or IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
         or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_CONDITION, journalIndex, stepIndex, conditionIndex)
         or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
+        or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION, journalIndex, stepIndex, conditionIndex)
+        or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
 end
 
 local function IsQuestVisible(journalIndex)
@@ -115,10 +119,7 @@ local AREA_TEXTURE_RESTING_ALPHA_KEYBOARD = 0.85
 function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
     local platformModifier = IsInGamepadPreferredMode() and "Gamepad/gp_" or ""
     local pinType = pinType or areaTexture.pinType
-    local pinTypeAssisted = pinType == MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION 
-            or pinType == MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION 
-            or pinType == MAP_PIN_TYPE_ASSISTED_QUEST_ENDING
-
+    local pinTypeAssisted = ZO_MapPin.ASSISTED_PIN_TYPES[pinType]
     if pinTypeAssisted then
         areaTexture.left:SetTexture("EsoUI/Art/Compass/"..platformModifier.."areapin2frame_ends.dds")
         areaTexture.right:SetTexture("EsoUI/Art/Compass/"..platformModifier.."areapin2frame_ends.dds")
@@ -224,7 +225,8 @@ function Compass:InitializeQuestPins()
     end
 
     local function OnPlayerInPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
-        if pinType == MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION or pinType == MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION or pinType == MAP_PIN_TYPE_TRACKED_QUEST_CONDITION or pinType == MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION then
+        local isAreaPin = ZO_MapPin.QUEST_CONDITION_PIN_TYPES[pinType]
+        if isAreaPin then
             OnQuestAreaGoalStateChanged(param1 + 1, param2 + 1, param3 + 1, playerIsInside)
         end
     end
@@ -361,8 +363,12 @@ end
 function Compass:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
     local playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION)
     playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
     playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_CONDITION) or playedAnyAnimation
     playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
 
     if not self.refreshingJournalIndex and playedAnyAnimation and (self.currentOverrideJournalIndex ~= journalIndex or self.currentOverrideStepIndex ~= stepIndex or self.currentOverrideConditionIndex ~= conditionIndex) then
         if self.areaOverrideQueue then
@@ -462,6 +468,9 @@ do
 
     local TIME_BETWEEN_LABEL_UPDATES_MS = 100
 
+    local bestPinIndices = {}
+    local bestPinDistances = {}
+
     function Compass:OnUpdate()
         if self.areaOverrideAnimation:IsPlaying() then
             self.centerOverPinLabelAnimation:PlayBackward()
@@ -473,19 +482,36 @@ do
             self.nextLabelUpdateTime = now + TIME_BETWEEN_LABEL_UPDATES_MS
 
             local bestPinDescription
-            local bestLayerInformedDistance
             local bestPinType
-
             if not (DoesUnitExist("boss1") or DoesUnitExist("boss2")) then
-                for i=1, self.container:GetNumCenterOveredPins() do
-                    local description, pinType, distance, drawLayer, drawLevel, isSupressed = self.container:GetCenterOveredPinInfo(i)
-                    if not isSupressed and description ~= "" then
+                ZO_ClearNumericallyIndexedTable(bestPinIndices)
+                ZO_ClearNumericallyIndexedTable(bestPinDistances)
+                for i = 1, self.container:GetNumCenterOveredPins() do
+                    if not self.container:IsCenterOveredPinSuppressed(i) then
+                        local drawLayer, drawLevel = self.container:GetCenterOveredPinLayerAndLevel(i)
                         local layerInformedDistance = CalculateLayerInformedDistance(drawLayer, drawLevel)
-                        if not bestLayerInformedDistance or layerInformedDistance < bestLayerInformedDistance then
-                            bestLayerInformedDistance = layerInformedDistance
-                            bestPinDescription = description
-                            bestPinType = pinType
+                        local insertIndex
+                        for bestPinIndex = 1, #bestPinIndices do
+                            if layerInformedDistance < bestPinDistances[bestPinIndex] then
+                                insertIndex = bestPinIndex
+                                break
+                            end
                         end
+                        if not insertIndex then
+                            insertIndex = #bestPinIndices + 1
+                        end
+
+                        table.insert(bestPinIndices, insertIndex, i)
+                        table.insert(bestPinDistances, insertIndex, layerInformedDistance)
+                    end
+                end
+
+                for i, centeredPinIndex in ipairs(bestPinIndices) do
+                    local description = self.container:GetCenterOveredPinDescription(centeredPinIndex)
+                    if description ~= "" then
+                        bestPinDescription = description
+                        bestPinType = self.container:GetCenterOveredPinType(centeredPinIndex)
+                        break
                     end
                 end
             end

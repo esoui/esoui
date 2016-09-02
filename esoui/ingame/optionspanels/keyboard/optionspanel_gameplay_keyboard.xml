@@ -103,9 +103,17 @@
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>
+
+        <Control name="Options_Gameplay_AutoAddToCraftBag" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_UseAutoLoot_Stolen" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_LOOT, LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
       
         <Control name="Options_Gameplay_ToggleLootHistory" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_UseAutoLoot_Stolen" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="4" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_AutoAddToCraftBag" relativePoint="BOTTOMLEFT" offsetY="4" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_LOOT, LOOT_SETTING_LOOT_HISTORY)
                 ZO_OptionsWindow_InitializeControl(self)

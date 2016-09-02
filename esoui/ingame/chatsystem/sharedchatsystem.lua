@@ -2344,19 +2344,7 @@ function SharedChatSystem:GetFontSizeFromSetting()
     -- Should  be overridden
 end
 
-ZO_CHAT_BLOCKING_SCENE_NAMES =
-    {
-        ["gamepad_market_pre_scene"] = true,
-        ["gamepad_market"] = true,
-        ["gamepad_market_preview"] = true,
-    }
-
 function StartChatInput(text, channel, target)
-    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    if currentSceneName and ZO_CHAT_BLOCKING_SCENE_NAMES[currentSceneName] then
-        return
-    end
-
     if IsChatSystemAvailableForCurrentPlatform() then
         CHAT_SYSTEM:StartTextEntry(text, channel, target)
     end

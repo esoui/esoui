@@ -213,6 +213,18 @@ function PlayerInventoryMenuBar:Initialize(control)
         end,
     }
 
+    -- Stow all materials to craft bag
+    local stowMaterialsKeybind = {
+        name = GetString(SI_ITEM_ACTION_STOW_MATERIALS),
+        keybind = "UI_SHORTCUT_QUATERNARY",
+        visible =   function()
+                        return PLAYER_INVENTORY:IsShowingBackpack() and IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(BAG_BACKPACK)
+                    end,
+        callback = function()
+            StowAllVirtualItems()
+        end,
+    }
+
     local quickslotToggleKeybindButtons =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -242,6 +254,7 @@ function PlayerInventoryMenuBar:Initialize(control)
         },
         quickslotToggleKeybind,
         stackAllKeybind,
+        stowMaterialsKeybind,
     }
 
     self:AddTab(INVENTORY_MENU_INVENTORY_BUTTON, keybindButtons, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)

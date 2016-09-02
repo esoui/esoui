@@ -251,7 +251,11 @@ local PregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "ShowEULA"
+            if IsConsoleUI() or not DoesPlatformSelectServer() then
+                return "ShowEULA"
+            else
+                return "ServerSelectIntro"
+            end
         end,
     },
 

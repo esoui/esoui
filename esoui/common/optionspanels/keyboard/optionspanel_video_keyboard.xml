@@ -67,12 +67,34 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Video_CustomScale" inherits="ZO_Options_Slider">
+        <Control name="Options_Video_UseCustomScale" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
             <Anchor point="TOPLEFT" relativeTo="Options_Video_InterfaceSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_UI, UI_SETTING_USE_CUSTOM_SCALE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <OnShow>
+                ZO_OptionsPanel_Video_UseCustomScale_OnShow(self)
+            </OnShow>
+            <Controls>
+                <Button name="$(parent)Checkbox" override="true">
+                    <Dimensions x="180"/>
+                </Button>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Checkbox" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="Options_Video_CustomScale" inherits="ZO_Options_Slider">
+            <Dimensions x="490"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_UseCustomScale" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE)
                 ZO_OptionsWindow_InitializeControl(self)
-                ZO_OptionsPanel_Video_InitializeScaleControl(self)
             </OnInitialized>
             <OnShow>
                 ZO_OptionsPanel_Video_CustomScale_OnShow(self)
@@ -88,7 +110,7 @@
         </Control>
 
         <Control name="Options_Video_GraphicsSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Video_CustomScale" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_CustomScale" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_VIDEO, SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS)
                 ZO_OptionsWindow_InitializeControl(self)

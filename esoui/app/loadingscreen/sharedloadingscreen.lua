@@ -14,9 +14,11 @@ local MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS = 15000
 local INSTANCE_DISPLAY_TYPE_ICONS =
 {
     [INSTANCE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/loadingTips/loadingTip_soloInstance.dds",
-    [INSTANCE_DISPLAY_TYPE_GROUP] = "EsoUI/Art/loadingTips/loadingTip_groupInstance.dds",
+    [INSTANCE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/loadingTips/loadingTip_groupInstance.dds",
     [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/loadingTips/loadingTip_raidDungeon.dds",
     [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/loadingTips/loadingTip_groupDelve.dds",
+    [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/icon_missing.dds",
+    [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/icon_missing.dds",
 }
 
 function GetInstanceDisplayTypeIcon(instanceType)

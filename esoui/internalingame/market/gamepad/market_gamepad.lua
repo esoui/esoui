@@ -3,6 +3,7 @@ ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME = "gamepad_market_preview"
 ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME = "gamepad_market_bundle_contents"
 ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME = "gamepad_market_locked"
 ZO_GAMEPAD_MARKET_PRE_SCENE_NAME = "gamepad_market_pre_scene"
+ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME = "gamepad_market_content_list"
 
 local DEFAULT_AMOUNT_CROWNS = 0
 local FIRST_CATEGORY_INDEX = 1
@@ -62,12 +63,6 @@ function GamepadMarketPreview:Initialize(control)
 end
 
 function GamepadMarketPreview:InitializeKeybindDescriptors()
-    local function RefreshProductsOnPurchase()
-        self.previewProductsContainer:RefreshProducts()
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        self:LayoutPreviewedProduct()
-    end
-
     self.keybindStripDescriptors =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -98,25 +93,43 @@ function GamepadMarketPreview:HasMultiplePreviewProducts()
 end
 
 function GamepadMarketPreview:LayoutPreviewedProduct()
-    self.marketProduct:LayoutTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, self.marketProductId)
 end
 
-function GamepadMarketPreview:UpdatePreviewedProduct(marketProduct)
-    self.marketProduct = marketProduct
+function GamepadMarketPreview:UpdatePreviewedProduct(marketProductId)
+    self.marketProductId = marketProductId
     if IsCharacterPreviewingAvailable() then
-        self.marketProduct.variation = 1
-        self.marketProduct:Preview()
+        self.previewVariationIndex = 1
+        self:PreviewMarketProduct()
     end
 
-    if self.marketProduct:GetNumPreviewVariations() > 1 then
+    self.numPreviewVariations = GetNumMarketProductPreviewVariations(self.marketProductId)
+
+    if self.numPreviewVariations > 1 then
         self:SetMultiVariationPreviewIconsHidden(false)
-        self.variationLabel:SetText(self.marketProduct:GetPreviewVariationDisplayName())
+        self.variationLabel:SetText(self:GetPreviewVariationDisplayName())
     else
         self:SetMultiVariationPreviewIconsHidden(true)
     end
-    
+
     self:LayoutPreviewedProduct()
     self:SetCanChangePreview(false)
+end
+
+function GamepadMarketPreview:PreviewMarketProduct()
+    PreviewMarketProduct(self.marketProductId, self.previewVariationIndex)
+    self.previewProductsContainer:RefreshActions()
+    PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
+end
+
+function GamepadMarketPreview:GetPreviewVariationDisplayName()
+    local previewVariationDisplayName = GetMarketProductPreviewVariationDisplayName(self.marketProductId, self.previewVariationIndex)
+
+    if previewVariationDisplayName == "" then
+        return self.previewVariationIndex
+    else
+        return previewVariationDisplayName
+    end
 end
 
 function GamepadMarketPreview:SetCanChangePreview(canChangePreview)
@@ -146,26 +159,42 @@ function GamepadMarketPreview:SetPreviewProductsContainer(previewProductsContain
 end
 
 function GamepadMarketPreview:PreviewNextVariation()
-    self.marketProduct:PreviewNextVariation()
-    self.variationLabel:SetText(self.marketProduct:GetPreviewVariationDisplayName())
+    if CanPreviewMarketProduct(self.marketProductId) and self.numPreviewVariations > 0 then
+        self.previewVariationIndex = self.previewVariationIndex + 1
+
+        if self.previewVariationIndex > self.numPreviewVariations then
+            self.previewVariationIndex = 1
+        end
+
+        self:PreviewMarketProduct()
+    end
+
+    self.variationLabel:SetText(self:GetPreviewVariationDisplayName())
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
 end
 
 function GamepadMarketPreview:PreviewPreviousVariation()
-    self.marketProduct:PreviewPreviousVariation()
-    self.variationLabel:SetText(self.marketProduct:GetPreviewVariationDisplayName())
+    if CanPreviewMarketProduct(self.marketProductId) and self.numPreviewVariations > 0 then
+        self.previewVariationIndex = self.previewVariationIndex - 1
+
+        if self.previewVariationIndex < 1 then
+            self.previewVariationIndex = self.numPreviewVariations
+        end
+
+        self:PreviewMarketProduct()
+    end
+
+    self.variationLabel:SetText(self:GetPreviewVariationDisplayName())
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
 end
 
 function GamepadMarketPreview:UpdateDirectionalInput()
-    if self.marketProduct then
-        if self.marketProduct:GetNumPreviewVariations() > 0 and self.canChangePreview then
-            local result = self.movementController:CheckMovement()
-            if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
-                self:PreviewNextVariation()
-            elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-                self:PreviewPreviousVariation()
-            end
+    if self.numPreviewVariations > 0 and self.canChangePreview then
+        local result = self.movementController:CheckMovement()
+        if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+            self:PreviewNextVariation()
+        elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+            self:PreviewPreviousVariation()
         end
     end
 end
@@ -177,7 +206,7 @@ do
         self:Activate()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptors)
          -- Start the preview of the container's current object
-        self:UpdatePreviewedProduct(self.previewProductsContainer:GetCurrentPreviewProduct())
+        self:UpdatePreviewedProduct(self.previewProductsContainer:GetCurrentPreviewProductId())
 
         -- for the first preview we won't put a restriction on when we can preview the next one
         -- previewing a product automatically sets this to false so manually set it to true
@@ -195,7 +224,8 @@ function GamepadMarketPreview:OnHidden()
     EVENT_MANAGER:UnregisterForUpdate("GamepadMarketPreviewUpdate")
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptors)
     self:Deactivate()
-    self.marketProduct = nil
+    self.marketProductId = 0
+    self.numPreviewVariations = 0
     self.previewProductsContainer = nil
     self:SetMultiVariationPreviewIconsHidden(true)
 end
@@ -247,6 +277,10 @@ function GamepadMarket:New(...)
 end
 
 function GamepadMarket:Initialize(control)
+    -- initialize these first so we can update the amounts on ZO_Market_Shared Initialize
+    self.crownAmountControl = ZO_GamepadMarket_CurrencyFooter:GetNamedChild("CrownsAmount")
+    self.gemAmountControl = ZO_GamepadMarket_CurrencyFooter:GetNamedChild("GemsAmount")
+
     local EMPTY_TAB_HEADER = {}
     ZO_GamepadMarket_GridScreen.Initialize(self, control, ZO_GAMEPAD_MARKET_BUNDLE_PRODUCTS_PER_ROW, ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN, EMPTY_TAB_HEADER)
     ZO_Market_Shared.Initialize(self)
@@ -426,6 +460,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
     self.keybindStripDescriptors =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- Purchase Keybind
         {
              name =  function()
                         if self.selectedMarketProduct:IsBundle() then
@@ -445,11 +480,13 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 self:Deactivate()
             end,
         },
+        -- "Preview" Keybind
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
             name =  function()
-                        if self.selectedMarketProduct:IsBundle() then
-                            return GetString(SI_GAMEPAD_MARKET_BUNDLE_DETAILS_KEYBIND)
+                        local previewType = self.GetMarketProductPreviewType(self.selectedMarketProduct)
+                        if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
+                            return GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT)
                         else
                             return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
                         end
@@ -458,8 +495,10 @@ function GamepadMarket:InitializeKeybindDescriptors()
             visible =   function()
                             local marketProduct = self.selectedMarketProduct
                             if marketProduct ~= nil then
-                                if marketProduct:IsBundle() then
-                                    return not marketProduct:GetHidesChildProducts()
+                                local previewType = self.GetMarketProductPreviewType(marketProduct)
+
+                                if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE and marketProduct:GetHidesChildProducts() then
+                                    return false
                                 else
                                     return not self.selectedMarketProduct:IsBlank()
                                 end
@@ -469,19 +508,25 @@ function GamepadMarket:InitializeKeybindDescriptors()
             enabled =   function()
                             local marketProduct = self.selectedMarketProduct
                             if marketProduct ~= nil then
-                                if marketProduct:HasPreview() and IsCharacterPreviewingAvailable() then
-                                    return true
-                                elseif marketProduct:IsBundle() then
+                                local previewType = self.GetMarketProductPreviewType(marketProduct)
+                                if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
+                                    return marketProduct:HasPreview() and IsCharacterPreviewingAvailable()
+                                else
                                     return true
                                 end
                             end
+
                             return false
                         end,
             callback =  function()
                             local marketProduct = self.selectedMarketProduct
-                            if marketProduct:IsBundle() then
+
+                            local previewType = self.GetMarketProductPreviewType(marketProduct)
+                            if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
                                 self:ShowBundleContents(marketProduct)
-                            else
+                            elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
+                                self:ShowCrownCrateContents(marketProduct)
+                            else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
                                 self:BeginPreview()
                             end
                         end,
@@ -579,7 +624,8 @@ end
 do
     local MARKET_PRODUCT_SORT_KEYS =
     {
-        name = {},
+        name = { tiebreaker = "stackCount", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        stackCount = {},
     }
 
     function GamepadMarket:CompareMarketProducts(entry1, entry2)
@@ -587,9 +633,19 @@ do
     end
 end
 
-function GamepadMarket:UpdateCurrencyBalance(currentCurrency)
-    self.currencyAmountControl:SetText(ZO_CommaDelimitNumber(currentCurrency))
-    
+function GamepadMarket:UpdateCrownBalance(amount)
+    self.crownAmountControl:SetText(ZO_CommaDelimitNumber(amount))
+
+    if not self.control:IsHidden() then
+        self:RefreshKeybinds()
+    elseif GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE and GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE:IsShowing() then
+        ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS:RefreshKeybinds()
+    end
+end
+
+function GamepadMarket:UpdateCrownGemBalance(amount)
+    self.gemAmountControl:SetText(ZO_CommaDelimitNumber(amount))
+
     if not self.control:IsHidden() then
         self:RefreshKeybinds()
     elseif GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE and GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE:IsShowing() then
@@ -598,7 +654,7 @@ function GamepadMarket:UpdateCurrencyBalance(currentCurrency)
 end
 
 function GamepadMarket:CreateMarketScene()
-    local scene = ZO_RemoteScene:New(ZO_GAMEPAD_MARKET_SCENE_NAME , SCENE_MANAGER)
+    local scene = ZO_RemoteScene:New(ZO_GAMEPAD_MARKET_SCENE_NAME, SCENE_MANAGER)
     SYSTEMS:RegisterGamepadRootScene(ZO_MARKET_NAME, scene)
     self:SetMarketScene(scene)
 end
@@ -785,7 +841,7 @@ function GamepadMarket:BuildMarketProductList(data)
     end
 end
 
--- ... is a list of product ids
+-- ... is a list of tables containing product ids and presentationIndexes
 function GamepadMarket:GetCategoryProductIds(data, currentSubCategory, numSubCategories, ...)
     if currentSubCategory <= numSubCategories then
         local subCategoryData = data.subCategories[currentSubCategory]
@@ -802,12 +858,17 @@ function GamepadMarket:GetCategoryProductIds(data, currentSubCategory, numSubCat
     end
 end
 
+-- ... is a list of tables containing product ids and presentationIndexes
 function GamepadMarket:GetMarketProductIds(categoryIndex, subCategoryIndex, index, ...)
     if index >= 1 then
-        local id = GetMarketProductDefId(categoryIndex, subCategoryIndex, index)
+        local id, presentationIndex = GetMarketProductPresentationIds(categoryIndex, subCategoryIndex, index)
         self.subCategoryDataMarketProductIdMap[id] = self.currentSubCategoryBuildInProgress
+        local presentationInfo =    {
+                                        id = id,
+                                        presentationIndex = presentationIndex,
+                                    }
         index = index - 1
-        return self:GetMarketProductIds(categoryIndex, subCategoryIndex, index, id, ...)
+        return self:GetMarketProductIds(categoryIndex, subCategoryIndex, index, presentationInfo, ...)
     end
     return ...
 end
@@ -879,7 +940,12 @@ function GamepadMarket:FindOrCreateSubCategoryLabeledGroupTable(subCategoryData)
 end
 
 function GamepadMarket:FindSubCategoryLabeledGroupTable(categoryIndex)
-    return self.subCategoryLabeledGroupTableMap[categoryIndex].groupTable
+    local categoryData = self.subCategoryLabeledGroupTableMap[categoryIndex]
+    if categoryData then
+        return categoryData.groupTable
+    end
+
+    return {}
 end
 
 function GamepadMarket:AddMarketProductToLabeledGroupOrGeneralGroup(name, marketProduct, id)
@@ -1002,10 +1068,12 @@ function GamepadMarket:LayoutMarketProducts(...)
     local categoryType = self.currentCategoryData.type
 
     for i = 1, numProducts do
-        local id = select(i, ...)
+        local presentationInfo = select(i, ...)
+        local id = presentationInfo.id
+        local presentationIndex = presentationInfo.presentationIndex
         local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
-        marketProduct:Show(id)
-        local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
+        marketProduct:Show(id, presentationIndex)
+        local name, description, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
 
         -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
         local isLimitedTime = marketProduct:IsLimitedTimeProduct()
@@ -1088,6 +1156,13 @@ function GamepadMarket:ShowBundleContents(bundle)
     SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME)
 end
 
+function GamepadMarket:ShowCrownCrateContents(marketProduct)
+    self:Deactivate()
+    self.isLockedForCategoryRefresh = true
+    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME)
+    ZO_GAMEPAD_MARKET_PRODUCT_LIST:SetCrownCrate(marketProduct:GetId())
+end
+
 function GamepadMarket:OnTutorialShowing()
     g_activeMarketScreen:RemoveKeybinds()
     g_activeMarketScreen:Deactivate()
@@ -1113,14 +1188,39 @@ function GamepadMarket:ClearProducts()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptors)
 end
 
-
-function GamepadMarket:GetCategoryDataFromId(productId)
-    for i = 1, #self.featuredProducts do
-        if self.featuredProducts[i].product:GetId() == productId then
-            return self.featuredProducts[i]
+function GamepadMarket:GetMarketProductInfoFromLabeledGroup(labeledGroup, productId)
+    for i = 1, #labeledGroup do
+        if labeledGroup[i].product:GetId() == productId then
+            return labeledGroup[i]
         end
     end
 
+    return nil
+end
+
+function GamepadMarket:GetCurrentCategoryMarketProductInfoById(productId)
+    -- First check all our special categories to see if the MarketProduct is in one of them
+    local marketProductInfo = self:GetMarketProductInfoFromLabeledGroup(self.featuredProducts, productId)
+    if marketProductInfo then
+        return marketProductInfo
+    end
+
+    marketProductInfo = self:GetMarketProductInfoFromLabeledGroup(self.limitedTimedOfferProducts, productId)
+    if marketProductInfo then
+        return marketProductInfo
+    end
+
+    marketProductInfo = self:GetMarketProductInfoFromLabeledGroup(self.dlcProducts, productId)
+    if marketProductInfo then
+        return marketProductInfo
+    end
+
+    marketProductInfo = self:GetMarketProductInfoFromLabeledGroup(self.marketProducts, productId)
+    if marketProductInfo then
+        return marketProductInfo
+    end
+
+    -- We didn't find it in one of the special buckets, check the normal subcategories
     local numSubCategories = self.currentCategoryData.numSubCategories
     for subcategoryIndex = 1, numSubCategories do
         local subCategoryProducts = self:FindSubCategoryLabeledGroupTable(subcategoryIndex)
@@ -1144,7 +1244,7 @@ function GamepadMarket:ShowMarketProduct(id)
             self.header.tabBar:SetSelectedDataIndex(targetIndex)
         end
 
-        local targetMarketProduct = self:GetCategoryDataFromId(id)
+        local targetMarketProduct = self:GetCurrentCategoryMarketProductInfoById(id)
         if targetMarketProduct then
             self:ScrollToGridEntry(targetMarketProduct.product:GetFocusData(), true)
             local listIndex = targetMarketProduct.product:GetListIndex()
@@ -1175,6 +1275,16 @@ function GamepadMarket:RefreshKeybinds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindDescriptor)
 end
 
+-- copy the standard gamepad style but change the center and right offsets
+ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE = ZO_ShallowTableCopy(KEYBIND_STRIP_GAMEPAD_STYLE)
+ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE.centerAnchorOffset = -230
+
+function ZO_GamepadMarketKeybindStrip_RefreshStyle()
+    local crownsFooterWidth = ZO_GamepadMarket_CurrencyFooter:GetWidth()
+    ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE.rightAnchorOffset = -(crownsFooterWidth + ZO_GAMEPAD_SCREEN_PADDING)
+    KEYBIND_STRIP:SetStyle(ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE)
+end
+
 --
 -- [[ Market Product Tooltip ]]--
 --
@@ -1187,6 +1297,15 @@ do
         local UPGRADE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_UPGRADE)
         local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
         local SERVICE_HEADER = GetString(SI_SERVICE_TOOLTIP_TYPE)
+        local QUALITY_NORMAL = nil
+
+        local NO_CATEGORY_NAME = nil
+        local NO_NICKNAME = nil
+        local IS_PURCHASEABLE = true
+        local BLANK_HINT = ""
+        local HIDE_VISUAL_LAYER_INFO = false
+        local NO_COOLDOWN = nil
+        local HIDE_BLOCK_REASON = false
 
         function MarketTooltipMixin:AddInstantUnlockEligibilityFailures(...)
             local count = select("#", ...)
@@ -1202,33 +1321,53 @@ do
             end
         end
 
-        function MarketTooltipMixin:LayoutMarketProduct(product)
-            local productId = product:GetId()
-            local instantUnlockType = GetMarketProductInstantUnlockType(productId);
+        function MarketTooltipMixin:LayoutMarketProduct(productId)
+            local productType = GetMarketProductType(productId)
+            -- For some market product types we can just use other tooltip layouts
+            if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+                local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(productId)
+                self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+                return
+            elseif productType == MARKET_PRODUCT_TYPE_ITEM then
+                local itemLink = GetMarketProductItemLink(productId)
+                local stackCount = GetMarketProductStackCount(productId)
+                self:LayoutItemWithStackCountSimple(itemLink, stackCount)
+                return
+            end
 
             --things added to the topSection stack upwards
             local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
-            local productType = product:GetProductType()
-            -- Category
+            local instantUnlockType = MARKET_INSTANT_UNLOCK_NONE
             if productType == MARKET_PRODUCT_TYPE_BUNDLE then
                 if DoesMarketProductContainDLC(productId) and GetMarketProductNumBundledProducts(productId) == 1 then
                     topSection:AddLine(DLC_HEADER)
                 else
                     topSection:AddLine(BUNDLE_HEADER)
                 end
-            elseif productType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK and instantUnlockType ~= MARKET_INSTANT_UNLOCK_NONE then
-                if IsMarketInstantUnlockServiceToken(instantUnlockType) then
-                    topSection:AddLine(SERVICE_HEADER)
-                else
-                    topSection:AddLine(UPGRADE_HEADER)
+            elseif productType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
+                local crateId = GetMarketProductCrownCrateId(productId)
+                local crateCount = GetCrownCrateCount(crateId)
+                if crateCount > 0 then
+                    local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
+                    topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_crown_crate.dds", 24, 24, crateCount))
+                    topSection:AddSection(topSubsection)
+                end
+            elseif productType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
+                instantUnlockType = GetMarketProductInstantUnlockType(productId)
+                if instantUnlockType ~= MARKET_INSTANT_UNLOCK_NONE then
+                    if IsMarketInstantUnlockServiceToken(instantUnlockType) then
+                        topSection:AddLine(SERVICE_HEADER)
+                    else
+                        topSection:AddLine(UPGRADE_HEADER)
+                    end
                 end
             end
 
             self:AddSection(topSection)
 
             -- Name
-            self:AddLine(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, product.name), qualityNormal, self:GetStyle("title"))
+            self:AddLine(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductDisplayName(productId)), QUALITY_NORMAL, self:GetStyle("title"))
 
             local tooltipLines = {}
             if IsMarketInstantUnlockUpgrade(instantUnlockType) then
@@ -1279,12 +1418,12 @@ do
                 table.insert(tooltipLines, tokenUsageRequirement)
                 table.insert(tooltipLines, tokenCountString)
             else
-                table.insert(tooltipLines, product.description)
+                table.insert(tooltipLines, GetMarketProductDescription(productId))
             end
 
             -- Description
             local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
-            for i=1, #tooltipLines do
+            for i = 1, #tooltipLines do
                 bodySection:AddLine(tooltipLines[i], self:GetStyle("bodyDescription"))
             end
             self:AddSection(bodySection)
@@ -1303,6 +1442,9 @@ do
     -- Using a mixin because adding a method to ZO_Tooltip doesn't work with GAMEPAD_TOOLTIPS if the method is added after ZO_Tooltip_Gamepad.lua is loaded
     local rightTooltip = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_RIGHT_TOOLTIP)
     zo_mixin(rightTooltip, MarketTooltipMixin)
+
+    local leftTooltip = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_LEFT_TOOLTIP)
+    zo_mixin(leftTooltip, MarketTooltipMixin)
 end
 
 --
@@ -1407,7 +1549,7 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
 end
 
 function GamepadMarketBundleContents:SetBundle(bundle)
-    self.bundle = bundle 
+    self.bundle = bundle
     self.headerData.titleText = bundle.title:GetText()
 end
 
@@ -1533,6 +1675,242 @@ function GamepadMarketBundleContents:RefreshActions()
 end
 
 --
+--[[ Gamepad Market Product List Scene ]]--
+--
+
+local GamepadMarketProductListScene = ZO_Gamepad_ParametricList_Screen:Subclass()
+
+function GamepadMarketProductListScene:New(...)
+    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
+end
+
+function GamepadMarketProductListScene:Initialize(control)
+    ZO_GAMEPAD_MARKET_LIST_SCENE = ZO_RemoteScene:New(ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME, SCENE_MANAGER)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, ZO_GAMEPAD_MARKET_LIST_SCENE)
+    self.list = self:GetMainList()
+    self:InitializeHeader()
+    self.previewProducts = {}
+end
+
+function GamepadMarketProductListScene:OnDeferredInitialize()
+    self:SetListsUseTriggerKeybinds(true)
+end
+
+function GamepadMarketProductListScene:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- "Preview" Keybind
+        {
+            name = GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            visible =   function()
+                            local targetData = self.list:GetTargetData()
+                            if targetData then
+                                return true
+                            end
+                            return false
+                        end,
+            enabled =   function()
+                            local targetData = self.list:GetTargetData()
+                            if targetData then
+                                local productId = targetData.marketProductId
+                                return targetData.hasPreview and IsCharacterPreviewingAvailable()
+                            end
+                            return false
+                        end,
+            callback =  function()
+                            self:BeginPreview()
+                        end,
+        },
+
+        -- Back
+        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
+    }
+end
+
+function GamepadMarketProductListScene:InitializeHeader()
+    self.headerData = {
+        titleText = "",
+    }
+    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+function GamepadMarketProductListScene:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+    if self.queuedMarketProductId ~= nil then
+        self:ShowCrownCrateContents(self.queuedMarketProductId)
+        self.queuedMarketProductId = nil
+    else
+        if self.isPreviewing then
+            self:SelectAfterPreview()
+        end
+    end
+
+    self.isPreviewing = false
+    self.previewIndex = nil
+end
+
+function GamepadMarketProductListScene:OnHiding()
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    self.queuedMarketProduct = nil
+end
+
+do
+    local MARKET_PRODUCT_SORT_KEYS =
+        {
+            tierOrdering = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+            name = { tiebreaker = "stackCount", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+            stackCount = {},
+        }
+
+    function GamepadMarketProductListScene:CompareMarketProducts(entry1, entry2)
+        return ZO_TableOrderingFunction(entry1, entry2, "tierOrdering", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_DOWN)
+    end
+end
+
+function GamepadMarketProductListScene:SetCrownCrate(marketProductId)
+    if SCENE_MANAGER:IsShowing(self.scene.name) then
+        self:ShowCrownCrateContents(marketProductId)
+    else
+        self.queuedMarketProductId = marketProductId
+    end
+end
+
+function GamepadMarketProductListScene:ShowCrownCrateContents(marketProductId)
+    self.headerData.titleText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductDisplayName(marketProductId))
+    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+
+    local marketProducts = {}
+
+    local crateId = GetMarketProductCrownCrateId(marketProductId)
+
+    local numTiers = GetNumCrownCrateTiers(crateId)
+    for tierIndex = 1, numTiers do
+        local tierId = GetCrownCrateTierId(crateId, tierIndex)
+        local tierOrdering = GetCrownCrateTierOrdering(tierId)
+        local numProducts = GetNumMarketProductsInCrownCrateTier(tierId)
+        for productIndex = 1, numProducts do
+            local productId = GetMarketProductIdFromCrownCrateTier(tierId, productIndex)
+            local productInfo =
+                {
+                    productId = productId,
+                    name = GetMarketProductDisplayName(productId),
+                    stackCount = GetMarketProductStackCount(productId),
+                    tierId = tierId,
+                    tierOrdering = tierOrdering,
+                }
+            table.insert(marketProducts, productInfo)
+        end
+    end
+
+    table.sort(marketProducts, function(...)
+                                    return self:CompareMarketProducts(...)
+                                end)
+
+    self:ShowMarketProducts(marketProducts)
+end
+
+-- marketProducts is a table of Market Product info
+function GamepadMarketProductListScene:ShowMarketProducts(marketProducts)
+    self.list:Clear()
+
+    ZO_ClearNumericallyIndexedTable(self.previewProducts)
+
+    for i = 1, #marketProducts do
+        local productInfo = marketProducts[i]
+        local productId = productInfo.productId
+        local name, description, icon, isNew, isFeatured = GetMarketProductInfo(productId)
+
+        local entryData = ZO_GamepadEntryData:New(name, icon)
+        entryData.marketProductId = productId
+        entryData.listIndex = i
+        if i == 1 then
+            entryData:SetHeader(GetString(SI_MARKET_CRATE_LIST_HEADER))
+            self.list:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", entryData)
+        else
+            self.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        end
+
+        local hasPreview = CanPreviewMarketProduct(productId)
+        entryData.hasPreview = hasPreview
+        if hasPreview then
+            table.insert(self.previewProducts, entryData)
+            entryData.previewIndex = #self.previewProducts
+        end
+    end
+
+    self.list:Commit()
+    self.list:SetSelectedIndexWithoutAnimation(1)
+end
+
+function GamepadMarketProductListScene:OnTargetChanged(list, targetData, oldTargetData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+
+    if targetData then
+        local productId = targetData.marketProductId
+        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_LEFT_TOOLTIP, productId)
+    end
+end
+
+function GamepadMarketProductListScene:BeginPreview()
+    self.isPreviewing = true
+    local targetData = self.list:GetTargetData()
+    if targetData then
+        self.previewIndex = targetData.previewIndex
+    end
+    ZO_GAMEPAD_MARKET_PREVIEW:SetPreviewProductsContainer(self)
+    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)
+end
+
+function GamepadMarketProductListScene:HasMultiplePreviewProducts()
+    return #self.previewProducts > 1
+end
+
+function GamepadMarketProductListScene:RefreshActions()
+    self:RefreshKeybinds()
+end
+
+function GamepadMarketProductListScene:MoveToPreviousPreviewProduct()
+    self.previewIndex = self.previewIndex - 1
+
+    if self.previewIndex < 1 then
+        self.previewIndex = #self.previewProducts - self.previewIndex
+    end
+
+    return self:GetCurrentPreviewProductId()
+end
+
+function GamepadMarketProductListScene:MoveToNextPreviewProduct()
+    self.previewIndex = self.previewIndex + 1
+
+    if self.previewIndex > #self.previewProducts then
+        self.previewIndex = self.previewIndex - #self.previewProducts
+    end
+
+    return self:GetCurrentPreviewProductId()
+end
+
+function GamepadMarketProductListScene:GetCurrentPreviewProductId()
+    return self.previewProducts[self.previewIndex].marketProductId
+end
+
+function GamepadMarketProductListScene:GetCurrentPreviewData()
+    return self.previewProducts[self.previewIndex]
+end
+
+function GamepadMarketProductListScene:SelectAfterPreview()
+    local index = self:GetCurrentPreviewData().listIndex
+    self.list:SetSelectedIndexWithoutAnimation(index)
+end
+
+function GamepadMarketProductListScene:PerformUpdate()
+    -- This function is required but unused
+    self.dirty = false
+end
+
+--
 -- [[ Market Locked Screen ]]--
 --
 
@@ -1559,10 +1937,10 @@ function GamepadMarketLockedScreen:Initialize(control)
 end
 
 function GamepadMarketLockedScreen:OnStateChanged(oldState, newState)
-    if(newState == SCENE_SHOWN) then
+    if newState == SCENE_SHOWN then
         ZO_GamepadMarketKeybindStrip_RefreshStyle()
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptors)
-    elseif(newState == SCENE_HIDDEN) then
+    elseif newState == SCENE_HIDDEN then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptors)
         KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_STANDARD_STYLE)
     end
@@ -1677,4 +2055,8 @@ end
 
 function ZO_GamepadMarket_PreScene_OnInitialize(control)
     ZO_MARKET_PRE_SCENE = GamepadMarketPreScene:New(control)
+end
+
+function ZO_GamepadMarketProductList_OnInitialized(control)
+    ZO_GAMEPAD_MARKET_PRODUCT_LIST = GamepadMarketProductListScene:New(control)
 end

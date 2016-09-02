@@ -34,26 +34,31 @@ function ZO_OptionsPanel_Video_InitializeResolution(control)
     InitializeResolution(control, GetDisplayModes())
 end
 
-local function UpdateDefaultScaleIndicator(eventCode, screenWidth, screenHeight)
-    local uiScale = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE))
-    Options_Video_CustomScaleSlider:SetValue(uiScale)
-    Options_Video_CustomScale.value = uiScale
-end
-
 function ZO_OptionsPanel_Video_SetCustomScale(self, formattedValueString)
     SetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE, formattedValueString)
     ApplySettings()
 end
 
+function ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
+    if ZO_GameMenu_PreGame or GetSetting(SETTING_TYPE_UI, UI_SETTING_USE_CUSTOM_SCALE) == "0" then
+        ZO_Options_SetOptionInactive(control)
+    else
+        ZO_Options_SetOptionActive(control)
+    end
+end
+
 function ZO_OptionsPanel_Video_CustomScale_OnShow(control)
     if ZO_GameMenu_PreGame then
-        ZO_Options_SetOptionInactive(control)
+        ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
         GetControl(control, "WarningIcon"):SetHidden(false)
     end
 end
 
-function ZO_OptionsPanel_Video_InitializeScaleControl(self)
-    EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_SCREEN_RESIZED, UpdateDefaultScaleIndicator)
+function ZO_OptionsPanel_Video_UseCustomScale_OnShow(control)
+    if ZO_GameMenu_PreGame then
+        ZO_Options_SetOptionInactive(control)
+        GetControl(control, "WarningIcon"):SetHidden(false)
+    end
 end
 
 local ZO_OptionsPanel_Video_ControlData =
@@ -314,6 +319,27 @@ local ZO_OptionsPanel_Video_ControlData =
     --UI Settings
     [SETTING_TYPE_UI] =
     {
+        --Options_Video_UseCustomScale
+        [UI_SETTING_USE_CUSTOM_SCALE] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_USE_CUSTOM_SCALE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE,
+            tooltipText = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP,
+            events = {
+                [true] = "UseCustomScaleToggled",
+                [false] = "UseCustomScaleToggled",
+            },
+            eventCallbacks =
+            {
+                ["UseCustomScaleToggled"] = function()
+                    ApplySettings()
+                end
+            }
+        },
+        --Options_Video_CustomScale
         [UI_SETTING_CUSTOM_SCALE] =
         {
             controlType = OPTIONS_SLIDER,
@@ -326,6 +352,10 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 0.64,
             maxValue = 1.1,
             onReleasedHandler = ZO_OptionsPanel_Video_SetCustomScale,
+            eventCallbacks =
+            {
+                ["UseCustomScaleToggled"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
+            }
         },
     },
 

@@ -236,6 +236,16 @@ local ZO_OptionsPanel_Social_ControlData =
             tooltipText = SI_SOCIAL_OPTIONS_SHOW_LEADERBOARD_NOTIFICATIONS_TOOLTIP,
             events = {[false] = "LeaderboardNotifications_Off", [true] = "LeaderboardNotifications_On",},
         },
+        --Options_Social_AutoDeclineDuelInvites
+        [UI_SETTING_AUTO_DECLINE_DUEL_INVITES] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
+            panel = SETTING_PANEL_SOCIAL,
+            text = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES,
+            tooltipText = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES_TOOLTIP,
+        },
     },
 
     --Custom

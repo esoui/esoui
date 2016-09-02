@@ -173,9 +173,9 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                     self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO_REQUIRES_KEY, action, itemName))
                 else
                     self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO_WILL_CONSUME_KEY, action, itemName))
-                end                
+                end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_PICKPOCKET_CHANCE then
-                local isHostile, difficulty, isEmpty
+                local isHostile, difficulty, isEmpty, prospectiveResult, monsterClassString
                 self.isInBonus, isHostile, self.percentChance, difficulty, isEmpty, prospectiveResult, monsterClassString = GetGameCameraPickpocketingBonusInfo()
 
                 -- Prevent your success chance from going over 100%

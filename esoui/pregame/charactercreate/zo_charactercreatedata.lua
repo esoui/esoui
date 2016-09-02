@@ -95,17 +95,7 @@ function ZO_CharacterCreateData:PerformDeferredInitialization()
 
         if not templatesRequired then
             -- add the no template option
-            table.insert(templates,
-            {
-                template = 0,
-                name = GetString(SI_TEMPLATE_NONE),
-                race = 0,
-                class = 0,
-                gender = 0,
-                alliance = 0,
-                overrideAppearance = false,
-                isSelectable = true
-            })
+            table.insert(templates, self:GetNoneTemplate())
         end
 
         -- Keep these in the order that they are returned in so the template list matches the def order
@@ -127,6 +117,23 @@ function ZO_CharacterCreateData:PerformDeferredInitialization()
     end
 
     self:UpdateAllianceSelectability()
+end
+
+do
+    local NONE_TEMPLATE =
+        {
+            template = 0,
+            name = GetString(SI_TEMPLATE_NONE),
+            race = 0,
+            class = 0,
+            gender = 0,
+            alliance = 0,
+            overrideAppearance = false,
+            isSelectable = true
+        }
+    function ZO_CharacterCreateData:GetNoneTemplate()
+        return NONE_TEMPLATE
+    end
 end
 
 function ZO_CharacterCreateData:UpdateAllianceSelectability()

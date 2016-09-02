@@ -593,7 +593,8 @@ local AlertHandlers = {
 
     [EVENT_PLAYER_DEAD] = function()
         local isAVADeath, isBattleGroundDeath = select(6, GetDeathInfo())
-        if(not (isAVADeath or isBattleGroundDeath)) then
+		local isDuelingDeath = IsDuelingDeath()
+        if(not (isAVADeath or isBattleGroundDeath or isDuelingDeath)) then
             return ALERT, GetString(SI_DEATH_DURABILITY_ANNOUNCEMENT)
         end
     end,
@@ -781,6 +782,49 @@ local AlertHandlers = {
         end
 
         return ALERT, alertText, SOUNDS.GROUP_ELECTION_REQUESTED
+    end,
+
+    [EVENT_DUEL_INVITE_FAILED] = function(reason, targetCharacterName, targetDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
+        if userFacingName then
+            return ERROR, zo_strformat(GetString("SI_DUELINVITEFAILREASON", reason), userFacingName), SOUNDS.GENERAL_ALERT_ERROR
+        else
+            return ERROR, GetString("SI_DUELINVITEFAILREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_DUEL_INVITE_RECEIVED] = function(inviterCharacterName, inviterDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_RECEIVED, userFacingName)
+    end,
+
+    [EVENT_DUEL_INVITE_SENT] = function(inviteeCharacterName, inviteeDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_SENT, userFacingName)
+    end,
+
+    [EVENT_DUEL_INVITE_ACCEPTED] = function()
+        return ALERT, GetString(SI_DUEL_INVITE_ACCEPTED), SOUNDS.DUEL_ACCEPTED
+    end,
+
+    [EVENT_DUEL_INVITE_DECLINED] = function()
+        return ALERT, GetString(SI_DUEL_INVITE_DECLINED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_DUEL_INVITE_CANCELED] = function()
+        return ALERT, GetString(SI_DUEL_INVITE_CANCELED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_CROWN_CRATE_OPEN_RESPONSE] = function(crownCrateId, openResponse)
+        if openResponse ~= LOOT_CRATE_OPEN_RESPONSE_SUCCESS then
+            local errorText = GetString("SI_LOOTCRATEOPENRESPONSE", openResponse)
+            if openResponse == LOOT_CRATE_OPEN_RESPONSE_FAIL_NO_INVENTORY_SPACE then
+                local requiredSlots = GetInventorySpaceRequiredToOpenCrownCrate(crownCrateId)
+                local freeSlots = GetNumBagFreeSlots(BAG_BACKPACK)
+                errorText = zo_strformat(errorText, requiredSlots - freeSlots)
+            end
+            return ERROR, errorText, SOUNDS.GENERAL_ALERT_ERROR
+        end
     end,
 }
 

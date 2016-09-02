@@ -16,7 +16,6 @@ local CATEGORY_LAYOUT_INFO =
         --override the sizes set by AddCategories because these icons are twice as big as the others
         overrideNormalSize = 102,
         overrideDownSize = 128,
-        barPadding = 25,
 
         onInitializeCallback =  function(button)
                                     local animationTexture = button:GetNamedChild("ImageAnimation")
@@ -34,10 +33,10 @@ local CATEGORY_LAYOUT_INFO =
                                     membershipControl:SetHidden(not isSubscriber)
                                     membershipControl:SetText(GetString(SI_ESO_PLUS_TITLE))
                                     remainingCrownsControl:SetHidden(false)
-                                    local currentBalance = GetMarketCurrency()
+                                    local currentBalance = GetPlayerCrowns()
                                     remainingCrownsControl:SetText(ZO_CommaDelimitNumber(currentBalance))
-                                    button:RegisterForEvent(EVENT_MARKET_CURRENCY_UPDATE, function(currencyAmount)
-                                                                                                    local currentBalance = GetMarketCurrency()
+                                    button:RegisterForEvent(EVENT_CROWN_UPDATE, function(currencyAmount)
+                                                                                                    local currentBalance = GetPlayerCrowns()
                                                                                                     remainingCrownsControl:SetText(ZO_CommaDelimitNumber(currentBalance))
                                                                                                  end)
                                 end,
@@ -45,7 +44,7 @@ local CATEGORY_LAYOUT_INFO =
                                 button.animationTexture:SetHidden(true)
                                 button.timeline:PlayInstantlyToStart()
                                 button.timeline:Stop()
-                                button:UnregisterForEvent(EVENT_MARKET_CURRENCY_UPDATE)
+                                button:UnregisterForEvent(EVENT_CROWN_UPDATE)
                                 button:GetNamedChild("Membership"):SetHidden(true)
                                 button:GetNamedChild("RemainingCrowns"):SetHidden(true)
                             end,
@@ -63,6 +62,40 @@ local CATEGORY_LAYOUT_INFO =
                                     button.timeline:PlayInstantlyToStart()
                                     button.timeline:Stop()
                                 end,
+    },
+    [MENU_CATEGORY_CROWN_CRATES] =
+    {
+        binding = "TOGGLE_CROWN_CRATES",
+        categoryName = SI_MAIN_MENU_CROWN_CRATES,
+        scene = "crownCrateKeyboard",
+        previousButtonExtraPadding = 10,
+        barPadding = 20,
+        hideCategoryBar = true,
+
+        descriptor = MENU_CATEGORY_CROWN_CRATES,
+        normal = "EsoUI/Art/MainMenu/menuBar_crownCrates_up.dds",
+        pressed = "EsoUI/Art/MainMenu/menuBar_crownCrates_down.dds",
+        disabled = "EsoUI/Art/MainMenu/menuBar_crownCrates_disabled.dds",
+        highlight = "EsoUI/Art/MainMenu/menuBar_crownCrates_over.dds",
+        --override the sizes set by AddCategories because these icons are twice as big as the others
+        overrideNormalSize = 102,
+        overrideDownSize = 128,
+        
+        disableWhenDead = true,
+        disableWhenReviving = true,
+        disableWhenSwimming = true,
+        disableWhenWerewolf = true,
+
+        indicators = function()
+            if GetNumOwnedCrownCrateTypes() > 0 then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
+        visible = function()
+            --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
+            --Crown crates will properly refresh again when it closes its scene
+            return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
+        end,
     },
     [MENU_CATEGORY_INVENTORY] =
     {
@@ -218,6 +251,7 @@ local CATEGORY_LAYOUT_INFO =
     {
         binding = "TOGGLE_MAIL",
         categoryName = SI_MAIN_MENU_MAIL,
+        scene = "mailInbox",
 
         descriptor = MENU_CATEGORY_MAIL,
         normal = "EsoUI/Art/MainMenu/menuBar_mail_up.dds",
@@ -531,8 +565,11 @@ function MainMenu_Keyboard:RefreshCategoryIndicators()
     end
 end
 
-function MainMenu_Keyboard:RefreshCategoryBar()
-    ZO_MenuBar_UpdateButtons(self.categoryBar, FORCE_SELECTION)
+function MainMenu_Keyboard:RefreshCategoryBar(forceSelection)
+    if forceSelection == nil then
+        forceSelection = FORCE_SELECTION
+    end
+    ZO_MenuBar_UpdateButtons(self.categoryBar, forceSelection)
     self:RefreshCategoryIndicators()
 end
 
@@ -741,6 +778,10 @@ do
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_IN_COMBAT
         elseif MAIN_MENU_MANAGER:IsPlayerReviving() and categoryInfo.disableWhenReviving then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_REVIVING
+        elseif MAIN_MENU_MANAGER:IsPlayerSwimming() and categoryInfo.disableWhenSwimming then
+            return MAIN_MENU_CATEGORY_DISABLED_WHILE_SWIMMING
+        elseif MAIN_MENU_MANAGER:IsPlayerWerewolf() and categoryInfo.disableWhenWerewolf then
+            return MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF
         else
             return MAIN_MENU_CATEGORY_ENABLED
         end
@@ -756,6 +797,10 @@ do
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_IN_COMBAT)
         elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_REVIVING then
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_REVIVING)
+        elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_SWIMMING then
+            ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_SWIMMING)
+        elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF then
+            ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_WEREWOLF)
         else
             if(categoryLayoutInfo.visible == nil or categoryLayoutInfo.visible()) then
                 local categoryInfo = self.categoryInfo[category]
@@ -800,7 +845,7 @@ do
         for i = 1, #CATEGORY_LAYOUT_INFO do
             local categoryInfo = CATEGORY_LAYOUT_INFO[i]
             local shouldBeEnabled = GetCategoryState(categoryInfo) == MAIN_MENU_CATEGORY_ENABLED
-            if not shouldBeEnabled and self:IsShowing() and (self.lastCategory == i) then
+            if not shouldBeEnabled and (self.lastCategory == i) and SCENE_MANAGER:IsShowing(categoryInfo.scene) then
                 self:Hide()
             end
             ZO_MenuBar_SetDescriptorEnabled(self.categoryBar, i, shouldBeEnabled)

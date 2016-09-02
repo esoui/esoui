@@ -1,0 +1,10 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CrownCratePrototype">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_CrownCratePrototype_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

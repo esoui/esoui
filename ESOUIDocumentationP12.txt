@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 100016
+h1. ESO UI Documentation for API Version 100017
 
 h2. Global Variables
 
@@ -203,6 +203,7 @@ h5. ActivityQueueResult
 * ACTIVITY_QUEUE_RESULT_INVALID_LEVEL
 * ACTIVITY_QUEUE_RESULT_LOCATION_RESTRICTION
 * ACTIVITY_QUEUE_RESULT_MEMBERS_OFFLINE
+* ACTIVITY_QUEUE_RESULT_MEMEBER_CANCELED_READY_CHECK
 * ACTIVITY_QUEUE_RESULT_MEMEBR_LOCATION_NOT_VALID
 * ACTIVITY_QUEUE_RESULT_NOT_GROUP_LEADER
 * ACTIVITY_QUEUE_RESULT_NOT_IMPLEMENTED
@@ -696,6 +697,50 @@ h5. ConsoleServerChoice
 * CONSOLE_SERVER_NORTH_AMERICA
 
 
+h5. CrownCrateEvent
+* CROWN_CRATE_NPC_ANIMATION_TYPE_ALL_CARDS_REVEALED_HAS_CRATES
+* CROWN_CRATE_NPC_ANIMATION_TYPE_ALL_CARDS_REVEALED_NO_CRATES
+* CROWN_CRATE_NPC_ANIMATION_TYPE_DEAL_BONUS_CARDS
+* CROWN_CRATE_NPC_ANIMATION_TYPE_DEAL_PRIMARY_CARDS
+* CROWN_CRATE_NPC_ANIMATION_TYPE_FAREWELL
+* CROWN_CRATE_NPC_ANIMATION_TYPE_FLOURISH
+* CROWN_CRATE_NPC_ANIMATION_TYPE_GEMS_AWARDED
+* CROWN_CRATE_NPC_ANIMATION_TYPE_GREET_PLAYER
+* CROWN_CRATE_NPC_ANIMATION_TYPE_IDLE_CHATTER
+* CROWN_CRATE_NPC_ANIMATION_TYPE_INVALID
+* CROWN_CRATE_NPC_ANIMATION_TYPE_MANIFEST_ENTER_MULTI_CRATES
+* CROWN_CRATE_NPC_ANIMATION_TYPE_MANIFEST_ENTER_NO_CRATES
+* CROWN_CRATE_NPC_ANIMATION_TYPE_MANIFEST_ENTER_ONE_CRATES
+* CROWN_CRATE_NPC_ANIMATION_TYPE_NO_CRATES_WARNING
+* CROWN_CRATE_NPC_ANIMATION_TYPE_POSTURE_ENTER
+* CROWN_CRATE_NPC_ANIMATION_TYPE_POSTURE_EXIT
+* CROWN_CRATE_NPC_ANIMATION_TYPE_POSTURE_FIDGET
+* CROWN_CRATE_NPC_ANIMATION_TYPE_POSTURE_GROUP_FIDGET
+* CROWN_CRATE_NPC_ANIMATION_TYPE_POSTURE_LOOP
+* CROWN_CRATE_NPC_ANIMATION_TYPE_PRIMARY_CARDS_DEALT
+* CROWN_CRATE_NPC_ANIMATION_TYPE_REVEAL_ALL_CARDS
+* CROWN_CRATE_NPC_ANIMATION_TYPE_SHUFFLE_CARDS
+* CROWN_CRATE_NPC_ANIMATION_TYPE_SWIPE_CARDS_AWAY
+* CROWN_CRATE_NPC_ANIMATION_TYPE_TIER_FIVE_CARD
+* CROWN_CRATE_NPC_ANIMATION_TYPE_TIER_FOUR_CARD
+* CROWN_CRATE_NPC_ANIMATION_TYPE_TIER_ONE_CARD
+* CROWN_CRATE_NPC_ANIMATION_TYPE_TIER_SIX_CARD
+* CROWN_CRATE_NPC_ANIMATION_TYPE_TIER_THREE_CARD
+* CROWN_CRATE_NPC_ANIMATION_TYPE_TIER_TWO_CARD
+* CROWN_CRATE_NPC_ANIMATION_TYPE_UNDER_ATTACK
+
+
+h5. CrownCrateParticleEffects
+* CROWN_CRATE_PARTICLES_BONUS
+* CROWN_CRATE_PARTICLES_GEMIFY
+
+
+h5. CrownCrateTierParticleEffects
+* CROWN_CRATE_TIERED_PARTICLES_MYSTERY
+* CROWN_CRATE_TIERED_PARTICLES_REVEAL
+* CROWN_CRATE_TIERED_PARTICLES_REVEALED
+
+
 h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_ABILITY_UPGRADE_PURCHASE
 * CURRENCY_CHANGE_REASON_ACHIEVEMENT
@@ -937,6 +982,7 @@ h5. DerivedStats
 * STAT_DAMAGE_RESIST_SHOCK
 * STAT_DAMAGE_RESIST_START
 * STAT_DODGE
+* STAT_HEALING_DONE
 * STAT_HEALING_TAKEN
 * STAT_HEALTH_MAX
 * STAT_HEALTH_REGEN_COMBAT
@@ -950,7 +996,6 @@ h5. DerivedStats
 * STAT_MOUNT_STAMINA_REGEN_COMBAT
 * STAT_MOUNT_STAMINA_REGEN_MOVING
 * STAT_NONE
-* STAT_PARRY
 * STAT_PHYSICAL_PENETRATION
 * STAT_PHYSICAL_RESIST
 * STAT_POWER
@@ -979,6 +1024,20 @@ h5. DisguiseState
 * DISGUISE_STATE_DISGUISED
 * DISGUISE_STATE_NONE
 * DISGUISE_STATE_SUSPICIOUS
+
+
+h5. DuelResult
+* DUEL_RESULT_FORFEIT
+* DUEL_RESULT_WON
+
+
+h5. DuelState
+* DUEL_STATE_DUELING
+* DUEL_STATE_DUEL_PENDING
+* DUEL_STATE_DUEL_TERMINATING
+* DUEL_STATE_IDLE
+* DUEL_STATE_INVITE_CONSIDERING
+* DUEL_STATE_INVITE_REQUESTING
 
 
 h5. DungeonDifficulty
@@ -1013,6 +1072,7 @@ h5. DyeStampUseResult
 * DYE_STAMP_USE_RESULT_NONE
 * DYE_STAMP_USE_RESULT_NO_ACTIVE_COLLECTIBLES
 * DYE_STAMP_USE_RESULT_NO_ACTIVE_ITEMS
+* DYE_STAMP_USE_RESULT_NO_SUCH_DYE_STAMP
 * DYE_STAMP_USE_RESULT_NO_VALID_COLLECTIBLES
 * DYE_STAMP_USE_RESULT_NO_VALID_ITEMS
 
@@ -1189,6 +1249,8 @@ h5. GameCameraAdditionalInfo
 h5. GameCameraFramingScreenType
 * FRAMING_SCREEN_AVA
 * FRAMING_SCREEN_CHAMPION
+* FRAMING_SCREEN_CROWN_CRATES
+* FRAMING_SCREEN_CROWN_STORE
 * FRAMING_SCREEN_DEFAULT
 * FRAMING_SCREEN_INVENTORY
 * FRAMING_SCREEN_JOURNAL
@@ -1519,6 +1581,13 @@ h5. HookpointType
 * HOOK_POINT_SIEGE
 
 
+h5. HouseCategoryType
+* HOUSE_CATEGORY_TYPE_CLASSIC
+* HOUSE_CATEGORY_TYPE_NONE
+* HOUSE_CATEGORY_TYPE_NOTABLE
+* HOUSE_CATEGORY_TYPE_STAPLE
+
+
 h5. HousingEditorMode
 * HOUSING_EDITOR_MODE_BROWSE
 * HOUSING_EDITOR_MODE_DISABLED
@@ -1556,9 +1625,11 @@ h5. InfamyThresholdsType
 
 
 h5. InstanceDisplayType
-* INSTANCE_DISPLAY_TYPE_GROUP
+* INSTANCE_DISPLAY_TYPE_DUNGEON
+* INSTANCE_DISPLAY_TYPE_GROUP_AREA
 * INSTANCE_DISPLAY_TYPE_GROUP_DELVE
 * INSTANCE_DISPLAY_TYPE_NONE
+* INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON
 * INSTANCE_DISPLAY_TYPE_RAID
 * INSTANCE_DISPLAY_TYPE_SOLO
 
@@ -2060,6 +2131,23 @@ h5. LFGItemRewardType
 * LFG_ITEM_REWARD_TYPE_STANDARD
 
 
+h5. LFGReadyCheckCancelReason
+* LFG_READY_CHECK_CANCEL_REASON_GROUP_FORMED_SUCCESSFULLY
+* LFG_READY_CHECK_CANCEL_REASON_GROUP_MEMBER_CANCELED
+* LFG_READY_CHECK_CANCEL_REASON_GROUP_NOT_VIABLE
+* LFG_READY_CHECK_CANCEL_REASON_GROUP_READY
+* LFG_READY_CHECK_CANCEL_REASON_NOT_IN_READY_CHECK
+
+
+h5. LFGReadyCheckState
+* LFG_READY_CHECK_STATE_FORM_GROUP
+* LFG_READY_CHECK_STATE_GROUP_TIMEOUT_CANCEL
+* LFG_READY_CHECK_STATE_IN_READY_CHECK
+* LFG_READY_CHECK_STATE_NOT_IN_READY_CHECK
+* LFG_READY_CHECK_STATE_PLAYER_ACCEPTED
+* LFG_READY_CHECK_STATE_PLAYER_DECLINED
+
+
 h5. LFGRole
 * LFG_ROLE_DPS
 * LFG_ROLE_HEAL
@@ -2122,6 +2210,24 @@ h5. LockQuality
 * LOCK_QUALITY_TRIVIAL
 
 
+h5. LootCrateOpenResponse
+* LOOT_CRATE_OPEN_RESPONSE_FAIL_NO_INVENTORY_SPACE
+* LOOT_CRATE_OPEN_RESPONSE_INVALID_LOOT_CRATE
+* LOOT_CRATE_OPEN_RESPONSE_INVALID_LOOT_CRATE_TIER
+* LOOT_CRATE_OPEN_RESPONSE_INVALID_MARKET_PRODUCT
+* LOOT_CRATE_OPEN_RESPONSE_NO_PRODUCT_SELECTED
+* LOOT_CRATE_OPEN_RESPONSE_OUT_OF_ALL_LOOT_CRATES
+* LOOT_CRATE_OPEN_RESPONSE_OUT_OF_LOOT_CRATE
+* LOOT_CRATE_OPEN_RESPONSE_SUCCESS
+* LOOT_CRATE_OPEN_RESPONSE_SYSTEM_UNAVAILABLE
+
+
+h5. LootCratesSystemState
+* LOOT_CRATES_SYSTEM_STATE_OFFLINE
+* LOOT_CRATES_SYSTEM_STATE_ONLINE
+* LOOT_CRATES_SYSTEM_STATE_OPEN_ONLY
+
+
 h5. LootItemType
 * LOOT_TYPE_ANY
 * LOOT_TYPE_COLLECTIBLE
@@ -2133,6 +2239,7 @@ h5. LootItemType
 
 h5. LootSetting
 * LOOT_SETTING_AOE_LOOT
+* LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG
 * LOOT_SETTING_AUTO_LOOT
 * LOOT_SETTING_AUTO_LOOT_STOLEN
 * LOOT_SETTING_LOOT_HISTORY
@@ -2212,6 +2319,12 @@ h5. MarketColors
 * MARKET_COLORS_UNIVERSAL_ITEM_SELECTED
 
 
+h5. MarketCurrencyType
+* MKCT_CROWNS
+* MKCT_CROWN_GEMS
+* MKCT_NONE
+
+
 h5. MarketFilterView
 * MARKET_FILTER_VIEW_ALL
 * MARKET_FILTER_VIEW_NOT_PURCHASED
@@ -2241,6 +2354,7 @@ h5. MarketProductPurchaseState
 h5. MarketProductType
 * MARKET_PRODUCT_TYPE_BUNDLE
 * MARKET_PRODUCT_TYPE_COLLECTIBLE
+* MARKET_PRODUCT_TYPE_CROWN_CRATE
 * MARKET_PRODUCT_TYPE_INSTANT_UNLOCK
 * MARKET_PRODUCT_TYPE_ITEM
 * MARKET_PRODUCT_TYPE_NONE
@@ -2256,6 +2370,7 @@ h5. MarketPurchasableResult
 * MARKET_PURCHASE_RESULT_INVALID_MARKET_ITEM
 * MARKET_PURCHASE_RESULT_INVALID_STACK_SIZE
 * MARKET_PURCHASE_RESULT_MARKET_LOCKED
+* MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS
 * MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM
 * MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC
 * MARKET_PURCHASE_RESULT_SUCCESS
@@ -2440,6 +2555,7 @@ h5. NotificationType
 * NOTIFICATION_TYPE_COLLECTIONS
 * NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER
 * NOTIFICATION_TYPE_CUSTOMER_SERVICE
+* NOTIFICATION_TYPE_DUEL
 * NOTIFICATION_TYPE_FRIEND
 * NOTIFICATION_TYPE_GROUP
 * NOTIFICATION_TYPE_GROUP_ELECTION
@@ -2654,6 +2770,7 @@ h5. QuestType
 * QUEST_TYPE_DUNGEON
 * QUEST_TYPE_GROUP
 * QUEST_TYPE_GUILD
+* QUEST_TYPE_HOLIDAY_EVENT
 * QUEST_TYPE_MAIN_STORY
 * QUEST_TYPE_NONE
 * QUEST_TYPE_RAID
@@ -3246,6 +3363,8 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_CRAFT_BAG_ITEM_GAINED
 * TUTORIAL_TRIGGER_CRAFT_BAG_OPENED
 * TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED
+* TUTORIAL_TRIGGER_CROWN_CRATE_UI_OPENED
+* TUTORIAL_TRIGGER_CROWN_GEMS_GAINED
 * TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_1
 * TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_10
 * TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_2
@@ -3411,6 +3530,7 @@ h5. UIPlatform
 
 h5. UISetting
 * UI_SETTING_ALWAYS_SHOW_STATUS_TEXT
+* UI_SETTING_AUTO_DECLINE_DUEL_INVITES
 * UI_SETTING_COMPASS_ACTIVE_QUESTS
 * UI_SETTING_COMPASS_QUEST_GIVERS
 * UI_SETTING_CUSTOM_SCALE
@@ -3578,6 +3698,14 @@ h5. WeaponType
 * WEAPONTYPE_TWO_HANDED_SWORD
 
 
+h5. ZoneGroupDisplayType
+* ZONE_GROUP_DISPLAY_TYPE_DUNGEON
+* ZONE_GROUP_DISPLAY_TYPE_GROUP
+* ZONE_GROUP_DISPLAY_TYPE_GROUP_DELVE
+* ZONE_GROUP_DISPLAY_TYPE_NONE
+* ZONE_GROUP_DISPLAY_TYPE_PUBLIC_DUNGEON
+
+
 h5. Globals
 * ABILITY_MORPH_RANK
 * ACTION_BAR_CLASS_BAR_SIZE
@@ -3603,6 +3731,7 @@ h5. Globals
 * DISPLAY_NAME_PREFIX_BYTE
 * GROUP_SIZE_MAX
 * GROUP_SIZE_MAX_WITHOUT_PLAYER
+* INVALID_DYE_ID
 * INVALID_EXPLORATION_INDEX
 * INVALID_TRACKER_INDEX
 * MAIL_MAX_ATTACHED_ITEMS
@@ -3611,6 +3740,7 @@ h5. Globals
 * MAX_GUILD_RANKS
 * MAX_JOURNAL_QUESTS
 * MAX_KEEP_UPGRADE_LEVELS
+* MAX_CROWN_CRATE_REWARD_SLOTS
 * MAX_PLAYER_MONEY
 * NUM_POWER_POOLS
 * MAX_READY_QUEUES
@@ -3716,6 +3846,9 @@ h5. ActionResult
 * ACTION_RESULT_IN_AIR
 * ACTION_RESULT_IN_COMBAT
 * ACTION_RESULT_IN_ENEMY_KEEP
+* ACTION_RESULT_IN_ENEMY_OUTPOST
+* ACTION_RESULT_IN_ENEMY_RESOURCE
+* ACTION_RESULT_IN_ENEMY_TOWN
 * ACTION_RESULT_IN_HIDEYHOLE
 * ACTION_RESULT_KILLED_BY_SUBZONE
 * ACTION_RESULT_KILLING_BLOW
@@ -3837,6 +3970,31 @@ h5. CustomerServiceTicketCategory
 * TICKET_CATEGORY_REPORT_HARASSMENT
 * TICKET_CATEGORY_REPORT_OTHER
 * TICKET_CATEGORY_REPORT_SPAM
+
+
+h5. DuelInviteFailReason
+* DUEL_INVITE_FAIL_REASON_INELIGIBLE_AREA
+* DUEL_INVITE_FAIL_REASON_NONE
+* DUEL_INVITE_FAIL_REASON_RECENTLY_DECLINED
+* DUEL_INVITE_FAIL_REASON_SELF_ACTIVE_DUEL
+* DUEL_INVITE_FAIL_REASON_SELF_CONSIDERING_INVITE
+* DUEL_INVITE_FAIL_REASON_SELF_CRAFTING
+* DUEL_INVITE_FAIL_REASON_SELF_DEAD
+* DUEL_INVITE_FAIL_REASON_SELF_IN_COMBAT
+* DUEL_INVITE_FAIL_REASON_SELF_PENDING_REQUEST
+* DUEL_INVITE_FAIL_REASON_SELF_SWIMMING
+* DUEL_INVITE_FAIL_REASON_TARGET_ACTIVE_DUEL
+* DUEL_INVITE_FAIL_REASON_TARGET_CONSIDERING_INVITE
+* DUEL_INVITE_FAIL_REASON_TARGET_CRAFTING
+* DUEL_INVITE_FAIL_REASON_TARGET_DEAD
+* DUEL_INVITE_FAIL_REASON_TARGET_INVALID
+* DUEL_INVITE_FAIL_REASON_TARGET_IN_COMBAT
+* DUEL_INVITE_FAIL_REASON_TARGET_PENDING_REQUEST
+* DUEL_INVITE_FAIL_REASON_TARGET_SELF
+* DUEL_INVITE_FAIL_REASON_TARGET_SWIMMING
+* DUEL_INVITE_FAIL_REASON_TARGET_UNAVAILABLE
+* DUEL_INVITE_FAIL_REASON_TOO_FAR
+* DUEL_INVITE_FAIL_REASON_TOO_MANY_NEARBY
 
 
 h5. FastTravelKeepResult
@@ -4058,6 +4216,7 @@ h5. LootItemResult
 h5. MarketOpenOperation
 * MARKET_OPEN_OPERATION_ANNOUNCEMENT
 * MARKET_OPEN_OPERATION_COLLECTIONS_DLC
+* MARKET_OPEN_OPERATION_CROWN_CRATES
 * MARKET_OPEN_OPERATION_DIRECT
 * MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP
 * MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE
@@ -4329,7 +4488,6 @@ h5. PledgeOfMaraResult
 * PLEDGE_OF_MARA_RESULT_PLEDGE_DECLINED
 * PLEDGE_OF_MARA_RESULT_PLEDGE_INELIGIBLE
 * PLEDGE_OF_MARA_RESULT_TOO_BUSY
-* PLEDGE_OF_MARA_RESULT_WRONG_ALLIANCE
 
 
 h5. ProgressReason
@@ -4729,6 +4887,7 @@ h5. Globals
 * MAIL_MAX_BODY_CHARACTERS
 * MAX_LOCAL_MAILS
 * MAIL_MAX_SUBJECT_CHARACTERS
+* MAX_TEXT_CHAT_INPUT_CHARACTERS
 * NUM_BUG_CATEGORIES
 * MAX_PASSWORD_LENGTH
 * SYSTEM_MAIL_MAX_PARAMETER_CHARACTERS
@@ -4775,15 +4934,15 @@ h5. AnimationType
 * ANIMATION_COLOR
 * ANIMATION_CUSTOM
 * ANIMATION_INVALID
+* ANIMATION_ROTATE3D
 * ANIMATION_SCALE
 * ANIMATION_SCROLL
 * ANIMATION_SIZE
 * ANIMATION_TEXTURE
-* ANIMATION_TEXTURE3DROTATE
-* ANIMATION_TEXTURE3DTRANSLATE
 * ANIMATION_TEXTUREROTATE
 * ANIMATION_TEXTURESLIDE
 * ANIMATION_TRANSLATE
+* ANIMATION_TRANSLATE3D
 
 
 h5. BarAlignment
@@ -4849,11 +5008,6 @@ h5. CooldownDisplayType
 h5. CooldownTimeType
 * CD_TIME_TYPE_TIME_REMAINING
 * CD_TIME_TYPE_TIME_UNTIL
-
-
-h5. Dimensions
-* DIMENSIONS_THREE_DIMENSIONAL
-* DIMENSIONS_TWO_DIMENSIONAL
 
 
 h5. DrawLayer
@@ -5132,6 +5286,9 @@ h5. MapDisplayPinType
 * MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION
 * MAP_PIN_TYPE_ASSISTED_QUEST_ENDING
 * MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION
+* MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION
+* MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_ENDING
+* MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION
 * MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION
 * MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT
 * MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT
@@ -5219,6 +5376,7 @@ h5. MapDisplayPinType
 * MAP_PIN_TYPE_QUEST_GIVE_ITEM
 * MAP_PIN_TYPE_QUEST_INTERACT
 * MAP_PIN_TYPE_QUEST_OFFER
+* MAP_PIN_TYPE_QUEST_OFFER_REPEATABLE
 * MAP_PIN_TYPE_QUEST_TALK_TO
 * MAP_PIN_TYPE_RALLY_POINT
 * MAP_PIN_TYPE_RESPAWN_BORDER_KEEP_ACCESSIBLE
@@ -5233,6 +5391,9 @@ h5. MapDisplayPinType
 * MAP_PIN_TYPE_TRACKED_QUEST_CONDITION
 * MAP_PIN_TYPE_TRACKED_QUEST_ENDING
 * MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION
+* MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION
+* MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_ENDING
+* MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION
 * MAP_PIN_TYPE_TRAINER
 * MAP_PIN_TYPE_TRI_BATTLE_LARGE
 * MAP_PIN_TYPE_TRI_BATTLE_MEDIUM
@@ -5509,6 +5670,9 @@ h2. Game API
 * GetRaceName(*[Gender|#Gender]* _gender_, *integer* _raceId_)
 ** _Returns:_ *string* _raceName_
 
+* GetLocationName(*integer* _worldId_)
+** _Returns:_ *string* _worldName_
+
 * GetGenderFromNameDescriptor(*string* _nameDescriptor_)
 ** _Returns:_ *[Gender|#Gender]* _gender_
 
@@ -5543,8 +5707,6 @@ h2. Game API
 
 * Id64ToString(*id64* _id_)
 ** _Returns:_ *string* _stringDesc_
-
-* OpenURLByType *private* (*[ApprovedURLType|#ApprovedURLType]* _urlType_)
 
 * HideMouse(*bool* _onlyConsiderWhileMoving_)
 
@@ -5648,20 +5810,7 @@ h2. Game API
 * HashString(*string* _text_)
 ** _Returns:_ *integer* _hashValue_
 
-* Create3DRenderSpace()
-** _Returns:_ *integer* _spaceId_
-
-* Set3DRenderSpaceOrigin(*integer* _spaceId_, *number* _x_, *number* _y_, *number* _z_)
-
-* Set3DRenderSpaceRight(*integer* _spaceId_, *number* _x_, *number* _y_, *number* _z_)
-
-* Set3DRenderSpaceUp(*integer* _spaceId_, *number* _x_, *number* _y_, *number* _z_)
-
-* Set3DRenderSpaceForward(*integer* _spaceId_, *number* _x_, *number* _y_, *number* _z_)
-
-* Set3DRenderSpaceSystem(*integer* _spaceId_, *[GuiRender3DSpaceSystem|#GuiRender3DSpaceSystem]* _system_)
-
-* Set3DRenderSpaceToCurrentCamera(*integer* _spaceId_)
+* Set3DRenderSpaceToCurrentCamera(*string* _controlName_)
 
 * ComputeDepthAtWhichWorldWidthRendersAsUIWidth(*number* _worldWidth_, *number* _UIWidth_)
 ** _Returns:_ *number* _depth_
@@ -5687,6 +5836,14 @@ h2. Game API
 ** _Returns:_ *bool* _hasViewed_
 
 * MarkEULAAsViewed(*[EULAType|#EULAType]* _eulaType_)
+
+* OpenURLByType *private* (*[ApprovedURLType|#ApprovedURLType]* _urlType_)
+
+* GetURLTextByType *private* (*[ApprovedURLType|#ApprovedURLType]* _urlType_)
+** _Returns:_ *string* _urlText_
+
+* ShouldOpenURLTypeInOverlay *private* (*[ApprovedURLType|#ApprovedURLType]* _urlType_)
+** _Returns:_ *bool* _urlOpensInOverlay_
 
 * SetCurrentVideoPlaybackVolume(*number* _volume_, *number* _lerpTime_)
 
@@ -6055,8 +6212,14 @@ h2. Game API
 * GetTrialInfo()
 ** _Returns:_ *integer* _accountTypeId_, *string* _title_, *string* _description_, *integer* _version_
 
-* GetMarketCurrency *private* ()
-** _Returns:_ *integer* _marketCurrency_
+* GetPlayerCrowns *private* ()
+** _Returns:_ *integer* _currentCrowns_
+
+* GetPlayerCrownGems *private* ()
+** _Returns:_ *integer* _currentCrownGems_
+
+* GetPlayerMarketCurrency(*[MarketCurrencyType|#MarketCurrencyType]* _type_)
+** _Returns:_ *integer* _currencyAmount_
 
 
 * ComputeStringDistance(*string* _source_, *string* _target_, *integer* _maxDistance_)
@@ -6322,6 +6485,9 @@ h2. Game API
 
 * GetUnitPower(*string* _unitTag_, *[CombatMechanicType|#CombatMechanicType]* _powerType_)
 ** _Returns:_ *integer* _current_, *integer* _max_, *integer* _effectiveMax_
+
+* GetCurrentCharacterId()
+** _Returns:_ *string* _id_
 
 * GetPlayerStat(*[DerivedStats|#DerivedStats]* _derivedStat_, *[StatBonusOption|#StatBonusOption]* _statBonusOption_)
 ** _Returns:_ *integer* _value_
@@ -7154,6 +7320,8 @@ h2. Game API
 * IsFeedbackGatheringEnabled()
 ** _Returns:_ *bool* _enabled_
 
+* RequestOpenUnsafeURL(*string* _URL_)
+
 * Logout()
 
 * Quit()
@@ -7290,6 +7458,12 @@ h2. Game API
 * GetActiveActionLayerIndex(*luaindex* _activeActionLayerIndex_)
 ** _Returns:_ *luaindex:nilable* _layerIndex_
 
+* GetNumCharacters()
+** _Returns:_ *integer* _numCharacters_
+
+* GetCharacterInfo(*luaindex* _index_)
+** _Returns:_ *string* _name_, *[Gender|#Gender]* _gender_, *integer* _level_, *integer* _classId_, *integer* _raceId_, *[Alliance|#Alliance]* _alliance_, *string* _id_, *integer* _locationId_
+
 * GetNumAttributes()
 ** _Returns:_ *integer* _numAttributes_
 
@@ -7304,9 +7478,6 @@ h2. Game API
 
 * IsPlayerStunned()
 ** _Returns:_ *bool* _isStunned_
-
-* GetActiveCollectibleByCategory(*[CollectibleCategoryType|#CollectibleCategoryType]* _category_)
-** _Returns:_ *luaindex* _collectibleCostumeId_
 
 * GetSynergyInfo()
 ** _Returns:_ *string:nilable* _synergyName_, *textureName:nilable* _iconFilename_
@@ -7740,9 +7911,6 @@ h2. Game API
 * GetJournalQuestRewardInfo(*luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
 ** _Returns:_ *[RewardType|#RewardType]* _type_, *string* _name_, *integer* _amount_, *textureName* _iconFile_, *bool* _meetsUsageRequirement_, *[ItemQuality|#ItemQuality]* _itemQuality_, *[RewardItemType|#RewardItemType]:nilable* _itemType_
 
-* GetJournalQuestRewardInfoInZone(*luaindex* _zoneIndex_, *luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
-** _Returns:_ *[RewardType|#RewardType]* _type_, *string* _name_, *integer* _amount_, *textureName* _iconFile_, *bool* _meetsUsageRequirement_, *[ItemQuality|#ItemQuality]* _itemQuality_, *[RewardItemType|#RewardItemType]:nilable* _itemType_
-
 * GetJournalQuestRewardItemId(*luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
 ** _Returns:_ *integer* _rewardItemDefId_
 
@@ -7763,6 +7931,8 @@ h2. Game API
 
 * GetQuestItemTooltipInfo(*luaindex* _journalQuestIndex_, *luaindex* _stepIndex_, *luaindex* _conditionIndex_)
 ** _Returns:_ *string* _header_, *string* _itemName_, *string* _tooltipText_
+
+* CancelRequestJournalQuestConditionAssistance(*integer* _taskId_)
 
 * GetDynamicChatChannelName(*integer* _channelId_)
 ** _Returns:_ *string* _name_
@@ -8165,6 +8335,12 @@ h2. Game API
 * GetItemBoPTradeableDisplayNamesString(*integer* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *string* _namesString_
 
+* GetItemBoPTradeableNumEligibleNames(*integer* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *integer* _numNames_
+
+* GetItemBoPTradeableEligibleNameByIndex(*integer* _bagId_, *integer* _slotIndex_, *luaindex* _nameIndex_)
+** _Returns:_ *string* _name_
+
 * HasCraftBagAccess()
 ** _Returns:_ *bool* _hasAccess_
 
@@ -8179,7 +8355,15 @@ h2. Game API
 
 * DestroyAllJunk()
 
+* CanAnyItemsBeStoredInCraftBag(*integer* _bagId_)
+** _Returns:_ *bool* _canBeStoredInCraftBag_
+
+* StowAllVirtualItems()
+
 * DoesBagHaveSpaceFor(*[Bag|#Bag]* _destinationBagId_, *[Bag|#Bag]* _sourceBagId_, *integer* _sourceSlot_)
+** _Returns:_ *bool* _hasSpace_
+
+* DoesBagHaveSpaceForItemLink(*[Bag|#Bag]* _destinationBagId_, *string* _itemLink_)
 ** _Returns:_ *bool* _hasSpace_
 
 * CanItemBePlayerLocked(*integer* _bagId_, *integer* _slotIndex_)
@@ -8390,11 +8574,11 @@ h2. Game API
 * CanItemLinkBeVirtual(*string* _itemLink_)
 ** _Returns:_ *bool* _canBeVirtual_
 
-* GetItemLinkDyeDefIds(*string* _itemLink_)
+* GetItemLinkDyeIds(*string* _itemLink_)
 ** _Returns:_ *integer* _primaryDefId_, *integer* _secondaryDefId_, *integer* _accentDefId_
 
-* GetItemLinkDyeStampDefId(*string* _itemLink_)
-** _Returns:_ *integer* _dyeStampDefId_
+* GetItemLinkDyeStampId(*string* _itemLink_)
+** _Returns:_ *integer* _dyeStampId_
 
 * ShouldHideTooltipRequiredLevel(*string* _itemLink_)
 ** _Returns:_ *bool* _shouldHideLevel_
@@ -8596,7 +8780,7 @@ h2. Game API
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
 
 * GetMapInfo(*luaindex* _index_)
-** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *integer* _zoneId_
+** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *integer* _zoneId_, *string* _description_
 
 * GetZoneDescription(*integer* _zoneId_)
 ** _Returns:_ *string* _description_
@@ -8788,6 +8972,9 @@ h2. Game API
 
 * GetFastTravelNodeOutboundOnlyInfo(*luaindex* _nodeIndex_)
 ** _Returns:_ *bool* _isOutboundOnly_, *integer* _errorStringId_
+
+* GetFastTravelNodeDrawLevelOffset(*luaindex* _nodeIndex_)
+** _Returns:_ *integer* _drawLevelOffset_
 
 * GetFastTravelNodeLinkedCollectibleId(*luaindex* _nodeIndex_)
 ** _Returns:_ *integer* _collectibleId_
@@ -9252,6 +9439,9 @@ h2. Game API
 
 * RespawnAtKeep(*integer* _keepId_)
 
+* IsDuelingDeath()
+** _Returns:_ *bool* _duelingDeath_
+
 * RespawnAtForwardCamp(*luaindex* _index_)
 
 * GetNumForwardCamps(*[BattlegroundQueryContextType|#BattlegroundQueryContextType]* _battlegroundContext_)
@@ -9277,6 +9467,18 @@ h2. Game API
 
 * GetBattleStandardGuildName(*[BattlegroundQueryContextType|#BattlegroundQueryContextType]* _battlegroundContext_, *luaindex* _index_)
 ** _Returns:_ *string* _guildName_
+
+* GetDuelInfo()
+** _Returns:_ *[DuelState|#DuelState]* _duelState_, *string* _partnerCharacterName_, *string* _partnerDisplayName_
+
+* ChallengeTargetToDuel(*string* _characterOrDisplayName_)
+
+* AcceptDuel()
+
+* DeclineDuel()
+
+* IsNearDuelBoundary()
+** _Returns:_ *bool* _isNearBoundary_
 
 * TradeInvite(*string* _target_)
 
@@ -9306,6 +9508,15 @@ h2. Game API
 * GetTradeItemInfo(*[TradeParticipant|#TradeParticipant]* _who_, *luaindex* _tradeIndex_)
 ** _Returns:_ *string* _name_, *textureName* _icon_, *integer* _stack_, *integer* _quality_, *string* _creatorName_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *[EquipType|#EquipType]* _equipType_, *[ItemStyle|#ItemStyle]* _itemStyle_
 
+* IsTradeItemBoPAndTradeable(*[TradeParticipant|#TradeParticipant]* _who_, *luaindex* _tradeIndex_)
+** _Returns:_ *bool* _isBoPAndTradeable_
+
+* GetTradeItemBoPTimeRemainingSeconds(*[TradeParticipant|#TradeParticipant]* _who_, *luaindex* _tradeIndex_)
+** _Returns:_ *integer* _timeRemainingS_
+
+* GetTradeItemBoPTradeableDisplayNamesString(*[TradeParticipant|#TradeParticipant]* _who_, *luaindex* _tradeIndex_)
+** _Returns:_ *string* _namesString_
+
 * GetTradeItemBagAndSlot(*[TradeParticipant|#TradeParticipant]* _who_, *luaindex* _tradeIndex_)
 ** _Returns:_ *[Bag|#Bag]:nilable* _bagId_, *integer:nilable* _slotIndex_
 
@@ -9319,6 +9530,12 @@ h2. Game API
 ** _Returns:_ *bool* _isPlayerInside_
 
 * RemoveMapPinsInRange(*[MapDisplayPinType|#MapDisplayPinType]* _startType_, *[MapDisplayPinType|#MapDisplayPinType]* _endType_, *integer:nilable* _param1_, *integer:nilable* _param2_, *integer:nilable* _param3_)
+
+* AssistedQuestPinForTracked(*[MapDisplayPinType|#MapDisplayPinType]* _trackedPinType_)
+** _Returns:_ *[MapDisplayPinType|#MapDisplayPinType]* _assistedPinType_
+
+* TrackedQuestPinForAssisted(*[MapDisplayPinType|#MapDisplayPinType]* _assistedPinType_)
+** _Returns:_ *[MapDisplayPinType|#MapDisplayPinType]* _trackedPinType_
 
 * GetAvailableSkillPoints()
 ** _Returns:_ *integer* _numPoints_
@@ -9499,8 +9716,14 @@ h2. Game API
 * IsCollectibleCategoryUsable(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
 ** _Returns:_ *bool* _isUsable_
 
+* IsCollectibleCategoryPlaceableFurniture(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
+** _Returns:_ *bool* _isPlaceable_
+
 * IsCollectibleBlocked(*integer* _collectibleId_)
 ** _Returns:_ *bool* _isBlocked_
+
+* IsCollectibleValidForPlayer(*integer* _collectibleId_)
+** _Returns:_ *bool* _isValidForPlayer_
 
 * GetCollectibleBlockReason(*integer* _collectibleId_)
 ** _Returns:_ *[CollectibleUsageBlockReason|#CollectibleUsageBlockReason]* _usageBlockReason_
@@ -9591,7 +9814,7 @@ h2. Game API
 ** _Returns:_ *string* _overriddenEmoteSlashCommandName_
 
 * GetCollectibleRestrictionsByType(*integer* _collectibleId_, *[CollectibleRestrictionType|#CollectibleRestrictionType]* _restrictionType_)
-** _Returns:_ *bool* _hasGenderRestrictions_, *bool* _passesRestrictions_, *string* _allowedGenderNamesString_
+** _Returns:_ *bool* _hasRestrictions_, *bool* _passesRestrictions_, *string* _allowedNamesString_
 
 * GetNumAchievementCategories()
 ** _Returns:_ *integer* _numCategories_
@@ -9674,7 +9897,7 @@ h2. Game API
 ** _Returns:_ *bool* _hasRewardOfType_, *string* _titleName_
 
 * GetAchievementRewardDye(*integer* _achievementId_)
-** _Returns:_ *bool* _hasRewardOfType_, *integer* _dyeDefId_
+** _Returns:_ *bool* _hasRewardOfType_, *integer* _dyeId_
 
 * GetAchievementRewardCollectible(*integer* _achievementId_)
 ** _Returns:_ *bool* _hasRewardOfType_, *integer* _collectibleId_
@@ -10008,7 +10231,7 @@ h2. Game API
 ** _Returns:_ *integer* _numStyleItems_
 
 * GetSmithingStyleItemInfo(*luaindex* _styleItemIndex_)
-** _Returns:_ *string* _itemName_, *textureName* _icon_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *integer* _itemStyle_, *integer* _quality_
+** _Returns:_ *string* _itemName_, *textureName* _icon_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *integer* _itemStyle_, *integer* _quality_, *bool* _alwaysHideIfLocked_
 
 * GetSmithingStyleItemLink(*luaindex* _styleItemIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
@@ -10267,28 +10490,28 @@ h2. Game API
 
 * InitializePendingDyes(*[DyeMode|#DyeMode]* _dyeMode_)
 
-* SetPendingSlotDyes(*[DyeableSlot|#DyeableSlot]* _dyeableSlot_, *integer:nilable* _primaryDyeDefId_, *integer:nilable* _secondaryDyeDefId_, *integer:nilable* _accentDyeDefId_)
+* SetPendingSlotDyes(*[DyeableSlot|#DyeableSlot]* _dyeableSlot_, *integer* _primaryDyeId_, *integer* _secondaryDyeId_, *integer* _accentDyeId_)
 
 * GetPendingSlotDyes(*[DyeableSlot|#DyeableSlot]* _dyeableSlot_)
-** _Returns:_ *integer:nilable* _primaryDyeDefId_, *integer:nilable* _secondaryDyeDefId_, *integer:nilable* _accentDyeDefId_
+** _Returns:_ *integer* _primaryDyeId_, *integer* _secondaryDyeId_, *integer* _accentDyeId_
 
 * GetNumDyes()
 ** _Returns:_ *integer* _numDyes_
 
 * GetDyeInfo(*luaindex* _dyeIndex_)
-** _Returns:_ *string* _dyeName_, *bool* _known_, *[DyeRarity|#DyeRarity]* _rarity_, *[DyeHueCategory|#DyeHueCategory]* _hueCategory_, *integer* _achievementId_, *number* _r_, *number* _g_, *number* _b_, *integer* _sortKey_, *integer* _dyeDefId_
+** _Returns:_ *string* _dyeName_, *bool* _known_, *[DyeRarity|#DyeRarity]* _rarity_, *[DyeHueCategory|#DyeHueCategory]* _hueCategory_, *integer* _achievementId_, *number* _r_, *number* _g_, *number* _b_, *integer* _sortKey_, *integer* _dyeId_
 
-* GetDyeDefInfoById(*integer* _dyeDefId_)
+* GetDyeInfoById(*integer* _dyeId_)
 ** _Returns:_ *string* _dyeName_, *bool* _known_, *[DyeRarity|#DyeRarity]* _rarity_, *[DyeHueCategory|#DyeHueCategory]* _hueCategory_, *integer* _achievementId_, *number* _r_, *number* _g_, *number* _b_, *integer* _sortKey_
 
-* GetDyeDefColorsById(*integer* _dyeDefId_)
+* GetDyeColorsById(*integer* _dyeId_)
 ** _Returns:_ *number* _r_, *number* _g_, *number* _b_
 
 * GetCurrentItemDyes(*integer* _bagId_, *integer* _slotIndex_)
-** _Returns:_ *integer:nilable* _primaryDyeIndex_, *integer:nilable* _secondaryDyeIndex_, *integer:nilable* _accentDyeIndex_
+** _Returns:_ *integer* _primaryDyeIndex_, *integer* _secondaryDyeIndex_, *integer* _accentDyeIndex_
 
-* GetCurrentCollectibleDyes(*luaindex* _collectibleId_)
-** _Returns:_ *integer:nilable* _primaryDyeIndex_, *integer:nilable* _secondaryDyeIndex_, *integer:nilable* _accentDyeIndex_
+* GetCurrentCollectibleDyes(*integer* _collectibleId_)
+** _Returns:_ *integer* _primaryDyeIndex_, *integer* _secondaryDyeIndex_, *integer* _accentDyeIndex_
 
 * ApplyPendingDyes()
 
@@ -10296,9 +10519,9 @@ h2. Game API
 ** _Returns:_ *integer* _numSavedDyeSets_
 
 * GetSavedDyeSetDyes(*luaindex* _dyeSetIndex_)
-** _Returns:_ *integer:nilable* _primaryDyeDefId_, *integer:nilable* _secondaryDyeDefId_, *integer:nilable* _accentDyeDefId_
+** _Returns:_ *integer* _primaryDyeId_, *integer* _secondaryDyeId_, *integer* _accentDyeId_
 
-* SetSavedDyeSetDyes(*luaindex* _dyeSetIndex_, *integer:nilable* _primaryDyeDefId_, *integer:nilable* _secondaryDyeDefId_, *integer:nilable* _accentDyeDefId_)
+* SetSavedDyeSetDyes(*luaindex* _dyeSetIndex_, *integer* _primaryDyeId_, *integer* _secondaryDyeId_, *integer* _accentDyeId_)
 
 * CanUseCollectibleDyeing()
 ** _Returns:_ *bool* _collectibleDyeingAllowed_
@@ -10322,15 +10545,15 @@ h2. Game API
 ** _Returns:_ *textureName* _icon_
 
 * GetDyeableSlotCurrentDyes(*[DyeableSlot|#DyeableSlot]* _dyeableSlot_)
-** _Returns:_ *integer:nilable* _primaryDyeDefId_, *integer:nilable* _secondaryDyeDefId_, *integer:nilable* _accentDyeDefId_
+** _Returns:_ *integer* _primaryDyeId_, *integer* _secondaryDyeId_, *integer* _accentDyeId_
 
 * IsDyeIndexKnown(*luaindex* _dyeIndex_)
 ** _Returns:_ *bool* _isKnown_
 
-* CanPlayerUseCostumeDyeStamp(*integer* _dyeStampDefId_)
+* CanPlayerUseCostumeDyeStamp(*integer* _dyeStampId_)
 ** _Returns:_ *[DyeStampUseResult|#DyeStampUseResult]* _dyeStampUseResult_
 
-* CanPlayerUseItemDyeStamp(*integer* _dyeStampDefId_)
+* CanPlayerUseItemDyeStamp(*integer* _dyeStampId_)
 ** _Returns:_ *[DyeStampUseResult|#DyeStampUseResult]* _dyeStampUseResult_
 
 * SetupDyeStampPreview(*integer* _bagId_, *integer* _slotIndex_)
@@ -10439,7 +10662,7 @@ h2. Game API
 * GetPendingHeraldryCost()
 ** _Returns:_ *integer* _pendingCost_
 
-* RevertToSavedHeraldry()
+* RevertToSavedHeraldry(*bool* _hasActiveAppearance_)
 
 * SetPendingHeraldryIndices(*luaindex* _backgroundCategoryIndex_, *luaindex* _backgroundStyleIndex_, *luaindex* _backgroundPrimaryColorIndex_, *luaindex* _backgroundSecondaryColorIndex_, *luaindex* _crestCategoryIndex_, *luaindex* _crestStyleIndex_, *luaindex* _crestColorIndex_)
 
@@ -10586,6 +10809,9 @@ h2. Game API
 * IsInPreviewMode *private* ()
 ** _Returns:_ *bool* _isInPreviewMode_
 
+* IsCharacterPreviewingAvailable()
+** _Returns:_ *bool* _canPreview_
+
 * EndCurrentItemPreview *private* ()
 
 * BeginItemPreviewSpin *private* ()
@@ -10597,7 +10823,7 @@ h2. Game API
 
 * PreviewCollectible *private* (*integer* _collectibleDefId_, *integer* _variation_, *integer* _dyeBrushId_)
 
-* PreviewDyeStamp *private* (*integer* _dyeStampId_)
+* PreviewDyeStamp *private* (*integer* _dyeStampId_, *[ItemUseType|#ItemUseType]* _itemType_)
 
 * PreviewCraftItem *private* (*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *luaindex* _styleIndex_, *luaindex* _traitIndex_, *bool* _useUniversalStyleItem_, *integer* _aDyeStampId_)
 
@@ -10775,24 +11001,123 @@ h2. Game API
 
 * ShowMarketAndSearch(*string* _marketProductSearchString_, *[MarketOpenOperation|#MarketOpenOperation]* _source_)
 
+* SendCrownCrateOpenRequest(*integer* _crateId_)
+
+* GetNumOwnedCrownCrateTypes()
+** _Returns:_ *integer* _numCrownCrateTypes_
+
+* GetNextOwnedCrownCrateId(*integer:nilable* _lastCrateId_)
+** _Returns:_ *integer:nilable* _nextCrateId_
+
+* GetOnSaleCrownCrateId()
+** _Returns:_ *integer:nilable* _crateId_
+
+* GetCrownCrateName(*integer* _crateId_)
+** _Returns:_ *string* _crateName_
+
+* GetCrownCrateCount(*integer* _crateId_)
+** _Returns:_ *integer* _count_
+
+* GetInventorySpaceRequiredToOpenCrownCrate(*integer* _crateId_)
+** _Returns:_ *integer* _inventorySpaceRequired_
+
+* GetCrownCratePackNormalTexture(*integer* _crateId_)
+** _Returns:_ *textureName* _normalImage_
+
+* GetCrownCrateCardTextures(*integer* _crateId_)
+** _Returns:_ *textureName* _cardBackImage_, *textureName* _cardBackGlowImage_, *textureName* _cardFaceImage_, *textureName* _cardFaceGlowImage_
+
+* GetCurrentCrownCrateId()
+** _Returns:_ *integer* _crateId_
+
+* GetNumCurrentCrownCrateTotalRewards()
+** _Returns:_ *integer* _numRewards_
+
+* GetNumCurrentCrownCratePrimaryRewards()
+** _Returns:_ *integer* _numPrimaryRewards_
+
+* GetNumCurrentCrownCrateBonusRewards()
+** _Returns:_ *integer* _numBonusRewards_
+
+* GetCrownCrateRewardInfo(*luaindex* _rewardIndex_)
+** _Returns:_ *string* _rewardName_, *string* _rewardTypeText_, *textureName* _cardFaceImage_, *textureName* _cardFaceFrameAccentImage_, *integer* _gemsExchanged_, *bool* _isBonus_, *integer* _crownCrateTierId_, *integer* _stackCount_
+
+* GetCrownCrateRewardProductReferenceData(*luaindex* _rewardIndex_)
+** _Returns:_ *[MarketProductType|#MarketProductType]* _rewardProductType_, *integer* _referenceDataId_
+
+* GetCrownCrateNPCBoneWorldPosition(*string* _boneName_)
+** _Returns:_ *bool* _success_, *number* _positionX_, *number* _positionY_, *number* _positionZ_
+
+* CreateCrownCrateSpecificParticleEffect *private* (*integer* _crownCrateId_, *[CrownCrateParticleEffects|#CrownCrateParticleEffects]* _crownCrateParticleEffects_, *number* _worldX_, *number* _worldY_, *number* _worldZ_)
+** _Returns:_ *integer:nilable* _particleEffectId_
+
+* CreateCrownCrateTierSpecificParticleEffect *private* (*integer* _crownCrateTierId_, *[CrownCrateTierParticleEffects|#CrownCrateTierParticleEffects]* _crownCrateTierParticleEffects_, *number* _worldX_, *number* _worldY_, *number* _worldZ_)
+** _Returns:_ *integer:nilable* _particleEffectId_
+
+* GetCrownCrateNPCCardThrowingBoneName()
+** _Returns:_ *string* _boneName_
+
+* SetCrownCrateNPCVisible(*bool* _show_)
+
+* TriggerCrownCrateNPCAnimation(*[CrownCrateEvent|#CrownCrateEvent]* _event_)
+
+* GetCrownCrateTierQualityColor(*integer* _crownCrateTierId_)
+** _Returns:_ *number* _r_, *number* _g_, *number* _b_
+
+* GetCrownCrateTierReactionNPCAnimation(*integer* _crownCrateTierId_)
+** _Returns:_ *[CrownCrateEvent|#CrownCrateEvent]* _reactionEvent_
+
+* GetCrownCratesSystemState()
+** _Returns:_ *[LootCratesSystemState|#LootCratesSystemState]* _crownCratesSystemState_
+
+* CanInteractWithCrownCratesSystem()
+** _Returns:_ *bool* _canInteractWithCrownCratesSystem_
+
+* PlayCrownCrateTierSpecificParticleEffectSound(*integer* _crownCrateTierId_, *[CrownCrateTierParticleEffects|#CrownCrateTierParticleEffects]* _crownCrateTierParticleEffects_)
+
+* PlayCrownCrateSpecificParticleEffectSound(*integer* _crownCrateId_, *[CrownCrateParticleEffects|#CrownCrateParticleEffects]* _crownCrateTierParticleEffects_)
+
+* RefreshCardsInCrownCrateNPCsHand()
+
+* StartWorldParticleEffect *private* (*integer* _particleEffectId_)
+
+* StopWorldParticleEffect *private* (*integer* _particleEffectId_)
+
+* SetWorldParticleEffectPosition *private* (*integer* _particleEffectId_, *number* _worldX_, *number* _worldY_, *number* _worldZ_)
+
+* SetWorldParticleEffectOrientation *private* (*integer* _particleEffectId_, *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_)
+
+* SetWorldParticleEffectScale *private* (*integer* _particleEffectId_, *number* _scale_)
+
+* DeleteWorldParticleEffect *private* (*integer* _particleEffectId_)
+
 * GetActiveUserEmailAddress *private* ()
 ** _Returns:_ *string* _emailAddress_
 
 * GetCurrentZoneDungeonDifficulty()
 ** _Returns:_ *[DungeonDifficulty|#DungeonDifficulty]* _isVeteranDifficulty_
 
-* HousingEditorToggleSnapMode *private* ()
+* HousingEditorToggleSurfaceDragMode *private* ()
 
 * HousingEditorRequestPlacement *private* ()
 
-* HousingEditorRotateFixture *private* (*[AxisTypes|#AxisTypes]* _axis_, *number* _magnitude_)
+* HousingEditorRequestRemoveFurniture *private* (*id64* _furnitureId_)
 
-* HousingEditorPushFixture *private* (*number* _magnitude_)
+* HousingEditorRotateFurniture *private* (*[AxisTypes|#AxisTypes]* _axis_, *number* _magnitude_)
+
+* HousingEditorPushFurniture *private* (*number* _magnitude_)
+
+* HousingEditorAlignFurnitureToSurface *private* ()
 
 * HousingEditorPreviewItemFurniture *private* (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _success_
 
-* HousingEditorHasPendingFixture *private* ()
+* HousingEditorPreviewCollectibleFurniture *private* (*integer* _collectibleId_)
+** _Returns:_ *bool* _success_
+
+* HousingEditorEndCurrentPreview *private* ()
+
+* HousingEditorIsPreviewing *private* ()
 ** _Returns:_ *bool* _isPreview_
 
 * HousingEditorSelectFurniture *private* ()
@@ -10804,11 +11129,26 @@ h2. Game API
 * GetHousingEditorMode *private* ()
 ** _Returns:_ *[HousingEditorMode|#HousingEditorMode]* _mode_
 
-* DebugHousingEditorPreviewTestFurniture *private* (*luaindex* _index_)
+* GetNextPlacedHousingFurnitureId *private* (*id64:nilable* _lastItemId_)
+** _Returns:_ *id64:nilable* _nextItemId_
+
+* GetPlacedHousingFurnitureInfo *private* (*id64* _itemId_)
+** _Returns:_ *string* _itemName_, *textureName* _icon_
+
+* HousingEditorCanPlaceCollectible *private* (*integer* _collectibleId_)
 ** _Returns:_ *bool* _success_
 
-* DebugGetNumTestFurniture *private* ()
-** _Returns:_ *integer* _size_
+* HousingEditorJumpToSafeLocation *private* ()
+
+* SetNameplateKeyboardFont(*string* _fontName_, *[FontStyle|#FontStyle]* _fontStyle_)
+
+* GetNameplateKeyboardFont()
+** _Returns:_ *string* _fontName_, *[FontStyle|#FontStyle]* _fontStyle_
+
+* SetNameplateGamepadFont(*string* _fontName_, *[FontStyle|#FontStyle]* _fontStyle_)
+
+* GetNameplateGamepadFont()
+** _Returns:_ *string* _fontName_, *[FontStyle|#FontStyle]* _fontStyle_
 
 
 h2. Object API
@@ -10855,7 +11195,7 @@ h3. AnimationManager
 
 h3. AnimationObject
 Objects that inherit behavior from *AnimationObject*
-[AnimationObjectAlpha|#AnimationObjectAlpha], [AnimationObjectColor|#AnimationObjectColor], [AnimationObjectCustom|#AnimationObjectCustom], [AnimationObjectScale|#AnimationObjectScale], [AnimationObjectScroll|#AnimationObjectScroll], [AnimationObjectSize|#AnimationObjectSize], [AnimationObjectTexture|#AnimationObjectTexture], [AnimationObjectTexture3DRotate|#AnimationObjectTexture3DRotate], [AnimationObjectTexture3DTranslate|#AnimationObjectTexture3DTranslate], [AnimationObjectTextureRotate|#AnimationObjectTextureRotate], [AnimationObjectTextureSlide|#AnimationObjectTextureSlide], [AnimationObjectTranslate|#AnimationObjectTranslate]
+[AnimationObject3DRotate|#AnimationObject3DRotate], [AnimationObject3DTranslate|#AnimationObject3DTranslate], [AnimationObjectAlpha|#AnimationObjectAlpha], [AnimationObjectColor|#AnimationObjectColor], [AnimationObjectCustom|#AnimationObjectCustom], [AnimationObjectScale|#AnimationObjectScale], [AnimationObjectScroll|#AnimationObjectScroll], [AnimationObjectSize|#AnimationObjectSize], [AnimationObjectTexture|#AnimationObjectTexture], [AnimationObjectTextureRotate|#AnimationObjectTextureRotate], [AnimationObjectTextureSlide|#AnimationObjectTextureSlide], [AnimationObjectTranslate|#AnimationObjectTranslate]
 
 * GetAnimatedControl()
 ** _Returns:_ *object* _animatedControl_
@@ -10882,6 +11222,98 @@ Objects that inherit behavior from *AnimationObject*
 * SetEasingFunction(*function* _functionRef_)
 
 * SetHandler(*string* _EventName_, *function* _FunctionRef_)
+
+
+h3. AnimationObject3DRotate
+* GetEndPitch()
+** _Returns:_ *number* _endPitchRadians_
+
+* GetEndRoll()
+** _Returns:_ *number* _endRollRadians_
+
+* GetEndYaw()
+** _Returns:_ *number* _endYawRadians_
+
+* GetStartPitch()
+** _Returns:_ *number* _startPitchRadians_
+
+* GetStartRoll()
+** _Returns:_ *number* _startRollRadians_
+
+* GetStartYaw()
+** _Returns:_ *number* _startYawRadians_
+
+* SetEndPitch(*number* _endPitchRadians_)
+
+* SetEndRoll(*number* _endRollRadians_)
+
+* SetEndYaw(*number* _endYawRadians_)
+
+* SetRotationValues(*number* _startPitchRadians_, *number* _startYawRadians_, *number* _startRollRadians_, *number* _endPitchRadians_, *number* _endYawRadians_, *number* _endRollRadians_)
+
+* SetStartPitch(*number* _startPitchRadians_)
+
+* SetStartRoll(*number* _startRollRadians_)
+
+* SetStartYaw(*number* _startYawRadians_)
+
+
+h3. AnimationObject3DTranslate
+* ClearBezierControlPoints()
+
+* GetDeltaOffsetX()
+** _Returns:_ *number* _deltaX_
+
+* GetDeltaOffsetY()
+** _Returns:_ *number* _deltaY_
+
+* GetDeltaOffsetZ()
+** _Returns:_ *number* _deltaZ_
+
+* GetEndOffsetX()
+** _Returns:_ *number* _endX_
+
+* GetEndOffsetY()
+** _Returns:_ *number* _endY_
+
+* GetEndOffsetZ()
+** _Returns:_ *number* _endZ_
+
+* GetStartOffsetX()
+** _Returns:_ *number* _startX_
+
+* GetStartOffsetY()
+** _Returns:_ *number* _startY_
+
+* GetStartOffsetZ()
+** _Returns:_ *number* _startZ_
+
+* GetTranslateDeltas()
+** _Returns:_ *number* _deltaX_, *number* _deltaY_, *number* _deltaZ_
+
+* SetBezierControlPoint(*luaindex* _index_, *number* _x_, *number* _y_, *number* _z_)
+
+* SetDeltaOffsetX(*number* _deltaX_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+
+* SetDeltaOffsetY(*number* _deltaY_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+
+* SetDeltaOffsetZ(*number* _deltaZ_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+
+* SetEndOffsetX(*number* _endX_)
+
+* SetEndOffsetY(*number* _endY_)
+
+* SetEndOffsetZ(*number* _endZ_)
+
+* SetStartOffsetX(*number* _startX_)
+
+* SetStartOffsetY(*number* _startY_)
+
+* SetStartOffsetZ(*number* _startZ_)
+
+* SetTranslateDeltas(*number* _deltaX_, *number* _deltaY_, *number* _deltaZ_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
+
+* SetTranslateOffsets(*number* _startX_, *number* _startY_, *number* _startZ_, *number* _endX_, *number* _endY_, *number* _endZ_)
 
 
 h3. AnimationObjectAlpha
@@ -10982,98 +11414,6 @@ h3. AnimationObjectTexture
 * SetMirrorAlongX(*bool* _mirroring_)
 
 * SetMirrorAlongY(*bool* _mirroring_)
-
-
-h3. AnimationObjectTexture3DRotate
-* GetEndPitch()
-** _Returns:_ *number* _endPitchRadians_
-
-* GetEndRoll()
-** _Returns:_ *number* _endRollRadians_
-
-* GetEndYaw()
-** _Returns:_ *number* _endYawRadians_
-
-* GetStartPitch()
-** _Returns:_ *number* _startPitchRadians_
-
-* GetStartRoll()
-** _Returns:_ *number* _startRollRadians_
-
-* GetStartYaw()
-** _Returns:_ *number* _startYawRadians_
-
-* SetEndPitch(*number* _endPitchRadians_)
-
-* SetEndRoll(*number* _endRollRadians_)
-
-* SetEndYaw(*number* _endYawRadians_)
-
-* SetRotationValues(*number* _startPitchRadians_, *number* _startYawRadians_, *number* _startRollRadians_, *number* _endPitchRadians_, *number* _endYawRadians_, *number* _endRollRadians_)
-
-* SetStartPitch(*number* _startPitchRadians_)
-
-* SetStartRoll(*number* _startRollRadians_)
-
-* SetStartYaw(*number* _startYawRadians_)
-
-
-h3. AnimationObjectTexture3DTranslate
-* ClearBezierControlPoints()
-
-* GetDeltaOffsetX()
-** _Returns:_ *number* _deltaX_
-
-* GetDeltaOffsetY()
-** _Returns:_ *number* _deltaY_
-
-* GetDeltaOffsetZ()
-** _Returns:_ *number* _deltaZ_
-
-* GetEndOffsetX()
-** _Returns:_ *number* _endX_
-
-* GetEndOffsetY()
-** _Returns:_ *number* _endY_
-
-* GetEndOffsetZ()
-** _Returns:_ *number* _endZ_
-
-* GetStartOffsetX()
-** _Returns:_ *number* _startX_
-
-* GetStartOffsetY()
-** _Returns:_ *number* _startY_
-
-* GetStartOffsetZ()
-** _Returns:_ *number* _startZ_
-
-* GetTranslateDeltas()
-** _Returns:_ *number* _deltaX_, *number* _deltaY_, *number* _deltaZ_
-
-* SetBezierControlPoint(*luaindex* _index_, *number* _x_, *number* _y_, *number* _z_)
-
-* SetDeltaOffsetX(*number* _deltaX_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
-
-* SetDeltaOffsetY(*number* _deltaY_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
-
-* SetDeltaOffsetZ(*number* _deltaZ_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
-
-* SetEndOffsetX(*number* _endX_)
-
-* SetEndOffsetY(*number* _endY_)
-
-* SetEndOffsetZ(*number* _endZ_)
-
-* SetStartOffsetX(*number* _startX_)
-
-* SetStartOffsetY(*number* _startY_)
-
-* SetStartOffsetZ(*number* _startZ_)
-
-* SetTranslateDeltas(*number* _deltaX_, *number* _deltaY_, *number* _deltaZ_, *[TranslateAnimationDeltaType|#TranslateAnimationDeltaType]* _translateAnimationDeltaType_)
-
-* SetTranslateOffsets(*number* _startX_, *number* _startY_, *number* _startZ_, *number* _endX_, *number* _endY_, *number* _endZ_)
 
 
 h3. AnimationObjectTextureRotate
@@ -11371,8 +11711,20 @@ h3. CompassDisplayControl
 * GetAlphaCoefficients(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_)
 ** _Returns:_ *number* _leadingCoefficient_, *number* _coefficient_, *number* _constant_
 
+* GetCenterOveredPinDescription(*luaindex* _centerOveredPinIndex_)
+** _Returns:_ *string* _description_
+
+* GetCenterOveredPinDistance(*luaindex* _centerOveredPinIndex_)
+** _Returns:_ *number* _distance_
+
 * GetCenterOveredPinInfo(*luaindex* _centerOveredPinIndex_)
-** _Returns:_ *string* _description_, *integer* _type_, *number* _distance_, *[DrawLayer|#DrawLayer]* _drawLayer_, *integer* _drawLevel_, *bool* _suppressed_
+** _Returns:_ *string* _description_, *[MapDisplayPinType|#MapDisplayPinType]* _type_, *number* _distance_, *[DrawLayer|#DrawLayer]* _drawLayer_, *integer* _drawLevel_, *bool* _suppressed_
+
+* GetCenterOveredPinLayerAndLevel(*luaindex* _centerOveredPinIndex_)
+** _Returns:_ *[DrawLayer|#DrawLayer]* _drawLayer_, *integer* _drawLevel_
+
+* GetCenterOveredPinType(*luaindex* _centerOveredPinIndex_)
+** _Returns:_ *[MapDisplayPinType|#MapDisplayPinType]* _type_
 
 * GetMinVisibleAlpha(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_)
 ** _Returns:_ *number* _minVisibleAlpha_
@@ -11385,6 +11737,9 @@ h3. CompassDisplayControl
 
 * GetScaleCoefficients(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_)
 ** _Returns:_ *number* _leadingCoefficient_, *number* _coefficient_, *number* _constant_
+
+* IsCenterOveredPinSuppressed(*luaindex* _centerOveredPinIndex_)
+** _Returns:_ *bool* _suppressed_
 
 * SetAlphaCoefficients(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *number* _leadingCoefficient_, *number* _coefficient_, *number* _constant_)
 
@@ -11406,8 +11761,45 @@ Objects that inherit behavior from *Control*
 
 * ClearAnchors *protected-attributes* ()
 
+* Convert3DLocalOrientationToWorldOrientation(*number* _localPitch_, *number* _localYaw_, *number* _localRoll_)
+** _Returns:_ *number* _worldPitch_, *number* _worldYaw_, *number* _worldRoll_
+
+* Convert3DLocalPositionToWorldPosition(*number* _localX_, *number* _localY_, *number* _localZ_)
+** _Returns:_ *number* _worldX_, *number* _worldY_, *number* _worldZ_
+
+* Convert3DWorldOrientationToLocalOrientation(*number* _worldPitch_, *number* _worldYaw_, *number* _worldRoll_)
+** _Returns:_ *number* _localPitch_, *number* _localYaw_, *number* _localRoll_
+
+* Convert3DWorldPositionToLocalPosition(*number* _worldX_, *number* _worldY_, *number* _worldZ_)
+** _Returns:_ *number* _localX_, *number* _localY_, *number* _localZ_
+
+* Create3DRenderSpace()
+
 * CreateControl(*string* _arg1_, *integer* _type_)
 ** _Returns:_ *object* _apRet_
+
+* Destroy3DRenderSpace()
+
+* Does3DRenderSpaceUseDepthBuffer()
+** _Returns:_ *bool* _usesDepthBuffer_
+
+* Get3DRenderSpaceForward()
+** _Returns:_ *number* _x_, *number* _y_, *number* _z_
+
+* Get3DRenderSpaceOrientation()
+** _Returns:_ *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_
+
+* Get3DRenderSpaceOrigin()
+** _Returns:_ *number* _x_, *number* _y_, *number* _z_
+
+* Get3DRenderSpaceRight()
+** _Returns:_ *number* _x_, *number* _y_, *number* _z_
+
+* Get3DRenderSpaceSystem()
+** _Returns:_ *[GuiRender3DSpaceSystem|#GuiRender3DSpaceSystem]* _system_
+
+* Get3DRenderSpaceUp()
+** _Returns:_ *number* _x_, *number* _y_, *number* _z_
 
 * GetAlpha()
 ** _Returns:_ *number* _alpha_
@@ -11520,6 +11912,9 @@ Objects that inherit behavior from *Control*
 * GetWidth()
 ** _Returns:_ *number* _width_
 
+* Has3DRenderSpace()
+** _Returns:_ *bool* _has3DRenderSpace_
+
 * IsChildOf(*object* _desiredParent_)
 ** _Returns:_ *bool* _isChild_
 
@@ -11543,6 +11938,20 @@ Objects that inherit behavior from *Control*
 
 * RegisterForEvent(*integer* _event_, *function* _callback_)
 ** _Returns:_ *bool* _success_
+
+* Set3DRenderSpaceForward(*number* _x_, *number* _y_, *number* _z_)
+
+* Set3DRenderSpaceOrientation(*number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_)
+
+* Set3DRenderSpaceOrigin(*number* _x_, *number* _y_, *number* _z_)
+
+* Set3DRenderSpaceRight(*number* _x_, *number* _y_, *number* _z_)
+
+* Set3DRenderSpaceSystem(*[GuiRender3DSpaceSystem|#GuiRender3DSpaceSystem]* _system_)
+
+* Set3DRenderSpaceUp(*number* _x_, *number* _y_, *number* _z_)
+
+* Set3DRenderSpaceUsesDepthBuffer(*bool* _usesDepthBuffer_)
 
 * SetAlpha *protected-attributes* (*number* _alpha_)
 
@@ -11681,7 +12090,7 @@ h3. EditControl
 ** _Returns:_ *bool* _enabled_
 
 * GetFontHeight()
-** _Returns:_ *number* _fontHeight_
+** _Returns:_ *number* _fontHeightUIUnits_
 
 * GetNewLineEnabled()
 ** _Returns:_ *bool* _enabled_
@@ -11773,7 +12182,7 @@ h3. LabelControl
 ** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
 
 * GetFontHeight()
-** _Returns:_ *number* _fontHeight_
+** _Returns:_ *number* _fontHeightUIUnits_
 
 * GetHorizontalAlignment()
 ** _Returns:_ *integer* _align_
@@ -11785,7 +12194,7 @@ h3. LabelControl
 ** _Returns:_ *integer* _numLines_
 
 * GetStringWidth(*string* _text_)
-** _Returns:_ *number* _width_
+** _Returns:_ *number* _pixelWidth_
 
 * GetStyleColor()
 ** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
@@ -12134,12 +12543,6 @@ h3. TextureControl
 * Get3DLocalDimensions()
 ** _Returns:_ *number* _width_, *number* _height_
 
-* Get3DLocalOffset()
-** _Returns:_ *number* _right_, *number* _up_, *number* _forward_
-
-* Get3DLocalOrientation()
-** _Returns:_ *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_
-
 * GetAddressMode()
 ** _Returns:_ *[TextureAddressMode|#TextureAddressMode]* _addressMode_
 
@@ -12167,6 +12570,9 @@ h3. TextureControl
 * GetVertexUV(*[VERTEX_POINTS|#VERTEX_POINTS]* _vertex_)
 ** _Returns:_ *number* _u_, *number* _v_
 
+* Is3DQuadFacingCamera()
+** _Returns:_ *bool* _isFacing_
+
 * IsPixelRoundingEnabled()
 ** _Returns:_ *bool* _pixelRoundingEnabled_
 
@@ -12174,12 +12580,6 @@ h3. TextureControl
 ** _Returns:_ *bool* _loaded_
 
 * Set3DLocalDimensions(*number* _width_, *number* _height_)
-
-* Set3DLocalOffset(*number* _right_, *number* _up_, *number* _forward_)
-
-* Set3DLocalOrientation(*number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_)
-
-* Set3DRenderSpace(*integer* _spaceId_)
 
 * SetAddressMode(*[TextureAddressMode|#TextureAddressMode]* _addressMode_)
 
@@ -12192,8 +12592,6 @@ h3. TextureControl
 * SetDesaturation(*number* _desaturation_)
 
 * SetGradientColors(*[ControlOrientation|#ControlOrientation]* _orientation_, *number* _startR_, *number* _startG_, *number* _startB_, *number* _startA_, *number* _endR_, *number* _endG_, *number* _endB_, *number* _endA_)
-
-* SetNumDimensions(*[Dimensions|#Dimensions]* _dimensions_)
 
 * SetPixelRoundingEnabled(*bool* _pixelRoundingEnabled_)
 
@@ -12435,6 +12833,7 @@ h2. Events
 * EVENT_AGENT_CHAT_REQUESTED
 * EVENT_AGENT_CHAT_TERMINATED
 * EVENT_ALLIANCE_POINT_UPDATE (*integer* _alliancePoints_, *bool* _playSound_, *integer* _difference_)
+* EVENT_ANIMATION_NOTE (*string* _animNote_)
 * EVENT_ARTIFACT_CONTROL_STATE (*string* _artifactName_, *integer* _keepId_, *string* _characterName_, *integer* _playerAlliance_, *integer* _controlEvent_, *integer* _controlState_, *integer* _campaignId_, *string* _displayName_)
 * EVENT_ASSIGNED_CAMPAIGN_CHANGED (*integer* _newAssignedCampaignId_)
 * EVENT_ATTRIBUTE_FORCE_RESPEC (*string* _note_)
@@ -12489,7 +12888,7 @@ h2. Events
 * EVENT_CLOSE_TRADING_HOUSE
 * EVENT_COLLECTIBLES_SEARCH_RESULTS_READY
 * EVENT_COLLECTIBLE_NEW_STATUS_CLEARED (*integer* _collectibleId_)
-* EVENT_COLLECTIBLE_NOTIFICATION_NEW
+* EVENT_COLLECTIBLE_NOTIFICATION_NEW (*integer* _collectibleId_)
 * EVENT_COLLECTIBLE_NOTIFICATION_REMOVED (*integer* _notificationId_, *integer* _collectibleId_)
 * EVENT_COLLECTIBLE_ON_COOLDOWN
 * EVENT_COLLECTIBLE_RENAME_ERROR (*integer* _errorReason_)
@@ -12507,6 +12906,10 @@ h2. Events
 * EVENT_CRAFT_BAG_AUTO_TRANSFER_NOTIFICATION_CLEARED
 * EVENT_CRAFT_COMPLETED (*integer* _craftSkill_)
 * EVENT_CRAFT_STARTED (*integer* _craftSkill_)
+* EVENT_CROWN_CRATES_SYSTEM_STATE_CHANGED (*integer* _crownCratesSystemState_)
+* EVENT_CROWN_CRATE_INVENTORY_UPDATED
+* EVENT_CROWN_CRATE_OPEN_RESPONSE (*integer* _crownCrateId_, *integer* _response_)
+* EVENT_CROWN_CRATE_QUANTITY_UPDATE (*integer* _crateId_, *integer* _count_)
 * EVENT_CURRENT_CAMPAIGN_CHANGED (*integer* _newCurrentCampaignId_)
 * EVENT_CURRENT_SUBZONE_LIST_CHANGED
 * EVENT_CURSOR_DROPPED (*integer* _type_, *integer* _param1_, *integer* _param2_, *integer* _param3_, *integer* _param4_, *integer* _param5_, *integer* _param6_)
@@ -12524,6 +12927,16 @@ h2. Events
 * EVENT_DISPLAY_ANNOUNCEMENT (*string* _title_, *string* _description_)
 * EVENT_DISPLAY_TUTORIAL (*luaindex* _tutorialIndex_)
 * EVENT_DISPOSITION_UPDATE (*string* _unitTag_)
+* EVENT_DUEL_COUNTDOWN (*integer* _startTimeMS_)
+* EVENT_DUEL_FINISHED (*integer* _duelResult_, *bool* _wasLocalPlayersResult_, *string* _opponentCharacterName_, *string* _opponentDisplayName_, *integer* _opponentAlliance_, *integer* _opponentGender_, *integer* _opponentClassId_, *integer* _opponentRaceId_)
+* EVENT_DUEL_INVITE_ACCEPTED
+* EVENT_DUEL_INVITE_CANCELED
+* EVENT_DUEL_INVITE_DECLINED
+* EVENT_DUEL_INVITE_FAILED (*integer* _reason_, *string* _targetCharacterName_, *string* _targetDisplayName_)
+* EVENT_DUEL_INVITE_RECEIVED (*string* _inviterCharacterName_, *string* _inviterDisplayName_)
+* EVENT_DUEL_INVITE_REMOVED
+* EVENT_DUEL_INVITE_SENT (*string* _inviteeCharacterName_, *string* _inviteeDisplayName_)
+* EVENT_DUEL_NEAR_BOUNDARY
 * EVENT_DYEING_STATION_INTERACT_END
 * EVENT_DYEING_STATION_INTERACT_START
 * EVENT_DYE_STAMP_USE_FAIL (*integer* _reason_)
@@ -12555,6 +12968,7 @@ h2. Events
 * EVENT_FORWARD_CAMPS_UPDATED
 * EVENT_FORWARD_CAMP_RESPAWN_TIMER_BEGINS (*integer* _durationMS_)
 * EVENT_GAME_CAMERA_ACTIVATED
+* EVENT_GAME_CAMERA_CHARACTER_FRAMING_STARTED
 * EVENT_GAME_CAMERA_DEACTIVATED
 * EVENT_GAME_CAMERA_UI_MODE_CHANGED
 * EVENT_GAME_FOCUS_CHANGED (*bool* _hasFocus_)
@@ -12600,6 +13014,7 @@ h2. Events
 * EVENT_GUILD_KIOSK_CONSIDER_PURCHASE_START
 * EVENT_GUILD_KIOSK_CONSIDER_PURCHASE_STOP
 * EVENT_GUILD_KIOSK_ERROR (*integer* _reason_)
+* EVENT_GUI_WORLD_PARTICLE_EFFECT_READY (*integer* _particleEffectId_)
 * EVENT_HELP_INITIALIZED
 * EVENT_HELP_SEARCH_RESULTS_READY
 * EVENT_HERALDRY_CUSTOMIZATION_END
@@ -12610,7 +13025,11 @@ h2. Events
 * EVENT_HIDE_OBJECTIVE_STATUS
 * EVENT_HIGH_FALL_DAMAGE
 * EVENT_HOT_BAR_RESULT (*integer* _reason_)
+* EVENT_HOUSING_COLLECTIBLE_PLACED (*integer* _collectibleId_)
+* EVENT_HOUSING_COLLECTIBLE_REMOVED (*integer* _collectibleId_)
 * EVENT_HOUSING_EDITOR_MODE_CHANGED (*integer* _oldMode_, *integer* _newMode_)
+* EVENT_HOUSING_FURNITURE_PLACED (*id64* _furnitureId_, *integer:nilable* _collectibleId_)
+* EVENT_HOUSING_FURNITURE_REMOVED (*id64* _furnitureId_, *integer:nilable* _collectibleId_)
 * EVENT_IMPACTFUL_HIT
 * EVENT_IMPERIAL_CITY_ACCESS_GAINED_NOTIFICATION (*integer* _campaignId_, *integer* _alliance_)
 * EVENT_IMPERIAL_CITY_ACCESS_LOST_NOTIFICATION (*integer* _campaignId_, *integer* _alliance_)
@@ -12654,7 +13073,7 @@ h2. Events
 * EVENT_JUSTICE_PICKPOCKET_FAILED
 * EVENT_JUSTICE_STOLEN_ITEMS_REMOVED
 * EVENT_KEEPS_INITIALIZED
-* EVENT_KEEP_ALLIANCE_OWNER_CHANGED (*integer* _keepId_, *integer* _battlegroundContext_, *integer* _owningAlliance_)
+* EVENT_KEEP_ALLIANCE_OWNER_CHANGED (*integer* _keepId_, *integer* _battlegroundContext_, *integer* _owningAlliance_, *integer* _oldOwningAlliance_)
 * EVENT_KEEP_END_INTERACTION
 * EVENT_KEEP_GATE_STATE_CHANGED (*integer* _keepId_, *bool* _open_)
 * EVENT_KEEP_GUILD_CLAIM_UPDATE (*integer* _keepId_, *integer* _battlegroundContext_)
@@ -13011,7 +13430,6 @@ h4. Attributes:
 * newLineIndent *number*
 * normal *string*
 * normalColor *string*
-* numDimensions *[Dimensions|#Dimensions]*
 * orientation *[ControlOrientation|#ControlOrientation]*
 * pinFont *string*
 * pixelRoundingEnabled *bool*
@@ -13099,12 +13517,12 @@ h5. Animations
 * [Child: AnimationTimeline|#AnimationTimeline]
 * [Child: ColorAnimation|#ColorAnimation]
 * [Child: CustomAnimation|#CustomAnimation]
+* [Child: Rotate3DAnimation|#Rotate3DAnimation]
 * [Child: ScaleAnimation|#ScaleAnimation]
 * [Child: SizeAnimation|#SizeAnimation]
-* [Child: Texture3DRotateAnimation|#Texture3DRotateAnimation]
-* [Child: Texture3DTranslateAnimation|#Texture3DTranslateAnimation]
 * [Child: TextureAnimation|#TextureAnimation]
 * [Child: TextureRotateAnimation|#TextureRotateAnimation]
+* [Child: Translate3DAnimation|#Translate3DAnimation]
 * [Child: TranslateAnimation|#TranslateAnimation]
 
 h5. Backdrop
@@ -13463,16 +13881,6 @@ h5. LocalDimensions3D
 * _attribute:_ *number* _x_
 * _attribute:_ *number* _y_
 
-h5. LocalOffset3D
-* _attribute:_ *number* _x_
-* _attribute:_ *number* _y_
-* _attribute:_ *number* _z_
-
-h5. LocalOrientation3D
-* _attribute:_ *number* _pitch_
-* _attribute:_ *number* _yaw_
-* _attribute:_ *number* _roll_
-
 h5. MapDisplay
 * [Inherits: Control|#Control]
 * [Child: MapGutter|#MapGutter]
@@ -13772,6 +14180,15 @@ h5. ResizeToFitPadding
 * _attribute:_ *number* _width_
 * _attribute:_ *number* _height_
 
+h5. Rotate3DAnimation
+* [Inherits: AnimationBase|#AnimationBase]
+* [Child: endPitch|#Attributes]
+* [Child: endRoll|#Attributes]
+* [Child: endYaw|#Attributes]
+* [Child: startPitch|#Attributes]
+* [Child: startRoll|#Attributes]
+* [Child: startYaw|#Attributes]
+
 h5. ScaleAnimation
 * [Inherits: AnimationBase|#AnimationBase]
 * [Child: endScale|#Attributes]
@@ -13859,44 +14276,17 @@ h5. TextBuffer
 h5. Texture
 * [Inherits: Control|#Control]
 * [Child: LocalDimensions3D|#LocalDimensions3D]
-* [Child: LocalOffset3D|#LocalOffset3D]
-* [Child: LocalOrientation3D|#LocalOrientation3D]
 * [Child: OnTextureLoaded|#OnTextureLoaded]
 * [Child: TextureCoords|#TextureCoords]
 * [Child: addressMode|#Attributes]
 * [Child: autoAdjustTextureCoords|#Attributes]
 * [Child: blendMode|#Attributes]
 * [Child: color|#Attributes]
-* [Child: numDimensions|#Attributes]
 * [Child: pixelRoundingEnabled|#Attributes]
 * [Child: resizeToFitFile|#Attributes]
 * [Child: textureCoordsRotation|#Attributes]
 * [Child: textureFile|#Attributes]
 * [Child: textureFileReleaseOption|#Attributes]
-
-h5. Texture3DRotateAnimation
-* [Inherits: AnimationBase|#AnimationBase]
-* [Child: endPitch|#Attributes]
-* [Child: endRoll|#Attributes]
-* [Child: endYaw|#Attributes]
-* [Child: startPitch|#Attributes]
-* [Child: startRoll|#Attributes]
-* [Child: startYaw|#Attributes]
-
-h5. Texture3DTranslateAnimation
-* [Inherits: AnimationBase|#AnimationBase]
-* [Child: deltaX|#Attributes]
-* [Child: deltaXFromEnd|#Attributes]
-* [Child: deltaY|#Attributes]
-* [Child: deltaYFromEnd|#Attributes]
-* [Child: deltaZ|#Attributes]
-* [Child: deltaZFromEnd|#Attributes]
-* [Child: endX|#Attributes]
-* [Child: endY|#Attributes]
-* [Child: endZ|#Attributes]
-* [Child: startX|#Attributes]
-* [Child: startY|#Attributes]
-* [Child: startZ|#Attributes]
 
 h5. TextureAnimation
 * [Inherits: AnimationBase|#AnimationBase]
@@ -13957,6 +14347,21 @@ h5. TopLevelControl
 * [Inherits: Control|#Control]
 * [Child: allowBringToTop|#Attributes]
 * [Child: topmost|#Attributes]
+
+h5. Translate3DAnimation
+* [Inherits: AnimationBase|#AnimationBase]
+* [Child: deltaX|#Attributes]
+* [Child: deltaXFromEnd|#Attributes]
+* [Child: deltaY|#Attributes]
+* [Child: deltaYFromEnd|#Attributes]
+* [Child: deltaZ|#Attributes]
+* [Child: deltaZFromEnd|#Attributes]
+* [Child: endX|#Attributes]
+* [Child: endY|#Attributes]
+* [Child: endZ|#Attributes]
+* [Child: startX|#Attributes]
+* [Child: startY|#Attributes]
+* [Child: startZ|#Attributes]
 
 h5. TranslateAnimation
 * [Inherits: AnimationBase|#AnimationBase]

@@ -78,7 +78,7 @@ function CreateLinkAccount_Keyboard:Initialize(control)
 
     CREATE_LINK_ACCOUNT_FRAGMENT = ZO_FadeSceneFragment:New(control)
     
-    if DoesPlatformRequireAccountLinking() then
+    if IsUsingLinkedLogin() then
         LoadCountryData()
         self.control:RegisterForEvent(EVENT_COUNTRY_DATA_LOADED, function() self:PopulateCountryDropdown() end)
     end

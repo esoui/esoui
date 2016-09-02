@@ -87,6 +87,10 @@ function ZO_SharedOptions:InitializeControl(control, selected)
             data.customSetupFunction(control, selected)
         end
     end
+
+    if data.onInitializeFunction then
+        data.onInitializeFunction(control)
+    end
 end
 
 function ZO_SharedOptions:IsControlTypeAnOption(data)

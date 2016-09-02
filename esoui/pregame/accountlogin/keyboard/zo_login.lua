@@ -81,7 +81,7 @@ function LoginBG_Keyboard:GetFullVersion()
 end
 
 function LoginBG_Keyboard:RebuildRequiredAccountLabel()
-    local requiresAccountLinking = DoesPlatformRequireAccountLinking()
+    local requiresAccountLinking = IsUsingLinkedLogin()
     if not requiresAccountLinking then
         local url = select(8, GetPlatformInfo(GetSelectedPlatformIndex()))
         local linkText = GetString(SI_LOGIN_ACCOUNT_REQUIRED_ESO)
@@ -116,7 +116,7 @@ end
 function Login_Keyboard:Initialize(control)
     ZO_LoginBase_Keyboard.Initialize(self, control)
 
-    local requiresAccountLinking = DoesPlatformRequireAccountLinking()
+    local requiresAccountLinking = IsUsingLinkedLogin()
 
     self.credentialsContainer = control:GetNamedChild("Credentials")
     self.accountName = self.credentialsContainer:GetNamedChild("AccountName")
@@ -269,7 +269,7 @@ function Login_Keyboard:UpdateLoginButtonState()
 
     if self.inMaintenanceMode then
         loginReady = false
-    elseif DoesPlatformRequireAccountLinking() then
+    elseif IsUsingLinkedLogin() then
         loginReady = LOGIN_MANAGER_KEYBOARD:IsLoginPossible()
     else
         local accountEmpty, passwordEmpty = self:GetEditControlStates()
@@ -364,7 +364,7 @@ function Login_Keyboard:ClearAttemptAutomaticLogin()
 end
 
 function Login_Keyboard:DoLogin()
-    if DoesPlatformRequireAccountLinking() then
+    if IsUsingLinkedLogin() then
         LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()
     else
         PregameLogin(self.accountNameEdit:GetText(), self.passwordEdit:GetText())
@@ -380,7 +380,7 @@ function Login_Keyboard:ShowRelaunchGameLabel()
 end
 
 function Login_Keyboard:ReanchorLoginButton()
-    if DoesPlatformRequireAccountLinking() then
+    if IsUsingLinkedLogin() then
         -- Since the credentials container is hidden when using linked login, reanchor the login button to the 
         -- 'relaunch client' label 
         local isValid, point, _, relPoint, offsetX, offsetY = self.loginButton:GetAnchor(0)
@@ -391,7 +391,7 @@ function Login_Keyboard:ReanchorLoginButton()
 end
 
 function Login_Keyboard:ReanchorAnnouncements()
-    if DoesPlatformRequireAccountLinking() then
+    if IsUsingLinkedLogin() then
         local isValid0, point0, _, relPoint0, offsetX0, offsetY0 = self.announcements:GetAnchor(0)
         local isValid1, point1, _, relPoint1, offsetX1, offsetY1 = self.announcements:GetAnchor(1)
         self.announcements:ClearAnchors()

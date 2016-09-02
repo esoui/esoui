@@ -19,6 +19,7 @@ local GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_POINTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
     [NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
+    [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_duel.dds",
 }
 
 local DATA_TYPE_TO_TEMPLATE = 
@@ -340,6 +341,19 @@ function ZO_GamepadLFGUpdateProvider:New(notificationManager)
     return ZO_LFGUpdateProvider.New(self, notificationManager)
 end
 
+
+--Duel Invite Provider
+-------------------------
+
+local ZO_GamepadDuelInviteProvider = ZO_DuelInviteProvider:Subclass()
+
+function ZO_GamepadDuelInviteProvider:New(notificationManager)
+    local provider = ZO_DuelInviteProvider.New(self, notificationManager)
+    provider:SetCanShowGamerCard(true)
+    return provider
+end
+
+
 --Notification Manager
 -------------------------
 
@@ -433,6 +447,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         collectionsProvider,
         ZO_GamepadLFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
+        ZO_GamepadDuelInviteProvider:New(self),
     }
 end
 

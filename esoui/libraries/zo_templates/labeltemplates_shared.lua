@@ -258,3 +258,17 @@ do
         ZO_PlatformStyle:New(function(...) ApplyStyle(label, ...) end, keyboardFonts, gamepadFonts)
     end
 end
+
+function ZO_TooltipIfTruncatedLabel_OnMouseEnter(self)
+    if self:WasTruncated() then
+        InitializeTooltip(InformationTooltip)
+        ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
+        SetTooltipText(InformationTooltip, self:GetText())
+    end
+end
+
+function ZO_TooltipIfTruncatedLabel_OnMouseExit(self)
+    if self:WasTruncated() then
+        ClearTooltip(InformationTooltip)
+    end
+end

@@ -28,19 +28,19 @@ ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME = "gamepad_market_purchase"
 local g_buyCrownsData
 local g_buyCrownsTextParams
 
-local function GetAvailableCrownsHeaderData()
+local function GetAvailableCurrencyHeaderData(marketCurrencyType)
     return {
-                value = function(control) 
-                    ZO_CurrencyControl_SetSimpleCurrency(control, UI_ONLY_CURRENCY_CROWNS, GetMarketCurrency(), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
+                value = function(control)
+                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), GetPlayerMarketCurrency(marketCurrencyType), ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
                     return true
                 end,
                 header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
             }
 end
-local function GetProductCostHeaderData(cost)
+local function GetProductCostHeaderData(cost, marketCurrencyType)
     return  {
-                value = function(control) 
-                    ZO_CurrencyControl_SetSimpleCurrency(control, UI_ONLY_CURRENCY_CROWNS, cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
+                value = function(control)
+                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
                     return true
                 end,
                 header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_COST_LABEL),
@@ -260,7 +260,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             {
                 keybind = "DIALOG_NEGATIVE",
-                text = SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
+                text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
                 callback = function(dialog, isNoChoice)
                                 OnMarketEndPurchase()
                                 self:EndPurchase(isNoChoice)
@@ -331,15 +331,18 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         
         if hasResult then
             if result == MARKET_PURCHASE_RESULT_SUCCESS then
-                if self.stackCount > 1 then
-                    self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, self.stackCount)
+                local useProductInfo = self.marketProduct:GetUseProductInfo()
+                if useProductInfo then
+                    self.purchaseResultText = zo_strformat(useProductInfo.transactionCompleteText, self.itemName, self.stackCount)
                 else
-                    if self.marketProduct:GetNumAttachedCollectibles() > 0 then
-                        self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
-                    elseif IsMarketInstantUnlockServiceToken(GetMarketProductInstantUnlockType(self.marketProductId)) then
-                        self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE, self.itemName)                        
+                    if self.stackCount > 1 then
+                        self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, self.stackCount)
                     else
-                        self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
+                        if self.marketProduct:GetNumAttachedCollectibles() > 0 then
+                            self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
+                        else
+                            self.purchaseResultText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
+                        end
                     end
                 end
             else
@@ -357,7 +360,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     local function MarketPurchasingDialogSetup(dialog, data)
         dialog:setupFunc()
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(data, ...) end)
-        BuyMarketProduct(self.marketProductId)
+        BuyMarketProduct(self.marketProduct:GetId(), self.marketProduct:GetPresentationIndex())
     end
 
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_PURCHASING], 
@@ -401,7 +404,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
             local displayData =
             {
-                data1 = GetAvailableCrownsHeaderData(),
+                data1 = GetAvailableCurrencyHeaderData(self.productCostCurrencyType),
             }
 
             dialog.data = displayData
@@ -430,19 +433,25 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             },
             {
                 keybind = "DIALOG_TERTIARY",
-                text = SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL,
+                text = function(dialog)
+                    local useProductInfo = self.marketProduct:GetUseProductInfo()
+                    return useProductInfo.buttonText
+                end,
                 visible = function(dialog)
-                        local isVisible = false
-
-                        if self.result and self.result == MARKET_PURCHASE_RESULT_SUCCESS then
-                            isVisible = IsMarketInstantUnlockServiceToken(GetMarketProductInstantUnlockType(self.marketProductId))
-                        end
-
-                        return isVisible
-                    end,
+                    if self.result and self.result == MARKET_PURCHASE_RESULT_SUCCESS then
+                        return self.marketProduct:HasUseProductInfo()
+                    else
+                        return false
+                    end
+                end,
                 callback = function()
-                        self:EndPurchaseAndLogout()
-                    end,
+                    -- since we are trying to logout/go to another scene we don't want to trigger any of the scene changes
+                    -- or try to show tutorials, however we want to clean up after ourselves
+                    -- in case we don't actually logout
+                    local marketProduct = self.marketProduct
+                    self:ResetState()
+                    marketProduct:GoToUseProductLocation()
+                end,
             },
         },
         canQueue = true,
@@ -454,8 +463,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
             local displayData =
             {
-                data1 = GetAvailableCrownsHeaderData(),
-                data2 = GetProductCostHeaderData(self.productCost),
+                data1 = GetAvailableCurrencyHeaderData(self.productCostCurrencyType),
+                data2 = GetProductCostHeaderData(self.productCost, self.productCostCurrencyType),
             }
 
             dialog.data = displayData
@@ -471,7 +480,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         mainText =
         {
-            text = function() 
+            text = function()
                 return self.purchaseFailedText
             end
         },
@@ -493,13 +502,10 @@ do
     local function CreateMarketPurchaseListEntry(marketProductId)
         local name = GetMarketProductDisplayName(marketProductId)
         local formattedName
-        if GetMarketProductType(marketProductId) == MARKET_PRODUCT_TYPE_ITEM then
-            local stackSize = GetMarketProductItemStackCount(marketProductId)
-            if stackSize > 1 then
-                formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, name, stackSize)
-            else
-                formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
-            end
+
+        local stackCount = GetMarketProductStackCount(marketProductId)
+        if stackCount > 1 then
+            formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, name, stackCount)
         else
             formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
         end
@@ -518,16 +524,14 @@ do
     function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(dialog)
         local marketProduct = self.marketProduct
         local marketProductId = self.marketProductId
-        local productName, description, cost, discountedCost, discountPercent, productIcon = marketProduct:GetMarketProductInfo()
+        local productName, description, productIcon = marketProduct:GetMarketProductInfo()
         local isBundle = marketProduct:IsBundle()
         self.hasItems = marketProduct:GetNumAttachedItems() > 0
         self.stackCount = 0
 
         local formattedProductName
         if not isBundle then
-             if marketProduct:GetProductType() == MARKET_PRODUCT_TYPE_ITEM then
-                self.stackCount = GetMarketProductItemStackCount(marketProductId)
-            end
+            self.stackCount = marketProduct:GetStackCount()
             dialog.listHeader = nil
         else
             dialog.listHeader = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, productName)
@@ -535,10 +539,13 @@ do
 
         self.itemName = productName
 
+        local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = marketProduct:GetMarketProductPricingByPresentation()
+
         local finalCost = cost
-        if discountPercent > 0 then
-            finalCost = discountedCost
+        if hasDiscount then
+            finalCost = costAfterDiscount
         end
+        self.productCostCurrencyType = currencyType
         self.productCost = finalCost
 
         local itemInfo = dialog.info.itemInfo
@@ -560,8 +567,8 @@ do
 
         local displayData =
         {
-            data1 = GetAvailableCrownsHeaderData(),
-            data2 = GetProductCostHeaderData(finalCost),
+            data1 = GetAvailableCurrencyHeaderData(currencyType),
+            data2 = GetProductCostHeaderData(finalCost, currencyType),
         }
 
         dialog.data = displayData
@@ -632,15 +639,6 @@ function ZO_GamepadMarketPurchaseManager:EndPurchase(isNoChoice)
     self:ResetState()
 end
 
-function ZO_GamepadMarketPurchaseManager:EndPurchaseAndLogout()
-    -- since we are trying to logout we don't want to trigger any of the scene changes
-    -- or try to show tutorials, however we want to clean up after ourselves
-    -- in case we don't actually logout
-
-    self:ResetState()
-    Logout()
-end
-
 function ZO_GamepadMarketPurchaseManager:ResetState()
     self.result = nil
     self.loadingDelayTime = nil
@@ -663,7 +661,7 @@ function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position, dialogParams)
     if position == FLOW_CONFIRMATION then
         SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME)
     elseif position == FLOW_UNLOCKED then
-        local name = self.marketProduct:GetMarketProductInfo()
+        local name = self.marketProduct:GetMarketProductDisplayName()
         ZO_Dialogs_ShowGamepadDialog(DIALOG_FLOW[position], nil, {titleParams = {name}, mainTextParams = {ZO_SELECTED_TEXT:Colorize(name)}})
     else
         ZO_Dialogs_ShowGamepadDialog(DIALOG_FLOW[position], nil, dialogParams)

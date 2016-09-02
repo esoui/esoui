@@ -19,27 +19,32 @@
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)Ouroboros" alpha="0" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Ouroboros.dds">
-                    <Anchor point="CENTER" />
-                </Texture>
+                <Control name="$(parent)Logo" alpha="0" resizeToFitDescendents="true">
+                    <Anchor point="TOP" offsetY="104" />
+                    <Controls>
+                        <Texture name="$(parent)Title" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo.dds">
+                            <Anchor point="TOP" />
+                        </Texture>
+                
+                        <Texture name="$(parent)Ouroboros" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Ouroboros.dds">
+                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="40" />
+                        </Texture>
+                    </Controls>
+                </Control>
 
                 <Label name="$(parent)PressText" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Ouroboros" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Ouroboros" relativePoint="BOTTOMRIGHT" offsetY="-72" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Logo" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Logo" relativePoint="BOTTOMRIGHT" offsetY="40" />
                 </Label>
 
-                <Texture name="$(parent)Logo" alpha="0" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo.dds">
-                    <Anchor point="CENTER"/>
-                </Texture>
-
-                <Control name="$(parent)ErrorBox" hidden="true">
-                    <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" y="ZO_GAMEPAD_PANEL_BG_HEIGHT"/>
-                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X"/>
+                <Control name="$(parent)ErrorBox" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
                     
                     <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadDialog_Background_Template" tier="LOW" />
+                        
                         <Control name="$(parent)Container">
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
-                            <Anchor point="LEFT"/>
+                            <Anchor point="LEFT" />
                             <Controls>
                                 <Label name="$(parent)ErrorTitle" font="ZoFontGamepadBold42" modifyTextType="UPPERCASE">
                                     <Anchor point="TOPLEFT"/>

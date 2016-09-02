@@ -233,65 +233,50 @@ do
     
         return false
     end
-    
-    function ZO_CampaignBrowser_Shared:ShowQueueMessage(description, icon, id, isGroup, state)
-        icon:SetHidden(false)
-        description:SetHidden(false)
-    
-        if(state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING) then
-            icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_queued.dds")
-        elseif(state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
-            icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_ready.dds")
-        end
-    
-        if(state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING) then
-            local positionInQueue = GetCampaignQueuePosition(id, isGroup)
-            if(isGroup) then
-                if IsAnyGroupMemberOffline() then
-                    description:SetText(GetString(SI_CAMPAIGN_BROWSER_GROUP_PAUSED))
-                else
-                    description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_GROUP_QUEUED, positionInQueue))
-                end
-            else
-                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_QUEUED, positionInQueue))
-            end
-        elseif(state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
-            local timeString = ZO_FormatTime(GetCampaignQueueRemainingConfirmationSeconds(id, isGroup), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-            if(isGroup) then            
-                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_GROUP_READY, timeString))
-            else
-                description:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_READY, timeString))
-            end
-        end
-    end
-end
 
-local QUEUE_MESSAGES = {
-    [CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_JOIN] = GetString(SI_CAMPAIGN_BROWSER_QUEUE_PENDING_JOIN),
-    [CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_LEAVE] = GetString(SI_CAMPAIGN_BROWSER_QUEUE_PENDING_LEAVE),
-    [CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_ACCEPT] = GetString(SI_CAMPAIGN_BROWSER_QUEUE_PENDING_ACCEPT),
-}
-
-function ZO_CampaignBrowser_Shared:UpdateQueuedMessageControls(loading, description, icon, id, isGroup, state)
-    local queueMessage = QUEUE_MESSAGES[state]
-    if queueMessage then
-        loading:SetText(queueMessage)
-
-        icon:SetHidden(true)
-        description:SetHidden(true)
-        if(loading.Show) then
-            loading:Show()
-        else
-            loading:SetHidden(false)
-        end
-    else
-        if(loading.Hide) then
-            loading:Hide()
-        else
-            loading:SetHidden(true)
-        end
+    local QUEUE_MESSAGES = {
+        [CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_JOIN] = GetString(SI_CAMPAIGN_BROWSER_QUEUE_PENDING_JOIN),
+        [CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_LEAVE] = GetString(SI_CAMPAIGN_BROWSER_QUEUE_PENDING_LEAVE),
+        [CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_ACCEPT] = GetString(SI_CAMPAIGN_BROWSER_QUEUE_PENDING_ACCEPT),
+    }
+    
+    function ZO_CampaignBrowser_Shared:GetQueueMessage(id, isGroup, state)
+        local queueMessage = QUEUE_MESSAGES[state]
         
-        self:ShowQueueMessage(description, icon, id, isGroup, state)
+        if queueMessage then
+            return true, queueMessage
+        else
+            local descrtiptionText
+            local iconTexture
+
+            if(state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING) then
+                iconTexture = "EsoUI/Art/Campaign/campaignBrowser_queued.dds"
+            elseif(state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
+                iconTexture = "EsoUI/Art/Campaign/campaignBrowser_ready.dds"
+            end
+    
+            if(state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING) then
+                local positionInQueue = GetCampaignQueuePosition(id, isGroup)
+                if(isGroup) then
+                    if IsAnyGroupMemberOffline() then
+                        descrtiptionText = GetString(SI_CAMPAIGN_BROWSER_GROUP_PAUSED)
+                    else
+                         descrtiptionText = zo_strformat(SI_CAMPAIGN_BROWSER_GROUP_QUEUED, positionInQueue)
+                    end
+                else
+                    descrtiptionText = zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_QUEUED, positionInQueue)
+                end
+            elseif(state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
+                local timeString = ZO_FormatTime(GetCampaignQueueRemainingConfirmationSeconds(id, isGroup), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+                if(isGroup) then            
+                    descrtiptionText = zo_strformat(SI_CAMPAIGN_BROWSER_GROUP_READY, timeString)
+                else
+                    descrtiptionText = zo_strformat(SI_CAMPAIGN_BROWSER_SOLO_READY, timeString)
+                end
+            end
+
+            return false, descrtiptionText, iconTexture
+        end
     end
 end
 

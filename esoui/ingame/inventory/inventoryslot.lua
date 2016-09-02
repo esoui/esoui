@@ -1313,7 +1313,14 @@ local function LinkHelper(slotActions, actionName, link)
                                             if IsInGamepadPreferredMode() then
                                                  KEYBIND_STRIP:RemoveAllKeyButtonGroups()
                                                  ZO_Help_Customer_Service_Gamepad_SetupItemIssueTicket(link)
-                                                 SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+                                                 -- if we open up the help menu while interacting, we want to make sure that we are not
+                                                 -- just pushing the previous scene onto the stack since it will end the interaction
+                                                 -- and make the scene invalid when coming back to it after the help scene is closed
+                                                 if INTERACT_WINDOW:IsInteracting() then
+                                                    SCENE_MANAGER:Show("helpCustomerServiceGamepad")
+                                                 else
+                                                    SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+                                                 end
                                             else
                                                 HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
                                                 HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromItemLink(link)
@@ -2179,6 +2186,12 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
             tooltipUsed:ShowComparativeTooltips()
             ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
             ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+            
+            if inventorySlot.dataEntry then
+                local bagId = inventorySlot.dataEntry.data.bagId
+                local slotId = inventorySlot.dataEntry.data.slotIndex
+                ZO_CharacterWindowStats_ShowComparisonValues(bagId, slotId)
+            end
         end
 
         ItemTooltip:SetHidden(tooltipUsed ~= ItemTooltip)
@@ -2270,6 +2283,8 @@ function ZO_InventorySlot_OnMouseExit(inventorySlot)
     ClearTooltip(InformationTooltip)
     ZO_PlayHideAnimationOnComparisonTooltip(ComparativeTooltip1)
     ZO_PlayHideAnimationOnComparisonTooltip(ComparativeTooltip2)
+
+    ZO_CharacterWindowStats_HideComparisonValues()
 
     if buttonPart.animation then
         buttonPart.animation:PlayBackward()

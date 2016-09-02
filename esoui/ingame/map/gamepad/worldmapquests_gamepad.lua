@@ -20,8 +20,11 @@ function WorldMapQuests_Gamepad:Initialize(control)
 
     self.questList = ZO_GamepadVerticalParametricScrollList:New(control:GetNamedChild("Main"):GetNamedChild("List"))
     self.questList:SetAlignToScreenCenter(true)
-    self.questList:AddDataTemplate("ZO_GamepadSubMenuEntryTemplateWithStatusLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.questList:SetOnSelectedDataChangedCallback(function(list, selectedData) self:SetupQuestDetails(selectedData) end)
+    local function equalityFunction(data1, data2)
+        return data1.questInfo.questIndex == data2.questInfo.questIndex
+    end
+    self.questList:AddDataTemplate("ZO_GamepadSubMenuEntryTemplateWithStatusLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, equalityFunction)
+    self.questList:SetOnSelectedDataChangedCallback(function() self:SetupQuestDetails() end)
 
     self.entriesByIndex = {}
 
@@ -29,11 +32,12 @@ function WorldMapQuests_Gamepad:Initialize(control)
 
     GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
-            self.data:RefreshList()
+        if newState == SCENE_SHOWING then
             self.questList:Activate()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_SHOWN then
+            self:SetupQuestDetails()
+        elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.questList:Deactivate()
         end
@@ -42,12 +46,8 @@ end
 
 local BLACK = ZO_ColorDef:New(0, 0, 0)
 function WorldMapQuests_Gamepad:LayoutList()
-    if not IsInGamepadPreferredMode() then return end
-
     self.hasQuests = #self.data.masterList > 0
     self.noQuestsLabel:SetHidden(self.hasQuests)
-
-    self.data:Sort()
 
     self.questList:Clear()
     ZO_ClearTable(self.entriesByIndex)
@@ -56,7 +56,7 @@ function WorldMapQuests_Gamepad:LayoutList()
     local questJournalObject = SYSTEMS:GetObject("questJournal")
     for index, srcData in ipairs(self.data.masterList) do
         local questIndex = srcData.questIndex
-        local questIcon = questJournalObject:GetIconTexture(srcData.questType)
+        local questIcon = questJournalObject:GetIconTexture(srcData.questType, srcData.displayType)
 
         local entryData = ZO_GamepadEntryData:New(srcData.name, questIcon)
         self.entriesByIndex[questIndex] = entryData
@@ -85,20 +85,23 @@ function WorldMapQuests_Gamepad:RefreshHeaders()
     self:LayoutList()
 end
 
-function WorldMapQuests_Gamepad:SetupQuestDetails(selectedData)
+function WorldMapQuests_Gamepad:SetupQuestDetails()
     if self.control:IsHidden() then return end
 
     self.scrollTooltip:ClearLines()
     
-    if not selectedData then 
+    
+    local targetData = self.questList:GetTargetData()
+
+    if not targetData then 
         self:RefreshKeybind()
         return 
     end
 
     local tooltipControl = self.scrollTooltip
 
-    local questName = selectedData.questInfo.name
-    local questIndex = selectedData.questInfo.questIndex
+    local questName = targetData.questInfo.name
+    local questIndex = targetData.questInfo.questIndex
 
     local isAssisted = ZO_QuestTracker.tracker:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
 
@@ -106,9 +109,13 @@ function WorldMapQuests_Gamepad:SetupQuestDetails(selectedData)
     local questColor = GetColorDefForCon(GetCon(questLevel))
 
     local titleStyle = tooltipControl.tooltip:GetStyle("mapQuestTitle")
-    local groupSection = tooltipControl.tooltip:AcquireSection(titleStyle, tooltipControl.tooltip:GetStyle("mapKeepCategorySpacing"))
-    local icon = isAssisted and ASSISTED_TEXTURE or nil
-    tooltipControl:LayoutGroupHeader(groupSection, icon, questColor:Colorize(questName), titleStyle, tooltipControl.tooltip:GetStyle("mapTitle"))
+    local groupSection = tooltipControl.tooltip:AcquireSection(tooltipControl.tooltip:GetStyle("mapQuestTitle"), tooltipControl.tooltip:GetStyle("mapKeepCategorySpacing"))
+    local icon, mapIconTitleStyle
+    if isAssisted then
+        icon = ASSISTED_TEXTURE
+        mapIconTitleStyle = tooltipControl.tooltip:GetStyle("mapIconTitle")
+    end
+    tooltipControl:LayoutGroupHeader(groupSection, icon, questColor:Colorize(questName), mapIconTitleStyle, tooltipControl.tooltip:GetStyle("mapTitle"))
     tooltipControl.tooltip:AddSection(groupSection)
 
     local stepOverrideText, completed = select(5, GetJournalQuestInfo(questIndex))
@@ -145,8 +152,8 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
             name = GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_SET_ACTIVE_QUEST),
 
             callback = function()
-                local selectedData = self.questList:GetTargetData()
-                local questIndex = selectedData.questInfo.questIndex
+                local targetData = self.questList:GetTargetData()
+                local questIndex = targetData.questInfo.questIndex
 
                 if self.assistedEntryData then
                     self.assistedEntryData.isAssisted = false
@@ -160,12 +167,13 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
                 ZO_WorldMap_PanToQuest(questIndex)
                 QUEST_TRACKER:ForceAssist(questIndex)
                 self.questList:RefreshVisible()
+                self:SetupQuestDetails()
                 PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
             end,
 
             enabled = function()
-                local selectedData = self.questList:GetTargetData()
-                return selectedData ~= nil and selectedData.questInfo ~= nil and selectedData.questInfo.questIndex ~= nil
+                local targetData = self.questList:GetTargetData()
+                return targetData and targetData.questInfo and targetData.questInfo.questIndex and not targetData.isAssisted
             end
         },
     }

@@ -12,6 +12,7 @@ local INTERACT_TYPE_WORLD_EVENT_INVITE = 9
 local INTERACT_TYPE_LFG_JUMP_DUNGEON = 10
 local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 11
 local INTERACT_TYPE_GROUP_ELECTION = 12
+local INTERACT_TYPE_DUEL_INVITE = 13
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
@@ -151,6 +152,25 @@ end
 
 function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.incomingQueue = {}
+
+    local function OnDuelInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
+        PlaySound(SOUNDS.DUEL_INVITE_RECEIVED)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
+        self:AddPromptToIncomingQueue(INTERACT_TYPE_DUEL_INVITE, inviterCharacterName, inviterDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_DUEL, ZO_SELECTED_TEXT:Colorize(userFacingName)),
+            function()
+                AcceptDuel()
+            end,
+            function()
+                DeclineDuel()
+            end,
+            function()
+                self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
+            end)
+    end
+
+    local function OnDuelInviteRemoved()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
+    end
 
     local function OnGroupInviteReceived(eventCode, inviterCharacterName, inviterDisplayName)
         if not self:ExistsInQueue(INTERACT_TYPE_GROUP_INVITE, inviterCharacterName, inviterDisplayName) then
@@ -387,6 +407,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveScriptedWorldEventFromIncomingQueue(eventId)
     end
 
+    self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
+    self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_GROUP_INVITE_RECEIVED, OnGroupInviteReceived)
     self.control:RegisterForEvent(EVENT_GROUP_INVITE_REMOVED, OnGroupInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRADE_INVITE_CONSIDERING, OnTradeWindowInviteConsidering)
@@ -542,6 +564,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
 
     local function OnPlayerActivated()
+        local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
+        if duelState == DUEL_STATE_CONSIDERING then
+            OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName)
+        end
+
         local inviterCharaterName, aMillisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
 
         if inviterCharaterName ~= "" or inviterDisplayName ~= "" then
@@ -591,6 +618,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function OnPlayerDeactivated()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_DUEL_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_TRADE_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA)
@@ -1172,6 +1200,13 @@ local KEYBOARD_INTERACT_ICONS =
         enabledNormal = "EsoUI/Art/HUD/radialIcon_reportPlayer_up.dds",
         enabledSelected = "EsoUI/Art/HUD/radialIcon_reportPlayer_over.dds",
     },
+    [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/radialIcon_duel_up.dds",
+        enabledSelected = "EsoUI/Art/HUD/radialIcon_duel_over.dds",
+        disabledNormal = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/radialIcon_duel_disabled.dds",
+    },
     [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
     {
         enabledNormal = "EsoUI/Art/HUD/radialIcon_trade_up.dds",
@@ -1218,6 +1253,13 @@ local GAMEPAD_INTERACT_ICONS =
     {
         enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
         enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_reportPlayer_down.dds",
+    },
+    [SI_PLAYER_TO_PLAYER_INVITE_DUEL] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
+        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_down.dds",
+        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_duel_disabled.dds",
     },
     [SI_PLAYER_TO_PLAYER_INVITE_TRADE] =
     {
@@ -1320,6 +1362,25 @@ do
             reportCallback = function() ZO_ReportPlayerDialog_Show(primaryName, REPORT_PLAYER_REASON_BOTTING, formattedPlayerNames) end
         end
 		self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
+        
+        --Duel--
+        local duelState, partnerCharacterName, partnerDisplayName = GetDuelInfo()
+        if duelState ~= DUEL_STATE_IDLE then
+            local function AlreadyDuelingWarning(duelState, characterName, displayName)
+                return function()
+                    local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+                    local statusString = GetString("SI_DUELSTATE", duelState)
+                    statusString = zo_strformat(statusString, userFacingPartnerName)
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)    
+                end
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelState, partnerCharacterName, partnerDisplayName))
+        else
+            local function DuelInviteOption()
+                ChallengeTargetToDuel(currentTargetCharacterName)
+            end
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and DuelInviteOption or AlertIgnored)
+        end
 
         --Trade--
         local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(primaryNameInternal) end

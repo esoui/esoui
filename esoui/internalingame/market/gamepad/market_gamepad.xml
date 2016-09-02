@@ -7,27 +7,49 @@
         
         <Label name="ZO_GamepadMarket_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" virtual="true"/>
 
-        <Label name="ZO_GamepadMarket_DummyKeybindLabelTemplate" font="ZoFontGamepad34" modifyTextType="UPPERCASE" hidden="true" text="SI_MARKET_BUY_CROWNS"/>
-        
         <Label name="ZO_GamepadMarket_SubscriptionBenefitLine" font="ZoFontGamepadCondensed36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
-        <TopLevelControl name="ZO_GamepadMarket_CrownsFooter" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" verticalAlignment="BOTTOM" hidden="true">
-            <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-64"/>
+        <TopLevelControl name="ZO_GamepadMarket_CurrencyFooter" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" verticalAlignment="BOTTOM" hidden="true">
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
             <Dimensions y="42"/>
-    
+
             <Controls>
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/currency_crown.dds">
+                <Control name="$(parent)Crowns" resizeToFitDescendents="true">
                     <Anchor point="BOTTOMRIGHT"/>
-                    <Dimensions x="32" y="32"/>
-                </Texture>
-                <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="-2" relativeTo="$(parent)Icon"/>
-                    <Dimensions y="42"/>
-                </Label>
-                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_CURRENCY_CROWN">
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="-1" relativeTo="$(parent)Amount"/>
-                    <Dimensions y="27"/>
-                </Label>
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/currency_crown.dds">
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Dimensions x="32" y="32"/>
+                        </Texture>
+                        <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="-2" relativeTo="$(parent)Icon"/>
+                            <Dimensions y="42"/>
+                        </Label>
+                        <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_CURRENCY_CROWN">
+                            <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10"/>
+                            <Dimensions y="27"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Gems" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Crowns" relativePoint="BOTTOMLEFT" offsetX="-10" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/gamepad/gp_crown_gems.dds">
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Dimensions x="32" y="32"/>
+                        </Texture>
+                        <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="-2" relativeTo="$(parent)Icon"/>
+                            <Dimensions y="42"/>
+                        </Label>
+                        <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_CURRENCY_CROWN_GEM">
+                            <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10"/>
+                            <Dimensions y="27"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
             </Controls>
         </TopLevelControl>
 
@@ -70,6 +92,12 @@
                     </Controls>
                 </Control>
             </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GamepadMarket_ProductListScene" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadMarketProductList_OnInitialized(self)
+            </OnInitialized>
         </TopLevelControl>
 
         <TopLevelControl name="ZO_GamepadMarket_Locked" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" hidden="true" >

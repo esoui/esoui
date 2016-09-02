@@ -22,22 +22,7 @@
       
         <Control name="ZO_KeybindStripLeftSlideKeybind" inherits="ZO_KeybindButton" virtual="true" />
 
-        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM">
-            <Dimensions y="55" />
-            <Anchor point="BOTTOMLEFT" />
-            <Anchor point="BOTTOMRIGHT" />
-
-            <OnInitialized>
-                ZO_KeybindStrip_OnInitialized(self)
-            </OnInitialized>
-            
-            <Controls>
-                <Control name="$(parent)CenterParent" resizeToFitDescendents="true">
-                    <Anchor point="CENTER" />
-                </Control>
-            </Controls>
-        </TopLevelControl>
-
+        <!-- The Keybind strip Initialize assumes that these backgrounds exist -->
         <TopLevelControl name="ZO_KeybindStripMungeBackground" layer="BACKGROUND" hidden="true">
             <Dimensions y="55" />
             <Anchor point="BOTTOMLEFT" />
@@ -59,6 +44,22 @@
 
                     <TextureCoords left="0" right="0.9375" top="0" bottom="1" />
                 </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_KeybindStripControl" hidden="true" allowBringToTop="false" tier="MEDIUM">
+            <Dimensions y="55" />
+            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" />
+
+            <OnInitialized>
+                ZO_KeybindStrip_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)CenterParent" resizeToFitDescendents="true">
+                    <Anchor point="CENTER" />
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

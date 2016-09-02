@@ -30,22 +30,22 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
 end
 
 function ZO_QuestJournal_Keyboard:RegisterIcons()
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,         "EsoUI/Art/Journal/journal_Quest_Instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP,        "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,  "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,         "EsoUI/Art/Journal/journal_Quest_Trial.dds")
-
-    self:RegisterIconTexture(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_NONE,         "EsoUI/Art/Journal/journal_Quest_Dungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,           "EsoUI/Art/Journal/journal_Quest_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,        "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,    "EsoUI/Art/Journal/journal_Quest_Group_Delve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,     "EsoUI/Art/Icons/icon_missing.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,           "EsoUI/Art/Journal/journal_Quest_Trial.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON, "EsoUI/Art/Journal/journal_Quest_Dungeon.dds")
 end
 
 function ZO_QuestJournal_Keyboard:RegisterTooltips()
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,         SI_QUEST_JOURNAL_SOLO_TOOLTIP)
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP,        SI_QUEST_JOURNAL_GROUP_TOOLTIP)
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,         SI_QUEST_JOURNAL_RAID_TOOLTIP)
-    -- nothing should be marked as GROUP_DELVE, but just in case treat it like GROUP
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,  SI_QUEST_JOURNAL_GROUP_TOOLTIP)
-
-    self:RegisterTooltipText(QUEST_TYPE_DUNGEON,    INSTANCE_DISPLAY_TYPE_NONE,         SI_QUEST_JOURNAL_PUBLIC_DUNGEON_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,           SI_QUEST_JOURNAL_SOLO_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,        SI_QUEST_JOURNAL_DUNGEON_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,           SI_QUEST_JOURNAL_RAID_TOOLTIP)
+    -- nothing should be marked as GROUP_DELVE, but just in case treat it like GROUP      
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,    SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,     SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON, SI_QUEST_JOURNAL_PUBLIC_DUNGEON_TOOLTIP)
 end
 
 function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected)
@@ -132,7 +132,7 @@ function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
         -- Cycle Focused Quest
         {
             name = GetString(SI_QUEST_JOURNAL_CYCLE_FOCUSED_QUEST),
-            keybind = "UI_SHORTCUT_CYCLE_FOCUSED_QUEST",
+            keybind = "UI_SHORTCUT_QUATERNARY",
 
             callback = function()
                 local IGNORE_SCENE_RESTRICTION = true

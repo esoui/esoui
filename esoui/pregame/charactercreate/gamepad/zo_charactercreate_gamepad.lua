@@ -1278,6 +1278,11 @@ function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
 
 	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local templateData = self.characterData:GetTemplate(CharacterCreateGetTemplate(characterMode))
+    -- we may not have any template selected or we have no templates
+    -- so create a default template with no restrictions
+    if templateData == nil then
+        templateData = self.characterData:GetNoneTemplate()
+    end
 
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateRaceSelectorsForTemplate(...) end, self.characterData:GetRaceInfo(), templateData, self.raceRadioGroup)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateClassSelectorsForTemplate(...) end, self.characterData:GetClassInfo(), templateData, self.classRadioGroup)

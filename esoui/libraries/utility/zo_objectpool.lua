@@ -154,6 +154,14 @@ function ZO_ObjectPool:ReleaseAllObjects()
     self.m_Active = {}
 end
 
+function ZO_ObjectPool:DestroyAllFreeObjects(destroyFunction)
+    for k, object in pairs(self.m_Free) do
+        destroyFunction(object)
+    end
+    self.m_Free = {}
+    self.m_NextFree = 1
+end
+
 function ZO_ObjectPool_CreateControl(templateName, objectPool, parentControl)
     return CreateControlFromVirtual(templateName, parentControl, templateName, objectPool:GetNextControlId())
 end

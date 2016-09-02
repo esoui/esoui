@@ -18,8 +18,12 @@ local UP = true
 function ZO_KeybindStrip:Initialize(control, keybindButtonTemplate, styleInfo)
     self.control = control
     self.centerParent = control:GetNamedChild("CenterParent") or control
-    self.styleInfo = styleInfo
+    self.keybinds = {}
+    self.keybindGroups = {}
+    self.cooldownKeybinds = {}
     self.keybindStateStack = {}
+
+    self:SetStyle(styleInfo)
 
     local function OnButtonClicked(button)
         local keybindButtonDescriptor = button.keybindButtonDescriptor
@@ -55,10 +59,6 @@ function ZO_KeybindStrip:Initialize(control, keybindButtonTemplate, styleInfo)
     end
     
     self.keybindButtonPool = ZO_ObjectPool:New(CreateButton, Reset)
-
-    self.keybinds = {}
-    self.keybindGroups = {}
-    self.cooldownKeybinds = {}
 
     self.centerButtons = nil
     self.leftButtons = nil

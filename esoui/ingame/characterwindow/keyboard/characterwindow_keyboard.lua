@@ -350,6 +350,8 @@ end
 local DEFAULT_STAT_SPACING = 5
 local STAT_GROUP_SPACING = 25
 
+local CHARACTER_STAT_CONTROLS = {}
+
 function ZO_CharacterWindowStats_Initialize(control)
     local parentControl = control:GetNamedChild("ScrollScrollChild")
     local lastControl
@@ -357,6 +359,7 @@ function ZO_CharacterWindowStats_Initialize(control)
     for _, statGroup in ipairs(ZO_INVENTORY_STAT_GROUPS) do
         for _, stat in ipairs(statGroup) do
             local statControl = CreateControlFromVirtual("$(parent)StatEntry", parentControl, "ZO_StatsEntry", stat)
+            CHARACTER_STAT_CONTROLS[stat] = statControl
             local relativeAnchorSide = (lastControl == nil) and TOP or BOTTOM
             statControl:SetAnchor(TOP, lastControl, relativeAnchorSide, 0, nextPaddingY)
 
@@ -366,5 +369,27 @@ function ZO_CharacterWindowStats_Initialize(control)
             nextPaddingY = DEFAULT_STAT_SPACING
         end
         nextPaddingY = STAT_GROUP_SPACING
+    end
+end
+
+function ZO_CharacterWindowStats_ShowComparisonValues(bagId, slotId)
+    local statDeltaLookup = ZO_GetStatDeltaLookupFromItemComparisonReturns(CompareBagItemToCurrentlyEquipped(bagId, slotId))
+    for _, statGroup in ipairs(ZO_INVENTORY_STAT_GROUPS) do
+        for _, stat in ipairs(statGroup) do
+            local statDelta = statDeltaLookup[stat]
+            if statDelta then
+                local statControl = CHARACTER_STAT_CONTROLS[stat]
+                statControl.statEntry:ShowComparisonValue(statDelta)
+            end
+        end
+    end
+end
+
+function ZO_CharacterWindowStats_HideComparisonValues()
+    for _, statGroup in ipairs(ZO_INVENTORY_STAT_GROUPS) do
+        for _, stat in ipairs(statGroup) do
+            local statControl = CHARACTER_STAT_CONTROLS[stat]
+            statControl.statEntry:HideComparisonValue()
+        end
     end
 end

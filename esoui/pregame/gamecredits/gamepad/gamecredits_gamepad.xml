@@ -6,12 +6,14 @@
             <Dimensions x="800" />
         </Label>
         <Label name="ZO_GameCreditsTextBlockGamepad" inherits="ZO_GameCreditsNamesGamepad" virtual="true" />
-        <Texture name="ZO_GameCreditsLogoGamepad" pixelRoundingEnabled="false" resizeToFitFile="true" virtual="true" />
-        <Texture name="ZO_GameCreditsBGSwitchGamepad" virtual="true" />
-        <Control name="ZO_GameCreditsPaddingGamepad" virtual="true" />        
-        
-        <TopLevelControl name="ZO_GameCredits_Gamepad"  hidden="true">
-            <AnchorFill />
+        <Texture name="ZO_GameCreditsLogoGamepad" layer="CONTROLS" pixelRoundingEnabled="false" resizeToFitFile="true" virtual="true" />
+        <Texture name="ZO_GameCreditsBGSwitchGamepad" layer="CONTROLS" virtual="true" />
+        <Control name="ZO_GameCreditsPaddingGamepad" virtual="true" />
+
+        <TopLevelControl name="ZO_GameCredits_Gamepad" hidden="true">
+            <Dimensions x="800"/>
+            <Anchor point="TOPLEFT" offsetX="140" />
+            <Anchor point="BOTTOMLEFT" offsetX="140" />
 
             <OnInitialized>
                 ZO_GameCredits_Gamepad_Initialize(self)
@@ -19,13 +21,15 @@
 
             <Controls>
                 <Scroll name="$(parent)Scroll">
-                    <Dimensions x="800"/>
-                    <Anchor point="TOP" />
-                    <Anchor point="BOTTOM" />
+                    <AnchorFill />
                     <FadeGradient x1="0" y1="1" size1="300" x2="0" y2="-1" size2="300" />
                 </Scroll>
-            </Controls>            
-            
+                
+                <Control name="$(parent)Background" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+
         </TopLevelControl>
     </Controls>
 </GuiXml>

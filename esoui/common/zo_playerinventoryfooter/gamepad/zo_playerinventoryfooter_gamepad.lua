@@ -17,7 +17,7 @@ function ZO_Gamepad_PlayerInventoryFooterFragment:Initialize(...)
 
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, CapacityUpdate)
     self.control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, CapacityUpdate)
-    self.control:RegisterForEvent(EVENT_MARKET_CURRENCY_UPDATE, CapacityUpdate)
+    self.control:RegisterForEvent(EVENT_CROWN_UPDATE, CapacityUpdate)
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, CapacityUpdate)
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, CapacityUpdate)
 end

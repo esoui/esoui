@@ -3,8 +3,8 @@
         <AnimationTimeline name="CenterScreenLargeText">
             <Animations>
                 <!-- Keep the height "large" so that we don't have to worry about fitting the scroll around the text -->
-                <SizeAnimation duration="1700" startWidth="512" endWidth="2184" startHeight="500" endHeight="500" />
-                <SizeAnimation duration="2000" delay="3500" startWidth="2184" endWidth="512" startHeight="500" endHeight="500" />
+                <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
+                <SizeAnimation duration="2000" delay="3500" startWidth="ZO_MAX_CSA_SCROLL_WIDTH" endWidth="ZO_MIN_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
             </Animations>
         </AnimationTimeline>
 

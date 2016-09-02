@@ -3068,3 +3068,74 @@ ESO_Dialogs["CONFIRM_EQUIP_TRADE_BOP"] =
         },
     },
 }
+
+do
+    ZO_GAMEPAD_INVENTORY_ACTION_DIALOG = "GAMEPAD_INVENTORY_ACTIONS_DIALOG"
+    local function ActionsDialogSetup(dialog, data)
+        dialog.entryList:SetOnSelectedDataChangedCallback(function(list, selectedData)
+                                                                data.itemActions:SetSelectedAction(selectedData and selectedData.action)
+                                                            end)
+        local parametricList = dialog.info.parametricList
+        ZO_ClearNumericallyIndexedTable(parametricList)
+
+        dialog.itemActions = data.itemActions
+        local actions = data.itemActions:GetSlotActions()
+        local numActions = actions:GetNumSlotActions()
+
+        for i = 1, numActions do
+            local action = actions:GetSlotAction(i)
+            local actionName = actions:GetRawActionName(action)
+
+            local entryData = ZO_GamepadEntryData:New(actionName)
+            entryData:SetIconTintOnSelection(true)
+            entryData.action = action
+            entryData.setup = ZO_SharedGamepadEntry_OnSetup
+
+            local listItem =
+            {
+                template = "ZO_GamepadItemEntryTemplate",
+                entryData = entryData,
+            }
+            table.insert(parametricList, listItem)
+        end
+
+        dialog.finishedCallback = data.finishedCallback
+
+        dialog:setupFunc()
+    end
+
+    ESO_Dialogs[ZO_GAMEPAD_INVENTORY_ACTION_DIALOG] =
+    {
+        setup = function(...) ActionsDialogSetup(...) end,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        title =
+        {
+            text = SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND,
+        },
+        parametricList = {}, --we'll generate the entries on setup
+        finishedCallback =  function(dialog)
+                                dialog.itemActions = nil
+                                if dialog.finishedCallback then
+                                    dialog.finishedCallback()
+                                end
+                                dialog.finishedCallback = nil
+                            end,
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = GetString(SI_DIALOG_CANCEL),
+            },
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_GAMEPAD_SELECT_OPTION),
+                callback = function(dialog)
+                    dialog.itemActions:DoSelectedAction()
+                end,
+            },
+        },
+    }
+end

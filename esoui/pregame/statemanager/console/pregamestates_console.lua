@@ -44,11 +44,34 @@ local consolePregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "AccountLogin"
+            return "WaitForGuiRender"
         end,
 
         OnExit = function()
         end,
+    },
+
+    ["WaitForGuiRender"] =
+    {
+        ShouldAdvance = function()
+            return IsGuiShaderLoaded()
+        end,
+
+        OnEnter = function()
+            EVENT_MANAGER:RegisterForUpdate("PregameWaitForGuiRender", 0, function()
+                if IsGuiShaderLoaded() then
+                    PregameStateManager_AdvanceState()
+                end
+            end)
+        end,
+
+        OnExit = function()
+            EVENT_MANAGER:UnregisterForUpdate("PregameWaitForGuiRender")
+        end,
+
+        GetStateTransitionData = function()
+            return "AccountLogin"
+        end
     },
 
     ["AccountLogin"] =
@@ -68,9 +91,9 @@ local consolePregameStates =
             ZO_PREGAME_CHARACTER_COUNT = 0
 
             CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(CLOUDS_BACKGROUND_FRAGMENT)
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
             WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-            WORLD_SELECT_GAMEPAD:SetBackgroundFragment(CLOUDS_BACKGROUND_FRAGMENT)
+            WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
 
             -- Reset screen overscan/gamma and audio settings
             SetOverscanOffsets(0, 0, 0, 0)
@@ -78,6 +101,7 @@ local consolePregameStates =
             ResetToDefaultSettings(SETTING_TYPE_AUDIO)
 
             SetCurrentVideoPlaybackVolume(1.0, 4.0)
+
             SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
         end,
 
@@ -467,6 +491,10 @@ function ZO_PlayVideoAndAdvance(...)
 end
 
 function ZO_Gamepad_DisplayServerDisconnectedError()
+    if not IsErrorQueuedFromIngame() then
+        return
+    end
+
     local logoutError, globalErrorCode = GetErrorQueuedFromIngame()
 
     ZO_PREGAME_HAD_GLOBAL_ERROR = true
@@ -497,10 +525,12 @@ function ZO_Gamepad_DisplayServerDisconnectedError()
 end
 
 local function OnServerDisconnectError(eventCode)
-    ZO_Gamepad_DisplayServerDisconnectedError()
+    if IsErrorQueuedFromIngame() then
+        ZO_Gamepad_DisplayServerDisconnectedError()
 
-    local FORCE = true
-    ZO_Dialogs_ReleaseAllDialogs(FORCE)
+        local FORCE = true
+        ZO_Dialogs_ReleaseAllDialogs(FORCE)
+    end
 end
 
 local function OnProfileLoginResult(event, isSuccess, profileError)

@@ -395,8 +395,11 @@ function ZO_GamepadSkills:AddWeaponSwapDescriptor(descriptor)
         name = GetString(SI_BINDING_NAME_SPECIAL_MOVE_WEAPON_SWAP),
         keybind = "UI_SHORTCUT_TERTIARY",
         visible =   function()
+                        return GetUnitLevel("player") >= GetWeaponSwapUnlockedLevel()
+                    end,
+        enabled =   function()
                         local _, isWeaponSwapDisabled = GetActiveWeaponPairInfo()
-                        return GetUnitLevel("player") >= GetWeaponSwapUnlockedLevel() and not isWeaponSwapDisabled
+                        return not isWeaponSwapDisabled
                     end,
         callback = OnWeaponSwap,
     }
@@ -619,7 +622,7 @@ function ZO_GamepadSkills:InitializeEvents()
 		self:MarkForRefreshVisible()
 	end
 
-    local function OnActiveWeaponPairChanged(eventCode, activeWeaponPair)
+    local function OnWeaponPairLockChanged()
         if not self.control:IsHidden() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
@@ -636,7 +639,7 @@ function ZO_GamepadSkills:InitializeEvents()
     self.control:RegisterForEvent(EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED, FullRefresh)    
 
     self.control:RegisterForEvent(EVENT_ACTION_SLOT_UPDATED, MarkForRefreshVisible)
-    self.control:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
+    self.control:RegisterForEvent(EVENT_WEAPON_PAIR_LOCK_CHANGED, OnWeaponPairLockChanged)
 
     local function OnLevelUpdate(eventCode, unitTag, level)
         local weaponSwapLevel = GetWeaponSwapUnlockedLevel()

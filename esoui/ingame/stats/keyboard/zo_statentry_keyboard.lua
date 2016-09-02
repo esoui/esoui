@@ -70,8 +70,8 @@ function ZO_StatEntry_Keyboard:GetValue()
     return GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS, STAT_SOFT_CAP_OPTION_APPLY_SOFT_CAP)
 end
 
-function ZO_StatEntry_Keyboard:GetDisplayValue()
-    local value = self:GetValue()
+function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
+    local value = targetValue or self:GetValue()
     local statType = self.statType
 
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
@@ -103,6 +103,36 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
             valueLabel:SetText(displayValue)
         end
         self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())       
+    end
+end
+
+function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
+    if statDelta and statDelta ~= 0 then
+        local comparisonStatValue = self:GetValue() + statDelta
+        local color
+        local icon
+        if statDelta > 0 then
+            color = ZO_SUCCEEDED_TEXT
+            icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+        else
+            color = ZO_ERROR_COLOR
+            icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+        end
+
+        comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
+        comparisonValueString = color:Colorize(comparisonValueString)
+
+        self.control.value:SetHidden(true)
+        self.control.comparisonValue:SetHidden(false)
+        self.control.comparisonValue:SetText(comparisonValueString)
+    end
+end
+
+function ZO_StatEntry_Keyboard:HideComparisonValue()
+    if not self.control.comparisonValue:IsHidden() then
+        self.control.comparisonValue:SetText("")
+        self.control.comparisonValue:SetHidden(true)
+        self.control.value:SetHidden(false)
     end
 end
 

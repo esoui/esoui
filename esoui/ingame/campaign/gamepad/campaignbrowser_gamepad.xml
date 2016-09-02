@@ -81,20 +81,11 @@
                                 <Label name="$(parent)QueueMessage" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
                                     <Anchor point="TOPLEFT" />
                                 </Label>
-                                
-                                <Texture name="$(parent)QueueMessageIcon" hidden="true">
-                                    <Dimensions x="32" y="32"/>
-                                    <Anchor point="LEFT" relativeTo="$(parent)QueueMessage" relativePoint="RIGHT" />
-                                </Texture>
 
                                 <Label name="$(parent)GroupQueueMessage" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)QueueMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="RIGHT" offsetX="-32" constrains="X"/>
                                 </Label>
-
-                                <Texture name="$(parent)GroupQueueMessageIcon" hidden="true">
-                                    <Dimensions x="32" y="32"/>
-                                    <Anchor point="LEFT" relativeTo="$(parent)GroupQueueMessage" relativePoint="RIGHT" />
-                                </Texture>                               
                                 
                                 <Label name="$(parent)RulesContent" inherits="ZO_AvALabelCopyTemplate" horizontalAlignment="LEFT">
                                     <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />

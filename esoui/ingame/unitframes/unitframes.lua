@@ -1133,10 +1133,10 @@ function UnitFrame:UpdatePowerBar(index, powerType, cur, max, forceInit)
     end
 end
 
-local HIDE_LEVEL_REACTIONS =
+-- Global to allow for outside manipulation
+ZO_UNIT_FRAMES_SHOW_LEVEL_REACTIONS =
 {
-    [UNIT_REACTION_FRIENDLY] = true,
-    [UNIT_REACTION_NPC_ALLY] = true,
+    [UNIT_REACTION_PLAYER_ALLY] = true,
 }
 
 local HIDE_LEVEL_TYPES =
@@ -1151,17 +1151,17 @@ local HIDE_LEVEL_TYPES =
 function UnitFrame:ShouldShowLevel()
     --show level for players and non-friendly NPCs
     local unitTag = self:GetUnitTag()
-    if(IsUnitPlayer(unitTag)) then
+    if IsUnitPlayer(unitTag) then
         return true
-    elseif(IsUnitInvulnerableGuard(unitTag)) then
+    elseif IsUnitInvulnerableGuard(unitTag) then
         return false
     else
         local unitType = GetUnitType(unitTag)
-        if(HIDE_LEVEL_TYPES[unitType]) then
+        if HIDE_LEVEL_TYPES[unitType] then
             return false
         else
             local unitReaction = GetUnitReaction(unitTag)
-            if(not HIDE_LEVEL_REACTIONS[unitReaction]) then
+            if ZO_UNIT_FRAMES_SHOW_LEVEL_REACTIONS[unitReaction] then
                 return true
             end
         end

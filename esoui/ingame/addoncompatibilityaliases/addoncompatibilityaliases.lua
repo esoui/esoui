@@ -94,3 +94,8 @@ GetPendingEquippedItemDye = function(equipSlot)
                                 local dyeableSlot = GetEquipSlotFromDyeableSlot(equipSlot)
                                 return GetPendingSlotDyes(dyeableSlot)
                             end
+
+-- Removed 'by-zone' scaling for OneTamriel. Zone is no longer relevant to quest rewards.
+GetJournalQuestRewardInfoInZone = function(zoneIndex, journalQuestIndex, rewardIndex)
+                                      return GetJournalQuestRewardInfo(journalQuestIndex, rewardIndex)
+                                  end

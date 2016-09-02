@@ -51,6 +51,28 @@ end
 
 FRAME_PLAYER_FRAGMENT = ZO_FramePlayerFragment:New()
 
+-----------------------------------------
+--Frame Player On Scene Hidden Fragment
+-----------------------------------------
+
+ZO_FramePlayerOnSceneHiddenFragment = ZO_FramePlayerFragment:Subclass()
+
+function ZO_FramePlayerOnSceneHiddenFragment:New()
+    local fragment = ZO_FramePlayerFragment.New(self)
+    fragment:SetHideOnSceneHidden(true)
+    return fragment
+end
+
+function ZO_FramePlayerOnSceneHiddenFragment:Show()
+    ZO_FramePlayerFragment.Show(self)
+end
+
+function ZO_FramePlayerOnSceneHiddenFragment:Hide()
+    ZO_FramePlayerFragment.Hide(self)
+end
+
+FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT = ZO_FramePlayerOnSceneHiddenFragment:New()
+
 ------------------------
 --Normalized Point Fragment
 ------------------------
@@ -140,6 +162,12 @@ do
     end
     FRAME_TARGET_GAMEPAD_RIGHT_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadRightFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_GAMEPAD_RIGHT_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadRightFramingTarget)
+
+    local function CalculateOffscreenFramingTarget()
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        return 2 * screenWidth, 0
+    end
+    FRAME_TARGET_BLUR_FULLSCREEN_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateOffscreenFramingTarget)
 end
 
 ------------------------
@@ -173,6 +201,8 @@ FRAME_EMOTE_FRAGMENT_AVA = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_AVA)
 FRAME_EMOTE_FRAGMENT_SYSTEM = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_SYSTEM)
 FRAME_EMOTE_FRAGMENT_LOOT = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_LOOT)
 FRAME_EMOTE_FRAGMENT_CHAMPION = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CHAMPION)
+FRAME_EMOTE_FRAGMENT_CROWN_STORE = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_STORE)
+FRAME_EMOTE_FRAGMENT_CROWN_CRATES = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_CRATES)
 
 -------------------------------
 --Skills Action Bar Fragment (re-anchors it)
@@ -569,6 +599,60 @@ end
 
 SHOW_MARKET_FRAGMENT = ShowMarketFragment:New()
 
+-------------------------------------------------
+-- Suppress Collectible Notifications Fragment
+-------------------------------------------------
+
+local SuppressCollectibleNotificationsFragment = ZO_SceneFragment:Subclass()
+
+function SuppressCollectibleNotificationsFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function SuppressCollectibleNotificationsFragment:Show()
+    if NOTIFICATIONS then
+        NOTIFICATIONS:SuppressNotificationsByEvent(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
+    end
+    if GAMEPAD_NOTIFICATIONS then
+        GAMEPAD_NOTIFICATIONS:SuppressNotificationsByEvent(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
+    end
+    self:OnShown()
+end
+
+function SuppressCollectibleNotificationsFragment:Hide()
+    if NOTIFICATIONS then
+        NOTIFICATIONS:ResumeNotificationsByEvent(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
+    end
+    if GAMEPAD_NOTIFICATIONS then
+        GAMEPAD_NOTIFICATIONS:ResumeNotificationsByEvent(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
+    end
+    self:OnHidden()
+end
+
+SUPPRESS_COLLECTIBLE_NOTIFICATIONS_FRAGMENT = SuppressCollectibleNotificationsFragment:New()
+
+-------------------------------------------------
+-- Suppress Collectible Announcements Fragment
+-------------------------------------------------
+
+local SuppressCollectibleAnnouncementsFragment = ZO_SceneFragment:Subclass()
+
+function SuppressCollectibleAnnouncementsFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function SuppressCollectibleAnnouncementsFragment:Show()
+    CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByEvent(EVENT_COLLECTIBLE_UPDATED)
+    self:OnShown()
+end
+
+function SuppressCollectibleAnnouncementsFragment:Hide()
+    CENTER_SCREEN_ANNOUNCE:ResumeAnnouncementByEvent(EVENT_COLLECTIBLE_UPDATED)
+    self:OnHidden()
+end
+
+SUPPRESS_COLLECTIBLE_ANNOUNCEMENTS_FRAGMENT = SuppressCollectibleAnnouncementsFragment:New()
+
 --------------------------------------
 --General Fragment Declarations
 --------------------------------------
@@ -678,6 +762,8 @@ GUILD_HISTORY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHistory)
 GUILD_CREATE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildCreate)
 GUILD_SHARED_INFO_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildSharedInfo)
 GUILD_HERALDRY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHeraldry)
+
+CROWN_CRATES_FADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CrownCratesTopLevel)
 
 --Gamepad fragments
 local ALWAYS_ANIMATE = true

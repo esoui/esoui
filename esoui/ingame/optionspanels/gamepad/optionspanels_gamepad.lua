@@ -302,6 +302,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_LOOT,
+            settingId = LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_LOOT,
             settingId = LOOT_SETTING_LOOT_HISTORY,
         },
         {
@@ -389,6 +394,12 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS,
             header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
+        },
+
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
         },
     },
     [SETTING_PANEL_INTERFACE] =
