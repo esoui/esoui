@@ -2,7 +2,11 @@
     <Controls>
         <Control name="ZO_PlayerFurnitureSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="509" y="52" />
-
+            <OnInitialized>
+                self.name = self:GetNamedChild("Name")
+                self.icon = self:GetNamedChild("Button"):GetNamedChild("Icon")
+            </OnInitialized>
+            
             <OnMouseUp>
                 if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
                     ZO_HousingFurnitureBrowser_Keyboard_OnMouseClick(self)
@@ -37,19 +41,31 @@
                 </Label>
             </Controls>
         </Control>
-        
-        <TopLevelControl name="ZO_HousingFurnitureBrowser_KeyboardTopLevel" mouseEnabled="true" hidden="true">
-            <OnInitialized>
-                ZO_HousingFurnitureBrowser_Keyboard_OnInitialize(self)
-            </OnInitialized>
+
+        <TopLevelControl name="ZO_HousingFurnitureBrowserMenu_KeyboardTopLevel" inherits="ZO_SceneMenu" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550"/>
+        </TopLevelControl>
+
+        <Control name="ZO_HousingFurnitureBrowserList_Keyboard" mouseEnabled="true" hidden="true" virtual="true">
             <Dimensions x="565" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
             <Controls>
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <AnchorFill />
+                    <Anchor point="TOPRIGHT" offsetY="96"/>
+                    <Anchor point="BOTTOMLEFT" />
                 </Control>
             </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HousingFurnitureBrowser_KeyboardPlaceableTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard" />
+
+        <TopLevelControl name="ZO_HousingFurnitureBrowser_KeyboardRecallableTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard">
+            <!--This needs to be called off the last tab entry created-->
+            <OnInitialized>
+                ZO_HousingFurnitureBrowser_Keyboard_OnInitialize()
+            </OnInitialized>
         </TopLevelControl>
     </Controls>
 </GuiXml>

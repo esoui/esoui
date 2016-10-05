@@ -193,7 +193,7 @@ function ZO_GuildHeraldryManager_Keyboard:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
         
             callback = function()
-                RevertToSavedHeraldry()
+                RevertToSavedHeraldry(false)
                 self:SetSelectedHeraldryIndices()
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
                 PlaySound(SOUNDS.GUILD_HERALDRY_UNDO_CHANGES)

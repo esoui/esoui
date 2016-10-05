@@ -126,7 +126,7 @@ local function CreateHealthbarDimmingOption(option, stringsPrefix, dependsOnOpti
         tooltipText = _G["SI_INTERFACE_OPTIONS_HEALTHBARS_HIGHLIGHT_"..stringsPrefix.."_TOOLTIP"],
         valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
         valid = { ... },
-        gamepadIsEnabledCallback = AreNameplatesEnabled,
+        gamepadIsEnabledCallback = IsDimmingOptionEnabled,
         eventCallbacks =
         {
             ["AllHealthBars_Off"] = SetupDimmingOptionEnabled,
@@ -237,7 +237,7 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_HEALTHBAR_ALIGNMENT_TOOLTIP,
             valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
             valid = { NAMEPLATE_CHOICE_LEFT, NAMEPLATE_CHOICE_CENTER },
-            gamepadIsEnabledCallback = AreNameplatesEnabled,
+            gamepadIsEnabledCallback = AreHealthbarsEnabled,
             eventCallbacks =
             {
                 ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,

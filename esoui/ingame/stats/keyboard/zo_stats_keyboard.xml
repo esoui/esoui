@@ -18,6 +18,11 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
+        <Texture name="ZO_StatsEquipmentBonusIcon" virtual="true">
+            <Dimensions x="25" y="25"/>
+            <Anchor point="BOTTOMLEFT"/>
+        </Texture>
+        
         <Label name="ZO_StatsHeader" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true">
             <Dimensions x="607" />
         </Label>
@@ -261,7 +266,7 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Timer" />
                     <OnMouseEnter>
                         InitializeTooltip(InformationTooltip, self, RIGHT)
-                        SetTooltipText(InformationTooltip, zo_strformat(SI_TOOLTIP_RIDING_SKILL_DESCRIPTION, GetString(SI_STATS_RIDING_TRAINABLE_TOOLTIP)))
+                        SetTooltipText(InformationTooltip, zo_strformat(SI_STATS_RIDING_TRAINABLE_TOOLTIP))
                     </OnMouseEnter>
                     <OnMouseExit>
                         ClearTooltip(InformationTooltip)
@@ -279,21 +284,13 @@
             </OnInitialized>
 
             <OnMouseEnter>
-                InitializeTooltip(GameTooltip, self, RIGHT, -15)
-                GameTooltip:SetBuff(self.buffSlot, "player")
-                if not self.animation then
-                    self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", self:GetNamedChild("Highlight"))
-                end
-                self.animation:PlayForward()
+                ZO_StatsActiveEffect_OnMouseEnter(self)
             </OnMouseEnter>
             <OnMouseExit>
-                ClearTooltip(GameTooltip)
-                self.animation:PlayBackward()
+                ZO_StatsActiveEffect_OnMouseExit(self)
             </OnMouseExit>
             <OnMouseUp>
-                if(upInside and button == MOUSE_BUTTON_INDEX_RIGHT) then
-                    CancelBuff(self.buffSlot)
-                end
+                ZO_StatsActiveEffect_OnMouseUp(self, button, upInside)
             </OnMouseUp>
             <Controls>
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
@@ -347,22 +344,21 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="1"/>
                         </Label>
 
-                        <Control name="$(parent)BattleLevelHeader" >
-                            <Anchor point="RIGHT" offsetY="15" />
-                            <Dimensions x="200" y="24" />
+                        <Control name="$(parent)EquipmentBonus" mouseEnabled="true" resizeToFitDescendents="true" >
+                            <Anchor point="BOTTOMRIGHT" offsetX="5"/>
+                            <OnMouseEnter>
+                                ZO_Stats_EquipmentBonus_OnMouseEnter(self)
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_Stats_EquipmentBonus_OnMouseExit(self)
+                            </OnMouseExit>
                             <Controls>
-                                <Label name="$(parent)Level" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_STAT_VALUE:STAT_VALUE_COLOR_BATTLE_LEVELED">
-                                    <Anchor point="RIGHT"/>
+                                <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_STATS_EQUIPMENT_BONUS_TITLE_KEYBOARD" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="BOTTOMLEFT" />
                                 </Label>
-                                <Texture name="$(parent)LevelTypeIcon" textureFile="EsoUI/Art/Champion/champion_icon.dds">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT"/>
-                                    <TextureCoords left="0" top="0" right="1" bottom="1"/>
-                                     <!--The width is handled in code based on whenever or not you are Vet BattleRanked-->
-                                    <Dimensions x="0" y="24"/>
-                                </Texture>
-                                <Label name="$(parent)ScaledLevel" text="SI_STATS_SCALED_LEVEL" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)LevelTypeIcon" relativePoint="LEFT" offsetX="-3" />
-                                </Label>
+                                <Control name="$(parent)Icons" resizeToFitDescendents="true" >
+                                    <Anchor point ="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-5" />
+                                </Control>
                             </Controls>
                         </Control>
                     </Controls>
@@ -372,7 +368,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TitleSection" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-7"/>
                 </Control>
-           </Controls>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

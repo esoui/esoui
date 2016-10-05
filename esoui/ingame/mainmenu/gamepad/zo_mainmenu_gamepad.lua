@@ -5,19 +5,20 @@ do
     local MENU_MAIN_ENTRIES =
     {
         MARKET          = 1,
-        NOTIFICATIONS   = 2,
-        COLLECTIONS     = 3,
-        INVENTORY       = 4,
-        CHARACTER       = 5,
-        SKILLS          = 6,
-        CHAMPION        = 7,
-        CAMPAIGN        = 8,
-        JOURNAL         = 9,
-        SOCIAL          = 10,
-        ACTIVITY_FINDER = 11,
-        HELP            = 12,
-        OPTIONS         = 13,
-        LOG_OUT         = 14,
+        CROWN_CRATES     = 2,
+        NOTIFICATIONS   = 3,
+        COLLECTIONS     = 4,
+        INVENTORY       = 5,
+        CHARACTER       = 6,
+        SKILLS          = 7,
+        CHAMPION        = 8,
+        CAMPAIGN        = 9,
+        JOURNAL         = 10,
+        SOCIAL          = 11,
+        ACTIVITY_FINDER = 12,
+        HELP            = 13,
+        OPTIONS         = 14,
+        LOG_OUT         = 15,
     }
     local MENU_JOURNAL_ENTRIES =
     {
@@ -80,6 +81,29 @@ do
             header = GetString(SI_ESO_PLUS_TITLE),
             postPadding = 70,
             showHeader = function() return IsESOPlusSubscriber() end
+        },
+        [MENU_MAIN_ENTRIES.CROWN_CRATES] =
+        {
+            scene = "crownCrateGamepad",
+            name = GetString(SI_MAIN_MENU_CROWN_CRATES),
+            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_crownCrates.dds",
+            isNewCallback =
+                function()
+                    return GetNextOwnedCrownCrateId() ~= nil
+                end,
+            disableWhenDead = true,
+            disableWhenReviving = true,
+            disableWhenSwimming = true,
+            disableWhenWerewolf = true,
+            isNewCallback =
+                function()
+                    return GetNumOwnedCrownCrateTypes() > 0
+                end,
+            isVisibleCallback = function()
+                --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
+                --Crown crates will properly refresh again when it closes its scene
+                return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
+            end,
         },
         [MENU_MAIN_ENTRIES.COLLECTIONS] =
         {
@@ -317,6 +341,7 @@ do
     {
         [MENU_CATEGORY_NOTIFICATIONS]   = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.NOTIFICATIONS],
         [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.MARKET],
+        [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_CRATES],
         [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS],
         [MENU_CATEGORY_INVENTORY]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.INVENTORY],
         [MENU_CATEGORY_CHARACTER]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHARACTER],
@@ -406,6 +431,7 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
         end
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
     end)
+    MAIN_MENU_MANAGER:RegisterCallback("OnPlayerStateUpdate", function() self:UpdateEntryEnabledStates() end)
 end
 
 function ZO_MainMenuManager_Gamepad:OnShowing()
@@ -473,7 +499,7 @@ do
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
     
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
-        local currencyString = ZO_CommaDelimitNumber(GetMarketCurrency())
+        local currencyString = ZO_CommaDelimitNumber(GetPlayerCrowns())
         remainingCrownsLabel:SetText(currencyString)
     end
     
@@ -491,46 +517,47 @@ do
     end
 end
 
-do
-    local function ShouldDisableEntry(entry)
-        local data = entry.data
-
-        if MAIN_MENU_MANAGER:IsPlayerDead() and data.disableWhenDead then
-            return true
-        elseif MAIN_MENU_MANAGER:IsPlayerInCombat() and data.disableWhenInCombat then
-            return true
-        elseif MAIN_MENU_MANAGER:IsPlayerReviving() and data.disableWhenReviving then
-            return true
-        end
-
-        return false
+local function ShouldDisableEntry(entryData)
+    if MAIN_MENU_MANAGER:IsPlayerDead() and entryData.disableWhenDead then
+        return true
+    elseif MAIN_MENU_MANAGER:IsPlayerInCombat() and entryData.disableWhenInCombat then
+        return true
+    elseif MAIN_MENU_MANAGER:IsPlayerReviving() and entryData.disableWhenReviving then
+        return true
+    elseif MAIN_MENU_MANAGER:IsPlayerSwimming() and entryData.disableWhenSwimming then
+        return true
+    elseif MAIN_MENU_MANAGER:IsPlayerWerewolf() and entryData.disableWhenWerewolf then
+        return true
     end
 
-    function ZO_MainMenuManager_Gamepad:UpdateEntryEnabledStates()
-        local function UpdateState(entry)
-            if ShouldDisableEntry(entry) then
-                entry:SetEnabled(false)
-
-                if self:IsEntrySceneShowing(entry.data) then
-                    SCENE_MANAGER:ShowBaseScene()
-                end
-            else
-                entry:SetEnabled(true)
-            end
-        end
-
-        for _, entry in ipairs(MENU_ENTRIES) do
-            UpdateState(entry)
-            if entry.subMenu then
-                for _, subMenuEntry in ipairs(entry.subMenu) do
-                    UpdateState(subMenuEntry)
-                end
-            end
-        end
-
-        self:RefreshLists()
-    end
+    return false
 end
+
+function ZO_MainMenuManager_Gamepad:UpdateEntryEnabledStates()
+    local function UpdateState(entry)
+        if ShouldDisableEntry(entry.data) then
+            entry:SetEnabled(false)
+
+            if self:IsEntrySceneShowing(entry.data) then
+                SCENE_MANAGER:ShowBaseScene()
+            end
+        else
+            entry:SetEnabled(true)
+        end
+    end
+
+    for _, entry in ipairs(MENU_ENTRIES) do
+        UpdateState(entry)
+        if entry.subMenu then
+            for _, subMenuEntry in ipairs(entry.subMenu) do
+                UpdateState(subMenuEntry)
+            end
+        end
+    end
+
+    self:RefreshLists()
+end
+
 
 function ZO_MainMenuManager_Gamepad:RefreshLists()
     if self.mode == MODE_MAIN_LIST then
@@ -560,7 +587,6 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_LEVEL_UPDATE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_MAIL_NUM_UNREAD_CHANGED, MarkNewnessDirty)
-    MAIN_MENU_MANAGER:RegisterCallback("OnPlayerStateUpdate", function() self:UpdateEntryEnabledStates() end)
     MAIN_MENU_MANAGER:RegisterCallback("OnBlockingSceneCleared", OnBlockingSceneCleared)
 
     self:UpdateEntryEnabledStates()
@@ -667,7 +693,7 @@ function ZO_MainMenuManager_Gamepad:RefreshMainList()
     -- so as soon as we init, we don't need to update this any more
     if not self.initialized then
         -- notifications will appear at the top of the list if there are any available
-        local INVENTORY_LIST_INDEX = GAMEPAD_NOTIFICATIONS:GetNumNotifications() == 0 and 3 or 4
+        local INVENTORY_LIST_INDEX = GAMEPAD_NOTIFICATIONS:GetNumNotifications() == 0 and 4 or 5 -- 4 and 5 correspond to collections and inventory, respectively 
         self.mainList:SetDefaultSelectedIndex(INVENTORY_LIST_INDEX)
     end
 
@@ -722,6 +748,14 @@ function ZO_MainMenuManager_Gamepad:ToggleCategory(category)
     if self:IsEntrySceneShowing(entryData) then
         SCENE_MANAGER:ShowBaseScene()
     else
+        if entryData.isVisibleCallback and not entryData.isVisibleCallback() then
+            return
+        end
+
+        if ShouldDisableEntry(entryData) then
+            return
+        end
+
         self:ToggleScene(entryData.scene)
     end
 end

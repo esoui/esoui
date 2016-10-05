@@ -105,6 +105,13 @@ if IsConsoleUI() then
         system = SETTING_TYPE_AUDIO,
         settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
     })
+    if ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting() then
+        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 1, {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
+        })
+    end
 end
 
 local ZO_OptionsPanel_Gamepad_Pregame_ControlData =

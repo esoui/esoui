@@ -97,7 +97,7 @@ local AlertHandlers = {
             local message = GetString("SI_ACTIONRESULT", result)
 
             if(log and message ~= "") then
-                return ERROR, message, soundId
+                return ERROR, zo_strformat(message), soundId
             elseif(soundId ~= nil) then
                 return ERROR, nil, soundId
             end
@@ -135,19 +135,21 @@ local AlertHandlers = {
         return ERROR, GetString(SI_ITEM_FORMAT_STR_ON_COOLDOWN), SOUNDS.ITEM_ON_COOLDOWN
     end,
 
-    [EVENT_COLLECTIBLE_ON_COOLDOWN] = function()
-        return ERROR, GetString(SI_COLLECTIONS_COOLDOWN_ERROR), SOUNDS.COLLECTIBLE_ON_COOLDOWN
-    end,
-
-    [EVENT_COLLECTIBLE_USE_BLOCKED] = function(reason)
-        return ERROR, GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
+    [EVENT_COLLECTIBLE_USE_RESULT] = function(result, isAttemptingActivation)
+        if result == COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED then
+            local sound = isAttemptingActivation and SOUNDS.COLLECTIBLE_ACTIVATED or SOUNDS.COLLECTIBLE_DEACTIVATED
+            PlaySound(sound)
+        else
+            local sound = (result == COLLECTIBLE_USAGE_BLOCK_REASON_ON_COOLDOWN) and SOUNDS.COLLECTIBLE_ON_COOLDOWN or SOUNDS.GENERAL_ALERT_ERROR
+            return ERROR, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", reason)), sound
+        end
     end,
 
     [EVENT_SOCIAL_ERROR] = function(error)
         if(error ~= SOCIAL_RESULT_NO_ERROR and not IsSocialErrorIgnoreResponse(error)) then
-			if(ShouldShowSocialErrorInAlert(error)) then
-				return ERROR, GetString("SI_SOCIALACTIONRESULT", error), SOUNDS.GENERAL_ALERT_ERROR
-			end
+            if(ShouldShowSocialErrorInAlert(error)) then
+                return ERROR, zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)), SOUNDS.GENERAL_ALERT_ERROR
+            end
         end
     end,
 
@@ -333,7 +335,7 @@ local AlertHandlers = {
                 end
             else
                 if isLocalPlayer then
-                    message = SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED
+                    message = zo_strformat(SI_GROUP_NOTIFICATION_GROUP_SELF_KICKED)
                 else
                     useDefaultReasonText = true
                 end
@@ -593,7 +595,8 @@ local AlertHandlers = {
 
     [EVENT_PLAYER_DEAD] = function()
         local isAVADeath, isBattleGroundDeath = select(6, GetDeathInfo())
-        if(not (isAVADeath or isBattleGroundDeath)) then
+		local isDuelingDeath = IsDuelingDeath()
+        if(not (isAVADeath or isBattleGroundDeath or isDuelingDeath)) then
             return ALERT, GetString(SI_DEATH_DURABILITY_ANNOUNCEMENT)
         end
     end,
@@ -612,7 +615,7 @@ local AlertHandlers = {
     [EVENT_CAMPAIGN_UNASSIGNMENT_RESULT] = function(result)
         local resultString = GetString("SI_UNASSIGNCAMPAIGNRESULT", result)
         if resultString ~= "" then
-            return ERROR, resultString, SOUNDS.GENERAL_ALERT_ERROR
+            return ERROR, zo_strformat(resultString), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 
@@ -647,7 +650,7 @@ local AlertHandlers = {
     end,
 
     [EVENT_JUSTICE_PICKPOCKET_FAILED] = function()
-        return ALERT, GetString(SI_JUSTICE_PICKPOCKET_FAILED), SOUNDS.JUSTICE_PICKPOCKET_FAILED
+        return ALERT, zo_strformat(SI_JUSTICE_PICKPOCKET_FAILED), SOUNDS.JUSTICE_PICKPOCKET_FAILED
     end,
 
     [EVENT_LOOT_RECEIVED] = function(receivedBy, itemName, quantity, itemSound, lootType, receivedBySelf, isPickpocketLoot)
@@ -692,6 +695,24 @@ local AlertHandlers = {
         if TrialEventMappings[restrictionType] then
             return ERROR, GetString("SI_TRIALACCOUNTRESTRICTIONTYPE", restrictionType)
         end
+    end,
+
+    [EVENT_STUCK_ERROR_ON_COOLDOWN] = function()
+        local cooldownText = ZO_FormatTime(GetStuckCooldown(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+        local cooldownRemainingText = ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+        return ERROR, zo_strformat(SI_STUCK_ERROR_ON_COOLDOWN, cooldownText, cooldownRemainingText)
+    end,
+
+    [EVENT_STUCK_ERROR_ALREADY_IN_PROGRESS] = function()
+        return ERROR, GetString(SI_STUCK_ERROR_ALREADY_IN_PROGRESS)
+    end,
+
+    [EVENT_STUCK_ERROR_IN_COMBAT] = function()
+        return ERROR, GetString(SI_STUCK_ERROR_IN_COMBAT)
+    end,
+
+    [EVENT_STUCK_ERROR_INVALID_LOCATION] = function()
+        return ERROR, GetString(SI_INVALID_STUCK_LOCATION)
     end,
 
     [EVENT_STUCK_CANCELED] = function()
@@ -781,6 +802,53 @@ local AlertHandlers = {
         end
 
         return ALERT, alertText, SOUNDS.GROUP_ELECTION_REQUESTED
+    end,
+
+    [EVENT_DUEL_INVITE_FAILED] = function(reason, targetCharacterName, targetDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
+        if userFacingName then
+            return ERROR, zo_strformat(GetString("SI_DUELINVITEFAILREASON", reason), userFacingName), SOUNDS.GENERAL_ALERT_ERROR
+        else
+            return ERROR, GetString("SI_DUELINVITEFAILREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_DUEL_INVITE_RECEIVED] = function(inviterCharacterName, inviterDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_RECEIVED, userFacingName)
+    end,
+
+    [EVENT_DUEL_INVITE_SENT] = function(inviteeCharacterName, inviteeDisplayName)
+        local userFacingName = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_SENT, userFacingName)
+    end,
+
+    [EVENT_DUEL_INVITE_ACCEPTED] = function()
+        return ALERT, GetString(SI_DUEL_INVITE_ACCEPTED), SOUNDS.DUEL_ACCEPTED
+    end,
+
+    [EVENT_DUEL_INVITE_DECLINED] = function()
+        return ALERT, GetString(SI_DUEL_INVITE_DECLINED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_DUEL_INVITE_CANCELED] = function()
+        return ALERT, GetString(SI_DUEL_INVITE_CANCELED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_CROWN_CRATE_OPEN_RESPONSE] = function(crownCrateId, openResponse)
+        if openResponse ~= LOOT_CRATE_OPEN_RESPONSE_SUCCESS then
+            local errorText = GetString("SI_LOOTCRATEOPENRESPONSE", openResponse)
+            if openResponse == LOOT_CRATE_OPEN_RESPONSE_FAIL_NO_INVENTORY_SPACE then
+                local requiredSlots = GetInventorySpaceRequiredToOpenCrownCrate(crownCrateId)
+                local freeSlots = GetNumBagFreeSlots(BAG_BACKPACK)
+                errorText = zo_strformat(errorText, requiredSlots - freeSlots)
+            end
+            return ERROR, errorText, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_STACKED_ALL_ITEMS_IN_BAG] = function()
+        return ALERT, GetString(SI_STACK_ALL_ITEMS_ALERT)
     end,
 }
 

@@ -84,7 +84,7 @@
                 
                 <!-- have to make buttons for a custom dialog -->
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton" />
-                <Control name="$(parent)Logout" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)UseProduct" inherits="ZO_CustomDialogButton"/>
 
                 <Texture name="$(parent)ModalUnderlay" override="true" alpha="0" />
             </Controls>

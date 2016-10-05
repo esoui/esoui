@@ -408,15 +408,17 @@ function MenuBar:UpdateButtons(forceSelection)
     for i, button in ipairs(self.m_buttons) do
         local buttonControl = button[INDEX_BUTTON]
         buttonControl:ClearAnchors()
+        local buttonData = buttonControl.m_object.m_buttonData
 
-        local isVisible = IsVisible(buttonControl.m_object.m_buttonData)
+        local isVisible = IsVisible(buttonData)
         buttonControl:SetHidden(not isVisible)
 
         if(isVisible) then
             if lastDivider and lastDividerPadding then
                 buttonControl:SetAnchor(self.m_point, lastDivider, self.m_relativePoint, lastDividerPadding)
             elseif(lastVisibleButton) then
-                buttonControl:SetAnchor(self.m_point, lastVisibleButton, self.m_relativePoint, self.m_buttonPadding)
+                local previousButtonExtraPadding = buttonData.previousButtonExtraPadding or 0
+                buttonControl:SetAnchor(self.m_point, lastVisibleButton, self.m_relativePoint, self.m_buttonPadding + previousButtonExtraPadding)
             else
                 buttonControl:SetAnchor(self.m_point, nil, self.m_point, 0, 0)
             end
@@ -425,8 +427,8 @@ function MenuBar:UpdateButtons(forceSelection)
 
             buttonControl.m_object:RefreshStatus()
         end
-
-        local barPadding = GetBarPadding(buttonControl.m_object.m_buttonData)
+        
+        local barPadding = GetBarPadding(buttonData)
 
         if barPadding then
             -- create a bar control and place it next to lastVisibleButton

@@ -201,26 +201,31 @@ local function SetupPopulationIcon(control, data)
     end
 end
 
-function ZO_CampaignBrowser_Gamepad:UpdateQueuedMessageControls(loadingControl, descriptionControl, icon, id, isGroup, state)
+function ZO_CampaignBrowser_Gamepad:UpdateQueuedMessageControls(descriptionControl, id, isGroup, state)
     if state == CAMPAIGN_QUEUE_REQUEST_STATE_FINISHED then
-        icon:SetHidden(true)
-        descriptionControl:SetText("")
+        descriptionControl:SetHidden(true)
     else
-        self.campaignBrowser:UpdateQueuedMessageControls(loadingControl, descriptionControl, icon, id, isGroup, state)
+        descriptionControl:SetHidden(false)
+        local isLoading, message, messageIcon = self.campaignBrowser:GetQueueMessage(id, isGroup, state)
+        if isLoading then
+            descriptionControl:SetText(message)
+        else
+            local iconString = zo_iconFormat(messageIcon, 32, 32)
+            descriptionControl:SetText(message..iconString)
+        end
     end
 end
 
-function ZO_CampaignBrowser_Gamepad:UpdateQueueMessages(control, icon, groupControl, groupIcon, data)
+function ZO_CampaignBrowser_Gamepad:UpdateQueueMessages(control, groupControl, data)
     local IS_GROUP = true
-    local isGroupQueued = self:UpdateQueuedMessage(groupControl, data, IS_GROUP, data.queuedGroupState, groupIcon)
-    local isIndividualQueued = self:UpdateQueuedMessage(control, data, not IS_GROUP, data.queuedIndividualState, icon)
+    local isGroupQueued = self:UpdateQueuedMessage(groupControl, data, IS_GROUP, data.queuedGroupState)
+    local isIndividualQueued = self:UpdateQueuedMessage(control, data, not IS_GROUP, data.queuedIndividualState)
 end
 
-function ZO_CampaignBrowser_Gamepad:UpdateQueuedMessage(control, data, isGroup, state, icon)
+function ZO_CampaignBrowser_Gamepad:UpdateQueuedMessage(control, data, isGroup, state)
     local isQueued = IsQueuedForCampaign(data.id, isGroup)
-    local loadingControl = control
     local descriptionControl = control
-    self:UpdateQueuedMessageControls(loadingControl, descriptionControl, icon, data.id, isGroup, state)
+    self:UpdateQueuedMessageControls(descriptionControl, data.id, isGroup, state)
     return isQueued
 end
 
@@ -228,7 +233,7 @@ function ZO_CampaignBrowser_Gamepad:RefreshCampaignInfoContent()
     local selectedData = self.campaignList:GetTargetData()
 
     if selectedData then
-        self:UpdateQueueMessages(self.campaignQueueMessage, self.campaignQueueMessageIcon, self.groupCampaignQueueMessage, self.groupCampaignQueueMessageIcon, selectedData)
+        self:UpdateQueueMessages(self.campaignQueueMessage, self.groupCampaignQueueMessage, selectedData)
 
         self.campaignInfoRules:SetText(GetCampaignRulesetDescription(selectedData.rulesetId))
 
@@ -255,9 +260,7 @@ function ZO_CampaignBrowser_Gamepad:PerformDeferredInitialization()
     self.campaignInfoStats = campaignInfo:GetNamedChild("Stats")
     self.campaignInfoRules = campaignRules:GetNamedChild("RulesContent") 
     self.campaignQueueMessage = campaignRules:GetNamedChild("QueueMessage")
-    self.campaignQueueMessageIcon = campaignRules:GetNamedChild("QueueMessageIcon")
     self.groupCampaignQueueMessage = campaignRules:GetNamedChild("GroupQueueMessage")
-    self.groupCampaignQueueMessageIcon = campaignRules:GetNamedChild("GroupQueueMessageIcon")
     
     self.dataRegistration = ZO_CampaignDataRegistration:New("CampaignSelectorData", function() return GAMEPAD_AVA_ROOT_SCENE:IsShowing() end)
 

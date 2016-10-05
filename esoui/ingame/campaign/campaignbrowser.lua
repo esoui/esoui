@@ -391,7 +391,15 @@ function CampaignBrowser:SetupCampaignQueue(control, data)
     local loading = GetControl(control, "Loading")
     local description = GetControl(control, "Description")
     
-    self.campaignBrowser:UpdateQueuedMessageControls(loading, description, icon, data.id, data.isGroup, data.state)
+    local isLoading, message, messageicon = self.campaignBrowser:GetQueueMessage(data.id, data.isGroup, data.state)
+    icon:SetHidden(isLoading)
+    loading:SetHidden(not isLoading)
+
+    if not isLoading then
+        icon:SetTexture(messageicon)
+    end
+
+    description:SetText(message)
 end
 
 function CampaignBrowser:AddQueueRow(data, isGroup)
@@ -836,10 +844,12 @@ end
 
 function ZO_CampaignBrowserQueueRow_OnMouseEnter(control)
     CAMPAIGN_BROWSER:Row_OnMouseEnter(control)
+    ZO_TooltipIfTruncatedLabel_OnMouseEnter(GetControl(control, "Description"))
 end
 
 function ZO_CampaignBrowserQueueRow_OnMouseExit(control)
     CAMPAIGN_BROWSER:Row_OnMouseExit(control)
+    ZO_TooltipIfTruncatedLabel_OnMouseExit(GetControl(control, "Description"))
 end
 
 function ZO_CampaignBrowserQueueRow_OnMouseUp(control, button, upInside)

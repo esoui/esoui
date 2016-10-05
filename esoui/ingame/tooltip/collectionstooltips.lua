@@ -26,14 +26,19 @@ do
     }
     local g_collectibleDescriptionCache = 
     {
-        formatter = SI_GAMEPAD_COLLECTIONS_DESCRIPTION_FORMATTER,
+        --Descriptions are their own format (for potential gender switches)
+        formatter = nil,
         cache = {},
     }
 
     local function GetCachedText(cacheTable, rawText)
         local formattedName = cacheTable.cache[rawText]
         if not formattedName then
-            formattedName = zo_strformat(cacheTable.formatter, rawText)
+            if cacheTable.formatter then
+                formattedName = zo_strformat(cacheTable.formatter, rawText)
+            else
+                formattedName = zo_strformat(rawText)
+            end
             cacheTable.cache[rawText] = formattedName
         end
         return formattedName
@@ -144,7 +149,8 @@ do
         elseif showBlockReason then
             local usageBlockReason = GetCollectibleBlockReason(collectibleId)
             if usageBlockReason ~= COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED then
-                bodySection:AddLine(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", usageBlockReason), descriptionStyle, self:GetStyle("failed"))
+                local formattedBlockReason = GetCachedText(g_collectibleDescriptionCache, GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", usageBlockReason))
+                bodySection:AddLine(formattedBlockReason, descriptionStyle, self:GetStyle("failed"))
             end
         end
 

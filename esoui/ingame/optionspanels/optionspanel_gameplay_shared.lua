@@ -122,6 +122,24 @@ local ZO_OptionsPanel_Gameplay_ControlData =
                                             return tonumber(GetSetting(SETTING_TYPE_LOOT,LOOT_SETTING_AUTO_LOOT)) ~= 0
                                         end
         },
+        --Options_Gameplay_AutoAddToCraftBag
+        [LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_LOOT,
+            settingId = LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_LOOT_AUTO_ADD_TO_CRAFT_BAG,
+            tooltipText = SI_INTERFACE_OPTIONS_LOOT_AUTO_ADD_TO_CRAFT_BAG_TOOLTIP,
+            gamepadIsEnabledCallback = IsESOPlusSubscriber,
+            onInitializeFunction = function(control) 
+                                        if IsESOPlusSubscriber() then
+                                            ZO_Options_SetOptionActive(control)
+                                        else 
+                                            ZO_Options_SetOptionInactive(control)
+                                        end
+                                    end
+        },
         --Options_Gameplay_UseLootHistory
         [LOOT_SETTING_LOOT_HISTORY] =
         {

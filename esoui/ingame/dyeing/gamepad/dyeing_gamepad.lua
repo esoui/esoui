@@ -38,7 +38,7 @@ local GAMEPAD_DYEING_ITEMS_SCENE_NAME = "gamepad_dyeing_items"
 
 local MODE_TO_SCENE_NAME =
 {
-    [DYE_MODE_NONE] = GAMEPAD_DYEING_ROOT_SCENE_NAME,
+    [DYE_MODE_SELECTION] = GAMEPAD_DYEING_ROOT_SCENE_NAME,
     [DYE_MODE_EQUIPMENT] = GAMEPAD_DYEING_ITEMS_SCENE_NAME,
     [DYE_MODE_COLLECTIBLE] = GAMEPAD_DYEING_ITEMS_SCENE_NAME,
 }
@@ -100,7 +100,7 @@ function ZO_Dyeing_Gamepad:Initialize(control)
 
     GAMEPAD_DYEING_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            self:SetMode(DYE_MODE_NONE)
+            self:SetMode(DYE_MODE_SELECTION)
             self.modeList:Activate()
             local currentlySelectedData = self.modeList:GetTargetData()
             self:UpdateOptionLeftTooltip(currentlySelectedData.mode)
@@ -300,7 +300,8 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function() self:ActivateCurrentSelection() end,
-            visible = function() return self:CanActivateCurrentSelection() end,
+            visible = function() return self:CanViewCurrentSelection() end,
+            enabled = function() return self:CanActivateCurrentSelection() end,
         },
 
         -- Apply
@@ -600,6 +601,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:PerformDeferredInitialization()
     self.centerSwatch:GetNamedChild("Keybind"):SetTexture(keybindIcon)
     local dyeableSlotsSheet = self.rightRadialContainer:GetNamedChild("DyeableSlotsSheet")    
     self.dyeableSlotsMenu = ZO_Dyeing_Slots_Gamepad:New(dyeableSlotsSheet, radialSharedHighlight)
+    self.dyeableSlotsMenu:SetSelectionChangedCallback(function() self:RefreshKeybindStrip() end)
     self.dyeableSlotsMenu:SetOnSelectionChangedCallback(function(...) self:RadialMenuSelectionChanged(...) end)
 
     local function UpdateRotation(rotation)
@@ -1034,7 +1036,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:ActivateCurrentSelection()
     elseif self.selectionMode == SELECTION_SLOT then
         local selectedEntry = self.dyeableSlotsMenu.selectedEntry
         if not selectedEntry then
-            -- It should be impossible to get to this state as CanActivateCurrentSelection should
+            -- It should be impossible to get to this state as CanViewCurrentSelection should
             --  return false in this case.
             assert(false)
         else
@@ -1093,7 +1095,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:ActivateCurrentSelection()
     end
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:CanActivateCurrentSelection()
+function ZO_Dyeing_Slots_Panel_Gamepad:CanViewCurrentSelection()
     if self.selectionMode == SELECTION_DYE then
         local selectedSwatch = self.dyesList:GetSelectedSwatch()
         return selectedSwatch and (not selectedSwatch.locked)
@@ -1119,7 +1121,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:CanActivateCurrentSelection()
 
         local icon = GetDyeableSlotIcon(dyeableSlot)
         return icon ~= ZO_NO_TEXTURE_FILE
-    elseif (self.selectionMode == SELECTION_SLOT_COLOR) then
+    elseif self.selectionMode == SELECTION_SLOT_COLOR then
         if not self.activeSlotControl then
             return false
         end
@@ -1140,6 +1142,30 @@ function ZO_Dyeing_Slots_Panel_Gamepad:CanActivateCurrentSelection()
     end
 
     return false
+end
+
+function ZO_Dyeing_Slots_Panel_Gamepad:CanActivateCurrentSelection()
+	if self.selectionMode == SELECTION_SLOT_COLOR then
+		if not self.activeSlotControl then
+            return false
+        end
+		local selectedEntry = self.dyeableSlotsMenu.selectedEntry
+        if not selectedEntry then
+            return false
+        end
+
+		local dyeableSlot = selectedEntry.data.dyeableSlot
+        local selectedChannelData = self.activeSlotControl.dyeSelector:GetFocusItem()
+        local selectedChannel = selectedChannelData and selectedChannelData.slotIndex
+		local isChannelDyeableTable = {AreDyeableSlotDyeChannelsDyeable(dyeableSlot)}
+		if selectedChannel ~= nil then
+			return isChannelDyeableTable[selectedChannel]
+		end
+
+		return false
+	end
+
+	return true
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:UpdateDirectionalInput()

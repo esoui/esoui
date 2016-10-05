@@ -99,7 +99,13 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
     },
     mainText =
     {
-        text = SI_CONFIRM_OPEN_URL_TEXT,
+        text = function(dialog)
+            if ShouldOpenURLTypeInOverlay(dialog.data.urlType) then
+                return SI_CONFIRM_OPEN_STEAM_STORE
+            else
+                return SI_CONFIRM_OPEN_URL_TEXT
+            end
+        end,
     },
     buttons =
     {

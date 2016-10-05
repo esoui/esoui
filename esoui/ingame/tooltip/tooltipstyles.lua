@@ -130,6 +130,30 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_34)",
     },
 
+    --Character Attribute Tooltip
+
+    attributeBody =
+    {   
+        customSpacing = 30,
+        widthPercent = 100,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontSize = "$(GP_42)",
+    },
+    equipmentBonusValue =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    equipmentBonusLowestPieceHeader =
+    {
+        uppercase = true,
+        fontSize = "$(GP_27)",
+    },
+    equipmentBonusLowestPieceValue =
+    {
+        customSpacing = 0,
+    },
+
     --Item Tooltip
 
     baseStatsSection =
@@ -459,6 +483,11 @@ ZO_TOOLTIP_STYLES =
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
+    
+    mapIconTitle =
+    {
+        width = 310,
+    },
 
     mapQuestTitle =
     {
@@ -691,6 +720,13 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_NAME_PLATE,
         fontColorField = UNIT_NAMEPLATE_ALLY_PLAYER,
+    },
+    mapMoreQuestsContentSection =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        widthPercent = 100,
+        paddingTop = 20,
     },
 
     -- Achievement Tooltip

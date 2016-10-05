@@ -24,7 +24,6 @@ end
 
 function ZO_LargeSingleMarketProduct_Base:InitializeControls(control)
     ZO_MarketProductBase.InitializeControls(self, control)
-    self.currencyIcon = self.cost:GetNamedChild("CurrencyIcon")
     self.normalBorder = self.control:GetNamedChild("HighlightNormal")
 end
 
@@ -40,19 +39,19 @@ do
     end
 end
 
-function ZO_LargeSingleMarketProduct_Base:PerformLayout(description, cost, discountedCost, discountPercent, icon, background, isNew, isFeatured)
+function ZO_LargeSingleMarketProduct_Base:PerformLayout(description, icon, background, isNew, isFeatured)
     self.description = description
 end
 
-function ZO_LargeSingleMarketProduct_Base:LayoutCostAndText(description, cost, discountPercent, discountedCost, isNew)
-    ZO_MarketProductBase.LayoutCostAndText(self, description, cost, discountPercent, discountedCost, isNew)
+function ZO_LargeSingleMarketProduct_Base:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
+    ZO_MarketProductBase.LayoutCostAndText(self, description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
 
     self.cost:ClearAnchors()
     self.textCallout:ClearAnchors()
 
     if self.isFree then
         self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 4)
-    elseif cost > discountedCost then
+    elseif self.onSale then
         self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
         self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, 4) -- x offset to account for strikethrough
     else
@@ -68,14 +67,6 @@ end
 
 function ZO_LargeSingleMarketProduct_Base:GetBackground()
     return GetMarketProductGamepadBackground(self.marketProductId)
-end
-
-function ZO_LargeSingleMarketProduct_Base:GetStackCount()
-    if self:GetProductType() == MARKET_PRODUCT_TYPE_ITEM then
-        return GetMarketProductItemStackCount(self.marketProductId)
-    else
-        return 1
-    end
 end
 
 function ZO_LargeSingleMarketProduct_Base:SetTitle(title)
@@ -131,7 +122,7 @@ function ZO_LargeSingleMarketProduct_Base:LayoutTooltip(tooltip)
         local stackCount = self:GetStackCount()
         GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(tooltip, self.itemLink, stackCount)
     else
-        GAMEPAD_TOOLTIPS:LayoutMarketProduct(tooltip, self)
+        GAMEPAD_TOOLTIPS:LayoutMarketProduct(tooltip, self:GetId())
     end
 end
 
@@ -140,8 +131,6 @@ end
 function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
     local isFocused = self.isFocused
     local isPurchaseLocked = self:IsPurchaseLocked()
-    local isNew = self.isNew
-    local onSale = self.onSale
     local focusedState = isFocused and MARKET_PRODUCT_FOCUS_STATE_FOCUSED or MARKET_PRODUCT_FOCUS_STATE_UNFOCUSED
     local purchaseState = self.purchaseState
 
@@ -160,10 +149,10 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
     if self:IsLimitedTimeProduct() then
         textCalloutBackgroundColor = ZO_BLACK
         textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_ON_SALE_COLOR or ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR
-    elseif onSale then
+    elseif self.onSale then
         textCalloutBackgroundColor = isFocused and ZO_MARKET_PRODUCT_ON_SALE_COLOR or ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR
         textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
-    elseif isNew then
+    elseif self.isNew then
         textCalloutBackgroundColor = isFocused and ZO_MARKET_PRODUCT_NEW_COLOR or ZO_MARKET_PRODUCT_NEW_DIMMED_COLOR
         textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
     end
@@ -176,9 +165,6 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
     local backgroundColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
     self.background:SetColor(backgroundColor:UnpackRGB())
     self.background:SetDesaturation(self:GetBackgroundSaturation(isPurchaseLocked))
-
-    local crownsColor = isFocused and ZO_MARKET_SELECTED_COLOR or ZO_MARKET_DIMMED_COLOR
-    self.currencyIcon:SetColor(crownsColor:UnpackRGB())
 
     local previousCostColor = isFocused and ZO_DEFAULT_TEXT or ZO_DISABLED_TEXT
     self.previousCost:SetColor(previousCostColor:UnpackRGB())

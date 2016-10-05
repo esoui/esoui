@@ -485,12 +485,12 @@ end
 function CollectionsBook:InitializeEvents()
     ZO_JournalProgressBook_Common.InitializeEvents(self)
 
-    local SEARCH_DATA_STRIDE = 3
-
-    local function UpdateSearchResults(...)
+    local function UpdateSearchResults()
         ZO_ClearTable(self.searchResults)
-        for i = 1, select("#", ...), SEARCH_DATA_STRIDE do
-            local categoryIndex, subcategoryIndex, collectibleIndex = select(i, ...)
+
+        local numResults = GetNumCollectiblesSearchResults()
+        for i = 1, numResults do
+            local categoryIndex, subcategoryIndex, collectibleIndex = GetCollectiblesSearchResult(i)
             if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
                 if not self.searchResults[categoryIndex] then
                     self.searchResults[categoryIndex] = {}
@@ -506,7 +506,7 @@ function CollectionsBook:InitializeEvents()
     end
 
     local function OnSearchResultsReady()
-        UpdateSearchResults(GetCollectiblesSearchResults())
+        UpdateSearchResults()
         self:UpdateCollection()
         if NonContiguousCount(self.searchResults) > 0 then
             local data = self.categoryTree:GetSelectedData()
@@ -617,7 +617,7 @@ function CollectionsBook:BuildCategories()
         end
     end
 
-    if self.searchString == "" then
+    if not self:HasValidSearchString() then
         for categoryIndex = 1, self:GetNumCategories() do
             AddCategoryByCategoryIndex(categoryIndex)
         end
@@ -633,7 +633,7 @@ end
 
 function CollectionsBook:AddTopLevelCategory(categoryIndex, name, numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
     local parent
-    if self.searchString == "" then
+    if not self:HasValidSearchString() then
         parent = ZO_JournalProgressBook_Common.AddTopLevelCategory(self, categoryIndex, name, numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
     else
         --Special search layout
@@ -747,62 +747,54 @@ function CollectionsBook:UpdateCategoryLabels(data, retainScrollPosition)
     self:BuildContentList(data, retainScrollPosition)
 end
 
-    local function GetCategoryIndices(data, parentData)
-        if not data.isFakedSubcategory and parentData then
-            return parentData.categoryIndex, data.categoryIndex
-        end
-        
-        return data.categoryIndex
-    end
-
-    function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
-        if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then -- we ignore the DLC category when viewing the standard collections window
-            if index >= 1 then
-                if self.searchString ~= "" then
-                    local inSearchResults = false
-                    local categoryResults = self.searchResults[categoryIndex]
-                    if categoryResults then
-                        local effectiveSubcategoryIndex = subCategoryIndex or "root"
-                        local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
-                        if subcategoryResults and subcategoryResults[index] then
-                            inSearchResults = true
-                        end
-                    end
-
-                    if not inSearchResults then
-                        index = index - 1
-                        return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+    if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then -- we ignore the DLC category when viewing the standard collections window
+        if index >= 1 then
+            if self:HasValidSearchString() then
+                local inSearchResults = false
+                local categoryResults = self.searchResults[categoryIndex]
+                if categoryResults then
+                    local effectiveSubcategoryIndex = subCategoryIndex or "root"
+                    local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
+                    if subcategoryResults and subcategoryResults[index] then
+                        inSearchResults = true
                     end
                 end
-                local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
-                index = index - 1
-                return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
+
+                if not inSearchResults then
+                    index = index - 1
+                    return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+                end
             end
+            local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
+            index = index - 1
+            return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
         end
-        return ...
     end
+    return ...
+end
 
-    function CollectionsBook:BuildContentList(data, retainScrollPosition)
-        local parentData = data.parentData
-        local categoryIndex, subCategoryIndex = GetCategoryIndices(data, parentData)
-        local numCollectibles = self:GetCategoryInfoFromData(data, parentData)
+function CollectionsBook:BuildContentList(data, retainScrollPosition)
+    local parentData = data.parentData
+    local categoryIndex, subCategoryIndex = self:GetCategoryIndicesFromData(data)
+    local numCollectibles = self:GetCategoryInfoFromData(data, parentData)
 
-        local position = self.scrollbar:GetValue()
-        self:LayoutCollection(self:GetCollectibleIds(categoryIndex, subCategoryIndex, numCollectibles))
+    local position = self.scrollbar:GetValue()
+    self:LayoutCollection(self:GetCollectibleIds(categoryIndex, subCategoryIndex, numCollectibles))
         
-        if retainScrollPosition then
-            self.scrollbar:SetValue(position)
+    if retainScrollPosition then
+        self.scrollbar:SetValue(position)
 
-            if(g_currentMouseTarget ~= nil) then
-                g_currentMouseTarget:OnMouseExit()
-            end
+        if(g_currentMouseTarget ~= nil) then
+            g_currentMouseTarget:OnMouseExit()
+        end
 
-            local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-            if (mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl.collectible) then
-                mouseOverControl.collectible:OnMouseEnter()
-            end
+        local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+        if (mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl.collectible) then
+            mouseOverControl.collectible:OnMouseEnter()
         end
     end
+end
 
 do
     local function ShouldAddCollectible(filterType, id)
@@ -869,7 +861,7 @@ end
 
 function CollectionsBook:UpdateCollection()
     self:BuildCategories()
-    local foundNoMatches = self.searchString ~= "" and NonContiguousCount(self.searchResults) == 0
+    local foundNoMatches = self:HasValidSearchString() and NonContiguousCount(self.searchResults) == 0
     self.categoryInset:SetHidden(foundNoMatches)
     self.noMatches:SetHidden(not foundNoMatches)
     self.list:SetHidden(foundNoMatches)
@@ -936,6 +928,10 @@ end
 function CollectionsBook:SearchStart(searchString)
     self.searchString = searchString
     StartCollectibleSearch(searchString)
+end
+
+function CollectionsBook:HasValidSearchString()
+    return zo_strlen(self.searchString) > 1
 end
 
 function CollectionsBook:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)

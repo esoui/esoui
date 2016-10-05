@@ -638,6 +638,8 @@ function ZO_InventoryManager:New()
             end
             manager:RefreshMoney()
             manager:UpdateApparelSection()
+            --Reseting the comparison stats here since its too later when the window is already hidden.
+            ZO_CharacterWindowStats_HideComparisonValues()
         elseif(newState == SCENE_FRAGMENT_HIDDEN) then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             ZO_PlayerInventory_EndSearch(ZO_PlayerInventorySearchBox)
@@ -2079,6 +2081,8 @@ local function OnFullInventoryUpdated(bagId)
     elseif bagId == BAG_VIRTUAL then
         PlayerInventory:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
     end
+
+    INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
 end
 
 local function OnInventorySlotUpdated(bagId, slotIndex)
@@ -2093,6 +2097,8 @@ local function OnInventorySlotUpdated(bagId, slotIndex)
     elseif bagId == PlayerInventory.inventories[INVENTORY_CRAFT_BAG].backingBag then
         PlayerInventory:RefreshInventorySlot(INVENTORY_CRAFT_BAG, slotIndex)
     end
+
+    INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
 end
 
 local function OnInventorySlotLocked(eventCode, bagId, slotIndex)

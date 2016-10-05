@@ -21,8 +21,14 @@ function PlayerConsoleInfoRequestManager:Initialize()
     EVENT_MANAGER:RegisterForEvent("PlayerConsoleInfoRequest", EVENT_CONSOLE_INFO_RECEIVED, function(_, ...) self:OnConsoleInfoReceived(...) end)
     EVENT_MANAGER:RegisterForEvent("PlayerConsoleInfoRequest", EVENT_SELECT_FROM_USER_LIST_DIALOG_RESULT, function(_, ...) self:OnSelectFromUserListDialogResult(...) end)
     EVENT_MANAGER:RegisterForEvent("PlayerConsoleInfoRequest", EVENT_CONSOLE_TEXT_VALIDATION_RESULT, function(_, ...) self:OnConsoleTextValidationResult(...) end)
+    EVENT_MANAGER:RegisterForEvent("PlayerConsoleInfoRequest", EVENT_RESUME_FROM_SUSPEND, function(...) self:OnResumeFromSuspend(...) end)
 
     EVENT_MANAGER:RegisterForUpdate("PlayerConsoleInfoRequest", 500, function() self:OnUpdate() end)
+end
+
+function PlayerConsoleInfoRequestManager:OnResumeFromSuspend()
+	local NO_RESULT = false
+	self:OnSelectFromUserListDialogResult(NO_RESULT)
 end
 
 ZO_ID_REQUEST_TYPE_ACCOUNT_ID = "accountId"

@@ -53,7 +53,8 @@
                     <Dimensions x="870"/>
                     <Anchor point="BOTTOM" offsetY="-285"/>
                     <Controls>
-                        <Label name="$(parent)Target" horizontalAlignment="CENTER" verticalAlignment="BOTTOM">
+                        <!-- Subtitles are anchored here, so we want to ensure we always have a line even before we've ever set the text on this label -->
+                        <Label name="$(parent)Target" horizontalAlignment="CENTER" verticalAlignment="BOTTOM" text=" ">
                             <Anchor point="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
                         </Label>

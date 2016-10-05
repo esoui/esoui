@@ -1,6 +1,6 @@
 ZO_ChatMenu_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_SocialOptionsDialogGamepad)
 
-ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE = 10
+ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE = 200
 ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER = .7
 ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER = .1
 ZO_CHAT_MENU_GAMEPAD_LOG_LINE_WIDTH = ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH - (ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING * 2) --We squeeze in for the highlighting
@@ -447,11 +447,11 @@ do
             --Only chat channel messages will have raw text, because they're the only ones that could have links in them
             if rawMessageText then
                 for link in zo_strgmatch(rawMessageText, LINK_GMATCH_PATTERN) do
-                    if not links then
-                        links = {}
-                    end
                     local linkType = zo_strmatch(link, LINK_TYPE_MATCH_PATTERN)
-                    if  linkType == ACHIEVEMENT_LINK_TYPE or linkType == ITEM_LINK_TYPE or linkType == COLLECTIBLE_LINK_TYPE then
+                    if linkType == ACHIEVEMENT_LINK_TYPE or linkType == ITEM_LINK_TYPE or linkType == COLLECTIBLE_LINK_TYPE then
+                        if not links then
+                            links = {}
+                        end
                         table.insert(links, { linkType = linkType, link = link })
                     end
                 end

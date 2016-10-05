@@ -200,8 +200,8 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
             local sound, primaryMessage, secondaryMessage
             if wasTrespassing then
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
-                primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_TRESPASSING_PRIMARY))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_TRESPASSING_SECONDARY))
+                primaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_TRESPASSING_PRIMARY)
+                secondaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_TRESPASSING_SECONDARY)
 
                 if self.infamyMeterState.bounty > 0 then
                     TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_EXITED_WITH_BOUNTY)
@@ -209,8 +209,8 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
             else
             	TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_ENTERED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
-                primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_TRESPASSING_PRIMARY))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_TRESPASSING_SECONDARY))
+                primaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_PRIMARY)
+                secondaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_SECONDARY)
             end
 
             CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_JUSTICE_INFAMY_UPDATED, CSA_EVENT_COMBINED_TEXT, sound, primaryMessage, secondaryMessage)
@@ -220,13 +220,13 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
             if oldInfamyLevel == INFAMY_THRESHOLD_FUGITIVE then
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_INFAMY_LEVEL_CHANGED, GetString("SI_INFAMYTHRESHOLDSTYPE", infamyLevel))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_KOS))
+                secondaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_KOS)
                 icon = "EsoUI/Art/Stats/infamy_KOS_icon-Notification.dds"
             elseif infamyLevel == INFAMY_THRESHOLD_FUGITIVE then
                 TriggerTutorial(TUTORIAL_TRIGGER_FUGITIVE_REACHED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
-                primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_FUGITIVE))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_KOS))
+                primaryMessage = zo_strformat(SI_JUSTICE_NOW_FUGITIVE)
+                secondaryMessage = zo_strformat(SI_JUSTICE_NOW_KOS)
                 icon = "EsoUI/Art/Stats/infamy_KOS_icon-Notification.dds"
             else
                 if infamyLevel == INFAMY_THRESHOLD_DISREPUTABLE then

@@ -53,7 +53,7 @@
                 <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
                     <AnchorFill/>
                 </Control>
-                <Label name="$(parent)NoQuests" text="SI_WORLD_MAP_NO_QUESTS" font="ZoFontHeader">
+                <Label name="$(parent)NoQuests" font="ZoFontHeader">
                     <Anchor point="TOP"/>
                 </Label>
             </Controls>

@@ -1,0 +1,123 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CrownCratePackShow">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_SHOW_MOVE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation delay="ZO_CROWN_CRATES_PACK_SHOW_SPIN_DELAY_MS" duration="ZO_CROWN_CRATES_PACK_SHOW_SPIN_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackSelect">
+            <Animations>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_PACK_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackDeselect">
+            <Animations>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_PACK_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackGlow">
+            <Animations>
+                <!-- Glow Texture -->
+                <AlphaAnimation duration="ZO_CROWN_CRATES_PACK_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackHide">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_HIDE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <AlphaAnimation startAlpha="1" endAlpha="0" duration="ZO_CROWN_CRATES_PACK_HIDE_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackChoose">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_CHOOSE_MOVE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_PACK_CHOOSE_ROTATE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+                <AlphaAnimation startAlpha="1" endAlpha="0" delay="ZO_CROWN_CRATES_PACK_CHOOSE_HIDE_DELAY_MS" duration="ZO_CROWN_CRATES_PACK_CHOOSE_HIDE_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackShowInfo">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_PACK_SHOW_INFO_DURATION_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackHideInfo">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_PACK_HIDE_INFO_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackOpen">
+            <Animations>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_PACK_CHOOSE_MOVE_DURATION_MS" startPitch="ZO_CROWN_CRATES_PACK_OPEN_START_YAW_RADIANS" endPitch="ZO_CROWN_CRATES_PACK_OPEN_END_YAW_RADIANS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_CrownCratePack" virtual="true" hidden="true" tier="LOW">
+            <Controls>
+                <Control name="$(parent)Info">
+                    <Dimensions x="ZO_CROWN_CRATES_PACK_WIDTH_UI" y="ZO_CROWN_CRATES_PACK_INFO_AREA_HEIGHT_UI"/>
+                    <Controls>
+                        <Label name="$(parent)Name" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="25"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="25"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

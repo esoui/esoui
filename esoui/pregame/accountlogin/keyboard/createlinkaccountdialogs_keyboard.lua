@@ -1,18 +1,33 @@
-local PARTNER_ICON_DMM = "EsoUI/Art/Login/link_Login_DMM.dds"
 local WARNING_COLOR = ZO_ColorDef:New("DC8122")
+
+local PARTNER_ICONS = 
+{
+    [PLATFORM_SERVICE_TYPE_DMM] = "EsoUI/Art/Login/link_Login_DMM.dds",
+    [PLATFORM_SERVICE_TYPE_STEAM] = "EsoUI/Art/Login/link_Login_Steam.dds",
+}
 
 local function LinkAccountsDialogSetup(dialog, data)
     local partnerAccountName = GetControl(dialog, "PartnerAccount")
     local optionalTextLabel = GetControl(dialog, "OptionalText")
     local partnerIcon = GetControl(dialog, "PartnerIcon")
     local serviceType = GetPlatformServiceType()
-        
+
+    local iconPath = PARTNER_ICONS[serviceType]
+    if iconPath then
+        partnerIcon:SetTexture(iconPath)
+    end
+
     if serviceType == PLATFORM_SERVICE_TYPE_DMM then
         optionalTextLabel:SetText(WARNING_COLOR:Colorize(GetString(SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING)))
-        partnerIcon:SetTexture(PARTNER_ICON_DMM)
         partnerAccountName:SetText(GetString(SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM))
     else
         partnerAccountName:SetText(data.partnerAccount or "")
+    end
+
+    local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
+    if accountTypeName then
+        local confirmWarning = GetControl(dialog, "LinkConfirm2")
+        confirmWarning:SetText(zo_strformat(GetString(SI_KEYBOARD_LINKACCOUNT_CONFIRM_2_FORMAT), accountTypeName))
     end
 
     GetControl(dialog, "ESOAccount"):SetText(data.esoAccount or "")

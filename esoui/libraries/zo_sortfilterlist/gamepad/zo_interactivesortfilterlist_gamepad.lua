@@ -40,9 +40,9 @@ function GamepadInteractiveSortFilterFocus:AppendKeybind(keybind)
 end
 
 function GamepadInteractiveSortFilterFocus:UpdateKeybinds()
-	if self.keybindDescriptor then
-		KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindDescriptor)
-	end
+    if self.keybindDescriptor then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindDescriptor)
+    end
 end
 
 function GamepadInteractiveSortFilterFocus:Activate()
@@ -233,7 +233,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeHeader(headerData)
             font = "ZoFontGamepadBold48",
         },
         {
-            font = "ZoFontGamepadBold36",
+            font = "ZoFontGamepadBold34",
         },
         {
             font = "ZoFontGamepadBold27",
@@ -520,9 +520,9 @@ function ZO_GamepadInteractiveSortFilterList:GetListFragment()
 end
 
 function ZO_GamepadInteractiveSortFilterList:UpdateKeybinds()
-	ZO_SortFilterList_Gamepad.UpdateKeybinds(self)
+    ZO_SortFilterList_Gamepad.UpdateKeybinds(self)
 
-	self.filtersFocalArea:UpdateKeybinds()
+    self.filtersFocalArea:UpdateKeybinds()
     self.headersFocalArea:UpdateKeybinds()
     self.panelFocalArea:UpdateKeybinds()
 end
@@ -549,30 +549,6 @@ function ZO_GamepadInteractiveSortFilterList:CompareSortEntries(listEntry1, list
     return ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys, self.currentSortOrder)
 end
 
-function ZO_GamepadInteractiveSortFilterList:ResetSelectedEntry()
-    local selectedData = ZO_ScrollList_GetSelectedData(self.list)
-    ZO_ScrollList_SelectData(self.list, nil)
-    ZO_ScrollList_ResetAutoSelectIndex(self.list)
-    ZO_Scroll_ResetToTop(self.list)
-    if selectedData then
-        ZO_ScrollList_AutoSelectData(self.list)
-    end
-end
-
-function ZO_GamepadInteractiveSortFilterList:RefreshFilters()
-    ZO_SortFilterList.RefreshFilters(self)
-    if(not self:IsLockedForUpdates()) then
-        self:ResetSelectedEntry()
-    end
-end
-
-function ZO_GamepadInteractiveSortFilterList:RefreshData()
-    ZO_SortFilterList.RefreshData(self)
-    if(not self:IsLockedForUpdates()) then
-        self:ResetSelectedEntry()
-    end
-end
-
 function ZO_GamepadInteractiveSortFilterList:CommitScrollList()
     ZO_SortFilterList.CommitScrollList(self)
 
@@ -581,15 +557,22 @@ function ZO_GamepadInteractiveSortFilterList:CommitScrollList()
         self.emptyRowMessage:SetText(#self.masterList == 0 and self.emptyText or GetString(SI_SORT_FILTER_LIST_NO_RESULTS))
     end
 
-    --If the cursor is in the list, but the list is empty because of a filter, we need to force it out of the panel area
-	if self.currentFocalArea == self.panelFocalArea and self.isActive then
-	    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    if self.currentFocalArea == self.panelFocalArea and self.isActive then
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
         if #scrollData == 0 then
-		    self.currentFocalArea:Deactivate()
-		    self.currentFocalArea = self.headersFocalArea
-		    self.currentFocalArea:Activate()
+            --If the cursor is in the list, but the list is empty because of a filter, we need to force it out of the panel area
+            self.currentFocalArea:Deactivate()
+            self.currentFocalArea = self.headersFocalArea
+            self.currentFocalArea:Activate()
+        else
+            -- if we've lost our selection and the panelFocalArea is active, then we want to
+            -- AutoSelect the next appropriate entry
+            local selectedData = ZO_ScrollList_GetSelectedData(self.list)
+            if not selectedData then
+                ZO_ScrollList_AutoSelectData(self.list, ANIMATE_INSTANTLY)
+            end
         end
-	end
+    end
 end
 
 function ZO_GamepadInteractiveSortFilterList:IsMatch(searchTerm, data)

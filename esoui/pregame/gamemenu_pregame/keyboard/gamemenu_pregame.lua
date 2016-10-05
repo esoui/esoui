@@ -19,6 +19,20 @@ local function AddPlayEntry(entryTable)
     table.insert(entryTable, data)
 end
 
+-- Server Select
+
+local function ShowServerSelect()
+    --Makes sure the login stuff is in the background when selecting your server.
+    ShowLogin()
+    ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", {isIntro = false, onClosed = ZO_GameMenu_PreGame_Reset})
+end
+
+local function AddServerEntry(entryTable)
+    local currentServer = GetCVar("LastPlatform")
+    local data = {name = zo_strformat(SI_GAME_MENU_SERVER, currentServer), callback = ShowServerSelect, hasSelectedState = true}
+    table.insert(entryTable, data)
+end
+
 -- Settings
 
 local function AddSettingsEntries(entryTable)
@@ -51,6 +65,9 @@ end
 local function RebuildTree(gameMenu)
     gameEntries = {}
     AddPlayEntry(gameEntries)
+    if DoesPlatformSelectServer() then
+        AddServerEntry(gameEntries)
+    end
     AddSettingsEntries(gameEntries)
     AddCreditsEntry(gameEntries)
     AddQuitEntry(gameEntries)

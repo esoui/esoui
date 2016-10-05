@@ -129,7 +129,9 @@ function ZO_SharedAlchemy:InitializeSlots()
 end
 
 function ZO_SharedAlchemy:UpdateThirdAlchemySlot()
-    self:ClearSelections()
+    local SUPPRESS_SOUND = true
+    local IGNORE_REQUIREMENTS = true
+    self:ClearSelections(SUPPRESS_SOUND, IGNORE_REQUIREMENTS)
 
     local slotContainer = self.control:GetNamedChild("SlotContainer")
     local reagentsLabel = slotContainer:GetNamedChild("ReagentsLabel")
@@ -375,13 +377,13 @@ function ZO_SharedAlchemy:IsSlotted(bagId, slotIndex)
     return false
 end
 
-function ZO_SharedAlchemy:ClearSelections()
-    self.solventSlot:SetItem(nil)
+function ZO_SharedAlchemy:ClearSelections(suppressSound, ignoreUsabilityRequirement)
+    local NO_BAG = nil
+    local NO_INDEX = nil
+    self.solventSlot:SetItem(NO_BAG, NO_INDEX, suppressSound, ignoreUsabilityRequirement)
 
     for i, slot in ipairs(self.reagentSlots) do
-        if slot:MeetsUsabilityRequirement() then
-            slot:SetItem(nil, nil, nil, true)
-        end
+        slot:SetItem(NO_BAG, NO_INDEX, suppressSound, ignoreUsabilityRequirement)
     end
 
     self:OnReagentSlotChanged()

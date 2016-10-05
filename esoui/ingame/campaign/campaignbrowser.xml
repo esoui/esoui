@@ -127,7 +127,7 @@
                         ZO_CampaignBrowserQueueRowIcon_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
-                <Label name="$(parent)Description" inherits="ZO_CampaignBrowserLabel">
+                <Label name="$(parent)Description" inherits="ZO_CampaignBrowserLabel" maxLineCount="1">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
                     <Dimensions x="369"/>
                 </Label>

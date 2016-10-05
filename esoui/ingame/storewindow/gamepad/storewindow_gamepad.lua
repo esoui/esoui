@@ -550,7 +550,7 @@ function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
         end
     elseif selectedData.price > 0 and selectedData.price > GetCarriedCurrencyAmount(CURT_MONEY) then
         return false, GetString(SI_NOT_ENOUGH_MONEY)
-    elseif GetNumBagFreeSlots(BAG_BACKPACK) == 0 then
+    elseif not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
         return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
     else
         return true

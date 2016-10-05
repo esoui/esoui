@@ -24,14 +24,14 @@
     <Controls>
         <!-- Quadrant System Gamepad Grid Anchors: DO NOT BLOAT! -->
 
-        <Texture name="ZO_GamepadGrid_BackgroundTextureBase" virtual="true" addressMode="WRAP" tier="LOW" level="2" autoAdjustTextureCoords="false">
+        <Texture name="ZO_GamepadGrid_BackgroundTextureBase" virtual="true" addressMode="WRAP" tier="LOW" level="ZO_GAMEPAD_PANEL_BACKGROUND_TEXTURE_DRAW_LEVEL" autoAdjustTextureCoords="false">
             <AnchorFill/>
             <OnUpdate>
                 ZO_GamepadGrid_BackgroundTextureBase_OnUpdate(self, time)
             </OnUpdate>
         </Texture>
         
-        <!-- Textures -->        
+        <!-- Textures -->
         <Texture name="ZO_GamepadGrid_BackgroundTexture" inherits="ZO_GamepadGrid_BackgroundTextureBase" textureFile="EsoUI/Art/Windows/Gamepad/panelBG_focus_512.dds" virtual="true"/>
         
         <Texture name="ZO_GamepadGrid_VertDivider" textureFile="EsoUI/Art/Windows/Gamepad/gp_fullVertDiv.dds" tier="HIGH" virtual="true">
@@ -111,13 +111,13 @@
             </OnInitialized>
         </Control>
 
-        <Control name="ZO_Gamepad_BackgroundTopLevel_Base_Template" inherits="ZO_Gamepad_BackgroundTopLevel_OnInitialized_Template" hidden="true" layer="BACKGROUND" virtual="true"/>
+        <Control name="ZO_Gamepad_BackgroundTopLevel_Base_Template" inherits="ZO_Gamepad_BackgroundTopLevel_OnInitialized_Template" hidden="true" layer="BACKGROUND" level="ZO_GAMEPAD_PANEL_BACKGROUND_TOP_LEVEL_DRAW_LEVEL" virtual="true"/>
 
         <Control name="ZO_Gamepad_BackgroundControl_Base_Template" inherits="ZO_Gamepad_Background_Screen_Center_Template" virtual="true">
             <Anchor point="TOPLEFT" offsetY="-ZO_GAMEPAD_QUADRANT_TOP_OFFSET"/>
             <Anchor point="BOTTOMRIGHT" offsetY="-ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
             <Controls>
-                <Texture name="$(parent)Highlight" color="2D6099" alpha="0.5" tier="LOW" level="10" hidden="true">
+                <Texture name="$(parent)Highlight" color="2D6099" alpha="0.5" tier="LOW" level="ZO_GAMEPAD_PANEL_BACKGROUND_HIGHLIGHT_DRAW_LEVEL" hidden="true">
                     <AnchorFill/>
                 </Texture>
             </Controls>
@@ -131,7 +131,7 @@
         </Control>
 
         <Control name="ZO_Gamepad_BackgroundControl_LeftArrow" inherits="ZO_Gamepad_BackgroundControl_Base_Template" virtual="true">
-            <Controls>                
+            <Controls>
                 <Control name="$(parent)LeftDivider" inherits="ZO_GamepadGrid_LeftVertDividerWithArrow" />
                 <Texture name="$(parent)RightDivider" inherits="ZO_GamepadGrid_RightVertDivider" />
             </Controls>

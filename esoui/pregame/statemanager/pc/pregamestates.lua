@@ -83,6 +83,24 @@ local pregameStates =
         OnExit = function()
         end
     },
+
+    ["ServerSelectIntro"] =
+    {
+        ShouldAdvance = function()
+            return GetCVar("IsServerSelected") == "1"
+        end,
+
+        OnEnter = function()
+            ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", {isIntro = true})
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "ShowEULA"
+        end
+    },
 }
 
 PregameStateManager_AddStates(pregameStates)

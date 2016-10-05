@@ -1133,10 +1133,10 @@ function UnitFrame:UpdatePowerBar(index, powerType, cur, max, forceInit)
     end
 end
 
-local HIDE_LEVEL_REACTIONS =
+-- Global to allow for outside manipulation
+ZO_UNIT_FRAMES_SHOW_LEVEL_REACTIONS =
 {
-    [UNIT_REACTION_FRIENDLY] = true,
-    [UNIT_REACTION_NPC_ALLY] = true,
+    [UNIT_REACTION_PLAYER_ALLY] = true,
 }
 
 local HIDE_LEVEL_TYPES =
@@ -1151,17 +1151,17 @@ local HIDE_LEVEL_TYPES =
 function UnitFrame:ShouldShowLevel()
     --show level for players and non-friendly NPCs
     local unitTag = self:GetUnitTag()
-    if(IsUnitPlayer(unitTag)) then
+    if IsUnitPlayer(unitTag) then
         return true
-    elseif(IsUnitInvulnerableGuard(unitTag)) then
+    elseif IsUnitInvulnerableGuard(unitTag) then
         return false
     else
         local unitType = GetUnitType(unitTag)
-        if(HIDE_LEVEL_TYPES[unitType]) then
+        if HIDE_LEVEL_TYPES[unitType] then
             return false
         else
             local unitReaction = GetUnitReaction(unitTag)
-            if(not HIDE_LEVEL_REACTIONS[unitReaction]) then
+            if ZO_UNIT_FRAMES_SHOW_LEVEL_REACTIONS[unitReaction] then
                 return true
             end
         end
@@ -1304,7 +1304,7 @@ function UnitFrame:UpdateDifficulty()
                 self.leftBracketUnderlay:SetHidden(false)
                 self.rightBracketUnderlay:SetHidden(false)
             end
-			TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
         end
     end
 end
@@ -1312,16 +1312,11 @@ end
 function UnitFrame:UpdateUnitReaction()
     local unitTag = self:GetUnitTag()
 
-    if(self.nameLabel) then
-        if(ZO_Group_IsGroupUnitTag(unitTag)) then
+    if self.nameLabel then
+        if ZO_Group_IsGroupUnitTag(unitTag) then
             local currentNameAlpha = self.nameLabel:GetControlAlpha()
-            if IsUnitGroupLeader(unitTag) then
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CONTRAST)
-                self.nameLabel:SetColor(r, g, b, currentNameAlpha)
-            else
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT)
-                self.nameLabel:SetColor(r, g, b, currentNameAlpha)
-            end
+            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT)
+            self.nameLabel:SetColor(r, g, b, currentNameAlpha)
         end
     end
 end

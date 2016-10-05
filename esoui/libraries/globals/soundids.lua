@@ -237,6 +237,8 @@ SOUNDS = {
     COLLECTION_COMPLETED            = "Collection_Completed",
 
     COLLECTIBLE_ON_COOLDOWN         = "Collectible_On_Cooldown",
+    COLLECTIBLE_ACTIVATED           = "Collectible_Activated",
+    COLLECTIBLE_DEACTIVATED         = "Collectible_Deactivated",
 
     --Item sounds
     ITEM_MONEY_CHANGED              = "Money_Transact",
@@ -788,6 +790,7 @@ SOUNDS = {
     MARKET_PURCHASE_SELECTED            = "Market_PurchaseSelected",
     MARKET_PREVIEW_SELECTED             = "Market_PreviewSelected",
     MARKET_CROWNS_SPENT                 = "Market_CrownsSpent",
+    MARKET_CROWN_GEMS_SPENT             = "Market_CrownGemsSpent",
 
     -- Gamepad Player Menu Sounds
     PLAYER_MENU_ENTRY_DISABLED          = "PlayerMenu_EntryDisabled",
@@ -801,4 +804,28 @@ SOUNDS = {
     -- HUD Sounds
     HUD_ARMOR_BROKEN                        = "HUD_ArmorBroken",
     HUD_WEAPON_DEPLETED                     = "HUD_WeaponDepleted",
+
+    -- Duel Sounds
+    DUEL_INVITE_RECEIVED                        = "Duel_InviteReceived",
+    DUEL_ACCEPTED                               = "Duel_Accepted",
+    DUEL_START                                  = "Duel_Start",
+    DUEL_WON                                    = "Duel_Won",
+    DUEL_FORFEIT                                = "Duel_Forfeit",
+    DUEL_BOUNDARY_WARNING                       = "Duel_Boundary_Warning",
+
+    -- Crown Crates
+    CROWN_CRATES_DEAL_PRIMARY               = "CrownCrates_Deal_Primary",
+    CROWN_CRATES_DEAL_BONUS                 = "CrownCrates_Deal_Bonus",
+    CROWN_CRATES_CARDS_LEAVE                = "CrownCrates_Cards_Leave",
+    CROWN_CRATES_CARDS_REVEAL_ALL           = "CrownCrates_Cards_Reveal_All",
+    CROWN_CRATES_GAIN_GEMS                  = "CrownCrates_Gain_Gems",
+    CROWN_CRATES_PURCHASED_WITH_GEMS        = "CrownCrates_Purchased_With_Gems",
+    CROWN_CRATES_MANIFEST_CHOSEN            = "CrownCrates_Manifest_Chosen",
+    CROWN_CRATES_MANIFEST_SELECTED          = "CrownCrates_Manifest_Selected",
+    CROWN_CRATES_MANIFEST_IN                = "CrownCrates_Manifest_In",
+    CROWN_CRATES_MANIFEST_OUT               = "CrownCrates_Manifest_Out",
+    CROWN_CRATES_CARD_SELECTED              = "CrownCrates_Card_Selected",
+    CROWN_CRATES_CARD_FLIPPING              = "CrownCrates_Card_Flipping",
+    CROWN_CRATES_SCENE_OPEN                 = "CrownCrates_Scene_Open",
+    CROWN_CRATES_SCENE_CLOSED               = "CrownCrates_Scene_Closed",
 }

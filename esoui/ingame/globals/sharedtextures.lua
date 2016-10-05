@@ -57,9 +57,13 @@ end
 local INSTANCE_DISPLAY_TYPE_ICONS =
 {
     [INSTANCE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
-    [INSTANCE_DISPLAY_TYPE_GROUP] = "EsoUI/Art/Icons/mapKey/mapKey_groupInstance.dds",
+    [INSTANCE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_groupInstance.dds",
     [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/Icons/mapKey/mapKey_raidDungeon.dds",
     [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_groupDelve.dds",
+    [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
+    [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_publicDungeon.dds",
+    [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
+    [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
 }
 
 function GetInstanceDisplayTypeIcon(instanceType)
@@ -135,10 +139,15 @@ function GetGamepadPlayerStatusIcon(playerStatus)
 end
 
 local CHAMPION_POINT_ICON = "EsoUI/Art/Champion/champion_icon.dds"
+local CHAMPION_POINT_ICON_SMALL = "EsoUI/Art/Champion/champion_icon_32.dds"
 local GAMEPAD_CHAMPION_POINT_ICON = "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds"
 
 function GetChampionPointsIcon()
     return CHAMPION_POINT_ICON
+end
+
+function GetChampionPointsIconSmall()
+    return CHAMPION_POINT_ICON_SMALL
 end
 
 function GetGamepadChampionPointsIcon()

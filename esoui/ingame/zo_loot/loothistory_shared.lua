@@ -1,4 +1,9 @@
 ZO_LOOT_HISTORY_NAME = "ZO_LootHistory"
+LOOT_ENTRY_TYPE_EXPERIENCE = 1
+LOOT_ENTRY_TYPE_CROWN_GEMS = 2
+LOOT_ENTRY_TYPE_MONEY = 3
+LOOT_ENTRY_TYPE_ITEM = 4
+LOOT_ENTRY_TYPE_COLLECTIBLE = 5
 
 --
 --[[ LootHistory_Singleton ]]--
@@ -20,6 +25,12 @@ function LootHistory_Singleton:Initialize()
     local function OnNewItemReceived(...)
         if CanAddLootEntry() then
             SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnNewItemReceived(...)
+        end
+    end
+
+    local function OnNewCollectibleReceived(collectibleId)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnNewCollectibleReceived(collectibleId)
         end
     end
 
@@ -50,6 +61,12 @@ function LootHistory_Singleton:Initialize()
     local function OnExperienceGainUpdate(...)
         if CanAddLootEntry() then
             SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnExperienceGainUpdate(...)
+        end
+    end
+
+    local function OnCrownGemUpdate(...)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnCrownGemUpdate(...)
         end
     end
 
@@ -94,6 +111,8 @@ function LootHistory_Singleton:Initialize()
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_TELVAR_STONE_UPDATE, function(eventId, ...) OnTelvarStoneUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_QUEST_TOOL_UPDATED, function(eventId, ...) OnQuestToolUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(eventId, ...) OnNewCollectibleReceived(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CROWN_GEM_UPDATE, function(eventId, ...) OnCrownGemUpdate(...) end)
 end
 
 ZO_LOOT_HISTOY_SINGLETON = LootHistory_Singleton:New()
@@ -141,14 +160,20 @@ do
         -- entry1 and entry2 are tables of one item
         local data1 = entry1[1]
         local data2 = entry2[1]
-        if data1.moneyType then
-            return data1.moneyType == data2.moneyType
-        elseif data1.itemId then
-            return data1.itemId == data2.itemId and data1.quality == data2.quality
-        elseif data1.compareExp then
-            return data1.compareExp == data2.compareExp
-        else
+        local data1EntryType = data1.entryType
+        local data2EntryType = data2.entryType
+        if data1EntryType ~= data2EntryType then
             return false
+        end
+
+        if data1.entryType == LOOT_ENTRY_TYPE_MONEY then
+            return data1.moneyType == data2.moneyType
+        elseif data1.entryType == LOOT_ENTRY_TYPE_ITEM then
+            return data1.itemId == data2.itemId and data1.quality == data2.quality
+        elseif data1.entryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
+            return data1.collectibleId == data2.collectibleId
+        else
+            return true
         end
     end
 
@@ -262,7 +287,8 @@ do
                             icon = MONEY_ICONS[moneyType],
                             stackCount = moneyAdded,
                             color = ZO_SELECTED_TEXT,
-                            moneyType = moneyType
+                            moneyType = moneyType,
+                            entryType = LOOT_ENTRY_TYPE_MONEY
                         }
         local lootEntry = self:CreateLootEntry(lootData)
         lootEntry.isPersistent = true
@@ -275,7 +301,20 @@ do
                             icon = LOOT_EXPERIENCE_ICON,
                             stackCount = xpAdded,
                             color = ZO_SELECTED_TEXT,
-                            compareExp = true
+                            entryType = LOOT_ENTRY_TYPE_EXPERIENCE
+                        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        lootEntry.isPersistent = true
+        self:InsertOrQueue(lootEntry)
+    end
+
+    function ZO_LootHistory_Shared:AddGemEntry(gemsAdded)
+        local lootData = {
+                            text = GetString(SI_LOOT_HISTORY_CROWN_GEMS_GAIN),
+                            icon = LOOT_GEMS_ICON,
+                            stackCount = gemsAdded,
+                            color = ZO_SELECTED_TEXT,
+                            entryType = LOOT_ENTRY_TYPE_CROWN_GEMS
                         }
         local lootEntry = self:CreateLootEntry(lootData)
         lootEntry.isPersistent = true
@@ -290,15 +329,17 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
         local color
         local quality
 
+        -- we already handle collectibles as collectibles, 
+        -- but if we get them as something like a quest reward, they need to be funneled properly
+        if lootType == LOOT_TYPE_COLLECTIBLE then
+            local collectibleId = GetCollectibleIdFromLink(itemLinkOrName)
+            self:OnNewCollectibleReceived(collectibleId)
+            return
+        end
+
         if lootType == LOOT_TYPE_QUEST_ITEM then
             itemName = itemLinkOrName --quest items don't support item linking, this just returns their name.
             icon = questItemIcon
-            color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
-        elseif lootType == LOOT_TYPE_COLLECTIBLE then
-            local collectibleId = GetCollectibleIdFromLink(itemLinkOrName)
-            local collectibleName, _, collectibleIcon = GetCollectibleInfo(collectibleId)
-            itemName = collectibleName
-            icon = collectibleIcon
             color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
         else
             itemName = GetItemLinkName(itemLinkOrName)
@@ -315,6 +356,26 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
                             itemId = itemId,
                             quality = quality,
                             isCraftBagItem = isVirtual,
+                            entryType = LOOT_ENTRY_TYPE_ITEM,
+                        }
+
+        local lootEntry = self:CreateLootEntry(lootData)
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
+function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
+    if not self.hidden or self:CanShowItemsInHistory() then
+        local name, _, icon = GetCollectibleInfo(collectibleId)
+
+        local QUALITY_NORMAL = 1
+        local lootData = {
+                            text = zo_strformat(SI_TOOLTIP_ITEM_NAME, name),
+                            icon = icon,
+                            stackCount = 1,
+                            color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, QUALITY_NORMAL)),
+                            collectibleId = collectibleId,
+                            entryType = LOOT_ENTRY_TYPE_COLLECTIBLE
                         }
 
         local lootEntry = self:CreateLootEntry(lootData)
@@ -351,6 +412,12 @@ end
 function ZO_LootHistory_Shared:OnExperienceGainUpdate(reason, level, previousExperience, currentExperience)
     local difference = currentExperience - previousExperience
     self:AddXpEntry(difference)
+end
+
+function ZO_LootHistory_Shared:OnCrownGemUpdate(totalGems, gemDifference)
+    if gemDifference > 0 then
+        self:AddGemEntry(gemDifference)
+    end
 end
 
 -- functions to be overridden

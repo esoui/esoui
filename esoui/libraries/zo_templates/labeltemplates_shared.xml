@@ -20,16 +20,10 @@
         
         <Label name="ZO_TooltipIfTruncatedLabel" mouseEnabled="true" wrapMode="ELLIPSIS" virtual="true">
             <OnMouseEnter>
-                if self:WasTruncated() then
-                    InitializeTooltip(InformationTooltip)
-                    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self)
-                    SetTooltipText(InformationTooltip, self:GetText())
-                end
+                ZO_TooltipIfTruncatedLabel_OnMouseEnter(self)
             </OnMouseEnter>
             <OnMouseExit>
-                if self:WasTruncated() then
-                    ClearTooltip(InformationTooltip)
-                end
+                ZO_TooltipIfTruncatedLabel_OnMouseExit(self)
             </OnMouseExit>
         </Label>
 

@@ -352,7 +352,7 @@ function ZO_ChampionStar:RefreshTexture()
     local animationCellsSize = textureInfo.animationCellsSize
 
     self.pulseTimeline:Stop()
-    self.texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(size, size, self.depth))
+    self.texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(size, size, self.depth, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.texture:SetTextureCoords(0, 1 / animationCellsSize, 0, 1 / animationCellsSize)
     local textureAnimation = self.pulseTimeline:GetFirstAnimation()
     textureAnimation:SetImageData(animationCellsSize, animationCellsSize)
@@ -598,7 +598,7 @@ function ZO_ChampionStar:PlayOneShotAnimation(animationInfo)
 
     local timeline, texture = CHAMPION_PERKS:AcquireOneShotAnimation(animationInfo, self.oneShotAnimationOnReleaseCallback)
     self.sceneNode:AddControl(texture, self.x, self.y, self.depth)
-    texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(STAR_ONE_SHOT_ANIMATION_SIZE, STAR_ONE_SHOT_ANIMATION_SIZE, self.depth + 0.01))
+    texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(STAR_ONE_SHOT_ANIMATION_SIZE, STAR_ONE_SHOT_ANIMATION_SIZE, self.depth + 0.01, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.oneShotAnimationTimeline = timeline
     self.oneShotAnimationInfo = animationInfo
     if animationInfo.reverse then

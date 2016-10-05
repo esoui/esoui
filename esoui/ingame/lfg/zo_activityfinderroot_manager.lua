@@ -5,8 +5,10 @@ local GROUP_TYPE_TO_MAX_SIZE =
     [LFG_GROUP_TYPE_LARGE] = GROUP_SIZE_MAX,
 }
 
-local function LFGLevelSort(entry1, entry2)
-    if entry1.championPointsMin ~= entry2.championPointsMin then
+local function LFGSort(entry1, entry2)
+    if entry1.sortOrder ~= entry2.sortOrder then
+        return entry1.sortOrder > entry2.sortOrder 
+    elseif entry1.championPointsMin ~= entry2.championPointsMin then
         return entry1.championPointsMin < entry2.championPointsMin
     elseif entry1.levelMin ~= entry2.levelMin then
         return entry1.levelMin < entry2.levelMin
@@ -61,7 +63,7 @@ local function IsPreferredRoleSelected()
 end
 
 local function CreateLocationData(activityType, lfgIndex)
-    local name, levelMin, levelMax, championPointsMin, championPointsMax, groupType, minNumMembers, description = GetLFGOption(activityType, lfgIndex)
+    local name, levelMin, levelMax, championPointsMin, championPointsMax, groupType, minNumMembers, description, sortOrder = GetLFGOption(activityType, lfgIndex)
     local descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard = GetLFGOptionKeyboardDescriptionTextures(activityType, lfgIndex)
     local descriptionTextureGamepad = GetLFGOptionGamepadDescriptionTexture(activityType, lfgIndex)
     local requiredCollectible = GetRequiredLFGCollectibleId(activityType, lfgIndex)
@@ -85,6 +87,7 @@ local function CreateLocationData(activityType, lfgIndex)
         minGroupSize = minNumMembers,
         maxGroupSize = GetGroupSizeFromLFGGroupType(groupType),
         requiredCollectible = requiredCollectible,
+        sortOrder = sortOrder,
     }
 end
 
@@ -195,7 +198,7 @@ function ActivityFinderRoot_Manager:InitializeLocationData()
                 end
             end
         
-            table.sort(sortedActivityData, LFGLevelSort)
+            table.sort(sortedActivityData, LFGSort)
             locationsLookupData[activityType] = lookupActivityData
             sortedLocationsData[activityType] = sortedActivityData
             randomActivityTypeGroupSizeRanges[activityType] = { min = minGroupSize, max = maxGroupSize }

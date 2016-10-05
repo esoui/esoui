@@ -260,6 +260,14 @@
                                 layer="OVERLAY"
                                 clamped="true"
                     />
+                  
+                    <CompassPinType name="QUEST_OFFER_REPEATABLE"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_available_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_available_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_available_icon.dds"
+                                layer="OVERLAY"
+                                clamped="true"
+                    />
                     
                     <!-- These inherit the style depending on the type of condition they are overriding. -->
                     <CompassPinType name="QUEST_COMPLETE" />
@@ -299,6 +307,38 @@
                                 minScale="1.0"
                                 minAlpha="0.75"
                     />
+                    <CompassPinType name="ASSISTED_QUEST_REPEATABLE_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                areaTexture="EsoUI/Art/Compass/repeatableQuest_assistedAreaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/repeatableQuest_icon_door_assisted.dds"
+                                layer="TEXT"
+                                clamped="true"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
+                    <CompassPinType name="ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                areaTexture="EsoUI/Art/Compass/repeatableQuest_assistedAreaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/repeatableQuest_icon_door_assisted.dds"
+                                layer="TEXT"
+                                clamped="true"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
+                    <CompassPinType name="ASSISTED_QUEST_REPEATABLE_ENDING"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds"
+                                linkTexture="EsoUI/Art/Compass/repeatableQuest_icon_door_assisted.dds"
+                                layer="TEXT"
+                                clamped="true"
+                                minScale="1.0"
+                                minAlpha="0.75"
+                    />
                     <CompassPinType name="TRACKED_QUEST_CONDITION"
                                 pinTexture="EsoUI/Art/Compass/quest_icon.dds"
                                 aboveTexture="EsoUI/Art/Compass/quest_icon.dds"
@@ -320,6 +360,29 @@
                                 aboveTexture="EsoUI/Art/Compass/quest_icon.dds"
                                 belowTexture="EsoUI/Art/Compass/quest_icon.dds"
                                 linkTexture="EsoUI/Art/Compass/quest_icon_door.dds"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_REPEATABLE_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                areaTexture="EsoUI/Art/Compass/repeatableQuest_areaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/repeatableQuest_icon_door.dds"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                areaTexture="EsoUI/Art/Compass/repeatableQuest_areaPin.dds"
+                                linkTexture="EsoUI/Art/Compass/repeatableQuest_icon_door.dds"
+                                layer="TEXT"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_REPEATABLE_ENDING"
+                                pinTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                aboveTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                belowTexture="EsoUI/Art/Compass/repeatableQuest_icon.dds"
+                                linkTexture="EsoUI/Art/Compass/repeatableQuest_icon_door.dds"
                                 layer="TEXT"
                     />
                     <CompassPinType name="POI_SEEN"

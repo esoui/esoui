@@ -26,18 +26,6 @@ local FOCUS_MOVEMENT_TYPES =
     MOVE_PREVIOUS = 2,
 }
 
--- copy the standard gamepad style but change the center and right offsets
-ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE = ZO_ShallowTableCopy(KEYBIND_STRIP_GAMEPAD_STYLE)
-ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE.centerAnchorOffset = -230
-
-function ZO_GamepadMarketKeybindStrip_RefreshStyle()
-    local iconWidth = ZO_GamepadMarket_CrownsFooterIcon:GetWidth()
-    local crownsAmountWidth = ZO_GamepadMarket_CrownsFooterAmount:GetTextWidth()
-    local crownsLabelWidth = ZO_GamepadMarket_CrownsFooterLabel:GetTextWidth()
-    ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE.rightAnchorOffset = -iconWidth - crownsAmountWidth - crownsLabelWidth - ZO_GamepadMarket_DummyKeybindLabelTemplate:GetTextWidth()
-    KEYBIND_STRIP:SetStyle(ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE)
-end
-
 --[[
     Gamepad Grid Focus
 
@@ -364,7 +352,6 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, gridWidth, gridHeight, 
     self.currentCategoryControl = self.contentContainer.scrollChild -- Used for product parenting, may be updated by subclass
     self.lastAlphaUpdateTime = 0
     self.showScrollbar = false
-    self.currencyAmountControl = ZO_GamepadMarket_CrownsFooter:GetNamedChild("Amount")
     self.selectingItem = false
     self.lastGridY = 1
     self.gridScrollYPosition = 1
@@ -373,6 +360,7 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, gridWidth, gridHeight, 
     self.focusList:SetFocusChangedCallback(function(...) self:OnSelectionChanged(...) end)
     self.previewProducts = {}
     self:InitializeMarketProductPool()
+
     self.headerContainer = self.fullPane:GetNamedChild("ContainerHeaderContainer")
     self.header = self.headerContainer.header
     self:InitializeHeader(initialTabBarEntries)
@@ -543,7 +531,11 @@ end
 function ZO_GamepadMarket_GridScreen:GetCurrentPreviewProduct()
     return self.previewProducts[self.previewIndex]
 end
-   
+
+function ZO_GamepadMarket_GridScreen:GetCurrentPreviewProductId()
+    return self.previewProducts[self.previewIndex]:GetId()
+end
+
 -- Supports wrapping around the preview list
 function ZO_GamepadMarket_GridScreen:MoveToPreviousPreviewProduct()
     self.previewIndex = self.previewIndex - 1
@@ -552,7 +544,7 @@ function ZO_GamepadMarket_GridScreen:MoveToPreviousPreviewProduct()
         self.previewIndex = #self.previewProducts - self.previewIndex
     end
 
-    return self:GetCurrentPreviewProduct()
+    return self:GetCurrentPreviewProductId()
 end
 
 -- Supports wrapping around the preview list
@@ -563,7 +555,7 @@ function ZO_GamepadMarket_GridScreen:MoveToNextPreviewProduct()
         self.previewIndex = self.previewIndex - #self.previewProducts
     end
 
-    return self:GetCurrentPreviewProduct()
+    return self:GetCurrentPreviewProductId()
 end
 
 function ZO_GamepadMarket_GridScreen:OnShowing()
@@ -584,7 +576,8 @@ function ZO_GamepadMarket_GridScreen:SelectAfterPreview()
                 local gridY = self.focusList:GetGridYPosition()
                 self.gridScrollYPosition = zo_min(maxY - (NUM_VISIBLE_ROWS - 1), gridY)
                 self.lastGridY = gridY
-                self:ScrollToGridEntry(marketProduct:GetFocusData())
+                local SCROLL_INSTANTLY = true
+                self:ScrollToGridEntry(marketProduct:GetFocusData(), SCROLL_INSTANTLY)
             end
         end
 

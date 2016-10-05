@@ -4,6 +4,463 @@ local MARKET_LABELED_GROUP_LABEL_TEMPLATE = "ZO_Market_GroupLabel"
 ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS = "previous"
 ZO_MARKET_PREVIEW_DIRECTION_NEXT = "next"
 
+ZO_MARKET_LIST_ENTRY_HEIGHT = 52
+
+--
+--[[ Market Content Fragment ]]--
+--
+
+local MarketContentFragment = ZO_SimpleSceneFragment:Subclass()
+
+function MarketContentFragment:New(...)
+    local fragment = ZO_SimpleSceneFragment.New(self, ...)
+    fragment:Initialize(...)
+    return fragment
+end
+
+function MarketContentFragment:Initialize(control, marketProductPool, marketProductBundlePool)
+    self.control = control
+    self.productList = control:GetNamedChild("ProductList")
+    self.productListScrollChild = self.productList:GetNamedChild("ScrollChild")
+    self.contentHeader = control:GetNamedChild("ContentHeader")
+    self.cost = control:GetNamedChild("Cost")
+
+    self.marketProductPool = ZO_MetaPool:New(marketProductPool)
+    self.marketProductBundlePool = ZO_MetaPool:New(marketProductBundlePool)
+
+    self.marketProducts = {}
+
+    self:RegisterCallback("StateChange", function(...) self:OnStateChange(...) end)
+end
+
+function MarketContentFragment:OnStateChange(oldState, newState)
+    if newState == SCENE_FRAGMENT_HIDDEN then
+        self.marketProductPool:ReleaseAllObjects()
+        self.marketProductBundlePool:ReleaseAllObjects()
+        self.marketProduct = nil
+    end
+end
+
+do
+    local CURRENCY_ICON_SIZE = "100%"
+    function MarketContentFragment:ShowMarketProductContents(marketProduct)
+        self.marketProductPool:ReleaseAllObjects()
+        self.marketProductBundlePool:ReleaseAllObjects()
+        ZO_Scroll_ResetToTop(self.productList)
+        ZO_ClearNumericallyIndexedTable(self.marketProducts)
+
+        self.marketProduct = marketProduct
+
+        self.contentHeader:SetText(marketProduct:GetMarketProductDisplayName())
+
+        local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = marketProduct:GetMarketProductPricingByPresentation()
+        local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
+        local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
+        self.cost:SetText(currencyString)
+
+        local numChildren = marketProduct:GetNumChildren()
+        if numChildren > 0 then
+            for childIndex = 1, numChildren do
+                local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
+
+                local isBundle = GetMarketProductType(childMarketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
+
+                local pool = isBundle and self.marketProductBundlePool or self.marketProductPool
+                local childMarketProduct = pool:AcquireObject()
+                childMarketProduct:ShowAsChild(childMarketProductId)
+                childMarketProduct:SetParent(self.productListScrollChild)
+
+                local productInfo = {
+                                product = childMarketProduct,
+                                control = childMarketProduct:GetControl(),
+                                name = childMarketProduct:GetMarketProductDisplayName(),
+                                isBundle = isBundle,
+                                stackCount = childMarketProduct:GetStackCount(),
+                            }
+                table.insert(self.marketProducts, productInfo)
+            end
+
+            table.sort(self.marketProducts, function(entry1, entry2)
+                return MARKET:CompareMarketProducts(entry1, entry2)
+            end)
+        end
+
+        MARKET.LayoutProductGrid(self.marketProducts)
+    end
+end
+
+function MarketContentFragment:RefreshProducts()
+    for index, productInfo in ipairs(self.marketProducts) do
+        local product = productInfo.product
+        product:Refresh()
+    end
+end
+
+function MarketContentFragment:Purchase()
+    if self.marketProduct then
+        self.marketProduct:Purchase()
+    end
+end
+
+function MarketContentFragment:CanPurchase()
+    if self.marketProduct then
+        return not self.marketProduct:IsPurchaseLocked()
+    else
+        return false
+    end
+end
+
+--
+--[[ Market List Fragment ]]--
+--
+
+local MarketListFragment = ZO_SimpleSceneFragment:Subclass()
+
+function MarketListFragment:New(...)
+    local fragment = ZO_SimpleSceneFragment.New(self, ...)
+    fragment:Initialize(...)
+    return fragment
+end
+
+function MarketListFragment:Initialize(control, owner)
+    self.control = control
+    self.owner = owner
+
+    self.list = control:GetNamedChild("List")
+    self.listHeader = control:GetNamedChild("ListHeader")
+    self.contentHeader = control:GetNamedChild("ContentHeader")
+    self.cost = control:GetNamedChild("Cost")
+
+    -- initialize the scroll list
+    ZO_ScrollList_Initialize(self.list)
+
+    local function SetupEntry(...)
+        self:SetupEntry(...)
+    end
+
+    local function OnEntryReset(...)
+        self:OnEntryReset(...)
+    end
+
+    local NO_ON_HIDDEN_CALLBACK = nil
+    local NO_SELECT_SOUND = nil
+    ZO_ScrollList_AddDataType(self.list, 1, "ZO_MarketListEntry", ZO_MARKET_LIST_ENTRY_HEIGHT, SetupEntry, NO_ON_HIDDEN_CALLBACK, NO_SELECT_SOUND, OnEntryReset)
+    ZO_ScrollList_AddResizeOnScreenResize(self.list)
+
+    self.scrollData = ZO_ScrollList_GetDataList(self.list)
+end
+
+function MarketListFragment:SetupEntry(rowControl, data)
+    rowControl.data = data
+    rowControl.nameControl:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.name))
+    rowControl.iconControl:SetTexture(data.icon)
+
+    if data.stackCount > 1 then
+        rowControl.stackCount:SetText(data.stackCount)
+        rowControl.stackCount:SetHidden(false)
+    else
+        rowControl.stackCount:SetHidden(true)
+    end
+
+    rowControl:SetHandler("OnMouseEnter", function(...) self:OnMouseEnter(...) end)
+    rowControl:SetHandler("OnMouseExit", function(...) self:OnMouseExit(...) end)
+    rowControl:SetHandler("OnMouseUp", function(...) self:OnMouseUp(...) end)
+end
+
+function MarketListFragment:OnEntryReset(rowControl, data)
+    local highlight = rowControl.highlight
+    if highlight.animation then
+        highlight.animation:PlayFromEnd(highlight.animation:GetDuration())
+    end
+
+    local icon = rowControl.iconControl
+    if icon.animation then
+        icon.animation:PlayInstantlyToStart()
+    end
+
+    rowControl.data = nil
+
+    ZO_ObjectPool_DefaultResetControl(rowControl)
+end
+
+function MarketListFragment:SetupListHeader(headerString)
+    if headerString == nil or headerString == "" then
+        self.listHeader:SetHidden(true)
+        -- we want to position the list up to where the header starts
+        self.list:ClearAnchors()
+        self.list:SetAnchor(TOPLEFT, self.listHeader, TOPLEFT, 0, 0)
+    else
+        self.listHeader:SetHidden(false)
+        self.list:ClearAnchors()
+        self.list:SetAnchor(TOPLEFT, self.listHeader, BOTTOMLEFT, 0, 15)
+        self.listHeader:SetText(headerString)
+    end
+end
+
+function MarketListFragment:ShowCrownCrateContents(marketProduct)
+    self.contentHeader:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, marketProduct:GetMarketProductDisplayName()))
+    self:SetupListHeader(GetString(SI_MARKET_CRATE_LIST_HEADER))
+
+    local marketProducts = ZO_Market_Shared.GetCrownCrateContentsProductInfo(marketProduct:GetId())
+
+    table.sort(marketProducts, function(...)
+                return ZO_Market_Shared.CompareCrateMarketProducts(...)
+            end)
+
+    self:ShowMarketProducts(marketProducts)
+end
+
+function MarketListFragment:ShowMarketProductBundleContents(marketProduct)
+    self.contentHeader:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, marketProduct:GetMarketProductDisplayName()))
+    self:SetupListHeader(nil)
+
+    local marketProducts = ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProduct:GetId())
+
+    table.sort(marketProducts, function(...)
+                return ZO_Market_Shared.CompareBundleMarketProducts(...)
+            end)
+
+    self:ShowMarketProducts(marketProducts)
+end
+
+-- marketProducts is a table of Market Product info
+function MarketListFragment:ShowMarketProducts(marketProducts)
+    ZO_ScrollList_Clear(self.list)
+    ZO_ScrollList_ResetToTop(self.list)
+
+    for i = 1, #marketProducts do
+        local productInfo = marketProducts[i]
+        local productId = productInfo.productId
+        local name, description, icon, isNew, isFeatured = GetMarketProductInfo(productId)
+        local stackCount = productInfo.stackCount
+
+        local rowData =
+            {
+                productId = productId,
+                name = name,
+                icon = icon,
+                stackCount = stackCount,
+            }
+        table.insert(self.scrollData, ZO_ScrollList_CreateDataEntry(1, rowData))
+    end
+
+    ZO_ScrollList_Commit(self.list)
+end
+
+function MarketListFragment:CanPreview()
+    if self.selectedRow ~= nil then
+        local productId = self.selectedRow.data.productId
+        return CanPreviewMarketProduct(productId)
+    end
+
+    return false
+end
+
+function MarketListFragment:IsActivelyPreviewing()
+    if self.selectedRow ~= nil then
+        local productId = self.selectedRow.data.productId
+        return IsPreviewingMarketProduct(productId)
+    end
+
+    return false
+end
+
+function MarketListFragment:GetPreviewState()
+    local isPreviewing = IsCurrentlyPreviewing()
+    local canPreview = false
+    local isActivePreview = false
+
+    if self.selectedRow ~= nil then
+        
+        canPreview = IsCharacterPreviewingAvailable() and self:CanPreview()
+
+        if isPreviewing and self:IsActivelyPreviewing() then
+            isActivePreview = true
+        end
+    end
+
+    return isPreviewing, canPreview, isActivePreview
+end
+
+function MarketListFragment:IsReadyToPreview()
+    local _, canPreview, isActivePreview = self:GetPreviewState()
+    return canPreview and not isActivePreview
+end
+
+function MarketListFragment:GetSelectedProductId()
+    if self.selectedRow ~= nil then
+        return self.selectedRow.data.productId
+    end
+
+    return 0
+end
+
+local function SetListHighlightHidden(control, hidden)
+    local highlight = control.highlight
+    if not highlight.animation then
+        highlight.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", highlight)
+    end
+    if hidden then
+        highlight.animation:PlayBackward()
+    else
+        highlight.animation:PlayForward()
+    end
+end
+
+function MarketListFragment:OnMouseEnter(control)
+    SetListHighlightHidden(control, false)
+
+    local icon = control.iconControl
+    if not icon.animation then
+        icon.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", icon)
+    end
+
+    icon.animation:PlayForward()
+
+    local offsetX = -15
+    local offsetY = 0
+    InitializeTooltip(ItemTooltip, control, RIGHT, offsetX, offsetY, LEFT)
+    ItemTooltip:SetMarketProduct(control.data.productId)
+
+    self.selectedRow = control
+
+    self.owner:RefreshActions()
+end
+
+function MarketListFragment:OnMouseExit(control)
+    SetListHighlightHidden(control, true)
+
+    local icon = control.iconControl
+    if icon.animation then
+        icon.animation:PlayBackward()
+    end
+
+    ClearTooltip(ItemTooltip)
+
+    self.selectedRow = nil
+
+    self.owner:RefreshActions()
+end
+
+function MarketListFragment:OnMouseUp(control, button)
+    if button == MOUSE_BUTTON_INDEX_LEFT and self:IsReadyToPreview() then
+        self.owner:BeginPreview(self:GetSelectedProductId())
+    end
+end
+
+--
+--[[ Market Preview Fragment ]]--
+--
+
+local MarketPreview = ZO_MarketPreview:Subclass()
+
+function MarketPreview:New(...)
+    return ZO_MarketPreview.New(self, ...)
+end
+
+function MarketPreview:Initialize(control)
+    ZO_MarketPreview.Initialize(self, control)
+
+    self.variationLabel = control:GetNamedChild("VariationLabel")
+
+    self.previewVariationLeftArrow = control:GetNamedChild("PreviewVariationLeftArrow")
+    self.previewVariationRightArrow = control:GetNamedChild("PreviewVariationRightArrow")
+    self:InitializeArrowButton(self.previewVariationLeftArrow, ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS)
+    self:InitializeArrowButton(self.previewVariationRightArrow, ZO_MARKET_PREVIEW_DIRECTION_NEXT)
+
+    self:InitializeRotationControl()
+end
+
+function MarketPreview:InitializeRotationControl()
+    local rotationControl = self.control:GetNamedChild("RotationArea")
+    rotationControl:SetHandler("OnMouseEnter", function(control) control.mouseInside = true end)
+    rotationControl:SetHandler("OnMouseExit", function(control) control.mouseInside = false end)
+    rotationControl:SetHandler("OnMouseDown",
+                                function(control, button)
+                                    if button == MOUSE_BUTTON_INDEX_LEFT and control.canRotate then
+                                        control.isRotating = true
+                                        BeginItemPreviewSpin()
+                                    end
+                                end)
+    rotationControl:SetHandler("OnMouseUp",
+                                function(control, button)
+                                    if button == MOUSE_BUTTON_INDEX_LEFT then
+                                        if control.isRotating then
+                                            control.isRotating = false
+                                            EndItemPreviewSpin()
+                                        end
+                                    end
+                                end)
+    rotationControl:SetHandler("OnEffectivelyHidden",
+                                function(control)
+                                    if control.isRotating then
+                                        control.isRotating = false
+                                        EndItemPreviewSpin()
+                                    end
+                                end)
+    rotationControl:SetHandler("OnUpdate",
+                                function(control)
+                                    if control.mouseInside and CanSpinPreviewCharacter() then
+                                        control.canRotate = true
+                                        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
+                                    else
+                                        if control.canRotate then
+                                            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+                                        end
+                                        control.canRotate = false
+                                    end
+                                end)
+
+    self.rotationControl = rotationControl
+end
+
+function MarketPreview:InitializeArrowButton(control, direction)
+    control:SetHandler("OnClicked", function(control) self:CyclePreviewVariations(direction) end)
+end
+
+function MarketPreview:SetOwner(owner)
+    self.owner = owner
+end
+
+function MarketPreview:SetVariationControlsHidden(hidden)
+    self.previewVariationLeftArrow:SetHidden(hidden)
+    self.previewVariationRightArrow:SetHidden(hidden)
+    self.variationLabel:SetHidden(hidden)
+end
+
+function MarketPreview:SetVariationLabel(variationName)
+    self.variationLabel:SetText(variationName)
+end
+
+function MarketPreview:SetCanChangePreview(canChangePreview)
+    ZO_MarketPreview.SetCanChangePreview(self, canChangePreview)
+    self.owner:RefreshActions()
+end
+
+function MarketPreview:PreviewMarketProduct()
+    ZO_MarketPreview.PreviewMarketProduct(self)
+    self.owner:RefreshActions()
+end
+
+function MarketPreview:CyclePreviewVariations(direction)
+    if self:CanChangePreview() then
+        if direction == ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS then
+            self:PreviewPreviousVariation()
+        else
+            self:PreviewNextVariation()
+        end
+    end
+end
+
+function MarketPreview:SetEnabled(isEnabled)
+    local hideControls = not isEnabled
+    self.rotationControl:SetHidden(hideControls)
+    
+    if hideControls then
+        self:SetVariationControlsHidden(hideControls)
+    end
+end
+
 --
 --[[ Market ]]--
 --
@@ -17,16 +474,38 @@ end
 function Market:Initialize(control)
     control.owner = self
     self.control = control
-    self.contentsControl = self.control:GetNamedChild("Contents")
-    self.currencyLabel = self.contentsControl:GetNamedChild("Currency"):GetNamedChild("CurrencyLabel")
+
+    self.currencyContainer = self.control:GetNamedChild("Currency")
+    self.crownsContainer = self.currencyContainer:GetNamedChild("Crowns")
+    self.crownsCurrencyLabel = self.crownsContainer:GetNamedChild("CurrencyValue")
+
+    local crownsContainerWidth = self.crownsContainer:GetWidth()
+    local crownsNameWidth = self.crownsContainer:GetNamedChild("CurrencyName"):GetWidth()
+    self.crownsCurrencyLabel:SetWidth(crownsContainerWidth - crownsNameWidth)
+
+    self.gemsContainer = self.currencyContainer:GetNamedChild("Gems")
+    self.gemsCurrencyLabel = self.gemsContainer:GetNamedChild("CurrencyValue")
+
+    local gemsContainerWidth = self.gemsContainer:GetWidth()
+    local gemsNameWidth = self.gemsContainer:GetNamedChild("CurrencyName"):GetWidth()
+    self.gemsCurrencyLabel:SetWidth(gemsContainerWidth - gemsNameWidth)
+
     self.messageLabel = self.control:GetNamedChild("MessageLabel")
     self.messageLoadingIcon = self.control:GetNamedChild("MessageLoadingIcon")
-    self.rotationControl = self.control:GetNamedChild("RotationArea")
+
+    -- Crown Store Contents
+    self.contentsControl = CreateControlFromVirtual("$(parent)Contents", self.control, "ZO_KeyboardMarketContents")
+    self.contentsControl:ClearAnchors()
+    self.contentsControl:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, 5)
+    self.contentsControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -5, 0)
+
+    self.contentFragment = ZO_SimpleSceneFragment:New(self.contentsControl)
+    self.contentFragment:SetConditional(function()
+                                            return self.shouldShowMarketContents
+                                        end)
+
     self.noMatchesMessage = self.contentsControl:GetNamedChild("NoMatchMessage")
-    self.searchBox = self.contentsControl:GetNamedChild("Search"):GetNamedChild("Box")
-    self.previewVariationLeftArrow = self.control:GetNamedChild("PreviewVariationLeftArrow")
-    self.previewVariationRightArrow = self.control:GetNamedChild("PreviewVariationRightArrow")
-    self.variationLabel = self.control:GetNamedChild("VariationLabel")
+    self.searchBox = self.contentsControl:GetNamedChild("SearchBox")
 
     local subscriptionControl = self.contentsControl:GetNamedChild("SubscriptionPage")
     self.subscriptionPage = subscriptionControl
@@ -40,9 +519,26 @@ function Market:Initialize(control)
     self.subscriptionBenefitLinePool = ZO_ControlPool:New("ZO_Market_SubscriptionBenefitLine", control)
 
     self.nextPreviewChangeTime = 0
-    self.canBeginPreview = true
 
     self.control:SetHandler("OnUpdate", function(control, currentTime) self:OnUpdate(currentTime) end)
+
+    self:InitializeObjectPools()
+
+    -- Bundle Contents
+    self.bundleContentsControl = CreateControlFromVirtual("$(parent)BundleContents", self.control, "ZO_KeyboardBundleContents")
+    self.bundleContentsControl:ClearAnchors()
+    self.bundleContentsControl:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, 5)
+    self.bundleContentsControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -5, 0)
+
+    self.bundleContentFragment = MarketContentFragment:New(self.bundleContentsControl, self.masterMarketProductPool, self.masterMarketProductBundlePool)
+
+    -- Product List
+    self.productListControl = CreateControlFromVirtual("$(parent)ProductList", self.control, "ZO_KeyboardMarketProductList")
+    self.productListControl:ClearAnchors()
+    self.productListControl:SetAnchor(TOPLEFT, self.control, TOPLEFT, 0, 5)
+    self.productListControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -5, 0)
+
+    self.productListFragment = MarketListFragment:New(self.productListControl, self)
 
     -- ZO_Market_Shared.Initialize needs to be called after the control declarations
     -- This is because several overridden functions such as InitializeCategories and InitializeFilters called during initialization reference them
@@ -53,9 +549,27 @@ function Market:GetLabeledGroupLabelTemplate()
     return MARKET_LABELED_GROUP_LABEL_TEMPLATE
 end
 
-function Market:UpdateCurrencyBalance(currency)
-    local currencyString = zo_strformat(SI_MARKET_CURRENCY_LABEL, ZO_CommaDelimitNumber(currency))
-    self.currencyLabel:SetText(currencyString)
+local CURRENCY_ICON_SIZE = 24
+function Market:UpdateCrownBalance(amount)
+    local crownsIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWNS), CURRENCY_ICON_SIZE)
+    local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(amount), crownsIcon)
+    self.crownsCurrencyLabel:SetText(currencyString)
+end
+
+function Market:UpdateCrownGemBalance(amount)
+    local gemsIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), CURRENCY_ICON_SIZE)
+    local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(amount), gemsIcon)
+    self.gemsCurrencyLabel:SetText(currencyString)
+end
+
+function Market:CanPreviewMarketProductPreviewType(previewType)
+    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
+        return not self.bundleContentFragment:IsShowing()
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+        return not self.productListFragment:IsShowing()
+    else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+        return self:IsReadyToPreview()
+    end
 end
 
 function Market:InitializeKeybindDescriptors()
@@ -63,6 +577,7 @@ function Market:InitializeKeybindDescriptors()
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
 
+        -- End Preview Keybind
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
             name =      GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT),
@@ -79,37 +594,89 @@ function Market:InitializeKeybindDescriptors()
                         end,
         },
 
+        -- "Preview" Keybind
         {
-            name =      GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT),
+            name =      function()
+                            if self.productListFragment:IsShowing() then
+                                return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                            else
+                                local previewType = self.GetMarketProductPreviewType(self.selectedMarketProduct)
+                                if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                                    return GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT)
+                                else
+                                    return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                                end
+                            end
+                        end,
             keybind =   "UI_SHORTCUT_SECONDARY",
             visible =   function()
-                            return self:IsReadyToPreview()
+                            if self.productListFragment:IsShowing() then
+                                return self.productListFragment:IsReadyToPreview()
+                            else
+                                local marketProduct = self.selectedMarketProduct
+                                if marketProduct ~= nil then
+                                    local previewType = self.GetMarketProductPreviewType(marketProduct)
+                                    return self:CanPreviewMarketProductPreviewType(previewType)
+                                end
+                            end
+                            return false
                         end,
             callback =  function()
-                            self.selectedMarketProduct.variation = 1
-                            self:BeginPreview()
-                            self:SetCanBeginPreview(false, GetFrameTimeSeconds())
+                            if self.productListFragment:IsShowing() then
+                                self:BeginPreview(self.productListFragment:GetSelectedProductId())
+                            else
+                                local marketProduct = self.selectedMarketProduct
+
+                                local previewType = self.GetMarketProductPreviewType(marketProduct)
+                                if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
+                                    self:ShowBundleContents(marketProduct)
+                                elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
+                                    self:ShowCrownCrateContents(marketProduct)
+                                elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                                    self:ShowBundleContentsAsList(marketProduct)
+                                else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+                                    self:BeginPreview(marketProduct:GetId())
+                                end
+                            end
                         end,
             enabled =   function()
-                            return self.canBeginPreview
+                            local previewType = self.GetMarketProductPreviewType(marketProduct)
+                            if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
+                                return ZO_MARKET_PREVIEW:CanChangePreview()
+                            else
+                                return true
+                            end
                         end,
         },
 
+        -- Purchase Keybind
         {
             name =  function()
-                        if self.selectedMarketProduct:IsBundle() then
+                        if self.bundleContentFragment:IsShowing() then
                             return GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT)
                         else
-                            return GetString(SI_MARKET_PURCHASE_KEYBIND_TEXT)
+                            if self.selectedMarketProduct:IsBundle() then
+                                return GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT)
+                            else
+                                return GetString(SI_MARKET_PURCHASE_KEYBIND_TEXT)
+                            end
                         end
                     end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            visible = function()
-                          return self.selectedMarketProduct ~= nil and not self.selectedMarketProduct:IsPurchaseLocked()
-                      end,
-            callback = function()
-                           self.selectedMarketProduct:Purchase()
-                       end,
+            visible =   function()
+                            if self.bundleContentFragment:IsShowing() then
+                                return self.bundleContentFragment:CanPurchase()
+                            else
+                                return self.selectedMarketProduct ~= nil and not self.selectedMarketProduct:IsPurchaseLocked()
+                            end
+                        end,
+            callback =  function()
+                            if self.bundleContentFragment:IsShowing() then
+                                self.bundleContentFragment:Purchase()
+                            else
+                                self.selectedMarketProduct:Purchase()
+                            end
+                        end,
         },
     }
 end
@@ -151,6 +718,10 @@ function Market:CreateMarketScene()
     local scene = ZO_RemoteScene:New(ZO_KEYBOARD_MARKET_SCENE_NAME, SCENE_MANAGER)
     SYSTEMS:RegisterKeyboardRootScene(ZO_MARKET_NAME, scene)
     self:SetMarketScene(scene)
+
+    self.marketScene:AddFragment(self.contentFragment)
+    self.marketScene:AddFragment(ZO_MARKET_PREVIEW:GetFragment())
+    ZO_MARKET_PREVIEW:SetOwner(self)
 end
 
 function Market:InitializeCategories()
@@ -176,7 +747,7 @@ function Market:InitializeCategories()
     local function TreeHeaderSetup_Child(node, control, data, open, userRequested)
         BaseTreeHeaderSetup(node, control, data, open)
 
-        if(open and userRequested) then
+        if open and userRequested then
             self.categoryTree:SelectFirstChild(node)
         end
     end
@@ -212,9 +783,19 @@ function Market:InitializeCategories()
     end
 
     local DEFAULT_NOT_SELECTED = false
+    local SUBCATEGORY_GEM_TEXTURE = "EsoUI/Art/currency/currency_crown_gems.dds"
     local function TreeEntrySetup(node, control, data, open)
         control:SetText(data.name)
         control:SetSelected(DEFAULT_NOT_SELECTED)
+
+        local icon = control:GetNamedChild("Icon")
+
+        if data.showGemIcon then
+            icon:SetTexture(SUBCATEGORY_GEM_TEXTURE)
+            icon:SetHidden(false)
+        else
+            icon:SetHidden(true)
+        end
     end
     
     self.categoryTree:AddTemplate("ZO_IconHeader", TreeHeaderSetup_Child, nil, nil, 60, 0)
@@ -231,11 +812,13 @@ function Market:InitializeMarketList()
 
     -- override the default functionality when the extants change for the product list so we can scroll to a specific item
     -- if one exists because we openned the market to see a specific item
-    self.marketProductList.scroll:SetHandler("OnScrollExtentsChanged", function(control)
-                                                                                   ZO_Scroll_OnExtentsChanged(control:GetParent()) 
-                                                                                   self:ScrollAndPreviewQueuedMarketProduct()
-                                                                                   end)
+    self.marketProductList.scroll:SetHandler("OnScrollExtentsChanged",  function(control)
+                                                                            ZO_Scroll_OnExtentsChanged(control:GetParent()) 
+                                                                            self:ScrollAndPreviewQueuedMarketProduct()
+                                                                        end)
+end
 
+function Market:InitializeObjectPools()
     -- MarketProductIcon Pool
 
     local function CreateMarketProductIcon(objectPool)
@@ -259,7 +842,9 @@ function Market:InitializeMarketList()
         marketProduct:Reset()
     end
 
-    self.marketProductPool = ZO_ObjectPool:New(CreateMarketProduct, ResetMarketProduct)
+    self.masterMarketProductPool = ZO_ObjectPool:New(CreateMarketProduct, ResetMarketProduct)
+
+    self.marketProductPool = ZO_MetaPool:New(self.masterMarketProductPool)
 
     -- ZO_MarketProductBundle Pool
 
@@ -271,7 +856,9 @@ function Market:InitializeMarketList()
         marketProductBundle:Reset()
     end
 
-    self.marketProductBundlePool = ZO_ObjectPool:New(CreateMarketProductBundle, ResetMarketProductBundle)
+    self.masterMarketProductBundlePool = ZO_ObjectPool:New(CreateMarketProductBundle, ResetMarketProductBundle)
+
+    self.marketProductBundlePool = ZO_MetaPool:New(self.masterMarketProductBundlePool)
 end
 
 function Market:BuildCategories()
@@ -279,7 +866,7 @@ function Market:BuildCategories()
     self.categoryTree:Reset()
     self.nodeLookupData = {}
 
-    if self.searchString == "" then
+    if not self:HasValidSearchString() then
         --Special featured items blade
         local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
         if numFeaturedMarketProducts > 0 then
@@ -444,10 +1031,11 @@ do
         self.queuedSearchString = nil
     end
 
-    local function AddCategory(lookup, tree, nodeTemplate, parent, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType)
+    local function AddCategory(lookup, tree, nodeTemplate, parent, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType, isFakedSubcategory, showGemIcon)
         categoryType = categoryType or ZO_MARKET_CATEGORY_TYPE_NONE
         local entryData = 
         {
+            isFakedSubcategory = isFakedSubcategory,
             categoryIndex = categoryIndex,
             name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name),
             type = categoryType,
@@ -455,13 +1043,15 @@ do
             normalIcon = normalIcon,
             pressedIcon = pressedIcon,
             mouseoverIcon = mouseoverIcon,
+            showGemIcon = showGemIcon,
         }
 
         local soundId = parent and SOUNDS.MARKET_SUB_CATEGORY_SELECTED or SOUNDS.MARKET_CATEGORY_SELECTED
         local node = tree:AddNode(nodeTemplate, entryData, parent, soundId)
         entryData.node = node
 
-        AddNodeLookup(lookup, node, parent, categoryIndex)
+        finalCategoryIndex = isFakedSubcategory and "root" or categoryIndex
+        AddNodeLookup(lookup, node, parent, finalCategoryIndex)
         return node
     end
 
@@ -469,49 +1059,60 @@ do
         local tree = self.categoryTree
         local lookup = self.nodeLookupData
 
-        --Either there's more than one subcategory found, or the subcategory found isn't "general", thus children
-        local searchResultsWithChildren = self.searchString ~= "" and (NonContiguousCount(self.searchResults[categoryIndex]) > 1 or self.searchResults[categoryIndex]["root"] == nil)
+        -- Either there's more than one subcategory found, or the subcategory found isn't "general", thus children
+        local hasSearchResults = self:HasValidSearchString()
+        local searchResultsWithChildren = hasSearchResults and (NonContiguousCount(self.searchResults[categoryIndex]) > 1 or self.searchResults[categoryIndex]["root"] == nil)
         local hasChildren = numSubCategories > 0 --Only for non-search results
 
-        local nodeTemplate = hasChildren and "ZO_IconHeader" or "ZO_MarketChildlessCategory"
+        -- Select the correct template for the parent based on whether or not we will show any subcategories
+        local nodeTemplate
+        if hasSearchResults then
+            -- if we have search results we will only have children if we have a real subcategory
+            -- if we only have the root subcategory, we do not add it
+            nodeTemplate = searchResultsWithChildren and "ZO_IconHeader" or "ZO_MarketChildlessCategory"
+        else
+            -- if we are not searching, we only have children if the category has subcategories
+            nodeTemplate = hasChildren and "ZO_IconHeader" or "ZO_MarketChildlessCategory"
+        end
 
         local parent = AddCategory(lookup, tree, nodeTemplate, nil, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType)
 
-        if searchResultsWithChildren then
+        if hasSearchResults then
+            if searchResultsWithChildren and self.searchResults[categoryIndex]["root"] then
+                local isFakedSubcategory = true
+                local categoryName = GetMarketProductCategoryInfo(categoryIndex)
+                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, isFakedSubcategory)
+            end
+
             for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
                 if subcategoryIndex ~= "root" then
-                    local subCategoryName, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(categoryIndex, subcategoryIndex)
-                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, normalIcon, pressedIcon, mouseoverIcon)
+                    local isRealSubCategory = false
+                    local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(categoryIndex, subcategoryIndex)
+                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, isRealSubCategory, showGemIcon)
                 end
             end
         elseif hasChildren then
+            local numMarketProducts = select(3, GetMarketProductCategoryInfo(categoryIndex))
+            if numMarketProducts > 0 then
+                local isFakedSubcategory = true
+                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, isFakedSubcategory)
+            end
+
             for i = 1, numSubCategories do
-                local subCategoryName, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(categoryIndex, i)
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, i, subCategoryName, normalIcon, pressedIcon, mouseoverIcon)
+                local isRealSubCategory = false
+                local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(categoryIndex, i)
+                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, i, subCategoryName, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, isRealSubCategory, showGemIcon)
             end
         end
 
         return parent
     end
-    
-    local function GetFeaturedSubCategoryProductIds(index, ...)
-        if index >= 1 then
-            local id = GetFeaturedMarketProductId(index)
-            index = index - 1
-            return GetFeaturedSubCategoryProductIds(index, id, ...)
-        end
-        return ...
-    end
-    
-    function Market:BuildFeaturedMarketProductList(data)
-        local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
-        self:LayoutMarketProducts(GetFeaturedSubCategoryProductIds(numFeaturedMarketProducts))
-    end
 end
 
+-- ... is a list of tables containing product ids and presentationIndexes
 function Market:GetMarketProductIds(categoryIndex, subCategoryIndex, index, ...)
     if index >= 1 then
-        if self.searchString ~= "" then
+        if self:HasValidSearchString() then
             if NonContiguousCount(self.searchResults) == 0 then
                 return ...
             end
@@ -523,11 +1124,21 @@ function Market:GetMarketProductIds(categoryIndex, subCategoryIndex, index, ...)
             end
         end
 
-        local id = GetMarketProductDefId(categoryIndex, subCategoryIndex, index)
+        local id, presentationIndex = GetMarketProductPresentationIds(categoryIndex, subCategoryIndex, index)
+        local presentationInfo =    {
+                                        id = id,
+                                        presentationIndex = presentationIndex,
+                                    }
         index = index - 1
-        return self:GetMarketProductIds(categoryIndex, subCategoryIndex, index, id, ...)
+        return self:GetMarketProductIds(categoryIndex, subCategoryIndex, index, presentationInfo, ...)
     end
     return ...
+end
+
+function Market:AddLabeledGroupTable(labeledGroupName, labeledGroupTable)
+    ZO_Market_Shared.AddLabeledGroupTable(self, labeledGroupName, labeledGroupTable)
+
+    self.previousRowControl = self.LayoutProductGrid(labeledGroupTable, self.previousRowControl, labeledGroupName, self.labeledGroupLabelPool)
 end
 
 do
@@ -536,14 +1147,11 @@ do
     local LABELED_GROUP_PADDING = 70
     local FIRST_LABELED_GROUP_PADDING = 40
     local LABELED_GROUP_LABEL_PADDING = -20
-    function Market:AddLabeledGroupTable(labeledGroupName, labeledGroupTable)
-        ZO_Market_Shared.AddLabeledGroupTable(self, labeledGroupName, labeledGroupTable)
-        
-        local previousRowControl = self.previousRowControl
+    function Market.LayoutProductGrid(marketProductInfos, previousRowControl, sectionHeader, labelPool)
+        local previousRowControl = previousRowControl
         local previousControl
         local currentColumn = 1
-        for i = 1, #labeledGroupTable do
-            local productInfo = labeledGroupTable[i]
+        for index, productInfo in ipairs(marketProductInfos) do
             local marketProduct = productInfo.product
             local marketControl = marketProduct:GetControl()
             marketControl:ClearAnchors()
@@ -555,12 +1163,23 @@ do
 
             if currentColumn == 1 then
                 if previousRowControl then
-                    local yPadding = (i == 1 and LABELED_GROUP_PADDING or 0) + ROW_PADDING
-                    marketControl:SetAnchor(TOPLEFT, previousRowControl, BOTTOMLEFT, 0, yPadding)
+                    local extraYPadding = 0
+                    if index == 1 and sectionHeader then
+                        extraYPadding = LABELED_GROUP_PADDING
+                    end
+                    marketControl:SetAnchor(TOPLEFT, previousRowControl, BOTTOMLEFT, 0, ROW_PADDING + extraYPadding)
                 else
-                    marketControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, labeledGroupName and FIRST_LABELED_GROUP_PADDING or 0)
+                    marketControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, sectionHeader and FIRST_LABELED_GROUP_PADDING or 0)
                 end
-                
+
+                if index == 1 and sectionHeader and labelPool then
+                    local sectionLabel = labelPool:AcquireObject()
+                    sectionLabel:SetText(sectionHeader)
+                    sectionLabel:SetParent(marketControl)
+                    sectionLabel:ClearAnchors()
+                    sectionLabel:SetAnchor(BOTTOMLEFT, marketControl, TOPLEFT, 0, LABELED_GROUP_LABEL_PADDING)
+                end
+
                 previousRowControl = marketControl
             else
                 marketControl:SetAnchor(LEFT, previousControl, RIGHT, ZO_MARKET_PRODUCT_COLUMN_PADDING, 0)
@@ -574,17 +1193,11 @@ do
                     currentColumn = 1
                 end
             end
-            
-            if i == 1 and labeledGroupName then
-                self:AddLabel(labeledGroupName, marketControl, LABELED_GROUP_LABEL_PADDING)
-            end
 
             previousControl = marketControl
         end
         
-        if #labeledGroupTable > 0 then
-            self.previousRowControl = previousRowControl
-        end
+        return previousRowControl
     end
 end
 
@@ -648,16 +1261,19 @@ function Market:LayoutMarketProducts(...)
     local filterType = self.categoryFilter.filterType
     local hasShownProduct = false
     for i = 1, select("#", ...) do
-        local id = select(i, ...)
+        local presentationInfo = select(i, ...)
+        local id = presentationInfo.id
         if self:ShouldAddMarketProduct(filterType, id) then
             hasShownProduct = true
             local isBundle = GetMarketProductType(id) == MARKET_PRODUCT_TYPE_BUNDLE
 
             local pool = isBundle and self.marketProductBundlePool or self.marketProductPool
             local marketProduct = pool:AcquireObject()
-            marketProduct:Show(id)
+            local presentationIndex = presentationInfo.presentationIndex
+            marketProduct:Show(id, presentationIndex)
+            marketProduct:SetParent(self.marketScrollChild)
 
-            local name, description, cost, discountedCost, discountPercent, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
+            local name, description, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
             local timeLeft = marketProduct:GetTimeLeftInSeconds()
             -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
             local isLimitedTime = timeLeft > 0 and timeLeft <= ZO_ONE_MONTH_IN_SECONDS
@@ -701,20 +1317,59 @@ end
 
 function Market:ShowMarket(showMarket)
     ZO_Market_Shared.ShowMarket(self, showMarket)
-    self.contentsControl:SetHidden(not showMarket)
+
+    -- if the Market is locked (showMarket == false) then we don't want to show the
+    -- Category tree and the MarketProduct scroll area, so set this flag
+    -- so the content fragment can hide appropriately
+    self.shouldShowMarketContents = showMarket
+
+    self.marketScene:AddFragment(self.contentFragment)
+    SCENE_MANAGER:RemoveFragment(self.bundleContentFragment)
+    SCENE_MANAGER:RemoveFragment(self.productListFragment)
+    self.contentFragment:Refresh() -- make sure the contents show/hide appropriately
+    self.currencyContainer:SetHidden(not showMarket)
     self.messageLabel:SetHidden(showMarket)
-    self.rotationControl:SetHidden(not showMarket)
+    ZO_MARKET_PREVIEW:SetEnabled(showMarket)
     if showMarket then
         -- hide the market products and show our no matches message if search has no results
-        local showMessage = self.searchString ~= "" and NonContiguousCount(self.searchResults) == 0
+        local showMessage = self:HasValidSearchString() and NonContiguousCount(self.searchResults) == 0
         self:ShowNoMatchesMessage(showMessage)
         self.messageLoadingIcon:Hide()
     end
+
+    self:EndCurrentPreview()
 end
 
 function Market:ShowNoMatchesMessage(showMessage)
     self.marketProductList:SetHidden(showMessage)
     self.noMatchesMessage:SetHidden(not showMessage)
+end
+
+function Market:ShowBundleContents(marketProduct)
+    self:EndCurrentPreview()
+
+    self.marketScene:RemoveFragment(self.contentFragment)
+    SCENE_MANAGER:RemoveFragment(self.productListFragment)
+    SCENE_MANAGER:AddFragment(self.bundleContentFragment)
+    self.bundleContentFragment:ShowMarketProductContents(marketProduct)
+end
+
+function Market:ShowCrownCrateContents(marketProduct)
+    self:EndCurrentPreview()
+
+    self.marketScene:RemoveFragment(self.contentFragment)
+    SCENE_MANAGER:RemoveFragment(self.bundleContentFragment)
+    SCENE_MANAGER:AddFragment(self.productListFragment)
+    self.productListFragment:ShowCrownCrateContents(marketProduct)
+end
+
+function Market:ShowBundleContentsAsList(marketProduct)
+    self:EndCurrentPreview()
+
+    self.marketScene:RemoveFragment(self.contentFragment)
+    SCENE_MANAGER:RemoveFragment(self.bundleContentFragment)
+    SCENE_MANAGER:AddFragment(self.productListFragment)
+    self.productListFragment:ShowMarketProductBundleContents(marketProduct)
 end
 
 function Market:OnMarketUpdate()
@@ -744,36 +1399,21 @@ end
 
 function Market:RefreshActions()
     self:RefreshKeybinds()
-    local cursor = self:IsReadyToPreview() and MOUSE_CURSOR_PREVIEW or MOUSE_CURSOR_DO_NOT_CARE
-    WINDOW_MANAGER:SetMouseCursor(cursor)
-end
+    local readyToPreview = false
 
-do
-    local PREVIEW_WAIT_TIME_SECONDS = ZO_MARKET_PREVIEW_WAIT_TIME_MS / 1000
-    function Market:SetCanBeginPreview(canBeginPreview, lastChangeTimeSeconds)
-        self.canBeginPreview = canBeginPreview
-        self.nextPreviewChangeTime = lastChangeTimeSeconds + PREVIEW_WAIT_TIME_SECONDS
-        self:RefreshKeybinds()
-
-        if canBeginPreview then
-            self.variationLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
-        else
-            self.variationLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
-        end
+    if self.productListFragment:IsShowing() then
+        readyToPreview = self.productListFragment:IsReadyToPreview()
+    else
+        readyToPreview = self:IsReadyToPreview()
     end
-end
 
-function Market:GetCanBeginPreview()
-    return self.canBeginPreview
+    local cursor = readyToPreview and MOUSE_CURSOR_PREVIEW or MOUSE_CURSOR_DO_NOT_CARE
+    WINDOW_MANAGER:SetMouseCursor(cursor)
 end
 
 do
     local DISPLAY_LOADING_DELAY_SECONDS = ZO_MARKET_DISPLAY_LOADING_DELAY_MS / 1000
     function Market:OnUpdate(currentTime)
-        if(not self.canBeginPreview and (currentTime >= self.nextPreviewChangeTime)) then
-            self:SetCanBeginPreview(true, currentTime)
-        end
-
         if self.marketState == MARKET_STATE_UNKNOWN then
             if self.loadingStartTime == nil then
                 self.loadingStartTime = currentTime
@@ -808,6 +1448,8 @@ end
 function Market:OnHidden()
     self:RemoveKeybinds()
     ZO_Dialogs_ReleaseAllDialogs()
+    -- make sure we restore the content fragment when we close the market
+    self.marketScene:AddFragment(self.contentFragment)
 end
 
 function Market:RefreshProducts()
@@ -830,6 +1472,10 @@ function Market:RefreshProducts()
         local product = self.dlcProducts[i].product
         product:Refresh()
     end
+
+    if self.bundleContentFragment:IsShowing() then
+        self.bundleContentFragment:RefreshProducts()
+    end
 end
 
 function Market:RestoreActionLayerForTutorial()
@@ -845,43 +1491,21 @@ function Market:ResetSearch()
     self.searchBox:SetText("")
 end
 
+function Market:BeginPreview(productId)
+    ZO_MARKET_PREVIEW:BeginPreview(productId)
+end
+
 function Market:EndCurrentPreview()
     ZO_Market_Shared.EndCurrentPreview(self)
-    self:SetCurrentMultiVariationPreviewProduct(nil)
-end
-
-function Market:SetCurrentMultiVariationPreviewProduct(marketProduct)
-    self.currentMultiVariationPreviewProduct = marketProduct
-
-    local hideMultiVariationControls = marketProduct == nil
-    self.previewVariationLeftArrow:SetHidden(hideMultiVariationControls)
-    self.previewVariationRightArrow:SetHidden(hideMultiVariationControls)
-    self.variationLabel:SetHidden(hideMultiVariationControls)
-
-    if marketProduct then
-        self.variationLabel:SetText(marketProduct:GetPreviewVariationDisplayName())
-    end
-end
-
-function Market:CyclePreviewVariations(direction)
-    if self.currentMultiVariationPreviewProduct then
-        if direction == ZO_MARKET_PREVIEW_DIRECTION_PREVIOUS then
-            self.currentMultiVariationPreviewProduct:PreviewPreviousVariation()
-        else
-            self.currentMultiVariationPreviewProduct:PreviewNextVariation()
-        end
-
-        self.variationLabel:SetText(self.currentMultiVariationPreviewProduct:GetPreviewVariationDisplayName())
-        self:SetCanBeginPreview(false, GetFrameTimeSeconds())
-    end
+    ZO_MARKET_PREVIEW:EndCurrentPreview()
 end
 
 --
 --[[ XML Handlers ]]--
 --
 
-function ZO_Market_OnInitialize(self)
-    MARKET = Market:New(self)
+function ZO_Market_OnInitialize(control)
+    MARKET = Market:New(control)
     SYSTEMS:RegisterKeyboardObject(ZO_MARKET_NAME, MARKET)
 end
 
@@ -902,9 +1526,17 @@ function ZO_Market_OnSearchEnterKeyPressed(editBox)
     editBox:LoseFocus()
 end
 
-function ZO_MarketCurrency_OnMouseEnter(control)
+function ZO_MarketCurrency_OnMouseEnter(control, currencyType)
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -2)
-    SetTooltipText(InformationTooltip, GetString(SI_MARKET_CURRENCY_TOOLTIP))
+
+    local currencyTooltip
+    if currencyType == MKCT_CROWNS then
+        currencyTooltip = GetString(SI_MARKET_CROWNS_TOOLTIP)
+    elseif currencyType == MKCT_CROWN_GEMS then
+        currencyTooltip = GetString(SI_MARKET_CROWN_GEMS_TOOLTIP)
+    end
+
+    SetTooltipText(InformationTooltip, currencyTooltip)
 end
 
 function ZO_MarketCurrency_OnMouseExit(control)
@@ -920,8 +1552,13 @@ function ZO_MarketCurrencyBuySubscription_OnClicked(control)
     ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
 end
 
-function ZO_Market_PreviewArrowOnMouseClicked(control, direction)
-    if MARKET:GetCanBeginPreview() then
-        MARKET:CyclePreviewVariations(direction)
+function ZO_MarketPreview_OnInitialize(control)
+     ZO_MARKET_PREVIEW = MarketPreview:New(control)
+end
+
+function ZO_MarketContentFragmentBack_OnMouseUp(self, upInside)
+    if upInside then
+        PlaySound(SOUNDS.NEGATIVE_CLICK)
+        MARKET:ShowMarket(true)
     end
 end

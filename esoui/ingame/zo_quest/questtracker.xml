@@ -1,7 +1,12 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_TrackedHeader" mouseEnabled="true" font="ZoFontGameShadow" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="22"/>
             <Dimensions x="226" y="0" />
+
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
 
             <OnMouseUp>
                 ZO_TrackedHeader_MouseUp(self, button, upInside)
@@ -14,6 +19,12 @@
             <OnMouseExit>
                 ZO_TrackedHeader_MouseExit(self)
             </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="3" hidden="true">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
+                </Texture>
+            </Controls>
         </Label>
 
         <Label name="ZO_QuestCondition" font="ZoFontGameShadow" virtual="true" mouseEnabled="true">

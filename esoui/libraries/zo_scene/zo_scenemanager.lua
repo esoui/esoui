@@ -23,22 +23,25 @@ function ZO_SceneManager:OnRemoteSceneChange(sceneName, sceneChangeType, sceneCh
         if sceneChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_SWAP then
             self:OnRemoteSceneSwap(sceneName)
         else
-            scene:SetSendsStateChanges(false)
+            
             if self:IsShowing(sceneName) then
                 if sceneChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_HIDE then
+                    scene:SetSendsStateChanges(false)
                     self:OnRemoteSceneHide(sceneName)
+                    scene:SetSendsStateChanges(true)
                 end
             else
                 if sceneChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_PUSH then
                     -- we need to send events on push because the result isn't known ahead of time
                     -- we need to inform remote scenes if we actually show as a result of the push
-                    scene:SetSendsStateChanges(true)
                     self:OnRemoteScenePush(sceneName)
                 elseif sceneChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_SHOW then
+                    -- we send events on show, because whatever requested us to show needs to know
+                    -- what to do when we perform the show on our main stack
                     self:OnRemoteSceneShow(sceneName)
                 end
             end
-            scene:SetSendsStateChanges(true)
+            
         end
     end
 end

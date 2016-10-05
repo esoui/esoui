@@ -9,7 +9,7 @@ end
 function LoginManager_Keyboard:Initialize()
     self.showCreateLinkAccountFragment = false  -- Always assume we show the regular login screen first
 
-    if DoesPlatformRequireAccountLinking() then
+    if IsUsingLinkedLogin() then
         EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_CREATE_LINK_LOADING_ERROR, function(...) self:OnCreateLinkLoadingError(...) end)
         EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_SUCCESSFUL, function(...) self:OnLoginSuccessful(...) end)
         EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_ACCOUNT_LINK_SUCCESSFUL, function(...) self:OnCreateLinkAccountSuccessful(...) end)
@@ -24,7 +24,7 @@ function LoginManager_Keyboard:ShowRelevantLoginFragment()
     --  2. If we have not yet established a link between accounts
     --  3. If we didn't encounter an error trying to establish the link (or the Login button was pressed again after that)
 
-    if DoesPlatformRequireAccountLinking() and self.showCreateLinkAccountFragment then
+    if IsUsingLinkedLogin() and self.showCreateLinkAccountFragment then
         self.currentFragment = CREATE_LINK_ACCOUNT_FRAGMENT
     else
         self.currentFragment = LOGIN_FRAGMENT
@@ -62,7 +62,7 @@ function LoginManager_Keyboard:SwitchToCreateLinkAccountFragment()
 end
 
 function LoginManager_Keyboard:IsLoginPossible()
-    return not DoesPlatformRequireAccountLinking() or not self.mustRelaunch
+    return not IsUsingLinkedLogin() or not self.mustRelaunch
 end
 
 function LoginManager_Keyboard:AttemptLinkedLogin()

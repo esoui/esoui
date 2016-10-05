@@ -286,12 +286,18 @@ function ZO_GamepadOptions_HorizontalListEqualityFunction(left, right)
     return left.text == right.text
 end
 
+local function ReleaseControl(control)
+    control.state = nil
+end
+
 local function ReleaseSlider(control)
     control.slider:Deactivate()
+    ReleaseControl(control)
 end
 
 local function ReleaseHorizontalList(control)
     control.horizontalListObject:Deactivate()
+    ReleaseControl(control)
 end
 
 local GAMEPAD_OPTIONS_HEADER_SELECTED_PADDING = -20
@@ -301,7 +307,7 @@ function ZO_GamepadOptions:SetupList(list)
 end
 
 function ZO_GamepadOptions:SetupOptionsList(list)
-    local function OptionsSetup(control, data, selected, reselectingDuringRebuild, enabled, active)       
+    local function OptionsSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         control.data = data
         self:InitializeControl(control, selected)     
     end
@@ -315,6 +321,8 @@ function ZO_GamepadOptions:SetupOptionsList(list)
 
     list:AddDataTemplate("ZO_GamepadOptionsCheckboxRow", OptionsSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)    
     list:AddDataTemplateWithHeader("ZO_GamepadOptionsCheckboxRow", OptionsSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsHeaderTemplate")
+    list:SetDataTemplateReleaseFunction("ZO_GamepadOptionsCheckboxRow", ReleaseControl)
+    list:SetDataTemplateWithHeaderReleaseFunction("ZO_GamepadOptionsCheckboxRow", ReleaseControl)
 
     list:AddDataTemplate("ZO_GamepadOptionsHorizontalListRow", OptionsSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)    
     list:AddDataTemplateWithHeader("ZO_GamepadOptionsHorizontalListRow", OptionsSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsHeaderTemplate")
@@ -323,6 +331,8 @@ function ZO_GamepadOptions:SetupOptionsList(list)
 
     list:AddDataTemplate("ZO_GamepadOptionsLabelRow", OptionsSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)    
     list:AddDataTemplateWithHeader("ZO_GamepadOptionsLabelRow", OptionsSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsHeaderTemplate")
+    list:SetDataTemplateReleaseFunction("ZO_GamepadOptionsLabelRow", ReleaseControl)
+    list:SetDataTemplateWithHeaderReleaseFunction("ZO_GamepadOptionsLabelRow", ReleaseControl)
 end
 
 function ZO_GamepadOptions:InitializeOptionsLists()

@@ -70,7 +70,7 @@ function HelpCustomerService_Keyboard:InitializeHelpDialogs()
 		},
         mainText =
         {
-			text = zo_strformat(SI_CUSTOMER_SERVICE_SUBMIT_FAILED_BODY, GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_HELP))
+			text = zo_strformat(SI_CUSTOMER_SERVICE_SUBMIT_FAILED_BODY, GetURLTextByType(APPROVED_URL_ESO_HELP))
         },
        
         buttons =

@@ -47,7 +47,7 @@ end
 local KEYBOARD_FUNCTIONS =
 {
     playerStatusIcon = GetPlayerStatusIcon,
-    championPointsIcon = GetChampionPointsIcon,
+    championPointsIcon = GetChampionPointsIconSmall,
     allianceIcon = GetAllianceSymbolIcon,
     classIcon = GetClassIcon,
 }

@@ -242,12 +242,14 @@ function ZO_GuildHeraldryManager_Shared:InitializeStylePool(template)
         end
     end
 
+    local DEFAULT_WIDTH = 10
+
     local function UpdateSelectedState(style, skipAnim)
-        UpdateState(style, skipAnim, self.sharedStyleSelectedHighlight, style.selected)
+        UpdateState(style, skipAnim, self.sharedStyleSelectedHighlight, style.selected, DEFAULT_WIDTH)
     end
 
     local function UpdateHighlightedState(style, skipAnim)
-        UpdateState(style, skipAnim, nil, style.highlighted, 10)
+        UpdateState(style, skipAnim, nil, style.highlighted, DEFAULT_WIDTH)
     end
 
     local function OnClicked(style, button, upInside)

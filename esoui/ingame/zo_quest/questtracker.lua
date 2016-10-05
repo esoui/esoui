@@ -42,6 +42,7 @@ local KEYBOARD_CONSTANTS =
 
     QUEST_LINE_BASE_WIDTH = 212,
     QUEST_LINE_HEADER_WIDTH = 222,
+    QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT = 22,
     QUEST_TRACKER_TREE_INDENT = 10,
     QUEST_TRACKER_TREE_ANCHOR_POINT = TOPLEFT,
     QUEST_TRACKER_TREE_RELATIVE_POINT = BOTTOMLEFT,
@@ -82,6 +83,7 @@ local GAMEPAD_CONSTANTS =
     TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
     QUEST_LINE_BASE_HEIGHT = 34,
+    QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT = 48,
     QUEST_HEADER_BASE_HEIGHT = 28,
     QUEST_TRACKER_TREE_INDENT = 0,
     QUEST_TRACKER_TREE_ANCHOR_POINT = TOPRIGHT,
@@ -127,6 +129,7 @@ local function ApplyPlatformStyleToHeader(control)
 
     control:ClearAnchors()
     control:SetDimensions(constants.QUEST_LINE_HEADER_WIDTH, constants.QUEST_HEADER_BASE_HEIGHT)
+    control.icon:SetDimensions(constants.QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT, constants.QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT)
     control:SetFont(constants.FONT_HEADER)
     control:SetModifyTextType(constants.TEXT_TYPE_HEADER)
     --Text needs to be reset on the text type changing
@@ -134,6 +137,13 @@ local function ApplyPlatformStyleToHeader(control)
         control:SetText(control.headerText)
     end
     control:SetInheritAlpha(constants.HEADER_INHERIT_ALPHA)
+
+    if control.questType or control.instanceDisplayType then
+        local icon = control.icon
+        local questJournalObject = SYSTEMS:GetObject("questJournal")
+        local iconTexture = questJournalObject:GetIconTexture(control.questType, control.instanceDisplayType)
+        icon:SetTexture(iconTexture)
+    end
 
     if control.m_TreeNode then
         control.m_TreeNode:SetOffsetY(constants.QUEST_TRACKER_TREE_LINE_SPACING[QUEST_TRACKER_TREE_HEADER])
@@ -164,7 +174,11 @@ end
 local function ApplyPlatformStyleToAssistedTexture(assistedTexture, assistedHeader)
     local constants = GetPlatformConstants()
     assistedTexture:ClearAnchors()
-    assistedTexture:SetAnchor(constants.ASSISTED_TEXTURE_ANCHOR_POINT, assistedHeader, constants.ASSISTED_TEXTURE_RELATIVE_POINT, constants.ASSISTED_TEXTURE_OFFSET_X, constants.ASSISTED_TEXTURE_OFFSET_Y)
+    local targetRelativeTo = assistedHeader
+    if assistedHeader.isUsingIcon then
+        targetRelativeTo = assistedHeader.icon
+    end
+    assistedTexture:SetAnchor(constants.ASSISTED_TEXTURE_ANCHOR_POINT, targetRelativeTo, constants.ASSISTED_TEXTURE_RELATIVE_POINT, constants.ASSISTED_TEXTURE_OFFSET_X, constants.ASSISTED_TEXTURE_OFFSET_Y)
     assistedTexture:SetInheritAlpha(constants.HEADER_INHERIT_ALPHA)
 end
 
@@ -239,6 +253,8 @@ function ZO_Tracker:New(trackerPanel, trackerControl)
 									control.m_BGStorage = nil
 									control.m_TreeNode = nil
                                     control.headerText = nil
+                                    control.questType = nil
+                                    control.instanceDisplayType = nil
 								end
 
     trackerControl:GetParent().tracker = tracker            
@@ -497,7 +513,7 @@ end
 -- Header Management
 --
 
-function ZO_Tracker:CreateQuestHeader(data, questName, questType, isComplete)
+function ZO_Tracker:CreateQuestHeader(data, questName, questType, isComplete, instanceDisplayType)
     local questHeader, questHeaderKey = self.headerPool:AcquireObject()
     
     local treeNode = self.treeView:AddChild(nil, questHeader)
@@ -513,15 +529,31 @@ function ZO_Tracker:CreateQuestHeader(data, questName, questType, isComplete)
                                                         -- no longer tracking this quest
     questHeader.m_StepDescriptionControls = {}
 
-    self:InitializeQuestHeader(questName, questType, questHeader, isComplete)
+    self:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
 
     return questHeader, treeNode
 end
 
-function ZO_Tracker:InitializeQuestHeader(questName, questType, questHeader, isComplete)
+function ZO_Tracker:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
     questHeader:SetColor(GetConColor(questHeader.m_Data.level))
     questHeader:SetText(questName)
-    questHeader.headerText = questName --save the text off so it can be easily reset on the style changing
+    -- add icon here
+    local icon = questHeader.icon
+    local questJournalObject = SYSTEMS:GetObject("questJournal")
+    local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
+    if iconTexture then
+        icon:SetTexture(iconTexture)
+        icon:SetHidden(false)
+        questHeader.isUsingIcon = true
+    else
+        icon:SetHidden(true)
+        questHeader.isUsingIcon = false
+    end
+
+    --save the text and icon data off so it can be easily reset on the style changing
+    questHeader.headerText = questName
+    questHeader.questType = questType
+    questHeader.instanceDisplayType = instanceDisplayType
 end
 
 function ZO_Tracker:InitializeQuestCondition(questCondition, parentQuestHeader, questConditionKey, treeNode)
@@ -788,7 +820,8 @@ function ZO_Tracker:OnQuestAdvanced(questIndex, questName, isPushed, isComplete,
         if(questHeader)
         then
             local questType = GetJournalQuestType(questIndex)
-            self:InitializeQuestHeader(questName, questType, questHeader, isComplete)
+            local instanceDisplayType = GetJournalInstanceDisplayType(questIndex)
+            self:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
         end
         
         self:RebuildConditions(questIndex)       
@@ -931,7 +964,7 @@ end
 
 function ZO_Tracker:AddQuest(data)
     local questIndex = data:GetJournalIndex()
-    local questName, _, _, stepType, stepTrackerText, isComplete, tracked, _, _, questType = GetJournalQuestInfo(questIndex)
+    local questName, _, _, stepType, stepTrackerText, isComplete, tracked, _, _, questType, instanceDisplayType = GetJournalQuestInfo(questIndex)
     
     -- This line prevents quests from being tracked multiple times but allows quests to be properly tracked
     -- when the UI is reloaded.
@@ -939,7 +972,7 @@ function ZO_Tracker:AddQuest(data)
     --if this quest isnt on the c++ tracker or it isnt on the lua tracker then give up
     if((not tracked) or (not self:IsOnTracker(TRACK_TYPE_QUEST, questIndex))) then return end
     
-    local questHeader, treeNode = self:CreateQuestHeader(data, questName, questType, isComplete)
+    local questHeader, treeNode = self:CreateQuestHeader(data, questName, questType, isComplete, instanceDisplayType)
 
     self:PopulateQuestConditions(questIndex, questName, stepType, stepTrackerText, isComplete, tracked, questHeader, treeNode)    
     

@@ -132,24 +132,6 @@ local ChatEventFormatters = {
         end
     end,
 
-    [EVENT_STUCK_ERROR_ON_COOLDOWN] = function()
-        local cooldownText = ZO_FormatTime(GetStuckCooldown(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-        local cooldownRemainingText = ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-        return zo_strformat(SI_STUCK_ERROR_ON_COOLDOWN, cooldownText, cooldownRemainingText)
-    end,
-
-    [EVENT_STUCK_ERROR_ALREADY_IN_PROGRESS] = function()
-        return GetString(SI_STUCK_ERROR_ALREADY_IN_PROGRESS)
-    end,
-
-    [EVENT_STUCK_ERROR_IN_COMBAT] = function()
-        return GetString(SI_STUCK_ERROR_IN_COMBAT)
-    end,
-
-    [EVENT_STUCK_ERROR_INVALID_LOCATION] = function()
-        return GetString(SI_INVALID_STUCK_LOCATION)
-    end,
-
     [EVENT_TRIAL_FEATURE_RESTRICTED] = function(restrictionType)
         if ZO_ChatSystem_GetTrialEventMappings()[restrictionType] then
             return GetString("SI_TRIALACCOUNTRESTRICTIONTYPE", restrictionType)

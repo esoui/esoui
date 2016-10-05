@@ -18,6 +18,9 @@ EsoUI\Pregame\Tooltip\Tooltip.xml
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
+EsoUI\Pregame\PregameAnimatedBackground\PregameAnimatedBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\PregameAnimatedBackground.xml
+
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginBase.lua
@@ -25,6 +28,8 @@ EsoUI\Pregame\AccountLogin\Keyboard\ZO_Login.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_Login.xml
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_CreateLinkAccount.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_CreateLinkAccount.xml
+EsoUI\Pregame\AccountLogin\Keyboard\ServerSelect.lua
+EsoUI\Pregame\AccountLogin\Keyboard\ServerSelect.xml
 
 EsoUI\Pregame\AccountLogin\EULA.lua
 EsoUI\Pregame\AccountLogin\EULA.xml

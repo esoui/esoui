@@ -25,6 +25,20 @@ function ZO_WorldMapQuests_Shared:Initialize(control)
     end
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapQuestsDataRefresh", LayoutList)
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function() self:RefreshNoQuestsLabel() end)
+end
+
+function ZO_WorldMapQuests_Shared:RefreshNoQuestsLabel()
+    if #self.data.masterList > 0 then
+        self.noQuestsLabel:SetHidden(true)    
+    else
+        self.noQuestsLabel:SetHidden(false)
+        if ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList() then
+            self.noQuestsLabel:SetText(GetString(SI_WORLD_MAP_NO_QUESTS))
+        else
+            self.noQuestsLabel:SetText(GetString(SI_WORLD_MAP_DOESNT_SHOW_QUESTS_DISTANCE))
+        end
+    end
 end
 
 -- Singleton shared data
@@ -37,6 +51,7 @@ function ZO_WorldMapQuestsData_Singleton:New(...)
 end
 
 function ZO_WorldMapQuestsData_Singleton:Initialize(control)
+    self.listDirty = false
     self.masterList = {}
 
     self.CompareQuests = function(a, b)
@@ -49,128 +64,88 @@ function ZO_WorldMapQuestsData_Singleton:Initialize(control)
         end
     end
 
-    local function OnQuestPositionRequestComplete(eventCode, taskId, pinType, xLoc, zLoc, areaRadius, insideCurrentMapWorld, isBreadcrumb)
-        local insideBounds = (xLoc >= 0 and xLoc <= 1 and zLoc >= 0 and zLoc <= 1)
-        local shouldAddQuest = insideCurrentMapWorld and insideBounds
-
-        self:MarkTaskCompleted(taskId, shouldAddQuest)
-    end
-
-    local function RefreshList()
-        self:RefreshList()
-    end
-
-    control:RegisterForEvent(EVENT_QUEST_ADDED, RefreshList)
-    control:RegisterForEvent(EVENT_QUEST_REMOVED, RefreshList)
-    control:RegisterForEvent(EVENT_LINKED_WORLD_POSITION_CHANGED, RefreshList)
-
-    control:RegisterForEvent(EVENT_QUEST_POSITION_REQUEST_COMPLETE, OnQuestPositionRequestComplete)
-    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", RefreshList)
- end
-
-function ZO_WorldMapQuestsData_Singleton:RefreshList()
-    if(self:BuildMasterList()) then
-        local FORCE_LAYOUT = true
-        self:LayoutList(FORCE_LAYOUT)
-    end
+    WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestAvailable", function(...) self:OnQuestAvailable(...) end)
+    WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestRemoved", function(...) self:OnQuestRemoved(...) end)
+    EVENT_MANAGER:RegisterForUpdate("ZO_WorldMapQuestsData_Singleton", 100, function()
+        if self.listDirty then
+            self.listDirty = false
+            self:LayoutList(true)
+        end
+    end)
 end
 
-function ZO_WorldMapQuestsData_Singleton:LayoutList(forceLayout)
-    CALLBACK_MANAGER:FireCallbacks("OnWorldMapQuestsDataRefresh", forceLayout)
-end
-
-function ZO_WorldMapQuestsData_Singleton:ClearPendingTasks()
-    self.currentTasks = {}
-    self.containedQuests = {}
-    self.awaitingTasks = 0
-end
-
-function ZO_WorldMapQuestsData_Singleton:AddTask(taskId, questIndex)
-    if(taskId) then
-        self.currentTasks[taskId] = questIndex
-        self.containedQuests[questIndex] = false
-        self.awaitingTasks = self.awaitingTasks + 1
+function ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList()
+    local mapType = GetMapType()
+    --We don't want to track any quests when we are showing these high map levels
+    if mapType == MAPTYPE_WORLD or mapType == MAPTYPE_COSMIC or mapType == MAPTYPE_ALLIANCE then
+        return false
     end
+    return true
 end
 
-function ZO_WorldMapQuestsData_Singleton:AddQuestToList(questIndex)
-    local alreadyContainsQuest = self.containedQuests[questIndex]
-    if(not alreadyContainsQuest) then
-        self.containedQuests[questIndex] = true
+function ZO_WorldMapQuestsData_Singleton:OnQuestAvailable(questIndex)
+    if not ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList() then
+        return
+    end
+        
+    if self:GetQuestMasterListIndex(questIndex) then
+        -- We already have this quest in the list
+        return
+    end
+
+    local questSteps = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
+    local shouldAddQuest
+    if questSteps then
+        shouldAddQuest = false
+        for stepIndex, questConditions in pairs(questSteps) do
+            for conditionIndex, conditionData in pairs(questConditions) do
+                if conditionData.xLoc >= 0 and conditionData.xLoc <= 1 and conditionData.yLoc >= 0 and conditionData.yLoc <= 1 and conditionData.insideCurrentMapWorld then
+                    shouldAddQuest = true
+                    break
+                end
+            end
+        end
+    else
+        shouldAddQuest = IsJournalQuestInCurrentMapZone(questIndex)
+    end
+
+    if shouldAddQuest then
         local questType = GetJournalQuestType(questIndex)
         local name = GetJournalQuestName(questIndex)
         local level = GetJournalQuestLevel(questIndex)
+        local displayType = GetJournalQuestInstanceDisplayType(questIndex)
         table.insert(self.masterList, {
             questIndex = questIndex,
             name = name,
             level = level,
-            questType = questType
+            questType = questType,
+            displayType = displayType,
         })
+
+        self.listDirty = true
+    end       
+end
+
+function ZO_WorldMapQuestsData_Singleton:OnQuestRemoved(questIndex)
+    local masterListIndex = self:GetQuestMasterListIndex(questIndex)
+    if masterListIndex then
+        table.remove(self.masterList, masterListIndex)
+        self.listDirty = true
     end
 end
 
-function ZO_WorldMapQuestsData_Singleton:MarkTaskCompleted(taskId, shouldAddToList)
-    if(self.currentTasks) then
-        local questIndex = self.currentTasks[taskId]
-        if(questIndex ~= nil and self.awaitingTasks > 0) then
-            self.awaitingTasks = self.awaitingTasks - 1
-            
-            if(shouldAddToList) then
-                self:AddQuestToList(questIndex)
-            end
-
-            if(self.awaitingTasks == 0) then
-                self:LayoutList()
-            end
+function ZO_WorldMapQuestsData_Singleton:GetQuestMasterListIndex(questIndex)
+    for i, questData in ipairs(self.masterList) do
+        if questData.questIndex == questIndex then
+            return i
         end
     end
+    return nil
 end
 
-function ZO_WorldMapQuestsData_Singleton:GetNumRemainingTasks()
-    return self.awaitingTasks
-end
-
-function ZO_WorldMapQuestsData_Singleton:BuildMasterList()
-    self.masterList = {}
-    self:ClearPendingTasks()
-
-    local mapType = GetMapType()
-    if(mapType == MAPTYPE_WORLD or mapType == MAPTYPE_COSMIC or mapType == MAPTYPE_ALLIANCE) then return true end
-    
-    for questIndex = 1, MAX_JOURNAL_QUESTS do
-        local hadConditionPosition = false
-        if(IsValidQuestIndex(questIndex)) then
-            if(GetJournalQuestIsComplete(questIndex)) then
-                local taskId = RequestJournalQuestConditionAssistance(questIndex, QUEST_MAIN_STEP_INDEX, 1)                
-                if(taskId) then
-                    hadConditionPosition = true
-                    self:AddTask(taskId, questIndex)
-                end
-            else        
-                for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
-                    for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-                        local _, _, isFailCondition, isComplete, _, isVisible = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)                    
-                        if(not (isFailCondition or isComplete) and isVisible) then
-                            local taskId = RequestJournalQuestConditionAssistance(questIndex, stepIndex, conditionIndex)
-                            if(taskId) then
-                                hadConditionPosition = true
-                                self:AddTask(taskId, questIndex)
-                            end
-                        end
-                    end
-                end            
-            end
-
-            if(not hadConditionPosition) then
-                if(IsJournalQuestInCurrentMapZone(questIndex)) then
-                    self:AddQuestToList(questIndex)
-                end
-            end
-        end
-    end
-    
-    -- If there were no quests, the list should update immediately
-    return self:GetNumRemainingTasks() == 0
+function ZO_WorldMapQuestsData_Singleton:LayoutList(forceLayout)
+    self:Sort()
+    CALLBACK_MANAGER:FireCallbacks("OnWorldMapQuestsDataRefresh", forceLayout)
 end
 
 function ZO_WorldMapQuestsData_Singleton:Sort()

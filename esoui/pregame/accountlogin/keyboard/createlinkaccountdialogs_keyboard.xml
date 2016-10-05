@@ -38,7 +38,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ESOIcon" relativePoint="BOTTOMRIGHT" offsetX="5" />
                 </Label>
 
-                <Label name="$(parent)LinkConfirm2" inherits="ZO_CreateLinkAccountDialogLabel_Keyboard" text="SI_KEYBOARD_LINKACCOUNT_CONFIRM_2_DMM">
+                <Label name="$(parent)LinkConfirm2" inherits="ZO_CreateLinkAccountDialogLabel_Keyboard" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMLEFT" offsetY="64" />
                     <Dimensions x="360" />
                 </Label>

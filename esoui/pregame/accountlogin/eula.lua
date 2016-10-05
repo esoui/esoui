@@ -19,9 +19,8 @@ function ZO_EULAFragment:New(control)
 end
 
 function ZO_EULAFragment:Show()
-    ZO_Dialogs_ShowDialog("SHOW_EULA")
-
     EULA_SCREEN:ShowNextEULA()
+
     -- Call base class for animations after everything has been tweaked
     ZO_FadeSceneFragment.Show(self)
 end
@@ -51,7 +50,6 @@ function ZO_EULA:Initialize(control)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, function(...) self:OnLinkClicked(...) end)
     CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
         if self.isShowingLinkConfirmation then
-            ZO_Dialogs_ShowDialog("SHOW_EULA")
             self:ShowNextEULA()
             self.isShowingLinkConfirmation = false
         end
@@ -78,14 +76,18 @@ end
 function ZO_EULA:ShowNextEULA()
     self.eulaType = self:GetNextEulaType()
     if self.eulaType then
+        if ZO_Dialogs_IsShowing("SHOW_EULA") then
+            ZO_Dialogs_ReleaseDialog("SHOW_EULA")
+        end
         local eulaText, agreeText, disagreeText, hasAgreed, eulaTitle = GetEULADetails(self.eulaType)
         if eulaTitle == "" then
             eulaTitle = SI_WINDOW_TITLE_EULA
         end
-        ZO_Dialogs_UpdateDialogTitleText(self.control, { text = eulaTitle })
-        ZO_Dialogs_UpdateDialogMainText(self.control, { text = eulaText })
+        self.titleEulaText = eulaTitle
+        self.mainEulaText = eulaText
         self:SetupButtonTextData(agreeText, disagreeText)
         self:ResetDialog()
+        ZO_Dialogs_ShowDialog("SHOW_EULA")
     else
         SCENE_MANAGER:Hide("eula")
     end
@@ -96,11 +98,27 @@ function ZO_EULA:AcceptCurrentEULA()
 end
 
 function ZO_EULA:InitializeDialog(dialogControl)
+    local function GetMainText()
+        return self.mainEulaText
+    end
+
+    local function GetTitleText()
+        return self.titleEulaText
+    end
+
     self.dialogInfo =
     {
         customControl = dialogControl,
         canQueue = true,
         mustChoose = true,
+        title =
+        {
+            text = GetTitleText
+        },
+        mainText =
+        {
+            text = GetMainText
+        },
         buttons =
         {
             [1] =

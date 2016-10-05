@@ -268,6 +268,8 @@ function ZO_TradeWindow:OnTradeWindowItemAdded(eventCode, who, tradeSlot, itemSo
     end
 
     PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 --Either player removed an item from the trade
@@ -282,6 +284,8 @@ function ZO_TradeWindow:OnTradeWindowItemRemoved(eventCode, who, tradeSlot, item
         -- Do not play the sound for my items, cursor pickup handles that.
         PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_PICKUP)
     end
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 --region promotion of money change event
@@ -294,6 +298,8 @@ function ZO_TradeWindow:OnTradeWindowMoneyChanged(eventCode, who, money)
     end
 
     PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 --

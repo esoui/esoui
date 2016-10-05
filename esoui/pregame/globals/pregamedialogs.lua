@@ -859,7 +859,11 @@ ESO_Dialogs["LINKING_ACCOUNTS_SUCCESS_KEYBOARD"] =
     },
     mainText =
     {
-        text = SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_DMM,
+        text = function()
+            local serviceType = GetPlatformServiceType()
+            local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
+            return zo_strformat(GetString(SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_FORMAT), accountTypeName)
+        end,
     },
     noChoiceCallback = function()
             LOGIN_MANAGER_KEYBOARD:AttemptLinkedLogin()

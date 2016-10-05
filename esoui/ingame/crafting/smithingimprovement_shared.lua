@@ -235,7 +235,15 @@ function ZO_SharedSmithingImprovement:SharedImprove(dialogName)
     local improveItemLink = GetItemLink(itemToImproveBagId, itemToImproveSlotIndex)
     local boosterName = GetSmithingImprovementItemLink(craftingType, self:GetBoosterRowForQuality(self.currentQuality).index)
 
-	ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply }, {mainTextParams = { chance, improveItemLink, numBoostersToApply, boosterName}})
+    local function ShowImprovementDialog()
+        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply }, {mainTextParams = { chance, improveItemLink, numBoostersToApply, boosterName}})
+    end
+
+	if IsItemBoPAndTradeable(itemToImproveBagId, itemToImproveSlotIndex) then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_MODIFY_TRADE_BOP", {onAcceptCallback = ShowImprovementDialog}, {mainTextParams={GetItemName(itemToImproveBagId, itemToImproveSlotIndex)}})
+    else
+        ShowImprovementDialog()
+    end
 end
 
 -- Crafting slot

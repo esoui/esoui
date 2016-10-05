@@ -15,19 +15,12 @@ function WorldMapQuests:Initialize(control)
     self.headerPool = ZO_ControlPool:New("ZO_WorldMapQuestHeader", control:GetNamedChild("PaneScrollChild"), "Header")
 
     WORLD_MAP_QUESTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    WORLD_MAP_QUESTS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
-            self.data:RefreshList()
-        end
-    end)
     QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(...) self:RefreshHeaders() end)
 end
 
 function WorldMapQuests:LayoutList()
-    self.noQuestsLabel:SetHidden(#self.data.masterList > 0)
-
-    self.data:Sort()
-
+    self:RefreshNoQuestsLabel()
+    
     local prevHeader
     self.headerPool:ReleaseAllObjects()
     for i, data in ipairs(self.data.masterList) do

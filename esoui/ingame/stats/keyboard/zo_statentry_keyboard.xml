@@ -14,6 +14,7 @@
                 self.name = self:GetNamedChild("Name")
                 self.value = self:GetNamedChild("Value")
                 self.pendingBonus = self:GetNamedChild("PendingBonus")
+                self.comparisonValue = self:GetNamedChild("ComparisonValue")
             </OnInitialized>
             <OnMouseEnter>
                 ZO_StatsEntry_OnMouseEnter(self)
@@ -28,6 +29,9 @@
                 </Label>
                 <Label name="$(parent)PendingBonus" hidden="true" inherits="ZO_StatsRowValue">
                     <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-20"/>
+                </Label>
+                <Label name="$(parent)ComparisonValue" hidden="true" inherits="ZO_StatsRowValue">
+                    <Anchor point="RIGHT" offsetX="-20" />
                 </Label>
             </Controls>
         </Control>

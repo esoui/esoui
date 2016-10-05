@@ -93,20 +93,16 @@ end
 local KEYBOARD_STYLES = {
                             textTemplate = "ZO_Subtitles_Text_Keyboard_Template",
                             textWidth = 1200,
-                            textOffsetY = -272,
                         }
 
 local GAMEPAD_STYLES =  {
                             textTemplate = "ZO_Subtitles_Text_Gamepad_Template",
                             textWidth = 890,
-                            textOffsetY = -322,
                         }
 
 function ZO_SubtitleManager:UpdatePlatformStyles(styleTable)
     ApplyTemplateToControl(self.messageText, styleTable.textTemplate)
     self.messageText:SetWidth(styleTable.textWidth)
-    self.messageText:ClearAnchors()
-    self.messageText:SetAnchor(BOTTOM, nil, TOP, 0, styleTable.textOffsetY)
 end
 
 function ZO_SubtitleManager:InitializePlatformStyles()

@@ -56,6 +56,8 @@ function PreferredRolesManager:RefreshRoles()
     self:SetRoleToggled(LFG_ROLE_TANK, isTank, SYSTEM_REQUESTED)
     self:SetRoleToggled(LFG_ROLE_HEAL, isHeal, SYSTEM_REQUESTED)
     self:SetRoleToggled(LFG_ROLE_DPS, isDPS, SYSTEM_REQUESTED)
+
+    self:DisableRoleButtons(IsCurrentlySearchingForGroup())
 end
 
 function PreferredRolesManager:SetRoleToggled(role, selected, userRequested)

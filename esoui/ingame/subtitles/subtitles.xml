@@ -14,8 +14,7 @@
         <Label name="ZO_Subtitles_Text_Gamepad_Template" font="ZoFontGamepad42" virtual="true" />
 
         <TopLevelControl name="ZO_Subtitles" layer="BACKGROUND" tier="LOW" level="0">
-            <Anchor point="BOTTOMLEFT"/>
-            <Anchor point="BOTTOMRIGHT"/>
+            <Anchor point="BOTTOM" relativeTo="ZO_PlayerToPlayerAreaPromptContainerTarget" relativePoint="TOP" />
 
             <OnInitialized>
                 ZO_Subtitles_OnInitialize(self)
@@ -23,6 +22,7 @@
             
             <Controls>
                 <Label name="$(parent)Text" horizontalAlignment="CENTER" alpha="0.0">
+                    <Anchor point="BOTTOM" />
                     <Controls>
                         <Texture name="$(parent)Background" textureFile="EsoUI/Art/Subtitles/subtitle_background_centerBlur.dds" alpha="0.6">
                             <Anchor point="TOP" offsetY="-20"/>

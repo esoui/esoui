@@ -241,7 +241,8 @@ function ZO_QuickslotManager:New(container)
                                                                 manager.quickSlotState = false
                                                             end
                                                         end)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("CollectionsInventoryUpdate", RefreshQuickslotWindow)
+    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("FullCollectionsInventoryUpdate", RefreshQuickslotWindow)
+    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("SingleCollectionsInventoryUpdate", RefreshQuickslotWindow)
 
     return manager
 end

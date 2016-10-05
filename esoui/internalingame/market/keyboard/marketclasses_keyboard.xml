@@ -1,11 +1,11 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_MarketDefaultLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-        
-        <Button name="ZO_MarketProductIcon" mouseOverBlendMode="ADD" virtual="true">
-            <Dimensions x="68" y="68" />
 
-            <MouseButton button="2" enabled="true" />
+        <Button name="ZO_MarketProductIconTemplate_Keyboard" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="64" y="64" />
+
+            <MouseButton button="MOUSE_BUTTON_INDEX_RIGHT" enabled="true" />
 
             <OnMouseEnter>
                 ZO_MarketProductIcon_OnMouseEnter(self)
@@ -35,7 +35,7 @@
                 </TextureComposite>
                 
                 <Texture name="$(parent)Icon" level="ZO_MARKET_TILE_ICON_IMAGE_LEVEL">
-                    <Dimensions x="64" y="64" />
+                    <Dimensions x="58" y="58" />
                     <Anchor point="CENTER" />
                     <Controls>
                         <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
@@ -46,8 +46,8 @@
                 </Texture>
             </Controls>
         </Button>
-        
-        <Control name="ZO_MarketProductBase_Keyboard" inherits="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
+
+        <Control name="ZO_MarketProductTemplate_Keyboard" inherits="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
             
             <OnMouseEnter>
                 ZO_MarketProduct_OnMouseEnter(self) 
@@ -76,30 +76,29 @@
                     <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
                     <AnchorFill/>
                 </Backdrop>
-                
+
                 <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" maxLineCount="3" wrapMode="ELLIPSIS" mouseEnabled="true" override="true">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/>
                     <OnMouseEnter>
                         ZO_MarketProduct_OnMouseEnter(self:GetParent())
                     </OnMouseEnter>
-            
+
                     <OnMouseExit>
                         ZO_MarketProduct_OnMouseExit(self:GetParent())
                     </OnMouseExit>
-                    
+
                     <OnMouseUp>
                         if upInside then
                             self:GetParent().marketProduct:OnClicked(button)
                         end
                     </OnMouseUp>
-            
+
                     <OnMouseDoubleClick>
                         self:GetParent().marketProduct:OnDoubleClicked(button)
                     </OnMouseDoubleClick>
                 </Label>
-                
-                
+
                 <Label name="$(parent)PreviousCost" font="ZoFontWinH4" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                     <Controls>
@@ -112,16 +111,9 @@
                         </Texture>
                     </Controls>
                 </Label>
-                
-                <Label name="$(parent)Cost" font="ZoFontWinH4" override="true">
-                    <Controls>
-                        <Texture name="$(parent)CurrencyIcon" override="true">
-                            <Dimensions x="32" y="32" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
-                        </Texture>
-                    </Controls>
-                </Label>
-                
+
+                <Label name="$(parent)Cost" font="ZoFontWinH4" override="true" />
+
                 <Label name="$(parent)Purchased" font="ZoFontWinH4" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                 </Label>
@@ -150,7 +142,7 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_MarketProduct" inherits="ZO_MarketProductBase_Keyboard" virtual="true">
+        <Control name="ZO_MarketProduct_Keyboard" inherits="ZO_MarketProductTemplate_Keyboard" virtual="true">
             <Dimensions x="ZO_MARKET_PRODUCT_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
             
             <Controls>
@@ -161,7 +153,7 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_MarketProductBundle" inherits="ZO_MarketProductBase_Keyboard" virtual="true">
+        <Control name="ZO_MarketProductBundle_Keyboard" inherits="ZO_MarketProductTemplate_Keyboard" virtual="true">
             <Dimensions x="ZO_MARKET_PRODUCT_BUNDLE_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
             
             <Controls>
@@ -176,5 +168,6 @@
                 </Label>
             </Controls>
         </Control>
+
     </Controls>
 </GuiXml>

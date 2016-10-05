@@ -252,8 +252,32 @@ function ZO_SharedTradeWindow:CanTradeItem(bagId, slot)
     end
 end
 
+function ZO_SharedTradeWindow:HasItemsOrGoldInTradeWindow(who)
+    if GetTradeMoneyOffer(who) ~= 0 then
+        return true
+    end
+    
+    for i = 1, TRADE_NUM_SLOTS do
+        local _, _, stackCount = GetTradeItemInfo(who, i)
+        if stackCount ~= 0 then
+            return true
+        end
+    end
+
+    return false
+end
+
 function ZO_SharedTradeWindow:IsModifyConfirmationLevelEnabled()
-    return self.m_reenableTime == nil or (GetFrameTimeMilliseconds() >= self.m_reenableTime)
+    if self.m_reenableTime == nil or GetFrameTimeMilliseconds() >= self.m_reenableTime then
+        if self.confirm[TRADE_ME] == TRADE_CONFIRM_EDIT then
+            --There needs to be something in the trade (on either side) to accept it
+            return self:HasItemsOrGoldInTradeWindow(TRADE_ME) or self:HasItemsOrGoldInTradeWindow(TRADE_THEM)
+        else
+            return true
+        end
+    else
+        return false
+    end
 end
 
 local function OnConfirmationDelayUpdate(control)

@@ -49,7 +49,7 @@ function ZO_MouseInputGroup:AddControlAndAllChildren(control, inputType)
 end
 
 function ZO_MouseInputGroup:IsControlInGroup(searchControl, inputType)
-local groupControls = self:GetInputTypeGroup(inputType)
+    local groupControls = self:GetInputTypeGroup(inputType)
     for _, control in ipairs(groupControls) do
         if searchControl == control then
             return true
@@ -59,7 +59,11 @@ local groupControls = self:GetInputTypeGroup(inputType)
 end
 
 function ZO_MouseInputGroup:RefreshMouseOver()
-    local currentMouseOverControlInGroup = self:IsControlInGroup(WINDOW_MANAGER:GetMouseOverControl(), ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+    local currentMouseOverControlInGroup = false
+    --there seems to be a weird case where 3D controls can be mouse entered when exiting UI mode. So we prevent this from registering enters when not in UI mode
+    if SCENE_MANAGER:IsInUIMode() then
+       currentMouseOverControlInGroup = self:IsControlInGroup(WINDOW_MANAGER:GetMouseOverControl(), ZO_MOUSE_INPUT_GROUP_MOUSE_OVER) 
+    end
     if currentMouseOverControlInGroup ~= self.over then
         self.over = currentMouseOverControlInGroup
         if self.over then

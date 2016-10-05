@@ -1,0 +1,34 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_ServerSelectRadioButton" inherits="ZO_RadioButton" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5"/>
+                </Label>
+            </Controls>
+        </Button>
+
+        <TopLevelControl name="ZO_ServerSelectDialog" layer="OVERLAY" tier="HIGH" inherits="ZO_CustomDialogBase" hidden="true" resizeToFitDescendents="true">
+            <OnEffectivelyShown>
+                PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
+            </OnEffectivelyShown>
+
+            <OnInitialized>
+                ZO_ServerSelect_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RadioButtonContainer" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true" />
+
+                <Label name="$(parent)Text" text="SI_CHARACTER_SERVER_WARNING" font="ZoFontGameBold" >
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)RadioButtonContainer" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)RadioButtonContainer" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)Button1" inherits="ZO_DialogButton">
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Text" offsetY="15"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

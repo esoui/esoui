@@ -59,7 +59,7 @@ function ZO_Stats:OnShown()
     end
 
     self:UpdateSpendablePoints()
-    self:RefreshBattleLevelHeader()
+    self:RefreshEquipmentBonus()
 
     TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
     if GetAttributeUnspentPoints() > 0 then
@@ -114,36 +114,45 @@ function ZO_Stats:SetUpTitleSection()
         ClearTooltip(InformationTooltip)
     end)
 
-    local battleLevelHeader = titleSectionControl:GetNamedChild("BattleLevelHeader")
-
-    self.levelTypeIcon = battleLevelHeader:GetNamedChild("LevelTypeIcon")
-    self.levelLabel = battleLevelHeader:GetNamedChild("Level")
-
-    self.battleLevelHeader = battleLevelHeader
+    self.equipmentBonus = titleSectionControl:GetNamedChild("EquipmentBonus")
+    local equipmentBonusIcons = self.equipmentBonus:GetNamedChild("Icons")
+    self.equipmentBonus.iconPool = ZO_ControlPool:New("ZO_StatsEquipmentBonusIcon", equipmentBonusIcons)
+    self.equipmentBonus.value = EQUIPMENT_SCORE_LOW
+    self.equipmentBonus.lowestEquipSlot = EQUIP_SLOT_NONE
 
     self:RefreshTitleSection()
+end
+
+function ZO_Stats:SetEquipmentBonusTooltip()
+    InformationTooltip:AddLine(GetString(SI_STATS_EQUIPMENT_BONUS), "", ZO_NORMAL_TEXT:UnpackRGBA())
+    InformationTooltip:AddVerticalPadding(10)
+
+    InformationTooltip:AddLine(GetString("SI_EQUIPMENTBONUS", self.equipmentBonus.value))
+    InformationTooltip:AddVerticalPadding(10)
+
+    InformationTooltip:AddLine(GetString(SI_STATS_EQUIPMENT_BONUS_GENERAL_TOOLTIP))
+    InformationTooltip:AddVerticalPadding(10)
+
+    if self.equipmentBonus.value < EQUIPMENT_BONUS_SUPERIOR and self.equipmentBonus.lowestEquipSlot ~= EQUIP_SLOT_NONE then
+        local equipSlotHasItem = select(2, GetEquippedItemInfo(self.equipmentBonus.lowestEquipSlot))
+        local lowestItemText
+        if equipSlotHasItem then
+            local lowestItemLink = GetItemLink(BAG_WORN, self.equipmentBonus.lowestEquipSlot)
+            lowestItemText = GetItemLinkName(lowestItemLink)
+            local quality = GetItemLinkQuality(lowestItemLink)
+            local qualityColor = GetItemQualityColor(quality)
+            lowestItemText = qualityColor:Colorize(lowestItemText)
+        else
+            lowestItemText = zo_strformat(SI_STATS_EQUIPMENT_BONUS_TOOLTIP_EMPTY_SLOT, GetString("SI_EQUIPSLOT", self.equipmentBonus.lowestEquipSlot))
+            lowestItemText = ZO_ERROR_COLOR:Colorize(lowestItemText)
+        end
+        InformationTooltip:AddLine(zo_strformat(SI_STATS_EQUIPMENT_BONUS_LOWEST_PIECE_KEYBOARD, lowestItemText), "", ZO_NORMAL_TEXT:UnpackRGBA())
+    end
 end
 
 function ZO_Stats:RefreshTitleSection()
     local playerAlliance = GetUnitAlliance("player")
     self.allianceIconControl:SetTexture(GetLargeAllianceSymbolIcon(playerAlliance))
-end
-
-function ZO_Stats:RefreshBattleLevelHeader()       
-    local isBattleLeveled = IsUnitBattleLeveled("player")
-    local isChampionBattleLeveled = IsUnitChampionBattleLeveled("player")
-
-    if isChampionBattleLeveled then
-        self.levelTypeIcon:SetWidth(24)
-        self.levelTypeIcon:SetHidden(false)
-        self.levelLabel:SetText(GetUnitChampionBattleLevel("player"))
-    elseif isBattleLeveled then
-        self.levelTypeIcon:SetWidth(0)
-        self.levelTypeIcon:SetHidden(true)
-        self.levelLabel:SetText(GetUnitBattleLevel("player"))
-    end
-
-    self.battleLevelHeader:SetHidden(not (isBattleLeveled or isChampionBattleLeveled))
 end
 
 function ZO_Stats:CreateBackgroundSection()
@@ -463,15 +472,44 @@ function ZO_Stats:AddStatRow(statType1, statType2)
 end
 
 local function EffectsRowComparator(left, right)
-    return left.time.endTime < right.time.endTime
+    local leftIsArtificial, rightIsArtificial = left.isArtificial, right.isArtificial
+    if leftIsArtificial ~= rightIsArtificial then
+        --Artificial before real
+        return leftIsArtificial
+    else
+        if leftIsArtificial then
+            --Both artificial, use def defined sort order
+            return left.sortOrder < right.sortOrder
+        else
+            --Both real, use time
+            return left.time.endTime < right.time.endTime
+        end
+    end
 end
 
 function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
     local function UpdateEffects(eventCode, changeType, buffSlot, buffName, unitTag, startTime, endTime, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType)
         if (not unitTag or unitTag == "player") and not container:IsHidden() then
             effectsRowPool:ReleaseAllObjects()
-
+            
             local effectsRows = {}
+
+            --Artificial effects--
+            for effectId in ZO_GetNextActiveArtificialEffectIdIter do
+                local displayName, iconFile, effectType, sortOrder = GetArtificialEffectInfo(effectId)
+                local effectsRow = effectsRowPool:AcquireObject()
+                effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName))
+                effectsRow.icon:SetTexture(iconFile)
+                effectsRow.effectType = effectType
+                effectsRow.time:SetHidden(true)
+                effectsRow.sortOrder = sortOrder
+                effectsRow.tooltipTitle = displayName
+                effectsRow.effectId = effectId
+                effectsRow.isArtificial = true
+
+                table.insert(effectsRows, effectsRow)
+            end
+
             for i = 1, GetNumBuffs("player") do
                 local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType = GetUnitBuffInfo("player", i)
 
@@ -485,8 +523,9 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
                     effectsRow.time.endTime = endTime
                     effectsRow.effectType = effectType
                     effectsRow.buffSlot = buffSlot
+                    effectsRow.isArtificial = false
 
-                    effectsRows[#effectsRows + 1] = effectsRow
+                    table.insert(effectsRows, effectsRow)
                 end
             end
 
@@ -508,11 +547,22 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
 
     container:RegisterForEvent(EVENT_EFFECT_CHANGED, UpdateEffects)
     container:RegisterForEvent(EVENT_EFFECTS_FULL_UPDATE, UpdateEffects)
+    container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, UpdateEffects)
+    container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, UpdateEffects)
     container:SetHandler("OnEffectivelyShown", UpdateEffects)
 end
 
 function ZO_Stats_Initialize(control)
     STATS = ZO_Stats:New(control)
+end
+
+function ZO_Stats_EquipmentBonus_OnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOMRIGHT, 0, -5, TOPRIGHT)
+    STATS:SetEquipmentBonusTooltip()
+end
+
+function ZO_Stats_EquipmentBonus_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end
 
 local ATTRIBUTE_DESCRIPTIONS =
@@ -533,6 +583,33 @@ end
 
 function ZO_StatsAttribute_OnMouseExit()
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_StatsActiveEffect_OnMouseEnter(control)
+    InitializeTooltip(GameTooltip, control, RIGHT, -15)
+    if control.isArtificial then
+        local tooltipText = GetArtificialEffectTooltipText(control.effectId)
+        GameTooltip:AddLine(control.tooltipTitle, "", ZO_SELECTED_TEXT:UnpackRGBA())
+        GameTooltip:AddLine(tooltipText, "", ZO_NORMAL_TEXT:UnpackRGBA())
+    else
+        GameTooltip:SetBuff(control.buffSlot, "player")
+    end
+
+    if not control.animation then
+        control.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", control:GetNamedChild("Highlight"))
+    end
+    control.animation:PlayForward()
+end
+
+function ZO_StatsActiveEffect_OnMouseExit(control)
+    ClearTooltip(GameTooltip)
+    control.animation:PlayBackward()
+end
+
+function ZO_StatsActiveEffect_OnMouseUp(control, button, upInside)
+    if upInside and button == MOUSE_BUTTON_INDEX_RIGHT and not control.isArtificial then
+        CancelBuff(control.buffSlot)
+    end
 end
 
 function ZO_Stats_InitializeRidingSkills(control)

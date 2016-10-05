@@ -1,31 +1,3 @@
-
-
-local STAT_DESCRIPTIONS = {
-    [STAT_HEALTH_MAX] = SI_STAT_TOOLTIP_HEALTH_MAX,
-    [STAT_HEALTH_REGEN_IDLE] = SI_STAT_TOOLTIP_HEALTH_REGENERATION_IDLE,
-    [STAT_HEALTH_REGEN_COMBAT] = SI_STAT_TOOLTIP_HEALTH_REGENERATION_COMBAT,
-    [STAT_MAGICKA_MAX] = SI_STAT_TOOLTIP_MAGICKA_MAX,
-    [STAT_MAGICKA_REGEN_IDLE] = SI_STAT_TOOLTIP_MAGICKA_REGENERATION_IDLE,
-    [STAT_MAGICKA_REGEN_COMBAT] = SI_STAT_TOOLTIP_MAGICKA_REGENERATION_COMBAT,
-    [STAT_STAMINA_MAX] = SI_STAT_TOOLTIP_STAMINA_MAX,
-    [STAT_STAMINA_REGEN_IDLE] = SI_STAT_TOOLTIP_STAMINA_REGENERATION_IDLE,
-    [STAT_STAMINA_REGEN_COMBAT] = SI_STAT_TOOLTIP_STAMINA_REGENERATION_COMBAT,
-    [STAT_SPELL_POWER] = SI_STAT_TOOLTIP_SPELL_POWER,
-    [STAT_SPELL_PENETRATION] = SI_STAT_TOOLTIP_SPELL_PENETRATION,
-    [STAT_SPELL_CRITICAL] = SI_STAT_TOOLTIP_SPELL_CRITICAL,
-    [STAT_ATTACK_POWER] = SI_STAT_TOOLTIP_ATTACK_POWER,
-    [STAT_PHYSICAL_PENETRATION] = SI_STAT_TOOLTIP_PHYSICAL_PENETRATION,
-    [STAT_CRITICAL_STRIKE] = SI_STAT_TOOLTIP_CRITICAL_STRIKE,
-    [STAT_PHYSICAL_RESIST] = SI_STAT_TOOLTIP_PHYSICAL_RESIST,
-    [STAT_SPELL_RESIST] = SI_STAT_TOOLTIP_SPELL_RESIST,
-    [STAT_CRITICAL_RESISTANCE] = SI_STAT_TOOLTIP_CRITICAL_RESISTANCE,
-    [STAT_POWER] = SI_STAT_TOOLTIP_POWER,
-    [STAT_MITIGATION] = SI_STAT_TOOLTIP_MITIGATION,
-    [STAT_SPELL_MITIGATION] = SI_STAT_TOOLTIP_SPELL_MITIGATION,
-    [STAT_ARMOR_RATING] = SI_STAT_TOOLTIP_ARMOR_RATING,
-    [STAT_WEAPON_AND_SPELL_DAMAGE] = SI_STAT_TOOLTIP_WEAPON_POWER,
-}
-
 ZO_StatEntry_Keyboard = ZO_Object:Subclass()
 
 function ZO_StatEntry_Keyboard:New(...)
@@ -70,8 +42,8 @@ function ZO_StatEntry_Keyboard:GetValue()
     return GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS, STAT_SOFT_CAP_OPTION_APPLY_SOFT_CAP)
 end
 
-function ZO_StatEntry_Keyboard:GetDisplayValue()
-    local value = self:GetValue()
+function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
+    local value = targetValue or self:GetValue()
     local statType = self.statType
 
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
@@ -106,11 +78,41 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
     end
 end
 
+function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
+    if statDelta and statDelta ~= 0 then
+        local comparisonStatValue = self:GetValue() + statDelta
+        local color
+        local icon
+        if statDelta > 0 then
+            color = ZO_SUCCEEDED_TEXT
+            icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+        else
+            color = ZO_ERROR_COLOR
+            icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+        end
+
+        comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
+        comparisonValueString = color:Colorize(comparisonValueString)
+
+        self.control.value:SetHidden(true)
+        self.control.comparisonValue:SetHidden(false)
+        self.control.comparisonValue:SetText(comparisonValueString)
+    end
+end
+
+function ZO_StatEntry_Keyboard:HideComparisonValue()
+    if not self.control.comparisonValue:IsHidden() then
+        self.control.comparisonValue:SetText("")
+        self.control.comparisonValue:SetHidden(true)
+        self.control.value:SetHidden(false)
+    end
+end
+
 function ZO_StatsEntry_OnMouseEnter(control)
     local statEntry = control.statEntry
     if statEntry then
         local statType = statEntry.statType
-        local description = STAT_DESCRIPTIONS[statType]
+        local description = ZO_STAT_TOOLTIP_DESCRIPTIONS[statType]
         if description then
             InitializeTooltip(InformationTooltip, control, statEntry.tooltipAnchorSide, -5)
 

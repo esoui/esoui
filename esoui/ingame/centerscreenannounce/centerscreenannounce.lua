@@ -7,6 +7,10 @@ CSA_EVENT_RAID_COMPLETE_TEXT = 5
 
 CSA_OPTION_SUPPRESS_ICON_FRAME = true
 
+ZO_MAX_CSA_SCROLL_WIDTH = 2184
+ZO_MIN_CSA_SCROLL_WIDTH = 512
+ZO_MAX_CSA_SCROLL_HEIGHT = 500
+
 local ARG_INDEX_SOUND = 1
 local ARG_INDEX_MESSAGE = 2
 local ARG_INDEX_COMBINED_MESSAGE = 3
@@ -16,6 +20,8 @@ local ARG_INDEX_EXPIRING_CALLBACK = 6
 local ARG_INDEX_BAR_PARAMS = 7
 local ARG_INDEX_LIFESPAN = 8
 local ARG_INDEX_SUPPRESS_FRAME = 9
+local ARG_INDEX_QUEUE_IMMEDIATELY = 10
+local ARG_INDEX_SHOW_IMMEDIATELY = 11
 
 local ARG_BREAKDOWN_INDEX_SCORE = 1
 local ARG_BREAKDOWN_INDEX_TIME = 2
@@ -102,6 +108,7 @@ function CenterScreenAnnounce:InitializeWipeAnimation(container, timelineTemplat
 end
 
 local WAIT_INTERVAL_SECONDS = 0.5
+local NO_WAIT_INTERVAL_SECONDS = 0
 
 do
     local handlers = ZO_CenterScreenAnnounce_GetHandlers()
@@ -391,8 +398,10 @@ function CenterScreenAnnounce:QueueMessage(eventId, category, ...)
     self.m_control:SetHandler("OnUpdate", self.m_onUpdateHandler)
 
     --Delay choosing the next message to show by WAIT_INTERVAL_SECONDS each time a new message comes in to stabilize a bit
-    local timeNowSeconds = GetFrameTimeMilliseconds() / 1000 
-    self.m_nextUpdateTimeSeconds = timeNowSeconds + WAIT_INTERVAL_SECONDS
+    local timeNowSeconds = GetFrameTimeMilliseconds() / 1000
+    local shouldQueueImmediately = select(ARG_INDEX_QUEUE_IMMEDIATELY, ...)
+    local waitOffset = shouldQueueImmediately and NO_WAIT_INTERVAL_SECONDS or WAIT_INTERVAL_SECONDS
+    self.m_nextUpdateTimeSeconds = timeNowSeconds + waitOffset
 
     local priority, data = self:CreateMessagePayload(eventId, category, self.m_nextQueueIndex, ...)
     table.insert(self.m_displayQueue, data)
@@ -651,20 +660,33 @@ local setupFunctions =
         TrySettingDynamicText(self.m_largeText, select(ARG_INDEX_MESSAGE, ...))
         TrySettingDynamicText(self.m_smallCombinedText, "")
         
+        local showImmediately = select(ARG_INDEX_SHOW_IMMEDIATELY, ...)
         -- check for an overriding lifespan coming from the handlers, if not stick with the default        
-        local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
         local lifespan = select(ARG_INDEX_LIFESPAN, ...)
+        lifespan = lifespan or DEFAULT_FADE_OUT_TIME
 
-        if(lifespan) then
+        if not showImmediately then
+            local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
             self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
             self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
-        else
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, DEFAULT_FADE_OUT_TIME)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, DEFAULT_FADE_OUT_TIME)
-        end
 
-        self.m_largeTextContainer.m_timeline:PlayFromStart()
-        self.m_largeTextContainer.m_timeline.beforeExpiring = true
+            self.m_largeTextContainer.m_timeline:PlayFromStart()
+            self.m_largeTextContainer.m_timeline.beforeExpiring = true
+        else
+            local endTime = lifespan + GetFrameTimeMilliseconds()
+            local function UpdateShowAnnouncementTime(control, timeS)
+                local timeLeftMS = endTime - (timeS * 1000)
+                if timeLeftMS <= 0 then
+                    self:CallExpiringCallback(control)
+                    control:SetDimensions(ZO_MIN_CSA_SCROLL_WIDTH, ZO_MAX_CSA_SCROLL_HEIGHT)
+                    self:ReleaseLine(control)
+                    control:SetHandler("OnUpdate", nil)
+                end
+            end
+
+            self.m_largeTextContainer:SetHandler("OnUpdate", UpdateShowAnnouncementTime)
+            self.m_largeTextContainer:SetDimensions(ZO_MAX_CSA_SCROLL_WIDTH, ZO_MAX_CSA_SCROLL_HEIGHT)
+        end
 
         self.m_smallCombinedIcon:SetHidden(true)
         self.longformBreakdownContainer:SetHidden(true)
@@ -810,7 +832,8 @@ function CenterScreenAnnounce:DisplayMessage(category, ...)
     end
 end
 
-local ALLOWED_EVENTS_WHILE_CRAFTING = {
+local ALLOWED_EVENTS_WHILE_CRAFTING = 
+{
     [EVENT_QUEST_ADDED] = true,
     [EVENT_QUEST_CONDITION_COUNTER_CHANGED] = true,
     [EVENT_QUEST_ADVANCED] = true,
@@ -833,6 +856,11 @@ function CenterScreenAnnounce:AddMessage(eventId, category, ...)
             return
         end
 
+        -- prevent unwanted announcements that have been specified as supressed
+        if self:GetSupressAnnouncementByEvent(eventId) then
+            return
+        end
+
         -- Checking the recency of the message should be sufficient for duplicate messages
         -- Otherwise, this needs to combine the full message text into a single string and check the recency of that.
         -- MLR: Changing to use the Combined message when available because when multiple similar messages come in on the same frame,
@@ -847,6 +875,32 @@ function CenterScreenAnnounce:AddMessage(eventId, category, ...)
                 expiringCallback()
             end
         end
+    end
+end
+
+function CenterScreenAnnounce:SupressAnnouncementByEvent(eventId)
+    if not self.suppressAnnouncements then
+        self.suppressAnnouncements = {}
+    end
+
+    if not self.suppressAnnouncements[eventId] then
+        self.suppressAnnouncements[eventId] = 0
+    end
+
+    self.suppressAnnouncements[eventId] = self.suppressAnnouncements[eventId] + 1
+end
+
+function CenterScreenAnnounce:GetSupressAnnouncementByEvent(eventId)
+    if self.suppressAnnouncements and self.suppressAnnouncements[eventId] then
+        return self.suppressAnnouncements[eventId] > 0
+    end
+
+    return false
+end
+
+function CenterScreenAnnounce:ResumeAnnouncementByEvent(eventId)
+    if self.suppressAnnouncements and self.suppressAnnouncements[eventId] then
+        self.suppressAnnouncements[eventId] = self.suppressAnnouncements[eventId] - 1
     end
 end
 

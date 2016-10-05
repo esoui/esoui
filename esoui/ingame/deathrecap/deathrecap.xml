@@ -322,7 +322,7 @@
                                         <Control name="$(parent)GamepadDivider" hidden="false" />
                                     </Controls>
                                 </Control>
-                                <Label name="$(parent)Title" font="ZoFontGamepadBold45">
+                                <Label name="$(parent)Title" font="ZoFontGamepadBold48">
                                     <Anchor point="BOTTOM" relativePoint="TOP" relativeTo="$(parent)AttacksDivider" offsetY="-10"/>
                                 </Label>
                                 <Label name="$(parent)AttacksHeader" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >

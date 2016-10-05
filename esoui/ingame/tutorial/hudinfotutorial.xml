@@ -82,7 +82,7 @@
                         local fonts =
                         {
                             {
-                                font = "ZoFontGamepadBold42",
+                                font = "ZoFontGamepad42",
                             },
                             {
                                 font = "ZoFontGamepad36",

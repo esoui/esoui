@@ -496,7 +496,7 @@ ESO_Dialogs["CANT_BUYBACK_FROM_FENCE"] =
     },
     mainText = 
     {
-        text = SI_STOLEN_ITEM_CANNOT_BUYBACK_TEXT,
+        text = zo_strformat(SI_STOLEN_ITEM_CANNOT_BUYBACK_TEXT),
     },
     buttons =
     {
@@ -1484,6 +1484,7 @@ ESO_Dialogs["CONFIRM_CLEAR_MAIL_COMPOSE"] =
 
 ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
 {
+    canQueue = true,
 	gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1932,7 +1933,7 @@ ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
     },
     mainText = 
     {
-        text = SI_GAMEPAD_DYEING_DISCARD_CHANGES_BODY,
+        text = zo_strformat(SI_GAMEPAD_DYEING_DISCARD_CHANGES_BODY),
     },
 
     buttons =
@@ -2385,7 +2386,7 @@ ESO_Dialogs["CHAMPION_CONFIRM_CANCEL_RESPEC"] =
     },
     mainText = 
     {
-        text = zo_strformat(SI_CHAMPION_DIALOG_TEXT_FORMAT, GetString(SI_CHAMPION_DIALOG_CANCEL_RESPEC_BODY)),
+        text = zo_strformat(SI_CHAMPION_DIALOG_CANCEL_RESPEC_BODY),
     },
     buttons =
     {
@@ -2415,7 +2416,7 @@ ESO_Dialogs["CHAMPION_CONFIRM_CHANGES"] =
     },
     mainText = 
     {
-        text = zo_strformat(SI_CHAMPION_DIALOG_TEXT_FORMAT, GetString(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST)),
+        text = zo_strformat(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST),
     },
     buttons =
     {
@@ -2723,7 +2724,7 @@ ESO_Dialogs["KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS"] =
     },
     mainText = 
     {
-        text = SI_KEYBINDINGS_KEYBOARD_RESET_PROMPT,
+        text = zo_strformat(SI_KEYBINDINGS_KEYBOARD_RESET_PROMPT),
     },
     buttons =
     {
@@ -3068,3 +3069,74 @@ ESO_Dialogs["CONFIRM_EQUIP_TRADE_BOP"] =
         },
     },
 }
+
+do
+    ZO_GAMEPAD_INVENTORY_ACTION_DIALOG = "GAMEPAD_INVENTORY_ACTIONS_DIALOG"
+    local function ActionsDialogSetup(dialog, data)
+        dialog.entryList:SetOnSelectedDataChangedCallback(function(list, selectedData)
+                                                                data.itemActions:SetSelectedAction(selectedData and selectedData.action)
+                                                            end)
+        local parametricList = dialog.info.parametricList
+        ZO_ClearNumericallyIndexedTable(parametricList)
+
+        dialog.itemActions = data.itemActions
+        local actions = data.itemActions:GetSlotActions()
+        local numActions = actions:GetNumSlotActions()
+
+        for i = 1, numActions do
+            local action = actions:GetSlotAction(i)
+            local actionName = actions:GetRawActionName(action)
+
+            local entryData = ZO_GamepadEntryData:New(actionName)
+            entryData:SetIconTintOnSelection(true)
+            entryData.action = action
+            entryData.setup = ZO_SharedGamepadEntry_OnSetup
+
+            local listItem =
+            {
+                template = "ZO_GamepadItemEntryTemplate",
+                entryData = entryData,
+            }
+            table.insert(parametricList, listItem)
+        end
+
+        dialog.finishedCallback = data.finishedCallback
+
+        dialog:setupFunc()
+    end
+
+    ESO_Dialogs[ZO_GAMEPAD_INVENTORY_ACTION_DIALOG] =
+    {
+        setup = function(...) ActionsDialogSetup(...) end,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        title =
+        {
+            text = SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND,
+        },
+        parametricList = {}, --we'll generate the entries on setup
+        finishedCallback =  function(dialog)
+                                dialog.itemActions = nil
+                                if dialog.finishedCallback then
+                                    dialog.finishedCallback()
+                                end
+                                dialog.finishedCallback = nil
+                            end,
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = GetString(SI_DIALOG_CANCEL),
+            },
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_GAMEPAD_SELECT_OPTION),
+                callback = function(dialog)
+                    dialog.itemActions:DoSelectedAction()
+                end,
+            },
+        },
+    }
+end

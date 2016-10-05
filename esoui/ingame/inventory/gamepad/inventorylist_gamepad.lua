@@ -137,6 +137,20 @@ function ZO_GamepadInventoryList:RemoveOnSelectedDataChangedCallback(selectedDat
 end
 
 --[[
+Add a function called when the target data is changed.
+]]--
+function ZO_GamepadInventoryList:SetOnTargetDataChangedCallback(selectedDataCallback)
+    self.list:SetOnTargetDataChangedCallback(selectedDataCallback)
+end
+
+--[[
+Remove a function called when the target data is changed.
+]]--
+function ZO_GamepadInventoryList:RemoveOnTargetDataChangedCallback(selectedDataCallback)
+    self.list:RemoveOnTargetDataChangedCallback(selectedDataCallback)
+end
+
+--[[
 categorizationFunction function may be a function which takes a inventory data and returns
     a category string.
 ]]--

@@ -53,6 +53,10 @@ end
 
 SLASH_COMMANDS[GetString(SI_SLASH_READY_CHECK)] = ZO_SendReadyCheck
 
+SLASH_COMMANDS[GetString(SI_SLASH_DUEL_INVITE)] = function(txt)
+    ChallengeTargetToDuel(txt)
+end
+
 function DoCommand(text)
     local command, arguments = zo_strmatch(text, "^(/%S+)%s?(.*)")
 
@@ -66,7 +70,11 @@ function DoCommand(text)
     then
         fn(arguments or "")
     else
-        ExecuteChatCommand(text)
+		if IsInternalBuild() then
+			ExecuteChatCommand(text)
+		else
+			ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SI_ERROR_INVALID_COMMAND)
+		end
     end
 end
 

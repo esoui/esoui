@@ -132,7 +132,11 @@ end
 
 function ZO_OptionsPanel_Social_ResetTextSizeToDefault(control)
     CHAT_SYSTEM:ResetFontSizeToDefault()
-    ZO_OptionsPanel_Social_TextSizeOnShow(control)
+    -- Gamepad does not pass in a control when resetting
+    -- So skip attempting to update the control itself
+    if not IsInGamepadPreferredMode() then
+        ZO_OptionsPanel_Social_TextSizeOnShow(control)
+    end
 end
 
 do
@@ -171,7 +175,11 @@ end
 
 function ZO_OptionsPanel_Social_ResetMinAlphaToDefault(control)
     CHAT_SYSTEM:ResetMinAlphaToDefault()
-    ZO_OptionsPanel_Social_MinAlphaOnShow(control)
+    -- Gamepad does not pass in a control when resetting
+    -- So skip attempting to update the control itself
+    if not IsInGamepadPreferredMode() then
+        ZO_OptionsPanel_Social_MinAlphaOnShow(control)
+    end
 end
 
 do
@@ -235,6 +243,16 @@ local ZO_OptionsPanel_Social_ControlData =
             text = SI_SOCIAL_OPTIONS_SHOW_LEADERBOARD_NOTIFICATIONS,
             tooltipText = SI_SOCIAL_OPTIONS_SHOW_LEADERBOARD_NOTIFICATIONS_TOOLTIP,
             events = {[false] = "LeaderboardNotifications_Off", [true] = "LeaderboardNotifications_On",},
+        },
+        --Options_Social_AutoDeclineDuelInvites
+        [UI_SETTING_AUTO_DECLINE_DUEL_INVITES] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
+            panel = SETTING_PANEL_SOCIAL,
+            text = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES,
+            tooltipText = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES_TOOLTIP,
         },
     },
 

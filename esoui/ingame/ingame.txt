@@ -14,6 +14,7 @@ EsoUI\Ingame\Globals\CommonInventoryFunctions.lua
 EsoUI\Ingame\Globals\Gamepad\ZO_GamepadSocialLayoutConstants.lua
 EsoUI\Ingame\Globals\ZO_ChampionRankUtils.lua
 
+EsoUI\Ingame\Particles\Particles.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
@@ -198,6 +199,7 @@ EsoUI\Ingame\Cadwell\Keyboard\Cadwell.xml
 EsoUI\Ingame\Cadwell\Gamepad\Cadwell_Gamepad.lua
 EsoUI\Ingame\Cadwell\Gamepad\Cadwell_Gamepad.xml
 
+EsoUI\Ingame\Map\WorldMapQuestBreadcrumbs.lua
 EsoUI\Ingame\Map\WorldMapInfo_Shared.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapInfo_Keyboard.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapInfo_Keyboard.xml
@@ -918,12 +920,22 @@ EsoUI\Ingame\Subtitles\Subtitles.xml
 
 EsoUI\Ingame\HousingEditor\HousingEditorHud.lua
 EsoUI\Ingame\HousingEditor\HousingEditorHud.xml
-EsoUI\Ingame\HousingEditor\SharedFurnitureManager.lua
+EsoUI\Ingame\HousingEditor\FurnitureClasses_Shared.lua
+EsoUI\Ingame\HousingEditor\FurnitureManager_Shared.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureBrowser_Base.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.xml
+
+EsoUI\Ingame\CrownCrates\CrownCrateStateMachine.lua
+EsoUI\Ingame\CrownCrates\CrownCratesAnimatable.lua
+EsoUI\Ingame\CrownCrates\CrownCratesPackOpening.lua
+EsoUI\Ingame\CrownCrates\CrownCratesPackOpening.xml
+EsoUI\Ingame\CrownCrates\CrownCratesPackChoosing.lua
+EsoUI\Ingame\CrownCrates\CrownCratesPackChoosing.xml
+EsoUI\Ingame\CrownCrates\CrownCrates.lua
+EsoUI\Ingame\CrownCrates\CrownCrates.xml
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.lua

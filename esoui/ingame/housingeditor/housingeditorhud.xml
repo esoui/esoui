@@ -6,33 +6,79 @@
             </OnInitialized>
             <AnchorFill/>
             <Controls>
-                <Control name="$(parent)CenterAnchor">
+                <Control name="$(parent)ButtonContainer">
                     <Anchor point="CENTER" />
                     <Controls>
-                        <Button name="$(parent)RotateLeftButton" inherits="ZO_KeybindStripButtonTemplate">
+                        <Button name="$(parent)YawLeftButton" inherits="ZO_KeybindStripButtonTemplate">
                             <Anchor point="RIGHT" offsetX="-200"/>
                             <OnInitialized>
                                 ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_LEFT", callbackFunction)
                             </OnInitialized>
                         </Button>
-                        <Button name="$(parent)RotateRightButton" inherits="ZO_KeybindStripButtonTemplate">
+                        <Texture name="$(parent)YawLeftArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_y.dds" color="00FF00">
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)YawLeftButton" relativePoint="RIGHT"/>
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                        </Texture>
+                        
+                        <Button name="$(parent)YawRightButton" inherits="ZO_KeybindStripButtonTemplate">
                             <Anchor point="LEFT" offsetX="200"/>
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_RIGHT", callbackFunction)
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_RIGHT")
                             </OnInitialized>
                         </Button>
-                        <Button name="$(parent)RotateForwardButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="BOTTOM" offsetY="200"/>
+                        <Texture name="$(parent)YawRightArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_y.dds" color="00FF00">
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)YawRightButton" relativePoint="LEFT"/>
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                        </Texture>
+                            
+                        <Button name="$(parent)RollRightButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="LEFT" offsetX="70" offsetY="130"/>
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_FORWARD", callbackFunction)
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_ROLL_RIGHT")
+                            </OnInitialized>                    
+                        </Button>
+                        <Texture name="$(parent)RollRightArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_z.dds" color="0000FF">
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="BOTTOM" relativeTo="$(parent)RollRightButton" relativePoint="TOP"/>
+                            <TextureCoords left="0" right="1" top="1" bottom="0" />
+                        </Texture>
+
+                        <Button name="$(parent)RollLeftButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="RIGHT" offsetX="-70" offsetY="-130"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_ROLL_LEFT")
                             </OnInitialized>
                         </Button>
-                        <Button name="$(parent)RotateBackButton" inherits="ZO_KeybindStripButtonTemplate">
+                        <Texture name="$(parent)RollLeftArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_z.dds" textureCoordsRotation="1.571" color="0000FF">
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="TOP" relativeTo="$(parent)RollLeftButton" relativePoint="BOTTOM"/>
+                        </Texture>
+                        
+                        <Button name="$(parent)PitchForwardButton" inherits="ZO_KeybindStripButtonTemplate">
                             <Anchor point="TOP" offsetY="-200"/>
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_BACKWARD", callbackFunction)
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_FORWARD")
                             </OnInitialized>
                         </Button>
+                        <Texture name="$(parent)PitchForwardArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_x.dds" color="FF0000">
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="TOP" relativeTo="$(parent)PitchForwardButton" relativePoint="BOTTOM"/>
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                        </Texture>
+                        
+                        <Button name="$(parent)PitchBackButton" inherits="ZO_KeybindStripButtonTemplate">
+                            <Anchor point="BOTTOM" offsetY="200"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_BACKWARD")
+                            </OnInitialized>
+                        </Button>
+                        <Texture name="$(parent)PitchBackArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_x.dds" color="FF0000">
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="BOTTOM" relativeTo="$(parent)PitchBackButton" relativePoint="TOP"/>
+                            <TextureCoords left="0" right="1" top="1" bottom="0" />
+                        </Texture>
                     </Controls>
                 </Control>
             </Controls>

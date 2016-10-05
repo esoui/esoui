@@ -1,0 +1,56 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CrownCrateGainGemsUpdateCount">
+            <Animations>
+                <CustomAnimation/>
+            </Animations>
+        </AnimationTimeline>
+   </Animations>
+    <Controls>
+        <Control name="ZO_CrownCrates_GemsCounter_Keyboard_Template" virtual="true">
+            <Anchor point="BOTTOMLEFT" offsetX="32" offsetY="-10" />
+            <Controls>
+                <Label name="$(parent)GemsHeader" font="ZoFontKeybindStripDescription" />
+                <Label name="$(parent)Gems" font="ZoFontKeybindStripDescription" />
+                <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/currency/currency_crown_gems.dds" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CrownCrates_GemsCounter_Gamepad_Template" virtual="true">
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Controls>
+                <Label name="$(parent)GemsHeader" font="ZoFontGamepad42" />
+                <Label name="$(parent)Gems" font="ZoFontGamepad42" />
+                <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/currency/gamepad/gp_crown_gems.dds" />
+            </Controls>
+        </Control>
+
+        <!-- this needs to be a top level control so that it can render over the keybind strip while other crown crate controls don't -->
+        <TopLevelControl name="ZO_CrownCratesGemsCounter" resizeToFitDescendents="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <OnInitialized>
+                self.gemsLabel = self:GetNamedChild("Gems")
+                self.gemsIcon = self:GetNamedChild("GemIcon")
+                self.gemsHeaderLabel = self:GetNamedChild("GemsHeader")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)GemsHeader" text="SI_CROWN_CRATE_AVAILABLE_GEMS_HEADER" font="ZoFontKeybindStripDescription" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOMLEFT"/>
+                </Label>
+                <Label name="$(parent)Gems" font="ZoFontKeybindStripDescription">
+                    <Anchor point="LEFT" relativeTo="$(parent)GemsHeader" relativePoint="RIGHT" offsetX="8"/>
+                </Label>
+                <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/currency/currency_crown_gems.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Gems" relativePoint="RIGHT" offsetX="16"/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CrownCratesTopLevel" hidden="true">
+            <OnInitialized>
+                ZO_CrownCrates_OnInitialized(self)
+            </OnInitialized>
+            <AnchorFill/>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

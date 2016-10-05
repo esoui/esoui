@@ -303,6 +303,10 @@
                 <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_ACTIVITY_FINDER)</Down>
             </Action>
 
+            <Action name="TOGGLE_CROWN_CRATES">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CROWN_CRATES)</Down>
+            </Action>
+
             <Action name="TOGGLE_HELP">
                 <Down>
                     if not TUTORIAL_SYSTEM:ShowHelp() then
@@ -423,7 +427,7 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
-            <Action name="UI_SHORTCUT_CYCLE_FOCUSED_QUEST">
+            <Action name="UI_SHORTCUT_QUATERNARY">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
@@ -690,6 +694,10 @@
             </Action>
 
             <Action name="INTERCEPT_TOGGLE_ACTIVITY_FINDER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ACTIVITY_FINDER">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_TOGGLE_CROWN_CRATES" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CROWN_CRATES">
                 <Down>return true</Down>
             </Action>
             

@@ -972,7 +972,7 @@ local function AddGamepadMarketFragmentsToScene(scene, frameRightPanel)
     scene:AddFragment(GAMEPAD_MENU_SOUND_FRAGMENT)
     scene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
     scene:AddFragment(GAMEPAD_MENU_SOUND_FRAGMENT)
-    scene:AddFragment(FRAME_EMOTE_FRAGMENT_INVENTORY)
+    scene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
     scene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
 end
 
@@ -984,6 +984,7 @@ AddGamepadMarketFragmentsToScene(ZO_RemoteScene:New("gamepad_market_locked", SCE
 
 local FRAME_PLAYER_RIGHT_PANEL = true
 AddGamepadMarketFragmentsToScene(ZO_RemoteScene:New("gamepad_market_purchase", SCENE_MANAGER), FRAME_PLAYER_RIGHT_PANEL)
+AddGamepadMarketFragmentsToScene(ZO_RemoteScene:New("gamepad_market_content_list", SCENE_MANAGER), FRAME_PLAYER_RIGHT_PANEL)
 
 SCENE_MANAGER:AddSceneGroup("gamepad_market_scenegroup", ZO_SceneGroup:New("gamepad_market", "gamepad_market_preview", "gamepad_market_bundle_contents", "gamepad_market_purchase"))
 
@@ -1002,3 +1003,16 @@ gamepadChatMenuScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_RIGHT)
 gamepadChatMenuScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT)
 gamepadChatMenuScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 gamepadChatMenuScene:AddFragment(GAMEPAD_MENU_SOUND_FRAGMENT)
+
+-----------------------
+--Gamepad Crown Crate
+-----------------------
+
+CROWN_CRATE_GAMEPAD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.SUPRESS_COLLECTIBLES_GROUP)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragment(CROWN_CRATES_FRAGMENT)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragment(STOP_MOVEMENT_FRAGMENT)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragment(CROWN_CRATE_GEMS_AVAILABLE_QUANTITY_FRAGMENT)
+CROWN_CRATE_GAMEPAD_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_CRATES)

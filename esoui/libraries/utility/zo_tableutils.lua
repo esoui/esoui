@@ -183,3 +183,7 @@ function ZO_IsElementInNumericallyIndexedTable(table, element)
     end
     return false
 end
+
+function ZO_TableRandomInsert(t, element)
+    table.insert(t, zo_random(#t + 1), element)
+end

@@ -57,7 +57,7 @@ end
 function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, stackCount, quality)
     self.bag = bag
     self.index = index
-    self.stackCount = stackCount
+    self:SetStackCount(stackCount)
     self.quality = quality
     self:SetFontScaleOnSelection(false)    --item entries don't grow on selection
 
@@ -88,7 +88,7 @@ function ZO_GamepadEntryData:InitializeImprovementKitVisualData(bag, index, stac
 end
 
 function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(itemInfo, customSortData)
-    self.stackCount = itemInfo.stack
+    self:SetStackCount(itemInfo.stack)
     self.bagId = itemInfo.bag
     self.slotIndex = itemInfo.index
 
@@ -112,7 +112,7 @@ end
 local LOOT_QUEST_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
 function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen)
     self.lootId = lootId
-    self.stackCount = count
+    self:SetStackCount(count)
     self.quality = quality
     self.value = value
     self.isQuest = isQuest
@@ -343,5 +343,9 @@ function ZO_GamepadEntryData:SetModifyTextType(modifyTextType)
 end
 
 function ZO_GamepadEntryData:SetIsHiddenByWardrobe(isHidden)
-	self.isHiddenByWardrobe = isHidden
+    self.isHiddenByWardrobe = isHidden
+end
+
+function ZO_GamepadEntryData:SetStackCount(stackCount)
+    self.stackCount = stackCount
 end

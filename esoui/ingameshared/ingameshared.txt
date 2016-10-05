@@ -26,6 +26,7 @@ EsoUI\Ingame\Tooltip\StableTooltips.lua
 EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
 EsoUI\Ingame\Tooltip\GroupTooltips.lua
 EsoUI\Ingame\Tooltip\ChampionTooltips.lua
+EsoUI\Ingame\Tooltip\CharacterTooltips.lua
 EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 
 EsoUI\Ingame\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua

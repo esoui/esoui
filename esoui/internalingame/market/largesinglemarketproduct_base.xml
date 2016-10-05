@@ -34,20 +34,15 @@
                         </Texture>
                     </Controls>
                 </Label>
-                
+
                 <Label name="$(parent)Cost" override="true">
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)PreviousCost" offsetX="10"/>
-                    <Controls>
-                        <Texture name="$(parent)CurrencyIcon" override="true">
-                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" offsetX="4" offsetY="-2"/>
-                        </Texture>
-                    </Controls>
                 </Label>
 
                 <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PURCHASED" modifyTextType="UPPERCASE" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y"/>
                 </Label>
-                
+
                 <Label name="$(parent)TextCallout" override="true">
                     <Controls>
                         <Control name="$(parent)Background" override="true">

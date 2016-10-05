@@ -16,6 +16,9 @@ local SKY_DEPTH = 5
 local ZOOMED_IN_CAMERA_Z = 0.9
 local ZOOMED_IN_CAMERA_Y = 1035
 local ZOOMED_OUT_CAMERA_Z = -1.2
+--Champion computes all of its sizes off of a reference camera depth of -1 since it uses two camera levels. What the reference depth is doesn't really matter,
+--it's just important that it stays constant so we can use one measurement system at both zoom levels.
+ZO_CHAMPION_REFERENCE_CAMERA_Z = -1
 
 do
     local ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME =
@@ -231,7 +234,7 @@ function ChampionPerks:SetupCustomConfirmDialog()
         },
         mainText =
         {
-            text = zo_strformat(SI_CHAMPION_DIALOG_TEXT_FORMAT, GetString(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST)),
+            text = zo_strformat(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST),
         },
         setup = function(dialog)
             if SCENE_MANAGER:IsCurrentSceneGamepad() then
@@ -683,7 +686,7 @@ function ChampionPerks:BuildStarSpirals()
         local texture = CreateControlFromVirtual(self.canvasControl:GetName().."StarSpiral", self.canvasControl, "ZO_ConstellationStarSpiral", i)
         local spiralNode = self.sceneGraph:CreateNode("starSpiral"..i)
         spiralNode:SetParent(self.rootNode)
-        texture:SetDimensions(spiralNode:ComputeSizeForDepth(4000, 4000, STAR_SPIRAL_START_DEPTH))
+        texture:SetDimensions(spiralNode:ComputeSizeForDepth(4000, 4000, STAR_SPIRAL_START_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
         spiralNode:AddControl(texture, 0, 0, STAR_SPIRAL_START_DEPTH)
         self.starSpiralNodes[i] = spiralNode
     end
@@ -703,7 +706,7 @@ function ChampionPerks:BuildClouds()
         local skyCloudTexture = CreateControlFromVirtual(self.canvasControl:GetName().."SkyCloud", self.canvasControl, skyCloudTemplate, i)
         local skyCloudNode = self.sceneGraph:CreateNode("skyCloud"..i)
         skyCloudNode:SetParent(self.skyCloudsNode)
-        skyCloudTexture:SetDimensions(skyCloudNode:ComputeSizeForDepth(512, 256, SKY_CLOUD_DEPTH))
+        skyCloudTexture:SetDimensions(skyCloudNode:ComputeSizeForDepth(512, 256, SKY_CLOUD_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
         skyCloudNode:AddControl(skyCloudTexture, 0, 800 + (i % 3) * 75, SKY_CLOUD_DEPTH)
         skyCloudNode:SetRotation(((i - 1) / NUM_CLOUDS) * 2 * math.pi)
     end
@@ -720,12 +723,12 @@ function ChampionPerks:BuildSceneGraph()
 
     self.closeClouds1Node = self.sceneGraph:CreateNode("closeClouds1")
     self.closeClouds1Node:SetParent(self.rootNode)
-    self.closeClouds1Texture:SetDimensions(self.closeClouds1Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH))
+    self.closeClouds1Texture:SetDimensions(self.closeClouds1Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.closeClouds1Node:AddControl(self.closeClouds1Texture, 0, 0, CLOSE_CLOUDS_DEPTH)
 
     self.closeClouds2Node = self.sceneGraph:CreateNode("closeClouds2")
     self.closeClouds2Node:SetParent(self.rootNode)
-    self.closeClouds2Texture:SetDimensions(self.closeClouds2Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH))
+    self.closeClouds2Texture:SetDimensions(self.closeClouds2Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.closeClouds2Node:AddControl(self.closeClouds2Texture, 0, 0, CLOSE_CLOUDS_DEPTH)
 
     self:BuildClouds()
@@ -735,43 +738,43 @@ function ChampionPerks:BuildSceneGraph()
     self.colorCloudsNode = self.sceneGraph:CreateNode("colorClouds")
     self.colorCloudsNode:SetParent(self.rootNode)
     self.colorCloudsNode:SetRotation(6.11)
-    self.colorCloudsTexture:SetDimensions(self.colorCloudsNode:ComputeSizeForDepth(1300, 1300, COLOR_CLOUDS_DEPTH))
+    self.colorCloudsTexture:SetDimensions(self.colorCloudsNode:ComputeSizeForDepth(1300, 1300, COLOR_CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.colorCloudsNode:AddControl(self.colorCloudsTexture, 0, 0, COLOR_CLOUDS_DEPTH)
 
     self.cloudsNode = self.sceneGraph:CreateNode("clouds")
     self.cloudsNode:SetParent(self.rootNode)
-    self.cloudsTexture:SetDimensions(self.cloudsNode:ComputeSizeForDepth(1300, 1300, CLOUDS_DEPTH))
+    self.cloudsTexture:SetDimensions(self.cloudsNode:ComputeSizeForDepth(1300, 1300, CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.cloudsNode:AddControl(self.cloudsTexture, 0, 0, CLOUDS_DEPTH)
 
     self.smokeNode = self.sceneGraph:CreateNode("smoke")
     self.smokeNode:SetParent(self.rootNode)
-    self.smokeTexture:SetDimensions(self.smokeNode:ComputeSizeForDepth(1300, 1300, SMOKE_DEPTH))
+    self.smokeTexture:SetDimensions(self.smokeNode:ComputeSizeForDepth(1300, 1300, SMOKE_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.smokeNode:AddControl(self.smokeTexture, 0, 0, SMOKE_DEPTH)
 
     self.skyNode = self.sceneGraph:CreateNode("sky")
     self.skyNode:SetParent(self.rootNode)
     local skyTexture = self.canvasControl:GetNamedChild("Sky")
-    skyTexture:SetDimensions(self.skyNode:ComputeSizeForDepth(9000, 9000, SKY_DEPTH))
+    skyTexture:SetDimensions(self.skyNode:ComputeSizeForDepth(9000, 9000, SKY_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.skyNode:AddControl(skyTexture, 0, 0, SKY_DEPTH)
 
     self.darknessRingNode = self.sceneGraph:CreateNode("darknessRing")
     self.darknessRingNode:SetParent(self.rootNode)
-    self.darknessRingTexture:SetDimensions(self.darknessRingNode:ComputeSizeForDepth(1400, 1400, CONSTELLATIONS_DARKNESS_DEPTH))
+    self.darknessRingTexture:SetDimensions(self.darknessRingNode:ComputeSizeForDepth(1400, 1400, CONSTELLATIONS_DARKNESS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.darknessRingNode:AddControl(self.darknessRingTexture, 0, 0, CONSTELLATIONS_DARKNESS_DEPTH)
     self.darknessRingNode:SetRotation(6.11)
 
     self.radialSelectorNode = self.sceneGraph:CreateNode("radialSelector")
     self.radialSelectorNode:SetParent(self.sceneGraph:GetCameraNode())
-    self.radialSelectorTexture:SetDimensions(self.radialSelectorNode:ComputeSizeForDepth(512, 128, CONSTELLATIONS_DEPTH))
+    self.radialSelectorTexture:SetDimensions(self.radialSelectorNode:ComputeSizeForDepth(512, 128, CONSTELLATIONS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.radialSelectorNode:AddControl(self.radialSelectorTexture, 0, -580, CONSTELLATIONS_DEPTH)
 
     self.centerInfoBGNode = self.sceneGraph:CreateNode("centerInfoBG")
     self.centerInfoBGNode:SetParent(self.rootNode)
-    self.centerInfoBGTexture:SetDimensions(self.centerInfoBGNode:ComputeSizeForDepth(512, 512, CENTER_INFO_BG_DEPTH))
+    self.centerInfoBGTexture:SetDimensions(self.centerInfoBGNode:ComputeSizeForDepth(512, 512, CENTER_INFO_BG_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.centerInfoBGNode:AddControl(self.centerInfoBGTexture, 0, 0, CENTER_INFO_BG_DEPTH)
 
     self.ring = ZO_SceneNodeRing:New(self.rootNode)
-    self.ring:SetRadius(self.rootNode:ComputeSizeForDepth(self.constellationInnerRadius, self.constellationInnerRadius, CONSTELLATIONS_DEPTH))
+    self.ring:SetRadius(self.rootNode:ComputeSizeForDepth(self.constellationInnerRadius, self.constellationInnerRadius, CONSTELLATIONS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.constellations = {}
 
     for i = 1, GetNumChampionDisciplines() do

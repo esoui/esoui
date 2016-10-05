@@ -21,7 +21,7 @@ function GetChampionIconMarkupString(iconSize)
         if IsInGamepadPreferredMode() then
             championIcon = GetGamepadChampionPointsIcon()
         else
-            championIcon = GetChampionPointsIcon()
+            championIcon = GetChampionPointsIconSmall()
         end
 
         return zo_iconFormat(championIcon, iconSize, iconSize)

@@ -11,11 +11,7 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        
-        <Texture name="ZO_MarketCurrencyIcon" textureFile="EsoUI/Art/currency/currency_crown.dds" virtual="true">
-            <Dimensions x="32" y="32" />
-        </Texture>
-        
+
         <Control name="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
             <Controls>
                 <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL">
@@ -30,9 +26,9 @@
                 <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="ZO_MARKET_TILE_BORDER_LEVEL">
                     <AnchorFill/>
                 </Backdrop>
-                
+
                 <Label name="$(parent)Title" level="ZO_MARKET_TILE_TEXT_LEVEL" />
-                
+
                 <Label name="$(parent)PreviousCost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" level="ZO_MARKET_TILE_TEXT_LEVEL">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                     <Controls>
@@ -45,15 +41,9 @@
                         </Texture>
                     </Controls>
                 </Label>
-                
-                <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                    <Controls>
-                        <Texture name="$(parent)CurrencyIcon" inherits="ZO_MarketCurrencyIcon" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                            <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
-                        </Texture>
-                    </Controls>
-                </Label>
-                
+
+                <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+
                 <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                 </Label>

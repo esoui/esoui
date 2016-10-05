@@ -236,6 +236,7 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS, function(eventCode, ...) OnGroupMemberConnectedStatus(...) end)
 
     self.control:RegisterForEvent(EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, function(eventCode, ...) OnGroupVeteranDifficultyChanged(...) end)
+    self.control:RegisterForEvent(EVENT_VETERAN_DIFFICULTY_CHANGED,function(eventCode,...) OnGroupVeteranDifficultyChanged(...) end)
     self.control:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, function(eventCode, ...) OnChampionPointsChanged(...) end)
 
     self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(eventCode, ...) OnZoneUpdate(...) end)
@@ -330,20 +331,30 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         self:ActivateCurrentList()
     end
 
+    local function UpdateDifficultyIcon(icon, isVeteran, normalIcon, veteranIcon)
+        icon:ClearIcons()
+        icon:AddIcon(isVeteran and veteranIcon or normalIcon)
+        icon:Show()
+    end
+
     local function OnSelectedDungeonDifficulty(comboBox, name, entry, selectionChange)
         SetVeteranDifficulty(entry.isVeteran)
+        --Assuming dificulty change will be a success, will be refreshed when the player receieves a response from the server.
+        UpdateDifficultyIcon(comboBox.icon, entry.isVeteran, comboBox.normalIcon, comboBox.veteranIcon)        
     end
 
     local function SetupDungeonDifficultyEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
         local isVeteran = ZO_GetEffectiveDungeonDifficulty() == DUNGEON_DIFFICULTY_VETERAN
-        control.icon:ClearIcons()
-        control.icon:AddIcon(isVeteran and data.veteranIcon or data.normalIcon)
-        control.icon:Show()
+        UpdateDifficultyIcon(control.icon, isVeteran, data.normalIcon, data.veteranIcon)
 
         local dropdown = control.dropdown
         self.dungeonDifficultyDropdown = dropdown
+
+        dropdown.icon = control.icon
+        dropdown.normalIcon = data.normalIcon
+        dropdown.veteranIcon = data.veteranIcon
 
         dropdown:SetSortsItems(false)
         dropdown:SetDeactivatedCallback(OnDeactivatedDungeonDifficulty)

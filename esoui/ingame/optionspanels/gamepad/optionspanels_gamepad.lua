@@ -302,6 +302,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_LOOT,
+            settingId = LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_LOOT,
             settingId = LOOT_SETTING_LOOT_HISTORY,
         },
         {
@@ -389,6 +394,12 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS,
             header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
+        },
+
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
         },
     },
     [SETTING_PANEL_INTERFACE] =
@@ -640,6 +651,13 @@ if IsConsoleUI() then
         system = SETTING_TYPE_AUDIO,
         settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
     })
+    if ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting() then
+        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 1, {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
+        })
+    end
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
         panel = SETTING_PANEL_VIDEO,
         system = SETTING_TYPE_CUSTOM,

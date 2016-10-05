@@ -1,0 +1,37 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PregameAnimatedBackgroundFadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_MAP_FADE_DURATION_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_LINES_FADE_DURATION_MS" delay="ZO_PREGAME_ANIMATED_BACKGROUND_LINES_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_RINGS_FADE_DURATION_MS" delay="ZO_PREGAME_ANIMATED_BACKGROUND_RINGS_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_RINGS_FADE_DURATION_MS" delay="ZO_PREGAME_ANIMATED_BACKGROUND_RINGS_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_CONSTELLATIONS_FADE_DURATION_MS" delay="ZO_PREGAME_ANIMATED_BACKGROUND_CONSTELLATIONS_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_DAEDRIC_TEXT_FADE_DURATION_MS" delay="ZO_PREGAME_ANIMATED_BACKGROUND_DAEDRIC_TEXT_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_PREGAME_ANIMATED_BACKGROUND_COLD_HARBOR_FADE_DURATION_MS" delay="ZO_PREGAME_ANIMATED_BACKGROUND_COLD_HARBOR_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <TopLevelControl name="ZO_PregameAnimatedBackground" mouseEnabled="true" tier="LOW" layer="BACKGROUND" level="1" hidden="true">
+            <OnInitialized>
+                ZO_PregameAnimatedBackground_OnInitialized(self)
+            </OnInitialized>
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)Canvas">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Map" textureFile="EsoUI/Art/PregameAnimatedBackground/Map.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Lines" textureFile="EsoUI/Art/PregameAnimatedBackground/Lines.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Rings1" textureFile="EsoUI/Art/PregameAnimatedBackground/Rings1.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Rings2" textureFile="EsoUI/Art/PregameAnimatedBackground/Rings2.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)DaedricText" textureFile="EsoUI/Art/PregameAnimatedBackground/DaedricText.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Constellations" textureFile="EsoUI/Art/PregameAnimatedBackground/Constellations.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)ColdHarbor" textureFile="EsoUI/Art/PregameAnimatedBackground/ColdHarbor.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
