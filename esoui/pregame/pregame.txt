@@ -1,5 +1,5 @@
 ; pregame UI files
-## DependsOn: ZO_PregameLocalization ZO_Common
+## DependsOn: ZO_PregameLocalization ZO_PregameAndIngame
 
 EsoUI\Pregame\Globals\PregameGlobals.lua
 EsoUI\Pregame\Globals\PreGameDialogs.lua
@@ -142,6 +142,9 @@ EsoUI\Pregame\StateManager\Console\PregameStates_Console.lua
 
 EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.lua
 EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.xml
+
+EsoUI\Pregame\RzChroma\PregameRzChroma_Manager.lua
+EsoUI\Pregame\RzChroma\PregameRzChroma_Effects.lua
 
 EsoUI\Pregame\Scenes\PregameFragments.lua
 EsoUI\Pregame\Scenes\Console\PregameFragments_Console.lua

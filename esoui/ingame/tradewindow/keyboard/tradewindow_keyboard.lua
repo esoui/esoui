@@ -80,8 +80,12 @@ function ZO_TradeWindow:InitializeScene(name)
     tradeScene:RegisterCallback("StateChange",  function(oldState, newState)
                                                     if(newState == SCENE_SHOWING) then
                                                         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                    elseif(newState == SCENE_HIDDEN) then
+                                                    elseif newState == SCENE_HIDING then
+                                                        --The trade is often over as the scene starts hiding. If we don't remover the Submit Offer keybind here
+                                                        --we can run into a case where it collides with the enchant keyind on an item since that is only gated
+                                                        --from showing when we are actually in the trade (ESO-489071).
                                                         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+                                                    elseif(newState == SCENE_HIDDEN) then
                                                         TradeCancel()
                                                         CURRENCY_INPUT:Hide()
                                                         TradeSetMoney(0)

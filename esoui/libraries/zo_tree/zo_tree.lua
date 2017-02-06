@@ -33,7 +33,13 @@ function ZO_Tree:New(control, defaultIndent, defaultSpacing, width)
 
     tree:Reset()
 
+    TREES:Add(tree)
+
     return tree
+end
+
+function ZO_Tree:OnScreenResized()
+    self.rootNode:UpdateAllChildrenHeightsAndCurrentHeights()
 end
 
 function ZO_Tree:Reset()
@@ -560,36 +566,72 @@ function ZO_TreeNode:GetTree()
     return self.tree
 end
 
-function ZO_TreeNode:UpdateChildrenHeightsToRoot()
-    if(self.children) then
+--The height of the children if this node was all the way open
+function ZO_TreeNode:GetChildrenTotalHeight()
+    if self.children then
         local height = 0
         for i = 1, #self.children do
             height = height + self.children[i]:GetHeight()
         end
         height = height + self.childSpacing * (#self.children - 1)
-        self.childrenHeight = height
+        return height
+    else
+        return 0
     end
+end
+
+function ZO_TreeNode:UpdateChildrenHeight()
+    self.childrenHeight = self:GetChildrenTotalHeight()
+end
+
+function ZO_TreeNode:UpdateChildrenHeightsToRoot()
+    self:UpdateChildrenHeight()
 
     if(self.parentNode) then
         self.parentNode:UpdateChildrenHeightsToRoot()
     end
 end
 
-function ZO_TreeNode:UpdateCurrentChildrenHeightsToRoot()
-    if(self.children) then
+--The height of the children taking into account how open they are
+function ZO_TreeNode:GetChildrenTotalCurrentHeight()
+    if self.children then
         local height = 0
         for i = 1, #self.children do
             height = height + self.children[i]:GetCurrentHeight()
         end
         height = height + self.childSpacing * (#self.children - 1)
-        height = height * self.openPercentage
-        self.childrenCurrentHeight = height
+        return height
+    else
+        return 0
+    end
+end
+
+function ZO_TreeNode:UpdateChildrenCurrentHeight()
+    local height = self:GetChildrenTotalCurrentHeight()
+    height = height * self.openPercentage
+    self.childrenCurrentHeight = height
+    if self.childContainer then
         self.childContainer:SetHeight(self.childrenCurrentHeight)
     end
+end
+
+function ZO_TreeNode:UpdateCurrentChildrenHeightsToRoot()
+    self:UpdateChildrenCurrentHeight()
 
     if(self.parentNode) then
         self.parentNode:UpdateCurrentChildrenHeightsToRoot()
     end
+end
+
+function ZO_TreeNode:UpdateAllChildrenHeightsAndCurrentHeights(currentNode)
+    if self.children then
+        for _, child in ipairs(self.children) do
+            child:UpdateAllChildrenHeightsAndCurrentHeights(child)
+        end
+    end
+
+    self:UpdateChildrenHeight()
+    self:UpdateChildrenCurrentHeight()
 end
 
 function ZO_TreeNode:GetControl()
@@ -649,3 +691,31 @@ function ZO_TreeEntry_OnMouseUp(self, upInside)
         self.node:GetTree():SelectNode(self.node)
     end
 end
+
+--ZO_Trees
+---------------
+
+ZO_Trees = ZO_Object:Subclass()
+
+function ZO_Trees:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
+end
+
+function ZO_Trees:Initialize()
+    self.trees = {}
+    EVENT_MANAGER:RegisterForEvent("ZO_Trees", EVENT_ALL_GUI_SCREENS_RESIZED, function() self:OnScreenResized() end)
+end
+
+function ZO_Trees:Add(tree)
+    table.insert(self.trees, tree)
+end
+
+function ZO_Trees:OnScreenResized()
+    for _, tree in ipairs(self.trees) do
+        tree:OnScreenResized()
+    end
+end
+
+TREES = ZO_Trees:New()

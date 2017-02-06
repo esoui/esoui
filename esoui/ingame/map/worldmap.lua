@@ -401,8 +401,8 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_PLAYER_WAYPOINT]                              = { level = 150, minSize = 32, texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" },
     [MAP_PIN_TYPE_GROUP_LEADER]                                 = { level = 145, size = 32, texture = "EsoUI/Art/Compass/groupLeader.dds" },
     [MAP_PIN_TYPE_GROUP]                                        = { level = 144, size = 32, texture = "EsoUI/Art/MapPins/UI-WorldMapGroupPip.dds" },
-    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE]                        = { level = GetFastTravelPinDrawLevel, size = CONSTANTS.POI_PIN_SIZE, texture = GetFastTravelPinTextures, tint = GetPOIPinTint, insetX = 15, insetY = 10},
-    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC]            = { level = 140, size = CONSTANTS.POI_PIN_SIZE, texture = GetFastTravelPinTextures, tint = GetPOIPinTint, insetX = 15, insetY = 10},
+    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE]                        = { level = GetFastTravelPinDrawLevel, size = CONSTANTS.POI_PIN_SIZE, texture = GetFastTravelPinTextures, tint = GetPOIPinTint, insetX = 5, insetY = 10},
+    [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC]            = { level = 140, size = CONSTANTS.POI_PIN_SIZE, texture = GetFastTravelPinTextures, tint = GetPOIPinTint, insetX = 5, insetY = 10},
     [MAP_PIN_TYPE_FORWARD_CAMP_ALDMERI_DOMINION]                = { level = 130, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_aldmeri.dds", insetX = 20, insetY = 20, showsPinAndArea = true},
     [MAP_PIN_TYPE_FORWARD_CAMP_EBONHEART_PACT]                  = { level = 130, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_ebonheart.dds", insetX = 20, insetY = 20, showsPinAndArea = true},
     [MAP_PIN_TYPE_FORWARD_CAMP_DAGGERFALL_COVENANT]             = { level = 130, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_daggerfall.dds", insetX = 20, insetY = 20, showsPinAndArea = true},
@@ -504,8 +504,8 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_ALDMERI_DOMINION]        = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_artifactGate_aldmeri_closed.dds", insetX = 14, insetY = 14},
     [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_DAGGERFALL_COVENANT]     = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_artifactGate_daggerfall_closed.dds", insetX = 14, insetY = 14},
     [MAP_PIN_TYPE_ARTIFACT_GATE_CLOSED_EBONHEART_PACT]          = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_artifactGate_ebonheart_closed.dds", insetX = 14, insetY = 14},
-    [MAP_PIN_TYPE_POI_SEEN]                                     = { level = 46, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, insetX = 15, insetY = 10},
-    [MAP_PIN_TYPE_POI_COMPLETE]                                 = { level = 45, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, insetX = 15, insetY = 10},
+    [MAP_PIN_TYPE_POI_SEEN]                                     = { level = 46, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, insetX = 5, insetY = 10},
+    [MAP_PIN_TYPE_POI_COMPLETE]                                 = { level = 45, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, insetX = 5, insetY = 10},
     [MAP_PIN_TYPE_LOCATION]                                     = { level = 45, size = CONSTANTS.MAP_LOCATION_PIN_SIZE, texture = GetLocationPinTexture},
     [MAP_PIN_TYPE_FORWARD_CAMP_ACCESSIBLE]                      = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_linked_backdrop.dds"},
     [MAP_PIN_TYPE_KEEP_GRAVEYARD_ACCESSIBLE]                    = { level = 40, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_keep_linked_backdrop.dds"},
@@ -840,9 +840,10 @@ end
 
 function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     local nodeIndex = pin:GetFastTravelNodeIndex()
-    local known, name = GetFastTravelNodeInfo(nodeIndex)
+    local known, name, _, _, _, _, poiType = GetFastTravelNodeInfo(nodeIndex)
     local isCurrentLoc = g_fastTravelNodeIndex == nodeIndex
     local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+    local nodeIsHousePreview = poiType == POI_TYPE_HOUSE and not HasCompletedFastTravelNodePOI(nodeIndex)
 
     INFORMATION_TOOLTIP:AddLine(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
     if isCurrentLoc then --NO CLICK: Can't travel to origin
@@ -870,7 +871,9 @@ function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     elseif g_fastTravelNodeIndex == nil then --Recall
         local _, premiumTimeLeft = GetRecallCooldown()
         if premiumTimeLeft == 0 then --CLICK: Recall
-            INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_RECALL), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+            local text = GetString(nodeIsHousePreview and SI_TOOLTIP_WAYSHRINE_CLICK_TO_PREVIEW_HOUSE or SI_TOOLTIP_WAYSHRINE_CLICK_TO_RECALL)
+            INFORMATION_TOOLTIP:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+
             local cost = GetRecallCost(nodeIndex)
             local currency = GetRecallCurrency(nodeIndex)
             if cost > 0 then
@@ -885,7 +888,8 @@ function InformationTooltipMixin:AppendWayshrineTooltip(pin)
             INFORMATION_TOOLTIP:AddLine(cooldownText, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
         end
     else --CLICK: Fast Travel
-        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_FAST_TRAVEL), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        local text = GetString(nodeIsHousePreview and SI_TOOLTIP_WAYSHRINE_CLICK_TO_PREVIEW_HOUSE or SI_TOOLTIP_WAYSHRINE_CLICK_TO_FAST_TRAVEL)
+        INFORMATION_TOOLTIP:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     end
 end
 
@@ -3128,6 +3132,7 @@ function ZO_WorldMapPins:New()
                             g_pinBlobManager:ReleaseObject(pin.pinBlobKey)
                             pin.pinBlobKey = nil
                             pin.pinBlob = nil
+                            pin.pinBlobTexture = nil
                         end
                     end
 
@@ -3417,12 +3422,23 @@ function ZO_WorldMapPins:UpdatePinsForMapSizeChange()
     end
 end
 
+function ZO_WorldMapPins:GetWayshrinePin(nodeIndex)
+    local pins = self:GetActiveObjects()
+
+    for pinKey, pin in pairs(pins) do
+        local curIndex = pin:GetFastTravelNodeIndex()
+        if curIndex == nodeIndex then
+            return pin
+        end
+    end
+end
+
 function ZO_WorldMapPins:GetQuestConditionPin(questIndex)
     local pins = self:GetActiveObjects()
 
     for pinKey, pin in pairs(pins) do
         local curIndex = pin:GetQuestIndex()
-        if(curIndex == questIndex) then
+        if curIndex == questIndex then
             return pin
         end
     end
@@ -5297,11 +5313,7 @@ function ZO_WorldMap_RefreshRespawnTimer(currentTime)
         else
             if(g_mode == MAP_MODE_AVA_RESPAWN) then
                 local secondsRemaining = (g_nextRespawnTimeMS - currentTimeMS) / 1000
-                if (secondsRemaining < 10) then
-                    formattedTimeRemaining = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING)
-                else
-                    formattedTimeRemaining = ZO_FormatTimeLargestTwo(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-                end
+                formattedTimeRemaining = ZO_FormatTimeAsDecimalWhenBelowThreshold(secondsRemaining)
                 isTimerHidden = false
             else
                 -- hide the timer when not in AvA-Respawn map mode
@@ -5419,12 +5431,19 @@ local function CreateSinglePOIPin(zoneIndex, poiIndex)
 
     if(isShownInCurrentMap) then
         if(ZO_MapPin.POI_PIN_TYPES[iconType]) then
-            local wayshrine = IsPOIWayshrine(zoneIndex, poiIndex)
-            local group = IsPOIGroupDungeon(zoneIndex, poiIndex)
-            if((not wayshrine or iconType == MAP_PIN_TYPE_POI_SEEN) and not group) then
-                local tag = ZO_MapPin.CreatePOIPinTag(zoneIndex, poiIndex, icon, linkedCollectibleIsLocked)
-                g_mapPinManager:CreatePin(iconType, tag, xLoc, zLoc)
+            local poiType = GetPOIType(zoneIndex, poiIndex)
+
+            --Skip these, they're handled by AddWayshrines()
+            if poiType == POI_TYPE_GROUP_DUNGEON or poiType == POI_TYPE_HOUSE then
+                return
             end
+            --Seen Wayshines are POIs, discovered Wayshrines are handled by AddWayshrines()
+            if poiType == POI_TYPE_WAYSHRINE and iconType ~= MAP_PIN_TYPE_POI_SEEN then
+                return
+            end
+
+            local tag = ZO_MapPin.CreatePOIPinTag(zoneIndex, poiIndex, icon, linkedCollectibleIsLocked)
+            g_mapPinManager:CreatePin(iconType, tag, xLoc, zLoc)
         end
     end
 end
@@ -5875,6 +5894,11 @@ function ZO_WorldMap_SetMapByIndex(mapIndex)
     end
 end
 
+function ZO_WorldMap_PanToWayshrine(nodeIndex)
+    local pin = g_mapPinManager:GetWayshrinePin(nodeIndex)
+    g_mapPanAndZoom:PanToPin(pin)
+end
+
 function ZO_WorldMap_PanToQuest(questIndex)
     local pin = g_mapPinManager:GetQuestConditionPin(questIndex)
     g_mapPanAndZoom:PanToPin(pin)
@@ -5886,54 +5910,70 @@ function ZO_WorldMap_PanToPlayer()
     g_mapPanAndZoom:PanToPin(pin)
 end
 
+function ZO_WorldMap_JumpToPlayer()
+    local pin = g_mapPinManager:GetPlayerPin()
+    g_gamepadMap:StopMotion()
+    g_mapPanAndZoom:JumpToPin(pin)
+end
+
 function ZO_WorldMap_RefreshKeepNetwork()
     g_mapRefresh:RefreshAll("keepNetwork")
 end
 
 function ZO_WorldMap_ShowQuestOnMap(questIndex)
-    if(not ZO_WorldMap_IsMapChangingAllowed()) then
+    if not ZO_WorldMap_IsMapChangingAllowed() then
         return
     end
 
-    --first try to set the map to one of the quest's condition pins
+    --first try to set the map to one of the quest's step pins
     local result = SET_MAP_RESULT_FAILED
     for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
+        --Loop through the conditions, if there are any
         for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-            if(DoesJournalQuestConditionHavePosition(questIndex, stepIndex, conditionIndex)) then
+            if DoesJournalQuestConditionHavePosition(questIndex, stepIndex, conditionIndex) then
                 result = SetMapToQuestCondition(questIndex, stepIndex, conditionIndex)
-                if(result ~= SET_MAP_RESULT_FAILED) then
+                if result ~= SET_MAP_RESULT_FAILED then
                     break
                 end
             end
         end
-        if(result ~= SET_MAP_RESULT_FAILED) then
+
+        if result ~= SET_MAP_RESULT_FAILED then
             break
+        end
+
+        --If it's the end, set the map to the ending location (Endings don't have conditions)
+        if IsJournalQuestStepEnding(questIndex, stepIndex) then
+            result = SetMapToQuestStepEnding(questIndex, stepIndex)
+            if result ~= SET_MAP_RESULT_FAILED then
+                break
+            end
         end
     end
 
     --if it has no condition pins, set it to the quest's zone
-    if(result == SET_MAP_RESULT_FAILED) then
+    if result == SET_MAP_RESULT_FAILED then
         result = SetMapToQuestZone(questIndex)
     end
 
     --if that doesn't work, bail
-    if(result == SET_MAP_RESULT_FAILED) then
+    if result == SET_MAP_RESULT_FAILED then
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_WORLD_MAP_NO_QUEST_MAP_LOCATION)
         return
     end
 
     g_playerChoseCurrentMap = true
 
-    if(result == SET_MAP_RESULT_MAP_CHANGED) then
+    if result == SET_MAP_RESULT_MAP_CHANGED then
         CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
     end
 
-    if(not ZO_WorldMap_IsWorldMapShowing()) then
+    if not ZO_WorldMap_IsWorldMapShowing() then
         if IsInGamepadPreferredMode() then
             SCENE_MANAGER:Push("gamepad_worldMap")
         else
-        MAIN_MENU_KEYBOARD:ShowCategory(MENU_CATEGORY_MAP)
-    end
+            MAIN_MENU_KEYBOARD:ShowCategory(MENU_CATEGORY_MAP)
+        end
     end
 
     g_mapPanAndZoom:JumpToPinWhenAvailable(function()
@@ -5987,6 +6027,14 @@ function ZO_WorldMap_RemovePlayerWaypoint()
     RemovePlayerWaypoint()
     g_keybindStrips.mouseover:DoMouseExitForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
     g_keybindStrips.gamepad:DoMouseExitForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
+end
+
+function ZO_WorldMap_GetPinManager()
+    return g_mapPinManager
+end
+
+function ZO_WorldMap_GetPanAndZoom()
+    return g_mapPanAndZoom
 end
 
 --Initialization
@@ -6997,8 +7045,8 @@ function ZO_WorldMapChoice_Gamepad_Initialize(control)
     local container = control:GetNamedChild("Container")
     control.list = ZO_GamepadVerticalParametricScrollList:New(container:GetNamedChild("List"))
     control.list:SetAlignToScreenCenter(true)
-    control.list:AddDataTemplate("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    control.list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    control.list:AddDataTemplate("ZO_GamepadMenuEntryNoCapitalization", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    control.list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryNoCapitalization", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
     control.list:SetOnSelectedDataChangedCallback(function() KEYBIND_STRIP:UpdateKeybindButtonGroup(control.activeKeybind, control.m_keybindState) end)
 
     control.header = container:GetNamedChild("HeaderContainer").header
@@ -7079,10 +7127,10 @@ function ZO_WorldMap_AddActiveQuestDialogItems(list, pinDatas, header)
 
         if header then
             newEntry:SetHeader(header)
-            list:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabelWithHeader", newEntry)
+            list:AddEntry("ZO_GamepadMenuEntryNoCapitalizationWithHeader", newEntry)
             header = nil
         else
-            list:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", newEntry)
+            list:AddEntry("ZO_GamepadMenuEntryNoCapitalization", newEntry)
         end
     end
 
@@ -7160,10 +7208,10 @@ do
 
             if headersToShow[headerType] then
                 newEntry:SetHeader(HEADER_STRINGS[headerType])
-                list:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabelWithHeader", newEntry)
+                list:AddEntry("ZO_GamepadMenuEntryNoCapitalizationWithHeader", newEntry)
                 headersToShow[headerType] = false
             else
-                list:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", newEntry)
+                list:AddEntry("ZO_GamepadMenuEntryNoCapitalization", newEntry)
             end
         end
 
@@ -7193,10 +7241,10 @@ function ZO_WorldMap_AddRespawnDialogItems(list, pinDatas, header)
 
             if header then
                 newEntry:SetHeader(header)
-                list:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabelWithHeader", newEntry)
+                list:AddEntry("ZO_GamepadMenuEntryNoCapitalizationWithHeader", newEntry)
                 header = nil
             else
-                list:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", newEntry)
+                list:AddEntry("ZO_GamepadMenuEntryNoCapitalization", newEntry)
             end
 
             count = count + 1

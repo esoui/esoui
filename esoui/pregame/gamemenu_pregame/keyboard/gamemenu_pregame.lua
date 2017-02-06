@@ -29,6 +29,9 @@ end
 
 local function AddServerEntry(entryTable)
     local currentServer = GetCVar("LastPlatform")
+
+    currentServer = ZO_GetLocalizedServerName(currentServer)
+
     local data = {name = zo_strformat(SI_GAME_MENU_SERVER, currentServer), callback = ShowServerSelect, hasSelectedState = true}
     table.insert(entryTable, data)
 end

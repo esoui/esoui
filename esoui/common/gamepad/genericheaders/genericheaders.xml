@@ -219,7 +219,7 @@
                     </Controls>
                 </Control>
         -->
-        <Control name="ZO_GamepadScreenHeaderContainer" virtual="true">
+        <Control name="ZO_GamepadScreenHeaderContainer" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Control name="$(parent)Header" inherits="ZO_GamepadGenericScreenHeader">
                     <OnInitialized>

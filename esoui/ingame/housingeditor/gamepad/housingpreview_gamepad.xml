@@ -1,0 +1,112 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HousingPreviewDialog_PurchaseOptionSection_Gamepad" hidden="false" virtual="true">
+            <Controls>
+                <Button name="$(parent)Button" font="ZoFontGamepad34" verticalAlignment="CENTER" override="true">
+                    <Dimensions x="180" y="60"/>
+
+                    <Controls>
+                        <Backdrop name="$(parent)Border" inherits="ZO_GamepadGreyOutlineThin" tier="HIGH" layer="OVERLAY" blendMode="ADD">
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="-10" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="10" />
+                        </Backdrop>
+
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Border" offsetX="-4" offsetY="-4" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="4" offsetY="4" />
+                        </Backdrop>
+                    </Controls>
+                </Button>
+
+                <Label name="$(parent)CurrencyNameLabel" override="true" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM"  offsetY="10"/>
+                </Label>
+
+                <Label name="$(parent)ErrorLabel" override="true"  font="ZoFontGamepad27" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HousingPreviewDialog_Gamepad" inherits="ZO_CustomCenteredGamepadDialogTemplate ZO_HousingPreviewDialog_Shared" resizeToFitDescendents="true">
+            <ResizeToFitPadding width="4" height="24" />
+            
+            <OnInitialized>
+                ZO_HousingPreviewDialog_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)HouseImage" override="true">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                </Texture>
+
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad42" />
+                
+                <Control name="$(parent)Details" override="true">
+                    <Controls>
+                        <Label name="$(parent)LocationHeader" override="true" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_LOCATION_HEADER" />
+
+                        <Label name="$(parent)LocationData" override="true" inherits="ZO_GamepadHeaderDataTextTemplate" />
+
+                        <Label name="$(parent)HouseTypeHeader" override="true" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_HOUSE_TYPE_HEADER" />
+
+                        <Label name="$(parent)HouseTypeData" override="true" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)NotAvailableText" override="true" inherits="ZO_GamepadHeaderDataTextTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Details" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Details" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+                
+                <Control name="$(parent)Template" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Details" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Details" relativePoint="BOTTOMRIGHT" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Header" override="true" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_TEMPLATE_HEADER" />
+
+                        <Control name="$(parent)ComboBox" override="true" inherits="ZO_GamepadPassiveFocusDropdown">
+                            <Dimensions x="350" y="40" />
+
+                            <Controls>
+                                <Control name="$(parent)Dropdown" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)SelectedItemText" override="true" maxLineCount="2" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)PreviewButton" override="true" font="ZoFontGamepad34" modifyTextType="UPPERCASE" verticalAlignment="CENTER">
+                            <Dimensions x="150" y="42"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ComboBox" relativePoint="TOPRIGHT" offsetX="30" />
+                            
+                            <Controls>
+                                <Backdrop name="$(parent)Border" inherits="ZO_GamepadGreyOutlineThin" tier="HIGH" layer="OVERLAY" blendMode="ADD">
+                                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-2" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="2" />
+                                </Backdrop>
+
+                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Border" offsetX="-4" offsetY="-4" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="4" offsetY="4" />
+                                </Backdrop>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PurchaseOptions" override="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="30" />
+                    
+                    <Controls>
+                        <Control name="$(parent)Gold" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Gamepad" />
+
+                        <Control name="$(parent)Crowns" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Gamepad" />
+
+                        <Control name="$(parent)CrownGems" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Gamepad" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

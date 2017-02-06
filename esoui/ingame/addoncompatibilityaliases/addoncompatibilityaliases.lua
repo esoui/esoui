@@ -106,3 +106,45 @@ EVENT_COLLECTIBLE_USE_BLOCKED = EVENT_COLLECTIBLE_USE_RESULT
 
 --Renamed quest instance type function to match the others
 GetJournalInstanceDisplayType = GetJournalQuestInstanceDisplayType
+
+--Recipes can now have multiple tradeskill requirements
+GetItemLinkRecipeRankRequirement = function(itemLink)
+    for i = 1, GetItemLinkRecipeNumTradeskillRequirements(itemLink) do
+        local tradeskill, levelRequirement = GetItemLinkTradeskillRequirement(itemLink, i)
+        if tradeskill == CRAFTING_TYPE_PROVISIONING then
+            return levelRequirement
+        end
+    end
+    return 0
+end
+
+--Items can now be converted to more styles than just imperial
+CanConvertItemStyleToImperial = function(itemToBagId, itemToSlotIndex)
+    return CanConvertItemStyle(itemToBagId, itemToSlotIndex, ITEMSTYLE_RACIAL_IMPERIAL)
+end
+
+ConvertItemStyleToImperial = function(itemToBagId, itemToSlotIndex)
+    ConvertItemStyle(itemToBagId, itemToSlotIndex, ITEMSTYLE_RACIAL_IMPERIAL)
+end
+
+--renamed this type
+COLLECTIBLE_CATEGORY_TYPE_TROPHY = COLLECTIBLE_CATEGORY_TYPE_MEMENTO
+
+--Condensed these into one function
+IsPOIWayshrine = function(zoneIndex, poiIndex)
+    return GetPOIType(zoneIndex, poiIndex) == POI_TYPE_WAYSHRINE
+end
+
+IsPOIPublicDungeon = function(zoneIndex, poiIndex)
+    return GetPOIType(zoneIndex, poiIndex) == POI_TYPE_PUBLIC_DUNGEON
+end
+
+IsPOIGroupDungeon = function(zoneIndex, poiIndex)
+    return GetPOIType(zoneIndex, poiIndex) == POI_TYPE_GROUP_DUNGEON
+end
+
+-- Added category to item tags
+GetItemLinkItemTagDescription = function(itemLink, index)
+    local description, category = GetItemLinkItemTagInfo(itemLink, index)
+    return description
+end

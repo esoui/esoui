@@ -1,0 +1,60 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_OptionsWindow" hidden="true" layer="CONTROLS">
+            <Dimensions x="768" y="914" />
+            
+            <OnInitialized>
+                ZO_Options_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)BGLeft" textureFile="EsoUI\Art\Login\login_UIWindowBG_left.dds">
+                    <Dimensions x="512" y="914" />
+                    <Anchor point="TOPLEFT" />
+                    <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />                    
+                    <Controls>
+                        <Texture name="$(parent)BGRight" textureFile="EsoUI\Art\Login\login_UIWindowBG_right.dds">
+                            <Dimensions x="256" y="914" />
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                            <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Title" font="ZoFontWinH1" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="65" offsetY="70" />
+                </Label>
+                
+                <Texture name="$(parent)Divider" inherits="ZO_Options_Divider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="2"/>
+                </Texture>
+
+                <Control name="$(parent)Settings" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-120" offsetY="-120" />
+                </Control>
+
+                <Control name="$(parent)ResetToDefaultButton" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Settings" relativePoint="BOTTOMLEFT"  offsetY="10" />
+                    <OnInitialized>
+                        ZO_KeybindButtonTemplate_Setup(self, "OPTIONS_LOAD_DEFAULTS", function() ZO_Dialogs_ShowDialog("OPTIONS_RESET_TO_DEFAULTS") end, GetString(SI_OPTIONS_DEFAULTS))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ToggleFirstPersonButton" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResetToDefaultButton" relativePoint="TOPRIGHT"  offsetX="5" />
+                    <OnInitialized>
+                        ZO_KeybindButtonTemplate_Setup(self, "TOGGLE_FIRST_PERSON", ZO_OptionsWindow_ToggleFirstPerson, GetString(SI_BINDING_NAME_TOGGLE_FIRST_PERSON))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ApplyButton" inherits="ZO_DialogButton">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Settings" relativePoint="BOTTOMRIGHT" offsetX="-25" offsetY="10" />
+                    <OnInitialized>
+                        ZO_KeybindButtonTemplate_Setup(self, "OPTIONS_APPLY_CHANGES", ZO_OptionsWindow_ApplySettings, GetString(SI_APPLY))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+         </TopLevelControl>
+    </Controls>
+</GuiXml>

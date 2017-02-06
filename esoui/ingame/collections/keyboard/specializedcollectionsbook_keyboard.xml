@@ -1,0 +1,89 @@
+﻿<GuiXml>
+    <Controls>
+        <Label name="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" virtual="true">
+            <Dimensions x="598" />
+        </Label>
+        <Label name="ZO_SpecializedCollection_Book_LargeLabel_Keyboard" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard" font="ZoFontWinH2" virtual="true" />
+
+        <Control name="ZO_SpecializedCollection_Book_NavigationHeader_Keyboard" inherits="ZO_IconHeader" virtual="true">
+            <DimensionConstraints minY="48" />
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="7" />
+                </Texture>
+
+                <Label name="$(parent)Text" override="true" font="ZoFontHeader3" inherits="ZO_SelectableLabel">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="9" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_SpecializedCollection_Book_NavigationEntry_Keyboard"  inherits="ZO_SelectableTooltipIfTruncatedLabel ZO_TreeEntry" font="ZoFontHeader" verticalAlignment="CENTER" virtual="true">
+            <Dimensions x="210" y="22" />
+
+            <Controls>
+                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                </Texture>
+            </Controls>
+        </Label>
+
+        <TopLevelControl name="ZO_SpecializedCollection_Book_Keyboard" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)NavigationList" inherits="ZO_ScrollContainer">
+                    <Dimensions x="285" />
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="77" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-60" />
+                </Control>
+
+                <Control name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationList" relativePoint="TOPRIGHT" offsetX="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-36" />
+
+                    <Controls>
+                        <Texture name="$(parent)Image" level="2" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions y="200" />
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                            <!-- 1024x256 image cropped to 614x200-->
+                            <TextureCoords left="0" right="0.599609375" top="0" bottom="0.78125"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" />
+                            </Controls>
+                        </Texture>
+
+                        <Label name="$(parent)Name" inherits="ZO_SpecializedCollection_Book_LargeLabel_Keyboard" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Image" offsetX="10" offsetY="10" />
+                        </Label>
+
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
+                            <Dimensions y="300"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-60" />
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <OnInitialized>
+                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
+                                    </OnInitialized>
+
+                                    <Controls>
+                                        <Label name="$(parent)Description" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,5 +1,4 @@
 ﻿ZO_MARKET_NAME = "Market"
-ZO_MARKET_PREVIEW_WAIT_TIME_MS = 500
 ZO_MARKET_DISPLAY_LOADING_DELAY_MS = 500
 
 ZO_MARKET_CATEGORY_TYPE_NONE = "none"
@@ -13,6 +12,7 @@ ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE = 0
 ZO_MARKET_PREVIEW_TYPE_BUNDLE = 1
 ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE = 2
 ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN = 3
+ZO_MARKET_PREVIEW_TYPE_HOUSE = 4
 
 --
 --[[ Market Singleton ]]--
@@ -32,12 +32,10 @@ function Market_Singleton:Initialize()
 end
 
 function Market_Singleton:InitializeEvents()
-    local function OnMarketStateUpdated(marketState, ...)
-        SYSTEMS:GetObject(ZO_MARKET_NAME):OnMarketStateUpdated(marketState, ...)
-
-        -- if we are locked we need to inform both UIs that we need to refresh categories
+    local function OnMarketStateUpdated(eventId, displayGroup, marketState, ...)
+        -- if we are locked/updating we need to inform both UIs that we need to refresh categories
         -- because otherwise only the active UI will refresh and the other will get into a bad state
-        if marketState == MARKET_STATE_LOCKED then
+        if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE and (marketState == MARKET_STATE_LOCKED or marketState == MARKET_STATE_UPDATING)then
             -- keyboard market won't exist on consoles
             local keyboardMarket = SYSTEMS:GetKeyboardObject(ZO_MARKET_NAME)
             if keyboardMarket then
@@ -49,66 +47,68 @@ function Market_Singleton:InitializeEvents()
                 gamepadMarket:FlagMarketCategoriesForRefresh()
             end
         end
+
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnMarketStateUpdated(displayGroup, marketState, ...)
     end
 
-    local function OnCrownsUpdated(...)
-        SYSTEMS:GetObject(ZO_MARKET_NAME):OnCrownsUpdated(...)
-    end
-
-    local function OnCrownGemsUpdated(...)
-        SYSTEMS:GetObject(ZO_MARKET_NAME):OnCrownGemsUpdated(...)
-    end
-
-    local function OnMarketPurchaseResult(...)
+    local function OnMarketPurchaseResult(eventId, ...)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnMarketPurchaseResult(...)
     end
 
-    local function OnMarketSearchResultsReady()
+    local function OnMarketSearchResultsReady(eventId)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnMarketSearchResultsReady()
     end
 
-    local function OnMarketCollectibleUpdated(_, justUnlocked)
+    local function OnMarketCollectibleUpdated(eventId, _, justUnlocked)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectibleUpdated(justUnlocked)
     end
 
-    local function OnMarketCollectiblesUpdated(numJustUnlocked)
+    local function OnMarketCollectiblesUpdated(eventId, numJustUnlocked)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnCollectiblesUpdated(numJustUnlocked)
     end
 
-    local function OnShowMarketProduct(...)
+    local function OnShowMarketProduct(eventId, ...)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(...)
     end
 
-    local function OnShowMarketAndSearch(...)
+    local function OnShowMarketAndSearch(eventId, ...)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketAndSearch(...)
     end
 
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, function(eventId, ...) OnMarketStateUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_CROWN_UPDATE, function(eventId, ...) OnCrownsUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_CROWN_GEM_UPDATE, function(eventId, ...) OnCrownGemsUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, function() OnMarketSearchResultsReady() end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, function(eventId, ...) OnMarketCollectibleUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, function(eventId, ...) OnShowMarketProduct(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, function(eventId, ...) OnShowMarketAndSearch(...) end)
+    local function OnRequestPurchaseMarketProduct(eventId, ...)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnRequestPurchaseMarketProduct(...)
+    end
+
+    local function OnShowBuyCrownsDialog(eventId)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowBuyCrownsDialog()
+    end
+
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, OnMarketCollectibleUpdated)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, OnMarketCollectibleUpdated)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, OnShowMarketProduct)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_BUY_CROWNS_DIALOG, OnShowBuyCrownsDialog)
 end
 
 function Market_Singleton:RequestOpenMarket()
-    OpenMarket()
+    OpenMarket(MARKET_DISPLAY_GROUP_CROWN_STORE)
 end
 
 function Market_Singleton:InitializePlatformErrors()
     local consoleStoreName
     local platformServiceType = GetPlatformServiceType()
 
-    if platformServiceType == PLATFORM_SERVICE_TYPE_PS4 then
+    if platformServiceType == PLATFORM_SERVICE_TYPE_PSN then
         consoleStoreName = GetString(SI_GAMEPAD_MARKET_PLAYSTATION_STORE)
-    elseif platformServiceType == PLATFORM_SERVICE_TYPE_XBOX then
+    elseif platformServiceType == PLATFORM_SERVICE_TYPE_XBL then
         consoleStoreName = GetString(SI_GAMEPAD_MARKET_XBOX_STORE)
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_STEAM then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)))
-    else
+    else -- _ZOS and _DMM
         self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT))
     end
 
@@ -131,7 +131,7 @@ function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId, pre
         table.insert(errorStrings, zo_strformat(SI_MARKET_BUNDLE_PARTS_UNLOCKED_TEXT, name))
     end
 
-    if IsMarketProductPartiallyPurchased(marketProductId)  then
+    if IsMarketProductPartiallyPurchased(marketProductId) then
         table.insert(errorStrings, GetString(SI_MARKET_BUNDLE_PARTS_OWNED_TEXT))
     end
 
@@ -188,7 +188,7 @@ function ZO_Market_Shared:Initialize()
 
     -- Special buckets to contain MarketProducts in lieu of a Category/Subcategory
     -- If you add a new bucket, make sure to update all the places that used them
-    -- such as GamepadMarket:GetCategoryDataFromId or Market:GetMarketProductInfo
+    -- such as GamepadMarket:GetCurrentCategoryMarketProductInfoById or Market:GetMarketProductInfo
     self.featuredProducts = {}
     self.limitedTimedOfferProducts = {}
     self.dlcProducts = {}
@@ -216,22 +216,21 @@ function ZO_Market_Shared:Initialize()
 end
 
 function ZO_Market_Shared:OnInitialInteraction()
-        ZO_MARKET_SINGLETON:RequestOpenMarket()
-        SetSecureRenderModeEnabled(true)
+    ZO_MARKET_SINGLETON:RequestOpenMarket()
+    SetSecureRenderModeEnabled(true)
 
-        -- ensure that we are in the correct state
-        if self.marketState ~= GetMarketState() then
-            self:UpdateMarket()
-        elseif self.marketState == MARKET_STATE_OPEN then
-            self:UpdateCurrentCategory()
-        end
+    -- ensure that we are in the correct state
+    if self.marketState ~= GetMarketState(MARKET_DISPLAY_GROUP_CROWN_STORE) then
+        self:UpdateMarket()
+    elseif self.marketState == MARKET_STATE_OPEN then
+        self:UpdateCurrentCategory()
+    end
 end
 
 function ZO_Market_Shared:OnEndInteraction()
     self.currentTutorial = nil
     self:ResetSearch()
     SetSecureRenderModeEnabled(false)
-    EndPreviewMode()
     OnMarketClose()
 end
 
@@ -257,18 +256,11 @@ function ZO_Market_Shared:ResetCategoryData()
     self.currentCategoryData = nil
 end
 
-function ZO_Market_Shared:OnMarketStateUpdated(marketState)
-    self:ResetCategoryData()
-    self:UpdateMarket(marketState)
-end
-
--- difference is the difference in crowns for this update. For instance, new crowns purchased will show a positive difference.
-function ZO_Market_Shared:OnCrownsUpdated(currentCurrency, difference)
-    self:UpdateCrownBalance(currentCurrency)
-end
-
-function ZO_Market_Shared:OnCrownGemsUpdated(currentCurrency, difference)
-    self:UpdateCrownGemBalance(currentCurrency)
+function ZO_Market_Shared:OnMarketStateUpdated(displayGroup, marketState)
+    if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE then
+        self:ResetCategoryData()
+        self:UpdateMarket(marketState)
+    end
 end
 
 function ZO_Market_Shared:OnMarketPurchaseResult()
@@ -308,8 +300,16 @@ function ZO_Market_Shared:OnShowMarketAndSearch(marketProductSearchString)
     self:RequestShowMarketWithSearchString(marketProductSearchString)
 end
 
+function ZO_Market_Shared:OnRequestPurchaseMarketProduct(marketProductId, presentationIndex)
+    self:PurchaseMarketProduct(marketProductId, presentationIndex)
+end
+
+function ZO_Market_Shared:OnShowBuyCrownsDialog()
+    -- To be overridden
+end
+
 function ZO_Market_Shared:UpdateMarket(marketState)
-    self.marketState = marketState or GetMarketState()
+    self.marketState = marketState or GetMarketState(MARKET_DISPLAY_GROUP_CROWN_STORE)
 
     if self.marketState == MARKET_STATE_OPEN then
         self:OnMarketOpen()
@@ -347,7 +347,7 @@ function ZO_Market_Shared:OnCategorySelected(data)
     self.currentCategoryData = data
     
     if data.type == ZO_MARKET_CATEGORY_TYPE_FEATURED then
-        self:BuildFeaturedMarketProductList(data)
+        self:BuildFeaturedMarketProductList()
     elseif data.type == ZO_MARKET_CATEGORY_TYPE_ESO_PLUS then
         self:DisplayEsoPlusOffer()
     else
@@ -430,8 +430,8 @@ do
 
     function ZO_Market_Shared:BuildFeaturedMarketProductList()
         local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
-        
-        self:LayoutMarketProducts(GetFeaturedProductIds(numFeaturedMarketProducts))
+        local marketProductPresentations = { GetFeaturedProductIds(numFeaturedMarketProducts) }
+        self:LayoutMarketProducts(marketProductPresentations)
     end
 end
 
@@ -473,9 +473,12 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
             local productType = GetMarketProductType(childMarketProductId)
             local isBundle = productType == MARKET_PRODUCT_TYPE_BUNDLE
             local isValidForPlayer = true
+            local quality = ITEM_QUALITY_NORMAL
             if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
                 local collectibleId = GetMarketProductCollectibleId(childMarketProductId)
                 isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
+            elseif productType == MARKET_PRODUCT_TYPE_ITEM then
+                quality = select(4, GetMarketProductItemInfo(childMarketProductId))
             end
 
             local productInfo = {
@@ -484,12 +487,89 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
                             stackCount = GetMarketProductStackCount(childMarketProductId),
                             isBundle = isBundle,
                             isValidForPlayer = isValidForPlayer,
+                            quality = quality,
                         }
             table.insert(marketProducts, productInfo)
         end
     end
 
     return marketProducts
+end
+
+do
+    local SERVICE_TOKEN =
+    {
+        buttonText = GetString(SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL),
+        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE),
+        GoToUseProductLocation = Logout,
+    }
+
+    local CROWN_CRATE =
+    {
+        buttonText = GetString(SI_MARKET_OPEN_CROWN_CRATES_KEYBIND_LABEL),
+        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY),
+        visible = CanInteractWithCrownCratesSystem,
+        enabled = function()
+            local isAllowed, errorStringId = IsPlayerAllowedToOpenCrownCrates()
+            --Internal ingame doesn't have access to ZO_Alert
+            return isAllowed
+        end,
+        GoToUseProductLocation = function()
+            if IsInGamepadPreferredMode() then
+                SCENE_MANAGER:Show("crownCrateGamepad")
+            else
+                SCENE_MANAGER:Show("crownCrateKeyboard")
+            end
+        end,
+    }
+
+    function ZO_Market_Shared.GetUseProductInfo(marketProductId)
+        if DoesMarketProductContainServiceToken(marketProductId) then
+            return SERVICE_TOKEN
+        elseif GetCurrentZoneHouseId() ~= 0 and GetMarketProductFurnitureDataId(marketProductId) ~= 0
+            and HasAnyEditingPermissionsForCurrentHouse() and GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
+            local furniturePlacementInfo =
+            {
+                buttonText = GetString(SI_MARKET_PLACE_IN_HOUSE_KEYBIND_LABEL),
+                transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT),
+                GoToUseProductLocation = function()
+                    if HousingEditorCreateFurnitureForPlacementFromMarketProduct(marketProductId) then
+                        ShowRemoteBaseScene()
+                    end
+                end,
+            }
+            return furniturePlacementInfo
+        else
+            local marketProductType = GetMarketProductType(marketProductId)
+            if marketProductType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
+                return CROWN_CRATE
+            elseif marketProductType == MARKET_PRODUCT_TYPE_HOUSING then
+                local marketProductHouseId = GetMarketProductHouseId(marketProductId)
+                local houseInfo =
+                {
+                    buttonText = GetString(SI_MARKET_TRAVEL_TO_HOUSE_KEYBIND_LABEL),
+                    transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT),
+                    GoToUseProductLocation = function()
+                        RequestJumpToHouse(marketProductHouseId)
+                        ShowRemoteBaseScene()
+                    end,
+                }
+
+                return houseInfo
+            end
+        end
+    end
+
+    function ZO_Market_Shared.HasUseProductInfo(marketProductId)
+        return ZO_Market_Shared.GetUseProductInfo(marketProductId) ~= nil
+    end
+
+    function ZO_Market_Shared.GoToUseProductLocation(marketProductId)
+        local useProductInfo = ZO_Market_Shared.GetUseProductInfo(marketProductId)
+        if useProductInfo then
+            useProductInfo.GoToUseProductLocation()
+        end
+    end
 end
 
 function ZO_Market_Shared:GetCategoryIndices(data, parentData)
@@ -511,12 +591,14 @@ function ZO_Market_Shared:BuildMarketProductList(data)
 
     local numMarketProducts
     if finalSubcategoryIndex then
-        numMarketProducts = select(2, GetMarketProductSubCategoryInfo(categoryIndex, subCategoryIndex))
+        numMarketProducts = select(2, GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subCategoryIndex))
     else
-        numMarketProducts = select(3, GetMarketProductCategoryInfo(categoryIndex))
+        numMarketProducts = select(3, GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex))
     end
 
-    self:LayoutMarketProducts(self:GetMarketProductIds(categoryIndex, finalSubcategoryIndex, numMarketProducts))
+    local marketProductPresentations = {self:GetMarketProductIds(categoryIndex, finalSubcategoryIndex, numMarketProducts)}
+    local disableLTOGrouping = IsLTODisabledForMarketProductCategory(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, finalSubcategoryIndex)
+    self:LayoutMarketProducts(marketProductPresentations, disableLTOGrouping)
 end
 
 function ZO_Market_Shared:GetPreviewState()
@@ -644,18 +726,18 @@ end
 do
     local NO_SUBCATEGORY = nil
     function ZO_Market_Shared:GetCategoryDataForMarketProduct(productId)
-        for categoryIndex = 1, GetNumMarketProductCategories() do
-            local _, numSubCategories, numMarketProducts = GetMarketProductCategoryInfo(categoryIndex)
+        for categoryIndex = 1, GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE) do
+            local _, numSubCategories, numMarketProducts = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
             for marketProductIndex = 1, numMarketProducts do
-                local id = GetMarketProductPresentationIds(categoryIndex, NO_SUBCATEGORY, marketProductIndex)
+                local id = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, NO_SUBCATEGORY, marketProductIndex)
                 if id == productId then
                     return self:GetCategoryData(categoryIndex, NO_SUBCATEGORY)
                 end
             end
             for subcategoryIndex = 1, numSubCategories do
-                local _, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(categoryIndex, subcategoryIndex)
+                local _, numSubCategoryMarketProducts = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
                 for marketProductIndex = 1, numSubCategoryMarketProducts do
-                    local id = GetMarketProductPresentationIds(categoryIndex, subcategoryIndex, marketProductIndex)
+                    local id = GetMarketProductPresentationIds(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex, marketProductIndex)
                     if id == productId then
                         return self:GetCategoryData(categoryIndex, subcategoryIndex)
                     end
@@ -692,6 +774,8 @@ function ZO_Market_Shared.GetMarketProductPreviewType(marketProduct)
             local productType = marketProduct:GetMarketProductType()
             if productType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
                 return ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE
+            elseif marketProduct:IsHouseCollectible() and marketProduct:GetPurchaseState() == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED then
+                return ZO_MARKET_PREVIEW_TYPE_HOUSE
             else
                 return ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
             end
@@ -699,6 +783,18 @@ function ZO_Market_Shared.GetMarketProductPreviewType(marketProduct)
     else
         return ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
     end
+end
+
+function ZO_Market_Shared.PreviewMarketProduct(previewObject, marketProductId)
+    local previewInEmptyWorld = false
+    local furnitureId = GetMarketProductFurnitureDataId(marketProductId)
+    if furnitureId ~= 0 then
+        local productType = GetMarketProductType(marketProductId)
+        previewInEmptyWorld = productType == MARKET_PRODUCT_TYPE_ITEM
+    end
+
+    previewObject:SetPreviewInEmptyWorld(previewInEmptyWorld)
+    previewObject:PreviewMarketProduct(marketProductId)
 end
 
 --[[ Functions to be overridden ]]--
@@ -739,6 +835,9 @@ end
 function ZO_Market_Shared:OnMarketLocked()
 end
 
+function ZO_Market_Shared:LayoutMarketProducts(marketProductPresentations, disableLTOGrouping)
+end
+
 function ZO_Market_Shared:RefreshVisibleCategoryFilter()
 end
 
@@ -761,6 +860,9 @@ function ZO_Market_Shared:RequestShowMarketWithSearchString(searchString)
 end
 
 function ZO_Market_Shared:ResetSearch()
+end
+
+function ZO_Market_Shared:PurchaseMarketProduct(marketProductId, presentationIndex)
 end
 
 function ZO_Market_Shared:RemoveActionLayerForTutorial()
@@ -794,7 +896,7 @@ end
 --------------
 function ZO_Market_Shared:SearchStart(searchString)
     self.searchString = searchString
-    StartMarketProductSearch(searchString)
+    StartMarketProductSearch(MARKET_DISPLAY_GROUP_CROWN_STORE, searchString)
 end
 
 function ZO_Market_Shared:HasValidSearchString()
@@ -818,155 +920,4 @@ function ZO_Market_Shared:UpdateSearchResults()
 
         self.searchResults[categoryIndex][effectiveSubCategory][productIndex] = true
     end
-end
-
---
---[[ Market Preview]]--
---
-
-ZO_MarketPreview = ZO_Object:Subclass()
-
-function ZO_MarketPreview:New(...)
-    local preview = ZO_Object.New(self)
-    preview:Initialize(...)
-    return preview
-end
-
-function ZO_MarketPreview:Initialize(control)
-    self.control = control
-    
-
-    self.canChangePreview = true
-    self.lastSetChangeTime = 0
-
-    self.fragment = ZO_SimpleSceneFragment:New(control)
-    self.fragment:RegisterCallback("StateChange", function(...) self:OnStateChanged(...) end)
-end
-
-function ZO_MarketPreview:OnStateChanged(oldState, newState)
-    if newState == SCENE_FRAGMENT_SHOWING then
-        self:OnPreviewShowing()
-    elseif newState == SCENE_FRAGMENT_SHOWN then
-        self:OnPreviewShown()
-    elseif newState == SCENE_FRAGMENT_HIDDEN then
-        self:OnPreviewHidden()
-    end
-end
-
-do
-    local PREVIEW_UPDATE_INTERVAL_MS = 100
-    function ZO_MarketPreview:OnPreviewShowing()
-        -- for the first preview we won't put a restriction on when we can preview the next one
-        -- previewing a product automatically sets this to false so manually set it to true
-        self:SetCanChangePreview(true)
-
-        EVENT_MANAGER:RegisterForUpdate("ZO_MarketPreview", PREVIEW_UPDATE_INTERVAL_MS, function(...) self:OnUpdate(...) end)
-    end
-end
-
-function ZO_MarketPreview:OnPreviewShown()
-    -- optional override
-end
-
-function ZO_MarketPreview:OnPreviewHidden()
-    EVENT_MANAGER:UnregisterForUpdate("ZO_MarketPreview")
-    self:EndCurrentPreview()
-end
-
-function ZO_MarketPreview:EndCurrentPreview()
-    self.marketProductId = 0
-    self.numPreviewVariations = 0
-    self.previewVariationIndex = 0
-    self:SetVariationControlsHidden(true)
-end
-
-function ZO_MarketPreview:OnUpdate(currentTimeMs)
-    if not self.canChangePreview and (currentTimeMs - self.lastSetChangeTime) > ZO_MARKET_PREVIEW_WAIT_TIME_MS then
-        self.lastSetChangeTime = currentTimeMs
-        self:SetCanChangePreview(true)
-    end
-end
-
-function ZO_MarketPreview:GetFragment()
-    return self.fragment
-end
-
-function ZO_MarketPreview:BeginPreview(marketProductId)
-    self.marketProductId = marketProductId
-    if IsCharacterPreviewingAvailable() then
-        self.previewVariationIndex = 1
-        self:PreviewMarketProduct()
-    end
-
-    self.numPreviewVariations = GetNumMarketProductPreviewVariations(self.marketProductId)
-
-    if self.numPreviewVariations > 1 then
-        self:SetVariationControlsHidden(false)
-        self.variationLabel:SetText(self:GetPreviewVariationDisplayName())
-    else
-        self:SetVariationControlsHidden(true)
-    end
-
-    self:SetCanChangePreview(false)
-end
-
-function ZO_MarketPreview:PreviewMarketProduct()
-    PreviewMarketProduct(self.marketProductId, self.previewVariationIndex)
-    PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
-end
-
-function ZO_MarketPreview:GetPreviewVariationDisplayName()
-    local previewVariationDisplayName = GetMarketProductPreviewVariationDisplayName(self.marketProductId, self.previewVariationIndex)
-
-    if previewVariationDisplayName == "" then
-        return tostring(self.previewVariationIndex)
-    else
-        return previewVariationDisplayName
-    end
-end
-
-function ZO_MarketPreview:SetCanChangePreview(canChangePreview)
-    self.canChangePreview = canChangePreview
-end
-
-function ZO_MarketPreview:CanChangePreview()
-    return self.canChangePreview
-end
-
-function ZO_MarketPreview:PreviewNextVariation()
-    if CanPreviewMarketProduct(self.marketProductId) and self.numPreviewVariations > 0 then
-        self.previewVariationIndex = self.previewVariationIndex + 1
-
-        if self.previewVariationIndex > self.numPreviewVariations then
-            self.previewVariationIndex = 1
-        end
-
-        self:PreviewMarketProduct()
-    end
-
-    self:SetVariationLabel(self:GetPreviewVariationDisplayName())
-    self.lastSetChangeTime = GetFrameTimeMilliseconds()
-end
-
-function ZO_MarketPreview:PreviewPreviousVariation()
-    if CanPreviewMarketProduct(self.marketProductId) and self.numPreviewVariations > 0 then
-        self.previewVariationIndex = self.previewVariationIndex - 1
-
-        if self.previewVariationIndex < 1 then
-            self.previewVariationIndex = self.numPreviewVariations
-        end
-
-        self:PreviewMarketProduct()
-    end
-
-    self:SetVariationLabel(self:GetPreviewVariationDisplayName())
-    self.lastSetChangeTime = GetFrameTimeMilliseconds()
-end
-
-function ZO_MarketPreview:SetVariationControlsHidden(shouldHide)
-    -- optional override
-end
-
-function ZO_MarketPreview:SetVariationLabel(variationName)
-    -- optional override
 end

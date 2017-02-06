@@ -5,11 +5,15 @@ SCENE_FRAGMENT_HIDDEN = "hidden"
 SCENE_FRAGMENT_SHOWING = "showing"
 SCENE_FRAGMENT_HIDING = "hiding"
 
-function ZO_SceneFragment:New()
+function ZO_SceneFragment:New(...)
     local fragment = ZO_CallbackObject.New(self)
-    fragment.state = SCENE_FRAGMENT_HIDDEN
-    fragment.allShowHideTimeUpdates = false
+    fragment:Initialize(...)
     return fragment
+end
+
+function ZO_SceneFragment:Initialize()
+    self.state = SCENE_FRAGMENT_HIDDEN
+    self.allShowHideTimeUpdates = false
 end
 
 function ZO_SceneFragment:SetSceneManager(sceneManager)
@@ -66,11 +70,11 @@ end
 
 --Show and Hide will be called by the scene management system. They should not be called directly by code.
 function ZO_SceneFragment:Show()
-    
+    self:OnShown()
 end
 
 function ZO_SceneFragment:Hide()
-    
+    self:OnHidden()
 end
 
 function ZO_SceneFragment:GetState()

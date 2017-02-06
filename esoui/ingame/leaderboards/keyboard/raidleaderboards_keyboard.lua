@@ -28,6 +28,9 @@ function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
                                                      QueryRaidLeaderboardData()
                                                  end
                                              end)
+
+    SYSTEMS:RegisterKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:UpdateCategories()
 end
 
 function ZO_RaidLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)
@@ -78,6 +81,4 @@ end
 
 function ZO_RaidLeaderboardsInformationArea_OnInitialized(self)
     RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Keyboard:New(self)
-    LEADERBOARDS:UpdateCategories()
-    SYSTEMS:RegisterKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME, RAID_LEADERBOARDS)
 end

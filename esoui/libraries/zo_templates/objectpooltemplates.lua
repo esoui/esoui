@@ -123,17 +123,28 @@ function ZO_MetaPool:GetActiveObjectCount()
 end
 
 function ZO_MetaPool:ReleaseAllObjects()
-    for key, _ in pairs(self.activeObjects) do
+    for key, object in pairs(self.activeObjects) do
+        if self.customResetBehavior then
+            self.customResetBehavior(object)
+        end
         self.sourcePool:ReleaseObject(key)
     end
     self.activeObjects = {}
 end
 
 function ZO_MetaPool:ReleaseObject(objectKey)
+    local object = self.activeObjects[objectKey]
+    if self.customResetBehavior then
+        self.customResetBehavior(object)
+    end
     self.sourcePool:ReleaseObject(objectKey)
     self.activeObjects[objectKey] = nil
 end
 
 function ZO_MetaPool:SetCustomAcquireBehavior(customAcquireBehavior)
     self.customAcquireBehavior = customAcquireBehavior
+end
+
+function ZO_MetaPool:SetCustomResetBehavior(customeResetBehavior)
+    self.customResetBehavior = customeResetBehavior
 end

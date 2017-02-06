@@ -82,9 +82,13 @@ function ZO_GamepadInventory:OnDeferredInitialize()
 
     self:InitializeItemActions()
 
-    local function RefreshHeader()
+    local function RefreshCurrencies()
         if not self.control:IsHidden() then
             self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
+            --Refresh the currency tooltip if it is open.
+            if self.currentlySelectedData.isCurrencyEntry then
+                self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
+            end
         end
     end
 
@@ -94,9 +98,10 @@ function ZO_GamepadInventory:OnDeferredInitialize()
         end
     end
 
-    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, RefreshHeader)
-    self.control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, RefreshHeader)
-    self.control:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, RefreshHeader)
+    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
+        self.control:RegisterForEvent(info.event, RefreshCurrencies)
+    end
+
     self.control:RegisterForEvent(EVENT_PLAYER_DEAD, RefreshSelectedData)
     self.control:RegisterForEvent(EVENT_PLAYER_REINCARNATED, RefreshSelectedData)
 
@@ -447,7 +452,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             keybind = "UI_SHORTCUT_PRIMARY",
             order = -500,
             callback = function() self:Select() end,
-            visible = function() return not self.categoryList:IsEmpty() end,
+            visible = function() return not self.categoryList:IsEmpty() and not self.currentlySelectedData.isCurrencyEntry end,
         },
         {
             name = GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS),
@@ -479,7 +484,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                           return IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(BAG_BACKPACK)
                       end,
             callback = function()
-                StowAllVirtualItems()
+                ZO_Inventory_TryStowAllMaterials()
             end,
         },
     }
@@ -533,6 +538,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
     local function ItemListBackFunction()
         self:SwitchActiveList(INVENTORY_CATEGORY_LIST)
+        PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     end
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.itemFilterKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, ItemListBackFunction)
 
@@ -693,6 +699,8 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
         else
             GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER))
         end
+    elseif selectedData.isCurrencyEntry then
+        GAMEPAD_TOOLTIPS:LayoutCurrencies(GAMEPAD_LEFT_TOOLTIP)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
@@ -755,10 +763,35 @@ local function IsTwoHandedWeaponCategory(categoryType)
             categoryType == GAMEPAD_WEAPON_CATEGORY_TWO_HANDED_BOW)
 end
 
+function ZO_GamepadInventory:AddFilteredBackpackCategoryIfPopulated(filterType, iconFile)
+    local isListEmpty = self:IsItemListEmpty(nil, filterType)
+    if not isListEmpty then
+        local name = GetString("SI_ITEMFILTERTYPE", filterType)
+        local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, filterType, BAG_BACKPACK)
+        local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
+        data.filterType = filterType
+        data:SetIconTintOnSelection(true)
+        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+    end
+end
+
 function ZO_GamepadInventory:RefreshCategoryList()
     self.categoryList:Clear()
 
+	-- Currencies
+	do
+		local name = GetString(SI_INVENTORY_CURRENCIES)
+        local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_currencies.dds" 
+        local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, false)
+		data.isCurrencyEntry = true
+        data:SetIconTintOnSelection(true)
+        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+	end
+
     -- Supplies
+    -- Supplies is a catch all category for non-equipment items that don't fall into one of the specific categories below
+    -- If a new filtered category is added make sure to modify ZO_InventoryUtils_DoesNewItemMatchSupplies to match
+    -- otherwise items will show up in both the categories
     do
         local isListEmpty = self:IsItemListEmpty()
         if not isListEmpty then
@@ -772,32 +805,13 @@ function ZO_GamepadInventory:RefreshCategoryList()
     end
 
     -- Materials
-    do
-        local isListEmpty = self:IsItemListEmpty(nil, ITEMFILTERTYPE_CRAFTING)
-        if not isListEmpty then
-            local name = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CRAFTING)
-            local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_materials.dds"
-            local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, ITEMFILTERTYPE_CRAFTING, BAG_BACKPACK)
-            local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
-            data.filterType = ITEMFILTERTYPE_CRAFTING
-            data:SetIconTintOnSelection(true)
-            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
-        end
-    end
+    self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_CRAFTING, "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_materials.dds")
 
     -- Consumables
-    do
-        local isListEmpty = self:IsItemListEmpty(nil, ITEMFILTERTYPE_QUICKSLOT)
-        if not isListEmpty then
-            local name = GetString(SI_GAMEPAD_INVENTORY_CONSUMABLES)
-            local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_quickslot.dds"
-            local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, ITEMFILTERTYPE_QUICKSLOT, BAG_BACKPACK)
-            local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
-            data.filterType = ITEMFILTERTYPE_QUICKSLOT
-            data:SetIconTintOnSelection(true)
-            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
-        end
-    end
+    self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_QUICKSLOT, "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_quickslot.dds")
+
+    -- Furnishing
+    self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_FURNISHING, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_furnishings.dds")
 
     -- Quest Items
     do
@@ -940,6 +954,19 @@ end
 
 local function GetBestItemCategoryDescription(itemData)
     if itemData.equipType == EQUIP_TYPE_INVALID then
+        if itemData.itemType == ITEMTYPE_FURNISHING then
+            local furnitureDataId = GetItemFurnitureDataId(itemData.bagId, itemData.slotIndex)
+            if furnitureDataId ~= 0 then
+                local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+                if categoryId then
+                    local categoryName = GetFurnitureCategoryInfo(categoryId)
+                    if categoryName ~= "" then
+                        return categoryName
+                    end
+                end
+            end
+        end
+
         return GetString("SI_ITEMTYPE", itemData.itemType)
     end
 
@@ -1133,16 +1160,6 @@ function ZO_GamepadInventory:RefreshHeader(blockCallback)
     ZO_GamepadGenericHeader_Refresh(self.header, headerData, blockCallback)
 end
 
-local function UpdateAlliancePoints(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS), ZO_GAMEPAD_CURRENCY_OPTIONS)
-    return true
-end
-
-local function UpdateTelvarStones(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), ZO_GAMEPAD_CURRENCY_OPTIONS)
-    return true
-end
-
 local function UpdateGold(control)
     ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
     return true
@@ -1179,14 +1196,8 @@ function ZO_GamepadInventory:InitializeHeader()
         data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
 
-        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_ALLIANCE_POINTS),
-        data2Text = UpdateAlliancePoints,
-
-        data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_TELVAR_STONES),
-        data3Text = UpdateTelvarStones,
-
-        data4HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-        data4Text = UpdateCapacityString,
+        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+        data2Text = UpdateCapacityString,
     }
 
     self.craftBagHeaderData = {
@@ -1202,14 +1213,8 @@ function ZO_GamepadInventory:InitializeHeader()
         data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
         data1Text = UpdateGold,
 
-        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_ALLIANCE_POINTS),
-        data2Text = UpdateAlliancePoints,
-
-        data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_TELVAR_STONES),
-        data3Text = UpdateTelvarStones,
-
-        data4HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-        data4Text = UpdateCapacityString,
+        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+        data2Text = UpdateCapacityString,
     }
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
@@ -1309,6 +1314,7 @@ end
 
 function ZO_GamepadInventory:Select()
     self:SwitchActiveList(INVENTORY_ITEM_LIST)
+    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end
 
 function ZO_GamepadInventory:ShowQuickslot()

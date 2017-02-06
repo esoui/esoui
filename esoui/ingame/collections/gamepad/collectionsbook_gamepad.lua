@@ -1,5 +1,5 @@
-ZO_DLC_BACKGROUND_TEXTURE_SQUARE_DIMENSION = 1024
-ZO_DLC_BACKGROUND_TEXTURE_COORD_RIGHT = ZO_GAMEPAD_QUADRANT_2_3_CONTENT_BACKGROUND_WIDTH / ZO_DLC_BACKGROUND_TEXTURE_SQUARE_DIMENSION
+ZO_GAMEPAD_COLLECTIONS_PANEL_TEXTURE_SQUARE_DIMENSION = 1024
+ZO_GAMEPAD_COLLECTIONS_PANEL_TEXTURE_COORD_RIGHT = ZO_GAMEPAD_QUADRANT_2_3_CONTENT_BACKGROUND_WIDTH / ZO_GAMEPAD_COLLECTIONS_PANEL_TEXTURE_SQUARE_DIMENSION
 
 local GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME = "GAMEPAD_COLLECTIONS_ACTIONS_DIALOG"
 local GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME = "GAMEPAD_COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"
@@ -53,6 +53,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     self:RefreshHeader()
 
     self:InitializeInfoPanel()
+    self:InitializeHousingPanel()
     self:InitializeActionsDialog()
     self:InitializeRenameCollectibleDialog()
 
@@ -76,7 +77,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
 end
 
 function ZO_GamepadCollectionsBook:InitializeInfoPanel()
-    local infoPanel = self.control:GetNamedChild("InfoPanel")
+    local infoPanel = self.control:GetNamedChild("DLCPanel")
     infoPanel.backgroundControl = infoPanel:GetNamedChild("Background")
 
     local container = infoPanel:GetNamedChild("Container")
@@ -89,6 +90,26 @@ function ZO_GamepadCollectionsBook:InitializeInfoPanel()
     infoPanel.questAcceptIndicator = scrollContainer:GetNamedChild("QuestAcceptIndicator")
     infoPanel.questAcceptDescription = scrollContainer:GetNamedChild("QuestAcceptDescription")
     self.infoPanelControl = infoPanel
+end
+
+function ZO_GamepadCollectionsBook:InitializeHousingPanel()
+    local housingPanel = self.control:GetNamedChild("HousingPanel")
+    housingPanel.backgroundControl = housingPanel:GetNamedChild("Background")
+    
+    local container = housingPanel:GetNamedChild("Container")
+    housingPanel.collectedStatusLabel = container:GetNamedChild("UnlockStatusLabel")
+    housingPanel.nameLabel = container:GetNamedChild("Name")
+    housingPanel.nicknameLabel = container:GetNamedChild("Nickname")
+    housingPanel.locationLabel = container:GetNamedChild("LocationValue")
+    housingPanel.houseTypeLabel = container:GetNamedChild("HouseTypeValue")
+    
+    local scrollContainer = container:GetNamedChild("ScrollSection"):GetNamedChild("ScrollChild")
+    housingPanel.descriptionLabel = scrollContainer:GetNamedChild("Description")
+    housingPanel.primaryResidenceHeaderLabel  = scrollContainer:GetNamedChild("PrimaryResidenceHeader")
+    housingPanel.primaryResidenceValueLabel = scrollContainer:GetNamedChild("PrimaryResidenceValue")
+    housingPanel.hintLabel = scrollContainer:GetNamedChild("Hint")
+    
+    self.housingPanelControl = housingPanel
 end
 
 function ZO_GamepadCollectionsBook:SetupList(list)
@@ -206,8 +227,10 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local nameStringId
                 if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
                     nameStringId = SI_DLC_BOOK_ACTION_ACCEPT_QUEST
-                elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_TROPHY then
+                elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
                     nameStringId = SI_COLLECTIBLE_ACTION_USE
+                elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                    nameStringId = collectibleData.unlocked and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
                 elseif collectibleData.active then
                     if categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET then
                         nameStringId = SI_COLLECTIBLE_ACTION_DISMISS
@@ -223,13 +246,22 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             callback = function()
                 local entryData = self.currentList.list:GetTargetData()
                 local collectibleData = entryData.data
-                UseCollectible(collectibleData.collectibleId)
+                if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                    RequestJumpToHouse(collectibleData.referenceData)
+                    SCENE_MANAGER:ShowBaseScene()
+                else
+                    UseCollectible(collectibleData.collectibleId)
+                end
             end,
             visible = function()
                 local entryData = self.currentList.list:GetTargetData()
                 if entryData and entryData.data then
                     local collectibleData = entryData.data
-                    return collectibleData.useable
+                    if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                        return true
+                    else
+                        return collectibleData.useable
+                    end
                 else
                     return false
                 end
@@ -237,16 +269,21 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             sound = SOUNDS.DEFAULT_CLICK,
             enabled = function()
                 local entryData = self.currentList.list:GetTargetData()
-                if entryData and entryData.data and entryData.data.useable then
-                    local remaining = GetCollectibleCooldownAndDuration(entryData.data.collectibleId)
-                    if entryData.data.active then
+                if entryData and entryData.data then
+                    if entryData.data.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
                         return true
-                    elseif remaining > 0 then
-                        return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
-                    elseif entryData.data.blocked then
-                        return false, GetString(SI_COLLECTIONS_BLOCKED_ERROR)
-                    else
-                        return true
+                    end
+                    if entryData.data.useable then
+                        local remaining = GetCollectibleCooldownAndDuration(entryData.data.collectibleId)
+                        if entryData.data.active then
+                            return true
+                        elseif remaining > 0 then
+                            return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
+                        elseif entryData.data.blocked then
+                            return false, GetString(SI_COLLECTIONS_BLOCKED_ERROR)
+                        else
+                            return true
+                        end
                     end
                 end
                 return false
@@ -452,6 +489,8 @@ end
 function ZO_GamepadCollectionsBook:OnCollectionUpdated()
     if not self.control:IsHidden() then
         if self.categoryList then
+            self:ShowList(self.categoryList)
+            self.categoryList.list:SetSelectedIndex(1)
             self:BuildCategoryList()
         end
     end
@@ -585,7 +624,13 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryIndex, subcategor
         local entryData = self:BuildCollectibleData(categoryIndex, subcategoryIndex, collectibleIndex)
         if not entryData.data.isPlaceholder then
             if entryData.data.unlocked then
-                table.insert(unlockedData, entryData)
+                --Special case: The primary residence is sorted to the top of the category for housing
+                local housingData = entryData.housingData
+                if housingData and housingData.isPrimaryResidence then
+                    table.insert(unlockedData, 1, entryData)
+                else
+                    table.insert(unlockedData, entryData)
+                end
             else
                 table.insert(lockedData, entryData)
             end
@@ -650,6 +695,25 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
     local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
     local isNew = IsCollectibleNew(collectibleId)
     local isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
+    
+    local referenceData = GetCollectibleReferenceId(collectibleId)
+
+    local housingData
+    if categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+        local houseFoundInZoneId = GetHouseFoundInZoneId(referenceData)
+
+        if hint == "" then
+            hint = GetString(SI_HOUSING_BOOK_AVAILABLE_FOR_PURCHASE)
+        else
+            hint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
+        end
+
+        housingData = {
+            location = GetZoneNameById(houseFoundInZoneId),
+            houseCategoryType = GetHouseCategoryType(referenceData),
+            isPrimaryResidence = IsPrimaryHouse(referenceData),
+        }
+    end
 
     if visualLayerHidden and not active then
         visualLayerHidden = false
@@ -658,6 +722,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
     local entryData = ZO_GamepadEntryData:New(name, iconFile)
     entryData.data = {
         collectibleId = collectibleId,
+        referenceData = referenceData,
         name = name,
         nickname = GetCollectibleNickname(collectibleId),
         description = description,
@@ -679,6 +744,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
         hasNameBeenFormatted = false,
         isNew = isNew,
         isValidForPlayer = isValidForPlayer,
+        housingData = housingData,
     }
     entryData.isEquippedInCurrentCategory = active
 
@@ -759,52 +825,99 @@ function ZO_GamepadCollectionsBook:RefreshTooltip(entryData)
     if entryData and entryData.data then
         local collectibleData = entryData.data
         if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
-            local infoPanel = self.infoPanelControl
-            infoPanel.backgroundControl:SetTexture(collectibleData.backgroundFile)
-            infoPanel.nameControl:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleData.name))
-            infoPanel.descriptionControl:SetText(collectibleData.description)
-            infoPanel.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData.unlockState))
-
-            local questAcceptLabelStringId = collectibleData.active and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
-            local questName = GetCollectibleQuestPreviewInfo(collectibleData.collectibleId)
-            infoPanel.questStatusControl:SetText(zo_strformat(SI_GAMEPAD_DLC_BOOK_QUEST_STATUS_INFO, questName, GetString(questAcceptLabelStringId)))
-            
-            local showsQuest = not (collectibleData.active or collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED)
-            local questAcceptIndicator = infoPanel.questAcceptIndicator
-            local questAcceptDescription = infoPanel.questAcceptDescription
-            if showsQuest then
-                questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
-                questAcceptIndicator:SetHidden(false)
-                
-                local questDescription = select(2, GetCollectibleQuestPreviewInfo(collectibleData.collectibleId))
-                questAcceptDescription:SetText(questDescription)
-                questAcceptDescription:SetHidden(false)
-            elseif collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED then
-                questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK))
-                questAcceptIndicator:SetHidden(false)
-                questAcceptDescription:SetHidden(true)
-            else
-                questAcceptIndicator:SetHidden(true)
-                questAcceptDescription:SetHidden(true)
-            end
-
-            SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-            SCENE_MANAGER:AddFragment(GAMEPAD_COLLECTIONS_BOOK_INFO_PANEL_FRAGMENT)
+            self:RefreshDLCTooltip(collectibleData)
+        elseif collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+            self:RefreshHousingTooltip(collectibleData)
         else
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
-            GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_LEFT_TOOLTIP, true)
-
-            local categoryName = collectibleData.categoryName
-            local timeRemainingS = entryData:GetCooldownTimeRemainingMs() / 1000
-            local SHOW_VISUAL_LAYER_INFO = true
-            local SHOW_BLOCK_REASON = true
-            GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_LEFT_TOOLTIP, collectibleData.collectibleId, categoryName, collectibleData.name, collectibleData.nickname, collectibleData.purchasable, collectibleData.description, collectibleData.hint, collectibleData.isPlaceholder, SHOW_VISUAL_LAYER_INFO, timeRemainingS, SHOW_BLOCK_REASON)
+            self:RefreshStandardTooltip(collectibleData, entryData)
         end
     else
         SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_INFO_PANEL_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
+end
+
+function ZO_GamepadCollectionsBook:RefreshStandardTooltip(collectibleData, entryData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
+    GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_LEFT_TOOLTIP, true)
+
+    local categoryName = collectibleData.categoryName
+    local timeRemainingS = entryData:GetCooldownTimeRemainingMs() / 1000
+    local SHOW_VISUAL_LAYER_INFO = true
+    local SHOW_BLOCK_REASON = true
+    GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_LEFT_TOOLTIP, collectibleData.collectibleId, categoryName, collectibleData.name, collectibleData.nickname, collectibleData.purchasable, collectibleData.description, collectibleData.hint, collectibleData.isPlaceholder, SHOW_VISUAL_LAYER_INFO, timeRemainingS, SHOW_BLOCK_REASON)
+end
+
+function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
+    local infoPanel = self.infoPanelControl
+    infoPanel.backgroundControl:SetTexture(collectibleData.backgroundFile)
+    infoPanel.nameControl:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleData.name))
+    infoPanel.descriptionControl:SetText(collectibleData.description)
+    infoPanel.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData.unlockState))
+
+    local questAcceptLabelStringId = collectibleData.active and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
+    local questName = GetCollectibleQuestPreviewInfo(collectibleData.collectibleId)
+    infoPanel.questStatusControl:SetText(zo_strformat(SI_GAMEPAD_DLC_BOOK_QUEST_STATUS_INFO, questName, GetString(questAcceptLabelStringId)))
+    
+    local showsQuest = not (collectibleData.active or collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED)
+    local questAcceptIndicator = infoPanel.questAcceptIndicator
+    local questAcceptDescription = infoPanel.questAcceptDescription
+    if showsQuest then
+        questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
+        questAcceptIndicator:SetHidden(false)
+        
+        local questDescription = select(2, GetCollectibleQuestPreviewInfo(collectibleData.collectibleId))
+        questAcceptDescription:SetText(questDescription)
+        questAcceptDescription:SetHidden(false)
+    elseif collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED then
+        questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK))
+        questAcceptIndicator:SetHidden(false)
+        questAcceptDescription:SetHidden(true)
+    else
+        questAcceptIndicator:SetHidden(true)
+        questAcceptDescription:SetHidden(true)
+    end
+
+    SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+    SCENE_MANAGER:AddFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
+end
+
+function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
+    local housingPanel = self.housingPanelControl
+    local housingData = collectibleData.housingData
+    housingPanel.backgroundControl:SetTexture(collectibleData.backgroundFile)
+    housingPanel.nameLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleData.name))
+    housingPanel.locationLabel:SetText(ZO_CachedStrFormat(SI_ZONE_NAME, housingData.location))
+    housingPanel.houseTypeLabel:SetText(GetString("SI_HOUSECATEGORYTYPE", housingData.houseCategoryType))
+    housingPanel.descriptionLabel:SetText(collectibleData.description)
+    housingPanel.collectedStatusLabel:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData.unlockState))
+    
+    local hasNickName = collectibleData.nickname ~= ""
+    if hasNickName then
+        housingPanel.nicknameLabel:SetText(ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, collectibleData.nickname))
+    else
+        housingPanel.nicknameLabel:SetText("")
+    end
+
+    if collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED then
+        housingPanel.hintLabel:SetText(collectibleData.hint)
+        
+        housingPanel.hintLabel:SetHidden(false)
+        housingPanel.primaryResidenceHeaderLabel:SetHidden(true)
+        housingPanel.primaryResidenceValueLabel:SetHidden(true)
+    else
+        local primaryResidenceText = housingData.isPrimaryResidence and GetString(SI_YES) or GetString(SI_NO)
+        housingPanel.primaryResidenceValueLabel:SetText(primaryResidenceText)
+        
+        housingPanel.primaryResidenceHeaderLabel:SetHidden(false)
+        housingPanel.primaryResidenceValueLabel:SetHidden(false)
+        housingPanel.hintLabel:SetHidden(true)
+    end
+
+    SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+    SCENE_MANAGER:AddFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
 end
 
 function ZO_GamepadCollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subcategoryIndex)

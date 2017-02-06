@@ -191,7 +191,7 @@ do
         {
             customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
             name = GetString(SI_MAIN_MENU_JOURNAL),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds",
+            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_journal.dds",
             subMenu =
             {
                 [MENU_JOURNAL_ENTRIES.QUESTS] =

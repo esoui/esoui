@@ -329,6 +329,11 @@ do
         return true
     end
 
+	local function UpdateWritVouchers(control)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_WRIT_VOUCHERS, GetCarriedCurrencyAmount(CURT_WRIT_VOUCHERS), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        return true
+    end
+
     local function UpdateRidingTrainingCost(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, STABLE_MANAGER.trainingCost, ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT, nil, not STABLE_MANAGER:CanAffordTraining())
         return true
@@ -369,6 +374,11 @@ do
         headerText = GetString(SI_CURRENCY_TELVAR_STONES),
         text = UpdateTelvarStones
     }
+	local WRIT_VOUCHER_HEADER_DATA =
+    {
+        headerText = GetString(SI_CURRENCY_WRIT_VOUCHERS),
+        text = UpdateWritVouchers
+    }
 
     local RIDING_TRAINING_COST_HEADER_DATA =
     {
@@ -382,7 +392,7 @@ do
         text = GetTransactionValueString
     }
 
-    local g_pendingHeaderData = {}
+	local g_pendingHeaderData = {}
     function ZO_GamepadStoreManager:RefreshHeaderData()
         if not self.activeComponent then
             return
@@ -390,7 +400,7 @@ do
 
         ZO_SharedStoreManager.RefreshCurrency(self)
 
-        ZO_ClearTable(g_pendingHeaderData)
+		ZO_ClearTable(g_pendingHeaderData)
         local mode = self:GetCurrentMode()
 
         local isStable = mode == ZO_MODE_STORE_STABLE
@@ -407,42 +417,31 @@ do
             table.insert(g_pendingHeaderData, CAPACITY_HEADER_DATA)
         end
 
-        -- mirroring PC here:
-        -- Buy screen shows the appropriate currency for that screen (gold or AP)
-        -- Sell shows both, always
-        -- Repair and Buyback show gold and not AP, always
-
-        local hideGold = false
-        local hideAP = false
-        local hideTelvarStones = false
-
         if mode == ZO_MODE_STORE_BUY then
-            hideGold = not self.storeUsesMoney
-            hideAP = not self.storeUsesAP
-            hideTelvarStones = not self.storeUsesTelvarStones
-        else
-            hideAP = true
-            hideTelvarStones = true
-        end
+			if self.storeUsesMoney then
+				table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
+			end
 
-        if not isStable then
-            local cost = GetRepairAllCost()
-            if cost > 0 then
-                hideGold = false
-            end
-        end
-
-        if not hideGold then
-            table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
-        end
-
-        if not hideAP then
-            table.insert(g_pendingHeaderData, AP_HEADER_DATA)
-        end
-
-        if not hideTelvarStones then
-            table.insert(g_pendingHeaderData, TELVAR_STONE_HEADER_DATA)
-        end
+			-- We only have space to display the first 2 alternate currencies this store uses. 
+			-- According to our design standards, no store should ever use more than gold + 2 alternate currencies anyway.
+			local MAX_ALTERNATE_CURRENCIES = 2
+			local alternateCurrenciesUsed = 0
+			if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesAP then
+				table.insert(g_pendingHeaderData, AP_HEADER_DATA)
+				alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+			end
+			if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesTelvarStones then
+				table.insert(g_pendingHeaderData, TELVAR_STONE_HEADER_DATA)
+				alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+			end
+			if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesWritVouchers then
+				table.insert(g_pendingHeaderData, WRIT_VOUCHER_HEADER_DATA)
+				alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+			end
+		else
+			-- This is for selling, fencing, and the stable
+			table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
+		end
 
         if isStable then
             table.insert(g_pendingHeaderData, RIDING_TRAINING_COST_HEADER_DATA)
@@ -547,6 +546,8 @@ function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS)
         elseif currencyType == CURT_TELVAR_STONES then
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES)
+		elseif currencyType == CURT_WRIT_VOUCHERS then
+            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS)
         end
     elseif selectedData.price > 0 and selectedData.price > GetCarriedCurrencyAmount(CURT_MONEY) then
         return false, GetString(SI_NOT_ENOUGH_MONEY)

@@ -20,14 +20,14 @@
 
         <Control name="ZO_KeybindButton_Keyboard_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" />
+                <Label name="$(parent)NameLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="NONE" font="ZoFontKeybindStripDescription" />
                 <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" />
             </Controls>
         </Control>
 
         <Control name="ZO_KeybindButton_Gamepad_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" font="ZoFontGamepad34" />
+                <Label name="$(parent)NameLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" font="ZoFontGamepad34" />
                 <Label name="$(parent)KeyLabel" font="ZoFontGamepad22" />
             </Controls>
         </Control>

@@ -26,6 +26,7 @@ function ItemTransferDialog_Keyboard:Initialize(control)
 
     ZO_Dialogs_RegisterCustomDialog("ITEM_TRANSFER_ADD_TO_CRAFT_BAG_KEYBOARD",
     {
+        canQueue = true,
         customControl = control,
         setup = setupFunc,
         title =

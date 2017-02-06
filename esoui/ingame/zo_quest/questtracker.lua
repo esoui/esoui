@@ -82,7 +82,8 @@ local GAMEPAD_CONSTANTS =
     HEADER_INHERIT_ALPHA = false,
     TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-    QUEST_LINE_BASE_HEIGHT = 34,
+    QUEST_LINE_MAX_WIDTH = 350,
+
     QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT = 48,
     QUEST_HEADER_BASE_HEIGHT = 28,
     QUEST_TRACKER_TREE_INDENT = 0,
@@ -155,6 +156,7 @@ end
 local function ApplyPlatformStyleToCondition(control)
     local constants = GetPlatformConstants()
     control:SetDimensions(constants.QUEST_LINE_BASE_WIDTH, constants.QUEST_LINE_BASE_HEIGHT)
+    control:SetDimensionConstraints(constants.QUEST_LINE_MIN_WIDTH, constants.QUEST_LINE_MIN_HEIGHT, constants.QUEST_LINE_MAX_WIDTH, constants.QUEST_LINE_MAX_HEIGHT)
     control:SetFont(constants.FONT_GENERAL)
     if control.m_TreeNode then
         control.m_TreeNode:SetOffsetY(constants.QUEST_TRACKER_TREE_LINE_SPACING[control.entryType])

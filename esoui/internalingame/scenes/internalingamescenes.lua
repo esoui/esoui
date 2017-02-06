@@ -11,6 +11,8 @@ local empty = ZO_Scene:New("empty", SCENE_MANAGER)
 local marketScene = SCENE_MANAGER:GetScene(ZO_KEYBOARD_MARKET_SCENE_NAME)
 if marketScene then
     marketScene:AddFragment(RIGHT_BG_FRAGMENT)
+    marketScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+    marketScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
     marketScene:AddFragment(MARKET_FRAGMENT)
     marketScene:AddFragment(MARKET_TREE_UNDERLAY_FRAGMENT)
     marketScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)

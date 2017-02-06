@@ -32,7 +32,7 @@ local CombatEventToSoundId =
     [ACTION_RESULT_DISORIENTED] = SOUNDS.ABILITY_CASTER_DISORIENTED,
     [ACTION_RESULT_TARGET_TOO_CLOSE] = SOUNDS.ABILITY_TARGET_TOO_CLOSE,
     [ACTION_RESULT_WRONG_WEAPON] = SOUNDS.ABILITY_WRONG_WEAPON,
-    [ACTION_RESULT_TARGET_NOT_PVP_FLAGGED] = SOUNDS.ABILITY_TARGET_NOT_PVP_FLAGGED  ,
+    [ACTION_RESULT_TARGET_NOT_PVP_FLAGGED] = SOUNDS.ABILITY_TARGET_NOT_PVP_FLAGGED,
     [ACTION_RESULT_PACIFIED] = SOUNDS.ABILITY_CASTER_PACIFIED,
     [ACTION_RESULT_LEVITATED] = SOUNDS.ABILITY_CASTER_LEVITATED,
     [ACTION_RESULT_REINCARNATING] = SOUNDS.NONE,
@@ -141,7 +141,7 @@ local AlertHandlers = {
             PlaySound(sound)
         else
             local sound = (result == COLLECTIBLE_USAGE_BLOCK_REASON_ON_COOLDOWN) and SOUNDS.COLLECTIBLE_ON_COOLDOWN or SOUNDS.GENERAL_ALERT_ERROR
-            return ERROR, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", reason)), sound
+            return ERROR, zo_strformat(GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", result)), sound
         end
     end,
 
@@ -845,10 +845,42 @@ local AlertHandlers = {
             end
             return ERROR, errorText, SOUNDS.GENERAL_ALERT_ERROR
         end
+	end,
+
+    [EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED] = function(reason)
+        if reason ~= LFG_READY_CHECK_CANCEL_REASON_NOT_IN_READY_CHECK then
+            return ALERT, GetString("SI_LFGREADYCHECKCANCELREASON", reason)
+        end
     end,
 
     [EVENT_STACKED_ALL_ITEMS_IN_BAG] = function()
         return ALERT, GetString(SI_STACK_ALL_ITEMS_ALERT)
+    end,
+
+	[EVENT_ACTION_SLOT_ABILITY_USED_WRONG_WEAPON] = function(weaponConfigType)
+		return ALERT, zo_strformat(SI_ERROR_WRONG_WEAPON_EQUIPPED_FOR_SKILL, GetString("SI_WEAPONCONFIGTYPE", weaponConfigType))
+	end,
+
+	[EVENT_HOUSING_ADD_PERMISSIONS_FAILED] = function(userGroup, attemptedName)
+        if userGroup == HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL then
+		    return ALERT, zo_strformat(SI_HOUSING_ADD_PERMISSIONS_FAILED_INDIVIDUAL, ZO_FormatUserFacingDisplayName(attemptedName))
+        elseif userGroup == HOUSE_PERMISSION_USER_GROUP_GUILD then
+            return ALERT, zo_strformat(SI_HOUSING_ADD_PERMISSIONS_FAILED_GUILD, attemptedName)
+        end
+	end,
+
+	[EVENT_HOUSING_ADD_PERMISSIONS_CANT_ADD_SELF] = function()
+        return ALERT, GetString(SI_HOUSING_ADD_PERMISSIONS_CANT_ADD_SELF)
+	end,
+
+	[EVENT_HOUSING_LOAD_PERMISSIONS_RESULT] = function(loadResult)
+        return ALERT, GetString("SI_HOUSINGLOADPERMISSIONSRESULT", loadResult)
+	end,
+
+    [EVENT_HOUSING_EDITOR_REQUEST_RESULT] = function(result)
+        if result ~= HOUSING_REQUEST_RESULT_SUCCESS then
+            return ALERT, GetString("SI_HOUSINGREQUESTRESULT", result)
+        end
     end,
 }
 

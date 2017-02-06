@@ -191,8 +191,8 @@ function zo_callLater(func, ms)
 
     EVENT_MANAGER:RegisterForUpdate(name, ms,
         function()
-            func(id)
             EVENT_MANAGER:UnregisterForUpdate(name)
+            func(id)
         end)
     return id
 end
@@ -237,4 +237,11 @@ end
 -- Use this function to get unique hash key for a given id64. 
 function zo_getSafeId64Key(id)
 	return Id64ToString(id)
+end
+
+function zo_distance3D(x1, y1, z1, x2, y2, z2)
+    local diffX = x1 - x2
+    local diffY = y1 - y2
+    local diffZ = z1 - z2
+    return zo_sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ)
 end

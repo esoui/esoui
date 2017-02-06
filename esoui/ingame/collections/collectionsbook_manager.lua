@@ -3,7 +3,6 @@
 --
 
 ZO_COLLECTIONS_SYSTEM_NAME = "collections"
-ZO_COLLECTIONS_CATEGORY_DLC_INDEX = 1
 
 local CollectionsBook_Singleton = ZO_CallbackObject:Subclass()
 
@@ -15,6 +14,7 @@ end
 
 function CollectionsBook_Singleton:Initialize()
     self.dlcIdToQuestIsPending = {}
+    self.ownedHouses = {}
 
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) self:OnCollectibleUpdated(...) end)
@@ -25,6 +25,7 @@ function CollectionsBook_Singleton:Initialize()
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
 
     self:RefreshDLCStates()
+    self:RefreshOwnedHouses()
 end
 
 function CollectionsBook_Singleton:BrowseToCollectible(...)
@@ -47,8 +48,33 @@ function CollectionsBook_Singleton:RefreshDLCStates()
     end
 end
 
+function CollectionsBook_Singleton:RefreshOwnedHouses()
+    ZO_ClearTable(self.ownedHouses)
+    local numAllHouses = GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE)
+    for houseIndex = 1, numAllHouses do
+        local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_HOUSE, houseIndex)
+        local houseId = GetCollectibleReferenceId(collectibleId)
+        local isUnlocked = IsCollectibleUnlocked(collectibleId)
+        if isUnlocked then
+            self.ownedHouses[collectibleId] = { houseId = houseId }
+        end
+    end
+end
+
+function CollectionsBook_Singleton:RefreshOwnedHouseById(collectibleId, justUnlocked)
+    local isUnlocked, _, _, categoryType = select(5, GetCollectibleInfo(collectibleId))
+    if categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE and isUnlocked then
+        local houseId = GetCollectibleReferenceId(collectibleId)
+        if justUnlocked then
+            self.ownedHouses[collectibleId] = { showPermissionsDialogOnEnter = true }
+        end
+        self.ownedHouses[collectibleId].houseId = houseId
+    end
+end
+
 function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, justUnlocked)
     self:RefreshDLCStateById(collectibleId)
+    self:RefreshOwnedHouseById(collectibleId, justUnlocked)
     self:FireCallbacks("OnCollectibleUpdated", collectibleId, justUnlocked)
 end
 
@@ -75,7 +101,7 @@ function CollectionsBook_Singleton:OnUpdateCooldowns(...)
 end
 
 function CollectionsBook_Singleton:IsCategoryIndexDLC(categoryIndex)
-    return categoryIndex == ZO_COLLECTIONS_CATEGORY_DLC_INDEX
+    return GetCollectibleCategorySpecialization(categoryIndex) == COLLECTIBLE_CATEGORY_SPECIALIZATION_DLC
 end
 
 function CollectionsBook_Singleton:IsDLCIdQuestPending(dlcId)
@@ -89,6 +115,28 @@ function CollectionsBook_Singleton:DoesAnyDLCHaveQuestPending()
         end
     end
     return false
+end
+
+function CollectionsBook_Singleton:GetOwnedHouses()
+    return self.ownedHouses
+end
+
+function CollectionsBook_Singleton:IsOwnedHouseCollectibleUnlocked(collectibleId)
+    return self.ownedHouses[collectibleId] ~= nil
+end
+
+function CollectionsBook_Singleton:DoesHousePermissionsDialogNeedToBeShownForCollectible(collectibleId)
+    return self.ownedHouses[collectibleId] and self.ownedHouses[collectibleId].showPermissionsDialogOnEnter
+end
+
+function CollectionsBook_Singleton:MarkHouseCollectiblePermissionLoadDialogShown(collectibleId)
+    if self.ownedHouses[collectibleId] then
+        self.ownedHouses[collectibleId].showPermissionsDialogOnEnter = false
+    end
+end
+
+function CollectionsBook_Singleton:IsCategoryIndexHousing(categoryIndex)
+    return GetCollectibleCategorySpecialization(categoryIndex) == COLLECTIBLE_CATEGORY_SPECIALIZATION_HOUSING
 end
 
 function CollectionsBook_Singleton.DoesCollectibleListHaveVisibleCollectible(...)

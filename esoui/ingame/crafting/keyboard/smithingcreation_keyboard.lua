@@ -90,7 +90,6 @@ function ZO_SmithingCreation:InitializeFilterTypeBar()
 
     local function CreateNewTabFilterData(filterType, name, normal, pressed, highlight, disabled, visible)
         return {
-            activeTabText = name,
             tooltipText = name,
 
             descriptor = filterType,

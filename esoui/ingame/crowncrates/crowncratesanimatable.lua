@@ -13,6 +13,9 @@ function ZO_CrownCratesAnimatable:Initialize(control, animationSource, ...)
     self.playingAnimationTimelines = {}
     self.textureControls = {}
     self.particles = {}
+    self.nextCallLaterId = 1
+    self.callLaterPrefix = string.format("%sCallLater", control:GetName())
+    self.callLaters = {}
 end
 
 function ZO_CrownCratesAnimatable:AddTexture(textureControl)
@@ -26,6 +29,10 @@ function ZO_CrownCratesAnimatable:Reset()
     for _, textureControl in ipairs(self.textureControls) do
         textureControl:SetAlpha(0)
         textureControl:SetMouseEnabled(false)
+    end
+
+    for _, callLaterName in pairs(self.callLaters) do
+        EVENT_MANAGER:UnregisterForUpdate(callLaterName)
     end
 
     self:ReleaseAllParticles()
@@ -208,4 +215,21 @@ function ZO_CrownCratesAnimatable:DestroyParticle(particleType)
 		self:ReleaseParticle(particleType)
 		pool:DestroyFreeObject(key, ZO_CrownCrates.DeleteParticle)
 	end
+end
+
+function ZO_CrownCratesAnimatable:CallLater(func, ms)
+    local id = self.nextCallLaterId
+    local name = self.callLaterPrefix..self.nextCallLaterId
+    self.nextCallLaterId = self.nextCallLaterId + 1
+
+    EVENT_MANAGER:RegisterForUpdate(name, ms,
+        function()
+            self.callLaters[id] = nil
+            EVENT_MANAGER:UnregisterForUpdate(name)
+            func(id)
+        end)
+    
+    self.callLaters[id] = name
+
+    return id
 end

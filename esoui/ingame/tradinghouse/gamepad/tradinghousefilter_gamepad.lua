@@ -17,13 +17,16 @@ local function InitializeComboBox(comboBox, data, callback, lastName, lastIndex)
     comboBox:ClearItems()
     
     local selectFirstItem = lastName == nil or lastIndex == 1
-    ZO_TradingHouse_InitializeColoredComboBox(comboBox, data, callback, nil, nil, selectFirstItem)
-    
-    if not selectFirstItem then
+    local DONT_SELECT_FIRST_ITEM = false
+    ZO_TradingHouse_InitializeColoredComboBox(comboBox, data, callback, nil, nil, DONT_SELECT_FIRST_ITEM)
+    --All of the selection callbacks depend on querying the highlighted item instead of the selected item so we have to set that first
+    --before the selected item changed callback.
+    comboBox:SetHighlightedItem(lastIndex)
+    if selectFirstItem then
+        comboBox:SelectFirstItem()
+    else
         comboBox:SelectItemByIndex(lastIndex, IGNORE_CALLBACK)
     end
-
-    comboBox:SetHighlightedItem(lastIndex)
 end
 
 --[[ Gamepad Trading House Filter ]]--
@@ -247,6 +250,70 @@ function ZO_GamepadCategoryFilter:SetComboBoxes(comboBoxes)
     ZO_GamepadTradingHouse_Filter.SetComboBoxes(self, comboBoxes)
 end
 
+--Combo Box Data
+
+ZO_TradingHouse_Gamepad_ComboBoxData = ZO_Object:Subclass()
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:New(...)
+   local object = ZO_Object.New(self)
+   object:Initialize(...)
+   return object 
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:Initialize(name, onChangeCallback)
+    self.name = name
+    self.lastSelectionIndex = 1
+    self.visible = true
+    self.onChangeCallback = onChangeCallback
+
+    self.initCallback = function(comboBox)
+        self.comboBox = comboBox
+        InitializeComboBox(comboBox, self.data, self.onChangeCallback, self.lastSelectionText, self.lastSelectionIndex)
+    end
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:GetData()
+    return self.data
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:SetData(data)
+    self.data = data
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:IsVisible()
+    return self.visible
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:SetVisible(visible)
+    self.visible = visible
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:GetSelectedEntryDataFromMemory()
+    return self.data[self.lastSelectionIndex]
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:UpdateSelectedEntryMemory(entryName, entryIndex)
+    if entryName ~= self.lastSelectionText then
+        self.lastSelectionText = entryName
+        self.lastSelectionIndex = entryIndex
+        return true
+    else
+        return false
+    end
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:ClearSelectedEntryMemory()
+    self.lastSelectionText = nil
+    self.lastSelectionIndex = 1
+end
+
+function ZO_TradingHouse_Gamepad_ComboBoxData:ReInitializeComboBox()
+    self:ClearSelectedEntryMemory()
+    if self.comboBox then
+		self.initCallback(self.comboBox)
+	end
+end
+
 --[[ Gamepad Category With Subtype Filter ]]--
 
 -- used by Weapon, Armor, and Crafting Filters
@@ -260,27 +327,13 @@ end
 function ZO_CategorySubtypeFilter:Initialize(name, filterData, traitType, enchantmentType)
     ZO_GamepadTradingHouse_Filter.Initialize(self, traitType, enchantmentType)
     self.name = name
-    self.filterData = filterData
-    self.lastFilterCategoryIndex = 1
-    self.lastFilterSubTypeIndex = 1
+    self.filterComboBoxData = {}
+    self.comboBoxNameToFilterComboBoxData = {}
 
-    self.filterComboBoxData = 
-    { 
-        {
-            name = "GuildStoreBrowseFilterCategoryFilter" .. self.name, 
-            initCallback = function(comboBox)
-                self:InitializeFilterCategoryComboBox(comboBox)
-            end,
-            visible = true
-        },
-        {
-            name = "GuildStoreBrowseFilterSubTypeFilter" .. self.name,
-            initCallback = function(comboBox)
-                self:InitializeSubTypeComboBox(comboBox)
-            end,
-            visible = true
-        }
-    }
+    self:AddFilterComboBoxData("Category", function(...) self:PopulateSubTypes(...) end)
+    self:AddFilterComboBoxData("SubType", function(...) self:SetFilterSubType(...) end)
+    local categoryComboBoxData = self:GetFilterComboBoxData("Category")
+    categoryComboBoxData:SetData(filterData)
 
     ZO_GamepadTradingHouse_Filter.AddMods(self, self.filterComboBoxData)
 end
@@ -289,62 +342,57 @@ function ZO_CategorySubtypeFilter:GetComboBoxData()
     return self.filterComboBoxData
 end
 
-function ZO_CategorySubtypeFilter:SetSubType(entry)
-    self.m_FilterSubType = entry.minValue
+function ZO_CategorySubtypeFilter:AddFilterComboBoxData(comboBoxName, onChangeCallback)
+    local fullName = string.format("GuildStoreBrowseFilter%sFilter%s", comboBoxName, self.name)
+    local comboBoxData = ZO_TradingHouse_Gamepad_ComboBoxData:New(fullName, onChangeCallback)
+    table.insert(self.filterComboBoxData, comboBoxData)
+    self.comboBoxNameToFilterComboBoxData[comboBoxName] = comboBoxData
+    return comboBoxData
+end
+
+function ZO_CategorySubtypeFilter:GetFilterComboBoxData(comboBoxName)
+    return self.comboBoxNameToFilterComboBoxData[comboBoxName]
+end
+
+function ZO_CategorySubtypeFilter:PopulateSubTypes(comboBox, entryName, entry)
+    local categoryComboBoxData = self:GetFilterComboBoxData("Category")
+    local subTypeComboBoxData = self:GetFilterComboBoxData("SubType")
+
+	if categoryComboBoxData:UpdateSelectedEntryMemory(entryName, comboBox:GetHighlightedIndex()) then
+        self:SetCategoryTypeAndSubData(entry)
+        subTypeComboBoxData:ReInitializeComboBox()
+        ZO_TradingHouse_SearchCriteriaChanged(true)
+	end
+
+end
+
+function ZO_CategorySubtypeFilter:SetCategoryTypeAndSubData(entry)
+    self.categoryType = entry.minValue
+    local subTypeComboBoxData = self:GetFilterComboBoxData("SubType")
+    subTypeComboBoxData:SetData(entry.maxValue)
 end
 
 function ZO_CategorySubtypeFilter:SetFilterSubType(comboBox, entryName, entry)
-    local selectionChanged = self.lastFilterSubTypeName ~= entryName
-    if selectionChanged then
-        comboBox.m_focus.savedIndex = 1 -- reset the weapon type filter whenever the weapon's handedness filter is changed 
-        self.lastFilterSubTypeIndex = comboBox:GetHighlightedIndex()
+    local subTypeComboBoxData = self:GetFilterComboBoxData("SubType")    
+    if subTypeComboBoxData:UpdateSelectedEntryMemory(entryName, comboBox:GetHighlightedIndex()) then
+        self:SetSubType(entry)
+        ZO_TradingHouse_SearchCriteriaChanged(true)
     end
-
-    self.lastFilterSubTypeName = entryName
-    self:SetSubType(entry)
-    ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
 end
 
-function ZO_CategorySubtypeFilter:InitializeSubTypeComboBox(comboBox)
-    self.filterSubTypeComboBox = comboBox
-    InitializeComboBox(comboBox, self.subCategoryData, function(...) self:SetFilterSubType(...) end, self.lastFilterSubTypeName, self.lastFilterSubTypeIndex)
-end
-
-function ZO_CategorySubtypeFilter:InitializeFilterCategoryComboBox(comboBox)
-    self.filterCategoryComboBox = comboBox
-    InitializeComboBox(comboBox, self:GetFilterData(), function(...) self:PopulateSubTypes(...) end, self.lastFilterCategoryName, self.lastFilterCategoryIndex)
+function ZO_CategorySubtypeFilter:SetSubType(entry)
+    self.m_FilterSubType = entry.minValue
+    self.subcategoryEntry = entry
 end
 
 function ZO_CategorySubtypeFilter:GetFilterData()
     return self.filterData
 end
 
-function ZO_CategorySubtypeFilter:SetCategoryTypeAndSubData(entry)
-    self.categoryType = entry.minValue
-    self.subCategoryData = entry.maxValue
-end
-
-function ZO_CategorySubtypeFilter:PopulateSubTypes(comboBox, entryName, entry)
-	local selectionChanged = self.lastFilterCategoryName ~= entryName
-    self.lastFilterCategoryName = entryName
-    self:SetCategoryTypeAndSubData(entry)
-
-	if selectionChanged then
-        self.lastFilterSubTypeIndex = 1
-        self.lastFilterSubTypeName = nil
-        self.lastFilterCategoryIndex = comboBox:GetHighlightedIndex()
-        if self.filterSubTypeComboBox then
-			self:InitializeSubTypeComboBox(self.filterSubTypeComboBox)
-		end
-	end
-
-    ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
-end
-
 function ZO_CategorySubtypeFilter:SetComboBoxes(comboBoxes)
-    self.lastFilterCategoryIndex = 1
-    self.lastFilterSubTypeIndex = 1
-    self.lastFilterSubTypeName = nil
-    self.lastFilterCategoryName = nil
+    --Only wipe out the combo boxes we added, the rest will be handled by the parent class
+    for comboBoxName, comboBoxData in pairs(self.comboBoxNameToFilterComboBoxData) do
+        comboBoxData:ClearSelectedEntryMemory()
+    end
     ZO_GamepadTradingHouse_Filter.SetComboBoxes(self, comboBoxes)
 end

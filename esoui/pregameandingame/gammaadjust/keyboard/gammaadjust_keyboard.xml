@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GammaAdjust" override="true">
+            <Controls>
+                <Slider name="$(parent)Slider" inherits="ZO_Slider" hidden="true">
+                    <Dimensions x="230" y="16" />
+                    <Anchor point="TOP" relativeTo="$(parent)SubText" relativePoint="BOTTOM" offsetY="10" />
+                    <Limits min="0" max="1" />
+
+                    <OnInitialized>
+                        ZO_GammaAdjustSlider_Keyboard_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Button name="$(parent)Decrement" inherits="ZO_PreviousArrowButton" hidden="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-4" />
+
+                            <OnClicked>
+                                ZO_GammaAdjust_ChangeGamma(-10)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)Increment" inherits="ZO_NextArrowButton" hidden="true">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="4" />
+
+                            <OnClicked>
+                                ZO_GammaAdjust_ChangeGamma(10)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Slider>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

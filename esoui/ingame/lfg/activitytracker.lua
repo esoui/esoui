@@ -4,7 +4,7 @@ local KEYBOARD_STYLE =
     FONT_STATUS = "ZoFontGameShadow",
     TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
-    HEADER_PRIMARY_ANCHOR_OFFSET_Y = 10,
+    CONTAINER_PRIMARY_ANCHOR_OFFSET_Y = 10,
     STATUS_PRIMARY_ANCHOR_OFFSET_Y = 2,
 }
 
@@ -14,8 +14,8 @@ local GAMEPAD_STYLE =
     FONT_STATUS = "ZoFontGamepad34",
     TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-    HEADER_PRIMARY_ANCHOR_OFFSET_Y = 20,
-    STATUS_PRIMARY_ANCHOR_OFFSET_Y = 16,
+    CONTAINER_PRIMARY_ANCHOR_OFFSET_Y = 20,
+    STATUS_PRIMARY_ANCHOR_OFFSET_Y = 10,
 }
 
 local HEADER_MAPPING =
@@ -41,23 +41,23 @@ function ActivityTracker:Initialize(control)
     self.control = control
     control.owner = self
 
-    local container = control:GetNamedChild("Container")
-    self.headerLabel = container:GetNamedChild("Header")
-    self.statusLabel = container:GetNamedChild("Status")
+    self.container = control:GetNamedChild("Container")
+    self.headerLabel = self.container:GetNamedChild("Header")
+    self.statusLabel = self.container:GetNamedChild("Status")
 
     local allConstants = { KEYBOARD_STYLE, GAMEPAD_STYLE }
     for _, constants in ipairs(allConstants) do
-        constants.HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, container, TOPRIGHT, 0, constants.HEADER_PRIMARY_ANCHOR_OFFSET_Y)
+        constants.CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, control, TOPRIGHT, 0, constants.CONTAINER_PRIMARY_ANCHOR_OFFSET_Y)
+        constants.HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container)
         constants.STATUS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, constants.STATUS_PRIMARY_ANCHOR_OFFSET_Y)
     end
 
-    local questTrackerContainerControl = GetControl("ZO_FocusedQuestTrackerPanelContainerQuestContainer")
-    KEYBOARD_STYLE.HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, questTrackerContainerControl, BOTTOMLEFT, 0, 10)
-    KEYBOARD_STYLE.STATUS_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, 2)
+    KEYBOARD_STYLE.CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, control, TOPLEFT, 0, KEYBOARD_STYLE.CONTAINER_PRIMARY_ANCHOR_OFFSET_Y)
+    KEYBOARD_STYLE.HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container)
+    KEYBOARD_STYLE.STATUS_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, KEYBOARD_STYLE.STATUS_PRIMARY_ANCHOR_OFFSET_Y)
 
     ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 
-    self.container = container
 
     ACTIVITY_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
 
@@ -83,7 +83,8 @@ function ActivityTracker:Update()
         self.headerLabel:SetText(HEADER_MAPPING[activityType])
         self.statusLabel:SetText(GetString("SI_ACTIVITYFINDERSTATUS", GetActivityFinderStatus()))
     end
-    self.container:SetHidden(activityType == nil)
+    self.headerLabel:SetHidden(activityType == nil)
+    self.statusLabel:SetHidden(activityType == nil)
     self.activityType = activityType
 end
 
@@ -94,6 +95,12 @@ function ActivityTracker:ApplyPlatformStyle(style)
         self.headerLabel:SetText(HEADER_MAPPING[self.activityType])
     end
     self.statusLabel:SetFont(style.FONT_STATUS)
+
+    self.container:ClearAnchors()
+    style.CONTAINER_PRIMARY_ANCHOR:AddToControl(self.container)
+    if style.CONTAINER_SECONDARY_ANCHOR then
+        style.CONTAINER_SECONDARY_ANCHOR:AddToControl(self.container)
+    end
 
     self.headerLabel:ClearAnchors()
     style.HEADER_PRIMARY_ANCHOR:AddToControl(self.headerLabel)

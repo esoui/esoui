@@ -1,0 +1,34 @@
+; Pregame and Ingame Script Files
+; These are not shared with InternalIngame
+## DependsOn: ZO_Common
+
+EsoUI\PregameAndIngame\ZO_Options\ZO_SharedOptions.lua
+EsoUI\PregameAndIngame\ZO_Options\Keyboard\ZO_Options_Keyboard.lua
+EsoUI\PregameAndIngame\ZO_Options\Keyboard\ZO_Options_Keyboard.xml
+EsoUI\PregameAndIngame\ZO_Options\Gamepad\ZO_Options_Gamepad.lua
+EsoUI\PregameAndIngame\ZO_Options\Gamepad\ZO_Options_Gamepad.xml
+
+EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.lua
+EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.xml
+
+EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.lua
+EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.xml
+EsoUI\PregameAndIngame\GammaAdjust\Keyboard\GammaAdjust_Keyboard.xml
+EsoUI\PregameAndIngame\GammaAdjust\Gamepad\GammaAdjust_Gamepad.xml
+
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Camera_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanels_Keyboard.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Audio_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\Console\OptionsPanel_Audio_Console.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Video_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Video_Keyboard.xml
+
+EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.lua
+EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.xml
+EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnManager.lua
+EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnManager.xml
+
+EsoUI\PregameAndIngame\Globals\Presence.lua
+
+EsoUI\PregameAndIngame\Globals\Gamepad\GamepadEventHandlers.lua

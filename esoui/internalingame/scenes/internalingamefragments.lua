@@ -43,6 +43,13 @@ function ZO_ActionLayerFragment:Hide()
     self:OnHidden()
 end
 
+MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = 950,
+    dynamicFramingConsumedWidth = 1150,
+    dynamicFramingConsumedHeight = 300,
+    forcePreparePreview = false,
+})
 RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightBackground)
 MARKET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Market)
 GENERAL_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_GENERAL))

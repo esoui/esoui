@@ -54,9 +54,9 @@ function GroupList_Gamepad:SetupRow(control, data, selected)
     local dpsIcon = rolesControl:GetNamedChild("DPS")
     local healIcon = rolesControl:GetNamedChild("Heal")
     local tankIcon = rolesControl:GetNamedChild("Tank")
-    dpsIcon:SetTexture(ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_DPS].icon)
-    healIcon:SetTexture(ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_HEAL].icon)
-    tankIcon:SetTexture(ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_TANK].icon)
+    dpsIcon:SetTexture(GetGamepadRoleIcon(LFG_ROLE_DPS))
+    healIcon:SetTexture(GetGamepadRoleIcon(LFG_ROLE_HEAL))
+    tankIcon:SetTexture(GetGamepadRoleIcon(LFG_ROLE_TANK))
     
     dpsIcon:SetAlpha(data.isDps and ZO_GAMEPAD_ICON_SELECTED_ALPHA or ZO_GAMEPAD_ICON_UNSELECTED_ALPHA)
     healIcon:SetAlpha(data.isHeal and ZO_GAMEPAD_ICON_SELECTED_ALPHA or ZO_GAMEPAD_ICON_UNSELECTED_ALPHA)
@@ -103,11 +103,16 @@ function GroupList_Gamepad:BuildOptionsList()
         return IsUnitGroupLeader("player") and self.socialData.online and not self:SelectedDataIsPlayer()
     end
 
+    local function CanJumpToPlayerHouse()
+       return not self:SelectedDataIsPlayer()
+    end
+
     self:AddOptionTemplate(groupingId, GroupList_Gamepad.BuildPromoteToLeaderOption, ShouldAddPromoteOption)
     self:AddOptionTemplate(groupingId, GroupList_Gamepad.BuildKickMemberOption, CanKickMember)
     self:AddOptionTemplate(groupingId, GroupList_Gamepad.BuildVoteKickMemberOption, CanVoteForKickMember)
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
+    self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption, CanJumpToPlayerHouse)
 
     self:AddInviteToGuildOptionTemplates()
 end

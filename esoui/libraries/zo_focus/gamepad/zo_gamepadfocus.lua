@@ -76,6 +76,10 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
     end
 end
 
+function ZO_GamepadFocus:IsActive()
+    return self.active
+end
+
 function ZO_GamepadFocus:SetFocusChangedCallback(onFocusChangedFunction)
     self.onFocusChangedFunction = onFocusChangedFunction
 end

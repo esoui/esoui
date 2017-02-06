@@ -49,9 +49,9 @@ function ZO_Gamepad_ParametricList_Screen:Initialize(control, createTabBar, acti
     self.activateOnShow = (activateOnShow ~= false) -- nil should be true
     self:SetScene(scene)
 
-    local headerContainer = container:GetNamedChild("HeaderContainer")
-    control.header = headerContainer.header
-    self.headerFragment = ZO_ConveyorSceneFragment:New(headerContainer, ALWAYS_ANIMATE)
+    self.headerContainer = container:GetNamedChild("HeaderContainer")
+    control.header = self.headerContainer.header
+    self.headerFragment = ZO_ConveyorSceneFragment:New(self.headerContainer, ALWAYS_ANIMATE)
 
     self.header = control.header
     ZO_GamepadGenericHeader_Initialize(self.header, createTabBar)
@@ -95,6 +95,10 @@ end
 
 function ZO_Gamepad_ParametricList_Screen:GetHeaderFragment()
     return self.headerFragment
+end
+
+function ZO_Gamepad_ParametricList_Screen:GetHeaderContainer()
+    return self.headerContainer
 end
 
 function ZO_Gamepad_ParametricList_Screen:ActivateCurrentList()

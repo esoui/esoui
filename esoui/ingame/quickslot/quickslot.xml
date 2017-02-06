@@ -60,7 +60,7 @@
             </OnMouseExit>
         </Control>
 
-        <TopLevelControl name="ZO_QuickSlotCircle" mouseEnabled="true" hidden="true" layer="BACKGROUND">
+        <TopLevelControl name="ZO_QuickSlotCircle" mouseEnabled="true" hidden="true">
             <Dimensions x="300" y="300" />
             <Anchor point="CENTER" relativeTo="GuiRoot" offsetX="-20" offsetY="-100" />
 
@@ -70,7 +70,7 @@
                     <Anchor point="CENTER" />
                 </Texture>
 
-                <Texture name="$(parent)Underlay" color="000000" alpha=".55" excludeFromResizeToFitExtents="true" inheritScale="false">
+                <Texture name="$(parent)Underlay" color="000000" alpha=".55" excludeFromResizeToFitExtents="true" inheritScale="false" mouseEnabled="true">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
                 </Texture>

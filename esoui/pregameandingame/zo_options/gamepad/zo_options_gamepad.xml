@@ -1,0 +1,289 @@
+<GuiXml>
+    <Controls>
+
+        <Label name="ZO_GamepadOptionsHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderTemplate" virtual="true">
+            <Anchor point="BOTTOM" relativePoint="TOP" />
+            <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-19" />
+            <Dimensions y="24" />
+        </Label>
+
+        <Label name="ZO_GamepadOptionsNameTemplate" inherits="ZO_GamepadFullWidthLabelTemplate" virtual="true" />
+
+        <Slider name="ZO_GamepadOptionsSlider" inherits="ZO_GamepadSlider" virtual="true">
+            <Dimensions x="300" y="18" />
+            <OnInitialized>
+                ZO_GamepadSlider_OnInitialized(self)
+            </OnInitialized>
+
+            <OnValueChanged>
+                ZO_Options_SliderOnValueChanged(self, value, eventReason)
+            </OnValueChanged>
+        </Slider>
+        
+        <Control name="ZO_GamepadOptionsSliderRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                self.GetHeight = function(control)
+                    return self.label:GetTextHeight() + self.slider:GetHeight()
+                end
+                self.label = self:GetNamedChild("Name")
+                self.slider = self:GetNamedChild("Slider")
+            </OnInitialized>
+
+            <OnEffectivelyShown>
+                ZO_Options_OnShow(self)
+            </OnEffectivelyShown>
+            
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadOptionsNameTemplate"/>
+
+                <Slider name="$(parent)Slider" inherits="ZO_GamepadOptionsSlider" >
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" />
+                </Slider>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadOptionsHorizontalListRow" inherits="ZO_GamepadHorizontalListRow" virtual="true">
+            <OnInitialized>
+                ZO_GamepadHorizontalListRow_Initialize(self, ZO_GamepadOptions_OptionsHorizontalListSetup, ZO_GamepadOptions_HorizontalListEqualityFunction)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadOptionsCheckboxRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                self.GetHeight = function(control)
+                    --The on and off labels are setup to not wrap to a new line
+                    return self:GetNamedChild("Name"):GetTextHeight() + self:GetNamedChild("On"):GetTextHeight()
+                end
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadOptionsNameTemplate"/>
+                
+                <Button name="$(parent)Checkbox" inherits="ZO_CheckButton_Text" font="ZoFontGamepad27" modifyTextType="UPPERCASE" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT"/>
+                    <FontColors
+                        normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                        pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                        disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GAMEPAD_TERTIARY"
+                        disabledPressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GAMEPAD_TERTIARY"
+                    />
+                </Button>
+                <Label name="$(parent)On" font="ZoFontGamepad27" modifyTextType="UPPERCASE" text="SI_CHECK_BUTTON_ON" maxLineCount="1">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetX="-8"/>
+                </Label>
+
+                <Label name="$(parent)Off" font="ZoFontGamepad27" modifyTextType="UPPERCASE" text="SI_CHECK_BUTTON_OFF" maxLineCount="1">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetX="8"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadOptionsLabelRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                self.GetHeight = function(control)
+                    return control:GetNamedChild("Name"):GetTextHeight()
+                end
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadOptionsNameTemplate"/>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GamepadOptionsInfoPanelLabelCenter" text="" horizontalAlignment="CENTER" tier="HIGH" font="ZoFontGamepad25" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="280" />
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Buttons/Gamepad/Inline_ControllerBkg_DarkGrey-Center.dds">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Label>
+
+        <Label name="ZO_GamepadOptionsInfoPanelLabelRight" horizontalAlignment="RIGHT" inherits="ZO_GamepadOptionsInfoPanelLabelCenter" virtual="true">
+            <Dimensions x="280" />
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Buttons/Gamepad/Inline_ControllerBkg_DarkGrey-Right.dds" override="true">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Label>
+
+        <Label name="ZO_GamepadOptionsInfoPanelLabelLeft" horizontalAlignment="LEFT" inherits="ZO_GamepadOptionsInfoPanelLabelCenter" virtual="true">
+            <Dimensions x="280" />
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Buttons/Gamepad/Inline_ControllerBkg_DarkGrey-Right.dds" override="true">
+                    <AnchorFill/>
+                    <TextureCoords left="1" right="0" />
+                </Texture>
+            </Controls>
+        </Label>
+
+        <Control name="ZO_GamepadOptionsKeybindLabelGroupRightAligned" virtual="true">
+            <Dimensions x="280" y="140"/>
+            <OnInitialized>
+                self.alignment = RIGHT
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label1" inherits="ZO_GamepadOptionsInfoPanelLabelRight">
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" />
+                </Label>
+                <Label name="$(parent)Label2" inherits="ZO_GamepadOptionsInfoPanelLabelRight">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label1" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                </Label>
+                <Label name="$(parent)Label3" inherits="ZO_GamepadOptionsInfoPanelLabelRight">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label2" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                </Label>
+                <Label name="$(parent)Label4" inherits="ZO_GamepadOptionsInfoPanelLabelRight">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label3" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadOptionsKeybindLabelGroupLeftAligned" virtual="true">
+            <Dimensions x="280" y="140"/>
+            <OnInitialized>
+                self.alignment = LEFT
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label1" inherits="ZO_GamepadOptionsInfoPanelLabelLeft">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" />
+                </Label>
+                <Label name="$(parent)Label2" inherits="ZO_GamepadOptionsInfoPanelLabelLeft">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label1" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Label>
+                <Label name="$(parent)Label3" inherits="ZO_GamepadOptionsInfoPanelLabelLeft">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label2" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Label>
+                <Label name="$(parent)Label4" inherits="ZO_GamepadOptionsInfoPanelLabelLeft">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label3" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadOptionsKeybindLabelGroupBottomCenterAligned" virtual="true">
+            <Dimensions x="265" y="140"/>
+            <OnInitialized>
+                self.alignment = CENTER
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label1" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" />
+                </Label>
+                <Label name="$(parent)Label2" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Label1" relativePoint="TOP" offsetY="-4" />
+                </Label>
+                <Label name="$(parent)Label3" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Label2" relativePoint="TOP" offsetY="-4" />
+                </Label>
+                <Label name="$(parent)Label4" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Label3" relativePoint="TOP" offsetY="-4" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadOptionsKeybindLabelGroupTopCenterAligned" virtual="true">
+            <Dimensions x="265" y="140"/>
+            <OnInitialized>
+                self.alignment = CENTER
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label1" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="TOP" relativePoint="TOP" />
+                </Label>
+                <Label name="$(parent)Label2" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="TOP" relativeTo="$(parent)Label1" relativePoint="BOTTOM" offsetY="4" />
+                </Label>
+                <Label name="$(parent)Label3" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="TOP" relativeTo="$(parent)Label2" relativePoint="BOTTOM" offsetY="4" />
+                </Label>
+                <Label name="$(parent)Label4" inherits="ZO_GamepadOptionsInfoPanelLabelCenter">
+                    <Anchor point="TOP" relativeTo="$(parent)Label3" relativePoint="BOTTOM" offsetY="4" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_GamepadOptionsTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GamepadOptions_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)InfoPanel" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors">
+                    <Controls>
+                        <Texture name="$(parent)Gamepad" tier="MEDIUM">
+                            <Dimensions x="1024" y="1024" />
+                            <Anchor point="CENTER" offsetY="20" />
+                        </Texture>
+
+                        <!-- Left Side Buttons -->
+                        <Control name="$(parent)Left1" inherits="ZO_GamepadOptionsKeybindLabelGroupRightAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Gamepad" relativePoint="TOPLEFT" offsetX="150" offsetY="50" />
+                        </Control>
+
+                        <Control name="$(parent)Left2" inherits="ZO_GamepadOptionsKeybindLabelGroupRightAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left1" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Left3" inherits="ZO_GamepadOptionsKeybindLabelGroupRightAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left2" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Left4" inherits="ZO_GamepadOptionsKeybindLabelGroupRightAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left3" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Left5" inherits="ZO_GamepadOptionsKeybindLabelGroupRightAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left4" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Left6" inherits="ZO_GamepadOptionsKeybindLabelGroupRightAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left5" relativePoint="BOTTOMLEFT" offsetY="10" />
+                        </Control>
+
+                        <!-- Right Side Buttons -->
+                        <Control name="$(parent)Right1" inherits="ZO_GamepadOptionsKeybindLabelGroupLeftAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Gamepad" relativePoint="TOPRIGHT" offsetX="-150" offsetY="50" />
+                        </Control>
+
+                        <Control name="$(parent)Right2" inherits="ZO_GamepadOptionsKeybindLabelGroupLeftAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Right1" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Right3" inherits="ZO_GamepadOptionsKeybindLabelGroupLeftAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Right2" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Right4" inherits="ZO_GamepadOptionsKeybindLabelGroupLeftAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Right3" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Right5" inherits="ZO_GamepadOptionsKeybindLabelGroupLeftAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Right4" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Control>
+
+                        <Control name="$(parent)Right6" inherits="ZO_GamepadOptionsKeybindLabelGroupLeftAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Right5" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Control>
+
+                        <!-- Center Top Buttons -->
+                        <Control name="$(parent)TopLeft" inherits="ZO_GamepadOptionsKeybindLabelGroupBottomCenterAligned">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Gamepad" relativePoint="TOP" offsetX="-10" offsetY="200" />
+                        </Control>
+
+                        <Control name="$(parent)TopRight" inherits="ZO_GamepadOptionsKeybindLabelGroupBottomCenterAligned">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Gamepad" relativePoint="TOP" offsetX="20" offsetY="200" />
+                        </Control>
+
+                        <!-- Center Bottom Buttons -->
+                        <Control name="$(parent)BottomLeft" inherits="ZO_GamepadOptionsKeybindLabelGroupTopCenterAligned">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Gamepad" relativePoint="BOTTOM" offsetX="-10" offsetY="-250" />
+                        </Control>
+
+                        <Control name="$(parent)BottomRight" inherits="ZO_GamepadOptionsKeybindLabelGroupTopCenterAligned">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Gamepad" relativePoint="BOTTOM" offsetX="20" offsetY="-250" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

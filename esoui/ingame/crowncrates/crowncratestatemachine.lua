@@ -20,6 +20,7 @@ ZO_CROWN_CRATE_TRIGGER_COMMANDS =
     CARD_GEMIFY_COMPLETE = "OnGemifyComplete",
     CARD_LEAVE = "OnCardLeave",
     BACK_TO_MANIFEST = "BackToManifest",
+    GEMIFICATION_HIDDEN = "GemificationHidden",
 }
 
 ZO_CrownCratesStateMachine = ZO_StateMachine_Base:Subclass()
@@ -28,22 +29,24 @@ function ZO_CrownCratesStateMachine:New(...)
 	return ZO_StateMachine_Base.New(self, ...)
 end
 
-function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpening)
+function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpening, gemificationKeyboard, gemificationGamepad, gemificationSlot)
 	ZO_StateMachine_Base.Initialize(self, "CROWN_CRATE_STATE_MACHINE")
 
 	self.manager = manager
 	self.packChoosing = packChoosing
 	self.packOpening = packOpening
+    self.gemificationKeyboard = gemificationKeyboard
+    self.gemificationGamepad = gemificationGamepad
+	self.gemificationSlot = gemificationSlot
 
-	
-   --States--
+    --States--
 	local states =
 	{
 		START = ZO_StateMachine_State:New(self, "START"), --1
 		SUMMON_CAT = ZO_StateMachine_State:New(self, "SUMMON_CAT"), --2
 		MANIFEST_IN = ZO_StateMachine_State:New(self, "MANIFEST_IN"), --3
 		MANIFEST = ZO_StateMachine_State:New(self, "MANIFEST"), --4
-		MANIFEST_OUT = ZO_StateMachine_State:New(self, "MANIFEST_OUT"), --5
+		MANIFEST_OUT_FOR_DEAL = ZO_StateMachine_State:New(self, "MANIFEST_OUT_FOR_DEAL"), --5
 		CAT_PRIMARY_DEAL = ZO_StateMachine_State:New(self, "CAT_PRIMARY_DEAL"), --6
 		UI_PRIMARY_DEAL = ZO_StateMachine_State:New(self, "UI_PRIMARY_DEAL"), --7
 		CAT_BONUS_DEAL = ZO_StateMachine_State:New(self, "CAT_BONUS_DEAL"), --8
@@ -53,6 +56,8 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 		CARDS_OUT_BACK = ZO_StateMachine_State:New(self, "CARDS_OUT_BACK"), --12
 		CARDS_OUT_NEXT = ZO_StateMachine_State:New(self, "CARDS_OUT_NEXT"), --13
 		FRAMING_PLAYER = ZO_StateMachine_State:New(self, "FRAMING_PLAYER"), --14
+        MANIFEST_OUT_FOR_GEMIFICATION = ZO_StateMachine_State:New(self, "MANIFEST_OUT_FOR_GEMIFICATION"), --15
+        GEMIFICATION = ZO_StateMachine_State:New(self, "GEMIFICATION"), --16
 	}
 	self.states = states
 
@@ -63,9 +68,9 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 		FRAMING_PLAYER_TO_SUMMON_CAT = ZO_StateMachine_Edge:New(states.FRAMING_PLAYER, states.SUMMON_CAT), --14 -> 2
 		SUMMON_CAT_TO_MANIFEST_IN = ZO_StateMachine_Edge:New(states.SUMMON_CAT, states.MANIFEST_IN), --2 -> 3
 		MANIFEST_IN_TO_MANIFEST = ZO_StateMachine_Edge:New(states.MANIFEST_IN, states.MANIFEST), --3 -> 4
-		MANIFEST_TO_MANIFEST_OUT = ZO_StateMachine_Edge:New(states.MANIFEST, states.MANIFEST_OUT), --4 -> 5
-		MANIFEST_OUT_TO_MANIFEST_IN = ZO_StateMachine_Edge:New(states.MANIFEST_OUT, states.MANIFEST_IN), --5 -> 3
-		MANIFEST_OUT_TO_CAT_PRIMARY_DEAL = ZO_StateMachine_Edge:New(states.MANIFEST_OUT, states.CAT_PRIMARY_DEAL), --5 -> 6
+		MANIFEST_TO_MANIFEST_OUT_FOR_DEAL = ZO_StateMachine_Edge:New(states.MANIFEST, states.MANIFEST_OUT_FOR_DEAL), --4 -> 5
+		MANIFEST_OUT_FOR_DEAL_TO_MANIFEST_IN = ZO_StateMachine_Edge:New(states.MANIFEST_OUT_FOR_DEAL, states.MANIFEST_IN), --5 -> 3
+		MANIFEST_OUT_FOR_DEAL_TO_CAT_PRIMARY_DEAL = ZO_StateMachine_Edge:New(states.MANIFEST_OUT_FOR_DEAL, states.CAT_PRIMARY_DEAL), --5 -> 6
 		CAT_PRIMARY_DEAL_TO_UI_PRIMARY_DEAL = ZO_StateMachine_Edge:New(states.CAT_PRIMARY_DEAL, states.UI_PRIMARY_DEAL), --6 -> 7
 		UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION = ZO_StateMachine_Edge:New(states.UI_PRIMARY_DEAL, states.ACTIVE_HAND_MANIPULATION), --7 -> 10
 		UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL = ZO_StateMachine_Edge:New(states.UI_PRIMARY_DEAL, states.CAT_BONUS_DEAL), --7 -> 8
@@ -77,12 +82,28 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 		CARDS_OUT_BACK_TO_MANIFEST_IN = ZO_StateMachine_Edge:New(states.CARDS_OUT_BACK, states.MANIFEST_IN), --12 -> 3
 		CARDS_OUT_NEXT_TO_MANIFEST_IN = ZO_StateMachine_Edge:New(states.CARDS_OUT_NEXT, states.MANIFEST_IN), --13 -> 3
 		CARDS_OUT_NEXT_TO_CAT_PRIMARY_DEAL = ZO_StateMachine_Edge:New(states.CARDS_OUT_NEXT, states.CAT_PRIMARY_DEAL), --13 -> 6
+        MANIFEST_TO_MANIFEST_OUT_FOR_GEMIFICATION = ZO_StateMachine_Edge:New(states.MANIFEST, states.MANIFEST_OUT_FOR_GEMIFICATION), --4 -> 15
+        MANIFEST_OUT_FOR_GEMIFICATION_TO_GEMIFICATION = ZO_StateMachine_Edge:New(states.MANIFEST_OUT_FOR_GEMIFICATION, states.GEMIFICATION), --15 -> 16
+        GEMIFICATION_TO_MANIFEST_IN = ZO_StateMachine_Edge:New(states.GEMIFICATION, states.MANIFEST_IN), --16 -> 3
 	}
 	self.edges = edges
 
 	--Triggers--
 	local triggers
 	do
+        local MANIFEST_TO_GEMIFICATION_KEYBIND =
+        {
+			alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            name = function()
+                local gemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
+                return gemIcon..GetString(SI_GEMIFICATION_TITLE)
+            end,
+            gamepadOrder = 10000,
+            order = -10000,
+            callback = nil,
+        }
+
 		local ALL_REVEALED_TO_CARDS_OUT_NEXT_KEYBIND = 
 		{
 			alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -145,9 +166,9 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 			FRAMING_PLAYER_TO_SUMMON_CAT = ZO_StateMachine_TriggerEventManager:New(EVENT_GAME_CAMERA_CHARACTER_FRAMING_STARTED), --14 -> 2
 			SUMMON_CAT_TO_MANIFEST_IN = ZO_StateMachine_TriggerAnimNote:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.CAT_SUMMON_COMPLETE), --2 -> 3
 			MANIFEST_IN_TO_MANIFEST = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_IN_COMPLETE), --3 -> 4
-			MANIFEST_TO_MANIFEST_OUT = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.DEAL_REQUESTED), --4 -> 5
-			MANIFEST_OUT_TO_MANIFEST_IN = CreateServerResponseAndAnimationMultiTrigger(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_OUT_COMPLETE, FilterOpenResponseFailed, ManifestOutEventCountCallback), --5 -> 3
-			MANIFEST_OUT_TO_CAT_PRIMARY_DEAL = CreateServerResponseAndAnimationMultiTrigger(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_OUT_COMPLETE, FilterOpenResponseSuccess, ManifestOutEventCountCallback), --5 -> 6
+			MANIFEST_TO_MANIFEST_OUT_FOR_DEAL = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.DEAL_REQUESTED), --4 -> 5
+			MANIFEST_OUT_FOR_DEAL_TO_MANIFEST_IN = CreateServerResponseAndAnimationMultiTrigger(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_OUT_COMPLETE, FilterOpenResponseFailed, ManifestOutEventCountCallback), --5 -> 3
+			MANIFEST_OUT_FOR_DEAL_TO_CAT_PRIMARY_DEAL = CreateServerResponseAndAnimationMultiTrigger(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_OUT_COMPLETE, FilterOpenResponseSuccess, ManifestOutEventCountCallback), --5 -> 6
 			CAT_PRIMARY_DEAL_TO_UI_PRIMARY_DEAL = ZO_StateMachine_TriggerAnimNote:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.PRIMARY_DEAL_COMPLETE_CAT), --6 -> 7
 			UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.PRIMARY_DEAL_COMPLETE), --7 -> 10
 			UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.PRIMARY_DEAL_COMPLETE), --7 -> 8
@@ -159,7 +180,17 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 			CARDS_OUT_BACK_TO_MANIFEST_IN = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.CARD_OUT_COMPLETE), --12 -> 3
 			CARDS_OUT_NEXT_TO_MANIFEST_IN = CreateServerResponseAndAnimationMultiTrigger(ZO_CROWN_CRATE_TRIGGER_COMMANDS.CARD_OUT_COMPLETE, FilterOpenResponseFailed, GetNumCurrentCrownCrateTotalRewards), --13 -> 3
 			CARDS_OUT_NEXT_TO_CAT_PRIMARY_DEAL = CreateServerResponseAndAnimationMultiTrigger(ZO_CROWN_CRATE_TRIGGER_COMMANDS.CARD_OUT_COMPLETE, FilterOpenResponseSuccess, GetNumCurrentCrownCrateTotalRewards), --13 -> 6
-		}
+		    MANIFEST_TO_MANIFEST_OUT_FOR_GEMIFICATION = ZO_StateMachine_TriggerKeybind:New(MANIFEST_TO_GEMIFICATION_KEYBIND), --4 -> 15
+            MANIFEST_OUT_FOR_GEMIFICATION_TO_GEMIFICATION = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_OUT_COMPLETE), --15 -> 16
+            GEMIFICATION_TO_MANIFEST_IN = ZO_StateMachine_TriggerStateCallback:New(ZO_CROWN_CRATE_TRIGGER_COMMANDS.GEMIFICATION_HIDDEN) --16 -> 3
+        }
+
+        --Add Conditionals
+        triggers.UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION:SetEventCount(GetNumCurrentCrownCratePrimaryRewards)
+	    triggers.UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL:SetEventCount(GetNumCurrentCrownCratePrimaryRewards)
+	    triggers.UI_BONUS_DEAL_TO_ACTIVE_HAND_MANIPULATION:SetEventCount(GetNumCurrentCrownCrateBonusRewards)
+	    triggers.ACTIVE_HAND_MANIPULATION_TO_ALL_REVEALED:SetEventCount(GetNumCurrentCrownCrateTotalRewards)
+        triggers.MANIFEST_OUT_FOR_GEMIFICATION_TO_GEMIFICATION:SetEventCount(ManifestOutEventCountCallback)
 	end
 	self.triggers = triggers
 
@@ -168,9 +199,9 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 	edges.FRAMING_PLAYER_TO_SUMMON_CAT:AddTrigger(triggers.FRAMING_PLAYER_TO_SUMMON_CAT)
 	edges.SUMMON_CAT_TO_MANIFEST_IN:AddTrigger(triggers.SUMMON_CAT_TO_MANIFEST_IN)
 	edges.MANIFEST_IN_TO_MANIFEST:AddTrigger(triggers.MANIFEST_IN_TO_MANIFEST)
-	edges.MANIFEST_TO_MANIFEST_OUT:AddTrigger(triggers.MANIFEST_TO_MANIFEST_OUT)
-	edges.MANIFEST_OUT_TO_MANIFEST_IN:AddTrigger(triggers.MANIFEST_OUT_TO_MANIFEST_IN)
-	edges.MANIFEST_OUT_TO_CAT_PRIMARY_DEAL:AddTrigger(triggers.MANIFEST_OUT_TO_CAT_PRIMARY_DEAL)
+	edges.MANIFEST_TO_MANIFEST_OUT_FOR_DEAL:AddTrigger(triggers.MANIFEST_TO_MANIFEST_OUT_FOR_DEAL)
+	edges.MANIFEST_OUT_FOR_DEAL_TO_MANIFEST_IN:AddTrigger(triggers.MANIFEST_OUT_FOR_DEAL_TO_MANIFEST_IN)
+	edges.MANIFEST_OUT_FOR_DEAL_TO_CAT_PRIMARY_DEAL:AddTrigger(triggers.MANIFEST_OUT_FOR_DEAL_TO_CAT_PRIMARY_DEAL)
 	edges.CAT_PRIMARY_DEAL_TO_UI_PRIMARY_DEAL:AddTrigger(triggers.CAT_PRIMARY_DEAL_TO_UI_PRIMARY_DEAL)
 	edges.UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION:AddTrigger(triggers.UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION)
 	edges.UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL:AddTrigger(triggers.UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL)
@@ -182,15 +213,13 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 	edges.CARDS_OUT_BACK_TO_MANIFEST_IN:AddTrigger(triggers.CARDS_OUT_BACK_TO_MANIFEST_IN)
 	edges.CARDS_OUT_NEXT_TO_MANIFEST_IN:AddTrigger(triggers.CARDS_OUT_NEXT_TO_MANIFEST_IN)
 	edges.CARDS_OUT_NEXT_TO_CAT_PRIMARY_DEAL:AddTrigger(triggers.CARDS_OUT_NEXT_TO_CAT_PRIMARY_DEAL)
+    edges.MANIFEST_TO_MANIFEST_OUT_FOR_GEMIFICATION:AddTrigger(triggers.MANIFEST_TO_MANIFEST_OUT_FOR_GEMIFICATION)
+    edges.MANIFEST_OUT_FOR_GEMIFICATION_TO_GEMIFICATION:AddTrigger(triggers.MANIFEST_OUT_FOR_GEMIFICATION_TO_GEMIFICATION)
+    edges.GEMIFICATION_TO_MANIFEST_IN:AddTrigger(triggers.GEMIFICATION_TO_MANIFEST_IN)
 
 	--Add Conditionals--
 	edges.UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION:SetConditional(function() return GetNumCurrentCrownCrateBonusRewards() == 0 end)
 	edges.UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL:SetConditional(function() return GetNumCurrentCrownCrateBonusRewards() > 0 end)
-
-	triggers.UI_PRIMARY_DEAL_TO_ACTIVE_HAND_MANIPULATION:SetEventCount(GetNumCurrentCrownCratePrimaryRewards)
-	triggers.UI_PRIMARY_DEAL_TO_CAT_BONUS_DEAL:SetEventCount(GetNumCurrentCrownCratePrimaryRewards)
-	triggers.UI_BONUS_DEAL_TO_ACTIVE_HAND_MANIPULATION:SetEventCount(GetNumCurrentCrownCrateBonusRewards)
-	triggers.ACTIVE_HAND_MANIPULATION_TO_ALL_REVEALED:SetEventCount(GetNumCurrentCrownCrateTotalRewards)
 
 	do
 		local function ManifestInEventCountCallback()
@@ -223,9 +252,9 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 		SetCrownCrateNPCVisible(true)
 	end)
 
-	states.SUMMON_CAT:RegisterCallback("OnDeactivated", function()
-		TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_GREET_PLAYER)
-	end)
+    edges.SUMMON_CAT_TO_MANIFEST_IN:RegisterCallback("OnTrigger", function()
+        TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_GREET_PLAYER)
+    end)
 
 	states.MANIFEST_IN:RegisterCallback("OnActivated", function()
 		self.manager:LockLocalSpaceToCurrentCamera()
@@ -252,14 +281,37 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 		self.packChoosing:RemoveManifestKeybinds()
 	end)
 
-	states.MANIFEST_OUT:RegisterCallback("OnActivated", function() 
+	states.MANIFEST_OUT_FOR_DEAL:RegisterCallback("OnActivated", function() 
 		self.packChoosing:AnimateChoice()
 		PlaySound(SOUNDS.CROWN_CRATES_MANIFEST_OUT)
 		--Start the flourish while we wait so it doesn't feel unresponsive
 		TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_FLOURISH)
 	end)
 
-	states.MANIFEST_OUT:RegisterCallback("OnDeactivated", function()
+    states.MANIFEST_OUT_FOR_GEMIFICATION:RegisterCallback("OnActivated", function()
+        self.packChoosing:Hide()
+    end)
+
+    states.MANIFEST_OUT_FOR_GEMIFICATION:RegisterCallback("OnDeactivated", function()
+        self.packChoosing:ResetPacks()
+    end)
+
+    states.GEMIFICATION:RegisterCallback("OnActivated", function()
+        local gemificationSystem
+        if SCENE_MANAGER:IsCurrentSceneGamepad() then
+            gemificationSystem = self.gemificationGamepad
+        else
+            gemificationSystem = self.gemificationKeyboard
+        end
+        gemificationSystem:InsertIntoScene()
+        SCENE_MANAGER:AddFragment(self.gemificationSlot:GetFragment())
+    end)
+
+    states.GEMIFICATION:RegisterCallback("OnDeactivated", function()
+        SCENE_MANAGER:RemoveFragment(self.gemificationSlot:GetFragment())
+    end)
+
+	states.MANIFEST_OUT_FOR_DEAL:RegisterCallback("OnDeactivated", function()
 		self.packChoosing:ResetPacks()
 		SetFullscreenEffect(FULLSCREEN_EFFECT_NONE)
 	end)
@@ -335,7 +387,7 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 
 	self.DISABLED_BACK_STATES =
 	{
-		[states.MANIFEST_OUT] = true,
+		[states.MANIFEST_OUT_FOR_DEAL] = true,
 		[states.CAT_PRIMARY_DEAL] = true,
 		[states.UI_PRIMARY_DEAL] = true,
 		[states.CAT_BONUS_DEAL] = true,

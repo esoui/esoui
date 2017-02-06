@@ -1,4 +1,3 @@
-CAMPAIGN_LEADERBOARDS = nil
 local CAMPAIGN_LEADERBOARD_FRAGMENT
 
 -----------------
@@ -58,7 +57,7 @@ end
 function ZO_LeaderboardCampaignSelector_Keyboard:SetCampaignWindows()
     self.campaignWindows =
     {
-        CAMPAIGN_LEADERBOARDS,
+        SYSTEMS:GetKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
     }
 end
 
@@ -134,6 +133,10 @@ function ZO_CampaignLeaderboardsManager_Keyboard:Initialize(control)
                                                      self.selector.dataRegistration:Refresh()
                                                  end
                                              end)
+
+    SYSTEMS:RegisterKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:UpdateCategories()
+    self.selector = ZO_LeaderboardCampaignSelector_Keyboard:New(control)
 end
 
 function ZO_CampaignLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo()
@@ -156,6 +159,4 @@ end
 
 function ZO_CampaignLeaderboardsInformationArea_OnInitialized(self)
     CAMPAIGN_LEADERBOARDS = ZO_CampaignLeaderboardsManager_Keyboard:New(self)
-    LEADERBOARDS:UpdateCategories()
-    CAMPAIGN_LEADERBOARDS.selector = ZO_LeaderboardCampaignSelector_Keyboard:New(self)
 end

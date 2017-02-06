@@ -77,9 +77,7 @@ local consolePregameStates =
     ["AccountLogin"] =
     {
         ShouldAdvance = function()
-            -- TODO: This may not be valid on console, however should be convenient for
-            --  developement.
-            return GetCVar("QuickLaunch") == "1"
+            return false
         end,
 
         OnEnter = function()
@@ -90,19 +88,44 @@ local consolePregameStates =
             ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
             ZO_PREGAME_CHARACTER_COUNT = 0
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-            WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-            WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+            --If we're quick launching, then just register a profile login event that sets the LastPlatform and advances the state.
+            if (GetCVar("QuickLaunch") == "1") then
+                EVENT_MANAGER:RegisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT, function(eventCode, isSuccess, profileError)
+					EVENT_MANAGER:UnregisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT)
 
-            -- Reset screen overscan/gamma and audio settings
-            SetOverscanOffsets(0, 0, 0, 0)
-            SetCVar("GAMMA_ADJUSTMENT", 100)
-            ResetToDefaultSettings(SETTING_TYPE_AUDIO)
+                    if (isSuccess) then
+                        local lastPlat = GetCVar("LastPlatform")
+                        if lastPlat ~= nil then
+                            for platformIndex = 1, GetNumPlatforms() do
+                                local platformName = GetPlatformInfo(platformIndex)            
+                                if platformName == lastPlat then
+                                    SetSelectedPlatform(platformIndex)
+                                end
+                            end
+                        end
 
-            SetCurrentVideoPlaybackVolume(1.0, 4.0)
+                        SetCVar("IsServerSelected", "true")
+                        SetCVar("SelectedServer", CONSOLE_SERVER_NORTH_AMERICA)
+                        PregameStateManager_AdvanceState()
+                    end
+                end)
 
-            SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
+                PregameSelectProfile()
+            else
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
+                WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+
+                -- Reset screen overscan/gamma and audio settings
+                SetOverscanOffsets(0, 0, 0, 0)
+                SetCVar("GAMMA_ADJUSTMENT", 100)
+                ResetToDefaultSettings(SETTING_TYPE_AUDIO)
+
+                SetCurrentVideoPlaybackVolume(1.0, 4.0)
+
+                SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
+            end
         end,
 
         OnExit = function()
@@ -113,7 +136,7 @@ local consolePregameStates =
         end,
     },
 
-	["InitialGameStartup"] =
+    ["InitialGameStartup"] =
     {
         ShouldAdvance = function()
             return not IsConsoleUI() or GetCVar("IsServerSelected") == "1"
@@ -131,10 +154,10 @@ local consolePregameStates =
         end,
     },
 
-	["GameStartup"] =
+    ["GameStartup"] =
     {
         ShouldAdvance = function()
-            return false
+            return (GetCVar("QuickLaunch") == "1")
         end,
 
         OnEnter = function(mustPurchaseGame)
@@ -195,14 +218,14 @@ local consolePregameStates =
         end,
 
         OnEnter = function()
-			local platform = GetUIPlatform()
-			
-			--Smoke video audio fade out to prevent audio clicking on console due to load time hitches
+            local platform = GetUIPlatform()
+            
+            --Smoke video audio fade out to prevent audio clicking on console due to load time hitches
             --4 seconds seems to be a good fade out time for here
-			if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
-				SetCurrentVideoPlaybackVolume(0.0, 4.0)
-			end
-			
+            if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+                SetCurrentVideoPlaybackVolume(0.0, 4.0)
+            end
+            
             if(IsConsoleUI() and platform == UI_PLATFORM_PC) then
                 -- should only ever hit this on internal builds testing with PC
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_PCBypassConsoleLogin, GetString(SI_CONSOLE_PREGAME_LOADING))
@@ -534,7 +557,7 @@ local function OnServerDisconnectError(eventCode)
 end
 
 local function OnProfileLoginResult(event, isSuccess, profileError)
-	--Don't return to IIS if we're on Server Select and NO_PROFILE was returned because they probably cancelled the selection
+    --Don't return to IIS if we're on Server Select and NO_PROFILE was returned because they probably cancelled the selection
     if isSuccess == false and not (profileError == PROFILE_LOGIN_ERROR_NO_PROFILE and SCENE_MANAGER:IsShowing("GameStartup"))  then
         local errorString
         local errorStringFormat = GetString("SI_PROFILELOGINERROR", profileError)

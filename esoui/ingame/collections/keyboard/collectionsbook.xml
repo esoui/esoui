@@ -176,14 +176,7 @@
                                     <OnInitialized>
                                         ZO_EditDefaultText_Initialize(self, GetString(SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT))
                                     </OnInitialized>
-                                    <OnEscape>
-                                        ZO_CollectionsBook_EndSearch(self)
-                                    </OnEscape>
-                                    <OnMouseDown>
-                                        ZO_CollectionsBook_BeginSearch(self)
-                                    </OnMouseDown>
                                     <OnTextChanged>
-                                        ZO_EditDefaultText_OnTextChanged(self)
                                         ZO_CollectionsBook_OnSearchTextChanged(self)
                                     </OnTextChanged>
                                     <OnEnter>

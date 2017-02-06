@@ -1,6 +1,8 @@
 --Layout consts--
 local HEADER_OVERLAP_UNITS = 3
+ZO_GAMEPAD_INTERACTIVE_FILTER_ARROW_PADDING = 15
 ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING = 10
+ZO_GAMEPAD_INTERACTIVE_FILTER_RIGHT_ALIGN_HIGHLIGHT_PADDING = ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING + ZO_GAMEPAD_INTERACTIVE_FILTER_ARROW_PADDING
 ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_PADDING_X = ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING - HEADER_OVERLAP_UNITS
 ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_PADDING_X * 2
 ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT = 80
@@ -208,10 +210,9 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     end
     self.panelFocalArea = GamepadInteractiveSortFilterFocus_Panel:New(self, PanelActivateCallback, PanelDeactivateCallback)
 
-    local NO_PREVIOUS, NO_NEXT
-    self.filtersFocalArea:SetupSiblings(NO_PREVIOUS, self.headersFocalArea)
+    self.filtersFocalArea:SetupSiblings(ZO_GAMEPAD_FOCUS_NO_PREVIOUS, self.headersFocalArea)
     self.headersFocalArea:SetupSiblings(self.filtersFocalArea, self.panelFocalArea)
-    self.panelFocalArea:SetupSiblings(self.headersFocalArea, NO_NEXT)
+    self.panelFocalArea:SetupSiblings(self.headersFocalArea, ZO_GAMEPAD_FOCUS_NO_NEXT)
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeHeader(headerData)
@@ -595,4 +596,9 @@ end
 
 function ZO_GamepadInteractiveSortFilterHeader_Initialize(control, text, sortKey, textAlignment)
     ZO_SortHeader_Initialize(control, text, sortKey, ZO_SORT_ORDER_UP, textAlignment, nil, "ZO_GamepadInteractiveSortFilterHeaderHighlight")
+    if textAlignment == TEXT_ALIGN_RIGHT then
+        local nameControl = control:GetNamedChild("Name")
+        --Account for the arrow
+        nameControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -ZO_GAMEPAD_INTERACTIVE_FILTER_ARROW_PADDING)
+    end
 end

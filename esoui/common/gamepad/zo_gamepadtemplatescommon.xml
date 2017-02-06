@@ -145,6 +145,26 @@
             <Insets left="4" top="4" right="-4" bottom="-4" />
         </Backdrop>
 
+        <Backdrop name="ZO_GamepadNormalOutlineThin" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Insets left="2" top="2" right="-2" bottom="-2" />
+        </Backdrop>
+
+        <Backdrop name="ZO_GamepadBlackOutlineThin" edgeColor="000000" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Insets left="2" top="2" right="-2" bottom="-2" />
+        </Backdrop>
+
+        <Backdrop name="ZO_GamepadWhiteOutlineThin" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Insets left="2" top="2" right="-2" bottom="-2" />
+        </Backdrop>
+
+        <Backdrop name="ZO_GamepadGreyOutlineThin" edgeColor="797979" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Insets left="2" top="2" right="-2" bottom="-2" />
+        </Backdrop>
+        
         <Backdrop name="ZO_GamepadWhiteSelectorHighlight" centerColor="00000000" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
             <Insets left="4" top="4" right="-4" bottom="-4" />
@@ -164,7 +184,7 @@
         <Control name="ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
             </OnInitialized>
         </Control>
 
@@ -259,51 +279,9 @@
 
         <Label name="ZO_GamepadMenuEntrySubLabelTemplateMain" font="ZoFontGamepad25" verticalAlignment="CENTER" wrapMode="ELLIPSIS" virtual="true"/>
 
-        <Control name="ZO_GamepadMenuEntryExpandingWithOneSubLabel" inherits="ZO_GamepadMenuEntryTemplate" virtual="true" verticalAlignment="BOTTOM">
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 1
-                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
-            </OnInitialized>
-
+        <Control name="ZO_GamepadMenuEntryNoCapitalization" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" override="true">
-                    <Anchor point="TOPLEFT" offsetX="5" />
-                    <Anchor point="TOPRIGHT" />
-                </Label>
-                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
-                </Label>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_GamepadIndentedMenuEntryExpandingWithOneSubLabel" inherits="ZO_GamepadMenuEntryExpandingWithOneSubLabel" virtual="true">
-            <Controls>
-                <Label name="$(parent)Label" override="true">
-                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-                    <Anchor point="TOPRIGHT" />
-                </Label>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel" inherits="ZO_GamepadMenuEntryTemplate" virtual="true" verticalAlignment="BOTTOM">
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 2
-                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
-            </OnInitialized>
-
-            <Controls>
-                <Label name="$(parent)Label" override="true" modifyTextType="NONE" wrapMode="NONE"/>
-                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
-                </Label>
-                <Label name="$(parent)SubLabel2" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMRIGHT"/>
-                </Label>
+                <Label name="$(parent)Label" override="true" modifyTextType="NONE"/>
             </Controls>
         </Control>
         
@@ -357,6 +335,14 @@
                 <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
                     <Anchor point="LEFT" relativeTo="$(parent)CheckBox" relativePoint="RIGHT" offsetX="5"/>
                 </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_CheckBoxTemplate_WithoutIndent_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
+            <Controls>
+                <Button name="$(parent)CheckBox" override="true">
+                    <Anchor point="LEFT" />
+                </Button>
             </Controls>
         </Control>
         
@@ -544,6 +530,10 @@
         <Control name="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
+
+                self.GetHeight = function()
+                    return self.dropdown:GetHeight()
+                end
             </OnInitialized>
             <Anchor point="TOPLEFT"/>
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>

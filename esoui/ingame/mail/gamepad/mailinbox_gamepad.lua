@@ -179,7 +179,7 @@ end
 
 local function SetupList(list)
     list:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplate("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplate("ZO_GamepadMenuEntryNoCapitalization", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 end
 
 function ZO_MailInbox_Gamepad:InitializeMailList()
@@ -678,7 +678,7 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
 
     for i=1, #entries do
         local entryData = entries[i]
-        self.mailList:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", entryData)
+        self.mailList:AddEntry("ZO_GamepadMenuEntryNoCapitalization", entryData)
     end
 
     self.mailList:Commit()

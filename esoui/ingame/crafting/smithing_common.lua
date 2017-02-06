@@ -66,19 +66,18 @@ SMITHING_BONUSES =
 
 function ZO_Smithing_Common:Initialize(control)
     self.control = control
-end
-
-function ZO_Smithing_Common:CreateInteractScene(sceneName)
-    local SMITHING_STATION_INTERACTION =
+    self.smithingStationInteraction =
     {
         type = "Smithing Station",
         End = function()
-            SCENE_MANAGER:Hide(self.mainSceneName)
+            SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },
     }
+end
 
-    return ZO_InteractScene:New(sceneName, SCENE_MANAGER, SMITHING_STATION_INTERACTION)
+function ZO_Smithing_Common:CreateInteractScene(sceneName)
+    return ZO_InteractScene:New(sceneName, SCENE_MANAGER, self.smithingStationInteraction)
 end
 
 SMITHING_MODE_ROOT = 0
@@ -87,6 +86,7 @@ SMITHING_MODE_CREATION = 2
 SMITHING_MODE_DECONSTRUCTION = 3
 SMITHING_MODE_IMPROVEMENT = 4
 SMITHING_MODE_RESEARCH = 5
+SMITHING_MODE_RECIPES = 6
 
 function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
     if craftingType == CRAFTING_TYPE_BLACKSMITHING then

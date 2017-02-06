@@ -364,6 +364,30 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, gridWidth, gridHeight, 
     self.headerContainer = self.fullPane:GetNamedChild("ContainerHeaderContainer")
     self.header = self.headerContainer.header
     self:InitializeHeader(initialTabBarEntries)
+
+    self.previewKeybindStripDesciptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        {
+            name = GetString(SI_GAMEPAD_PREVIEW_PREVIOUS),
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+            callback = function()
+                self:MoveToPreviousPreviewProduct()
+            end,
+            visible = function() return self:HasMultiplePreviewProducts() end,
+            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
+        },
+        {
+            name = GetString(SI_GAMEPAD_PREVIEW_NEXT),
+            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            callback = function()
+                self:MoveToNextPreviewProduct()
+            end,
+            visible = function() return self:HasMultiplePreviewProducts() end,
+            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
+        },
+        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
+    }
 end
 
 -- calculate offset needed to scroll grid entries to the absolute screen center instead of the relative container center
@@ -514,10 +538,29 @@ end
 
 function ZO_GamepadMarket_GridScreen:BeginPreview()
     self.previewIndex = self.selectedMarketProduct:GetPreviewIndex()
-    ZO_GAMEPAD_MARKET_PREVIEW:SetPreviewProductsContainer(self)
     self.isPreviewing = true
     self:Deactivate()
-    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)
+    
+    self.RefreshPreviewKeybindStrip = function()
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.previewKeybindStripDesciptor)
+    end
+
+    self.PreviewSceneOnStateChange = function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.previewKeybindStripDesciptor)
+            ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.RefreshPreviewKeybindStrip)
+        elseif newState == SCENE_SHOWN then
+            --Preventing an out of order issue with the begin preview mode
+            self:UpdatePreviewToCurrentPreviewedProduct()
+        elseif newState == SCENE_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
+            GAMEPAD_MARKET_PREVIEW_SCENE:UnregisterCallback("StateChange", self.PreviewSceneOnStateChange)
+            ITEM_PREVIEW_GAMEPAD:UnregisterCallback(self.RefreshPreviewKeybindStrip)
+        end
+    end
+
+    GAMEPAD_MARKET_PREVIEW_SCENE:RegisterCallback("StateChange", self.PreviewSceneOnStateChange)
+    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)    
 end
 
 function ZO_GamepadMarket_GridScreen:EndCurrentPreview()
@@ -544,7 +587,7 @@ function ZO_GamepadMarket_GridScreen:MoveToPreviousPreviewProduct()
         self.previewIndex = #self.previewProducts - self.previewIndex
     end
 
-    return self:GetCurrentPreviewProductId()
+    self:UpdatePreviewToCurrentPreviewedProduct()
 end
 
 -- Supports wrapping around the preview list
@@ -555,7 +598,12 @@ function ZO_GamepadMarket_GridScreen:MoveToNextPreviewProduct()
         self.previewIndex = self.previewIndex - #self.previewProducts
     end
 
-    return self:GetCurrentPreviewProductId()
+    self:UpdatePreviewToCurrentPreviewedProduct()
+end
+
+function ZO_GamepadMarket_GridScreen:UpdatePreviewToCurrentPreviewedProduct()
+    ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_GAMEPAD, self:GetCurrentPreviewProductId())
+    GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, self:GetCurrentPreviewProductId())
 end
 
 function ZO_GamepadMarket_GridScreen:OnShowing()
@@ -639,13 +687,6 @@ end
 
 function ZO_GamepadMarket_GridScreen:UpdateTooltip()
     self:LayoutSelectedMarketProduct()
-end
-
-do
-    local g_purchaseManager = ZO_GamepadMarketPurchaseManager:New() -- Singleton purchase manager
-    function ZO_GamepadMarket_GridScreen:BeginPurchase(marketProduct, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        g_purchaseManager:BeginPurchase(marketProduct:GetProductForSell(), onPurchaseSuccessCallback, onPurchaseEndCallback)
-    end
 end
 
 function ZO_GamepadMarket_GridScreen:UpdatePreviousAndNewlySelectedProducts(previousSelectedProduct, newlySelectedProduct)

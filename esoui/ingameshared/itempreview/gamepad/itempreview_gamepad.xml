@@ -1,0 +1,14 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ItemPreview_GamepadTopLevel">
+            <OnInitialized>
+                ZO_ItemPreview_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)VariationLabel" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="BOTTOM" offsetY="-20"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

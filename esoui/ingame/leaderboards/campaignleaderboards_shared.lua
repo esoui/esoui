@@ -1,6 +1,7 @@
 -----------------
 -- Leaderboard Campaign Selector Shared
 -----------------
+CAMPAIGN_LEADERBOARD_SYSTEM_NAME = "campaignLeaderboards"
 
 ZO_LeaderboardCampaignSelector_Shared = ZO_CampaignSelector_Shared:Subclass()
 

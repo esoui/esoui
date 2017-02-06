@@ -50,14 +50,16 @@
         </Control>
 
         <Control name="ZO_GamepadSkillsActionBarTemplate" virtual="true">
-            <Dimensions x="466" y="90" />
-            <Controls>                
+            <!-- This container needs to be large enough to contain the buttons without them popping out the bottom -->
+            <Dimensions x="466" y="106" />
+            <Controls>
                 <Label name="$(parent)Header" modifyTextType="UPPERCASE" text="SI_GAMEPAD_SKILLS_ACTIONBAR_HEADER" inherits="ZO_GamepadMenuEntryHeaderTemplate">
                     <Anchor point="TOP"/>
                 </Label>
 
                 <Control name="$(parent)Button1" inherits="ZO_GamepadSkillsActionButtonTemplate">
-                    <Anchor point="BOTTOMLEFT" offsetX="54"/>
+                    <!-- This button needs to be offset from the bottom so that when it is selected it doesn't grow outside the container -->
+                    <Anchor point="BOTTOMLEFT" offsetX="54" offsetY="-14"/>
                 </Control>
 
                 <Control name="$(parent)Button2" inherits="ZO_GamepadSkillsActionButtonTemplate">

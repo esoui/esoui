@@ -83,7 +83,7 @@ end
 function LoginBG_Keyboard:RebuildRequiredAccountLabel()
     local requiresAccountLinking = IsUsingLinkedLogin()
     if not requiresAccountLinking then
-        local url = select(8, GetPlatformInfo(GetSelectedPlatformIndex()))
+        local url = select(5, GetPlatformInfo(GetSelectedPlatformIndex()))
         local linkText = GetString(SI_LOGIN_ACCOUNT_REQUIRED_ESO)
         local link = ZO_LinkHandler_CreateURLLink(url, linkText)
         local message = zo_strformat(SI_LOGIN_ACCOUNT_REQUIRED, link)
@@ -188,6 +188,15 @@ function Login_Keyboard:Initialize(control)
                                                             self:AttemptAutomaticLogin()
                                                         end
                                                     end)
+
+    local lastPlatformName = GetCVar("LastPlatform")
+    for platformIndex = 0, GetNumPlatforms() do
+        local platformName = GetPlatformInfo(platformIndex)
+        if platformName ~= "" and platformName == lastPlatformName then
+            SetSelectedPlatform(platformIndex)
+            break
+        end
+    end
 end
 
 function Login_Keyboard:GetControl()

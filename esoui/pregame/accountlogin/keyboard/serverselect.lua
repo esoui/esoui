@@ -1,3 +1,16 @@
+local NA_STRING = "Live"
+local EU_STRING = "Live-EU"
+
+function ZO_GetLocalizedServerName(serverName)
+    if(serverName == NA_STRING) then
+        serverName = GetString("SI_MEGASERVER", MEGASERVER_NA)
+    elseif (serverName == EU_STRING) then
+        serverName = GetString("SI_MEGASERVER", MEGASERVER_EU)
+    end
+    
+    return serverName
+end
+
 local function InitServerOptions(dialogControl)
     dialogControl.radioButtonGroup = ZO_RadioButtonGroup:New()
     local radioButtonGroupControl = dialogControl:GetNamedChild("RadioButtonContainer")
@@ -13,7 +26,8 @@ local function InitServerOptions(dialogControl)
             dialogControl.radioButtonGroup:Add(serverRadioButton)
 
             local label = GetControl(serverRadioButton, "Label")
-            label:SetText(platformName)
+            local serverName = ZO_GetLocalizedServerName(platformName)
+            label:SetText(serverName)
             serverRadioButton.data = {server = platformName, index = i}
 
             if(prev == nil) then
@@ -63,6 +77,11 @@ local function ServerSelectDialogInitialize(dialogControl)
                                if GetCVar("LastPlatform") ~= buttonData.server then
                                    SetCVar("LastPlatform", buttonData.server)
                                    SetSelectedPlatform(buttonData.index)
+                                   RequestAnnouncements()
+                                   -- If we're using linked login, it's possible to be on the Create/Link fragment,
+                                   -- which means we have a session with a different login endpoint and the next Create/Link will fail.
+                                   -- Make sure we're at the login fragment so we have to login again to get a new session.
+                                   LOGIN_MANAGER_KEYBOARD:SwitchToLoginFragment()
                                end
                            end,
             },

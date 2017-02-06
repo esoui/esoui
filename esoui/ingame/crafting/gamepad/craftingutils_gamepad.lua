@@ -83,15 +83,16 @@ function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString,
         if tabBarFirstEntry.text then
             titleString = tabBarFirstEntry.text
         end
+        if tabBarFirstEntry.callback then
+            tabBarFirstEntry:callback()
+        end
     end
 
     local function GetCapacity()
         return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
     end
 
-    craftingObject.headerData = {
-	    titleText = titleString,
-    }
+    craftingObject.headerData = { }
 
     if showCapacity or showCapacity == nil then        
         craftingObject.headerData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
@@ -101,6 +102,9 @@ function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString,
     if tabBarEntries and #tabBarEntries > 1 then 
         craftingObject.headerData.tabBarEntries = ZO_ShallowTableCopy(tabBarEntries)
         craftingObject.headerData.titleText = nil
+    else
+        craftingObject.headerData.tabBarEntries = nil
+        craftingObject.headerData.titleText = titleString
     end
 end
 

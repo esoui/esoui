@@ -1,6 +1,6 @@
 
 local GAMEPAD_PLAYER_EMOTE_SCENE_NAME = "gamepad_player_emote"
-local GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithSubLabelTemplate"
+local GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE = "ZO_GamepadItemSubEntryTemplate"
 
 local EMPTY_QUICKSLOT_TEXTURE = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
 local EMPTY_QUICKSLOT_STRING = GetString(SI_QUICKSLOTS_EMPTY)
@@ -325,6 +325,10 @@ function ZO_GamepadPlayerEmote:New(...)
     return ZO_Gamepad_ParametricList_Screen.New(self, ...)
 end
 
+local function OnPlayerEmoteFailedPlay()
+    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_EMOTE_FAILED_PLAY))
+end
+
 function ZO_GamepadPlayerEmote:Initialize(control)
     self.control = control
     self.emoteListGridControl = control:GetNamedChild("EmoteListGrid")
@@ -337,6 +341,8 @@ function ZO_GamepadPlayerEmote:Initialize(control)
     GAMEPAD_PLAYER_EMOTE_SCENE = ZO_Scene:New(GAMEPAD_PLAYER_EMOTE_SCENE_NAME, SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_PLAYER_EMOTE_SCENE)
+
+    self.radialControl:RegisterForEvent(EVENT_PLAYER_EMOTE_FAILED_PLAY, OnPlayerEmoteFailedPlay)
 end
 
 function ZO_GamepadPlayerEmote:OnDeferredInitialize()
@@ -439,10 +445,6 @@ function ZO_GamepadPlayerEmote:InitializeEmoteGrid()
     self.emoteListGrid:SetPageChangedCallback(function() self:RefreshHeader() end)
 end
 
-local function OnPlayerEmoteFailedPlay()
-    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_EMOTE_FAILED_PLAY))
-end
-
 function ZO_GamepadPlayerEmote:InitializeRadialMenu(control)
     self.radialMenu = ZO_RadialMenu:New(self.radialControl, "ZO_GamepadPlayerEmoteRadialMenuEntryTemplate", nil, "SelectableItemRadialMenuEntryAnimation", "RadialMenu")
     --store entry controls to animate with later
@@ -461,7 +463,6 @@ function ZO_GamepadPlayerEmote:InitializeRadialMenu(control)
     end
 
     self.radialControl:RegisterForEvent(EVENT_ACTION_SLOT_UPDATED, OnActionSlotUpdated)
-    self.radialControl:RegisterForEvent(EVENT_PLAYER_EMOTE_FAILED_PLAY, OnPlayerEmoteFailedPlay)
 end
 
 function ZO_GamepadPlayerEmote:PerformUpdate()

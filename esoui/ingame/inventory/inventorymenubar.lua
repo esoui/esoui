@@ -221,7 +221,7 @@ function PlayerInventoryMenuBar:Initialize(control)
                         return PLAYER_INVENTORY:IsShowingBackpack() and IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(BAG_BACKPACK)
                     end,
         callback = function()
-            StowAllVirtualItems()
+            ZO_Inventory_TryStowAllMaterials()
         end,
     }
 

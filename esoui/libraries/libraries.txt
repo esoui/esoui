@@ -218,6 +218,9 @@ EsoUI\Libraries\ZO_MouseInputGroup\ZO_MouseInputGroup.xml
 EsoUI\Libraries\ZO_PixelUnits\ZO_PixelUnits.lua
 EsoUI\Libraries\ZO_PixelUnits\ZO_PixelUnits.xml
 
+EsoUI\Libraries\ZO_FractionDisplay\ZO_FractionDisplay.lua
+EsoUI\Libraries\ZO_FractionDisplay\ZO_FractionDisplay.xml
+
 EsoUI\Libraries\ZO_PlatformStyle\ZO_PlatformStyle.lua
 EsoUI\Libraries\ZO_ButtonTabBar\Gamepad\ZO_GamepadButtonTabBar.lua
 

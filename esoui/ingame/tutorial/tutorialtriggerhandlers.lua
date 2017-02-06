@@ -32,9 +32,8 @@ local TutorialTriggerHandlers = {
     end,
 
     [EVENT_POI_DISCOVERED] = function(zoneIndex, poiIndex)
-        if IsPOIGroupDungeon(zoneIndex, poiIndex) then
-            return TUTORIAL_TRIGGER_DISCOVERED_GROUP_DUNGEON
-        elseif IsPOIPublicDungeon(zoneIndex, poiIndex) then
+        local poiType = GetPOIType(zoneIndex, poiIndex)
+        if poiType == POI_TYPE_GROUP_DUNGEON or poiType == POI_TYPE_PUBLIC_DUNGEON then
             return TUTORIAL_TRIGGER_DISCOVERED_GROUP_DUNGEON
         end
     end,

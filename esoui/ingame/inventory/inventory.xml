@@ -9,10 +9,6 @@
                 ZO_PlayerInventory_EndSearch(self)
             </OnEscape>
 
-            <OnMouseDown>
-                ZO_PlayerInventory_BeginSearch(self)
-            </OnMouseDown>
-
             <OnTextChanged>
                 ZO_EditDefaultText_OnTextChanged(self)
                 ZO_PlayerInventory_OnSearchTextChanged(self)
@@ -78,7 +74,8 @@
                                 "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
                                 "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
                                 "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
-                                "age")
+                                "statusSortOrder",
+                                ZO_SORT_ORDER_DOWN)
 
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
                             </OnInitialized>
@@ -87,7 +84,7 @@
                             <Dimensions x="241" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name", ZO_SORT_ORDER_UP)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)StatValue" inherits="ZO_SortHeader">
@@ -95,14 +92,14 @@
                             <Dimensions x="82" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Price" inherits="ZO_SortHeader">
                             <Dimensions x="70" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                     </Controls>
@@ -161,7 +158,7 @@
                             <Dimensions x="280" y="20" />
                             <Anchor point="LEFT" offsetX="73" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name", ZO_SORT_ORDER_UP)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)StatValue" inherits="ZO_SortHeader">
@@ -169,14 +166,14 @@
                             <Dimensions x="82" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Price" inherits="ZO_SortHeader">
                             <Dimensions x="70" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                     </Controls>
@@ -308,7 +305,7 @@
                             <Dimensions x="280" y="20" />
                             <Anchor point="LEFT" offsetX="73" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name", ZO_SORT_ORDER_UP)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)StatValue" inherits="ZO_SortHeader">
@@ -316,14 +313,14 @@
                             <Dimensions x="82" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Price" inherits="ZO_SortHeader">
                             <Dimensions x="70" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                     </Controls>
@@ -397,7 +394,8 @@
                                     "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
                                     "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
                                     "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
-                                    "age")
+                                    "statusSortOrder",
+                                    ZO_SORT_ORDER_DOWN)
 
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
                             </OnInitialized>
@@ -406,21 +404,21 @@
                             <Dimensions x="241" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name", ZO_SORT_ORDER_UP)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)StatValue" inherits="ZO_SortHeader"> <!-- This header changes name depending on what filter is active (currently power/armor values) -->
                             <Dimensions x="82" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Price" inherits="ZO_SortHeader">
                             <Dimensions x="70" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)StatValue" relativePoint="RIGHT" offsetX="35" />
                             <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice")
+                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackSellPrice", ZO_SORT_ORDER_DOWN)
                             </OnInitialized>
                         </Control>
                     </Controls>

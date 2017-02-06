@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ControllerDisconnect" keyboardEnabled="true" hidden="true" inherits="ZO_GenericCenteredGamepadDialogTemplate" tier="HIGH" layer="OVERLAY" level="ZO_HIGH_TIER_GAMEPAD_DISCONNECT_POPUP" resizeToFitDescendents="false">
+            <OnShow>
+                PushActionLayerByName("ControllerDisconnect")
+            </OnShow>
+
+            <OnHide>
+                RemoveActionLayerByName("ControllerDisconnect")
+            </OnHide>
+
+            <OnKeyDown>
+                if IsKeyCodeGamepadKey(key) then
+                    ZO_ControllerDisconnect_DismissPopup()
+                end
+            </OnKeyDown>
+
+            <OnInitialized>
+                ZO_ControllerDisconnect_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

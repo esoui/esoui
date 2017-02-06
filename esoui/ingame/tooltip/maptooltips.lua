@@ -147,6 +147,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
     local isCurrentLoc = (currentNodeIndex == nodeIndex)
     local isUsingRecall = currentNodeIndex == nil
     local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
+    local nodeIsHousePreview = poiType == POI_TYPE_HOUSE and not HasCompletedFastTravelNodePOI(nodeIndex)
 
     self:LayoutIconStringLine(wayshrineSection, icon, zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), self.tooltip:GetStyle("mapLocationTooltipWayshrineHeader"))
     if isCurrentLoc then --NO BUTTON: Can't travel to origin
@@ -172,6 +173,10 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         local message = GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD)
         self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     elseif isUsingRecall then --Recall
+        local keyText = ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1)
+        local travelStringId = nodeIsHousePreview and SI_GAMEPAD_TOOLTIP_WAYSHRINE_PREVIEW_HOUSE_INTERACT or SI_GAMEPAD_TOOLTIP_WAYSHRINE_RECALL_INTERACT
+        local travelText = zo_strformat(travelStringId, keyText)
+        self:LayoutIconStringLine(wayshrineSection, nil, travelText, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
         local _, premiumTimeLeft = GetRecallCooldown()
         if premiumTimeLeft == 0 then --BUTTON: Recall
             local cost = GetRecallCost(nodeIndex)
@@ -187,7 +192,8 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         end
     else --BUTTON: Fast Travel
         local keyText = ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1)
-        local travelText = zo_strformat(SI_GAMEPAD_TOOLTIP_WAYSHRINE_FAST_TRAVEL_INTERACT, keyText)
+        local travelStringId = nodeIsHousePreview and SI_GAMEPAD_TOOLTIP_WAYSHRINE_PREVIEW_HOUSE_INTERACT or SI_GAMEPAD_TOOLTIP_WAYSHRINE_FAST_TRAVEL_INTERACT
+        local travelText = zo_strformat(travelStringId, keyText)
         self:LayoutIconStringLine(wayshrineSection, nil, travelText, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     end
 

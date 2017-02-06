@@ -41,7 +41,14 @@ function ZO_CrownCrates:Initialize(control)
     self.control = control
 	self.packChoosing = ZO_CrownCratesPackChoosing:New(self)
     self.packOpening = ZO_CrownCratesPackOpening:New(self)
-	self.stateMachine = ZO_CrownCratesStateMachine:New(self, self.packChoosing, self.packOpening)
+    self.gemificationSlot = ZO_CrownGemificationSlot:New(self)
+    if ZO_CrownGemification_Keyboard then
+        self.gemificationKeyboard = ZO_CrownGemification_Keyboard:New(self, self.gemificationSlot)
+    end
+    if ZO_CrownGemification_Gamepad then
+	    self.gemificationGamepad = ZO_CrownGemification_Gamepad:New(self, self.gemificationSlot)
+    end
+	self.stateMachine = ZO_CrownCratesStateMachine:New(self, self.packChoosing, self.packOpening, self.gemificationKeyboard, self.gemificationGamepad, self.gemificationSlot)    
 	self.packChoosing:SetStateMachine(self.stateMachine)
 	self.packOpening:SetStateMachine(self.stateMachine)
 
@@ -312,6 +319,7 @@ function ZO_CrownCrates:InitializeAnimationPools()
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_COLOR_TINT] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifyColorTintAnimation"),
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_FINAL_GEM] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifyFinalGemAnimation"),
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_CROWN_GEM_TEXT] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifyCrownGemsTextAnimation"),
+        [ZO_CROWN_CRATES_ANIMATION_MANUAL_GEMIFY_SET] = ZO_AnimationPool:New("ZO_CrownCrateGemificationSlotSet"),
     }
     
     self:CreateWobbleAnimationPool(ZO_CROWN_CRATES_ANIMATION_MYSTERY_SELECTED,
@@ -545,49 +553,9 @@ function ZO_CrownCrates:UpdateCrownGemsQuantity()
     self.currentCrownGems = currentCrownGems
 end
 
-do
-    local TIME_ADDED_PER_CROWN_GEM_MS = 500
-    local TIME_MULTIPLER_FOR_CROWN_GEMS = 2
-    local TIME_BASE_VALUE_FOR_CROWN_GEMS_MS= 150
-    local function CalculateGemUpdateAnimation(amount)
-        return math.sqrt(amount * TIME_ADDED_PER_CROWN_GEM_MS) * TIME_MULTIPLER_FOR_CROWN_GEMS + TIME_BASE_VALUE_FOR_CROWN_GEMS_MS
-    end
-
-    function ZO_CrownCrates:AddCrownGems(amount)
-        if amount <= 0 then
-            return
-        end
-
-        local previousGemTotal = self.currentCrownGems 
-        self.currentCrownGems = previousGemTotal + amount
-
-        local gemUpdateAnimation = self.gemsUpdateCountAnimationTimeline:GetFirstAnimation()
-        if not self.gemsUpdateCountAnimationTimeline:IsPlaying() then
-            local calcDuration = CalculateGemUpdateAnimation(amount)
-            self.previousGemTotal = previousGemTotal
-            self.currentGemAnimationValue = previousGemTotal
-            gemUpdateAnimation:SetDuration(calcDuration)
-            self.gemsUpdateCountAnimationTimeline:PlayFromStart()
-        else
-            local currentTimelineProgression = self.gemsUpdateCountAnimationTimeline:GetProgress()
-            local newTargetAmount = self.currentCrownGems - self.currentGemAnimationValue
-            local newDuration = CalculateGemUpdateAnimation(newTargetAmount) + (gemUpdateAnimation:GetDuration() * currentTimelineProgression)
-            gemUpdateAnimation:SetDuration(newDuration)
-        end
-
-        TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_GEMS_AWARDED)
-    end
-
-    local GEMS_UPDATE_REFRESH_RATE = 0.05 -- only update text when a certain percentage to the next step is reached
-    function ZO_CrownCrates:UpdateGemsAnimation(animation, progress)
-        local difference = self.currentCrownGems - self.previousGemTotal
-        local delta = (difference) * progress
-        local nextValue = zo_floor(delta + self.previousGemTotal)
-        if (nextValue - self.currentGemAnimationValue) / difference > GEMS_UPDATE_REFRESH_RATE then
-            self:UpdateGemsLabel(nextValue)
-            self.currentGemAnimationValue = nextValue
-        end
-    end
+function ZO_CrownCrates:AddCrownGems(amount)
+    self.currentCrownGems = self.currentCrownGems + amount
+    self:UpdateGemsLabel(self.currentCrownGems)
 end
 
 function ZO_CrownCrates:GetControl()
@@ -598,6 +566,10 @@ function ZO_CrownCrates:GetCameraLocalPositionFromWorldPosition(worldX, worldY, 
     return self.control:Convert3DWorldPositionToLocalPosition(worldX, worldY, worldZ)
 end
 
+function ZO_CrownCrates:FireStateMachineTrigger(trigger)
+    self.stateMachine:FireCallbacks(trigger)
+end
+
 --Lifecycle
 function ZO_CrownCrates:LockLocalSpaceToCurrentCamera()
     Set3DRenderSpaceToCurrentCamera(self.control:GetName())
@@ -606,6 +578,10 @@ function ZO_CrownCrates:LockLocalSpaceToCurrentCamera()
 end
 
 --Global XML
+
+function ZO_CrownCrates_FireStateMachineTrigger(trigger)
+    g_crownCratesManager:FireStateMachineTrigger(trigger)
+end
 
 function ZO_CrownCrates_OnInitialized(self)
     g_crownCratesManager = ZO_CrownCrates:New(self)

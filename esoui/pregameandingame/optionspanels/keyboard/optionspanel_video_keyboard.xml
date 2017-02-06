@@ -1,0 +1,241 @@
+<GuiXml>
+    <Controls>
+        <Control name="Options_Video_DisplaySection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_VIDEO, SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_DisplayMode" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_DisplaySection" relativePoint="BOTTOMLEFT" offsetY="4" />
+
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)
+                ZO_OptionsWindow_InitializeControl(self)
+
+                EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_FULLSCREEN_MODE_CHANGED, function() ZO_Options_UpdateOption(self) end)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Resolution" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_DisplayMode" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_RESOLUTION)
+                ZO_OptionsPanel_Video_InitializeResolution(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_VSync" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Resolution" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_VSYNC)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Anti_Aliasing" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_VSync" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTI_ALIASING)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Gamma_Adjustment" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Anti_Aliasing" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GAMMA_ADJUSTMENT)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <Controls>
+                <Button name="$(parent)Calibrate" inherits="ZO_DefaultButton" text="SI_VIDEO_OPTIONS_CALIBRATE_GAMMA" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="210" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                    <OnClicked>
+                        SCENE_MANAGER:Push("gammaAdjust")
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="Options_Video_InterfaceSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Gamma_Adjustment" relativePoint="BOTTOMLEFT" offsetY="40" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_VIDEO, SI_VIDEO_OPTIONS_INTERFACE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_UseCustomScale" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_InterfaceSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_UI, UI_SETTING_USE_CUSTOM_SCALE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <OnShow>
+                ZO_OptionsPanel_Video_UseCustomScale_OnShow(self)
+            </OnShow>
+            <Controls>
+                <Button name="$(parent)Checkbox" override="true">
+                    <Dimensions x="180"/>
+                </Button>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Checkbox" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="Options_Video_CustomScale" inherits="ZO_Options_Slider">
+            <Dimensions x="490"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_UseCustomScale" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+            <OnShow>
+                ZO_OptionsPanel_Video_CustomScale_OnShow(self)
+            </OnShow>
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="Options_Video_GraphicsSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_CustomScale" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_VIDEO, SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Graphics_Quality" inherits="ZO_Options_Dropdown_IncludeApplyScreenWarning">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_GraphicsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_PRESETS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Texture_Resolution" inherits="ZO_Options_Dropdown_IncludeApplyScreenWarning ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Graphics_Quality" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_MIP_LOAD_SKIP_LEVELS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Sub_Sampling" inherits="ZO_Options_Dropdown ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Texture_Resolution" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_SUB_SAMPLING)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Shadows" inherits="ZO_Options_Dropdown_IncludeApplyScreenWarning ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Sub_Sampling" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_SHADOWS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Reflection_Quality" inherits="ZO_Options_Dropdown_IncludeApplyScreenWarning ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Shadows" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_REFLECTION_QUALITY)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Maximum_Particle_Systems" inherits="ZO_Options_Slider ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Reflection_Quality" relativePoint="BOTTOMLEFT" offsetY="8" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_PFX_GLOBAL_MAXIMUM)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_SliderScreenWarning">
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_MAXIMUM_PARTICLE_SYSTEMS_RESTRICTION }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="Options_Video_Particle_Suppression_Distance" inherits="ZO_Options_Slider ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Maximum_Particle_Systems" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_PFX_SUPPRESS_DISTANCE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_View_Distance" inherits="ZO_Options_Slider ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Particle_Suppression_Distance" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_VIEW_DISTANCE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Ambient_Occlusion" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_View_Distance" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_AMBIENT_OCCLUSION)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Bloom" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Ambient_Occlusion" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_BLOOM)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Depth_Of_Field" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Bloom" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_DEPTH_OF_FIELD)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Distortion" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Depth_Of_Field" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_DISTORTION)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_God_Rays" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_Distortion" relativePoint="BOTTOMLEFT" offsetY="6" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GOD_RAYS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Clutter_2D" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_God_Rays" relativePoint="BOTTOMLEFT" offsetY="6" />
+
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_CLUTTER_2D)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -53,6 +53,13 @@ function WorldMapInfo:InitializeTabs()
                                                 "EsoUI/Art/WorldMap/map_indexIcon_locations_down.dds",
                                                 "EsoUI/Art/WorldMap/map_indexIcon_locations_over.dds")
     self.modeBar:Add(SI_MAP_INFO_MODE_LOCATIONS, { WORLD_MAP_LOCATIONS_FRAGMENT }, locationButtonData)
+
+	--Houses Button
+    local housesButtonData = CreateButtonData("EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
+                                                "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
+                                                "EsoUI/Art/WorldMap/map_indexIcon_housing_over.dds")
+    self.modeBar:Add(SI_MAP_INFO_MODE_HOUSES, { WORLD_MAP_HOUSES:GetFragment() }, housesButtonData)
+
 end
 
 function WorldMapInfo:SelectTab(name)

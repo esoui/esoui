@@ -1,0 +1,72 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_Market_LabelCurrencyPair" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
+            <Dimensions x="250" />
+            <OnMouseEnter>
+                ZO_MarketCurrency_OnMouseEnter(self, self.currencyType)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_MarketCurrency_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)CurrencyName" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT" />
+                </Label>
+
+                <Label name="$(parent)CurrencyValue" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                    <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)CurrencyName" offsetX="5"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_Market_Currency_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true" level="1">
+            <OnInitialized>
+                ZO_MarketCurrency_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true" >
+                    <Anchor point="BOTTOMLEFT" offsetY="0" offsetX="20" />
+
+                    <Controls>
+                        <Button name="$(parent)BuyCrowns" inherits="ZO_DefaultButton" text="SI_MARKET_BUY_CROWNS">
+                            <Dimensions x="200"/>
+                            <Anchor point="BOTTOMLEFT" />
+                            <OnClicked>
+                                ZO_MarketCurrencyBuyCrowns_OnClicked(self)
+                            </OnClicked>
+                            <Controls>
+                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/store_crowns.dds" layer="CONTROLS">
+                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="32" />
+                                </Texture>
+                            </Controls>
+                        </Button>
+
+                        <Control name="$(parent)Crowns" inherits="ZO_Market_LabelCurrencyPair">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)BuyCrowns" relativePoint="TOP" offsetY="-20" offsetX="20" />
+
+                            <OnInitialized>
+                                self.currencyType = MKCT_CROWNS
+                            </OnInitialized>
+                            <Controls>
+                                <Label name="$(parent)CurrencyName" text="SI_CURRENCY_CROWN" override="true" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Gems" inherits="ZO_Market_LabelCurrencyPair">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)Crowns" relativePoint="TOP" offsetY="-5" />
+                            <OnInitialized>
+                                self.currencyType = MKCT_CROWN_GEMS
+                            </OnInitialized>
+                            <Controls>
+                                <Label name="$(parent)CurrencyName" text="SI_CURRENCY_CROWN_GEM" override="true" />
+                            </Controls>
+                        </Control>
+
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

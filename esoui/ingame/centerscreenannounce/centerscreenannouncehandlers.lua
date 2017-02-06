@@ -911,7 +911,10 @@ CSH[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentChara
         resultSound = SOUNDS.DUEL_FORFEIT
     end
 
-    return CSA_EVENT_SMALL_TEXT, resultSound, resultString
+    local SHOW_IMMEDIATELY = true
+    local QUEUE_IMMEDIATELY = true
+    local REINSERT_STOMPED_MESSAGE = false
+    return CSA_EVENT_LARGE_TEXT, resultSound, resultString, nil, nil, nil, nil, nil, nil, nil, QUEUE_IMMEDIATELY, SHOW_IMMEDIATELY, REINSERT_STOMPED_MESSAGE
 end
 
 function ZO_CenterScreenAnnounce_GetHandlers()

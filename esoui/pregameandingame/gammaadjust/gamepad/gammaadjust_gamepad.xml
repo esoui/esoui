@@ -1,0 +1,22 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GammaAdjust" override="true">
+            <Controls>
+                <Slider name="$(parent)GamepadSlider" inherits="ZO_GamepadSlider" step="1" hidden="true">
+                    <Dimensions x="230" y="16" />
+                    <Anchor point="TOP" relativeTo="$(parent)SubText" relativePoint="BOTTOM" offsetY="10" />
+                    <OnInitialized>
+                        ZO_GamepadSlider_OnInitialized(self)
+                        ZO_GammaAdjustSlider_Gamepad_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Left" inherits="ZO_GamepadWhiteFrameLeftArrowMedium" tier="HIGH" override="true" />
+                        <Texture name="$(parent)Right" inherits="ZO_GamepadWhiteFrameRightArrowMedium" tier="HIGH" override="true" />
+                        <Texture name="$(parent)Center" inherits="ZO_GamepadWhiteFrameCenterMedium" tier="HIGH" override="true" />
+                    </Controls>
+                </Slider>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

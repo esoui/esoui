@@ -1,0 +1,64 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ChromaAnimationBase">
+            <OnStop>
+                ZO_ChromaAnimation_OnStop(self, completedPlaying)
+            </OnStop>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="ZO_ChromaDeathPulsateAnimation" inherits="ZO_ChromaAnimationBase">
+            <Animations>
+                <CustomAnimation duration="500">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+                <CustomAnimation duration="1000" delay="1750">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, 1-progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChromaDeathFadeOutAnimation" inherits="ZO_ChromaAnimationBase">
+            <Animations>
+                <CustomAnimation duration="2000">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, 1-progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChromaOnePulseAnimation" inherits="ZO_ChromaAnimationBase">
+            <Animations>
+                <CustomAnimation duration="250">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+                <CustomAnimation duration="500" delay="1000">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, 1-progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ChromaSteadyPulsateAnimation" inherits="ZO_ChromaAnimationBase">
+            <Animations>
+                <CustomAnimation duration="750">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+                <CustomAnimation duration="750" delay="500">
+                    <UpdateFunction>
+                        ZO_ChromaAnimation_SetProgress(self, 1-progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

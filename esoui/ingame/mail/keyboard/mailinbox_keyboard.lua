@@ -35,19 +35,15 @@ function MailInbox:Initialize(control)
 
     MAIL_INBOX_SCENE = ZO_Scene:New("mailInbox", SCENE_MANAGER)
     MAIL_INBOX_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.selectionKeybindStripDescriptor)
             if(self.inboxDirty) then
                 self:RefreshData()
             end
-        elseif(newState == SCENE_HIDING) then
+        elseif newState == SCENE_HIDING then
             CURRENCY_INPUT:Hide()
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.selectionKeybindStripDescriptor)
-        elseif(newState == SCENE_SHOWN) then
-            if self.dirtyMail then
-                self:OnMailReadable(self.dirtyMail)
-            end
         end
     end)
 
@@ -57,6 +53,15 @@ function MailInbox:Initialize(control)
     control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, function(_, mailId) self:OnTakeAttachedMoneySuccess(mailId) end)
     control:RegisterForEvent(EVENT_MAIL_REMOVED, function(_, mailId) self:OnMailRemoved(mailId) end)
     control:RegisterForEvent(EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnMailNumUnreadChanged(numUnread) end)
+    control:RegisterForEvent(EVENT_MAIL_OPEN_MAILBOX, function()
+        --It's possible that the mail that's selected was selected after we closed the mail interaction (for example, deleting the current mail and
+        --rapidly closing the window). In that case we never sent a message to the server to get the mail contents so the details pane is empty.
+        --If we show the window again and the request hasn't be responsed to then self.requestedMailId will still be set so we know we have to query
+        --again now that the interaction is open again. We wait till shown for the interaction to be open.
+        if self.pendingRequestMailId then
+            self:RequestReadMessage(self.pendingRequestMailId)
+        end
+    end)
 
     self:SetNumUnread(GetNumUnreadMail())
 
@@ -300,6 +305,7 @@ end
 
 function MailInbox:RequestReadMessage(mailId)
     if(not AreId64sEqual(self.mailId, mailId)) then
+        self.pendingRequestMailId = mailId
         RequestReadMail(mailId)
     end
 end
@@ -409,14 +415,13 @@ local MAIL_COD_ATTACHED_MONEY_OPTIONS =
 }
 
 function MailInbox:OnMailReadable(mailId)
-    if self.control:IsHidden() then
-        self.dirtyMail = mailId
+    if not AreId64sEqual(mailId, self.pendingRequestMailId) then
         return
     end
-    self.dirtyMail = nil
 
     self:EndRead()
 
+    self.pendingRequestMailId = nil
     self.mailId = mailId
     self.messageControl:SetHidden(false)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.selectionKeybindStripDescriptor)
@@ -501,6 +506,9 @@ end
 
 function MailInbox:OnMailRemoved(mailId)
     self.reportedMailIds[zo_getSafeId64Key(mailId)] = nil
+    if AreId64sEqual(self.mailId, mailId) then
+        self:EndRead()
+    end
     self:RefreshData()
 end
 

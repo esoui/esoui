@@ -28,46 +28,6 @@ marketScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 local announcementScene = ZO_RemoteScene:New("marketAnnouncement", SCENE_MANAGER)
 announcementScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
 
--------------------
---Inventory Scene
--------------------
-
-local inventoryScene = ZO_Scene:New("inventory", SCENE_MANAGER)
-inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
-inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
-inventoryScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
-inventoryScene:AddFragment(WIDE_LEFT_PANEL_BG_FRAGMENT)
-inventoryScene:AddFragment(CHARACTER_WINDOW_FRAGMENT)
-inventoryScene:AddFragment(CHARACTER_WINDOW_STATS_FRAGMENT)
-inventoryScene:AddFragment(INVENTORY_MENU_FRAGMENT)
-inventoryScene:AddFragment(FRAME_EMOTE_FRAGMENT_INVENTORY)
-inventoryScene:AddFragment(INVENTORY_WINDOW_SOUNDS)
-
--------------------
---Bank Scene
--------------------
-
-local bankScene = SCENE_MANAGER:GetScene("bank")
-bankScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-bankScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
-bankScene:AddFragment(BANK_MENU_FRAGMENT)
-bankScene:AddFragment(BANK_WINDOW_SOUNDS)
-bankScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
-bankScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED))
-
--------------------
---Guild Bank Scene
--------------------
-
-local guildBankScene = SCENE_MANAGER:GetScene("guildBank")
-guildBankScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-guildBankScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
-guildBankScene:AddFragment(GUILD_BANK_MENU_FRAGMENT)
-guildBankScene:AddFragment(BANK_WINDOW_SOUNDS)
-guildBankScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
-guildBankScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_GUILD_BANK_OPENED))
-
 ----------------
 --Lockpick Scene
 ----------------
@@ -177,19 +137,8 @@ STATS_SCENE:AddFragment(CHARACTER_WINDOW_SOUNDS)
 --Siege Bar Scene
 -----------------------
 
-SIEGE_BAR_SCENE:AddFragment(SIEGE_ACTION_LAYER_FRAGMENT)
-SIEGE_BAR_SCENE:AddFragment(SIEGE_HUD_FRAGMENT)
-SIEGE_BAR_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
-SIEGE_BAR_SCENE:AddFragment(UNIT_FRAMES_FRAGMENT)
-SIEGE_BAR_SCENE:AddFragment(PLAYER_ATTRIBUTE_BARS_FRAGMENT)
-SIEGE_BAR_SCENE:AddFragment(COMPASS_FRAME_FRAGMENT)
-
-SIEGE_BAR_UI_SCENE:AddFragment(SIEGE_HUD_FRAGMENT)
-SIEGE_BAR_UI_SCENE:AddFragment(SIEGE_ACTION_LAYER_FRAGMENT)
-SIEGE_BAR_UI_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
-SIEGE_BAR_UI_SCENE:AddFragment(UNIT_FRAMES_FRAGMENT)
-SIEGE_BAR_UI_SCENE:AddFragment(PLAYER_ATTRIBUTE_BARS_FRAGMENT)
-SIEGE_BAR_UI_SCENE:AddFragment(COMPASS_FRAME_FRAGMENT)
+SIEGE_BAR_SCENE:AddFragmentGroup(FRAGMENT_GROUP.SIEGE_BAR_GROUP)
+SIEGE_BAR_UI_SCENE:AddFragmentGroup(FRAGMENT_GROUP.SIEGE_BAR_GROUP)
 
 ---------------------------
 --Champion Perks Scene
@@ -214,6 +163,8 @@ CHAMPION_PERKS_SCENE:AddFragment(FRAME_PLAYER_FRAGMENT)
 --Housing Editor Scene
 -----------------------
 
-HOUSING_EDITOR_HUD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.HOUSING_EDITOR_HUD_SCENE_GROUP)
+HOUSING_EDITOR_HUD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.HOUSING_EDITOR_HUD)
+HOUSING_EDITOR_HUD_SCENE:AddFragment(HOUSING_EDITOR_HUD_FRAGMENT)
+HOUSING_EDITOR_HUD_SCENE:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_OPENED_EDITOR))
 
-HOUSING_EDITOR_HUD_UI_SCENE:AddFragmentGroup(FRAGMENT_GROUP.HOUSING_EDITOR_HUD_SCENE_GROUP)
+HOUSING_EDITOR_HUD_UI_SCENE:AddFragmentGroup(FRAGMENT_GROUP.HOUSING_EDITOR_HUD)

@@ -26,6 +26,7 @@ function MarketProduct_Keyboard:Initialize(controlId, controlTemplate, parent, i
     ZO_MarketProductBase.Initialize(self, control, owner, ...)
     self.iconPool = ZO_MetaPool:New(iconPool)
     self.activeMarketProductIcon = nil
+    self:SetTextCalloutYOffset(-7)
 end
 
 function MarketProduct_Keyboard:LayoutBackground(background)
@@ -47,19 +48,6 @@ end
 function MarketProduct_Keyboard:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
     ZO_MarketProductBase.LayoutCostAndText(self, description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
 
-    self.cost:ClearAnchors()
-    self.textCallout:ClearAnchors()
-
-    if self.isFree then
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, -7)
-    elseif self.onSale then
-        self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, -7) -- x offset to account for strikethrough
-    else
-        self.cost:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, 10, -10)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.cost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, -7)
-    end
-
     local textCalloutBackgroundColor
     local textCalloutTextColor
     if self:IsLimitedTimeProduct() then
@@ -80,22 +68,9 @@ function MarketProduct_Keyboard:LayoutCostAndText(description, currencyType, cos
 end
 
 function MarketProduct_Keyboard:Purchase()
-    PlaySound(SOUNDS.MARKET_PURCHASE_SELECTED)
-
-    local hasErrors, dialogParams, promptBuyCrowns, allowContinue = ZO_MARKET_SINGLETON:GetMarketProductPurchaseErrorInfo(self.marketProductId, self:GetPresentationIndex())
-
-    if promptBuyCrowns then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
-    elseif not allowContinue then
-        local NO_DATA = nil
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DATA, dialogParams)
-    elseif hasErrors then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", {marketProduct = self}, dialogParams)
-    else
-        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProduct = self})
-    end
-
-    OnMarketStartPurchase(self.marketProductId)
+    local marketProductId = self.marketProductId
+    local presentationIndex = self:GetPresentationIndex()
+    MARKET:PurchaseMarketProduct(marketProductId, presentationIndex)
 end
 
 function MarketProduct_Keyboard:Reset()
@@ -162,13 +137,14 @@ end
 
 function MarketProduct_Keyboard:OnClicked(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
+        -- We don't use CanPreviewMarketProductPreviewType here because we don't want clicking on bundles to actually preview, lest we wouldn't be able to double click
         if self.owner:IsReadyToPreview() then
             self:Preview()
         end
     elseif button == MOUSE_BUTTON_INDEX_RIGHT then
         ClearMenu()
 
-        if not self:IsPurchaseLocked() and self:HasValidPresentationIndex() then
+        if self:CanBePurchased() and self:HasValidPresentationIndex() then
             local function PurchaseCallback()
                 self:Purchase()
             end
@@ -203,7 +179,7 @@ end
 
 function MarketProduct_Keyboard:OnDoubleClicked(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
-        if not self:IsPurchaseLocked() and self:HasValidPresentationIndex() then
+        if self:CanBePurchased() and self:HasValidPresentationIndex() then
             self:Purchase()
         end
     end
@@ -379,7 +355,7 @@ function ZO_MarketProductBundle:Preview(icon)
     if activeIcon then
         local attachmentId = activeIcon:GetMarketProductId()
         if CanPreviewMarketProduct(attachmentId) then
-            self.owner:BeginPreview(attachmentId)
+            self.owner:PreviewMarketProduct(attachmentId)
         end
     else
         if self:GetHidesChildProducts() then
@@ -437,8 +413,10 @@ function ZO_MarketProductIndividual:Preview()
         self.owner:ShowCrownCrateContents(self)
     elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
         self.owner:ShowBundleContentsAsList(self)
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+        self.owner:ShowHousePreviewDialog(self)
     else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
-        self.owner:BeginPreview(self:GetId())
+        self.owner:PreviewMarketProduct(self:GetId())
     end
 end
 
@@ -561,7 +539,7 @@ function ZO_MarketProductIcon:OnClicked(button)
         ClearMenu()
         local marketProduct = self.parentMarketProduct
 
-        if not marketProduct:IsPurchaseLocked() and marketProduct:HasValidPresentationIndex() then
+        if marketProduct:CanBePurchased() and marketProduct:HasValidPresentationIndex() then
             if marketProduct:IsBundle() then
                 AddMenuItem(GetString(SI_MARKET_ACTION_PURCHASE_BUNDLE), function() marketProduct:Purchase() end)
             else

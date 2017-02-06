@@ -129,7 +129,7 @@ function TextEntry:Initialize(system, control, chatEditBufferTop, chatEditBuffer
     self.commandHistory = ZO_CircularBuffer:New(NUM_COMMAND_HISTORY_TO_SAVE)
     
     self.commandHistoryCursor = 1
-    self.autoComplete = ZO_AutoComplete:New(self.editControl, { AUTO_COMPLETE_FLAG_ALL }, nil, AUTO_COMPLETION_ONLINE_ONLY, MAX_AUTO_COMPLETION_RESULTS, AUTO_COMPLETION_MANUAL_MODE)
+    self.autoComplete = ZO_AutoComplete:New(self.editControl, { AUTO_COMPLETE_FLAG_ALL }, { AUTO_COMPLETE_FLAG_GUILD_NAMES }, AUTO_COMPLETION_ONLINE_ONLY, MAX_AUTO_COMPLETION_RESULTS, AUTO_COMPLETION_MANUAL_MODE)
 
     self.autoComplete:SetUseCallbacks(true)
     self.autoComplete:SetAnchorStyle(AUTO_COMPLETION_ANCHOR_BOTTOM)

@@ -730,6 +730,14 @@ else
     })
 end
 
+if IsSystemUsingHDR() then
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
+        panel = SETTING_PANEL_VIDEO,
+        system = SETTING_TYPE_GRAPHICS,
+        settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+    })
+end
+
 local function AddSettings(panel, settings)
     for _, entry in ipairs(settings) do
         table.insert(GAMEPAD_SETTINGS_DATA[panel], entry)

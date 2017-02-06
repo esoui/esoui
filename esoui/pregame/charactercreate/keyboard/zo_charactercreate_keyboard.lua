@@ -377,14 +377,14 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
 
     -- Pick an alliance 
     if templateData.alliance ~= 0 then
-        CharacterCreateSetAlliance(templateData.alliance)
+        ZO_CharacterCreate_SetAlliance(templateData.alliance)
     else
         -- (never random unless a race without a fixed alliance is picked)
         local alliance = self.characterData:GetRaceForRaceDef(CharacterCreateGetRace(characterMode)).alliance
         if alliance ~= 0 then
-            CharacterCreateSetAlliance(alliance)
+            ZO_CharacterCreate_SetAlliance(alliance)
         else
-            CharacterCreateSetAlliance(self.characterData:PickRandomAlliance(validAlliances))
+            ZO_CharacterCreate_SetAlliance(self.characterData:PickRandomAlliance(validAlliances))
         end
     end
 
@@ -918,6 +918,9 @@ function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
 
     self.saveButton:SetHidden(true)
     self.createButton:SetHidden(false)
+
+    local currentAlliance = CharacterCreateGetAlliance(characterMode)
+    ZO_CharacterCreate_SetChromaColorForAlliance(currentAlliance)
 end
 
 --

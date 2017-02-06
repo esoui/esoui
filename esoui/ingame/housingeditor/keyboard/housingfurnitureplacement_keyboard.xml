@@ -1,0 +1,5 @@
+<GuiXml> 
+    <Controls>
+        <TopLevelControl name="ZO_HousingFurniturePlacementPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" hidden="true" />
+    </Controls>
+</GuiXml>

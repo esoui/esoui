@@ -53,3 +53,14 @@ function ZO_SavePlayerConsoleProfile()
         SavePlayerConsoleProfile()
     end
 end
+
+function ZO_GetInviteInstructions()
+    local instructions 
+    if IsConsoleUI() then
+        local platform = ZO_GetPlatformAccountLabel()
+        instructions = zo_strformat(SI_GAMEPAD_SOCIAL_REQUEST_NAME_INSTRUCTIONS, platform)
+    else
+        instructions = GetString(SI_REQUEST_NAME_INSTRUCTIONS)
+    end
+    return instructions
+end

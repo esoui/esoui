@@ -1,71 +1,18 @@
 <GuiXml> 
-    <Controls>
-        <Control name="ZO_PlayerFurnitureSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
-            <Dimensions x="509" y="52" />
+    <Controls>    
+        <TopLevelControl name="ZO_HousingFurnitureBrowserMenu_KeyboardTopLevel" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550" y="ZO_SCENE_MENU_HEIGHT"/>
+          
             <OnInitialized>
-                self.name = self:GetNamedChild("Name")
-                self.icon = self:GetNamedChild("Button"):GetNamedChild("Icon")
+                ZO_HousingFurnitureBrowser_Keyboard_OnInitialize(self)
             </OnInitialized>
             
-            <OnMouseUp>
-                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
-                    ZO_HousingFurnitureBrowser_Keyboard_OnMouseClick(self)
-                end
-            </OnMouseUp>
-
-            <OnMouseDoubleClick>
-                if(button == MOUSE_BUTTON_INDEX_LEFT) then
-                    ZO_HousingFurnitureBrowser_Keyboard_OnMouseDoubleClick(self)
-                end
-            </OnMouseDoubleClick>
-            
             <Controls>
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
-                </Texture>
-
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
-                </Texture>
-
-                <Button name="$(parent)Button" inherits="ZO_ItemSlot">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26" />
-                </Button>
-
-                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="274" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Button" relativePoint="RIGHT" offsetX="10" />
-                </Label>
-            </Controls>
-        </Control>
-
-        <TopLevelControl name="ZO_HousingFurnitureBrowserMenu_KeyboardTopLevel" inherits="ZO_SceneMenu" hidden="true">
-            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
-            <Dimensions x="550"/>
-        </TopLevelControl>
-
-        <Control name="ZO_HousingFurnitureBrowserList_Keyboard" mouseEnabled="true" hidden="true" virtual="true">
-            <Dimensions x="565" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-            <Controls>
-                <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <Anchor point="TOPRIGHT" offsetY="96"/>
-                    <Anchor point="BOTTOMLEFT" />
+                <Control name="$(parent)Bar" inherits="ZO_LabelButtonBar">
+                    <Anchor point="TOPRIGHT" />
                 </Control>
             </Controls>
-        </Control>
-        
-        <TopLevelControl name="ZO_HousingFurnitureBrowser_KeyboardPlaceableTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard" />
-
-        <TopLevelControl name="ZO_HousingFurnitureBrowser_KeyboardRecallableTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard">
-            <!--This needs to be called off the last tab entry created-->
-            <OnInitialized>
-                ZO_HousingFurnitureBrowser_Keyboard_OnInitialize()
-            </OnInitialized>
         </TopLevelControl>
     </Controls>
 </GuiXml>

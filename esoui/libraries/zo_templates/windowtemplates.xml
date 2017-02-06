@@ -235,18 +235,23 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_NarrowRightPanelFootPrint" virtual="true">
+            <Dimensions x="551" y="730" />
+            <Anchor point="RIGHT" offsetX="-14" offsetY="17" />
+        </TopLevelControl>
+        
         <TopLevelControl name="ZO_RightPanelFootPrint" virtual="true">
             <Dimensions x="930" y="690" />
             <Anchor point="RIGHT" offsetY="32" />
         </TopLevelControl>
 
         <TopLevelControl name="ZO_RightFootPrintBackground" allowBringToTop="false" virtual="true">
-            <Dimensions x="930" y="750" />
+            <Dimensions x="960" y="750" />
             <Anchor point="RIGHT" offsetY="20"/>
             <Controls>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
                     <Dimensions x="1024" y="1024" />
-                    <Anchor point="TOPLEFT" offsetX="-65" offsetY="-75" />
+                    <Anchor point="TOPLEFT" offsetX="-35" offsetY="-75" />
                 </Texture>
                 <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
                     <Dimensions x="64" y="1024" />
@@ -352,16 +357,16 @@
         </Control>
 
         <Control name="ZO_MediumLeftPanelBG" virtual="true">
-            <Dimensions x="512" y="750" />
+            <Dimensions x="366" y="750" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-55"/>
             <Controls>
                 <Texture name="$(parent)Top" textureFile="EsoUI/Art/Miscellaneous/medium_bg_top.dds" mouseEnabled="true">
                     <Dimensions x="512" y="512" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT" />
                 </Texture>
                 <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Miscellaneous/medium_bg_bottom.dds" mouseEnabled="true">
                     <Dimensions x="512" y="256" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Top" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Top" relativePoint="BOTTOMLEFT" />
                 </Texture>
             </Controls>
         </Control>

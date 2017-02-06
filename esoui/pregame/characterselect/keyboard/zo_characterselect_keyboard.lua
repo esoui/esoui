@@ -78,6 +78,7 @@ local function DoCharacterSelection(index)
     SetCharacterManagerMode(CHARACTER_MODE_SELECTION)
     SetSuppressCharacterChanges(false)
     SelectCharacterToView(index)
+    ZO_CharacterSelect_SetChromaColorForCharacterIndex(index)
 end
 
 local SetupCharacterList

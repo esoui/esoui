@@ -86,6 +86,10 @@ function WorldMapInfo_Gamepad:InitializeTabs()
             text = GetString(SI_MAP_INFO_MODE_FILTERS), 
             callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT, DOESNT_USE_RIGHT_SIDE_CONTENT) end
         },
+        {
+            text = GetString(SI_MAP_INFO_MODE_HOUSES), 
+            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_HOUSES:GetFragment(), DOESNT_USE_RIGHT_SIDE_CONTENT) end
+        },
     }
 
     self.baseHeaderData = {

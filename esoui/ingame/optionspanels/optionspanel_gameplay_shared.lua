@@ -132,11 +132,16 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             text = SI_INTERFACE_OPTIONS_LOOT_AUTO_ADD_TO_CRAFT_BAG,
             tooltipText = SI_INTERFACE_OPTIONS_LOOT_AUTO_ADD_TO_CRAFT_BAG_TOOLTIP,
             gamepadIsEnabledCallback = IsESOPlusSubscriber,
-            onInitializeFunction = function(control) 
-                                        if IsESOPlusSubscriber() then
-                                            ZO_Options_SetOptionActive(control)
-                                        else 
-                                            ZO_Options_SetOptionInactive(control)
+            onInitializeFunction = function(control, isKeyboardControl)
+                                        if isKeyboardControl then
+                                            --ZO_Options_SetOptionActive/Inactive are keyboard only functions. The gamepad manages active state through
+                                            --the gamepadIsEnabledCallback. Using ZO_Options_SetOptionActive/Inactive with gamepad controls will set them
+                                            --to the keyboard colors and also doesn't handle the parametric list's selected state's impact.
+                                            if IsESOPlusSubscriber() then
+                                                ZO_Options_SetOptionActive(control)
+                                            else 
+                                                ZO_Options_SetOptionInactive(control)
+                                            end
                                         end
                                     end
         },

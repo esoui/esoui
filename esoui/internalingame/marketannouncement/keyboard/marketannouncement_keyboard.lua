@@ -11,24 +11,7 @@ end
 local KEYBOARD_CURRENCY_ICON_SIZE = 24
 function MarketAnnouncementMarketProduct_Keyboard:Initialize(...)
     ZO_MarketAnnouncementMarketProduct_Base.Initialize(self, ...)
-end
-
--- overwrite to change anchoring
-function MarketAnnouncementMarketProduct_Keyboard:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-    ZO_MarketProductBase.LayoutCostAndText(self, description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-
-    self.cost:ClearAnchors()
-    self.textCallout:ClearAnchors()
-
-    if self.isFree then
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 0)
-    elseif self.onSale then
-        self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, 0) -- x offset to account for strikethrough
-    else
-        self.cost:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET, ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.cost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 0)
-    end
+    self:SetTextCalloutYOffset(0)
 end
 
 ----

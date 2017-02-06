@@ -1,0 +1,48 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_MarketCurrencyLabel_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+                <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="-2" relativeTo="$(parent)Icon"/>
+                    <Dimensions y="42"/>
+                </Label>
+                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10"/>
+                    <Dimensions y="27"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_MarketCurrency_Gamepad_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" verticalAlignment="BOTTOM" hidden="true">
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
+            <Dimensions y="42"/>
+
+            <OnInitialized>
+                ZO_MarketCurrency_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Crowns" inherits="ZO_MarketCurrencyLabel_Gamepad">
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/currency_crown.dds" override="true" />
+                        <Label name="$(parent)Label" text="SI_CURRENCY_CROWN" override="true" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Gems" inherits="ZO_MarketCurrencyLabel_Gamepad">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Crowns" relativePoint="BOTTOMLEFT" offsetX="-10" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/gamepad/gp_crown_gems.dds" override="true" />
+                        <Label name="$(parent)Label" text="SI_CURRENCY_CROWN_GEM" override="true" />
+                    </Controls>
+                </Control>
+
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

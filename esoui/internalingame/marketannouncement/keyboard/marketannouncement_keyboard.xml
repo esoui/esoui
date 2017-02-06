@@ -17,16 +17,9 @@
                         </Texture>
                     </Controls>
                 </Label>
-                
-                <Label name="$(parent)Cost" font="ZoFontHeader3" override="true">
-                    <Controls>
-                        <Texture name="$(parent)CurrencyIcon" override="true">
-                            <Dimensions x="32" y="32" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Cost" relativePoint="RIGHT" offsetX="2" offsetY="-4"/>
-                        </Texture>
-                    </Controls>
-                </Label>
-                
+
+                <Label name="$(parent)Cost" font="ZoFontHeader3" override="true" />
+
                 <Label name="$(parent)Purchased" font="ZoFontHeader3" override="true"/>
                 
                 <Label name="$(parent)TextCallout" font="ZoMarketAnnouncementCalloutFont" override="true">

@@ -44,7 +44,8 @@ end
 local BASE_TUTORIAL_HEIGHT = 170
 function ZO_HudInfoTutorial:DisplayTutorial(tutorialIndex)
     self.tutorialIndex = tutorialIndex
-    if IsInGamepadPreferredMode() then
+    local isInGamepadMode = IsInGamepadPreferredMode()
+    if isInGamepadMode then
         self.tutorial = self.tutorialGamepad
         self.tutorialAnimation = self.tutorialAnimationGamepad
     else
@@ -58,10 +59,11 @@ function ZO_HudInfoTutorial:DisplayTutorial(tutorialIndex)
     self.tutorial.title:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, title))
     self.tutorial.description:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, description))
     
-    self.tutorial.helpLabel:SetHidden(not hasHelp)
-    self.tutorial.helpKey:SetHidden(not hasHelp)
+	local showHelpLabel = hasHelp and not isInGamepadMode
+    self.tutorial.helpLabel:SetHidden(not showHelpLabel)
+    self.tutorial.helpKey:SetHidden(not showHelpLabel)
 
-    if not IsInGamepadPreferredMode() then
+    if not isInGamepadMode then
         local textHeight = self.tutorial.description:GetTextHeight()
         if hasHelp then
             textHeight = textHeight + self.tutorial.helpLabel:GetHeight()
@@ -110,13 +112,14 @@ end
 function ZO_HudInfoTutorial:ClearAll()
     self:SetCurrentlyDisplayedTutorialIndex(nil)
     self.currentlyDisplayedTutorialTimeLeft = nil
-    self.tutorialAnimation:PlayForward()
+    self.tutorialAnimationGamepad:PlayForward()
+    self.tutorialAnimationKeyboard:PlayForward()
 
     self.queue = {}
 end
 
 function ZO_HudInfoTutorial:ShowHelp()
-    if self:GetCurrentlyDisplayedTutorialIndex() then
+    if self:GetCurrentlyDisplayedTutorialIndex() and not IsInGamepadPreferredMode() then
         local helpCategoryIndex, helpIndex = GetTutorialLinkedHelpInfo(self:GetCurrentlyDisplayedTutorialIndex())
         if helpCategoryIndex and helpIndex then
             self:RemoveTutorial(self:GetCurrentlyDisplayedTutorialIndex())

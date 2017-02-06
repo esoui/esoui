@@ -197,7 +197,7 @@ function Collectible:GetInteractionTextEnum()
             textEnum = SI_COLLECTIBLE_ACTION_PUT_AWAY
         end
     elseif self.isCooldownActive ~= true and self.isBlocked ~= true then
-        if self.categoryType == COLLECTIBLE_CATEGORY_TYPE_TROPHY then
+        if self.categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
             textEnum = SI_COLLECTIBLE_ACTION_USE
         else
             textEnum = SI_COLLECTIBLE_ACTION_SET_ACTIVE
@@ -407,11 +407,7 @@ function Collectible:UpdateCooldownEffect()
 
     if not self.active then
         local secondsRemaining = cooldown / 1000
-        if (secondsRemaining < 10) then
-            control.cooldownTime:SetText(ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING))
-        else
-            control.cooldownTime:SetText(ZO_FormatTimeLargestTwo(secondsRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
-        end
+        control.cooldownTime:SetText(ZO_FormatTimeAsDecimalWhenBelowThreshold(secondsRemaining))
     else
         control.cooldownTime:SetText("")
     end
@@ -491,7 +487,7 @@ function CollectionsBook:InitializeEvents()
         local numResults = GetNumCollectiblesSearchResults()
         for i = 1, numResults do
             local categoryIndex, subcategoryIndex, collectibleIndex = GetCollectiblesSearchResult(i)
-            if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
+            if self:IsStandardCategory(categoryIndex) then
                 if not self.searchResults[categoryIndex] then
                     self.searchResults[categoryIndex] = {}
                 end
@@ -601,6 +597,10 @@ function CollectionsBook:GetSubCategoryInfo(categoryIndex, i)
     return GetCollectibleSubCategoryInfo(categoryIndex, i)
 end
 
+function CollectionsBook:IsStandardCategory(categoryIndex)
+    return GetCollectibleCategorySpecialization(categoryIndex) == COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE
+end
+
 --[[ Refresh ]]--
 -----------------
 function CollectionsBook:BuildCategories()
@@ -610,8 +610,8 @@ function CollectionsBook:BuildCategories()
         
     local function AddCategoryByCategoryIndex(categoryIndex)
         local name, numSubCategories, _, _, _, hidesUnearned = self:GetCategoryInfo(categoryIndex)
-        --DLC is handled by the DLC book now
-        if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
+        --Some categories are handled by specialized scenes.
+        if self:IsStandardCategory(categoryIndex) then
             local normalIcon, pressedIcon, mouseoverIcon = self:GetCategoryIcons(categoryIndex)
             self:AddTopLevelCategory(categoryIndex, zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY, name), numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
         end
@@ -748,7 +748,7 @@ function CollectionsBook:UpdateCategoryLabels(data, retainScrollPosition)
 end
 
 function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
-    if not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then -- we ignore the DLC category when viewing the standard collections window
+    if self:IsStandardCategory(categoryIndex) then -- we ignore the categories that have a special tab when viewing the standard collections window
         if index >= 1 then
             if self:HasValidSearchString() then
                 local inSearchResults = false
@@ -905,6 +905,8 @@ function CollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subca
 
     if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
         DLC_BOOK_KEYBOARD:BrowseToCollectible(collectibleId)
+    elseif COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexHousing(categoryIndex) then
+        HOUSING_BOOK_KEYBOARD:BrowseToCollectible(collectibleId)
     else
         --Select the category or subcategory of the collectible
         local categoryNode = self:GetLookupNodeByCategory(categoryIndex, subcategoryIndex)
@@ -956,15 +958,8 @@ function ZO_CollectionsBook_OnInitialize(control)
     COLLECTIONS_BOOK = CollectionsBook:New(control)
 end
 
-function ZO_CollectionsBook_BeginSearch(editBox)
-    editBox:TakeFocus()
-end
-
-function ZO_CollectionsBook_EndSearch(editBox)
-    editBox:LoseFocus()
-end
-
 function ZO_CollectionsBook_OnSearchTextChanged(editBox)
+    ZO_EditDefaultText_OnTextChanged(editBox)
     COLLECTIONS_BOOK:SearchStart(editBox:GetText())
 end
 

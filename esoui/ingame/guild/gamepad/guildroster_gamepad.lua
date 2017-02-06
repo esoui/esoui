@@ -179,7 +179,13 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
     local function BuildTravelToGuildPlayerOption()
         return self:BuildTravelToPlayerOption(JumpToGuildMember)
     end
+
+    local function CanJumpToPlayerHouse()
+       return not self:SelectedDataIsPlayer()
+    end
+
     self:AddOptionTemplate(groupId, BuildTravelToGuildPlayerOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption, CanJumpToPlayerHouse)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, function() return not SelectedIndexIsPlayerIndex() end)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
     self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildShowGamerCardOption, IsConsoleUI)

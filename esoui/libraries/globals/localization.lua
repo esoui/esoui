@@ -49,6 +49,55 @@ function zo_strformat(formatString, ...)
     return LocalizeString(formatString, unpack(strArgs))
 end
 
+do
+    -- zo_strformat elegantly handles the case where we pass in a param as the "formatter" (e.g.: collectible descriptions).
+    -- However, in order to avoid having each string generate its own cache table, the ZO_CachedStrFormat function need to be explicitely told "I have no formatter"
+    -- so it can add all of them to one table.  This cuts down on overhead, with the downside that it loses slight parity with zo_strformat.
+    -- However, the fact that we do this whole no param thing at all is exploiting a quirk in the grammar to get around a bug in the grammar anyway so
+    -- it's a relatively rare scenario
+
+    ZO_CACHED_STR_FORMAT_NO_FORMATTER = ""
+
+    local g_cachedStringsByFormatter = 
+    {
+        [ZO_CACHED_STR_FORMAT_NO_FORMATTER] = {} --Used for strings that need to run through grammar without a formatter
+    }
+
+    function ZO_CachedStrFormat(formatter, ...)
+        formatter = formatter or ZO_CACHED_STR_FORMAT_NO_FORMATTER
+
+        local formatterCache = g_cachedStringsByFormatter[formatter]
+        if not formatterCache then
+            formatterCache = {}
+            g_cachedStringsByFormatter[formatter] = formatterCache
+        end
+        
+        local cachedString
+        if formatter == ZO_CACHED_STR_FORMAT_NO_FORMATTER then
+            --"No formatter" only works with 1 param
+            local rawString = ...
+            local hashKey = HashString(rawString)
+
+            cachedString = formatterCache[hashKey]
+            if not cachedString then
+                cachedString = zo_strformat(rawString)
+                formatterCache[hashKey] = cachedString
+            end
+        else
+            local concatParams = table.concat({ ... })
+            local hashKey = HashString(concatParams)
+
+            cachedString = formatterCache[hashKey]
+            if not cachedString then
+                cachedString = zo_strformat(formatter, ...)
+                formatterCache[hashKey] = cachedString
+            end
+        end
+
+        return cachedString
+    end
+end
+
 function zo_strtrim(str)
     -- The extra parentheses are used to discard the additional return value (which is the total number of matches)
     return(zo_strgsub(str, "^%s*(.-)%s*$", "%1"))
@@ -106,6 +155,19 @@ function ZO_GenerateCommaSeparatedList(argumentTable)
                 finalSeparator = SI_LIST_AND_SEPARATOR
             end
             listString = listString .. GetString(finalSeparator) .. argumentTable[numArguments]
+        end
+        return listString
+    else
+        return ""
+    end
+end
+
+function ZO_GenerateCommaSeparatedListWithoutAnd(argumentTable)
+    if argumentTable ~= nil and #argumentTable > 0 then
+        local numArguments = #argumentTable
+        local listString = argumentTable[1]
+        for i = 2, numArguments do
+            listString = listString .. GetString(SI_LIST_COMMA_SEPARATOR) .. argumentTable[i]
         end
         return listString
     else

@@ -147,7 +147,7 @@ end
 
 function ZO_CampaignBonusEntryTemplate_OnInitialized(control)
     ZO_SharedGamepadEntry_OnInitialized(control)
-    ZO_SharedGamepadEntry_SetHeightFromLabel(control)
+    ZO_SharedGamepadEntry_SetHeightFromLabels(control)
     control.checkmark = control:GetNamedChild("Checkmark")
     control.typeIcon = control:GetNamedChild("ItemIcon")
     control.countText = control:GetNamedChild("ItemCount")

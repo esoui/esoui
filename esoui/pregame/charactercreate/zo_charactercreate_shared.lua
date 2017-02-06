@@ -95,11 +95,13 @@ function ZO_CharacterCreate_Manager:Initialize()
         -- load state. It won't necessarily do any extra work creating an actual character, since we're going
         -- to drop back into the current state, but we need to tell the system to load something
         if GetNumCharacters() == 0 then
+            SetSuppressCharacterChanges(true)
             -- in order to load correctly we need to be put into CHARACTER_MODE_CREATION first
             self:SetCharacterMode(CHARACTER_MODE_CREATION)
             -- now reset character create to generate a random character
             characterCreate:Reset()
             CharacterCreateSetFirstTimePosture()
+            SetSuppressCharacterChanges(false)
         end
     end
 
@@ -249,7 +251,7 @@ end
 
 function ZO_CharacterCreate_Base:SetAlliance(allianceDef, options)
 	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
-    CharacterCreateSetAlliance(allianceDef)
+    ZO_CharacterCreate_SetAlliance(allianceDef)
 
     -- When picking an alliance, unless the player is entitled to playing any race as any alliance or if the current race
     -- has no alliance, we need to choose a new race for the player.  This is currently done as picking a race in the new
@@ -303,7 +305,7 @@ function ZO_CharacterCreate_Base:PickRandomRace()
 end
 
 function ZO_CharacterCreate_Base:PickRandomAlliance()
-    CharacterCreateSetAlliance(self.characterData:PickRandomAlliance())
+    ZO_CharacterCreate_SetAlliance(self.characterData:PickRandomAlliance())
 end
 
 function ZO_CharacterCreate_Base:GetCurrentAllianceData()
@@ -564,4 +566,15 @@ end
 
 function OnCharacterCreateOptionChanged()
     ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(true)
+end
+
+function ZO_CharacterCreate_SetAlliance(alliance)
+    CharacterCreateSetAlliance(alliance)
+    ZO_CharacterCreate_SetChromaColorForAlliance(alliance)
+end
+
+function ZO_CharacterCreate_SetChromaColorForAlliance(alliance)
+    if ZO_RZCHROMA_EFFECTS then
+        ZO_RZCHROMA_EFFECTS:SetAlliance(alliance)
+    end
 end

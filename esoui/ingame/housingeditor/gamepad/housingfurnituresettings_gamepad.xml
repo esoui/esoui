@@ -1,0 +1,108 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HousingPermissionsSettingsRow_Gamepad" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadOptionsNameTemplate"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingPermissionsRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Controls>
+                <Label name="$(parent)DisplayName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH"/>
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Label>
+
+                <Label name="$(parent)Permission" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
+                    <Dimensions x="ZO_GAMEPAD_HOUSING_SETTINGS_PERMISSIONS_WIDTH"/>
+                    <Anchor point="RIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_RIGHT_ALIGN_HIGHLIGHT_PADDING" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Furniture_Setting_Panel_Header_DisplayName_Gamepad" inherits="ZO_GamepadInteractiveFilterHeader" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH"/>
+            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+            <OnInitialized>
+                ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_Furniture_Setting_Panel_Header_GuildName_Gamepad" inherits="ZO_GamepadInteractiveFilterHeader" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH"/>
+            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+            <OnInitialized>
+                ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_GUILD), "displayName", TEXT_ALIGN_LEFT)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_Furniture_Setting_Panel_Header_Permissions_Gamepad" inherits="ZO_GamepadInteractiveFilterHeader" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_HOUSING_SETTINGS_PERMISSIONS_WIDTH"/>
+            <Anchor point="TOPRIGHT" offsetX="-26"/>
+            <OnInitialized>
+                ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_PERMISSIONS), "permissionPresetName", TEXT_ALIGN_RIGHT)
+            </OnInitialized>
+        </Control>
+    
+        <Control name="ZO_HousingPermissionsVisitors_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_DisplayName_Gamepad" />
+
+                                <Control name="$(parent)Permission" inherits="ZO_Furniture_Setting_Panel_Header_Permissions_Gamepad" />
+                        </Controls>
+                    </Control>
+                </Controls>
+            </Control>
+        </Controls>
+    </Control>
+        
+        <Control name="ZO_HousingPermissionsBanList_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_DisplayName_Gamepad" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_HousingPermissionsGuildVisitors_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_GuildName_Gamepad" />
+
+                                <Control name="$(parent)Permission" inherits="ZO_Furniture_Setting_Panel_Header_Permissions_Gamepad" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_HousingPermissionsGuildBanList_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_GuildName_Gamepad" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+    </Controls>
+</GuiXml>

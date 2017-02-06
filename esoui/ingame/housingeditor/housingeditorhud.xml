@@ -1,84 +1,50 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_HousingEditorHudTopLevel" hidden="true">
+        <TopLevelControl name="ZO_HousingHUDFragmentTopLevel" hidden="true">
+            <AnchorFill />
             <OnInitialized>
-                ZO_HousingEditorHud_OnInitialize(self)
+                ZO_HousingHUDFragmentTopLevel_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <!-- This control will largely be setup by the fragment -->
+                <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true" />
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_HousingHudButton" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <AnchorFill/>
+                </Texture>
+
+                <Texture name="$(parent)Frame" level="2">
+                    <AnchorFill/>
+                </Texture>
+                
+                <Label name="$(parent)Text" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameSmall" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="70" y="18"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="1"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HousingEditorActionBarTopLevel" hidden="true">
+            <OnInitialized>
+                ZO_HousingEditorActionBar_OnInitialize(self)
             </OnInitialized>
             <AnchorFill/>
             <Controls>
-                <Control name="$(parent)ButtonContainer">
-                    <Anchor point="CENTER" />
+                <Control name="$(parent)ButtonContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" offsetY="-200"/>
                     <Controls>
-                        <Button name="$(parent)YawLeftButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="RIGHT" offsetX="-200"/>
-                            <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_LEFT", callbackFunction)
-                            </OnInitialized>
-                        </Button>
-                        <Texture name="$(parent)YawLeftArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_y.dds" color="00FF00">
-                            <Dimensions x="48" y="48"/>
-                            <Anchor point="LEFT" relativeTo="$(parent)YawLeftButton" relativePoint="RIGHT"/>
-                            <TextureCoords left="1" right="0" top="0" bottom="1" />
-                        </Texture>
-                        
-                        <Button name="$(parent)YawRightButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="LEFT" offsetX="200"/>
-                            <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_YAW_RIGHT")
-                            </OnInitialized>
-                        </Button>
-                        <Texture name="$(parent)YawRightArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_y.dds" color="00FF00">
-                            <Dimensions x="48" y="48"/>
-                            <Anchor point="RIGHT" relativeTo="$(parent)YawRightButton" relativePoint="LEFT"/>
-                            <TextureCoords left="0" right="1" top="0" bottom="1" />
-                        </Texture>
-                            
-                        <Button name="$(parent)RollRightButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="LEFT" offsetX="70" offsetY="130"/>
-                            <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_ROLL_RIGHT")
-                            </OnInitialized>                    
-                        </Button>
-                        <Texture name="$(parent)RollRightArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_z.dds" color="0000FF">
-                            <Dimensions x="48" y="48"/>
-                            <Anchor point="BOTTOM" relativeTo="$(parent)RollRightButton" relativePoint="TOP"/>
-                            <TextureCoords left="0" right="1" top="1" bottom="0" />
-                        </Texture>
-
-                        <Button name="$(parent)RollLeftButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="RIGHT" offsetX="-70" offsetY="-130"/>
-                            <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_ROLL_LEFT")
-                            </OnInitialized>
-                        </Button>
-                        <Texture name="$(parent)RollLeftArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_z.dds" textureCoordsRotation="1.571" color="0000FF">
-                            <Dimensions x="48" y="48"/>
-                            <Anchor point="TOP" relativeTo="$(parent)RollLeftButton" relativePoint="BOTTOM"/>
-                        </Texture>
-                        
-                        <Button name="$(parent)PitchForwardButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="TOP" offsetY="-200"/>
-                            <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_FORWARD")
-                            </OnInitialized>
-                        </Button>
-                        <Texture name="$(parent)PitchForwardArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_x.dds" color="FF0000">
-                            <Dimensions x="48" y="48"/>
-                            <Anchor point="TOP" relativeTo="$(parent)PitchForwardButton" relativePoint="BOTTOM"/>
-                            <TextureCoords left="1" right="0" top="0" bottom="1" />
-                        </Texture>
-                        
-                        <Button name="$(parent)PitchBackButton" inherits="ZO_KeybindStripButtonTemplate">
-                            <Anchor point="BOTTOM" offsetY="200"/>
-                            <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "HOUSING_EDITOR_PITCH_BACKWARD")
-                            </OnInitialized>
-                        </Button>
-                        <Texture name="$(parent)PitchBackArrow" textureFile="EsoUI/Art/Housing/gp_toolIcon_rotate_x.dds" color="FF0000">
-                            <Dimensions x="48" y="48"/>
-                            <Anchor point="BOTTOM" relativeTo="$(parent)PitchBackButton" relativePoint="TOP"/>
-                            <TextureCoords left="0" right="1" top="1" bottom="0" />
-                        </Texture>
+                        <Control name="$(parent)YawLeftButton" inherits="ZO_HousingHudButton">
+                            <Anchor point="LEFT"/>
+                        </Control>
+                        <Control name="$(parent)YawRightButton" inherits="ZO_HousingHudButton" />
+                        <Control name="$(parent)PitchForwardButton" inherits="ZO_HousingHudButton" />
+                        <Control name="$(parent)PitchBackButton" inherits="ZO_HousingHudButton" />
+                        <Control name="$(parent)RollRightButton" inherits="ZO_HousingHudButton" />
+                        <Control name="$(parent)RollLeftButton" inherits="ZO_HousingHudButton" />
                     </Controls>
                 </Control>
             </Controls>

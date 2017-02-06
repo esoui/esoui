@@ -56,13 +56,12 @@ end
 function ZO_StatEntry_Keyboard:UpdateStatValue()
     if not self.control:IsHidden() then
         self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
-        local isBattleLeveled = self.statObject and self.statObject:IsPlayerBattleLeveled()
         local value = self:GetValue()
         local displayValue = self:GetDisplayValue()
         local pendingBonusAmount = self:GetPendingStatBonuses()
 
-        if pendingBonusAmount and pendingBonusAmount > 0 then       -- We don't show any attribute stat increases while in battle leveled zones because
-            self.control.pendingBonus:SetHidden(isBattleLeveled)    -- it doesn't make any sense based on how battle leveling now works
+        if pendingBonusAmount and pendingBonusAmount > 0 then       
+            self.control.pendingBonus:SetHidden(false)
             self.control.pendingBonus:SetText(zo_strformat(SI_STAT_PENDING_BONUS_FORMAT, pendingBonusAmount))
         else
             self.control.pendingBonus:SetHidden(true)

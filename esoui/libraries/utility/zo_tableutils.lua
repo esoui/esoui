@@ -150,6 +150,14 @@ function ZO_ClearTable(t)
     end
 end
 
+--Want to keep ZO_ClearTable(t) snappy, so don't bog it down with an optional callback param to if check
+function ZO_ClearTableWithCallback(t, c)
+    for k, v in pairs(t) do
+        c(v)
+        t[k] = nil
+    end
+end
+
 function ZO_ShallowTableCopy(source, dest)
     dest = dest or {}
     

@@ -22,13 +22,13 @@
                 <Control name="$(parent)Canvas">
                     <AnchorFill/>
                     <Controls>
-                        <Texture name="$(parent)Map" textureFile="EsoUI/Art/PregameAnimatedBackground/Map.dds" pixelRoundingEnabled="false" tier="LOW"/>
-                        <Texture name="$(parent)Lines" textureFile="EsoUI/Art/PregameAnimatedBackground/Lines.dds" pixelRoundingEnabled="false" tier="LOW"/>
-                        <Texture name="$(parent)Rings1" textureFile="EsoUI/Art/PregameAnimatedBackground/Rings1.dds" pixelRoundingEnabled="false" tier="LOW"/>
-                        <Texture name="$(parent)Rings2" textureFile="EsoUI/Art/PregameAnimatedBackground/Rings2.dds" pixelRoundingEnabled="false" tier="LOW"/>
-                        <Texture name="$(parent)DaedricText" textureFile="EsoUI/Art/PregameAnimatedBackground/DaedricText.dds" pixelRoundingEnabled="false" tier="LOW"/>
-                        <Texture name="$(parent)Constellations" textureFile="EsoUI/Art/PregameAnimatedBackground/Constellations.dds" pixelRoundingEnabled="false" tier="LOW"/>
-                        <Texture name="$(parent)ColdHarbor" textureFile="EsoUI/Art/PregameAnimatedBackground/ColdHarbor.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Map" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/Map.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Lines" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/Lines.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Rings1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/Rings1.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Rings2" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/Rings2.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)DaedricText" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/DaedricText.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Constellations" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/Constellations.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)ColdHarbor" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/ColdHarbor.dds" pixelRoundingEnabled="false" tier="LOW"/>
                     </Controls>
                 </Control>
             </Controls>

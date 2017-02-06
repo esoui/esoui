@@ -280,6 +280,13 @@ function ZO_GamepadTooltip:GetTooltipBgFragment(tooltipType)
     end
 end
 
+function ZO_GamepadTooltip:AddTooltipInstantScene(tooltipType, scene)
+    local info = self:GetTooltipInfo(tooltipType)
+    info.fragment:AddInstantScene(scene)
+    info.bgFragment:AddInstantScene(scene)
+    info.darkBgFragment:AddInstantScene(scene)
+end
+
 function ZO_GamepadTooltip:DoesAutoShowTooltipBg(tooltipType)
     return self:GetTooltipInfo(tooltipType).autoShowBg
 end

@@ -1,0 +1,73 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadHousingItemEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" hidden="true"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadHousingMPEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_GamepadHousingMPEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+
+                <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT"/>
+                </Label>
+
+                <Label name="$(parent)PreviousPrice" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Price" relativePoint="BOTTOMRIGHT" offsetX="-32" />
+                    <Controls>
+                        <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY">
+                            <Anchor point="LEFT" offsetX="-2" offsetY="1"/>
+                            <Anchor point="RIGHT" offsetX="2" offsetY="1"/>
+                            <OnInitialized>
+                                self:SetHeight(2.5)
+                            </OnInitialized>
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                </Label>
+
+                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadHousingMPEntrySubLabelTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GamepadHousingMPEntrySubLabelTemplate" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE" virtual="true">
+            <Controls>
+                <Control name="$(parent)Background">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <DimensionConstraints minX="0" />
+                            <AnchorFill />
+                        </Texture>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <Dimensions x="16"/>
+                            <DimensionConstraints minX="16" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Center" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Center" relativePoint="BOTTOMLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds">
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                            <Dimensions x="16"/>
+                            <DimensionConstraints minX="16" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Center" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Center" relativePoint="BOTTOMRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Label>
+    </Controls>
+</GuiXml>

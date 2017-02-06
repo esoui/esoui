@@ -249,6 +249,7 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                     end)
                     AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGuildMember(data.displayName) end)
                 end
+				AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), function() MAIL_SEND:ComposeMailTo(data.displayName) end)
 
                 if(not IsFriend(data.displayName)) then

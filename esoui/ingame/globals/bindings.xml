@@ -52,9 +52,6 @@
         <Category name="SI_KEYBINDINGS_CATEGORY_COMBAT">
             <Action name="SPECIAL_MOVE_ATTACK">
                 <Down>
-                    if IsInGamepadPreferredMode() and IsMounted() then
-                        ToggleMount()
-                    end
                     PrepareAttack()
                 </Down>
                 <Up>PerformAttack()</Up>
@@ -321,6 +318,10 @@
 
             <Action name="ASSIST_NEXT_TRACKED_QUEST">
                 <Down>QUEST_TRACKER:AssistNext()</Down>
+            </Action>
+
+            <Action name="SHOW_HOUSING_PANEL">
+                <Down>HOUSING_HUD_FRAGMENT:OnHousingHUDButtonPressed()</Down>
             </Action>
 
             <Action name="TOGGLE_FIRST_PERSON">
@@ -849,7 +850,125 @@
             </Action>
             <Action name="SCREEN_ADJUST_CANCEL" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
                 <Down>SCREEN_ADJUST:OnCancel()</Down>
-            </Action>            
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="SI_KEYBINDINGS_LAYER_HOUSING_EDITOR" allowFallthrough="false">
+        <Category>
+            <!--Movement-->
+            <AllowAction name="MOVE_FORWARD" />
+            <AllowAction name="MOVE_BACKWARD" />
+            <AllowAction name="TOGGLE_WALK" />
+            <AllowAction name="TURN_LEFT" />
+            <AllowAction name="TURN_RIGHT" />
+            <AllowAction name="MOVE_JUMPASCEND" />
+            <AllowAction name="AUTORUN" />
+            <AllowAction name="GAMEPAD_JUMP_OR_INTERACT" />
+            <AllowAction name="SPECIAL_MOVE_SPRINT" />
+            <AllowAction name="SPECIAL_MOVE_CROUCH" />
+            <AllowAction name="GAMEPAD_MOVE_JUMPASCEND" />
+            
+            <!--Camera-->
+            <AllowAction name="CAMERA_ZOOM_OUT" />
+            <AllowAction name="CAMERA_ZOOM_IN" />
+            <AllowAction name="GAME_CAMERA_MOUSE_FREE_LOOK" />
+            <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM" />
+            <AllowAction name="TOGGLE_FIRST_PERSON" />
+
+            <!--Chat-->
+            <AllowAction name="START_CHAT_ENTER" />
+            <AllowAction name="START_CHAT_SLASH" />
+            <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER" />
+            
+            <!--Utility-->
+            <AllowAction name="TAKE_SCREENSHOT" />
+            <AllowAction name="TOGGLE_FULLSCREEN" />
+            <AllowAction name="TOGGLE_SHOW_INGAME_GUI" />
+            <AllowAction name="TOGGLE_GAME_CAMERA_UI_MODE" />
+            <AllowAction name="TOGGLE_SYSTEM" />
+            <AllowAction name="TOGGLE_HUD_UI" />
+            <AllowAction name="TOGGLE_GAMEPAD_MODE" />
+
+            <Action name="HOUSING_EDITOR_PRIMARY_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_NEGATIVE_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_SECONDARY_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_TERTIARY_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_QUATERNARY_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_YAW_LEFT">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_YAW_RIGHT">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_PITCH_FORWARD">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_PITCH_BACKWARD">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_ROLL_LEFT">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            
+            <Action name="HOUSING_EDITOR_ROLL_RIGHT">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_PUSH_FORWARD">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_PULL_BACKWARD">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_ALIGN_TO_SURFACE">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_JUMP_TO_SAFE_LOC">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="DISABLE_HOUSING_EDITOR" inheritsBindFrom="SHOW_HOUSING_PANEL" hideAction="true">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
         </Category>
     </Layer>
 </Bindings>

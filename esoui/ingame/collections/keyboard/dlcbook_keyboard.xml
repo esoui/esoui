@@ -1,99 +1,30 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_DLCBookDefaultLabel_Keyboard" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-        <Label name="ZO_DLCBookLargeLabel_Keyboard" inherits="ZO_DLCBookDefaultLabel_Keyboard" font="ZoFontWinH2" virtual="true" />
-
-        <Control name="ZO_DLCBookNavigationHeader_Keyboard" inherits="ZO_IconHeader" virtual="true">
-            <DimensionConstraints minY="48" maxY="48" />
-
-            <Controls>
-                <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="7" />
-                </Texture>
-
-                <Label name="$(parent)Text" override="true" font="ZoFontHeader3" inherits="ZO_SelectableLabel">
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="9" />
-                </Label>
-            </Controls>
-        </Control>
-
-        <Label name="ZO_DLCBookNavigationEntry_Keyboard"  inherits="ZO_SelectableTooltipIfTruncatedLabel ZO_TreeEntry" font="ZoFontHeader" verticalAlignment="CENTER" virtual="true">
-            <Dimensions x="210" y="22" />
-
-            <Controls>
-                <Texture name="$(parent)StatusIcon" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds" hidden="true">
-                    <Dimensions x="24" y="24" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" />
-                </Texture>
-            </Controls>
-        </Label>
-
-        <TopLevelControl name="ZO_DLCBook_Keyboard" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
+        <TopLevelControl name="ZO_DLCBook_Keyboard" inherits="ZO_SpecializedCollection_Book_Keyboard" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_DLCBook_Keyboard_OnInitialize(self)
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)NavigationList" inherits="ZO_ScrollContainer">
-                    <Dimensions x="285" />
-                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="77" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-60" />
-                </Control>
-
-                <Control name="$(parent)Contents">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationList" relativePoint="TOPRIGHT" offsetX="5" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-36" />
-
+                <Control name="$(parent)Contents" override="true">
                     <Controls>
-                        <Texture name="$(parent)Image" level="2">
-                            <Dimensions y="200" />
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
-                            <!-- 1024x256 image cropped to 614x200-->
-                            <TextureCoords left="0" right="0.599609375" top="0" bottom="0.78125"/>
-                            <Controls>
-                                <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" />
-                            </Controls>
-                        </Texture>
-
-                        <Label name="$(parent)Name" inherits="ZO_DLCBookLargeLabel_Keyboard" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Image" offsetX="10" offsetY="10" />
-                        </Label>
-
-                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
-                            <Dimensions y="300"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" offsetY="10" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Image" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                            
+                        <Control name="$(parent)ScrollContainer" override="true">
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
-                                    <OnInitialized>
-                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
-                                    </OnInitialized>
-                                    
                                     <Controls>
-                                        <Label name="$(parent)Description" inherits="ZO_DLCBookDefaultLabel_Keyboard">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" />
-                                        </Label>
-
-                                        <Label name="$(parent)UnlockStatusLabel" inherits="ZO_DLCBookDefaultLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                        <Label name="$(parent)UnlockStatusLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10" />
                                         </Label>
 
-                                        <Label name="$(parent)QuestStatusLabel" inherits="ZO_DLCBookDefaultLabel_Keyboard">
+                                        <Label name="$(parent)QuestStatusLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)UnlockStatusLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                                         </Label>
 
-                                        <Label name="$(parent)QuestAvailable" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" hidden="true">
-                                            <Dimensions x="598" />
+                                        <Label name="$(parent)QuestAvailable" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" hidden="true">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)QuestStatusLabel" relativePoint="BOTTOMLEFT" offsetY="30" />
                                         </Label>
 
-                                        <Label name="$(parent)QuestDescription" inherits="ZO_DLCBookDefaultLabel_Keyboard" hidden="true">
-                                            <Dimensions x="598" />
+                                        <Label name="$(parent)QuestDescription" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" hidden="true">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)QuestAvailable" relativePoint="BOTTOMLEFT" />
                                         </Label>
                                     </Controls>

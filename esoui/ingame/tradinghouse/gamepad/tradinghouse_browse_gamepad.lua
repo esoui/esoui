@@ -125,6 +125,17 @@ function ZO_GamepadTradingHouse_Browse:InitializeKeybindStripDescriptors()
                 return self:HasNoCooldown() and NotAwaitingResponse()
             end
         },
+        {
+            name = GetString(SI_TRADING_HOUSE_RESET_SEARCH),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            callback =  function()
+                            self:ResetFilterValuesToDefaults()
+                            if self.isInitialized then
+                                local DONT_RESELECT = true
+                                self:ResetList(nil, DONT_RESELECT)
+                            end
+                        end,
+        },
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
     }
 
@@ -339,6 +350,9 @@ function ZO_GamepadTradingHouse_Browse:PopulateCategoryDropDown(dropDown)
 
     ZO_TradingHouse_InitializeCategoryComboBox(dropDown, self.OnCategorySelectionChanged, DONT_SELECT_ITEM)
     
+    -- Make sure the highlighted item is correct (this is changed by Parametric scroll list during control reuse). 
+    dropDown:SetHighlightedItem(self.lastCategoryIndex)
+
     if self.lastCategoryEntryName then
         -- Set selected item without invoking the item's callback, otherwise we would get infinite recursion
         dropDown:SelectItemByIndex(self.lastCategoryIndex, IGNORE_CALLBACK)
@@ -347,9 +361,6 @@ function ZO_GamepadTradingHouse_Browse:PopulateCategoryDropDown(dropDown)
         -- We still need to select the first item on the first initialzation call otherwise the combobox display is blank
         dropDown:SelectFirstItem()
     end
-
-    -- Make sure the highlighted item is correct (this is changed by Parametric scroll list during control reuse). 
-    dropDown:SetHighlightedItem(self.lastCategoryIndex)
 end
 
 function ZO_GamepadTradingHouse_Browse:PopulateQualityDropDown(dropDown)
@@ -678,17 +689,6 @@ function ZO_GamepadTradingHouse_Browse:ResetFilterValuesToDefaults()
     self.levelRangeFilterType = TRADING_HOUSE_FILTER_TYPE_LEVEL
     self.lastLevelEntryName = nil
     self.lastLevelIndex = 1
-end
-
--- This is called when the Trading House scene is shown initially (as opposed to specifically the browse filter tab)
-function ZO_GamepadTradingHouse_Browse:OnInitialInteraction()
-    self:ResetFilterValuesToDefaults()
-
-    -- Need to reset the list when revisiting the guild store after leaving completely
-    if self.isInitialized then
-        local DONT_RESELECT = true
-        self:ResetList(nil, DONT_RESELECT)
-    end
 end
 
 function ZO_GamepadTradingHouse_Browse:OnHiding()

@@ -245,7 +245,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 local anySelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
                 local currentlySearching = IsCurrentlySearchingForGroup()
                 local lookingAtEntries = self.entryList:IsActive()
-                local playerCanToggleQueue = IsUnitSoloOrGroupLeader("player")
+                local playerCanToggleQueue = not ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader()
                 return playerCanToggleQueue and anySelected and (lookingAtEntries or currentlySearching)
             end,
         }
@@ -298,7 +298,9 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     self.entryList:Clear()
     self:AddRolesMenuEntry(self.entryList)
     local isSearching = IsCurrentlySearchingForGroup()
-    
+
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RebuildSelections( {self.currentSpecificActivityType } )
+
     if self.navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then
         for _, entryData in ipairs(self.randomEntryDatas) do
             local lockReasonText = self:GetLockTextByActivity(entryData.data.activityType)

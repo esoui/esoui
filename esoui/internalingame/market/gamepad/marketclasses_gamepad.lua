@@ -69,10 +69,6 @@ function ZO_GamepadMarketProduct:GetPreviewIndex()
     return self.previewIndex
 end
 
-function ZO_GamepadMarketProduct:GetProductForSell()
-    return self
-end
-
 --
 --[[ Gamepad Market Product Bundle Attachment ]]--
 --
@@ -121,10 +117,6 @@ end
 
 function ZO_GamepadMarketProductBundleAttachment:IsPurchaseLocked()
      return self.bundle:IsPurchaseLocked()
-end
-
-function ZO_GamepadMarketProductBundleAttachment:GetProductForSell()
-    return self.bundle
 end
 
 function ZO_GamepadMarketProductBundleAttachment:Reset()

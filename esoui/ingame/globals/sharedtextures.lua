@@ -254,6 +254,78 @@ function GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
     return GAMEPAD_DUNGEON_DIFFICULTY_ICONS[dungeonDifficulty]
 end
 
+do
+    local KEYBOARD_RECIPE_CRAFTING_SYSTEM_BUTTON_TEXTURES =
+    {
+        [RECIPE_CRAFTING_SYSTEM_BLACKSMITHING_DIAGRAMS] =
+        {
+            up = "EsoUI/Art/Crafting/diagrams_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/diagrams_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/diagrams_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/diagrams_tabIcon_disabled.dds"
+        },
+        [RECIPE_CRAFTING_SYSTEM_CLOTHIER_PATTERNS] =
+        {
+            up = "EsoUI/Art/Crafting/patterns_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/patterns_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/patterns_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/patterns_tabIcon_disabled.dds",
+        },
+        [RECIPE_CRAFTING_SYSTEM_ENCHANTING_SCHEMATICS] =
+        {
+            up = "EsoUI/Art/Crafting/schematics_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/schematics_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/schematics_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/schematics_tabIcon_disabled.dds",
+        },
+        [RECIPE_CRAFTING_SYSTEM_ALCHEMY_FORMULAE] = 
+        {
+            up = "EsoUI/Art/Crafting/formulae_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/formulae_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/formulae_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/formulae_tabIcon_disabled.dds",
+        },
+        [RECIPE_CRAFTING_SYSTEM_PROVISIONING_DESIGNS] =
+        {
+            up = "EsoUI/Art/Crafting/designs_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/designs_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/designs_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/designs_tabIcon_disabled.dds",
+        },
+        [RECIPE_CRAFTING_SYSTEM_WOODWORKING_BLUEPRINTS] =
+        {
+            up = "EsoUI/Art/Crafting/blueprints_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/blueprints_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/blueprints_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/blueprints_tabIcon_disabled.dds",
+        },
+    }
+
+    function GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
+        local textures = KEYBOARD_RECIPE_CRAFTING_SYSTEM_BUTTON_TEXTURES[recipeCraftingSystem]
+        if textures then
+            return textures.up, textures.down, textures.over, textures.disabled
+        end
+    end
+end
+
+do
+    local GAMEPAD_RECIPE_CRAFTING_SYSTEM_MENU_TEXTURES =
+    {
+        [RECIPE_CRAFTING_SYSTEM_BLACKSMITHING_DIAGRAMS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_diagrams.dds",
+        [RECIPE_CRAFTING_SYSTEM_CLOTHIER_PATTERNS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_patterns.dds",
+        [RECIPE_CRAFTING_SYSTEM_ENCHANTING_SCHEMATICS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_schematics.dds",
+        [RECIPE_CRAFTING_SYSTEM_ALCHEMY_FORMULAE] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_formulae.dds",
+        [RECIPE_CRAFTING_SYSTEM_PROVISIONING_DESIGNS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_designs.dds",
+        [RECIPE_CRAFTING_SYSTEM_WOODWORKING_BLUEPRINTS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_blueprints.dds",
+    }
+
+    function GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem)
+        return GAMEPAD_RECIPE_CRAFTING_SYSTEM_MENU_TEXTURES[recipeCraftingSystem]
+    end
+end
+
+
 ZO_NO_TEXTURE_FILE = "/esoui/art/icons/icon_missing.dds"
 ZO_KEYBOARD_NEW_ICON = "EsoUI/Art/Miscellaneous/new_icon.dds"
 ZO_GAMEPAD_NEW_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new.dds"

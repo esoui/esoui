@@ -527,8 +527,8 @@ function ZO_GamepadGenericHeader_Refresh(control, data, blockTabBarCallbacks)
         local pipsControl = nil
         local numEntries = 0
 
+        control.tabBar:Clear()
         if data.tabBarEntries then
-            control.tabBar:Clear()            
             for i, tabData in ipairs(data.tabBarEntries) do
                 if (tabData.visible == nil) or tabData.visible() then
                     control.tabBar:AddEntry("ZO_GamepadTabBarTemplate", tabData)

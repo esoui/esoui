@@ -56,13 +56,6 @@
                             <OnInitialized>
                                 ZO_EditDefaultText_Initialize(self, GetString(SI_HELP_ENTER_KEYWORD))
                             </OnInitialized>
-                            <OnEscape>
-                                ZO_Help_EndSearch(self)
-                            </OnEscape>
-                            <OnMouseDown>
-                                ZO_Help_BeginSearch(self)
-                            </OnMouseDown>
-
                             <OnTextChanged>
                                 ZO_EditDefaultText_OnTextChanged(self)
                                 ZO_Help_OnSearchTextChanged(self)

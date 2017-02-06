@@ -38,7 +38,7 @@ end
 
 function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", function() self:RefreshView() end)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function() self:OnActivityFinderStatusUpdate() end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function(status) self:OnActivityFinderStatusUpdate(status) end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnHandleLFMPromptResponse", function() self:OnHandleLFMPromptResponse() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", function() self:RefreshFilters() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnCooldownsUpdate", function() self:OnCooldownsUpdate() end)
@@ -80,7 +80,7 @@ function ZO_ActivityFinderTemplate_Shared:RefreshFilters()
     assert(false) --Must override
 end
 
-function ZO_ActivityFinderTemplate_Shared:OnActivityFinderStatusUpdate()
+function ZO_ActivityFinderTemplate_Shared:OnActivityFinderStatusUpdate(status)
     assert(false) --Must override
 end
 
@@ -211,12 +211,23 @@ function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfo()
     return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit
 end
 
+function ZO_ActivityFinderTemplate_Shared:GetNumLocations()
+    local numLocations = 0
+
+    local modes = self.dataManager:GetFilterModeData()
+    for _, activityType in ipairs(modes:GetActivityTypes()) do
+        numLocations = numLocations + ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType)
+    end
+
+    return numLocations
+end
+
 function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
     local isGloballyLocked = false
     local globalLockReasons =
     {
         isActivityQueueOnCooldown = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityQueueOnCooldown(),
-        isLockedByNotLeader = not IsUnitSoloOrGroupLeader("player"),
+        isLockedByNotLeader = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader(),
     }
 
     for i, reason in pairs(globalLockReasons) do

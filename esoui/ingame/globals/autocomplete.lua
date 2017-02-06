@@ -4,7 +4,8 @@ AUTO_COMPLETE_FLAG_GUILD = 2
 AUTO_COMPLETE_FLAG_RECENT = 3
 AUTO_COMPLETE_FLAG_RECENT_TARGET = 4
 AUTO_COMPLETE_FLAG_RECENT_CHAT = 5
-AUTO_COMPLETE_FLAG_ALL = 6
+AUTO_COMPLETE_FLAG_GUILD_NAMES = 6
+AUTO_COMPLETE_FLAG_ALL = 7
 
 local g_currentPlayerName
 local g_currentPlayerUserId
@@ -145,6 +146,14 @@ local FlagHandlers = {
 
     [AUTO_COMPLETE_FLAG_RECENT_CHAT] = function(results, input, onlineOnly, include)
         IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentChat, results, include)
+    end,
+
+    [AUTO_COMPLETE_FLAG_GUILD_NAMES] = function(results, input, onlineOnly, include)
+        for i = 1, GetNumGuilds() do
+            local guildId = GetGuildId(i)
+            local guildName = GetGuildName(guildId)
+            IncludeOrExcludeResult(results, zo_strformat("<<1>>", guildName), include)
+        end
     end,
 }
 

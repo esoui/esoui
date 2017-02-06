@@ -10,6 +10,7 @@ end
 
 function ZO_Dyeing_Slots_Gamepad:SetupDyeableSlot(control, data)
     local dyeableSlot = data.dyeableSlot
+    self.controlsBySlot[dyeableSlot] = control
 	control.onSelectionChangedCallback = self.onSelectionChangedCallback
     ZO_Dyeing_SetupDyeableSlotControl(control.slot, dyeableSlot)
     ZO_Dyeing_RefreshDyeableSlotControlDyes(control, dyeableSlot)

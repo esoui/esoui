@@ -72,14 +72,14 @@ end
 do
     local keyNameTable = {}
     local EXPECTED_ICON_SIZE = 64
-    local BASE_PERCENT = 180
+    local DEFAULT_SCALE_PERCENT = 180
 
-    local function GetKeyOrTexture(keyCode, textureOptions)
+    local function GetKeyOrTexture(keyCode, textureOptions, textureWidthPercent, textureHeightPercent)
         if textureOptions == KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP then
             local path, width, height = ZO_Keybindings_GetTexturePathForKey(keyCode)
             if path then
-                local widthPercent = (width / EXPECTED_ICON_SIZE) * BASE_PERCENT;
-                local heightPercent = (height / EXPECTED_ICON_SIZE) * BASE_PERCENT;
+                local widthPercent = (width / EXPECTED_ICON_SIZE) * (textureWidthPercent or DEFAULT_SCALE_PERCENT);
+                local heightPercent = (height / EXPECTED_ICON_SIZE) * (textureHeightPercent or DEFAULT_SCALE_PERCENT);
                 return ("|t%f%%:%f%%:%s|t"):format(widthPercent, heightPercent, path)
             end
             return ZO_Keybindings_GenerateKeyMarkup(GetKeyName(keyCode))
@@ -87,33 +87,29 @@ do
         return GetKeyName(keyCode)
     end
 
-    local function TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions)
+    local function TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent)
         if key ~= KEY_INVALID then
             ZO_ClearNumericallyIndexedTable(keyNameTable)
 
             textOptions = textOptions or KEYBIND_TEXT_OPTIONS_ABBREVIATED_NAME
             textureOptions = textureOptions or KEYBIND_TEXTURE_OPTIONS_NONE
-        
-            if textOptions == KEYBIND_TEXT_OPTIONS_FULL_NAME or textOptions == KEYBIND_TEXT_OPTIONS_FULL_NAME_SEPARATE_MODS then
-                if mod1 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod1, textureOptions)) end
-                if mod2 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod2, textureOptions)) end
-                if mod3 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod3, textureOptions)) end
-                if mod4 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod4, textureOptions)) end
-                table.insert(keyNameTable, GetKeyOrTexture(key, textureOptions))
-            
-                if textOptions == KEYBIND_TEXT_OPTIONS_FULL_NAME_SEPARATE_MODS then
-                    return unpack(keyNameTable, 1, 4)
-                end
+
+            if mod1 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod1, textureOptions, textureWidthPercent, textureHeightPercent)) end
+            if mod2 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod2, textureOptions, textureWidthPercent, textureHeightPercent)) end
+            if mod3 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod3, textureOptions, textureWidthPercent, textureHeightPercent)) end
+            if mod4 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod4, textureOptions, textureWidthPercent, textureHeightPercent)) end
+
+            if textOptions == KEYBIND_TEXT_OPTIONS_ABBREVIATED_NAME and #keyNameTable > 0 then
+                table.insert(keyNameTable, textureOptions == KEYBIND_TEXTURE_OPTIONS_NONE and "-" or " - ")
+            end
+
+            table.insert(keyNameTable, GetKeyOrTexture(key, textureOptions, textureWidthPercent, textureHeightPercent))
+
+            if textOptions == KEYBIND_TEXT_OPTIONS_FULL_NAME_SEPARATE_MODS then
+                return unpack(keyNameTable, 1, 4)
+            elseif textOptions == KEYBIND_TEXT_OPTIONS_FULL_NAME then
                 return table.concat(keyNameTable, textureOptions == KEYBIND_TEXTURE_OPTIONS_NONE and "-" or " - ")
             else
-                if mod1 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod1, textureOptions)) end
-                if mod2 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod2, textureOptions)) end
-                if mod3 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod3, textureOptions)) end
-                if mod4 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod4, textureOptions)) end
-                if #keyNameTable > 0 then table.insert(keyNameTable, textureOptions == KEYBIND_TEXTURE_OPTIONS_NONE and "-" or " - ") end
-
-                table.insert(keyNameTable, GetKeyOrTexture(key, textureOptions))
-            
                 return table.concat(keyNameTable)
             end
         end
@@ -121,8 +117,8 @@ do
         return GetString(SI_ACTION_IS_NOT_BOUND)
     end
 
-    function ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions)
-        return TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions)
+    function ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent)
+        return TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent)
     end
 
     function ZO_Keybindings_GetBindingStringFromAction(actionName, textOptions, textureOptions, bindingIndex)
@@ -136,35 +132,15 @@ do
 
     -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if theres no binds
     function ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, textOptions, textureOptions, alwaysPreferGamepadMode)
-        local isGamepadPreferredMode
+        local preferGamepadMode
         if alwaysPreferGamepadMode == nil then
-            isGamepadPreferredMode = IsInGamepadPreferredMode()
+            preferGamepadMode = IsInGamepadPreferredMode()
         else
-            isGamepadPreferredMode = alwaysPreferGamepadMode
+            preferGamepadMode = alwaysPreferGamepadMode
         end
-        local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
-        if layerIndex then
-            local bestBindingIndex = nil
-            for bindingIndex = 1, GetMaxBindingsPerAction() do
-                local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
-                if key ~= KEY_INVALID then
-                    
-                    -- If the key matches the preferred mode then just use it
-                    if IsKeyCodeGamepadKey(key) == isGamepadPreferredMode then
-                        return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions), key, mod1, mod2, mod3, mod4
-                    end
-
-                    -- Otherwise try considering this as the best binding index
-                    if not bestBindingIndex then
-                        bestBindingIndex = bindingIndex
-                    end
-                end
-            end
-
-            if bestBindingIndex then
-                local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bestBindingIndex)
-                return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions), key, mod1, mod2, mod3, mod4
-            end
+        local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromName(actionName, preferGamepadMode)
+        if key ~= KEY_INVALID then
+            return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions), key, mod1, mod2, mod3, mod4
         end
 
         return nil

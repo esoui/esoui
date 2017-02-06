@@ -1,7 +1,7 @@
 local function LogPurchaseClose(dialog)
     if not dialog.info.dontLogClose then
         if dialog.info.logPurchasedMarketId then
-            OnMarketEndPurchase(dialog.data.marketProduct:GetId())
+            OnMarketEndPurchase(dialog.data.marketProductId)
         else
             OnMarketEndPurchase()
         end
@@ -89,25 +89,26 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
 
 local CURRENCY_ICON_SIZE = 24
 local function MarketPurchaseConfirmationDialogSetup(dialog, data)
-    local marketProduct = data.marketProduct
-    local name, description, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
+    local marketProductId = data.marketProductId
+    local presentationIndex = data.presentationIndex
+    local name, description, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
 
     -- set this up for the MARKET_PURCHASING dialog
     data.itemName = ZO_DEFAULT_ENABLED_COLOR:Colorize(name)
-    data.hasItems = marketProduct:GetNumAttachedItems() > 0 -- TODO: Consider consumable specific check
+    data.hasItems = GetMarketProductNumItems(marketProductId) > 0 -- TODO: Consider consumable specific check
 
     dialog:GetNamedChild("ItemContainerItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name))
 
     local iconTextureControl = dialog:GetNamedChild("ItemContainerIcon")
     iconTextureControl:SetTexture(icon)
 
-    local stackSize = marketProduct:GetStackCount()
+    local stackSize = GetMarketProductStackCount(marketProductId)
 
     local stackCountControl = iconTextureControl:GetNamedChild("StackCount")
     stackCountControl:SetText(stackSize)
     stackCountControl:SetHidden(stackSize < 2)
 
-    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = marketProduct:GetMarketProductPricingByPresentation()
+    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
 
     local finalCost = cost
     if hasDiscount then
@@ -139,24 +140,23 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
             canQueue = true,
             buttons =
             {
-                [1] =
                 {
                     control =   self:GetNamedChild("Confirm"),
                     text =      SI_MARKET_CONFIRM_PURCHASE_LABEL,
                     callback =  function(dialog)
                                     dialog.info.logPurchasedMarketId = true
-                                    local marketProduct = dialog.data.marketProduct
+                                    local marketProductId = dialog.data.marketProductId
+                                    local presentationIndex = dialog.data.presentationIndex
                                     -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
-                                    ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = dialog.data.itemName, hasItems = dialog.data.hasItems, marketProduct = marketProduct})
-                                    BuyMarketProduct(marketProduct:GetId(), marketProduct:GetPresentationIndex())
+                                    ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = dialog.data.itemName, hasItems = dialog.data.hasItems, marketProductId = marketProductId, presentationIndex = presentationIndex})
+                                    BuyMarketProduct(marketProductId, presentationIndex)
                                 end,
                 },
-        
-                [2] =
+
                 {
                     control =   self:GetNamedChild("Cancel"),
                     text =      SI_DIALOG_DECLINE,
-                }
+                },
             }
         }
     )
@@ -184,6 +184,8 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
         data.loadingDelayTime = timeInMilliseconds + LOADING_DELAY
     end
 
+    local marketProductId = dialog.data.marketProductId
+
     local result = data.result
     local hasResult = result ~= nil
     local hideUseProductButton = true
@@ -195,8 +197,8 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
         if result == MARKET_PURCHASE_RESULT_SUCCESS then
             titleText = TRANSACTION_COMPLETE_TITLE_TEXT
 
-            local useProductInfo = data.marketProduct:GetUseProductInfo()
-            local stackCount = data.marketProduct:GetStackCount()
+            local useProductInfo = ZO_Market_Shared.GetUseProductInfo(marketProductId)
+            local stackCount = GetMarketProductStackCount(marketProductId)
             if useProductInfo then
                 hideUseProductButton = useProductInfo.visible and not useProductInfo.visible()
                 enableUseProductButton = not useProductInfo.enabled or useProductInfo.enabled()
@@ -206,7 +208,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                 if stackCount > 1 then
                     g_transactionCompleteMainText.text = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, dialog.data.itemName, stackCount)
                 else
-                    if dialog.data.marketProduct:GetNumAttachedCollectibles() > 0 then
+                    if GetMarketProductNumCollectibles(marketProductId) > 0 then
                         g_transactionCompleteMainText.text = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, dialog.data.itemName)
                     else
                         g_transactionCompleteMainText.text = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, dialog.data.itemName)
@@ -217,7 +219,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
             titleText = TRANSACTION_FAILED_TITLE_TEXT
             g_transactionCompleteMainText.text = GetString("SI_MARKETPURCHASABLERESULT", result)
         end
-        
+
         ZO_Dialogs_UpdateDialogTitleText(dialog, titleText)
         ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), HIDE_LOADING_ICON)
     else
@@ -270,7 +272,7 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                     control =   self:GetNamedChild("UseProduct"),
                     keybind =   "DIALOG_RESET",
                     callback =  function(dialog)
-                                    dialog.data.marketProduct:GoToUseProductLocation()
+                                    ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductId)
                                 end,
                 },
                 {

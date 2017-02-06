@@ -8,6 +8,10 @@ function ZO_SocialOptionsDialogGamepad:Initialize()
     self.optionTemplateGroups = {}
     self.conditionResults = {}
     self:BuildOptionsList()
+
+	self.dialogData = {}
+	self.control:RegisterForEvent(EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
+	self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
 end
 
 function ZO_SocialOptionsDialogGamepad:ShowOptionsDialog()
@@ -16,6 +20,9 @@ function ZO_SocialOptionsDialogGamepad:ShowOptionsDialog()
     local data = {
         parametricList = parametricList,
     }
+	--Saving the displayName and online state of the person the dialog is being opened for.
+	self.dialogData.displayName = self.socialData.displayName
+	self.dialogData.online = self.socialData.online
     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_OPTIONS_DIALOG", data)
 end
 
@@ -127,6 +134,16 @@ function ZO_SocialOptionsDialogGamepad:AddSocialOptionsKeybind(descriptor, callb
     }
 end
 
+--Hiding the options dialog if the player's online status changes.
+function ZO_SocialOptionsDialogGamepad:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus)
+	if self.dialogData and self.dialogData.displayName == displayName and newStatus ~= nil then
+		local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
+		if(self.dialogData.online ~= isOnline) then
+			ZO_Dialogs_ReleaseAllDialogsOfName("GAMEPAD_SOCIAL_OPTIONS_DIALOG")
+		end
+	end
+end
+
 --Shared Options
 function ZO_SocialOptionsDialogGamepad:SelectedDataIsPlayer()
     return self.socialData.displayName == GetDisplayName()
@@ -200,6 +217,14 @@ function ZO_SocialOptionsDialogGamepad:BuildTravelToPlayerOption(jumpFunc)
         SCENE_MANAGER:ShowBaseScene()
     end
     return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_JUMP_TO_PLAYER, callback)
+end
+
+function ZO_SocialOptionsDialogGamepad:BuildVisitPlayerHouseOption()
+    local callback = function()
+		JumpToHouse(DecorateDisplayName(self.socialData.displayName))
+        SCENE_MANAGER:ShowBaseScene()
+    end
+    return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_VISIT_HOUSE, callback)
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()

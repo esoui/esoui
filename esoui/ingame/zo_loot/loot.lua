@@ -167,14 +167,18 @@ end
 function ZO_Loot:SetUpLootItem(control, data)
     local nameControl = GetControl(control, "Name")
 
-    if data.currencyType == CURT_MONEY or data.currencyType == CURT_TELVAR_STONES then
+    if data.currencyType == CURT_MONEY or data.currencyType == CURT_TELVAR_STONES or data.currencyType == CURT_WRIT_VOUCHERS then
         nameControl:SetText(ZO_CurrencyControl_BuildCurrencyString(data.currencyType, data.currencyAmount))
         nameControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     else
-        if data.isQuest then
-            nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
+        if data.itemType == LOOT_TYPE_COLLECTIBLE then
+            nameControl:SetColor(ZO_WHITE:UnpackRGBA())
         else
-            nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality))
+            if data.isQuest then
+                nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
+            else
+                nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality))
+            end
         end
 
         nameControl:SetText(data.name)
@@ -215,6 +219,7 @@ function ZO_Loot:UpdateList()
     local numLootItems = GetNumLootItems()
     local unownedMoney, ownedMoney = GetLootCurrency(CURT_MONEY)
     local telvarStones = GetLootCurrency(CURT_TELVAR_STONES)
+	local writVouchers = GetLootCurrency(CURT_WRIT_VOUCHERS)
     self.itemCount = 0
 
     -- Assume that there's only stolen stuff present in this window until proven otherwise
@@ -223,6 +228,7 @@ function ZO_Loot:UpdateList()
     -- Add unowned currency and items
     self:UpdateListAddLootCurrency(scrollData, CURT_MONEY, LOOT_MONEY_ICON, unownedMoney, not STOLEN)
     self:UpdateListAddLootCurrency(scrollData, CURT_TELVAR_STONES, LOOT_TELVAR_STONE_ICON, telvarStones, not STOLEN)
+	self:UpdateListAddLootCurrency(scrollData, CURT_WRIT_VOUCHERS, LOOT_WRIT_VOUCHER_ICON, writVouchers, not STOLEN)
     self:UpdateListAddLootItems(scrollData, numLootItems, not STOLEN)
 
     -- Add owned money and items
@@ -262,7 +268,7 @@ end
 
 function ZO_Loot:UpdateListAddLootItems(scrollData, numLootItems, addStolenItems)
     for i = 1, numLootItems do
-        local lootId, name, icon, count, quality, value, isQuest, isStolen = GetLootItemInfo(i)
+        local lootId, name, icon, count, quality, value, isQuest, isStolen, itemType = GetLootItemInfo(i)
 
         -- only add stolen items or non stolen items
         if addStolenItems == isStolen then
@@ -276,7 +282,8 @@ function ZO_Loot:UpdateListAddLootItems(scrollData, numLootItems, addStolenItems
                 quality = quality,
                 value = value,
                 isQuest = isQuest,
-                isStolen = isStolen
+                isStolen = isStolen,
+                itemType = itemType
             }
 
             if not isStolen then

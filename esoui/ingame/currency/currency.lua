@@ -43,6 +43,15 @@ local currencies =
         gamepadTexture = "EsoUI/Art/currency/gamepad/gp_telvar.dds",
         gamepadColor = DEFAULT_GAMEPAD_COLOR
     },
+	[CURT_WRIT_VOUCHERS] =
+    {
+        keyboardTexture = "EsoUI/Art/currency/currency_writvoucher.dds",
+        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_WRIT_VOUCHERS) ),
+        name = GetString(SI_CURRENCY_WRIT_VOUCHERS),
+        formatString = SI_WRIT_VOUCHER_FORMAT,
+        gamepadTexture = "EsoUI/Art/currency/gamepad/gp_writvoucher.dds",
+        gamepadColor = DEFAULT_GAMEPAD_COLOR
+    },
     
     [UI_ONLY_CURRENCY_INSPIRATION] =
     {
@@ -383,12 +392,38 @@ function ZO_CurrencyControl_SetClickHandler(self, handler)
     end
 end
 
+function ZO_Currency_GetPlatformCurrencyIcon(currencyType)
+    if IsInGamepadPreferredMode() then
+        return currencies[currencyType].gamepadTexture
+    else
+        return currencies[currencyType].keyboardTexture
+    end
+end
+
 function ZO_Currency_GetPlatformFormattedGoldIcon()
     if IsInGamepadPreferredMode() then
         return zo_iconFormat("EsoUI/Art/currency/gamepad/gp_gold.dds", 24, 24)
     else
         return zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 16, 16)
     end
+end
+
+function ZO_Currency_GetKeyboardFormattedCurrencyIcon(currencyType, overrideIconSize, inheritColor)
+    local iconFormatter = zo_iconFormat
+    if inheritColor then
+        iconFormatter = zo_iconFormatInheritColor
+    end
+    local iconSize = overrideIconSize or KEYBOARD_TEXTURE_SIZE
+    return iconFormatter(currencies[currencyType].keyboardTexture, iconSize, iconSize)
+end
+
+function ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType, overrideIconSize, inheritColor)
+    local iconFormatter = zo_iconFormat
+    if inheritColor then
+        iconFormatter = zo_iconFormatInheritColor
+    end
+    local iconSize = overrideIconSize or GAMEPAD_TEXTURE_SIZE
+    return iconFormatter(currencies[currencyType].gamepadTexture, iconSize, iconSize)
 end
 
 function ZO_Currency_GetPlatformFormattedCurrencyIcon(currencyType, overrideIconSize, inheritColor)

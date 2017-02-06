@@ -203,7 +203,10 @@ function ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, currentFilter)
 end
 
 function ZO_InventoryUtils_DoesNewItemMatchSupplies(itemData)
-    return itemData.equipType == EQUIP_TYPE_INVALID and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_QUICKSLOT) and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_CRAFTING)
+    return itemData.equipType == EQUIP_TYPE_INVALID
+            and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_QUICKSLOT)
+            and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_CRAFTING)
+            and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_FURNISHING)
 end
 
 function ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equipSlot)

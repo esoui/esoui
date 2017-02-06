@@ -262,7 +262,15 @@ end
 local function OnReadOnlyStateChanged(readOnly)
     for equipSlot, slotControl in pairs(slots) do
         RestoreMouseOverTexture(slotControl)
-        ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, nil, readOnly)
+
+        --Make sure slots with a condition on them meet that condition.
+        local linkData = heldSlotLinkage[equipSlot]
+        local meetsRequirements = nil
+        if linkData and linkData.pullFromConditionFn then
+            meetsRequirements = not linkData.pullFromConditionFn()
+        end
+
+        ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsRequirements, readOnly)
     end
 end
 

@@ -20,11 +20,11 @@ function GamepadCraftingFilter:SetSubType(entry)
 end
 
 function GamepadCraftingFilter:SetCategoryTypeAndSubData(entry)
-    self.subCategoryData = entry.minValue
+    self:GetFilterComboBoxData("SubType"):SetData(entry.minValue)
 end
 
 function GamepadCraftingFilter:ApplyToSearch(search)
-    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, self.categoryType)
+    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM, self.categoryType)
     ZO_GamepadTradingHouse_Filter.ApplyToSearch(self, search)
 end
 

@@ -7,7 +7,7 @@ local CHANGE_MOTD_GAMEPAD_DIALOG = "CHANGE_MOTD_GAMEPAD"
 local GAMEPAD_OPTIONS_LIST_ENTRY = "ZO_GamepadMenuEntryTemplate"
 local GAMEPAD_GUILD_LIST_ENTRY = "ZO_GamepadSubMenuEntryTemplate"
 
-local GAMEPAD_CREATE_GUILD_LIST_ENTRY = "ZO_GamepadCreateGuildEntry"
+local GAMEPAD_CREATE_GUILD_LIST_ENTRY = "ZO_GamepadSubMenuEntryTemplate"
 
 local GUILD_HUB_DISPLAY_MODE = 
 {  

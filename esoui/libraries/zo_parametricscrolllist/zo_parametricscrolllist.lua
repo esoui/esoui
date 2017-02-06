@@ -402,23 +402,29 @@ function ZO_ParametricScrollList:CanSelect(newIndex)
 end
 
 function ZO_ParametricScrollList:MovePrevious()
-    local newIndex = (self.targetSelectedIndex or self.selectedIndex or 2) - 1
-    while (newIndex >= 1) and (self:CanSelect(newIndex) == false) do
-        newIndex = newIndex - 1
+    if #self.dataList > 1 then
+        local newIndex = (self.targetSelectedIndex or self.selectedIndex or 2) - 1
+        while newIndex >= 1 and  not self:CanSelect(newIndex) do
+            newIndex = newIndex - 1
+        end
+        if newIndex >= 1 then
+            self:SetSelectedIndex(newIndex)
+            return true
+        end
     end
-    if (newIndex >= 1) then
-        self:SetSelectedIndex(newIndex)
-        return true
-    end
+
     return false
 end
 
 function ZO_ParametricScrollList:MoveNext()
-    local newIndex = self:GetNextSelectableIndex(self:CalculateSelectedIndexOffsetWithDrag())
-    if (newIndex <= #self.dataList) then
-        self:SetSelectedIndex(newIndex)
-        return true
+    if #self.dataList > 1 then
+        local newIndex = self:GetNextSelectableIndex(self:CalculateSelectedIndexOffsetWithDrag())
+        if newIndex <= #self.dataList then
+            self:SetSelectedIndex(newIndex)
+            return true
+        end
     end
+
     return false
 end
 
@@ -787,8 +793,9 @@ function ZO_ParametricScrollList:OnUpdate()
     end
 end
 
+local SELECTION_LERP_RATE = 0.2
 function ZO_ParametricScrollList:CalculateNextLerpedContinousOffset(continousTargetOffset)
-    return zo_deltaNormalizedLerp(self.lastContinousTargetOffset, continousTargetOffset, .2)
+    return zo_deltaNormalizedLerp(self.lastContinousTargetOffset, continousTargetOffset, SELECTION_LERP_RATE)
 end
 
 function ZO_ParametricScrollList:GetSelectedControl()

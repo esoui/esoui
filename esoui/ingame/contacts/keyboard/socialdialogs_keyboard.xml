@@ -62,7 +62,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DisplayName" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="265"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" maxInputCharacters="255" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
+                        <EditBox name="$(parent)Edit" maxInputCharacters="254" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
                             <OnInitialized>
                                 ZO_EditDefaultText_Initialize(self, GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
                             </OnInitialized>

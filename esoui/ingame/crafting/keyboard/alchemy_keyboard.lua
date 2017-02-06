@@ -54,8 +54,16 @@ function ZO_Alchemy:InitializeScenes()
             TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_OPENED)
             self.inventory:SetActiveFilterByDescriptor(nil)
 
-            CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
-            CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
+            -- Reselect so we re-add the temporary fragment for the recipe mode
+            -- and setup/update the tooltip and corresponding sounds correctly
+            local oldMode = self.mode
+            self.mode = nil
+            ZO_MenuBar_ClearSelection(self.modeBar)
+            if not oldMode then
+                ZO_MenuBar_SelectDescriptor(self.modeBar, ZO_ALCHEMY_MODE_CREATION)
+            else
+                ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
+            end
         elseif newState == SCENE_HIDDEN then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -86,7 +94,7 @@ function ZO_Alchemy:InitializeModeBar()
             disabled = disabled,
             callback = function(tabData)
                 self.modeBarLabel:SetText(GetString(name))
-                --Currently only one mode, no switch needed
+                self:SetMode(mode)
             end,
         }
     end
@@ -94,20 +102,29 @@ function ZO_Alchemy:InitializeModeBar()
     self.modeBar = self.control:GetNamedChild("ModeMenuBar")
     self.modeBarLabel = self.modeBar:GetNamedChild("Label")
 
-    local creationData = CreateButtonData(
+    local creationTab = CreateButtonData(
         SI_ALCHEMY_CREATION,
-        nil,
+        ZO_ALCHEMY_MODE_CREATION,
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_up.dds",
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_down.dds",
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_over.dds",
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds"
     )
 
-    ZO_MenuBar_AddButton(self.modeBar, creationData)
+    ZO_MenuBar_AddButton(self.modeBar, creationTab)
+
+    local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ALCHEMY)
+    local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
+    local recipeTab = CreateButtonData(
+        recipeCraftingSystemNameStringId,
+        ZO_ALCHEMY_MODE_RECIPES,
+        GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
+
+    ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
 
-    ZO_MenuBar_SelectDescriptor(self.modeBar, nil)
+    ZO_MenuBar_SelectDescriptor(self.modeBar, ZO_ALCHEMY_MODE_CREATION)
 end
 
 function ZO_Alchemy:GetReagentSlotOffset(thirdSlotUnlocked)
@@ -179,6 +196,36 @@ function ZO_Alchemy:OnItemReceiveDrag(slotControl, bagId, slotIndex)
         end
     end
 end
+
+function ZO_Alchemy:SetMode(mode)
+    if self.mode ~= mode then
+        local oldMode = self.mode
+        self.mode = mode
+
+        CRAFTING_RESULTS:SetCraftingTooltip(nil)
+
+        if mode == ZO_ALCHEMY_MODE_RECIPES then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            PROVISIONER:EmbedInCraftingScene()
+        else -- mode is ZO_ALCHEMY_MODE_CREATION
+            if oldMode == ZO_ALCHEMY_MODE_RECIPES then
+                PROVISIONER:RemoveFromCraftingScene()
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+
+            CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
+            CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
+        end
+
+        self.control:GetNamedChild("Inventory"):SetHidden(mode ~= ZO_ALCHEMY_MODE_CREATION)
+        self.control:GetNamedChild("SlotContainer"):SetHidden(mode ~= ZO_ALCHEMY_MODE_CREATION)
+        self:UpdateTooltip()
+    end
+end
+
+
+--Alchemy Inventory
+-------------------------
 
 ZO_AlchemyInventory = ZO_CraftingInventory:Subclass()
 

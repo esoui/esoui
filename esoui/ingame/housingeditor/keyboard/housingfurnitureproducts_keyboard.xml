@@ -1,0 +1,16 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_HousingFurnitureProductsPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" hidden="true" >
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)CategoryList" override="true" >
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-130" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

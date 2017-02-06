@@ -108,7 +108,7 @@ function ZO_ApplyEnchant_Gamepad:PerformItemImprovement()
 end
 
 function ZO_ApplyEnchant_Gamepad:GetItemTemplateName()
-    return "ZO_Gamepad_ApplyEnchant_ItemTemplate"
+    return "ZO_GamepadItemSubEntryTemplate"
 end
 
 --[[ Globals ]]--

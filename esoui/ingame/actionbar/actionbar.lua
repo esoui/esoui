@@ -110,6 +110,9 @@ local function StopUltimateReadyAnimations()
     if(g_ultimateReadyBurstTimeline) then
         g_ultimateReadyBurstTimeline:Stop()
         g_ultimateReadyLoopTimeline:Stop()
+        if ZO_RZCHROMA_EFFECTS then
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("ACTION_BUTTON_8")
+        end
     end
 end
 
@@ -128,14 +131,22 @@ local function PlayUltimateReadyAnimations(ultimateReadyBurstTexture, ultimateRe
         end
         g_ultimateReadyBurstTimeline:SetHandler("OnStop", OnStop)
     end
+
+    local addChromaEffect = false
     if not g_activeWeaponSwapInProgress then
         if not g_ultimateReadyBurstTimeline:IsPlaying() and not g_ultimateReadyLoopTimeline:IsPlaying() then
             ultimateReadyBurstTexture:SetHidden(false)
             g_ultimateReadyBurstTimeline:PlayFromStart()
+            addChromaEffect = true
         end
     elseif not g_ultimateReadyLoopTimeline:IsPlaying() then
         g_ultimateReadyLoopTimeline:PlayFromStart()
         ultimateReadyLoopTexture:SetHidden(false)
+        addChromaEffect = true
+    end
+
+    if ZO_RZCHROMA_EFFECTS and addChromaEffect then
+        ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_8")
     end
 end
 

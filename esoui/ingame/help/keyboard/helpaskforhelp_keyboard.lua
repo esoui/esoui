@@ -1,31 +1,8 @@
-local function SetSpecificItemTarget(text)
-    local savedItemLink = HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:GetSavedItemLink()
-    if savedItemLink then
-        SetCustomerServiceTicketItemTargetByLink(savedItemLink)
-    else
-        SetCustomerServiceTicketItemTarget(text)
-    end
-end
-
-
 local HELP_ASK_FOR_HELP_CATEGORY_INFO =
 {
 	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE] =
 	{
 		ticketCategory = TICKET_CATEGORY_CHARACTER_ISSUE,
-	},
-	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_QUEST_ISSUE] =
-	{
-		ticketCategory = TICKET_CATEGORY_QUEST_ISSUE,
-		detailsTitle = GetString(SI_CUSTOMER_SERVICE_QUEST_NAME),
-		detailsRegistrationFunction = SetCustomerServiceTicketQuestTarget,
-		extraInfo = zo_strformat(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_NO_QUEST_HINT, ZO_LinkHandler_CreateURLLink("", GetURLTextByType(APPROVED_URL_ESO_FORUMS))),
-	},
-	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITEM_ISSUE] =
-	{
-		ticketCategory = TICKET_CATEGORY_ITEM_ISSUE,
-		detailsTitle = GetString(SI_CUSTOMER_SERVICE_ITEM_NAME),
-		detailsRegistrationFunction = SetSpecificItemTarget,
 	},
 	[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] =
 	{
@@ -83,13 +60,11 @@ function HelpAskForHelp_Keyboard:Initialize(control)
 	self.helpCategoryTitle = control:GetNamedChild("CategoryTitle")
 	self.helpSubcategoryTitle = control:GetNamedChild("SubcategoryTitle")
 	self.helpDetailsTitle = control:GetNamedChild("DetailsTitle")
-	self.helpExtraInfoTitle = control:GetNamedChild("ExtraInfoTitle")
 	self.helpDescriptionTitle = control:GetNamedChild("DescriptionTitle")
 	self.helpDetailsTextControl = control:GetNamedChild("DetailsTextLine")
 
 	self.helpSubcategoryContainer = control:GetNamedChild("SubcategoryContainer")
 	self.helpDetailsContainer = control:GetNamedChild("DetailsContainer")
-	self.helpExtraInfoContainer = control:GetNamedChild("ExtraInfoContainer")
 
 	self.helpCategoryComboBoxControl = control:GetNamedChild("CategoryComboBox")
 	self.helpSubcategoryComboBoxControl = control:GetNamedChild("SubcategoryComboBox")
@@ -123,7 +98,6 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
 	local function OnCategoryChanged(comboBox, entryText, entry)
 		self:UpdateSubcategories()
 		self:UpdateDetailsComponents()
-		self:UpdateExtraInfo()
 		self:UpdateSubmitButton()
 	end
 
@@ -217,7 +191,6 @@ end
 
 function HelpAskForHelp_Keyboard:UpdateDetailsComponents()
 	self.details:SetText("")
-    self.savedItemLink = nil
 
 	local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
 
@@ -234,26 +207,6 @@ function HelpAskForHelp_Keyboard:UpdateDetailsComponents()
 			self.helpDetailsTitle:SetText(title)
 		end
 	end
-end
-
-function HelpAskForHelp_Keyboard:UpdateExtraInfo()
-	self.helpExtraInfoTitle:SetText("")
-
-	self:SetExtraInfoContentHidden(true)
-
-	local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
-
-	local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]
-		
-	if mainArray then
-		local title = mainArray.extraInfo
-		if title then
-			self.helpExtraInfoTitle:SetText(title)
-
-			self:SetExtraInfoContentHidden(false)
-		end
-	end
-
 end
 
 function HelpAskForHelp_Keyboard:SetSubcategoryContentHidden(shouldHide)
@@ -276,16 +229,6 @@ function HelpAskForHelp_Keyboard:SetDetailsContentHidden(shouldHide)
 		offsetY = 20
 	end
 	self.helpDetailsContainer:SetAnchor(TOPLEFT, self.helpSubcategoryContainer, BOTTOMLEFT, 0, offsetY)
-end
-
-function HelpAskForHelp_Keyboard:SetExtraInfoContentHidden(shouldHide)
-	self.helpExtraInfoTitle:SetHidden(shouldHide)
-
-	local offsetY = 0
-	if not shouldHide then
-		offsetY = 20
-	end
-	self.helpExtraInfoContainer:SetAnchor(TOPLEFT, self.helpDetailsContainer, BOTTOMLEFT, 0, offsetY)
 end
 
 function HelpAskForHelp_Keyboard:UpdateSubmitButton()
@@ -341,28 +284,11 @@ function HelpAskForHelp_Keyboard:SelectSubcategory(subcategory)
 	end
 end
 
-function HelpAskForHelp_Keyboard:GetSavedItemLink()
-    return self.savedItemLink
-end
-
 function HelpAskForHelp_Keyboard:SetDetailsText(text)
 	self.details:SetText(text)
 end
 
-function HelpAskForHelp_Keyboard:SetDetailsFromItemLink(itemLink)
-	self:ClearFields()
-	self:SelectCategory(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITEM_ISSUE)
-    self.savedItemLink = itemLink
-	self:SetDetailsText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(itemLink)))
-end
-
-function HelpAskForHelp_Keyboard:SetDetailsFromQuestName(questName)
-	self:ClearFields()
-	self:SelectCategory(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_QUEST_ISSUE)
-	self:SetDetailsText(questName)
-end
-
-function HelpAskForHelp_Keyboard:OpenAskForHelp(category, subcategory)
+function HelpAskForHelp_Keyboard:OpenAskForHelp(category, subcategory, playerName)
 	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
 	self:ClearFields()
 
@@ -373,6 +299,10 @@ function HelpAskForHelp_Keyboard:OpenAskForHelp(category, subcategory)
 			self:SelectSubcategory(subcategory)
 		end
 	end
+
+    if playerName then
+        self:SetDetailsText(playerName)
+    end
 end
 
 function HelpAskForHelp_Keyboard:AttemptToSendTicket()

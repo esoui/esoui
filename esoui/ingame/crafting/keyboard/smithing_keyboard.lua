@@ -37,15 +37,7 @@ function ZO_Smithing:Initialize(control)
 
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 
-            local oldMode = self.mode
-            self.mode = nil
-            ZO_MenuBar_ClearSelection(self.modeBar)
-
-            if isCraftingTypeDifferent or not oldMode then
-                ZO_MenuBar_SelectDescriptor(self.modeBar, SMITHING_MODE_REFINMENT)
-            else
-                ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
-            end
+           self:AddTabsToMenuBar(craftingType, isCraftingTypeDifferent)
         elseif newState == SCENE_HIDDEN then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -204,7 +196,6 @@ function ZO_Smithing:InitializeModeBar()
 
     local function CreateModeData(name, mode, normal, pressed, highlight, disabled)
         return {
-            activeTabText = name,
             categoryName = name,
 
             descriptor = mode,
@@ -212,17 +203,59 @@ function ZO_Smithing:InitializeModeBar()
             pressed = pressed,
             highlight = highlight,
             disabled = disabled,
-            callback = function(tabData) self.modeBarLabel:SetText(GetString(name)) self:SetMode(mode) end,
+            callback = function(tabData)
+                self.modeBarLabel:SetText(GetString(name))
+                self:SetMode(mode)
+            end,
         }
     end
 
-    ZO_MenuBar_AddButton(self.modeBar, CreateModeData(SI_SMITHING_TAB_REFINMENT, SMITHING_MODE_REFINMENT, "EsoUI/Art/Crafting/smithing_tabIcon_refine_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_disabled.dds"))
-    ZO_MenuBar_AddButton(self.modeBar, CreateModeData(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/smithing_tabIcon_creation_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds"))
-    ZO_MenuBar_AddButton(self.modeBar, CreateModeData(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_disabled.dds"))
-    ZO_MenuBar_AddButton(self.modeBar, CreateModeData(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/smithing_tabIcon_improve_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_disabled.dds"))
-    ZO_MenuBar_AddButton(self.modeBar, CreateModeData(SI_SMITHING_TAB_RESEARCH, SMITHING_MODE_RESEARCH, "EsoUI/Art/Crafting/smithing_tabIcon_research_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_research_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_research_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_research_disabled.dds"))
+    self.refinementTab = CreateModeData(SI_SMITHING_TAB_REFINMENT, SMITHING_MODE_REFINMENT, "EsoUI/Art/Crafting/smithing_tabIcon_refine_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_disabled.dds")
+    self.creationTab = CreateModeData(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/smithing_tabIcon_creation_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds")
+    self.deconstructionTab = CreateModeData(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_disabled.dds")
+    self.improvementTab = CreateModeData(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/smithing_tabIcon_improve_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_disabled.dds")
+    self.researchTab = CreateModeData(SI_SMITHING_TAB_RESEARCH, SMITHING_MODE_RESEARCH, "EsoUI/Art/Crafting/smithing_tabIcon_research_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_research_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_research_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_research_disabled.dds")
+
+    self.recipeTab =
+    {
+        descriptor = SMITHING_MODE_RECIPES,
+        callback = function(tabData)
+            self.modeBarLabel:SetText(GetString(tabData.categoryName))
+            self:SetMode(SMITHING_MODE_RECIPES)
+        end,
+    }
 
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
+end
+
+function ZO_Smithing:AddTabsToMenuBar(craftingType, isCraftingTypeDifferent)
+    local oldMode = self.mode
+    self.mode = nil
+    
+    local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(craftingType)
+    local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
+    local normal, pressed, highlight, disabled = GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
+
+    local recipeTab = self.recipeTab
+    recipeTab.categoryName = recipeCraftingSystemNameStringId
+    recipeTab.normal = normal
+    recipeTab.pressed = pressed
+    recipeTab.highlight = highlight
+    recipeTab.disabled = disabled
+
+    ZO_MenuBar_ClearButtons(self.modeBar)
+    ZO_MenuBar_AddButton(self.modeBar, self.refinementTab)
+    ZO_MenuBar_AddButton(self.modeBar, self.creationTab)
+    ZO_MenuBar_AddButton(self.modeBar, self.deconstructionTab)
+    ZO_MenuBar_AddButton(self.modeBar, self.improvementTab)
+    ZO_MenuBar_AddButton(self.modeBar, self.researchTab)
+    ZO_MenuBar_AddButton(self.modeBar, self.recipeTab)
+
+    if isCraftingTypeDifferent or not oldMode then
+        ZO_MenuBar_SelectDescriptor(self.modeBar, SMITHING_MODE_REFINMENT)
+    else
+        ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
+    end   
 end
 
 function ZO_Smithing:OnItemReceiveDrag(slotControl, bagId, slotIndex)
@@ -237,17 +270,28 @@ end
 
 function ZO_Smithing:SetMode(mode)
     if self.mode ~= mode then
+        local oldMode = self.mode
         self.mode = mode
 
         CRAFTING_RESULTS:SetCraftingTooltip(nil)
+
+        if mode == SMITHING_MODE_RECIPES then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            PROVISIONER:EmbedInCraftingScene()
+        else
+            if oldMode == SMITHING_MODE_RECIPES then
+                PROVISIONER:RemoveFromCraftingScene()
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            TriggerTutorial(self.GetTutorialTrigger(self, GetCraftingInteractionType(), mode))
+        end
+
         self.refinementPanel:SetHidden(mode ~= SMITHING_MODE_REFINMENT)
         self.creationPanel:SetHidden(mode ~= SMITHING_MODE_CREATION)
         self.improvementPanel:SetHidden(mode ~= SMITHING_MODE_IMPROVEMENT)
         self.deconstructionPanel:SetHidden(mode ~= SMITHING_MODE_DECONSTRUCTION)
         self.researchPanel:SetHidden(mode ~= SMITHING_MODE_RESEARCH)
-        
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-        TriggerTutorial(self.GetTutorialTrigger(self, GetCraftingInteractionType(), mode))
     end
 end
 

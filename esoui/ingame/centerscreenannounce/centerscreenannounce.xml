@@ -33,7 +33,7 @@
 
     <Controls>
         <Label name="ZO_CenterScreenAnnounceTextTemplate" horizontalAlignment="CENTER" virtual="true">
-            <Dimensions x="1160" />
+            <Dimensions x="1280" />
             <Anchor point="TOP" />
         </Label>
 

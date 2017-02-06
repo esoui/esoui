@@ -17,6 +17,9 @@ function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
                                                     GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
                                                  end
                                              end)
+
+    SYSTEMS:RegisterGamepadObject(RAID_LEADERBOARD_SYSTEM_NAME, self)
+    GAMEPAD_LEADERBOARDS:UpdateCategories()
 end
 
 function ZO_RaidLeaderboardsManager_Gamepad:PerformDeferredInitialization(control)
@@ -69,6 +72,4 @@ end
 
 function ZO_RaidLeaderboardsInformationArea_Gamepad_OnInitialized(self)
     GAMEPAD_RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Gamepad:New(self)
-    GAMEPAD_LEADERBOARDS:UpdateCategories()
-    SYSTEMS:RegisterGamepadObject(RAID_LEADERBOARD_SYSTEM_NAME, GAMEPAD_RAID_LEADERBOARDS)
 end

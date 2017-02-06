@@ -243,6 +243,8 @@
         <Texture name="ZO_CrownCrateCardTexture" virtual="true">
             <LocalDimensions3D x="ZO_CROWN_CRATES_CARD_WIDTH_WORLD" y="ZO_CROWN_CRATES_CARD_HEIGHT_WORLD"/>
         </Texture>
+
+        <Label name="ZO_CrownCrateCardCrownGemsText" horizontalAlignment="CENTER" virtual="true" tier="HIGH"/>
         
         <Control name="ZO_CrownCrateCard" virtual="true" hidden="true" tier="LOW">
             <Controls>
@@ -288,9 +290,6 @@
                         <Label name="$(parent)Text" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
                             <Anchor point="BOTTOMLEFT" offsetX="ZO_CROWN_CRATES_CARD_INFO_INSET_X" offsetY="-5" />
                             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_CROWN_CRATES_CARD_INFO_INSET_X" offsetY="-5" />
-                        </Label>
-                        <Label name="$(parent)CrownGemsText" horizontalAlignment="CENTER">
-                            <Anchor point="BOTTOM" relativeTo="$(parent)Text" relativePoint="TOP" offsetY="5" />
                         </Label>
                     </Controls>
                 </Control>

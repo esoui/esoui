@@ -1,0 +1,86 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_HousingFurnitureBrowser_Gamepad_Row" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="30" />
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                    <Anchor point="LEFT" />
+                </Label>
+
+                <Label name="$(parent)Value" font="ZoFontGamepad34" maxLineCount="1" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="15" />
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HouseInformation_GamepadTopLevel" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_HouseInformation_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSE_INFORMATION_TITLE">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDivider">
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="20" />
+                        </Control>
+
+                        <Control name="$(parent)NameRow" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="70" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSING_NAME_HEADER" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)LocationRow" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameRow" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSING_LOCATION_HEADER" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)InfoSection" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)LocationRow" relativePoint="BOTTOMLEFT" offsetY="70" />
+                            <Controls>
+                                <Control name="$(parent)FurnishingLimits" resizToFitDescendents="true">
+                                    <Anchor point="TOPLEFT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)PrimaryResidenceRow" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)InfoSection" relativePoint="BOTTOMLEFT" offsetY="70" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSING_PRIMARY_RESIDENCE_HEADER" />
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)CurrentVisitorsRow" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidenceRow" relativePoint="BOTTOMLEFT" offsetY="70" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSING_CURRENT_RESIDENTS_HEADER" />
+                                <Label name="$(parent)Value" override="true" >
+                                    <Anchor point="RIGHT" />
+                                </Label>
+                                <Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5"/>
+                                    <Dimensions x="32" y="32"/>
+                                    <Controls>
+                                        <Label name="$(parent)OverPopulationLabel" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT" text="SI_HOUSING_CURRENT_RESIDENTS_OVER_POPULATION_TEXT">
+                                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)Name" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                                            <Dimensions x="350"/>
+                                        </Label>
+                                    </Controls>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

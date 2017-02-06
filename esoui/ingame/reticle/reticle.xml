@@ -77,7 +77,7 @@
                     <Anchor point="LEFT" relativePoint="CENTER" offsetX="45" offsetY="40" />
                     <Controls>
                         <Label name="$(parent)Context">
-                            <DimensionConstraints maxX="260" />
+                            <DimensionConstraints maxX="380" />
                             <Anchor point="BOTTOMLEFT" />
                         </Label>
 
@@ -91,14 +91,14 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)NonInteract" resizeToFitDescendents="true" hidden="true">                            
+                <Control name="$(parent)NonInteract" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="LEFT" relativePoint="CENTER" offsetX="45"/>
                     <Controls>
                         <Label name="$(parent)Text">
                             <Anchor point="TOPLEFT"/>
                             <Dimensions x="300"/>
                         </Label>
-                    </Controls>                            
+                    </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>

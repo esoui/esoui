@@ -19,7 +19,7 @@ local ABILITY_LIST_BROWSE_MODE = 3
 local SINGLE_ABILITY_ASSIGN_MODE = 4
 
 function ZO_GamepadSkills:Initialize(control)
-	ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
 
     self.trySetClearNewFlagCallback = function(callId)
         self:TrySetClearNewFlag(callId)
@@ -28,8 +28,8 @@ function ZO_GamepadSkills:Initialize(control)
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadSkillsTopLevelSkillInfo)
 
     GAMEPAD_SKILLS_ROOT_SCENE = ZO_Scene:New("gamepad_skills_root", SCENE_MANAGER)
-    GAMEPAD_SKILLS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
     GAMEPAD_SKILLS_ROOT_SCENE:AddFragment(skillLineXPBarFragment)
+    GAMEPAD_SKILLS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
         if newState == SCENE_SHOWING then
             GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_LEFT_TOOLTIP, true)
@@ -52,6 +52,14 @@ function ZO_GamepadSkills:Initialize(control)
                     end
                 end
                 zo_callLater(ShowDialog, 20)
+            end
+        elseif newState == SCENE_SHOWN then
+            --If we entered skills with the action bar selected make sure to activate it. We do this in shown because fragments are set to showing after
+            --the scene is which means the action bar is still hidden on showing which prevents activating it.
+            if self.mode == SKILL_LIST_BROWSE_MODE then
+                if self.categoryList:GetSelectedData() == ACTION_BAR_ID then
+                    self:ActivateAssignableActionBarFromList()
+                end
             end
         elseif newState == SCENE_HIDDEN then
             self:DisableCurrentList()
@@ -88,12 +96,12 @@ function ZO_GamepadSkills:Initialize(control)
     end)
 
     local ALWAYS_ANIMATE = true
-    GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadSkillsTopLevelBuildPlannerContainer, ALWAYS_ANIMATE)
+    GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT = ZO_FadeSceneFragment:New(self.control:GetNamedChild("BuildPlannerContainer"), ALWAYS_ANIMATE)
     GAMEPAD_SKILLS_BUILD_PLANNER_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.modeBeforeBuildPlannerShow = self.mode
             if self.modeBeforeBuildPlannerShow == SKILL_LIST_BROWSE_MODE then
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)             
+                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             elseif self.modeBeforeBuildPlannerShow == ABILITY_LIST_BROWSE_MODE then
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
             end
@@ -111,7 +119,7 @@ function ZO_GamepadSkills:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.buildPlannerKeybindStripDescriptor)
          
             if self.modeBeforeBuildPlannerShow == SKILL_LIST_BROWSE_MODE then
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)             
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             elseif self.modeBeforeBuildPlannerShow == ABILITY_LIST_BROWSE_MODE then
                 KEYBIND_STRIP:AddKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
             end
@@ -447,16 +455,22 @@ function ZO_GamepadSkills:InitializeAssignableActionBar()
     self.actionBarAnimation:PlayInstantlyToStart()
 end
 
-function ZO_GamepadSkills:SelectableActionBarSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    if data == ACTION_BAR_ID and selected then
-        if selected then
-            if self.assignableActionBarSelectedId then
-                self.assignableActionBar:SetSelectedButtonBySlotId(self.assignableActionBarSelectedId)
-            else
-                self.assignableActionBar:SetSelectedButton(1)
-            end
+function ZO_GamepadSkills:ActivateAssignableActionBarFromList()
+    --Only activate the action bar if it is showing. You could start moving toward it being selected and then close the window
+    --before selection happens, then the selection happens when the window is closed an the bar activates (ESO-490544).
+    if not self.assignableActionBar:GetControl():IsHidden() then
+        if self.assignableActionBarSelectedId then
+            self.assignableActionBar:SetSelectedButtonBySlotId(self.assignableActionBarSelectedId)
+        else
+            self.assignableActionBar:SetSelectedButton(1)
         end
         self.assignableActionBar:Activate()
+    end
+end
+
+function ZO_GamepadSkills:SelectableActionBarSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    if data == ACTION_BAR_ID and selected then        
+        self:ActivateAssignableActionBarFromList()
     --when weapon swapping or assigning in these mode we want the selected button to stay selected
     elseif self.mode ~= SINGLE_ABILITY_ASSIGN_MODE and self.mode ~= BUILD_PLANNER_ASSIGN_MODE  then 
         self.assignableActionBar:SetSelectedButton(nil)

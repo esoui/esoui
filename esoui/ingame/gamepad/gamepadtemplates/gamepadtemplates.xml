@@ -53,36 +53,7 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_GamepadSubMenuEntryWithSubLabelTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true" verticalAlignment="BOTTOM">
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 1
-                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplate" hidden="true" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
-                </Label>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_GamepadSubMenuEntryWithTwoSubLabelsTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 2
-                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)SubLabel1" font="ZoFontGamepad22" hidden="true" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
-                </Label>
-                <Label name="$(parent)SubLabel2" font="ZoFontGamepad22" hidden="true" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMRIGHT"/>
-                </Label>
-            </Controls>
-        </Control>
+        <Label name="ZO_ProvisioningSubLabelTemplate" font="ZoFontGamepad22" modifyTextType="UPPERCASE" virtual="true"/>
 
         <Control name="ZO_GamepadOptionsMenuEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
@@ -264,7 +235,7 @@
         <Control name="ZO_GamepadPricedVendorItemEntryTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate" excludeFromResizeToFitExtents="true">
@@ -303,8 +274,7 @@
         <Control name="ZO_GamepadLoreCollectionEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 1
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabelOnly(self)
             </OnInitialized>
 
             <Controls>

@@ -21,6 +21,12 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
     self.conditionTextBulletList = ZO_BulletList:New(control:GetNamedChild("ConditionTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel")
     self.optionalStepTextBulletList = ZO_BulletList:New(control:GetNamedChild("OptionalStepTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel")
 
+    self.bgText = control:GetNamedChild("BGText")
+    self.stepText = control:GetNamedChild("StepText")
+    self.optionalStepTextLabel = control:GetNamedChild("OptionalStepTextLabel")
+    self.questInfoContainer = control:GetNamedChild("QuestInfoContainer")
+    self.questStepContainer = control:GetNamedChild("QuestStepContainer")
+
     self:RefreshQuestMasterList()
 
     ZO_QuestJournal_Shared.Initialize(self, control)
@@ -471,8 +477,8 @@ function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
             end
 
             AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() 
-																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
-																	HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromQuestName(node.data.name)
+																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:GetFragment())
+																	HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:SetDetailsText(node.data.name)
 																end)
 
             ShowMenu(label)

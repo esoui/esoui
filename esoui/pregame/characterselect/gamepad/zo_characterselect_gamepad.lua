@@ -898,6 +898,11 @@ local function OnCharacterConstructionReady()
             local ALLOW_EVEN_IF_DISABLED = true
             local FORCE_ANIMATION = false
             ZO_CharacterSelect_Gamepad.characterList:SetSelectedIndexWithoutAnimation(g_currentlySelectedCharacterData.slot, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION)
+
+            --if we're quick launching, then just select the first character we can.
+            if (GetCVar("QuickLaunch") == "1") then
+                ZO_CharacterSelect_Gamepad_Login(CHARACTER_OPTION_EXISTING_AREA)
+            end
         end
         ZO_CharacterSelect_Gamepad_RefreshCharacter()
     end

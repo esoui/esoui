@@ -118,11 +118,17 @@ function PregameInitialScreen_Console:PerformDeferredInitialization()
     self:SetupStartupButtons()
 
     local function ProfileLoginResult(eventCode, isSuccess, profileError)
-        if SCENE_MANAGER:IsShowing("PregameInitialScreen_Gamepad") then
-            if isSuccess == true then
-                self:OnProfileLoginSuccess()
-            else
-                self:RefreshScreen()
+        if (GetCVar("QuickLaunch") == "1") and (isSuccess == true) then
+            --Fast fadeout the logo and get us into game if we're quick launching.
+            self.fadeMode = LOGO_FADING_OUT;
+            self.esoLogoAnimation:PlayInstantlyToEnd()
+        else
+            if SCENE_MANAGER:IsShowing("PregameInitialScreen_Gamepad") then
+                if isSuccess == true then
+                    self:OnProfileLoginSuccess()
+                else
+                    self:RefreshScreen()
+                end
             end
         end
     end

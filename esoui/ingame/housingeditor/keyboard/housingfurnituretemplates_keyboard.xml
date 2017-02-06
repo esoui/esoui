@@ -1,0 +1,259 @@
+<GuiXml> 
+    <Controls>
+        <Label name="ZO_HousingFurnitureBrowserSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" >
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Control name="ZO_PlayerFurnitureSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+            <Dimensions x="509" y="ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT" />
+            <OnInitialized>
+                ZO_HousingFurnitureTemplates_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnMouseUp>
+                ZO_HousingFurnitureTemplates_Keyboard_OnMouseClick(self, button, upInside)
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                ZO_HousingFurnitureTemplates_Keyboard_OnMouseDoubleClick(self, button)
+            </OnMouseDoubleClick>
+
+            <OnMouseEnter>
+                ZO_HousingFurnitureTemplates_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_HousingFurnitureTemplates_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" offsetX="0" offsetY="10" />
+                </Texture>
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26" />
+
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="274" />
+                    <Anchor point="LEFT" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="89" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RetrievableFurnitureSlot" inherits="ZO_PlayerFurnitureSlot" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Direction" textureFile="EsoUI/Art/Housing/housing_retrievalDirctionArrow.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="RIGHT" offsetX="-10" />
+                </Texture>
+                
+                <Label name="$(parent)Distance" font="ZoFontGameShadow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Direction" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="89" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Distance" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_MarketProductFurnitureSlot" inherits="ZO_PlayerFurnitureSlot" virtual="true">
+            <OnInitialized>
+                ZO_MarketProductHousingFurnitureTemplates_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Cost" font="ZoFontWinH4">
+                    <Anchor point="RIGHT" offsetX="-10" />
+                </Label>
+
+                <Label name="$(parent)PreviousCost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontWinH4" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Cost" relativePoint="LEFT" offsetX="-10" />
+                    <Controls>
+                        <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY">
+                            <Dimensions y="2.5" />
+                            <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
+                            <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Label name="$(parent)TextCallout" font="ZoFontWinT1" modifyTextType="UPPERCASE">
+                    <Anchor point="RIGHT" relativeTo="$(parent)PreviousCost" relativePoint="LEFT" offsetX="-10" />
+                    <Controls>
+                        <Control name="$(parent)Background">
+                            <AnchorFill />
+                            <Controls>
+                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds">
+                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                                    <AnchorFill />
+                                </Texture>
+                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds">
+                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                                    <Dimensions x="16"/>
+                                    <DimensionConstraints minX="16" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Center" relativePoint="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Center" relativePoint="BOTTOMLEFT"/>
+                                </Texture>
+                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds">
+                                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                                    <Dimensions x="16"/>
+                                    <DimensionConstraints minX="16" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Center" relativePoint="TOPRIGHT"/>
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Center" relativePoint="BOTTOMRIGHT"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Label>
+
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="89" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextCallout" relativePoint="LEFT" offsetX="-10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingFurniture_ContentsAnchor" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryList" relativePoint="TOPRIGHT" offsetY="5" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-12" />
+        </Control>
+
+        <Control name="ZO_HousingFurnitureBrowserList_Keyboard" inherits="ZO_RightPanelFootPrint"  mouseEnabled="true" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-14" />
+                    <Controls>
+                        <Control name="$(parent)CategoryList" inherits="ZO_ScrollContainer" >
+                            <Dimensions x="310" />
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                        </Control>
+
+                        <Control name="$(parent)List" inherits="ZO_ScrollList ZO_HousingFurniture_ContentsAnchor" />
+
+                        <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" hidden="true">
+                            <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="TOP" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" inherits="ZO_HousingFurnitureBrowserList_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)SearchBox" inherits="ZO_HousingFurniture_SearchBox" >
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="28" />
+                        </Backdrop>
+
+                        <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Backdrop name="ZO_HousingFurniture_SearchBox" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
+            <Dimensions x="240"/>
+            <Controls>
+                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                    <OnInitialized>
+                        ZO_EditDefaultText_Initialize(self, GetString(SI_HOUSING_FURNITURE_TEXT_FILTER_DEFAULT_TEXT))
+                    </OnInitialized>
+                </EditBox>
+
+                <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_HOUSING_BROWSER_SEARCH_FILTER_BY">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
+                </Label>
+            </Controls>
+        </Backdrop>
+        
+        <Control name="ZO_HousingSettings_Dropdown" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" >
+                    <Dimensions x="340" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+                
+                <Control name="$(parent)DropDown" inherits="ZO_ComboBox">
+                    <Dimensions x="230" y="35" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                    <OnMouseEnter>
+                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingSettings_Button" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                    <Dimensions x="340" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Button name="$(parent)Button" inherits="ZO_DefaultButton">
+                    <Dimensions x="230" y="35"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                    <OnMouseEnter>
+                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+        </Control>
+
+    </Controls>
+</GuiXml>

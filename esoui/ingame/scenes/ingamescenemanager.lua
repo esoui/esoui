@@ -176,6 +176,9 @@ function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
 end
 
 function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
+    self:RestoreHUDScene()
+    self:RestoreHUDUIScene()   
+
     --if a scene was already shown when we change input mode, hide it
     if not self:IsShowingBaseScene() and self.currentScene and self.currentScene:IsShowing() then
         self:SetInUIMode(false)
@@ -214,6 +217,10 @@ do
         ["gamepad_market_preview"] = true,
         ["dyeStampConfirmationKeyboard"] = true,
         ["dyeStampConfirmationGamepad"] = true,
+        ["inventory"] = true,
+        ["gamepad_inventory_root"] = true,
+        ["collectionsBook"] = true,
+        ["gamepadCollectionsBook"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()
@@ -404,6 +411,10 @@ function ZO_IngameSceneManager:OnToggleUIModeBinding()
         if(self:IsInUIMode()) then
             self:SetInUIMode(false)
         else
+            if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
+                --disable housing if going to a menu, but not a from mouse mode back to crosshair
+                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+            end
             self:SetInUIMode(true)
             GetMenuObject():ShowLastCategory()
         end

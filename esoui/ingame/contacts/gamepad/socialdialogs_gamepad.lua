@@ -17,7 +17,6 @@ local function SetActiveEdit(dialog)
     local data = dialog.entryList:GetTargetData()
     local edit = data.control.editBoxControl
 
-    local SAVE_EXISTING_TEXT = true
     edit:TakeFocus()
 end
 
@@ -161,6 +160,7 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.highlight:SetHidden(not selected)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
+                        control.editBoxControl:SetMaxInputChars(254)
                         ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_EDIT_NOTE_DEFAULT_TEXT))
                         if parametricDialog.data.note then
                             control.editBoxControl:SetText(parametricDialog.data.note)
@@ -212,17 +212,6 @@ function ZO_GamepadSocialDialogs:InitializeEditNoteDialog()
 
 end
 
-local function GetInviteInstructions()
-    local instructions 
-    if IsConsoleUI() then
-        local platform = ZO_GetPlatformAccountLabel()
-        instructions = zo_strformat(SI_GAMEPAD_SOCIAL_REQUEST_NAME_INSTRUCTIONS, platform)
-    else
-        instructions = GetString(SI_REQUEST_NAME_INSTRUCTIONS)
-    end
-    return instructions
-end
-
 -------------------
 -- Add Friend
 -------------------
@@ -263,7 +252,7 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                     data.control = control
 
                     if nameText == "" then
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, GetInviteInstructions())
+                        ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                         control.resetFunction = function()
                             control.editBoxControl.textChangedCallback = nil
                             if not control.editBoxControl.isInScreen then
@@ -429,7 +418,7 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                             if validInput then
                                 control.editBoxControl:SetText(nameText)
                             else
-                                ZO_EditDefaultText_Initialize(control.editBoxControl, GetInviteInstructions())
+                                ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                             end
                         end
                     end,
@@ -523,7 +512,7 @@ function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
                         if validInput then
                             control.editBoxControl:SetText(nameText)
                         else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetInviteInstructions())
+                            ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                         end
                     end,
                     callback = function(dialog)
@@ -618,7 +607,7 @@ function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
                         if validInput then
                             control.editBoxControl:SetText(nameText)
                         else
-                            ZO_EditDefaultText_Initialize(control.editBoxControl, GetInviteInstructions())
+                            ZO_EditDefaultText_Initialize(control.editBoxControl, ZO_GetInviteInstructions())
                         end
                     end,
                     callback = function(dialog)

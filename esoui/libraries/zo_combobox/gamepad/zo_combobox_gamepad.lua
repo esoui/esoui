@@ -177,8 +177,8 @@ function ZO_ComboBox_Gamepad:SelectHighlightedItem()
 end
 
 function ZO_ComboBox_Gamepad:SelectItemByIndex(index, ignoreCallback)
-    ZO_ComboBox_Base.SelectItemByIndex(self, index, ignoreCallback)
     self.m_highlightedIndex = index
+    ZO_ComboBox_Base.SelectItemByIndex(self, index, ignoreCallback)
 end
 
 function ZO_ComboBox_Gamepad:SetHighlightedItem(highlightIndex, reselectIndex)
@@ -221,6 +221,10 @@ end
 function ZO_ComboBox_Gamepad:SetDeactivatedCallback(callback, args)
     self.deactivatedCallbackArgs = args
     self.deactivatedCallback = callback
+end
+
+function ZO_ComboBox_Gamepad:SetKeybindAlignment(alignment)
+    self.keybindStripDescriptor.alignment = alignment
 end
 
 function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()

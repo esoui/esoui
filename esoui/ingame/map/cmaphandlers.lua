@@ -45,7 +45,6 @@ function CMapHandlers:InitializeEvents()
     end
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_GATE_STATE_CHANGED, RefreshKeeps)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEPS_INITIALIZED, RefreshKeeps)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_CURRENT_SUBZONE_LIST_CHANGED, RefreshKeeps)
 
     local function RefreshAvAObjectives()
         self.refresh:RefreshAll("avaObjectives")
@@ -54,6 +53,12 @@ function CMapHandlers:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_OBJECTIVE_CONTROL_STATE, RefreshAvAObjectives)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_GAME_STATE_CHANGED, RefreshAvAObjectives)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ZONE_SCORING_CHANGED, RefreshAvAObjectives)
+    
+    local function RefreshKeepsAndObjectives()
+        self.refresh:RefreshAll("keep")
+        self.refresh:RefreshAll("avaObjectives")
+    end
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_CURRENT_SUBZONE_LIST_CHANGED, RefreshKeepsAndObjectives)
 
     local function RefreshAll()
         self:RefreshAll()
@@ -115,31 +120,55 @@ local AVA_OBJECTIVE_PINS_WITH_ARROWS =
     [MAP_PIN_TYPE_BALL_NEUTRAL] = true,       
 }
 
+function CMapHandlers:IsObjectiveShown(keepId, objectiveId, bgContext)
+    if IsAvAObjectiveInBattleground(keepId, objectiveId, bgContext) then
+        return true
+    else
+        local _, objectiveType = GetAvAObjectiveInfo(keepId, objectiveId, bgContext)
+        if objectiveType == OBJECTIVE_ARTIFACT_OFFENSIVE or objectiveType == OBJECTIVE_ARTIFACT_DEFENSIVE then
+            return true
+        elseif objectiveType == OBJECTIVE_CAPTURE_AREA and GetKeepType(keepId) == KEEPTYPE_TOWN then
+            return true
+        end
+    end
+    return false
+end
+
 function CMapHandlers:RefreshAvAObjectives()
     RemoveMapPinsInRange(MAP_PIN_TYPE_FLAG_ALDMERI_DOMINION, MAP_PIN_TYPE_HALF_CAPTURE_FLAG_DAGGERFALL_COVENANT)    
+    --Clearing the attack indicators.    
+    RemoveMapPinsByType(MAP_PIN_TYPE_FLAG_ATTACKED)
 
     local numObjectives = GetNumAvAObjectives()
     for i = 1, numObjectives do
         local keepId, objectiveId, bgContext = GetAvAObjectiveKeysByIndex(i)
-        if(IsLocalBattlegroundContext(bgContext)) then            
-            if(ZO_WorldMap_IsObjectiveShown(keepId, objectiveId, bgContext)) then
+        if IsLocalBattlegroundContext(bgContext) then            
+            if self:IsObjectiveShown(keepId, objectiveId, bgContext) and DoesObjectivePassCompassVisibilitySubzoneCheck(keepId, objectiveId, bgContext) then
                 --spawn locations
                 local pinType, spawnX, spawnY = GetAvAObjectiveSpawnPinInfo(keepId, objectiveId, bgContext)            
-                if(pinType ~= MAP_PIN_TYPE_INVALID) then
+                if pinType ~= MAP_PIN_TYPE_INVALID then
                     self:AddMapPin(pinType, keepId, objectiveId)
                 end            
 
                 -- current locations
                 local pinType, currentX, currentY, continuousUpdate = GetAvAObjectivePinInfo(keepId, objectiveId, bgContext)
-                if(pinType ~= MAP_PIN_TYPE_INVALID) then
+                if pinType ~= MAP_PIN_TYPE_INVALID then
+                    local _, objectiveType, objectiveState = GetAvAObjectiveInfo(keepId, objectiveId, bgContext)
+
                     self:AddMapPin(pinType, keepId, objectiveId)
                 
-                    if(continuousUpdate) then
+                    if continuousUpdate then
                         SetMapPinContinuousPositionUpdate(pinType, true, keepId, objectiveId)    
                     end
 
-                    if(AVA_OBJECTIVE_PINS_WITH_ARROWS[pinType]) then
+                    if AVA_OBJECTIVE_PINS_WITH_ARROWS[pinType] then
                         SetMapPinAssisted(pinType, true, keepId, objectiveId)
+                    end
+                    
+                    if objectiveType == OBJECTIVE_CAPTURE_AREA then
+                        if objectiveState ~= OBJECTIVE_CONTROL_STATE_AREA_MAX_CONTROL and objectiveState ~= OBJECTIVE_CONTROL_STATE_AREA_NO_CONTROL then
+                            self:AddMapPin(MAP_PIN_TYPE_FLAG_ATTACKED, keepId, objectiveId)
+                        end
                     end
                 end
             end

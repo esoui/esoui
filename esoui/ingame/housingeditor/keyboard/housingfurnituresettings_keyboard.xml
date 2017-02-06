@@ -1,0 +1,382 @@
+<GuiXml> 
+    <Controls>
+        <Control name="ZO_HousingSettings_BanList_Row" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnMouseEnter>
+                ZO_HousingSettingsRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_HousingSettingsRow_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                
+                <Button name="$(parent)Remove" mouseOverBlendMode="ADD">
+                    <Dimensions x="26" y="26"/>
+                    <Anchor point="LEFT" offsetX="5"/>
+                    <Textures
+                        normal="EsoUI/Art/Buttons/decline_up.dds"
+                        pressed="EsoUI/Art/Buttons/decline_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/decline_over.dds"
+                    />
+                    <OnMouseEnter>
+                        ZO_Tooltips_ShowTextTooltip(self, TOP, GetString(SI_HOUSING_FURNITURE_SETTINGS_REMOVE_FROM_BANLIST))
+                        ZO_HousingSettingsRow_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_Tooltips_HideTextTooltip()
+                        ZO_HousingSettingsRow_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                    <OnClicked>
+                        ZO_HousingSettings_BanList_Row_OnClick(self:GetParent(), button)
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)DisplayName" font="ZoFontGame" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativeTo="$(parent)Remove" relativePoint="RIGHT" offsetX="15" offsetY="-3"/>
+                    <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH" y="20"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingSettings_WhiteList_Row" mouseEnabled="true" virtual="true">
+            <Dimensions y="30"/>
+            <OnMouseEnter>
+                ZO_HousingSettingsRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_HousingSettingsRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_HousingSettingsRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                <Label name="$(parent)DisplayName" font="ZoFontGame" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" maxLineCount="1" mouseEnabled="true">
+                    <Anchor point="LEFT" offsetX="25" />
+                    <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH" y="20"/>
+                    <OnMouseEnter>
+                        ZO_HousingSettingsRow_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_HousingSettingsRow_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                    <OnMouseUp>
+                        ZO_HousingSettingsRow_OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
+                </Label>
+                <Label name="$(parent)Permissions" font="ZoFontGame" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" maxLineCount="1" mouseEnabled="true">
+                    <Anchor point="RIGHT" relativePoint="RIGHT" offsetX="-5"/>
+                    <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_PERMISSIONS_WIDTH" y="20"/>
+                    <OnMouseEnter>
+                        ZO_HousingSettingsRow_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_HousingSettingsRow_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                    <OnMouseUp>
+                        ZO_HousingSettingsRow_OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_AddPermissionIndividualNameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_NAME_INSTRUCTIONS" virtual="true"/>
+        <Label name="ZO_AddPermissionGuildNameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_ADD_GUILD_PERMISSION_INSTRUCTIONS" virtual="true"/>
+        <Label name="ZO_AddPermissionPresetsHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_REQUEST_SELECT_PERMISSION_HEADER" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="15" />
+        </Label>
+
+        <Control name="ZO_AddPermissionPresets" inherits="ZO_ComboBox" virtual="true">
+            <Dimensions x="200" y="36"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)PresetsHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+        </Control>
+
+        <Backdrop name="ZO_AddPermissionIndividualEditBackdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+            <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+            <Controls>
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                    <OnInitialized>
+                        ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
+                        local includeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }
+                        local excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }
+                        ZO_AutoComplete:New(self, includeFlags, excludeFlags, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+                    </OnInitialized>
+                    <OnEffectivelyShown>
+                        self:TakeFocus()
+                    </OnEffectivelyShown>
+                </EditBox>
+            </Controls>
+        </Backdrop>
+        
+        <Backdrop name="ZO_AddPermissionGuildEditBackdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+            <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+            <Controls>
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                    <OnInitialized>
+                        ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_GUILD_DEFAULT_TEXT))
+                        local includeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }
+                        local excludeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }
+                        ZO_AutoComplete:New(self, includeFlags, excludeFlags, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+                    </OnInitialized>
+                    <OnEffectivelyShown>
+                        self:TakeFocus()
+                    </OnEffectivelyShown>
+                </EditBox>
+            </Controls>
+        </Backdrop>
+
+        <Button name="ZO_HousingPermissionAllHousesCheckBox" inherits="ZO_CheckButton" virtual="true">
+            <OnInitialized>
+                ZO_CheckButton_SetLabelText(self, GetString(SI_DIALOG_OPTION_VISITOR_PERMISSION_AFFECTS_ALL_HOUSES))
+                ZO_CheckButton_SetCheckState(self, true)
+            </OnInitialized>
+        </Button>
+
+        <Control name="ZO_PermissionsDialog" inherits="ZO_CustomDialogBase" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Furniture_Setting_Panel_ScrollList" inherits="ZO_ScrollList" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+            <Anchor point="BOTTOMRIGHT" />
+        </Control>
+
+        <Control name="ZO_Furniture_Setting_Panel_Header_DisplayName" inherits="ZO_SortHeader" virtual="true">
+            <OnInitialized>
+                ZO_SortHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_DISPLAY_NAME), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+            </OnInitialized>
+            <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH" y="32"/>
+        </Control>
+        
+        <Control name="ZO_Furniture_Setting_Panel_Header_GuildName" inherits="ZO_SortHeader" virtual="true">
+            <OnInitialized>
+                ZO_SortHeader_Initialize(self, GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_GUILD), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+            </OnInitialized>
+            <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH" y="32"/>
+        </Control>
+
+        <Control name="ZO_Furniture_Setting_Panel_Header_Permissions" inherits="ZO_SortHeader" virtual="true">
+            <OnInitialized>
+                ZO_SortHeader_Initialize(self, GetString(SI_HOUSING_FURNITURE_SETTINGS_SOCIAL_LIST_PERMISSIONS), "permissionPresetName", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+            </OnInitialized>
+            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-20"/>
+            <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_PERMISSIONS_WIDTH" y="32" />
+        </Control>
+
+        <Control name="ZO_Furniture_Settings_Panel_Header_Anchors" virtual="true">
+            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPRIGHT" />
+            <Dimensions y="32"/>
+        </Control>
+        
+        <TopLevelControl name="ZO_HousingFurnitureSettingsPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard" hidden="true">
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)General" inherits="ZO_HousingFurniture_ContentsAnchor">
+                            <Controls>
+                                <Control name="$(parent)Settings" inherits="ZO_ScrollContainer">
+                                    <AnchorFill />
+                                </Control>
+                                
+                                <Control name="$(parent)PrimaryResidence" inherits="ZO_HousingSettings_Button">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SettingsScrollChild"  offsetX="20" offsetY="20" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE]
+                                    </OnInitialized>
+                                </Control>
+                                
+                                <Control name="$(parent)DefaultAccess" inherits="ZO_HousingSettings_Dropdown">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidence" relativePoint="BOTTOMLEFT" offsetY="15" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS]
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)Visitors" inherits="ZO_HousingFurniture_ContentsAnchor" hidden="true">
+                            <Controls>
+                                <Control name="$(parent)Headers" inherits="ZO_Furniture_Settings_Panel_Header_Anchors">
+                                    <Controls>
+                                        <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_DisplayName">
+                                            <Anchor point="TOPLEFT" offsetX="24"/>
+                                        </Control>
+                                        <Control name="$(parent)Permissions" inherits="ZO_Furniture_Setting_Panel_Header_Permissions" />
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)List" inherits="ZO_Furniture_Setting_Panel_ScrollList" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)BanList" inherits="ZO_HousingFurniture_ContentsAnchor" hidden="true">
+                            <Controls>
+                                <Control name="$(parent)Headers" inherits="ZO_Furniture_Settings_Panel_Header_Anchors">
+                                    <Controls>
+                                        <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_DisplayName">
+                                            <Anchor point="TOPLEFT" offsetX="47"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)List" inherits="ZO_Furniture_Setting_Panel_ScrollList" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)GuildVisitors" inherits="ZO_HousingFurniture_ContentsAnchor" hidden="true">
+                            <Controls>
+                                <Control name="$(parent)Headers" inherits="ZO_Furniture_Settings_Panel_Header_Anchors">
+                                    <Controls>
+                                        <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_GuildName">
+                                            <Anchor point="TOPLEFT" offsetX="24"/>
+                                        </Control>
+                                        <Control name="$(parent)Permissions" inherits="ZO_Furniture_Setting_Panel_Header_Permissions" />
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)List" inherits="ZO_Furniture_Setting_Panel_ScrollList" />
+                            </Controls>
+                        </Control>
+                        
+                        <Control name="$(parent)GuildBanList" inherits="ZO_HousingFurniture_ContentsAnchor" hidden="true">
+                            <Controls>
+                                <Control name="$(parent)Headers" inherits="ZO_Furniture_Settings_Panel_Header_Anchors">
+                                    <Controls>
+                                        <Control name="$(parent)DisplayName" inherits="ZO_Furniture_Setting_Panel_Header_GuildName">
+                                            <Anchor point="TOPLEFT" offsetX="47"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)List" inherits="ZO_Furniture_Setting_Panel_ScrollList" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ChangeHousingPermissionsDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_ChangeHousingPermissionsDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Header" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="15" />
+                </Label>
+
+                <Control name="$(parent)Presets" inherits="ZO_AddPermissionPresets" />
+
+                <Button name="$(parent)AllHouses" inherits="ZO_HousingPermissionAllHousesCheckBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Presets" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="20" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_RemoveHousingPermissionsDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_RemoveHousingPermissionsDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Header" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Button name="$(parent)AllHouses" inherits="ZO_HousingPermissionAllHousesCheckBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="20" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_RequestAddIndividualPermissionDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_RequestAddUserGroupDialog_OnInitialized(self, "REQUEST_ADD_INDIVIDUAL_PERMISSION")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_AddPermissionIndividualNameHeader" />
+
+                <Backdrop name="$(parent)Name" inherits="ZO_AddPermissionIndividualEditBackdrop" />
+
+                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader" />
+                
+                <Control name="$(parent)Presets" inherits="ZO_AddPermissionPresets" />
+
+                <Button name="$(parent)AllHouses" inherits="ZO_HousingPermissionAllHousesCheckBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Presets" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="20" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_RequestAddGuildPermissionDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_RequestAddUserGroupDialog_OnInitialized(self, "REQUEST_ADD_GUILD_PERMISSION")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_AddPermissionGuildNameHeader" />
+
+                <Backdrop name="$(parent)Name" inherits="ZO_AddPermissionGuildEditBackdrop" />
+
+                <Label name="$(parent)PresetsHeader" inherits="ZO_AddPermissionPresetsHeader" />
+
+                <Control name="$(parent)Presets" inherits="ZO_AddPermissionPresets" />
+
+                <Button name="$(parent)AllHouses" inherits="ZO_HousingPermissionAllHousesCheckBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Presets" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="20" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_RequestBanIndividualPermissionDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_RequestBanUserGroupDialog_OnInitialized(self, "REQUEST_BAN_INDIVIDUAL_PERMISSION")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_AddPermissionIndividualNameHeader" />
+
+                <Backdrop name="$(parent)Name" inherits="ZO_AddPermissionIndividualEditBackdrop" />
+
+                <Button name="$(parent)AllHouses" inherits="ZO_HousingPermissionAllHousesCheckBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="20" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_RequestBanGuildPermissionDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_RequestBanUserGroupDialog_OnInitialized(self, "REQUEST_BAN_GUILD_PERMISSION")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_AddPermissionGuildNameHeader" />
+
+                <Backdrop name="$(parent)Name" inherits="ZO_AddPermissionGuildEditBackdrop" />
+
+                <Button name="$(parent)AllHouses" inherits="ZO_HousingPermissionAllHousesCheckBox">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="20" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CopyHousingPermissionsDialog" inherits="ZO_PermissionsDialog" hidden="true">
+            <OnInitialized>
+                ZO_CopyHousingPermissionsDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)HousesHeader" inherits="ZO_DialogContentAnchors" text="SI_DIALOG_COPY_HOUSING_PERMISSION_HEADER" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Control name="$(parent)HousesComboBox" inherits="ZO_ComboBox">
+                    <Dimensions x="350" y="36"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HousesHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+    </Controls>
+</GuiXml>

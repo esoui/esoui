@@ -76,11 +76,16 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
     elseif(itemType == ITEMTYPE_COSTUME) then
         self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText)
     elseif(itemType == ITEMTYPE_RECIPE) then
-        if(IsItemLinkRecipeKnown(itemLink)) then
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, ZO_GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING))
+        local craftingSkillType = GetItemLinkRecipeCraftingSkillType(itemLink)
+        if IsItemLinkRecipeKnown(itemLink) then
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, GetCraftingSkillName(craftingSkillType))
         else
-            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE), ZO_GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING))
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE), GetCraftingSkillName(craftingSkillType))
         end
+    elseif itemType == ITEMTYPE_FURNISHING then
+        local furnitureDataId = GetItemLinkFurnitureDataId(itemLink)
+        local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, GetFurnitureCategoryName(categoryId))
     elseif(itemType ~= ITEMTYPE_NONE and equipType ~= EQUIP_TYPE_INVALID) then
         local weaponType = GetItemLinkWeaponType(itemLink)
         if itemType == ITEMTYPE_ARMOR and weaponType == WEAPONTYPE_NONE then
@@ -101,7 +106,7 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
     else
         local craftingSkillType = GetItemLinkCraftingSkillType(itemLink)
         if(craftingSkillType ~= CRAFTING_TYPE_INVALID) then
-            local craftingSkillName = ZO_GetCraftingSkillName(craftingSkillType)
+            local craftingSkillName = GetCraftingSkillName(craftingSkillType)
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, craftingSkillName)
         elseif(itemType ~= ITEMTYPE_NONE) then
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText)
@@ -490,27 +495,34 @@ function ZO_Tooltip:AddMaterialLevels(itemLink)
     end
 end
 
-local MAX_ITEM_TAGS = 3
 function ZO_Tooltip:AddItemTags(itemLink)
     local numItemTags = GetItemLinkNumItemTags(itemLink)
     if numItemTags > 0 then
-        assert(numItemTags <= MAX_ITEM_TAGS)
-        local itemTagsSection = self:AcquireSection(self:GetStyle("itemTagsSection"))
         local itemTagStrings = {}
-        itemTagsSection:AddLine(zo_strformat(SI_TOOLTIP_ITEM_TAGGING_HEADER), self:GetStyle("itemTagTitle"))
+
+        -- Build a map of tag category -> table of tags in that category
         for i = 1, numItemTags do
-            local itemTagDescription = GetItemLinkItemTagDescription(itemLink, i)
+            local itemTagDescription, itemTagCategory = GetItemLinkItemTagInfo(itemLink, i)
             if itemTagDescription ~= "" then
-                table.insert(itemTagStrings, itemTagDescription)
+                if not itemTagStrings[itemTagCategory] then
+                    itemTagStrings[itemTagCategory] = {}
+                end
+                table.insert(itemTagStrings[itemTagCategory], zo_strformat(SI_TOOLTIP_ITEM_TAG_FORMATER, itemTagDescription)) 
             end
         end
 
-        local itemTagsFormat = _G["SI_TOOLTIP_ITEM_TAGS_" .. #itemTagStrings]
-        if itemTagsFormat then
-            itemTagsSection:AddLine(zo_strformat(itemTagsFormat, unpack(itemTagStrings)), self:GetStyle("itemTagDescription"))
+        -- Iterate through categories, and build a section for each category with tags in it
+        for i = TAG_CATEGORY_MIN_VALUE, TAG_CATEGORY_MAX_VALUE do
+            if itemTagStrings[i] then
+                local itemTagsSection = self:AcquireSection(self:GetStyle("itemTagsSection"))
+                local categoryName = GetString("SI_ITEMTAGCATEGORY", i)
+                if categoryName ~= "" then
+                    itemTagsSection:AddLine(categoryName, self:GetStyle("itemTagTitle"))
+                end
+                itemTagsSection:AddLine(table.concat(itemTagStrings[i], GetString(SI_LIST_COMMA_SEPARATOR)), self:GetStyle("itemTagDescription"))
+                self:AddSection(itemTagsSection)
+            end
         end
-
-        self:AddSection(itemTagsSection)
     end
 end
 
@@ -536,7 +548,11 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         self:AddPoisonSystemDescription()
     end
     self:AddFlavorText(itemLink)
-    self:AddCreator(itemLink, creatorName)
+    -- We don't want crafted furniture to show who made it, since it will get cleared once placed in a house
+    -- TODO: If we implement saving the creator name, add back in LayoutItemCreator call (ESO-495280)
+    if not IsItemLinkPlaceableFurniture(itemLink) then
+        self:AddCreator(itemLink, creatorName)
+    end
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
@@ -696,6 +712,23 @@ do
     end
 end
 
+function ZO_Tooltip:LayoutMasterWritItem(itemLink, tradeBoPData)
+    self:AddTopSection(itemLink)
+    self:AddItemTitle(itemLink)
+
+    local writDescription = self:AcquireSection(self:GetStyle("bodySection"))
+    writDescription:AddLine(GenerateMasterWritBaseText(itemLink), self:GetStyle("bodyDescription"))
+    self:AddSection(writDescription)
+
+    local rewardDescription = self:AcquireSection(self:GetStyle("bodySection"))
+    rewardDescription:AddLine(GenerateMasterWritRewardText(itemLink), self:GetStyle("bodyDescription"))
+    self:AddSection(rewardDescription)
+
+    self:AddFlavorText(itemLink)
+    self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
+end
+
 function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
     self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:AddItemTitle(itemLink)
@@ -742,14 +775,15 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData)
         local ingredientsSection = self:AcquireSection(self:GetStyle("bodySection"))
         ingredientsSection:AddLine(GetString(SI_PROVISIONER_INGREDIENTS_HEADER), self:GetStyle("bodyHeader"))
         for i = 1, numIngredients do
-            local ingredientName, numOwned = GetItemLinkRecipeIngredientInfo(itemLink, i)
+            local ingredientName, numOwned, numRequired = GetItemLinkRecipeIngredientInfo(itemLink, i)
             local hasIngredientStyle
-            if(numOwned > 0) then
+            if numOwned >= numRequired then
                 hasIngredientStyle = self:GetStyle("hasIngredient")
             else
                 hasIngredientStyle = self:GetStyle("doesntHaveIngredient")
             end
-            ingredientsSection:AddLine(zo_strformat(SI_NUMBERED_LIST_ENTRY, i, ingredientName), hasIngredientStyle, self:GetStyle("bodyDescription"))
+            local ingredientNameWithRequiredQuantity = zo_strformat(SI_RECIPE_INGREDIENT_WITH_COUNT, ingredientName, numRequired)
+            ingredientsSection:AddLine(zo_strformat(SI_NUMBERED_LIST_ENTRY, i, ingredientNameWithRequiredQuantity), hasIngredientStyle, self:GetStyle("bodyDescription"))
         end
         self:AddSection(ingredientsSection)
     end
@@ -758,25 +792,33 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData)
     local requirementsSection = self:AcquireSection(self:GetStyle("bodySection"))
     requirementsSection:AddLine(GetString(SI_PROVISIONER_REQUIREMENTS_HEADER), self:GetStyle("bodyHeader"))
 
-    local requiredRank = GetItemLinkRecipeRankRequirement(itemLink)
-    local rank = GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_LEVEL)
-    local rankSuccessStyle
-    if(rank >= requiredRank) then
-        rankSuccessStyle = self:GetStyle("succeeded")
-    else
-        rankSuccessStyle = self:GetStyle("failed")
+    for tradeskillIndex = 1, GetItemLinkRecipeNumTradeskillRequirements(itemLink) do
+        local tradeskill, levelReq = GetItemLinkRecipeTradeskillRequirement(itemLink, tradeskillIndex)
+        local level = GetNonCombatBonus(GetNonCombatBonusLevelTypeForTradeskillType(tradeskill))
+        local rankSuccessStyle
+        if level < levelReq then
+            rankSuccessStyle = self:GetStyle("failed")
+        else
+            rankSuccessStyle = self:GetStyle("succeeded")
+        end
+
+        local levelPassiveAbilityId = GetTradeskillLevelPassiveAbilityId(tradeskill)
+        local levelPassiveAbilityName = GetAbilityName(levelPassiveAbilityId)            
+        requirementsSection:AddLine(zo_strformat(SI_RECIPE_REQUIRES_LEVEL_PASSIVE, levelPassiveAbilityName, levelReq),  rankSuccessStyle, self:GetStyle("bodyDescription"))
     end
-    requirementsSection:AddLine(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_IMPROVEMENT, requiredRank),  rankSuccessStyle, self:GetStyle("bodyDescription"))
     
     local requiredQuality = GetItemLinkRecipeQualityRequirement(itemLink)
-    local quality = GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL)
-    local qualitySuccessStyle
-    if(quality >= requiredQuality) then
-        qualitySuccessStyle = self:GetStyle("succeeded")
-    else
-        qualitySuccessStyle = self:GetStyle("failed")
+    if requiredQuality > 0 then
+        local quality = GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL)
+        local qualitySuccessStyle
+        if(quality >= requiredQuality) then
+            qualitySuccessStyle = self:GetStyle("succeeded")
+        else
+            qualitySuccessStyle = self:GetStyle("failed")
+        end
+        --Only exclusively provisioning system recipes have a quality requirement
+        requirementsSection:AddLine(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_QUALITY, requiredQuality),  qualitySuccessStyle, self:GetStyle("bodyDescription"))
     end
-    requirementsSection:AddLine(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_QUALITY, requiredQuality),  qualitySuccessStyle, self:GetStyle("bodyDescription"))
 
     self:AddSection(requirementsSection)
 
@@ -785,7 +827,7 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData)
     if(IsItemLinkRecipeKnown(itemLink)) then
         useToLearnOrKnownSection:AddLine(GetString(SI_RECIPE_ALREADY_KNOWN), self:GetStyle("bodyDescription"))
     else
-        useToLearnOrKnownSection:AddLine(GetString(SI_PROVISIONER_USE_TO_LEARN_RECIPE), self:GetStyle("bodyDescription"))
+        useToLearnOrKnownSection:AddLine(GetString(SI_GAMEPAD_PROVISIONER_USE_TO_LEARN_RECIPE), self:GetStyle("bodyDescription"))
     end
     self:AddSection(useToLearnOrKnownSection)
     self:AddItemTags(itemLink)
@@ -1177,7 +1219,11 @@ do
             if(IsItemLinkVendorTrash(itemLink)) then
                 self:LayoutVendorTrash(itemLink, itemName)
             elseif(DoesItemLinkStartQuest(itemLink) or DoesItemLinkFinishQuest(itemLink)) then
-                self:LayoutQuestStartOrFinishItem(itemLink, itemName)
+                if GetItemLinkItemType(itemLink) == ITEMTYPE_MASTER_WRIT then
+                    self:LayoutMasterWritItem(itemLink, tradeBoPData)
+                else
+                    self:LayoutQuestStartOrFinishItem(itemLink, itemName)
+                end
             else
                 -- now attempt to layout the itemlink by the item type
                 local itemType = GetItemLinkItemType(itemLink)
@@ -1420,4 +1466,16 @@ function ZO_Tooltip:LayoutItemStatComparison(bagId, slotId, comparisonSlot)
         self:AddSection(statSection)
     end
     
+end
+
+function ZO_Tooltip:LayoutCurrencies()
+    local currencySection = self:AcquireSection(self:GetStyle("currencySection"))
+    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
+        local statValuePair = currencySection:AcquireStatValuePair(self:GetStyle("currencyStatValuePair"))
+        statValuePair:SetStat(info.name, self:GetStyle("currencyStatValuePairStat"))
+        local valueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, ZO_CommaDelimitNumber(GetCarriedCurrencyAmount(type)), ZO_Currency_GetPlatformFormattedCurrencyIcon(type))
+        statValuePair:SetValue(valueString, self:GetStyle("currencyStatValuePairValue"))
+        currencySection:AddStatValuePair(statValuePair)
+    end
+    self:AddSection(currencySection)
 end

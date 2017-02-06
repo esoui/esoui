@@ -20,6 +20,10 @@ function ZO_InteractScene:GetInteractionInfo()
     return self.interactionInfo
 end
 
+function ZO_InteractScene:SetInteractionInfo(interactionInfo)
+    self.interactionInfo = interactionInfo
+end
+
 function ZO_InteractScene:OnRemovedFromQueue()
     if not INTERACT_WINDOW:IsInteracting(self.interactionInfo) then
         RemoveActionLayerByName("SceneChangeInterceptLayer")

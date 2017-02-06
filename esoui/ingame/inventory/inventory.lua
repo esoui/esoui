@@ -137,9 +137,10 @@ local sortKeys =
     stackCount = { tiebreaker = "slotIndex", isNumeric = true },
     name = { tiebreaker = "stackCount" },
     quality = { tiebreaker = "name", isNumeric = true },
-    stackSellPrice = { tiebreaker = "name", isNumeric = true },
-    age = { tiebreaker = "name", isNumeric = true, reverseTiebreakerSortOrder = true },
-    statValue = { tiebreaker = "name", isNumeric = true },
+    stackSellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true },
+    statusSortOrder = { tiebreaker = "age", isNumeric = true},
+    age = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true},
+    statValue = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
 }
 
 function ZO_Inventory_GetDefaultHeaderSortKeys()
@@ -163,7 +164,6 @@ local function InitializeHeaderSort(inventoryType, inventory, headerControl)
     sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     sortHeaders:AddHeadersFromContainer()
     sortHeaders:SelectHeaderByKey(inventory.currentSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
-    sortHeaders:SelectHeaderByKey(inventory.currentSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS) -- select twice to make it descending!  EVIL, ask chip about a better way to do this.
 
     inventory.sortHeaders = sortHeaders
 end
@@ -185,8 +185,6 @@ end
 local function InitializeInventoryFilters(inventory)
     if(inventory.tabFilters) then
         local menuBar = inventory.filterBar
-        ZO_MenuBar_SetData(menuBar, inventory.filterBarData)
-
         for _, data in ipairs(inventory.tabFilters) do
             local filterButton = ZO_MenuBar_AddButton(menuBar, data)
 
@@ -216,6 +214,9 @@ local function UpdateStatusControl(inventorySlot, slotData)
     end
     if slotData.isBoPTradeable then
         statusControl:AddIcon(ZO_TRADE_BOP_ICON)
+    end
+    if slotData.isGemmable then
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWN_GEMS))
     end
 
     statusControl:Show()
@@ -400,7 +401,7 @@ function ZO_InventoryManager:New()
     local questHiddenColumns =
     {
         ["statValue"] = true,
-        ["age"] = true,
+        ["statusSortOrder"] = true,
         ["stackSellPrice"] = true,
     }
 
@@ -412,7 +413,7 @@ function ZO_InventoryManager:New()
     local tradingHouseHiddenColumns =
     {
         ["statValue"] = true,
-        ["age"] = true,
+        ["statusSortOrder"] = true,
     }
 
     local HIDE_TAB = true
@@ -422,6 +423,7 @@ function ZO_InventoryManager:New()
         CreateNewTabFilterData(ITEMFILTERTYPE_JUNK, INVENTORY_BACKPACK, "EsoUI/Art/Inventory/inventory_tabIcon_junk_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_junk_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_junk_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_QUEST, INVENTORY_QUEST_ITEM, "EsoUI/Art/Inventory/inventory_tabIcon_quest_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_quest_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_quest_over.dds", questHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_MISCELLANEOUS, INVENTORY_BACKPACK, "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_FURNISHING, INVENTORY_BACKPACK, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CRAFTING, INVENTORY_BACKPACK, "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CONSUMABLE, INVENTORY_BACKPACK, "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ARMOR, INVENTORY_BACKPACK, "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", gearHiddenColumns),
@@ -435,6 +437,7 @@ function ZO_InventoryManager:New()
     {
         CreateNewTabFilterData(ITEMFILTERTYPE_JUNK, INVENTORY_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_junk_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_junk_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_junk_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_MISCELLANEOUS, INVENTORY_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_FURNISHING, INVENTORY_BANK, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CRAFTING, INVENTORY_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CONSUMABLE, INVENTORY_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ARMOR, INVENTORY_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", gearHiddenColumns),
@@ -446,6 +449,7 @@ function ZO_InventoryManager:New()
     {
         CreateNewTabFilterData(ITEMFILTERTYPE_JUNK, INVENTORY_GUILD_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_junk_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_junk_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_junk_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_MISCELLANEOUS, INVENTORY_GUILD_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_FURNISHING, INVENTORY_GUILD_BANK, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CRAFTING, INVENTORY_GUILD_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CONSUMABLE, INVENTORY_GUILD_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ARMOR, INVENTORY_GUILD_BANK, "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", gearHiddenColumns),
@@ -464,16 +468,6 @@ function ZO_InventoryManager:New()
         CreateNewTabFilterData(ITEMFILTERTYPE_CLOTHING, INVENTORY_CRAFT_BAG, "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_clothing_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_clothing_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_clothing_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_BLACKSMITHING, INVENTORY_CRAFT_BAG, "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_blacksmithing_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_blacksmithing_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_blacksmithing_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ALL, INVENTORY_CRAFT_BAG, "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", typicalHiddenColumns),
-    }
-
-    local filterBarData =
-    {
-        initialButtonAnchorPoint = RIGHT,
-        buttonTemplate = "ZO_InventoryFilterTab",
-        normalSize = 40,
-        downSize = 51,
-        buttonPadding = -5,
-        animationDuration = 180,
     }
 
     local function BackpackAltFreeSlotType()
@@ -505,12 +499,11 @@ function ZO_InventoryManager:New()
             altFreeSlotType = BackpackAltFreeSlotType,
             freeSlotsStringId = SI_INVENTORY_BACKPACK_REMAINING_SPACES,
             freeSlotsFullStringId = SI_INVENTORY_BACKPACK_COMPLETELY_FULL,
-            currentSortKey = "age",
+            currentSortKey = "statusSortOrder",
             currentSortOrder = ZO_SORT_ORDER_DOWN,
             currentFilter = ITEMFILTERTYPE_ALL,
             tabFilters = backpackFilters,
             filterBar = ZO_PlayerInventoryTabs,
-            filterBarData = filterBarData,
             rowTemplate = "ZO_PlayerInventorySlot",
             activeTab = ZO_PlayerInventoryTabsActive,
             inventoryEmptyStringId = SI_INVENTORY_ERROR_INVENTORY_EMPTY,
@@ -547,11 +540,10 @@ function ZO_InventoryManager:New()
             freeSlotsStringId = SI_INVENTORY_BANK_REMAINING_SPACES,
             freeSlotsFullStringId = SI_INVENTORY_BANK_COMPLETELY_FULL,
             currentSortKey = "name",
-            currentSortOrder = ZO_SORT_ORDER_DOWN,
+            currentSortOrder = ZO_SORT_ORDER_UP,
             currentFilter = ITEMFILTERTYPE_ALL,
             tabFilters = bankFilters,
             filterBar = ZO_PlayerBankTabs,
-            filterBarData = filterBarData,
             rowTemplate = "ZO_PlayerInventorySlot",
             activeTab = ZO_PlayerBankTabsActive,
         },
@@ -573,11 +565,10 @@ function ZO_InventoryManager:New()
             freeSlotsStringId = SI_INVENTORY_BANK_REMAINING_SPACES,
             freeSlotsFullStringId = SI_INVENTORY_BANK_COMPLETELY_FULL,
             currentSortKey = "name",
-            currentSortOrder = ZO_SORT_ORDER_DOWN,
+            currentSortOrder = ZO_SORT_ORDER_UP,
             currentFilter = ITEMFILTERTYPE_ALL,
             tabFilters = guildBankFilters,
             filterBar = ZO_GuildBankTabs,
-            filterBarData = filterBarData,
             rowTemplate = "ZO_PlayerInventorySlot",
             activeTab = ZO_GuildBankTabsActive,
         },
@@ -592,12 +583,11 @@ function ZO_InventoryManager:New()
             listDataType = INVENTORY_DATA_TYPE_BACKPACK,
             listSetupCallback = SetupBackpackInventoryItemRow,
             listHiddenCallback = OnInventoryItemRowHidden,
-            currentSortKey = "age",
+            currentSortKey = "statusSortOrder",
             currentSortOrder = ZO_SORT_ORDER_DOWN,
             currentFilter = ITEMFILTERTYPE_ALL,
             tabFilters = craftBagFilters,
             filterBar = ZO_CraftBagTabs,
-            filterBarData = filterBarData,
             rowTemplate = "ZO_CraftBagSlot",
             activeTab = ZO_CraftBagTabsActive,
             inventoryEmptyStringId = SI_INVENTORY_ERROR_CRAFT_BAG_EMPTY,
@@ -768,7 +758,7 @@ function ZO_InventoryManager:ChangeFilter(filterTab)
 
         if inventory.hiddenColumns[inventory.currentSortKey] then
             -- User wanted to sort by a column that's gone!
-            -- Fallback to name...the default sort is "age", but there are filters that hide that one, so "name" is the
+            -- Fallback to name...the default sort is "statusSortOrder", but there are filters that hide that one, so "name" is the
             -- only safe bet for now...
             sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
 
@@ -1183,9 +1173,8 @@ do
     local function TryClearNewStatus(inventory, slotIndex, inventoryManager)
         local slot = inventory.slots[slotIndex]
         if ShouldClearAgeOnClose(slot, inventoryManager) then
-            slot.age = 0
             slot.clearAgeOnClose = nil
-            slot.brandNew = false
+            SHARED_INVENTORY:ClearNewStatus(inventory.backingBag, slotIndex)
         end
     end
 
@@ -1257,18 +1246,36 @@ function ZO_InventoryManager:IsSlotOccupied(bagId, slotIndex)
 end
 
 do
-    local function UpdateItemTable(itemIds, bagId, bagIndex, predicate)
-        if not predicate or predicate(bagId, bagIndex) then
-            local itemId = GetItemInstanceId(bagId, bagIndex)
-            if itemId then
-                local _, stackCount = GetItemInfo(bagId, bagIndex)
-                if itemIds[itemId] then
-                    itemIds[itemId].stack = itemIds[itemId].stack + stackCount
-                else
-                    itemIds[itemId] = { bag = bagId, index = bagIndex, stack = stackCount }
-                end
+    local function UpdateItemTable(bagId, slotIndex, predicate, dataTable)
+        if not predicate or predicate(bagId, slotIndex) then
+            local _, stackCount = GetItemInfo(bagId, slotIndex)
+            if not dataTable then
+                return { bag = bagId, index = slotIndex, stack = stackCount }
+            else
+                dataTable.stack = dataTable.stack + stackCount
             end
         end
+        return dataTable
+    end
+
+    --where ... are inventory types
+    function ZO_InventoryManager:GenerateVirtualStackedItem(predicate, specificItemInstanceId, ...)
+        local data
+        for i = 1, select("#", ...) do
+            local inventoryType = select(i, ...)
+            local inventory = self.inventories[inventoryType]
+            local bagId = inventory.backingBag
+
+            local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+            while slotIndex do
+                local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+                if itemInstanceId == specificItemInstanceId then
+                    data = UpdateItemTable(bagId, slotIndex, predicate, data)
+                end
+                slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+            end
+        end
+        return data
     end
 
     function ZO_InventoryManager:GenerateListOfVirtualStackedItems(inventoryType, predicate, itemIds)
@@ -1278,8 +1285,13 @@ do
         itemIds = itemIds or {}
 
         local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+        local itemData
         while slotIndex do
-            UpdateItemTable(itemIds, bagId, slotIndex, predicate)
+            local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+            if itemInstanceId then
+                itemData = itemIds[itemInstanceId]
+                itemIds[itemInstanceId] = UpdateItemTable(bagId, slotIndex, predicate, itemData)
+            end
             slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
         end
 
@@ -2336,10 +2348,6 @@ function ZO_PlayerInventory_OnSearchTextChanged(editBox)
     end
 end
 
-function ZO_PlayerInventory_BeginSearch(editBox)
-    editBox:TakeFocus()
-end
-
 function ZO_PlayerInventory_EndSearch(editBox)
     if editBox:GetText() ~= "" then
         editBox:SetText("")
@@ -2365,12 +2373,18 @@ end
 
 --Bank
 ------
-function ZO_PlayerInventory_InitSortHeader(header, stringId, textAlignment, sortKey)
-    ZO_SortHeader_Initialize(header, GetString(stringId), sortKey, ZO_SORT_ORDER_UP, textAlignment or TEXT_ALIGN_LEFT, "ZoFontHeader")
+function ZO_PlayerInventory_InitSortHeader(header, stringId, textAlignment, sortKey, sortOrder)
+    if sortOrder == nil then
+        sortOrder = ZO_SORT_ORDER_UP
+    end
+    ZO_SortHeader_Initialize(header, GetString(stringId), sortKey, sortOrder, textAlignment or TEXT_ALIGN_LEFT, "ZoFontHeader")
 end
 
-function ZO_PlayerInventory_InitSortHeaderIcon(header, icon, sortUpIcon, sortDownIcon, mouseoverIcon, sortKey)
-    ZO_SortHeader_InitializeIconHeader(header, icon, sortUpIcon, sortDownIcon, mouseoverIcon, sortKey, ZO_SORT_ORDER_UP)
+function ZO_PlayerInventory_InitSortHeaderIcon(header, icon, sortUpIcon, sortDownIcon, mouseoverIcon, sortKey, sortOrder)
+    if sortOrder == nil then
+        sortOrder = ZO_SORT_ORDER_UP
+    end
+    ZO_SortHeader_InitializeIconHeader(header, icon, sortUpIcon, sortDownIcon, mouseoverIcon, sortKey, sortOrder)
 end
 
 function ZO_PlayerInventory_Initialize()

@@ -11,7 +11,8 @@ function ZO_Enchanting:Initialize(control)
 end
 
 function ZO_Enchanting:InitializeInventory()
-    self.inventory = ZO_EnchantingInventory:New(self, self.control:GetNamedChild("Inventory"))
+    self.inventoryControl = self.control:GetNamedChild("Inventory")
+    self.inventory = ZO_EnchantingInventory:New(self, self.inventoryControl)
 end
 
 function ZO_Enchanting:InitializeEnchantingScenes()
@@ -54,7 +55,7 @@ function ZO_Enchanting:InitializeEnchantingScenes()
 
     self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
         if craftingType == CRAFTING_TYPE_ENCHANTING then
-            SCENE_MANAGER:Hide("enchanting")
+            SCENE_MANAGER:ShowBaseScene()
         end
     end)
 end
@@ -78,7 +79,7 @@ function ZO_Enchanting:InitializeModes()
     self.modeBar = self.control:GetNamedChild("ModeMenuBar")
     self.modeBarLabel = self.modeBar:GetNamedChild("Label")
 
-    local creationData = CreateButtonData(
+    local creationTab = CreateButtonData(
         SI_ENCHANTING_CREATION, 
         ENCHANTING_MODE_CREATION, 
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_up.dds", 
@@ -86,10 +87,9 @@ function ZO_Enchanting:InitializeModes()
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_over.dds",
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds"
     )
+    ZO_MenuBar_AddButton(self.modeBar, creationTab)
 
-    ZO_MenuBar_AddButton(self.modeBar, creationData)
-
-    local extractionData = CreateButtonData(
+    local extractionTab = CreateButtonData(
         SI_ENCHANTING_EXTRACTION, 
         ENCHANTING_MODE_EXTRACTION, 
         "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_up.dds", 
@@ -97,8 +97,15 @@ function ZO_Enchanting:InitializeModes()
         "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_over.dds",
         "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_disabled.dds"
     )
+    ZO_MenuBar_AddButton(self.modeBar, extractionTab)
 
-    ZO_MenuBar_AddButton(self.modeBar, extractionData)
+    local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ENCHANTING)
+    local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
+    local recipeTab = CreateButtonData(
+        recipeCraftingSystemNameStringId,
+        ENCHANTING_MODE_RECIPES,
+        GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
+    ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
 end
@@ -151,30 +158,41 @@ end
 
 function ZO_Enchanting:SetEnchantingMode(enchantingMode)
     if self.enchantingMode ~= enchantingMode then
+        local oldEnchantingMode = self.enchantingMode
         self.enchantingMode = enchantingMode
 
+        self.runeSlotContainer:SetHidden(enchantingMode ~= ENCHANTING_MODE_CREATION)
+        self.extractionSlotContainer:SetHidden(enchantingMode ~= ENCHANTING_MODE_EXTRACTION)
+
+        if enchantingMode == ENCHANTING_MODE_RECIPES then
+            --Make sure we hide the tooltip when going to the Provisioner Scene.
+            self.resultTooltip:SetHidden(true)
+
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            PROVISIONER:EmbedInCraftingScene()
+            self.inventoryControl:SetHidden(true)
+        else
+            if oldEnchantingMode == ENCHANTING_MODE_RECIPES then
+                PROVISIONER:RemoveFromCraftingScene()
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+            self.inventoryControl:SetHidden(false)
+            self.inventory:ChangeMode(enchantingMode)
+            ClearCursor()
+            self:OnSlotChanged()
+        end
+
+        -- This block of code must be done second so the tooltip animation and sounds are reset correctly
+        -- when switching back from the provisioning scene
         if enchantingMode == ENCHANTING_MODE_CREATION then
             CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
-            self.runeSlotContainer:SetHidden(false)
-            self.extractionSlotContainer:SetHidden(true)
-
             CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ENCHANTING_CREATE_TOOLTIP_GLOW)
-
             TriggerTutorial(TUTORIAL_TRIGGER_ENCHANTING_CREATION_OPENED)
         elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
             CRAFTING_RESULTS:SetCraftingTooltip(nil)
-            self.runeSlotContainer:SetHidden(true)
-            self.extractionSlotContainer:SetHidden(false)
-
             CRAFTING_RESULTS:SetTooltipAnimationSounds(nil)
-
             TriggerTutorial(TUTORIAL_TRIGGER_ENCHANTING_EXTRACTION_OPENED)
         end
-
-        self.inventory:ChangeMode(enchantingMode)
-
-        ClearCursor()
-        self:OnSlotChanged()
     end
 end
 

@@ -50,11 +50,12 @@ function InventoryWalletManager:Initialize(container)
 end
 
 --Adding a new currency entry here should handle all updating unless GetCarriedCurrencyAmount does not accept that type like Crowns
-local CURRENCY_INFO_TABLE =
+ZO_CURRENCY_INFO_TABLE =
 {
     [CURT_MONEY] = { name = GetString(SI_CURRENCY_GOLD), event = EVENT_MONEY_UPDATE },
     [CURT_ALLIANCE_POINTS] = { name = GetString(SI_CURRENCY_ALLIANCE_POINTS), event = EVENT_ALLIANCE_POINT_UPDATE, },
     [CURT_TELVAR_STONES] = { name = GetString(SI_CURRENCY_TELVAR_STONES), event = EVENT_TELVAR_STONE_UPDATE }, 
+	[CURT_WRIT_VOUCHERS] = { name = GetString(SI_CURRENCY_WRIT_VOUCHERS), event = EVENT_WRIT_VOUCHER_UPDATE }, 
 }
 
 function InventoryWalletManager:RegisterEvents()
@@ -70,7 +71,7 @@ function InventoryWalletManager:RegisterEvents()
          self:UpdateFreeSlots()
     end
 
-    for type, info in pairs(CURRENCY_INFO_TABLE) do
+    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
         ZO_InventoryWallet:RegisterForEvent(info.event, OnCurrencyUpdated)
     end
 
@@ -127,7 +128,7 @@ function InventoryWalletManager:UpdateList()
     ZO_ScrollList_Clear(self.list)
     ZO_ScrollList_ResetToTop(self.list)
 
-    for type, info in pairs(CURRENCY_INFO_TABLE) do
+    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
         self:CreateAndAddCurrencyEntry(scrollData, type)
     end
 
@@ -139,7 +140,7 @@ end
 function InventoryWalletManager:CreateAndAddCurrencyEntry(scrollData, currencyType)
     local entryData =
     {
-        name = CURRENCY_INFO_TABLE[currencyType].name,
+        name = ZO_CURRENCY_INFO_TABLE[currencyType].name,
         currencyType = currencyType,
         amount = GetCarriedCurrencyAmount(currencyType)
     }

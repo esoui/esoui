@@ -325,6 +325,26 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_CustomCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
+            <Anchor point="CENTER" />
+
+            <OnInitialized>
+                ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                </Backdrop>
+
+                <Texture name="$(parent)BgDialog" color="000000" excludeFromResizeToFitExtents="true">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+        
         <TopLevelControl name="ZO_GenericGamepadStaticListDialogTemplate" inherits="ZO_GenericGamepadDialogBase" virtual="true">
             <OnInitialized>
                 ZO_GenericGamepadStaticListDialogTemplate_OnInitialized(self)

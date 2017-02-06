@@ -123,6 +123,10 @@ local function CheckEnableApplyButton(oldValue, currentValue)
     end
 end
 
+--ZO_Options_SetOptionActive/Inactive are keyboard only functions. The gamepad manages active state through
+--the gamepadIsEnabledCallback. Using ZO_Options_SetOptionActive/Inactive with gamepad controls will set them
+--to the keyboard colors and also doesn't handle the parametric list's selected state's impact.
+
 function ZO_Options_SetOptionActive(control)
     UpdateOptionControlState(control, activateOptionControl, ENABLED_STATE)
 end
@@ -652,8 +656,11 @@ function ZO_Options_OnMouseEnter(control)
     local tooltipText = data.tooltipText
 
     if tooltipText ~= nil then
-        if type(tooltipText) == "number" then
+        local tooltipTextType = type(tooltipText) 
+        if tooltipTextType == "number" then
             tooltipText = GetString(tooltipText)
+        elseif tooltipTextType == "function" then
+            tooltipText = tooltipText()
         end
 
         if tooltipText == "" then

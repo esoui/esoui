@@ -316,10 +316,15 @@ function MailManager_Gamepad:ShowTab(tabIndex, pushScene)
     end
 end
 
-function MailManager_Gamepad:SwitchToHeader(headerData)
+function MailManager_Gamepad:SwitchToHeader(headerData, tabIndex)
     self.activeHeader = headerData
     if headerData then
         ZO_GamepadGenericHeader_Refresh(self.header, headerData)
+
+        if tabIndex ~= nil then
+            ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, tabIndex)
+        end
+
         if headerData.tabBarEntries then
             ZO_GamepadGenericHeader_Activate(self.header)
         else

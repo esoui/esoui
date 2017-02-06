@@ -227,7 +227,7 @@ function ZO_CrownCratesCard:Initialize(control, owner)
     self.nameLabel = self.nameAreaControl:GetNamedChild("Text")
     self.rewardTypeAreaControl = control:GetNamedChild("RewardTypeArea")
     self.rewardTypeLabel = self.rewardTypeAreaControl:GetNamedChild("Text")
-    self.gemGainLabel = self.rewardTypeAreaControl:GetNamedChild("CrownGemsText")
+    self.gemGainLabelPool = ZO_ControlPool:New("ZO_CrownCrateCardCrownGemsText", self.rewardTypeAreaControl)
     self.activateCollectibleAreaControl = control:GetNamedChild("SetCollectibleActiveArea")
     self.activateCollectibleKeybindControl = self.activateCollectibleAreaControl:GetNamedChild("Keybind")
 
@@ -394,9 +394,11 @@ end
 function ZO_CrownCratesCard:ApplyStyle(style)
     ZO_FontAdjustingWrapLabel_OnInitialized(self.nameLabel, style.nameFonts, TEXT_WRAP_MODE_ELLIPSIS)
     ZO_FontAdjustingWrapLabel_OnInitialized(self.rewardTypeLabel, style.rewardTextFonts, TEXT_WRAP_MODE_ELLIPSIS)
-    ZO_FontAdjustingWrapLabel_OnInitialized(self.gemGainLabel, style.gemGainFonts, TEXT_WRAP_MODE_ELLIPSIS)
     self.activateCollectibleKeybindControl:SetupStyle(style.activateCollectibleKeybindStyle)
-	self.formattedGemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
+    --Switching between upper and title case requires setting the string again
+    self.activateCollectibleKeybindControl:SetText(GetString(SI_COLLECTIBLE_ACTION_SET_ACTIVE))
+    self.formattedGemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
+    self.gemGainFonts = style.gemGainFonts
 end
 
 function ZO_CrownCratesCard:SetRewardIndex(rewardIndex)
@@ -437,7 +439,6 @@ function ZO_CrownCratesCard:Reset()
     
     self.nameAreaControl:SetAlpha(0)
     self.rewardTypeAreaControl:SetAlpha(0)
-    self.gemGainLabel:SetAlpha(0)
 
     self.rootX = nil
     self.rootY = nil
@@ -465,12 +466,12 @@ function ZO_CrownCratesCard:Reset()
 
     self.control:SetHandler("OnUpdate", nil)
 
-    self.gemGainLabel:SetAnchor(BOTTOM, self.rewardTypeLabel, TOP, 0, 5)
-
     --Extend the card down below the edge of the screen to fix the bouncing as it moves up on selection and out from under the mouse
     self.mouseAreaControl:Set3DLocalDimensions(ZO_CROWN_CRATES_CARD_WIDTH_WORLD, ZO_CROWN_CRATES_CARD_HEIGHT_WORLD + ZO_CROWN_CRATES_CARD_HEIGHT_BUFFER_WORLD)
     self.mouseAreaControl:Set3DRenderSpaceOrigin(0, -0.5 * (ZO_CROWN_CRATES_CARD_HEIGHT_BUFFER_WORLD + ZO_CROWN_CRATES_CARD_HEIGHT_WORLD) + 0.5 * ZO_CROWN_CRATES_CARD_HEIGHT_WORLD, 0)
     self.activateCollectibleAreaControl:SetHidden(true)
+
+    self.gemGainLabelPool:ReleaseAllObjects()
 end
 
 function ZO_CrownCratesCard:SetupCardSide(side)
@@ -857,7 +858,7 @@ function ZO_CrownCratesCard:Gemify()
             self:SetupCardSide(ZO_CROWN_CRATES_CARD_SIDE_GEMIFIED_FACE)
             self.colorTintOverlayTextureControl:SetAlpha(ZO_CROWN_CRATES_GEMIFY_TINT_ALPHA)
             self.colorFlashOverlayTextureControl:SetAlpha(0)
-            self.nameLabel:SetText(zo_strformat(SI_CROWN_CRATE_REWARD_WITH_GEMS_EXCHANGED, self.rewardName, self.gemsExchanged, self.formattedGemIcon))
+            self.nameLabel:SetText(zo_strformat(SI_CROWN_CRATE_REWARD_WITH_GEMS_EXCHANGED, self.gemsExchanged, self.formattedGemIcon, self.rewardName))
             self.control:SetHandler("OnUpdate", nil)
         end 
 	end
@@ -872,7 +873,10 @@ function ZO_CrownCratesCard:Gemify()
             local currentPitch, currentYaw, currentRoll = self.control:Get3DRenderSpaceOrientation()
             self.control:Set3DRenderSpaceOrientation(ZO_CROWN_CRATES_GEMIFY_BEGIN_PITCH_RADIANS, currentYaw, currentRoll)
             self:SetupCardSide(ZO_CROWN_CRATES_CARD_SIDE_GEMIFIED_FLIPPED_FACE)
-            self:StartSingleGemsAnimation()
+            local function OnAllSingleGemAnimationsComplete()
+                self:StartFinalGemAndTextAnimation()
+            end
+            self:StartSingleGemsAnimation(OnAllSingleGemAnimationsComplete)
         end
     end
 
@@ -888,20 +892,43 @@ function ZO_CrownCratesCard:Gemify()
     PlaySound(SOUNDS.CROWN_CRATES_GAIN_GEMS)
 end
 
-function ZO_CrownCratesCard:StartSingleGemsAnimation()
-    self.totalSingleGemsPlaying = ZO_CROWN_CRATES_GEMIFY_TOTAL_SINGLE_GEMS_TO_PLAY
-
-    for i = 1, self.totalSingleGemsPlaying do
+function ZO_CrownCratesCard:StartSingleGemsAnimation(OnAllGemsAnimationComplete)
+    for i = 1, ZO_CROWN_CRATES_GEMIFY_TOTAL_SINGLE_GEMS_TO_PLAY do
         local nextSingleGem, objectKey = self.singleGemPool:AcquireObject()
+        nextSingleGem.objectKey = objectKey
         nextSingleGem:SetHidden(false)
 
-        local AnimationOnStop = function(timeline, completedPlaying)
+        local function OnAnimationStopRelease(timeline, completedPlaying)
             if completedPlaying then
-                self:EndSingleGemAnimation(objectKey)
+                self.singleGemPool:ReleaseObject(timeline:GetFirstAnimation():GetAnimatedControl().objectKey)
             end
         end
 
-        local singleGemAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_SINGLE_GEM_GAIN, nextSingleGem, AnimationOnStop)
+        local function OnAnimationStopReleaseAndFlash(timeline, completedPlaying)
+            OnAnimationStopRelease(timeline, completedPlaying)
+            if completedPlaying then
+                local colorTintAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_COLOR_TINT, self.colorFlashOverlayTextureControl)
+                self:StartAnimation(colorTintAnimationTimeline)
+            end
+        end
+
+        local function OnAnimationStopReleaseAndComplete(timeline, completedPlaying)
+            OnAnimationStopRelease(timeline, completedPlaying)
+            if completedPlaying and OnAllGemsAnimationComplete then
+                OnAllGemsAnimationComplete()
+            end
+        end
+
+        local playOrderIndex = ZO_CROWN_CRATES_GEMIFY_TOTAL_SINGLE_GEMS_TO_PLAY - i
+        local animationOnStopHandler
+        if playOrderIndex == ZO_CROWN_CRATES_GEMIFY_TOTAL_SINGLE_GEMS_TO_PLAY - 2 then
+            animationOnStopHandler = OnAnimationStopReleaseAndFlash
+        elseif playOrderIndex == ZO_CROWN_CRATES_GEMIFY_TOTAL_SINGLE_GEMS_TO_PLAY - 1 then
+            animationOnStopHandler = OnAnimationStopReleaseAndComplete
+        else
+            animationOnStopHandler = OnAnimationStopRelease
+        end
+        local singleGemAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_SINGLE_GEM_GAIN, nextSingleGem, animationOnStopHandler)
 
         local translateAnimation = singleGemAnimationTimeline:GetAnimation(2)
         local halfCardHeight = ZO_CROWN_CRATES_CARD_HEIGHT_REVEALED_UI / 2
@@ -911,43 +938,45 @@ function ZO_CrownCratesCard:StartSingleGemsAnimation()
         translateAnimation:SetTranslateOffsets(offsetX, offsetY, 0, 0)
         nextSingleGem:SetAnchor(CENTER, self.activateCollectibleAreaControl)
         nextSingleGem:SetAlpha(0)
-        zo_callLater( function() self:StartAnimation(singleGemAnimationTimeline) end, (self.totalSingleGemsPlaying - i) * ZO_CROWN_CRATES_GEMIFY_SINGLE_GEM_START_TIME_DELAY_MS)
+
+        self:CallLater(function() self:StartAnimation(singleGemAnimationTimeline) end, playOrderIndex * ZO_CROWN_CRATES_GEMIFY_SINGLE_GEM_START_TIME_DELAY_MS)
     end
 end
 
-function ZO_CrownCratesCard:EndSingleGemAnimation(objectKey)
-    self.singleGemPool:ReleaseObject(objectKey)
-    self.totalSingleGemsPlaying = self.totalSingleGemsPlaying - 1
-    if self.totalSingleGemsPlaying == 0 then
-        local finalGem, finalObjectKey = self.singleGemPool:AcquireObject()
-        finalGem:SetHidden(false)
+function ZO_CrownCratesCard:StartFinalGemAndTextAnimation()
+    local finalGem, finalObjectKey = self.singleGemPool:AcquireObject()
+    finalGem:SetHidden(false)
 
-        local AnimationOnStop = function(timeline, completedPlaying)
-            if completedPlaying then
-                self:SetState(CARD_STATES.REVEALED)
-                self.owner:OnCardFlipComplete()
-                self:StartTierSpecificParticleEffects(ZO_CROWN_CRATES_PARTICLE_TYPE_LIFECYCLE, CROWN_CRATE_TIERED_PARTICLES_REVEALED)
-                self.gemOverlayTextureControl:SetAlpha(1)
-                self.singleGemPool:ReleaseObject(finalObjectKey)
-                self:RefreshActivateCollectibleKeybind()
-            end
+    local AnimationOnStop = function(timeline, completedPlaying)
+        if completedPlaying then
+            self:SetState(CARD_STATES.REVEALED)
+            self.owner:OnCardFlipComplete()
+            self:StartTierSpecificParticleEffects(ZO_CROWN_CRATES_PARTICLE_TYPE_LIFECYCLE, CROWN_CRATE_TIERED_PARTICLES_REVEALED)
+            self.gemOverlayTextureControl:SetAlpha(1)
+            self.singleGemPool:ReleaseObject(finalObjectKey)
+            self:RefreshActivateCollectibleKeybind()
         end
-
-        finalGem:SetAnchor(CENTER, self.activateCollectibleAreaControl)
-        local finalGemAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_FINAL_GEM, finalGem, AnimationOnStop)
-        self:StartAnimation(finalGemAnimationTimeline)
-
-        self.crownCratesManager:AddCrownGems(self.gemsExchanged)
-
-        self.gemGainLabel:SetText(zo_strformat(SI_CROWN_CRATE_GEMS_GAINED_FORMAT, self.gemsExchanged, self.formattedGemIcon))
-        self.gemGainLabel:SetAlpha(1)
-        local gemTextAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_CROWN_GEM_TEXT, self.gemGainLabel)
-        self:StartAnimation(gemTextAnimationTimeline)
-
-    elseif self.totalSingleGemsPlaying == ZO_CROWN_CRATES_GEMIFY_SINGLE_GEM_INDEX_TO_START_FLASH then
-        local colorTintAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_COLOR_TINT, self.colorFlashOverlayTextureControl)
-        self:StartAnimation(colorTintAnimationTimeline)
     end
+
+    finalGem:SetAnchor(CENTER, self.activateCollectibleAreaControl)
+    local finalGemAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_FINAL_GEM, finalGem, AnimationOnStop)
+    self:StartAnimation(finalGemAnimationTimeline)
+
+    self.crownCratesManager:AddCrownGems(self.gemsExchanged)
+    TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_GEMS_AWARDED)
+
+    self:StartGemGainTextAnimation(self.gemsExchanged, BOTTOM, self.rewardTypeLabel, TOP, 0, 5)
+end
+
+function ZO_CrownCratesCard:StartGemGainTextAnimation(gemsGained, startPoint, startRelativeTo, startRelativePoint, startOffsetX, startOffsetY)
+    local gemGainLabel, gemGainLabelKey = self.gemGainLabelPool:AcquireObject()
+    gemGainLabel:ClearAnchors()
+    gemGainLabel:SetAnchor(startPoint, startRelativeTo, startRelativePoint, startOffsetX, startOffsetY)
+    ZO_FontAdjustingWrapLabel_OnInitialized(gemGainLabel, self.gemGainFonts, TEXT_WRAP_MODE_ELLIPSIS)
+    gemGainLabel:SetText(zo_strformat(SI_CROWN_CRATE_GEMS_GAINED_FORMAT, gemsGained, self.formattedGemIcon))
+    gemGainLabel:SetAlpha(1)
+    local gemTextAnimationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_GEMIFY_CROWN_GEM_TEXT, gemGainLabel, function() self.gemGainLabelPool:ReleaseObject(gemGainLabelKey) end)
+    self:StartAnimation(gemTextAnimationTimeline)
 end
 
 function ZO_CrownCratesCard:SuppressRevealSounds()
@@ -1096,7 +1125,7 @@ do
     local DISALLOWED_EQUIPPABLE_COLLECTIBLE_TYPES =
     {
         [COLLECTIBLE_CATEGORY_TYPE_ASSISTANT] = true,
-        [COLLECTIBLE_CATEGORY_TYPE_TROPHY] = true,
+        [COLLECTIBLE_CATEGORY_TYPE_MEMENTO] = true,
         [COLLECTIBLE_CATEGORY_TYPE_DLC] = true,
     }
 
@@ -1398,11 +1427,9 @@ function ZO_CrownCratesPackOpening:RevealAllCards()
             TriggerCrownCrateNPCAnimation(highestTierCard.rewardReaction)
         end
         card:SetState(CARD_STATES.FLIPPING)
-        zo_callLater(function()
-                        if card.visualSlotIndex then
-                            card:Reveal()
-                        end
-                     end, (i - 1) * ZO_CROWN_CRATES_REVEAL_ALL_OFFSET_DURATION_MS)
+        card:CallLater(function()
+            card:Reveal()
+        end, (i - 1) * ZO_CROWN_CRATES_REVEAL_ALL_OFFSET_DURATION_MS)
     end
     PlaySound(SOUNDS.CROWN_CRATES_CARDS_REVEAL_ALL)
 end
@@ -1450,10 +1477,8 @@ function ZO_CrownCratesPackOpening:StartPrimaryDealAnimation(sourceX, sourceY, s
 
     for visualIndex, card in ipairs(self.cardsInVisualOrder) do
         card:InitializeForDeal(visualIndex)
-        zo_callLater(function()
-            if card.visualSlotIndex then
-                card:PrimayDealFromWorldPositionToWorldPosition(sourceX, sourceY, sourceZ)
-            end
+        card:CallLater(function()
+            card:PrimayDealFromWorldPositionToWorldPosition(sourceX, sourceY, sourceZ)
         end, (visualIndex - 1) * ZO_CROWN_CRATES_PRIMARY_DEAL_SPACING_DURATION_MS)
     end
 end
@@ -1474,10 +1499,8 @@ function ZO_CrownCratesPackOpening:StartBonusDealAnimation(sourceX, sourceY, sou
         local distanceFromEdge = 0
         for i = splitCard, 1, -1 do
             local card = self:GetCardInVisualOrder(i)
-            zo_callLater(function()
-                if card.visualSlotIndex then
-                    card:BonusSlideToWorldPosition()
-                end
+            card:CallLater(function()
+                card:BonusSlideToWorldPosition()
             end, ZO_CROWN_CRATES_BONUS_SLIDE_DELAY_MS + distanceFromEdge * ZO_CROWN_CRATES_BONUS_SLIDE_SPACING_DURATION_MS)
             distanceFromEdge = distanceFromEdge + 1
         end
@@ -1487,10 +1510,8 @@ function ZO_CrownCratesPackOpening:StartBonusDealAnimation(sourceX, sourceY, sou
             local card = self:GetCardInVisualOrder(i)
             local visualSlotIndex = i + numBonusCards
             card:SetVisualSlotIndex(visualSlotIndex)
-            zo_callLater(function()
-                if card.visualSlotIndex then
-                    card:BonusSlideToWorldPosition()
-                end
+            card:CallLater(function()
+                card:BonusSlideToWorldPosition()
             end, ZO_CROWN_CRATES_BONUS_SLIDE_DELAY_MS + distanceFromEdge * ZO_CROWN_CRATES_BONUS_SLIDE_SPACING_DURATION_MS)
             distanceFromEdge = distanceFromEdge + 1
         end
@@ -1500,10 +1521,8 @@ function ZO_CrownCratesPackOpening:StartBonusDealAnimation(sourceX, sourceY, sou
             local card = self:GetCard(numNormalCards + i)
             local visualSlotIndex = splitCard + i
             card:InitializeForDeal(visualSlotIndex)
-            zo_callLater(function()
-                if card.visualSlotIndex then
-                    card:BonusDealFromWorldPositionToWorldPosition(sourceX, sourceY, sourceZ)
-                end
+            card:CallLater(function()
+                card:BonusDealFromWorldPositionToWorldPosition(sourceX, sourceY, sourceZ)
             end, (i - 1) * ZO_CROWN_CRATES_BONUS_DEAL_SPACING_DURATION_MS)
             table.insert(self.cardsInVisualOrder, splitCard + 1, card)
         end
@@ -1530,12 +1549,10 @@ function ZO_CrownCratesPackOpening:StartLeaveAnimation()
     local leavingIndex = 0
     for i = #self.cardsInVisualOrder, 1, -1 do
         local card = self.cardsInVisualOrder[i]
-        zo_callLater(function()
-            if card.visualSlotIndex then
-                card:Leave()
-                card:SetState(CARD_STATES.LEAVING)
-                card:RefreshActivateCollectibleKeybind()
-            end
+        card:CallLater(function()
+            card:Leave()
+            card:SetState(CARD_STATES.LEAVING)
+            card:RefreshActivateCollectibleKeybind()
         end, leavingIndex * ZO_CROWN_CRATES_LEAVE_SPACING_MS)
         leavingIndex = leavingIndex + 1
     end

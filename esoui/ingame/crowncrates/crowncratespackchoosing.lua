@@ -727,6 +727,12 @@ function ZO_CrownCratesPackChoosing:AnimateChoice()
     end
 end
 
+function ZO_CrownCratesPackChoosing:Hide()
+    for _, pack in ipairs(self.packPool:GetActiveObjects()) do
+        pack:Hide()
+    end
+end
+
 function ZO_CrownCratesPackChoosing:ComputeSlotCenterWorldPosition(planeMetrics, spacingUI, bottomOffsetUI, bottomOffsetWorld, slotIndex, totalSlots)
     local spacingWorldWidth = spacingUI * planeMetrics.worldUnitsPerUIUnit
     local totalWorldWidth = totalSlots * ZO_CROWN_CRATES_PACK_WIDTH_WORLD + (totalSlots - 1) * spacingWorldWidth
@@ -747,11 +753,8 @@ function ZO_CrownCratesPackChoosing:StartPackShowAnimation(packIndex, numPacks, 
     local ADDITIONAL_START_OFFSET_Y = -20
     local startX, startY, startZ = self:ComputeSlotCenterWorldPosition(self.manifestCameraPlaneMetrics, ZO_CROWN_CRATES_PACK_SPACING_UI, ADDITIONAL_START_OFFSET_Y, -ZO_CROWN_CRATES_PACK_HEIGHT_WORLD, packIndex, numPacks)
     local endX, endY, endZ = self:ComputeSlotCenterWorldPosition(self.manifestCameraPlaneMetrics, ZO_CROWN_CRATES_PACK_SPACING_UI, ZO_CROWN_CRATES_PACK_OFFSET_Y_UI + ZO_CrownCrates.GetBottomOffsetUI(), 0, packIndex, numPacks)
-    zo_callLater(function()
-        -- we could have cleaned this up but this function still gets called, so we need to be cautious
-        if pack.visualSlotIndex then
-            pack:Show(startX, startY, startZ, endX, endY, endZ)
-        end
+    pack:CallLater(function()
+        pack:Show(startX, startY, startZ, endX, endY, endZ)
     end, (packIndex - 1) * ZO_CROWN_CRATES_PACK_SHOW_SPACING_MS + 1)
     self.packsInVisualOrder[packIndex] = pack
 end

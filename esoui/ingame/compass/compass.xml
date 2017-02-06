@@ -694,6 +694,10 @@
                                 leadingScaleCoefficient="-11.5"
                                 scaleCoefficient="0.0"
                     />
+                    <CompassPinType name="FLAG_ATTACKED"
+                                pinTexture="EsoUI/Art/Compass/AvA_attackBurst_64.dds"
+                                layer="BACKGROUND"
+                    />
                     <CompassPinType name="PING"
                                 pinTexture="EsoUI/Art/MapPins/MapPing.dds"
                                 allowUpdatesWhenAnimating="true"

@@ -69,10 +69,15 @@ function ZO_Loot_Gamepad_Base:ShowTooltip(selectedData)
     if selectedData.isQuest then
         GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_RIGHT_TOOLTIP, selectedData)
     else
-        local itemLink = GetLootItemLink(selectedData.lootId)
+        local lootLink = GetLootItemLink(selectedData.lootId)
         local NOT_EQUIPPED = false
         local FORCE_FULL_DURABILITY = true
-        GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_RIGHT_TOOLTIP, itemLink, NOT_EQUIPPED, nil, FORCE_FULL_DURABILITY, nil, nil, selectedData.stackCount)
+        local lootType = selectedData.itemType
+        if lootType == LOOT_TYPE_COLLECTIBLE then
+            GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_RIGHT_TOOLTIP, lootLink)
+        else
+            GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_RIGHT_TOOLTIP, lootLink, NOT_EQUIPPED, nil, FORCE_FULL_DURABILITY, nil, nil, selectedData.stackCount)
+        end
     end
     GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
 end
@@ -95,7 +100,8 @@ end
 function ZO_Loot_Gamepad_Base:HasLootItems()
     local unownedMoney, ownedMoney = GetLootCurrency(CURT_MONEY)
     local telvarStones = GetLootCurrency(CURT_TELVAR_STONES)
-    return unownedMoney > 0 or ownedMoney > 0 or telvarStones > 0 or GetNumLootItems() > 0
+	local writVouchers = GetLootCurrency(CURT_WRIT_VOUCHERS)
+    return unownedMoney > 0 or ownedMoney > 0 or telvarStones > 0 or writVouchers > 0 or GetNumLootItems() > 0 
 end
 
 function ZO_Loot_Gamepad_Base:UpdateList()
@@ -108,11 +114,13 @@ function ZO_Loot_Gamepad_Base:UpdateList()
 
     local unownedMoney, ownedMoney = GetLootCurrency(CURT_MONEY)
     local telvarStones = GetLootCurrency(CURT_TELVAR_STONES)
+	local writVouchers = GetLootCurrency(CURT_WRIT_VOUCHERS)
     local numLootItems = GetNumLootItems()
 
     -- Add unowned currencies and items
     self:UpdateListAddLootCurrency(CURT_MONEY, SI_CURRENCY_GOLD, LOOT_MONEY_ICON, unownedMoney, not STOLEN)
     self:UpdateListAddLootCurrency(CURT_TELVAR_STONES, SI_CURRENCY_TELVAR_STONES, LOOT_TELVAR_STONE_ICON, telvarStones, not STOLEN)
+	self:UpdateListAddLootCurrency(CURT_WRIT_VOUCHERS, SI_CURRENCY_WRIT_VOUCHERS, LOOT_WRIT_VOUCHER_ICON, writVouchers, not STOLEN)
     self:UpdateListAddLootItems(numLootItems, not STOLEN)
 
     -- Add owned currencies and items
@@ -148,13 +156,13 @@ end
 
 function ZO_Loot_Gamepad_Base:UpdateListAddLootItems(numLootItems, addStolenItems)
     for i = 1, numLootItems do
-        local lootId, name, icon, count, quality, value, isQuest, isStolen = GetLootItemInfo(i)
+        local lootId, name, icon, count, quality, value, isQuest, isStolen, itemType = GetLootItemInfo(i)
             
         -- only add stolen items or non stolen items
         if addStolenItems == isStolen then
             name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
             local lootEntry = ZO_GamepadEntryData:New(name, icon)
-            lootEntry:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen)
+            lootEntry:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen, itemType)
             if isStolen then
                 lootEntry:AddIcon(STOLEN_ICON_TEXTURE)
             end

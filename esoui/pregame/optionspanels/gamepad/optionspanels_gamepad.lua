@@ -148,4 +148,12 @@ local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
     }
 }
 
+if IsSystemUsingHDR() then
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
+        panel = SETTING_PANEL_VIDEO,
+        system = SETTING_TYPE_GRAPHICS,
+        settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+    })
+end
+
 SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_CINEMATIC, ZO_OptionsPanel_Gamepad_Pregame_ControlData)

@@ -27,9 +27,22 @@ EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
 EsoUI\Ingame\Tooltip\GroupTooltips.lua
 EsoUI\Ingame\Tooltip\ChampionTooltips.lua
 EsoUI\Ingame\Tooltip\CharacterTooltips.lua
+EsoUI\Ingame\Tooltip\HousingTooltips.lua
 EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 
 EsoUI\Ingame\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
 EsoUI\Ingame\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml
+
+EsoUI\IngameShared\ItemPreview\ItemPreview_Shared.lua
+EsoUI\IngameShared\ItemPreview\Keyboard\ItemPreview_Keyboard.lua
+EsoUI\IngameShared\ItemPreview\Keyboard\ItemPreview_Keyboard.xml
+EsoUI\IngameShared\ItemPreview\Gamepad\ItemPreview_Gamepad.lua
+EsoUI\IngameShared\ItemPreview\Gamepad\ItemPreview_Gamepad.xml
+
+EsoUI\IngameShared\MarketCurrency\MarketCurrency_Shared.lua
+EsoUI\IngameShared\MarketCurrency\Keyboard\MarketCurrency_Keyboard.lua
+EsoUI\IngameShared\MarketCurrency\Keyboard\MarketCurrency_Keyboard.xml
+EsoUI\IngameShared\MarketCurrency\Gamepad\MarketCurrency_Gamepad.lua
+EsoUI\IngameShared\MarketCurrency\Gamepad\MarketCurrency_Gamepad.xml
 
 EsoUI\Ingame\TrialAccount\TrialAccount_IngameShared.lua

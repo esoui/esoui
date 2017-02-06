@@ -154,7 +154,7 @@ function ZO_TradingHouseManager:InitializeScene()
             ClearMenu()
             PLAYER_INVENTORY:SetTradingHouseModeEnabled(false)
         elseif(newState == SCENE_HIDDEN) then
-            self:ResetAllSearchData()
+            self:ClearSearchResults()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end
@@ -225,6 +225,18 @@ function ZO_TradingHouseManager:InitializeKeybindDescriptor()
                             ZO_Dialogs_ShowDialog("SELECT_TRADING_HOUSE_GUILD")
                         end,
         },
+
+        --Reset Search
+        {
+            name = GetString(SI_TRADING_HOUSE_RESET_SEARCH),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            visible =   function()
+                            return tradingHouse:IsInSearchMode()
+                        end,
+            callback =  function()
+                            self:ResetAllSearchData()
+                        end,
+        }
     }
 end
 

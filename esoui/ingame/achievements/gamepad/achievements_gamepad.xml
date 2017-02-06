@@ -33,8 +33,7 @@
         <Control name="ZO_GamepadAchievementsEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 1
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabelOnly(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" level="0" modifyTextType="NONE" inherits="ZO_GamepadMenuEntryLabelTemplate">

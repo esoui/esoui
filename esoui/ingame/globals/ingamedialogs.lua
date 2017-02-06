@@ -799,7 +799,27 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     },
     mainText = 
     {
-        text = SI_FAST_TRAVEL_DIALOG_MAIN_TEXT, -- Will be overwritten with textUpdateFn on update.
+        text = function(dialog)
+            local cooldown = GetRecallCooldown()
+            local destination = dialog.data.nodeIndex
+            local cost = GetRecallCost(destination)
+            local currency = GetRecallCurrency(destination)
+            local canAffordRecall = cost <= GetCarriedCurrencyAmount(currency)
+
+            if cooldown == 0 or cost == 0 then
+                if canAffordRecall then
+                    return SI_FAST_TRAVEL_DIALOG_MAIN_TEXT
+                else
+                    return SI_FAST_TRAVEL_DIALOG_CANT_AFFORD
+                end
+            else
+                if canAffordRecall then
+                    return SI_FAST_TRAVEL_DIALOG_PREMIUM
+                else
+                    return SI_FAST_TRAVEL_DIALOG_CANT_AFFORD_PREMIUM
+                end
+            end
+        end,
     },
     buttons =
     {
@@ -821,34 +841,24 @@ ESO_Dialogs["RECALL_CONFIRM"] =
         },
     },
     updateFn = function(dialog)
-        local cooldown = GetRecallCooldown()
-        local wayshrineName = select(2, GetFastTravelNodeInfo(dialog.data.nodeIndex))
         local destination = dialog.data.nodeIndex
-        local cost = GetRecallCost(destination)
-        local currency = GetRecallCurrency(destination)
-        local canAffordRecall = cost <= GetCarriedCurrencyAmount(currency)
+        local wayshrineName = select(2, GetFastTravelNodeInfo(destination))
+        local wayshrineNameChanged = not dialog.wayshrineName or dialog.wayshrineName ~= wayshrineName
+        local onCooldown = GetRecallCooldown() > 0
+        onCooldownChanged = dialog.onCooldown ~= onCooldown
 
-        if cooldown == 0 then
-            if canAffordRecall then
-                dialogText = SI_FAST_TRAVEL_DIALOG_MAIN_TEXT
-            else
-                dialogText = SI_FAST_TRAVEL_DIALOG_CANT_AFFORD
-            end
-        else
-            if canAffordRecall then
-                dialogText = SI_FAST_TRAVEL_DIALOG_PREMIUM
-            else
-                dialogText = SI_FAST_TRAVEL_DIALOG_CANT_AFFORD_PREMIUM
-            end
-        end
-
-        if not dialog.wayshrineName or dialog.wayshrineName ~= wayshrineName then
+        if wayshrineNameChanged or onCooldownChanged then
             -- Name has changed, update it.
-            ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(dialogText, wayshrineName) })
+            ZO_Dialogs_UpdateDialogMainText(dialog, nil, { wayshrineName })
             dialog.wayshrineName = wayshrineName
+            dialog.onCooldown = onCooldown
         end
 
         if not IsInGamepadPreferredMode() then
+            local cost = GetRecallCost(destination)
+            local currency = GetRecallCurrency(destination)
+            local canAffordRecall = cost <= GetCarriedCurrencyAmount(currency)
+
             if canAffordRecall then
                 ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
             else
@@ -1012,6 +1022,7 @@ ESO_Dialogs["GROUP_INVITE"] =
         autoComplete = 
         { 
             includeFlags = { AUTO_COMPLETE_FLAG_ALL }, 
+            excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }, 
             onlineOnly = AUTO_COMPLETION_ONLINE, 
             maxResults = MAX_AUTO_COMPLETION_RESULTS, 
         },
@@ -3138,5 +3149,171 @@ do
                 end,
             },
         },
+    }
+end
+
+ESO_Dialogs["EXTRACT_ALL_PROMPT"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_GEMIFICATION_EXTRACT_ALL_CONFIRM_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_GEMIFICATION_EXTRACT_ALL_CONFIRM_TEXT,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_YES,
+            callback =  function(dialog)
+                            dialog.data.gemificationSlot:GemifyAll()
+                        end,
+        },
+        [2] =
+        {
+            text =      SI_NO,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_STOW_GEMIFIABLE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CONFIRM_STOW_GEMIFIABLE_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CONFIRM_STOW_GEMIFIABLE_TEXT,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_YES,
+            callback =  function(dialog)
+                            local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
+                            transferDialog:StartTransfer(dialog.data.sourceBagId, dialog.data.sourceSlotIndex, BAG_VIRTUAL)
+                        end,
+        },
+        [2] =
+        {
+            text =      SI_NO,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_STOW_ALL_GEMIFIABLE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CONFIRM_STOW_ALL_GEMIFIABLE_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CONFIRM_STOW_ALL_GEMIFIABLE_TEXT,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_YES,
+            callback =  function(dialog)
+                            StowAllVirtualItems()
+                        end,
+        },
+        [2] =
+        {
+            text =      SI_NO,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_PRIMARY_RESIDENCE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_HOUSING_PERMISSIONS_PRIMARY_RESIDENCE_DIALOG_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_HOUSING_PERMISSIONS_PRIMARY_RESIDENCE_DIALOG_TEXT,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_YES,
+            callback =  function(dialog)
+                            SetHousingPrimaryHouse(dialog.data.currentHouse)
+                        end,
+        },
+        [2] =
+        {
+            text =      SI_NO,
+        }
+    }
+}
+
+do
+    local function OnBuyHouseForGoldReleased()
+        EndInteraction(INTERACTION_VENDOR)
+    end
+
+    ESO_Dialogs["CONFIRM_BUY_HOUSE_FOR_GOLD"] =
+    {
+        canQueue = true,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+            dontEndInWorldInteractions = true,
+        },
+        title =
+        {
+            text = SI_HOUSING_PREVIEW_PURCHASE_FOR_GOLD_TITLE,
+        },
+        mainText = 
+        {
+            text = SI_HOUSING_PREVIEW_PURCHASE_FOR_GOLD_BODY,
+        },
+        buttons =
+        {
+            [1] =
+            {
+                text = SI_DIALOG_CONFIRM,
+                callback =  function(dialog)
+                                PlaySound(SOUNDS.HOUSING_BUY_FOR_GOLD)
+                                BuyStoreItem(dialog.data.goldStoreEntryIndex, 1)
+                            end
+            },
+
+            [2] =
+            {
+                text =  SI_DIALOG_CANCEL,
+            }
+        },
+        finishedCallback = OnBuyHouseForGoldReleased,
+        noChoiceCallback = OnBuyHouseForGoldReleased,
     }
 end

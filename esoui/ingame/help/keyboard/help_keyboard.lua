@@ -296,14 +296,6 @@ function ZO_HelpManager:SearchStart(searchString)
     StartHelpSearch(searchString)
 end
 
-function ZO_Help_BeginSearch(editBox)
-    editBox:TakeFocus()
-end
-
-function ZO_Help_EndSearch(editBox)
-    editBox:LoseFocus()
-end
-
 function ZO_Help_OnSearchTextChanged(editBox)
     HELP:SearchStart(editBox:GetText())
 end

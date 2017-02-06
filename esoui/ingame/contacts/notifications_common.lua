@@ -6,6 +6,7 @@ NOTIFICATIONS_COLLECTIBLE_DATA = 5
 NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA = 6
 NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA = 7
 NOTIFICATIONS_YES_NO_DATA = 8
+NOTIFICATIONS_LFG_READY_CHECK_DATA = 9
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -1015,6 +1016,8 @@ function ZO_LFGUpdateProvider:New(notificationManager)
 
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_NEW)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_REMOVED)
+    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED)
+    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED)
 
@@ -1035,7 +1038,7 @@ function ZO_LFGUpdateProvider:BuildNotificationList()
             return
         end
 
-        local dungeonName = GetLFGOption(activityType, activityIndex)
+        local activityName = GetLFGOption(activityType, activityIndex)
 
         self:AddJumpNotification(
             {
@@ -1043,19 +1046,32 @@ function ZO_LFGUpdateProvider:BuildNotificationList()
                 activityIndex = activityIndex,
                 role = role,
                 timeRemainingSeconds = timeRemainingSeconds,
-                dungeonName = dungeonName,
+                activityName = activityName,
+            }
+        )
+    end
+
+    if HasLFGReadyCheckNotification() then
+        local activityType, role, timeRemainingSeconds = GetLFGReadyCheckNotificationInfo()
+        
+        self:AddReadyCheckNotification(
+            {
+                activityType = activityType,
+                activityIndex = activityIndex,
+                role = role,
+                timeRemainingSeconds = timeRemainingSeconds,
             }
         )
     end
 
     if HasLFGFindReplacementNotification() then
         local activityType, activityIndex = GetLFGFindReplacementNotificationInfo()
-        local dungeonName = GetLFGOption(activityType, activityIndex)
+        local activityName = GetLFGOption(activityType, activityIndex)
         self:AddFindReplacementNotification(
             {
                 activityType = activityType,
                 activityIndex = activityIndex,
-                dungeonName = dungeonName,
+                activityName = activityName,
             }
         )
     end
@@ -1063,22 +1079,22 @@ end
 
 function ZO_LFGUpdateProvider:AddJumpNotification(data)
     local role = data.role
-    local dungeonName = data.dungeonName
+    local activityName = data.activityName
 
     local messageFormat, messageParams
     if role == LFG_ROLE_INVALID then
         messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
-        messageParams = { dungeonName }
+        messageParams = { activityName }
     else
         messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
-        messageParams = { dungeonName, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
+        messageParams = { activityName, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
     end
 
     local newListEntry =
     {
         notificationType = NOTIFICATION_TYPE_LFG,
         dataType = NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA,
-        shortDisplayText = dungeonName,
+        shortDisplayText = activityName,
         data = data,
 
         expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
@@ -1087,7 +1103,40 @@ function ZO_LFGUpdateProvider:AddJumpNotification(data)
         messageParams = messageParams,
 
         --For sorting
-        displayName = dungeonName,
+        displayName = activityName,
+        secsSinceRequest = 0,
+    }
+
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_LFGUpdateProvider:AddReadyCheckNotification(data)
+    local role = data.role
+    local activityTypeString = GetString("SI_LFGACTIVITY", data.activityType)
+
+    local messageFormat, messageParams
+    if role == LFG_ROLE_INVALID then
+        messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
+        messageParams = { activityTypeString }
+    else
+        messageFormat = SI_LFG_READY_CHECK_TEXT
+        messageParams = { activityTypeString, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
+    end
+
+    local newListEntry =
+    {
+        notificationType = NOTIFICATION_TYPE_LFG,
+        dataType = NOTIFICATIONS_LFG_READY_CHECK_DATA,
+        shortDisplayText = activityTypeString,
+        data = data,
+
+        expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
+        expirationCallback = ClearLFGReadyCheckNotification,
+        messageFormat = messageFormat,
+        messageParams = messageParams,
+
+        --For sorting
+        displayName = activityTypeString,
         secsSinceRequest = 0,
     }
 
@@ -1098,13 +1147,13 @@ function ZO_LFGUpdateProvider:AddFindReplacementNotification(data)
     local newListEntry = {
         notificationType = NOTIFICATION_TYPE_LFG,
         dataType = NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA,
-        shortDisplayText = data.dungeonName,
+        shortDisplayText = data.activityName,
         data = data,
 
-        message = zo_strformat(SI_LFG_FIND_REPLACEMENT_TEXT, data.dungeonName),
+        message = zo_strformat(SI_LFG_FIND_REPLACEMENT_TEXT, data.activityName),
 
         --For sorting
-        displayName = data.dungeonName,
+        displayName = data.activityName,
         secsSinceRequest = 0,
     }
 
@@ -1114,13 +1163,17 @@ end
 function ZO_LFGUpdateProvider:Accept(entryData)
     if entryData.dataType == NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA then
         AcceptLFGJumpNotification()
+    elseif entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
+        AcceptLFGReadyCheckNotification()
     elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
         AcceptLFGFindReplacementNotification()
     end
 end
 
 function ZO_LFGUpdateProvider:Decline(entryData)
-    if entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
+    if entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
+        DeclineLFGReadyCheckNotification()
+    elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
         DeclineLFGFindReplacementNotification()
     end
 end

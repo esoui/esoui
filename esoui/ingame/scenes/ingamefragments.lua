@@ -135,6 +135,28 @@ do
     FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStandardRightPanelFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStandardRightPanelFramingTarget)
 
+    local function CalculateFurnitureBrowserFramingTarget()
+        local x = zo_lerp(0, ZO_SharedRightBackground:GetLeft(), .45)
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        local y = zo_lerp(0, screenHeight, .5)
+        return x, y
+    end
+    FRAME_TARGET_FURNITURE_BROWSER_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateFurnitureBrowserFramingTarget, SetFrameLocalPlayerTarget)
+
+    local function CalculateCraftingFramingTarget()
+        local x = zo_lerp(ZO_SharedThinLeftPanelBackground:GetRight(), ZO_SharedRightPanelBackground:GetLeft(), .5)
+        local y = zo_lerp(0, ZO_KeybindStripMungeBackgroundTexture:GetTop(), .45)
+        return x, y
+    end
+    FRAME_TARGET_CRAFTING_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCraftingFramingTarget, SetFrameLocalPlayerTarget)
+    
+    local function CalculateCraftingGamepadFramingTarget()
+        local x = zo_lerp(ZO_SharedGamepadNavQuadrant_1_Background:GetRight(), GuiRoot:GetRight(), .5)
+        local y = zo_lerp(0, ZO_KeybindStripGamepadBackgroundTexture:GetTop(), .45)
+        return x, y
+    end
+    FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCraftingGamepadFramingTarget, SetFrameLocalPlayerTarget)
+
     local function CalculateCenteredFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
         return screenWidth / 2, .55 * screenHeight
@@ -768,6 +790,8 @@ GUILD_HERALDRY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHeraldry)
 
 CROWN_CRATES_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_CrownCratesTopLevel)
 
+HOUSING_FURNITURE_BROWSER_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HOUSING_BROWSER_TITLE)
+
 --Gamepad fragments
 local ALWAYS_ANIMATE = true
 
@@ -793,6 +817,7 @@ OPTIONS_MENU_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadOptionsTop
     
 GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
+GAMEPAD_NAV_QUADRANT_1_INSTANT_BACKGROUND_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
 GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_Background)
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_1_2_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_Background)
@@ -803,6 +828,25 @@ GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Share
 ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
 GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_4_Background, ALWAYS_ANIMATE)
 GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
+
+GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    paddingRight = 0,
+    dynamicFramingConsumedWidth = 1150,
+    dynamicFramingConsumedHeight = 400,
+    forcePreparePreview = false,
+    previewBufferMS = 300
+})
+
+FURNITURE_BROWSER_GAMEPAD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = 1200,
+    dynamicFramingConsumedHeight = 400,
+    forcePreparePreview = false,
+    previewInEmptyWorld = true,
+    previewBufferMS = 300
+})
 
 -- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
 
@@ -851,6 +895,7 @@ TRADING_HOUSE_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.TRADING_HOUSE_WI
 CHAMPION_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.CHAMPION_WINDOW_OPENED, SOUNDS.CHAMPION_WINDOW_CLOSED)
 MARKET_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.MARKET_WINDOW_OPENED, SOUNDS.MARKET_WINDOW_CLOSED)
 COLLECTIONS_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.COLLECTIONS_WINDOW_OPEN, SOUNDS.COLLECTIONS_WINDOW_CLOSE)
+CROWN_CRATES_GEMIFICATION_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.DEFAULT_WINDOW_OPEN, SOUNDS.DEFAULT_WINDOW_CLOSE)
 
 --Action Layers
 UI_SHORTCUTS_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
@@ -859,7 +904,7 @@ GUILD_SELECTOR_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("Guild")
 MOUSE_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("MouseUIMode")
 GAMEPAD_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("GamepadUIMode")
 GAMEPAD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("GamepadActions")
-HOUSING_EDITOR_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("DebugHousingEditorMode")
+HOUSING_EDITOR_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HOUSING_EDITOR))
 
 --Intercept Layer
 INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SceneChangeInterceptLayer")
@@ -894,4 +939,5 @@ CRAFTING_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
 --Shared Tutorials
 LOCKPICK_TUTORIAL_FRAGMENT = ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_LOCKPICKING_OPENED)
 
-HOUSING_EDITOR_HUD_FRAGMENT = ZO_HousingEditorHUDFragment:New(ZO_HousingEditorHudTopLevel)
+HOUSING_EDITOR_HUD_FRAGMENT = ZO_HousingEditorHUDFragment:New()
+HOUSING_EDITOR_ACTION_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingEditorActionBarTopLevel)

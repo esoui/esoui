@@ -43,6 +43,15 @@ function ZO_FormatRelativeTimeStamp(timestamp, precisionType)
     return ZO_FormatTimeMilliseconds(timestamp, TIME_FORMAT_STYLE_RELATIVE_TIMESTAMP, precisionType or TIME_FORMAT_PRECISION_TENTHS)
 end
 
+function ZO_FormatTimeAsDecimalWhenBelowThreshold(seconds, secondsThreshold)
+    secondsThreshold = secondsThreshold or 10
+    if seconds < secondsThreshold then
+        return ZO_FormatTime(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING)
+    else
+        return ZO_FormatTimeLargestTwo(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+    end
+end
+
 local CLOCK_FORMAT
 
 function ZO_FormatClockTime()

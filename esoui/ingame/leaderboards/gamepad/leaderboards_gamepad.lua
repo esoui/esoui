@@ -79,6 +79,10 @@ function ZO_LeaderboardsManager_Gamepad:InitializeScenes()
     self:RegisterMasterListUpdatedCallback(GAMEPAD_LEADERBOARDS_SCENE)
 end
 
+function ZO_LeaderboardsManager_Gamepad:RefreshLeaderboardType(leaderboardType)
+    GAMEPAD_LEADERBOARD_LIST:RefreshLeaderboardType(leaderboardType)
+end
+
 function ZO_LeaderboardsManager_Gamepad:PerformUpdate()
     if self.campaignName then
         self.categoryHeaderData.messageText = zo_strformat(SI_GAMEPAD_CAMPAIGN_LEADERBOARDS_ACTIVE_CAMPAIGN, self.campaignIcon, self.campaignName)
@@ -156,11 +160,19 @@ end
 function ZO_LeaderboardsManager_Gamepad:UpdateCategories()
     self.categoryListData = {}
 
-    if GAMEPAD_CAMPAIGN_LEADERBOARDS then
-        GAMEPAD_CAMPAIGN_LEADERBOARDS:AddCategoriesToParentSystem()
+    local campaignLeaderboards = CAMPAIGN_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetGamepadObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME)
+    if campaignLeaderboards then
+        campaignLeaderboards:AddCategoriesToParentSystem()
     end
-    if GAMEPAD_RAID_LEADERBOARDS then
-        GAMEPAD_RAID_LEADERBOARDS:AddCategoriesToParentSystem()
+
+    local raidLeaderboards = RAID_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetGamepadObject(RAID_LEADERBOARD_SYSTEM_NAME)
+    if raidLeaderboards then
+        raidLeaderboards:AddCategoriesToParentSystem()
+    end
+
+    local housingLeaderboards = HOUSING_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetGamepadObject(HOUSING_LEADERBOARD_SYSTEM_NAME)
+    if housingLeaderboards then
+        housingLeaderboards:AddCategoriesToParentSystem()
     end
 
     if GAMEPAD_LEADERBOARDS_SCENE:IsShowing() then

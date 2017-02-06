@@ -48,18 +48,6 @@ function ZO_LootHistory_Shared:CanShowItemsInHistory()
     return currentSceneName == "inventory" or currentSceneName == "interact" or currentSceneName == "crownCrateKeyboard" or LOOT_WINDOW.returnScene == "inventory"
 end
 
-function ZO_LootHistory_Keyboard:OnLootReceived(...)
-    ZO_LootHistory_Shared.OnLootReceived(self, ...)
-end
-
-function ZO_LootHistory_Keyboard:OnGoldUpdate(...)
-    ZO_LootHistory_Shared.OnGoldUpdate(self, ...)
-end
-
-function ZO_LootHistory_Keyboard:OnTelvarStoneUpdate(...)
-    ZO_LootHistory_Shared.OnTelvarStoneUpdate(self, ...)
-end
-
 function ZO_LootHistory_Keyboard_OnInitialized(control)
     LOOT_HISTORY_KEYBOARD = ZO_LootHistory_Keyboard:New(control)
     SYSTEMS:RegisterKeyboardObject(ZO_LOOT_HISTORY_NAME, LOOT_HISTORY_KEYBOARD)

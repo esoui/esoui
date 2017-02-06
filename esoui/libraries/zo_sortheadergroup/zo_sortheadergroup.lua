@@ -82,7 +82,7 @@ local function UpdateTextOrderingTextures(header, arrow, sortOrder)
     local alignmentFn = sortArrowAlignments[nameControl:GetHorizontalAlignment()]
     if(alignmentFn) then
         arrow:ClearAnchors()
-        alignmentFn(arrow, header, textWidth)
+        alignmentFn(arrow, nameControl, textWidth)
     end
 end
 
@@ -154,7 +154,11 @@ function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceRese
             resetSortDir = true
         end
 
-        self.sortDirection = resetSortDir and header.initialDirection or not self.sortDirection
+        if resetSortDir then
+            self.sortDirection = header.initialDirection
+        else
+            self.sortDirection = not self.sortDirection
+        end
 
         self:SelectHeader(header)
     
@@ -436,12 +440,35 @@ function ZO_SortHeaderGroup:MakeSelectedSortHeaderSelectedIndex()
     end
 end
 
-function ZO_SortHeaderGroup:MovePrevious()
-    self:SetSelectedIndex(self.selectedIndex and self.selectedIndex - 1)
-end
+do
+    local CHECK_FORWARD = 1
+    local CHECK_BACKWARD = -1
 
-function ZO_SortHeaderGroup:MoveNext()
-    self:SetSelectedIndex(self.selectedIndex and self.selectedIndex + 1)
+    --On Gamepad, we need to check for and ignore hidden headers
+    function ZO_SortHeaderGroup:FindNextActiveHeaderIndex(checkDirection)
+        local checkIndex = self.selectedIndex
+        local activeHeaderFound = false
+        while not activeHeaderFound do
+            checkIndex = checkIndex + checkDirection
+            local checkControl = self.sortHeaders[checkIndex]
+            if checkControl then
+                activeHeaderFound = not checkControl:IsHidden()
+            else
+                break
+            end
+        end
+        return activeHeaderFound and checkIndex or self.selectedIndex
+    end
+
+    function ZO_SortHeaderGroup:MovePrevious()
+        local previousActiveIndex = self:FindNextActiveHeaderIndex(CHECK_BACKWARD)
+        self:SetSelectedIndex(self.selectedIndex and previousActiveIndex)
+    end
+
+    function ZO_SortHeaderGroup:MoveNext()
+        local nextActiveIndex = self:FindNextActiveHeaderIndex(CHECK_FORWARD)
+        self:SetSelectedIndex(self.selectedIndex and nextActiveIndex)
+    end
 end
 
 function ZO_SortHeaderGroup:GetSelectedData()

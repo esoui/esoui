@@ -640,8 +640,10 @@ function ZO_MailSend_Gamepad:Reset()
 
     self.goldMode = nil
     self.inSendMode = false
+end
 
-    MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.mainHeaderData)
+function ZO_MailSend_Gamepad:SwitchToSendTab()
+    MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.mainHeaderData, SEND_TAB_INDEX)
 end
 
 function ZO_MailSend_Gamepad:EnterSending()
@@ -660,6 +662,7 @@ function ZO_MailSend_Gamepad:EnterOutbox()
     if self.inSendMode then
         self:EnterSending()
     else
+        self:SwitchToSendTab()
         MAIL_MANAGER_GAMEPAD:SetCurrentList(self.mainList)
         MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.mainKeybindDescriptor)
     end

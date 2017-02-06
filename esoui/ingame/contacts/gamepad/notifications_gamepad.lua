@@ -30,7 +30,8 @@ local DATA_TYPE_TO_TEMPLATE =
     [NOTIFICATIONS_LEADERBOARD_DATA] = "ZO_GamepadNotificationsLeaderboardRow",
     [NOTIFICATIONS_ALERT_DATA] = "ZO_GamepadNotificationsAlertRow",
     [NOTIFICATIONS_COLLECTIBLE_DATA] = "ZO_GamepadNotificationsCollectibleRow",
-    [NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA] = "ZO_GamepadNotificationsLFGJumpDungeonRow",
+	[NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA] = "ZO_GamepadNotificationsLFGJumpDungeonRow",
+    [NOTIFICATIONS_LFG_READY_CHECK_DATA] = "ZO_GamepadNotificationsLFGReadyCheckRow",
     [NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA] = "ZO_GamepadNotificationsLFGFindReplacementRow",
 }
 
@@ -406,7 +407,8 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsLeaderboardRow"] = SetupRequest,
         ["ZO_GamepadNotificationsAlertRow"] = function(...) self:SetupAlert(...) end,
         ["ZO_GamepadNotificationsCollectibleRow"] = SetupRequest,
-        ["ZO_GamepadNotificationsLFGJumpDungeonRow"] = SetupRequest,
+		["ZO_GamepadNotificationsLFGJumpDungeonRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsLFGReadyCheckRow"] = SetupRequest,
         ["ZO_GamepadNotificationsLFGFindReplacementRow"] = SetupRequest,
         ["ZO_GamepadNotificationsYesNoRow"] = SetupRequest,
     }

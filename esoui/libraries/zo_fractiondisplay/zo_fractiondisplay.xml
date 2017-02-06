@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_FractionDisplay" virtual="true">
+            <Controls>
+                <Label name="$(parent)Numerator" horizontalAlignment="CENTER">
+                    <Anchor point="TOP"/>
+                </Label>
+                <Texture name="$(parent)Divider" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)Numerator" relativePoint="BOTTOM"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Numerator" relativePoint="BOTTOM"/>
+                </Texture>
+                <Label name="$(parent)Denominator" horizontalAlignment="CENTER">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

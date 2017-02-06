@@ -75,6 +75,7 @@ function ZO_MarketProductBase:Initialize(control, owner)
     self.owner = owner
     self.marketProductId = 0
     self.variation = 1
+    self.textCalloutYOffset = 0
 
     if control then
         self:InitializeControls(control)
@@ -180,6 +181,21 @@ function ZO_MarketProductBase:IsPurchaseLocked()
     return self.purchaseState ~= MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
 end
 
+function ZO_MarketProductBase:CanBePurchased()
+    return not (self:IsPurchaseLocked() or self:IsHouseCollectible())
+end
+
+function ZO_MarketProductBase:IsHouseCollectible()
+    if self:GetMarketProductType() == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+        local collectibleType = select(4, GetMarketProductCollectibleInfo(self:GetId()))
+        if collectibleType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+            return true
+        end
+    end
+
+    return false
+end
+
 function ZO_MarketProductBase:HasBeenPartiallyPurchased()
     return IsMarketProductPartiallyPurchased(self.marketProductId)
 end
@@ -195,6 +211,10 @@ end
 function ZO_MarketProductBase:IsLimitedTimeProduct()
     local remainingTime = self:GetTimeLeftInSeconds()
     return remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS
+end
+
+function ZO_MarketProductBase:SetTextCalloutYOffset(yOffset)
+    self.textCalloutYOffset = yOffset
 end
 
 do
@@ -214,14 +234,16 @@ do
     local INHERIT_ICON_COLOR = true
     local CURRENCY_ICON_SIZE = "100%"
     function ZO_MarketProductBase:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-        local canPurchase = not self:IsPurchaseLocked()
         local hideCallouts = true
         local isFree = cost == 0 or costAfterDiscount == 0
         self.isFree = isFree
 
-        if canPurchase then
-             -- callouts for new and on sale
-            local onSale = discountPercent > 0
+        local canBePurchased = self:CanBePurchased()
+        local isHouseCollectible = self:IsHouseCollectible()
+
+        -- setup the callouts for new, on sale, and LTO
+        if canBePurchased or (isHouseCollectible and self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED) then
+            local onSale = discountPercent > 0 and not isHouseCollectible
 
             local calloutUpdateHandler
             -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
@@ -245,15 +267,20 @@ do
 
             self.onSale = onSale
             self.isNew = isNew
+        end
 
+        self.textCallout:SetHidden(hideCallouts)
+
+        -- layout the price labels
+        if canBePurchased then
             -- setup the cost
-            if onSale and not isFree then
+            if self.onSale and not isFree then
                 self.previousCost:SetText(ZO_CommaDelimitNumber(cost))
             end
 
             if not isFree then
-                self.previousCost:SetHidden(not onSale)
-                self.previousCostStrikethrough:SetHidden(not onSale)
+                self.previousCost:SetHidden(not self.onSale)
+                self.previousCostStrikethrough:SetHidden(not self.onSale)
                 local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
                 local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
                 self.cost:SetText(currencyString)
@@ -267,8 +294,9 @@ do
             self.purchaseLabelControl:SetHidden(not isFree)
             self.cost:SetHidden(isFree)
         else
-            self.previousCost:SetHidden(true)
-            if self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
+            if self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED and isHouseCollectible then
+                self.purchaseLabelControl:SetText(GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT))
+            elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
                 local errorStringId = GetMarketProductCompleteErrorStringId(self.marketProductId)
                 self.purchaseLabelControl:SetText(GetErrorString(errorStringId))
             elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
@@ -279,10 +307,26 @@ do
             ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
 
             self.purchaseLabelControl:SetHidden(false)
+            self.previousCost:SetHidden(true)
             self.cost:SetHidden(true)
         end
 
-        self.textCallout:SetHidden(hideCallouts)
+        self.cost:ClearAnchors()
+        self.textCallout:ClearAnchors()
+
+        -- Call IsControlHidden instead of IsHidden because our parent control is likely hidden currently
+        -- and we need to set the anchors based on whether the purchase label will be showing when we show the parent
+        local showingPurchaseLabel = not self.purchaseLabelControl:IsControlHidden()
+
+        if showingPurchaseLabel then
+            self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
+        elseif self.onSale then
+            self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
+            self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, self.textCalloutYOffset) -- x offset to account for strikethrough
+        else
+            self.cost:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, 10, -10)
+            self.textCallout:SetAnchor(BOTTOMLEFT, self.cost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
+        end
 
         local isBundle = self:IsBundle()
         if isBundle then
@@ -405,7 +449,8 @@ end
 -- MarketProduct Preview functions
 
 function ZO_MarketProductBase:HasPreview()
-    return CanPreviewMarketProduct(self.marketProductId)
+    --Houses are special because as far as C is concerned they aren't previewable, but Lua allows for a roundabout preview with jumping to the house
+    return CanPreviewMarketProduct(self.marketProductId) or ZO_Market_Shared.GetMarketProductPreviewType(self) == ZO_MARKET_PREVIEW_TYPE_HOUSE
 end
 
 function ZO_MarketProductBase:EndPreview()
@@ -417,55 +462,6 @@ function ZO_MarketProductBase:GetNumPreviewVariations()
     return GetNumMarketProductPreviewVariations(self.marketProductId)
 end
 
-do
-    local SERVICE_TOKEN =
-    {
-        buttonText = GetString(SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL),
-        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE),
-        GoToUseProductLocation = Logout,
-    }
-
-    local CROWN_CRATE =
-    {
-        buttonText = GetString(SI_MARKET_OPEN_CROWN_CRATES_KEYBIND_LABEL),
-        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY),
-        visible = CanInteractWithCrownCratesSystem,
-        enabled = function()
-            local isAllowed, errorStringId = IsPlayerAllowedToOpenCrownCrates()
-            --Internal ingame doesn't have access to ZO_Alert
-            return isAllowed
-        end,
-        GoToUseProductLocation = function()
-            if IsInGamepadPreferredMode() then
-                SCENE_MANAGER:Show("crownCrateGamepad")
-            else
-                SCENE_MANAGER:Show("crownCrateKeyboard")
-            end
-        end,
-    }
-
-    function ZO_MarketProductBase:GetUseProductInfo()
-        if DoesMarketProductContainServiceToken(self:GetId()) then
-            return SERVICE_TOKEN
-        else
-            local marketProductType = self:GetMarketProductType()
-            if marketProductType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
-                return CROWN_CRATE
-            end
-        end
-    end
-
-    function ZO_MarketProductBase:HasUseProductInfo()
-        return self:GetUseProductInfo() ~= nil
-    end
-
-    function ZO_MarketProductBase:GoToUseProductLocation()
-        local useProductInfo = self:GetUseProductInfo()
-        if useProductInfo then
-            useProductInfo.GoToUseProductLocation()
-        end        
-    end
-end
 -- virtual functions
 
 function ZO_MarketProductBase:Purchase()

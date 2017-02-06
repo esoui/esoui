@@ -1,0 +1,80 @@
+﻿<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_HousingBook_Keyboard" inherits="ZO_SpecializedCollection_Book_Keyboard" mouseEnabled="true" hidden="true">
+            <OnInitialized>
+                ZO_HousingBook_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Image" override="true">
+                            <Dimensions y="ZO_HOUSING_BOOK_IMAGE_HEIGHT" />
+                            <TextureCoords left="0" right="ZO_HOUSING_BOOK_IMAGE_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_HOUSING_BOOK_IMAGE_TEXTURE_COORD_BOTTOM"/>
+                        </Texture>
+                        
+                        <Label name="$(parent)Nickname" inherits="ZO_SpecializedCollection_Book_LargeLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                        </Label>
+
+                        <Control name="$(parent)ScrollContainer" override="true">
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true" >
+                                    <Controls>
+                                        <Label name="$(parent)LocationLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                        </Label>
+
+                                        <Label name="$(parent)HouseTypeLabel"  inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LocationLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                        </Label>
+
+                                        <Label name="$(parent)PrimaryResidenceLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" hidden="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                        </Label>
+                                        
+                                        <Label name="$(parent)HintLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidenceLabel" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)HousingInteractButtons" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)ScrollContainer" relativePoint="BOTTOM" offsetY="12" />
+                            <Controls>
+                                <Button name="$(parent)TravelToHouse" inherits="ZO_DefaultButton" text="SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE">
+                                    <Dimensions x="200" />
+                                    <Anchor point="BOTTOMLEFT" />
+
+                                    <OnClicked>
+                                        ZO_HousingBook_Keyboard_OnRequestJumpToHouseClicked(self)
+                                    </OnClicked>
+                                </Button>
+
+                                <Button name="$(parent)ChangeNickname" inherits="ZO_DefaultButton" text="SI_COLLECTIBLE_ACTION_RENAME">
+                                    <Dimensions x="200" />
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TravelToHouse"  relativePoint="BOTTOMRIGHT" />
+
+                                    <OnClicked>
+                                        ZO_HousingBook_Keyboard_OnChangNicknameClicked(self)
+                                    </OnClicked>
+                                </Button>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)PreviewHouseButton" inherits="ZO_DefaultButton" text="SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE">
+                            <Dimensions x="200" />
+                            <Anchor point="TOP" relativeTo="$(parent)HousingInteractButtons" />
+
+                            <OnClicked>
+                                ZO_HousingBook_Keyboard_OnRequestJumpToHouseClicked(self)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -254,6 +254,9 @@ SOUNDS = {
     TELVAR_MULTIPLIERMAX            = "Telvar_MultiplierMax",
     TELVAR_TRANSACT                 = "Telvar_Transact",
 
+	-- Writ voucher sounds
+	WRIT_VOUCHER_TRANSACT			= "WritVoucher_Transact",
+
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
     JUSTICE_NOW_KOS                 = "Justice_NowKOS",
@@ -281,6 +284,7 @@ SOUNDS = {
     LFG_SEARCH_STARTED              = "LFG_Search_Started",
     LFG_SEARCH_FINISHED             = "LFG_Search_Finished",
     LFG_JUMP_DUNGEON                = "LFG_Jump_Dungeon",
+    LFG_READY_CHECK                 = "LFG_Ready_Check",
     LFG_FIND_REPLACEMENT            = "LFG_Find_Replacement",
     LFG_COMPLETE_ANNOUNCEMENT       = "LFG_Complete_Announcement",
 
@@ -617,6 +621,7 @@ SOUNDS = {
     PROVISIONING_ENTRY_SELECTED             = "Provisioning_EntrySelected",
 
     RECIPE_LEARNED                          = "Recipe_Learned",
+    DEFAULT_RECIPE_CRAFTED                  = "Default_Recipe_Crafted",
 
     -- Enchanting
     ENCHANTING_OPENED                       = "Enchanting_Opened",
@@ -828,4 +833,16 @@ SOUNDS = {
     CROWN_CRATES_CARD_FLIPPING              = "CrownCrates_Card_Flipping",
     CROWN_CRATES_SCENE_OPEN                 = "CrownCrates_Scene_Open",
     CROWN_CRATES_SCENE_CLOSED               = "CrownCrates_Scene_Closed",
+    CROWN_CRATES_GEM_WOBBLE                 = "CrownCrates_GemmingWobble",
+    CROWN_CRATES_GEM_ITEM                   = "CrownCrates_Gem_Item",
+
+    --Housing
+    HOUSING_EDITOR_OPEN                     = "Housing_MenuOpen",
+    HOUSING_EDITOR_CLOSED                   = "Housing_MenuClosed",
+    HOUSING_EDITOR_OPEN_BROWSER             = "Housing_OpenBrowser",
+    HOUSING_EDITOR_CLOSE_BROWSER            = "Housing_CloseBrowser",
+    HOUSING_EDITOR_PLACE_ITEM               = "Housing_PlaceItem",
+    HOUSING_EDITOR_PICKUP_ITEM              = "Housing_PickupItem",
+    HOUSING_EDITOR_RETRIEVE_ITEM            = "Housing_StoreItem",
+    HOUSING_BUY_FOR_GOLD                    = "Housing_BuyForGold",
 }

@@ -49,18 +49,6 @@ function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
            or currentSceneName == "crownCrateGamepad" or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
 end
 
-function ZO_LootHistory_Gamepad:OnLootReceived(...)
-    ZO_LootHistory_Shared.OnLootReceived(self, ...)
-end
-
-function ZO_LootHistory_Gamepad:OnGoldUpdate(...)
-    ZO_LootHistory_Shared.OnGoldUpdate(self, ...)
-end
-
-function ZO_LootHistory_Gamepad:OnTelvarStoneUpdate(...)
-    ZO_LootHistory_Shared.OnTelvarStoneUpdate(self, ...)
-end
-
 function ZO_LootHistory_Gamepad_OnInitialized(control)
     LOOT_HISTORY_GAMEPAD = ZO_LootHistory_Gamepad:New(control)
     SYSTEMS:RegisterGamepadObject(ZO_LOOT_HISTORY_NAME, LOOT_HISTORY_GAMEPAD)

@@ -277,7 +277,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                     control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
                 end
 
-                creatorFunc(control, reward.name, reward.amount, reward.icon, reward.meetsUsageRequirement, reward.quality)
+                creatorFunc(control, reward.name, reward.amount, reward.icon, reward.meetsUsageRequirement, reward.quality, reward.itemType)
 
                 -- Money rewards do not get box-anchored, they're shown after all the reward icons (or immediately if there were no icons)
                 ZO_Anchor_BoxLayout(ROOT_REWARD_ANCHOR, control, anchorIndex, REWARD_STRIDE, REWARD_PADDING_X, REWARD_PADDING_Y, REWARD_SIZE_X, REWARD_SIZE_Y, REWARD_ROOT_OFFSET_X, REWARD_ROOT_OFFSET_Y)

@@ -479,21 +479,22 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
         if slotData and slotData.stackCount > 0 then
             local itemData =
             {
-            iconFile = slotData.iconFile,
-            stackCount = slotData.stackCount,
-            sellPrice = slotData.sellPrice,
-            stackSellPrice = slotData.stackCount * slotData.sellPrice,
-            bagId = BAG_BACKPACK,
-            slotIndex = slotIndex,
-            meetsUsageRequirement = slotData.meetsUsageRequirement,
-            locked = slotData.locked,
-            quality = slotData.quality,
-            slotType = SLOT_TYPE_ITEM,
-            filterData = { GetItemFilterTypeInfo(BAG_BACKPACK, slotIndex) },
-            age = slotData.age,
-            stolen = IsItemStolen(BAG_BACKPACK, slotIndex),
-            name = slotData.name or zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_BACKPACK, slotIndex))
-        }
+                iconFile = slotData.iconFile,
+                stackCount = slotData.stackCount,
+                sellPrice = slotData.sellPrice,
+                stackSellPrice = slotData.stackCount * slotData.sellPrice,
+                bagId = BAG_BACKPACK,
+                slotIndex = slotIndex,
+                meetsUsageRequirement = slotData.meetsUsageRequirement,
+                locked = slotData.locked,
+                quality = slotData.quality,
+                slotType = SLOT_TYPE_ITEM,
+                filterData = { GetItemFilterTypeInfo(BAG_BACKPACK, slotIndex) },
+                age = slotData.age,
+                stolen = IsItemStolen(BAG_BACKPACK, slotIndex),
+                name = slotData.name or zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_BACKPACK, slotIndex)),
+                isGemmable = slotData.isGemmable,
+            }
 
             if self:ShouldAddItemToList(itemData) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_ITEM, itemData))
@@ -530,10 +531,13 @@ function ZO_QuickslotManager:SetUpQuickSlot(control, data)
 
     local statusControl = GetControl(control, "StatusTexture")
     statusControl:ClearIcons()
-    if (data.stolen) then
+    if data.stolen then
         statusControl:AddIcon(STOLEN_ICON_TEXTURE)
-        statusControl:Show()        
     end
+    if data.isGemmable then
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWN_GEMS))
+    end
+    statusControl:Show()
 
     UpdateNewStatusControl(control, data)
 end

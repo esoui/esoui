@@ -224,8 +224,8 @@ function ZO_ComboBox_Base:SelectItemByIndex(index, ignoreCallback)
     self:SelectItem(self.m_sortedItems[index], ignoreCallback)
 end
 
-function ZO_ComboBox_Base:SelectFirstItem()
-    self:SelectItemByIndex(1)
+function ZO_ComboBox_Base:SelectFirstItem(ignoreCallback)
+    self:SelectItemByIndex(1, ignoreCallback)
 end
 
 function ZO_ComboBox_Base:SetSelectedItemByEval(eval, ignoreCallback)

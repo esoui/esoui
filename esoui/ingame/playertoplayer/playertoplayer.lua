@@ -13,6 +13,7 @@ local INTERACT_TYPE_LFG_JUMP_DUNGEON = 10
 local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 11
 local INTERACT_TYPE_GROUP_ELECTION = 12
 local INTERACT_TYPE_DUEL_INVITE = 13
+local INTERACT_TYPE_LFG_READY_CHECK = 14
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
@@ -87,11 +88,16 @@ do
         self.lastFailedPromptTime = GetFrameTimeMilliseconds()
 
         EVENT_MANAGER:RegisterForUpdate(control:GetName() .. "OnUpdate", 0, function() self:OnUpdate() end)
+        control:RegisterForEvent(EVENT_DUEL_STARTED, function() self:OnDuelStarted() end)
 
         SHARED_INFORMATION_AREA:AddPlayerToPlayer(self.container)
 
         ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
     end
+end
+
+function ZO_PlayerToPlayer:OnDuelStarted()
+    self:StopInteraction()
 end
 
 function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
@@ -424,10 +430,12 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_REQUESTED, OnAgentChatRequested)
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_ACCEPTED, OnAgentChatAccepted)
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_DECLINED, OnAgentChatDeclined)
-	self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, OnCampaignQueueStateChanged)
-	self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_LEFT, OnCampaignQueueLeft)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, OnCampaignQueueStateChanged)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_LEFT, OnCampaignQueueLeft)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE, OnScriptedWorldEventInvite)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
 
     local function OnGroupingToolsJumpDungeonNotificationNew()
         local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
@@ -478,17 +486,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_NEW, function(event, ...) OnGroupingToolsJumpDungeonNotificationNew(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_REMOVED, function(event, ...) OnGroupingToolsJumpDungeonNotificationRemoved(...) end)
 
-
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
         local activityType, activityIndex = GetLFGFindReplacementNotificationInfo()
 
-        local function AcceptCallback()
-            AcceptLFGFindReplacementNotification()
-        end
-        local function DeclineCallback()
-            DeclineLFGFindReplacementNotification()
-        end
         local function DeferDecisionCallback()
             self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         end
@@ -499,14 +500,15 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         
         local text = zo_strformat(SI_LFG_FIND_REPLACEMENT_TEXT, dungeonName)
-        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptCallback, DeclineCallback, DeferDecisionCallback)
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptLFGFindReplacementNotification, DeclineLFGFindReplacementNotification, DeferDecisionCallback)
         promptData.acceptText = GetString(SI_LFG_FIND_REPLACEMENT_ACCEPT)
     end
     local function OnGroupingToolsFindReplacementNotificationRemoved()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
     end
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW, function(event, ...) OnGroupingToolsFindReplacementNotificationNew(...) end)
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED, function(event, ...) OnGroupingToolsFindReplacementNotificationRemoved(...) end)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW, OnGroupingToolsFindReplacementNotificationNew)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED, OnGroupingToolsFindReplacementNotificationRemoved)
+
 
     local function OnGroupElectionNotificationAdded()
         local electionType, timeRemainingSeconds, descriptor, targetUnitTag = GetGroupElectionInfo()
@@ -608,6 +610,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnGroupingToolsJumpDungeonNotificationNew()
         end
 
+        if HasLFGReadyCheckNotification() then
+            self:OnGroupingToolsReadyCheckUpdated()
+        end
+
         if HasLFGFindReplacementNotification() then
             OnGroupingToolsFindReplacementNotificationNew()
         end
@@ -625,6 +631,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_QUEST_SHARE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_WORLD_EVENT_INVITE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
     end
 
@@ -768,11 +775,12 @@ end
 
 do
     local function DoesDataMatch(firstEntry, secondEntryType, secondCharacterName, secondDisplayName)
-        local removeWithoutName = characterName == nil and displayName == nil
-        local doesCharacterNameMatch = not secondCharacterName or firstEntry.characterName == secondCharacterName
-        local doesDisplayNameMatch = not secondDisplayName or firstEntry.displayName == secondDisplayName
-        local doesTypesMatch = firstEntry.incomingType == secondEntryType
-        return removeWithoutName or (doesCharacterNameMatch and doesDisplayNameMatch and doesTypesMatch)
+        if firstEntry.incomingType == secondEntryType then
+            local doesCharacterNameMatch = not secondCharacterName or firstEntry.characterName == secondCharacterName
+            local doesDisplayNameMatch = not secondDisplayName or firstEntry.displayName == secondDisplayName
+            return doesCharacterNameMatch and doesDisplayNameMatch
+        end
+        return false
     end
 
     function ZO_PlayerToPlayer:ExistsInQueue(incomingType, characterName, displayName)
@@ -796,6 +804,15 @@ do
                 break
             end
         end
+    end
+
+    function ZO_PlayerToPlayer:GetFromIncomingQueue(incomingType, characterName, displayName)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
+                return incomingEntry
+            end
+        end
+        return nil
     end
 end
 
@@ -827,6 +844,54 @@ function ZO_PlayerToPlayer:RemoveScriptedWorldEventFromIncomingQueue(eventId, qu
             break
         end
     end
+end
+
+function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
+    if HasLFGReadyCheckNotification() then
+        local activityType, role, timeRemainingSeconds = GetLFGReadyCheckNotificationInfo()
+
+        local promptData = self:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+        if not promptData then
+            local function DeferDecisionCallback()
+                self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+            end
+
+            local messageFormat, messageParams
+            if role == LFG_ROLE_INVALID then
+                messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
+                messageParams = { GetString("SI_LFGACTIVITY", activityType) }
+            else
+                local roleIconPath = GetRoleIcon(role)
+                local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
+
+                messageFormat = SI_LFG_READY_CHECK_TEXT
+                local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+                messageParams = { GetString("SI_LFGACTIVITY", activityType), roleIconFormat, GetString("SI_LFGROLE", role), timeText }
+            end
+
+            promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK, nil, nil, nil, AcceptLFGReadyCheckNotification, DeclineLFGReadyCheckNotification, DeferDecisionCallback)
+            promptData.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
+            promptData.messageFormat = messageFormat
+            promptData.messageParams = messageParams
+            local function UpdateTimeLeft(incomingEntry, isActive)
+                if isActive then
+                    local timeRemainingSeconds = select(3, GetLFGReadyCheckNotificationInfo())
+                    local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+                    incomingEntry.messageParams[4] = timeText
+                    self:SetupTargetLabel(incomingEntry)
+                end
+            end
+            promptData.updateFn = UpdateTimeLeft
+
+            PlaySound(SOUNDS.LFG_READY_CHECK)
+        end
+    else
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+    end
+end
+
+function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckCancelled()
+    self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
 end
 
 local NO_LEADING_EDGE = false
@@ -970,6 +1035,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
                 self.pendingResurrectInfo:SetText(GetString(SI_PLAYER_TO_PLAYER_RESURRECT_HAS_RESURRECT_PENDING))
             end
         else
+            self.pendingResurrectInfo:SetHidden(true)
             self.actionKeybindButton:SetHidden(false)
 
             local targetLevel = GetUnitEffectiveLevel(P2P_UNIT_TAG)
@@ -992,7 +1058,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
 
         return true
     end
-
+    self.pendingResurrectInfo:SetHidden(true)
     return false
 end
 
@@ -1018,15 +1084,16 @@ function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
     return false
 end
 
-function ZO_PlayerToPlayer:TryShowingPromptAfterDelay()
+function ZO_PlayerToPlayer:ShouldShowPromptAfterDelay()
     local now = GetFrameTimeMilliseconds()
     if IsPlayerMoving() then
         self.lastFailedPromptTime = now
     else
         if now - self.lastFailedPromptTime >= self.msToDelayToShowPrompt then
-            self:SetHidden(false)
+            return true
         end
     end
+    return false
 end
 
 function ZO_PlayerToPlayer:ShowResponseActionKeybind(keybindText)
@@ -1091,8 +1158,6 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
                 local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
                 self.promptKeybindButton1:SetText(acceptText)
                 self.promptKeybindButton2:SetText(declineText)
-                self.promptKeybindButton1:SetHidden(false)
-                self.promptKeybindButton2:SetHidden(false)
                 self.shouldShowNotificationKeybindLayer = true
             end
 
@@ -1127,13 +1192,9 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.hasRequiredSoulGem = false
         self.failedRaidRevives = false
         self.responding = false
-        self:SetHidden(not self.isInteracting)
         self.actionKeybindButton:SetHidden(true)
         self.actionKeybindButton:SetEnabled(true)
         self.additionalInfo:SetHidden(true)
-        self.promptKeybindButton1:SetHidden(true)
-        self.promptKeybindButton2:SetHidden(true)
-        self.pendingResurrectInfo:SetHidden(true)
 
         if (not self.isInteracting) or (not IsConsoleUI()) then
             self.gamerID:SetHidden(true)
@@ -1141,16 +1202,23 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         self.shouldShowNotificationKeybindLayer = false
 
+        local hideSelf = not self.isInteracting
+
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
         if isReticleTargetInteractable and self:TryShowingResurrectLabel() then
-            self:SetHidden(false)
+            hideSelf = false
         elseif not self.isInteracting and (self.showingNotificationMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then
-            self:SetHidden(false)
+            hideSelf = false
         elseif not self.isInteracting and isReticleTargetInteractable and self:TryShowingStandardInteractLabel() then
-            self:TryShowingPromptAfterDelay()
+            hideSelf = not self:ShouldShowPromptAfterDelay()
         end
+        
+        self:SetHidden(hideSelf)
+        self.promptKeybindButton1:SetHidden(not self.shouldShowNotificationKeybindLayer)
+        self.promptKeybindButton2:SetHidden(not self.shouldShowNotificationKeybindLayer)
 
         local isNotificationLayerShown = IsActionLayerActiveByName(notificationsKeybindLayerName)
+
         if self.shouldShowNotificationKeybindLayer ~= isNotificationLayerShown then
             if(self.shouldShowNotificationKeybindLayer) then
                 PushActionLayerByName(notificationsKeybindLayerName)
@@ -1391,6 +1459,20 @@ do
         self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
 
         self:GetRadialMenu():Show()
+    end
+end
+
+function ZO_PlayerToPlayer_OnKeybindEffectivelyShown(control)
+    if ZO_RZCHROMA_EFFECTS then
+        local keybindAction = control:GetKeyboardKeybind()
+        ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect(keybindAction)
+    end
+end
+
+function ZO_PlayerToPlayer_OnKeybindEffectivelyHidden(control)
+    if ZO_RZCHROMA_EFFECTS then
+        local keybindAction = control:GetKeyboardKeybind()
+        ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect(keybindAction)
     end
 end
 

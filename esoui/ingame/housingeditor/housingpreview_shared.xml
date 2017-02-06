@@ -1,0 +1,112 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HousingPreviewDialog_PurchaseOptionSection" hidden="true" virtual="true">
+            
+            <Controls>
+                <Button name="$(parent)Button">
+                    <Anchor point="TOP" />
+                </Button>
+                
+                <Label name="$(parent)CurrencyNameLabel" modifyTextType="UPPERCASE">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM"  offsetY="5"/>
+                </Label>
+
+                <Label name="$(parent)ErrorLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)CurrencyNameLabel" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HousingPreviewDialog_Shared" virtual="true">
+            <Controls>
+                <Texture name="$(parent)HouseImage" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="ZO_HOUSING_PREVIEW_IMAGE_CANVAS_WIDTH" y="ZO_HOUSING_PREVIEW_IMAGE_CANVAS_HEIGHT" />
+                    <TextureCoords left="0" right="ZO_HOUSING_PREVIEW_IMAGE_TEXTURE_COORDS_RIGHT" top="0" bottom="ZO_HOUSING_PREVIEW_IMAGE_TEXTURE_COORDS_BOTTOM"/>
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <Label name="$(parent)Title" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseImage" relativePoint="BOTTOMLEFT" offsetX ="ZO_HOUSING_PREVIEW_INFO_PADDING_X" offsetY="-50"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HouseImage" relativePoint="BOTTOMRIGHT" offsetX ="-ZO_HOUSING_PREVIEW_INFO_PADDING_X" offsetY="-50"/>
+                </Label>
+                
+                <Control name="$(parent)Details" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="20" />
+
+                    <Controls>
+                        <Label name="$(parent)LocationHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)LocationData" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <AnchorToBaseline relativeToLabel="$(parent)LocationHeader" side="RIGHT" offsetX="5" />
+                        </Label>
+
+                        <Label name="$(parent)HouseTypeHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <AnchorToBaseline relativeToLabel="$(parent)LocationData" side="RIGHT" offsetX="10" />
+                        </Label>
+
+                        <Label name="$(parent)HouseTypeData" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <AnchorToBaseline relativeToLabel="$(parent)HouseTypeHeader" side="RIGHT" offsetX="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)NotAvailableText" text="SI_HOUSING_PREVIEW_NOT_AVAILABLE_FOR_PURCHASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Details" relativePoint="BOTTOMLEFT" offsetY="40" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Details" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                </Label>
+
+                <Control name="$(parent)Template" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Details" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Details" relativePoint="BOTTOMRIGHT" offsetY="20" />
+
+                    <Controls>
+                        <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Control name="$(parent)ComboBox">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="TOPRIGHT" offsetX="20" offsetY="-5" />
+                        </Control>
+
+                        <Button name="$(parent)PreviewButton" text="SI_HOUSE_TEMPLATE_PREVIEW_BUTTON_TEXT" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ComboBox" relativePoint="TOPRIGHT" offsetX="10" />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PurchaseOptions" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="20" />
+
+                    <Controls>
+                        <Control name="$(parent)Gold" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">
+                            <Anchor point="TOPLEFT" />
+                            
+                            <Controls>
+                                <Label name="$(parent)CurrencyNameLabel" override="true" text="SI_CURRENCY_GOLD" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Crowns" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Gold" relativePoint="TOPRIGHT" />
+                            
+                            <Controls>
+                                <Label name="$(parent)CurrencyNameLabel" override="true" text="SI_CURRENCY_CROWN" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)CrownGems" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Crowns" relativePoint="TOPRIGHT" />
+
+                            <Controls>
+                                <Label name="$(parent)CurrencyNameLabel" override="true" text="SI_CURRENCY_CROWN_GEM" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

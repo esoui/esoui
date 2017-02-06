@@ -257,6 +257,23 @@
                 </Button>
             </Controls>
         </Control>
+      
+        <Control name="ZO_NotificationsLFGReadyCheckRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+            <OnInitialized>
+                self.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
+                self.declineText = GetString(SI_NOTIFICATIONS_REQUEST_DECLINE)
+            </OnInitialized>
+
+            <Controls>
+                <Button name="$(parent)Accept" override="true">
+                    <Textures
+                        normal="EsoUI/Art/Buttons/accept_up.dds"
+                        pressed="EsoUI/Art/Buttons/accept_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
+                    />
+                </Button>
+            </Controls>
+        </Control>
 
         <Control name="ZO_NotificationsLFGFindReplacementRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>

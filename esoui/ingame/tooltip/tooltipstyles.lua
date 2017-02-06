@@ -105,7 +105,7 @@ ZO_TOOLTIP_STYLES =
     },
     itemTagsSection =
     {
-        customSpacing = 80,
+        customSpacing = 40,
         widthPercent = 100,
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
@@ -1298,6 +1298,53 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_42)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
     },
+    -- Housing Tooltips
+    defaultAccessTopSection =
+    {
+        customSpacing = 10,
+        paddingTop = 30,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontSize = "$(GP_42)",
+    },
+    defaultAccessTitle =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    defaultAccessBody =
+    {   
+        widthPercent = 100,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontSize = "$(GP_42)",
+    },
+
+    --Gamepad Currency Tooltip
+    currencySection =
+    {
+        customSpacing = 47,
+        widthPercent = 100,
+        childSpacing = 20,
+    },
+    currencyStatValuePair =
+    {
+        height = 40,
+        widthPercent = 98,
+    },
+    currencyStatValuePairStat =
+    {
+        fontSize = "$(GP_27)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    currencyStatValuePairValue = 
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        horizontalAlignment = TEXT_ALIGN_RIGHT,
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
 }
 
 local function Style(name)

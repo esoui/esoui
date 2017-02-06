@@ -19,7 +19,7 @@ end
 
 function ZO_GamepadCraftingInventory:AddListDataTypes()
     -- intended to be overridden for custom data types
-    self:AddVerticalScrollDataTypes("ZO_GamepadSubMenuEntryWithSubLabel")
+    self:AddVerticalScrollDataTypes("ZO_GamepadItemSubEntry")
 end
 
 function ZO_GamepadCraftingInventory:AddVerticalScrollDataTypes(verticalScrollCraftEntryType, setupTemplate, setupHeaderTemplate)

@@ -380,10 +380,13 @@ function ActionButton:UpdateCooldown(options)
     local slotnum = self:GetSlot()
     local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum)
     local isInCooldown = duration > 0
-    local showGlobalForCollectible = global and GetSlotType(slotnum) == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
-    local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalForCollectible)
+    local slotType = GetSlotType(slotnum)
+    local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
+    local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalCooldownForCollectible)
 
     self.cooldown:SetHidden(not showCooldown)
+
+    local updateChromaQuickslot = slotType ~= ACTION_TYPE_ABILITY and ZO_RZCHROMA_EFFECTS
 
     if showCooldown then
         self.cooldown:StartCooldown(remain, duration, CD_TYPE_RADIAL, nil, NO_LEADING_EDGE)
@@ -405,6 +408,9 @@ function ActionButton:UpdateCooldown(options)
         end
 
         self.slot:SetHandler("OnUpdate", function() self:RefreshCooldown() end)
+        if updateChromaQuickslot then
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("UI_SHORTCUT_QUICK_SLOTS")
+        end
     else
         if self.showingCooldown then
             -- This ability was in a non-global cooldown, and now the cooldown is over...play animation and sound
@@ -421,6 +427,10 @@ function ActionButton:UpdateCooldown(options)
             anim:SetImageData(16,1)
             anim:SetFramerate(30)
             anim:GetTimeline():PlayFromStart()
+
+            if updateChromaQuickslot then
+                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("UI_SHORTCUT_QUICK_SLOTS")
+            end
         end
 
         self.icon.percentComplete = 1

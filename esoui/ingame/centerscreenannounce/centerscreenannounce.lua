@@ -22,6 +22,7 @@ local ARG_INDEX_LIFESPAN = 8
 local ARG_INDEX_SUPPRESS_FRAME = 9
 local ARG_INDEX_QUEUE_IMMEDIATELY = 10
 local ARG_INDEX_SHOW_IMMEDIATELY = 11
+local ARG_INDEX_REINSERT_STOMPED_MESSAGE = 12
 
 local ARG_BREAKDOWN_INDEX_SCORE = 1
 local ARG_BREAKDOWN_INDEX_TIME = 2
@@ -189,7 +190,8 @@ do
             if(not completedPlayback) then return end
 
             local control = timeline.m_control
-            self:ReleaseLine(control)
+			local skipDisplayNext = true
+            self:ReleaseLine(control, skipDisplayNext)
             self:UpdateDisplay(control) -- passing in the control whose animation just finished...yes, it's already been released
         end
 
@@ -198,6 +200,7 @@ do
 
             local control = timeline.m_control
             if(self:IsTopLine(control)) then
+				self:CallExpiringCallback(control)
                 local offset = zo_clamp(GetFrameTimeMilliseconds() - control.m_acquisitionTime, 0, 2500)
                 control.m_fadeOutTimeline:PlayFromStart(offset)
             end
@@ -210,19 +213,19 @@ do
 
         local function SetupWipeIn(animation, container)
             container:ClearAnchors()
-            container:SetAnchor(TOPLEFT, control, TOPLEFT, -512, 0)
+            container:SetAnchor(TOPLEFT, control, TOPLEFT, -560, 0)
         end
 
         local function SetupWipeOut(animation, container)
             container:ClearAnchors()
-            container:SetAnchor(TOPRIGHT, control, TOPRIGHT, 512, 0)
+            container:SetAnchor(TOPRIGHT, control, TOPRIGHT, 560, 0)
         end
 
         self:InitializeWipeAnimation(self.m_largeTextContainer, "CenterScreenLargeText", "m_timeline", OnFadeOutComplete, DEFAULT_FADE_OUT_TIME, CallExpiringCallbackTimeline, SetupWipeIn, SetupWipeOut)
     
         local function SmallLineFactory(line)
             self:InitializeLineAnimation(line, "CenterScreenSmallTextFadeIn", "m_fadeInTimeline")
-            self:InitializeLineAnimation(line, "CenterScreenSmallTextFadeOut", "m_fadeOutTimeline", OnFadeOutComplete, 0, CallExpiringCallbackTimeline)
+            self:InitializeLineAnimation(line, "CenterScreenSmallTextFadeOut", "m_fadeOutTimeline", OnFadeOutComplete)
             self:InitializeLineAnimation(line, "CenterScreenSmallTextTranslate", "m_translateTimeline", OnSmallLineTranslateComplete)
 
             line.m_translateTimeline:InsertCallback(OnSmallTextLineCheckNextEvent, 500)
@@ -359,8 +362,8 @@ function CenterScreenAnnounce:CanDisplayMessage(category)
     if SYSTEMS:GetObject("craftingResults"):HasEntries() then
         return false
     end
-    if(self.m_displayMode == CSA_INACTIVE) then return true end
-    if(category == CSA_EVENT_SMALL_TEXT and self.m_displayMode == category) then
+    if self.m_displayMode == CSA_INACTIVE then return true end
+    if category == CSA_EVENT_SMALL_TEXT and self.m_displayMode == category then
         return self.m_lastSmallLineMovedOutOfTheWay and (#self.m_activeSmallTextLines < self.MAX_SMALL_TEXT_LINES)
     end
     
@@ -395,11 +398,28 @@ function CenterScreenAnnounce:CreateMessagePayload(eventId, category, queuedOrde
 end
 
 function CenterScreenAnnounce:QueueMessage(eventId, category, ...)
-    self.m_control:SetHandler("OnUpdate", self.m_onUpdateHandler)
-
     --Delay choosing the next message to show by WAIT_INTERVAL_SECONDS each time a new message comes in to stabilize a bit
     local timeNowSeconds = GetFrameTimeMilliseconds() / 1000
     local shouldQueueImmediately = select(ARG_INDEX_QUEUE_IMMEDIATELY, ...)
+
+    if shouldQueueImmediately then
+        self:DisplayMessage(category, ...)
+
+        if self.m_currentMsg ~= nil then
+            local reinsertStompedMsg = select(ARG_INDEX_REINSERT_STOMPED_MESSAGE, ...)
+            if reinsertStompedMsg then
+                --If we are interrupting a message, lets put the current message back in the queue so it can come back 
+                --up when were done with the immediate message that is interrupting.
+                table.insert(self.m_displayQueue, 1, self.m_currentMsg)
+            end
+            self.m_currentMsg = nil
+        end
+
+        return
+    end
+
+    self.m_control:SetHandler("OnUpdate", self.m_onUpdateHandler)
+    
     local waitOffset = shouldQueueImmediately and NO_WAIT_INTERVAL_SECONDS or WAIT_INTERVAL_SECONDS
     self.m_nextUpdateTimeSeconds = timeNowSeconds + waitOffset
 
@@ -505,6 +525,7 @@ end
 
 function CenterScreenAnnounce:DisplayNextQueuedEvent()
     local nextEvent = self:RemoveNextEvent()
+    self.m_currentMsg = nextEvent
     self:DisplayMessage(nextEvent.category, unpack(nextEvent, 1, nextEvent.length))
     self.m_control:SetHandler("OnUpdate", nil)
 end
@@ -514,14 +535,25 @@ function CenterScreenAnnounce:MoveSmallTextLinesUp(completedLine)
 
     local nextTop = completedLine:GetTop()
     for index, line in ipairs(self.m_activeSmallTextLines) do
-        local distanceFromDestination = line:GetTop() - nextTop
-        nextTop = nextTop + line.m_lineHeight
+		local distanceFromDestination = line:GetTop() - nextTop
+		nextTop = nextTop + line.m_lineHeight
 
-        local timeline = line.m_translateTimeline
-        timeline:Stop()
-        timeline:GetAnimation(1):SetTranslateDeltas(0, -distanceFromDestination)
-        timeline:PlayFromStart()
+		local timeline = line.m_translateTimeline
+		timeline:Stop()
+		timeline:GetAnimation(1):SetTranslateDeltas(0, -distanceFromDestination)
+		timeline:PlayFromStart()
     end
+end
+
+function CenterScreenAnnounce:EndAllSmallLines()
+    for index, line in ipairs(self.m_activeSmallTextLines) do
+        self.m_activeLineCount = self.m_activeLineCount - 1
+		line.m_translateTimeline:Stop()
+        line.m_fadeOutTimeline:Stop()
+        line:SetHandler("OnUpdate", nil)
+        self.m_pool:ReleaseObject(line.m_key)
+    end
+    ZO_ClearNumericallyIndexedTable(self.m_activeSmallTextLines)
 end
 
 function CenterScreenAnnounce:IsTopLine(line)
@@ -548,7 +580,7 @@ function CenterScreenAnnounce:UpdateDisplay(completedLine, skipSmallBlockMove)
     self:TryDisplayingNextQueuedMessage()
 end
 
-function CenterScreenAnnounce:ReleaseLine(completedLine)
+function CenterScreenAnnounce:ReleaseLine(completedLine, skipDisplayNext)
     self.m_activeLineCount = self.m_activeLineCount - 1
     if(completedLine.m_key) then
         completedLine:SetHandler("OnUpdate", nil)
@@ -562,13 +594,15 @@ function CenterScreenAnnounce:ReleaseLine(completedLine)
         self.m_smallCombinedText:SetHandler("OnUpdate", nil)
     end
 
-    self:CheckNowInactive()
+    self:CheckNowInactive(skipDisplayNext)
 end
 
-function CenterScreenAnnounce:CheckNowInactive()
+function CenterScreenAnnounce:CheckNowInactive(skipDisplayNext)
     if(self.m_activeLineCount == 0 and self.m_hasActiveBar == false) then
         self.m_displayMode = CSA_INACTIVE
-        self:TryDisplayingNextQueuedMessage()
+		if not skipDisplayNext then
+			self:TryDisplayingNextQueuedMessage()
+		end
     end
 end
 
@@ -665,14 +699,17 @@ local setupFunctions =
         local lifespan = select(ARG_INDEX_LIFESPAN, ...)
         lifespan = lifespan or DEFAULT_FADE_OUT_TIME
 
-        if not showImmediately then
-            local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
+        --We always want to make sure the fadeout happens at the end of the lifespan of the current
+        --message even if that message shows immediately.
+        local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
+        self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
+        self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
 
+        if not showImmediately then
             self.m_largeTextContainer.m_timeline:PlayFromStart()
             self.m_largeTextContainer.m_timeline.beforeExpiring = true
         else
+            self:EndAllSmallLines()
             local endTime = lifespan + GetFrameTimeMilliseconds()
             local function UpdateShowAnnouncementTime(control, timeS)
                 local timeLeftMS = endTime - (timeS * 1000)
@@ -823,7 +860,7 @@ function CenterScreenAnnounce:DisplayMessage(category, ...)
         local barParams = select(ARG_INDEX_BAR_PARAMS, ...)
         if(barParams and (category == CSA_EVENT_LARGE_TEXT or category == CSA_EVENT_COMBINED_TEXT or category == CSA_EVENT_NO_TEXT)) then
             local barType, startLevel, start, stop, sound = barParams:GetParams()
-            if(stop - start > 0 or barParams.showNoGain) then
+            if stop - start > 0 or barParams.showNoGain then
                 self.m_hasActiveBar = true
                 PLAYER_PROGRESS_BAR:ShowIncrease(barType, startLevel, start, stop, sound, category == CSA_EVENT_NO_TEXT and 0 or 500, self)
             end

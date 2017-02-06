@@ -7,11 +7,8 @@ end
 function ZO_GamepadEnchanting:Initialize(control)
     self.slotCreationAnimationName = "gamepad_enchanting_creation"
     self.containerControl = control:GetNamedChild("Container")
-    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.containerControl:GetNamedChild("Mode"))
 
-    local function MenuEntryTemplateEquality(left, right)
-        return left.uniqueId == right.uniqueId
-    end
+    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.containerControl:GetNamedChild("Mode"))
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
     self:InitializeModes()
 
@@ -41,12 +38,18 @@ function ZO_GamepadEnchanting:InitializeModes()
     self.modeList:Clear()
     local data = ZO_GamepadEntryData:New(GetString(SI_ENCHANTING_CREATION), "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
     data.mode = ENCHANTING_MODE_CREATION
-
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data, nil, 0, nil, 0)
     
     data = ZO_GamepadEntryData:New(GetString(SI_ENCHANTING_EXTRACTION), "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_deconstruct.dds")
     data.mode = ENCHANTING_MODE_EXTRACTION
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data, nil, 0, nil, 0)
+
+    local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ENCHANTING)
+    local recipeCraftingSystemName = GetString("SI_RECIPECRAFTINGSYSTEM", recipeCraftingSystem)
+    data = ZO_GamepadEntryData:New(recipeCraftingSystemName, GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ENCHANTING))
+    data.mode = ENCHANTING_MODE_RECIPES
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data, nil, 0, nil, 0)
+
     self.modeList:Commit()
 end
 
@@ -108,24 +111,22 @@ function ZO_GamepadEnchanting:InitializeInventory()
 end
 
 function ZO_GamepadEnchanting:InitializeEnchantingScenes()
-
-    local ENCHANTING_STATION_MODE_INTERACTION =
+    self.enchantingStationInteraction =
     {
         type = "Enchanting Station",
         End = function()
-            SCENE_MANAGER:Hide("gamepad_enchanting_mode")
+            SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },
     }
 
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadEnchantingTopLevelSkillInfo)
 
-    GAMEPAD_ENCHANTING_MODE_SCENE_ROOT = ZO_InteractScene:New("gamepad_enchanting_mode", SCENE_MANAGER, ENCHANTING_STATION_MODE_INTERACTION)
+    GAMEPAD_ENCHANTING_MODE_SCENE_ROOT = ZO_InteractScene:New("gamepad_enchanting_mode", SCENE_MANAGER, self.enchantingStationInteraction)
     GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:AddFragment(skillLineXPBarFragment)
     GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindModeStripDescriptor)
-            self:InitializeModes()
             self:SetEnchantingMode(ENCHANTING_MODE_NONE)
             self.modeList:Activate()
 
@@ -166,16 +167,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
         GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
     end
 
-    local ENCHANTING_STATION_CREATION_INTERACTION =
-    {
-        type = "Enchanting Station",
-        End = function()
-            SCENE_MANAGER:Hide("gamepad_enchanting_creation")
-        end,
-        interactTypes = { INTERACTION_CRAFT },
-    }
-
-    GAMEPAD_ENCHANTING_CREATION_SCENE = ZO_InteractScene:New("gamepad_enchanting_creation", SCENE_MANAGER, ENCHANTING_STATION_CREATION_INTERACTION)
+    GAMEPAD_ENCHANTING_CREATION_SCENE = ZO_InteractScene:New("gamepad_enchanting_creation", SCENE_MANAGER, self.enchantingStationInteraction)
     GAMEPAD_ENCHANTING_CREATION_SCENE:AddFragment(skillLineXPBarFragment)
     GAMEPAD_ENCHANTING_CREATION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -187,16 +179,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
         end
     end)
 
-    local ENCHANTING_STATION_EXTRACTION_INTERACTION =
-    {
-        type = "Enchanting Station",
-        End = function()
-            SCENE_MANAGER:Hide("gamepad_enchanting_extraction")
-        end,
-        interactTypes = { INTERACTION_CRAFT },
-    }
-
-    GAMEPAD_ENCHANTING_EXTRACTION_SCENE = ZO_InteractScene:New("gamepad_enchanting_extraction", SCENE_MANAGER, ENCHANTING_STATION_MODE_INTERACTION)
+    GAMEPAD_ENCHANTING_EXTRACTION_SCENE = ZO_InteractScene:New("gamepad_enchanting_extraction", SCENE_MANAGER, self.enchantingStationInteraction)
     GAMEPAD_ENCHANTING_EXTRACTION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
     GAMEPAD_ENCHANTING_EXTRACTION_SCENE:AddFragment(skillLineXPBarFragment)
         if newState == SCENE_SHOWING then
@@ -215,9 +198,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
 
     self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
         if craftingType == CRAFTING_TYPE_ENCHANTING then
-            SCENE_MANAGER:Hide("gamepad_enchanting_mode")
-            SCENE_MANAGER:Hide("gamepad_enchanting_creation")
-            SCENE_MANAGER:Hide("gamepad_enchanting_extraction")
+            SCENE_MANAGER:ShowBaseScene()
         end
     end)
 end
@@ -438,8 +419,10 @@ function ZO_GamepadEnchanting:SelectMode()
     if data then
         if data.mode == ENCHANTING_MODE_EXTRACTION then
             SCENE_MANAGER:Push("gamepad_enchanting_extraction")
-        else
+        elseif data.mode == ENCHANTING_MODE_CREATION then
             SCENE_MANAGER:Push("gamepad_enchanting_creation")
+        elseif data.mode == ENCHANTING_MODE_RECIPES then
+            GAMEPAD_PROVISIONER:EmbedInCraftingScene(self.enchantingStationInteraction)
         end
     end
 end
@@ -589,7 +572,7 @@ function ZO_GamepadEnchantingInventory:Initialize(owner, control, ...)
 end
 
 function ZO_GamepadEnchantingInventory:AddListDataTypes()
-    self:AddVerticalScrollDataTypes("ZO_GamepadSubMenuEntryWithTwoSubLabels")
+    self:AddVerticalScrollDataTypes("ZO_GamepadItemSubEntry")
 end
 
 function ZO_GamepadEnchantingInventory:IsLocked(bagId, slotIndex)

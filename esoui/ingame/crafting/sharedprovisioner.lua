@@ -36,7 +36,6 @@ function ZO_SharedProvisioner:Initialize(control)
     
     self.control = control
     self.resultTooltip = self.control:GetNamedChild("Tooltip")
-    ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"), CRAFTING_TYPE_PROVISIONING)
 
     self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
         if craftingType == CRAFTING_TYPE_PROVISIONING and self:ShouldShowForControlScheme() then
@@ -49,12 +48,6 @@ function ZO_SharedProvisioner:Initialize(control)
         if craftingType == CRAFTING_TYPE_PROVISIONING and self:ShouldShowForControlScheme() then
             self:StartHide()
             SCENE_MANAGER:Hide(self.mainSceneName)
-        end
-    end)
-
-    self.control:RegisterForEvent(EVENT_RECIPE_LEARNED, function()  
-        if self:ShouldShowForControlScheme() then
-            self:DirtyRecipeList()
         end
     end)
 
@@ -73,33 +66,18 @@ function ZO_SharedProvisioner:Initialize(control)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftStarted)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftCompleted)
     
-    local function HandleInventoryChanged()
-        if self:ShouldShowForControlScheme() then
-            self:DirtyRecipeList()
-        end
-    end
-
-    self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
-    self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
-
-    self.control:RegisterForEvent(EVENT_NON_COMBAT_BONUS_CHANGED, function(eventCode, nonCombatBonusType)
-        if self:ShouldShowForControlScheme() then
-            if nonCombatBonusType == NON_COMBAT_BONUS_PROVISIONING_LEVEL or nonCombatBonusType == NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL then
-                self:DirtyRecipeList()
-            end
-        end
+    PROVISIONER_MANAGER:RegisterCallback("RecipeDataUpdated", function()
+        self:DirtyRecipeList()
     end)
-    
+
     self.control:SetHandler("OnUpdate", function()
         if self.dirty then
             self:RefreshRecipeList()
             self.dirty = false
         end
     end)
-end
 
-function ZO_SharedProvisioner:CreateInteractScene(sceneName)
-    local PROVISIONER_STATION_INTERACTION =
+    self.provisionerStationInteraction =
     {
         type = "Provisioner Station",
         End = function()
@@ -107,33 +85,10 @@ function ZO_SharedProvisioner:CreateInteractScene(sceneName)
         end,
         interactTypes = { INTERACTION_CRAFT },
     }
-
-    return ZO_InteractScene:New(sceneName, SCENE_MANAGER, PROVISIONER_STATION_INTERACTION)
 end
 
-function ZO_SharedProvisioner:SetupMainInteractScene(mainInteractScene)
-    mainInteractScene:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            if not self.deferredInitializationComplete then
-                self.deferredInitializationComplete = true
-                self:PerformDeferredInitialization()
-            end
-
-            TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
-
-            SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(self.resultTooltip)
-
-            self:OnSceneShowing()
-        elseif newState == SCENE_HIDDEN then
-            SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(nil)
-
-            self:OnSceneHidden()
-        end
-    end)
-end
-
-function ZO_SharedProvisioner:PerformDeferredInitialization()
-    -- meant to be overriden
+function ZO_SharedProvisioner:CreateInteractScene(sceneName)
+    return ZO_InteractScene:New(sceneName, SCENE_MANAGER, self.provisionerStationInteraction)
 end
 
 function ZO_SharedProvisioner:DirtyRecipeList()
@@ -157,31 +112,30 @@ function ZO_SharedProvisioner:SetDetailsEnabled(enabled)
     -- meant to be overriden
 end
 
-function ZO_SharedProvisioner:PassesProvisionerLevelReq(provisionerLevelReq)
-    return provisionerLevelReq <= GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_LEVEL)
+function ZO_SharedProvisioner:PassesTradeskillLevelReqs(tradeskillsReqs)
+    for tradeskill, levelReq in pairs(tradeskillsReqs) do
+        local level = GetNonCombatBonus(GetNonCombatBonusLevelTypeForTradeskillType(tradeskill))
+        if level < levelReq then
+            return false
+        end
+    end
+    return true
 end
 
 function ZO_SharedProvisioner:PassesQualityLevelReq(qualityReq)
-    return qualityReq <= GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL)
-end
-
-function ZO_SharedProvisioner:CalculateHowManyCouldBeCreated(recipeListIndex, recipeIndex, numIngredients)
-    local minCount
-
-    for ingredientIndex = 1, numIngredients do
-        local _, _, requiredQuantity = GetRecipeIngredientItemInfo(recipeListIndex, recipeIndex, ingredientIndex)
-        local ingredientCount = GetCurrentRecipeIngredientCount(recipeListIndex, recipeIndex, ingredientIndex)
-
-        minCount = zo_min(zo_floor(ingredientCount / requiredQuantity), minCount or math.huge)
-        if minCount == 0 then
-            return 0
-        end
+    if qualityReq == 0 then
+        return true
+    else
+        --Only exclusively provisioning system recipes have a quality requirement
+        return GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL) >= qualityReq
     end
-
-    return minCount or 0
 end
 
-function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkNumCreatable, numCreatable, checkSkills, provisionerLevelReq, qualityReq)
+function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkNumCreatable, numCreatable, checkSkills, tradeskillsLevelReqs, qualityReq, craftingInteractionType, requiredCraftingStationType)
+    if craftingInteractionType ~= requiredCraftingStationType then
+        return false
+    end
+    
     if self.filterType ~= specialIngredientType then
         return false
     end
@@ -193,12 +147,33 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkN
     end
 
     if checkSkills then
-        if not self:PassesProvisionerLevelReq(provisionerLevelReq) or not self:PassesQualityLevelReq(qualityReq) then
+        if not self:PassesTradeskillLevelReqs(tradeskillsLevelReqs) or not self:PassesQualityLevelReq(qualityReq) then
             return false
         end
     end
-
+   
     return true
+end
+
+function ZO_SharedProvisioner:CanPreviewRecipe(recipeData)
+    return recipeData ~= nil and recipeData.specialIngredientType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING
+end
+
+function ZO_SharedProvisioner:PreviewRecipe(recipeData)
+    if self:CanPreviewRecipe(recipeData) then
+        SYSTEMS:GetObject("itemPreview"):PreviewProvisionerItemAsFurniture(recipeData.recipeListIndex, recipeData.recipeIndex)
+    end
+end
+
+function ZO_SharedProvisioner:EndRecipePreview()
+    SYSTEMS:GetObject("itemPreview"):EndCurrentPreview()
+end
+
+function ZO_SharedProvisioner:CanPreviewRecipe(recipeData)
+    if recipeData then
+        return recipeData.specialIngredientType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING
+    end
+    return false
 end
 
 function ZO_Provisioning_IsSceneShowing()

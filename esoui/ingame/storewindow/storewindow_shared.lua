@@ -20,13 +20,14 @@ STORE_INTERACTION =
 ZO_SharedStoreManager = ZO_Object:Subclass()
 
 function ZO_SharedStoreManager:InitializeStore()
-    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones = GetStoreCurrencyTypes()
+    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers = GetStoreCurrencyTypes()
 end
 
 function ZO_SharedStoreManager:RefreshCurrency()
     self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
     self.currentAP = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
     self.currentTelvarStones = GetCarriedCurrencyAmount(CURT_TELVAR_STONES)
+    self.currentWritVouchers = GetCarriedCurrencyAmount(CURT_WRIT_VOUCHERS)
 end
 
 -- Shared global functions
@@ -38,7 +39,7 @@ function ZO_StoreManager_GetStoreItems()
         local icon, name, stack, price, sellPrice, meetsRequirementsToBuy, meetsRequirementsToEquip, quality, questNameColor, currencyType1, currencyQuantity1,
             currencyType2, currencyQuantity2, entryType = GetStoreEntryInfo(entryIndex)
 
-        if(stack > 0) then
+        if stack > 0 then
             local itemData =
             {
                 entryType = entryType,
@@ -89,6 +90,7 @@ local CURRENCY_TYPE_TO_SOUND_ID =
 {
     [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,
     [CURT_ALLIANCE_POINTS] = SOUNDS.ALLIANCE_POINT_TRANSACT,
+    [CURT_WRIT_VOUCHERS] = SOUNDS.WRIT_VOUCHER_TRANSACT,
 }
 
 local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
@@ -103,9 +105,5 @@ local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurre
 end
 
 function ZO_StoreManager_OnPurchased(eventId, entryName, entryType, entryQuantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
-    if(entryType == STORE_ENTRY_TYPE_MOUNT) then
-        PlaySound(SOUNDS.STABLE_BUY_MOUNT)
-    else
-        PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
-    end
+    PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
 end

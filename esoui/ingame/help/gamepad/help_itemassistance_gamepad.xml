@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Help_ItemAssistance_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Help_ItemAssistance_Gamepad_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

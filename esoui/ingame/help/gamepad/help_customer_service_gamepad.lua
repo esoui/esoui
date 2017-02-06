@@ -14,9 +14,6 @@ local TICKET_VALIDATION_STATUS =
     FAILED_NO_NAME = 3,
 }
 
-local EMAIL_TEXT_BOX_HEIGHT = 40
-local DETAILS_TEXT_BOX_HEIGHT = 120
-
 local REFRESH_KEYBIND_STRIP = true
 
 local TICKET_CATEGORIES = 
@@ -24,14 +21,6 @@ local TICKET_CATEGORIES =
     {
         id = TICKET_CATEGORY_CHARACTER_ISSUE,
         name = GetString(SI_GAMEPAD_HELP_CATEGORY_CHARACTER),
-    },
-    {
-        id = TICKET_CATEGORY_QUEST_ISSUE,
-        name = GetString(SI_GAMEPAD_HELP_CATEGORY_QUEST),
-    },
-    {
-        id = TICKET_CATEGORY_ITEM_ISSUE,
-        name = GetString(SI_GAMEPAD_HELP_CATEGORY_ITEM),
     },
     {
         id = TICKET_CATEGORY_REPORT_DEFAULT,
@@ -68,8 +57,6 @@ local TICKET_SUBCATEGORIES =
 
 local REQUIRED_FIELD_DEFAULT_TEXTS = 
 {
-    [TICKET_CATEGORY_QUEST_ISSUE] = GetString(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_QUEST),
-    [TICKET_CATEGORY_ITEM_ISSUE] = GetString(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_ITEM),
     [TICKET_CATEGORY_REPORT_DEFAULT] = zo_strformat(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_DISPLAY, ZO_GetPlatformAccountLabel()),
 }
 
@@ -78,8 +65,6 @@ local VALIDATION_ERROR_STRINGS =
     [TICKET_VALIDATION_STATUS.FAILED_NO_EMAIL] = GetString(SI_GAMEPAD_HELP_TICKET_FAILED_NO_EMAIL),
     [TICKET_VALIDATION_STATUS.FAILED_NO_NAME] = 
     {
-        [TICKET_CATEGORY_QUEST_ISSUE] = GetString(SI_GAMEPAD_HELP_TICKET_FAILED_REPORT_WITHOUT_QUEST),
-        [TICKET_CATEGORY_ITEM_ISSUE] = GetString(SI_GAMEPAD_HELP_TICKET_FAILED_REPORT_WITHOUT_ITEM),
         [TICKET_CATEGORY_REPORT_DEFAULT] = zo_strformat(SI_GAMEPAD_HELP_TICKET_FAILED_REPORT_WITHOUT_DISPLAY_NAME, ZO_GetPlatformAccountLabel())
     }
 }
@@ -125,10 +110,6 @@ function ZO_Help_Customer_Service_Gamepad:Initialize(control)
                                                 local categoryId = self:GetCurrentCategory()
                                                 if (categoryId == TICKET_CATEGORY_REPORT_DEFAULT) then
                                                     self:SetReportPlayerTargetByDisplayName(ZO_FormatManualNameEntry(text))
-                                                elseif (categoryId == TICKET_CATEGORY_QUEST_ISSUE) then
-                                                    self:SetQuestTargetByName(text)
-                                                elseif (categoryId == TICKET_CATEGORY_ITEM_ISSUE) then
-                                                    self:SetItemTargetByName(text)
                                                 end
                                             end,
         [TICKET_FIELD_ADDITIONAL_DETAILS] = function(text)
@@ -146,40 +127,27 @@ function ZO_Help_Customer_Service_Gamepad:Initialize(control)
     self.websiteText = GetString(SI_GAMEPAD_HELP_WEBSITE)
 
     control:RegisterForEvent(EVENT_CUSTOMER_SERVICE_TICKET_SUBMITTED, function (...) self:OnCustomerServiceTicketSubmitted(...) end)
-
-    HELP_CUSTOMER_SERVICE_GAMEPAD_SCENE:RegisterCallback("StateChange", 
-        function(oldState, newState)
-            if newState == SCENE_SHOWING then
-                self:PrefillContactEmail()
-                self:UpdateFields()
-            elseif newState == SCENE_SHOWN then
-                HELP_CUSTOMER_SERVICE_GAMEPAD:AddKeybindsBasedOnState()
-            elseif newState == SCENE_HIDING then
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(HELP_CUSTOMER_SERVICE_GAMEPAD.keybindStripDescriptor)
-            elseif newState == SCENE_HIDDEN then
-                self.itemList:Clear()
-                self.itemList:Commit()
-                self:ResetTicket()
-            end
-        end)
 end
 
 function ZO_Help_Customer_Service_Gamepad:OnShowing()
     self:ChangeTicketState(TICKET_STATE_FIELD_ENTRY)
+    self:PrefillContactEmail()
+    self:UpdateFields()
+end
+
+function ZO_Help_Customer_Service_Gamepad:OnShow()
+    self:AddKeybindsBasedOnState()
+end
+
+function ZO_Help_Customer_Service_Gamepad:OnHiding()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_Help_Customer_Service_Gamepad:OnHide()
     if(self.currentDropdown ~= nil) then
         self.currentDropdown:Deactivate(true)
     end
-end
-
-function ZO_Help_Customer_Service_Gamepad:AnchorTextHelper(anchorDest, controlToAnchor)
-    local textAnchor = ZO_Anchor:New(TOPLEFT, anchorDest, BOTTOMLEFT)
-    textAnchor:AddToControl(controlToAnchor)
-
-    textAnchor = ZO_Anchor:New(TOPRIGHT, anchorDest, BOTTOMRIGHT, 0, 55)
-    textAnchor:AddToControl(controlToAnchor)
+    self:ResetTicket()
 end
 
 function ZO_Help_Customer_Service_Gamepad:InitializeKeybindStripDescriptors()
@@ -324,13 +292,18 @@ function ZO_Help_Customer_Service_Gamepad:ResetTicket()
 end
 
 function ZO_Help_Customer_Service_Gamepad:OnCustomerServiceTicketSubmitted(eventCode, response, success)
-    if (SCENE_MANAGER:IsShowing("helpCustomerServiceGamepad")) then
+    --TODO: Split everything out and refactor
+    local customerServiceShowing = SCENE_MANAGER:IsShowing("helpCustomerServiceGamepad")
+    local questAssistanceShowing = SCENE_MANAGER:IsShowing("helpQuestAssistanceGamepad")
+    local itemAssistanceShowing = SCENE_MANAGER:IsShowing("helpItemAssistanceGamepad")
+    if customerServiceShowing or questAssistanceShowing or itemAssistanceShowing then
         local dialogParams = {}
+        local email = customerServiceShowing and g_email or GetActiveUserEmailAddress()
 
         if ((success == true) and (response ~= nil)) then
             dialogParams.titleParams = { self.ticketSubmittedSuccessHeader }
             dialogParams.mainTextParams =   {
-                                                response .. zo_strformat(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_SUBMITTED_EMAIL, g_email),
+                                                response .. zo_strformat(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_SUBMITTED_EMAIL, email),
                                                 self.knowledgeBaseText, 
                                                 self.websiteText,
                                             }
@@ -352,21 +325,6 @@ end
 function ZO_Help_Customer_Service_Gamepad:SetReportPlayerTargetByDisplayName(displayName)
     SetCustomerServiceTicketPlayerTarget(displayName) -- this function only works on Console builds
     self.savedFields[TICKET_FIELD_REQUIRED_DETAILS] = ZO_FormatUserFacingDisplayName(displayName)
-end
-
-function ZO_Help_Customer_Service_Gamepad:SetQuestTargetByName(questName)
-    SetCustomerServiceTicketQuestTarget(questName)
-    self.savedFields[TICKET_FIELD_REQUIRED_DETAILS] = questName
-end
-
-function ZO_Help_Customer_Service_Gamepad:SetItemTargetByName(itemName)
-    SetCustomerServiceTicketItemTarget(itemName)
-    self.savedFields[TICKET_FIELD_REQUIRED_DETAILS] = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)
-end
-
-function ZO_Help_Customer_Service_Gamepad:SetItemTargetByItemLink(itemLink)
-    SetCustomerServiceTicketItemTargetByLink(itemLink)
-    self.savedFields[TICKET_FIELD_REQUIRED_DETAILS] = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(itemLink))
 end
 
 function ZO_Help_Customer_Service_Gamepad:SetBodyText(bodyText)
@@ -681,22 +639,6 @@ function ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
     HELP_CUSTOMER_SERVICE_GAMEPAD:ResetTicket()
     HELP_CUSTOMER_SERVICE_GAMEPAD:SetCategory(TICKET_CATEGORY_REPORT_DEFAULT)
     HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportPlayerTargetByDisplayName(displayName)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetRequiredInfoProvidedInternally(true)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:ChangeTicketState(TICKET_STATE_FIELD_ENTRY)
-end
-
-function ZO_Help_Customer_Service_Gamepad_SetupItemIssueTicket(itemLink)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:ResetTicket()
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetCategory(TICKET_CATEGORY_ITEM_ISSUE)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetItemTargetByItemLink(itemLink)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetRequiredInfoProvidedInternally(true)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:ChangeTicketState(TICKET_STATE_FIELD_ENTRY)
-end
-
-function ZO_Help_Customer_Service_Gamepad_SetupQuestIssueTicket(questName)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:ResetTicket()
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetCategory(TICKET_CATEGORY_QUEST_ISSUE)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetQuestTargetByName(questName)
     HELP_CUSTOMER_SERVICE_GAMEPAD:SetRequiredInfoProvidedInternally(true)
     HELP_CUSTOMER_SERVICE_GAMEPAD:ChangeTicketState(TICKET_STATE_FIELD_ENTRY)
 end

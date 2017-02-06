@@ -101,16 +101,6 @@ function MapLocations_Gamepad:SetupLocationDetails(data)
     self:UpdateSideContentVisibility()
 end
 
-function MapLocations_Gamepad:SwitchToKeybind(keybindStripDescriptor)
-    if self.keybindStripDescriptor then
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    end
-    self.keybindStripDescriptor = keybindStripDescriptor
-    if keybindStripDescriptor then
-        KEYBIND_STRIP:AddKeybindButtonGroup(keybindStripDescriptor)
-    end
-end
-
 function MapLocations_Gamepad:RefreshKeybind()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

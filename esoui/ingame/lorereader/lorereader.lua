@@ -24,7 +24,7 @@ function LoreReader:Initialize(control)
     self.secondPage.scrollChild = self.secondPage:GetNamedChild("Child")
     self.secondPage.body = self.secondPage.scrollChild:GetNamedChild("Body")
 
-    local function OnShowBook(eventCode, title, body, medium, showTitle)
+    local function OnShowBook(eventCode, title, body, medium, showTitle, bookId)
         local willShow = self:Show(title, body, medium, showTitle)
         if willShow then
             PlaySound(self.OpenSound)

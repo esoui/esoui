@@ -136,7 +136,7 @@ end
 function DeathType:UpdateButtonsEnabled()
     local button1 = self:GetButton(1)
     local button2 = self:GetButton(2)
-    if IsQueuedForCyclicRespawn() then
+    if IsQueuedForCyclicRespawn() and not IsResurrectPending() then
         if button1 then
             button1:SetEnabled(false)
         end
@@ -334,8 +334,8 @@ function BGDeath:New(control)
     local bg = DeathType.New(self, control)
 
     local button1 = bg:GetButton(1)
-    button1:SetText(GetString(SI_DEATH_PROMPT_JOIN))
-    button1:SetCallback(JoinRespawnQueue)
+    button1:SetText(GetString(SI_DEATH_PROMPT_RELEASE))
+    button1:SetCallback(Release)
 
     return bg   
 end
@@ -685,13 +685,7 @@ function Death:UpdateCyclicRespawnTimer()
     if IsQueuedForCyclicRespawn() then
         local secondsToWait = respawnQueueTimeLeft / 1000
         secondsToWait = zo_max(secondsToWait, 0)
-        local timeLeft = ""
-        if (secondsToWait < 10) then
-            timeLeft = ZO_FormatTime(secondsToWait, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_SHOW_TENTHS_SECS, TIME_FORMAT_PRECISION_TENTHS, TIME_FORMAT_DIRECTION_DESCENDING)
-        else
-            timeLeft = ZO_FormatTimeLargestTwo(secondsToWait, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-        end
-            self.types[self.currentType]:UpdateCyclicTimer(timeLeft)
+        self.types[self.currentType]:UpdateCyclicTimer(ZO_FormatTimeAsDecimalWhenBelowThreshold(secondsToWait))
     else
         self.types[self.currentType]:UpdateCyclicTimer()
     end

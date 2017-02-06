@@ -75,9 +75,14 @@ function ZO_SharedInventoryManager:Initialize()
             end
         end
 
-        self.refresh:UpdateRefreshGroups()
+        local previousSlotData = self:GetOrCreateBagCache(bagId)[slotIndex]
+        --Since the inventory can update the existing slot table to a new item we need to make a copy of the old data
+        if previousSlotData then
+            previousSlotData = ZO_ShallowTableCopy(previousSlotData)
+        end
 
         self.refresh:RefreshSingle("inventory", bagId, slotIndex, isNewItem, itemSoundCategory, updateReason)
+        self.refresh:UpdateRefreshGroups()
 
         if bagId == BAG_BACKPACK or bagId == BAG_VIRTUAL then
             if isNewItem and GetCraftingInteractionType() == CRAFTING_TYPE_INVALID and not SYSTEMS:IsShowing("crownCrate") then
@@ -106,7 +111,7 @@ function ZO_SharedInventoryManager:Initialize()
             end
         end
 
-        self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex)
+        self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
     end
 
     local function OnGuildBankUpdated()
@@ -126,8 +131,10 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankUpdated)
 
     local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex)
+        local previousSlotData = self:GetOrCreateBagCache(BAG_GUILDBANK)[slotIndex]
         self.refresh:RefreshSingle("inventory", BAG_GUILDBANK, slotIndex)
-        self:FireCallbacks("SingleSlotInventoryUpdate", BAG_GUILDBANK, slotIndex)
+        self.refresh:UpdateRefreshGroups()
+        self:FireCallbacks("SingleSlotInventoryUpdate", BAG_GUILDBANK, slotIndex, previousSlotData)
     end
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEM_ADDED, OnGuildBankInventorySlotUpdated)
@@ -298,6 +305,7 @@ function ZO_SharedInventoryManager:ClearNewStatus(bagId, slotIndex)
     if slotData then
         slotData.age = 0
         slotData.brandNew = nil
+        self:RefreshStatusSortOrder(slotData)
     end
 end
 
@@ -393,6 +401,22 @@ function ZO_SharedInventoryManager:HandleSlotCreationOrUpdate(bagCache, bagId, s
     end
 end
 
+function ZO_SharedInventoryManager:ComputeDynamicStatusMask(...)
+    local value = 0
+    local currentBitValue = 1
+    for i = 1, select("#", ...) do
+        if select(i, ...) then
+            value = value + currentBitValue
+        end
+        currentBitValue = currentBitValue * 2
+    end
+    return value
+end
+
+function ZO_SharedInventoryManager:RefreshStatusSortOrder(slotData)
+    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isBoPTradeable, slotData.brandNew)
+end
+
 function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagId, slotIndex, isNewItem)
     local icon, stackCount, sellPrice, meetsUsageRequirement, locked, equipType, _, quality = GetItemInfo(bagId, slotIndex)
     local launderPrice = GetItemLaunderPrice(bagId, slotIndex)
@@ -455,6 +479,21 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.condition = GetItemCondition(bagId, slotIndex)
     slot.isPlaceableFurniture = IsItemPlaceableFurniture(bagId, slotIndex)
 
+    local isFromCrownCrate = IsItemFromCrownCrate(bagId, slotIndex)
+    slot.isGemmable = false
+    slot.requiredPerGemConversion = nil
+    slot.gemsAwardedPerConversion = nil
+    if isFromCrownCrate then
+        local requiredPerGemConversion, gemsAwardedPerConversion = GetNumCrownGemsFromItemManualGemification(bagId, slotIndex)
+        if requiredPerGemConversion > 0 and gemsAwardedPerConversion > 0 then
+            slot.requiredPerGemConversion = requiredPerGemConversion
+            slot.gemsAwardedPerConversion = gemsAwardedPerConversion
+            slot.isGemmable = true
+        end
+    end
+
+    slot.isFromCrownStore = IsItemFromCrownStore(bagId, slotIndex)
+
     if wasSameItemInSlotBefore and slot.age ~= 0 then
         -- don't modify the age, keep it the same relative sort - for now?
     elseif isNewItem then
@@ -462,6 +501,8 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     else
         slot.age = 0
     end
+
+    self:RefreshStatusSortOrder(slot)
 
     if hadItemInSlotBefore then
         if isNewItem then
@@ -664,6 +705,25 @@ function ZO_Inventory_EnumerateEquipSlots(f)
         local result = f(slotId)
         if(result ~= nil) then
             return result
+        end
+    end
+end
+
+function ZO_Inventory_TryStowAllMaterials()
+    local backpackSlots = SHARED_INVENTORY:GetBagCache(BAG_BACKPACK)
+    if backpackSlots then
+        local hadGemmableMaterial = false
+        for slotIndex, slotData in pairs(backpackSlots) do
+            if slotData.isGemmable and not slotData.stolen and CanItemBeVirtual(BAG_BACKPACK, slotIndex) then
+                hadGemmableMaterial = true
+                break
+            end
+        end
+
+        if hadGemmableMaterial then
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_STOW_ALL_GEMIFIABLE")
+        else
+            StowAllVirtualItems()
         end
     end
 end

@@ -624,7 +624,7 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                 if disabledAlertType == KEYBIND_STRIP_DISABLED_DIALOG then
                     ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, {mainTextParams = {disabledAlertText}})
                 else
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, disabledAlertText)
+                    ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, disabledAlertText)
                     PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
                 end
             end
@@ -945,7 +945,7 @@ do
         return leftOrder < rightOrder
     end
 
-    local function UpdateAnchors(anchorTable, anchor, relativeAnchor, parent, startOffset, yOffset)
+    function ZO_KeybindStrip:UpdateAnchorsInternal(anchorTable, anchor, relativeAnchor, parent, startOffset, yOffset)
         if anchorTable and #anchorTable > 0 then
             if IsInGamepadPreferredMode() then
                 table.sort(anchorTable, GamepadSort)
@@ -959,7 +959,11 @@ do
             local prevButton
             for i, button in ipairs(anchorTable) do
                 local isVisible = IsVisible(button.keybindButtonDescriptor)
-                button:SetHidden(not isVisible)
+				local wasVisible = not button:IsHidden()
+				if isVisible and not wasVisible then
+					local UPDATE_ONLY = true
+					self:SetUpButton(button, UPDATE_ONLY)
+				end
 
                 if isVisible then
                     button:SetParent(parent)
@@ -979,9 +983,9 @@ do
 
     function ZO_KeybindStrip:UpdateAnchors()
         local yOffset = self.styleInfo and self.styleInfo.yAnchorOffset or 0
-        self.leftButtons = UpdateAnchors(self.leftButtons, LEFT, RIGHT, self.control, self.styleInfo and self.styleInfo.leftAnchorOffset or 0, yOffset)
-        self.rightButtons = UpdateAnchors(self.rightButtons, RIGHT, LEFT, self.control, self.styleInfo and self.styleInfo.rightAnchorOffset or 0, yOffset)
+        self.leftButtons = self:UpdateAnchorsInternal(self.leftButtons, LEFT, RIGHT, self.control, self.styleInfo and self.styleInfo.leftAnchorOffset or 0, yOffset)
+        self.rightButtons = self:UpdateAnchorsInternal(self.rightButtons, RIGHT, LEFT, self.control, self.styleInfo and self.styleInfo.rightAnchorOffset or 0, yOffset)
 
-        self.centerButtons = UpdateAnchors(self.centerButtons, LEFT, RIGHT, self.centerParent, self.styleInfo and self.styleInfo.centerAnchorOffset or 0, yOffset)
+        self.centerButtons = self:UpdateAnchorsInternal(self.centerButtons, LEFT, RIGHT, self.centerParent, self.styleInfo and self.styleInfo.centerAnchorOffset or 0, yOffset)
     end
 end

@@ -692,10 +692,17 @@ local function TryMoveToInventory(inventorySlot)
 end
 
 local function TryMoveToCraftBag(inventorySlot)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
-    transferDialog:StartTransfer(bag, index, BAG_VIRTUAL)
-    return true
+    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    local slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
+    if slotData then
+        if slotData.isGemmable then
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_STOW_GEMIFIABLE", { sourceBagId = bagId, sourceSlotIndex = slotIndex })
+        else
+            local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
+            transferDialog:StartTransfer(bagId, slotIndex, BAG_VIRTUAL)
+            return true
+        end
+    end
 end
 
 local function TryPreviewDyeStamp(inventorySlot)
@@ -1209,7 +1216,7 @@ local useActions =
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(inventorySlot, slotActions)
                                             local textEnum
                                             local category = inventorySlot.categoryType
-                                            if category == COLLECTIBLE_CATEGORY_TYPE_TROPHY then
+                                            if category == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
                                                 textEnum = SI_COLLECTIBLE_ACTION_USE
                                             elseif inventorySlot.active then
                                                 if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET then
@@ -1311,21 +1318,22 @@ local function LinkHelper(slotActions, actionName, link)
             slotActions:AddSlotAction(SI_ITEM_ACTION_REPORT_ITEM, 
                                         function()
                                             if IsInGamepadPreferredMode() then
-                                                 KEYBIND_STRIP:RemoveAllKeyButtonGroups()
-                                                 ZO_Help_Customer_Service_Gamepad_SetupItemIssueTicket(link)
-                                                 -- if we open up the help menu while interacting, we want to make sure that we are not
-                                                 -- just pushing the previous scene onto the stack since it will end the interaction
-                                                 -- and make the scene invalid when coming back to it after the help scene is closed
-                                                 if INTERACT_WINDOW:IsInteracting() then
-                                                    SCENE_MANAGER:Show("helpCustomerServiceGamepad")
-                                                 else
-                                                    SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-                                                 end
+                                                KEYBIND_STRIP:RemoveAllKeyButtonGroups()
+                                                HELP_ITEM_ASSISTANCE_GAMEPAD:InitWithDetails(link)
+                                                -- if we open up the help menu while interacting, we want to make sure that we are not
+                                                -- just pushing the previous scene onto the stack since it will end the interaction
+                                                -- and make the scene invalid when coming back to it after the help scene is closed
+                                                local sceneName = HELP_ITEM_ASSISTANCE_GAMEPAD:GetSceneName()
+                                                if INTERACT_WINDOW:IsInteracting() then
+                                                    SCENE_MANAGER:Show(sceneName)
+                                                else
+                                                    SCENE_MANAGER:Push(sceneName)
+                                                end
                                             else
-                                                HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
-                                                HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromItemLink(link)
+                                                HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ITEM_ASSISTANCE_KEYBOARD:GetFragment())
+                                                HELP_CUSTOMER_SERVICE_ITEM_ASSISTANCE_KEYBOARD:SetDetailsFromItemLink(link)
                                             end
-                                        end, 
+                                        end,
                                         "secondary")
         end
     end
@@ -1524,7 +1532,7 @@ local actionHandlers =
 
     ["gamepad_equip"] = function(inventorySlot, slotActions)
                             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
+                            if GAMEPAD_INVENTORY_ROOT_SCENE:IsShowing() and IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() GAMEPAD_INVENTORY:TryEquipItem(inventorySlot) end, "primary")
                             end
                         end,
@@ -1706,7 +1714,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] =    { "trading_house_cancel_listing", "link_to_chat" },
     [SLOT_TYPE_REPAIR] =                        { "vendor_repair", "link_to_chat", "destroy", "report_item" },
     [SLOT_TYPE_PENDING_REPAIR] =                NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_CRAFTING_COMPONENT] =            { "add_to_craft", "remove_from_craft", "link_to_chat", "report_item" },
+    [SLOT_TYPE_CRAFTING_COMPONENT] =            { "add_to_craft", "remove_from_craft", "mark_as_locked", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_CRAFTING_COMPONENT] =    { "remove_from_craft", "link_to_chat", "report_item" },
     [SLOT_TYPE_SMITHING_MATERIAL] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_SMITHING_STYLE] =                NON_INTERACTABLE_ITEM_ACTIONS,
@@ -2566,26 +2574,35 @@ function ZO_InventorySlot_RemoveMouseOverKeybinds()
     UpdateMouseoverCommand(nil)
 end
 
-function ZO_InventorySlot_Status_OnMouseEnter(control)
-    local slotData = control:GetParent():GetParent().dataEntry.data
-    local isNew = slotData.brandNew
-    local isStolen = slotData.stolen
-    local tooltipText
+do
+    local g_tooltipLines = {}
 
-    if slotData.isPlayerLocked then
-        tooltipText = GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP)
-    elseif isNew and isStolen then
-        tooltipText = GetString(SI_INVENTORY_NEW_AND_STOLEN_ITEM_TOOLTIP)
-    elseif isNew then
-        tooltipText = GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP)
-    elseif isStolen then
-        tooltipText = GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP)
-    elseif slotData.isBoPTradeable then
-        tooltipText = GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP)
-    end
+    function ZO_InventorySlot_Status_OnMouseEnter(control)
+        local slotData = control:GetParent():GetParent().dataEntry.data
 
-    if tooltipText then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, tooltipText)
+        ZO_ClearNumericallyIndexedTable(g_tooltipLines)
+
+        if slotData.isPlayerLocked then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP))
+        end
+        if slotData.brandNew then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP))
+        end
+        if slotData.stolen then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP))
+        end
+        if slotData.isBoPTradeable then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP))
+        end
+        if slotData.isGemmable then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_GEMMABLE_ITEM_TOOLTIP))
+        end
+
+        if #g_tooltipLines > 0 then
+            InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
+            for _, lineText in ipairs(g_tooltipLines) do
+                InformationTooltip:AddLine(lineText, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+            end
+        end
     end
 end

@@ -1,11 +1,14 @@
 local ZO_HUDFragment = ZO_SceneFragment:Subclass()
 
-function ZO_HUDFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    EVENT_MANAGER:RegisterForEvent("HUDFragment", EVENT_PLAYER_DEAD, function() fragment:UpdateVisibility() end)
-    EVENT_MANAGER:RegisterForEvent("HUDFragment", EVENT_PLAYER_ALIVE, function() fragment:UpdateVisibility() end)
+function ZO_HUDFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
 
-    return fragment
+function ZO_HUDFragment:Initialize(...)
+    ZO_SceneFragment.Initialize(self, ...)
+
+    EVENT_MANAGER:RegisterForEvent("HUDFragment", EVENT_PLAYER_DEAD, function() self:UpdateVisibility() end)
+    EVENT_MANAGER:RegisterForEvent("HUDFragment", EVENT_PLAYER_ALIVE, function() self:UpdateVisibility() end)
 end
 
 function ZO_HUDFragment:UpdateVisibility()
@@ -51,8 +54,7 @@ HUD_FRAGMENT = ZO_HUDFragment:New()
 local ZO_ReticleModeFragment = ZO_SceneFragment:Subclass()
 
 function ZO_ReticleModeFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    return fragment
+    return ZO_SceneFragment.New(self)
 end
 
 function ZO_ReticleModeFragment:Show()
@@ -78,6 +80,7 @@ local HUD_FRAGMENT_GROUP =
     COMPASS_FRAME_FRAGMENT,
     FOCUSED_QUEST_TRACKER_FRAGMENT,
     ACTIVITY_TRACKER_FRAGMENT,
+    READY_CHECK_TRACKER_FRAGMENT,
     ACTION_BAR_FRAGMENT,
     HUD_EQUIPMENT_STATUS_FRAGMENT,
     CONTEXTUAL_ACTION_BAR_AREA_FRAGMENT,
@@ -90,6 +93,7 @@ local HUD_FRAGMENT_GROUP =
     SUBTITLE_HUD_FRAGMENT,
     GAMEPAD_LOOT_HISTORY_FRAGMENT,
     KEYBOARD_LOOT_HISTORY_FRAGMENT,
+    HOUSING_HUD_FRAGMENT,
 }
 
 if IsConsoleUI() then
@@ -100,11 +104,13 @@ local NO_DEAD_FRAGMENTS =
 {
     FOCUSED_QUEST_TRACKER_FRAGMENT,
     ACTIVITY_TRACKER_FRAGMENT,
+    READY_CHECK_TRACKER_FRAGMENT,
     ACTION_BAR_FRAGMENT,
     HUD_EQUIPMENT_STATUS_FRAGMENT,
     CONTEXTUAL_ACTION_BAR_AREA_FRAGMENT,
     PLAYER_ATTRIBUTE_BARS_FRAGMENT,
     SUBTITLE_HUD_FRAGMENT,
+    HOUSING_HUD_FRAGMENT,
 }
 
 local DEAD_ONLY_FRAGMENTS =
@@ -125,6 +131,21 @@ end
 EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_DEAD, UpdateDeathFragments)
 EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ALIVE, UpdateDeathFragments)
 UpdateDeathFragments()
+
+local HOUSING_ONLY_FRAGMENTS =
+{
+    HOUSING_HUD_FRAGMENT,
+}
+
+local function UpdateHousingFragments()
+    local isHousingZone = GetCurrentZoneHouseId() ~= 0
+    for _, fragment in ipairs(HOUSING_ONLY_FRAGMENTS) do
+        fragment:SetHiddenForReason("Housing", not isHousingZone)
+    end
+end
+
+
+EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ACTIVATED, UpdateHousingFragments)
 
 ---------------
 --ZO_HUDScene

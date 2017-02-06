@@ -315,6 +315,8 @@ COLLECTIONS_BOOK_SCENE = SCENE_MANAGER:GetScene("collectionsBook")
 COLLECTIONS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 COLLECTIONS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
 COLLECTIONS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+COLLECTIONS_BOOK_SCENE:AddFragment(RIGHT_BG_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+COLLECTIONS_BOOK_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
 COLLECTIONS_BOOK_SCENE:AddFragment(COLLECTIONS_BOOK_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
@@ -341,6 +343,23 @@ DLC_BOOK_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
 DLC_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
 DLC_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
 DLC_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
+
+------------------------
+--Housing Book Scene
+------------------------
+
+HOUSING_BOOK_SCENE = SCENE_MANAGER:GetScene("housingBook")
+HOUSING_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+HOUSING_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+HOUSING_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+HOUSING_BOOK_SCENE:AddFragment(HOUSING_BOOK_FRAGMENT)
+HOUSING_BOOK_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+HOUSING_BOOK_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+HOUSING_BOOK_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
+HOUSING_BOOK_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+HOUSING_BOOK_SCENE:AddFragment(COLLECTIONS_WINDOW_SOUNDS)
+HOUSING_BOOK_SCENE:AddFragment(TITLE_FRAGMENT)
+HOUSING_BOOK_SCENE:AddFragment(COLLECTIONS_TITLE_FRAGMENT)
 
 -------------------
 --Notifications
@@ -553,10 +572,16 @@ storeScene:AddFragment(BACKPACK_STORE_LAYOUT_FRAGMENT)
 --Housing Furniture Browser Scene
 -------------------
 
-local furnitureBrowserScene = SCENE_MANAGER:GetScene("keyboard_housing_furniture_scene")
+local furnitureBrowserScene = SCENE_MANAGER:GetScene(HOUSING_FURNITURE_KEYBOARD_SCENE_NAME)
 furnitureBrowserScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
-furnitureBrowserScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+furnitureBrowserScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_FURNITURE_BROWSER_NO_BLUR)
+furnitureBrowserScene:AddFragment(TITLE_FRAGMENT)
+furnitureBrowserScene:AddFragment(RIGHT_BG_FRAGMENT)
+furnitureBrowserScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 furnitureBrowserScene:AddFragment(HOUSING_FURNITURE_BROWSER_MENU_FRAGMENT)
+furnitureBrowserScene:AddFragment(HOUSING_FURNITURE_BROWSER_TITLE_FRAGMENT)
+furnitureBrowserScene:AddFragment(FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+furnitureBrowserScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
 
 -------------------------------
 -- Dye Stamp Confirmation Scene
@@ -582,7 +607,52 @@ CROWN_CRATE_KEYBOARD_SCENE:AddFragment(STOP_MOVEMENT_FRAGMENT)
 CROWN_CRATE_KEYBOARD_SCENE:AddFragment(CROWN_CRATES_FRAGMENT)
 CROWN_CRATE_KEYBOARD_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_CRATES)
 CROWN_CRATE_KEYBOARD_SCENE:AddFragment(CROWN_CRATE_GEMS_AVAILABLE_QUANTITY_FRAGMENT)
-CROWN_CRATE_KEYBOARD_SCENE:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT) -- TEMP
+CROWN_CRATE_KEYBOARD_SCENE:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+--Don't animate the right panel bg in the crown crate scene since we want it to be able to hide instantly        
+RIGHT_PANEL_BG_FRAGMENT:AddInstantScene(CROWN_CRATE_KEYBOARD_SCENE)
+
+-------------------
+--Inventory Scene
+-------------------
+
+local inventoryScene = ZO_Scene:New("inventory", SCENE_MANAGER)
+inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
+inventoryScene:AddFragment(ZO_ItemPreviewOptionsFragment:New({paddingLeft = 570, paddingRight = 620, forcePreparePreview = false}))
+inventoryScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+inventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+inventoryScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+inventoryScene:AddFragment(WIDE_LEFT_PANEL_BG_FRAGMENT)
+inventoryScene:AddFragment(CHARACTER_WINDOW_FRAGMENT)
+inventoryScene:AddFragment(CHARACTER_WINDOW_STATS_FRAGMENT)
+inventoryScene:AddFragment(INVENTORY_MENU_FRAGMENT)
+inventoryScene:AddFragment(FRAME_EMOTE_FRAGMENT_INVENTORY)
+inventoryScene:AddFragment(INVENTORY_WINDOW_SOUNDS)
+
+-------------------
+--Bank Scene
+-------------------
+
+local bankScene = SCENE_MANAGER:GetScene("bank")
+bankScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+bankScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+bankScene:AddFragment(BANK_MENU_FRAGMENT)
+bankScene:AddFragment(BANK_WINDOW_SOUNDS)
+bankScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+bankScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED))
+
+-------------------
+--Guild Bank Scene
+-------------------
+
+local guildBankScene = SCENE_MANAGER:GetScene("guildBank")
+guildBankScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+guildBankScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+guildBankScene:AddFragment(GUILD_BANK_MENU_FRAGMENT)
+guildBankScene:AddFragment(BANK_WINDOW_SOUNDS)
+guildBankScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+guildBankScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_GUILD_BANK_OPENED))
+
 
 -------------------
 --Main Menu
@@ -637,7 +707,7 @@ do
             highlight = "EsoUI/Art/Collections/collections_tabIcon_collectibles_over.dds",
             statusIcon = function()
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and not COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) then
+                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and COLLECTIONS_BOOK:IsStandardCategory(categoryIndex) then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end
@@ -651,17 +721,37 @@ do
             pressed = "EsoUI/Art/Collections/collections_tabIcon_DLC_down.dds",
             highlight = "EsoUI/Art/Collections/collections_tabIcon_DLC_over.dds",
             statusIcon = function()
+                -- check for any pending quests
+                if COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+
+                -- check for any DLC collectibles with notifications
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if (COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex)) or COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending() then
+                    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) and COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end
                 return nil
             end,
         },
-
+        {
+            categoryName = SI_HOUSING_BOOK_TITLE,
+            descriptor = "housingBook",
+            normal = "EsoUI/Art/Collections/collections_tabIcon_housing_up.dds",
+            pressed = "EsoUI/Art/Collections/collections_tabIcon_housing_down.dds",
+            highlight = "EsoUI/Art/Collections/collections_tabIcon_housing_over.dds",
+            statusIcon = function()
+                for categoryIndex = 1, GetNumCollectibleCategories() do
+                    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexHousing(categoryIndex) and (COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) or COLLECTIONS_BOOK:DoesCategoryHaveAnyNewCollectibles(categoryIndex)) then
+                        return ZO_KEYBOARD_NEW_ICON
+                    end
+                end
+                return nil
+            end,
+        },
     }
-    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook"))
+    SCENE_MANAGER:AddSceneGroup("collectionsSceneGroup", ZO_SceneGroup:New("collectionsBook", "dlcBook", "housingBook"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_COLLECTIONS, "collectionsSceneGroup", iconData)
 end
 
@@ -834,13 +924,13 @@ do
             pressed = "EsoUI/Art/Help/help_tabIcon_CS_down.dds",
             highlight = "EsoUI/Art/Help/help_tabIcon_CS_over.dds",
         },
-		{
-			categoryName = SI_HELP_EMOTES,
-			descriptor = "helpEmotes",
-			normal = "EsoUI/Art/Help/help_tabIcon_emotes_up.dds",
+        {
+            categoryName = SI_HELP_EMOTES,
+            descriptor = "helpEmotes",
+            normal = "EsoUI/Art/Help/help_tabIcon_emotes_up.dds",
             pressed = "EsoUI/Art/Help/help_tabIcon_emotes_down.dds",
             highlight = "EsoUI/Art/Help/help_tabIcon_emotes_over.dds",
-		}
+        }
     }
     SCENE_MANAGER:AddSceneGroup("helpSceneGroup", ZO_SceneGroup:New("helpTutorials", "helpCustomerSupport", "helpEmotes"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_HELP, "helpSceneGroup", iconData)

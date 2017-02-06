@@ -106,7 +106,6 @@ function ZO_Achievements_Gamepad:SetupList(list)
     list:AddDataTemplate("ZO_GamepadAchievementsEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:AddDataTemplateWithHeader("ZO_GamepadAchievementsEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
     list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", MenuEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplate("ZO_GamepadMenuEntryExpandingWithOneSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     self.itemList = list
 end

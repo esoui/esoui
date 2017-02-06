@@ -1010,7 +1010,40 @@ end
 
 function Achievements:OnAchievementAwarded(achievementId)
     self:UpdatePointDisplay()
-    self:OnAchievementUpdated(achievementId)
+    local updatedAchievement = self:OnAchievementUpdated(achievementId)
+    --Move up to the top of the list
+    if updatedAchievement then
+        local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
+        local oldIndex = updatedAchievement.index
+
+        updatedAchievement.index = achievementIndex
+
+        if achievementIndex >= oldIndex then
+            -- there's no way for us to move down in the list, unless there's an update pending after this
+            -- that will insert before this entry and push it down
+            return
+        end
+
+        local oldPrevious = updatedAchievement:GetAnchoredToAchievement()
+        local oldNext = updatedAchievement:GetDependentAnchoredAchievement()
+
+        local nextAchievementId = GetAchievementId(categoryIndex, subCategoryIndex, achievementIndex + 1)
+        local newNext = self.achievementsById[self:GetBaseAchievementId(nextAchievementId)]
+        local newPrevious = newNext:GetAnchoredToAchievement()
+
+        --Update anchors
+        if oldNext then
+            oldNext:SetAnchor(oldPrevious)
+        elseif oldPrevious then
+            oldPrevious:SetDependentAnchoredAchievement(nil)
+        end
+
+        updatedAchievement:SetAnchor(newPrevious)
+
+        if newNext then
+            newNext:SetAnchor(updatedAchievement)
+        end
+    end
 end
 
 function Achievements:OnAchievementUpdated(achievementId)
@@ -1021,7 +1054,7 @@ function Achievements:OnAchievementUpdated(achievementId)
         local data = self.categoryTree:GetSelectedData()
         if data then
             local selectedCategoryIndex, selectedSubCategoryIndex = self:GetCategoryIndicesFromData(data)
-            local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
+            local categoryIndex, subCategoryIndex = GetCategoryInfoFromAchievementId(achievementId)
             -- Only update if the achievement is in the category you're currently viewing
             -- An achievement can only be in one category, and switching categories does a full refresh anyway
             if categoryIndex == selectedCategoryIndex and subCategoryIndex == selectedSubCategoryIndex then
@@ -1029,56 +1062,21 @@ function Achievements:OnAchievementUpdated(achievementId)
                 local baseAchievementId = self:GetBaseAchievementId(achievementId)
                 local updatedAchievement = self.achievementsById[baseAchievementId]
 
-                local oldPrevious, oldNext, newNext, newPrevious
-                if updatedAchievement then
-                    oldPrevious = updatedAchievement:GetAnchoredToAchievement()
-                    oldNext = updatedAchievement:GetDependentAnchoredAchievement()
-                else
+                if not updatedAchievement then
                     updatedAchievement = self.achievementPool:AcquireObject()
-                    self.achievementsById[baseAchievementId] = achievement
+                    self.achievementsById[baseAchievementId] = updatedAchievement
                 end
 
-                updatedAchievement:Show(ZO_GetNextInProgressAchievementInLine(achievementId))
+                -- Must use base here because in a line, all of the remaining achievements get an update,
+                -- but you only want the lowest one that hasn't been completed
+                -- e.g.: Ids 1, 2, 3.  1 complete, 2 and 3 in progress.  2 and 3 both get updates.
+                -- 2 calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (good).
+                -- 3 calls ZO_GetNextInProgressAchievementInLine, returns 3 as next in progress (bad).
+                -- 1 (base for 2 AND 3) calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (best).
+                updatedAchievement:Show(ZO_GetNextInProgressAchievementInLine(baseAchievementId))
                 updatedAchievement:RefreshExpandedView()
 
-                newNext = self.achievementsByIndex[achievementIndex]
-                if newNext then
-                    --We're already occupying the spot we want to be in, so abort anchoring restructure
-                    if newNext == updatedAchievement then
-                        return
-                    end
-                    newPrevious = newNext:GetAnchoredToAchievement()
-                else
-                    newPrevious = self.achievementsByIndex[#self.achievementsByIndex]
-                end
-
-                --If we got this far, we've changed position, or we're new, so reorder/reanchor the list--
-
-                --Remove the achievement from its current position in the indexed list
-                if oldPrevious or oldNext then
-                    for index, achievement in ipairs(self.achievementsByIndex) do
-                        if achievement == updatedAchievement then
-                            table.remove(self.achievementsByIndex, index)
-                            break
-                        end
-                    end
-                end
-
-                --Add the achievement to its new position in the indexed list
-                table.insert(self.achievementsByIndex, achievementIndex, updatedAchievement)
-
-                --Update anchors
-                if oldNext then
-                    oldNext:SetAnchor(oldPrevious)
-                elseif oldPrevious then
-                    oldPrevious:SetDependentAnchoredAchievement(nil)
-                end
-                    
-                updatedAchievement:SetAnchor(newPrevious)
-
-                if newNext then
-                    newNext:SetAnchor(updatedAchievement)
-                end
+                return updatedAchievement
             end
         end
     end
@@ -1156,7 +1154,6 @@ end
 
 function Achievements:InitializeAchievementList(control)
     self.achievementsById = {}
-    self.achievementsByIndex = {}
 
     local sharedCheckPool = ZO_ControlPool:New("ZO_AchievementCheckbox", self.contentListScrollChild)
     sharedCheckPool:SetCustomFactoryBehavior(   function(control)
@@ -1276,9 +1273,8 @@ end
 function Achievements:LayoutAchievements(achievements)
     self.achievementPool:ReleaseAllObjects()
     ZO_ClearTable(self.achievementsById)
-    ZO_ClearNumericallyIndexedTable(self.achievementsByIndex)
     ZO_Scroll_ResetToTop(self.contentList)
-        
+
     local previous
     for i=1, #achievements do
         local id = achievements[i]
@@ -1286,7 +1282,7 @@ function Achievements:LayoutAchievements(achievements)
             local achievement = self.achievementPool:AcquireObject()
             local baseAchievementId = self:GetBaseAchievementId(id)
             self.achievementsById[baseAchievementId] = achievement
-            table.insert(self.achievementsByIndex, achievement)
+            achievement.index = i
 
             achievement:Show(ZO_GetNextInProgressAchievementInLine(id))
 

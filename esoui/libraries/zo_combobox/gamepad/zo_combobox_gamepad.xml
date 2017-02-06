@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_ComboBox_Gamepad" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_ComboBox_Gamepad" virtual="true">
             <Dimensions x="150" y="48" />
             <OnInitialized>
                 ZO_ComboBox_Gamepad:New(self)

@@ -46,34 +46,6 @@ EsoUI\Common\Gamepad\ZO_GamepadIconSelector.xml
 EsoUI\Common\ZO_GameMenu\ZO_GameMenu.lua
 EsoUI\Common\ZO_GameMenu\ZO_GameMenu.xml
 
-
-EsoUI\Common\ZO_Options\ZO_SharedOptions.lua
-EsoUI\Common\ZO_Options\Keyboard\ZO_Options_Keyboard.lua
-EsoUI\Common\ZO_Options\Keyboard\ZO_Options_Keyboard.xml
-EsoUI\Common\ZO_Options\Gamepad\ZO_Options_Gamepad.lua
-EsoUI\Common\ZO_Options\Gamepad\ZO_Options_Gamepad.xml
-
-EsoUI\Common\Gamepad\ControllerDisconnect\ControllerDisconnect.lua
-EsoUI\Common\Gamepad\ControllerDisconnect\ControllerDisconnect.xml
-
-EsoUI\Common\GammaAdjust\GammaAdjust.lua
-EsoUI\Common\GammaAdjust\GammaAdjust.xml
-EsoUI\Common\GammaAdjust\Keyboard\GammaAdjust_Keyboard.xml
-EsoUI\Common\GammaAdjust\Gamepad\GammaAdjust_Gamepad.xml
-
-EsoUI\Common\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
-EsoUI\Common\OptionsPanels\OptionsPanel_Camera_Shared.lua
-EsoUI\Common\OptionsPanels\Keyboard\OptionsPanels_Keyboard.lua
-EsoUI\Common\OptionsPanels\OptionsPanel_Audio_Shared.lua
-EsoUI\Common\OptionsPanels\Console\OptionsPanel_Audio_Console.lua
-EsoUI\Common\OptionsPanels\OptionsPanel_Video_Shared.lua
-EsoUI\Common\OptionsPanels\Keyboard\OptionsPanel_Video_Keyboard.xml
-
-EsoUI\Common\ZO_AddOnManager\ZO_AddOnEula.lua
-EsoUI\Common\ZO_AddOnManager\ZO_AddOnEula.xml
-EsoUI\Common\ZO_AddOnManager\ZO_AddOnManager.lua
-EsoUI\Common\ZO_AddOnManager\ZO_AddOnManager.xml
-
 EsoUI\Common\ZO_UIErrors\ErrorFrame.lua
 EsoUI\Common\ZO_UIErrors\ErrorFrame.xml
 
@@ -85,12 +57,15 @@ EsoUI\Common\Globals\SharedDialogs.lua
 EsoUI\Common\ZO_KeybindStrip\KeybindStrip.lua
 EsoUI\Common\ZO_KeybindStrip\KeybindStrip.xml
 
-EsoUI\Common\Globals\Presence.lua
 EsoUI\Common\ZO_SaveLoadDialog\ZO_SaveLoadDialog.lua
 
 EsoUI\Common\Scenes\CommonFragments.lua
 
-EsoUI\Common\Globals\Gamepad\GamepadEventHandlers.lua
-
 EsoUI\Common\ZO_PlayerInventoryFooter\Gamepad\ZO_PlayerInventoryFooter_Gamepad.lua
 EsoUI\Common\ZO_PlayerInventoryFooter\Gamepad\ZO_PlayerInventoryFooter_Gamepad.xml
+
+EsoUI\Common\RzChroma\RzChroma_Renderer.lua
+EsoUI\Common\RzChroma\RzChroma_Templates.lua
+EsoUI\Common\RzChroma\RzChroma_Templates.xml
+EsoUI\Common\RzChroma\RzChroma_Manager.lua
+EsoUI\Common\RzChroma\RzChroma_Effects.lua

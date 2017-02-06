@@ -42,21 +42,8 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)ExtraInfoContainer" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Controls>
-                        <Label name="$(grandparent)ExtraInfoTitle" font="ZoFontWinT2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT" mouseEnabled="true" linkEnabled="true">
-                            <Dimensions x="550" />
-                            <Anchor point="TOPLEFT" />
-                            <OnLinkClicked>
-                                ZO_HelpAskForHelp_OnForumLinkClicked()
-                            </OnLinkClicked>
-                        </Label>
-                    </Controls>
-                </Control>
-
                 <Label name="$(parent)DescriptionTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_DESCRIPTION">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ExtraInfoContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
                 </Label>
 
                 <Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard">
@@ -74,7 +61,6 @@
                         ZO_HelpAskForHelp_Keyboard_AttemptToSendTicket()
                     </OnClicked>
                 </Button>
-
             </Controls>
         </TopLevelControl>
     </Controls>

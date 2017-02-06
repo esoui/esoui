@@ -14,36 +14,6 @@ do
 end
 
 do
-    local g_collectibleNameCache = 
-    {
-        formatter = SI_COLLECTIBLE_NAME_FORMATTER,
-        cache = {},
-    }
-    local g_collectibleNicknameCache = 
-    {
-        formatter = SI_TOOLTIP_COLLECTIBLE_NICKNAME,
-        cache = {},
-    }
-    local g_collectibleDescriptionCache = 
-    {
-        --Descriptions are their own format (for potential gender switches)
-        formatter = nil,
-        cache = {},
-    }
-
-    local function GetCachedText(cacheTable, rawText)
-        local formattedName = cacheTable.cache[rawText]
-        if not formattedName then
-            if cacheTable.formatter then
-                formattedName = zo_strformat(cacheTable.formatter, rawText)
-            else
-                formattedName = zo_strformat(rawText)
-            end
-            cacheTable.cache[rawText] = formattedName
-        end
-        return formattedName
-    end
-
     local PURCHASED_TEXT = GetString(SI_COLLECTIBLE_TOOLTIP_PURCHASABLE)
     local COOLDOWN_TEXT = GetString(SI_GAMEPAD_TOOLTIP_COOLDOWN_HEADER)
     local QUALITY_NORMAL = nil
@@ -54,7 +24,7 @@ do
             local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
 
             if collectionName then
-                local formattedName = GetCachedText(g_collectibleNameCache, collectionName)
+                local formattedName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectionName)
                 topSection:AddLine(formattedName)
             end
 
@@ -71,13 +41,13 @@ do
             self:AddSection(topSection)
         end
 
-        local formattedName = GetCachedText(g_collectibleNameCache, collectibleName)
+        local formattedName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName)
         self:AddLine(formattedName, QUALITY_NORMAL, self:GetStyle("title"))
     
         local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
 
         if collectibleNickname and collectibleNickname ~= "" then
-            formattedName = GetCachedText(g_collectibleNicknameCache, collectibleNickname)
+            formattedName = ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, collectibleNickname)
             headerSection:AddLine(formattedName, QUALITY_NORMAL, self:GetStyle("bodyHeader"))
         end
 
@@ -98,7 +68,7 @@ do
         local descriptionStyle = self:GetStyle("bodyDescription")
 
         if description then
-            local formattedDescription = GetCachedText(g_collectibleDescriptionCache, description)
+            local formattedDescription = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, description)
             bodySection:AddLine(formattedDescription, descriptionStyle)
         end
 
@@ -107,7 +77,7 @@ do
         end
 
         if hint and hint ~= "" then
-            local formattedHint = GetCachedText(g_collectibleDescriptionCache, hint)
+            local formattedHint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
             bodySection:AddLine(formattedHint, descriptionStyle)
         end
 
@@ -149,7 +119,7 @@ do
         elseif showBlockReason then
             local usageBlockReason = GetCollectibleBlockReason(collectibleId)
             if usageBlockReason ~= COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED then
-                local formattedBlockReason = GetCachedText(g_collectibleDescriptionCache, GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", usageBlockReason))
+                local formattedBlockReason = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, GetString("SI_COLLECTIBLEUSAGEBLOCKREASON", usageBlockReason))
                 bodySection:AddLine(formattedBlockReason, descriptionStyle, self:GetStyle("failed"))
             end
         end

@@ -20,6 +20,7 @@ function ZO_LeaderboardsListManager_Shared:Initialize()
         CALLBACK_MANAGER:FireCallbacks("OnLeaderboardMasterListUpdated")
     end
 
+    EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_HOME_SHOW_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
     EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_RAID_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
     EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_CAMPAIGN_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
 end
@@ -58,17 +59,29 @@ end
 
 function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
     if dataTable.index then
-        local rank, name, points, class, alliance, displayName = self.infoFunction(dataTable.index, self.subType)
+        local rank, playerDisplayName, characterName, points, class, alliance, houseCollectibleId
+
+        --Get and setup Leaderboard Type specific data
+        if self.leaderboardRankType == LEADERBOARD_TYPE_HOUSE then
+            rank, playerDisplayName, houseCollectibleId, points = self.infoFunction(dataTable.index, self.subType)
+             
+            local houseName = GetCollectibleInfo(houseCollectibleId)
+            dataTable.houseName = houseName
+        else
+            rank, characterName, points, class, alliance, playerDisplayName = self.infoFunction(dataTable.index, self.subType)
+                
+            dataTable.characterName = characterName
+            dataTable.class = class
+            dataTable.alliance = alliance
+            dataTable.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
+        end
+
+        --Setup common leaderboard data
+        dataTable.displayName = playerDisplayName
+        dataTable.type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES
         --This is the overall rank for the specific type of leaderboard you've requested.
         --The rank that is ultimately shown might be reshuffled based on the provided filters.
         dataTable.trueRank = rank
-        dataTable.displayName = displayName
-        dataTable.characterName = name
-        dataTable.class = class
-        dataTable.alliance = alliance
-        dataTable.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
-        dataTable.type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES
-
         if points == 0 then
             dataTable.points = ""
         else
@@ -152,6 +165,10 @@ function ZO_LeaderboardsManager_Shared:SetSelectedLeaderboardObject(leaderboardO
     -- Should be overridden
 end
 
+function ZO_LeaderboardsManager_Shared:RefreshLeaderboardType(leaderboardType)
+    -- Should be overridden
+end
+
 function ZO_LeaderboardsManager_Shared:RegisterMasterListUpdatedCallback(scene)
     CALLBACK_MANAGER:RegisterCallback("OnLeaderboardMasterListUpdated", function()
         if scene:IsShowing() then
@@ -176,6 +193,7 @@ function ZO_LeaderboardsManager_Shared:OnLeaderboardSelected(data)
 
     local titleName = self:GetLeaderboardTitleName(data.titleName, data.subType)
     self:SetActiveLeaderboardTitle(titleName)
+    self:RefreshLeaderboardType(data.leaderboardRankType)
 
     self.pointsHeaderLabel:SetText(data.pointsHeaderString or GetString(SI_CAMPAIGN_LEADERBOARDS_HEADER_POINTS))
 
@@ -194,30 +212,50 @@ function ZO_LeaderboardsManager_Shared:OnLeaderboardDataChanged(leaderboardObjec
 end
 
 function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data)
+    local leaderboardData = self:GetSelectedLeaderboardData()
+    local isHousingLeaderboard = leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_HOUSE
+
+    --Rank
     control.rankLabel:SetHidden(data.rank == 0)
     control.rankLabel:SetText(data.rank)
-
+        
+    --Name
     local safeDisplayName = data.displayName ~= "" and data.displayName or GetString(SI_LEADERBOARDS_STAT_NOT_AVAILABLE)
     local nameToUse = ZO_GetPlatformUserFacingName(data.characterName, safeDisplayName)
     control.nameLabel:SetText(nameToUse)
-    control.pointsLabel:SetText(data.points)
-
-    local classTexture = GetPlatformClassIcon(data.class)
-    if(classTexture) then
-        control.classIcon:SetHidden(false)
-        control.classIcon:SetTexture(classTexture)
-    else
+        
+    --House
+    if isHousingLeaderboard then
         control.classIcon:SetHidden(true)
-    end
-
-    local allianceTexture = GetPlatformAllianceSymbolIcon(data.alliance)
-    if(allianceTexture) then
-        control.allianceIcon:SetHidden(false)
-        control.allianceIcon:SetTexture(allianceTexture)
-    else
         control.allianceIcon:SetHidden(true)
+
+        control.houseLabel:SetHidden(false)
+        control.houseLabel:SetText(data.houseName)
+    --Class/Alliance
+    else
+        control.houseLabel:SetHidden(true)
+
+        local classTexture = GetPlatformClassIcon(data.class)
+        if(classTexture) then
+            control.classIcon:SetHidden(false)
+            control.classIcon:SetTexture(classTexture)
+        else
+            control.classIcon:SetHidden(true)
+        end
+
+        local allianceTexture = GetPlatformAllianceSymbolIcon(data.alliance)
+        if(allianceTexture) then
+            control.allianceIcon:SetHidden(false)
+            control.allianceIcon:SetTexture(allianceTexture)
+        else
+            control.allianceIcon:SetHidden(true)
+        end
     end
 
+    --Points
+    control.pointsLabel:SetText(data.points)
+        
+    --Background
     local bg = GetControl(control, "BG")
     if bg then
         local hidden = (data.index % 2) == 0
@@ -237,8 +275,10 @@ function ZO_LeaderboardsManager_Shared:GetRowColors(data)
     return textColor, iconColor
 end
 
-function ZO_Leaderboards_PopulateDropdownFilter(dropdown, changedCallback, includeAllFilter, defaultToPlayerClass)
+function ZO_Leaderboards_PopulateDropdownFilter(dropdown, changedCallback, leaderboardType)
     dropdown:ClearItems()
+    local defaultToPlayerClass = leaderboardType == LEADERBOARD_TYPE_CLASS
+    local includeAllFilter = not isClassType
     local defaultIndex = 1
     local desiredClass = defaultToPlayerClass and GetUnitClassId("player")
     local currentIndex = 0

@@ -4,6 +4,14 @@ function ZO_KeybindButtonMixin:GetKeybind()
     return (IsInGamepadPreferredMode() or self.alwaysPreferGamepadMode) and self.gamepadPreferredKeybind or self.keybind
 end
 
+function ZO_KeybindButtonMixin:GetKeyboardKeybind()
+    return self.keybind
+end
+
+function ZO_KeybindButtonMixin:GetGamepadKeybind()
+    return self.gamepadPreferredKeybind
+end
+
 function ZO_KeybindButtonMixin:UpdateEnabledState()
     self.nameLabel:SetEnabled(self.enabled)
     local keybindEnabled = self.keybindEnabled and self.enabled

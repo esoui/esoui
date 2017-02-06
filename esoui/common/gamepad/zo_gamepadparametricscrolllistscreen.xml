@@ -14,7 +14,7 @@
                         self:GetParent().list = self
                     </OnInitialized>
 
-                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainer" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT"/>
                 </Control>
             </Controls>

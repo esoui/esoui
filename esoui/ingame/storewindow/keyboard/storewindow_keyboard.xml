@@ -96,11 +96,11 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
                     <Controls>
-                        <Label name="$(parent)AlliancePoints" inherits="ZO_CurrencyTemplate">
+                        <Label name="$(parent)Currency1" inherits="ZO_CurrencyTemplate">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Money" relativePoint="TOPLEFT" offsetX="-10" />
                         </Label>
-                        <Label name="$(parent)TelvarStones" inherits="ZO_CurrencyTemplate">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)AlliancePoints" relativePoint="TOPLEFT" offsetX="-10" />
+                        <Label name="$(parent)Currency2" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Currency1" relativePoint="TOPLEFT" offsetX="-10" />
                         </Label>
                     </Controls>
                 </Control>

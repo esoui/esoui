@@ -460,9 +460,14 @@ end
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
-        function(control, name, amount, icon, meetsUsageRequirement, itemQuality)
-            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemQuality)
-            SetupBasicReward(control, name, amount, icon, meetsUsageRequirement, r, g, b)
+        function(control, name, amount, icon, meetsUsageRequirement, itemQuality, itemType)
+            --Collectibles should display as the default text color, white.
+            if itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
+                SetupBasicReward(control, name, amount, icon, meetsUsageRequirement)
+            else
+                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemQuality)
+                SetupBasicReward(control, name, amount, icon, meetsUsageRequirement, r, g, b)
+            end
             g_numItemRewardsForQuest = g_numItemRewardsForQuest + 1
         end,
     [REWARD_TYPE_INSPIRATION] =
@@ -485,6 +490,10 @@ local REWARD_CREATORS =
         function(control, name, amount)
             SetupPartialSkillPointReward(control, amount)
         end,
+	[REWARD_TYPE_WRIT_VOUCHERS] =
+        function(control, name, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_WRIT_VOUCHERS, amount, currencyOptions)
+        end,
 }
 
 local currencyRewards =
@@ -493,6 +502,7 @@ local currencyRewards =
     [REWARD_TYPE_ALLIANCE_POINTS] = true,
     [REWARD_TYPE_INSPIRATION] = true,
     [REWARD_TYPE_TELVAR_STONES] = true,
+	[REWARD_TYPE_WRIT_VOUCHERS] = true,
 }
 
 function ZO_SharedInteraction:IsCurrencyReward(rewardType)
@@ -504,6 +514,7 @@ local currencyRewardToCurrencyType =
     [REWARD_TYPE_MONEY] = CURT_MONEY,
     [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
     [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
+	[REWARD_TYPE_WRIT_VOUCHERS] = CURT_WRIT_VOUCHERS,
 }
 
 function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)

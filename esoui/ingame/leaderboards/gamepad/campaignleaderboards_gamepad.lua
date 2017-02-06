@@ -1,5 +1,3 @@
-GAMEPAD_CAMPAIGN_LEADERBOARDS = nil
-
 local ACTIVE_CAMPAIGN_INDEX = 1
 local ICON_SIZE = 60
 
@@ -35,7 +33,7 @@ end
 function ZO_LeaderboardCampaignSelector_Gamepad:SetCampaignWindows()
     self.campaignWindows =
     {
-        GAMEPAD_CAMPAIGN_LEADERBOARDS,
+        SYSTEMS:GetGamepadObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
     }
 end
 
@@ -95,6 +93,10 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
                                                      self.selector.dataRegistration:Refresh()
                                                  end
                                              end)
+
+    SYSTEMS:RegisterGamepadObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
+    GAMEPAD_LEADERBOARDS:UpdateCategories()
+    self.selector = ZO_LeaderboardCampaignSelector_Gamepad:New(control)
 end
 
 function ZO_CampaignLeaderboardsManager_Gamepad:PerformDeferredInitialization(control)
@@ -164,6 +166,4 @@ end
 
 function ZO_CampaignLeaderboardsInformationArea_Gamepad_OnInitialized(self)
     GAMEPAD_CAMPAIGN_LEADERBOARDS = ZO_CampaignLeaderboardsManager_Gamepad:New(self)
-    GAMEPAD_LEADERBOARDS:UpdateCategories()
-    GAMEPAD_CAMPAIGN_LEADERBOARDS.selector = ZO_LeaderboardCampaignSelector_Gamepad:New(self)
 end

@@ -10,7 +10,6 @@ local function ShowLogoutDialog(dialogName, deferralTimeMS)
         ZO_Dialogs_UpdateDialogMainText(ZO_Dialogs_FindDialog(dialogName), nil, {deferralTimeMS})
     else
         -- Show the initial dialog
-        SCENE_MANAGER:ShowBaseScene()
         if deferralTimeMS then
             ZO_Dialogs_ShowPlatformDialog(dialogName, { endTime = deferralTimeMS + GetFrameTimeMilliseconds() }, {mainTextParams = {deferralTimeMS}})
         else

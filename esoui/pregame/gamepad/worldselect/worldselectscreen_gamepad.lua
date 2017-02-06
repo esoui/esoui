@@ -162,9 +162,9 @@ function ZO_WorldSelect_Gamepad:AddServerEntry(worldIndex, worldName, worldStatu
     local template
     if worldIndex == 0 then
         option:SetHeader(GetString(SI_SELECT_SERVER))
-        template = "ZO_GamepadMenuEntryExpandingWithOneSubLabelWithHeader"
+        template = "ZO_GamepadMenuEntryTemplateWithHeader"
     else
-        template = "ZO_GamepadMenuEntryExpandingWithOneSubLabel"
+        template = "ZO_GamepadMenuEntryTemplate"
     end
 
     self.optionsList:AddEntry(template, option)
@@ -209,11 +209,10 @@ function ZO_WorldSelect_Gamepad:SetupOptionsList()
     self.optionsList = ZO_GamepadVerticalParametricScrollList:New(self.optionsControl:GetNamedChild("List"))
     self.optionsList:SetOnSelectedDataChangedCallback(function() self:RefreshKeybindStrip() end)
 
-    self.optionsList:SetUniversalPostPadding(30)
     self.optionsList:SetFixedCenterOffset(-165)
 
-    self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryExpandingWithOneSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.optionsList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryExpandingWithOneSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.optionsList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     self:RefreshWorldList()
 end

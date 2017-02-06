@@ -7,7 +7,7 @@ local CAMPAIGN_DATA = 1
 local CAMPAIGN_QUEUE_DATA = 2
 
 function ZO_CampaignBrowser_Shared:New(...)
-    return ZO_Object.New(self, ...)
+    return ZO_Object.New(self)
 end
 
 function ZO_CampaignBrowser_Shared:CanHome(data)

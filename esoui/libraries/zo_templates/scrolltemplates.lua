@@ -382,14 +382,15 @@ function ZO_Scroll_UpdateScrollBar(self)
         end
 
         --extents updating
-        if(self.verticalExtents ~= nil and self.verticalExtents ~= verticalExtents) then
-            if(verticalExtents > 0) then
+        local verticalExtentsChanged = self.verticalExtents ~= nil and not zo_floatsAreEqual(self.verticalExtents, verticalExtents)
+        self.verticalExtents = verticalExtents
+        if verticalExtentsChanged then
+            if verticalExtents > 0 then
                 self.scrollbar:SetValue(MAX_SCROLL_VALUE * (verticalOffset / verticalExtents))
             else
                 ZO_Scroll_ResetToTop(self)
             end
         end
-        self.verticalExtents = verticalExtents
 
         UpdateScrollFade(self.useFadeGradient, scroll, scrollbar)
     elseif scrollIndicator then
@@ -402,13 +403,13 @@ function ZO_Scroll_UpdateScrollBar(self)
         end
 
         --extents updating
-        if(self.verticalExtents ~= nil and self.verticalExtents ~= verticalExtents) then
+        local verticalExtentsChanged = self.verticalExtents ~= nil and not zo_floatsAreEqual(self.verticalExtents, verticalExtents)
+        self.verticalExtents = verticalExtents
+        if verticalExtentsChanged then
             if verticalExtents <= 0 then
                 ZO_Scroll_ResetToTop(self)
             end
         end
-
-        self.verticalExtents = verticalExtents
 
         ZO_UpdateScrollFade(self.useFadeGradient, scroll, ZO_SCROLL_DIRECTION_VERTICAL)
     end
@@ -623,9 +624,10 @@ end
 function ZO_ScrollList_Clear(self)
     ZO_ClearNumericallyIndexedTable(self.data)
     self.categories = {}
-    self.selectedData = nil
-    self.selectedDataIndex = nil
-    self.lastSelectedDataIndex = nil
+    if AreSelectionsEnabled(self) then
+        ZO_ScrollList_SelectData(self, NO_SELECTED_DATA, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+        self.lastSelectedDataIndex = nil
+    end
 end
 
 function ZO_ScrollList_GetCategoryHidden(self, categoryId)
@@ -914,8 +916,8 @@ function ZO_ScrollList_GetDataControl(self, data)
 end
 
 function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild, animateInstantly)
-    if(AreSelectionsEnabled(self) and self.selectedData ~= data) then
-        if(reselectingDuringRebuild == nil) then
+    if AreSelectionsEnabled(self) and self.selectedData ~= data then
+        if reselectingDuringRebuild == nil then
             reselectingDuringRebuild = false
         end
 
@@ -923,35 +925,45 @@ function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild,
             animateInstantly = false
         end
 
-        local previouslySelectedData = self.selectedData
-        if(self.selectedData) then
-            self.selectedData = nil
-            self.selectedDataIndex = nil
-            if(self.selectedControl) then
-                UnselectControl(self, self.selectedControl, animateInstantly)
-            end
-        end
-        
-        if(data) then
-            self.selectedData = data
+        local dataIndex
+        if data ~= nil then
             for i = 1, #self.data do
-                if(self.data[i].data == data) then
-                    self.selectedDataIndex = i
-                    self.lastSelectedDataIndex = i
+                if self.data[i].data == data then
+                    dataIndex = i
                     break
                 end
             end
 
-            if(not control) then
+            --this data we tried to select isn't in the scroll list at all, just abort
+            if dataIndex == nil then
+                return
+            end
+        end
+
+        local previouslySelectedData = self.selectedData
+        if self.selectedData then
+            self.selectedData = nil
+            self.selectedDataIndex = nil
+            if self.selectedControl then
+                UnselectControl(self, self.selectedControl, animateInstantly)
+            end
+        end
+        
+        if data ~= nil then
+            self.selectedDataIndex = dataIndex
+            self.lastSelectedDataIndex = dataIndex
+            self.selectedData = data
+
+            if not control then
                 control = ZO_ScrollList_GetDataControl(self, data)
             end
 
-            if(control) then
+            if control then
                 SelectControl(self, control, animateInstantly)
             end
         end
         
-        if(self.selectionCallback) then
+        if self.selectionCallback then
             self.selectionCallback(previouslySelectedData, self.selectedData, reselectingDuringRebuild)
         end
     end
@@ -1147,6 +1159,7 @@ end
 --Updates the scroll control with new data. Call this when you modify the data list by adding or removing entries.
 function ZO_ScrollList_Commit(self)
     local windowHeight = ZO_ScrollList_GetHeight(self)
+    local selectionsEnabled = AreSelectionsEnabled(self)
         
     --the window isn't big enough to show anything (its anchors probably haven't been processed yet), so delay the commit until that happens
     if(windowHeight <= 0) then
@@ -1169,7 +1182,7 @@ function ZO_ScrollList_Commit(self)
             currentData.bottom = currentY
             table.insert(self.visibleData, i)
             
-            if AreSelectionsEnabled(self) and AreDataEqualSelections(self, currentData.data, self.selectedData) then
+            if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
                 foundSelected = true
                 ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
             end
@@ -1179,7 +1192,7 @@ function ZO_ScrollList_Commit(self)
         for i = 1,#self.data do
             table.insert(self.visibleData, i)
             
-            if(AreSelectionsEnabled(self) and AreDataEqualSelections(self, self.data[i].data, self.selectedData)) then
+            if selectionsEnabled and AreDataEqualSelections(self, self.data[i].data, self.selectedData) then
                foundSelected = true
                ZO_ScrollList_SelectData(self, self.data[i].data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
             end
@@ -1196,11 +1209,13 @@ function ZO_ScrollList_Commit(self)
         i = i - 1
     end
 
-    if not foundSelected then
-        if self.autoSelect then
-            AutoSelect(self, ANIMATE_INSTANTLY)
-        else
-            ZO_ScrollList_SelectData(self, NO_SELECTED_DATA, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+    if selectionsEnabled then
+        if not foundSelected then
+            if self.autoSelect then
+                AutoSelect(self, ANIMATE_INSTANTLY)
+            else
+                ZO_ScrollList_SelectData(self, NO_SELECTED_DATA, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+            end
         end
     end
 

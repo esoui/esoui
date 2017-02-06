@@ -73,6 +73,19 @@
         </Control>
         
         <Control name="ZO_InventoryTabs" inherits="ZO_MenuBarTemplate" virtual="true">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local filterBarData =
+                {
+                    initialButtonAnchorPoint = RIGHT,
+                    buttonTemplate = "ZO_InventoryFilterTab",
+                    normalSize = 40,
+                    downSize = 51,
+                    buttonPadding = -5,
+                    animationDuration = 180,
+                }
+                ZO_MenuBar_SetData(self, filterBarData)
+            </OnInitialized>
             <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
             <Controls>
                 <Label name="$(parent)Active" font="ZoFontHeader2" verticalAlignment="CENTER" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">

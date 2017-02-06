@@ -31,6 +31,7 @@ function ZO_GamepadEntryData:Initialize(text, icon, selectedIcon, highlight, isN
     self.fontScaleOnSelection = true
     self.alphaChangeOnSelection = false
     self.enabled = true
+    self.subLabelTemplate = "ZO_GamepadMenuEntrySubLabelTemplateMain"
 end
 
 function ZO_GamepadEntryData:InitializeInventoryVisualData(itemData)
@@ -110,13 +111,14 @@ function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(itemInfo, cus
 end
 
 local LOOT_QUEST_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
-function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen)
+function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen, itemType)
     self.lootId = lootId
     self:SetStackCount(count)
     self.quality = quality
     self.value = value
     self.isQuest = isQuest
     self.isStolen = isStolen
+    self.itemType = itemType
     self:SetFontScaleOnSelection(false)    --item entries don't grow on selection
     
     if isQuest then
@@ -270,6 +272,14 @@ function ZO_GamepadEntryData:SetSubLabelColors(selectedColor, unselectedColor)
     self.unselectedSubLabelColor = unselectedColor
 end
 
+function ZO_GamepadEntryData:GetSubLabelTemplate()
+    return self.subLabelTemplate
+end
+
+function ZO_GamepadEntryData:SetSubLabelTemplate(template)
+    self.subLabelTemplate = template
+end
+
 function ZO_GamepadEntryData:SetIconTint(selectedColor, unselectedColor)
     self.selectedIconTint = selectedColor
     self.unselectedIconTint = unselectedColor
@@ -284,6 +294,12 @@ function ZO_GamepadEntryData:AddSubLabel(text)
         self.subLabels = {}
     end
     table.insert(self.subLabels, text)
+end
+
+function ZO_GamepadEntryData:ClearSubLabels()
+    if self.subLabels then
+        ZO_ClearNumericallyIndexedTable(self.subLabels)
+    end
 end
 
 function ZO_GamepadEntryData:SetShowUnselectedSublabels(showUnselectedSublabels)

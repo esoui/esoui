@@ -7,7 +7,7 @@
         <Control name="ZO_GamepadNotificationsRequestRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_GAMEPAD_NOTIFICATIONS_ACCEPT_OPTION)
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DECLINE_OPTION)
             </OnInitialized>
@@ -16,7 +16,7 @@
         <Control name="ZO_GamepadNotificationsYesNoRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_YES)
                 self.declineText = GetString(SI_NO)
             </OnInitialized>
@@ -25,7 +25,7 @@
         <Control name="ZO_GamepadNotificationsLeaderboardRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_GAMEPAD_NOTIFICATIONS_SHOW_LEADERBOARD_OPTION)
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
@@ -34,7 +34,7 @@
         <Control name="ZO_GamepadNotificationsCollectibleRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_COLLECTIONS_NOTIFICATION_BUTTON)
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
@@ -43,15 +43,24 @@
         <Control name="ZO_GamepadNotificationsLFGJumpDungeonRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_LFG_JUMP_TO_DUNGEON_ACCEPT)
+            </OnInitialized>
+        </Control>
+      
+        <Control name="ZO_GamepadNotificationsLFGReadyCheckRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DECLINE_OPTION)
             </OnInitialized>
         </Control>
 
         <Control name="ZO_GamepadNotificationsLFGFindReplacementRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_LFG_FIND_REPLACEMENT_ACCEPT)
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
@@ -70,7 +79,7 @@
         <Control name="ZO_GamepadNotificationsAlertRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabel(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
         </Control>

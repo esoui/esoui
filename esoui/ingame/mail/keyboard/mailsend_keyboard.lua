@@ -10,7 +10,7 @@ function MailSend:New(control)
     manager.sendMoneyMode = true
         
     manager.to = control:GetNamedChild("ToField")
-    manager.autoComplete = ZO_AutoComplete:New(manager.to, { AUTO_COMPLETE_FLAG_ALL }, nil, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+    manager.autoComplete = ZO_AutoComplete:New(manager.to, { AUTO_COMPLETE_FLAG_ALL }, { AUTO_COMPLETE_FLAG_GUILD_NAMES }, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
     editControlGroup:AddEditControl(manager.to, manager.autoComplete)
     ZO_EditDefaultText_Initialize(manager.to, GetString(SI_REQUEST_NAME_DEFAULT_TEXT))
         

@@ -270,11 +270,11 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
 
     local mainText, textControl
 
-    local isGenericGamepadDialog = (dialog.isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType) -- There is a legacy gamepad dialog still in use (for now).
-    if isGenericGamepadDialog then
+    local isGamepadDialog = dialog.isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType -- There is a legacy gamepad dialog still in use (for now).
+    if isGamepadDialog then
         local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
         mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
-        ZO_GenericGamepadDialog_BaseSetup(dialog, title, mainText)
+        ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText)
     else
         textControl = dialog:GetNamedChild("Text")
         mainText = dialogInfo.mainText
@@ -401,8 +401,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     ------------------------------
     local dialog
 
-    local isGenericGamepadDialog = isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType -- There is a legacy gamepad dialog still in use (for now).
-
+    local isGamepadDialog = isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType  -- There is a legacy gamepad dialog still in use (for now).
+    local isGenericGamepadDialog = isGamepadDialog and dialogInfo.gamepadInfo.dialogType ~= GAMEPAD_DIALOGS.CUSTOM
     if isGenericGamepadDialog then
         dialog = ZO_GenericGamepadDialog_GetControl(dialogInfo.gamepadInfo.dialogType)
 
@@ -462,7 +462,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     local buttonInfos = dialogInfo.buttons
     local numButtonInfos = buttonInfos and #buttonInfos or 0
     dialog.numButtons = numButtonInfos
-    if(numButtonInfos > 0 and not isGenericGamepadDialog) then
+    if(numButtonInfos > 0 and not isGamepadDialog) then
         for i = 1, numButtonInfos do
             local buttonInfo = buttonInfos[i]
             local button = GetButtonControl(dialog, i)
@@ -529,7 +529,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     end
 
     --Custom Init
-    if dialogInfo.customControl or isGenericGamepadDialog then
+    if dialogInfo.customControl or isGamepadDialog then
         RefreshMainText(dialog, dialogInfo, textParams)
         if dialogInfo.setup then
             dialogInfo.setup(dialog, data)
@@ -715,7 +715,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
     dialog.name = name
     dialog:BringWindowToTop()
-    if not isGenericGamepadDialog then
+    if not isGamepadDialog then
         PlaySound(SOUNDS.DIALOG_SHOW)
     end
 
@@ -951,7 +951,7 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
 
                 local mainText = GetFormattedText(dialog, textTable, params)
                 if mainText and mainText ~= "" then
-                    ZO_GenericGamepadDialog_BaseSetup(dialog, dialog.headerData.titleText, mainText)
+                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, mainText)
                 end
             end
         else

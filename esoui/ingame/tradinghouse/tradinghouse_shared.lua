@@ -40,6 +40,7 @@ local TRADING_HOUSE_DESIRED_FILTER_ORDERING =
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_CRAFTING,
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_GUILD_ITEMS,
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_CONSUMABLES,
+    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_FURNISHINGS,
     SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_OTHER,
 }
 
@@ -498,6 +499,7 @@ function ZO_TradingHouse_InitializeColoredComboBox(comboBox, entryData, callback
         local entry = comboBox:CreateItemEntry(text, callback)
         entry.minValue = data[ZO_RANGE_COMBO_INDEX_MIN_VALUE]
         entry.maxValue = data[ZO_RANGE_COMBO_INDEX_MAX_VALUE]
+        entry.childKey = data[ZO_RANGE_COMBO_INDEX_CHILD_KEY]
 
         comboBox:AddItem(entry)
     end
@@ -537,6 +539,9 @@ function ZO_TradingHouseSearch:Initialize()
         [TRADING_HOUSE_FILTER_TYPE_PRICE] = { values = {}, isRange = true, },
         [TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS] = { values = {}, isRange = true, },
         [TRADING_HOUSE_FILTER_TYPE_ENCHANTMENT] = { values = {}, isRange = false, },
+        [TRADING_HOUSE_FILTER_TYPE_FURNITURE_CATEGORY] = { values = {}, isRange = false, },
+        [TRADING_HOUSE_FILTER_TYPE_FURNITURE_SUBCATEGORY] = { values = {}, isRange = false, },
+        [TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM] = { values = {}, isRange = false, },
     }
 
     self:ResetAllSearchData()

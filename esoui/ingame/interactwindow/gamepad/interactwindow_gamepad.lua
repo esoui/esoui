@@ -23,15 +23,15 @@ function ZO_GamepadInteraction:Initialize(control)
 
     ZO_SharedInteraction.Initialize(self, control)
 
-	self:InitInteraction()
-	self:InitializeKeybindStripDescriptors()
+    self:InitInteraction()
+    self:InitializeKeybindStripDescriptors()
 
-	local function OnStateChange(oldState, newState)
+    local function OnStateChange(oldState, newState)
         if(newState == SCENE_HIDDEN) then
-			self:OnHidden()
-		elseif newState == SCENE_SHOWING then
-			self:OnShowing()
-		end
+            self:OnHidden()
+        elseif newState == SCENE_SHOWING then
+            self:OnShowing()
+        end
     end
 
     local interactScene = self:CreateInteractScene("gamepadInteract")
@@ -43,45 +43,45 @@ function ZO_GamepadInteraction:Initialize(control)
 end
 
 local function SetupBodyText(control, data, selected, selectedDuringRebuild, enabled, activated)
-	control:GetNamedChild("TargetArea"):GetNamedChild("BodyText"):SetText(data.bodyText)
+    control:GetNamedChild("TargetArea"):GetNamedChild("BodyText"):SetText(data.bodyText)
 end
 
 local function SetupReward(control, data, selected, selectedDuringRebuild, enabled, activated)
-	ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 end
 
 local function SetupOption(control, data, selected, selectedDuringRebuild, enabled, activated)
-	if(data.optionsEnabled) then
-		data.enabled = data.optionUsable
-		control:SetText(data.optionText)
+    if(data.optionsEnabled) then
+        data.enabled = data.optionUsable
+        control:SetText(data.optionText)
         control.optionText = data.optionText
-		if selected then
+        if selected then
             if data.recolorIfUnusable and not data.optionUsable then
                 control:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
             else
-			    control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+                control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
             end
-		elseif data.isImportant then
-			control:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        elseif data.isImportant then
+            control:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
         elseif (data.recolorIfUnusable and not data.optionUsable) or data.chosenBefore then
             control:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGB())
         else
-			control:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-		end
+            control:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        end
 
         control:SetHandler("OnUpdate", data.labelUpdateFunction)
         if data.labelUpdateFunction then
             data.labelUpdateFunction(control, data)
         end
 
-		local icon = GetControl(control, "IconImage")
+        local icon = GetControl(control, "IconImage")
 
-		icon:SetHidden((data.iconFile == nil) or not USE_CHATTER_OPTION_ICON)
+        icon:SetHidden((data.iconFile == nil) or not USE_CHATTER_OPTION_ICON)
 
-		if(data.iconFile) then
-			icon:SetTexture(data.iconFile)
-		end
-	end
+        if(data.iconFile) then
+            icon:SetTexture(data.iconFile)
+        end
+    end
 end
 
 local MAX_CURRENCY_CONTROLS = 3
@@ -94,39 +94,39 @@ function ZO_GamepadInteraction:InitInteraction()
     self.titleControl = self.control:GetNamedChild("Title")
     self.textControl = self.contentContainerControl:GetNamedChild("Text")
 
-	-- Setup Interaction with parametric scroll list
-	local function SetupRewardTitle(control, data, selected, selectedDuringRebuild, enabled, activated)
+    -- Setup Interaction with parametric scroll list
+    local function SetupRewardTitle(control, data, selected, selectedDuringRebuild, enabled, activated)
         for i = 1, MAX_CURRENCY_CONTROLS do
             local currencyControl = control:GetNamedChild("Currency" .. i)
             currencyControl:SetHidden(true)
-		end	
+        end	
 
-		for i, currencyData in ipairs(data.currencyRewards) do
-			local creatorFunc = self:GetRewardCreateFunc(currencyData.rewardType)
-			local currencyControl = control:GetNamedChild("Currency" .. i)
-			if currencyControl and creatorFunc then
+        for i, currencyData in ipairs(data.currencyRewards) do
+            local creatorFunc = self:GetRewardCreateFunc(currencyData.rewardType)
+            local currencyControl = control:GetNamedChild("Currency" .. i)
+            if currencyControl and creatorFunc then
                 creatorFunc(currencyControl, currencyData.name, currencyData.amount, ZO_GAMEPAD_CURRENCY_OPTIONS)
-			end
-		end
-	end
-	
+            end
+        end
+    end
+    
     local interactControl = self.contentContainerControl:GetNamedChild("Interact")
     local listControl = interactControl:GetNamedChild("List")
     self.itemList = ZO_GamepadVerticalItemParametricScrollList:New(listControl)
     ZO_GamepadQuadrants_SetBackgroundArrowCenterOffsetY(self.control:GetNamedChild("BG"), LEFT, ZO_INTERACT_CENTER_OFFSET)
     self.itemList:SetFixedCenterOffset(ZO_INTERACT_CENTER_OFFSET)
-	self.itemList:SetSelectedItemOffsets(0,10)
+    self.itemList:SetSelectedItemOffsets(0,10)
     self.itemList:SetAlignToScreenCenter(true)
     self.itemList:SetDrawScrollArrows(true)
 
-	self.itemList:SetOnSelectedDataChangedCallback(function(list, selectedData)
-		KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self.itemList:SetOnSelectedDataChangedCallback(function(list, selectedData)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end)
 
-	self.itemList:AddDataTemplate("ZO_InteractWindow_GamepadBodyTextItem", SetupBodyText, ZO_GamepadMenuEntryTemplateParametricListFunction)
-	self.itemList:AddDataTemplateWithHeader("ZO_QuestReward_Title_Gamepad", SetupRewardTitle, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadQuestRewardEntryHeaderTemplate")
-	self.itemList:AddDataTemplate("ZO_QuestReward_Gamepad", SetupReward, ZO_GamepadMenuEntryTemplateParametricListFunction)
-	self.itemList:AddDataTemplate("ZO_ChatterOption_Gamepad", SetupOption, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.itemList:AddDataTemplate("ZO_InteractWindow_GamepadBodyTextItem", SetupBodyText, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.itemList:AddDataTemplateWithHeader("ZO_QuestReward_Title_Gamepad", SetupRewardTitle, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadQuestRewardEntryHeaderTemplate")
+    self.itemList:AddDataTemplate("ZO_QuestReward_Gamepad", SetupReward, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.itemList:AddDataTemplate("ZO_ChatterOption_Gamepad", SetupOption, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.itemList:SetDataTemplateReleaseFunction("ZO_ChatterOption_Gamepad", ReleaseChatterOptionControl)
 end
 
@@ -134,15 +134,15 @@ function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
 
     local function ItemSelected()
         local selectedData = self.itemList:GetTargetData()
-		if selectedData.isChatterOption then
-			self:HandleChatterOptionClicked(selectedData)
-		end
+        if selectedData.isChatterOption then
+            self:HandleChatterOptionClicked(selectedData)
+        end
     end
 
     local function IsVisible()
         local selectedData = self.itemList:GetTargetData()
         if selectedData then
-		    return selectedData.isChatterOption
+            return selectedData.isChatterOption
         else
             return true
         end
@@ -157,7 +157,7 @@ function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
         end
     end
 
-	self.keybindStripDescriptor = {}
+    self.keybindStripDescriptor = {}
     ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.keybindStripDescriptor, 
                                                         GAME_NAVIGATION_TYPE_BUTTON,
                                                         ItemSelected,
@@ -175,34 +175,34 @@ function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
 end
 
 function ZO_GamepadInteraction:ResetInteraction(bodyText)
-	self.titleControl:SetText(GetUnitName("interact"))
+    self.titleControl:SetText(GetUnitName("interact"))
     self.textControl:SetText(bodyText)
     if self.itemList then
-	    self.itemList:Clear()
-	    self.itemList:Commit()
+        self.itemList:Clear()
+        self.itemList:Commit()
     end
 end
 
 function ZO_GamepadInteraction:EndInteraction()
-	self.itemList:Deactivate()
+    self.itemList:Deactivate()
 end
 
 function ZO_GamepadInteraction:SelectChatterOptionByIndex(optionIndex)
-	local chatterBegin = nil
-	local numData = #self.itemList.dataList
-	for i = 1, numData do
-		local itemData = self.itemList:GetDataForDataIndex(i)
-		if itemData.isChatterOption then
-			chatterBegin = i
-			break
-		end
-	end
+    local chatterBegin = nil
+    local numData = #self.itemList.dataList
+    for i = 1, numData do
+        local itemData = self.itemList:GetDataForDataIndex(i)
+        if itemData.isChatterOption then
+            chatterBegin = i
+            break
+        end
+    end
 
-	if chatterBegin then 
-		local selectedOption = chatterBegin + optionIndex - 1
-		self.itemList:SetSelectedIndex(selectedOption)
-		self.itemList:RefreshVisible()
-	end
+    if chatterBegin then 
+        local selectedOption = chatterBegin + optionIndex - 1
+        self.itemList:SetSelectedIndex(selectedOption)
+        self.itemList:RefreshVisible()
+    end
 end
 
 function ZO_GamepadInteraction:SelectLastChatterOption()
@@ -210,50 +210,50 @@ function ZO_GamepadInteraction:SelectLastChatterOption()
 end
 
 function ZO_GamepadInteraction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
-	local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
+    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
 
-	if chatterData.isImportant then
-		TriggerTutorial(TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE)
-	end
+    if chatterData.isImportant then
+        TriggerTutorial(TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE)
+    end
 
-	self.itemList:AddEntry("ZO_ChatterOption_Gamepad", chatterData)
+    self.itemList:AddEntry("ZO_ChatterOption_Gamepad", chatterData)
 end
 
 function ZO_GamepadInteraction:FinalizeChatterOptions(optionCount)
-	self.itemList:CommitWithoutReselect()
+    self.itemList:CommitWithoutReselect()
     self.itemList:RefreshVisible()
 end
 
 function ZO_GamepadInteraction:UpdateChatterOptions(optionCount, backToTOCOption)
-	self:PopulateChatterOptions(optionCount, backToTOCOption)
+    self:PopulateChatterOptions(optionCount, backToTOCOption)
 end
 
 function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
-	local rewardData = self:GetRewardData(journalQuestIndex)
+    local rewardData = self:GetRewardData(journalQuestIndex)
 
-	if #rewardData == 0 then
-		return
-	end
+    if #rewardData == 0 then
+        return
+    end
 
-	local currencyRewards = {}
-	local itemRewards = {}
+    local currencyRewards = {}
+    local itemRewards = {}
     local confirmError
-	for i, data in ipairs(rewardData) do
-		if self:IsCurrencyReward(data.rewardType) then
-			table.insert(currencyRewards, data)
+    for i, data in ipairs(rewardData) do
+        if self:IsCurrencyReward(data.rewardType) then
+            table.insert(currencyRewards, data)
             --warn the player they aren't going to get their money when they hit complete
             confirmError = self:TryGetMaxCurrencyWarningText(data.rewardType, data.amount)
-		else
-			table.insert(itemRewards, data) 
-		end
-	end
+        else
+            table.insert(itemRewards, data) 
+        end
+    end
 
-	local titleData = {}
-	titleData.canSelect = false
-	titleData.currencyRewards = currencyRewards
+    local titleData = {}
+    titleData.canSelect = false
+    titleData.currencyRewards = currencyRewards
     titleData.header = GetString(SI_INTERACT_REWARDS_GIVEN)
-	self.itemList:AddEntryWithHeader("ZO_QuestReward_Title_Gamepad", titleData)
+    self.itemList:AddEntryWithHeader("ZO_QuestReward_Title_Gamepad", titleData)
 
     for i, itemData in ipairs(itemRewards) do
         if itemData.rewardType == REWARD_TYPE_PARTIAL_SKILL_POINTS then
@@ -272,20 +272,21 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
             }
         end
 
-		local entry = ZO_GamepadEntryData:New(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, itemData.name))
+        local entry = ZO_GamepadEntryData:New(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, itemData.name))
         entry:InitializeInventoryVisualData(itemData)
         entry.itemData = itemData
+        entry:SetStackCount(itemData.amount)
 
-		self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
+        self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
     end
 
     return confirmError
 end
 
 function ZO_GamepadInteraction:RefreshList()
-	if self.itemList then
-		self.itemList:RefreshVisible()
-	end
+    if self.itemList then
+        self.itemList:RefreshVisible()
+    end
 end
 
 function ZO_GamepadInteraction:GetInteractGoldIcon()
@@ -311,18 +312,18 @@ function ZO_GamepadInteraction:UpdateShadowyConnectionsOnTimeComplete(control, d
 end
 
 function ZO_GamepadInteraction:OnShowing()
-	KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-	self:RefreshList()
-	self.itemList:Activate()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    self:RefreshList()
+    self.itemList:Activate()
 end
 
 function ZO_GamepadInteraction:OnHidden()
-	self.itemList:Deactivate()
-	KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self.itemList:Deactivate()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     ZO_SharedInteraction.OnHidden(self)
     GAMEPAD_TOOLTIPS:Reset(GAMEPAD_MOVABLE_TOOLTIP)
 end
 
 function ZO_InteractWindow_Gamepad_Initialize(control)
-	GAMEPAD_INTERACTION = ZO_GamepadInteraction:New(control)
+    GAMEPAD_INTERACTION = ZO_GamepadInteraction:New(control)
 end

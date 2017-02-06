@@ -17,24 +17,67 @@ do
     end
 end
 
-ZO_GamepadAlchemy = ZO_Object.MultiSubclass(ZO_SharedAlchemy, ZO_Gamepad_ParametricList_Screen)
+ZO_GamepadAlchemy = ZO_SharedAlchemy:Subclass()
 
 function ZO_GamepadAlchemy:New(...)
-    local alchemy = ZO_Object.New(self)
+    local alchemy = ZO_SharedAlchemy.New(self)
     alchemy:Initialize(...)
     return alchemy
 end
 
 function ZO_GamepadAlchemy:Initialize(control)
-    self.sceneName = "gamepad_alchemy"
-
+    ZO_SharedAlchemy.Initialize(self, control)
+    
     local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_ALCHEMY)
-
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
+    ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
     ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
     ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
 
-    ZO_SharedAlchemy.Initialize(self, control)
+    self:InitializeKeybindStripDescriptors()
+    self:InitializeModeList()
+end
+
+function ZO_GamepadAlchemy:InitializeScenes()
+    local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadAlchemyTopLevelSkillInfo)
+    GAMEPAD_ALCHEMY_ROOT_SCENE = self:CreateInteractScene("gamepad_alchemy_mode")
+    GAMEPAD_ALCHEMY_ROOT_SCENE:AddFragment(skillLineXPBarFragment)
+    GAMEPAD_ALCHEMY_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.modeKeybindStripDescriptor)
+            TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_OPENED)
+            self.modeList:Activate()
+        elseif newState == SCENE_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.modeKeybindStripDescriptor)
+            self.modeList:Deactivate()
+        end
+    end)
+
+    GAMEPAD_ALCHEMY_CREATION_SCENE = self:CreateInteractScene("gamepad_alchemy_creation")
+    GAMEPAD_ALCHEMY_CREATION_SCENE:AddFragment(skillLineXPBarFragment)
+    GAMEPAD_ALCHEMY_CREATION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            KEYBIND_STRIP:RemoveDefaultExit()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
+            self.inventory:Activate()
+            self.inventory:OnShow()
+            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
+            GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
+            self:UpdateTooltip()
+        elseif newState == SCENE_HIDDEN then
+            self.inventory:Deactivate()
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
+            KEYBIND_STRIP:RestoreDefaultExit()
+            self.inventory:HandleDirtyEvent()
+            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
+            self.tooltip:SetHidden(true)
+        end
+    end)
+
+    self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
+        if SCENE_MANAGER:IsShowing("gamepad_alchemy_creation") then
+            self:OnSlotChanged()
+        end
+    end)
 end
 
 function ZO_AlchemyCraftingBarSlotTemplateSetup(control, data)
@@ -52,7 +95,7 @@ function ZO_GamepadAlchemy:InitializeSlots()
     self.craftingBar:AddDataTemplate("ZO_GamepadAlchemyCraftingSlotWithTraits", ZO_AlchemyCraftingBarSlotTemplateSetup)
     self.craftingBar:AddDataTemplate("ZO_AlchemySolventSlot_Gamepad", ZO_AlchemyCraftingBarSolventSlotTemplateSetup)
 
-    self.slotAnimation = ZO_CraftingCreateSlotAnimation:New(self.sceneName)
+    self.slotAnimation = ZO_CraftingCreateSlotAnimation:New("gamepad_alchemy_creation")
 
     self.control:RegisterForEvent(EVENT_NON_COMBAT_BONUS_CHANGED, function(eventCode, nonCombatBonusType)
         if nonCombatBonusType == NON_COMBAT_BONUS_ALCHEMY_THIRD_SLOT then
@@ -83,7 +126,7 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
     self.reagentSlots = {}
     for i = 1, reagents
     do
-	    local newData = {
+        local newData = {
             icon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_reagent.dds",
             placedSound = SOUNDS.ALCHEMY_REAGENT_PLACED, 
             removedSound = SOUNDS.ALCHEMY_REAGENT_REMOVED,
@@ -93,14 +136,31 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
         }
         self.craftingBar:AddEntry("ZO_GamepadAlchemyCraftingSlotWithTraits", newData)
         self.reagentSlots[i] = newData.slot
-	end
+    end
 
     self.craftingBar:Commit()
 end
 
+function ZO_GamepadAlchemy:InitializeModeList()
+    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("ContainerMode"))
+    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
+
+    local data = ZO_GamepadEntryData:New(GetString(SI_ENCHANTING_CREATION), "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
+    data.mode = ZO_ALCHEMY_MODE_CREATION
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+    
+    local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ALCHEMY)
+    local recipeCraftingSystemName = GetString("SI_RECIPECRAFTINGSYSTEM", recipeCraftingSystem)
+    data = ZO_GamepadEntryData:New(recipeCraftingSystemName, GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ALCHEMY))
+    data.mode = ZO_ALCHEMY_MODE_RECIPES
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+
+    self.modeList:Commit()
+end
+
 function ZO_GamepadAlchemy:InitializeInventory()
-    local SETUP_LOCALLY = true
-    self.inventory = self:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadAlchemyInventory, self)
+    self.inventory = ZO_GamepadAlchemyInventory:New(self.control:GetNamedChild("ContainerInventory"), self)
+   
     self.activeSlotIndex = 0
 
     self.inventory:SetOnTargetDataChangedCallback(function(list, selectedData)
@@ -110,7 +170,7 @@ function ZO_GamepadAlchemy:InitializeInventory()
     end)
 
     -- Override the default parametric offset calculation
-    self.inventory.list.CalculateParametricOffset = function(self, startAdditionalPadding, endAdditionalPadding, distanceFromCenter, continuousParametricOffset)
+    self.inventory:GetList().CalculateParametricOffset = function(self, startAdditionalPadding, endAdditionalPadding, distanceFromCenter, continuousParametricOffset)
         local additionalPaddingEasingFunc
 
         -- Use linear easing during transition between rows with small and large padding.
@@ -127,11 +187,17 @@ function ZO_GamepadAlchemy:InitializeInventory()
             self:UpdateItemOnWorkbench(data)
         end
     )
-
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindStripDescriptor, self.inventory.list)
 end
 
 function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
+    -- Mode keybind strip
+    self.modeKeybindStripDescriptor =
+    {
+    }
+    
+    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.modeKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:SelectMode() end)
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.modeKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+
     -- Main keybind strip
     self.mainKeybindStripDescriptor =
     {
@@ -148,13 +214,13 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function()
-                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory.list:GetTargetData() ~= nil
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:GetTargetData() ~= nil
             end,
             enabled = function()
-                return self.inventory.list:GetTargetData() ~= nil and self.inventory.list:GetTargetData().meetsUsageRequirement
+                return self.inventory:GetTargetData() ~= nil and self.inventory:GetTargetData().meetsUsageRequirement
             end,
             callback = function()
-                local targetData = self.inventory.list:GetTargetData()
+                local targetData = self.inventory:GetTargetData()
                 local adding = not self:IsSelectionOnWorkbench()
 
                 if adding then
@@ -202,47 +268,20 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
     }
 
     ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(self.mainKeybindStripDescriptor)
-
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.mainKeybindStripDescriptor)
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindStripDescriptor, self.inventory:GetList())
 end
 
-function ZO_GamepadAlchemy:InitializeScenes()
-    local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadAlchemyTopLevelSkillInfo)
-    GAMEPAD_ALCHEMY_ROOT_SCENE = self:CreateInteractScene(self.sceneName)
-    GAMEPAD_ALCHEMY_ROOT_SCENE:AddFragment(skillLineXPBarFragment)
-    GAMEPAD_ALCHEMY_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-    end)
+function ZO_GamepadAlchemy:SelectMode()
+    local data = self.modeList:GetTargetData()
 
-    self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if SCENE_MANAGER:IsShowing(self.sceneName) then
-            self:OnSlotChanged()
+    if data then
+        if data.mode == ZO_ALCHEMY_MODE_CREATION then
+            SCENE_MANAGER:Push("gamepad_alchemy_creation")
+        elseif data.mode == ZO_ALCHEMY_MODE_RECIPES then
+            GAMEPAD_PROVISIONER:EmbedInCraftingScene(self.alchemyStationInteraction)
         end
-    end)
-end
-
-function ZO_GamepadAlchemy:OnShowing()
-    self:SetCurrentList(self.inventory)
-    self.inventory:OnShow()
-
-    KEYBIND_STRIP:RemoveDefaultExit()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
-
-    TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_OPENED)
-
-    GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
-    GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
-
-    self:UpdateTooltipLayout()
-end
-
-function ZO_GamepadAlchemy:OnHide()
-    self.inventory:HandleDirtyEvent()
-
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
-    KEYBIND_STRIP:RestoreDefaultExit()
-
-    GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
+    end
 end
 
 function ZO_GamepadAlchemy:InitializeTooltip()
@@ -284,18 +323,18 @@ function ZO_GamepadAlchemy:GetReagentSlotOffset(thirdSlotUnlocked)
 end
 
 function ZO_GamepadAlchemy:OnWorkbenchUpdated()
-    for _, data in pairs(self.inventory.list.dataList) do
+    for _, data in pairs(self.inventory:GetList().dataList) do
         self:UpdateItemOnWorkbench(data)
     end
 
     self:UpdateActiveSlot()
-    self.inventory.list:RefreshVisible()
+    self.inventory:GetList():RefreshVisible()
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
 function ZO_GamepadAlchemy:UpdateActiveSlot()
-    local targetData = self.inventory.list:GetTargetData()
+    local targetData = self.inventory:GetTargetData()
     if targetData then
         local oldActiveSlotIndex = self.activeSlotIndex
         local newActiveSlotIndex
@@ -393,7 +432,11 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
         else
             return INGREDIENT_SORT_ORDER_OTHER + subSortOrder
         end
-	end)
+    end)
+end
+
+function ZO_GamepadAlchemyInventory:GetList()
+    return self.list
 end
 
 function ZO_GamepadAlchemyInventory:IsLocked(bagId, slotIndex)
@@ -522,6 +565,10 @@ end
 
 function ZO_GamepadAlchemyInventory:IsActive()
     return self.list:IsActive()
+end
+
+function ZO_GamepadAlchemyInventory:GetTargetData()
+    return self.list:GetTargetData()
 end
 
 function ZO_GamepadAlchemyInventory:SetOnTargetDataChangedCallback(selectedDataCallback)

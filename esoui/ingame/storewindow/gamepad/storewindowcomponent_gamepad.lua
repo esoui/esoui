@@ -101,12 +101,16 @@ function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mod
     local invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(currencyType) or false
     local priceControl = control:GetNamedChild("Price")
 
-    local storeUsesAP, storeUsesTelvarStones = select(2, GetStoreCurrencyTypes())
-    if storeUsesAP and mode == ZO_MODE_STORE_BUY and currencyType == CURT_ALLIANCE_POINTS then
-        invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS) or false
-    elseif storeUsesTelvarStones and mode == ZO_MODE_STORE_BUY and currencyType == CURT_TELVAR_STONES then
-        invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_TELVAR_STONES) or false
-    end
+	if mode == ZO_MODE_STORE_BUY then 
+		local storeUsesAP, storeUsesTelvarStones, storeUsesWritVouchers = select(2, GetStoreCurrencyTypes())
+		if storeUsesAP and currencyType == CURT_ALLIANCE_POINTS then
+			invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS) or false
+		elseif storeUsesTelvarStones and currencyType == CURT_TELVAR_STONES then
+			invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_TELVAR_STONES) or false
+		elseif storeUsesWritVouchers and currencyType == CURT_WRIT_VOUCHERS then
+			invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_WRIT_VOUCHERS) or false
+		end
+	end
 
     ZO_CurrencyControl_SetSimpleCurrency(priceControl, currencyType, price, options, CURRENCY_SHOW_ALL, invalidPrice)
 end

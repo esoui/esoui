@@ -15,6 +15,9 @@ function ZO_LeaderboardsManager_Keyboard:Initialize(control, leaderboardControl)
 
     self.activeLeaderboardLabel = GetControl(control, "ActiveLeaderboard")
     self.pointsHeaderLabel = GetControl(control, "HeadersPoints")
+    self.classHeaderLabel = GetControl(control, "HeadersClass")
+    self.allianceHeaderLabel = GetControl(control, "HeadersAlliance")
+    self.houseHeaderLabel = GetControl(control, "HeadersHouse")
     self.emptyRow = GetControl(control, "EmptyRow")
 
     self:InitializeFilters()
@@ -124,14 +127,29 @@ end
 function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
     self.navigationTree:Reset()
 
-    if CAMPAIGN_LEADERBOARDS then
-        CAMPAIGN_LEADERBOARDS:AddCategoriesToParentSystem()
+    local campaignLeaderboards = CAMPAIGN_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME)
+    if campaignLeaderboards then
+        campaignLeaderboards:AddCategoriesToParentSystem()
     end
-    if RAID_LEADERBOARDS then
-        RAID_LEADERBOARDS:AddCategoriesToParentSystem()
+
+    local raidLeaderboards = RAID_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME)
+    if raidLeaderboards then
+        raidLeaderboards:AddCategoriesToParentSystem()
+    end
+
+    local housingLeaderboards = HOUSING_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(HOUSING_LEADERBOARD_SYSTEM_NAME)
+    if housingLeaderboards then
+        housingLeaderboards:AddCategoriesToParentSystem()
     end
 
     self.navigationTree:Commit()
+end
+
+function ZO_LeaderboardsManager_Keyboard:RefreshLeaderboardType(leaderboardType)
+    local isHouseLeaderboard = leaderboardType == LEADERBOARD_TYPE_HOUSE
+    self.classHeaderLabel:SetHidden(isHouseLeaderboard)
+    self.allianceHeaderLabel:SetHidden(isHouseLeaderboard)
+    self.houseHeaderLabel:SetHidden(not isHouseLeaderboard)
 end
 
 function ZO_LeaderboardsManager_Keyboard:SetSelectedLeaderboardObject(leaderboardObject, subType)
@@ -204,14 +222,11 @@ function ZO_LeaderboardsManager_Keyboard:ColorRow(control, data)
 end
 
 function ZO_LeaderboardsManager_Keyboard:RepopulateFilterDropdown()
-    local isClassType = LEADERBOARD_LIST_MANAGER.leaderboardRankType == LEADERBOARD_TYPE_CLASS
-    local includeAllFilter = not isClassType
-
     local function OnFilterChanged(comboBox, entryText, entry)
         self:RefreshFilters()
     end
 
-    ZO_Leaderboards_PopulateDropdownFilter(self.filterComboBox, OnFilterChanged, includeAllFilter, isClassType)
+    ZO_Leaderboards_PopulateDropdownFilter(self.filterComboBox, OnFilterChanged, includeAllFilter, LEADERBOARD_LIST_MANAGER.leaderboardRankType)
 end
 
 --Global XML Handlers

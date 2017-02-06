@@ -19,6 +19,7 @@ end
 
 local NUM_TICKS_TO_START_ACCELERATING = 5
 local ACCELERATION_MAGNTITUDE_FACTOR = 3
+local MAX_TICKS_TO_ACCEL_ACROSS = 30
 
 function ZO_MovementController:Initialize(direction, accumulationPerSecondForChange, magnitudeQueryFunctionOverride)
     self.direction = direction or MOVEMENT_CONTROLLER_DIRECTION_VERTICAL
@@ -31,10 +32,15 @@ function ZO_MovementController:Initialize(direction, accumulationPerSecondForCha
     self.allowAcceleration = true
     self.numTicksToStartAccelerating = NUM_TICKS_TO_START_ACCELERATING
     self.accelerationMagnitudeFactor = ACCELERATION_MAGNTITUDE_FACTOR
+    self.numAccumulationTicks = 0
 end
 
 function ZO_MovementController:SetAllowAcceleration(allowAcceleration)
     self.allowAcceleration = allowAcceleration
+end
+
+function ZO_MovementController:SetAccumulationPerSecondForChange(accumulation)
+    self.accumulationPerSecondForChange = accumulation
 end
 
 function ZO_MovementController:SetNumTicksToStartAccelerating(numTicks)
@@ -43,6 +49,27 @@ end
 
 function ZO_MovementController:SetAccelerationMagnitudeFactor(accelerationMagnitudeFactor)
     self.accelerationMagnitudeFactor = accelerationMagnitudeFactor
+end
+
+function ZO_MovementController:IsAtMaxVelocity()
+    if self.numAccumulationTicks > MAX_TICKS_TO_ACCEL_ACROSS then
+        return true --if we're over the MAX_TICKS_TO_ACCEL_ACROSS we definitely aren't accelerating anymore
+    end
+
+    if self.debt == 0 then --otherwise if a snapshot of the accumulation right now is greater than the accumulation per second required, 
+        local magnitude = self:GetMagnitude()--we're already updating every frame regardless of being at max velocity
+        local snapshotAccumulation = magnitude * GetFrameDeltaNormalizedForTargetFramerate() * self:CalculateAccelerationFactor()
+        if snapshotAccumulation >= self.accumulationPerSecondForChange then
+            return true
+        elseif snapshotAccumulation <= -self.accumulationPerSecondForChange then
+            return true
+        end
+    end
+    --for sufficiently large accumulation per second for change, you can potentially get to max velocity for a several frames before
+    --numAcculmulationTicks > MAX_TICKS_TO_ACCEL_ACROSS, ie you might get MOVE, NO, NO, MOVE, NO, MOVE, NO, NO, MOVE, NO, but short of
+    --keeping a running history of the last several frames we can't accurately predict that we've gotten to that point.  Also 20 ticks
+    --a second is way too many to require a move 
+    return false
 end
 
 MOVEMENT_CONTROLLER_NO_CHANGE = 0
@@ -62,6 +89,7 @@ function ZO_MovementController:CheckMovement()
         self.totalAccumulation = 0
         self.isMovingFromAccumulation = false
         self.lastMagnitude = 0
+        self.numAccumulationTicks = 0
     else
         if IsChangingDirections(self.lastMagnitude, magnitude) then
             -- reset moving state when changing a direction
@@ -121,13 +149,9 @@ function ZO_MovementController:GetMagnitude()
     return self.magnitudeQueryFunction(self.direction)
 end
 
-do
-    local MAX_TICKS_TO_ACCEL_ACROSS = 30
-
-    function ZO_MovementController:CalculateAccelerationFactor()
-        if self.allowAcceleration then
-            return 1.0 + ZO_EaseOutQuartic(zo_clampedPercentBetween(self.numTicksToStartAccelerating, MAX_TICKS_TO_ACCEL_ACROSS, self.numAccumulationTicks)) * self.accelerationMagnitudeFactor
-        end
-        return 1.0
+function ZO_MovementController:CalculateAccelerationFactor()
+    if self.allowAcceleration then
+        return 1.0 + ZO_EaseOutQuartic(zo_clampedPercentBetween(self.numTicksToStartAccelerating, MAX_TICKS_TO_ACCEL_ACROSS, self.numAccumulationTicks)) * self.accelerationMagnitudeFactor
     end
+    return 1.0
 end
