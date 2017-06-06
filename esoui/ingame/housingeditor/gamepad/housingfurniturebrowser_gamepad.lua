@@ -219,6 +219,5 @@ end
 --
 
 function ZO_HousingFurnitureBrowser_Gamepad_OnInitialize(control)
-    local gamepadBrowser = ZO_HousingFurnitureBrowser_Gamepad:New(control)
-    SYSTEMS:RegisterGamepadObject("housing_furniture_browser", gamepadBrowser)
+    GAMEPAD_HOUSING_FURNITURE_BROWSER = ZO_HousingFurnitureBrowser_Gamepad:New(control)
 end

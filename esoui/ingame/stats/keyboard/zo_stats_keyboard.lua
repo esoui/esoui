@@ -488,20 +488,22 @@ local function EffectsRowComparator(left, right)
 end
 
 function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
-    local function UpdateEffects(eventCode, changeType, buffSlot, buffName, unitTag, startTime, endTime, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType)
-        if (not unitTag or unitTag == "player") and not container:IsHidden() then
+    local function UpdateEffects()
+        if not container:IsHidden() then
             effectsRowPool:ReleaseAllObjects()
             
             local effectsRows = {}
 
             --Artificial effects--
             for effectId in ZO_GetNextActiveArtificialEffectIdIter do
-                local displayName, iconFile, effectType, sortOrder = GetArtificialEffectInfo(effectId)
+                local displayName, iconFile, effectType, sortOrder, startTime, endTime = GetArtificialEffectInfo(effectId)
                 local effectsRow = effectsRowPool:AcquireObject()
                 effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName))
                 effectsRow.icon:SetTexture(iconFile)
                 effectsRow.effectType = effectType
-                effectsRow.time:SetHidden(true)
+                local duration = startTime - endTime
+                effectsRow.time:SetHidden(duration == 0)
+                effectsRow.time.endTime = endTime
                 effectsRow.sortOrder = sortOrder
                 effectsRow.tooltipTitle = displayName
                 effectsRow.effectId = effectId
@@ -545,7 +547,13 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
         end
     end
 
-    container:RegisterForEvent(EVENT_EFFECT_CHANGED, UpdateEffects)
+    local function OnEffectChanged(eventCode, changeType, buffSlot, buffName, unitTag)
+        if unitTag == "player" then
+            UpdateEffects()
+        end
+    end
+
+    container:RegisterForEvent(EVENT_EFFECT_CHANGED, OnEffectChanged)
     container:RegisterForEvent(EVENT_EFFECTS_FULL_UPDATE, UpdateEffects)
     container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, UpdateEffects)
     container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, UpdateEffects)

@@ -242,7 +242,7 @@ ZO_TOOLTIP_STYLES =
         height = 92,
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
-    },    
+    },
     topSubsection = 
     {
         layoutPrimaryDirection = "right",
@@ -254,13 +254,12 @@ ZO_TOOLTIP_STYLES =
     },
     collectionsTopSection =
     {
-        customSpacing = 7,
-        layoutPrimaryDirection = "right",
-        layoutSecondaryDirection = "up",
+        layoutPrimaryDirection = "up",
+        layoutSecondaryDirection = "right",
         widthPercent = 100,
-        childSpacing = 7,
+        childSpacing = 1,
         fontSize = "$(GP_27)",
-        height = 67,
+        height = 110,
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
@@ -1052,6 +1051,11 @@ ZO_TOOLTIP_STYLES =
         fontColor = ZO_PERSONALITY_EMOTES_COLOR,
     },
 
+    collectionsEmoteGranted =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
     -- Gamepad Crown Store Market
     instantUnlockIneligibilitySection =
     {
@@ -1344,7 +1348,16 @@ ZO_TOOLTIP_STYLES =
         horizontalAlignment = TEXT_ALIGN_RIGHT,
         fontColorField = GENERAL_COLOR_WHITE,
     },
-
+    requirementPass =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GAMEPAD_TOOLTIP_COLOR_SUCCEEDED,
+    },
+    requirementFail =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
+    },
 }
 
 local function Style(name)

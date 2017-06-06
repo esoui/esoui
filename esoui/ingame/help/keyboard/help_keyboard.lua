@@ -65,7 +65,7 @@ function ZO_HelpManager:Initialize(control)
     control:RegisterForEvent(EVENT_HELP_INITIALIZED, UpdateHelp)
     control:RegisterForEvent(EVENT_HELP_SEARCH_RESULTS_READY, OnSearchResultsReady)
 
-	self:Refresh()
+	UpdateHelp()
 end
 
 function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)

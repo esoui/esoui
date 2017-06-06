@@ -338,7 +338,7 @@ do
                         local productType = GetMarketProductType(productId)
                         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
                             local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(productId)
-                            GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_RIGHT_TOOLTIP, collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+                            GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_RIGHT_TOOLTIP, collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
                         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
                             local itemLink = GetMarketProductItemLink(productId)
                             local stackCount = GetMarketProductStackCount(productId)
@@ -346,9 +346,9 @@ do
                         end
                     elseif furnitureObject.collectibleId then
                         local collectibleId = furnitureObject.collectibleId
-                        local name, description, _, _, _, purchasable, _, _, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
+                        local name, description, _, _, _, purchasable, _, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
                         local nickname = GetCollectibleNickname(collectibleId)
-                        GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_RIGHT_TOOLTIP, collectibleId, NO_COLLECTION_NAME, name, nickname, purchaseable, description, hint, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+                        GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_RIGHT_TOOLTIP, collectibleId, NO_COLLECTION_NAME, name, nickname, purchaseable, description, hint, isPlaceholder, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
                     elseif furnitureObject.retrievableFurnitureId then
                         local itemLink, collectibleLink = GetPlacedFurnitureLink(furnitureObject.retrievableFurnitureId)
                         if itemLink ~= "" then

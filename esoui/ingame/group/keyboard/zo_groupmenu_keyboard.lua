@@ -107,7 +107,7 @@ function GroupMenu_Keyboard:InitializeKeybindDescriptors()
 
         visible = function()
             local playerIsGrouped, playerIsLeader, groupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupStatus()
-            return not playerIsGrouped or (playerIsLeader and groupSize < GROUP_SIZE_MAX)
+            return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < GROUP_SIZE_MAX))
         end
     }
 end

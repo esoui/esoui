@@ -33,6 +33,10 @@ function ZO_GetPlatformAccountLabel()
     return GetString("SI_PLATFORMACCOUNTLABEL", GetUIPlatform())
 end
 
+function ZO_GetPlatformStoreName()
+    return GetString("SI_PLATFORMSTORELABEL", GetPlatformServiceType())
+end
+
 function ZO_GetPlatformUserFacingName(characterName, displayName)
     local userFacingName
 

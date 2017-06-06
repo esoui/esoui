@@ -6,7 +6,7 @@
             <Controls>
                 <Texture name="$(parent)Icon" override="true">
                     <Controls>
-                        <Label name="$(parent)StackCount" override="true" font="ZoFontGameOutline" />
+                        <Label name="$(parent)OverlayText" override="true" font="ZoFontGameOutline" />
                         
                         <Texture name="$(parent)CraftBagIcon" textureFile="EsoUI/Art/HUD/lootHistory_icon_craftBag.dds" override="true">
                             <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>

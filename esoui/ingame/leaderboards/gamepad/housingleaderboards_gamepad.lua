@@ -18,13 +18,13 @@ function ZO_HousingLeaderboardsManager_Gamepad:Initialize(control)
                                              end)
 
     SYSTEMS:RegisterGamepadObject(HOUSING_LEADERBOARD_SYSTEM_NAME, self)
-    GAMEPAD_LEADERBOARDS:UpdateCategories()
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
 end
 
 function ZO_HousingLeaderboardsManager_Gamepad:RefreshHeaderPlayerInfo()
     local headerData = GAMEPAD_LEADERBOARD_LIST:GetContentHeaderData()
     
-    headerData.data1HeaderText = GetString(SI_GAMEPAD_HOUSING_LEADERBOARDS_BEST_SCORE_LABEL)
+    headerData.data1HeaderText = GetString(SI_GAMEPAD_LEADERBOARDS_BEST_SCORE_LABEL)
     headerData.data1Text = self.currentScoreData or GetString(SI_LEADERBOARDS_NO_SCORE_RECORDED)
 
     local rankingTypeText = GetString("SI_LEADERBOARDTYPE", LEADERBOARD_LIST_MANAGER.leaderboardRankType)

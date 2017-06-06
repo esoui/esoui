@@ -86,7 +86,6 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
 
     GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                  if newState == SCENE_FRAGMENT_SHOWING then
-                                                     self:PerformDeferredInitialization(control)
                                                      self.selector.dataRegistration:Refresh()
                                                      self:SetActiveCampaign()
                                                  elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -95,7 +94,7 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
                                              end)
 
     SYSTEMS:RegisterGamepadObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
-    GAMEPAD_LEADERBOARDS:UpdateCategories()
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
     self.selector = ZO_LeaderboardCampaignSelector_Gamepad:New(control)
 end
 
@@ -124,7 +123,7 @@ function ZO_CampaignLeaderboardsManager_Gamepad:RefreshHeaderTimer()
     local headerData = GAMEPAD_LEADERBOARD_LIST:GetContentHeaderData()
 
     if self.timerLabelData then
-        if self.timerLabelIdentifier == SI_CAMPAIGN_LEADERBOARDS_REOPENS_IN_TIMER then
+        if self.timerLabelIdentifier == SI_LEADERBOARDS_REOPENS_IN_TIMER then
             headerData.data3HeaderText = GetString(SI_GAMEPAD_LEADERBOARDS_REOPENS_IN_TIMER_LABEL)
         else
             headerData.data3HeaderText = GetString(SI_GAMEPAD_LEADERBOARDS_CLOSES_IN_TIMER_LABEL)

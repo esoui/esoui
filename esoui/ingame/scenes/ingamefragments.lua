@@ -666,12 +666,14 @@ function SuppressCollectibleAnnouncementsFragment:New(...)
 end
 
 function SuppressCollectibleAnnouncementsFragment:Show()
-    CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByEvent(EVENT_COLLECTIBLE_UPDATED)
+    CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+    CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
     self:OnShown()
 end
 
 function SuppressCollectibleAnnouncementsFragment:Hide()
-    CENTER_SCREEN_ANNOUNCE:ResumeAnnouncementByEvent(EVENT_COLLECTIBLE_UPDATED)
+    CENTER_SCREEN_ANNOUNCE:ResumeAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+    CENTER_SCREEN_ANNOUNCE:ResumeAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
     self:OnHidden()
 end
 
@@ -710,9 +712,15 @@ RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightBackground)
 STATS_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedStatsBackground)
 WIDE_RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideRightBackground)
 LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedLeftPanelBackground)
+THIN_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinRightPanelBackground)
 THIN_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinLeftPanelBackground)
-WIDE_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideLeftPanelBackground)
+THIN_TALL_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinTallRightPanelBackground)
+MEDIUM_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumRightPanelBackground)
 MEDIUM_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumLeftPanelBackground)
+MEDIUM_SHORT_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumShortRightPanelBackground)
+MEDIUM_SHORT_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumShortLeftPanelBackground)
+WIDE_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideRightPanelBackground)
+WIDE_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideLeftPanelBackground)
 TREE_UNDERLAY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedTreeUnderlay)
 TOP_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TopBar)
 
@@ -740,7 +748,6 @@ PLAYER_PROGRESS_BAR_GAMEPAD_NAME_LOCATION_ANCHOR_FRAGMENT = ZO_GamepadPlayerProg
 
 QUEST_JOURNAL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuestJournal)
 COLLECTIONS_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CollectionsBook)
-LEADERBOARDS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Leaderboards)
 LORE_LIBRARY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LoreLibrary)
 LORE_READER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LoreReader)
 TREASURE_MAP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TreasureMap)
@@ -841,7 +848,7 @@ GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptions
 FURNITURE_BROWSER_GAMEPAD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
     paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    dynamicFramingConsumedWidth = 1200,
+    dynamicFramingConsumedWidth = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
     dynamicFramingConsumedHeight = 400,
     forcePreparePreview = false,
     previewInEmptyWorld = true,
@@ -905,6 +912,9 @@ MOUSE_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("MouseUIMode")
 GAMEPAD_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("GamepadUIMode")
 GAMEPAD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("GamepadActions")
 HOUSING_EDITOR_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HOUSING_EDITOR))
+HOUSING_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HUD_HOUSING))
+BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundHud")
+BATTLEGROUND_SCOREBOARD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundScoreboard")
 
 --Intercept Layer
 INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SceneChangeInterceptLayer")

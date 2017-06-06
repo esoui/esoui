@@ -18,6 +18,8 @@
     <Font name="ZoFontGamepad27NoShadow" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_27)" />
     <Font name="ZoFontGamepad42NoShadow" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_42)" />
 
+    <Font name="ZoFontGamepad36ThickOutline" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_36)|thick-outline" />
+    
     <Font name="ZoFontGamepadCondensed61" font="$(GAMEPAD_LIGHT_FONT)|$(GP_61)|soft-shadow-thick" />
     <Font name="ZoFontGamepadCondensed54" font="$(GAMEPAD_LIGHT_FONT)|$(GP_54)|soft-shadow-thick" />
     <Font name="ZoFontGamepadCondensed45" font="$(GAMEPAD_LIGHT_FONT)|$(GP_45)|soft-shadow-thick" />

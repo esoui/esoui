@@ -134,7 +134,10 @@
             </OnMouseUp>
         </Button>
 
-        <Control name="ZO_PaperdollManipulation" inherits="ZO_PaperdollManipulation_Shared" virtual="true">
+        <Control name="ZO_PaperdollManipulation" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="328"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-430"/>
+
             <OnMouseEnter>
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
             </OnMouseEnter>

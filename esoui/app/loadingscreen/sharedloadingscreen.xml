@@ -3,7 +3,6 @@
         <AnimationTimeline name="SpinnerFadeAnimation">
             <Animations>
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
             </Animations>
         </AnimationTimeline>
     </Animations>
@@ -15,18 +14,12 @@
             <Insets left="8" top="8" right="-8" bottom="-8" />
         </Backdrop>
 
-        <Control name="ZO_LoadingScreenBase" keyboardEnabled="true" hidden="true" virtual="true">
+        <Control name="ZO_LoadingScreenBase" hidden="true" virtual="true">
             <AnchorFill />
 
             <OnUpdate>
                 self:Update()
             </OnUpdate>
-
-            <OnKeyDown>
-                if key == KEY_ENTER and alt then
-                    ToggleFullScreen()
-                end
-            </OnKeyDown>
 
             <Controls>
                 <Texture name="$(parent)Bg" color="000000">

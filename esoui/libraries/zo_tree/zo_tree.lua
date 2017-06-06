@@ -35,6 +35,8 @@ function ZO_Tree:New(control, defaultIndent, defaultSpacing, width)
 
     TREES:Add(tree)
 
+    tree:FindScrollControl()
+
     return tree
 end
 
@@ -208,6 +210,10 @@ end
 
 function ZO_Tree:ToggleNode(treeNode)
     if treeNode:IsEnabled() and (not self.exclusive or not treeNode:IsOpen()) then
+        if self.scrollControl and not treeNode:IsOpen() then
+            ZO_Scroll_SetScrollToTargetControl(self.scrollControl, treeNode:GetControl())
+            self.scrollTargetNode = treeNode
+        end
         self:SetNodeOpen(treeNode, not treeNode:IsOpen(), USER_REQUESTED_OPEN)
     end
 end
@@ -317,6 +323,10 @@ end
 
 function ZO_Tree:OnOpenAnimationStopped(timeline)
     local node = timeline.node
+    if self.scrollTargetNode == node and self.scrollControl then
+        self.scrollTargetNode = nil
+        ZO_Scroll_SetScrollToTargetControl(self.scrollControl, nil)
+    end
     self.openAnimationPool:ReleaseObject(node)
 end
 
@@ -341,6 +351,19 @@ end
 function ZO_Tree:IsAnimated()
     return not self.suspendAnimations 
            and self.openAnimationPool ~= nil
+end
+
+function ZO_Tree:SetScrollPercentageToTop(percentage)
+    if self.scrollControl then
+        ZO_Scroll_SetScrollPercentageToTop(self.scrollControl, percentage)
+    end
+end
+
+function ZO_Tree:FindScrollControl()
+    local scrollControl = self.control:GetParent():GetParent()
+    if scrollControl and scrollControl.scroll then
+        self.scrollControl = scrollControl
+    end
 end
 
 --TreeNode
@@ -477,13 +500,13 @@ function ZO_TreeNode:IsOpen()
 end
 
 function ZO_TreeNode:SetOpen(open, userRequested)
-    if(not self:IsLeaf() and self.enabled and self.open ~= open) then
+    if not self:IsLeaf() and self.enabled and self.open ~= open then
         self.open = open
         self:RefreshControl(userRequested)
-        if(self:IsAnimated()) then
+        if self:IsAnimated() then
             local timeline = self.tree:AcquireOpenAnimation(self)
-            if(timeline:IsPlaying()) then
-                if(open) then
+            if timeline:IsPlaying() then
+                if open then
                     timeline:PlayForward()
                 else
                     timeline:PlayBackward()
@@ -498,7 +521,7 @@ function ZO_TreeNode:SetOpen(open, userRequested)
                     animation:SetAnimatedControl(self.childContainer)
                 end
 
-                if(open) then
+                if open then
                     customAnim:SetEasingFunction(ZO_EaseOutQuadratic)
                     timeline:PlayFromStart()
                 else
@@ -507,7 +530,7 @@ function ZO_TreeNode:SetOpen(open, userRequested)
                 end
             end
         else
-            if(self.open) then
+            if self.open then
                 self:SetOpenPercentage(1)
             else
                 self:SetOpenPercentage(0)
@@ -519,6 +542,9 @@ end
 function ZO_TreeNode:SetOpenPercentage(openPercentage)
     self.openPercentage = openPercentage
     self:UpdateCurrentChildrenHeightsToRoot()
+    if self.open then
+        self.tree:SetScrollPercentageToTop(self.openPercentage)
+    end
 end
 
 function ZO_TreeNode:OnSelected(reselectingDuringRebuild)

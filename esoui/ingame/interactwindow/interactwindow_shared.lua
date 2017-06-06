@@ -76,6 +76,7 @@ function ZO_SharedInteraction:InitializeSharedEvents()
 
         self:InitializeInteractWindow(dialog)
 
+        self.importantOptions = {}
         self:PopulateChatterOption(1, AcceptOfferedQuest, response, CHATTER_GENERIC_ACCEPT)
         self:PopulateChatterOption(2, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE)
 
@@ -94,6 +95,8 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         if confirmError then
             confirmComplete = zo_strformat(SI_QUEST_COMPLETE_FORMAT_STRING, confirmComplete, confirmError)
         end
+
+        self.importantOptions = {}
         self:PopulateChatterOption(1, CompleteQuest, confirmComplete, CHATTER_COMPLETE_QUEST)
         self:PopulateChatterOption(2, function() self:CloseChatter() end, declineComplete, CHATTER_GOODBYE)
 
@@ -457,6 +460,23 @@ local function SetupPartialSkillPointReward(control, amount)
     control:SetHidden(false)
 end
 
+local function SetupSkillLineReward(control, name, icon)
+    local nameControl = GetControl(control, "Name")
+    local iconTexture = GetControl(control, "Icon")
+    iconTexture:SetHidden(false)
+    iconTexture:SetTexture(icon)
+    GetControl(control, "StackSize"):SetHidden(true)
+
+    nameControl:SetText(ZO_QuestReward_GetSkillLineEarnedText(name))
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+    control.allowTooltip = false
+    control:SetHidden(false)
+end
+
+function ZO_QuestReward_GetSkillLineEarnedText(skillLineName)
+    return zo_strformat(SI_QUEST_REWARD_SKILL_LINE, skillLineName)
+end
+
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
@@ -493,6 +513,10 @@ local REWARD_CREATORS =
 	[REWARD_TYPE_WRIT_VOUCHERS] =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_WRIT_VOUCHERS, amount, currencyOptions)
+        end,
+    [REWARD_TYPE_SKILL_LINE] = 
+        function(control, name, amount, icon)
+            SetupSkillLineReward(control, name, icon)
         end,
 }
 
@@ -551,6 +575,12 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
                 index = i,
                 itemType = itemType
             }
+
+            if rewardType == REWARD_TYPE_SKILL_LINE then
+                local skillType, skillLineIndex = GetJournalQuestRewardSkillLine(journalQuestIndex, i)
+                local down, up, over, announce = ZO_Skills_GetIconsForSkillType(skillType)
+                rewardData.icon = announce
+            end
 
             table.insert(data, rewardData)
         end

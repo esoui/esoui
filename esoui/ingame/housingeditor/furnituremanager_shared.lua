@@ -40,6 +40,9 @@ function ZO_SharedFurnitureManager:Initialize()
     self.marketProducts = {}
     self.marketProductTextFilter = ""
 
+    self.placementFurnitureTheme = FURNITURE_THEME_TYPE_ALL
+    self.purchaseFurnitureTheme = FURNITURE_THEME_TYPE_ALL
+
     local function CreateMarketProduct(objectPool)
         return ZO_HousingMarketProduct:New()
     end
@@ -71,33 +74,10 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         RefreshAll = function()
             self.placeableFurnitureCategoryTreeData:Clear()
             local itemFurnitureCache = self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_ITEM)
-            local foundBankInventory = false
             for bagId, bagEntries in pairs(itemFurnitureCache) do
-                self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, bagEntries)
-                if bagId == BAG_BANK then
-                    foundBankInventory = true
-                end
+                self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, bagEntries, self.placementFurnitureTheme)
             end
-            -- it's very possible that we do not have the banks contents created at this point in the inventory cache
-            -- so in the case that we did not have it yet, we need to create the data and put it in the category tree
-            if not foundBankInventory then
-                local filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(PlaceableFurnitureFilter, BAG_BANK)
-                for _, itemData in pairs(filteredDataTable) do
-                    self:CreateOrUpdateItemDataEntry(itemData.bagId, itemData.slotIndex)
-                end
-                -- maybe we don't actually have anything in our bank though, so only try to add bank items if there are bank items to add
-                if itemFurnitureCache[BAG_BANK] then
-                    --this filter operation will be late since we are already building the list and the text filter is async, but it will
-                    --trigger a rebuild of the categories once it completes
-                    --but only do this if we have a search string, otherwise this could cause the callback to make the placement list build twice
-                    if self.placeableTextFilter ~= "" then
-                        self:RequestApplyPlaceableTextFilterToData()
-                    end
-                    self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, itemFurnitureCache[BAG_BANK])
-                end
-            end
-
-            self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE))
+            self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE), self.placementFurnitureTheme)
             self.placeableFurnitureCategoryTreeData:SortCategoriesRecursive()
         end,
         RefreshSingle = function(furnitureCommand)
@@ -121,7 +101,7 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
     {
         RefreshAll = function()
             self.marketProductCategoryTreeData:Clear()
-            self:BuildCategoryTreeData(self.marketProductCategoryTreeData, self:GetMarketProductCache())
+            self:BuildCategoryTreeData(self.marketProductCategoryTreeData, self:GetMarketProductCache(), self.purchaseFurnitureTheme)
             self.marketProductCategoryTreeData:SortCategoriesRecursive()
         end,
     })
@@ -333,9 +313,10 @@ do
         end
     end
 
-    function ZO_SharedFurnitureManager:BuildCategoryTreeData(categoryTreeData, data)
+    function ZO_SharedFurnitureManager:BuildCategoryTreeData(categoryTreeData, data, theme)
+        local furnitureTheme = theme or FURNITURE_THEME_TYPE_ALL
         for _, furniture in pairs(data) do
-            if furniture:GetPassesTextFilter() then
+            if furniture:GetPassesTextFilter() and furniture:PassesTheme(furnitureTheme) then
                 AddEntryToCategory(categoryTreeData, furniture)
             end
         end
@@ -553,6 +534,30 @@ do
     end
 end
 
+function ZO_SharedFurnitureManager:GetPlacementFurnitureTheme()
+    return self.placementFurnitureTheme
+end
+
+function ZO_SharedFurnitureManager:SetPlacementFurnitureTheme(theme)
+    if self.placementFurnitureTheme ~= theme then
+        self.placementFurnitureTheme = theme
+        self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
+        self:FireCallbacks("PlaceableFurnitureChanged")
+    end
+end
+
+function ZO_SharedFurnitureManager:GetPurchaseFurnitureTheme()
+    return self.purchaseFurnitureTheme
+end
+
+function ZO_SharedFurnitureManager:SetPurchaseFurnitureTheme(theme)
+    if self.purchaseFurnitureTheme ~= theme then
+        self.purchaseFurnitureTheme = theme
+        self.refreshGroups:RefreshAll("UpdateMarketProducts")
+        self:FireCallbacks("MarketProductsChanged")
+    end
+end
+
 function ZO_SharedFurnitureManager:GetPlaceableTextFilter()
     return self.placeableTextFilter
 end
@@ -616,6 +621,7 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         local itemTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.placeableTextFilter)
         self.inProgressPlaceableFurnitureTextFilterTaskIds[ZO_PLACEABLE_TYPE_ITEM] = itemTaskId
         AddBackgroundListFilterType(itemTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
+        AddBackgroundListFilterType(itemTaskId, BACKGROUND_LIST_FILTER_TYPE_FURNITURE_KEYWORDS)
         for bagId, slots in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) do
             for slotId, slotData in pairs(slots) do
                 slotData:SetPassesTextFilter(false)
@@ -628,6 +634,7 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         local collectibleTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID, self.placeableTextFilter)
         self.inProgressPlaceableFurnitureTextFilterTaskIds[ZO_PLACEABLE_TYPE_COLLECTIBLE] = collectibleTaskId
         AddBackgroundListFilterType(collectibleTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
+        AddBackgroundListFilterType(collectibleTaskId, BACKGROUND_LIST_FILTER_TYPE_FURNITURE_KEYWORDS)
         for collectibleId, collectibleData in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]) do
             collectibleData:SetPassesTextFilter(false)
             AddBackgroundListFilterEntry(collectibleTaskId, collectibleId)
@@ -695,6 +702,7 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_DESCRIPTION)
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_SEARCH_KEYWORDS)
+        AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_FURNITURE_KEYWORDS)
         for i, marketProductData in ipairs(self.marketProducts) do
             marketProductData:SetPassesTextFilter(false)
             AddBackgroundListFilterEntry(marketProductTaskId, marketProductData:GetMarketProductId())

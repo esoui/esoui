@@ -57,7 +57,7 @@ function ZO_HousingFurnitureBrowser_Keyboard:OnDeferredInitialization()
     self.houseInfoFragmentGroup = 
     {
         HOUSE_INFORMATION_FRAGMENT,
-        MEDIUM_LEFT_PANEL_BG_FRAGMENT,
+        MEDIUM_SHORT_LEFT_PANEL_BG_FRAGMENT,
     }
 
     self.isInitialized = true
@@ -191,5 +191,4 @@ end
 
 function ZO_HousingFurnitureBrowser_Keyboard_OnInitialize(control)
     KEYBOARD_HOUSING_FURNITURE_BROWSER = ZO_HousingFurnitureBrowser_Keyboard:New(control)
-    SYSTEMS:RegisterKeyboardObject("housing_furniture_browser", keyboardBrowser)
 end

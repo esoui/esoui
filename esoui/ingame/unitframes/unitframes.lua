@@ -847,7 +847,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
 
     local DONT_COLOR_RANK_ICON = false
     newFrame.rankIcon = newFrame:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
-    newFrame.roleIcon = newFrame:AddFadeComponent("RoleIcon", DONT_COLOR_RANK_ICON)
+    newFrame.assignmentIcon = newFrame:AddFadeComponent("AssignmentIcon", DONT_COLOR_RANK_ICON)
     newFrame.championIcon = newFrame:AddFadeComponent("ChampionIcon")
     newFrame.leftBracket = newFrame:AddFadeComponent("LeftBracket")
     newFrame.leftBracketGlow = GetControl(newFrame.frame, "LeftBracketGlow")
@@ -1042,7 +1042,7 @@ function UnitFrame:RefreshControls()
 
             self:UpdateStatus(IsUnitDead(self.unitTag), IsUnitOnline(self.unitTag))
             self:UpdateRank()
-            self:UpdateRole()
+            self:UpdateAssignment()
             self:UpdateDifficulty()
             self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(unitTag))
         end
@@ -1055,6 +1055,10 @@ function UnitFrame:RefreshUnit(unitChanged)
         if(self.unitTag == "reticleovertarget") then
             local localPlayerIsTarget = AreUnitsEqual("player", "reticleover")
             validTarget = UnitFrames:IsTargetOfTargetEnabled() and not localPlayerIsTarget
+        end
+
+        if IsUnitLivestock(self.unitTag) then
+            TriggerTutorial(TUTORIAL_TRIGGER_LIVESTOCK_TARGETED)
         end
     end
 
@@ -1215,15 +1219,26 @@ function UnitFrame:UpdateRank()
     end
 end
 
-function UnitFrame:UpdateRole()
-    if self.roleIcon then
+function UnitFrame:UpdateAssignment()
+    if self.assignmentIcon then
         local unitTag = self:GetUnitTag()
-        local assignedRole = GetGroupMemberAssignedRole(unitTag)
-        local hasAssignedRole = assignedRole ~= LFG_ROLE_INVALID
-        if hasAssignedRole then
-            self.roleIcon:SetTexture(GetRoleIcon(assignedRole))
+        local assignmentTexture = nil
+        if IsActiveWorldBattleground() then
+            local battlegroundAlliance = GetUnitBattlegroundAlliance(unitTag)
+            if battlegroundAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
+                assignmentTexture = GetBattlegroundTeamIcon(battlegroundAlliance)
+            end
+        else
+            local assignedRole = GetGroupMemberAssignedRole(unitTag)
+            if assignedRole ~= LFG_ROLE_INVALID then
+                assignmentTexture = GetRoleIcon(assignedRole)
+            end
         end
-        self.roleIcon:SetHidden(not hasAssignedRole)
+
+        if assignmentTexture then
+            self.assignmentIcon:SetTexture(assignmentTexture)
+        end
+        self.assignmentIcon:SetHidden(assignmentTexture == nil)
     end
 end
 
@@ -1284,13 +1299,8 @@ function UnitFrame:UpdateDifficulty()
         local difficulty = GetUnitDifficulty(self:GetUnitTag())
 
         --show difficulty for neutral and hostile NPCs
-        local showsDifficulty = difficulty > MONSTER_DIFFICULTY_EASY
-        if(showsDifficulty) then
-            local unitReaction = GetUnitReaction(self:GetUnitTag())
-            if(unitReaction ~= UNIT_REACTION_NEUTRAL and unitReaction ~= UNIT_REACTION_HOSTILE) then
-                showsDifficulty = false
-            end
-        end
+        local unitReaction = GetUnitReaction(self:GetUnitTag())
+        local showsDifficulty = (difficulty > MONSTER_DIFFICULTY_EASY) and (unitReaction == UNIT_REACTION_NEUTRAL or unitReaction == UNIT_REACTION_HOSTILE)
 
         self.leftBracket:SetHidden(not showsDifficulty)
         self.rightBracket:SetHidden(not showsDifficulty)
@@ -1304,7 +1314,10 @@ function UnitFrame:UpdateDifficulty()
                 self.leftBracketUnderlay:SetHidden(false)
                 self.rightBracketUnderlay:SetHidden(false)
             end
-            TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+
+            if unitReaction == UNIT_REACTION_HOSTILE then
+                TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+            end
         end
     end
 end
@@ -1336,21 +1349,18 @@ end
 
 function UnitFrame:UpdateCaption()
     local captionLabel = self.captionLabel
-    if(captionLabel) then
+    if captionLabel then
         local caption
         local unitTag = self:GetUnitTag()
-        if(IsUnitPlayer(unitTag)) then
+        if IsUnitPlayer(unitTag) then
             caption = ZO_GetSecondaryPlayerNameWithTitleFromUnitTag(unitTag)
         else
             caption = zo_strformat(SI_TOOLTIP_UNIT_CAPTION, GetUnitCaption(unitTag))
         end
 
-        if(caption ~= "") then
-            captionLabel:SetHidden(false)
-            captionLabel:SetText(caption)
-        else
-            captionLabel:SetHidden(true)
-        end
+        local hideCaption = caption == ""
+        captionLabel:SetHidden(hideCaption)
+        captionLabel:SetText(caption) -- still set the caption text when empty so we collapse the label for anything anchoring off the bottom of it
     end
 end
 

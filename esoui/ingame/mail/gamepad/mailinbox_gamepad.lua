@@ -123,7 +123,7 @@ function ZO_MailInbox_Gamepad:AttachmentSelectionChanged(list, selectedData, old
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
     if selectedData then
         local EQUIPPED = false
-        GAMEPAD_TOOLTIPS:LayoutGenericItem(GAMEPAD_LEFT_TOOLTIP, selectedData.itemLink, EQUIPPED, selectedData.creator)
+        GAMEPAD_TOOLTIPS:LayoutItem(GAMEPAD_LEFT_TOOLTIP, selectedData.itemLink, EQUIPPED, selectedData.creator)
     end
 end
 
@@ -664,8 +664,8 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
         entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
         entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText()))
 
-		local safeIdKey = zo_getSafeId64Key(mailId)
-		self.mailDataById[safeIdKey] = mailData
+        local safeIdKey = zo_getSafeId64Key(mailId)
+        self.mailDataById[safeIdKey] = mailData
         self.mailEntryDataById[safeIdKey] = entryData
 
         -- Setup icons.
@@ -714,7 +714,7 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
     MAIL_MANAGER_GAMEPAD:RefreshKeybind()
 
     -- Get the data.
-	local safeIdKey = zo_getSafeId64Key(mailId)
+    local safeIdKey = zo_getSafeId64Key(mailId)
     local mailData = self.mailDataById[safeIdKey]
     local entryData = self.mailEntryDataById[safeIdKey]
     local wasUnread = mailData.unread
@@ -745,6 +745,10 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
 
     for i = mailData.numAttachments + 1, MAX_READ_ATTACHMENTS do
         self.inbox:ClearAttachment(i)
+    end
+
+    if noAttachments and MAIL_MANAGER_GAMEPAD:IsCurrentList(self.attachmentsList) then
+        self:EnterMailList()
     end
 
     -- Update the mail list (mostly for unread icon update).

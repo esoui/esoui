@@ -8,12 +8,12 @@ function ZO_SpecializedCollectionsBook_Keyboard:New(...)
     return object
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, categoryType)
+function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, ...)
     control.owner = self
     self.control = control
 
     self.sceneName = sceneName
-    self.collectibleCategoryType = categoryType
+    self.collectibleCategoryTypes = { ... }
     
     self:InitializeControls()
     self:InitializeNavigationList()
@@ -41,7 +41,7 @@ end
 
 function ZO_SpecializedCollectionsBook_Keyboard:DoesCollectibleHaveAlert(data)
     --Override for additional checks if a collectible has been updated
-    return false
+    return IsCollectibleNew(data.collectibleId)
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:InitializeNavigationList()
@@ -138,92 +138,116 @@ function ZO_SpecializedCollectionsBook_Keyboard:FocusCollectibleId(id)
     end
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:SetupAdditionalCollectibleData(data, collectibleId)
+function ZO_SpecializedCollectionsBook_Keyboard:SetupAdditionalCollectibleData(data)
     --Override to add additional data if needed
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:SortCollectibleData(collectibleData)
-    if not self.SortCollectibleByNameFunction then
-        self.SortCollectibleByNameFunction = function(a, b)
-            return a.name < b.name
+do
+    local function DefaultSort(entry1, entry2)
+        if entry1.sortOrder ~= entry2.sortOrder then
+            return entry1.sortOrder < entry2.sortOrder
+        else
+            return entry1.name < entry2.name
         end
     end
 
-    table.sort(collectibleData, self.SortCollectibleByNameFunction)
+    function ZO_SpecializedCollectionsBook_Keyboard:SortCollectibleData(collectibleData)
+        table.sort(collectibleData, DefaultSort)
+    end
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:GetRelevantCollectibles()
+    local collectiblesData = {}
+
+    for _, collectibleCategoryType in ipairs(self.collectibleCategoryTypes) do
+        for i = 1, GetTotalCollectiblesByCategoryType(collectibleCategoryType) do
+            local collectibleId = GetCollectibleIdFromType(collectibleCategoryType, i)
+            local name, description, _, _, unlocked, purchasable, active, _, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
+            if not isPlaceholder then
+                if hint and hint ~= "" then
+                    hint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
+                end
+
+                local data =
+                {
+                    collectibleId = collectibleId,
+                    name = name,
+                    description = description,
+                    background = GetCollectibleKeyboardBackgroundImage(collectibleId),
+                    unlockState = GetCollectibleUnlockStateById(collectibleId),
+                    active = active,
+                    purchasable = purchasable,
+                    unlocked = unlocked,
+                    hint = hint,
+                    nickname = GetCollectibleNickname(collectibleId),
+                    referenceId = GetCollectibleReferenceId(collectibleId),
+                    sortOrder = GetCollectibleSortOrder(collectibleId),
+                }
+
+                self:SetupAdditionalCollectibleData(data)
+                table.insert(collectiblesData, data)
+            end
+        end
+    end
+
+    self:SortCollectibleData(collectiblesData)
+
+    return collectiblesData
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:GetCategorizedLists()
+    local collectiblesData = self:GetRelevantCollectibles()
+
+    local unlockedList = {}
+    local lockedList = {}
+    local lists = 
+    {
+        {
+            name = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED),
+            collectibles = unlockedList,
+        },
+        {
+            name = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED),
+            collectibles = lockedList,
+        },
+    }
+
+    for _, data in ipairs(collectiblesData) do
+        if data.unlocked then
+            table.insert(unlockedList, data)
+        else
+            table.insert(lockedList, data)
+        end
+    end
+
+    return lists
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:RefreshList()
     ZO_ClearTable(self.headerNodes)
     ZO_ClearTable(self.collectibleIdToTreeNode)
     self.navigationTree:Reset()
+
+    local categorizedLists = self:GetCategorizedLists()
+    
     local firstNode = nil
     local selectedNode = nil
 
-    local numCollectibles = GetTotalCollectiblesByCategoryType(self.collectibleCategoryType)
-    local collectibleData = {}
+    for _, categorizedList in ipairs(categorizedLists) do
+        if #categorizedList.collectibles > 0 then
+            local headerNode = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationHeader_Keyboard", categorizedList.name, nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED)
 
-    local hasUnlockedCollectible = false
-    local hasLockedCollectible = false
+            for _, collectibleData in ipairs(categorizedList.collectibles) do
+                local node = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", collectibleData, headerNode, SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED)
+                self.collectibleIdToTreeNode[collectibleData.collectibleId] = node
+                if not firstNode then
+                    firstNode = node
+                end
 
-    for i = 1, numCollectibles do
-        local collectibleId = GetCollectibleIdFromType(self.collectibleCategoryType, i)
-        local name, description, _, _, unlocked, purchasable, active, _, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
-        if not isPlaceholder then
-            local unlockState = GetCollectibleUnlockStateById(collectibleId)
-
-            if unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED then
-                hasLockedCollectible = true
-            else
-                hasUnlockedCollectible = true
+                if self.selectedId and self.selectedId == collectibleData.collectibleId then
+                    selectedNode = node
+                end
             end
-
-            local background = GetCollectibleKeyboardBackgroundImage(collectibleId)
-            if hint and hint ~= "" then
-                hint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
-            end
-            local data =
-            {
-                collectibleId = collectibleId,
-                name = name,
-                description = description,
-                background = background,
-                unlockState = unlockState,
-                active = active,
-                purchasable = purchasable,
-                unlocked = unlocked,
-                hint = hint,
-            }
-            data.nickname = GetCollectibleNickname(collectibleId)
-            data.referenceId = GetCollectibleReferenceId(collectibleId)
-
-            self:SetupAdditionalCollectibleData(data, data.collectibleId)
-            table.insert(collectibleData, data)
-        end
-    end
-
-    self:SortCollectibleData(collectibleData)
-
-    if hasUnlockedCollectible then
-        self.headerNodes[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED] = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationHeader_Keyboard", GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED), nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED)
-    end
-    if hasLockedCollectible then
-        self.headerNodes[COLLECTIBLE_UNLOCK_STATE_LOCKED] = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationHeader_Keyboard", GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED), nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED)
-    end
-
-    for i = 1, #collectibleData do
-        local data = collectibleData[i]
-
-        local simplifiedUnlockState = data.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED and COLLECTIBLE_UNLOCK_STATE_LOCKED or COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED
-        local headerNode = self.headerNodes[simplifiedUnlockState]
-
-        local node = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", data, headerNode, SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED)
-        self.collectibleIdToTreeNode[data.collectibleId] = node
-        if not firstNode then
-            firstNode = node
-        end
-
-        if self.selectedId and self.selectedId == data.collectibleId then
-            selectedNode = node
         end
     end
 

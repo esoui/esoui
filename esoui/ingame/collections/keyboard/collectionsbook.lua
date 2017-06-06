@@ -533,9 +533,6 @@ function CollectionsBook:InitializeEvents()
             self:UpdateCollectible(collectibleId)
         end,
     })
-
-    -- cache our GetCollectibleIds function so we don't have to make it everytime we check for new collectibles
-    self.getCollectiblesFunction = function(...) return self:GetCollectibleIds(...) end
 end
 
 function CollectionsBook:InitializeCategoryTemplates()
@@ -748,28 +745,26 @@ function CollectionsBook:UpdateCategoryLabels(data, retainScrollPosition)
 end
 
 function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
-    if self:IsStandardCategory(categoryIndex) then -- we ignore the categories that have a special tab when viewing the standard collections window
-        if index >= 1 then
-            if self:HasValidSearchString() then
-                local inSearchResults = false
-                local categoryResults = self.searchResults[categoryIndex]
-                if categoryResults then
-                    local effectiveSubcategoryIndex = subCategoryIndex or "root"
-                    local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
-                    if subcategoryResults and subcategoryResults[index] then
-                        inSearchResults = true
-                    end
-                end
-
-                if not inSearchResults then
-                    index = index - 1
-                    return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+    if index >= 1 then
+        if self:HasValidSearchString() then
+            local inSearchResults = false
+            local categoryResults = self.searchResults[categoryIndex]
+            if categoryResults then
+                local effectiveSubcategoryIndex = subCategoryIndex or "root"
+                local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
+                if subcategoryResults and subcategoryResults[index] then
+                    inSearchResults = true
                 end
             end
-            local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
-            index = index - 1
-            return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
+
+            if not inSearchResults then
+                index = index - 1
+                return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
+            end
         end
+        local id = GetCollectibleId(categoryIndex, subCategoryIndex, index) 
+        index = index - 1
+        return self:GetCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
     end
     return ...
 end
@@ -941,7 +936,7 @@ function CollectionsBook:HasAnyNotifications(optionalCategoryIndexFilter, option
 end
 
 function CollectionsBook:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
-    return COLLECTIONS_BOOK_SINGLETON.DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex, self.getCollectiblesFunction)
+    return COLLECTIONS_BOOK_SINGLETON:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
 end
 
 function CollectionsBook:HasAnyNewCollectibles()

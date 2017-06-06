@@ -4,6 +4,7 @@ LOOT_ALLIANCE_POINT_ICON = "EsoUI/Art/Icons/Icon_AlliancePoints.dds"
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_GEMS_ICON = "EsoUI/Art/Icons/store_crownGem.dds"
 LOOT_WRIT_VOUCHER_ICON = "EsoUI/Art/Icons/Icon_WritVoucher.dds"
+LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
 
 ZO_LootScene = ZO_Scene:Subclass()
 

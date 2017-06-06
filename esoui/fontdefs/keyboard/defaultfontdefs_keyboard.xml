@@ -7,13 +7,15 @@
     <Font name="ZoFontWinH4" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thick" />
     <Font name="ZoFontWinH5" font="$(BOLD_FONT)|$(KB_16)|soft-shadow-thick" />
 
+    <Font name="ZoFontWinH3SoftShadowThin" font="$(BOLD_FONT)|$(KB_20)|soft-shadow-thin" />
+
     <Font name="ZoFontWinT1" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
     <Font name="ZoFontWinT2" font="$(BOLD_FONT)|$(KB_16)|soft-shadow-thin" />
 
     <Font name="ZoFontGame" font="$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin" />
     <Font name="ZoFontGameMedium" font="$(MEDIUM_FONT)|$(KB_18)|soft-shadow-thin" />
     <Font name="ZoFontGameBold" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
-    <Font name="ZoFontGameOutline" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
+    <Font name="ZoFontGameOutline" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />    
     <Font name="ZoFontGameShadow" font="$(BOLD_FONT)|$(KB_18)|soft-shadow-thin" />
 
     <Font name="ZoFontKeyboard28ThickOutline" font="$(BOLD_FONT)|$(KB_28)|thick-outline" />

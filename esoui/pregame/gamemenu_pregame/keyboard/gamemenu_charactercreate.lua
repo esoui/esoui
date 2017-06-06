@@ -66,7 +66,7 @@ function GoBack()
     if GetNumCharacters() > 0 then
         KEYBOARD_CHARACTER_CREATE_MANAGER:ExitToState("CharacterSelect_FromIngame")
     else
-        PregameStateManager_SetState("Disconnect")
+        ZO_Disconnect()
     end
 end
 

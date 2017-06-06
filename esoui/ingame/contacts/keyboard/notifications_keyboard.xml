@@ -230,30 +230,14 @@
             <Controls>
                 <Button name="$(parent)Accept" override="true">
                     <Textures
-                        normal="EsoUI/Art/Notifications/collectionsButton_up.dds"
-                        pressed="EsoUI/Art/Notifications/collectionsButton_down.dds"
-                        mouseOver="EsoUI/Art/Notifications/collectionsButton_over.dds"
+                        normal="EsoUI/Art/Buttons/accept_up.dds"
+                        pressed="EsoUI/Art/Buttons/accept_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
                     />
                 </Button>
 
                 <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
-                </Button>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_NotificationsLFGJumpDungeonRow" inherits="ZO_NotificationsOneButtonRow" virtual="true">
-            <OnInitialized>
-                self.acceptText = GetString(SI_LFG_JUMP_TO_DUNGEON_ACCEPT)
-            </OnInitialized>
-
-            <Controls>
-                <Button name="$(parent)Accept" override="true">
-                    <Textures
-                        normal="EsoUI/Art/Buttons/accept_up.dds"
-                        pressed="EsoUI/Art/Buttons/accept_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
-                    />
                 </Button>
             </Controls>
         </Control>
@@ -288,6 +272,27 @@
                         pressed="EsoUI/Art/Buttons/accept_down.dds"
                         mouseOver="EsoUI/Art/Buttons/accept_over.dds"
                     />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_NotificationsEsoPlusSubscriptionRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+            <OnInitialized>
+                self.acceptText = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_VIEW_BENEFITS)
+                self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
+            </OnInitialized>
+
+            <Controls>
+                <Button name="$(parent)Accept" override="true">
+                    <Textures
+                        normal="EsoUI/Art/Buttons/accept_up.dds"
+                        pressed="EsoUI/Art/Buttons/accept_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
+                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
             </Controls>
         </Control>

@@ -112,7 +112,7 @@ do
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
             isNewCallback =
                 function()
-                    return (GAMEPAD_COLLECTIONS_BOOK and GAMEPAD_COLLECTIONS_BOOK:HasAnyNewCollectibles()) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending())
+                    return GAMEPAD_COLLECTIONS_BOOK and GAMEPAD_COLLECTIONS_BOOK:HasAnyNewCollectibles()
                 end,
         },
         [MENU_MAIN_ENTRIES.INVENTORY] =
@@ -144,6 +144,11 @@ do
             canLevel =
                 function()
                     return GetAvailableSkillPoints() > 0
+                end,
+            isNewCallback = 
+                function()
+                    local CHECK_ABILITIES_IN_SKILL_LINES = true
+                    return NEW_SKILL_CALLOUTS and NEW_SKILL_CALLOUTS:AreAnySkillLinesNew(CHECK_ABILITIES_IN_SKILL_LINES)
                 end,
         },
         [MENU_MAIN_ENTRIES.CHAMPION] =

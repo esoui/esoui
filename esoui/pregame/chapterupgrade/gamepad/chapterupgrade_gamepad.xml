@@ -1,0 +1,66 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ChapterUpgrade_Gamepad_HeaderLabel" font="ZoFontGamepadBold27" virtual="true" />
+
+        <Label name="ZO_ChapterUpgrade_Gamepad_InfoLabel" font="ZoFontGamepadCondensed34" virtual="true" />
+
+        <Control name="ZO_ChapterUpgrade_Gamepad_InstructionsSection" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Header" override="true" inherits="ZO_ChapterUpgrade_Gamepad_HeaderLabel" />
+                        <Label name="$(parent)Instructions" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InfoLabel" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Button name="ZO_ChapterUpgradeButton_Gamepad" font="ZoFontGamepadBold48"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" tier="HIGH" verticalAlignment="CENTER" virtual="true">
+            <Dimensions x="295" y="90"/>
+
+            <FontColors
+                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GAMEPAD_TERTIARY"
+                disabledPressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GAMEPAD_TERTIARY"
+            />
+
+            <Controls>
+                <Backdrop name="$(parent)Border" inherits="ZO_GamepadGreyOutlineThin" blendMode="ADD">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-10" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="10" />
+                    <Controls>
+                        <Texture name="$(parent)Bg" layer="BACKGROUND" color="000000">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Backdrop>
+
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Border" offsetX="-4" offsetY="-4" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="4" offsetY="4" />
+                </Backdrop>
+            </Controls>
+        </Button>
+
+        <TopLevelControl name="ZO_ChapterUpgrade_Gamepad" inherits="ZO_ChapterUpgrade_Shared" hidden="true">
+            <OnInitialized>
+                ZO_ChapterUpgrade_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+
+                <Control name="$(parent)TextContainer" override="true">
+                    <Controls>
+                        <Label name="$(parent)RegistrationSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Gamepad_HeaderLabel" />
+                        <Label name="$(parent)RegistrationSummary" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InfoLabel" />
+                        <Label name="$(parent)CodeEntry" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InstructionsSection" />
+                        <Label name="$(parent)DigitalUpgrade" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InstructionsSection" />
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" />
+                <Button name="$(parent)EnterCodeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

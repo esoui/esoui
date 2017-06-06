@@ -149,8 +149,6 @@ function Login_Keyboard:Initialize(control)
 
     control:SetHandler("OnUpdate", function(control, timeSeconds) self:OnUpdate(control, timeSeconds) end)
 
-    self.attemptAutomaticLogin = requiresAccountLinking
-
     local function OnAnnouncementsResult(eventCode, success)
         local message = success and GetAnnouncementMessage() or GetString(SI_LOGIN_ANNOUNCEMENTS_FAILURE)
 
@@ -360,16 +358,9 @@ end
 
 function Login_Keyboard:AttemptAutomaticLogin()
     -- Only attempt an automatic login on first showing the Login screen
-    if self.attemptAutomaticLogin then
-        if not ZO_PREGAME_HAD_GLOBAL_ERROR then
-            self:DoLogin()
-        end
-        self:ClearAttemptAutomaticLogin()
+    if ShouldAttemptAutoLogin() and not ZO_PREGAME_HAD_GLOBAL_ERROR then
+        self:DoLogin()
     end
-end
-
-function Login_Keyboard:ClearAttemptAutomaticLogin()
-    self.attemptAutomaticLogin = false
 end
 
 function Login_Keyboard:DoLogin()

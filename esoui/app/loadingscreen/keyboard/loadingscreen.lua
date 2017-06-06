@@ -1,9 +1,7 @@
 local LoadingScreen_Keyboard = {}
 
 function LoadingScreen_Keyboard:InitializeAnimations()
-    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation")
-    self.spinnerFadeAnimation:GetAnimation(1):SetAnimatedControl(LoadingScreenBg)
-    self.spinnerFadeAnimation:GetAnimation(2):SetAnimatedControl(LoadingScreenSpinner)
+    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation", LoadingScreenSpinner)
 
     self.animations = GetAnimationManager():CreateTimelineFromVirtual("LoadingCompleteAnimation")
     self.animations:GetAnimation(1):SetAnimatedControl(LoadingScreenArt)

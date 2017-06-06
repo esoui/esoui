@@ -127,7 +127,6 @@ function ZO_CampaignLeaderboardsManager_Keyboard:Initialize(control)
 
     CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                  if newState == SCENE_FRAGMENT_SHOWING then
-                                                     QueryCampaignLeaderboardData()
                                                      self.selector.dataRegistration:Refresh()
                                                  elseif newState == SCENE_FRAGMENT_HIDDEN then
                                                      self.selector.dataRegistration:Refresh()

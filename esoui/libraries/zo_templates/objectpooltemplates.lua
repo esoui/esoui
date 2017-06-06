@@ -77,17 +77,10 @@ function ZO_ControlPool:SetCustomResetBehavior(customResetBehavior)
     self.customResetBehavior = customResetBehavior
 end
 
-function ZO_ControlPool:SetCustomAcquireBehavior(customAcquireBehavior)
-    self.customAcquireBehavior = customAcquireBehavior
-end
-
 function ZO_ControlPool:AcquireObject(objectKey)
     local control, key = ZO_ObjectPool.AcquireObject(self, objectKey)
     if(control) then
         control:SetHidden(false)
-    end
-    if self.customAcquireBehavior then
-        self.customAcquireBehavior(control)
     end
     return control, key
 end
@@ -120,6 +113,10 @@ end
 
 function ZO_MetaPool:GetActiveObjectCount()
     return NonContiguousCount(self.activeObjects)
+end
+
+function ZO_MetaPool:GetActiveObjects()
+    return self.activeObjects
 end
 
 function ZO_MetaPool:ReleaseAllObjects()

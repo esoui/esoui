@@ -67,7 +67,7 @@ function ZO_Loot_Gamepad_Base:ShowTooltip(selectedData)
     GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
 
     if selectedData.isQuest then
-        GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_RIGHT_TOOLTIP, selectedData)
+        GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_RIGHT_TOOLTIP, GetLootQuestItemId(selectedData.lootId))
     else
         local lootLink = GetLootItemLink(selectedData.lootId)
         local NOT_EQUIPPED = false

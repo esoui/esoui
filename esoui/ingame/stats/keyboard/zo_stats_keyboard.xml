@@ -42,7 +42,8 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_StatsDropdownRow" virtual="true">
+        <!-- This needs to be on a higher tier so the other controls don't compete for mouse input on the dropdown-->
+        <Control name="ZO_StatsDropdownRow" virtual="true" tier="HIGH">
             <Dimensions x="607" y="30" />
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
@@ -50,7 +51,7 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
-                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                <Control name="$(parent)Dropdown" inherits="ZO_ScrollableComboBox">
                     <Dimensions x="300"/>
                     <Anchor point="RIGHT"/>
                 </Control>
@@ -134,7 +135,7 @@
                     </OnMouseExit>
                     <OnMouseWheel>
                         self:GetParent().pointLimitedSpinner:OnMouseWheel(delta)
-                    </OnMouseWheel>                   
+                    </OnMouseWheel>
                 </Texture>
 
                 <Control name="$(parent)Spinner" mouseEnabled="true">

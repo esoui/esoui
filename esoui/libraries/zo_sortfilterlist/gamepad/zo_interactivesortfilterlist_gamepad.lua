@@ -281,6 +281,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
             self.filterDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
         end,
         highlight = filterControl:GetNamedChild("Highlight"),
+        canFocus = function() return not filterControl:IsHidden() and not filterDropdownControl:IsHidden() end,
     }
     self.filterSwitcher:AddEntry(filterData)
 end
@@ -302,6 +303,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
             end
         end,
         highlight = searchControl:GetNamedChild("Highlight"),
+        canFocus = function() return not searchControl:IsHidden() and not searchEdit:IsHidden() end
     }
     self.filterSwitcher:AddEntry(searchData)
     self.searchEdit = searchEdit

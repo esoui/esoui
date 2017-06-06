@@ -6,7 +6,7 @@ end
 
 function HousingPreviewDialog_Gamepad:Initialize(control)
     ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(control)
-    ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOME_SHOW_VOTE_GAMEPAD")
+    ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOUSE_PREVIEW_PURCHASE_GAMEPAD")
 
     self.houseNameLabel = control:GetNamedChild("Title")
     self.houseDescriptionLabel = control:GetNamedChild("Text")

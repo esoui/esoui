@@ -46,7 +46,6 @@ function ZO_Dyeing:Initialize(control)
         if newState == SCENE_SHOWING then
             MAIN_MENU_MANAGER:SetBlockingScene("dyeing", OnBlockingSceneActivated)
             TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
-            local selectedTabType = ZO_MenuBar_GetSelectedDescriptor(self.tabs)
             self:UpdateOptionControls()
 
             InitializePendingDyes(self.mode)
@@ -72,6 +71,12 @@ function ZO_Dyeing:Initialize(control)
             if CanUseCollectibleDyeing() then
                 ZO_MenuBar_SetDescriptorEnabled(self.tabs, DYE_MODE_COLLECTIBLE, IS_ENABLED)
             else
+                -- if we have the collectible tab selected, switch tabs it before disabling it
+                -- so the highlights setup correctly
+                local selectedTabType = ZO_MenuBar_GetSelectedDescriptor(self.tabs)
+                if selectedTabType == DYE_MODE_COLLECTIBLE then
+                    ZO_MenuBar_SelectDescriptor(self.tabs, DYE_MODE_EQUIPMENT)
+                end
                 ZO_MenuBar_SetDescriptorEnabled(self.tabs, DYE_MODE_COLLECTIBLE, not IS_ENABLED)
             end
         elseif newState == SCENE_HIDDEN then
@@ -383,7 +388,7 @@ function ZO_Dyeing:InitializeSortsAndFilters()
 
     ZO_CheckButton_SetToggleFunction(self.showLockedCheckBox, OnFilterChanged)
     ZO_CheckButton_SetLabelText(self.showLockedCheckBox, GetString(SI_DYEING_SHOW_LOCKED))
-	ZO_CheckButton_SetLabelWrapMode(self.showLockedCheckBox, TEXT_WRAP_MODE_ELLIPSIS, self.control:GetRight() - self.showLockedCheckBox:GetRight())
+    ZO_CheckButton_SetLabelWrapMode(self.showLockedCheckBox, TEXT_WRAP_MODE_ELLIPSIS, self.control:GetRight() - self.showLockedCheckBox:GetRight())
 
     local function SetSortStyle(_, _, entry)
         if entry.sortStyleType ~= self.savedVars.sortStyle then

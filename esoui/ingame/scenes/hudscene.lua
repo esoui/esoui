@@ -94,6 +94,10 @@ local HUD_FRAGMENT_GROUP =
     GAMEPAD_LOOT_HISTORY_FRAGMENT,
     KEYBOARD_LOOT_HISTORY_FRAGMENT,
     HOUSING_HUD_FRAGMENT,
+    BUFF_DEBUFF_FRAGMENT,
+    HOUSING_HUD_ACTION_LAYER_FRAGMENT,
+    BATTLEGROUND_HUD_FRAGMENT,
+    BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT,
 }
 
 if IsConsoleUI() then
@@ -111,6 +115,8 @@ local NO_DEAD_FRAGMENTS =
     PLAYER_ATTRIBUTE_BARS_FRAGMENT,
     SUBTITLE_HUD_FRAGMENT,
     HOUSING_HUD_FRAGMENT,
+    BUFF_DEBUFF_FRAGMENT,
+    HOUSING_HUD_ACTION_LAYER_FRAGMENT,
 }
 
 local DEAD_ONLY_FRAGMENTS =
@@ -135,17 +141,39 @@ UpdateDeathFragments()
 local HOUSING_ONLY_FRAGMENTS =
 {
     HOUSING_HUD_FRAGMENT,
+    HOUSING_HUD_ACTION_LAYER_FRAGMENT,
 }
 
-local function UpdateHousingFragments()
+local BATTLEGROUND_ONLY_FRAGMENTS =
+{
+    BATTLEGROUND_HUD_FRAGMENT,
+    BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT,
+}
+
+local BATTLEGROUND_EXCLUDED_FRAGMENTS =
+{
+    FOCUSED_QUEST_TRACKER_FRAGMENT,
+    ACTIVITY_TRACKER_FRAGMENT,
+    READY_CHECK_TRACKER_FRAGMENT,
+}
+
+local function UpdateLocationSpecificFragments()
     local isHousingZone = GetCurrentZoneHouseId() ~= 0
     for _, fragment in ipairs(HOUSING_ONLY_FRAGMENTS) do
         fragment:SetHiddenForReason("Housing", not isHousingZone)
     end
+
+    local isBattlegroundZone = IsActiveWorldBattleground()
+    for _, fragment in ipairs(BATTLEGROUND_ONLY_FRAGMENTS) do
+        fragment:SetHiddenForReason("Battleground", not isBattlegroundZone)
+    end
+
+    for _, fragment in ipairs(BATTLEGROUND_EXCLUDED_FRAGMENTS) do
+        fragment:SetHiddenForReason("Battleground", isBattlegroundZone)
+    end
 end
 
-
-EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ACTIVATED, UpdateHousingFragments)
+EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ACTIVATED, UpdateLocationSpecificFragments)
 
 ---------------
 --ZO_HUDScene
@@ -170,6 +198,7 @@ ZO_HUDUIScene = ZO_Scene:Subclass()
 
 function ZO_HUDUIScene:New()
     local scene = ZO_Scene.New(self, "hudui", SCENE_MANAGER)
+    SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("hudui", true)
     scene:AddFragment(MOUSE_UI_MODE_FRAGMENT)
     scene:AddFragmentGroup(HUD_FRAGMENT_GROUP)
 

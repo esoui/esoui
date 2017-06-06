@@ -405,6 +405,11 @@ end
 
 function ZO_GamepadProvisioner:OnTabFilterChanged(filterType)
     if self.filterType ~= filterType then
+        if self.filterType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING then
+            if SYSTEMS:GetObject("itemPreview"):IsInteractionCameraPreviewEnabled() then
+                self:TogglePreviewMode()
+            end
+        end
         self.filterType = filterType
         self:DirtyRecipeList()
     end

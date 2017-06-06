@@ -140,6 +140,7 @@ function ZO_StoreManager:New(container)
     manager.storeFilters =
     {
         CreateNewTabFilterData(ITEMFILTERTYPE_MISCELLANEOUS, "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_FURNISHING, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CRAFTING, "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CONSUMABLE, "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ARMOR, "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", gearHiddenColumns),
@@ -164,9 +165,9 @@ function ZO_StoreManager:New(container)
     manager.hiddenColumns = typicalHiddenColumns
 
     local function ShowStoreWindow()
-		if not IsInGamepadPreferredMode() then
-			SCENE_MANAGER:Show("store")
-		end
+        if not IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Show("store")
+        end
     end
 
     local function CloseStoreWindow()
@@ -252,7 +253,7 @@ function ZO_StoreManager:New(container)
 end
 
 function ZO_StoreManager:InitializeStore(overrideMode)
-	ZO_SharedStoreManager.InitializeStore(self)
+    ZO_SharedStoreManager.InitializeStore(self)
 
     self.windowMode = overrideMode or ZO_STORE_WINDOW_MODE_NORMAL
 
@@ -459,44 +460,44 @@ function ZO_StoreManager:ApplySort()
 end
 
 function ZO_StoreManager:SetCurrencyControl(currencyType, currencyValue, currencyOptions)
-	local control = (not self.currency1Display.isInUse and self.currency1Display) or 
-					(not self.currency2Display.isInUse and self.currency2Display) or nil
+    local control = (not self.currency1Display.isInUse and self.currency1Display) or 
+                    (not self.currency2Display.isInUse and self.currency2Display) or nil
 
-	if control then
+    if control then
         ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, currencyValue, currencyOptions)
         control:SetHidden(false)
         control.isInUse = true
-	end
+    end
 end
 
 function ZO_StoreManager:RefreshCurrency()
-	ZO_SharedStoreManager.RefreshCurrency(self)
+    ZO_SharedStoreManager.RefreshCurrency(self)
 
     local repairAllCost = GetRepairAllCost()
     local gold = (self.storeUsesMoney or repairAllCost > 0) and self.currentMoney or 0
 
-	ZO_CurrencyControl_SetCurrencyData(self.currenyMoneyDisplay, CURT_MONEY, gold, self.storeUsesMoney)
+    ZO_CurrencyControl_SetCurrencyData(self.currenyMoneyDisplay, CURT_MONEY, gold, self.storeUsesMoney)
     ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
 
-	-- We're laying out the player alternate currency labels this way to ensure that we never display more than two labels, even if 
-	-- more than two are applicable to this store, and to ensure that they maintain a consistent priority
-	self.currency1Display:SetHidden(true)
+    -- We're laying out the player alternate currency labels this way to ensure that we never display more than two labels, even if 
+    -- more than two are applicable to this store, and to ensure that they maintain a consistent priority
+    self.currency1Display:SetHidden(true)
     self.currency1Display.isInUse = false
 
-	self.currency2Display:SetHidden(true)
+    self.currency2Display:SetHidden(true)
     self.currency2Display.isInUse = false
-	
-	if self.storeUsesAP then
-		self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_ALTERNATE_CURRENCY_OPTIONS)
-	end
+    
+    if self.storeUsesAP then
+        self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_ALTERNATE_CURRENCY_OPTIONS)
+    end
 
-	if self.storeUsesTelvarStones then
-		self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
-	end 
+    if self.storeUsesTelvarStones then
+        self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
+    end 
 
-	if self.storeUsesWritVouchers then
-		self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CARRIED_WRIT_VOUCHER_OPTIONS)
-	end 
+    if self.storeUsesWritVouchers then
+        self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CARRIED_WRIT_VOUCHER_OPTIONS)
+    end 
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
@@ -507,7 +508,7 @@ function ZO_StoreManager:UpdateFilters()
     --The last filter added is the farthest left, so to the player it should be "first"
     local lastFilter
     for _, data in ipairs(self.storeFilters) do
-        if (data.filterType == ITEMFILTERTYPE_ALL and self.multipleFilters) or self.usedFilterTypes[data.filterType] then
+        if (data.filterType == ITEMFILTERTYPE_ALL and self.showAllFilter) or self.usedFilterTypes[data.filterType] then
             ZO_MenuBar_AddButton(self.tabs, data)
             lastFilter = data.filterType
         end
@@ -519,8 +520,18 @@ function ZO_StoreManager:UpdateFilters()
 end
 
 function ZO_StoreManager:GetStoreItems()
-	self.items, self.usedFilterTypes = ZO_StoreManager_GetStoreItems()
-    self.multipleFilters = NonContiguousCount(self.usedFilterTypes) > 1
+    self.items, self.usedFilterTypes = ZO_StoreManager_GetStoreItems()
+
+    local numUsedStoreFilters = 0
+    for _, data in ipairs(self.storeFilters) do
+        if self.usedFilterTypes[data.filterType] then
+            numUsedStoreFilters = numUsedStoreFilters + 1
+        end
+    end
+
+    -- We only want to show the all filter if we aren't showing one specific filter
+    -- because then all and the specific filter would have the same contents
+    self.showAllFilter = numUsedStoreFilters ~= 1 
 end
 
 function ZO_StoreManager:UpdateList()
@@ -530,8 +541,7 @@ function ZO_StoreManager:UpdateList()
     for index = 1, #self.items do
         local itemData = self.items[index]
 
-        if(self:ShouldAddItemToList(itemData))
-        then
+        if self:ShouldAddItemToList(itemData) then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_STORE_ITEM, itemData)
         end
     end
@@ -617,7 +627,7 @@ function ZO_StoreManager:HasEnoughCurrencyToBuyItem(currencyType, itemCost)
         return self.currentAP >= itemCost
     elseif currencyType == CURT_TELVAR_STONES then
         return self.currentTelvarStones >= itemCost
-	elseif currencyType == CURT_WRIT_VOUCHERS then
+    elseif currencyType == CURT_WRIT_VOUCHERS then
         return self.currentWritVouchers >= itemCost
     end
 

@@ -51,7 +51,11 @@ local function OnZoneCollectibleRequirementFailed(eventId, collectibleId)
     else
         storeTextId = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_STORE_XBOX
     end
-    ZO_Dialogs_ShowPlatformDialog("ZONE_COLLECTIBLE_REQUIREMENT_FAILED", { collectibleName = collectibleName }, {mainTextParams = {collectibleName, GetString(storeTextId) }})
+    if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+        ZO_Dialogs_ShowPlatformDialog("ZONE_CHAPTER_COLLECTIBLE_REQUIREMENT_FAILED")
+    else
+        ZO_Dialogs_ShowPlatformDialog("ZONE_DLC_COLLECTIBLE_REQUIREMENT_FAILED", { collectibleName = collectibleName }, {mainTextParams = {collectibleName, GetString(storeTextId) }})
+    end
 end
 
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_GLOBAL_MOUSE_UP, OnGlobalMouseUp)
@@ -139,4 +143,10 @@ function ZO_FormatResourceBarCurrentAndMax(current, maximum)
 	end
 
 	return returnValue
+end
+
+-- This allows us to make a the same function in InGame and Pregame while changing exactly what it calls,
+-- so shared code doesn't need to know which state its in
+function ZO_Disconnect()
+    Disconnect()
 end

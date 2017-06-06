@@ -52,6 +52,15 @@
                                         ZO_DLCBook_Keyboard_OnUnlockPermanentlyClicked(self)
                                     </OnClicked>
                                 </Button>
+
+                                <Button name="$(parent)ChapterUpgrade" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE">
+                                    <Dimensions x="200" />
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)QuestAccept"  relativePoint="BOTTOMRIGHT" />
+
+                                    <OnClicked>
+                                        ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(self)
+                                    </OnClicked>
+                                </Button>
                             </Controls>
                         </Control>
 

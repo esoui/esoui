@@ -190,6 +190,9 @@ end
 
 function PlayerInventoryMenuBar:Initialize(control)
     ZO_InventoryMenuBar.Initialize(self, control)
+
+    SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function() self:UpdateInventoryKeybinds() end)
+
     -- Quickslot toggle button
     local quickslotToggleKeybind = {
         keybind = "UI_SHORTCUT_QUICK_SLOTS",

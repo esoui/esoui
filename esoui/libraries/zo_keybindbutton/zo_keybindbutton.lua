@@ -1,4 +1,4 @@
-local ZO_KeybindButtonMixin = {}
+ZO_KeybindButtonMixin = {}
 
 function ZO_KeybindButtonMixin:GetKeybind()
     return (IsInGamepadPreferredMode() or self.alwaysPreferGamepadMode) and self.gamepadPreferredKeybind or self.keybind
@@ -152,10 +152,23 @@ function ZO_KeybindButtonMixin:OnClicked()
     end
 end
 
-function ZO_KeybindButtonTemplate_OnMouseUp(self, button, upInside)
-    if(upInside and (button == MOUSE_BUTTON_INDEX_LEFT) and self.enabled) then
-        self:OnClicked()
+local g_cooldownButtons = {}
+
+-- Should only be used for Floating Keybind Buttons
+-- Otherwise use ZO_KeybindStrip:TriggerCooldown
+function ZO_KeybindButtonMixin:SetCooldown(durationMs)
+    self.cooldownDurationMs = durationMs
+    self.cooldownStartTimeMs = GetFrameTimeMilliseconds()
+
+    --Check for duplicates
+    for i, button in ipairs(g_cooldownButtons) do
+        if button == self then
+            return
+        end
     end
+
+    self.baseText = self.nameLabel:GetText()
+    table.insert(g_cooldownButtons, self)
 end
 
 local g_areKeybindsEnabled
@@ -163,13 +176,31 @@ local g_keybindButtons = {}
 local g_numDisabledReferences = 0
 local function OnUpdate()
     local shouldKeybindsBeEnabled = WINDOW_MANAGER:GetFocusControl() == nil and g_numDisabledReferences == 0
-    if(shouldKeybindsBeEnabled ~= g_areKeybindsEnabled) then
+    if shouldKeybindsBeEnabled ~= g_areKeybindsEnabled then
         g_areKeybindsEnabled = shouldKeybindsBeEnabled
         for i = 1, #g_keybindButtons do
-            if(not g_keybindButtons[i].keybindEnabledInEdit) then
-                g_keybindButtons[i]:SetKeybindEnabled(shouldKeybindsBeEnabled)
+            local currentKeybindButton = g_keybindButtons[i]
+            if not currentKeybindButton.keybindEnabledInEdit then
+                currentKeybindButton:SetKeybindEnabled(shouldKeybindsBeEnabled)
             end
         end
+    end
+
+    local currentTimeMs = GetFrameTimeMilliseconds()
+    for i = #g_cooldownButtons, 1, -1 do
+        local button = g_cooldownButtons[i]
+        local timeDifferenceMs = currentTimeMs - button.cooldownStartTimeMs
+        local shouldBeEnabled = timeDifferenceMs > button.cooldownDurationMs
+        if shouldBeEnabled then
+            button:SetText(button.baseText)
+            button.cooldownDurationMs = nil
+            button.cooldownStartTimeMs = nil
+            table.remove(g_cooldownButtons, i)
+        else
+            local secondsTillEnabled = zo_ceil((button.cooldownStartTimeMs + button.cooldownDurationMs - currentTimeMs) / 1000)
+            button:SetText(zo_strformat(SI_BINDING_NAME_COOLDOWN_FORMAT, button.baseText, secondsTillEnabled))
+        end
+        button:SetEnabled(shouldBeEnabled)
     end
 end
 EVENT_MANAGER:RegisterForUpdate("KeybindButtonUpdate", 0, OnUpdate)
@@ -182,6 +213,11 @@ function ZO_KeybindButtonTemplate_RemoveGlobalDisableReference()
     g_numDisabledReferences = g_numDisabledReferences - 1
 end
 
+function ZO_KeybindButtonTemplate_OnMouseUp(self, button, upInside)
+    if upInside and (button == MOUSE_BUTTON_INDEX_LEFT) and self.enabled then
+        self:OnClicked()
+    end
+end
 
 function ZO_KeybindButtonTemplate_OnInitialized(self)
     self.nameLabel = self:GetNamedChild("NameLabel")

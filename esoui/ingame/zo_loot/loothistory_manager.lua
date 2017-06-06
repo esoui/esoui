@@ -14,7 +14,7 @@ function LootHistory_Manager:New(...)
 end
 
 local function CanAddLootEntry()
-    return tonumber(GetSetting(SETTING_TYPE_LOOT,LOOT_SETTING_LOOT_HISTORY)) == 1 
+    return tonumber(GetSetting(SETTING_TYPE_LOOT,LOOT_SETTING_LOOT_HISTORY)) == 1
 end
 
 do
@@ -62,7 +62,7 @@ do
             end
         end
 
-	    local function OnWritVoucherUpdate(...)
+        local function OnWritVoucherUpdate(...)
             if CanAddLootEntry() then
                 SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnWritVoucherUpdate(...)
             end
@@ -77,6 +77,20 @@ do
         local function OnCrownGemUpdate(...)
             if CanAddLootEntry() then
                 SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnCrownGemUpdate(...)
+            end
+        end
+
+        local function OnMedalAwarded(...)
+            if CanAddLootEntry() then
+                SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnMedalAwarded(...)
+            end
+        end
+
+        local function OnBattlegroundScoreboardUpdated(...)
+            if CanAddLootEntry() then
+                if GetCurrentBattlegroundState() == BATTLEGROUND_STATE_POSTGAME then
+                    SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnBattlegroundScoreboardUpdated(...)
+                end
             end
         end
 
@@ -112,18 +126,20 @@ do
                 OnNewItemReceived(questItemName, countDelta, nil, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL)
             end
         end
-    
+
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_LOOT_RECEIVED, function(eventId, ...) OnLootReceived(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MONEY_UPDATE, function(eventId, ...) OnGoldUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_JUSTICE_GOLD_PICKPOCKETED, function(eventId, ...) OnGoldPickpocket(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_ALLIANCE_POINT_UPDATE, function(eventId, ...) OnAlliancePointUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_TELVAR_STONE_UPDATE, function(eventId, ...) OnTelvarStoneUpdate(...) end)
-	    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_WRIT_VOUCHER_UPDATE, function(eventId, ...) OnWritVoucherUpdate(...) end)
+        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_WRIT_VOUCHER_UPDATE, function(eventId, ...) OnWritVoucherUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_QUEST_TOOL_UPDATED, function(eventId, ...) OnQuestToolUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(eventId, ...) OnNewCollectibleReceived(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CROWN_GEM_UPDATE, function(eventId, ...) OnCrownGemUpdate(...) end)
+        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MEDAL_AWARDED, function(eventId, ...) OnMedalAwarded(...) end)
+        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_SCOREBOARD_UPDATED, function(eventId, ...) OnBattlegroundScoreboardUpdated(...) end)
     end
 end
 

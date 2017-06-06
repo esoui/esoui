@@ -601,6 +601,7 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self:AddCategory(SETTING_PANEL_INTERFACE)
     self:AddCategory(SETTING_PANEL_NAMEPLATES)
     self:AddCategory(SETTING_PANEL_SOCIAL)
+    self:AddCategory(SETTING_PANEL_COMBAT)
 
     self.categoryList:Commit()
 end
@@ -616,6 +617,7 @@ do
         [SETTING_PANEL_INTERFACE] = "EsoUI/Art/Options/Gamepad/gp_options_interface.dds",
         [SETTING_PANEL_SOCIAL] = "EsoUI/Art/Options/Gamepad/gp_options_social.dds",
         [SETTING_PANEL_NAMEPLATES] = "EsoUI/Art/Options/Gamepad/gp_options_nameplates.dds",
+        [SETTING_PANEL_COMBAT] = "EsoUI/Art/Options/Gamepad/gp_options_combat.dds",
     }
 
     function ZO_GamepadOptions:AddCategory(panelId)

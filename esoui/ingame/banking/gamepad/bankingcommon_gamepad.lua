@@ -329,9 +329,17 @@ function ZO_BankingCommon_Gamepad:SetDepositList(list)
     self.depositList = list
 end
 
--- set the bag that will be banked from, banked is a word.
-function ZO_BankingCommon_Gamepad:SetBankedBag(bag)
-    self.bankedBag = bag
+function ZO_BankingCommon_Gamepad:ClearBankedBags()
+    self.bankedBags = {}
+end
+
+-- set the bag(s) that will be banked from, banked is a word.
+function ZO_BankingCommon_Gamepad:AddBankedBag(bag)
+    if self.bankedBags then
+        table.insert(self.bankedBags, bag)
+    else
+        self.bankedBags = {bag}
+    end
 end
 
 -- set the bag that the player is carrying, probably always backpack
@@ -448,7 +456,7 @@ end
 function ZO_BankingCommon_Gamepad:RecolorCapacityHeader(control, usedSlots, bagSize, recolorMode)
     local color = ZO_SELECTED_TEXT
 
-    if recolorMode == self.mode and usedSlots == bagSize then
+    if recolorMode == self.mode and usedSlots >= bagSize then
         color = ZO_ERROR_COLOR
     end
 
@@ -456,8 +464,15 @@ function ZO_BankingCommon_Gamepad:RecolorCapacityHeader(control, usedSlots, bagS
 end
 
 function ZO_BankingCommon_Gamepad:SetBankCapacityHeaderText(control)
-    local usedSlots = GetNumBagUsedSlots(self.bankedBag)
-    local bagSize = GetBagSize(self.bankedBag)
+    local usedSlots = 0
+    local bagSize = 0
+
+    if self.bankedBags then
+        for index, bagId in ipairs(self.bankedBags) do  
+            usedSlots = usedSlots + GetNumBagUsedSlots(bagId)
+            bagSize = bagSize + GetBagUseableSize(bagId)
+        end
+    end
 
     self:RecolorCapacityHeader(control, usedSlots, bagSize, BANKING_GAMEPAD_MODE_DEPOSIT)
 

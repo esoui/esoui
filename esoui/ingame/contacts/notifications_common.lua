@@ -3,10 +3,10 @@ NOTIFICATIONS_WAITING_DATA = 2
 NOTIFICATIONS_LEADERBOARD_DATA = 3
 NOTIFICATIONS_ALERT_DATA = 4
 NOTIFICATIONS_COLLECTIBLE_DATA = 5
-NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA = 6
-NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA = 7
-NOTIFICATIONS_YES_NO_DATA = 8
-NOTIFICATIONS_LFG_READY_CHECK_DATA = 9
+NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA = 6
+NOTIFICATIONS_YES_NO_DATA = 7
+NOTIFICATIONS_LFG_READY_CHECK_DATA = 8
+NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA = 9
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -385,9 +385,9 @@ function ZO_GroupInviteProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
     local inviterCharacterName, aMillisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
-	if(inviterCharacterName ~= "") then
-		local nameToUse = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
-		local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
+    if(inviterCharacterName ~= "") then
+        local nameToUse = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
@@ -467,7 +467,7 @@ function ZO_GroupElectionProvider:BuildNotificationList()
                 characterNameForGamercard = GetUnitName(targetUnitTag),
                 --For sorting
                 displayName = shortText,
-                secsSinceRequest = 0,
+                secsSinceRequest = ZO_NormalizeSecondsSince(0),
             })
     end
 end
@@ -843,7 +843,7 @@ function ZO_LeaderboardRaidProvider:BuildNotificationList()
 
             if hasPlayer then
                 -- Player just received a notification about themselves, so filter it out
-                self:Decline({ notificationId = notificationId, })                            
+                self:Decline({ notificationId = notificationId, })
             elseif hasFriend or hasGuildMember then
                 local raidName = GetRaidName(raidId)
 
@@ -959,7 +959,7 @@ function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo
 
         --For sorting
         displayName = message,
-        secsSinceRequest = 0,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
     }
 
     table.insert(self.list, newListEntry)
@@ -1014,8 +1014,6 @@ function ZO_LFGUpdateProvider:New(notificationManager)
     local provider = ZO_NotificationProvider.New(self, notificationManager)
     provider:SetHasTimer(true)
 
-    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_NEW)
-    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_REMOVED)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED)
     provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
@@ -1029,105 +1027,49 @@ end
 function ZO_LFGUpdateProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    if HasLFGJumpNotification() then
-        local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
-        local role = GetGroupMemberAssignedRole("player")
-
-        --No notification for AVA types
-        if activityType == LFG_ACTIVITY_AVA then
-            return
-        end
-
-        local activityName = GetLFGOption(activityType, activityIndex)
-
-        self:AddJumpNotification(
-            {
-                activityType = activityType,
-                activityIndex = activityIndex,
-                role = role,
-                timeRemainingSeconds = timeRemainingSeconds,
-                activityName = activityName,
-            }
-        )
-    end
-
     if HasLFGReadyCheckNotification() then
         local activityType, role, timeRemainingSeconds = GetLFGReadyCheckNotificationInfo()
         
         self:AddReadyCheckNotification(
             {
                 activityType = activityType,
-                activityIndex = activityIndex,
                 role = role,
                 timeRemainingSeconds = timeRemainingSeconds,
             }
         )
     end
 
-    if HasLFGFindReplacementNotification() then
-        local activityType, activityIndex = GetLFGFindReplacementNotificationInfo()
-        local activityName = GetLFGOption(activityType, activityIndex)
+    if HasActivityFindReplacementNotification() then
+        local activityId = GetActivityFindReplacementNotificationInfo()
+        local activityName = GetActivityName(activityId)
         self:AddFindReplacementNotification(
             {
-                activityType = activityType,
-                activityIndex = activityIndex,
+                activityId = activityId,
                 activityName = activityName,
             }
         )
     end
 end
 
-function ZO_LFGUpdateProvider:AddJumpNotification(data)
-    local role = data.role
-    local activityName = data.activityName
-
-    local messageFormat, messageParams
-    if role == LFG_ROLE_INVALID then
-        messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
-        messageParams = { activityName }
-    else
-        messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
-        messageParams = { activityName, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
-    end
-
-    local newListEntry =
-    {
-        notificationType = NOTIFICATION_TYPE_LFG,
-        dataType = NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA,
-        shortDisplayText = activityName,
-        data = data,
-
-        expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
-        expirationCallback = ClearLFGJumpNotification,
-        messageFormat = messageFormat,
-        messageParams = messageParams,
-
-        --For sorting
-        displayName = activityName,
-        secsSinceRequest = 0,
-    }
-
-    table.insert(self.list, newListEntry)
-end
-
 function ZO_LFGUpdateProvider:AddReadyCheckNotification(data)
     local role = data.role
-    local activityTypeString = GetString("SI_LFGACTIVITY", data.activityType)
+    local activityTypeText = GetString("SI_LFGACTIVITY", data.activityType)
+    local generalActivityText = ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[data.activityType]
 
     local messageFormat, messageParams
     if role == LFG_ROLE_INVALID then
         messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
-        messageParams = { activityTypeString }
+        messageParams = { activityTypeText, generalActivityText }
     else
         messageFormat = SI_LFG_READY_CHECK_TEXT
-        messageParams = { activityTypeString, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
+        messageParams = { activityTypeText, generalActivityText, zo_iconFormat(GetRoleIcon(role), "100%", "100%"), GetString("SI_LFGROLE", role) }
     end
 
     local newListEntry =
     {
         notificationType = NOTIFICATION_TYPE_LFG,
         dataType = NOTIFICATIONS_LFG_READY_CHECK_DATA,
-        shortDisplayText = activityTypeString,
+        shortDisplayText = generalActivityText,
         data = data,
 
         expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
@@ -1136,8 +1078,8 @@ function ZO_LFGUpdateProvider:AddReadyCheckNotification(data)
         messageParams = messageParams,
 
         --For sorting
-        displayName = activityTypeString,
-        secsSinceRequest = 0,
+        displayName = generalActivityText,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
     }
 
     table.insert(self.list, newListEntry)
@@ -1154,19 +1096,17 @@ function ZO_LFGUpdateProvider:AddFindReplacementNotification(data)
 
         --For sorting
         displayName = data.activityName,
-        secsSinceRequest = 0,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
     }
 
     table.insert(self.list, newListEntry)
 end
 
 function ZO_LFGUpdateProvider:Accept(entryData)
-    if entryData.dataType == NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA then
-        AcceptLFGJumpNotification()
-    elseif entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
+    if entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
         AcceptLFGReadyCheckNotification()
     elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
-        AcceptLFGFindReplacementNotification()
+        AcceptActivityFindReplacementNotification()
     end
 end
 
@@ -1174,7 +1114,7 @@ function ZO_LFGUpdateProvider:Decline(entryData)
     if entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
         DeclineLFGReadyCheckNotification()
     elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
-        DeclineLFGFindReplacementNotification()
+        DeclineAcceptFindReplacementNotification()
     end
 end
 
@@ -1210,7 +1150,7 @@ function ZO_CraftBagAutoTransferProvider:AddNotification()
 
         --For sorting
         displayName = notificationTypeString,
-        secsSinceRequest = 0,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
     }
     table.insert(self.list, newListEntry)
 end
@@ -1259,6 +1199,63 @@ function ZO_DuelInviteProvider:Decline(data, button, openedFromKeybind)
     DeclineDuel()
 end
 
+-- ZO_EsoPlusSubscriptionStatusProvider
+-------------------------
+
+ZO_EsoPlusSubscriptionStatusProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_EsoPlusSubscriptionStatusProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_SUBSCRIPTION_STATUS_CHANGED)
+    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_SUBSCRIPTION_NOTIFICATION_CLEARED)
+    provider.hasMoreInfo = GetEsoPlusSubscriptionInfoHelpIndices() ~= nil
+
+    return provider
+end
+
+function ZO_EsoPlusSubscriptionStatusProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if HasEsoPlusSubscriptionNotification() then
+        self:AddNotification()
+    end
+end
+
+function ZO_EsoPlusSubscriptionStatusProvider:AddNotification()
+    local notificationTypeString = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION)
+
+    local isSubscriber = IsESOPlusSubscriber()
+    local message
+    if isSubscriber then
+        message = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_STARTED)
+    else
+        message = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_ENDED)
+    end
+
+    local newListEntry = {
+        notificationType = NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION,
+        dataType = NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA,
+        shortDisplayText = notificationTypeString,
+        message = message,
+        moreInfo = self.hasMoreInfo,
+
+        --For sorting
+        displayName = notificationTypeString,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_EsoPlusSubscriptionStatusProvider:Accept()
+    ShowEsoPlusPage(MARKET_OPEN_OPERATION_NOTIFICATION)
+    ClearEsoPlusSubscriptionNotification()
+end
+
+function ZO_EsoPlusSubscriptionStatusProvider:Decline()
+    ClearEsoPlusSubscriptionNotification()
+end
+
 -- Sort List
 -------------------------
 local ENTRY_SORT_KEYS =
@@ -1300,7 +1297,6 @@ end
 ZO_NotificationManager = ZO_Object:Subclass()
 
 function ZO_NotificationManager:New(control)
-    
     local notificationManager = ZO_Object.New(self)
     notificationManager:Initialize(control)
     return notificationManager

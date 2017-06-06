@@ -172,7 +172,7 @@ function ZO_CrownGemification_Manager:OnUpdate()
 end
 
 function ZO_CrownGemification_Manager:IsRelevantBag(bagId)
-    return bagId == BAG_BACKPACK or bagId == BAG_BANK
+    return bagId == BAG_BACKPACK or bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK
 end
 
 function ZO_CrownGemification_Manager:GetGemifiableList()

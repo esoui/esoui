@@ -607,11 +607,12 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                 enabled = false
             end
             if enabled ~= false then
+                local keybindHandled = nil
                 if self:FilterSceneHiding(keybindButtonDescriptor) then
                     if keybindButtonDescriptor.callback then
                         local sound = keybindButtonDescriptor.sound
                         ClearMenu()
-                        keybindButtonDescriptor.callback(DOWN)
+                        keybindHandled = keybindButtonDescriptor.callback(DOWN)
                         keybindButtonDescriptor.handledDown = true
 
                         if sound then
@@ -619,7 +620,7 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                         end
                     end
                 end
-                return true
+                return keybindHandled or keybindHandled == nil --nil is considered true in this case to ensure backwards compatability
             elseif disabledAlertText then
                 if disabledAlertType == KEYBIND_STRIP_DISABLED_DIALOG then
                     ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, {mainTextParams = {disabledAlertText}})
@@ -647,13 +648,14 @@ function ZO_KeybindStrip:TryHandlingKeybindUp(keybind)
             keybindButtonDescriptor.handledDown = nil
             if enabled ~= false or handledPreviousDown then
                 if keybindButtonDescriptor.handlesKeyUp or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor.handlesKeyUp then
+                    local keybindHandled = nil
                     if self:FilterSceneHiding(keybindButtonDescriptor) then
                         if keybindButtonDescriptor.callback then
                             ClearMenu()
-                            keybindButtonDescriptor.callback(UP)
+                            keybindHandled = keybindButtonDescriptor.callback(UP)
                         end
                     end
-                    return true
+                    return keybindHandled or keybindHandled == nil --nil is considered true in this case to ensure backwards compatability
                 end
             end
         end

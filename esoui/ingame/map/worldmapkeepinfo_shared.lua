@@ -210,6 +210,10 @@ function ZO_WorldMapKeepInfo_Shared:Initialize(control)
             CALLBACK_MANAGER:FireCallbacks("OnWorldMapKeepChanged")
         end
     end)
+
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function()
+        self:HideKeep()
+    end)
 end
 
 function ZO_WorldMapKeepInfo_Shared:GetKeepUpgradeObject()

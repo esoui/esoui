@@ -94,10 +94,6 @@ local TutorialTriggerHandlers = {
         end
     end,
 
-    [EVENT_JUSTICE_LIVESTOCK_SLAIN] = function()
-        return TUTORIAL_TRIGGER_LIVESTOCK_SLAIN
-    end,
-
     [EVENT_MOUNTED_STATE_CHANGED] = function(isMounted)
         if isMounted then
             return TUTORIAL_TRIGGER_MOUNTED

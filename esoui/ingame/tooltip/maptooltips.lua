@@ -114,9 +114,14 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendMapPing(pinType, unitTag)
     self:LayoutIconStringLine(self.tooltip, nil, text, self.tooltip:GetStyle("keepBaseTooltipContent"))
 end
 
-function ZO_MapInformationTooltip_Gamepad_Mixin:AppendAvAObjective(queryType, keepId, objectiveId, isSpawnLocation)
-    local text = GenerateAvAObjectiveConditionTooltipLine(queryType, keepId, objectiveId, isSpawnLocation)
-    self:LayoutIconStringLine(self.tooltip, nil, text, self.tooltip:GetStyle("keepBaseTooltipContent"))
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendAvAObjective(queryType, keepId, objectiveId, objectivePinTier)
+    local text, interfaceColorType, color = GenerateAvAObjectiveConditionTooltipLine(queryType, keepId, objectiveId, objectivePinTier)
+    local objectiveColorStyle =
+    {
+        fontColorType = interfaceColorType,
+        fontColorField = color,
+    }
+    self:LayoutIconStringLine(self.tooltip, nil, text, objectiveColorStyle, self.tooltip:GetStyle("keepBaseTooltipContent"))
 end
 
 function ZO_MapInformationTooltip_Gamepad_Mixin:AddMoney(baseSection, amount, reason, notEnough, ...)
@@ -159,16 +164,18 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     elseif not CanLeaveCurrentLocationViaTeleport() then --NO BUTTON: Current Zone or Subzone restricts jumping
         local cantLeaveStringId
-        if IsInTutorialZone() then
-            cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_TUTORIAL
-        elseif IsInOutlawZone() then
+        if IsInOutlawZone() then
             cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_OUTLAW_REFUGE
         else
             cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
         end
         self:LayoutIconStringLine(wayshrineSection, nil, GetString(cantLeaveStringId), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
-    elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store
-        self:LayoutIconStringLine(wayshrineSection, ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
+    elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store/Upgrade Chapter
+        local icon
+        if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_DLC then
+            icon = ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE
+        end
+        self:LayoutIconStringLine(wayshrineSection, icon, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
     elseif IsUnitDead("player") then -- NO BUTTON: Dead
         local message = GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD)
         self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))

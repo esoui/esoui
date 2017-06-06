@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_TrackedHeader" mouseEnabled="true" font="ZoFontGameShadow" virtual="true">
+        <Label name="ZO_TrackedHeader" mouseEnabled="true" virtual="true">
             <Anchor point="TOPLEFT" offsetX="22"/>
             <Dimensions x="226" y="0" />
 
@@ -10,12 +10,12 @@
 
             <OnMouseUp>
                 ZO_TrackedHeader_MouseUp(self, button, upInside)
-            </OnMouseUp>                    
-                    
+            </OnMouseUp>
+
             <OnMouseEnter>
-                ZO_TrackedHeader_MouseEnter(self)                        
-            </OnMouseEnter>     
-                    
+                ZO_TrackedHeader_MouseEnter(self)
+            </OnMouseEnter>
+
             <OnMouseExit>
                 ZO_TrackedHeader_MouseExit(self)
             </OnMouseExit>
@@ -27,11 +27,11 @@
             </Controls>
         </Label>
 
-        <Label name="ZO_QuestCondition" font="ZoFontGameShadow" virtual="true" mouseEnabled="true">
+        <Label name="ZO_QuestCondition" virtual="true" mouseEnabled="true">
             <Dimensions x="200" y="0" />
         </Label>
 
-        <Label name="ZO_QuestStepDescription" font="ZoFontGameShadow" virtual="true">
+        <Label name="ZO_QuestStepDescription" virtual="true">
             <Dimensions x="200" y="0" />
         </Label>
 
@@ -58,8 +58,8 @@
                             <Dimensions x="16" y="16"/>
                         </Texture>
                     </Controls>
-                </Control>                
+                </Control>
             </Controls>
-        </TopLevelControl>        
+        </TopLevelControl>
     </Controls>
 </GuiXml>

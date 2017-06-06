@@ -190,7 +190,7 @@
                 <Up>GameCameraMouseFreeLookStop()</Up>
             </Action>
 
-            <Action name="GAME_CAMERA_GAMEPAD_ZOOM" hideAction="true">
+            <Action name="GAME_CAMERA_GAMEPAD_ZOOM">
                 <Down>GameCameraGamepadZoomDown()</Down>
                 <Up>GameCameraGamepadZoomUp()</Up>
             </Action>
@@ -318,10 +318,6 @@
 
             <Action name="ASSIST_NEXT_TRACKED_QUEST">
                 <Down>QUEST_TRACKER:AssistNext()</Down>
-            </Action>
-
-            <Action name="SHOW_HOUSING_PANEL">
-                <Down>HOUSING_HUD_FRAGMENT:OnHousingHUDButtonPressed()</Down>
             </Action>
 
             <Action name="TOGGLE_FIRST_PERSON">
@@ -853,6 +849,79 @@
             </Action>
         </Category>
     </Layer>
+    
+    <Layer name="SI_KEYBINDINGS_LAYER_HUD_HOUSING">
+        <Category>
+            <Action name="SHOW_HOUSING_PANEL">
+                <Down>HOUSING_HUD_FRAGMENT:OnHousingHUDButtonPressed()</Down>
+            </Action>
+        </Category>
+    </Layer>
+
+    <!-- These binds don't do anything. They exist to provide all of the actions used by the BG Hud and BG Scoreboard. The specific layers for those
+         screens inherit the key from these, but define their own down and up callbacks. -->
+    <Layer name="SI_KEYBINDINGS_LAYER_BATTLEGROUNDS">
+        <Category>
+            <Action name="TOGGLE_BATTLEGROUND_SCOREBOARD_DUMMY">
+                <Down>return false</Down>
+            </Action>
+            <Action name="LEAVE_BATTLEGROUND_DUMMY">
+                <Down>return false</Down>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_PREVIOUS_DUMMY">
+                <Down>return false</Down>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_NEXT_DUMMY">
+                <Down>return false</Down>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_PLAYER_OPTIONS_DUMMY">
+                <Down>return false</Down>
+            </Action>
+        </Category>
+    </Layer>
+    
+    <!-- The actions in this layer must inherit from an action in SI_KEYBINDINGS_LAYER_BATTLEGROUNDS. This layer is not shown in the keybind window.-->
+    <Layer name="BattlegroundHud">
+        <Category>
+            <Action name="SHOW_BATTLEGROUND_SCOREBOARD" inheritsBindFrom="TOGGLE_BATTLEGROUND_SCOREBOARD_DUMMY" hideAction="true">
+                <Down>BATTLEGROUND_SCOREBOARD_FRAGMENT:OnHUDButtonPressedDown()</Down>
+            </Action>
+        </Category>
+    </Layer>
+
+    <!-- The actions in this layer must inherit from an action in SI_KEYBINDINGS_LAYER_BATTLEGROUNDS. This layer is not shown in the keybind window.-->
+    <Layer name="BattlegroundScoreboard">
+        <Category>
+            <Action name="LEAVE_BATTLEGROUND" inheritsBindFrom="LEAVE_BATTLEGROUND_DUMMY" hideAction="true">
+                <Down>
+                    return BATTLEGROUND_SCOREBOARD_END_OF_GAME:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="HIDE_BATTLEGROUND_SCOREBOARD" inheritsBindFrom="TOGGLE_BATTLEGROUND_SCOREBOARD_DUMMY" hideAction="true">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_PREVIOUS" inheritsBindFrom="BATTLEGROUND_SCOREBOARD_PREVIOUS_DUMMY" hideAction="true">
+                <Down>
+                    return BATTLEGROUND_SCOREBOARD_END_OF_GAME:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_NEXT" inheritsBindFrom="BATTLEGROUND_SCOREBOARD_NEXT_DUMMY" hideAction="true">
+                <Down>
+                    return BATTLEGROUND_SCOREBOARD_END_OF_GAME:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_PLAYER_OPTIONS" inheritsBindFrom="BATTLEGROUND_SCOREBOARD_PLAYER_OPTIONS_DUMMY" hideAction="true">
+                <Down>
+                    return BATTLEGROUND_SCOREBOARD_END_OF_GAME:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+        </Category>
+    </Layer>
 
     <Layer name="SI_KEYBINDINGS_LAYER_HOUSING_EDITOR" allowFallthrough="false">
         <Category>
@@ -866,6 +935,7 @@
             <AllowAction name="AUTORUN" />
             <AllowAction name="GAMEPAD_JUMP_OR_INTERACT" />
             <AllowAction name="SPECIAL_MOVE_SPRINT" />
+            <AllowAction name="GAMEPAD_SPECIAL_MOVE_SPRINT" />
             <AllowAction name="SPECIAL_MOVE_CROUCH" />
             <AllowAction name="GAMEPAD_MOVE_JUMPASCEND" />
             

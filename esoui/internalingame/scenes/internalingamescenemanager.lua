@@ -69,6 +69,7 @@ function ZO_InternalIngameSceneManager:HideTopLevel(topLevel)
     if(not topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true) then
         topLevel:SetHidden(true)
         self.numTopLevelShown = self.numTopLevelShown - 1
+        ChangeRemoteTopLevel(REMOTE_SCENE_STATE_CHANGE_TYPE_HIDE, REMOTE_SCENE_STATE_CHANGE_ORIGIN_INTERNAL)
     end
 end
 
@@ -76,6 +77,7 @@ function ZO_InternalIngameSceneManager:ShowTopLevel(topLevel)
     if(topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true) then
         topLevel:SetHidden(false)
         self.numTopLevelShown = self.numTopLevelShown + 1
+        ChangeRemoteTopLevel(REMOTE_SCENE_STATE_CHANGE_TYPE_SHOW, REMOTE_SCENE_STATE_CHANGE_ORIGIN_INTERNAL)
     end
 end
 

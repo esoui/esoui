@@ -337,6 +337,17 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_ThinRightPanelBG" allowBringToTop="false" virtual="true">
+            <Dimensions x="300" y="500" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="-85"/>
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <Dimensions x="1024" y="724" />
+                    <Anchor point="TOPLEFT" offsetX="-65" offsetY="-75" />
+                </Texture>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_ThinLeftPanelBG" allowBringToTop="false" virtual="true">
             <Dimensions x="240" y="500" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-85"/>
@@ -352,11 +363,42 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_WideLeftPanelBG" inherits="ZO_ThinLeftPanelBG" virtual="true">
-            <Dimensions x="535" y="500" />
+        <Control name="ZO_ThinTallRightPanelBG" inherits="ZO_ThinRightPanelBG" virtual="true">
+            <Dimensions y="645" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="-10"/>
+            <Controls>
+                <Texture name="$(parent)Left" override="true">
+                    <Dimensions y="900" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_MediumRightPanelBG" inherits="ZO_ThinRightPanelBG" virtual="true">
+            <Dimensions x="366" y="500" />
         </Control>
 
-        <Control name="ZO_MediumLeftPanelBG" virtual="true">
+        <Control name="ZO_MediumLeftPanelBG" inherits="ZO_ThinLeftPanelBG" virtual="true">
+            <Dimensions x="366" y="500" />
+        </Control>
+
+        <Control name="ZO_MediumShortRightPanelBG" virtual="true">
+            <Dimensions x="366" y="750" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="-55"/>
+            <Controls>
+                <Texture name="$(parent)Top" textureFile="EsoUI/Art/Miscellaneous/medium_bg_top.dds" mouseEnabled="true">
+                    <Dimensions x="512" y="512" />
+                    <Anchor point="TOPRIGHT" />
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                </Texture>
+                <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Miscellaneous/medium_bg_bottom.dds" mouseEnabled="true">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Top" relativePoint="BOTTOMRIGHT" />
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_MediumShortLeftPanelBG" virtual="true">
             <Dimensions x="366" y="750" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-55"/>
             <Controls>
@@ -369,6 +411,14 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Top" relativePoint="BOTTOMLEFT" />
                 </Texture>
             </Controls>
+        </Control>
+
+        <Control name="ZO_WideRightPanelBG" inherits="ZO_ThinRightPanelBG" virtual="true">
+            <Dimensions x="535" y="500" />
+        </Control>
+
+        <Control name="ZO_WideLeftPanelBG" inherits="ZO_ThinLeftPanelBG" virtual="true">
+            <Dimensions x="535" y="500" />
         </Control>
         
         <Control name="ZO_PanelBackground" tier="LOW" layer="BACKGROUND" virtual="true">
@@ -460,11 +510,7 @@
         <Control name="ZO_RightFullscreenPanelBG" virtual="true">
             <Dimensions x="640" />
             <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
-
-            <OnInitialized>
-                self:SetHeight(GuiRoot:GetHeight())
-                self:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:SetHeight(GuiRoot:GetHeight()) end)
-            </OnInitialized>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
 
             <Controls>
                 <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/rightPanel_BG_right.dds">
@@ -481,6 +527,28 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_LeftFullscreenPanelBG" virtual="true">
+            <Dimensions x="640" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+
+            <Controls>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/rightPanel_BG_left.dds">
+                    <Dimensions x="512" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                </Texture>
+                
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/rightPanel_BG_right.dds">
+                    <Dimensions x="128" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                </Texture>
+            </Controls>
+        </Control>
+        
         <Texture name="ZO_TopBarBG" tier="LOW" layer="BACKGROUND" textureFile="EsoUI/Art/Miscellaneous/top_bar.dds" addressMode="WRAP" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetY="-3" />
             <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetY="-3" />

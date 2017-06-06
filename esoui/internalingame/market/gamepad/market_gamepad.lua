@@ -160,6 +160,21 @@ function GamepadMarket:OnShown()
         self:RefreshKeybinds()
         CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
 
+        if self.queuedCategoryIndex then
+            local categoryData = self:GetCategoryData(self.queuedCategoryIndex)
+
+            if categoryData then
+                local targetIndex = categoryData.tabIndex
+                if self.header.tabBar:GetSelectedIndex() ~= targetIndex then
+                    self.header.tabBar:SetSelectedDataIndex(targetIndex)
+                end
+            end
+
+            self.queuedCategoryIndex = nil
+            -- A request to go to a specific category overrides a request to go to a specific Market Product
+            self.queuedMarketProductId = nil
+        end
+
         if self.queuedMarketProductId then
             self:ShowMarketProduct(self.queuedMarketProductId)
             self.queuedMarketProductId = nil
@@ -551,17 +566,19 @@ do
 
             local numFeaturedMarketProducts = GetNumFeaturedMarketProducts()
             local hasFeaturedCategory = numFeaturedMarketProducts > 0
+            self.featuredCategoryIndex = nil
             if hasFeaturedCategory then
-                self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, firstIndex, GetString(SI_MARKET_FEATURED_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_FEATURED)
+                self.featuredCategoryIndex = firstIndex
+                self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, self.featuredCategoryIndex, GetString(SI_MARKET_FEATURED_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_FEATURED)
             end
 
-            local esoPlusIndex = hasFeaturedCategory and GetNextTabIndex() or firstIndex
-            self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, esoPlusIndex, GetString(SI_MARKET_ESO_PLUS_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS)
+            self.esoPlusCategoryIndex = hasFeaturedCategory and GetNextTabIndex() or firstIndex
+            self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, self.esoPlusCategoryIndex, GetString(SI_MARKET_ESO_PLUS_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS)
 
             -- adding in the custom categories offsets our market product cateogry indices
             -- so even though a category is index 1 from data, it might actually be index 3
             -- since we show a featured and ESO Plus category
-            self.categoryIndexOffset = esoPlusIndex
+            self.categoryIndexOffset = self.esoPlusCategoryIndex
 
             local numCategories = GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE)
             for i = 1, numCategories do
@@ -888,9 +905,11 @@ function GamepadMarket:OnMarketLocked()
     end
 end
 
--- we shouldn't get into this state when the gamepad Crown Store is open, so treat it like a lock (as before)
+-- If the Market is loading/updating switch to the pre-scene so we can show the loading info and then switch to the proper market state
 function GamepadMarket:OnMarketLoading()
-    self:OnMarketLocked()
+    if self.isInitialized and (SCENE_MANAGER:IsShowing(ZO_GAMEPAD_MARKET_SCENE_NAME) or ZO_GAMEPAD_MARKET_LOCKED_SCENE:IsShowing()) then
+        SCENE_MANAGER:SwapCurrentScene(ZO_GAMEPAD_MARKET_PRE_SCENE_NAME)
+    end
 end
 
 function GamepadMarket:OnMarketPurchaseResult()
@@ -916,6 +935,10 @@ do
     function GamepadMarket:OnShowBuyCrownsDialogInternal()
         PURCHASE_MANAGER:ShowBuyCrownsDialog(FROM_CROWN_STORE)
     end
+end
+
+function GamepadMarket:RequestShowCategory(categoryIndex)
+    self.queuedCategoryIndex = categoryIndex
 end
 
 function GamepadMarket:ShowBundleContents(bundle)
@@ -1029,9 +1052,19 @@ function GamepadMarket:ShowMarketProduct(id)
 end
 
 function GamepadMarket:GetCategoryData(categoryIndex)
-    local categoryTable = self.headerData.tabBarEntries[categoryIndex + self.categoryIndexOffset]
-    if categoryTable ~= nil then
-        return categoryTable.categoryData
+    local normalizedCategoryIndex
+    if categoryIndex > 0 then
+       normalizedCategoryIndex = categoryIndex + self.categoryIndexOffset
+    elseif categoryIndex == ZO_MARKET_ESO_PLUS_CATEGORY_INDEX then
+        normalizedCategoryIndex = self.esoPlusCategoryIndex
+    elseif categoryIndex == ZO_MARKET_FEATURED_CATEGORY_INDEX then
+        normalizedCategoryIndex = self.featuredCategoryIndex
+    end
+    if normalizedCategoryIndex then
+        local categoryTable = self.headerData.tabBarEntries[normalizedCategoryIndex]
+        if categoryTable ~= nil then
+            return categoryTable.categoryData
+        end
     end
 end
 
@@ -1100,7 +1133,7 @@ do
             -- For some market product types we can just use other tooltip layouts
             if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
                 local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(productId)
-                self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+                self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
                 return
             elseif productType == MARKET_PRODUCT_TYPE_ITEM then
                 local itemLink = GetMarketProductItemLink(productId)
@@ -1767,8 +1800,12 @@ end
 
 function GamepadMarketLockedScreen:OnStateChanged(oldState, newState)
     if newState == SCENE_SHOWN then
-        ZO_GamepadMarketKeybindStrip_RefreshStyle()
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptors)
+        if GetMarketState(MARKET_DISPLAY_GROUP_CROWN_STORE) == MARKET_STATE_OPEN then
+            self:OnMarketOpen()
+        else
+            ZO_GamepadMarketKeybindStrip_RefreshStyle()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptors)
+        end
     elseif newState == SCENE_HIDDEN then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptors)
         KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_STANDARD_STYLE)
@@ -1822,9 +1859,7 @@ function GamepadMarketPreScene:OnShown()
     ZO_MARKET_SINGLETON:RequestOpenMarket()
     SetSecureRenderModeEnabled(true)
 
-    if self.marketState ~= MARKET_STATE_UNKNOWN then
-        self:SwapToMarketScene()
-    end
+    self:TrySwapToMarketScene()
 end
 
 function GamepadMarketPreScene:OnHiding()
@@ -1838,7 +1873,7 @@ end
 function GamepadMarketPreScene:OnMarketStateUpdated(displayGroup, marketState)
     if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE then
         self.marketState = marketState
-        self:SwapToMarketScene()
+        self:TrySwapToMarketScene()
     end
 end
 
@@ -1854,11 +1889,11 @@ function GamepadMarketPreScene:OnUpdate(currentMs)
     end
 end
 
-function GamepadMarketPreScene:SwapToMarketScene()
+function GamepadMarketPreScene:TrySwapToMarketScene()
     if ZO_GAMEPAD_MARKET_PRE_SCENE:IsShowing() then
         if self.marketState == MARKET_STATE_OPEN then
             SCENE_MANAGER:SwapCurrentScene(ZO_GAMEPAD_MARKET_SCENE_NAME)
-        else
+        elseif self.marketState == MARKET_STATE_LOCKED then
             SCENE_MANAGER:SwapCurrentScene(ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME)
         end
     end

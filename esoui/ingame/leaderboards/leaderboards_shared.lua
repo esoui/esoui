@@ -4,10 +4,10 @@ ZO_LEADERBOARD_PLAYER_DATA = 1
 --Leaderboards Masterlist
 -----------------
 
-ZO_LeaderboardsListManager_Shared = ZO_Object:Subclass()
+ZO_LeaderboardsListManager_Shared = ZO_CallbackObject:Subclass()
 
 function ZO_LeaderboardsListManager_Shared:New()
-    local listManager = ZO_Object.New(self)
+    local listManager = ZO_CallbackObject.New(self)
     listManager:Initialize()
     return listManager
 end
@@ -17,12 +17,13 @@ function ZO_LeaderboardsListManager_Shared:Initialize()
 
     local function OnLeaderboardUpdated()
         self:BuildMasterList()
-        CALLBACK_MANAGER:FireCallbacks("OnLeaderboardMasterListUpdated")
+        self:FireCallbacks("OnLeaderboardMasterListUpdated")
     end
 
     EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_HOME_SHOW_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
     EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_RAID_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
     EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_CAMPAIGN_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
+    EVENT_MANAGER:RegisterForEvent("LeaderboardsListManager", EVENT_BATTLEGROUND_LEADERBOARD_DATA_CHANGED, OnLeaderboardUpdated)
 end
 
 function ZO_LeaderboardsListManager_Shared:SetSelectedLeaderboard(data)
@@ -32,8 +33,10 @@ function ZO_LeaderboardsListManager_Shared:SetSelectedLeaderboard(data)
     self.infoFunction = data.infoFunction
     self.pointsFormatFunction = data.pointsFormatFunction
     self.consoleIdRequestParamsFunction = data.consoleIdRequestParamsFunction
-    self.leaderboardRankType = data.leaderboardRankType
-
+    if self.leaderboardRankType ~= data.leaderboardRankType then
+        self.leaderboardRankType = data.leaderboardRankType
+        self:FireCallbacks("LeaderboardRankTypeChanged")
+    end
     self:BuildMasterList()
 end
 
@@ -67,6 +70,9 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
              
             local houseName = GetCollectibleInfo(houseCollectibleId)
             dataTable.houseName = houseName
+        elseif self.leaderboardRankType == LEADERBOARD_TYPE_BATTLEGROUND then
+            rank, playerDisplayName, characterName, points = self.infoFunction(dataTable.index, self.subType)
+            dataTable.characterName = characterName
         else
             rank, characterName, points, class, alliance, playerDisplayName = self.infoFunction(dataTable.index, self.subType)
                 
@@ -155,10 +161,20 @@ function ZO_LeaderboardsManager_Shared:Initialize(control, leaderboardControl)
     self:InitializeScenes()
 
     self.leaderboardDataMetatable = {__index = function(dataTable, key) self:IndexFunction(dataTable, key) end}
+    LEADERBOARD_LIST_MANAGER:RegisterCallback("LeaderboardRankTypeChanged", function() self:RepopulateFilterDropdown() end)
+    LEADERBOARD_LIST_MANAGER:RegisterCallback("OnLeaderboardMasterListUpdated", function()
+        if self.scene:IsShowing() then
+            self:OnLeaderboardDataChanged(self.leaderboardObject)
+        end
+    end)
 end
 
-function ZO_LeaderboardsManager_Shared:InitializeScenes()
-    -- Should be overridden
+function ZO_LeaderboardsManager_Shared:InitializeScenes(sceneName)
+    self.scene = ZO_Scene:New(sceneName, SCENE_MANAGER)
+end
+
+function ZO_LeaderboardsManager_Shared:GetScene()
+    return self.scene
 end
 
 function ZO_LeaderboardsManager_Shared:SetSelectedLeaderboardObject(leaderboardObject, subType)
@@ -169,12 +185,14 @@ function ZO_LeaderboardsManager_Shared:RefreshLeaderboardType(leaderboardType)
     -- Should be overridden
 end
 
-function ZO_LeaderboardsManager_Shared:RegisterMasterListUpdatedCallback(scene)
-    CALLBACK_MANAGER:RegisterCallback("OnLeaderboardMasterListUpdated", function()
-        if scene:IsShowing() then
-            self:OnLeaderboardDataChanged(self.leaderboardObject)
-        end
-    end)
+function ZO_LeaderboardsManager_Shared:RepopulateFilterDropdown()
+    -- Should be overridden
+end
+
+function ZO_LeaderboardsManager_Shared:QueryData()
+    QueryCampaignLeaderboardData()
+    QueryRaidLeaderboardData()
+    QueryBattlegroundLeaderboardData()
 end
 
 function ZO_LeaderboardsManager_Shared:GetLeaderboardTitleName(titleName, subType)
@@ -184,18 +202,15 @@ end
 function ZO_LeaderboardsManager_Shared:OnLeaderboardSelected(data)
     self:SetSelectedLeaderboardObject(data.leaderboardObject, data.subType)
 
-    local oldRankType = LEADERBOARD_LIST_MANAGER.leaderboardRankType
-    LEADERBOARD_LIST_MANAGER:SetSelectedLeaderboard(data)
-
-    if oldRankType ~= data.leaderboardRankType then
-        self:RepopulateFilterDropdown()
+    if self:GetScene():IsShowing() then
+        LEADERBOARD_LIST_MANAGER:SetSelectedLeaderboard(data)
     end
 
     local titleName = self:GetLeaderboardTitleName(data.titleName, data.subType)
     self:SetActiveLeaderboardTitle(titleName)
     self:RefreshLeaderboardType(data.leaderboardRankType)
 
-    self.pointsHeaderLabel:SetText(data.pointsHeaderString or GetString(SI_CAMPAIGN_LEADERBOARDS_HEADER_POINTS))
+    self.pointsHeaderLabel:SetText(data.pointsHeaderString or GetString(SI_LEADERBOARDS_HEADER_POINTS))
 
     self:RefreshData()
 end
@@ -213,7 +228,6 @@ end
 
 function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data)
     local leaderboardData = self:GetSelectedLeaderboardData()
-    local isHousingLeaderboard = leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_HOUSE
 
     --Rank
     control.rankLabel:SetHidden(data.rank == 0)
@@ -225,12 +239,17 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
     control.nameLabel:SetText(nameToUse)
         
     --House
-    if isHousingLeaderboard then
+    if leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_HOUSE then
         control.classIcon:SetHidden(true)
         control.allianceIcon:SetHidden(true)
 
         control.houseLabel:SetHidden(false)
         control.houseLabel:SetText(data.houseName)
+    --Battleground
+    elseif leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_BATTLEGROUND then
+        control.houseLabel:SetHidden(true)
+        control.classIcon:SetHidden(true)
+        control.allianceIcon:SetHidden(true)
     --Class/Alliance
     else
         control.houseLabel:SetHidden(true)
@@ -268,37 +287,53 @@ function ZO_LeaderboardsManager_Shared:CommitScrollList()
     ZO_SortFilterList.CommitScrollList(self)
 end
 
-function ZO_LeaderboardsManager_Shared:GetRowColors(data)
-    local textColor = ZO_SECOND_CONTRAST_TEXT
-    local iconColor = ZO_SELECTED_TEXT
+do
+    local INCLUDE_ALL_FILTER =
+    {
+        [LEADERBOARD_TYPE_OVERALL] = true,
+        [LEADERBOARD_TYPE_ALLIANCE] = true,
+        [LEADERBOARD_TYPE_HOUSE] = true,
+        [LEADERBOARD_TYPE_BATTLEGROUND] = true,
+    }
 
-    return textColor, iconColor
-end
+    local INCLUDE_CLASS_FILTERS =
+    {
+        [LEADERBOARD_TYPE_OVERALL] = true,
+        [LEADERBOARD_TYPE_ALLIANCE] = true,
+        [LEADERBOARD_TYPE_CLASS] = true,
+    }
 
-function ZO_Leaderboards_PopulateDropdownFilter(dropdown, changedCallback, leaderboardType)
-    dropdown:ClearItems()
-    local defaultToPlayerClass = leaderboardType == LEADERBOARD_TYPE_CLASS
-    local includeAllFilter = not isClassType
-    local defaultIndex = 1
-    local desiredClass = defaultToPlayerClass and GetUnitClassId("player")
-    local currentIndex = 0
-    if includeAllFilter then
-        local entry = ZO_ComboBox:CreateItemEntry(GetString(SI_LEADERBOARDS_FILTER_ALL_CLASSES), changedCallback)
-        dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-        currentIndex = currentIndex + 1
-    end
+    function ZO_Leaderboards_PopulateDropdownFilter(dropdown, changedCallback, leaderboardType)
+        dropdown:ClearItems()
 
-    for i = 1, GetNumClasses() do
-        local classId = GetClassInfo(i)
-        local className = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
-        local entry = ZO_ComboBox:CreateItemEntry(className, changedCallback)
-        entry.classId = classId
-        dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-        currentIndex = currentIndex + 1
-        if desiredClass and desiredClass == classId then
-            defaultIndex = currentIndex
+        local defaultIndex = 1
+        local currentIndex = 0
+
+        local includeAllFilter = INCLUDE_ALL_FILTER[leaderboardType]
+        if includeAllFilter then
+            local entry = ZO_ComboBox:CreateItemEntry(GetString(SI_LEADERBOARDS_FILTER_ALL_CLASSES), changedCallback)
+            dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            currentIndex = currentIndex + 1
         end
+
+        if INCLUDE_CLASS_FILTERS[leaderboardType] then
+            local desiredClass = not includeAllFilter and GetUnitClassId("player")
+
+            for i = 1, GetNumClasses() do
+                local classId = GetClassInfo(i)
+                local className = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
+                local entry = ZO_ComboBox:CreateItemEntry(className, changedCallback)
+                entry.classId = classId
+                dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                currentIndex = currentIndex + 1
+                if desiredClass and desiredClass == classId then
+                    defaultIndex = currentIndex
+                end
+            end
+        end
+
+        local IGNORE_CALLBACK = true
+        dropdown:SelectItemByIndex(defaultIndex, IGNORE_CALLBACK)
+        dropdown:GetContainer():SetHidden(currentIndex == 1)
     end
-    local IGNORE_CALLBACK = true
-    dropdown:SelectItemByIndex(defaultIndex, IGNORE_CALLBACK)
 end

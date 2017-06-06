@@ -133,7 +133,7 @@
                         <Label name="$(parent)Alliance" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_ALLIANCE">
                             <Anchor point="CENTER" relativePoint="LEFT" offsetX="395" />
                         </Label>
-                        <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_CAMPAIGN_LEADERBOARDS_HEADER_POINTS">
+                        <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_POINTS">
                             <Anchor point="CENTER" relativePoint="LEFT" offsetX="560"/>
                         </Label>
                     </Controls>

@@ -29,16 +29,22 @@ end
 
 function ZO_NewSkillCalloutManager:InitializeSkillList()
     self.currentSkillList = {}
+
     for skillType = 1, GetNumSkillTypes() do
         for skillLineIndex = 1, GetNumSkillLines(skillType) do 
             self:AddSkillLineToList(skillType, skillLineIndex)
             
+            -- Initialize all "recently updated" flags to false
             local skillLineName = GetSkillLineInfo(skillType, skillLineIndex)
-            local abilityList = self.currentSkillList[skillLineName]
-            if abilityList then 
-                for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do
-                    if abilityList[abilityIndex] then
-                        abilityList[abilityIndex].isNew = false --initialize all news to false
+            local entry = self:GetSkillLineEntry(skillLineName)
+            if entry then
+                entry.isNew = false
+
+                if entry.abilityList then
+                    for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do
+                        if entry.abilityList[abilityIndex] then
+                            entry.abilityList[abilityIndex].isNewlyAvailable = false
+                        end
                     end
                 end
             end
@@ -48,22 +54,22 @@ end
 
 function ZO_NewSkillCalloutManager:UpdateAbility(skillType, skillLineIndex, abilityIndex)
     local skillLineName, currentSkillRank = GetSkillLineInfo(skillType, skillLineIndex)
-    local abilityList = self.currentSkillList[skillLineName]
+    local abilityList = self:GetAbilityList(skillLineName)
     if abilityList ~= nil then
         local _,_,earnedRank,_,_,_,progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
         local atMorph = progressionIndex and select(4, GetAbilityProgressionXPInfo(progressionIndex))
 
-        if abilityList[abilityIndex] and not abilityList[abilityIndex].isNew then
+        if abilityList[abilityIndex] then
             if atMorph and not abilityList[abilityIndex].atMorph then
                 abilityList[abilityIndex].atMorph = true
-                abilityList[abilityIndex].isNew = true
+                abilityList[abilityIndex].isNewlyAvailable = true  -- remark this as updated to better highlight that a morph is now available
             end
         end
         if not abilityList[abilityIndex] and earnedRank <= currentSkillRank then
             abilityList[abilityIndex] =
             {
                 atMorph = atMorph,
-                isNew = true,       --new ability that came with new skill line
+                isNewlyAvailable = true,       --new ability that came with new skill line
             }                  
         end
     end
@@ -71,7 +77,7 @@ end
 
 function ZO_NewSkillCalloutManager:UpdateSkillLine(skillType, skillLineIndex)
     local skillLineName = GetSkillLineInfo(skillType, skillLineIndex)
-    local abilityList = self.currentSkillList[skillLineName]
+    local abilityList = self:GetAbilityList(skillLineName)
 
     if abilityList == nil then  -- add new skill line to list
         self:AddSkillLineToList(skillType, skillLineIndex)
@@ -83,8 +89,12 @@ function ZO_NewSkillCalloutManager:UpdateSkillLine(skillType, skillLineIndex)
 end
 
 function ZO_NewSkillCalloutManager:AddSkillLineToList(skillType, skillLineIndex)
+    local skillLineName, currentSkillRank, discovered = GetSkillLineInfo(skillType, skillLineIndex)
+    if not discovered then
+        return
+    end
+
     local abilityList = {}
-    local skillLineName, currentSkillRank = GetSkillLineInfo(skillType, skillLineIndex)
     for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do  
 
         local _,_,earnedRank,_,_,_,progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
@@ -95,17 +105,18 @@ function ZO_NewSkillCalloutManager:AddSkillLineToList(skillType, skillLineIndex)
             abilityList[abilityIndex] =
             {
                 atMorph = atMorph,
-                isNew = unlocked,       --new ability that came with new skill line
+                isNewlyAvailable = unlocked,       --new ability that came with new skill line
             }
         end
     end
-    self.currentSkillList[skillLineName] = abilityList
+
+    self.currentSkillList[skillLineName] = {abilityList = abilityList, isNew = true}
 end
 
-function ZO_NewSkillCalloutManager:AreAnySkillsNew()
+function ZO_NewSkillCalloutManager:AreAnySkillLinesNew(includeAbilities)
     for skillType = 1, GetNumSkillTypes() do
         for skillLineIndex = 1, GetNumSkillLines(skillType) do
-            if self:IsSkillLineNew(skillType, skillLineIndex) then
+            if self:IsSkillLineNew(skillType, skillLineIndex, includeAbilities) then
                 return true
             end
         end
@@ -114,44 +125,88 @@ function ZO_NewSkillCalloutManager:AreAnySkillsNew()
     return false
 end
 
-function ZO_NewSkillCalloutManager:IsSkillLineNew(skillType, skillLineIndex)
+function ZO_NewSkillCalloutManager:AreAnySkillLinesInTypeNew(skillType, includeAbilities)
+    for skillLineIndex = 1, GetNumSkillLines(skillType) do
+        if self:IsSkillLineNew(skillType, skillLineIndex, includeAbilities) then
+            return true
+        end
+    end
+
+    return false
+end
+
+function ZO_NewSkillCalloutManager:IsSkillLineNew(skillType, skillLineIndex, includeAbilities)
     
     local skillLineName = GetSkillLineInfo(skillType, skillLineIndex)
-    local abilityList = self.currentSkillList[skillLineName]
+    local entry = self:GetSkillLineEntry(skillLineName)
 
-    if abilityList == nil then
+    if entry == nil then
+        return false
+    end
+
+    if entry.isNew then
         return true
     end
 
-    for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do
-        if self:IsAbilityNew(skillType, skillLineIndex, abilityIndex) then
-            return true     --a skill line got a new ability
+    if includeAbilities then
+        if entry.abilityList then
+            for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do
+                if self:DoesAbilityHaveUpdates(skillType, skillLineIndex, abilityIndex) then
+                    return true     --a skill line got a newly updated ability
+                end
+            end
         end
     end
 
     return false
 end
 
-function ZO_NewSkillCalloutManager:IsAbilityNew(skillType, skillLineIndex, abilityIndex)
+function ZO_NewSkillCalloutManager:DoesAbilityHaveUpdates(skillType, skillLineIndex, abilityIndex)
     local skillLineName = GetSkillLineInfo(skillType, skillLineIndex)
-    local abilityList = self.currentSkillList[skillLineName]
+    local abilityList = self:GetAbilityList(skillLineName)
 
     if abilityList ~= nil and abilityList[abilityIndex] then
-        if abilityList[abilityIndex].isNew and abilityList[abilityIndex].atMorph then
-            return true -- abilities are now only new if they are at their morph stage
+        -- To be considered updated, the ability must be both newly available (unlocked) and morphable.  We don't treat as updated when first unlocked
+        -- because that feels too spammy.
+        if abilityList[abilityIndex].isNewlyAvailable and abilityList[abilityIndex].atMorph then
+            return true
         end
     end
 
     return false
 end
 
-function ZO_NewSkillCalloutManager:ClearNewStatusOnAbilities(skillType, skillLineIndex, abilityIndex)
+function ZO_NewSkillCalloutManager:ClearAbilityUpdatedStatus(skillType, skillLineIndex, abilityIndex)
     local skillLineName = GetSkillLineInfo(skillType, skillLineIndex)
-    local abilityList = self.currentSkillList[skillLineName]
+    local abilityList = self:GetAbilityList(skillLineName)
 
-    if abilityList ~= nil and abilityList[abilityIndex] then
-        abilityList[abilityIndex].isNew = false
+    if abilityList ~= nil and abilityList[abilityIndex] and abilityList[abilityIndex].isNewlyAvailable then
+        abilityList[abilityIndex].isNewlyAvailable = false
+        self:FireCallbacks("OnAbilityUpdatedStatusChanged", skillType, skillLineIndex, abilityIndex)
     end
+end
+
+function ZO_NewSkillCalloutManager:ClearSkillLineNewStatus(skillType, skillLineIndex)
+    local skillLineName = GetSkillLineInfo(skillType, skillLineIndex)
+    local entry = self:GetSkillLineEntry(skillLineName)
+
+    if entry ~= nil and entry.isNew then
+        entry.isNew = false
+        self:FireCallbacks("OnSkillLineNewStatusChanged", skillType, skillLineIndex)
+    end
+end
+
+function ZO_NewSkillCalloutManager:GetSkillLineEntry(skillLineName)
+    return self.currentSkillList[skillLineName]
+end
+
+function ZO_NewSkillCalloutManager:GetAbilityList(skillLineName)
+    local skillLineEntry = self:GetSkillLineEntry(skillLineName)
+    if skillLineEntry then
+        return skillLineEntry.abilityList
+    end
+
+    return nil
 end
 
 NEW_SKILL_CALLOUTS = ZO_NewSkillCalloutManager:New()

@@ -25,9 +25,9 @@ function GamepadArmorFilter:PopulateSubTypes(comboBox, entryName, entry)
     local entryEquipTypeData = categoryComboBoxData:GetData()[selectedEntryIndex][EQUIP_TYPE_INDEX]
     
     local forceRepopulate = true    
-    if not filterEquipTypeData and subTypeComboBoxData:IsVisible() then
+    if not entryEquipTypeData and subTypeComboBoxData:IsVisible() then
         subTypeComboBoxData:SetVisible(false)
-    elseif filterEquipTypeData and not subTypeComboBoxData:IsVisible() then
+    elseif entryEquipTypeData and not subTypeComboBoxData:IsVisible() then
         subTypeComboBoxData:SetVisible(true)
     else
         forceRepopulate = false

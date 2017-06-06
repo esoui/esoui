@@ -220,9 +220,9 @@ end
 function ZO_Help_MechanicAssistance_Gamepad:ValidateTicketFields()
     local selectedCategoryData = self.categoryDropdown:GetSelectedItemData()
     local savedDetails = self:GetSavedField(ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.DETAILS)
-    local savedCategoryIndex = self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.CATEGORY]
+    local savedCategoryValue = self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.CATEGORY]
     local savedDescription = self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.DESCRIPTION]
-    if savedCategoryIndex == self.mechanicCategoriesData.invalidCategory then
+    if savedCategoryValue == self.mechanicCategoriesData.invalidCategory then
         return TICKET_VALIDATION_STATUS.FAILED_NO_CATEGORY
     elseif self:DetailsRequired() and (not savedDetails or savedDetails == "") then
         return TICKET_VALIDATION_STATUS.FAILED_NO_DETAILS
@@ -263,7 +263,7 @@ function ZO_Help_MechanicAssistance_Gamepad:SetupList(list)
     ZO_Gamepad_ParametricList_Screen.SetupList(self, list)
     
     local function OnCategorySelectionChanged(control, name, entry, selectionChanged)
-        self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.CATEGORY] = entry.index
+        self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.CATEGORY] = entry.categoryEnumValue
     end
 
     local function SetupCategoryListEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -272,17 +272,17 @@ function ZO_Help_MechanicAssistance_Gamepad:SetupList(list)
         local dropdown = control.dropdown
         dropdown:SetSortsItems(false)
         dropdown:ClearItems()
-        local savedCategoryIndex = self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.CATEGORY]
+        local savedCategoryValue = self.savedFields[ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.CATEGORY]
         local savedDropdownIndex = 1
         local currentDropdownIndex = 1
         local mechanicCategoriesData = self.mechanicCategoriesData
-        for i = mechanicCategoriesData.categoryEnumMin, mechanicCategoriesData.categoryEnumMax do
-            local name = GetString(mechanicCategoriesData.categoryEnumStringPrefix, i)
+        for _, enumValue in ipairs(mechanicCategoriesData.categoryEnumOrderedValues) do
+            local name = GetString(mechanicCategoriesData.categoryEnumStringPrefix, enumValue)
             if name ~= nil then
                 local entry = ZO_ComboBox:CreateItemEntry(name, OnCategorySelectionChanged)
-                entry.index = i
+                entry.categoryEnumValue = enumValue
                 dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-                if savedCategoryIndex == i then
+                if savedCategoryValue == enumValue then
                     savedDropdownIndex = currentDropdownIndex
                 end
                 currentDropdownIndex = currentDropdownIndex + 1

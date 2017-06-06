@@ -155,6 +155,7 @@ end
 do
     local MARKET_PRODUCT_SORT_KEYS =
         {
+            isPromo = { tiebreaker = "isLimitedTime", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
             isLimitedTime = {tiebreaker = "timeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
             timeLeft = {isNumeric = true, tiebreaker = "containsDLC", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
             containsDLC = { tiebreaker = "isNew", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
@@ -163,7 +164,7 @@ do
         }
 
     function CompareMarketProducts(entry1, entry2)
-        return ZO_TableOrderingFunction(entry1, entry2, "isLimitedTime", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_DOWN)
+        return ZO_TableOrderingFunction(entry1, entry2, "isPromo", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_DOWN)
     end
 
     function ZO_MarketAnnouncement_Base:OnShowing()
@@ -183,6 +184,7 @@ do
                     local containsDLC = DoesMarketProductContainDLC(productId)
                     -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
                     local isLimitedTime = timeLeft > 0 and timeLeft <= ZO_ONE_MONTH_IN_SECONDS
+                    local isPromo = marketProduct:IsPromo()
                     local productInfo = {
                                             marketProduct = marketProduct,
                                             isLimitedTime = isLimitedTime,
@@ -190,6 +192,7 @@ do
                                             isNew = isNew,
                                             name = name,
                                             containsDLC = containsDLC,
+                                            isPromo = isPromo,
                                         }
 
                     table.insert(productInfoTable, productInfo)

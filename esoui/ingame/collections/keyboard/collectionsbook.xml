@@ -25,7 +25,7 @@
             <Controls>
                 <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
                     <Dimensions x="24" y="24" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
                 </Texture>
             </Controls>
         </Label>

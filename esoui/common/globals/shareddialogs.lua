@@ -114,11 +114,168 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
             text = SI_URL_DIALOG_OPEN,
             callback =  function(dialog)
                             OpenURLByType(dialog.data.urlType)
+                            dialog.data.confirmed = true
                         end,
         },
         [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
-    }
+    },
+    finishedCallback = function(dialog)
+        if dialog.data.finishedCallback then
+            dialog.data.finishedCallback(dialog)
+        end
+    end,
+}
+
+ESO_Dialogs["CHAPTER_UPGRADE_STORE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    canQueue = true,
+
+    title =
+    {
+        text = SI_CHAPTER_UPGRADE_DIALOG_TITLE
+    },
+
+    mainText =
+    {
+        text = function()
+            if ShouldOpenURLTypeInOverlay(APPROVED_URL_ESO_CHAPTER_UPGRADE) then
+                return SI_OPEN_CHAPTER_UPGRADE_STEAM
+            else
+                return zo_strformat(SI_OPEN_CHAPTER_UPGRADE, ZO_GetPlatformStoreName())
+            end
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_LOG_OUT_UPGRADE,
+            callback = function(dialog)
+                            OpenURLByType(APPROVED_URL_ESO_CHAPTER_UPGRADE)
+                            ZO_Disconnect()
+                        end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CHAPTER_UPGRADE_STORE_CONSOLE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    canQueue = true,
+
+    title =
+    {
+        text = SI_CHAPTER_UPGRADE_DIALOG_TITLE
+    },
+
+    mainText =
+    {
+        text = function()
+            return zo_strformat(SI_OPEN_CHAPTER_UPGRADE_CONSOLE, ZO_GetPlatformStoreName())
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_LOG_OUT_UPGRADE,
+            callback = function(dialog)
+                            ShowConsoleESOChapterUpgradeUI()
+                            ZO_Disconnect()
+                        end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["SHOW_REDEEM_CODE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ENTER_CODE_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_OPEN_ENTER_CODE_PAGE,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_LOG_OUT_ENTER_CODE,
+            callback = function(dialog)
+                            OpenURLByType(APPROVED_URL_ESO_ACCOUNT)
+                            ZO_Disconnect()
+                       end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_ENTER_CODE_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_ENTER_CODE_DIALOG_BODY,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_LOG_OUT_ENTER_CODE,
+            callback = function(dialog)
+                            ShowConsoleRedeemCodeUI()
+                            ZO_Disconnect()
+                       end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
 }

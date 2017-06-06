@@ -138,13 +138,13 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
         insufficientFundsButtons[1] =
         {
-            text = zo_strformat(SI_GAMEPAD_MARKET_OPEN_FIRST_PARTY_STORE_KEYBIND, consoleStoreName),
+            text = zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, consoleStoreName),
             callback = OpenConsoleStoreToPurchaseCrowns
         }
 
         buyCrownsButtons[1] =
         {
-            text = zo_strformat(SI_GAMEPAD_MARKET_OPEN_FIRST_PARTY_STORE_KEYBIND, consoleStoreName),
+            text = zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, consoleStoreName),
             callback = OpenConsoleStoreToPurchaseCrowns
         }
 
@@ -525,13 +525,16 @@ do
 
     local function CreateMarketPurchaseListEntry(marketProductId)
         local name = GetMarketProductDisplayName(marketProductId)
+        local productQuality = GetMarketProductQuality(marketProductId)
+        local color = GetItemQualityColor(productQuality)
+        local colorizedName = color:Colorize(name)
         local formattedName
 
         local stackCount = GetMarketProductStackCount(marketProductId)
         if stackCount > 1 then
-            formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, name, stackCount)
+            formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, colorizedName, stackCount)
         else
-            formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
+            formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, colorizedName)
         end
 
         local entryTable = {
@@ -549,19 +552,21 @@ do
         local marketProduct = self.marketProduct
         local marketProductId = self.marketProductId
         local productName, description, productIcon = GetMarketProductInfo(self.marketProductId)
+        local productQuality = GetMarketProductQuality(self.marketProductId)
         local isBundle = GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
         self.hasItems = GetMarketProductNumItems(self.marketProductId) > 0
         self.stackCount = 0
 
-        local formattedProductName
+        local color = GetItemQualityColor(productQuality)
+        local colorizedName = color:Colorize(productName)
         if not isBundle then
             self.stackCount = GetMarketProductStackCount(self.marketProductId)
             dialog.listHeader = nil
         else
-            dialog.listHeader = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, productName)
+            dialog.listHeader = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, colorizedName)
         end
 
-        self.itemName = productName
+        self.itemName = colorizedName
 
         local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(self.marketProductId)
 

@@ -1,13 +1,13 @@
 local MAX_CHATTER_OPTIONS = 10 -- keep this updated with the keybinds
 local CHATTER_OPTION_INDENT = 30
 
-local REWARD_STRIDE = 2
-local REWARD_PADDING_X = 20
+local REWARD_STRIDE = 3
+local REWARD_PADDING_X = 10
 local REWARD_PADDING_Y = 10
-local REWARD_SIZE_X = 240
-local REWARD_SIZE_Y = 52
 local REWARD_ROOT_OFFSET_X = 0
 local REWARD_ROOT_OFFSET_Y = 10
+ZO_REWARD_SIZE_X = 290
+ZO_REWARD_SIZE_Y = 56
 
 local ENABLED_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CHATTER_PLAYER_OPTION))
 local SEEN_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_DISABLED))
@@ -124,11 +124,9 @@ function ZO_Interaction:OnScreenResized()
 end
 
 function ZO_Interaction:DimOtherImportantOptions(chatterControl)
-    if chatterControl.isImportant then
-        for i, control in ipairs(self.importantOptions) do
-            if control ~= chatterControl then
-                control:SetColor(DISABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
-            end
+    for i, control in ipairs(self.importantOptions) do
+        if control ~= chatterControl then
+            control:SetColor(DISABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
         end
     end
 end
@@ -280,7 +278,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 creatorFunc(control, reward.name, reward.amount, reward.icon, reward.meetsUsageRequirement, reward.quality, reward.itemType)
 
                 -- Money rewards do not get box-anchored, they're shown after all the reward icons (or immediately if there were no icons)
-                ZO_Anchor_BoxLayout(ROOT_REWARD_ANCHOR, control, anchorIndex, REWARD_STRIDE, REWARD_PADDING_X, REWARD_PADDING_Y, REWARD_SIZE_X, REWARD_SIZE_Y, REWARD_ROOT_OFFSET_X, REWARD_ROOT_OFFSET_Y)
+                ZO_Anchor_BoxLayout(ROOT_REWARD_ANCHOR, control, anchorIndex, REWARD_STRIDE, REWARD_PADDING_X, REWARD_PADDING_Y, ZO_REWARD_SIZE_X, ZO_REWARD_SIZE_Y, REWARD_ROOT_OFFSET_X, REWARD_ROOT_OFFSET_Y)
                 anchorIndex = anchorIndex + 1
 
                 -- Controls in the first column and last row serve as the anchor for the money reward control
@@ -291,7 +289,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
         end
     end
 
-    local rewardWindowHeight = zo_ceil(anchorIndex / REWARD_STRIDE) * (REWARD_SIZE_Y + REWARD_PADDING_Y) + 50
+    local rewardWindowHeight = zo_ceil(anchorIndex / REWARD_STRIDE) * (ZO_REWARD_SIZE_Y + REWARD_PADDING_Y) + 50
     local initialMoneyControl = moneyControls[1]
 
     if(initialMoneyControl) then
@@ -342,7 +340,7 @@ function ZO_ChatterOption_MouseEnter(label)
     highlight:SetAnchorFill(label)
     highlight:SetHidden(false)
 
-    if label.isImportant then
+    if label.optionType ~= CHATTER_GOODBYE then
         INTERACTION:DimOtherImportantOptions(label)
     end
 
@@ -352,7 +350,7 @@ end
 function ZO_ChatterOption_MouseExit(label)
     ZO_InteractWindowPlayerAreaHighlight:SetHidden(true)
 
-    if label.isImportant then
+    if label.optionType ~= CHATTER_GOODBYE then
         INTERACTION:RestoreOtherImportantOptions(label)
     end
 
@@ -382,6 +380,24 @@ function ZO_QuestReward_MouseExit(control)
             ZO_PlayHideAnimationOnComparisonTooltip(ComparativeTooltip1)
             ZO_PlayHideAnimationOnComparisonTooltip(ComparativeTooltip2)
         end
+    end
+end
+
+function ZO_QuestRewardName_MouseEnter(label)
+    local questRewardControl = label:GetParent()
+    if questRewardControl.allowTooltip then
+        ZO_QuestReward_MouseEnter(questRewardControl)
+    else
+        ZO_TooltipIfTruncatedLabel_OnMouseEnter(label)
+    end
+end
+
+function ZO_QuestRewardName_MouseExit(label)
+    local questRewardControl = label:GetParent()
+    if questRewardControl.allowTooltip then
+        ZO_QuestReward_MouseExit(questRewardControl)
+    else
+        ZO_TooltipIfTruncatedLabel_OnMouseExit(label)
     end
 end
 

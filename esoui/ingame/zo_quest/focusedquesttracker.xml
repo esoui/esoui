@@ -30,7 +30,7 @@
                     </OnInitialized>
                 </Control>
 
-                <Control name="$(parent)Container" resizeToFitDescendents="true" hidden="true">
+                <Control name="$(parent)Container" hidden="true">
                     <AnchorFill />
                     <Controls>
                         <Control name="$(parent)QuestContainer" mouseEnabled="true" resizeToFitDescendents="true">

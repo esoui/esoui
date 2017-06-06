@@ -39,14 +39,6 @@
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
         </Control>
-        
-        <Control name="ZO_GamepadNotificationsLFGJumpDungeonRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
-                self.acceptText = GetString(SI_LFG_JUMP_TO_DUNGEON_ACCEPT)
-            </OnInitialized>
-        </Control>
       
         <Control name="ZO_GamepadNotificationsLFGReadyCheckRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
@@ -83,7 +75,16 @@
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
         </Control>
-                
+
+        <Control name="ZO_GamepadNotificationsEsoPlusSubscriptionRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_VIEW_BENEFITS)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
+            </OnInitialized>
+        </Control>
+
         <TopLevelControl name="ZO_GamepadNotifications" hidden="true"  inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GamepadNotifications_OnInitialized(self)

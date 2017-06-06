@@ -3,22 +3,52 @@
 
 local DeathType = ZO_Object:Subclass()
 
-function DeathType:New(control)
+function DeathType:New(...)
     local deathType = ZO_Object.New(self)
-    deathType.control = control
-    deathType.buttons = { GetControl(control, "Button1"), GetControl(control, "Button2"), GetControl(control, "Button3") }
-    if(deathType.buttons[1]) then
-        deathType.buttons[1]:SetKeybind("DEATH_PRIMARY")
-    end
-    if(deathType.buttons[2]) then
-        deathType.buttons[2]:SetKeybind("DEATH_SECONDARY")
-    end
-    if(deathType.buttons[3]) then
-        deathType.buttons[3]:SetKeybind("DEATH_TERTIARY")
-    end
-    deathType.deathRecapToggleButton = control:GetNamedChild("DeathRecapToggleButton")
-    
+    deathType:Initialize(...)    
     return deathType
+end
+
+do
+    local BUTTON_KEYBINDS = { "DEATH_PRIMARY", "DEATH_SECONDARY", "DEATH_TERTIARY" }
+
+    function DeathType:Initialize(control)
+        self.control = control
+
+        self.buttons = { GetControl(control, "Button1"), GetControl(control, "Button2"), GetControl(control, "Button3") }
+        for i, button in ipairs(self.buttons) do
+            self:MixinDeathKeybindButton(button)
+            button:SetKeybind(BUTTON_KEYBINDS[i])
+        end
+    
+        local deathRecapToggleButton = control:GetNamedChild("DeathRecapToggleButton")
+        if deathRecapToggleButton then
+            self:MixinDeathKeybindButton(deathRecapToggleButton)
+            deathRecapToggleButton:SetText(GetString(SI_DEATH_RECAP_TOGGLE_KEYBIND))
+            deathRecapToggleButton:SetKeybind("DEATH_RECAP_TOGGLE")
+            deathRecapToggleButton:SetCallback(function() DEATH_RECAP:SetWindowOpen(not DEATH_RECAP:IsWindowOpen()) end)
+            self.deathRecapToggleButton = deathRecapToggleButton
+        end
+    end
+end
+
+do
+    local DeathKeybindButtonMixin =
+    {     
+        SetText = function(control, text)
+            control.originalText = text
+            ZO_KeybindButtonMixin.SetText(control, text)
+        end,
+        RefreshText = function(control)
+            if control.originalText then
+                ZO_KeybindButtonMixin.SetText(control, control.originalText)
+            end
+        end,
+    }
+
+    function DeathType:MixinDeathKeybindButton(button)
+        zo_mixin(button, DeathKeybindButtonMixin)
+    end
 end
 
 function DeathType:SetDeathRecapToggleButtonEnabled(enabled)
@@ -112,14 +142,16 @@ function DeathType:LayoutHereButton(hereButton)
     end
     
     local level = GetUnitEffectiveLevel("player")
-    local name, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level) 
-    hereButton:SetEnabled(soulGemStackCount > 0 or freeRevive)
+    local name, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level)
+    local enabled = (soulGemStackCount > 0 or freeRevive) and not self:AreButtonsDisabledDueToCyclicRespawn()
+    hereButton:SetEnabled(enabled)
     
     local soulGemSuccess, coloredFilledText, coloredSoulGemIconMarkup = ZO_Death_GetResurrectSoulGemText(level)
     hereButton:SetText(zo_strformat(soulGemSuccess and SI_DEATH_PROMPT_HERE_GEM or SI_DEATH_PROMPT_HERE_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup))
+end
 
-    local reviveTextControl = hereButton:GetNamedChild("ReviveText")
-    reviveTextControl:SetText(GetString(SI_DEATH_PROMPT_REVIVE_LABEL))
+function DeathType:AreButtonsDisabledDueToCyclicRespawn()
+    return IsQueuedForCyclicRespawn() and not IsResurrectPending()
 end
 
 function DeathType:LayoutWayshrineButton(wayshrineButton)
@@ -128,34 +160,27 @@ function DeathType:LayoutWayshrineButton(wayshrineButton)
 	else
 		wayshrineButton:SetText(GetString(SI_DEATH_PROMPT_WAYSHRINE))
     end
-
-    local reviveTextControl = wayshrineButton:GetNamedChild("ReviveText")
-    reviveTextControl:SetText(GetString(SI_DEATH_PROMPT_REVIVE_LABEL))
 end
 
-function DeathType:UpdateButtonsEnabled()
-    local button1 = self:GetButton(1)
-    local button2 = self:GetButton(2)
-    if IsQueuedForCyclicRespawn() and not IsResurrectPending() then
-        if button1 then
-            button1:SetEnabled(false)
-        end
-        if button2 then
-            button2:SetEnabled(false)
-        end
+function DeathType:ApplyStyleToKeybindButton(button, isGamepad)
+    local reviveTextLabel = button:GetNamedChild("ReviveText")
+    local buttonTemplate
+    if reviveTextLabel then
+        buttonTemplate = ZO_GetPlatformTemplate("ZO_DeathReviveButton")
     else
-        if button1 then
-            button1:SetEnabled(true)
-        end
-        if button2 then
-            button2:SetEnabled(true)
-        end
+        buttonTemplate = ZO_GetPlatformTemplate("ZO_DeathKeybindButton")
     end
+    ApplyTemplateToControl(button, buttonTemplate)
+    button:SetNormalTextColor(isGamepad and ZO_SELECTED_TEXT or ZO_NORMAL_TEXT)
+    button:RefreshText()
 end
 
-function LayoutDeathRecapToggleButton(deathRecapToggleButton)
-    if deathRecapToggleButton then
-        deathRecapToggleButton:SetText(GetString(SI_DEATH_RECAP_TOGGLE_KEYBIND))
+function DeathType:ApplyStyle(isGamepad)
+    for i, button in ipairs(self.buttons) do
+        self:ApplyStyleToKeybindButton(button, isGamepad)
+    end
+    if self.deathRecapToggleButton then
+        self:ApplyStyleToKeybindButton(self.deathRecapToggleButton, isGamepad)
     end
 end
 
@@ -264,6 +289,10 @@ function ImperialPvPDeath:UpdateDisplay()
             self.timerCooldown:SetHidden(true)
         end
     end
+
+    local enabled = not self:AreButtonsDisabledDueToCyclicRespawn()
+    self:GetButton(1):SetEnabled(enabled)
+    self:GetButton(2):SetEnabled(enabled)
 end
 
 --Cyclic Respawn Death Type
@@ -321,7 +350,6 @@ end
 function ImperialPvEDeath:UpdateDisplay()
     if self:CheckUpdateTimer() then
         self:LayoutHereButton(self:GetButton(1))
-        self:UpdateButtonsEnabled()
     end
 end
 
@@ -335,12 +363,13 @@ function BGDeath:New(control)
 
     local button1 = bg:GetButton(1)
     button1:SetText(GetString(SI_DEATH_PROMPT_RELEASE))
-    button1:SetCallback(Release)
+    button1:SetCallback(JoinRespawnQueue)
 
-    return bg   
+    return bg
 end
 
 function BGDeath:UpdateDisplay()
+    self:GetButton(1):SetEnabled(not self:AreButtonsDisabledDueToCyclicRespawn())
 end
 
 --Release Only Death
@@ -395,7 +424,6 @@ function TwoOptionDeath:UpdateDisplay()
     if self:CheckUpdateTimer() then
         self:LayoutHereButton(self:GetButton(1))
         self:LayoutWayshrineButton(self:GetButton(2))
-        LayoutDeathRecapToggleButton(self.deathRecapToggleButton)
     end
 end
 
@@ -600,7 +628,6 @@ function Death:UpdateDisplay()
 
     if(self.currentType) then
         self.types[self.currentType]:UpdateDisplay()
-        self.types[self.currentType]:UpdateButtonsEnabled()
         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", false)
     else
         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", true)
@@ -621,42 +648,13 @@ function Death:UpdateBindingLayer()
     end
 end
 
-do
-    local function ApplyNormalColorToKeybind(keybind, color)
-        keybind:SetNormalTextColor(color)
+function Death:ApplyStyle()
+    local isGamepad = IsInGamepadPreferredMode()
+    for _, deathType in pairs(self.types) do
+        deathType:ApplyStyle(isGamepad)
     end
-
-    local function ApplyNormalColorToOneButton(buttons, color)
-        ApplyNormalColorToKeybind(GetControl(buttons, "Button1"), color)
-        ApplyNormalColorToKeybind(GetControl(buttons, "DeathRecapToggleButton"), color)
-    end
-
-    local function ApplyNormalColorToTwoButton(buttons, color)
-        ApplyNormalColorToOneButton(buttons, color)
-        ApplyNormalColorToKeybind(GetControl(buttons, "Button2"), color)
-    end
-
-    local function ApplyNormalColorToThreeButton(buttons, color)
-        ApplyNormalColorToTwoButton(buttons, color)
-        ApplyNormalColorToKeybind(GetControl(buttons, "Button3"), color)
-    end
-
-    local function ApplyNormalColorToDeath(control, color)
-        ApplyNormalColorToOneButton(control:GetNamedChild("AvA"), color)
-        ApplyNormalColorToOneButton(control:GetNamedChild("BG"), color)
-        ApplyNormalColorToOneButton(control:GetNamedChild("ReleaseOnly"), color)
-        ApplyNormalColorToTwoButton(control:GetNamedChild("TwoOption"), color)
-        ApplyNormalColorToTwoButton(control:GetNamedChild("Resurrect"), color)
-        ApplyNormalColorToTwoButton(control:GetNamedChild("ImperialPvP"), color)
-        ApplyNormalColorToTwoButton(control:GetNamedChild("ImperialPvE"), color)
-    end
-
-    function Death:ApplyStyle()
-        local isGamepad = IsInGamepadPreferredMode()
-        ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_Death"))
-        ApplyNormalColorToDeath(self.control, isGamepad and ZO_SELECTED_TEXT or ZO_NORMAL_TEXT)
-        self.types[DEATH_TYPE_IN_ENCOUNTER]:ApplyTemplateToMessage(ZO_GetPlatformTemplate("ZO_DeathInEncouterLoadingLabel"))
-    end
+    self.types[DEATH_TYPE_IN_ENCOUNTER]:ApplyTemplateToMessage(ZO_GetPlatformTemplate("ZO_DeathInEncouterLoadingLabel"))
+    ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_Death"))
 end
 
 --Cyclic Respawn Timer
@@ -703,10 +701,6 @@ function Death:SelectOption(keybind)
     if(self.currentType) then
         self.types[self.currentType]:SelectOption(keybind)
     end
-end
-
-function ZO_Death_ToggleDeathRecapCallback()
-    DEATH_RECAP:SetWindowOpen(not DEATH_RECAP:IsWindowOpen())
 end
 
 function Death:ToggleDeathRecap()

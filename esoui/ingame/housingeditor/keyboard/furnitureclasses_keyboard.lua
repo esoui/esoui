@@ -302,6 +302,8 @@ function ZO_HousingFurnitureList:Initialize(...)
     end
 
     self.freeSlotsLabel = self.contents:GetNamedChild("InfoBarFreeSlots")
+
+    self:InitializeThemeSelector()
 end
 
 function ZO_HousingFurnitureList:InitializeList()
@@ -453,6 +455,10 @@ function ZO_HousingFurnitureList:UpdateFreeSlots()
             self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
         end
     end
+end
+
+function ZO_HousingBrowserList:InitializeThemeSelector()
+    --Override
 end
 
 --

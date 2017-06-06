@@ -257,6 +257,14 @@ function ZO_VoiceChat_Manager:Initialize()
             historyData = HistoryData:New(),
         },
         [VOICE_CHANNEL_GUILD] = {}, --populates during channel retrieval
+        [VOICE_CHANNEL_BATTLEGROUP] = {
+            channelType = VOICE_CHANNEL_BATTLEGROUP,
+            guildId = 0,
+	        guildRoomNumber = 0,
+	        name = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_GROUP),
+            description = GetString(SI_GAMEPAD_VOICECHAT_CHANNEL_DESCRIPTION_GROUP),
+            historyData = HistoryData:New(),
+        },
     }
 
     --The guild ids are dirtied and will need to be refreshed for all guild channels whenever a guild is joined or left.
@@ -270,6 +278,7 @@ function ZO_VoiceChat_Manager:Initialize()
     self.participantsData[VOICE_CHANNEL_AREA] = ParticipantsData:New(SORT_BY_OCCURRENCE)
     self.participantsData[VOICE_CHANNEL_GROUP] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE)
     self.participantsData[VOICE_CHANNEL_GUILD] = {} --populates during channel retrieval
+    self.participantsData[VOICE_CHANNEL_BATTLEGROUP] = ParticipantsData:New(DONT_SORT_BY_OCCURRENCE)
 
     self.mutedUsers = {}
     self:UpdateMutes()
@@ -291,8 +300,13 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     local function DoLoginJoinsDefault()
         local areaChannel = self.channelData[VOICE_CHANNEL_AREA]
         local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+		local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
 
-        if groupChannel.isAvailable then
+        if bgChannel.isAvailable then
+            self:SetDesiredActiveChannel(bgChannel)
+            self:SetDesiredPassiveChannel(areaChannel)
+
+		elseif groupChannel.isAvailable then
             self:SetDesiredActiveChannel(groupChannel)
             self:SetDesiredPassiveChannel(areaChannel)
             
@@ -352,7 +366,10 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
 
     local function SwapOnLosingActiveGuildChannel()
         local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-        if groupChannel.isAvailable then
+        local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+        if bgChannel.isAvailable then
+            self:SetDesiredActiveChannel(bgChannel)
+        elseif groupChannel.isAvailable then
             self:SetDesiredActiveChannel(groupChannel)
         else
             self:SetDesiredActiveChannel(self.desiredPassiveChannel)
@@ -408,8 +425,11 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     
     local function OnGroupMemberJoined(rawCharacterName)
         if(GetRawUnitName("player") == rawCharacterName) then
-            local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-            self:SetAndSwapDesiredActiveChannel(groupChannel)
+            local bestGroupChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+			if not bestGroupChannel.isAvailable then
+				bestGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+			end
+            self:SetAndSwapDesiredActiveChannel(bestGroupChannel)
         end
     end
 
@@ -425,14 +445,14 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         local desiredActiveChannel = self.desiredActiveChannel
         if desiredActiveChannel then
             local channelType = desiredActiveChannel.channelType
-            if channelType == VOICE_CHANNEL_GUILD or channelType == VOICE_CHANNEL_GROUP then
+            if channelType == VOICE_CHANNEL_GUILD or channelType == VOICE_CHANNEL_GROUP or channelType == VOICE_CHANNEL_BATTLEGROUP then
                 return
             end
         end
         local desiredPassiveChannel = self.desiredPassiveChannel
         if desiredPassiveChannel then
             local channelType = desiredPassiveChannel.channelType
-            if channelType == VOICE_CHANNEL_GUILD or channelType == VOICE_CHANNEL_GROUP then
+            if channelType == VOICE_CHANNEL_GUILD or channelType == VOICE_CHANNEL_GROUP or channelType == VOICE_CHANNEL_BATTLEGROUP then
                 return
             end
         end
@@ -549,9 +569,9 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         --early problem where the engine could send us invalid availability events.
         if channelType == VOICE_CHANNEL_NONE then
             return
-        end
-
-        if channelType == VOICE_CHANNEL_GUILD then
+        elseif channelType == VOICE_CHANNEL_BATTLEGROUP then
+			self:SetAndSwapDesiredActiveChannel(self:GetChannel(channelData))
+		elseif channelType == VOICE_CHANNEL_GUILD then
             local guildId = channelData.guildId
             local guildRoomNumber = channelData.guildRoomNumber
             self:AddGuildChannelRoom(channelName, guildId, guildRoomNumber)
@@ -1028,9 +1048,14 @@ function ZO_VoiceChat_Manager:GetChannelData()
         areaData = areaChannel
     end
 
-    local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-    if groupChannel.isAvailable then
-        groupData = groupChannel
+	local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+	if bgChannel.isAvailable then
+		groupData = bgChannel
+	else
+		local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+		if groupChannel.isAvailable then
+			groupData = groupChannel
+		end
     end
 
     local guildData = self.channelData[VOICE_CHANNEL_GUILD]

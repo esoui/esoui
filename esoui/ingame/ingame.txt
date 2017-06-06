@@ -47,6 +47,8 @@ EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
 
 EsoUI\Ingame\SpamWarning\SpamWarning.lua
 
+EsoUI\Ingame\Sounds\SoundEvents.lua
+
 EsoUI\Ingame\Guild\SelectGuildDialog.lua
 EsoUI\Ingame\Guild\SelectGuildDialog.xml
 
@@ -68,6 +70,7 @@ EsoUI\Ingame\Contacts\SocialManager.lua
 
 EsoUI\Ingame\Group\ZO_GroupList_Manager.lua
 
+EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Classes.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Manager.lua
 EsoUI\Ingame\Group\GroupUtils.lua
 EsoUI\Ingame\LFG\PreferredRoles.lua
@@ -99,6 +102,7 @@ EsoUI\InGame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.lua
 EsoUI\InGame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.xml
 EsoUI\Ingame\LFG\ZO_DungeonFinder_Manager.lua
 EsoUI\Ingame\LFG\ZO_AvAFinder_Manager.lua
+EsoUI\Ingame\LFG\ZO_BattlegroundFinder_Manager.lua
 
 EsoUI\Ingame\LFG\SearchingForGroup.lua
 EsoUI\Ingame\LFG\SearchingForGroup.xml
@@ -143,6 +147,8 @@ EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Nameplates_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Social_Shared.lua
 EsoUI\Ingame\OptionsPanels\Console\OptionsPanel_Social_Console.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Social_Keyboard.xml
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Combat_Shared.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Combat_Keyboard.xml
 
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.lua
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.xml
@@ -271,6 +277,7 @@ EsoUI\Ingame\Reticle\Reticle.xml
 EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
 EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
 EsoUI\Ingame\SlashCommands\Console\SlashCommands_Console.lua
+EsoUI\Ingame\SlashCommands\SlashCommandAutoComplete.lua
 
 EsoUI\Ingame\SiegeBar\SiegeBar.lua
 
@@ -913,6 +920,11 @@ EsoUI\Ingame\Leaderboards\Keyboard\RaidLeaderboards_Keyboard.lua
 EsoUI\Ingame\Leaderboards\Keyboard\RaidLeaderboards_Keyboard.xml
 EsoUI\Ingame\Leaderboards\Gamepad\RaidLeaderboards_Gamepad.lua
 EsoUI\Ingame\Leaderboards\Gamepad\RaidLeaderboards_Gamepad.xml
+EsoUI\Ingame\Leaderboards\BattlegroundLeaderboards_Shared.lua
+EsoUI\Ingame\Leaderboards\Keyboard\BattlegroundLeaderboards_Keyboard.lua
+EsoUI\Ingame\Leaderboards\Keyboard\BattlegroundLeaderboards_Keyboard.xml
+EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.lua
+EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.xml
 
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Dialogs_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
@@ -1011,7 +1023,34 @@ EsoUI\Ingame\CrownCrates\CrownGemificationSlot.lua
 EsoUI\Ingame\CrownCrates\CrownGemificationSlot.xml
 EsoUI\Ingame\CrownCrates\CrownCrates.lua
 EsoUI\Ingame\CrownCrates\CrownCrates.xml
+
 EsoUI\Ingame\CombatLogs\TargetDummyLog.lua
+
+EsoUI\Ingame\BuffDebuff\BuffDebuffStyles.lua
+EsoUI\Ingame\BuffDebuff\BuffDebuffStyles.xml
+EsoUI\Ingame\BuffDebuff\BuffDebuff.lua
+EsoUI\Ingame\BuffDebuff\BuffDebuff.xml
+
+EsoUI\Ingame\Battleground\BattlegroundObjectiveStateDisplay.lua
+EsoUI\Ingame\Battleground\BattlegroundObjectiveStateDisplay.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreHud.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreHud.xml
+EsoUI\Ingame\Battleground\BattlegroundHud.lua
+EsoUI\Ingame\Battleground\BattlegroundHud.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreboard.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboardInGame.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboard.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreboardEndOfGame.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboardEndOfGame.xml
+EsoUI\Ingame\Battleground\BattlegroundMedalInfo_Shared.lua
+EsoUI\Ingame\Battleground\BattlegroundMedalInfo_Shared.xml
+EsoUI\Ingame\Battleground\Keyboard\BattlegroundMedalInfo_Keyboard.lua
+EsoUI\Ingame\Battleground\Keyboard\BattlegroundMedalInfo_Keyboard.xml
+EsoUI\Ingame\Battleground\Gamepad\BattlegroundMedalInfo_Gamepad.lua
+EsoUI\Ingame\Battleground\Gamepad\BattlegroundMedalInfo_Gamepad.xml
+
+EsoUI\Ingame\Cutscene\Cutscene.lua
+EsoUI\Ingame\Cutscene\Cutscene.xml
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.lua

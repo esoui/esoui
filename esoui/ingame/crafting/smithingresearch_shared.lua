@@ -72,10 +72,12 @@ function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl,
             
             if data.researchingTraitIndex then
                 local durationSecs, timeRemainingSecs = GetSmithingResearchLineTraitTimes(data.craftingType, data.researchLineIndex, data.researchingTraitIndex)
-                local now = GetFrameTimeSeconds()
-                local timeElapsed = durationSecs - timeRemainingSecs
-                self.timer:Start(now - timeElapsed, now + timeRemainingSecs)
-                listContainer.extraInfoLabel:SetHidden(true)
+                if durationSecs and timeRemainingSecs then
+                    local now = GetFrameTimeSeconds()
+                    local timeElapsed = durationSecs - timeRemainingSecs
+                    self.timer:Start(now - timeElapsed, now + timeRemainingSecs)
+                    listContainer.extraInfoLabel:SetHidden(true)
+                end
             else
                 self.timer:Stop()
                 listContainer.extraInfoLabel:SetHidden(false)
@@ -100,6 +102,7 @@ function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl,
     end
 
     self.researchLineList = scrollListControl:New(listContainer.listControl, listSlotContainerName, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction)
+    listContainer:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_TIMES_UPDATED, function() self.researchLineList:RefreshVisible() end)
 
     local highlightTexture = listContainer.highlightTexture
     self.researchLineList:SetSelectionHighlightInfo(highlightTexture, highlightTexture and highlightTexture.pulseAnimation)

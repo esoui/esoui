@@ -57,7 +57,7 @@
         </Control>
 
         <TopLevelControl name="ZO_ActivityFinderTemplateTooltip_Keyboard" hidden="true" tier="HIGH" clampedToScreen="true">
-            <Dimensions x="350" y="200" />
+            <Dimensions x="420" y="240" />
 
             <Controls>
                 <Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop">
@@ -84,12 +84,22 @@
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="TOPLEFT" offsetX="-10"/>
                         </Label>
 
+                        <Control name="$(parent)SetTypesSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontHeader" />
+                                <Label name="$(parent)List" override="true" font="ZoFontHeader" />
+                            </Controls>
+                        </Control>
+                        
                         <Label name="$(parent)LockedInfoLabel" font="ZoFontHeader">
                             <Anchor point="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
                         </Label>
                     </Controls>
-                </Control>                
+                </Control>
             </Controls>
         </TopLevelControl>
 

@@ -85,19 +85,8 @@ end
 
 -- Back
 
-local function GoBackToLogin()
-    if not IsConsoleUI() then
-        -- On PC, an automatic login happens the first time the login screen is shown for clients that require a linked
-        -- login, which doesn't persist if the player returns to pregame from ingame through the character select window.
-        -- On console, a linked login is only attempted once the player moves past the IIS screen through a button press,
-        -- and the player always returns to the IIS screen on server error or returning from character select.
-        LOGIN_KEYBOARD:ClearAttemptAutomaticLogin()
-    end
-    PregameStateManager_SetState("Disconnect")
-end
-
 local function AddBackEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_BACK), callback = GoBackToLogin}
+    local data = {name = GetString(SI_GAME_MENU_BACK), callback = ZO_Disconnect}
     table.insert(entryTable, data)
 end
 
@@ -132,6 +121,9 @@ function ZO_GameMenu_CharacterSelect_Initialize(self)
  
     gameMenuCharacterSelectScene:RegisterCallback("StateChange",    function(oldState, newState)
                                                                         ZO_UpdatePaperDollManipulationForScene(ZO_CharacterSelectCharacterViewport, newState)
+                                                                        if newState == SCENE_SHOWING then
+                                                                            RebuildTree(GAME_MENU_CHARACTERSELECT)
+                                                                        end
                                                                     end)
 
     local function UpdateNewStates()

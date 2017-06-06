@@ -354,19 +354,31 @@ end
 
 function ZO_Tooltip:AddOnUseAbility(itemLink)
     local onUseAbilitySection = self:AcquireSection(self:GetStyle("bodySection"))
-    local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isChampionPoints = GetItemLinkOnUseAbilityInfo(itemLink)
-    if(hasAbility) then
-        if(abilityHeader ~= "") then
+    local cooldownRemainingSection = self:AcquireSection(self:GetStyle("bodySection"))
+    local hasAbility, abilityHeader, abilityDescription, cooldown, hasScaling, minLevel, maxLevel, isChampionPoints, remainingCooldown = GetItemLinkOnUseAbilityInfo(itemLink)
+    if hasAbility then
+        if abilityHeader ~= "" then
             onUseAbilitySection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_DESCRIPTION_HEADER, abilityHeader), self:GetStyle("bodyHeader"))
         end
-        if(abilityDescription ~= "") then
-            if(cooldown == 0) then
+        if abilityDescription ~= "" then
+            if cooldown == 0 then
                 onUseAbilitySection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ON_USE, abilityDescription), self:GetStyle("bodyDescription"))
             else
-                onUseAbilitySection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN, abilityDescription, cooldown / 1000), self:GetStyle("bodyDescription"))
+                local cooldownString = ZO_FormatTimeMilliseconds(cooldown, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES, TIME_FORMAT_PRECISION_SECONDS)
+                onUseAbilitySection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN, abilityDescription, cooldownString), self:GetStyle("bodyDescription"))
             end
+
             if hasScaling then
                 self:AddItemAbilityScalingRange(onUseAbilitySection, minLevel, maxLevel, isChampionPoints)
+            end
+
+            if cooldown > ZO_ONE_MINUTE_IN_MILLISECONDS and remainingCooldown > 0 then
+                if remainingCooldown < ZO_ONE_MINUTE_IN_MILLISECONDS then
+                    cooldownRemainingSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_REMAINING_COOLDOWN, GetString(SI_STR_TIME_LESS_THAN_MINUTE_SHORT)), self:GetStyle("bodyDescription"))
+                else
+                    local formattedRemainingCooldown = ZO_FormatTimeMilliseconds(remainingCooldown, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+                    cooldownRemainingSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_REMAINING_COOLDOWN, formattedRemainingCooldown), self:GetStyle("bodyDescription"))
+                end
             end
         end
     else
@@ -374,8 +386,8 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
         local maxCooldown = 0
         for i = 1, GetMaxTraits() do
             local hasTraitAbility, traitAbilityDescription, traitCooldown, traitHasScaling, traitMinLevel, traitMaxLevel, traitIsChampionPoints = GetItemLinkTraitOnUseAbilityInfo(itemLink, i)
-            if(hasTraitAbility) then
-                table.insert(traitAbilities, 
+            if hasTraitAbility then
+                table.insert(traitAbilities,
                 {
                     description = traitAbilityDescription,
                     hasScaling = traitHasScaling,
@@ -383,7 +395,7 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
                     maxLevel = traitMaxLevel,
                     isChampionPoints = traitIsChampionPoints,
                 })
-                if(traitCooldown > maxCooldown) then
+                if traitCooldown > maxCooldown then
                     maxCooldown = traitCooldown
                 end
             end
@@ -395,7 +407,8 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
                 if maxCooldown == 0 then
                     text = zo_strformat(SI_ITEM_FORMAT_STR_ON_USE, traitAbility.description)
                 else
-                    text = zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN, traitAbility.description, maxCooldown / 1000)
+                    local cooldownString = ZO_FormatTimeMilliseconds(maxCooldown, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES, TIME_FORMAT_PRECISION_SECONDS)
+                    text = zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN, traitAbility.description, cooldownString)
                 end
             else
                 text = zo_strformat(SI_ITEM_FORMAT_STR_ON_USE_MULTI_EFFECT, traitAbility.description)
@@ -412,6 +425,7 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
         end
     end
     self:AddSection(onUseAbilitySection)
+    self:AddSection(cooldownRemainingSection)
 end
 
 function ZO_Tooltip:AddTrait(itemLink)
@@ -706,6 +720,8 @@ do
                 errorSection:AddLine(GetString(SI_DYE_STAMP_REQUIRES_COLLECTIBLE), self:GetStyle("dyeStampError"))
             elseif useResult == DYE_STAMP_USE_RESULT_NO_VALID_COLLECTIBLES then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_SAME_DYE_DATA), self:GetStyle("dyeStampError"))
+            elseif useResult == DYE_STAMP_USE_RESULT_COLLECTIBLES_NOT_ACTIVE then
+                errorSection:AddLine(GetString(SI_DYE_STAMP_COLLECTIBLES_HIDDEN), self:GetStyle("dyeStampError"))
             end
         end
         self:AddSection(errorSection)
@@ -1087,8 +1103,30 @@ end
 function ZO_Tooltip:LayoutStoreWindowItem(itemData)
     if itemData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
         self:LayoutCollectibleFromLink(itemData.itemLink)
+    elseif itemData.entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
+        self:LayoutQuestItem(itemData.questItemId)
     else
         self:LayoutStoreItemFromLink(itemData.itemLink, itemData.icon)
+    end
+
+    local buyable = itemData.dataSource.meetsRequirementsToBuy
+    --itemData.dataSource.slotIndex is the entryIndex
+    local errorStringId = GetStoreEntryBuyRequirementErrorId(itemData.dataSource.slotIndex)
+
+    if errorStringId > 0 then
+        local errorString = GetErrorString(errorStringId)
+        if errorString ~= "" then
+            local style
+            if buyable then
+                style = "requirementPass"
+            else
+                style = "requirementFail"
+            end
+
+            local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
+            styleSection:AddLine(errorString, self:GetStyle(style))
+            self:AddSection(styleSection)
+        end
     end
 end
 
@@ -1405,15 +1443,10 @@ function ZO_Tooltip:LayoutResearchSmithingItem(traitType, traitDescription)
     self:AddSection(bodySection)
 end
 
-function ZO_Tooltip:LayoutQuestItem(questItem)
-    local header, itemName, tooltipText
-    if questItem.lootId then
-        header, itemName, tooltipText = GetQuestLootItemTooltipInfo(questItem.lootId)
-    elseif questItem.toolIndex then
-        header, itemName, tooltipText = GetQuestToolTooltipInfo(questItem.questIndex, questItem.toolIndex)
-    else
-        header, itemName, tooltipText = GetQuestItemTooltipInfo(questItem.questIndex, questItem.stepIndex, questItem.conditionIndex)
-    end
+function ZO_Tooltip:LayoutQuestItem(questItemId)       
+    local header = GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
+    local itemName = GetQuestItemName(questItemId)
+    local tooltipText = GetQuestItemTooltipText(questItemId)
 
     local topSection = self:AcquireSection(self:GetStyle("topSection"))
     topSection:AddLine(header)

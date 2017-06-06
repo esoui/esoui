@@ -246,23 +246,34 @@ function DeathRecap:SetupAttacks()
 
         local attackerNameControl = attackControl:GetNamedChild("AttackerName")
         local frameControl
-        if(DoesKillingAttackHaveAttacker(attackInfo.index)) then
+        if DoesKillingAttackHaveAttacker(attackInfo.index) then
             local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = GetKillingAttackerInfo(attackInfo.index)
-            
-            local attackerNameLine
-            if(isPlayer) then
-                local coloredRankIconMarkup = GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
+            local battlegroundAlliance = GetKillingAttackerBattlegroundAlliance(attackInfo.index)
 
+            local attackerNameLine
+            if isPlayer then
+                
                 local nameToShow
                 if showBothPlayerNames then
                     nameToShow = ZO_GetPrimaryPlayerNameWithSecondary(attackerDisplayName, attackerRawName)
                 else
                     nameToShow = ZO_GetPrimaryPlayerName(attackerDisplayName, attackerRawName)
                 end
-                if(minionName == "") then
-                    attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME, coloredRankIconMarkup, attackerAvARank, nameToShow)
+
+                if battlegroundAlliance == BATTLEGROUND_ALLIANCE_NONE then
+                    local coloredRankIconMarkup = GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
+                    if minionName == "" then
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME, coloredRankIconMarkup, attackerAvARank, nameToShow)
+                    else
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME_MINION, coloredRankIconMarkup, attackerAvARank, nameToShow, minionName)
+                    end
                 else
-                    attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME_MINION, coloredRankIconMarkup, attackerAvARank, nameToShow, minionName)
+                    local battlegroundAllianceIconMarkup = GetBattlegroundIconMarkup(battlegroundAlliance, 32)
+                    if minionName == "" then
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_BATTLEGROUND_ALLIANCE_ATTACKER_NAME, battlegroundAllianceIconMarkup, nameToShow)
+                    else
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_BATTLEGROUND_ALLIANCE_ATTACKER_NAME_MINION, battlegroundAllianceIconMarkup, nameToShow, minionName)
+                    end
                 end
             else
                 if(minionName == "") then

@@ -115,17 +115,20 @@ function ZO_QuestJournal_Manager:GetQuestListData()
             local type
 
             if questType == QUEST_TYPE_MAIN_STORY then
-                categoryName = GetString(SI_QUEST_JOURNAL_MAIN_STORY_CATEGORY)
+                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_MAIN_STORY)
                 type = QUEST_CAT_OTHER
             elseif questType == QUEST_TYPE_GUILD then
-                categoryName = GetString(SI_QUEST_JOURNAL_GUILD_CATEGORY)
+                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_GUILD)
                 type = QUEST_CAT_OTHER
             elseif questType == QUEST_TYPE_CRAFTING then
-                categoryName = GetString(SI_QUEST_JOURNAL_CRAFTING_CATEGORY)
+                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_CRAFTING)
                 type = QUEST_CAT_OTHER
             elseif questType == QUEST_TYPE_HOLIDAY_EVENT then
-                categoryName = GetString(SI_QUEST_JOURNAL_HOLIDAY_EVENT_CATEGORY)
+                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_HOLIDAY_EVENT)
                 type= QUEST_CAT_OTHER
+            elseif questType == QUEST_TYPE_BATTLEGROUND then
+                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_BATTLEGROUND)
+                type = QUEST_CAT_OTHER
             elseif zone ~= "" then
                 categoryName = zo_strformat(SI_QUEST_JOURNAL_ZONE_FORMAT, zone)
                 type = QUEST_CAT_ZONE
@@ -154,7 +157,7 @@ function ZO_QuestJournal_Manager:GetQuestListData()
                     questType = questType,
                     displayType = instanceDisplayType
                 }
-                )
+            )
         end
     end
 

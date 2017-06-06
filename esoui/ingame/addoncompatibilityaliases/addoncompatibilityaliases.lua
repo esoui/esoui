@@ -110,7 +110,7 @@ GetJournalInstanceDisplayType = GetJournalQuestInstanceDisplayType
 --Recipes can now have multiple tradeskill requirements
 GetItemLinkRecipeRankRequirement = function(itemLink)
     for i = 1, GetItemLinkRecipeNumTradeskillRequirements(itemLink) do
-        local tradeskill, levelRequirement = GetItemLinkTradeskillRequirement(itemLink, i)
+        local tradeskill, levelRequirement = GetItemLinkRecipeTradeskillRequirement(itemLink, i)
         if tradeskill == CRAFTING_TYPE_PROVISIONING then
             return levelRequirement
         end
@@ -147,4 +147,90 @@ end
 GetItemLinkItemTagDescription = function(itemLink, index)
     local description, category = GetItemLinkItemTagInfo(itemLink, index)
     return description
+end
+
+--Switched Activity Finder API from activityType and index based to Id based
+function GetCurrentLFGActivity()
+    local activityId = GetCurrentLFGActivityId()
+    if activityId > 0 then
+        return GetActivityTypeAndIndex(activityId)
+    end
+end
+
+do
+    local function BasicTypeIndexToIdTemplate(idFunction, activityType, index)
+        local activityId = GetActivityIdByTypeAndIndex(activityType, index)
+        return idFunction(activityId)
+    end
+
+    GetLFGOption = function(...) return BasicTypeIndexToIdTemplate(GetActivityInfo, ...) end
+    GetLFGOptionKeyboardDescriptionTextures = function(...) return BasicTypeIndexToIdTemplate(GetActivityKeyboardDescriptionTextures, ...) end
+    GetLFGOptionGamepadDescriptionTexture = function(...) return BasicTypeIndexToIdTemplate(GetActivityGamepadDescriptionTexture, ...) end
+    GetLFGDisplayLevels = function(...) return BasicTypeIndexToIdTemplate(GetActivityDisplayLevels, ...) end
+    GetLFGOptionGroupType = function(...) return BasicTypeIndexToIdTemplate(GetActivityGroupType, ...) end
+    DoesPlayerMeetLFGLevelRequirements = function(...) return BasicTypeIndexToIdTemplate(DoesPlayerMeetActivityLevelRequirements, ...) end
+    DoesGroupMeetLFGLevelRequirements = function(...) return BasicTypeIndexToIdTemplate(DoesGroupMeetActivityLevelRequirements, ...) end
+    GetRequiredLFGCollectibleId = function(...) return BasicTypeIndexToIdTemplate(GetRequiredActivityCollectibleId, ...) end
+end
+
+function AddGroupFinderSearchEntry(activityType, index)
+    if index then
+        local activityId = GetActivityIdByTypeAndIndex(activityType, index)
+        AddActivityFinderSpecificSearchEntry(activityId)
+    else
+        AddActivityFinderRandomSearchEntry(activityType)
+    end
+end
+
+function GetLFGRequestInfo(requestIndex)
+    local activityId = GetActivityRequestIds()
+    return GetActivityTypeAndIndex(activityId)
+end
+
+function GetLFGFindReplacementNotificationInfo()
+    local activityId = GetActivityFindReplacementNotificationInfo(activityType, index)
+    if activityId then
+        return GetActivityTypeAndIndex(activityId)
+    end
+end
+
+function GetLFGAverageRoleTimeByActivity(activityType, index, role)
+    local activityId = GetActivityIdByTypeAndIndex(activityType, index)
+    return GetActivityAverageRoleTime(activityId, role)
+end
+
+GetNumLFGOptions = GetNumActivitiesByType
+GetNumLFGRequests = GetNumActivityRequests
+HasLFGFindReplacementNotification = HasActivityFindReplacementNotification
+AcceptLFGFindReplacementNotification = AcceptActivityFindReplacementNotification
+DeclineLFGFindReplacementNotification = DeclineActivityFindReplacementNotification
+
+--Renamed the objective functions to indicate that they aren't specific to AvA anymore
+GetNumAvAObjectives = GetNumObjectives
+GetAvAObjectiveKeysByIndex = GetObjectiveIdsForIndex
+GetAvAObjectiveInfo = GetObjectiveInfo
+GetAvAObjectivePinInfo = GetObjectivePinInfo
+GetAvAObjectiveSpawnPinInfo = GetObjectiveSpawnPinInfo
+IsAvAObjectiveInBattleground = IsBattlegroundObjective
+
+--Exposed the quest item id instead of duplicating the tooltip function for each system
+GetQuestLootItemTooltipInfo = function(lootId)
+    local questItemId = GetLootQuestItemId(lootId)
+    local itemName = GetQuestItemName(questItemId)
+    local tooltipText = GetQuestItemTooltipText(questItemId)
+    return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM), itemName, tooltipText
+end
+
+GetQuestToolTooltipInfo = function(questIndex, toolIndex)
+    local questItemId = GetQuestToolQuestItemId(questIndex, toolIndex)
+    local itemName = GetQuestItemName(questItemId)
+    local tooltipText = GetQuestItemTooltipText(questItemId)
+    return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM), itemName, tooltipText    
+end
+
+GetQuestItemTooltipInfo = function(questIndex, stepIndex, conditionIndex)
+    local questItemId = GetQuestConditionQuestItemId(questIndex, stepIndex, conditionIndex)
+    local itemName = GetQuestItemName(questItemId)
+    local tooltipText = GetQuestItemTooltipText(questItemId)
+    return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM), itemName, tooltipText    
 end

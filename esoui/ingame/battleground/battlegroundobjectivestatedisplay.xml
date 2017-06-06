@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_BattlegroundObjectiveStatePin" virtual="true">
+            <Dimensions x="58" y="58"/>
+            <Controls>
+                <Texture name="$(parent)Aura" level="1">
+                    <AnchorFill/>
+                </Texture>
+                <Texture name="$(parent)Pin" level="2">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

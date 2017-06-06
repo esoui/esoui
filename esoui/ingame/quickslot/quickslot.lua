@@ -512,7 +512,7 @@ function ZO_QuickslotManager:AppendCollectiblesData(scrollData)
 end
 
 local function UpdateNewStatusControl(control, data)
-    PLAYER_INVENTORY:UpdateNewStatus(INVENTORY_BACKPACK, data.slotIndex)
+    PLAYER_INVENTORY:UpdateNewStatus(INVENTORY_BACKPACK, data.slotIndex, data.bagId)
 end
 
 function ZO_QuickslotManager:SetUpQuickSlot(control, data)

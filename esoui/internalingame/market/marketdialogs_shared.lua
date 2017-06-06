@@ -18,7 +18,8 @@ do
             keybindString = ZO_Keybindings_GenerateKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
         end
 
-        local houseName = GetCollectibleName(GetMarketProductCollectibleId(marketProductId))
+        -- The display name of a MarketProductCollectible is the name of the collectible
+        local houseName = GetMarketProductDisplayName(marketProductId)
         houseName = ZO_SELECTED_TEXT:Colorize(houseName)
 
         return {houseName, keybindString}

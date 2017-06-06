@@ -189,8 +189,8 @@
                 <Texture name="$(parent)SharedHighlight" tier="HIGH" textureFile="EsoUI/Art/Dye/dye_swatch_highlight.dds" inheritScale="false" blendMode="ADD" hidden="true" />
 
                 <Control name="$(parent)EquipmentSheet" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="32" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="-170" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumShortLeftPanelBackground" offsetY="32" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumShortLeftPanelBackground" offsetY="-170" />
                     <Dimensions x="400"/>
 
                     <OnInitialized>
@@ -257,8 +257,8 @@
                 </Control>
 
                 <Control name="$(parent)CollectibleSheet" mouseEnabled="true" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="32" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="-170" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumShortLeftPanelBackground" offsetY="32" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumShortLeftPanelBackground" offsetY="-170" />
                     <Dimensions x="400"/>
 
                     <OnInitialized>

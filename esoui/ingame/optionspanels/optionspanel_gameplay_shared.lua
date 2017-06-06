@@ -217,6 +217,17 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             gamepadValidStringOverrides = {SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_GOLD, SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_CROWNS},
             valueStringPrefix = "SI_DEFAULTSOULGEMCHOICE",
         },
+
+        --Options_Gameplay_FootInverseKinematics
+        [IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS,
+            tooltipText = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS_TOOLTIP,
+        },
     },
 
     --Tutorial

@@ -41,14 +41,16 @@ function ZO_RaidLeaderboardsManager_Shared:Initialize(...)
     self.raidListNodes = {}
 end
 
-function ZO_RaidLeaderboardsManager_Shared:RegisterForEvents(control)
+function ZO_RaidLeaderboardsManager_Shared:RegisterForEvents()
     local function SelectCurrentRaid()
         local currentRaidId = GetCurrentParticipatingRaidId()
         if currentRaidId > 0 then
             self:SelectRaidById(currentRaidId, RAID_LEADERBOARD_SELECT_OPTION_PREFER_WEEKLY)
         end
     end
-
+    
+    local control = self.control
+    control:RegisterForEvent(EVENT_RAID_LEADERBOARD_DATA_CHANGED, function() self:OnDataChanged() end)
     control:RegisterForEvent(EVENT_RAID_LEADERBOARD_PLAYER_DATA_CHANGED, function() self:UpdatePlayerInfo() end)
     control:RegisterForEvent(EVENT_RAID_PARTICIPATION_UPDATE, function() SelectCurrentRaid(); self:UpdatePlayerParticipationStatus() end)
     control:RegisterForEvent(EVENT_RAID_TIMER_STATE_UPDATE, function() self:UpdatePlayerParticipationStatus() end)
@@ -160,7 +162,7 @@ do
         end
 
         local function AddEntry(parent, name, categoryData, leaderboardRankType)
-            local node = self.leaderboardSystem:AddEntry(self, name, GetRaidLeaderboardTitleName, parent, categoryData, GetNumEntries, nil, GetSingleRaidEntryInfo, nil, GetString(SI_RAID_LEADERBOARDS_HEADER_SCORE), GetRaidLeaderboardEntryConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_trial.dds", leaderboardRankType)
+            local node = self.leaderboardSystem:AddEntry(self, name, GetRaidLeaderboardTitleName, parent, categoryData, GetNumEntries, nil, GetSingleRaidEntryInfo, nil, GetString(SI_LEADERBOARDS_HEADER_SCORE), GetRaidLeaderboardEntryConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_trial.dds", leaderboardRankType)
             if node then
                 local nodeData = node.GetData and node:GetData() or node
                 nodeData.raidId = categoryData.raidId
@@ -261,10 +263,10 @@ do
             local secsUntilEnd, secsUntilNextStart = GetRaidOfTheWeekTimes()
 
             if secsUntilEnd > 0 then
-                self.timerLabelIdentifier = SI_RAID_LEADERBOARDS_CLOSES_IN_TIMER
+                self.timerLabelIdentifier = SI_LEADERBOARDS_CLOSES_IN_TIMER
                 self.timerLabelData = ZO_FormatTime(secsUntilEnd, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
             elseif secsUntilNextStart > 0 then
-                self.timerLabelIdentifier = SI_RAID_LEADERBOARDS_REOPENS_IN_TIMER
+                self.timerLabelIdentifier = SI_LEADERBOARDS_REOPENS_IN_TIMER
                 self.timerLabelData = ZO_FormatTime(secsUntilNextStart, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
             else
                 self.timerLabelIdentifier = nil
@@ -336,7 +338,7 @@ function ZO_RaidLeaderboardsManager_Shared:UpdateRaidScore()
     if raidInProgress or raidComplete then
         self.currrentScoreData = GetCurrentRaidScore()
     else
-        self.currrentScoreData = GetString(SI_RAID_LEADERBOARDS_NO_CURRENT_SCORE)
+        self.currrentScoreData = GetString(SI_LEADERBOARDS_NO_CURRENT_SCORE)
     end
 end
 

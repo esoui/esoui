@@ -11,7 +11,8 @@ local STORE_SUPPLIES_GROUP = 6
 local STORE_MATERIALS_GROUP = 7
 local STORE_QUICKSLOTS_GROUP = 8
 local STORE_COLLECTIBLE_GROUP = 9
-local STORE_OTHER_GROUP = 10
+local STORE_QUEST_ITEMS_GROUP = 10
+local STORE_OTHER_GROUP = 11
 
 local groupCategoryDictionary = {
     [STORE_WEAPON_GROUP] = GAMEPAD_ITEM_CATEGORY_WEAPONS,
@@ -29,6 +30,8 @@ local groupCategoryDictionary = {
 local function GetItemStoreGroup(itemData)
     if itemData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
         return STORE_COLLECTIBLE_GROUP
+    elseif itemData.entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
+        return STORE_QUEST_ITEMS_GROUP
     elseif itemData.equipType == EQUIP_TYPE_RING or itemData.equipType== EQUIP_TYPE_NECK then
         return STORE_JEWELRY_GROUP
     elseif itemData.itemType == ITEMTYPE_WEAPON or itemData.displayFilter == ITEMFILTERTYPE_WEAPONS then
@@ -63,6 +66,8 @@ local function GetBestItemCategoryDescription(itemData)
     if itemData.storeGroup == STORE_COLLECTIBLE_GROUP then
         local collectibleCategory = GetCollectibleCategoryTypeFromLink(itemData.itemLink)
         return GetString("SI_COLLECTIBLECATEGORYTYPE", collectibleCategory)
+    elseif itemData.storeGroup == STORE_QUEST_ITEMS_GROUP then
+        return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
     else
         return ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
     end
@@ -347,7 +352,10 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
         local postPadding = postPaddingOverride or (isNextEntryAHeader and STORE_ITEM_HEADER_DEFAULT_PADDING)
 
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
+        
+        --This is only used by stables        
         entry.data = itemData.data
+        
         if not itemData.ignoreStoreVisualInit then
             entry:InitializeStoreVisualData(itemData)
         end

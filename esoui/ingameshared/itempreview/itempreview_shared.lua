@@ -148,6 +148,19 @@ function ZO_ItemPreviewType_ProvisionerItemAsFurniture:Apply(variationIndex)
     PreviewProvisionerItemAsFurniture(self.recipeListIndex, self.recipeIndex)
 end
 
+--Item Link
+
+ZO_ItemPreviewType_ItemLink = ZO_ItemPreviewType:Subclass()
+
+function ZO_ItemPreviewType_ItemLink:SetStaticParameters(itemLink, dyeBrushId)
+    self.itemLink = itemLink
+    self.dyeBrushId = dyeBrushId
+end
+
+function ZO_ItemPreviewType_ItemLink:Apply(variationIndex)
+    PreviewItemLink(self.itemLink, self.dyeBrushId)
+end
+
 --
 --[[ Item Preview]]--
 --
@@ -158,6 +171,7 @@ ZO_ITEM_PREVIEW_COLLECTIBLE_AS_FURNITURE = 3
 ZO_ITEM_PREVIEW_PLACED_FURNITURE = 4
 ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE = 5
 ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT = 6
+ZO_ITEM_PREVIEW_ITEM_LINK = 7
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
@@ -187,6 +201,7 @@ function ZO_ItemPreview_Shared:Initialize(control)
         [ZO_ITEM_PREVIEW_PLACED_FURNITURE] = ZO_ItemPreviewType_PlacedFurniture:New(),
         [ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE] = ZO_ItemPreviewType_ProvisionerItemAsFurniture:New(),
         [ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT] = ZO_ItemPreviewType_FurnitureMarketProduct:New(),
+        [ZO_ITEM_PREVIEW_ITEM_LINK] = ZO_ItemPreviewType_ItemLink:New(),
     }
 
     self.forcePreparePreview = true
@@ -253,6 +268,7 @@ function ZO_ItemPreview_Shared:OnPreviewHidden()
     ClearPreviewInEmptyWorld()
    
     EndPreviewMode()
+
     self.forcePreparePreview = true
     self:SetHorizontalPaddings(0, 0)
     self.previewBufferMS = nil
@@ -319,6 +335,10 @@ end
 
 function ZO_ItemPreview_Shared:PreviewProvisionerItemAsFurniture(recipeListIndex, recipeIndex)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE, recipeListIndex, recipeIndex)
+end
+
+function ZO_ItemPreview_Shared:PreviewItemLink(itemLink, dyeBrushId)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_ITEM_LINK, itemLink, dyeBrushId)
 end
 
 function ZO_ItemPreview_Shared:ApplyOrBuffer()

@@ -342,7 +342,7 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
         return false
     end
 
-	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     if not templateData.isSelectable or CharacterCreateGetTemplate(characterMode) == templateId then
         return false
     end
@@ -764,7 +764,7 @@ function ZO_CharacterCreate_Keyboard:Reset()
 end
 
 function ZO_CharacterCreate_Keyboard:UpdateGenderSpecificText(currentGender)
-	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     currentGender = currentGender or CharacterCreateGetGender(characterMode)
 
     ZO_CharacterCreateRaceName:SetText(zo_strformat(SI_RACE_NAME, GetRaceName(currentGender, CharacterCreateGetRace(characterMode))))
@@ -772,7 +772,7 @@ function ZO_CharacterCreate_Keyboard:UpdateGenderSpecificText(currentGender)
 end
 
 function ZO_CharacterCreate_Keyboard:UpdateRaceControl()
-	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local currentRace = CharacterCreateGetRace(characterMode)
 
     local function IsRaceClicked(button)
@@ -815,7 +815,7 @@ function ZO_CharacterCreate_Keyboard:UpdateGenderControl()
 end
 
 function ZO_CharacterCreate_Keyboard:UpdateClassControl()
-	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local currentClass = CharacterCreateGetClass(characterMode)
 
     local function IsClassClicked(button)
@@ -847,7 +847,7 @@ function ZO_CharacterCreate_Keyboard:OnCreateButtonClicked(startLocation)
         if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() and startLocation ~= CHARACTER_OPTION_CLEAN_TEST_AREA and startLocation ~= "CharacterSelect_FromIngame" then
             ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(false)
             -- color the character name white so it's highlighted in the dialog
-			local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+            local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
             local genderDecoratedCharacterName = ZO_SELECTED_TEXT:Colorize(GetGrammarDecoratedName(characterName, CharacterCreateGetGender(characterMode)))
             ZO_Dialogs_ShowDialog("CHARACTER_CREATE_SKIP_TUTORIAL", { startLocation = startLocation }, {mainTextParams = { genderDecoratedCharacterName }})
         else
@@ -897,7 +897,7 @@ end
 
 function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
     self:SetCharacterCreateMode(CHARACTER_CREATE_MODE_CREATE)
-	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
 
     local templateData = self.characterData:GetTemplate(CharacterCreateGetTemplate(characterMode))
     -- we may not have any template selected or we have no templates
@@ -1039,13 +1039,15 @@ function ZO_CharacterCreate_MouseEnterNamedSelector(button)
     if button.name then
         SetTooltipText(InformationTooltip, zo_strformat(button.tooltipFormatter, button.name))
     elseif button.nameFn then
-		local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+        local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
         SetTooltipText(InformationTooltip, zo_strformat(button.tooltipFormatter, button.nameFn(CharacterCreateGetGender(characterMode), button.defId)))
     end
 
-    local characterCreateMode = KEYBOARD_CHARACTER_CREATE_MANAGER:GetCharacterCreateMode()
-    if characterCreateMode ~= CHARACTER_CREATE_MODE_CREATE then
-        if button:GetState() == BSTATE_DISABLED or button:GetState() == BSTATE_DISABLED_PRESSED then
+    -- If a button is disabled, add any disable reasons to the tooltip
+    if button:GetState() == BSTATE_DISABLED or button:GetState() == BSTATE_DISABLED_PRESSED then
+        -- Check if disabled due to a barbershop mode
+        local characterCreateMode = KEYBOARD_CHARACTER_CREATE_MANAGER:GetCharacterCreateMode()
+        if characterCreateMode ~= CHARACTER_CREATE_MODE_CREATE then
             local selectorType = button.selectorType
 
             local addDisableReason = false
@@ -1063,22 +1065,22 @@ function ZO_CharacterCreate_MouseEnterNamedSelector(button)
                 InformationTooltip:AddLine(zo_strformat(SI_CREATE_CHARACTER_SELECTOR_TOKEN_DISABLED, tokenString), "", ZO_NORMAL_TEXT:UnpackRGB())
             end
         end
-    end
 
-    if (button:GetState() == BSTATE_DISABLED or button:GetState() == BSTATE_DISABLED_PRESSED) and button.selectorType == CHARACTER_CREATE_SELECTOR_RACE then
-        local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
-        local currentAlliance = CharacterCreateGetAlliance(characterMode)
-
-        if button.alliance == ALLIANCE_NONE then
-            if not CanPlayAsImperial() then
-                InformationTooltip:AddLine(zo_strformat(SI_CHARACTER_MODIFY_FAIL_REQUIREMENT, GetPlayAsImperialName()), "", ZO_NORMAL_TEXT:UnpackRGB())
+        -- Check for race specific disable reasons
+        if button.selectorType == CHARACTER_CREATE_SELECTOR_RACE then
+            local restrictionReason, restrictingCollectible = GetRaceRestrictionReason(button.defId)
+            local restrictionString = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
+            if restrictionString ~= "" then
+                InformationTooltip:AddLine(restrictionString, "", ZO_NORMAL_TEXT:UnpackRGB())
             end
-        elseif button.alliance ~= currentAlliance then
-            if not CanPlayAnyRaceAsAnyAlliance() then
-                InformationTooltip:AddLine(zo_strformat(SI_CHARACTER_MODIFY_FAIL_REQUIREMENT, GetPlayAsAnyRaceName()), "", ZO_NORMAL_TEXT:UnpackRGB())
+        -- Check for class specific disable reasons
+        elseif button.selectorType == CHARACTER_CREATE_SELECTOR_CLASS then
+            local restrictionReason, restrictingCollectible = GetClassRestrictionReason(button.defId)
+            local restrictionString = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
+            if restrictionString ~= "" then
+                InformationTooltip:AddLine(restrictionString, "", ZO_NORMAL_TEXT:UnpackRGB())
             end
         end
-        
     end
 end
 

@@ -49,11 +49,11 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:InitializeComboBox()
     combo:SetSpacing(4)
     self.helpCategoryComboBox = combo
     local mechanicCategoriesData = self.mechanicCategoriesData
-    for i = mechanicCategoriesData.categoryEnumMin, mechanicCategoriesData.categoryEnumMax do
-        local name = GetString(mechanicCategoriesData.categoryEnumStringPrefix, i)
+    for _, enumValue in ipairs(mechanicCategoriesData.categoryEnumOrderedValues) do
+        local name = GetString(mechanicCategoriesData.categoryEnumStringPrefix, enumValue)
         if name ~= nil then
             local entry = ZO_ComboBox:CreateItemEntry(name, function() self:UpdateSubmitButton() end)
-            entry.index = i
+            entry.categoryEnumValue = enumValue
             self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
         end
     end
@@ -110,7 +110,7 @@ end
 function ZO_HelpMechanicAssistanceTemplate_Keyboard:UpdateSubmitButton()
     local enableSubmitButton = true
 
-    if self.helpCategoryComboBox:GetSelectedItemData().index == self.mechanicCategoriesData.invalidCategory then
+    if self.helpCategoryComboBox:GetSelectedItemData().categoryEnumValue == self.mechanicCategoriesData.invalidCategory then
         enableSubmitButton = false
     elseif not self.details.hasValue and self:DetailsRequired() then
         enableSubmitButton = false
@@ -133,7 +133,7 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:SelectCategory(category)
     local categories = self.helpCategoryComboBox:GetItems()
 
     for i, categoryId in ipairs(categories) do
-        if categoryId.index == category then
+        if categoryId.categoryEnumValue == category then
             local PERFORM_CALLBACK = false
             self.helpCategoryComboBox:SelectItemByIndex(i, PERFORM_CALLBACK)
             break
@@ -170,8 +170,8 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:AttemptToSendTicket()
     SetCustomerServiceTicketContactEmail(GetActiveUserEmailAddress())
     
     --Category value must be valid as it enables the submit button to be clicked on
-    local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
-    local infoMap = self.mechanicCategoriesData.ticketCategoryMap[categoryIndex]
+    local categoryEnumValue = self.helpCategoryComboBox:GetSelectedItemData().categoryEnumValue
+    local infoMap = self.mechanicCategoriesData.ticketCategoryMap[categoryEnumValue]
     SetCustomerServiceTicketCategory(infoMap.ticketCategory)
     if self.details.hasValue then
         self:RegisterDetails()

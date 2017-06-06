@@ -65,7 +65,7 @@
                         <Label name="$(parent)Header" override="true" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_TEMPLATE_HEADER" />
 
                         <Control name="$(parent)ComboBox" override="true" inherits="ZO_GamepadPassiveFocusDropdown">
-                            <Dimensions x="350" y="40" />
+                            <Dimensions x="320" y="40" />
 
                             <Controls>
                                 <Control name="$(parent)Dropdown" override="true">

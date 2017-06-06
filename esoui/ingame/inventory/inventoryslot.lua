@@ -202,6 +202,11 @@ function ZO_Inventory_GetSlotIndex(slotControl)
     return slotControl.slotIndex
 end
 
+function ZO_Inventory_GetSlotDataForInventoryControl(slotControl)
+    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(slotControl)
+    return SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
+end
+
 function ZO_Inventory_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
     ZO_ItemSlot_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
 
@@ -467,26 +472,27 @@ local function TryEnchantItem(inventorySlot)
     
 end
 
-local function CanConvertItemStyle(inventorySlot)
+local function CanConvertToStyle(inventorySlot, toStyle)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     if(CanUseSecondaryActionOnSlot(inventorySlot)) and not IsItemPlayerLocked(bag, index) then
-        return CanConvertItemStyleToImperial(bag, index)
+        return CanConvertItemStyle(bag, index, toStyle)
     end
 end
 
 local function IsSlotLocked(inventorySlot)
-    local slot = PLAYER_INVENTORY:SlotForInventoryControl(inventorySlot)
+    local slotData = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlot)
 
-    if slot then
-        return slot.locked
+    if slotData then
+        return slotData.locked
     end
 end
 
-local function TryConvertItemStyle(inventorySlot)
+local function TryConvertItemToStyle(inventorySlot, toStyle)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local itemName = GetItemLink(bag, index)
+    local styleName = GetString("SI_ITEMSTYLE", toStyle)
     if(not IsSlotLocked(inventorySlot)) then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_CONVERT_IMPERIAL_STYLE", { bagId = bag, slotIndex = index }, {mainTextParams = { itemName }})
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_CONVERT_STYLE", { bagId = bag, slotIndex = index, style = toStyle }, { titleParams = { styleName }, mainTextParams = { styleName, itemName } })
     else
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_ERROR_ITEM_LOCKED))
     end
@@ -540,6 +546,19 @@ end
 
 function TryPlaceInventoryItemInEmptySlot(targetBag)
     local emptySlotIndex = FindFirstEmptySlotInBag(targetBag)
+
+    if not emptySlotIndex and IsESOPlusSubscriber() then
+        -- The player may be trying to split a stack. If they're transacting on the bank or 
+        -- subscriber bank, then the other bag is also a valid target for the split item.
+        if targetBag == BAG_BANK then
+            targetBag = BAG_SUBSCRIBER_BANK
+            emptySlotIndex = FindFirstEmptySlotInBag(targetBag)
+        elseif targetBag == BAG_SUBSCRIBER_BANK then
+            targetBag = BAG_BANK
+            emptySlotIndex = FindFirstEmptySlotInBag(targetBag)
+        end
+    end
+
     if emptySlotIndex ~= nil then
         PlaceInInventory(targetBag, emptySlotIndex)
     else
@@ -657,7 +676,7 @@ end
 local function TryBankItem(inventorySlot)
     if(PLAYER_INVENTORY:IsBanking()) then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if(bag == BAG_BANK) then
+        if(bag == BAG_BANK or bag == BAG_SUBSCRIBER_BANK) then
             --Withdraw
             if(DoesBagHaveSpaceFor(BAG_BACKPACK, bag, index)) then
                 PickupInventoryItem(bag, index)
@@ -667,13 +686,20 @@ local function TryBankItem(inventorySlot)
             end
         else
             --Deposit
-            if(IsItemStolen(bag, index)) then
+            if IsItemStolen(bag, index) then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_STOLEN_ITEM_CANNOT_DEPOSIT_MESSAGE)
-            elseif(not DoesBagHaveSpaceFor(BAG_BANK, bag, index)) then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_BANK_FULL)
-            else
+            elseif DoesBagHaveSpaceFor(BAG_BANK, bag, index) or DoesBagHaveSpaceFor(BAG_SUBSCRIBER_BANK, bag, index) then
                 PickupInventoryItem(bag, index)
                 PlaceInTransfer()
+            else
+                if not IsESOPlusSubscriber() then
+                    if GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK) > 0 then
+                        TriggerTutorial(TUTORIAL_TRIGGER_BANK_OVERFULL)
+                    else
+                        TriggerTutorial(TUTORIAL_TRIGGER_BANK_FULL_NO_ESO_PLUS)
+                    end
+                end
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_BANK_FULL)
             end
         end
         return true
@@ -1303,7 +1329,7 @@ local function IsCraftingActionVisible()
 end
 
 local function LinkHelper(slotActions, actionName, link)
-    if link then
+    if link and link ~= "" then
         if actionName == "link_to_chat" and IsChatSystemAvailableForCurrentPlatform() then
             local linkFn = function()
                 ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
@@ -1314,7 +1340,7 @@ local function LinkHelper(slotActions, actionName, link)
             end
 
             slotActions:AddSlotAction(SI_ITEM_ACTION_LINK_TO_CHAT, linkFn, "secondary", nil, {visibleWhenDead = true})
-        elseif actionName == "report_item" then
+        elseif actionName == "report_item" and GetLinkType(link) == LINK_TYPE_ITEM then
             slotActions:AddSlotAction(SI_ITEM_ACTION_REPORT_ITEM, 
                                         function()
                                             if IsInGamepadPreferredMode() then
@@ -1641,8 +1667,14 @@ local actionHandlers =
                                         end,
 
     ["convert_to_imperial_style"] =     function(inventorySlot, slotActions)
-                                           if(CanConvertItemStyle(inventorySlot)) then
-                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_IMPERIAL_STYLE, function() TryConvertItemStyle(inventorySlot) end, "secondary")
+                                           if(CanConvertToStyle(inventorySlot, ITEMSTYLE_RACIAL_IMPERIAL)) then
+                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_IMPERIAL_STYLE, function() TryConvertItemToStyle(inventorySlot, ITEMSTYLE_RACIAL_IMPERIAL) end, "secondary")
+                                            end
+                                        end,
+
+    ["convert_to_morag_tong_style"] =     function(inventorySlot, slotActions)
+                                           if(CanConvertToStyle(inventorySlot, ITEMSTYLE_ORG_MORAG_TONG)) then
+                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_MORAG_TONG_STYLE, function() TryConvertItemToStyle(inventorySlot, ITEMSTYLE_ORG_MORAG_TONG) end, "secondary")
                                             end
                                         end,
 
@@ -1696,8 +1728,8 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                    { "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "destroy", "report_item" },
-    [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_STORE_BUY] =                     { "buy", "buy_multiple", "link_to_chat", "report_item" },
@@ -1722,7 +1754,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =              NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =           { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
 }

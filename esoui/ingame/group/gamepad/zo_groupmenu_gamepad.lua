@@ -262,7 +262,7 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
     list:AddEntry(MENU_ENTRY_TEMPLATE, self.menuEntries[MENU_ENTRY_TYPE_CURRENT_GROUP])
     list:AddEntryWithHeader("ZO_GroupMenuGamepadDungeonDifficultyEntry", self.menuEntries[MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY])  
     
-    if groupSize == 0 or (playerIsLeader and groupSize < GROUP_SIZE_MAX) then
+    if IsGroupModificationAvailable() and (groupSize == 0 or (playerIsLeader and groupSize < GROUP_SIZE_MAX)) then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_PLAYER])
         local platform = GetUIPlatform()
         if platform == UI_PLATFORM_XBOX and GetNumberConsoleFriends() > 0 then
@@ -275,7 +275,7 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_READY_CHECK])
     end
 
-    if playerIsLeader and not DoesGroupModificationRequireVote() then
+    if playerIsLeader and IsGroupModificationAvailable() and not DoesGroupModificationRequireVote() then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_DISBAND_GROUP])
     end
 

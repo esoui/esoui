@@ -42,33 +42,33 @@ function HousingBook_Keyboard:InitializeEvents()
     self.control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, function(_, ...) self:OnPrimaryResidenceSet(...) end)
 end
 
-function HousingBook_Keyboard:DoesCollectibleHaveAlert(data)
-    return IsCollectibleNew(data.collectibleId)
-end
-
 function HousingBook_Keyboard:OnPrimaryResidenceSet(houseId)
     self:RefreshList()
 end
 
 function HousingBook_Keyboard:SortCollectibleData(collectibleData)
     local primaryHouseId = GetHousingPrimaryHouse()
-    table.sort(collectibleData, function(a, b)
+    table.sort(collectibleData, function(entry1, entry2)
         if primaryHouseId ~= 0 then
-            local houseIdA = GetCollectibleReferenceId(a.collectibleId)
-            local houseIdB = GetCollectibleReferenceId(b.collectibleId)
+            local houseId1 = GetCollectibleReferenceId(entry1.collectibleId)
+            local houseId2 = GetCollectibleReferenceId(entry2.collectibleId)
 
-            if primaryHouseId == houseIdA then
+            if primaryHouseId == houseId1 then
                 return true
-            elseif primaryHouseId == houseIdB then
+            elseif primaryHouseId == houseId2 then
                 return false
             end
         end
 
-        return a.name < b.name
+        if entry1.sortOrder ~= entry2.sortOrder then
+            return entry1.sortOrder < entry2.sortOrder
+        else
+            return entry1.name < entry2.name
+        end
     end)
 end
 
-function HousingBook_Keyboard:SetupAdditionalCollectibleData(data, collectibleId)
+function HousingBook_Keyboard:SetupAdditionalCollectibleData(data)
     local houseFoundInZoneId = GetHouseFoundInZoneId(data.referenceId)
     data.location = GetZoneNameById(houseFoundInZoneId)
     data.houseCategoryType = GetHouseCategoryType(data.referenceId)

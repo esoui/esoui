@@ -34,7 +34,7 @@
                     <OnInitialized>
                         self.fadeTimeline = GetAnimationManager():CreateTimelineFromVirtual("ConfirmFade", self)
                     </OnInitialized>
-            </Label>
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

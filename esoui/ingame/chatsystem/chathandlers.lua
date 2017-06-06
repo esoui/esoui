@@ -143,6 +143,10 @@ local ChatEventFormatters = {
             return GetString(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
         end
     end,
+
+    [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = function()
+        return GetString(SI_BATTLEGROUND_INACTIVITY_WARNING)
+    end,
 }
 
 function ZO_ChatSystem_GetEventHandlers()

@@ -38,7 +38,7 @@
                     <Dimensions x="40" y="40" />
                     <Anchor point="LEFT" offsetX="-5"/>
                     <Controls>
-                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
+                        <Label name="$(parent)OverlayText" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
                             <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1"/>
                         </Label>
 

@@ -50,13 +50,13 @@
 
         <Texture name="ZO_GamepadWhiteFrameLeftLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" virtual="true">
             <Dimensions x="6" y="32" />
-            <TextureCoords left="0.65625" right="0.59375" top="0.265625" bottom="0.765625"/>
+            <TextureCoords left="0.65625" right="0.609375" top="0.265625" bottom="0.765625"/>
             <Anchor point="RIGHT" relativePoint="LEFT" />
         </Texture>
 
         <Texture name="ZO_GamepadWhiteFrameRightLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" level="100" tier="HIGH" virtual="true">
             <Dimensions x="6" y="32" />
-            <TextureCoords left="0.59375" right="0.65625" top="0.265625" bottom="0.765625"/>
+            <TextureCoords left="0.609375" right="0.65625" top="0.265625" bottom="0.765625"/>
             <Anchor point="LEFT" relativePoint="RIGHT" />
         </Texture>
 

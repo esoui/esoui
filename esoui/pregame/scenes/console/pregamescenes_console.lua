@@ -155,3 +155,11 @@ GAMEPAD_CREDITS_ROOT_SCENE = ZO_Scene:New("gamepad_credits", SCENE_MANAGER)
 GAMEPAD_CREDITS_ROOT_SCENE:AddFragment(GAME_CREDITS_GAMEPAD_FRAGMENT)
 GAMEPAD_CREDITS_ROOT_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 GAMEPAD_CREDITS_ROOT_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
+
+-----------------------
+-- Chapter Upgrade Scene
+-----------------------
+
+local chapterUpgradeScene = SCENE_MANAGER:GetScene("chapterUpgradeGamepad")
+chapterUpgradeScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
+chapterUpgradeScene:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)

@@ -117,7 +117,7 @@ function ZO_GamepadCollectionsBook:SetupList(list)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
 
         local entryData = data.data
-        if self:DoesCategoryHaveAnyNewCollectibles(entryData.categoryIndex, entryData.subcategoryIndex) or (COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(entryData.categoryIndex) and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending()) then
+        if self:DoesCategoryHaveAnyNewCollectibles(entryData.categoryIndex, entryData.subcategoryIndex) then
             control.icon:ClearIcons()
             control.icon:AddIcon(entryData.icon)
             control.icon:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
@@ -129,7 +129,7 @@ function ZO_GamepadCollectionsBook:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        data.brandNew = data.data.isNew or COLLECTIONS_BOOK_SINGLETON:IsDLCIdQuestPending(data.collectibleId)
+        data.brandNew = data.data.isNew
         if not data.hasNameBeenFormatted then
             data:SetEnabled(not data.blocked)
             data:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
@@ -225,7 +225,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local collectibleData = entryData.data
                 local categoryType = collectibleData.categoryType
                 local nameStringId
-                if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
+                if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
                     nameStringId = SI_DLC_BOOK_ACTION_ACCEPT_QUEST
                 elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
                     nameStringId = SI_COLLECTIBLE_ACTION_USE
@@ -315,35 +315,28 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         },
         -- Actions
         {
-            -- If there is never going to be a "Link to chat" option then there will only ever be "rename."  Since design considers an
-            -- "action panel" with only one action silly, we want to just make "rename" the default keybind with no other action layer
-            name = GetString(IsChatSystemAvailableForCurrentPlatform() and SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND or SI_COLLECTIBLE_ACTION_RENAME),
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
                 local entryData = self.currentList.list:GetTargetData()
                 local collectibleData = entryData.data
 
-                if IsChatSystemAvailableForCurrentPlatform() then
-                    local dialogData = 
-                    {
-                        collectibleId = collectibleData.collectibleId,
-                        name = collectibleData.nickname,
-                        active = collectibleData.active,
-                    }
-                    ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME, dialogData)
-                else
-                    ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME, { collectibleId = collectibleData.collectibleId, name = collectibleData.nickname })
-                end
+                local dialogData = 
+                {
+                    collectibleId = collectibleData.collectibleId,
+                    name = collectibleData.nickname,
+                    active = collectibleData.active,
+                }
+                ZO_Dialogs_ShowGamepadDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME, dialogData)
             end,
             visible = function()
                 local entryData = self.currentList.list:GetTargetData()
                 local collectibleData = entryData and entryData.data
 
                 if collectibleData then
-                    if IsChatSystemAvailableForCurrentPlatform() then --Every collectible can link to chat
+                    if IsChatSystemAvailableForCurrentPlatform() or IsCollectibleRenameable(collectibleData.collectibleId) or
+                       self:CanPurchaseCurrentTarget() or self:CanUpgradeCurrentTarget() then
                         return true
-                    else
-                        return IsCollectibleRenameable(collectibleData.collectibleId)
                     end
                 else
                     return false
@@ -365,7 +358,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             visible = function()
                 local entryData = self.currentList.list:GetTargetData()
                 local collectibleData = entryData.data
-                return collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC and not IsESOPlusSubscriber()
+                return collectibleData.storiesData and collectibleData.storiesData.unlockedViaSubscription and not IsESOPlusSubscriber()
             end,
         },
     }
@@ -708,10 +701,20 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
             hint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
         end
 
-        housingData = {
+        housingData =
+        {
             location = GetZoneNameById(houseFoundInZoneId),
             houseCategoryType = GetHouseCategoryType(referenceData),
             isPrimaryResidence = IsPrimaryHouse(referenceData),
+        }
+    end
+
+    local storiesData
+    if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+        storiesData =
+        {
+            unlockedViaSubscription = DoesESOPlusUnlockCollectible(collectibleId),
+            requiresEntitlement = DoesCollectibleRequireEntitlement(collectibleId),
         }
     end
 
@@ -744,6 +747,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
         hasNameBeenFormatted = false,
         isNew = isNew,
         isValidForPlayer = isValidForPlayer,
+        storiesData = storiesData,
         housingData = housingData,
     }
     entryData.isEquippedInCurrentCategory = active
@@ -824,7 +828,7 @@ end
 function ZO_GamepadCollectionsBook:RefreshTooltip(entryData)
     if entryData and entryData.data then
         local collectibleData = entryData.data
-        if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
+        if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
             self:RefreshDLCTooltip(collectibleData)
         elseif collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
             self:RefreshHousingTooltip(collectibleData)
@@ -847,7 +851,7 @@ function ZO_GamepadCollectionsBook:RefreshStandardTooltip(collectibleData, entry
     local timeRemainingS = entryData:GetCooldownTimeRemainingMs() / 1000
     local SHOW_VISUAL_LAYER_INFO = true
     local SHOW_BLOCK_REASON = true
-    GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_LEFT_TOOLTIP, collectibleData.collectibleId, categoryName, collectibleData.name, collectibleData.nickname, collectibleData.purchasable, collectibleData.description, collectibleData.hint, collectibleData.isPlaceholder, SHOW_VISUAL_LAYER_INFO, timeRemainingS, SHOW_BLOCK_REASON)
+    GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_LEFT_TOOLTIP, collectibleData.collectibleId, categoryName, collectibleData.name, collectibleData.nickname, collectibleData.purchasable, collectibleData.description, collectibleData.hint, collectibleData.isPlaceholder, collectibleData.categoryType, SHOW_VISUAL_LAYER_INFO, timeRemainingS, SHOW_BLOCK_REASON)
 end
 
 function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
@@ -864,6 +868,9 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
     local showsQuest = not (collectibleData.active or collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED)
     local questAcceptIndicator = infoPanel.questAcceptIndicator
     local questAcceptDescription = infoPanel.questAcceptDescription
+    local canUnlockOnStore = collectibleData.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED and collectibleData.purchasable
+    local canUnlockWithSubscription = not IsESOPlusSubscriber() and collectibleData.storiesData.unlockedViaSubscription
+    local canUpgrade = collectibleData.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED and collectibleData.storiesData.requiresEntitlement
     if showsQuest then
         questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
         questAcceptIndicator:SetHidden(false)
@@ -872,8 +879,14 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
         questAcceptDescription:SetText(questDescription)
         questAcceptDescription:SetHidden(false)
     elseif collectibleData.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED then
-        questAcceptIndicator:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK))
-        questAcceptIndicator:SetHidden(false)
+        if canUnlockOnStore or canUnlockWithSubscription or canUpgrade then
+            local acquireText = canUpgrade and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
+            questAcceptIndicator:SetText(acquireText)
+            questAcceptIndicator:SetHidden(false)
+        else
+            questAcceptIndicator:SetHidden(true)
+        end
+
         questAcceptDescription:SetHidden(true)
     else
         questAcceptIndicator:SetHidden(true)
@@ -931,8 +944,21 @@ function ZO_GamepadCollectionsBook:BrowseToCollectible(collectibleId, categoryIn
     SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "gamepadCollectionsBook")
 end
 
---[[Global functions]]--
-------------------------
+function ZO_GamepadCollectionsBook:CanPurchaseCurrentTarget()
+    local entryData = self.currentList.list:GetTargetData()
+    local collectibleData = entryData.data
+    return collectibleData.purchasable and collectibleData.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED
+end
+
+function ZO_GamepadCollectionsBook:CanUpgradeCurrentTarget()
+    local entryData = self.currentList.list:GetTargetData()
+    local collectibleData = entryData.data
+    return collectibleData.storiesData and collectibleData.storiesData.requiresEntitlement and collectibleData.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED
+end
+
+-----------------
+-- Actions Dialog
+-----------------
 
 function ZO_GamepadCollectionsBook:InitializeActionsDialog()
     local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
@@ -963,6 +989,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                         ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
                         CHAT_SYSTEM:SubmitTextEntry()
                     end,
+                    visible = IsChatSystemAvailableForCurrentPlatform
                 },
             },
             -- Rename
@@ -992,9 +1019,21 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                         ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                     end,
                     visible = function()
-                        local entryData = self.currentList.list:GetTargetData()
-                        local collectibleData = entryData.data
-                        return collectibleData.purchasable and collectibleData.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED
+                        return self:CanPurchaseCurrentTarget()
+                    end
+                },
+            },
+            -- Chapter Upgrade
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = {
+                    text = GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        ZO_ShowChapterUpgradePlatformDialog()
+                    end,
+                    visible = function()
+                        return self:CanUpgradeCurrentTarget()
                     end
                 },
             },
@@ -1018,9 +1057,9 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
     })
 end
 
--------------------
--- Rename Collectible
--------------------
+----------------------------
+-- Rename Collectible Dialog
+----------------------------
 
 function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
     local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
@@ -1152,7 +1191,7 @@ function ZO_GamepadCollectionsBook:HasAnyNotifications(optionalCategoryIndexFilt
 end
 
 function ZO_GamepadCollectionsBook:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
-    return COLLECTIONS_BOOK_SINGLETON.DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
+    return COLLECTIONS_BOOK_SINGLETON:DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex)
 end
 
 function ZO_GamepadCollectionsBook:HasAnyNewCollectibles()

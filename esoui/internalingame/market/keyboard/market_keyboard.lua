@@ -92,7 +92,7 @@ end
 function MarketContentFragment:RefreshProducts()
     for index, productInfo in ipairs(self.marketProducts) do
         local product = productInfo.product
-        product:Refresh()
+        product:RefreshAsChild()
     end
 end
 
@@ -681,10 +681,10 @@ function Market:InitializeMarketList()
     self.marketScrollChild = self.marketProductList:GetNamedChild("ScrollChild")
 
     -- override the default functionality when the extants change for the product list so we can scroll to a specific item
-    -- if one exists because we openned the market to see a specific item
+    -- if one exists because we opened the market to see a specific item
     self.marketProductList.scroll:SetHandler("OnScrollExtentsChanged",  function(control)
-                                                                            ZO_Scroll_OnExtentsChanged(control:GetParent()) 
-                                                                            self:ScrollAndPreviewQueuedMarketProduct()
+                                                                            ZO_Scroll_OnExtentsChanged(control:GetParent())
+                                                                            self:ScrollToQueuedMarketProduct()
                                                                         end)
 end
 
@@ -788,6 +788,122 @@ function Market:RefreshVisibleCategoryFilter()
     end
 end
 
+function Market:GetCategoryData(categoryIndex, subCategoryIndex)
+    if categoryIndex ~= nil then
+        local categoryTable = self.nodeLookupData[categoryIndex]
+        if categoryTable ~= nil then
+            if subCategoryIndex ~= nil then
+                return categoryTable.subCategories[subCategoryIndex]
+            else
+                if categoryTable.node:IsLeaf() then
+                    return categoryTable.node
+                else
+                    return categoryTable.node:GetChildren()[1]
+                end
+            end
+        end
+    end
+end
+
+function Market:GetMarketProductInfo(productId)
+    for i = 1, #self.marketProducts do
+        if self.marketProducts[i].product:GetId() == productId then
+            return self.marketProducts[i]
+        end
+    end
+
+    for i = 1, #self.featuredProducts do
+        if self.featuredProducts[i].product:GetId() == productId then
+            return self.featuredProducts[i]
+        end
+    end
+
+    for i = 1, #self.limitedTimedOfferProducts do
+        if self.limitedTimedOfferProducts[i].product:GetId() == productId then
+            return self.limitedTimedOfferProducts[i]
+        end
+    end
+end
+
+function Market:RequestShowMarketProduct(id)
+    if self.marketState ~= MARKET_STATE_OPEN then
+        self.queuedMarketProductId = id
+        return
+    end
+
+    local targetNode = self:GetCategoryDataForMarketProduct(id)
+    if targetNode then
+        if self.categoryTree:GetSelectedNode() == targetNode then
+            local preview = self:ShouldAutomaticallyPreviewMarketProduct(id)
+            self:ScrollToMarketProduct(id, preview)
+        else
+            self.categoryTree:SelectNode(targetNode)
+            self.queuedMarketProductId = id -- order of operations is important here
+        end
+    end
+end
+
+do
+    local AUTOPREVIEWABLE_PRODUCT_TYPES =
+    {
+        [MARKET_PRODUCT_TYPE_NONE] = false,
+        [MARKET_PRODUCT_TYPE_ITEM] = true,
+        [MARKET_PRODUCT_TYPE_COLLECTIBLE] = true,
+        [MARKET_PRODUCT_TYPE_INSTANT_UNLOCK] = false,
+        [MARKET_PRODUCT_TYPE_BUNDLE] = false,
+        [MARKET_PRODUCT_TYPE_CROWN_CRATE] = false,
+        [MARKET_PRODUCT_TYPE_HOUSING] = false,
+    }
+    function Market:ShouldAutomaticallyPreviewMarketProduct(marketProductId, queuePreview)
+        local productType = GetMarketProductType(marketProductId)
+        if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+            local collectibleType = select(4, GetMarketProductCollectibleInfo(marketProductId))
+            if collectibleType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                return false
+            end
+        end
+        return AUTOPREVIEWABLE_PRODUCT_TYPES[productType]
+    end
+end
+
+do
+    local INSTANTLY_SCROLL_TO_CENTER = true
+    function Market:ScrollToMarketProduct(marketProductId, queuePreview)
+        local marketProductInfo = self:GetMarketProductInfo(marketProductId)
+        if marketProductInfo then
+            ZO_Scroll_ScrollControlIntoCentralView(self.marketProductList, marketProductInfo.control, INSTANTLY_SCROLL_TO_CENTER)
+            marketProductInfo.product:PlayHighlightAnimationToEnd()
+            if queuePreview then
+                self.queuedMarketProductPreview = marketProductInfo.product
+            end
+        end
+    end
+end
+
+function Market:ScrollToQueuedMarketProduct()
+    local preview = self:ShouldAutomaticallyPreviewMarketProduct(self.queuedMarketProductId)
+    self:ScrollToMarketProduct(self.queuedMarketProductId, preview)
+    self.queuedMarketProductId = nil
+end
+
+function Market:RequestShowMarketWithSearchString(searchString)
+    if self.marketState ~= MARKET_STATE_OPEN then
+        self.queuedSearchString = searchString
+        return
+    end
+
+    self:DisplayMarketProductsBySearchString(searchString)
+end
+
+function Market:DisplayMarketProductsBySearchString(searchString)
+    self.searchBox:SetText(searchString)
+end
+
+function Market:DisplayQueuedMarketProductsBySearchString()
+    self:DisplayMarketProductsBySearchString(self.queuedSearchString)
+    self.queuedSearchString = nil
+end
+
 do
     local function AddNodeLookup(lookup, node, parent, categoryIndex)
         if categoryIndex ~= nil then
@@ -812,93 +928,6 @@ do
                 categoryTable.node = node
             end
         end
-    end
-
-    function Market:GetCategoryData(categoryIndex, subCategoryIndex)
-        if categoryIndex ~= nil then
-            local categoryTable = self.nodeLookupData[categoryIndex]
-            if categoryTable ~= nil then
-                if subCategoryIndex ~= nil then
-                    return categoryTable.subCategories[subCategoryIndex]
-                else
-                    if categoryTable.node:IsLeaf() then
-                        return categoryTable.node
-                    else
-                        return categoryTable.node:GetChildren()[1]
-                    end
-                end
-            end
-        end
-    end
-
-    function Market:GetMarketProductInfo(productId)
-        for i = 1, #self.marketProducts do
-            if self.marketProducts[i].product:GetId() == productId then
-                return self.marketProducts[i]
-            end
-        end
-
-        for i = 1, #self.featuredProducts do
-            if self.featuredProducts[i].product:GetId() == productId then
-                return self.featuredProducts[i]
-            end
-        end
-
-        for i = 1, #self.limitedTimedOfferProducts do
-            if self.limitedTimedOfferProducts[i].product:GetId() == productId then
-                return self.limitedTimedOfferProducts[i]
-            end
-        end
-    end
-
-    function Market:RequestShowMarketProduct(id)
-        if self.marketState ~= MARKET_STATE_OPEN then
-            self.queuedMarketProductId = id
-            return
-        end
-
-        local targetNode = self:GetCategoryDataForMarketProduct(id)
-        if targetNode then
-            if self.categoryTree:GetSelectedNode() == targetNode then
-                self:ScrollAndPreviewMarketProduct(id)
-            else
-                self.categoryTree:SelectNode(targetNode)
-                self.queuedMarketProductId = id -- order of operations is important here
-            end
-        end
-    end
-
-    local INSTANTLY_SCROLL_TO_CENTER = true
-    function Market:ScrollAndPreviewMarketProduct(marketProductId)
-        local marketProductInfo = self:GetMarketProductInfo(marketProductId)
-        if marketProductInfo then
-            ZO_Scroll_ScrollControlIntoCentralView(self.marketProductList, marketProductInfo.control, INSTANTLY_SCROLL_TO_CENTER)
-            marketProductInfo.product:PlayHighlightAnimationToEnd()
-            self.queuedMarketProductPreview = marketProductInfo.product
-        end
-    end
-
-    function Market:ScrollAndPreviewQueuedMarketProduct()
-        self:ScrollAndPreviewMarketProduct(self.queuedMarketProductId)
-        self.queuedMarketProductId = nil
-    end
-
-    function Market:RequestShowMarketWithSearchString(searchString)
-        if self.marketState ~= MARKET_STATE_OPEN then
-            self.queuedSearchString = searchString
-            return
-        end
-
-        self:DisplayMarketProductsBySearchString(searchString)
-    end
-
-    function Market:DisplayMarketProductsBySearchString(searchString)
-        self.searchBox:SetText(searchString)
-    end
-
-    function Market:DisplayQueuedMarketProductsBySearchString()
-        self:DisplayMarketProductsBySearchString(self.queuedSearchString)
-        self.queuedSearchString = nil
     end
 
     local function AddCategory(lookup, tree, nodeTemplate, parent, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType, isFakedSubcategory, showGemIcon)
@@ -1293,9 +1322,22 @@ function Market:PurchaseMarketProduct(marketProductId, presentationIndex)
     OnMarketStartPurchase(marketProductId)
 end
 
-function ZO_Market_Shared:OnShowBuyCrownsDialog()
+function Market:OnShowBuyCrownsDialog()
     OnMarketPurchaseMoreCrowns()
     ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_CROWNS_URL_TYPE, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
+end
+
+function Market:RequestShowCategory(categoryIndex)
+    self.queuedCategoryIndex = categoryIndex
+end
+
+function Market:SelectCategory(categoryIndex, subcategoryIndex)
+    local targetNode = self:GetCategoryData(categoryIndex, NO_SUBCATEGORY)
+    if targetNode then
+        if self.categoryTree:GetSelectedNode() ~= targetNode then
+            self.categoryTree:SelectNode(targetNode)
+        end
+    end
 end
 
 function Market:MarketProductSelected(marketProduct)
@@ -1320,7 +1362,7 @@ end
 do
     local DISPLAY_LOADING_DELAY_SECONDS = ZO_MARKET_DISPLAY_LOADING_DELAY_MS / 1000
     function Market:OnUpdate(currentTime)
-        if self.marketState == MARKET_STATE_UNKNOWN then
+        if self.marketState == MARKET_STATE_UNKNOWN or self.marketState == MARKET_STATE_UPDATING then
             if self.loadingStartTime == nil then
                 self.loadingStartTime = currentTime
             end
@@ -1352,6 +1394,11 @@ function Market:OnShown()
     if self.queuedMarketProductPreview and IsCharacterPreviewingAvailable() then
         self.queuedMarketProductPreview:Preview()
         self.queuedMarketProductPreview = nil
+    end
+
+    if self.queuedCategoryIndex then
+        self:SelectCategory(self.queuedCategoryIndex, NO_SUBCATEGORY)
+        self.queuedCategoryIndex = nil
     end
 end
 

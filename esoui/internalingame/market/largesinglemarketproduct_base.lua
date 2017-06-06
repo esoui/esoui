@@ -5,9 +5,6 @@ ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y = 11
 ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET = 25
 ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y = -20
 
---account for the fade that we add to the sides of the callout
-ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
-
 --
 --[[ ZO_LargeSingleMarketProduct_Base ]]--
 --
@@ -40,10 +37,6 @@ do
     end
 end
 
-function ZO_LargeSingleMarketProduct_Base:PerformLayout(description, icon, background, isNew, isFeatured)
-    self.description = description
-end
-
 -- Used for explicity show/hide without re-laying out the data via :Show
 function ZO_LargeSingleMarketProduct_Base:SetHidden(hidden)
     self.control:SetHidden(hidden)
@@ -54,10 +47,12 @@ function ZO_LargeSingleMarketProduct_Base:GetBackground()
 end
 
 function ZO_LargeSingleMarketProduct_Base:SetTitle(title)
-    local formattedTitle = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
+    local formattedTitle
     local stackCount = self:GetStackCount()
     if stackCount > 1 then
-        formattedTitle = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, formattedTitle, stackCount)
+        formattedTitle = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, title, stackCount)
+    else
+        formattedTitle = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
     end
 
     self.title:SetText(formattedTitle)
@@ -78,7 +73,7 @@ do
         local productType = self:GetProductType()
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
             local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
-            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
+            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             self.itemLink = GetMarketProductItemLink(self:GetId())
         end

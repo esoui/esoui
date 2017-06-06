@@ -65,6 +65,10 @@ function ZO_StoreManager_GetStoreItems()
                 isUnique = IsItemLinkUnique(GetStoreItemLink(entryIndex)),
             }
 
+            if entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
+                itemData.questItemId = GetStoreEntryQuestItemId(entryIndex)
+            end
+
             items[#items + 1] = itemData
             for i = 1, #itemData.filterData do
                 usedFilterTypes[itemData.filterData[i]] = true

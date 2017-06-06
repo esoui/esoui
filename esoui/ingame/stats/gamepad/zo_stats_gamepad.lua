@@ -705,7 +705,7 @@ do
         --Artificial effects
         local sortedArtificialEffectsTable = {}
         for effectId in ZO_GetNextActiveArtificialEffectIdIter do
-            local displayName, iconFile, effectType, sortOrder = GetArtificialEffectInfo(effectId)
+            local displayName, iconFile, effectType, sortOrder, startTime, endTime = GetArtificialEffectInfo(effectId)
         
             local data = ZO_GamepadEntryData:New(zo_strformat(SI_ABILITY_TOOLTIP_NAME, displayName), iconFile)
             data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.EFFECTS
@@ -714,6 +714,12 @@ do
             data.tooltipTitle = displayName
             data.sortOrder = sortOrder
             data.isArtificial = true
+
+            local duration = endTime - startTime
+            if duration > 0 then
+                local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
+                data:SetCooldown(timeLeft, duration * 1000.0)
+            end
 
             table.insert(sortedArtificialEffectsTable, data)
         end
@@ -727,7 +733,7 @@ do
         --Real Effects
         local numBuffs = GetNumBuffs("player")
         local hasActiveEffects = numBuffs > 0
-        if(hasActiveEffects) then
+        if hasActiveEffects then
             for i = 1, numBuffs do
                 local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff = GetUnitBuffInfo("player", i)
 
@@ -740,7 +746,7 @@ do
                     data.isArtificial = false
 
                     local duration = endTime - startTime
-                    if(duration > 0) then
+                    if duration > 0 then
                         local timeLeft = (endTime * 1000.0) - GetFrameTimeMilliseconds()
                         data:SetCooldown(timeLeft, duration * 1000.0)
                     end
@@ -797,42 +803,37 @@ end
 function ZO_GamepadStats:RefreshCharacterEffects()
     local selectedData = self.mainList:GetTargetData()
 
-    local contentTitle, contentDescription
+    local contentTitle, contentDescription, contentStartTime, contentEndTime, _
 
     if selectedData.isArtificial then
-        local tooltipText = GetArtificialEffectTooltipText(selectedData.artificialEffectId)
-        contentTitle = selectedData.tooltipTitle
-        contentDescription = tooltipText
-        self.effectDesc:SetHandler("OnUpdate", nil)
+        contentTitle, _, _, _, contentStartTime, contentEndTime = GetArtificialEffectInfo(selectedData.artificialEffectId)
+        contentDescription = GetArtificialEffectTooltipText(selectedData.artificialEffectId)
     else
-        local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType, abilityId = GetUnitBuffInfo("player", selectedData.buffIndex)
-        contentTitle = buffName
+        local buffSlot, abilityId
+        contentTitle, contentStartTime, contentEndTime, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", selectedData.buffIndex)
 
         if(DoesAbilityExist(abilityId)) then
             contentDescription = GetAbilityEffectDescription(buffSlot)
         end
+    end
 
+    local contentDuration = contentEndTime - contentStartTime
+    if contentDuration > 0 then
         local function OnTimerUpdate()
-            local selectedData = self.mainList:GetTargetData()
-            local buffName, startTime, endTime, buffSlot, stackCount, iconFile, buffType, effectType, abilityType, statusEffectType = GetUnitBuffInfo("player", selectedData.buffIndex)
+            local timeLeft = contentEndTime - (GetFrameTimeMilliseconds() / 1000.0)
 
-            local duration = endTime - startTime
-            if(duration > 0) then
-                local timeLeft = endTime - (GetFrameTimeMilliseconds() / 1000.0)
+            local timeLeftText = ZO_FormatTime(timeLeft, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
 
-                local durationText = ZO_FormatTime(timeLeft, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-
-                self:RefreshContentHeader(buffName, GetString(SI_STAT_GAMEPAD_TIME_REMAINING), durationText)
-            end
+            self:RefreshContentHeader(contentTitle, GetString(SI_STAT_GAMEPAD_TIME_REMAINING), timeLeftText)
         end
-    
+
         self.effectDesc:SetHandler("OnUpdate", OnTimerUpdate)
+    else
+        self.effectDesc:SetHandler("OnUpdate", nil)
     end
 
     self.effectDesc:SetText(contentDescription)
     self:RefreshContentHeader(contentTitle)
-
-    return contentTitle
 end
 
 ---------------------

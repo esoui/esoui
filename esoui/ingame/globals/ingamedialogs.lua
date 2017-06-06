@@ -1524,7 +1524,7 @@ ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
     },
 }
 
-ESO_Dialogs["CONFIRM_CONVERT_IMPERIAL_STYLE"] =
+ESO_Dialogs["CONFIRM_CONVERT_STYLE"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -1533,18 +1533,18 @@ ESO_Dialogs["CONFIRM_CONVERT_IMPERIAL_STYLE"] =
     },
     title =
     {
-        text = SI_CONVERT_ITEM_STYLE_IMPERIAL_TITLE,
+        text = SI_CONVERT_ITEM_STYLE_TITLE,
     },
     mainText =
     {
-        text = SI_CONVERT_ITEM_STYLE_IMPERIAL_BODY,
+        text = SI_CONVERT_ITEM_STYLE_BODY,
     },
     buttons =
     {
         {
-            text = SI_CONVERT_ITEM_STYLE_IMPERIAL_BUTTON,
+            text = SI_CONVERT_ITEM_STYLE_BUTTON,
             callback = function(dialog)
-                ConvertItemStyleToImperial(dialog.data.bagId, dialog.data.slotIndex)
+                ConvertItemStyle(dialog.data.bagId, dialog.data.slotIndex, dialog.data.style)
             end,
         },
         {
@@ -1801,54 +1801,6 @@ ESO_Dialogs["CONFIRM_INTERACTION"] =
                         end
         }  
     }
-}
-
-ESO_Dialogs["CONFIRM_STUCK"] =
-{
-    title =
-    {
-        text = SI_CONFIRM_STUCK_TITLE,
-    },
-    mainText =
-    {
-        text = SI_CONFIRM_STUCK_PROMPT,
-    },
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
-                            SendPlayerStuck()
-                        end
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-        }  
-    },
-}
-
-ESO_Dialogs["CONFIRM_STUCK_WITH_TELVAR_COST"] =
-{
-    title =
-    {
-        text = SI_CONFIRM_STUCK_TITLE,
-    },
-    mainText =
-    {
-        text = SI_CONFIRM_STUCK_PROMPT_TELVAR,
-    },
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
-                            SendPlayerStuck()
-                        end
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-        }  
-    },
 }
 
 ESO_Dialogs["FIXING_STUCK"] =
@@ -2184,7 +2136,14 @@ ESO_Dialogs["GROUP_DISBAND_DIALOG"] =
     },
     mainText =
     {
-        text = zo_strformat(SI_GROUP_DIALOG_DISBAND_GROUP_CONFIRMATION),
+        text = function()
+            --These have gender switches, which is why they need to use zo_strformat instead of GetString
+            if IsActiveWorldGroupOwnable() then
+                return zo_strformat(SI_GROUP_DIALOG_DISBAND_GROUP_INSTANCE_CONFIRMATION)
+            else
+                return zo_strformat(SI_GROUP_DIALOG_DISBAND_GROUP_CONFIRMATION)
+            end
+        end,
     },
     buttons =
     {
@@ -2214,7 +2173,16 @@ ESO_Dialogs["GROUP_LEAVE_DIALOG"] =
     },
     mainText =
     {
-        text = zo_strformat(SI_GROUP_DIALOG_LEAVE_GROUP_CONFIRMATION),
+        text = function()
+            --These have gender switches, which is why they need to use zo_strformat instead of GetString
+            if IsActiveWorldBattleground() then
+                return zo_strformat(SI_GROUP_DIALOG_LEAVE_GROUP_BATTLEGROUND_CONFIRMATION)
+            elseif IsActiveWorldGroupOwnable() then
+                return zo_strformat(SI_GROUP_DIALOG_LEAVE_GROUP_INSTANCE_CONFIRMATION)
+            else
+                return zo_strformat(SI_GROUP_DIALOG_LEAVE_GROUP_CONFIRMATION)
+            end
+        end,
     },
     buttons =
     {
@@ -2294,7 +2262,7 @@ ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_PROMPT"] =
     },
 }
 
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT"] =
+ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_DLC_COLLECTIBLE_LOCKED_PROMPT"] =
 {
     gamepadInfo =
     {
@@ -2306,7 +2274,7 @@ ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT"] =
     },
     mainText =
     {
-        text = SI_JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT,
+        text = SI_JUMP_TO_GROUP_LEADER_WORLD_DLC_COLLECTIBLE_LOCKED_PROMPT,
     },
 
     buttons =
@@ -2316,6 +2284,36 @@ ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT"] =
             callback = function(dialog)
                             local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleName)
                             ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP)
+                       end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_EXIT,
+        },
+    },
+}
+
+ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_CHAPTER_COLLECTIBLE_LOCKED_PROMPT"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_JUMP_TO_GROUP_LEADER_COLLECTIBLE_LOCKED_TITLE,
+    },
+    mainText =
+    {
+        text = SI_JUMP_TO_GROUP_LEADER_WORLD_CHAPTER_COLLECTIBLE_LOCKED_PROMPT,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE,
+            callback = function(dialog)
+                            ZO_ShowChapterUpgradePlatformDialog()
                        end,
             clickSound = SOUNDS.DIALOG_ACCEPT,
         },
@@ -2779,7 +2777,7 @@ ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS"] =
     }
 }
 
-ESO_Dialogs["ZONE_COLLECTIBLE_REQUIREMENT_FAILED"] = 
+ESO_Dialogs["ZONE_DLC_COLLECTIBLE_REQUIREMENT_FAILED"] = 
 {
     gamepadInfo =
     {
@@ -2793,7 +2791,7 @@ ESO_Dialogs["ZONE_COLLECTIBLE_REQUIREMENT_FAILED"] =
     },
     mainText = 
     {
-        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_BODY,
+        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DLC_DIALOG_BODY,
     },
     buttons =
     {
@@ -2803,6 +2801,38 @@ ESO_Dialogs["ZONE_COLLECTIBLE_REQUIREMENT_FAILED"] =
             callback = function(dialog)
                             local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleName)
                             ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE)
+                       end
+        },
+        [2] =
+        {
+            text = SI_DIALOG_EXIT,
+        },
+    }
+}
+
+ESO_Dialogs["ZONE_CHAPTER_COLLECTIBLE_REQUIREMENT_FAILED"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowShowOnNextScene = true,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_CHAPTER_DIALOG_BODY,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE,
+            callback = function(dialog)
+                            ZO_ShowChapterUpgradePlatformDialog()
                        end
         },
         [2] =
@@ -3317,3 +3347,34 @@ do
         noChoiceCallback = OnBuyHouseForGoldReleased,
     }
 end
+
+ESO_Dialogs["CONFIRM_LEAVE_BATTLEGROUND"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_BATTLEGROUND_CONFIRM_LEAVE_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_BATTLEGROUND_CONFIRM_LEAVE_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text =      SI_YES,
+            callback =  function(dialog)
+                            LeaveBattleground()
+                        end,
+        },
+        [2] =
+        {
+            text =      SI_NO,
+        }
+    }
+}

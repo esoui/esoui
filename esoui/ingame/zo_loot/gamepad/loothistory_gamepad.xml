@@ -8,7 +8,7 @@
                 <Texture name="$(parent)Icon" override="true">
                     <Anchor point="LEFT" offsetX="20" />
                     <Controls>
-                        <Label name="$(parent)StackCount" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
+                        <Label name="$(parent)OverlayText" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                         
                         <Texture name="$(parent)CraftBagIcon" textureFile="EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds" override="true">
                             <Anchor point="LEFT" relativeTo="$(grandparent)" relativePoint="RIGHT" offsetX="-5"/>

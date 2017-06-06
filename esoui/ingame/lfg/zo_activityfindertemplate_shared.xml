@@ -14,6 +14,20 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Control name="ZO_ActivityFinderTemplateSetTypesSection_Shared" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Label name="$(parent)List" wrapMode="ELLIPSIS" maxLineCount="3" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
         
         <Control name="ZO_ActivityFinderSingularTemplate_Shared" virtual="true">
             <Controls>

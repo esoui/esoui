@@ -10,7 +10,6 @@ function ZO_ErrorFrame:New(...)
     return errorFrame
 end
 
-local LOW_MEMORY_STRING = GetString(SI_LUA_LOW_MEMORY)
 function ZO_ErrorFrame:Initialize(control)
     self.control = control
     self.textEditControl = control:GetNamedChild("TextEdit")
@@ -25,7 +24,6 @@ function ZO_ErrorFrame:Initialize(control)
     self:InitializePlatformStyles()
 
     EVENT_MANAGER:RegisterForEvent("ErrorFrame", EVENT_LUA_ERROR, function(eventCode, ...) self:OnUIError(...) end)
-    EVENT_MANAGER:RegisterForEvent("ErrorFrame", EVENT_LUA_LOW_MEMORY, function() self:OnUIError(LOW_MEMORY_STRING) end)
 end
 
 local KEYBOARD_STYLES = {

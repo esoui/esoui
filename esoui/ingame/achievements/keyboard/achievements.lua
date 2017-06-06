@@ -111,7 +111,7 @@ function Achievement:Initialize(control, checkPool, statusBarPool, rewardLabelPo
     self.anchoredToAchievement = nil
     self.dependentAnchoredAchievement = nil
 
-    if(self.highlight) then
+    if self.highlight then
         self.highlight:SetHeight(ACHIEVEMENT_COLLAPSED_HEIGHT)
     end
 end
@@ -122,6 +122,14 @@ end
 
 function Achievement:GetAchievementInfo(achievementId)
     return GetAchievementInfo(achievementId)
+end
+
+function Achievement:GetIndex()
+    return self.index
+end
+
+function Achievement:SetIndex(index)
+    self.index = index
 end
 
 function Achievement:Show(achievementId)
@@ -141,9 +149,9 @@ function Achievement:Show(achievementId)
     
     self.completed = completed
     self.isExpandable = self:IsExpandable()
-    
+
     if completed then
-        self.date:SetHidden(false)        
+        self.date:SetHidden(false)
         self.date:SetText(date)
 
         ApplyColorToAchievementIcon(self, ZO_DEFAULT_ENABLED_COLOR)
@@ -177,7 +185,7 @@ end
 do
     local function LayoutLineSection(controls, yOffset, parent, controlWidth, controlHeight)
         local numControls = #controls
-        if numControls > 0 then            
+        if numControls > 0 then
             local previous
             for i = 1, numControls do
                 if previous then
@@ -199,7 +207,7 @@ do
     local function LayoutCriteriaSection(controls, yOffset, parent, controlHeight)
         local useFunctionToGetHeight = type(controlHeight) == "function"
         local numControls = #controls
-        if numControls > 0 then            
+        if numControls > 0 then
             for i, control in ipairs(controls) do
                 yOffset = yOffset + (control.additionalVerticalPadding or 0)
                 control:SetAnchor(TOPLEFT, parent, TOPLEFT, 90, yOffset)
@@ -220,7 +228,7 @@ do
     local function LayoutRewardSection(controls, yOffset, parent, controlHeight)
         local numControls = #controls
         if numControls > 0 then
-            local numRewards = 0          
+            local numRewards = 0
             for i, control in ipairs(controls) do
                 if not control.isHeader then
                     if control.prefix then
@@ -642,7 +650,7 @@ function Achievement:Collapse()
     if not self.collapsed then
         self.collapsed = true
 
-        if(self.rewardThumb) then
+        if self.rewardThumb then
             self.rewardThumb:ClearAnchors()
             self.rewardThumb:SetAnchor(TOPLEFT, self.control, TOPLEFT, 42, 58)
         end
@@ -681,6 +689,7 @@ function Achievement:SetAnchor(previous)
     -- So whenever moving an achievement in the list, you must move the achievement to its new spot BEFORE closing the gap
     if self.anchoredToAchievement then
         self.anchoredToAchievement:SetDependentAnchoredAchievement(nil)
+        self.anchoredToAchievement = nil
     end
 
     if previous then
@@ -689,7 +698,6 @@ function Achievement:SetAnchor(previous)
         self.anchoredToAchievement = previous
     else
         self.control:SetAnchor(TOPLEFT, nil, TOPLEFT)
-        self.anchoredToAchievement = nil
     end
 end
 
@@ -717,11 +725,12 @@ function Achievement:ToggleCollapse()
     end
 end
 
-function Achievement:Destroy()
+function Achievement:Reset()
     self.control:SetHidden(true)
     self:SetHighlightHidden(true)
     self:Collapse()
     self.rewardLabel = nil
+    self:SetIndex(nil)
 end
 
 function Achievement:SetHighlightHidden(hidden)
@@ -836,7 +845,7 @@ end
 
 function PopupAchievement:Hide()
     self.parentControl:SetHidden(true)
-    self:Destroy()
+    self:Reset()
 end
 
 --[[ Icon Achievement ]]--
@@ -863,7 +872,7 @@ function IconAchievement:Show(achievementId)
     self.control:SetHidden(false)
 end
 
-function IconAchievement:Destroy()
+function IconAchievement:Reset()
     self.control:SetHidden(true)
     self.achievementId = nil
     self.name = nil
@@ -958,32 +967,27 @@ end
 
 function Achievements:InitializeEvents()
     local function OnAchievementsUpdated()
-        if self.control:IsHidden() then
-            self.refreshGroups:RefreshAll("FullUpdate")
-        else
-            self:OnAchievementsUpdated()
-        end
+        self.refreshGroups:RefreshAll("FullUpdate")
     end
-    
+
     local function OnAchievementUpdated(event, id)
-        if self.control:IsHidden() then
-            self.refreshGroups:RefreshSingle("AchievementUpdated", id)
-        else
-            self:OnAchievementUpdated(id)
-        end
+        self.refreshGroups:RefreshSingle("AchievementUpdated", id)
     end
-    
+
     local function OnAchievementAwarded(event, name, points, id)
-        if self.control:IsHidden() then
-            self.refreshGroups:RefreshSingle("AchievementAwarded", id)
-        else
-            self:OnAchievementAwarded(id)
+        self.refreshGroups:RefreshSingle("AchievementAwarded", id)
+    end
+
+    local function OnUpdate()
+        if not self.control:IsHidden() then
+            self.refreshGroups:UpdateRefreshGroups()
         end
     end
-    
+
     self.control:RegisterForEvent(EVENT_ACHIEVEMENTS_UPDATED, OnAchievementsUpdated)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_UPDATED, OnAchievementUpdated)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_AWARDED, OnAchievementAwarded)
+    self.control:SetHandler("OnUpdate", OnUpdate)
 
     self.refreshGroups = ZO_Refresh:New()
     self.refreshGroups:AddRefreshGroup("FullUpdate",
@@ -1014,30 +1018,59 @@ function Achievements:OnAchievementAwarded(achievementId)
     --Move up to the top of the list
     if updatedAchievement then
         local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
-        local oldIndex = updatedAchievement.index
+        local oldIndex = updatedAchievement:GetIndex()
 
-        updatedAchievement.index = achievementIndex
-
-        if achievementIndex >= oldIndex then
-            -- there's no way for us to move down in the list, unless there's an update pending after this
-            -- that will insert before this entry and push it down
+        if oldIndex and achievementIndex == oldIndex then
+            -- if the old index of the achievement matches our target index,
+            -- then we should already be in the right position
             return
         end
+
+        updatedAchievement:SetIndex(achievementIndex)
 
         local oldPrevious = updatedAchievement:GetAnchoredToAchievement()
         local oldNext = updatedAchievement:GetDependentAnchoredAchievement()
 
         local nextAchievementId = GetAchievementId(categoryIndex, subCategoryIndex, achievementIndex + 1)
+        if nextAchievementId == 0 then
+            -- It's possible there is no next achievement, so we'll just bail here since we should be at
+            -- the bottom of the list
+            return
+        end
+
         local newNext = self.achievementsById[self:GetBaseAchievementId(nextAchievementId)]
+        if newNext == updatedAchievement then
+            -- nextAchievementId could be the next achievement in the same line, so newNext could be
+            -- the same achievement as updatedAchievement
+            return
+        end
+
         local newPrevious = newNext:GetAnchoredToAchievement()
+        if newPrevious == updatedAchievement then
+            -- alternatively, we get the achievement that is the very next one that happens already anchored to updatedAchievement
+            -- so newPrevious could be the same achievement as updatedAchievement
+            return
+        end
 
         --Update anchors
+
+        -- first we need to remove the updated achievement from the current chain of achievements
+
+        -- clear the linkage between this updated achievement and the previous one
+        updatedAchievement:SetAnchor(nil)
+
         if oldNext then
+            -- if we have an achievement after the updated achievement then we need
+            -- to put it beneath the updated achievement's previous achievement, if any
+            -- this will also clear the linkage from oldNext to updatedAchievement
             oldNext:SetAnchor(oldPrevious)
         elseif oldPrevious then
+            -- if there isn't an achievement after the updated achievement
+            -- then the updated achievement's previous achievement doesn't have a child achievement now
             oldPrevious:SetDependentAnchoredAchievement(nil)
         end
 
+        -- insert the updated achievement back into the chain
         updatedAchievement:SetAnchor(newPrevious)
 
         if newNext then
@@ -1060,12 +1093,6 @@ function Achievements:OnAchievementUpdated(achievementId)
             if categoryIndex == selectedCategoryIndex and subCategoryIndex == selectedSubCategoryIndex then
                 self:UpdateCategoryLabels(data, SAVE_EXPANDED, DONT_REBUILD_CONTENT_LIST)
                 local baseAchievementId = self:GetBaseAchievementId(achievementId)
-                local updatedAchievement = self.achievementsById[baseAchievementId]
-
-                if not updatedAchievement then
-                    updatedAchievement = self.achievementPool:AcquireObject()
-                    self.achievementsById[baseAchievementId] = updatedAchievement
-                end
 
                 -- Must use base here because in a line, all of the remaining achievements get an update,
                 -- but you only want the lowest one that hasn't been completed
@@ -1073,10 +1100,19 @@ function Achievements:OnAchievementUpdated(achievementId)
                 -- 2 calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (good).
                 -- 3 calls ZO_GetNextInProgressAchievementInLine, returns 3 as next in progress (bad).
                 -- 1 (base for 2 AND 3) calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (best).
-                updatedAchievement:Show(ZO_GetNextInProgressAchievementInLine(baseAchievementId))
-                updatedAchievement:RefreshExpandedView()
+                if ZO_GetNextInProgressAchievementInLine(baseAchievementId) == achievementId then
+                    local updatedAchievement = self.achievementsById[baseAchievementId]
 
-                return updatedAchievement
+                    if not updatedAchievement then
+                        updatedAchievement = self.achievementPool:AcquireObject()
+                        self.achievementsById[baseAchievementId] = updatedAchievement
+                    end
+
+                    updatedAchievement:Show(achievementId)
+                    updatedAchievement:RefreshExpandedView()
+
+                    return updatedAchievement
+                end
             end
         end
     end
@@ -1194,11 +1230,11 @@ function Achievements:InitializeAchievementList(control)
         return Achievement:New(achievement, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool)
     end
     
-    local function DestroyAchievement(achievement)
-        achievement:Destroy()
+    local function ResetAchievement(achievement)
+        achievement:Reset()
     end
 
-    self.achievementPool = ZO_ObjectPool:New(CreateAchievement, DestroyAchievement)
+    self.achievementPool = ZO_ObjectPool:New(CreateAchievement, ResetAchievement)
 
     ZO_AchievementPopup.owner = self
     self.popup = PopupAchievement:New(ZO_AchievementPopup, sharedCheckPool, sharedStatusBarPool, sharedRewardLabelPool, sharedRewardIconPool, sharedLineThumbPool, sharedDyeSwatchPool)
@@ -1276,13 +1312,13 @@ function Achievements:LayoutAchievements(achievements)
     ZO_Scroll_ResetToTop(self.contentList)
 
     local previous
-    for i=1, #achievements do
+    for i = 1, #achievements do
         local id = achievements[i]
-        if(ZO_ShouldShowAchievement(self.categoryFilter.filterType, id)) then
+        if ZO_ShouldShowAchievement(self.categoryFilter.filterType, id) then
             local achievement = self.achievementPool:AcquireObject()
             local baseAchievementId = self:GetBaseAchievementId(id)
             self.achievementsById[baseAchievementId] = achievement
-            achievement.index = i
+            achievement:SetIndex(i)
 
             achievement:Show(ZO_GetNextInProgressAchievementInLine(id))
 
@@ -1317,7 +1353,7 @@ function Achievements:InitializeSummary(control)
     end
 
     local function DestroyIconAchievement(achievement)
-        achievement:Destroy()
+        achievement:Reset()
     end
 
     self.iconAchievementPool = ZO_ObjectPool:New(CreateIconAchievement, DestroyIconAchievement)

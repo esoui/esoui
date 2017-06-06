@@ -92,11 +92,11 @@ function GroupList_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption, ZO_SocialOptionsDialogGamepad.ShouldAddWhisperOption)
     
     local function CanKickMember()
-        return not DoesGroupModificationRequireVote() and IsUnitGroupLeader("player") and not self:SelectedDataIsPlayer()
+        return IsGroupModificationAvailable() and not DoesGroupModificationRequireVote() and IsUnitGroupLeader("player") and not self:SelectedDataIsPlayer()
     end
 
     local function CanVoteForKickMember()
-        return DoesGroupModificationRequireVote() and not self:SelectedDataIsPlayer()
+        return IsGroupModificationAvailable() and DoesGroupModificationRequireVote() and not self:SelectedDataIsPlayer()
     end
 
     local function ShouldAddPromoteOption()

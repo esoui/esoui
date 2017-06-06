@@ -150,7 +150,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                 local objectiveId = GetKeepArtifactObjectiveId(keepId)
                 if(objectiveId ~= 0) then
                     local text
-                    local _, artifactType, artifactState, alliance1, alliance2 = GetAvAObjectiveInfo(keepId, objectiveId, battlegroundContext)
+                    local _, artifactType, artifactState = GetObjectiveInfo(keepId, objectiveId, battlegroundContext)
                     if(artifactType == OBJECTIVE_ARTIFACT_OFFENSIVE) then
                         text = zo_strformat(SI_TOOLTIP_ARTIFACT_TYPE_OFFENSIVE)
                     else
@@ -360,7 +360,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                 local objectiveId = GetKeepArtifactObjectiveId(keepId)
                 if(objectiveId ~= 0) then
                     local text
-                    local artifactName, artifactType, artifactState, alliance1, alliance2 = GetAvAObjectiveInfo(keepId, objectiveId, battlegroundContext)
+                    local artifactName, artifactType, artifactState = GetObjectiveInfo(keepId, objectiveId, battlegroundContext)
                     if(artifactType == OBJECTIVE_ARTIFACT_OFFENSIVE) then
                         text = GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_SCROLL_OFFENSIVE)
                     else
@@ -374,7 +374,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                     if isStolen then
                         self:LayoutIconStringLine(artifactSection, nil, GetString(SI_TOOLTIP_ARTIFACT_TAKEN), colorStyle, self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
                     else
-                        self:LayoutIconStringLine(artifactSection, nil, zo_strformat(SI_AVA_OBJECTIVE_ARTIFACT_TOOLTIP, artifactName), colorStyle, self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
+                        self:LayoutIconStringLine(artifactSection, nil, zo_strformat(SI_AVA_OBJECTIVE_DISPLAY_NAME_TOOLTIP, artifactName), colorStyle, self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
                     end
                     self:LayoutIconStringLine(artifactSection, nil, text, colorStyle, self.tooltip:GetStyle("mapLocationKeepElderScrollInfo"))
                     keepSection:AddSection(artifactSection)
@@ -425,7 +425,7 @@ local function GetImperialCityStrings(campaignId, isLockedByLinkedCollectible)
     if isLockedByLinkedCollectible then
         local collectibleId = GetImperialCityCollectibleId()
         local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-        lockedText = zo_strformat(SI_TOOLTIP_POI_LINKED_COLLECTIBLE_LOCKED, collectibleName, categoryName)
+        lockedText = zo_strformat(SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED, collectibleName, categoryName)
     end
 
     return name, ruleText, lockedText

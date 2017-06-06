@@ -33,7 +33,12 @@ function ZO_IngameRzChroma_Effects:RegisterForEvents()
     ZO_RzChroma_Effects.RegisterForEvents(self)
 
     local function OnPlayerActivated()
-        self:SetAlliance(GetUnitAlliance("player"))
+        if GetCurrentBattlegroundId() ~= 0 then
+            self:SetAlliance(GetUnitBattlegroundAlliance("player"), true)
+        else
+            self:SetAlliance(GetUnitAlliance("player"), false)
+        end
+
         if IsUnitDead("player") then
             self:AddDeathEffects()
         end

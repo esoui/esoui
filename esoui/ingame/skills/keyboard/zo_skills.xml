@@ -135,7 +135,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Ability" relativePoint="RIGHT" offsetX="10" />
                 </Label>
 
-                <Label name="$(parent)Warning" font="ZoFontGameMedium" horizontalAlignment="CENTER" text="SI_SKILLS_CONFIRM_COST"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Label name="$(parent)Warning" font="ZoFontGameMedium" horizontalAlignment="CENTER" text="SI_SKILLS_IMPROVEMENT_COST"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Ability" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="20" />
                 </Label>
 
@@ -165,7 +165,7 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Track" offsetX="15" offsetY="10" />
                 </Button>
 
-                <Label name="$(parent)Warning" font="ZoFontGameMedium" text="SI_SKILLS_MORPH_COST" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Label name="$(parent)Warning" font="ZoFontGameMedium" text="SI_SKILLS_IMPROVEMENT_COST" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Description" offsetY="230" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" offsetY="230" />
                 </Label>
@@ -192,7 +192,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Track" relativePoint="RIGHT" offsetX="-38" />
                 </Button>
 
-                <Label name="$(parent)Warning" font="ZoFontGameMedium" horizontalAlignment="CENTER" text="SI_SKILLS_UPGRADE_COST" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Label name="$(parent)Warning" font="ZoFontGameMedium" horizontalAlignment="CENTER" text="SI_SKILLS_IMPROVEMENT_COST" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Description" offsetY="145" />
                 </Label>
 
@@ -200,11 +200,20 @@
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-        
+
         <Label name="ZO_SkillsNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+            <OnInitialized>
+                ZO_SkillsNavigationEntry_OnInitialized(self)
+            </OnInitialized>
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                </Texture>
+            </Controls>
         </Label>
         
         <TopLevelControl name="ZO_Skills" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
@@ -235,9 +244,9 @@
                 </Label>
 
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
-                    <Dimensions x="335"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkyShards" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="25" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-55" />
+                    <Dimensions x="353"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkyShards" relativePoint="BOTTOMLEFT" offsetX="-28" offsetY="25" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-55" />
                 </Control>
 
                 <!-- Right Side -->
@@ -258,5 +267,22 @@
                 </Label>
             </Controls>
         </TopLevelControl>
+
+        <Control name="ZO_SkillIconHeader" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_SkillIconHeader_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="28" y="28" />
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                </Texture>
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="18" />
+                </Texture>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

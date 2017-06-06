@@ -21,8 +21,12 @@ local SINGLE_ABILITY_ASSIGN_MODE = 4
 function ZO_GamepadSkills:Initialize(control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
 
-    self.trySetClearNewFlagCallback = function(callId)
-        self:TrySetClearNewFlag(callId)
+    self.trySetClearUpdatedAbilityFlagCallback = function(callId)
+        self:TrySetClearUpdatedAbilityFlag(callId)
+    end
+
+    self.trySetClearNewSkillLineFlagCallback = function(callId)
+        self:TrySetClearNewSkillLineFlag(callId)
     end
 
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadSkillsTopLevelSkillInfo)
@@ -81,11 +85,15 @@ function ZO_GamepadSkills:Initialize(control)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
         elseif newState == SCENE_HIDDEN then
             self:DisableCurrentList()
-            self:TryClearNewStatus()
-            self.clearNewStatusCallId = nil
-            self.clearNewStatusSkillType = nil
-            self.clearNewStatusSkillLineIndex = nil
-            self.clearNewStatusAbilityIndex = nil
+            self:TryClearAbilityUpdatedStatus()
+            self:TryClearSkillLineNewStatus()
+            self.clearAbilityUpdatedStatusCallId = nil
+            self.clearSkillLineNewStatusCallId = nil
+            self.clearAbilityUpdatedStatusSkillType = nil
+            self.clearAbilityUpdatedStatusSkillLineIndex = nil
+            self.clearAbilityUpdatedStatusAbilityIndex = nil
+            self.clearSkillLineNewStatusSkillType = nil
+            self.clearSkillLineNewStatusSkillLineIndex = nil
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
@@ -337,21 +345,27 @@ function ZO_GamepadSkills:InitializeKeybindStrip()
                 local selectedData = self.lineFilterList:GetTargetData()
                 if selectedData ~= ACTION_BAR_ID  then
                     if self.mode == ABILITY_LIST_BROWSE_MODE then
-                        local actionType = GetAbilityAction(selectedData.skillType, selectedData.skillLineIndex, selectedData.abilityIndex)
-                        local name,icon,_,_,_,_,progressionIndex = GetSkillAbilityInfo(selectedData.skillType, selectedData.skillLineIndex, selectedData.abilityIndex)
+                        local skillType = selectedData.skillType
+                        local skillLineIndex = selectedData.skillLineIndex
+                        local abilityIndex = selectedData.abilityIndex
+                        local actionType = GetAbilityAction(skillType, skillLineIndex, abilityIndex)
+                        local name, _, _, _, _, _, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
                         local availablePoints = GetAvailableSkillPoints()
-                        
+
+                        local currentUpgradeLevel, maxUpgradeLevel = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
+                        name = ZO_Skills_GenerateAbilityName(SI_ABILITY_NAME_AND_UPGRADE_LEVELS, name, currentUpgradeLevel, maxUpgradeLevel, progressionIndex)
+
                         if actionType == ACTION_PURCHASE then
                             local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
-                            local callbackData = {skillType = selectedData.skillType, skillLineIndex = selectedData.skillLineIndex, abilityIndex = selectedData.abilityIndex, }
+                            local callbackData = {skillType = skillType, skillLineIndex = skillLineIndex, abilityIndex = abilityIndex, }
 
                             ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILLS_PURCHASE_CONFIRMATION", callbackData, labelData)
                         elseif actionType == ACTION_UPGRADE then
                             local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
-                            local callbackData = {skillType = selectedData.skillType, skillLineIndex = selectedData.skillLineIndex, abilityIndex = selectedData.abilityIndex, }
+                            local callbackData = {skillType = skillType, skillLineIndex = skillLineIndex, abilityIndex = abilityIndex, }
 
                             ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILLS_UPGRADE_CONFIRMATION", callbackData, labelData)
-                        elseif actionType == ACTION_MORPH then               
+                        elseif actionType == ACTION_MORPH then
                             local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
                             local callbackData = {progressionIndex = progressionIndex }
 
@@ -508,8 +522,7 @@ function ZO_GamepadSkills:InitializeCategoryList()
 
     self.categoryList:SetOnSelectedDataChangedCallback(
     function(_, selectedData)
-        self:RefreshSelectedTooltip()
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryKeybindStripDescriptor)
+        self:OnSelectedSkillLineChanged(selectedData)
     end)
 end
 
@@ -673,17 +686,31 @@ function ZO_GamepadSkills:InitializeEvents()
     end
 end
 
-function ZO_GamepadSkills:TryClearNewStatus()
-    if self.clearNewStatusOnSelectionChanged then
-        self.clearNewStatusOnSelectionChanged = false
-        NEW_SKILL_CALLOUTS:ClearNewStatusOnAbilities(self.clearNewStatusSkillType, self.clearNewStatusSkillLineIndex, self.clearNewStatusAbilityIndex)
+function ZO_GamepadSkills:TryClearAbilityUpdatedStatus()
+    if self.clearAbilityStatusOnSelectionChanged then
+        self.clearAbilityStatusOnSelectionChanged = false
+        NEW_SKILL_CALLOUTS:ClearAbilityUpdatedStatus(self.clearAbilityUpdatedStatusSkillType, self.clearAbilityUpdatedStatusSkillLineIndex, self.clearAbilityUpdatedStatusAbilityIndex)
         self.lineFilterList:RefreshVisible()
     end
 end
 
-function ZO_GamepadSkills:TrySetClearNewFlag(callId)
-    if self.clearNewStatusCallId == callId then
-        self.clearNewStatusOnSelectionChanged = true
+function ZO_GamepadSkills:TryClearSkillLineNewStatus()
+    if self.clearSkillLineStatusOnSelectionChanged then
+        self.clearSkillLineStatusOnSelectionChanged = false
+        NEW_SKILL_CALLOUTS:ClearSkillLineNewStatus(self.clearSkillLineNewStatusSkillType, self.clearSkillLineNewStatusSkillLineIndex)
+        self.categoryList:RefreshVisible()
+    end
+end
+
+function ZO_GamepadSkills:TrySetClearUpdatedAbilityFlag(callId)
+    if self.clearAbilityUpdatedStatusCallId == callId then
+        self.clearAbilityStatusOnSelectionChanged = true
+    end
+end
+
+function ZO_GamepadSkills:TrySetClearNewSkillLineFlag(callId)
+    if self.clearSkillLineNewStatusCallId == callId then
+        self.clearSkillLineStatusOnSelectionChanged = true
     end
 end
 
@@ -694,12 +721,13 @@ function ZO_GamepadSkills:RefreshCategoryList()
 
     for skillType = 1, GetNumSkillTypes() do
         local numSkillLines = GetNumSkillLines(skillType)
-        if numSkillLines > 0 then
-            for skillLineIndex = 1, numSkillLines do
-                local isHeader = skillLineIndex == 1
-                local name = GetSkillLineInfo(skillType, skillLineIndex)
+        local isHeader = true
+        for skillLineIndex = 1, numSkillLines do
+            local name, _ , discovered = GetSkillLineInfo(skillType, skillLineIndex)
+            if discovered then
                 local function IsSkillLineNew()
-                    return NEW_SKILL_CALLOUTS:IsSkillLineNew(skillType, skillLineIndex)
+                    local CHECK_ABILITIES_IN_SKILL_LINE = true
+                    return NEW_SKILL_CALLOUTS:IsSkillLineNew(skillType, skillLineIndex, CHECK_ABILITIES_IN_SKILL_LINE)
                 end
 
                 local data = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, name))
@@ -713,6 +741,8 @@ function ZO_GamepadSkills:RefreshCategoryList()
                 else
                     self.categoryList:AddEntry("ZO_GamepadSkillLineEntryTemplate", data)
                 end
+
+                isHeader = false
             end
         end
     end
@@ -1196,19 +1226,36 @@ do
 end
 
 local TIME_NEW_PERSISTS_WHILE_SELECTED = 1000
+
 function ZO_GamepadSkills:OnSelectedAbilityChanged(selectedData)
     self:RefreshSelectedTooltip()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
 
-    self:TryClearNewStatus()
+    self:TryClearAbilityUpdatedStatus()
 
-    if selectedData and selectedData ~= ACTION_BAR_ID and NEW_SKILL_CALLOUTS:IsAbilityNew(selectedData.skillType, selectedData.skillLineIndex, selectedData.abilityIndex) then
-        self.clearNewStatusSkillType = selectedData.skillType
-        self.clearNewStatusSkillLineIndex = selectedData.skillLineIndex
-        self.clearNewStatusAbilityIndex = selectedData.abilityIndex
-        self.clearNewStatusCallId = zo_callLater(self.trySetClearNewFlagCallback, TIME_NEW_PERSISTS_WHILE_SELECTED)
+    if selectedData and selectedData ~= ACTION_BAR_ID and NEW_SKILL_CALLOUTS:DoesAbilityHaveUpdates(selectedData.skillType, selectedData.skillLineIndex, selectedData.abilityIndex) then
+        self.clearAbilityUpdatedStatusSkillType = selectedData.skillType
+        self.clearAbilityUpdatedStatusSkillLineIndex = selectedData.skillLineIndex
+        self.clearAbilityUpdatedStatusAbilityIndex = selectedData.abilityIndex
+        self.clearAbilityUpdatedStatusCallId = zo_callLater(self.trySetClearUpdatedAbilityFlagCallback, TIME_NEW_PERSISTS_WHILE_SELECTED)
     else
-        self.clearNewStatusCallId = nil
+        self.clearAbilityUpdatedStatusCallId = nil
+    end
+end
+
+function ZO_GamepadSkills:OnSelectedSkillLineChanged(selectedData)
+    self:RefreshSelectedTooltip()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryKeybindStripDescriptor)
+
+    self:TryClearSkillLineNewStatus()
+
+    local CHECK_ABILITIES_IN_SKILL_LINE = true
+    if selectedData and selectedData ~= ACTION_BAR_ID and NEW_SKILL_CALLOUTS:IsSkillLineNew(selectedData.skillType, selectedData.skillLineIndex, CHECK_ABILITIES_IN_SKILL_LINE) then
+        self.clearSkillLineNewStatusSkillType = selectedData.skillType
+        self.clearSkillLineNewStatusSkillLineIndex = selectedData.skillLineIndex
+        self.clearSkillLineNewStatusCallId = zo_callLater(self.trySetClearNewSkillLineFlagCallback, TIME_NEW_PERSISTS_WHILE_SELECTED)
+    else
+        self.clearSkillLineNewStatusCallId = nil
     end
 end
 
@@ -1433,7 +1480,7 @@ function ZO_GamepadAbilityEntryTemplate_Setup(control, abilityData, selected, ac
 
     local atMorph = progressionIndex and select(4, GetAbilityProgressionXPInfo(progressionIndex))
 
-    local isNew = NEW_SKILL_CALLOUTS:IsAbilityNew(skillType, skillLineIndex, abilityIndex)
+    local abilityHasUpdates = NEW_SKILL_CALLOUTS:DoesAbilityHaveUpdates(skillType, skillLineIndex, abilityIndex)
 
     if control.alert then
         control.alert:ClearIcons()
@@ -1508,7 +1555,7 @@ function ZO_GamepadAbilityEntryTemplate_Setup(control, abilityData, selected, ac
     SetupAbilityXpBar(control, skillType, skillLineIndex, abilityIndex, selected)
 
     if control.alert then
-        if isNew then
+        if abilityHasUpdates then
             control.alert:AddIcon("EsoUI/Art/Inventory/newItem_icon.dds")
         end
         control.alert:Show()

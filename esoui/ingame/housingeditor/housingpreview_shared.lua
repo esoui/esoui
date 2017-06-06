@@ -228,6 +228,7 @@ function ZO_HousingPreviewDialog_Shared:ShowDialog()
 end
 
 function ZO_HousingPreviewDialog_Shared:OnDialogShowing()
+    StopAllMovement()
     RequestOpenHouseStore()
     HOUSE_PREVIEW_MANAGER:RequestOpenMarket()
 end

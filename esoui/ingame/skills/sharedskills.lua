@@ -5,48 +5,56 @@ local SKILL_TYPE_TO_ICONS =
         "EsoUI/Art/Progression/progression_indexIcon_class_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_class_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_class_over.dds",
+        "EsoUI/Art/Progression/skills_announce_class.dds",
     },
     [SKILL_TYPE_WEAPON] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_weapons_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_weapons_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_weapons_over.dds",
+        "EsoUI/Art/Progression/skills_announce_weapons.dds",
     },
     [SKILL_TYPE_ARMOR] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_armor_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_armor_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_armor_over.dds",
+        "EsoUI/Art/Progression/skills_announce_armor.dds",
     },
     [SKILL_TYPE_WORLD] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_world_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_world_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_world_over.dds",
+        "EsoUI/Art/Progression/skills_announce_world.dds",
     },
     [SKILL_TYPE_GUILD] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_guilds_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_guilds_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_guilds_over.dds",
+        "EsoUI/Art/Progression/skills_announce_guilds.dds",
     },
     [SKILL_TYPE_AVA] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_AVA_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_AVA_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_AVA_over.dds",
+        "EsoUI/Art/Progression/skills_announce_ava.dds",
     },
     [SKILL_TYPE_RACIAL] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_race_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_race_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_race_over.dds",
+        "EsoUI/Art/Progression/skills_announce_race.dds",
     },
     [SKILL_TYPE_TRADESKILL] = 
     {
         "EsoUI/Art/Progression/progression_indexIcon_tradeskills_down.dds",
         "EsoUI/Art/Progression/progression_indexIcon_tradeskills_up.dds",
         "EsoUI/Art/Progression/progression_indexIcon_tradeskills_over.dds",
+        "EsoUI/Art/Progression/skills_announce_tradeskills.dds",
     },
 }
 function ZO_Skills_GetIconsForSkillType(skillType)
@@ -151,7 +159,10 @@ function ZO_Skills_TieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl, cra
                     skillInfoHeaderControl.increaseAnimation:PlayFromStart()
 
                     if lineRank > lastRank then
-                        CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_SKILL_RANK_UPDATE, CSA_EVENT_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP, zo_strformat(SI_SKILL_RANK_UP, lineName, lineRank))
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
+                        messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, lineRank))
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
+                        CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                     end
                 end
 

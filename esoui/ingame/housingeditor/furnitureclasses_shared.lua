@@ -19,6 +19,7 @@ end
 
 function ZO_FurnitureDataBase:Initialize(...)
     self.passesTextFilter = true
+    self.theme = FURNITURE_THEME_TYPE_ALL
 end
 
 function ZO_FurnitureDataBase:GetRawName()
@@ -93,6 +94,10 @@ function ZO_FurnitureDataBase:IsBeingPreviewed()
     return false
 end
 
+function ZO_FurnitureDataBase:PassesTheme(theme)
+    return theme == FURNITURE_THEME_TYPE_ALL or self.theme == theme
+end
+
 function ZO_FurnitureDataBase:RefreshInfo(...)
     assert(false)  --must be overridden
 end
@@ -128,9 +133,10 @@ function ZO_PlaceableFurnitureItem:RefreshInfo(bagId, slotIndex)
     self.slotIndex = slotIndex
 
     self.furnitureDataId = GetItemFurnitureDataId(bagId, slotIndex)
-    local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(self.furnitureDataId)
+    local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
     self.categoryId = categoryId
     self.subcategoryId = subcategoryId
+    self.theme = furnitureTheme
 
     self.slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
 
@@ -242,9 +248,10 @@ function ZO_PlaceableFurnitureCollectible:RefreshInfo(collectibleId)
         self.icon = collData.iconFile
 
         self.furnitureDataId = GetCollectibleFurnitureDataId(collectibleId)
-        local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(self.furnitureDataId)
+        local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
         self.categoryId = categoryId
         self.subcategoryId = subcategoryId
+        self.theme = furnitureTheme
     end
 end
 
@@ -295,9 +302,10 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
     self.furnitureDataId = furnitureDataId
     self.quality = GetPlacedHousingFurnitureQuality(retrievableFurnitureId)
     
-    local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+    local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(furnitureDataId)
     self.categoryId = categoryId
     self.subcategoryId = subcategoryId
+    self.theme = furnitureTheme
 
     local playerWorldX, playerWorldY, playerWorldZ = GetPlayerWorldPositionInHouse()
     self:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, GetPlayerCameraHeading())
@@ -400,17 +408,13 @@ function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)
     self.cost = cost
     self.costAfterDiscount = costAfterDiscount
     self.discountPercent = discountPercent
-
-    if GetMarketProductType(marketProductId) == MARKET_PRODUCT_TYPE_ITEM then
-        self.quality = select(4, GetMarketProductItemInfo(marketProductId))
-    else
-        self.quality = ITEM_QUALITY_NORMAL
-    end
+    self.quality = GetMarketProductQuality(marketProductId)
 
     self.furnitureDataId = GetMarketProductFurnitureDataId(marketProductId)
-    local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(self.furnitureDataId)
+    local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
     self.categoryId = categoryId
     self.subcategoryId = subcategoryId
+    self.theme = furnitureTheme
 end
 
 function ZO_HousingMarketProduct:GetMarketProductId()
@@ -501,8 +505,11 @@ function ZO_FurnitureCategory:Initialize(parent, categoryId)
         self.categoryId = categoryId
         if categoryId == ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
             self.name = GetString(SI_HOUSING_FURNITURE_NEEDS_CATEGORIZATION)
+            self.categoryOrder = 0
         else
-            self.name = GetFurnitureCategoryInfo(categoryId)
+            local categoryName, _, _, categoryOrder = GetFurnitureCategoryInfo(categoryId)
+            self.name = categoryName
+            self.categoryOrder = categoryOrder
         end
     end
 end
@@ -595,7 +602,11 @@ end
 
 do
     local function SortCategories(a, b)
-        return a.name < b.name
+        if a.categoryOrder == b.categoryOrder then
+            return a.name < b.name
+        end
+
+        return a.categoryOrder < b.categoryOrder
     end
 
     function ZO_FurnitureCategory:SortCategoriesRecursive()

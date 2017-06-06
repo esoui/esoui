@@ -40,7 +40,7 @@ do
         end
 
         local function AddEntry(parent, name, categoryData)
-            local node = self.leaderboardSystem:AddEntry(self, name, nil, parent, categoryData, GetNumEntries, nil, GetSingleHomeShowEntryInfo, nil, GetString(SI_HOUSING_LEADERBOARDS_HEADER_SCORE), GetHousingLeaderboardEntryConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_housing.dds", LEADERBOARD_TYPE_HOUSE)
+            local node = self.leaderboardSystem:AddEntry(self, name, nil, parent, categoryData, GetNumEntries, nil, GetSingleHomeShowEntryInfo, nil, GetString(SI_LEADERBOARDS_HEADER_POINTS), GetHousingLeaderboardEntryConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_housing.dds", LEADERBOARD_TYPE_HOUSE)
             if node then
                 local nodeData = node.GetData and node:GetData() or node
                 nodeData.voteCategory = categoryData.voteCategory
@@ -54,7 +54,7 @@ do
 
         --Create the category header
         if numVoteCategories > 0 then
-            self.header = self.leaderboardSystem:AddCategory(GetString(SI_HOUSING_LEADERBOARDS_HOME_SHOW), HOME_SHOW_HEADER_ICONS.up, HOME_SHOW_HEADER_ICONS.down, HOME_SHOW_HEADER_ICONS.over)
+            self.header = self.leaderboardSystem:AddCategory(GetString(SI_HOUSING_LEADERBOARDS_CATEGORIES_HEADER), HOME_SHOW_HEADER_ICONS.up, HOME_SHOW_HEADER_ICONS.down, HOME_SHOW_HEADER_ICONS.over)
 
             for voteCategory = 0, numVoteCategories - 1 do
                 local houseEventName = GetHomeShowLeaderboardVoteCategoryName(voteCategory)
@@ -119,10 +119,9 @@ do
             return
         end
 
-        local bestRank, bestScore
-        bestRank, bestScore = GetHomeShowLeaderboardLocalPlayerInfo(self.selectedSubType.voteCategory, self.selectedSubType.houseCategory)
+        local bestRank, bestScore = GetHomeShowLeaderboardLocalPlayerInfo(self.selectedSubType.voteCategory, self.selectedSubType.houseCategory)
 
-        self.currentRankData = bestRank and bestRank > 0 and rank
+        self.currentRankData = bestRank and bestRank > 0 and bestRank
         self.currentScoreData = bestScore and bestScore > 0 and bestScore
 
         self.control:SetHandler("OnUpdate", function(_, currentTime) self:TimerLabelOnUpdate(currentTime) end)

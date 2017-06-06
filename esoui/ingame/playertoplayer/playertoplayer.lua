@@ -9,19 +9,18 @@ local INTERACT_TYPE_FRIEND_REQUEST = 6
 local INTERACT_TYPE_GUILD_INVITE = 7
 local INTERACT_TYPE_CAMPAIGN_QUEUE = 8
 local INTERACT_TYPE_WORLD_EVENT_INVITE = 9
-local INTERACT_TYPE_LFG_JUMP_DUNGEON = 10
-local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 11
-local INTERACT_TYPE_GROUP_ELECTION = 12
-local INTERACT_TYPE_DUEL_INVITE = 13
-local INTERACT_TYPE_LFG_READY_CHECK = 14
+local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 10
+local INTERACT_TYPE_GROUP_ELECTION = 11
+local INTERACT_TYPE_DUEL_INVITE = 12
+local INTERACT_TYPE_LFG_READY_CHECK = 13
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
 local function ShouldUseRadialNotificationMenu(data)
-	if IsInGamepadPreferredMode() and data.pendingResponse then
-		return true
-	end
-	return false
+    if IsInGamepadPreferredMode() and data.pendingResponse then
+        return true
+    end
+    return false
 end
 
 function ZO_PlayerToPlayer:New(...)
@@ -437,70 +436,21 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
 
-    local function OnGroupingToolsJumpDungeonNotificationNew()
-        local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
-        local role = GetGroupMemberAssignedRole("player")
-
-        -- No prompt for AVA types
-        -- Also add a null check for an edge case that should someday soon get fixed
-        if activityType == LFG_ACTIVITY_AVA or not activityType or not activityIndex or not timeRemainingSeconds then
-            return
-        end
-
-        local function AcceptCallback()
-            AcceptLFGJumpNotification()
-        end
-        local function DeferDecisionCallback()
-            self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
-        end
-        
-        local dungeonName = GetLFGOption(activityType, activityIndex)
-
-        local messageFormat, messageParams
-        if role == LFG_ROLE_INVALID then
-            messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
-            messageParams = { dungeonName }
-        else
-            local roleIconPath = GetRoleIcon(role)
-            local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
-
-            messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
-            messageParams = { dungeonName, roleIconFormat, GetString("SI_LFGROLE", role) }
-        end
-        
-        PlaySound(SOUNDS.LFG_JUMP_DUNGEON)
-        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
-        
-        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON, nil, nil, nil, AcceptCallback, nil, DeferDecisionCallback)
-        promptData.acceptText = GetString(SI_LFG_JUMP_TO_DUNGEON_ACCEPT)
-        promptData.declineText = GetString(SI_LFG_JUMP_TO_DUNGEON_HIDE)
-
-        promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
-        promptData.messageFormat = messageFormat
-        promptData.messageParams = messageParams
-        promptData.expirationCallback = ClearLFGJumpNotification
-    end
-    local function OnGroupingToolsJumpDungeonNotificationRemoved()
-        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
-    end
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_NEW, function(event, ...) OnGroupingToolsJumpDungeonNotificationNew(...) end)
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_REMOVED, function(event, ...) OnGroupingToolsJumpDungeonNotificationRemoved(...) end)
-
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
-        local activityType, activityIndex = GetLFGFindReplacementNotificationInfo()
+        local activityId = GetActivityFindReplacementNotificationInfo()
 
         local function DeferDecisionCallback()
             self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         end
         
-        local dungeonName = GetLFGOption(activityType, activityIndex)
+        local dungeonName = GetActivityName(activityId)
         
         PlaySound(SOUNDS.LFG_FIND_REPLACEMENT)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         
         local text = zo_strformat(SI_LFG_FIND_REPLACEMENT_TEXT, dungeonName)
-        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptLFGFindReplacementNotification, DeclineLFGFindReplacementNotification, DeferDecisionCallback)
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptActivityFindReplacementNotification, DeclineActivityFindReplacementNotification, DeferDecisionCallback)
         promptData.acceptText = GetString(SI_LFG_FIND_REPLACEMENT_ACCEPT)
     end
     local function OnGroupingToolsFindReplacementNotificationRemoved()
@@ -606,15 +556,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             end
         end
 
-        if HasLFGJumpNotification() then
-            OnGroupingToolsJumpDungeonNotificationNew()
-        end
-
         if HasLFGReadyCheckNotification() then
             self:OnGroupingToolsReadyCheckUpdated()
         end
 
-        if HasLFGFindReplacementNotification() then
+        if HasActivityFindReplacementNotification() then
             OnGroupingToolsFindReplacementNotificationNew()
         end
 
@@ -630,7 +576,6 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_QUEST_SHARE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_WORLD_EVENT_INVITE)
-        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
     end
@@ -857,16 +802,21 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
             end
 
             local messageFormat, messageParams
+            local activityTypeText = GetString("SI_LFGACTIVITY", activityType)
+            local generalActivityText = ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[activityType]
+            local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+            local timeParamIndex
             if role == LFG_ROLE_INVALID then
                 messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
-                messageParams = { GetString("SI_LFGACTIVITY", activityType) }
+                messageParams = { activityTypeText, generalActivityText, timeText }
+                timeParamIndex = 3
             else
                 local roleIconPath = GetRoleIcon(role)
                 local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
 
                 messageFormat = SI_LFG_READY_CHECK_TEXT
-                local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-                messageParams = { GetString("SI_LFGACTIVITY", activityType), roleIconFormat, GetString("SI_LFGROLE", role), timeText }
+                messageParams = { activityTypeText, generalActivityText, roleIconFormat, GetString("SI_LFGROLE", role), timeText }
+                timeParamIndex = 5
             end
 
             promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK, nil, nil, nil, AcceptLFGReadyCheckNotification, DeclineLFGReadyCheckNotification, DeferDecisionCallback)
@@ -877,7 +827,7 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
                 if isActive then
                     local timeRemainingSeconds = select(3, GetLFGReadyCheckNotificationInfo())
                     local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-                    incomingEntry.messageParams[4] = timeText
+                    incomingEntry.messageParams[timeParamIndex] = timeText
                     self:SetupTargetLabel(incomingEntry)
                 end
             end
@@ -1309,6 +1259,8 @@ local GAMEPAD_INTERACT_ICONS =
     {
         enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
         enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
+        disabledNormal =  "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
     },
     [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
     {
@@ -1389,21 +1341,42 @@ do
         end
 
         --Group--
-        local playerHasGroupPermissions = IsUnitSoloOrGroupLeader("player")
-        local errorReason = not playerHasGroupPermissions and GetString(SI_PLAYER_TO_PLAYER_GROUP_NOT_LEADER) or nil
+        local isGroupModificationAvailable = IsGroupModificationAvailable()
+        local groupModicationRequiresVoting = DoesGroupModificationRequireVote()
+        local isSoloOrLeader = IsUnitSoloOrGroupLeader("player")
+
+        local function AlertGroupDisabled()
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_PLAYER_TO_PLAYER_GROUP_DISABLED))
+        end
+
         if IsPlayerInGroup(currentTargetCharacterNameRaw) then
-            local function GroupKickOption()
-                GroupKickByName(currentTargetCharacterNameRaw) 
+            local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModicationRequiresVoting
+            local groupKickFunction = nil
+            if groupKickEnabled then
+                groupKickFunction = function() GroupKickByName(currentTargetCharacterNameRaw) end
+            else
+                groupKickFunction = AlertGroupDisabled
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], ENABLED, GroupKickOption, errorReason)
+            
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
         else
-            local function InviteOption()
-                local NOT_SENT_FROM_CHAT = false
-                local DISPLAY_INVITED_MESSAGE = true
-                TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+            local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
+            local groupInviteFunction = nil
+            if groupInviteEnabled then
+                groupInviteFunction = function()
+                    local NOT_SENT_FROM_CHAT = false
+                    local DISPLAY_INVITED_MESSAGE = true
+                    TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+                end
+            else
+                if ENABLED_IF_NOT_IGNORED then
+                    groupInviteFunction = AlertGroupDisabled
+                else
+                    groupInviteFunction = AlertIgnored
+                end
             end
-            local groupInviteFunction = ENABLED_IF_NOT_IGNORED and InviteOption or AlertIgnored
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], ENABLED_IF_NOT_IGNORED and playerHasGroupPermissions, groupInviteFunction, errorReason)
+
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
         end
         
         --Friend--

@@ -34,14 +34,14 @@ function ZO_CampaignBrowser_Shared:CanQueue(data)
     local canQueueIndividual = false
     local canQueueGroup = false
     if data then
-        if(GetCurrentCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id)) then
-            if(GetAssignedCampaignId() == data.id or GetGuestCampaignId() == data.id or data.numGroupMembers > 0) then
+        if not IsActiveWorldBattleground() and GetCurrentCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id) then
+            if GetAssignedCampaignId() == data.id or GetGuestCampaignId() == data.id or data.numGroupMembers > 0 then
                 canQueueIndividual = not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
-                if(not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)) then
-                    if(IsUnitGrouped("player") and IsUnitGroupLeader("player") and not IsInLFGGroup()) then
+                if not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_GROUP) then
+                    if IsUnitGrouped("player") and IsUnitGroupLeader("player") and not IsInLFGGroup() then
                         canQueueGroup = true
                     end
-                end        
+                end
             end
         end
     end
@@ -75,12 +75,17 @@ function ZO_CampaignBrowser_Shared:DoQueue(data)
                     QueueForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)
                 end
             end
-
-            if IsInLFGGroup() and GetCurrentLFGActivity() ~= LFG_ACTIVITY_AVA then
-                ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING", {onAcceptCallback = QueueCallback })
-            else
-                QueueCallback()
+            
+            if IsInLFGGroup() then
+                local activityId = GetCurrentLFGActivityId()
+                local activityType = GetActivityType(activityId)
+                if activityType ~= LFG_ACTIVITY_AVA then
+                    ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING", {onAcceptCallback = QueueCallback })
+                    return
+                end
             end
+
+            QueueCallback()
         end
     end
 end

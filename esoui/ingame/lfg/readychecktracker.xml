@@ -4,21 +4,15 @@
             <Dimensions x="48" y="48" />
         </Texture>
         
-        <TopLevelControl name="ZO_ReadyCheckTrackerTopLevel">
-            <Anchor point="TOPLEFT" relativeTo="ZO_ActivityTrackerContainer" relativePoint="BOTTOMLEFT" />
-            <Anchor point="TOPRIGHT" relativeTo="ZO_ActivityTrackerContainer" relativePoint="BOTTOMRIGHT" />
-
+        <TopLevelControl name="ZO_ReadyCheckTrackerTopLevel" resizeToFitDescendents="true">
             <OnInitialized>
                 ZO_ReadyCheckTracker_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
                 <Control name="$(parent)Container" resizeToFitDescendents="true">
-                    <Anchor point="TOPRIGHT" />
-
                     <Controls>
                         <Control name="$(parent)Icons" resizeToFitDescendents="true">
-                            <Anchor point="TOPRIGHT" />
                             <Controls>
                                 <Texture name="$(parent)Icon1" inherits="ZO_ReadyCheckTrackerRoleIconTemplate">
                                     <Anchor point="TOPLEFT" />
@@ -34,7 +28,7 @@
                                 </Texture>
                             </Controls>
                         </Control>
-                        
+
                         <Label name="$(parent)Count" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
                     </Controls>
                 </Control>

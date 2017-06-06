@@ -325,7 +325,7 @@ function ZO_SharedSmithingImprovement_GetImprovementTooltipSounds()
 end
 
 function ZO_SharedSmithingImprovement_CanItemBeImproved(bagId, slotIndex)
-    return CanItemBeSmithingImproved(bagId, slotIndex, GetCraftingInteractionType())
+    return CanItemBeSmithingImproved(bagId, slotIndex, GetCraftingInteractionType()) and not IsItemPlayerLocked(bagId, slotIndex)
 end
 
 function ZO_SharedSmithingImprovement_GetPrimaryFilterType(...)
@@ -340,5 +340,5 @@ function ZO_SharedSmithingImprovement_GetPrimaryFilterType(...)
 end
 
 function ZO_SharedSmithingImprovement_DoesItemPassFilter(bagId, slotIndex, filterType)
-    return ZO_SharedSmithingImprovement_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex)) == filterType and not IsItemPlayerLocked(bagId, slotIndex)
+    return ZO_SharedSmithingImprovement_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex)) == filterType
 end

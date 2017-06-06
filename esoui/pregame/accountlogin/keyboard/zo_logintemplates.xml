@@ -17,10 +17,10 @@
                     </Controls>
                 </Texture>
 
-                <Texture name="$(parent)ESOLogo" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
+                <Texture name="$(parent)ESOLogo" textureFile="EsoUI/Art/Login/login_logoMorrowind_left.dds" resizeToFitFile="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BGMunge" offsetX="-34" offsetY="70" />
                     <Controls>
-                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_logo_right.dds" resizeToFitFile="true">
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_logoMorrowind_right.dds" resizeToFitFile="true">
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
                         </Texture>
                     </Controls>

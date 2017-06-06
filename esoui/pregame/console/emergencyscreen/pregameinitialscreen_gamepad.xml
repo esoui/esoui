@@ -22,11 +22,11 @@
                 <Control name="$(parent)Logo" alpha="0" resizeToFitDescendents="true">
                     <Anchor point="TOP" />
                     <Controls>
-                        <Texture name="$(parent)Title" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo.dds">
+                        <Texture name="$(parent)Title" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo_Morrowind.dds">
                             <Anchor point="TOP" offsetY="64" />
                         </Texture>
                 
-                        <Texture name="$(parent)Ouroboros" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Ouroboros.dds">
+                        <Texture name="$(parent)Ouroboros" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-HandOfVivec.dds">
                             <Anchor point="CENTER" relativeTo="GuiRoot"/>
                         </Texture>
                     </Controls>

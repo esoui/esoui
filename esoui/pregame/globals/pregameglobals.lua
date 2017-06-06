@@ -37,3 +37,9 @@ local function OnPregameFullyLoaded()
 end
 
 CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
+
+-- This allows us to make a the same function in InGame and Pregame while changing exactly what it calls,
+-- so shared code doesn't need to know which state its in
+function ZO_Disconnect()
+    PregameStateManager_SetState("Disconnect")
+end

@@ -202,6 +202,7 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
     end)
+    SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("housingEditorHudUI", true)
 
     local HOUSING_EDITOR_HUD_SCENE_GROUP = ZO_SceneGroup:New("housingEditorHud", "housingEditorHudUI")
     HOUSING_EDITOR_HUD_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
@@ -513,12 +514,15 @@ do
                                         PlaySound(SOUNDS.HOUSING_EDITOR_PLACE_ITEM)
                                     end
                                     self:ClearPlacementKeyPresses()
+                                    return true
                                 elseif mode == HOUSING_EDITOR_MODE_SELECTION then
                                     local result = HousingEditorSelectTargettedFurniture()
                                     ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
                                     if result == HOUSING_REQUEST_RESULT_SUCCESS then
                                         PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                                        return true
                                     end
+                                    return false --if not successful return false so you can jump in editor with a gamepad
                                 end
                             end,
                 order = 10,
@@ -846,14 +850,14 @@ end
 
 function ZO_HousingEditorHud:SetupHousingEditorHudScene()
     if IsInGamepadPreferredMode() then
-        HOUSING_EDITOR_HUD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.GAMEPAD_HOUSING_EDITOR_HUD_BACKDROP_GROUP)
-        HOUSING_EDITOR_HUD_SCENE:RemoveFragmentGroup(FRAGMENT_GROUP.KEYBOARD_HOUSING_EDITOR_HUD_BACKDROP_GROUP)
+        HOUSING_EDITOR_HUD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.GAMEPAD_KEYBIND_STRIP_GROUP)
+        HOUSING_EDITOR_HUD_SCENE:RemoveFragmentGroup(FRAGMENT_GROUP.KEYBOARD_KEYBIND_STRIP_GROUP)
 
         HOUSING_EDITOR_HUD_UI_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
         HOUSING_EDITOR_HUD_UI_SCENE:RemoveFragment(KEYBIND_STRIP_FADE_FRAGMENT)
     else
-        HOUSING_EDITOR_HUD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.KEYBOARD_HOUSING_EDITOR_HUD_BACKDROP_GROUP)
-        HOUSING_EDITOR_HUD_SCENE:RemoveFragmentGroup(FRAGMENT_GROUP.GAMEPAD_HOUSING_EDITOR_HUD_BACKDROP_GROUP)
+        HOUSING_EDITOR_HUD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.KEYBOARD_KEYBIND_STRIP_GROUP)
+        HOUSING_EDITOR_HUD_SCENE:RemoveFragmentGroup(FRAGMENT_GROUP.GAMEPAD_KEYBIND_STRIP_GROUP)
 
         HOUSING_EDITOR_HUD_UI_SCENE:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
         HOUSING_EDITOR_HUD_UI_SCENE:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)

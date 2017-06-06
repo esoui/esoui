@@ -101,8 +101,7 @@ end
 local PvEWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_PvEWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
 function PvEWorldMapFilterPanel:New(...)
-    local object = WorldMapFilterPanel.New(self, ...)
-    return object
+    return WorldMapFilterPanel.New(self, ...)
 end
 
 --PvP Filter Panel
@@ -110,8 +109,7 @@ end
 local PvPWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_PvPWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
 function PvPWorldMapFilterPanel:New(...)
-    local object = WorldMapFilterPanel.New(self, ...)
-    return object
+    return WorldMapFilterPanel.New(self, ...)
 end
 
 --Imperial PvP Filter Panel
@@ -119,8 +117,15 @@ end
 local ImperialPvPWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_ImperialPvPWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
 function ImperialPvPWorldMapFilterPanel:New(...)
-    local object = WorldMapFilterPanel.New(self, ...)
-    return object
+    return WorldMapFilterPanel.New(self, ...)
+end
+
+--Battleground Filter Panel
+
+local BattlegroundWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, WorldMapFilterPanel)
+
+function BattlegroundWorldMapFilterPanel:New(...)
+    return WorldMapFilterPanel.New(self, ...)
 end
 
 --Filters
@@ -145,6 +150,7 @@ function WorldMapFilters:Initialize(control)
         self.pvePanel = PvEWorldMapFilterPanel:New(self.control:GetNamedChild("PvE"), MAP_FILTER_TYPE_STANDARD, savedVars)
         self.pvpPanel = PvPWorldMapFilterPanel:New(self.control:GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
         self.imperialPvPPanel = ImperialPvPWorldMapFilterPanel:New(self.control:GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
+        self.battlegroundPanel = BattlegroundWorldMapFilterPanel:New(self.control:GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
     end)
 end
 

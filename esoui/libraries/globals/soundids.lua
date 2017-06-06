@@ -86,11 +86,6 @@ SOUNDS = {
     CHAT_MINIMIZED = "Chat_Min",
     CHAT_MAXIMIZED = "Chat_Max",
 
-    --Scroll Sounds
-    SCROLL_UP                       = "Scroll_Up",
-    SCROLL_DOWN                     = "Scroll_Down",
-    SCROLL_END                      = "Scroll_Down",
-
     -- Spinner Sounds
     SPINNER_UP                      = "Spinner_Up",
     SPINNER_DOWN                    = "Spinner_Down",
@@ -254,8 +249,8 @@ SOUNDS = {
     TELVAR_MULTIPLIERMAX            = "Telvar_MultiplierMax",
     TELVAR_TRANSACT                 = "Telvar_Transact",
 
-	-- Writ voucher sounds
-	WRIT_VOUCHER_TRANSACT			= "WritVoucher_Transact",
+    -- Writ voucher sounds
+    WRIT_VOUCHER_TRANSACT           = "WritVoucher_Transact",
 
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
@@ -283,7 +278,6 @@ SOUNDS = {
     --LFG sounds
     LFG_SEARCH_STARTED              = "LFG_Search_Started",
     LFG_SEARCH_FINISHED             = "LFG_Search_Finished",
-    LFG_JUMP_DUNGEON                = "LFG_Jump_Dungeon",
     LFG_READY_CHECK                 = "LFG_Ready_Check",
     LFG_FIND_REPLACEMENT            = "LFG_Find_Replacement",
     LFG_COMPLETE_ANNOUNCEMENT       = "LFG_Complete_Announcement",
@@ -295,21 +289,44 @@ SOUNDS = {
     GROUP_ELECTION_RESULT_LOST      = "GroupElection_ResultLost",
 
     --Battleground sounds
-    FLAG_ASSAULTED_ALLIANCE1        = "Flag_AssaultedByAlliance1",
-    FLAG_CAPUTURED_ALLIANCE1        = "AvA_Resource_Captured_ByAldmeri",
-    FLAG_ATTACKED_ALLIANCE1         = "Flag_AttackedByAlliance1",
-    FLAG_LOST_ALLIANCE1             = "Flag_LostByAlliance1",
+    BATTLEGROUND_INACTIVITY_WARNING = "Battleground_InactivityWarning",
+    BATTLEGROUND_MEDAL_RECEIVED = "BG_MedalReceived",
+    BATTLEGROUND_NEARING_VICTORY = "BG_VictoryNear",
+    BATTLEGROUND_COUNTDOWN_FINISH = "BG_Countdown_Finish",
+    BATTLEGROUND_MATCH_WON = "BG_MatchWon",
+    BATTLEGROUND_MATCH_LOST = "BG_MatchLost",
+    BATTLEGROUND_ONE_MINUTE_WARNING = "BG_One_Minute_Warning",
 
-    FLAG_ASSAULTED_ALLIANCE2        = "Flag_AssaultedByAlliance2",
-    FLAG_CAPUTURED_ALLIANCE2        = "AvA_Resource_Captured_ByEbonheart",
-    FLAG_ATTACKED_ALLIANCE2         = "Flag_AttackedByAlliance2",
-    FLAG_LOST_ALLIANCE2             = "Flag_LostByAlliance2",
+    -- Battleground capture flag objective sounds
+    BATTLEGROUND_CAPTURE_FLAG_TAKEN_OWN_TEAM = "BG_CTF_FlagTaken_OwnTeam",
+    BATTLEGROUND_CAPTURE_FLAG_TAKEN_OTHER_TEAM = "BG_CTF_FlagTaken_OtherTeam",
+    BATTLEGROUND_CAPTURE_FLAG_DROPPED_OWN_TEAM = "BG_CTF_FlagDropped_OwnTeam",
+    BATTLEGROUND_CAPTURE_FLAG_DROPPED_OTHER_TEAM = "BG_CTF_FlagDropped_OtherTeam",
+    BATTLEGROUND_CAPTURE_FLAG_RETURNED = "BG_CTF_FlagReturned",
+    BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OTHER_TEAM = "BG_CTF_FlagCaptured",
+    BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OWN_TEAM = "BG_CTF_TeamFlagCapture",
 
-    FLAG_ASSAULTED_ALLIANCE3        = "Flag_AssaultedByAlliance3",
-    FLAG_CAPUTURED_ALLIANCE3        = "AvA_Resource_Captured_ByDaggerfall",
-    FLAG_ATTACKED_ALLIANCE3         = "Flag_AttackedByAlliance3",
-    FLAG_LOST_ALLIANCE3             = "Flag_LostByAlliance3",
+    -- Battleground murderball objective sounds
+    BATTLEGROUND_MURDERBALL_TAKEN_OWN_TEAM = "BG_MB_BallTaken_OwnTeam",
+    BATTLEGROUND_MURDERBALL_TAKEN_OTHER_TEAM = "BG_MB_BallTaken_OtherTeam",
+    BATTLEGROUND_MURDERBALL_DROPPED_OWN_TEAM = "BG_MB_BallDropped_OwnTeam",
+    BATTLEGROUND_MURDERBALL_DROPPED_OTHER_TEAM = "BG_MB_BallDropped_OtherTeam",
+    BATTLEGROUND_MURDERBALL_RETURNED = "BG_MB_BallReturned",
 
+    -- Battleground capture area sounds
+    BATTLEGROUND_CAPTURE_AREA_CAPTURED_OWN_TEAM = "BG_CA_AreaCaptured_OwnTeam",
+    BATTLEGROUND_CAPTURE_AREA_CAPTURED_OTHER_TEAM = "BG_CA_AreaCaptured_OtherTeam",
+    BATTLEGROUND_CAPTURE_METER_CONTESTING = "BG_CM_ContestingArea",
+    BATTLEGROUND_CAPTURE_METER_CAPTURING = "BG_CM_CapturingArea",
+
+    -- Battleground kill sounds
+    BATTLEGROUND_KILL_KILLING_BLOW = "BG_Kill_KillingBlow",
+    BATTLEGROUND_KILL_ASSIST = "BG_Kill_Assist",
+    BATTLEGROUND_KILL_KILLED_BY_MY_TEAM = "BG_Kill_KilledByMyTeam",
+    BATTLEGROUND_KILL_STOLEN_BY_ENEMY_TEAM = "BG_Kill_StolenByEnemyTeam",
+    BATTLEGROUND_KILL_KILLED_BY_ENEMY_TEAM = "BG_Kill_KilledByEnemyTeam",
+
+    -- AVA sounds
     ELDER_SCROLL_CAPTURED_BY_ALDMERI = "ElderScroll_Captured_Aldmeri",
     ELDER_SCROLL_CAPTURED_BY_EBONHEART = "ElderScroll_Captured_Ebonheart",
     ELDER_SCROLL_CAPTURED_BY_DAGGERFALL = "ElderScroll_Captured_Daggerfall",
@@ -337,8 +354,6 @@ SOUNDS = {
     GUILD_KEEP_CLAIMED = "Guild_Keep_Claimed",
     GUILD_KEEP_RELEASED = "Guild_Keep_Released",
     GUILD_KEEP_LOST = "Guild_Keep_Lost",
-
-    MEDAL_AWARDED                   = "MedalAwarded",
 
     -- Broadcast sounds
     MESSAGE_BROADCAST               = "System_Broadcast",
@@ -845,4 +860,11 @@ SOUNDS = {
     HOUSING_EDITOR_PICKUP_ITEM              = "Housing_PickupItem",
     HOUSING_EDITOR_RETRIEVE_ITEM            = "Housing_StoreItem",
     HOUSING_BUY_FOR_GOLD                    = "Housing_BuyForGold",
+
+    -- ESO+ Trial
+    ESO_PLUS_TRIAL_STARTED                  = "ESOPlus_TrialStarted",
+    ESO_PLUS_TRIAL_ENDED                    = "ESOPlus_TrialEnded",
+
+    -- CSA Countdown
+    COUNTDOWN_TICK                          = "Countdown_Tick",
 }

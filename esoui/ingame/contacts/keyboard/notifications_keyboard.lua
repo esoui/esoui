@@ -19,6 +19,7 @@ local KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/notificationIcon_duel.dds",
+    [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/notificationIcon_ESO+.dds",
 }
 
 -- Provider Overrides
@@ -46,8 +47,8 @@ function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybin
                                                                     PlaySound(SOUNDS.DEFAULT_CLICK)
                                                                    end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
-																		HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
-																	end)
+                                                                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
+                                                                    end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
         self.notificationManager.sortFilterList:ShowMenu(button, 1)
@@ -78,8 +79,8 @@ function ZO_KeyboardGuildInviteProvider:Decline(data, button, openedFromKeybind)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_DECLINE), function() RejectGuildInvite(data.guildId) end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER), function() AddIgnore(data.displayName) end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
-																		HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
-																	end)
+                                                                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
+                                                                    end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
         self.notificationManager.sortFilterList:ShowMenu(button, 1)
@@ -200,6 +201,22 @@ function ZO_KeyboardCollectionsUpdateProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_KeyboardEsoPlusSubscriptionStatusProvider
+-------------------------
+
+local ZO_KeyboardEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
+
+function ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(notificationManager)
+    return ZO_EsoPlusSubscriptionStatusProvider.New(self, notificationManager)
+end
+
+function ZO_KeyboardEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
+    local helpCategoryIndex, helpIndex = GetEsoPlusSubscriptionInfoHelpIndices()
+    if helpCategoryIndex ~= nil then
+        HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+    end
+end
+
 --Notification Manager
 -------------------------
 
@@ -219,11 +236,11 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", 50, function(control, data) self:SetupWaiting(control, data) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", 50, function(control, data) self:SetupTwoButtonRow(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", 50, function(control, data) self:SetupAlert(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", 50, function(control, data) self:SetupCollectibleRow(control, data) end)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA, "ZO_NotificationsLFGJumpDungeonRow", 50, SetupRequest)    
-	ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA, "ZO_NotificationsEsoPlusSubscriptionRow", 50, function(control, data) self:SetupEsoPlusSubscriptionRow(control, data) end)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -252,6 +269,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_LFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_DuelInviteProvider:New(self),
+        ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))
@@ -423,13 +441,13 @@ function ZO_KeyboardNotificationManager:SetupWaiting(control, data)
     loading:Show()
 end
 
-function ZO_KeyboardNotificationManager:SetupAlert(control, data)
-    self:SetupBaseRow(control, data)
-    self:SetupMessage(control:GetNamedChild("Message"), data)
-    self:SetupNote(control, data)
+function ZO_KeyboardNotificationManager:SetupCollectibleRow(control, data)
+    self:SetupRequest(control, data)
+    local moreInfoButton = control:GetNamedChild("MoreInfo")
+    moreInfoButton:SetHidden(data.moreInfo ~= true)
 end
 
-function ZO_KeyboardNotificationManager:SetupCollectibleRow(control, data)
+function ZO_KeyboardNotificationManager:SetupEsoPlusSubscriptionRow(control, data)
     self:SetupRequest(control, data)
     local moreInfoButton = control:GetNamedChild("MoreInfo")
     moreInfoButton:SetHidden(data.moreInfo ~= true)
@@ -469,30 +487,30 @@ end
 
 function ZO_KeyboardNotificationManager:Accept_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-	if data then
-		self:AcceptRequest(data)
-	end
+    if data then
+        self:AcceptRequest(data)
+    end
 end
 
 function ZO_KeyboardNotificationManager:Decline_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-	if data then
-		self:DeclineRequest(data, button, MENU_OPENED_FROM_MOUSE)
-	end
+    if data then
+        self:DeclineRequest(data, button, MENU_OPENED_FROM_MOUSE)
+    end
 end
 
 function ZO_KeyboardNotificationManager:Message_OnMouseEnter(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-	if data then
-		data.provider:ShowMessageTooltip(data, control)
-	end
+    if data then
+        data.provider:ShowMessageTooltip(data, control)
+    end
 end
 
 function ZO_KeyboardNotificationManager:Message_OnMouseExit(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-	if data then
-		data.provider:HideMessageTooltip(control)
-	end
+    if data then
+        data.provider:HideMessageTooltip(control)
+    end
 end
 
 function ZO_KeyboardNotificationManager:RowMoreInfo_OnMouseEnter(control)
@@ -506,9 +524,9 @@ end
 
 function ZO_KeyboardNotificationManager:RowMoreInfo_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-	if data then
-		self:ShowMoreInfo(data)
-	end
+    if data then
+        self:ShowMoreInfo(data)
+    end
 end
 
 --Global XML

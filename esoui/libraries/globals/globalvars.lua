@@ -15,15 +15,7 @@ function CreateControl(name, parent, controlType)
 end
 
 function CreateControlFromVirtual(name, parent, templateName, optionalNameSuffix)
-    if(optionalNameSuffix) then
-        local suffixType = type(optionalNameSuffix)
-        
-        if(suffixType == "number" or suffixType == "string") then
-            name = name..optionalNameSuffix
-        end
-    end
-    
-    return WINDOW_MANAGER:CreateControlFromVirtual(name, parent, templateName)
+    return WINDOW_MANAGER:CreateControlFromVirtual(name, parent, templateName, optionalNameSuffix)
 end
 
 function ApplyTemplateToControl(control, templateName)

@@ -1,28 +1,6 @@
-local GAMEPAD_WAIT_FOR_PREGAME_FULLY_LOADED_SCENE = ZO_Scene:New("gamepadWaitForPregameFullyLoaded", SCENE_MANAGER)
 
 local consolePregameStates =
 {
-    ["WaitForPregameFullyLoaded"] =
-    {
-        ShouldAdvance = function()
-            return PregameIsFullyLoaded()
-        end,
-
-        OnEnter = function()
-            RegisterForLoadingUpdates()
-            PregameStateManager_UpdateRealmName()
-            SuppressWorldList()
-            Pregame_ShowScene("gamepadWaitForPregameFullyLoaded")
-        end,
-        
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "CharacterSelect"
-        end
-    },
-    
     ["CharacterSelect"] =
     {
         OnEnter = function()
@@ -91,7 +69,7 @@ local consolePregameStates =
             --If we're quick launching, then just register a profile login event that sets the LastPlatform and advances the state.
             if (GetCVar("QuickLaunch") == "1") then
                 EVENT_MANAGER:RegisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT, function(eventCode, isSuccess, profileError)
-					EVENT_MANAGER:UnregisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT)
+                    EVENT_MANAGER:UnregisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT)
 
                     if (isSuccess) then
                         local lastPlat = GetCVar("LastPlatform")
@@ -176,8 +154,7 @@ local consolePregameStates =
     ["ShowEULA"] =
     {
         ShouldAdvance = function()
-            -- TODO: Add checks for other legal agreements, if needed.
-            return ZO_HasAgreedToEULA()
+            return not ZO_ShouldShowEULAScreen()
         end,
 
         OnEnter = function()
@@ -316,7 +293,7 @@ local consolePregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "WaitForPregameFullyLoaded"
+            return "WaitForGameDataLoaded"
         end,
     },
 
@@ -488,28 +465,30 @@ PregameStateManager_AddStates(consolePregameStates)
 --This will probably need to be more robust (similar to non console PregameStates) as more pregame comes online
 local function OnVideoPlaybackComplete()
     EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
+    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
 
-    if(not ZO_PREGAME_HAD_GLOBAL_ERROR) then
-        if(ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING) then
-            ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = false
-            AttemptToAdvancePastCharacterCreateIntro()
-        elseif (ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING) then
+    if not ZO_PREGAME_HAD_GLOBAL_ERROR then
+        if ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING then
+            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
+            AttemptToAdvancePastChapterOpeningCinematic()
+        elseif ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING then
             ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
             AttemptToAdvancePastCharacterSelectCinematic()
         else
-            if(not IsInCharacterCreateState()) then
+            if not IsInCharacterCreateState() then
                 PregameStateManager_AdvanceState()
             end
         end
     else
         -- error cases just reset the flags
-        ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = false
+        ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
         ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
     end
 end
 
 function ZO_PlayVideoAndAdvance(...)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
     PlayVideo(...)
 end
 
@@ -540,7 +519,7 @@ function ZO_Gamepad_DisplayServerDisconnectedError()
         end
     end
 
-    if(errorString == "") then
+    if errorString == nil or errorString == "" then
         errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
     end
 
@@ -572,15 +551,9 @@ local function OnProfileLoginResult(event, isSuccess, profileError)
     end
 end
 
-local function OnPregameFullyLoaded()
-    PregameStateManager_AdvanceStateFromState("WaitForPregameFullyLoaded")
-end
-
 local function PregameStateManager_Initialize()
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnServerDisconnectError)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_PROFILE_LOGIN_RESULT, OnProfileLoginResult)
-
-    CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
 end
 
 PregameStateManager_Initialize()

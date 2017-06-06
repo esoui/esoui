@@ -76,7 +76,7 @@
             <Dimensions x="20" y="20" />
             <Anchor point="TOPRIGHT" offsetX="-5" offsetY="6" />
 
-			<TextureCoords left="0" top="0" right="0.625" bottom="0.625" />
+            <TextureCoords left="0" top="0" right="0.625" bottom="0.625" />
 
             <Textures
                 normal="EsoUI/Art/Buttons/closeButton_up.dds"
@@ -351,6 +351,19 @@
                 pressed="EsoUI/Art/Buttons/minus_down.dds"
                 mouseOver="EsoUI/Art/Buttons/minus_over.dds"
                 disabled="EsoUI/Art/Buttons/minus_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_ExtraLargeButton" inherits="ZO_DefaultButton" virtual="true">
+            <Dimensions x="256" y="78"/>
+            <!-- 256 X 128 texture cut to 256 x 78-->
+            <TextureCoords left="0" top="0" right="1" bottom="0.609375" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/button_xlarge_mouseUp.dds"
+                pressed="EsoUI/Art/Buttons/button_xlarge_mouseDown.dds"
+                mouseOver="EsoUI/Art/Buttons/button_xlarge_mouseOver.dds"
+                disabled="EsoUI/Art/Buttons/button_xlarge_mouseUp.dds"
             />
         </Button>
     </Controls>

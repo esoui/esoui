@@ -225,8 +225,8 @@ end
 
 function ZO_LinkAccount_Gamepad:IsAccountValidForLinking(linkErrorCode)
     return (linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_ACCOUNT_NOT_FOUND       and
-            linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED_XBL and
-            linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED_PSN and
+            linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_EXTERNAL_REFERENCE_ALREADY_USED and
+            linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED and
             linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_INVALID_CREDENTIALS     and
             linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_ACCOUNT_DELETED         and
             linkErrorCode ~= ACCOUNT_CREATE_LINK_ERROR_ACCOUNT_BANNED)

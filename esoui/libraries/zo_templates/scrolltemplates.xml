@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_ScrollUpButton" clickSound="Scroll_Up" virtual="true">
+        <Button name="ZO_ScrollUpButton" virtual="true">
             <Dimensions x="16" y="16" />
             <Anchor point="BOTTOM" relativePoint="TOP"/>
 
@@ -12,7 +12,7 @@
             />
         </Button>
 
-        <Button name="ZO_ScrollDownButton" clickSound="Scroll_Down" virtual="true">
+        <Button name="ZO_ScrollDownButton" virtual="true">
             <Dimensions x="16" y="16" />
             <Anchor point="TOP" relativePoint="BOTTOM"/>
 
@@ -24,7 +24,7 @@
             />
         </Button>
 
-        <Button name="ZO_ScrollEndButton" clickSound="Scroll_End" virtual="true">
+        <Button name="ZO_ScrollEndButton" virtual="true">
             <Textures
                 normal="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_up.dds"
                 pressed="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_down.dds"

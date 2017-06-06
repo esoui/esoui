@@ -3,8 +3,6 @@ local pregameStates =
     ["CharacterSelect"] =
     {
         OnEnter = function()
-            PregameStateManager_UpdateRealmName()
-            SuppressWorldList()
             Pregame_ShowScene("gameMenuCharacterSelect")
             if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                 ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
@@ -18,7 +16,7 @@ local pregameStates =
     ["ShowEULA"] =
     {
         ShouldAdvance = function()
-            return ZO_HasAgreedToEULA()
+            return not ZO_ShouldShowEULAScreen()
         end,
 
         OnEnter = function()
@@ -280,11 +278,12 @@ end
 
 local function OnVideoPlaybackComplete()
     EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
+    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
 
-    if(not ZO_PREGAME_HAD_GLOBAL_ERROR) then
-        if(IsInCharacterCreateIntroState()) then
-            ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = false
-            AttemptToAdvancePastCharacterCreateIntro()
+    if not ZO_PREGAME_HAD_GLOBAL_ERROR then
+        if IsPlayingChapterOpeningCinematic() then
+            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
+            AttemptToAdvancePastChapterOpeningCinematic()
         else
             PregameStateManager_AdvanceState()
         end
@@ -293,6 +292,7 @@ end
 
 function ZO_PlayVideoAndAdvance(...)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
     PlayVideo(...)
 end
 

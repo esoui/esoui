@@ -170,7 +170,7 @@ fenceKeyboardScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 DYEING_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 DYEING_SCENE:AddFragment(DYEING_FRAGMENT)
 DYEING_SCENE:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
-DYEING_SCENE:AddFragment(MEDIUM_LEFT_PANEL_BG_FRAGMENT)
+DYEING_SCENE:AddFragment(MEDIUM_SHORT_LEFT_PANEL_BG_FRAGMENT)
 DYEING_SCENE:AddFragment(ZO_WindowSoundFragment:New(SOUNDS.DYEING_OPENED, SOUNDS.DYEING_CLOSED))
 
 -----------------------
@@ -698,6 +698,10 @@ MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_CROWN_CRATES, "crownCrateKeyboard")
 --Collections Scene Group
 
 do
+    local function ShouldShowCollectibleNewIcon(categoryIndex)
+        return COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) or COLLECTIONS_BOOK:DoesCategoryHaveAnyNewCollectibles(categoryIndex)
+    end
+
     local iconData = {
         {
             categoryName = SI_COLLECTION_BOOK_TITLE,
@@ -707,7 +711,7 @@ do
             highlight = "EsoUI/Art/Collections/collections_tabIcon_collectibles_over.dds",
             statusIcon = function()
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) and COLLECTIONS_BOOK:IsStandardCategory(categoryIndex) then
+                    if COLLECTIONS_BOOK:IsStandardCategory(categoryIndex) and ShouldShowCollectibleNewIcon(categoryIndex) then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end
@@ -721,14 +725,9 @@ do
             pressed = "EsoUI/Art/Collections/collections_tabIcon_DLC_down.dds",
             highlight = "EsoUI/Art/Collections/collections_tabIcon_DLC_over.dds",
             statusIcon = function()
-                -- check for any pending quests
-                if COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending() then
-                    return ZO_KEYBOARD_NEW_ICON
-                end
-
                 -- check for any DLC collectibles with notifications
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) and COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) then
+                    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexDLC(categoryIndex) and ShouldShowCollectibleNewIcon(categoryIndex) then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end
@@ -743,7 +742,7 @@ do
             highlight = "EsoUI/Art/Collections/collections_tabIcon_housing_over.dds",
             statusIcon = function()
                 for categoryIndex = 1, GetNumCollectibleCategories() do
-                    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexHousing(categoryIndex) and (COLLECTIONS_BOOK:HasAnyNotifications(categoryIndex) or COLLECTIONS_BOOK:DoesCategoryHaveAnyNewCollectibles(categoryIndex)) then
+                    if COLLECTIONS_BOOK_SINGLETON:IsCategoryIndexHousing(categoryIndex) and ShouldShowCollectibleNewIcon(categoryIndex) then
                         return ZO_KEYBOARD_NEW_ICON
                     end
                 end

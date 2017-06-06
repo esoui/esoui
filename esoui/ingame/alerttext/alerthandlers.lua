@@ -9,12 +9,12 @@ local CombatEventToSoundId =
 {
     [ACTION_RESULT_ABILITY_ON_COOLDOWN] = SOUNDS.ABILITY_NOT_READY,
     [ACTION_RESULT_TARGET_OUT_OF_RANGE] = SOUNDS.ABILITY_TARGET_OUT_OF_RANGE,
-	[ACTION_RESULT_TARGET_NOT_IN_VIEW] = SOUNDS.ABILITY_TARGET_OUT_OF_LOS,
+    [ACTION_RESULT_TARGET_NOT_IN_VIEW] = SOUNDS.ABILITY_TARGET_OUT_OF_LOS,
     [ACTION_RESULT_CANT_SEE_TARGET] = SOUNDS.ABILITY_TARGET_OUT_OF_LOS,
-	[ACTION_RESULT_IMMUNE] = SOUNDS.ABILITY_TARGET_IMMUNE,
+    [ACTION_RESULT_IMMUNE] = SOUNDS.ABILITY_TARGET_IMMUNE,
     [ACTION_RESULT_SILENCED] = SOUNDS.ABILITY_CASTER_SILENCED,
     [ACTION_RESULT_STUNNED] = SOUNDS.ABILITY_CASTER_STUNNED,
-	[ACTION_RESULT_BUSY] = SOUNDS.ABILITY_CASTER_BUSY,
+    [ACTION_RESULT_BUSY] = SOUNDS.ABILITY_CASTER_BUSY,
     [ACTION_RESULT_BAD_TARGET] = SOUNDS.ABILITY_TARGET_BAD_TARGET,
     [ACTION_RESULT_TARGET_DEAD] = SOUNDS.ABILITY_TARGET_DEAD,
     [ACTION_RESULT_CASTER_DEAD] = SOUNDS.ABILITY_CASTER_DEAD,
@@ -189,9 +189,9 @@ local AlertHandlers = {
         return ERROR, GetString(SI_CANNOT_DO_THAT_WHILE_DEAD), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
-	[EVENT_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT] = function(artifactName)
-		return ERROR, zo_strformat(GetString(SI_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT), artifactName), SOUNDS.GENERAL_ALERT_ERROR
-	end,
+    [EVENT_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT] = function(artifactName)
+        return ERROR, zo_strformat(GetString(SI_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT), artifactName), SOUNDS.GENERAL_ALERT_ERROR
+    end,
 
     [EVENT_NOT_ENOUGH_MONEY] = function()
         return ERROR, GetString(SI_NOT_ENOUGH_MONEY), SOUNDS.PLAYER_ACTION_INSUFFICIENT_GOLD
@@ -230,17 +230,17 @@ local AlertHandlers = {
         end
     end,
 
-	[EVENT_SOUL_GEM_ITEM_CHARGE_FAILURE] = function(reason)
-		return ERROR, GetString("SI_SOULGEMITEMCHARGINGREASON", reason)
-	end,
+    [EVENT_SOUL_GEM_ITEM_CHARGE_FAILURE] = function(reason)
+        return ERROR, GetString("SI_SOULGEMITEMCHARGINGREASON", reason)
+    end,
 
-	[EVENT_ITEM_REPAIR_FAILURE] = function(reason)
-		return ERROR, GetString("SI_ITEMREPAIRREASON", reason)
-	end,
+    [EVENT_ITEM_REPAIR_FAILURE] = function(reason)
+        return ERROR, GetString("SI_ITEMREPAIRREASON", reason)
+    end,
 
-	[EVENT_MOUNT_FAILURE] = function(reason, arg1)
-		return ERROR, zo_strformat(GetString("SI_MOUNTFAILUREREASON", reason), arg1), SOUNDS.GENERAL_ALERT_ERROR
-	end,
+    [EVENT_MOUNT_FAILURE] = function(reason, arg1)
+        return ERROR, zo_strformat(GetString("SI_MOUNTFAILUREREASON", reason), arg1), SOUNDS.GENERAL_ALERT_ERROR
+    end,
 
     [EVENT_STORE_FAILURE] = function(reason)
         return ERROR, GetString("SI_STOREFAILURE", reason), SOUNDS.GENERAL_ALERT_ERROR
@@ -342,7 +342,7 @@ local AlertHandlers = {
             end
 
             sound = SOUNDS.GROUP_KICK
-        elseif reason == GROUP_LEAVE_REASON_VOLUNTARY then
+        elseif reason == GROUP_LEAVE_REASON_VOLUNTARY or reason == GROUP_LEAVE_REASON_LEFT_BATTLEGROUND then
             if not isLocalPlayer then
                 useDefaultReasonText = true
             end
@@ -473,10 +473,10 @@ local AlertHandlers = {
     end,
 
     [EVENT_GUILD_SELF_LEFT_GUILD] = function(guildId, guildName)
-		if(ShouldDisplaySelfKickedFromGuildAlert(guildId)) then
-			return ALERT, zo_strformat(SI_GUILD_SELF_KICKED_FROM_GUILD, guildName), SOUNDS.GENERAL_ALERT_ERROR
-		end
-		
+        if(ShouldDisplaySelfKickedFromGuildAlert(guildId)) then
+            return ALERT, zo_strformat(SI_GUILD_SELF_KICKED_FROM_GUILD, guildName), SOUNDS.GENERAL_ALERT_ERROR
+        end
+        
         return ALERT, nil, SOUNDS.GUILD_SELF_LEFT
     end,
 
@@ -487,7 +487,7 @@ local AlertHandlers = {
         end
     end,
 
-	[EVENT_TRAIT_LEARNED] = function(itemName, traitName)
+    [EVENT_TRAIT_LEARNED] = function(itemName, traitName)
         if not SYSTEMS:IsShowing("alchemy") then
             return ALERT, zo_strformat(SI_NEW_TRAIT_UNLOCKED, itemName, traitName)
         end
@@ -496,11 +496,11 @@ local AlertHandlers = {
     [EVENT_STYLE_LEARNED] = function(styleIndex, chapterIndex, isDefaultRacialStyle)
         if not isDefaultRacialStyle then
             local itemStyle = select(5, GetSmithingStyleItemInfo(styleIndex))
-		    if chapterIndex == ITEM_STYLE_CHAPTER_ALL then
-			    return ALERT, zo_strformat(SI_NEW_STYLE_LEARNED, GetString("SI_ITEMSTYLE", itemStyle))
-	        else
-			    return ALERT, zo_strformat(SI_NEW_STYLE_CHAPTER_LEARNED, GetString("SI_ITEMSTYLE", itemStyle), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
-		    end
+            if chapterIndex == ITEM_STYLE_CHAPTER_ALL then
+                return ALERT, zo_strformat(SI_NEW_STYLE_LEARNED, GetString("SI_ITEMSTYLE", itemStyle))
+            else
+                return ALERT, zo_strformat(SI_NEW_STYLE_CHAPTER_LEARNED, GetString("SI_ITEMSTYLE", itemStyle), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
+            end
         end
     end,
 
@@ -552,7 +552,7 @@ local AlertHandlers = {
         ZO_Dialogs_ReleaseAllDialogs(true)   
         if(logOutDialogOpen or quitGame) then
             return ERROR, GetString(SI_JUSTICE_LOGOUT_DISALLOWED), SOUNDS.GENERAL_ALERT_ERROR
-        end         
+        end
     end,
 
     [EVENT_JUMP_FAILED] = function(result)
@@ -595,7 +595,7 @@ local AlertHandlers = {
 
     [EVENT_PLAYER_DEAD] = function()
         local isAVADeath, isBattleGroundDeath = select(6, GetDeathInfo())
-		local isDuelingDeath = IsDuelingDeath()
+        local isDuelingDeath = IsDuelingDeath()
         if(not (isAVADeath or isBattleGroundDeath or isDuelingDeath)) then
             return ALERT, GetString(SI_DEATH_DURABILITY_ANNOUNCEMENT)
         end
@@ -626,23 +626,17 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_JUSTICE_BOUNTY_PAYOFF_AMOUNT_UPDATED] = function(oldBounty, newBounty)
-        if (newBounty > oldBounty) then
-            TriggerTutorial(TUTORIAL_TRIGGER_BOUNTY_ADDED)
-            return ALERT, zo_strformat(SI_JUSTICE_BOUNTY_ADDED, newBounty - oldBounty)
-        elseif (newBounty == 0 and oldBounty ~= 0) then
-            return ALERT, zo_strformat(SI_JUSTICE_BOUNTY_CLEARED)
-        else
-            return ALERT, zo_strformat(SI_JUSTICE_BOUNTY_SET, newBounty)
+    [EVENT_JUSTICE_BOUNTY_PAYOFF_AMOUNT_UPDATED] = function(oldBounty, newBounty, isInitialize)
+        if not isInitialize then
+            if (newBounty > oldBounty) then
+                TriggerTutorial(TUTORIAL_TRIGGER_BOUNTY_ADDED)
+                return ALERT, zo_strformat(SI_JUSTICE_BOUNTY_ADDED, newBounty - oldBounty)
+            elseif (newBounty == 0 and oldBounty ~= 0) then
+                return ALERT, zo_strformat(SI_JUSTICE_BOUNTY_CLEARED)
+            else
+                return ALERT, zo_strformat(SI_JUSTICE_BOUNTY_SET, newBounty)
+            end
         end
-    end,
-
-    [EVENT_JUSTICE_GOLD_REMOVED] = function(goldAmount)
-        PlaySound(SOUNDS.JUSTICE_GOLD_REMOVED)
-    end,
-
-    [EVENT_JUSTICE_STOLEN_ITEMS_REMOVED] = function()
-        PlaySound(SOUNDS.JUSTICE_ITEM_REMOVED)
     end,
 
     [EVENT_JUSTICE_GOLD_PICKPOCKETED] = function(goldAmount)
@@ -845,7 +839,7 @@ local AlertHandlers = {
             end
             return ERROR, errorText, SOUNDS.GENERAL_ALERT_ERROR
         end
-	end,
+    end,
 
     [EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED] = function(reason)
         if reason ~= LFG_READY_CHECK_CANCEL_REASON_NOT_IN_READY_CHECK then
@@ -857,30 +851,38 @@ local AlertHandlers = {
         return ALERT, GetString(SI_STACK_ALL_ITEMS_ALERT)
     end,
 
-	[EVENT_ACTION_SLOT_ABILITY_USED_WRONG_WEAPON] = function(weaponConfigType)
-		return ALERT, zo_strformat(SI_ERROR_WRONG_WEAPON_EQUIPPED_FOR_SKILL, GetString("SI_WEAPONCONFIGTYPE", weaponConfigType))
-	end,
+    [EVENT_ACTION_SLOT_ABILITY_USED_WRONG_WEAPON] = function(weaponConfigType)
+        return ALERT, zo_strformat(SI_ERROR_WRONG_WEAPON_EQUIPPED_FOR_SKILL, GetString("SI_WEAPONCONFIGTYPE", weaponConfigType))
+    end,
 
-	[EVENT_HOUSING_ADD_PERMISSIONS_FAILED] = function(userGroup, attemptedName)
+    [EVENT_HOUSING_ADD_PERMISSIONS_FAILED] = function(userGroup, attemptedName)
         if userGroup == HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL then
-		    return ALERT, zo_strformat(SI_HOUSING_ADD_PERMISSIONS_FAILED_INDIVIDUAL, ZO_FormatUserFacingDisplayName(attemptedName))
+            return ALERT, zo_strformat(SI_HOUSING_ADD_PERMISSIONS_FAILED_INDIVIDUAL, ZO_FormatUserFacingDisplayName(attemptedName))
         elseif userGroup == HOUSE_PERMISSION_USER_GROUP_GUILD then
             return ALERT, zo_strformat(SI_HOUSING_ADD_PERMISSIONS_FAILED_GUILD, attemptedName)
         end
-	end,
+    end,
 
-	[EVENT_HOUSING_ADD_PERMISSIONS_CANT_ADD_SELF] = function()
+    [EVENT_HOUSING_ADD_PERMISSIONS_CANT_ADD_SELF] = function()
         return ALERT, GetString(SI_HOUSING_ADD_PERMISSIONS_CANT_ADD_SELF)
-	end,
+    end,
 
-	[EVENT_HOUSING_LOAD_PERMISSIONS_RESULT] = function(loadResult)
+    [EVENT_HOUSING_LOAD_PERMISSIONS_RESULT] = function(loadResult)
         return ALERT, GetString("SI_HOUSINGLOADPERMISSIONSRESULT", loadResult)
-	end,
+    end,
 
     [EVENT_HOUSING_EDITOR_REQUEST_RESULT] = function(result)
         if result ~= HOUSING_REQUEST_RESULT_SUCCESS then
             return ALERT, GetString("SI_HOUSINGREQUESTRESULT", result)
         end
+    end,
+
+    [EVENT_PLAYER_EMOTE_FAILED_PLAY] = function(result)
+        return ALERT, GetString("SI_PLAYEREMOTEPLAYFAILURE", result)
+    end,
+
+    [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = function()
+        return ALERT, GetString(SI_BATTLEGROUND_INACTIVITY_WARNING), SOUNDS.BATTLEGROUND_INACTIVITY_WARNING
     end,
 }
 
@@ -898,7 +900,7 @@ if not playerName then
 end
 
 function ShouldShowSocialErrorInAlert(error)
-	return ZO_Menu_WasLastCommandFromMenu() or (error ~= SOCIAL_RESULT_ACCOUNT_NOT_FOUND and error ~= SOCIAL_RESULT_CHARACTER_NOT_FOUND)
+    return ZO_Menu_WasLastCommandFromMenu() or (error ~= SOCIAL_RESULT_ACCOUNT_NOT_FOUND and error ~= SOCIAL_RESULT_CHARACTER_NOT_FOUND)
 end
 
 function IsSocialErrorIgnoreResponse(error)
@@ -906,7 +908,7 @@ function IsSocialErrorIgnoreResponse(error)
 end
 
 function ShouldShowGroupErrorInAlert(error)
-	return ZO_Menu_WasLastCommandFromMenu() or (error ~= GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND)
+    return ZO_Menu_WasLastCommandFromMenu() or (error ~= GROUP_INVITE_RESPONSE_PLAYER_NOT_FOUND)
 end
 
 function IsGroupErrorIgnoreResponse(error)

@@ -207,8 +207,28 @@
                         </Label>
                     </Controls>
                 </Control>
+
+                <Control name="$(parent)GamepadTimerBar">
+                    <Dimensions x="400" y="30" />
+                    <Anchor point="TOP" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetY="45" />
+
+                    <Controls>
+                        <StatusBar name="$(parent)Status" inherits="ZO_GamepadArrowStatusBarWithBGLarge" tier="MEDIUM">
+                            <AnchorFill/>
+
+                            <OnInitialized>
+                                ZO_StatusBar_InitializeDefaultColors(self)
+                                self.gloss = self:GetNamedChild("Gloss")
+                            </OnInitialized>
+                        </StatusBar>
+                        <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)StealthIcon" inherits="ZO_StealthIconContainer">
-                    <Anchor point="TOP"  relativeTo="$(parent)TimerBar" relativePoint="BOTTOM" offsetY="60"/>
+                    <Anchor point="TOP" relativeTo="$(parent)TimerBar" relativePoint="BOTTOM" offsetY="60"/>
                 </Control>
             </Controls>
         </TopLevelControl>

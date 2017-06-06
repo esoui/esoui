@@ -79,6 +79,8 @@ function ZO_Scene:Initialize(name, sceneManager)
     self.state = SCENE_HIDDEN
     self.sceneManager = sceneManager
     self.fragments = {}
+    self.restoresHUDSceneToggleUIMode = false
+    self.restoresHUDSceneToggleGameMenu = false
 
     sceneManager:Add(self)
 end
@@ -383,6 +385,22 @@ end
 
 function ZO_Scene:IsRemoteScene()
     return false
+end
+
+function ZO_Scene:DoesSceneRestoreHUDSceneFromToggleUIMode()
+    return self.restoresHUDSceneToggleUIMode
+end
+
+function ZO_Scene:DoesSceneRestoreHUDSceneFromToggleGameMenu()
+    return self.restoresHUDSceneToggleGameMenu
+end
+
+function ZO_Scene:SetSceneRestoreHUDSceneToggleUIMode(restoreScene)
+    self.restoresHUDSceneToggleUIMode = restoreScene
+end
+
+function ZO_Scene:SetSceneRestoreHUDSceneToggleGameMenu(restoreScene)
+    self.restoresHUDSceneToggleGameMenu = restoreScene
 end
 
 ----------

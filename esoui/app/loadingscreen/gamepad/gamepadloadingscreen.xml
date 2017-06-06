@@ -10,18 +10,18 @@
 
         <AnimationTimeline name="GamepadLoadingCompleteAnimation">
             <OnPlay>
-                self.control:SetKeyboardEnabled(not self:IsPlayingBackward())
+                SharedLoadingCompleteAnimation_OnPlay(self)
             </OnPlay>
             <OnStop>
-                if LoadingScreen_Base_CanHide() and self:IsPlayingBackward() then
-                    self.control:SetHidden(true)
-                    SetGuiHidden("app", true)
-                end
+                SharedLoadingCompleteAnimation_OnStop(self)
             </OnStop>
             <Animations>
+                <!-- Art -->
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <!-- Top Munge / Bottom Munge -->
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />                
                 <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />
-                <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />
+                <!-- Info / Description / Description BG -->
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
@@ -30,7 +30,7 @@
     </Animations>
 
     <Controls>
-        <TopLevelControl name="GamepadLoadingScreen" inherits="ZO_LoadingScreenBase" keyboardEnabled="false">
+        <TopLevelControl name="GamepadLoadingScreen" inherits="ZO_LoadingScreenBase">
             <AnchorFill />
 
             <OnInitialized>

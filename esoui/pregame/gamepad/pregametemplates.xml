@@ -5,10 +5,9 @@
             <Anchor point="TOPRIGHT"/>
 
             <Controls>
-                <!-- TODO: Change to the correct image. -->
-                <Texture name="$(parent)Image" textureFile="EsoUI/Art/Login/Gamepad/login_ESO_Logo.dds">
+                <Texture name="$(parent)Image" textureFile="EsoUI/Art/Login/Gamepad/login_ESOMorrowind_Logo.dds">
                     <Anchor point="TOPLEFT" offsetX="-65" />
-                    <Dimensions x="512" y="256" />
+                    <Dimensions x="512" y="128" />
                 </Texture>
 
                 <Label name="$(parent)Text" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">

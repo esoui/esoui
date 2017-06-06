@@ -39,6 +39,7 @@ function ZO_SharedInventoryManager:Initialize()
             -- with the addition of Craft Bags the bank bag could be modified by the automatic transfer
             -- of bank contents to the Craft Bag on joining a region
             self:RefreshInventory(BAG_BANK)
+            self:RefreshInventory(BAG_SUBSCRIBER_BANK)
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -196,7 +197,6 @@ end
 function ZO_SharedInventoryManager:RefreshInventory(bagId)
     if self:HasBagCache(bagId) then
         self:PerformFullUpdateOnBagCache(bagId)
-        self:FireCallbacks("FullInventoryUpdate", bagId)
     end
 end
 
@@ -376,6 +376,8 @@ function ZO_SharedInventoryManager:PerformFullUpdateOnBagCache(bagId)
         self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
         slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
     end
+
+    self:FireCallbacks("FullInventoryUpdate", bagId)
 end
 
 local SHARED_INVENTORY_SLOT_RESULT_REMOVED = 1

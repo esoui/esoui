@@ -19,41 +19,41 @@ local NUM_EMOTES_ON_PAGE = NUM_EMOTE_ITEM_COLUMNS * NUM_EMOTE_ITEMS_IN_COLUMN
 local EMOTE_GRID_MODE_EMOTES = 0
 local EMOTE_GRID_MODE_QUICK_CHAT = 1
 
-local GAMEPAD_EMOTE_ICON_PATH = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_"
 local GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH = "EsoUI/Art/Quickslots/quickslot_emptySlot.dds"
 
 local GAMEPAD_EMOTE_ICONS = {
     [EMOTE_CATEGORY_INVALID]            = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
-    [EMOTE_CATEGORY_CEREMONIAL]         = GAMEPAD_EMOTE_ICON_PATH .. "ceremonial.dds",
-    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = GAMEPAD_EMOTE_ICON_PATH .. "cheersJeers.dds",
+    [EMOTE_CATEGORY_CEREMONIAL]         = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_ceremonial.dds",
+    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_cheersJeers.dds",
     [EMOTE_CATEGORY_DEPRECATED]         = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
-    [EMOTE_CATEGORY_EMOTION]            = GAMEPAD_EMOTE_ICON_PATH .. "emotion.dds",
-    [EMOTE_CATEGORY_ENTERTAINMENT]      = GAMEPAD_EMOTE_ICON_PATH .. "entertain.dds",
-    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = GAMEPAD_EMOTE_ICON_PATH .. "eatDrink.dds",
-    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = GAMEPAD_EMOTE_ICON_PATH .. "direction.dds",
-    [EMOTE_CATEGORY_PERPETUAL]          = GAMEPAD_EMOTE_ICON_PATH .. "perpetual.dds",
-    [EMOTE_CATEGORY_PHYSICAL]           = GAMEPAD_EMOTE_ICON_PATH .. "physical.dds",
-    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = GAMEPAD_EMOTE_ICON_PATH .. "fidget.dds",
-    [EMOTE_CATEGORY_PROP]               = GAMEPAD_EMOTE_ICON_PATH .. "prop.dds",
-    [EMOTE_CATEGORY_SOCIAL]             = GAMEPAD_EMOTE_ICON_PATH .. "social.dds",
-	[EMOTE_CATEGORY_PERSONALITY_OVERRIDE]= GAMEPAD_EMOTE_ICON_PATH .. "personality.dds",
+    [EMOTE_CATEGORY_EMOTION]            = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_emotion.dds",
+    [EMOTE_CATEGORY_ENTERTAINMENT]      = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_entertain.dds",
+    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_eatDrink.dds",
+    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_direction.dds",
+    [EMOTE_CATEGORY_PERPETUAL]          = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_perpetual.dds",
+    [EMOTE_CATEGORY_PHYSICAL]           = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_physical.dds",
+    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_fidget.dds",
+    [EMOTE_CATEGORY_PROP]               = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_prop.dds",
+    [EMOTE_CATEGORY_SOCIAL]             = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_social.dds",
+	[EMOTE_CATEGORY_PERSONALITY_OVERRIDE]= "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_personality.dds",
+    [EMOTE_CATEGORY_COLLECTED]          = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
 }
 
 -- TODO: Must use the blue gamepad icons for personalities
 local GAMEPAD_PERSONALITY_EMOTE_ICONS = {
 	[EMOTE_CATEGORY_INVALID]            = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
-    [EMOTE_CATEGORY_CEREMONIAL]         = GAMEPAD_EMOTE_ICON_PATH .. "ceremonial_personality.dds",
-    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = GAMEPAD_EMOTE_ICON_PATH .. "cheersJeers_personality.dds",
+    [EMOTE_CATEGORY_CEREMONIAL]         = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_ceremonial_personality.dds",
+    [EMOTE_CATEGORY_CHEERS_AND_JEERS]   = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_cheersJeers_personality.dds",
     [EMOTE_CATEGORY_DEPRECATED]         = GAMEPAD_EMOTE_EMPTY_SLOT_ICON_PATH,
-    [EMOTE_CATEGORY_EMOTION]            = GAMEPAD_EMOTE_ICON_PATH .. "emotion_personality.dds",
-    [EMOTE_CATEGORY_ENTERTAINMENT]      = GAMEPAD_EMOTE_ICON_PATH .. "entertain_personality.dds",
-    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = GAMEPAD_EMOTE_ICON_PATH .. "eatDrink_personality.dds",
-    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = GAMEPAD_EMOTE_ICON_PATH .. "direction_personality.dds",
-    [EMOTE_CATEGORY_PERPETUAL]          = GAMEPAD_EMOTE_ICON_PATH .. "perpetual_personality.dds",
-    [EMOTE_CATEGORY_PHYSICAL]           = GAMEPAD_EMOTE_ICON_PATH .. "physical_personality.dds",
-    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = GAMEPAD_EMOTE_ICON_PATH .. "fidget_personality.dds",
-    [EMOTE_CATEGORY_PROP]               = GAMEPAD_EMOTE_ICON_PATH .. "prop_personality.dds",
-    [EMOTE_CATEGORY_SOCIAL]             = GAMEPAD_EMOTE_ICON_PATH .. "social_personality.dds",
+    [EMOTE_CATEGORY_EMOTION]            = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_emotion_personality.dds",
+    [EMOTE_CATEGORY_ENTERTAINMENT]      = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_entertain_personality.dds",
+    [EMOTE_CATEGORY_FOOD_AND_DRINK]     = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_eatDrink_personality.dds",
+    [EMOTE_CATEGORY_GIVE_DIRECTIONS]    = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_direction_personality.dds",
+    [EMOTE_CATEGORY_PERPETUAL]          = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_perpetual_personality.dds",
+    [EMOTE_CATEGORY_PHYSICAL]           = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_physical_personality.dds",
+    [EMOTE_CATEGORY_POSES_AND_FIDGETS]  = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_fidget_personality.dds",
+    [EMOTE_CATEGORY_PROP]               = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_prop_personality.dds",
+    [EMOTE_CATEGORY_SOCIAL]             = "EsoUI/Art/Emotes/Gamepad/gp_emoteIcon_social_personality.dds",
 }
 
 --
@@ -325,10 +325,6 @@ function ZO_GamepadPlayerEmote:New(...)
     return ZO_Gamepad_ParametricList_Screen.New(self, ...)
 end
 
-local function OnPlayerEmoteFailedPlay()
-    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_EMOTE_FAILED_PLAY))
-end
-
 function ZO_GamepadPlayerEmote:Initialize(control)
     self.control = control
     self.emoteListGridControl = control:GetNamedChild("EmoteListGrid")
@@ -341,8 +337,6 @@ function ZO_GamepadPlayerEmote:Initialize(control)
     GAMEPAD_PLAYER_EMOTE_SCENE = ZO_Scene:New(GAMEPAD_PLAYER_EMOTE_SCENE_NAME, SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_PLAYER_EMOTE_SCENE)
-
-    self.radialControl:RegisterForEvent(EVENT_PLAYER_EMOTE_FAILED_PLAY, OnPlayerEmoteFailedPlay)
 end
 
 function ZO_GamepadPlayerEmote:OnDeferredInitialize()
@@ -351,7 +345,7 @@ function ZO_GamepadPlayerEmote:OnDeferredInitialize()
     self:CreateCategoryList()
     self:InitializeRadialMenu()
 
-    self.control:RegisterForEvent(EVENT_PERSONALITY_CHANGED,
+    PLAYER_EMOTE_MANAGER:RegisterCallback("EmoteListUpdated",
                                     function()
                                         if GAMEPAD_PLAYER_EMOTE_SCENE:IsShowing() then
                                             self:CreateCategoryList()

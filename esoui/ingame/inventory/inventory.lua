@@ -484,11 +484,11 @@ function ZO_InventoryManager:New()
     {
         [INVENTORY_BACKPACK] =
         {
-            slots = {},
             stringSearch = backpackSearch,
             searchBox = ZO_PlayerInventorySearchBox,
             slotType = SLOT_TYPE_ITEM,
-            backingBag = BAG_BACKPACK,
+            backingBags = { BAG_BACKPACK },
+            slots = { [BAG_BACKPACK] = {} },
             listView = ZO_PlayerInventoryList,
             listDataType = INVENTORY_DATA_TYPE_BACKPACK,
             listSetupCallback = SetupBackpackInventoryItemRow,
@@ -524,11 +524,11 @@ function ZO_InventoryManager:New()
         },
         [INVENTORY_BANK] =
         {
-            slots = {},
             stringSearch = bankSearch,
             searchBox = ZO_PlayerBankSearchBox,
             slotType = SLOT_TYPE_BANK_ITEM,
-            backingBag = BAG_BANK,
+            backingBags = { BAG_BANK, BAG_SUBSCRIBER_BANK },
+            slots = { [BAG_BANK] = {}, [BAG_SUBSCRIBER_BANK] = {} },
             listView = ZO_PlayerBankBackpack,
             listDataType = INVENTORY_DATA_TYPE_BACKPACK,
             listSetupCallback = SetupInventoryItemRow,
@@ -549,11 +549,11 @@ function ZO_InventoryManager:New()
         },
         [INVENTORY_GUILD_BANK] =
         {
-            slots = {},
             stringSearch = guildBankSearch,
             searchBox = ZO_GuildBankSearchBox,
             slotType = SLOT_TYPE_GUILD_BANK_ITEM,
-            backingBag = BAG_GUILDBANK,
+            backingBags = { BAG_GUILDBANK },
+            slots = { [BAG_GUILDBANK] = {} },
             listView = ZO_GuildBankBackpack,
             listDataType = INVENTORY_DATA_TYPE_BACKPACK,
             listSetupCallback = SetupInventoryItemRow,
@@ -574,11 +574,11 @@ function ZO_InventoryManager:New()
         },
         [INVENTORY_CRAFT_BAG] =
         {
-            slots = {},
             stringSearch = craftBagSearch,
             searchBox = ZO_CraftBagSearchBox,
             slotType = SLOT_TYPE_CRAFT_BAG_ITEM,
-            backingBag = BAG_VIRTUAL,
+            backingBags = { BAG_VIRTUAL },
+            slots = { [BAG_VIRTUAL] = {} },
             listView = ZO_CraftBagList,
             listDataType = INVENTORY_DATA_TYPE_BACKPACK,
             listSetupCallback = SetupBackpackInventoryItemRow,
@@ -607,6 +607,7 @@ function ZO_InventoryManager:New()
     {
         [BAG_BACKPACK] = INVENTORY_BACKPACK,
         [BAG_BANK] = INVENTORY_BANK,
+        [BAG_SUBSCRIBER_BANK] = INVENTORY_BANK,
         [BAG_GUILDBANK] = INVENTORY_GUILD_BANK,
         [BAG_VIRTUAL] = INVENTORY_CRAFT_BAG,
     }
@@ -779,21 +780,6 @@ function ZO_InventoryManager:ChangeFilter(filterTab)
     self:UpdateEmptyBagLabel(inventoryType, isEmptyList)
 end
 
-function ZO_InventoryManager:SlotForInventoryControl(inventorySlotControl)
-    local slotIndex = inventorySlotControl.slotIndex
-    if slotIndex then
-        local slotType = ZO_InventorySlot_GetType(inventorySlotControl)
-        if slotType == SLOT_TYPE_ITEM or slotType == SLOT_TYPE_GAMEPAD_INVENTORY_ITEM then
-            return self.inventories[INVENTORY_BACKPACK].slots[slotIndex]
-        elseif slotType == SLOT_TYPE_BANK_ITEM then
-            return self.inventories[INVENTORY_BANK].slots[slotIndex]
-        elseif slotType == SLOT_TYPE_CRAFT_BAG_ITEM then
-            return self.inventories[INVENTORY_CRAFT_BAG].slots[slotIndex]
-        end
-    end
-end
-
-
 --Bag Window
 ------------
 
@@ -935,35 +921,49 @@ function ZO_InventoryManager:PlayItemAddedAlert(filterData, tabFilters)
 end
 
 function ZO_InventoryManager:UpdateApparelSection()
-	if ZO_CharacterApparelHidden then
-		ZO_CharacterApparelHidden:SetHidden(not IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL))
-	end
+    if ZO_CharacterApparelHidden then
+        ZO_CharacterApparelHidden:SetHidden(not IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL))
+    end
 end
 
 --Inventory Item
 ----------------
 
-function ZO_InventoryManager:AddInventoryItem(inventoryType, slotIndex)
+function ZO_InventoryManager:AddInventoryItem(inventoryType, slotIndex, bagId)
     local inventory = self.inventories[inventoryType]
-    local bagId = inventory.backingBag
 
-    inventory.slots[slotIndex] = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+
+    inventory.slots[bagId][slotIndex] = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
 end
 
-function ZO_InventoryManager:UpdateNewStatus(inventoryType, slotIndex)
+function ZO_InventoryManager:UpdateNewStatus(inventoryType, slotIndex, bagId)
     local inventory = self.inventories[inventoryType]
+
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+
     -- might not have the slot data yet depending on who is calling this and when, this will ensure we have the correct data
     -- if the slot data was already created this will essentially be a no-op (some table lookups)
-    self:AddInventoryItem(inventoryType, slotIndex)
-    local slot = inventory.slots[slotIndex]
+    self:AddInventoryItem(inventoryType, slotIndex, bagId)
+    local slot = inventory.slots[bagId][slotIndex]
     if slot and slot.age ~= 0 then
         slot.clearAgeOnClose = true
     end
 end
 
-function ZO_InventoryManager:GetNumSlots(inventoryType)
+function ZO_InventoryManager:GetNumSlots(inventoryType, excludeUnavailable)
     local inventory = self.inventories[inventoryType]
-    return GetNumBagUsedSlots(inventory.backingBag), GetBagSize(inventory.backingBag)
+    local usedSlots = 0
+    local bagSize = 0
+
+    for k, bagId in ipairs(inventory.backingBags) do
+        usedSlots = usedSlots + GetNumBagUsedSlots(bagId)
+        bagSize = bagSize + GetBagUseableSize(bagId)
+    end
+
+    return usedSlots, bagSize
 end
 
 function ZO_InventoryManager:OnInventoryItemRemoved(inventoryType, bagId, slotIndex, oldSlotData)
@@ -1015,7 +1015,9 @@ do
     function ZO_InventoryManager:HasAnyQuickSlottableItems(inventoryType)
         local inventory = self.inventories[inventoryType]
         if inventory.hasAnyQuickSlottableItems == nil then
-            inventory.hasAnyQuickSlottableItems = HasAnyQuickSlottableItems(inventory.slots)
+            for bagIndex, bagId in ipairs(inventory.backingBags) do
+                inventory.hasAnyQuickSlottableItems = HasAnyQuickSlottableItems(inventory.slots[bagId])
+            end
         end
         return inventory.hasAnyQuickSlottableItems
     end
@@ -1068,9 +1070,13 @@ function ZO_InventoryManager:UpdateList(inventoryType, updateEvenIfHidden)
             end
         else
             local slots = inventory.slots
-            for slotIndex, slotData in pairs(slots) do
-                if self:ShouldAddSlotToList(inventory, slotData) then
-                    scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(inventory.listDataType, slotData)
+            for bagIndex, bagId in ipairs(inventory.backingBags) do
+                if slots[bagId] then
+                    for slotIndex, slotData in pairs(slots[bagId]) do
+                        if self:ShouldAddSlotToList(inventory, slotData) then
+                            scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(inventory.listDataType, slotData)
+                        end
+                    end
                 end
             end
         end
@@ -1093,12 +1099,20 @@ function ZO_InventoryManager:UpdateList(inventoryType, updateEvenIfHidden)
     end
 end
 
+function ZO_InventoryManager:EmptyInventory(inventory)
+    if inventory then
+        for bagIndex, bagId in ipairs(inventory.backingBags) do
+            if inventory.slots[bagId] then
+                ZO_ClearTable(inventory.slots[bagId])
+            end
+        end
+        inventory.hasAnyQuickSlottableItems = nil
+    end
+end
+
 function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
     local inventory = self.inventories[inventoryType]
-
-    --Reset
-    inventory.slots = {}
-    inventory.hasAnyQuickSlottableItems = nil
+    self:EmptyInventory(inventory)
 
     local search = inventory.stringSearch
     if search then
@@ -1107,13 +1121,12 @@ function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
 
     self.suppressItemAddedAlert = true
 
-    local bagId = inventory.backingBag
-
-    --Add items
-    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-    while slotIndex do
-        self:AddInventoryItem(inventoryType, slotIndex)
-        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+    for k, bagId in ipairs(inventory.backingBags) do
+        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+        while slotIndex do
+            self:AddInventoryItem(inventoryType, slotIndex, bagId)
+            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+        end
     end
 
     if inventoryType == INVENTORY_BACKPACK then
@@ -1125,10 +1138,14 @@ function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
     self.suppressItemAddedAlert = nil
 end
 
-function ZO_InventoryManager:RefreshInventorySlot(inventoryType, slotIndex)
+function ZO_InventoryManager:RefreshInventorySlot(inventoryType, slotIndex, bagId)
     local inventory = self.inventories[inventoryType]
+
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+
     inventory.hasAnyQuickSlottableItems = nil
-    self:AddInventoryItem(inventoryType, slotIndex)
+    self:AddInventoryItem(inventoryType, slotIndex, bagId)
 
     if inventoryType == INVENTORY_BACKPACK then
         CALLBACK_MANAGER:FireCallbacks("BackpackSlotUpdate", slotIndex)
@@ -1137,7 +1154,7 @@ function ZO_InventoryManager:RefreshInventorySlot(inventoryType, slotIndex)
     -- Rebuild the entire list, refilter, and resort every time a single item is updated...sadness.
     self:LayoutInventoryItems(inventoryType)
 
-    local slot = inventory.slots[slotIndex]
+    local slot = inventory.slots[bagId][slotIndex]
 
     if slot and slot.slotControl then
         CALLBACK_MANAGER:FireCallbacks("InventorySlotUpdate", GetControl(slot.slotControl, "Button"))
@@ -1149,11 +1166,14 @@ function ZO_InventoryManager:LayoutInventoryItems(inventoryType)
     self:UpdateFreeSlots(inventoryType)
 end
 
+-- This function only refreshes the 'traditional' slotted bags: backpack and bank
 function ZO_InventoryManager:RefreshAllInventoryOverlays(inventoryType)
-    local numSlots = GetBagSize(self.inventories[inventoryType].backingBag)
-    for slotIndex = 0, numSlots - 1 do
-        self:RefreshInventorySlotOverlay(inventoryType, slotIndex)
-    end
+    for k, bagId in ipairs(self.inventories[inventoryType].backingBags) do
+        local numSlots = GetBagSize(bagId)
+        for slotIndex = 0, numSlots - 1 do
+            self:RefreshInventorySlotOverlay(inventoryType, slotIndex, bagId)
+        end
+    end 
 end
 
 do
@@ -1170,22 +1190,23 @@ do
         return false
     end
 
-    local function TryClearNewStatus(inventory, slotIndex, inventoryManager)
-        local slot = inventory.slots[slotIndex]
+    local function TryClearNewStatus(inventory, bagId, slotIndex, inventoryManager)
+        local slot = inventory.slots[bagId][slotIndex]
         if ShouldClearAgeOnClose(slot, inventoryManager) then
             slot.clearAgeOnClose = nil
-            SHARED_INVENTORY:ClearNewStatus(inventory.backingBag, slotIndex)
+            SHARED_INVENTORY:ClearNewStatus(bagId, slotIndex)
         end
     end
 
     function ZO_InventoryManager:ClearNewStatusOnItemsThePlayerHasSeen(inventoryType)
         local inventory = self.inventories[inventoryType]
-        local bagId = inventory.backingBag
 
-        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-        while slotIndex do
-            TryClearNewStatus(inventory, slotIndex, self)
-            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+        for k, bagId in ipairs(inventory.backingBags) do
+            local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+            while slotIndex do
+                TryClearNewStatus(inventory, bagId, slotIndex, self)
+                slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+            end
         end
 
         self:ApplySort(inventoryType)
@@ -1200,10 +1221,13 @@ do
     end
 end
 
-function ZO_InventoryManager:RefreshInventorySlotLocked(inventoryType, slotIndex, locked)
+function ZO_InventoryManager:RefreshInventorySlotLocked(inventoryType, slotIndex, locked, bagId)
     local inventory = self.inventories[inventoryType]
-    local slot = inventory.slots[slotIndex]
 
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+
+    local slot = inventory.slots[bagId][slotIndex]
     if(slot and slot.locked ~= locked) then
         slot.locked = locked
         if(inventory.listView and slot.slotControl) then
@@ -1213,11 +1237,15 @@ function ZO_InventoryManager:RefreshInventorySlotLocked(inventoryType, slotIndex
     end
 end
 
-function ZO_InventoryManager:RefreshInventorySlotOverlay(inventoryType, slotIndex)
+function ZO_InventoryManager:RefreshInventorySlotOverlay(inventoryType, slotIndex, bagId)
     local inventory = self.inventories[inventoryType]
-    local slot = inventory.slots[slotIndex]
+
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+
+    local slot = inventory.slots[bagId][slotIndex]
     if slot then
-        local _, _, _, meetsUsageRequirement, _ = GetItemInfo(inventory.backingBag, slotIndex)
+        local _, _, _, meetsUsageRequirement, _ = GetItemInfo(bagId, slotIndex)
         local isLocalPlayerDead = IsUnitDead("player")
         local isLocked = slot.locked or isLocalPlayerDead
 
@@ -1240,7 +1268,7 @@ end
 
 function ZO_InventoryManager:IsSlotOccupied(bagId, slotIndex)
     local inventoryType = self.bagToInventoryType[bagId]
-    local slot = self.inventories[inventoryType].slots[slotIndex]
+    local slot = self.inventories[inventoryType].slots[bagId][slotIndex]
 
     return ((slot ~= nil) and (slot.stackCount > 0))
 end
@@ -1264,36 +1292,37 @@ do
         for i = 1, select("#", ...) do
             local inventoryType = select(i, ...)
             local inventory = self.inventories[inventoryType]
-            local bagId = inventory.backingBag
 
-            local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-            while slotIndex do
-                local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
-                if itemInstanceId == specificItemInstanceId then
-                    data = UpdateItemTable(bagId, slotIndex, predicate, data)
+            for k, bagId in ipairs(inventory.backingBags) do
+                local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+                while slotIndex do
+                    local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+                    if itemInstanceId == specificItemInstanceId then
+                        data = UpdateItemTable(bagId, slotIndex, predicate, data)
+                    end
+                    slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
                 end
-                slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
-            end
+            end 
         end
         return data
     end
 
     function ZO_InventoryManager:GenerateListOfVirtualStackedItems(inventoryType, predicate, itemIds)
         local inventory = self.inventories[inventoryType]
-        local bagId = inventory.backingBag
-
         itemIds = itemIds or {}
 
-        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-        local itemData
-        while slotIndex do
-            local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
-            if itemInstanceId then
-                itemData = itemIds[itemInstanceId]
-                itemIds[itemInstanceId] = UpdateItemTable(bagId, slotIndex, predicate, itemData)
+        for k, bagId in ipairs(inventory.backingBags) do
+            local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+            local itemData
+            while slotIndex do
+                local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+                if itemInstanceId then
+                    itemData = itemIds[itemInstanceId]
+                    itemIds[itemInstanceId] = UpdateItemTable(bagId, slotIndex, predicate, itemData)
+                end
+                slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
             end
-            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
-        end
+        end 
 
         return itemIds
     end
@@ -1304,12 +1333,19 @@ end
 
 function ZO_InventoryManager:GetNumBackpackSlots()
     local inventory = self.inventories[INVENTORY_BACKPACK]
-    return GetBagSize(inventory.backingBag)
+    local backpackSize = 0
+    for k, bagId in ipairs(inventory.backingBags) do
+        backpackSize = backpackSize + GetBagSize(bagId)
+    end
+    return backpackSize
 end
 
-function ZO_InventoryManager:GetBackpackItem(slotIndex)
+function ZO_InventoryManager:GetBackpackItem(slotIndex, bagId)
     local inventory = self.inventories[INVENTORY_BACKPACK]
-    return inventory.slots[slotIndex]
+
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+    return inventory.slots[bagId][slotIndex]
 end
 
 function ZO_InventoryManager:IsShowingBackpack()
@@ -1766,8 +1802,12 @@ function ZO_InventoryManager:RefreshUpgradePossible()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.bankWithdrawTabKeybindButtonGroup)
 end
 
-function ZO_InventoryManager:GetBankItem(slotIndex)
-    return self.inventories[INVENTORY_BANK].slots[slotIndex]
+function ZO_InventoryManager:GetBankItem(slotIndex, bagId)
+    local inventory = self.inventories[INVENTORY_BANK]
+
+    -- Default bagId to backingBags[1] for addon backwards-compatibility
+    bagId = bagId or inventory.backingBags[1]
+    return inventory.slots[bagId][slotIndex]
 end
 
 function ZO_InventoryManager:RefreshBankedGold()
@@ -1912,10 +1952,7 @@ end
 
 function ZO_InventoryManager:RefreshAllGuildBankItems()
     local inventory = self.inventories[INVENTORY_GUILD_BANK]
-
-    --Reset
-    inventory.slots = {}
-    inventory.hasAnyQuickSlottableItems = nil
+    self:EmptyInventory(inventory)
 
     local search = inventory.stringSearch
     if(search) then
@@ -1926,10 +1963,13 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
 
     --Add items
     local slotId = GetNextGuildBankSlotId()
-    while slotId do
-        self:AddInventoryItem(INVENTORY_GUILD_BANK, slotId)
-        slotId = GetNextGuildBankSlotId(slotId)
-    end 
+    for k, bagId in ipairs(inventory.backingBags) do
+        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+        while slotIndex do
+            self:AddInventoryItem(INVENTORY_GUILD_BANK, slotIndex, bagId)
+            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+        end
+    end
 
     self:LayoutInventoryItems(INVENTORY_GUILD_BANK)
 
@@ -1940,9 +1980,7 @@ end
 
 function ZO_InventoryManager:ClearAllGuildBankItems()
     local inventory = self.inventories[INVENTORY_GUILD_BANK]
-    
-    --Reset
-    inventory.slots = {}
+    self:EmptyInventory(inventory)
 
     local search = inventory.stringSearch
     if(search) then
@@ -2093,39 +2131,33 @@ local function OnFullInventoryUpdated(bagId)
     elseif bagId == BAG_VIRTUAL then
         PlayerInventory:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
     end
-
-    INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
 end
 
-local function OnInventorySlotUpdated(bagId, slotIndex)
-    if bagId == PlayerInventory.inventories[INVENTORY_BACKPACK].backingBag then
-        PlayerInventory:RefreshInventorySlot(INVENTORY_BACKPACK, slotIndex)
-    elseif PlayerInventory:IsBanking() and bagId == PlayerInventory.inventories[INVENTORY_BANK].backingBag then
-        PlayerInventory:RefreshInventorySlot(INVENTORY_BANK, slotIndex)
-    elseif bagId == PlayerInventory.inventories[INVENTORY_GUILD_BANK].backingBag then
-        PlayerInventory:RefreshInventorySlot(INVENTORY_GUILD_BANK, slotIndex)
-        --For the deposit window while guild banking, the guild info isn't available when INVENTORY_BACKPACK updates.
-        PlayerInventory:RefreshInventorySlot(INVENTORY_BACKPACK, slotIndex)
-    elseif bagId == PlayerInventory.inventories[INVENTORY_CRAFT_BAG].backingBag then
-        PlayerInventory:RefreshInventorySlot(INVENTORY_CRAFT_BAG, slotIndex)
+function ZO_InventoryManager:OnInventorySlotUpdated(bagId, slotIndex)
+    local inventory = self.bagToInventoryType[bagId]
+
+    if inventory then
+        PlayerInventory:RefreshInventorySlot(inventory, slotIndex, bagId)
+        if inventory == INVENTORY_GUILD_BANK then
+            -- For the deposit window while guild banking, the guild info isn't available when INVENTORY_BACKPACK updates.
+            PlayerInventory:RefreshInventorySlot(INVENTORY_BACKPACK, slotIndex, BAG_BACKPACK)
+        end
     end
 
     INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
 end
 
-local function OnInventorySlotLocked(eventCode, bagId, slotIndex)
-    if(bagId == PlayerInventory.inventories[INVENTORY_BACKPACK].backingBag) then
-        PlayerInventory:RefreshInventorySlotLocked(INVENTORY_BACKPACK, slotIndex, true)
-    elseif(PlayerInventory:IsBanking() and bagId == PlayerInventory.inventories[INVENTORY_BANK].backingBag) then
-        PlayerInventory:RefreshInventorySlotLocked(INVENTORY_BANK, slotIndex, true)
+function ZO_InventoryManager:OnInventorySlotLocked(bagId, slotIndex)
+    local inventory = self.bagToInventoryType[bagId]
+    if inventory then
+        PlayerInventory:RefreshInventorySlotLocked(inventory, slotIndex, true, bagId)
     end
 end
 
-local function OnInventorySlotUnlocked(eventCode, bagId, slotIndex)
-    if(bagId == PlayerInventory.inventories[INVENTORY_BACKPACK].backingBag) then
-        PlayerInventory:RefreshInventorySlotLocked(INVENTORY_BACKPACK, slotIndex, false)
-    elseif(PlayerInventory:IsBanking() and bagId == PlayerInventory.inventories[INVENTORY_BANK].backingBag) then
-        PlayerInventory:RefreshInventorySlotLocked(INVENTORY_BANK, slotIndex, false)
+function ZO_InventoryManager:OnInventorySlotUnlocked(bagId, slotIndex)
+    local inventory = self.bagToInventoryType[bagId]
+    if inventory then
+        PlayerInventory:RefreshInventorySlotLocked(inventory, slotIndex, false, bagId)
     end
 end
 
@@ -2397,10 +2429,10 @@ function ZO_PlayerInventory_Initialize()
 
     --inventory events
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", OnFullInventoryUpdated)
-    SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", OnInventorySlotUpdated)
+    SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", function(bagId, slotIndex) PLAYER_INVENTORY:OnInventorySlotUpdated(bagId, slotIndex) end)
 
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, OnInventorySlotLocked)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, OnInventorySlotUnlocked)
+    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, function(event, bagId, slotIndex) PLAYER_INVENTORY:OnInventorySlotLocked(bagId, slotIndex) end)
+    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, function(event, bagId, slotIndex) PLAYER_INVENTORY:OnInventorySlotUnlocked(bagId, slotIndex) end)
     ZO_PlayerInventory:RegisterForEvent(EVENT_MOUSE_REQUEST_DESTROY_ITEM, OnRequestDestroyItem)
     ZO_PlayerInventory:RegisterForEvent(EVENT_CANCEL_MOUSE_REQUEST_DESTROY_ITEM, OnCancelRequestDestroyItem)
     ZO_PlayerInventory:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
@@ -2450,6 +2482,7 @@ function ZO_PlayerInventory_Initialize()
 
     PlayerInventory:RefreshAllInventorySlots(INVENTORY_BACKPACK)
     PlayerInventory:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
+    PlayerInventory:RefreshAllInventorySlots(INVENTORY_BANK)
     PlayerInventory:RefreshAllQuests()
     PlayerInventory:RefreshMoney()
     PlayerInventory:RefreshTelvarStones()

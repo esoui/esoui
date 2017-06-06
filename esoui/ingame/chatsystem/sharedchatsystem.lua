@@ -2082,13 +2082,15 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
     local localPlayerIsGroupLeader = IsUnitGroupLeader("player")
     local otherPlayerIsInPlayersGroup = not otherPlayerIsDecoratedName and IsPlayerInGroup(rawName)
 
-    if not localPlayerIsGrouped or (localPlayerIsGroupLeader and not otherPlayerIsInPlayersGroup) then
-        AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_GROUP), function() 
-        local SENT_FROM_CHAT = false
-        local DISPLAY_INVITED_MESSAGE = true
-        TryGroupInviteByName(playerName, SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) end)
-    elseif otherPlayerIsInPlayersGroup and localPlayerIsGroupLeader then
-        AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_REMOVE_GROUP), function() GroupKickByName(rawName) end)
+    if IsGroupModificationAvailable() then
+        if not localPlayerIsGrouped or (localPlayerIsGroupLeader and not otherPlayerIsInPlayersGroup) then
+            AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_GROUP), function() 
+            local SENT_FROM_CHAT = false
+            local DISPLAY_INVITED_MESSAGE = true
+            TryGroupInviteByName(playerName, SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) end)
+        elseif otherPlayerIsInPlayersGroup and localPlayerIsGroupLeader then
+            AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_REMOVE_GROUP), function() GroupKickByName(rawName) end)
+        end
     end
 
     AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_WHISPER), function() self:StartTextEntry(nil, CHAT_CHANNEL_WHISPER, playerName) end)

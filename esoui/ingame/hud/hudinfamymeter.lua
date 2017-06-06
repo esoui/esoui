@@ -194,11 +194,14 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         -- Fire center-screen announcement if we updated below a threshold
         local infamyLevel = GetInfamyLevel(self.infamyMeterState["infamy"])
         local oldInfamyLevel = GetInfamyLevel(oldInfamy)
+        local messageParams
 
         -- Fire CSA
         if self.infamyMeterState.isTrespassing ~= wasTrespassing then
             local sound, primaryMessage, secondaryMessage
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
             if wasTrespassing then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_TRESPASSING_PRIMARY)
                 secondaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_TRESPASSING_SECONDARY)
@@ -207,28 +210,32 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
                     TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_EXITED_WITH_BOUNTY)
                 end
             else
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
             	TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_ENTERED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_PRIMARY)
                 secondaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_SECONDARY)
             end
 
-            CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_JUSTICE_INFAMY_UPDATED, CSA_EVENT_COMBINED_TEXT, sound, primaryMessage, secondaryMessage)
-
+            messageParams:SetText(primaryMessage, secondaryMessage)
         elseif infamyLevel ~= oldInfamyLevel then 
             local sound, primaryMessage, secondaryMessage, icon
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
             if oldInfamyLevel == INFAMY_THRESHOLD_FUGITIVE then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_INFAMY_LEVEL_CHANGED, GetString("SI_INFAMYTHRESHOLDSTYPE", infamyLevel))
                 secondaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_KOS)
                 icon = "EsoUI/Art/Stats/infamy_KOS_icon-Notification.dds"
             elseif infamyLevel == INFAMY_THRESHOLD_FUGITIVE then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
                 TriggerTutorial(TUTORIAL_TRIGGER_FUGITIVE_REACHED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_NOW_FUGITIVE)
                 secondaryMessage = zo_strformat(SI_JUSTICE_NOW_KOS)
                 icon = "EsoUI/Art/Stats/infamy_KOS_icon-Notification.dds"
             else
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED)
                 if infamyLevel == INFAMY_THRESHOLD_DISREPUTABLE then
                     TriggerTutorial(TUTORIAL_TRIGGER_DISREPUTABLE_REACHED)
                 elseif infamyLevel == INFAMY_THRESHOLD_NOTORIOUS then
@@ -239,16 +246,13 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
                 sound = SOUNDS.JUSTICE_STATE_CHANGED
             end
 
-            CENTER_SCREEN_ANNOUNCE:AddMessage(
-                EVENT_JUSTICE_INFAMY_UPDATED, 
-                CSA_EVENT_COMBINED_TEXT, 
-                sound, 
-                primaryMessage, 
-                secondaryMessage,
-                icon,
-                nil, nil, nil, nil, -- Use defaults for these
-                CSA_OPTION_SUPPRESS_ICON_FRAME
-            )
+            messageParams:SetText(primaryMessage, secondaryMessage)
+            messageParams:SetIconData(icon)
+            messageParams:MarkSuppressIconFrame()
+        end
+
+        if messageParams then
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
     end
 end

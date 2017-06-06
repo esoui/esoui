@@ -300,7 +300,10 @@ end
 
 local function RemoveFromTables(index, ...)
     for i = 1, select("#", ...) do
-        table.remove(select(i, ...), index)
+        local tableToRemoveFrom = select(i, ...)
+        local numElements = #tableToRemoveFrom
+        tableToRemoveFrom[index] = tableToRemoveFrom[numElements]
+        tableToRemoveFrom[numElements] = nil
     end
 end
 

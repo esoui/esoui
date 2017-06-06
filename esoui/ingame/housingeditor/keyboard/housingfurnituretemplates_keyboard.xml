@@ -182,6 +182,19 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_HousingFurnitureBrowserListWithSearchAndTheme_Keyboard" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                            <Dimensions x="200"/>
+                            <Anchor point="TOPRIGHT" offsetX="-9" offsetY="32"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
         <Backdrop name="ZO_HousingFurniture_SearchBox" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Dimensions x="240"/>
             <Controls>

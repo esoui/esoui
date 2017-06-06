@@ -35,7 +35,7 @@ function Market_Singleton:InitializeEvents()
     local function OnMarketStateUpdated(eventId, displayGroup, marketState, ...)
         -- if we are locked/updating we need to inform both UIs that we need to refresh categories
         -- because otherwise only the active UI will refresh and the other will get into a bad state
-        if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE and (marketState == MARKET_STATE_LOCKED or marketState == MARKET_STATE_UPDATING)then
+        if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE and (marketState == MARKET_STATE_LOCKED or marketState == MARKET_STATE_UPDATING) then
             -- keyboard market won't exist on consoles
             local keyboardMarket = SYSTEMS:GetKeyboardObject(ZO_MARKET_NAME)
             if keyboardMarket then
@@ -83,6 +83,10 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowBuyCrownsDialog()
     end
 
+    local function OnShowEsoPlusPage(eventId)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowEsoPlusPage()
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
@@ -92,6 +96,7 @@ function Market_Singleton:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_BUY_CROWNS_DIALOG, OnShowBuyCrownsDialog)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
 end
 
 function Market_Singleton:RequestOpenMarket()
@@ -304,6 +309,11 @@ function ZO_Market_Shared:OnRequestPurchaseMarketProduct(marketProductId, presen
     self:PurchaseMarketProduct(marketProductId, presentationIndex)
 end
 
+function ZO_Market_Shared:OnShowEsoPlusPage()
+    SCENE_MANAGER:Show("show_market")
+    self:RequestShowCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX)
+end
+
 function ZO_Market_Shared:OnShowBuyCrownsDialog()
     -- To be overridden
 end
@@ -313,7 +323,7 @@ function ZO_Market_Shared:UpdateMarket(marketState)
 
     if self.marketState == MARKET_STATE_OPEN then
         self:OnMarketOpen()
-    elseif self.marketState == MARKET_STATE_UNKNOWN then
+    elseif self.marketState == MARKET_STATE_UNKNOWN or self.marketState == MARKET_STATE_UPDATING then
         self:OnMarketLoading()
     else -- MARKET_STATE_LOCKED
         self:OnMarketLocked()
@@ -473,12 +483,10 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
             local productType = GetMarketProductType(childMarketProductId)
             local isBundle = productType == MARKET_PRODUCT_TYPE_BUNDLE
             local isValidForPlayer = true
-            local quality = ITEM_QUALITY_NORMAL
+            local quality = GetMarketProductQuality(childMarketProductId)
             if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
                 local collectibleId = GetMarketProductCollectibleId(childMarketProductId)
                 isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
-            elseif productType == MARKET_PRODUCT_TYPE_ITEM then
-                quality = select(4, GetMarketProductItemInfo(childMarketProductId))
             end
 
             local productInfo = {
@@ -885,6 +893,10 @@ function ZO_Market_Shared:RefreshActions()
 end
 
 function ZO_Market_Shared:RequestShowMarketProduct(id)
+    assert(false)
+end
+
+function ZO_Market_Shared:RequestShowCategory(categoryIndex)
     assert(false)
 end
 

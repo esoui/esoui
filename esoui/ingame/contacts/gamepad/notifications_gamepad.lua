@@ -20,6 +20,7 @@ local GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_CRAFT_BAG_AUTO_TRANSFER] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_duel.dds",
+    [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/Gamepad/gp_notification_ESO+.dds",
 }
 
 local DATA_TYPE_TO_TEMPLATE = 
@@ -30,9 +31,9 @@ local DATA_TYPE_TO_TEMPLATE =
     [NOTIFICATIONS_LEADERBOARD_DATA] = "ZO_GamepadNotificationsLeaderboardRow",
     [NOTIFICATIONS_ALERT_DATA] = "ZO_GamepadNotificationsAlertRow",
     [NOTIFICATIONS_COLLECTIBLE_DATA] = "ZO_GamepadNotificationsCollectibleRow",
-	[NOTIFICATIONS_LFG_JUMP_DUNGEON_DATA] = "ZO_GamepadNotificationsLFGJumpDungeonRow",
     [NOTIFICATIONS_LFG_READY_CHECK_DATA] = "ZO_GamepadNotificationsLFGReadyCheckRow",
     [NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA] = "ZO_GamepadNotificationsLFGFindReplacementRow",
+    [NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA] = "ZO_GamepadNotificationsEsoPlusSubscriptionRow",
 }
 
 -- Provider Overrides
@@ -82,7 +83,7 @@ function ZO_GamepadFriendRequestProvider:CanShowGamerCard()
 end
 
 function ZO_GamepadFriendRequestProvider:ShowGamerCard(data)
-	ZO_ShowGamerCardFromDisplayNameOrFallback(data.displayName, ZO_ID_REQUEST_TYPE_FRIEND_REQUEST, data.incomingFriendIndex)
+    ZO_ShowGamerCardFromDisplayNameOrFallback(data.displayName, ZO_ID_REQUEST_TYPE_FRIEND_REQUEST, data.incomingFriendIndex)
 end
 
 -- Guild Invite Request Provier
@@ -354,6 +355,22 @@ function ZO_GamepadDuelInviteProvider:New(notificationManager)
     return provider
 end
 
+-- ZO_GamepadEsoPlusSubscriptionStatusProvider
+-------------------------
+
+local ZO_GamepadEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
+
+function ZO_GamepadEsoPlusSubscriptionStatusProvider:New(notificationManager)
+    return ZO_EsoPlusSubscriptionStatusProvider.New(self, notificationManager)
+end
+
+function ZO_GamepadEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
+    local helpCategoryIndex, helpIndex = GetEsoPlusSubscriptionInfoHelpIndices()
+    if helpCategoryIndex ~= nil then
+        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
+    end
+end
+
 
 --Notification Manager
 -------------------------
@@ -407,10 +424,10 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsLeaderboardRow"] = SetupRequest,
         ["ZO_GamepadNotificationsAlertRow"] = function(...) self:SetupAlert(...) end,
         ["ZO_GamepadNotificationsCollectibleRow"] = SetupRequest,
-		["ZO_GamepadNotificationsLFGJumpDungeonRow"] = SetupRequest,
         ["ZO_GamepadNotificationsLFGReadyCheckRow"] = SetupRequest,
         ["ZO_GamepadNotificationsLFGFindReplacementRow"] = SetupRequest,
         ["ZO_GamepadNotificationsYesNoRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsEsoPlusSubscriptionRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -450,6 +467,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadLFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_GamepadDuelInviteProvider:New(self),
+        ZO_GamepadEsoPlusSubscriptionStatusProvider:New(self),
     }
 end
 
@@ -669,7 +687,6 @@ function ZO_GamepadNotificationManager:RefreshVisible()
 end
 
 function ZO_GamepadNotificationManager:AddDataEntry(dataType, data, isHeader)
-
     local entryData = ZO_GamepadEntryData:New(data.shortDisplayText, GAMEPAD_NOTIFICATION_ICONS[data.notificationType])
     entryData.data = data
     entryData:SetIconTintOnSelection(true)
@@ -679,8 +696,8 @@ function ZO_GamepadNotificationManager:AddDataEntry(dataType, data, isHeader)
         entryData:SetHeader(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", data.notificationType)))
         self.list:AddEntryWithHeader(DATA_TYPE_TO_TEMPLATE[dataType], entryData)
     else
-        self.list:AddEntry(DATA_TYPE_TO_TEMPLATE[dataType], entryData)     
-    end 
+        self.list:AddEntry(DATA_TYPE_TO_TEMPLATE[dataType], entryData)
+    end
 end
 
 function ZO_GamepadNotificationManager:GetTargetData()  
@@ -698,7 +715,7 @@ function ZO_GamepadNotificationManager:FinishNotificationList()
 end
 
 function ZO_GamepadNotificationManager:BuildEmptyList()
-end       
+end
 
 function ZO_GamepadNotificationManager:OnSelectionChanged(_, selected)
     if not self.control:IsControlHidden() then

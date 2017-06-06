@@ -817,7 +817,7 @@ function ZO_CrownCratesCard:Reveal()
 			TransitionCardReveal()
 
             if self.playRevealSounds then
-                TriggerCrownCrateNPCAnimation(self.rewardReaction)
+                TriggerCrownCrateNPCAnimation(self.rewardReaction, self.rewardIndex)
             end
             if self.gemsExchanged == 0 then
                 self:SetState(CARD_STATES.REVEALED)
@@ -1424,7 +1424,7 @@ function ZO_CrownCratesPackOpening:RevealAllCards()
     for i, card in ipairs(mysteryCards) do
         card:SuppressRevealSounds()
         if card == highestTierCard then
-            TriggerCrownCrateNPCAnimation(highestTierCard.rewardReaction)
+            TriggerCrownCrateNPCAnimation(highestTierCard.rewardReaction, highestTierCard.rewardIndex)
         end
         card:SetState(CARD_STATES.FLIPPING)
         card:CallLater(function()

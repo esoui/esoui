@@ -360,7 +360,7 @@ function ZO_GamepadComboBoxDropdown:AcquireControl(item, relativeControl)
     local templateName = self.templateName
     local control, key = self.pool:AcquireObject()
 
-    control:SetAnchor(RIGHT, self.m_container, RIGHT, 0, padding)
+    control:SetAnchor(RIGHT, self.m_container, RIGHT, 0, padding, ANCHOR_CONSTRAINS_X)
 
     if relativeControl then
         control:SetAnchor(TOPLEFT, relativeControl, BOTTOMLEFT, 0, padding)

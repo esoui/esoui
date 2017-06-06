@@ -354,7 +354,7 @@ do
         local data = dialog.entryList:GetTargetData()
         local edit = data.control.editBoxControl
 
-        edit:TakeFocus()
+	    edit:TakeFocus()
     end
 
     local function SetupRequestEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -659,6 +659,48 @@ do
         },
     }
 
+    -- Add Friend Button
+    local addFriendButtonData =
+    {
+        keybind = "DIALOG_SECONDARY",
+        text = SI_GAMEPAD_MAIL_CHOOSE_FRIEND,
+        callback =  function(dialog)
+			local data = dialog.entryList:GetTargetData()
+			local editbox = data.control.editBoxControl
+            local HandleUserIdResult = function(hasResult, displayName, consoleId)
+				if hasResult then
+					editbox:SetText(displayName)
+				end
+			end
+
+			local INCLUDE_ONLINE_FRIENDS = true
+			local INCLUDE_OFFLINE_FRIENDS = true
+			PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestIdFromUserListDialog(HandleUserIdResult, GetString(SI_GAMEPAD_CONSOLE_SELECT_FOR_HOUSE_PERMISSIONS), INCLUDE_ONLINE_FRIENDS, INCLUDE_OFFLINE_FRIENDS)
+        end,
+		visible = function(dialog)
+			local data = dialog.entryList:GetTargetData()
+			if data and data.control and data.control.editBoxControl then
+			    local platform = GetUIPlatform()
+			    if platform == UI_PLATFORM_PS4 then
+				    return true
+			    elseif platform == UI_PLATFORM_XBOX then
+				    if GetNumberConsoleFriends() > 0 then
+					    return true
+				    end
+			    end
+            end
+
+			return false
+		end
+    }
+
+    -- Individual Add/Ban Dialog Button Data
+    local individualDialogButtonData = {}
+    for i,buttonInfo in ipairs(buttonsData) do
+        table.insert(individualDialogButtonData, buttonInfo)
+    end
+    table.insert(individualDialogButtonData, addFriendButtonData)
+
     function ZO_HousingFurnitureSettings_Gamepad:InitializeAddIndividualDialog()
         local dialogName = "GAMEPAD_REQUEST_ADD_INDIVIDUAL_PERMISSION"
 
@@ -710,7 +752,7 @@ do
                 },
             },
             blockDialogReleaseOnPress = true,
-            buttons = buttonsData,
+            buttons = individualDialogButtonData,
             noChoiceCallback = NoChoiceCallback,
         })
     end
@@ -826,7 +868,7 @@ do
                 },
             },
             blockDialogReleaseOnPress = true,
-            buttons = buttonsData,
+            buttons = individualDialogButtonData,
         })
     end
 

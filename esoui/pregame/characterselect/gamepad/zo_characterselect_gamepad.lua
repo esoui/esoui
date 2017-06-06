@@ -11,6 +11,7 @@ local ACTIVATE_VIEWPORT = true
 local ENTRY_TYPE_EXTRA_INFO = 1
 local ENTRY_TYPE_CHARACTER = 2
 local ENTRY_TYPE_CREATE_NEW = 3
+local ENTRY_TYPE_CHAPTER = 4
 
 local CREATE_NEW_ICON = "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds"
 
@@ -258,7 +259,7 @@ local function InitKeybindingDescriptor(self)
         },
         deleteKeybind,
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() PregameStateManager_SetState("Disconnect") end),
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorDefault, self.characterList)
 
@@ -280,7 +281,7 @@ local function InitKeybindingDescriptor(self)
         },
         deleteKeybind,
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() PregameStateManager_SetState("Disconnect") end),
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorRename, self.characterList)
 
@@ -301,16 +302,36 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() PregameStateManager_SetState("Disconnect") end),
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorCreateNew, self.characterList)
+
+    self.charListKeybindStripDescriptorChapter =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        {
+            name = GetString(SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            disabledDuringSceneHiding = true,
+
+            callback = function()
+                self.characterList:Deactivate() -- So we can't select a different character
+                PlaySound(SOUNDS.DIALOG_ACCEPT)
+                PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+                PregameStateManager_SetState("ChapterUpgrade")
+            end,
+        },
+        optionsKeybind,
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+    }
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorChapter, self.characterList)
 
     -- Keybinds for the additional character slot control
     self.charListKeybindStripDescriptorAdditionalSlots =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() PregameStateManager_SetState("Disconnect") end),
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
     }
 
     -- Keybinds for service token controls
@@ -337,7 +358,7 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() PregameStateManager_SetState("Disconnect") end),
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
     }
 
     -- Keybinds for using service tokens on the character list
@@ -653,9 +674,24 @@ local function CreateList(self)
     self.characterList:Clear()
 
     CreateExtraInfoControls(self)
+    
+    local slot = 1
+
+    if not HasCurrentChapter() then
+        local chapterCollectibleId = GetCurrentChapterCollectibleId()
+        local data = 
+        {
+            index = slot,
+            type = ENTRY_TYPE_CHAPTER,
+            header = GetString(SI_CHARACTER_SELECT_GAMEPAD_CHAPTER_HEADER),
+            icon = GetCurrentChapterSmallLogoFileIndex(),
+            text = zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleDisplayName(chapterCollectibleId))
+        }
+        AddCharacterListEntry("ZO_GamepadMenuEntryTemplateWithHeader", data, self.characterList)
+        slot = slot + 1
+    end
 
     local characterDataList = ZO_CharacterSelect_GetCharacterDataList()
-    local slot = 1
     if  #characterDataList > 0 then
         local isFirstEntry = true
         
@@ -840,6 +876,8 @@ do
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorRename)
             elseif selectedData.type == ENTRY_TYPE_CREATE_NEW then
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorCreateNew)
+            elseif selectedData.type == ENTRY_TYPE_CHAPTER then
+                ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorChapter)
             else
                 g_canPlayCharacter = true
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorDefault)
@@ -889,7 +927,7 @@ function ZO_CharacterSelect_Gamepad_RefreshHeader()
 end
 
 local function OnCharacterConstructionReady()
-    if(GetNumCharacters() > 0) then
+    if GetNumCharacters() > 0 then
         g_currentlySelectedCharacterData = g_currentlySelectedCharacterData or ZO_CharacterSelect_GetBestSelectionData()
 
         if g_currentlySelectedCharacterData then
@@ -959,14 +997,15 @@ local function ZO_CharacterSelect_Gamepad_StateChanged(oldState, newState)
         ZO_CharacterSelect_GamepadCharacterViewport.Activate()
         SCENE_MANAGER:AddFragment(CHARACTER_SELECT_CHARACTERS_GAMEPAD_FRAGMENT)
 
-        if PregameIsFullyLoaded() then
+        local characterDataReady = IsPregameCharacterConstructionReady()
+        if characterDataReady then
             self.characterList:RefreshVisible()
             self.characterList:Activate()
             self.extraInfoFocus:Deactivate()
         end
 
         ZO_CharacterSelect_Gamepad_RefreshKeybindStrip()
-        if IsPregameCharacterConstructionReady() then
+        if characterDataReady then
             OnCharacterConstructionReady()  -- So that if we come to this screen from Character Create, it will load a different scene.
         end
 
@@ -1020,18 +1059,6 @@ local function ContextFilter(callback)
     return function(...)
         if IsConsoleUI() then
             callback(...)
-        end
-    end
-end
-
-local function OnPregameCharacterListReceived(characterCount, previousCharacterCount)
-    if (characterCount > 0) then
-        local currentState = PregameStateManager_GetCurrentState()
-
-        -- The character list is received a second time once a character is renamed, which prevents the rename success dialog from
-        -- displaying if we're already at CharacterSelect
-        if currentState ~= "CharacterSelect" and currentState ~= "WaitForPregameFullyLoaded" then
-            PregameStateManager_SetState("WaitForPregameFullyLoaded")
         end
     end
 end
@@ -1147,7 +1174,6 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
 
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", ContextFilter(OnCharacterConstructionReady))
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
-    CALLBACK_MANAGER:RegisterCallback("PregameCharacterListReceived", ContextFilter(OnPregameCharacterListReceived))
 
     self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
     self:RegisterForEvent(EVENT_CHARACTER_RENAME_RESULT, ContextFilter(OnCharacterRenamed))

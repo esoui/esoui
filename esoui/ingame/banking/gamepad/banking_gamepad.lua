@@ -89,7 +89,9 @@ function ZO_GamepadBanking:Initialize(control)
     ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_BANKING_SCENE)
     self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT)
 
-    self:SetBankedBag(BAG_BANK)
+    self:ClearBankedBags()
+    self:AddBankedBag(BAG_BANK)
+    self:AddBankedBag(BAG_SUBSCRIBER_BANK)
     self:SetCarriedBag(BAG_BACKPACK)
 
     self.control:RegisterForEvent(EVENT_OPEN_BANK, OnOpenBank)
@@ -158,7 +160,7 @@ function ZO_GamepadBanking:InitializeLists()
     end
 
     local SETUP_LIST_LOCALLY = true
-    local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBag, SLOT_TYPE_BANK_ITEM, OnSelectedDataCallback, OnWithdrawEntryDataCreatedCallback, nil, nil, nil, nil, ItemSetupTemplate)
+    local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBags, SLOT_TYPE_BANK_ITEM, OnSelectedDataCallback, OnWithdrawEntryDataCreatedCallback, nil, nil, nil, nil, ItemSetupTemplate)
     self:SetWithdrawList(withdrawList)
     withdrawList:SetOnTargetDataChangedCallback(UpdateTargetData)
 

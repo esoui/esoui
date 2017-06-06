@@ -274,7 +274,7 @@ function ZO_CraftingResults_Keyboard:DisplayTranslatedRunes()
 end
 
 function ZO_CraftingResults_Keyboard:ShouldDisplayMessages()
-    return CENTER_SCREEN_ANNOUNCE:IsInactive()
+    return not CENTER_SCREEN_ANNOUNCE:HasAnyActiveLines()
 end
 
 function ZO_CraftingResults_Keyboard_Initialize(control)

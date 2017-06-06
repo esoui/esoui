@@ -1221,3 +1221,56 @@ ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
         },
     }
 }
+
+ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    canQueue = true,
+
+    title =
+    {
+        text = SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_TITLE
+    },
+
+    mainText =
+    {
+        text = function()
+            local platformServiceType = GetPlatformServiceType()
+            local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE or SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY
+            local chapterCollectibleName = GetCollectibleDisplayName(GetCurrentChapterCollectibleId())
+            return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName(), chapterCollectibleName)
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
+                            if dialog.data then
+                                dialog.data.continue = true
+                            end
+                        end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+            callback = function(dialog)
+                            if dialog.data then
+                                dialog.data.continue = false
+                            end
+                        end,
+        },
+    },
+    finishedCallback = function(dialog)
+        if dialog.data and dialog.data.finishedCallback then
+            dialog.data.finishedCallback(dialog)
+        end
+    end,
+}

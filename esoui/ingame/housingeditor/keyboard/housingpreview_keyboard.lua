@@ -5,7 +5,7 @@ function HousingPreviewDialog_Keyboard:New(...)
 end
 
 function HousingPreviewDialog_Keyboard:Initialize(control)
-    ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOME_SHOW_VOTE")
+    ZO_HousingPreviewDialog_Shared.Initialize(self, control, "HOUSE_PREVIEW_PURCHASE")
 
     SYSTEMS:RegisterKeyboardObject("HOUSING_PREVIEW", self)
 end
@@ -20,9 +20,6 @@ end
 
 function HousingPreviewDialog_Keyboard:BuyFromMarket(control)
     ZO_HousingPreviewDialog_Shared.BuyFromMarket(self, control)
-    -- InternalInGame dialogs don't put huds in UI mode when they're floating, so we'll want to do that here (ESO-499135)
-    -- TODO: Come up with a solution that's more robust and system wide
-    SCENE_MANAGER:SetInUIMode(true)
 end
 
 function ZO_HousingPreviewDialog_Keyboard_OnInitialized(control)

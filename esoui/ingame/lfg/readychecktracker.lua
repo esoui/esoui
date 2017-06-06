@@ -1,13 +1,13 @@
 local KEYBOARD_STYLE =
 {
     FONT_COUNT = "ZoFontGameShadow",
-    CONTAINER_PRIMARY_ANCHOR_OFFSET_Y = 10,
+    TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y = 10,
 }
 
 local GAMEPAD_STYLE =
 {
     FONT_COUNT = "ZoFontGamepad34",
-    CONTAINER_PRIMARY_ANCHOR_OFFSET_Y = 20,
+    TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y = 20,
 }
 
 local MAX_ICON_COUNT = 4
@@ -40,19 +40,21 @@ function ZO_ReadyCheckTracker:Initialize(control)
 
     local allConstants = { KEYBOARD_STYLE, GAMEPAD_STYLE }
     for _, constants in ipairs(allConstants) do
-        constants.CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, control, TOPRIGHT, 0, constants.CONTAINER_PRIMARY_ANCHOR_OFFSET_Y)
-        constants.COUNT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container)
+        constants.TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, ZO_ActivityTracker, BOTTOMRIGHT, 0, constants.TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y)
+        constants.CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
+        constants.COUNT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
     end
 
-    KEYBOARD_STYLE.CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, control, TOPLEFT, 0, KEYBOARD_STYLE.CONTAINER_PRIMARY_ANCHOR_OFFSET_Y)
-    KEYBOARD_STYLE.COUNT_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container)
+    KEYBOARD_STYLE.TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ActivityTracker, BOTTOMLEFT, 0, KEYBOARD_STYLE.TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y)
+    KEYBOARD_STYLE.CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
+    KEYBOARD_STYLE.COUNT_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
 
-    KEYBOARD_STYLE.ICONS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container)
-    GAMEPAD_STYLE.ICONS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container)
+    KEYBOARD_STYLE.ICONS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
+    GAMEPAD_STYLE.ICONS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
 
     ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 
-    READY_CHECK_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
+    READY_CHECK_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(self.container)
 
     self:RegisterEvents()
 end
@@ -90,12 +92,9 @@ do
             local tanksAccepted, tanksPending, healersAccepted, healersPending, dpsAccepted, dpsPending = GetLFGReadyCheckCounts()
             local pendingTotal = tanksPending + healersPending + dpsPending
             local total = pendingTotal + tanksAccepted + healersAccepted + dpsAccepted 
+            local activityType = GetLFGReadyCheckActivityType()
 
-            if total > MAX_ICON_COUNT then
-                self.countLabel:SetText(zo_strformat(SI_READY_CHECK_TRACKER_COUNT_FORMAT, pendingTotal))
-                self.countLabel:SetHidden(false)
-                self.iconsContainer:SetHidden(true)
-            else
+            if ZO_IsActivityTypeDungeon(activityType) and pendingTotal <= MAX_ICON_COUNT then
                 self.countLabel:SetHidden(true)
                 self.iconsContainer:SetHidden(false)
 
@@ -111,6 +110,10 @@ do
                 for unusedIndex = currentIndex, MAX_ICON_COUNT do
                     iconControls[unusedIndex]:SetHidden(true)
                 end
+            else
+                self.countLabel:SetText(zo_strformat(SI_READY_CHECK_TRACKER_COUNT_FORMAT, pendingTotal))
+                self.countLabel:SetHidden(false)
+                self.iconsContainer:SetHidden(true)
             end
         else
             self.iconsContainer:SetHidden(true)
@@ -121,6 +124,12 @@ end
 
 function ZO_ReadyCheckTracker:ApplyPlatformStyle(style)
     self.countLabel:SetFont(style.FONT_COUNT)
+
+    self.control:ClearAnchors()
+    style.TOP_LEVEL_PRIMARY_ANCHOR:AddToControl(self.control)
+    if style.TOP_LEVEL_SECONDARY_ANCHOR then
+        style.TOP_LEVEL_SECONDARY_ANCHOR:AddToControl(self.control)
+    end
 
     self.container:ClearAnchors()
     style.CONTAINER_PRIMARY_ANCHOR:AddToControl(self.container)

@@ -140,19 +140,22 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
         mainText = 
         {
             text = function()
-                local cost = GetRecallCost()
+                local cost = zo_min(GetRecallCost(), GetCarriedCurrencyAmount(CURT_MONEY))
                 local goldIcon = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 32, 32)
                 local primaryButtonIconPath = ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_BUTTON_1)
                 local primaryButtonIcon = zo_iconFormat(primaryButtonIconPath, 64, 64)
-                local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
-                local mainText = DoesCurrentZoneHaveTelvarStoneBehavior() and SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT_TELVAR or SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT
-                local playerMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-                
-                if cost > playerMoney then
-                    cost = playerMoney
+
+                local text
+                if DoesCurrentZoneHaveTelvarStoneBehavior() then
+                    local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT_TELVAR, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
+                elseif IsActiveWorldBattleground() then
+                    text = GetString(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_IN_BATTLEGROUND)
+                else
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
                 end
 
-                return zo_strformat(mainText, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
+                return text
             end,
         },
        
@@ -160,7 +163,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
         {
             {
                 keybind = "DIALOG_PRIMARY",
-                text = SI_GAMEPAD_HELP_UNSTUCK_TELEPORT_KEYBIND_TEXT,
+                text = SI_DIALOG_ACCEPT,
                 callback = function()
                     SendPlayerStuck()
                 end,
@@ -168,7 +171,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
 
             {
                 keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_EXIT,
+                text = SI_DIALOG_CANCEL,
             },
         }
     })

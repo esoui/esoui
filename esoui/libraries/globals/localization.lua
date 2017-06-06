@@ -10,7 +10,7 @@ function zo_strformat(formatString, ...)
         if type(currentArg) == "number" then
             local str = ""
             local numFmt = "d"
-            local num, frac = math.modf(currentArg)
+            local num, frac = zo_decimalsplit(currentArg)
             
             local width = 0
             local digits = 1
@@ -139,37 +139,31 @@ end
 function ZO_GenerateCommaSeparatedList(argumentTable)
     if argumentTable ~= nil and #argumentTable > 0 then
         local numArguments = #argumentTable
-        -- start off the list with the first element in the array
-        local listString = argumentTable[1]
-        -- loop through the second through the second to last element adding commas in between
-        -- if there are only two things in the array this loop will be skipped
-        for i = 2, (numArguments - 1) do
-            listString = listString .. GetString(SI_LIST_COMMA_SEPARATOR) .. argumentTable[i]
-        end
-        -- add the last element of the array to the list
-        -- special behavior to add "and" for the last element
-        if numArguments >= 2 then
+        -- If there's only one item in the list, the string is just the first item
+        if numArguments == 1 then
+            return argumentTable[1]
+        else
+            -- loop through the first through the second to last element adding commas in between
+            -- don't add the last since we will use a different separator for it
+            local listString = table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR), 1, numArguments - 1)
+
+            -- add the last element of the array to the list using the ", and" separator
             local finalSeparator = SI_LIST_COMMA_AND_SEPARATOR
-            -- if there are only two it doesn't make sense to add ", and "
+            -- if there are only two items in the list, we want to use "and" without a comma
             if numArguments == 2 then
                 finalSeparator = SI_LIST_AND_SEPARATOR
             end
-            listString = listString .. GetString(finalSeparator) .. argumentTable[numArguments]
+            listString = string.format('%s%s%s', listString, GetString(finalSeparator), argumentTable[numArguments])
+            return listString
         end
-        return listString
     else
         return ""
     end
 end
 
 function ZO_GenerateCommaSeparatedListWithoutAnd(argumentTable)
-    if argumentTable ~= nil and #argumentTable > 0 then
-        local numArguments = #argumentTable
-        local listString = argumentTable[1]
-        for i = 2, numArguments do
-            listString = listString .. GetString(SI_LIST_COMMA_SEPARATOR) .. argumentTable[i]
-        end
-        return listString
+    if argumentTable ~= nil then
+        return table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR))
     else
         return ""
     end

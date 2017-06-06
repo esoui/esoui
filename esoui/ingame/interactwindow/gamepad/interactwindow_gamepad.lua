@@ -46,10 +46,6 @@ local function SetupBodyText(control, data, selected, selectedDuringRebuild, ena
     control:GetNamedChild("TargetArea"):GetNamedChild("BodyText"):SetText(data.bodyText)
 end
 
-local function SetupReward(control, data, selected, selectedDuringRebuild, enabled, activated)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-end
-
 local function SetupOption(control, data, selected, selectedDuringRebuild, enabled, activated)
     if(data.optionsEnabled) then
         data.enabled = data.optionUsable
@@ -125,7 +121,7 @@ function ZO_GamepadInteraction:InitInteraction()
 
     self.itemList:AddDataTemplate("ZO_InteractWindow_GamepadBodyTextItem", SetupBodyText, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.itemList:AddDataTemplateWithHeader("ZO_QuestReward_Title_Gamepad", SetupRewardTitle, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadQuestRewardEntryHeaderTemplate")
-    self.itemList:AddDataTemplate("ZO_QuestReward_Gamepad", SetupReward, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.itemList:AddDataTemplate("ZO_QuestReward_Gamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.itemList:AddDataTemplate("ZO_ChatterOption_Gamepad", SetupOption, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.itemList:SetDataTemplateReleaseFunction("ZO_ChatterOption_Gamepad", ReleaseChatterOptionControl)
 end
@@ -259,6 +255,8 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
         if itemData.rewardType == REWARD_TYPE_PARTIAL_SKILL_POINTS then
             itemData.name = ZO_QuestReward_GetSkillPointText(itemData.amount)
             itemData.icon = nil
+        elseif itemData.rewardType == REWARD_TYPE_SKILL_LINE then
+            itemData.name = ZO_QuestReward_GetSkillLineEarnedText(itemData.name)
         elseif itemData.rewardType == REWARD_TYPE_AUTO_ITEM and itemData.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
             itemData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
             local name, description = GetCollectibleInfo(itemData.itemId)
@@ -273,7 +271,15 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
         end
 
         local entry = ZO_GamepadEntryData:New(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, itemData.name))
-        entry:InitializeInventoryVisualData(itemData)
+        if itemData.rewardType == REWARD_TYPE_AUTO_ITEM then
+            entry:InitializeInventoryVisualData(itemData)
+        else
+            entry:SetFontScaleOnSelection(false)
+            if itemData.icon then
+                entry:AddIcon(itemData.icon)
+            end
+        end
+
         entry.itemData = itemData
         entry:SetStackCount(itemData.amount)
 

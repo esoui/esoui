@@ -102,7 +102,9 @@ do
     local DAILY_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_DAILY_REWARD_HEADER)
     local STANDARD_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_STANDARD_REWARD_HEADER)
 
-    function ZO_ActivityFinderTemplate_Shared:RefreshRewards(currentSelectionIsRandom, activityType)
+    function ZO_ActivityFinderTemplate_Shared:RefreshRewards(location)
+        local currentSelectionIsRandom = location:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.RANDOM
+        local activityType = location:GetActivityType()
         local hideItemReward = true
         local hideXPReward = true
         if currentSelectionIsRandom then
@@ -134,23 +136,16 @@ do
     end
 end
 
-function ZO_ActivityFinderTemplate_Shared.SetGroupSizeRangeText(labelControl, entryData, groupIconFormat)
-    if entryData.minGroupSize ~= entryData.maxGroupSize then
-        labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_RANGE_FORMAT, entryData.minGroupSize, entryData.maxGroupSize, groupIconFormat))
-    else
-        labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_SIMPLE_FORMAT, entryData.minGroupSize, groupIconFormat))
-    end
-end
-
 function ZO_ActivityFinderTemplate_Shared:GetLFMPromptInfo()
     local shouldShowLFMPrompt = false
     local lfmPromptActivityName
     if CanSendLFMRequest() then
-        local activityType, activityIndex = GetCurrentLFGActivity()
+        local activityId = GetCurrentLFGActivityId()
+        local activityType = GetActivityType(activityId)
         local modes = self.dataManager:GetFilterModeData()
         if ZO_IsElementInNumericallyIndexedTable(modes:GetActivityTypes(), activityType) then
             shouldShowLFMPrompt = true
-            lfmPromptActivityName = GetLFGOption(activityType, activityIndex)
+            lfmPromptActivityName = GetActivityName(activityId)
         end
     end
     return shouldShowLFMPrompt, lfmPromptActivityName
@@ -158,34 +153,54 @@ end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfoByActivity(activityType)
     local isLevelLocked = false
-    local lowestLevelLimit, lowestChampionPointLimit
+    local lowestLevelLimit, highestLevelLimit, lowestChampionPointLimit, highestChampionPointLimit
 
     local maxLevel = GetMaxLevel()
 
     local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
     for _, location in ipairs(locationData) do
-        if location.levelMin == maxLevel then --This is a veteran activity
-            if not lowestChampionPointLimit or location.championPointsMin < lowestChampionPointLimit then
-                lowestChampionPointLimit = location.championPointsMin
+        local locationLevelMin = location:GetLevelMin()
+        if locationLevelMin == maxLevel then --This is a veteran activity
+            local locationChampionPointsMin = location:GetChampionPointsMin()
+            local locationChampionPointsMax = location:GetChampionPointsMax()
+
+            if not lowestChampionPointLimit or locationChampionPointsMin < lowestChampionPointLimit then
+                lowestChampionPointLimit = locationChampionPointsMin
+            end
+
+            if not highestChampionPointLimit or locationChampionPointsMax > highestChampionPointLimit then
+                highestChampionPointLimit = locationChampionPointsMax
             end
         else
-            if not lowestLevelLimit or location.levelMin < lowestLevelLimit then
-                lowestLevelLimit = location.levelMin
+            local locationLevelMax = location:GetLevelMax()
+
+            if not lowestLevelLimit or locationLevelMin < lowestLevelLimit then
+                lowestLevelLimit = locationLevelMin
+            end
+
+            if not highestLevelLimit or locationLevelMax > highestLevelLimit then
+                highestLevelLimit = locationLevelMax
             end
         end
     end
     
     if lowestLevelLimit then
-        if GetUnitLevel("player") < lowestLevelLimit  then
+        local playerLevel = GetUnitLevel("player")
+        if playerLevel < lowestLevelLimit or playerLevel > highestLevelLimit then
             isLevelLocked = true
         end
     elseif lowestChampionPointLimit then
-        if not CanUnitGainChampionPoints("player") or GetPlayerChampionPointsEarned() < lowestChampionPointLimit then
+        if not CanUnitGainChampionPoints("player") then
             isLevelLocked = true
+        else
+            local playerChampionPoints = GetPlayerChampionPointsEarned()
+            if playerChampionPoints < lowestChampionPointLimit or playerChampionPoints > highestChampionPointLimit then
+                isLevelLocked = true
+            end
         end
     end
 
-    return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit
+    return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit, highestLevelLimit, highestChampionPointLimit
 end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfo()
@@ -216,7 +231,7 @@ function ZO_ActivityFinderTemplate_Shared:GetNumLocations()
 
     local modes = self.dataManager:GetFilterModeData()
     for _, activityType in ipairs(modes:GetActivityTypes()) do
-        numLocations = numLocations + ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType)
+        numLocations = numLocations + ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes())
     end
 
     return numLocations
@@ -226,8 +241,9 @@ function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
     local isGloballyLocked = false
     local globalLockReasons =
     {
-        isActivityQueueOnCooldown = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityQueueOnCooldown(),
+        isLockedByManager = self.dataManager:GetManagerLockInfo(),
         isLockedByNotLeader = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader(),
+        isActiveWorldBattleground = IsActiveWorldBattleground(),
     }
 
     for i, reason in pairs(globalLockReasons) do
@@ -240,19 +256,14 @@ function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
     return isGloballyLocked, globalLockReasons
 end
 
-local function ActivityQueueCooldownTextCallback()
-    local expireTimeS = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetActivityQueueCooldownExpireTimeS()
-    local timeRemainingS = zo_max(expireTimeS - GetFrameTimeSeconds(), 0)
-    local formattedTimeText = ZO_FormatTime(timeRemainingS, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-    return zo_strformat(SI_LFG_LOCK_REASON_QUEUE_COOLDOWN_VERBOSE, formattedTimeText)
-end
-
 function ZO_ActivityFinderTemplate_Shared:GetGlobalLockText()
     local isGloballyLocked, globalLockReasons = self:GetGlobalLockInfo()
     local lockReasonText
     if isGloballyLocked then
-        if globalLockReasons.isActivityQueueOnCooldown then
-            lockReasonText = ActivityQueueCooldownTextCallback
+        if globalLockReasons.isActiveWorldBattleground then
+            lockReasonText = GetString(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
+        elseif globalLockReasons.isLockedByManager then
+            lockReasonText = self.dataManager:GetManagerLockText()
         elseif globalLockReasons.isLockedByNotLeader then
             lockReasonText = GetString(SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT)
         end
@@ -279,4 +290,23 @@ function ZO_ActivityFinderTemplate_Shared:GetLockTextByActivity(activityType)
         lockText = self:GetLevelLockTextByActivity(activityType)
     end
     return lockText
+end
+
+function ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(setTypesSectionControl, setData)
+    local hideControls = true
+    local setTypesHeader = setTypesSectionControl:GetNamedChild("Header")
+    local setTypesList = setTypesSectionControl:GetNamedChild("List")
+
+    if setData.GetEntryType and setData:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET then
+        local setTypesHeaderText = setData:GetSetTypesHeaderText()
+        local setTypesListText = setData:GetSetTypesListText()
+        if setTypesHeaderText ~= "" and setTypesListText ~= "" then
+            setTypesHeader:SetText(setTypesHeaderText)
+            setTypesList:SetText(setTypesListText)
+            hideControls = false
+        end
+    end
+
+    setTypesHeader:SetHidden(hideControls)
+    setTypesList:SetHidden(hideControls)
 end

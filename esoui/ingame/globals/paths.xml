@@ -1,3 +1,5 @@
 <GuiXml>
     <String name="ICON_PATH" value="EsoUI/Art/Icons" />
+    <String name="MAP_PIN_PATH" value="EsoUI/Art/MapPins/" />
+    <String name="COMPASS_PATH" value="EsoUI/Art/Compass/" />
 </GuiXml>

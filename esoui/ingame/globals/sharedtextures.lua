@@ -1,34 +1,67 @@
-local ALLIANCE_ICON_TEXTURES =
-{
-    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/AvA/AvA_HUD_emblem_aldmeri.dds",
-    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/AvA/AvA_HUD_emblem_ebonheart.dds",
-    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/AvA_HUD_emblem_daggerfall.dds",
-}
+-- Alliance --
+do
+    local ALLIANCE_ICON_TEXTURES =
+    {
+        [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/AvA/AvA_HUD_emblem_aldmeri.dds",
+        [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/AvA/AvA_HUD_emblem_ebonheart.dds",
+        [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/AvA_HUD_emblem_daggerfall.dds",
+    }
 
-function GetAllianceTexture(alliance)
-    return ALLIANCE_ICON_TEXTURES[alliance]
+    function GetAllianceTexture(alliance)
+        return ALLIANCE_ICON_TEXTURES[alliance]
+    end
 end
 
-local ALLIANCE_SYMBOL_ICONS =
-{
-    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Contacts/social_allianceIcon_aldmeri.dds",
-    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Contacts/social_allianceIcon_ebonheart.dds",
-    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Contacts/social_allianceIcon_daggerfall.dds",
-}
+do
+    local ALLIANCE_SYMBOL_ICONS =
+    {
+        [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Contacts/social_allianceIcon_aldmeri.dds",
+        [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Contacts/social_allianceIcon_ebonheart.dds",
+        [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Contacts/social_allianceIcon_daggerfall.dds",
+    }
 
-function GetAllianceSymbolIcon(alliance)
-    return ALLIANCE_SYMBOL_ICONS[alliance]
+    function GetAllianceSymbolIcon(alliance)
+        return ALLIANCE_SYMBOL_ICONS[alliance]
+    end
 end
 
-local LARGE_ALLIANCE_SYMBOL_ICONS =
-{
-    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Stats/allianceBadge_Aldmeri.dds",
-    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Stats/allianceBadge_Ebonheart.dds",
-    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Stats/allianceBadge_Daggerfall.dds",
-}
+do
+    local LARGE_BATTLEGROUND_ALLIANCE_ICONS =
+    {
+        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Stats/battleground_alliance_badge_Fire_Drakes.dds",
+        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Stats/battleground_alliance_badge_Pit_Daemons.dds",
+        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Stats/battleground_alliance_badge_Storm_Lords.dds",
+    }
 
-function GetLargeAllianceSymbolIcon(alliance)
-    return LARGE_ALLIANCE_SYMBOL_ICONS[alliance]
+    function GetLargeBattlegroundAllianceSymbolIcon(bgAlliance)
+        return LARGE_BATTLEGROUND_ALLIANCE_ICONS[bgAlliance]
+    end
+end
+
+do
+    local COUNTDOWN_BATTLEGROUND_ALLIANCE_ICONS =
+    {
+        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_orange.dds",
+        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_green.dds",
+        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_purple.dds",
+    }
+
+    function GetCountdownBattlegroundAllianceSymbolIcon(bgAlliance)
+        return COUNTDOWN_BATTLEGROUND_ALLIANCE_ICONS[bgAlliance]
+    end
+end
+
+do
+    local LARGE_ALLIANCE_SYMBOL_ICONS =
+    {
+        [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Stats/allianceBadge_Aldmeri.dds",
+        [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Stats/allianceBadge_Ebonheart.dds",
+        [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Stats/allianceBadge_Daggerfall.dds",
+    }
+
+    function GetLargeAllianceSymbolIcon(alliance)
+        return LARGE_ALLIANCE_SYMBOL_ICONS[alliance]
+    end
 end
 
 function GetPlatformAllianceSymbolIcon(alliance)
@@ -43,46 +76,55 @@ function GetPlatformAllianceSymbolIcon(alliance)
     return icon
 end
 
-local ALLIANCE_BANNER_ICONS =
-{
-    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Contacts/social_allianceIcon_aldmeri.dds",
-    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Contacts/social_allianceIcon_ebonheart.dds",
-    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Contacts/social_allianceIcon_daggerfall.dds",
-}
+do
+    local ALLIANCE_BANNER_ICONS =
+    {
+        [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Contacts/social_allianceIcon_aldmeri.dds",
+        [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Contacts/social_allianceIcon_ebonheart.dds",
+        [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Contacts/social_allianceIcon_daggerfall.dds",
+    }
 
-function GetAllianceBannerIcon(alliance)
-    return ALLIANCE_BANNER_ICONS[alliance]
+    function GetAllianceBannerIcon(alliance)
+        return ALLIANCE_BANNER_ICONS[alliance]
+    end
 end
 
-local INSTANCE_DISPLAY_TYPE_ICONS =
-{
-    [INSTANCE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
-    [INSTANCE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_groupInstance.dds",
-    [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/Icons/mapKey/mapKey_raidDungeon.dds",
-    [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_groupDelve.dds",
-    [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
-    [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_publicDungeon.dds",
-    [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
-    [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
-}
+-- Instance Display Type --
+do
+    local INSTANCE_DISPLAY_TYPE_ICONS =
+    {
+        [INSTANCE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
+        [INSTANCE_DISPLAY_TYPE_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_groupInstance.dds",
+        [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/Icons/mapKey/mapKey_raidDungeon.dds",
+        [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_groupDelve.dds",
+        [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
+        [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_publicDungeon.dds",
+        [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
+        [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
+    }
 
-function GetInstanceDisplayTypeIcon(instanceType)
-    return INSTANCE_DISPLAY_TYPE_ICONS[instanceType]
+    function GetInstanceDisplayTypeIcon(instanceType)
+        return INSTANCE_DISPLAY_TYPE_ICONS[instanceType]
+    end
 end
 
-local SOCKET_TEXTURES = {
-    --Using blue slot for enchantment currently
-    [SOCKET_TYPE_ENCHANTMENT] = "EsoUI/Art/ItemToolTip/ESO_itemToolTip_blueSlot.dds",
-    [SOCKET_TYPE_PRECISION] = "EsoUI/Art/AvA/AvA_itemHighlight_precision.dds",
-    [SOCKET_TYPE_AMMO] = "EsoUI/Art/AvA/AvA_itemHighlight_ammo.dds",
-    [SOCKET_TYPE_LAUNCH_VELOCITY] = "EsoUI/Art/AvA/AvA_itemHighlight_range.dds",
-    [SOCKET_TYPE_TOUGHNESS] = "EsoUI/Art/AvA/AvA_itemHighlight_toughness.dds",
-}
+-- Socket --
+do
+    local SOCKET_TEXTURES = {
+        --Using blue slot for enchantment currently
+        [SOCKET_TYPE_ENCHANTMENT] = "EsoUI/Art/ItemToolTip/ESO_itemToolTip_blueSlot.dds",
+        [SOCKET_TYPE_PRECISION] = "EsoUI/Art/AvA/AvA_itemHighlight_precision.dds",
+        [SOCKET_TYPE_AMMO] = "EsoUI/Art/AvA/AvA_itemHighlight_ammo.dds",
+        [SOCKET_TYPE_LAUNCH_VELOCITY] = "EsoUI/Art/AvA/AvA_itemHighlight_range.dds",
+        [SOCKET_TYPE_TOUGHNESS] = "EsoUI/Art/AvA/AvA_itemHighlight_toughness.dds",
+    }
 
-function GetSocketTexture(socketType)
-    return SOCKET_TEXTURES[socketType]
+    function GetSocketTexture(socketType)
+        return SOCKET_TEXTURES[socketType]
+    end
 end
 
+-- Class --
 do
     local CLASS_ICONS = {}
     local GAMEPAD_CLASS_ICONS = {}
@@ -114,116 +156,139 @@ do
     end
 end
 
-local STATUS_ICONS =
-{
-    [PLAYER_STATUS_ONLINE] = "EsoUI/Art/Contacts/social_status_online.dds",
-    [PLAYER_STATUS_OFFLINE] = "EsoUI/Art/Contacts/social_status_offline.dds",
-    [PLAYER_STATUS_AWAY] = "EsoUI/Art/Contacts/social_status_afk.dds",
-    [PLAYER_STATUS_DO_NOT_DISTURB] = "EsoUI/Art/Contacts/social_status_dnd.dds",
-}
+-- Social Status --
+do
+    local STATUS_ICONS =
+    {
+        [PLAYER_STATUS_ONLINE] = "EsoUI/Art/Contacts/social_status_online.dds",
+        [PLAYER_STATUS_OFFLINE] = "EsoUI/Art/Contacts/social_status_offline.dds",
+        [PLAYER_STATUS_AWAY] = "EsoUI/Art/Contacts/social_status_afk.dds",
+        [PLAYER_STATUS_DO_NOT_DISTURB] = "EsoUI/Art/Contacts/social_status_dnd.dds",
+    }
 
-local GAMEPAD_STATUS_ICONS =
-{
-    [PLAYER_STATUS_ONLINE] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_online.dds",
-    [PLAYER_STATUS_OFFLINE] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_offline.dds",
-    [PLAYER_STATUS_AWAY] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_afk.dds",
-    [PLAYER_STATUS_DO_NOT_DISTURB] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_dnd.dds",
-}
-
-function GetPlayerStatusIcon(playerStatus)
-    return STATUS_ICONS[playerStatus]
+    function GetPlayerStatusIcon(playerStatus)
+        return STATUS_ICONS[playerStatus]
+    end
 end
 
-function GetGamepadPlayerStatusIcon(playerStatus)
-    return GAMEPAD_STATUS_ICONS[playerStatus]
+do
+    local GAMEPAD_STATUS_ICONS =
+    {
+        [PLAYER_STATUS_ONLINE] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_online.dds",
+        [PLAYER_STATUS_OFFLINE] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_offline.dds",
+        [PLAYER_STATUS_AWAY] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_afk.dds",
+        [PLAYER_STATUS_DO_NOT_DISTURB] = "EsoUI/Art/Contacts/Gamepad/gp_social_status_dnd.dds",
+    }
+
+    function GetGamepadPlayerStatusIcon(playerStatus)
+        return GAMEPAD_STATUS_ICONS[playerStatus]
+    end
 end
 
-local CHAMPION_POINT_ICON = "EsoUI/Art/Champion/champion_icon.dds"
-local CHAMPION_POINT_ICON_SMALL = "EsoUI/Art/Champion/champion_icon_32.dds"
-local GAMEPAD_CHAMPION_POINT_ICON = "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds"
+-- Champion --
+do
+    local CHAMPION_POINT_ICON = "EsoUI/Art/Champion/champion_icon.dds"
+    local CHAMPION_POINT_ICON_SMALL = "EsoUI/Art/Champion/champion_icon_32.dds"
+    local GAMEPAD_CHAMPION_POINT_ICON = "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds"
 
-function GetChampionPointsIcon()
-    return CHAMPION_POINT_ICON
+    function GetChampionPointsIcon()
+        return CHAMPION_POINT_ICON
+    end
+
+    function GetChampionPointsIconSmall()
+        return CHAMPION_POINT_ICON_SMALL
+    end
+
+    function GetGamepadChampionPointsIcon()
+        return GAMEPAD_CHAMPION_POINT_ICON
+    end
 end
 
-function GetChampionPointsIconSmall()
-    return CHAMPION_POINT_ICON_SMALL
+do
+    local POINTS_ATTRIBUTE_ICON =
+    {
+        [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon.dds",
+        [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon.dds",
+        [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon.dds",
+    }
+
+    function GetChampionPointAttributeIcon(attribute)
+        return POINTS_ATTRIBUTE_ICON[attribute]
+    end
 end
 
-function GetGamepadChampionPointsIcon()
-    return GAMEPAD_CHAMPION_POINT_ICON
+do
+    local POINTS_ATTRIBUTE_HUD_ICON =
+    {
+        [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon-HUD.dds",
+        [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon-HUD.dds",
+        [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD.dds",
+    }
+
+    function GetChampionPointAttributeHUDIcon(attribute)
+        return POINTS_ATTRIBUTE_HUD_ICON[attribute]
+    end
 end
 
-local VETERAN_ICON = "EsoUI/Art/UnitFrames/target_veteranRank_icon.dds"
-local GAMEPAD_VETERAN_ICON = "EsoUI/Art/Contacts/Gamepad/gp_social_levelIcon_veteran.dds"
+do
+    local POINTS_ATTRIBUTE_ACTIVE_ICON =
+    {
+        [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon_active.dds",
+        [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon_active.dds",
+        [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon_active.dds",
+    }
 
-function GetVeteranIcon()
-    return VETERAN_ICON
+    function GetChampionPointAttributeActiveIcon(attribute)
+        return POINTS_ATTRIBUTE_ACTIVE_ICON[attribute]
+    end
 end
 
-function GetGamepadVeteranIcon()
-    return GAMEPAD_VETERAN_ICON
+-- Veteran --
+do
+    local VETERAN_ICON = "EsoUI/Art/UnitFrames/target_veteranRank_icon.dds"
+    local GAMEPAD_VETERAN_ICON = "EsoUI/Art/Contacts/Gamepad/gp_social_levelIcon_veteran.dds"
+
+    function GetVeteranIcon()
+        return VETERAN_ICON
+    end
+
+    function GetGamepadVeteranIcon()
+        return GAMEPAD_VETERAN_ICON
+    end
 end
 
+-- AvA Rank --
 function GetColoredAvARankIconMarkup(avaRank, alliance, size)
     local rankIconMarkup = string.format("|t%d:%d:%s:inheritColor|t", size, size, GetAvARankIcon(avaRank))
     local coloredRankIconMarkup = GetAllianceColor(alliance):Colorize(rankIconMarkup)
     return coloredRankIconMarkup
 end
 
-local POINTS_ATTRIBUTE_ICON =
-{
-    [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon.dds",
-    [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon.dds",
-    [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon.dds",
-}
+--LFG Role --
+do
+    local KEYBOARD_ROLE_ICONS =
+    {
+        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_icon_dps.dds",
+        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_icon_tank.dds",
+        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_icon_healer.dds",
+    }
 
-function GetChampionPointAttributeIcon(attribute)
-    return POINTS_ATTRIBUTE_ICON[attribute]
+    function GetKeyboardRoleIcon(role)
+        return KEYBOARD_ROLE_ICONS[role]
+    end
 end
 
-local POINTS_ATTRIBUTE_HUD_ICON =
-{
-    [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon-HUD.dds",
-    [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon-HUD.dds",
-    [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon-HUD.dds",
-}
+do
+    local GAMEPAD_ROLE_ICONS =
+    {
+        [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
+        [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
+        [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
+    }
 
-function GetChampionPointAttributeHUDIcon(attribute)
-    return POINTS_ATTRIBUTE_HUD_ICON[attribute]
-end
-
-local POINTS_ATTRIBUTE_ACTIVE_ICON =
-{
-    [ATTRIBUTE_HEALTH] = "EsoUI/Art/Champion/champion_points_health_icon_active.dds",
-    [ATTRIBUTE_MAGICKA] = "EsoUI/Art/Champion/champion_points_magicka_icon_active.dds",
-    [ATTRIBUTE_STAMINA] = "EsoUI/Art/Champion/champion_points_stamina_icon_active.dds",
-}
-
-function GetChampionPointAttributeActiveIcon(attribute)
-    return POINTS_ATTRIBUTE_ACTIVE_ICON[attribute]
-end
-
-local KEYBOARD_ROLE_ICONS =
-{
-    [LFG_ROLE_DPS] = "EsoUI/Art/LFG/LFG_icon_dps.dds",
-    [LFG_ROLE_TANK] = "EsoUI/Art/LFG/LFG_icon_tank.dds",
-    [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/LFG_icon_healer.dds",
-}
-
-function GetKeyboardRoleIcon(role)
-    return KEYBOARD_ROLE_ICONS[role]
-end
-
-local GAMEPAD_ROLE_ICONS =
-{
-    [LFG_ROLE_DPS] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
-    [LFG_ROLE_TANK] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
-    [LFG_ROLE_HEAL] = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
-}
-
-function GetGamepadRoleIcon(role)
-    return GAMEPAD_ROLE_ICONS[role]
+    function GetGamepadRoleIcon(role)
+        return GAMEPAD_ROLE_ICONS[role]
+    end
 end
 
 function GetRoleIcon(role)
@@ -234,26 +299,71 @@ function GetRoleIcon(role)
     end
 end
 
-local KEYBOARD_DUNEGON_DIFFICULTY_ICONS =
-{
-    [DUNGEON_DIFFICULTY_NORMAL] = "EsoUI/Art/LFG/LFG_normalDungeon_up.dds",
-    [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/LFG_veteranDungeon_up.dds",
-}
+-- Battlegrounds --
+do
+    local KEYBOARD_BATTLEGROUND_TEAM_ICONS =
+    {
+        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_orange.dds",
+        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_green.dds",
+        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
+    }
 
-function GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
-    return KEYBOARD_DUNEGON_DIFFICULTY_ICONS[dungeonDifficulty]
+    function GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
+        return KEYBOARD_BATTLEGROUND_TEAM_ICONS[battlegroundAlliance]
+    end
 end
 
-local GAMEPAD_DUNGEON_DIFFICULTY_ICONS =
-{
-    [DUNGEON_DIFFICULTY_NORMAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_normalDungeon.dds",
-    [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_veteranDungeon.dds",
-}
+do
+    local GAMEPAD_BATTLEGROUND_TEAM_ICONS =
+    {
+        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_orange.dds",
+        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
+        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
+    }
 
-function GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
-    return GAMEPAD_DUNGEON_DIFFICULTY_ICONS[dungeonDifficulty]
+    function GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
+        return GAMEPAD_BATTLEGROUND_TEAM_ICONS[battlegroundAlliance]
+    end
 end
 
+function GetBattlegroundTeamIcon(battlegroundAlliance)
+    if IsInGamepadPreferredMode() then
+        return GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
+    else
+        return GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
+    end
+end
+
+function GetBattlegroundIconMarkup(battlegroundAlliance, size)
+    return zo_iconFormatInheritColor(GetBattlegroundTeamIcon(battlegroundAlliance), size, size)
+end
+
+-- Difficulty --
+do
+    local KEYBOARD_DUNEGON_DIFFICULTY_ICONS =
+    {
+        [DUNGEON_DIFFICULTY_NORMAL] = "EsoUI/Art/LFG/LFG_normalDungeon_up.dds",
+        [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/LFG_veteranDungeon_up.dds",
+    }
+
+    function GetKeyboardDungeonDifficultyIcon(dungeonDifficulty)
+        return KEYBOARD_DUNEGON_DIFFICULTY_ICONS[dungeonDifficulty]
+    end
+end
+
+do
+    local GAMEPAD_DUNGEON_DIFFICULTY_ICONS =
+    {
+        [DUNGEON_DIFFICULTY_NORMAL] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_normalDungeon.dds",
+        [DUNGEON_DIFFICULTY_VETERAN] = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_veteranDungeon.dds",
+    }
+
+    function GetGamepadDungeonDifficultyIcon(dungeonDifficulty)
+        return GAMEPAD_DUNGEON_DIFFICULTY_ICONS[dungeonDifficulty]
+    end
+end
+
+-- Recipe crafting --
 do
     local KEYBOARD_RECIPE_CRAFTING_SYSTEM_BUTTON_TEXTURES =
     {
@@ -325,7 +435,7 @@ do
     end
 end
 
-
+-- Misc --
 ZO_NO_TEXTURE_FILE = "/esoui/art/icons/icon_missing.dds"
 ZO_KEYBOARD_NEW_ICON = "EsoUI/Art/Miscellaneous/new_icon.dds"
 ZO_GAMEPAD_NEW_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new.dds"
@@ -336,7 +446,7 @@ ZO_TIMER_ICON_64 = "EsoUI/Art/Miscellaneous/timer_64.dds"
 ZO_KEYBOARD_LOCKED_ICON = "EsoUI/Art/Miscellaneous/status_locked.dds"
 ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
 
--- Gamepad Currency Textures
+-- Gamepad Currency Textures --
 ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE = "EsoUI/Art/currency/gamepad/gp_gold.dds"
 ZO_GAMEPAD_CURRENCY_ICON_ALLIANCE_POINTS_TEXTURE = "EsoUI/Art/currency/gamepad/gp_alliancePoints.dds"
 ZO_GAMEPAD_CURRENCY_ICON_TELVAR_STONES_TEXTURE = "EsoUI/Art/currency/gamepad/gp_telvar.dds"

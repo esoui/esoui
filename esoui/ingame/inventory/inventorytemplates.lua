@@ -15,7 +15,7 @@ do
         local slotsLabel = infoBar:GetNamedChild("FreeSlots")
 
         local numUsedSlots = GetNumBagUsedSlots(bagType)
-        local numSlots = GetBagSize(bagType)
+        local numSlots = GetBagUsedSize(bagType)
 
         if numUsedSlots < numSlots then
             slotsLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())

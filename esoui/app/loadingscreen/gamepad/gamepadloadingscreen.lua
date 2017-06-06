@@ -1,9 +1,7 @@
 local LoadingScreen_Gamepad = {}
 
 function LoadingScreen_Gamepad:InitializeAnimations()
-    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation")
-    self.spinnerFadeAnimation:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenBg)
-    self.spinnerFadeAnimation:GetAnimation(2):SetAnimatedControl(GamepadLoadingScreenSpinner)
+    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation", GamepadLoadingScreenSpinner)
 
     self.animations = GetAnimationManager():CreateTimelineFromVirtual("GamepadLoadingCompleteAnimation")
     self.animations:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenArt)

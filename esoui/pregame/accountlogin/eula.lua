@@ -4,6 +4,7 @@ local PREGAME_EULAS = {
     EULA_TYPE_TERMS_OF_SERVICE,
     EULA_TYPE_PRIVACY_POLICY,
     EULA_TYPE_CODE_OF_CONDUCT,
+    EULA_TYPE_NON_DISCLOSURE_AGREEMENT,
 }
 
 --[[
@@ -67,7 +68,7 @@ end
 
 function ZO_EULA:GetNextEulaType()
     for k, eulaType in ipairs(PREGAME_EULAS) do
-        if not HasAgreedToEULA(eulaType) then
+        if ShouldShowEULA(eulaType) then
             return eulaType
         end
     end
@@ -151,7 +152,12 @@ function ZO_EULA:InitializeDialog(dialogControl)
         self:CheckEnableAgreeButton(verticalOffset)
     end
 
+    local function OnScrollExtentsChanged()
+        ZO_Scroll_OnExtentsChanged(self.scroll:GetParent())
+        self.extentsChanged = true
+    end
     self.scroll:SetHandler("OnScrollOffsetChanged", OnDocumentScrollChanged)
+    self.scroll:SetHandler("OnScrollExtentsChanged", OnScrollExtentsChanged)
 end
 
 function ZO_EULA:CheckEnableAgreeButton(verticalOffset)
@@ -171,19 +177,19 @@ function ZO_EULA:ResetDialog()
     if not self.isShowingLinkConfirmation then
         ZO_Scroll_ResetToTop(self.scroll:GetParent())
     end
+    self.extentsChanged = false
 
     local automaticEnableTime = GetFrameTimeMilliseconds() + 5000
-
     local function OnUpdate()
         local _, verticalExtent = self.scroll:GetScrollExtents()
-        if(verticalExtent ~= 0) then
+        if verticalExtent ~= 0 and self.extentsChanged then
             self:CheckEnableAgreeButton()
             self.scroll:SetHandler("OnUpdate", nil)
         end
 
         if(GetFrameTimeMilliseconds() > automaticEnableTime) then
             self.agreeButton:SetEnabled(true)
-            self.scroll:SetHandler("OnUpdate", nil)            
+            self.scroll:SetHandler("OnUpdate", nil)
         end
     end
 
@@ -210,16 +216,16 @@ function ZO_EULAInit(control)
     EULA_SCREEN = ZO_EULA:New(control)
 end
 
-function ZO_HasAgreedToEULA()
+function ZO_ShouldShowEULAScreen()
     if GetUIPlatform() ~= UI_PLATFORM_PC then
-        return HasAgreedToEULA(EULA_TYPE_PREGAME_EULA)
+        return ShouldShowEULA(EULA_TYPE_PREGAME_EULA)
     else
         -- The PC loads its additional legal documents differently from console
         for k, eulaType in ipairs(PREGAME_EULAS) do
-            if not HasAgreedToEULA(eulaType) then
-                return false
+            if ShouldShowEULA(eulaType) then
+                return true
             end
         end
-        return true
+        return false
     end
 end

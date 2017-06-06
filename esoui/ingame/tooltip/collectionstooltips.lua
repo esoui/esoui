@@ -6,9 +6,9 @@ do
     function ZO_Tooltip:LayoutCollectibleFromLink(collectibleLink)
         local collectibleId = GetCollectibleIdFromLink(collectibleLink)
         if collectibleId then
-            local name, description, _, _, _, purchasable, _, _, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
+            local name, description, _, _, _, purchasable, _, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
             local nickname = GetCollectibleNickname(collectibleId)
-            self:LayoutCollectible(collectibleId, NO_COLLECTION_NAME, name, nickname, purchaseable, description, hint, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            self:LayoutCollectible(collectibleId, NO_COLLECTION_NAME, name, nickname, purchaseable, description, hint, isPlaceholder, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
         end
     end
 end
@@ -18,16 +18,12 @@ do
     local COOLDOWN_TEXT = GetString(SI_GAMEPAD_TOOLTIP_COOLDOWN_HEADER)
     local QUALITY_NORMAL = nil
 
-    function ZO_Tooltip:LayoutCollectible(collectibleId, collectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, isPlaceholder, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+    function ZO_Tooltip:LayoutCollectible(collectibleId, collectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, isPlaceholder, categoryType, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
         if not isPlaceholder then
-            --things added to the collection top section stacks to the right (side by side)
+            --things added to the collection top section stack downward
             local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
 
-            if collectionName then
-                local formattedName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectionName)
-                topSection:AddLine(formattedName)
-            end
-
+            topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
             local unlockState = GetCollectibleUnlockStateById(collectibleId)
             topSection:AddLine(GetString("SI_COLLECTIBLEUNLOCKSTATE", unlockState))
 
@@ -81,12 +77,21 @@ do
             bodySection:AddLine(formattedHint, descriptionStyle)
         end
 
-        local emoteOverrideNames = {GetCollectiblePersonalityOverridenEmoteDisplayNames(collectibleId)}
-        if #emoteOverrideNames > 0 then
-            local numEmoteNames = #emoteOverrideNames
-            local emoteString = ZO_GenerateCommaSeparatedList(emoteOverrideNames)
-            local formattedEmoteString = zo_strformat(SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_DISPLAY_NAMES_FORMATTER, emoteString, numEmoteNames)
-            bodySection:AddLine(formattedEmoteString, descriptionStyle, self:GetStyle("collectionsPersonality"))
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_PERSONALITY then
+            local emoteOverrideNames = {GetCollectiblePersonalityOverridenEmoteDisplayNames(collectibleId)}
+            if #emoteOverrideNames > 0 then
+                local numEmoteNames = #emoteOverrideNames
+                local emoteString = ZO_GenerateCommaSeparatedList(emoteOverrideNames)
+                local formattedEmoteString = zo_strformat(SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_DISPLAY_NAMES_FORMATTER, emoteString, numEmoteNames)
+                bodySection:AddLine(formattedEmoteString, descriptionStyle, self:GetStyle("collectionsPersonality"))
+            end
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_EMOTE then
+            local emoteId = GetCollectibleReferenceId(collectibleId)
+            local emoteIndex = GetEmoteIndex(emoteId)
+            if emoteIndex then
+                local displayName = select(4, GetEmoteInfo(emoteIndex))
+                bodySection:AddLine(zo_strformat(SI_COLLECTIBLE_TOOLTIP_EMOTE_DISPLAY_NAME_FORMATTER, displayName), descriptionStyle, self:GetStyle("collectionsEmoteGranted"))
+            end
         end
 
         self:AddSection(bodySection)

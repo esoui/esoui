@@ -63,6 +63,16 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
 
         if self.active then
             self:SetFocusByIndex(self.savedIndex ~= 0 and self.savedIndex or 1)
+            local data = self:GetFocusItem()
+            --The entry that was already focused is no longer eligble for focus
+            if data and data.canFocus and not data.canFocus(data.control) then
+                --Try to select the next thing
+                if not self:MoveNext() then
+                    --Nothing to select forward, so move backward
+                    self:MovePrevious()
+                end
+            end
+
             if self.directionalInputEnabled then
                 DIRECTIONAL_INPUT:Activate(self, self.control)
             end
@@ -321,11 +331,13 @@ function ZO_GamepadFocus:MovePrevious()
     if index then
         self:SetFocusByIndex(index)
         self.onPlaySoundFunction(FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS)
+        return true
     else
         if self.onLeaveFocusAtBeginningFunction then
             self.onLeaveFocusAtBeginningFunction()
         end
     end
+    return false
 end
 
 function ZO_GamepadFocus:MoveNext()
@@ -333,7 +345,9 @@ function ZO_GamepadFocus:MoveNext()
     if index then
         self:SetFocusByIndex(index)
         self.onPlaySoundFunction(FOCUS_MOVEMENT_TYPES.MOVE_NEXT)
+        return true
     end
+    return false
 end
  
 function ZO_GamepadFocus:UpdateDirectionalInput()

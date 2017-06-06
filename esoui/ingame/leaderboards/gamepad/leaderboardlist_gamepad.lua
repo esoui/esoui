@@ -43,6 +43,12 @@ local LEADERBOARD_TYPE_HIDDEN_COLUMNS =
         ["class"] = true,
         ["alliance"] = true,
     },
+    [LEADERBOARD_TYPE_BATTLEGROUND] = 
+    {
+        ["house"] = true,
+        ["class"] = true,
+        ["alliance"] = true,
+    },
 }
 
 local LeaderboardList_Gamepad = ZO_Object.MultiSubclass(ZO_GamepadInteractiveSortFilterList, ZO_SocialOptionsDialogGamepad)
@@ -78,12 +84,6 @@ function LeaderboardList_Gamepad:InitializeKeybinds()
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(keybindDescriptor, GAME_NAVIGATION_TYPE_BUTTON, self:GetBackKeybindCallback())
     self:SetKeybindStripDescriptor(keybindDescriptor)
     ZO_GamepadInteractiveSortFilterList.InitializeKeybinds(self)
-end
-
-function LeaderboardList_Gamepad:InitializeDropdownFilter()
-    ZO_GamepadInteractiveSortFilterList.InitializeDropdownFilter(self)
-    
-    self:RepopulateFilterDropdown()
 end
 
 function LeaderboardList_Gamepad:InitializeSearchFilter()

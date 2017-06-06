@@ -100,9 +100,9 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
             end,
 
             visible = function()
-                if(self.mouseOverRow) then
+                if IsGroupModificationAvailable() and self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if(data.hasCharacter and data.online and not data.isLocalPlayer) then
+                    if data.hasCharacter and data.online and not data.isLocalPlayer then
                         return true
                     end
                 end
@@ -242,14 +242,16 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                     if IsChatSystemAvailableForCurrentPlatform() then
                         AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
                     end
-                    AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function() 
-                        local NOT_SENT_FROM_CHAT = false
-                        local DISPLAY_INVITED_MESSAGE = true
-                        TryGroupInviteByName(data.characterName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) 
-                    end)
+                    if IsGroupModificationAvailable() then
+                        AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function() 
+                            local NOT_SENT_FROM_CHAT = false
+                            local DISPLAY_INVITED_MESSAGE = true
+                            TryGroupInviteByName(data.characterName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) 
+                        end)
+                    end
                     AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGuildMember(data.displayName) end)
                 end
-				AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
+                AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), function() MAIL_SEND:ComposeMailTo(data.displayName) end)
 
                 if(not IsFriend(data.displayName)) then

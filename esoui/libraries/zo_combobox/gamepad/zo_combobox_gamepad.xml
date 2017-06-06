@@ -12,7 +12,7 @@
                 </Texture>
                 
                 <Label name="$(parent)SelectedItemText" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3" constrains="X"/>
                     <Anchor point="TOPLEFT"/>
                 </Label>
             </Controls>

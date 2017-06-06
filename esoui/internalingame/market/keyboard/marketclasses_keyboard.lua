@@ -4,9 +4,6 @@ ZO_MARKET_PRODUCT_BUNDLE_WIDTH = 2 * ZO_MARKET_PRODUCT_WIDTH + ZO_MARKET_PRODUCT
 ZO_MARKET_PRODUCT_HEIGHT = 200
 ZO_MARKET_PRODUCT_INSET = 20
 
---account for the fade that we add to the sides of the callout
-ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
-
 ZO_MARKET_DEFAULT_BACKGROUND_COLOR = ZO_ColorDef:New(1, 1, 1)
 ZO_MARKET_MOUSE_OVER_BACKGROUND_COLOR = ZO_ColorDef:New(.8, .8, .8)
 ZO_MARKET_PURCHASED_BACKGROUND_COLOR = ZO_ColorDef:New(.6, .6, .6)
@@ -83,6 +80,16 @@ function MarketProduct_Keyboard:Refresh()
     self.iconPool:ReleaseAllObjects()
     self.activeMarketProductIcon = nil
     ZO_MarketProductBase.Refresh(self)
+end
+
+function MarketProduct_Keyboard:RefreshAsChild()
+    -- need to release the icons before we refresh, because Show() will grab a new icon
+    self.iconPool:ReleaseAllObjects()
+    self.activeMarketProductIcon = nil
+    local productId = self:GetId()
+    if productId > 0 then
+        self:ShowAsChild(productId)
+    end
 end
 
 function MarketProduct_Keyboard:InitializeMarketProductIcon(marketProductId, purchased)

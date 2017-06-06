@@ -11,6 +11,7 @@ function ZO_IngameSceneManager:New()
     local manager = ZO_SceneManager.New(self)
 
     manager.topLevelWindows = {}
+    manager.restoresBaseSceneOnGameMenuToggle = {}
     manager.numTopLevelShown = 0
     manager.initialized = false
     manager.hudSceneName = "hud"
@@ -28,6 +29,7 @@ function ZO_IngameSceneManager:New()
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_MOUNTED_STATE_CHANGED, function() manager:OnMountStateChanged() end)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_DISPLAY_TUTORIAL, function(eventCode, ...) manager:OnTutorialStart(...) end)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() manager:OnGamepadPreferredModeChanged() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_REMOTE_TOP_LEVEL_CHANGE, function(eventId, ...) manager:ChangeRemoteTopLevel(...) end)
 
     return manager
 end
@@ -176,9 +178,6 @@ function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
 end
 
 function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
-    self:RestoreHUDScene()
-    self:RestoreHUDUIScene()   
-
     --if a scene was already shown when we change input mode, hide it
     if not self:IsShowingBaseScene() and self.currentScene and self.currentScene:IsShowing() then
         self:SetInUIMode(false)
@@ -339,7 +338,7 @@ end
 function ZO_IngameSceneManager:SetHUDScene(hudSceneName)
    local oldHudScene = self.hudSceneName
    self.hudSceneName = hudSceneName
-   if(self:IsShowing(oldHudScene)) then
+   if self:IsShowing(oldHudScene) or self:IsShowingNext(oldHudScene) then
         self:SetBaseScene(hudSceneName)
         self:Show(hudSceneName)
    end
@@ -353,7 +352,7 @@ function ZO_IngameSceneManager:SetHUDUIScene(hudUISceneName, hidesAutomatically)
     local oldHUDUIScene = self.hudUISceneName
     self.hudUISceneName = hudUISceneName
     self.hudUISceneHidesAutomatically = hidesAutomatically
-    if(self:IsShowing(oldHUDUIScene)) then
+    if self:IsShowing(oldHUDUIScene) or self:IsShowingNext(oldHUDUIScene) then
         self:SetBaseScene(hudUISceneName)
         self:Show(hudUISceneName)
     end
@@ -374,9 +373,13 @@ function ZO_IngameSceneManager:HideTopLevel(topLevel)
     if(not topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true) then
         topLevel:SetHidden(true)
         self.numTopLevelShown = self.numTopLevelShown - 1
-        if(IsGameCameraActive()) then
-            self:ConsiderExitingUIMode(self:IsShowingBaseScene() or self:IsShowingBaseSceneNext())
-        end
+        self:OnHideTopLevel()
+    end
+end
+
+function ZO_IngameSceneManager:OnHideTopLevel()
+    if IsGameCameraActive() then
+        self:ConsiderExitingUIMode(self:IsShowingBaseScene() or self:IsShowingBaseSceneNext())
     end
 end
 
@@ -384,13 +387,15 @@ function ZO_IngameSceneManager:ShowTopLevel(topLevel)
     if(topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true) then
         topLevel:SetHidden(false)
         self.numTopLevelShown = self.numTopLevelShown + 1
-        if(IsGameCameraActive()) then
-            if(not self:IsInUIMode()) then
-                self:SetInUIMode(true)
-                self:ShowBaseScene()
-            end
-        end
+        self:OnShowTopLevel()
     end    
+end
+
+function ZO_IngameSceneManager:OnShowTopLevel()
+    if IsGameCameraActive() and not self:IsInUIMode() then
+        self:SetInUIMode(true)
+        self:ShowBaseScene()
+    end
 end
 
 function ZO_IngameSceneManager:ToggleTopLevel(topLevel)
@@ -398,6 +403,16 @@ function ZO_IngameSceneManager:ToggleTopLevel(topLevel)
         self:ShowTopLevel(topLevel)
     else
         self:HideTopLevel(topLevel)
+    end
+end
+
+function ZO_IngameSceneManager:ChangeRemoteTopLevel(remoteChangeType, remoteChangeOrigin)
+    if remoteChangeOrigin == REMOTE_SCENE_STATE_CHANGE_ORIGIN_INTERNAL then
+        if remoteChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_SHOW then
+            self:OnShowTopLevel()
+        elseif remoteChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_HIDE then
+            self:OnHideTopLevel()
+        end
     end
 end
 
@@ -414,6 +429,11 @@ function ZO_IngameSceneManager:OnToggleUIModeBinding()
             if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
                 --disable housing if going to a menu, but not a from mouse mode back to crosshair
                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+            end
+            if self.currentScene:DoesSceneRestoreHUDSceneFromToggleUIMode() then
+                self:RestoreHUDScene()
+                self:RestoreHUDUIScene()
+                return
             end
             self:SetInUIMode(true)
             GetMenuObject():ShowLastCategory()
@@ -476,6 +496,12 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
+    if self.currentScene:DoesSceneRestoreHUDSceneFromToggleGameMenu() then
+        self:RestoreHUDScene()
+        self:RestoreHUDUIScene()
+        return
+    end
+
     if(IsGameCameraPreferredTargetValid()) then
         ClearGameCameraPreferredTarget()
         return
@@ -505,7 +531,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if(self:IsShowing(self.hudUISceneName) and self.hudUISceneName ~= "hudui") then
+    if(self:IsShowing(self.hudUISceneName) and not self.restoresBaseSceneOnGameMenuToggle[self.hudUISceneName]) then
         self:RestoreHUDUIScene()
         return
     end
@@ -527,14 +553,20 @@ end
 
 --Period Key Functionality
 function ZO_IngameSceneManager:OnToggleHUDUIBinding()
-    if(IsGameCameraActive()) then
-        if(self:IsInUIMode()) then
+    if IsGameCameraActive() then
+        if self:IsInUIMode() then
             self:SetInUIMode(false)
+        elseif self.hudUISceneName == self.hudSceneName then
+            self:SetInUIMode(true)
         else
             self.manuallyEnteredHUDUIMode = true
             self:Show(self.hudUISceneName)
         end
     end 
+end
+
+function ZO_IngameSceneManager:SetSceneRestoresBaseSceneOnGameMenuToggle(sceneName, doesRestore)
+    self.restoresBaseSceneOnGameMenuToggle[sceneName] = doesRestore
 end
 
 --Global API

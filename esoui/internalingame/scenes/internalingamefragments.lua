@@ -48,7 +48,7 @@ MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingRight = 950,
     dynamicFramingConsumedWidth = 1150,
     dynamicFramingConsumedHeight = 300,
-    forcePreparePreview = false,
+    forcePreparePreview = true,
 })
 RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightBackground)
 MARKET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Market)

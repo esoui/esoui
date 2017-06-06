@@ -4,7 +4,11 @@
 
 ZO_SocialOptionsDialogGamepad = ZO_Object:Subclass()
 
-function ZO_SocialOptionsDialogGamepad:Initialize()
+function ZO_SocialOptionsDialogGamepad:Initialize(control)
+    if control then
+        self.control = control
+    end
+
     self.optionTemplateGroups = {}
     self.conditionResults = {}
     self:BuildOptionsList()
@@ -173,6 +177,10 @@ function ZO_SocialOptionsDialogGamepad:BuildEditNoteOption()
     return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_EDIT_NOTE, callback)
 end
 
+function ZO_SocialOptionsDialogGamepad:ShouldAddSendMailOption()
+    return not self:SelectedDataIsPlayer()
+end
+
 function ZO_SocialOptionsDialogGamepad:BuildSendMailOption()
     local function Callback()
         if IsUnitDead("player") then
@@ -196,8 +204,13 @@ function ZO_SocialOptionsDialogGamepad:BuildWhisperOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOption()
-    return not self:SelectedDataIsPlayer() and IsUnitSoloOrGroupLeader("player")
+    return IsGroupModificationAvailable() and not self:SelectedDataIsPlayer() and IsUnitSoloOrGroupLeader("player")
 end
+
+function ZO_SocialOptionsDialogGamepad:ShouldAddInviteToGroupOptionAndIsSelectedDataLoggedIn()
+    return self:ShouldAddInviteToGroupOption() and self:SelectedDataIsLoggedIn()
+end
+
 function ZO_SocialOptionsDialogGamepad:GetInviteToGroupCallback()
     return function()
         local NOT_SENT_FROM_CHAT = false

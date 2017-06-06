@@ -858,10 +858,10 @@ function PlayerProgressBar:OnComplete()
 end
 
 function PlayerProgressBar:OnDoneShowing()
-    if(CENTER_SCREEN_ANNOUNCE:DoesNextEventHaveBarType(self.barType)) then
+    if(CENTER_SCREEN_ANNOUNCE:DoesNextMessageHaveBarType(self.barType)) then
         self:SetBarMode(PPB_MODE_WAITING_FOR_INCREASE)
         self:OnComplete()
-    elseif(not CENTER_SCREEN_ANNOUNCE:DoesNextEventHaveBar() and self.baseType == self.barType) then
+    elseif(not CENTER_SCREEN_ANNOUNCE:DoesNextMessageHaveBarParams() and self.baseType == self.barType) then
         self:SetBarMode(PPB_MODE_CURRENT)
         self:RefreshCurrentBar()
         self:OnComplete()
@@ -906,7 +906,7 @@ function PlayerProgressBar:OnFadeOutComplete()
     self:SetBarState(PPB_STATE_HIDDEN)
     self.control:SetHidden(true)
 
-    local nextAnnouncementHasBar = CENTER_SCREEN_ANNOUNCE:DoesNextEventHaveBar()
+    local nextAnnouncementHasBar = CENTER_SCREEN_ANNOUNCE:DoesNextMessageHaveBarParams()
 
     if(oldBarMode == PPB_MODE_INCREASE) then
         self:OnComplete()

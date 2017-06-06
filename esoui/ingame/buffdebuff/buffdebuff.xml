@@ -1,0 +1,128 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_BuffDebuffIcon_BlinkAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.5" />
+                <AlphaAnimation delay="500" duration="500" startAlpha="0.5" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Animations>
+        <AnimationTimeline name="ZO_BuffDebuff_FadeAnimation">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0.0" endAlpha="1.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_BuffDebuffIcon_Keyboard_Template" virtual="true">
+            <Dimensions x="ZO_BUFF_DEBUFF_FRAME_DIMENSIONS_KEYBOARD" y="ZO_BUFF_DEBUFF_FRAME_DIMENSIONS_KEYBOARD" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame_buff.dds">
+                    <TextureCoords left="0.1875" right="0.8125" top="0.1875" bottom="0.8125" />
+                    <Controls>
+                        <Texture name="$(parent)BG" textureFile="EsoUI/Art/ActionBar/abilityInset.dds" />
+                    </Controls>
+                </Texture>
+                
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="ZO_BUFF_DEBUFF_ICON_DIMENSIONS_KEYBOARD" y="ZO_BUFF_DEBUFF_ICON_DIMENSIONS_KEYBOARD" />
+                </Texture>
+
+                <Label name="$(parent)Stacks" font="ZoFontWinT2" />
+
+                <Label name="$(parent)Duration" font="ZoFontWinT2" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BuffDebuffIcon_Gamepad_Template" virtual="true">
+            <Dimensions x="ZO_BUFF_DEBUFF_FRAME_DIMENSIONS_GAMEPAD" y="ZO_BUFF_DEBUFF_FRAME_DIMENSIONS_GAMEPAD" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_buff.dds">
+                    <TextureCoords left="0.1094" right="0.8906" top="0.1094" bottom="0.8906" />
+                    <Controls>
+                        <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="ZO_BUFF_DEBUFF_ICON_DIMENSIONS_GAMEPAD" y="ZO_BUFF_DEBUFF_ICON_DIMENSIONS_GAMEPAD" />
+                </Texture>
+
+                <Label name="$(parent)Stacks" font="ZoFontGamepadBold20" />
+
+                <Label name="$(parent)Duration" font="ZoFontGamepadBold20" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_BuffDebuffIcon" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_BuffDebuffIcon_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                ZO_BuffDebuffIcon_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_BuffDebuffIcon_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <Controls>
+                <Texture name="$(parent)Frame" level="1">
+                    <AnchorFill />
+
+                    <Controls>
+                        <Texture name="$(parent)BG" level="0">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Cooldown name="$(parent)Cooldown" inherits="ZO_DefaultCooldown" alpha="0.5" />
+
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" level="2">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)Stacks" font="ZoFontGameOutline" horizontalAlignment="RIGHT">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                    <Dimensions y="18" />
+                </Label>
+
+                <Label name="$(parent)Duration" font="ZoFontGameOutline" horizontalAlignment="CENTER" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Frame" relativePoint="BOTTOMRIGHT" />
+                    <Dimensions y="18"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BuffDebuffContainerTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container1" resizeToFitDescendents="true" />
+
+                <Control name="$(parent)Container2" resizeToFitDescendents="true" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_BuffDebuffTopLevel">
+            <OnInitialized>
+                ZO_BuffDebuff_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)SelfContainer" inherits="ZO_BuffDebuffContainerTemplate">
+                    <Anchor point="CENTER" relativeTo="ZO_PlayerAttribute" relativePoint="TOP" offsetY="-40"/>
+                </Control>
+
+                <!-- This will get anchored by lua later, since the target frame doesn't get loaded until OnAddonLoaded -->
+                <Control name="$(parent)TargetContainer" inherits="ZO_BuffDebuffContainerTemplate"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

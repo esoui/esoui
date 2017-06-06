@@ -10,7 +10,7 @@ ZO_PREGAME_CHARACTER_COUNT = 0
 ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY = false
 ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
 ZO_PREGAME_HAD_GLOBAL_ERROR = false
-ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = false
+ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
 ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
 
 local QUEUE_VIDEO = false
@@ -23,17 +23,6 @@ local loadingUpdates = false
 function Pregame_ShowScene(sceneName)
     SCENE_MANAGER:Show(sceneName)
     ZO_Dialogs_ReleaseAllDialogsExcept("HANDLE_ERROR", "HANDLE_ERROR_WITH_HELP")
-end
-
-function PregameStateManager_UpdateRealmName()
-    local worldName = GetWorldName()
-
-    if worldName == "" then
-        worldName = "Unknown Realm"
-    end
-
-    -- Not permanently removed, I think we'll want this info...just waiting for Marc to understand that...
-    -- ZO_CharacterSelectRealmName:SetText(worldName)
 end
 
 function AttemptQuickLaunch()
@@ -51,6 +40,26 @@ function AttemptToFireCharacterConstructionReady()
     if not ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY and IsPregameCharacterConstructionReady() and ZO_PREGAME_CHARACTER_LIST_RECEIVED then
         ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY = true
         CALLBACK_MANAGER:FireCallbacks("OnCharacterConstructionReady")
+    end
+end
+
+local AttemptToPlayIntroCinematic
+do
+    local OPENING_CINEMATIC =
+    {
+        [CHAPTER_BASE_GAME] = "Video/Opening_Cinematic_$(officialLanguage).bik",
+        [CHAPTER_VOLCANO] = "Video/Morrowind_Opener_$(officialLanguage).bik",
+    }
+
+    function AttemptToPlayIntroCinematic()
+        SetVideoCancelAllOnCancelAny(true)
+        local highestUnlockedChapter = GetHighestUnlockedChapter()
+        local videoPath = OPENING_CINEMATIC[highestUnlockedChapter]
+        if videoPath then
+            ZO_PlayVideoAndAdvance(videoPath, QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
+        else
+            ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(officialLanguage).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
+        end
     end
 end
 
@@ -75,9 +84,8 @@ local PregameStates =
 
         OnEnter = function()
             if not ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING then
+                AttemptToPlayIntroCinematic()
                 ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = true
-                SetVideoCancelAllOnCancelAny(true)
-                ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(officialLanguage).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
                 if IsInGamepadPreferredMode() then
                     --Stops extra button presses from modifying the options scene, like restoring options defaults or logging out
                     GAMEPAD_OPTIONS:SetGamepadOptionsInputBlocked(true);
@@ -105,42 +113,66 @@ local PregameStates =
         OnExit = function()
         end
     },
-    
-    ["CharacterCreate_PlayIntro"] =
+
+    ["PlayChapterOpeningCinematic"] =
     {
         ShouldAdvance = function()
             return false
         end,
 
         OnEnter = function()
-            SetVideoCancelAllOnCancelAny(true)
-            ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(officialLanguage).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
-            ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = true
-            ZO_CharacterCreate_PrepareFadeFromMovie()
+            AttemptToPlayIntroCinematic()
+            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = true
             SCENE_MANAGER:ShowBaseScene()
         end,
 
         GetStateTransitionData = function()
-            return "CharacterCreate_FromIntro"
+            return "WaitForGameDataLoaded"
         end,
 
         OnExit = function()
-            if(ZO_PREGAME_HAD_GLOBAL_ERROR) then
-                ZO_CharacterCreate_AbortMovieFade()
-            else
-                ZO_CharacterCreate_FadeFromMovie()
-            end
         end,
     },
 
-    ["CharacterCreate_FromIntro"] =
+    ["WaitForGameDataLoaded"] =
     {
-        OnEnter = function(allowAnimation)
-            -- Empty state, allow the completion of the movie transition or loading to reset the character creation state.
+        ShouldAdvance = function()
+            local loaded, total = GetDataLoadStatus()
+            return loaded == total
+        end,
+
+        OnEnter = function()
+            SuppressWorldList()
+            RegisterForLoadingUpdates()
+            -- Make sure we aren't showing a scene here if we
+            -- didn't show the cinematic before switching to this scene
+            SCENE_MANAGER:ShowBaseScene()
+        end,
+        
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "ChapterUpgradeInterstitial"
+        end
+    },
+
+    ["CharacterCreateFadeIn"] = 
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            ZO_CharacterCreate_FadeIn()
+        end,
+
+        GetStateTransitionData = function()
+            return "CharacterCreate"
         end,
 
         OnExit = function()
-        end
+        end,
     },
 
     ["CharacterCreate"] =
@@ -182,6 +214,71 @@ local PregameStates =
             ZO_Dialogs_ReleaseDialog("CHARACTER_CREATE_CREATING")
             SetCharacterCameraZoomAmount(-1) -- zoom all the way out when leaving this state
         end
+    },
+
+    ["ChapterUpgrade"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            if IsConsoleUI() then
+                Pregame_ShowScene("chapterUpgradeGamepad")
+            else
+                Pregame_ShowScene("chapterUpgradeKeyboard")
+            end
+        end,
+        
+        GetStateTransitionData = function()
+            return "CharacterSelect"
+        end,
+
+        OnExit = function()
+        end,
+    },
+
+    ["ChapterUpgradeInterstitial"] =
+    {
+        ShouldAdvance = function()
+            return not ZO_ChapterUpgrade_ShouldShow()
+        end,
+
+        OnEnter = function()
+            if IsConsoleUI() then
+                Pregame_ShowScene("chapterUpgradeGamepad")
+            else
+                Pregame_ShowScene("chapterUpgradeKeyboard")
+            end
+        end,
+        
+        GetStateTransitionData = function()
+            return "WaitForCharacterDataLoaded"
+        end,
+
+        OnExit = function()
+        end,
+    },
+
+    ["WaitForCharacterDataLoaded"] =
+    {
+        ShouldAdvance = function()
+            return IsPregameCharacterConstructionReady()
+        end,
+
+        OnEnter = function()
+        end,
+
+        GetStateTransitionData = function()
+            if ZO_PREGAME_CHARACTER_COUNT > 0 then
+                return "CharacterSelect"
+            else
+                return "CharacterCreateFadeIn"
+            end
+        end,
+
+        OnExit = function()
+        end,
     },
 
     ["BeginLoadingIntoWorld"] =
@@ -268,13 +365,12 @@ local PregameStates =
         OnEnter = function()
             -- If you haven't played the videos, you can't skip them until they finish...
             local skipMode
-            
-            if(IsConsoleUI()) then
+            if IsConsoleUI() then
                 skipMode = VIDEO_SKIP_MODE_ALLOW_SKIP
             else
                 skipMode = ZO_Pregame_MustPlayVideos() and VIDEO_SKIP_MODE_NO_SKIP or VIDEO_SKIP_MODE_ALLOW_SKIP
             end
-            
+
             -- TODO: Determine if these videos need localization or subtitles...
             SetVideoCancelAllOnCancelAny(false)
 
@@ -423,7 +519,7 @@ end
 
 -- this will only advance the state if we are currently in the state passed in
 function PregameStateManager_AdvanceStateFromState(state)
-    if(currentState == state) then
+    if currentState == state then
         PregameStateManager_AdvanceState()
     end
 end
@@ -438,11 +534,30 @@ end
 
 local function OnCharacterListReceived(eventCode, characterCount, maxCharacters, mostRecentlyPlayedCharacterId)
     ZO_PREGAME_CHARACTER_LIST_RECEIVED = true
-    local previousCharacterCount = ZO_PREGAME_CHARACTER_COUNT or 0
     ZO_PREGAME_CHARACTER_COUNT = characterCount
 
-    -- This causes other systems to figure out what state to drop in to
-    CALLBACK_MANAGER:FireCallbacks("PregameCharacterListReceived", characterCount, previousCharacterCount)
+    local highestUnlockedChapter = GetHighestUnlockedChapter()
+    local highestSeenOpening = tonumber(GetCVar("HighestChapterOpeningCinematicSeen"))
+
+    if highestUnlockedChapter > highestSeenOpening then
+        SetCVar("HighestChapterOpeningCinematicSeen", highestUnlockedChapter)
+        ZO_SavePlayerConsoleProfile()
+        -- Play intro movie
+        PregameStateManager_SetState("PlayChapterOpeningCinematic")
+    else
+        -- Go to character create/select as necessary after we have our data
+        -- If we are already at CharacterSelect when we get the character list, then we don't need to move
+        -- This could happen when we rename or delete a character
+        if PregameStateManager_GetCurrentState() ~= "CharacterSelect" then
+            PregameStateManager_SetState("WaitForGameDataLoaded")
+        elseif characterCount == 0 then
+            -- However, if we delete our last character then we need to switch to CharacterCreate
+            -- so we can create a new character. We also want to avoid CharacterCreateFadeIn since
+            -- that won't transition very nicely between CharacterSelect and CharacterCreate
+            -- We are also assuming here that we already have character data since we were at character select
+            PregameStateManager_SetState("CharacterCreate")
+        end
+    end
 
     -- if this hasn't been fired yet, then fire it (could have been a reload or coming from in-game)
     AttemptToFireCharacterConstructionReady()
@@ -471,8 +586,8 @@ local function OnAreaLoadStarted()
     ZO_Dialogs_ReleaseAllDialogs(true)
 end
 
-function IsInCharacterCreateIntroState()
-    return PregameStateManager_GetCurrentState() == "CharacterCreate_PlayIntro"
+function IsPlayingChapterOpeningCinematic()
+    return PregameStateManager_GetCurrentState() == "PlayChapterOpeningCinematic"
 end
 
 function IsInCharacterSelectCinematicState()
@@ -491,9 +606,9 @@ function PregameIsFullyLoaded()
     return GetNumLoadedSubsystems() == GetNumTotalSubsystemsToLoad()
 end
 
-function AttemptToAdvancePastCharacterCreateIntro()
-    if(IsInCharacterCreateIntroState()) then
-        if(PregameIsFullyLoaded() and ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING == false) then
+function AttemptToAdvancePastChapterOpeningCinematic()
+    if IsPlayingChapterOpeningCinematic() then
+        if PregameIsFullyLoaded() and ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING == false then
             PregameStateManager_AdvanceState()
         end
     end
@@ -508,13 +623,20 @@ function AttemptToAdvancePastCharacterSelectCinematic()
 end
 
 local function OnSubsystemLoadComplete(eventId, subSystem)
-    if(subSystem == LOADING_SYSTEM_GAME_DATA or subSystem == LOADING_SYSTEM_SHARED_CHARACTER_OBJECT) then
+    if subSystem == LOADING_SYSTEM_GAME_DATA or subSystem == LOADING_SYSTEM_SHARED_CHARACTER_OBJECT then
         AttemptToFireCharacterConstructionReady()
+        -- LOADING_SYSTEM_GAME_DATA loads before LOADING_SYSTEM_SHARED_CHARACTER_OBJECT so if we hit either
+        -- of those then the game data is loaded
+        if subSystem == LOADING_SYSTEM_GAME_DATA then
+            PregameStateManager_AdvanceStateFromState("WaitForGameDataLoaded")
+        elseif subSystem == LOADING_SYSTEM_SHARED_CHARACTER_OBJECT then
+            PregameStateManager_AdvanceStateFromState("WaitForCharacterDataLoaded")
+        end
     end
 
-    if(PregameIsFullyLoaded()) then
-        if(IsInCharacterCreateIntroState()) then
-            AttemptToAdvancePastCharacterCreateIntro()
+    if PregameIsFullyLoaded() then
+        if IsPlayingChapterOpeningCinematic() then
+            AttemptToAdvancePastChapterOpeningCinematic()
         end
 
         CALLBACK_MANAGER:FireCallbacks("PregameFullyLoaded")

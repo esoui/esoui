@@ -92,12 +92,14 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     local marketProductId = data.marketProductId
     local presentationIndex = data.presentationIndex
     local name, description, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
+    local productQuality = GetMarketProductQuality(marketProductId)
 
     -- set this up for the MARKET_PURCHASING dialog
-    data.itemName = ZO_DEFAULT_ENABLED_COLOR:Colorize(name)
+    local color = GetItemQualityColor(productQuality)
+    data.itemName = color:Colorize(name)
     data.hasItems = GetMarketProductNumItems(marketProductId) > 0 -- TODO: Consider consumable specific check
 
-    dialog:GetNamedChild("ItemContainerItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name))
+    dialog:GetNamedChild("ItemContainerItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
 
     local iconTextureControl = dialog:GetNamedChild("ItemContainerIcon")
     iconTextureControl:SetTexture(icon)

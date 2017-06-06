@@ -18,8 +18,8 @@ EsoUI\Pregame\Tooltip\Tooltip.xml
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\PregameAnimatedBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\PregameAnimatedBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\MorrowindBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\MorrowindBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml
@@ -145,6 +145,13 @@ EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.xml
 
 EsoUI\Pregame\RzChroma\PregameRzChroma_Manager.lua
 EsoUI\Pregame\RzChroma\PregameRzChroma_Effects.lua
+
+EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Shared.lua
+EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Shared.xml
+EsoUI\Pregame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua
+EsoUI\Pregame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.xml
+EsoUI\Pregame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.lua
+EsoUI\Pregame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.xml
 
 EsoUI\Pregame\Scenes\PregameFragments.lua
 EsoUI\Pregame\Scenes\Console\PregameFragments_Console.lua

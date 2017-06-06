@@ -5,9 +5,9 @@ ZO_LOGIN_EDITBOX_WIDTH = 500
 ZO_LoginBase_Keyboard = ZO_Object:Subclass()
 
 local DMM_LOGIN_LOGO_DATA = {
-    leftSideTexturePath = "EsoUI/Art/Login/jp_login_logo_left.dds",
+    leftSideTexturePath = "EsoUI/Art/Login/jp_login_logoMorrowind_left.dds",
     leftSideWidth = 512,
-    rightSideTexturePath = "EsoUI/Art/Login/jp_login_logo_right.dds",
+    rightSideTexturePath = "EsoUI/Art/Login/jp_login_logoMorrowind_right.dds",
     rightSideWidth = 256,
     height = 256,       -- Left and right logos share the same height
 }

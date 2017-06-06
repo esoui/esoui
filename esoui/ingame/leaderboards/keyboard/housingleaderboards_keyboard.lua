@@ -28,7 +28,7 @@ end
 
 function ZO_HousingLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo()
     local displayedScore = self.currentScoreData or GetString(SI_LEADERBOARDS_NO_SCORE_RECORDED)
-    self.currentScoreLabel:SetText(zo_strformat(SI_HOUSING_LEADERBOARDS_BEST_SCORE, displayedScore))
+    self.currentScoreLabel:SetText(zo_strformat(SI_LEADERBOARDS_BEST_SCORE, displayedScore))
 
     local rankingTypeText = GetString("SI_LEADERBOARDTYPE", LEADERBOARD_LIST_MANAGER.leaderboardRankType)
     local displayedRank = self.currentRankData or GetString(SI_LEADERBOARDS_NOT_RANKED)

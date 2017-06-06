@@ -38,7 +38,7 @@
             </OnMouseExit>
 
             <Controls>
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/MapPins/UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
+                <Texture name="$(parent)Highlight" textureFile="$(MAP_PIN_PATH)UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
                     <AnchorFill />
                 </Texture>
 

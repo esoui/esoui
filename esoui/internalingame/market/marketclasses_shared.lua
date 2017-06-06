@@ -21,6 +21,9 @@ ZO_MARKET_PRODUCT_NOT_PURCHASED_DESATURATION = 0
 ZO_FEATURED_PRESENTATION_INDEX = nil
 ZO_INVALID_PRESENTATION_INDEX = -1
 
+--account for the fade that we add to the sides of the callout
+ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
+
 do
     local function GetTextColor(enabled, normalColor, disabledColor)
         if enabled then
@@ -182,7 +185,15 @@ function ZO_MarketProductBase:IsPurchaseLocked()
 end
 
 function ZO_MarketProductBase:CanBePurchased()
-    return not (self:IsPurchaseLocked() or self:IsHouseCollectible())
+    return not (self:IsPurchaseLocked() or self:IsHouseCollectible() or self:IsPromo())
+end
+
+function ZO_MarketProductBase:IsBundle()
+    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
+end
+
+function ZO_MarketProductBase:IsPromo()
+    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_PROMO
 end
 
 function ZO_MarketProductBase:IsHouseCollectible()
@@ -240,10 +251,13 @@ do
 
         local canBePurchased = self:CanBePurchased()
         local isHouseCollectible = self:IsHouseCollectible()
+        local isPromo = self:IsPromo()
+        local showCallouts = canBePurchased or isPromo or (isHouseCollectible and self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED)
 
         -- setup the callouts for new, on sale, and LTO
-        if canBePurchased or (isHouseCollectible and self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED) then
-            local onSale = discountPercent > 0 and not isHouseCollectible
+        if showCallouts then
+            -- house colelctibles and promos don't show onSale
+            local onSale = discountPercent > 0 and not (isHouseCollectible or isPromo)
 
             local calloutUpdateHandler
             -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
@@ -294,7 +308,9 @@ do
             self.purchaseLabelControl:SetHidden(not isFree)
             self.cost:SetHidden(isFree)
         else
-            if self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED and isHouseCollectible then
+            if isPromo then
+                self.purchaseLabelControl:SetText("")
+            elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED and isHouseCollectible then
                 self.purchaseLabelControl:SetText(GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT))
             elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
                 local errorStringId = GetMarketProductCompleteErrorStringId(self.marketProductId)
@@ -319,7 +335,7 @@ do
         local showingPurchaseLabel = not self.purchaseLabelControl:IsControlHidden()
 
         if showingPurchaseLabel then
-            self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
+            self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
         elseif self.onSale then
             self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
             self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, self.textCalloutYOffset) -- x offset to account for strikethrough
@@ -470,10 +486,6 @@ end
 
 function ZO_MarketProductBase:PerformLayout(name, description, icon, background, isNew, isFeatured)
     -- to be overridden
-end
-
-function ZO_MarketProductBase:IsBundle()
-    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
 end
 
 function ZO_MarketProductBase:IsBlank()

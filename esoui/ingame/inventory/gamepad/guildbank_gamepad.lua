@@ -142,7 +142,8 @@ function ZO_GuildBank_Gamepad:Initialize(control)
     GAMEPAD_GUILD_BANK_SCENE = ZO_InteractScene:New(GAMEPAD_GUILD_BANK_SCENE_NAME, SCENE_MANAGER, GUILD_BANKING_INTERACTION)
     ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_GUILD_BANK_SCENE)
 
-    self:SetBankedBag(BAG_GUILDBANK)
+    self:ClearBankedBags()
+    self:AddBankedBag(BAG_GUILDBANK)
     self:SetCarriedBag(BAG_BACKPACK)
 
     local function OnOpenGuildBank()
@@ -369,7 +370,7 @@ do
         end
 
         local SETUP_LIST_LOCALLY = true
-        local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadGuildBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBag, SLOT_TYPE_GUILD_BANK_ITEM, OnSelectedDataCallback, nil, nil, nil, nil, nil, ZO_SharedGamepadEntry_OnSetup)
+        local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadGuildBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBags, SLOT_TYPE_GUILD_BANK_ITEM, OnSelectedDataCallback, nil, nil, nil, nil, nil, ZO_SharedGamepadEntry_OnSetup)
         self:SetWithdrawList(withdrawList)
 
         local depositList = self:AddList("deposit", SETUP_LIST_LOCALLY, ZO_GamepadGuildBankInventoryList, BANKING_GAMEPAD_MODE_DEPOSIT, self.carriedBag, SLOT_TYPE_ITEM, OnSelectedDataCallback, nil, nil, nil, nil, nil, ZO_SharedGamepadEntry_OnSetup)

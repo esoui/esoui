@@ -62,7 +62,7 @@ function ZO_SceneGraph:AddCameraZ(z)
 end
 
 function ZO_SceneGraph:SetCameraZ(z)
-    if self.cameraNode ~= z then
+    if self.cameraZ ~= z then
         self.cameraZ = z
         self.cameraNode:SetDirty(true)
     end

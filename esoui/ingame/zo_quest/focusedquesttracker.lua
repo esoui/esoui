@@ -6,12 +6,18 @@ GAMEPAD_FQT_ANIMATION_FADE_OUT_MS = 2000
 ZO_FocusedQuestTracker = ZO_Tracker:Subclass()
 
 function ZO_FocusedQuestTracker:New(...)
-    local tracker = ZO_Tracker.New(self, ...)
-    tracker:InitializeFadeAnimations()
-    tracker:RegisterCallbacks()
-    tracker:ApplyPlatformStyle()
-    FOCUSED_QUEST_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(tracker.trackerPanel:GetNamedChild("Container"))
-    return tracker
+    return ZO_Tracker.New(self, ...)
+end
+
+function ZO_FocusedQuestTracker:Initialize(...)
+    ZO_Tracker.Initialize(self, ...)
+
+    self:InitializeFadeAnimations()
+    self:RegisterCallbacks()
+    self:ApplyPlatformStyle()
+
+    FOCUSED_QUEST_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(self.trackerPanel:GetNamedChild("Container"))
+    FOCUSED_QUEST_TRACKER_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState) self:FireCallbacks("QuestTrackerFragmentStateChange", oldState, newState) end)
 end
 
 function ZO_FocusedQuestTracker:RegisterCallbacks()

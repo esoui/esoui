@@ -9,6 +9,7 @@ function ZO_GamepadEnchanting:Initialize(control)
     self.containerControl = control:GetNamedChild("Container")
 
     self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.containerControl:GetNamedChild("Mode"))
+    self.modeList:SetAlignToScreenCenter(true)
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
     self:InitializeModes()
 
@@ -38,17 +39,17 @@ function ZO_GamepadEnchanting:InitializeModes()
     self.modeList:Clear()
     local data = ZO_GamepadEntryData:New(GetString(SI_ENCHANTING_CREATION), "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
     data.mode = ENCHANTING_MODE_CREATION
-    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data, nil, 0, nil, 0)
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
     
     data = ZO_GamepadEntryData:New(GetString(SI_ENCHANTING_EXTRACTION), "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_deconstruct.dds")
     data.mode = ENCHANTING_MODE_EXTRACTION
-    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data, nil, 0, nil, 0)
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
 
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ENCHANTING)
     local recipeCraftingSystemName = GetString("SI_RECIPECRAFTINGSYSTEM", recipeCraftingSystem)
     data = ZO_GamepadEntryData:New(recipeCraftingSystemName, GetGamepadRecipeCraftingSystemMenuTextures(CRAFTING_TYPE_ENCHANTING))
     data.mode = ENCHANTING_MODE_RECIPES
-    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data, nil, 0, nil, 0)
+    self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
 
     self.modeList:Commit()
 end
