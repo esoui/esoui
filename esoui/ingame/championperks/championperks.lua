@@ -571,6 +571,7 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
                         else
                             selectedStar:StartRemovingPoints()
                         end
+                        return true
                     end
                 end
                 return false
@@ -599,8 +600,10 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
                         else
                             selectedStar:StartAddingPoints()
                         end
+                        return true
                     end
                 end
+                return false
             end,
         },
         {

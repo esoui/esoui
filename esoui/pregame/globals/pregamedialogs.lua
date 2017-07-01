@@ -473,7 +473,7 @@ ESO_Dialogs["BAD_LOGIN"] =
         [1] =
         {
             text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
-            keybind = "DIALOG_HELP",
+            keybind = "DIALOG_TERTIARY",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.accountPageURL)
@@ -508,7 +508,7 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
         [1] =
         {
             text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
-            keybind = "DIALOG_HELP",
+            keybind = "DIALOG_TERTIARY",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.accountPageURL)
@@ -590,7 +590,7 @@ ESO_Dialogs["HANDLE_ERROR_WITH_HELP"] =
         [1] =
         {
             text = SI_ERROR_DIALOG_HELP,
-            keybind = "DIALOG_HELP",
+            keybind = "DIALOG_TERTIARY",
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.url)
                         end,

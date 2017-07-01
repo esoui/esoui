@@ -46,13 +46,25 @@ function DialogKeybindStripDescriptor:Initialize()
             return true
         end
     end
+
+    self.name = function()
+        if self.buttonText then
+            if type(self.buttonText) == "function" then
+                return self.buttonText(self.dialog)
+            elseif type(self.buttonText) == "number" then
+                return GetString(self.buttonText)
+            else
+                return self.buttonText
+            end
+        end
+    end
     self:Reset()
 end
 
 function DialogKeybindStripDescriptor:Reset()
     self.buttonVisible = nil
     self.buttonCallback = nil
-    self.name = nil
+    self.buttonText = nil
     self.dialog = nil
     self.keybind = nil
     self.sound = nil
@@ -73,20 +85,16 @@ function DialogKeybindStripDescriptor:SetButtonCallback(buttonCallback)
     self.buttonCallback = buttonCallback
 end
 
--- keybinds expect text to be under 'name' and already looked up.
-function DialogKeybindStripDescriptor:SetText(text)
-    self.name = text
-    if(type(self.name) == "number") then
-        self.name = GetString(self.name)
-    end
-end
-
 function DialogKeybindStripDescriptor:SetDialog(dialog)
     self.dialog = dialog
 end
 
 function DialogKeybindStripDescriptor:SetVisible(visible)
     self.buttonVisible = visible
+end
+
+function DialogKeybindStripDescriptor:SetText(text)
+    self.buttonText = text
 end
 
 function DialogKeybindStripDescriptor:SetEthereal(ethereal)
@@ -158,7 +166,13 @@ local function TryRefreshKeybind(dialog, keybindDesc, buttonData, twoOrMoreButto
     if(dialog.textParams ~= nil and dialog.textParams.buttonKeybindOverrides ~= nil and dialog.textParams.buttonKeybindOverrides[index] ~= nil) then
         keybindDesc:SetKeybind(dialog.textParams.buttonKeybindOverrides[index], index)
     else
-        keybindDesc:SetKeybind(buttonData.keybind, index)
+        local keybind
+        if IsInGamepadPreferredMode() and buttonData.gamepadPreferredKeybind then
+            keybind = buttonData.gamepadPreferredKeybind
+        else
+            keybind = buttonData.keybind
+        end
+        keybindDesc:SetKeybind(keybind, index)
     end
 
     keybindDesc:SetDialog(dialog)

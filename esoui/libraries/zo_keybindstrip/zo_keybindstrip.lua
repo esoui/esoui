@@ -859,8 +859,21 @@ do
             else
                 button.keyLabel:SetHidden(false)
             end
-            local keybind = keybindButtonDescriptor.keybind or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonGroupDescriptor.keybindButtonGroupDescriptor.keybind
+
+            local keybind = keybindButtonDescriptor.keybind
+            local gamepadPreferredKeybind = keybindButtonDescriptor.gamepadPreferredKeybind
+            local keybindButtonGroupDescriptor = keybindButtonDescriptor.keybindButtonGroupDescriptor
             
+            if keybindButtonGroupDescriptor then
+                if not keybind then
+                    keybind = keybindButtonGroupDescriptor.keybind
+                end
+
+                if not gamepadPreferredKeybind then
+                    gamepadPreferredKeybind = keybindButtonGroupDescriptor.gamepadPreferredKeybind
+                end
+            end
+
             local buttonKeybindChanging = button:GetKeybind() ~= keybind
             local suppressUpdate = (updateOnly and isVisible == wasVisible)
             -- updateOnly is used only when we are trying to update keybinds from UpdateKeybindButton so we know that this setup is coming from an update
@@ -868,7 +881,8 @@ do
             local alwaysPreferGamepadMode = self:SetupButtonStyle(button, self.styleInfo)
 
             if not suppressUpdate or buttonKeybindChanging then
-                button:SetKeybind(keybind, nil, nil, alwaysPreferGamepadMode)
+                local DEFAULT_SHOW_UNBOUND = nil
+                button:SetKeybind(keybind, DEFAULT_SHOW_UNBOUND, gamepadPreferredKeybind, alwaysPreferGamepadMode)
             end
 
             local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")

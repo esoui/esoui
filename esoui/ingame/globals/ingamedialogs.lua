@@ -3378,3 +3378,56 @@ ESO_Dialogs["CONFIRM_LEAVE_BATTLEGROUND"] =
         }
     }
 }
+
+ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = function(dialog)
+            return dialog.data.dialogTitle
+        end,
+    },
+    mainText = 
+    {
+        text = function(dialog)
+            return ZO_PlayerToPlayer_GetIncomingEntryDisplayText(dialog.data)
+        end,
+    },
+    buttons =
+    {
+        {
+            keybind = "DIALOG_TERTIARY",
+            gamepadPreferredKeybind = "DIALOG_PRIMARY",
+            text = function(dialog)
+                local dialogData = dialog.data
+                return dialogData.acceptText or GetString(SI_DIALOG_ACCEPT)
+            end,
+            callback = function(dialog)
+                PLAYER_TO_PLAYER:Accept(dialog.data)
+            end,
+        },
+        {
+            keybind = "DIALOG_RESET",
+            gamepadPreferredKeybind = "DIALOG_NEGATIVE",
+            text = function(dialog)
+                local dialogData = dialog.data
+                return dialogData.declineText or GetString(SI_DIALOG_DECLINE)
+            end,
+            callback = function(dialog)
+                PLAYER_TO_PLAYER:Decline(dialog.data)
+            end,
+        }
+    },
+    updateFn = function(dialog)
+        ZO_Dialogs_RefreshDialogText("PTP_TIMED_RESPONSE_PROMPT", dialog)
+        local dialogData = dialog.data
+        if dialogData.expirationCallback and GetFrameTimeSeconds() > dialogData.expiresAtS then
+            dialogData.expirationCallback()
+        end
+    end,
+}

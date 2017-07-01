@@ -286,29 +286,12 @@ function ZO_CharacterSelect_Initialize(self)
 
     local function OnPregameFullyLoaded()
         if ZO_CharacterSelect_CanShowAdditionalSlotsInfo() then
-            local label = ZO_CharacterSelectExtraCharacterSlots
-            local labelHeight = label:GetHeight()
-            label:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining()))
-            
-            -- The label won't update automatically, but we need to recommit the scroll list once it does to ensure that all characters in the
-            -- list can be selected.
-            local oldUpdateFn = label:GetHandler("OnUpdate")
-            label:SetHandler("OnUpdate", function(...)
-                    if oldUpdateFn then
-                        oldUpdateFn(...)
-                    end
-
-                    if label:GetHeight() ~= labelHeight then
-                        -- Recommit and recenter scroll list
-                        ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
-                        local characterData = ZO_CharacterSelect_GetBestSelectionData()
-                        if characterData then
-                            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
-                        end
-
-                        label:SetHandler("OnUpdate", oldUpdateFn)
-                    end
-                end)
+            ZO_CharacterSelectExtraCharacterSlots:SetHidden(false)
+            ZO_CharacterSelectExtraCharacterSlots:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining()))
+            ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 10)
+        else
+            ZO_CharacterSelectExtraCharacterSlots:SetHidden(true)
+            ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 31)
         end
         
         if HasCurrentChapter() then

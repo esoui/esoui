@@ -110,14 +110,14 @@
             <Action name="DIALOG_SECONDARY">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
+            <Action name="DIALOG_TERTIARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
             <Action name="DIALOG_NEGATIVE">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
             <Action name="DIALOG_CLOSE">
                 <Down>ZO_Dialogs_CloseKeybindPressed()</Down>
-            </Action>
-            <Action name="DIALOG_HELP">
-                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
             <Action name="DIALOG_RESET">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>

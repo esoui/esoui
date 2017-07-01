@@ -127,13 +127,10 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-300" offsetY="120" />
                 </Control>
 
-                <Label name="$(parent)CharacterSlots" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOP" offsetY="31"/>
-                </Label>
+                <Label name="$(parent)CharacterSlots" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
 
                 <Label name="$(parent)ExtraCharacterSlots" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Dimensions x="350" />
-                    <Anchor point="TOP" relativeTo="$(parent)CharacterSlots" relativePoint="BOTTOM" offsetY="10" />
                 </Label>
 
                 <Control name="$(parent)ScrollList" inherits="ZO_ScrollList">

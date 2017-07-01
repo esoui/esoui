@@ -142,17 +142,11 @@ local function GetCampaignQueueData(campaignId, isGroup)
             campaignName = campaignName,
             messageFormat = isGroup and SI_NOTIFICATION_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_NOTIFICATION_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL,
             messageParams = { campaignName },
-            expiresAt = GetFrameTimeSeconds() + remainingSeconds,
+            expiresAtS = GetFrameTimeSeconds() + remainingSeconds,
+            dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CAMPAIGN_QUEUE),
         }
 
     return campaignData
-end
-
-local function ScriptedWorldEventUpdateFunction(data, isActive)
-    if isActive and data.messageParams and data.timeParam and type(data.timeParam) == "number" and #data.messageParams >= data.timeParam then
-        local timeLeftMS = GetScriptedEventInviteTimeRemainingMS(data.eventId)
-        data.messageParams[data.timeParam] = ZO_SELECTED_TEXT:Colorize(ZO_FormatTimeMilliseconds(timeLeftMS, TIME_FORMAT_STYLE_DESCRIPTIVE))
-    end
 end
 
 function ZO_PlayerToPlayer:InitializeIncomingEvents()
@@ -332,6 +326,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnCampaignQueueStateChanged( _, campaignId, isGroup, state)
         if state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
             local campaignQueueData = GetCampaignQueueData(campaignId, isGroup)
+
+            local function DeferDecisionCallback()
+                self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId)
+            end
+
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
             local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId, nil,
                 function()
@@ -341,13 +340,13 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                 function()
                     ConfirmCampaignEntry(campaignId, isGroup, false)
                 end,
-                function()
-                    self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId)
-                end)
+                DeferDecisionCallback)
 
             promptData.messageFormat = campaignQueueData.messageFormat
             promptData.messageParams = campaignQueueData.messageParams
-            promptData.expiresAt = campaignQueueData.expiresAt
+            promptData.expiresAtS = campaignQueueData.expiresAtS
+            promptData.dialogTitle = campaignQueueData.dialogTitle
+            promptData.expirationCallback = DeferDecisionCallback
         else
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
             self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId)
@@ -370,37 +369,35 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                 DeclineWorldEventInvite(eventId)
             end)
 
-        local timeLeft = SCRIPTED_WORLD_EVENT_TIMEOUT_MS
+        local function DeferDecisionCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_WORLD_EVENT_INVITE)
+        end
+
+        local timeRemainingMS = GetScriptedEventInviteTimeRemainingMS(eventId)
+        data.expiresAtS = GetFrameTimeSeconds() + (timeRemainingMS / ZO_ONE_SECOND_IN_MILLISECONDS)
+        data.expirationCallback = DeferDecisionCallback
+        data.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_SCRIPTED_WORLD_EVENT)
 
         if inviterName == "" then
             if questName == "" then
                 data.messageFormat = SI_EVENT_INVITE
-                data.messageParams = { eventName, timeLeft }
-                data.timeParam = 2
+                data.messageParams = { eventName }
             else
                 data.messageFormat = SI_EVENT_INVITE_QUEST
-                data.messageParams = { eventName, questName, timeLeft }
-                data.timeParam = 3
+                data.messageParams = { eventName, questName }
             end
         else
             if questName == "" then
                 data.messageFormat = SI_EVENT_INVITE_NAMED
-                data.messageParams = { inviterName, eventName, timeLeft}
-                data.timeParam = 3
+                data.messageParams = { inviterName, eventName}
             else
                 data.messageFormat = SI_EVENT_INVITE_NAMED_QUEST
-                data.messageParams = { inviterName, eventName, questName, timeLeft }
-                data.timeParam = 4
+                data.messageParams = { inviterName, eventName, questName }
             end
-        end
-
-        for i = 1, #data.messageParams do
-          data.messageParams[i] = ZO_SELECTED_TEXT:Colorize(data.messageParams[i])
         end
 
         data.eventId = eventId
         data.questName = questName
-        data.updateFn = ScriptedWorldEventUpdateFunction
 
         data.uniqueSounds = {
             accept = SOUNDS.SCRIPTED_WORLD_EVENT_ACCEPTED,
@@ -499,10 +496,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         promptData.acceptText = GetString(SI_YES)
         promptData.declineText = GetString(SI_NO)
 
-        promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
+        promptData.expiresAtS = GetFrameTimeSeconds() + timeRemainingSeconds
         promptData.messageFormat = messageFormat
         promptData.messageParams = messageParams
         promptData.expirationCallback = DeferDecisionCallback
+        promptData.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_GROUP_ELECTION)
         promptData.uniqueSounds = {
             accept = SOUNDS.GROUP_ELECTION_VOTE_SUBMITTED,
             decline = SOUNDS.GROUP_ELECTION_VOTE_SUBMITTED,
@@ -742,7 +740,8 @@ do
     function ZO_PlayerToPlayer:RemoveFromIncomingQueue(incomingType, characterName, displayName)
         for i, incomingEntry in ipairs(self.incomingQueue) do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
-                table.remove(self.incomingQueue, i)
+                local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
+
                 if i == 1 and self.responding then
                     self:StopInteraction()
                 end
@@ -764,7 +763,7 @@ end
 function ZO_PlayerToPlayer:RemoveGuildInviteFromIncomingQueue(guildId)
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_GUILD_INVITE and incomingEntry.guildId == guildId then
-            table.remove(self.incomingQueue, i)
+            self:RemoveEntryFromIncomingQueueTable(i)
             break
         end
     end
@@ -773,7 +772,7 @@ end
 function ZO_PlayerToPlayer:RemoveQuestShareFromIncomingQueue(questId)
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_QUEST_SHARE and incomingEntry.questId == questId then
-            table.remove(self.incomingQueue, i)
+            self:RemoveEntryFromIncomingQueueTable(i)
             break
         end
     end
@@ -782,13 +781,25 @@ end
 function ZO_PlayerToPlayer:RemoveScriptedWorldEventFromIncomingQueue(eventId, questName)
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_WORLD_EVENT_INVITE and (incomingEntry.eventId == eventId or incomingEntry.questName == questName) then
-            table.remove(self.incomingQueue, i)
+            self:RemoveEntryFromIncomingQueueTable(i)
+
             if i == 1 and self.responding then
                 self:StopInteraction()
             end
             break
         end
     end
+end
+
+function ZO_PlayerToPlayer:GetIndexFromIncomingQueue(incomingEntryToMatch)
+    if incomingEntryToMatch then
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if incomingEntryToMatch == incomingEntry then
+                return i
+            end
+        end
+    end
+    return nil
 end
 
 function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
@@ -804,34 +815,24 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
             local messageFormat, messageParams
             local activityTypeText = GetString("SI_LFGACTIVITY", activityType)
             local generalActivityText = ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[activityType]
-            local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-            local timeParamIndex
             if role == LFG_ROLE_INVALID then
                 messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
-                messageParams = { activityTypeText, generalActivityText, timeText }
-                timeParamIndex = 3
+                messageParams = { activityTypeText, generalActivityText }
             else
                 local roleIconPath = GetRoleIcon(role)
                 local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
 
                 messageFormat = SI_LFG_READY_CHECK_TEXT
-                messageParams = { activityTypeText, generalActivityText, roleIconFormat, GetString("SI_LFGROLE", role), timeText }
-                timeParamIndex = 5
+                messageParams = { activityTypeText, generalActivityText, roleIconFormat, GetString("SI_LFGROLE", role) }
             end
 
             promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK, nil, nil, nil, AcceptLFGReadyCheckNotification, DeclineLFGReadyCheckNotification, DeferDecisionCallback)
             promptData.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
+            promptData.expiresAtS = GetFrameTimeSeconds() + timeRemainingSeconds
             promptData.messageFormat = messageFormat
             promptData.messageParams = messageParams
-            local function UpdateTimeLeft(incomingEntry, isActive)
-                if isActive then
-                    local timeRemainingSeconds = select(3, GetLFGReadyCheckNotificationInfo())
-                    local timeText = ZO_FormatTime(timeRemainingSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-                    incomingEntry.messageParams[timeParamIndex] = timeText
-                    self:SetupTargetLabel(incomingEntry)
-                end
-            end
-            promptData.updateFn = UpdateTimeLeft
+            promptData.expirationCallback = DeferDecisionCallback
+            promptData.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_LFG)
 
             PlaySound(SOUNDS.LFG_READY_CHECK)
         end
@@ -864,7 +865,7 @@ function ZO_PlayerToPlayer:TryDisplayingIncomingRequests()
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if(incomingEntryToRespondTo.dialogName) then
             ZO_Dialogs_ShowPlatformDialog(incomingEntryToRespondTo.dialogName, nil, {mainTextParams = incomingEntryToRespondTo.mainTextParams})
-            table.remove(self.incomingQueue, 1)
+            self:RemoveEntryFromIncomingQueueTable(1)
             self.responding = false
             self:StopInteraction()
             return true
@@ -936,27 +937,47 @@ function ZO_PlayerToPlayer:StopInteraction()
     end
 end
 
-function ZO_PlayerToPlayer:Accept()
-    self:OnPromptAccepted()
+function ZO_PlayerToPlayer:Accept(incomingEntry)
+    local index = self:GetIndexFromIncomingQueue(incomingEntry)
+    if index then
+        self:RemoveEntryFromIncomingQueueTable(index)
+        NotificationAccepted(incomingEntry)
+    else
+        self:OnPromptAccepted()
+    end
 end
 
-function ZO_PlayerToPlayer:Decline()
-    self:OnPromptDeclined()
+function ZO_PlayerToPlayer:Decline(incomingEntry)
+    local index = self:GetIndexFromIncomingQueue(incomingEntry)
+    if index then
+        self:RemoveEntryFromIncomingQueueTable(index)
+        NotificationDeclined(incomingEntry)
+    else
+        self:OnPromptDeclined()
+    end
 end
 
 --With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
     if(self.responding and #self.incomingQueue > 0) then
-        local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
+        local incomingEntryToRespondTo = self:RemoveEntryFromIncomingQueueTable(1)
         NotificationAccepted(incomingEntryToRespondTo)
     end
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
     if(self.responding and #self.incomingQueue > 0) then
-        local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
+        local incomingEntryToRespondTo = self:RemoveEntryFromIncomingQueueTable(1)
         NotificationDeclined(incomingEntryToRespondTo)
     end
+end
+
+function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
+    local incomingEntry = table.remove(self.incomingQueue, index)
+    if incomingEntry.expiresAtS then
+        ZO_Dialogs_ReleaseAllDialogsOfName("PTP_TIMED_RESPONSE_PROMPT", function(dialogData) return dialogData == incomingEntry end)
+    end
+    return incomingEntry
 end
 
 function ZO_PlayerToPlayer:SetTargetIdentification()
@@ -1051,30 +1072,6 @@ function ZO_PlayerToPlayer:ShowResponseActionKeybind(keybindText)
     self.actionKeybindButton:SetText(keybindText)
 end
 
-function ZO_PlayerToPlayer:SetupTargetLabel(incomingEntry)
-    self.targetLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
-
-    if incomingEntry.targetLabel then
-        self.targetLabel:SetText(incomingEntry.targetLabel)
-    elseif incomingEntry.messageFormat then
-        if(incomingEntry.expiresAt) then
-            local remainingTime = zo_max(incomingEntry.expiresAt - GetFrameTimeSeconds(), 0)
-            local formattedTime = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-            local params = {unpack(incomingEntry.messageParams)}
-            table.insert(params, formattedTime)
-            self.targetLabel:SetText(zo_strformat(incomingEntry.messageFormat, unpack(params)))
-            if incomingEntry.expirationCallback and remainingTime == 0 then
-                incomingEntry.expirationCallback()
-            end
-        else
-            self.targetLabel:SetText(zo_strformat(incomingEntry.messageFormat, unpack(incomingEntry.messageParams)))
-        end		
-    end
-    
-    local font = IsInGamepadPreferredMode() and "ZoFontGamepad42" or "ZoInteractionPrompt"
-    self.targetLabel:SetFont(font)
-end
-
 function ZO_PlayerToPlayer:GetKeyboardStringFromInteractionType(interactionType)
     if interactionType == INTERACT_TYPE_RITUAL_OF_MARA then
         return GetString(SI_PLEDGE_OF_MARA_BEGIN_RITUAL_PROMPT)
@@ -1091,13 +1088,42 @@ function ZO_PlayerToPlayer:GetGamepadStringFromInteractionType(interactionType)
     end
 end
 
+function ZO_PlayerToPlayer_GetIncomingEntryDisplayText(incomingEntry)
+    if incomingEntry.targetLabel then
+        return incomingEntry.targetLabel
+    elseif incomingEntry.messageFormat then
+        if incomingEntry.expiresAtS then
+            local remainingTime = zo_max(incomingEntry.expiresAtS - GetFrameTimeSeconds(), 0)
+            local formattedTime = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+            local params = {unpack(incomingEntry.messageParams)}
+            table.insert(params, formattedTime)
+            return zo_strformat(incomingEntry.messageFormat, unpack(params))
+        else
+            return zo_strformat(incomingEntry.messageFormat, unpack(incomingEntry.messageParams))
+        end
+    end
+end
+
 function ZO_PlayerToPlayer:TryShowingResponseLabel()
     if #self.incomingQueue > 0 then
         local incomingEntry = self.incomingQueue[1]
         if incomingEntry.pendingResponse then
-            self:SetupTargetLabel(incomingEntry)
+            -- Set text on the label
+            local displayText = ZO_PlayerToPlayer_GetIncomingEntryDisplayText(incomingEntry)
+            local font = IsInGamepadPreferredMode() and "ZoFontGamepad42" or "ZoInteractionPrompt"
+            self.targetLabel:SetText(displayText)
+            self.targetLabel:SetFont(font)
+            self.targetLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
-            if(incomingEntry.dialogName) then
+            --Check for expiration
+            if incomingEntry.messageFormat and incomingEntry.expiresAtS and incomingEntry.expirationCallback then
+                if GetFrameTimeSeconds() > incomingEntry.expiresAtS then
+                    incomingEntry.expirationCallback()
+                end
+            end
+    
+
+            if incomingEntry.dialogName then
                 self:ShowResponseActionKeybind(self:GetKeyboardStringFromInteractionType(incomingEntry.incomingType))
             elseif ShouldUseRadialNotificationMenu(incomingEntry) then
                 if not self.showingNotificationMenu then
@@ -1112,6 +1138,7 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
             end
 
             self.responding = true
+            incomingEntry.seen = true
             return true
         end
     end
@@ -1131,6 +1158,12 @@ function ZO_PlayerToPlayer:OnUpdate()
         if incomingEntry.updateFn then
             local isActive = i == 1 and (self.responding or self.isInteracting)
             incomingEntry.updateFn(incomingEntry, isActive)
+        end
+
+        if incomingEntry.expiresAtS and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
+            -- For time sensitive prompts, if the player can't see them, throw up a dialog before it's too late to respond
+            ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
+            incomingEntry.seen = true
         end
     end
 

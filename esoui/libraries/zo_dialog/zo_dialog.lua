@@ -37,12 +37,12 @@ local function ContainsName(testName, ...)
     end
 end
 
-local function RemoveQueuedDialogs(name)
+local function RemoveQueuedDialogs(name, filterFunction)
     local i = 1
-    while(i <= #dialogQueue) do
+    while i <= #dialogQueue do
         local dialog = dialogQueue[i]
 
-        if(name == dialog[QUEUED_DIALOG_INDEX_NAME]) then
+        if name == dialog[QUEUED_DIALOG_INDEX_NAME] and (not filterFunction or filterFunction(dialog[QUEUED_DIALOG_INDEX_DATA])) then
             table.remove(dialogQueue, i)
         else
             i = i + 1
@@ -201,10 +201,12 @@ function ZO_Dialogs_SetDialogLoadingIcon(loadingIcon, textControl, showLoadingIc
     end
 end
 
-function ZO_Dialogs_FindDialog(name)
+function ZO_Dialogs_FindDialog(name, filterFunction)
     for _, displayedDialog in ipairs(displayedDialogs) do
-        if(displayedDialog.name == name) then
-            return displayedDialog.dialog
+        if displayedDialog.name == name then
+            if not filterFunction or filterFunction(displayedDialog.dialog.data) then
+                return displayedDialog.dialog
+            end
         end
     end
     return nil
@@ -496,9 +498,13 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 
                 local keybind
                 local hasKeybind = true
-                if(buttonInfo.keybind) then
-                    keybind = buttonInfo.keybind
-                elseif(buttonInfo.keybind == nil) then
+                if buttonInfo.keybind then
+                    if type(buttonInfo.keybind) == "function" then
+                        keybind = buttonInfo.keybind(dialog)
+                    else
+                        keybind = buttonInfo.keybind
+                    end
+                elseif buttonInfo.keybind == nil then
                     if(i == 1) then
                         keybind = "DIALOG_PRIMARY"
                     else
@@ -775,14 +781,14 @@ function ZO_Dialogs_IsShowingDialog()
     return #displayedDialogs > 0
 end
 
-function ZO_Dialogs_ReleaseAllDialogsOfName(name)
-    RemoveQueuedDialogs(name)
+function ZO_Dialogs_ReleaseAllDialogsOfName(name, filterFunction)
+    RemoveQueuedDialogs(name, filterFunction)
 
     local i = 1
     while i <= #displayedDialogs do
         local displayedDialog = displayedDialogs[i]
         local released = false
-        if displayedDialog.name == name then
+        if displayedDialog.name == name and (not filterFunction or filterFunction(displayedDialog.dialog.data)) then
             released = ZO_Dialogs_ReleaseDialog(displayedDialog.dialog)
         end
 
@@ -815,10 +821,10 @@ function ZO_Dialogs_ReleaseDialogOnButtonPress(nameOrDialog)
     return ZO_Dialogs_ReleaseDialog(nameOrDialog, RELEASED_FROM_BUTTON_PRESS)
 end
 
-function ZO_Dialogs_ReleaseDialog(nameOrDialog, releasedFromButton)
+function ZO_Dialogs_ReleaseDialog(nameOrDialog, releasedFromButton, filterFunction)
     local dialog
     if type(nameOrDialog) == "string" then
-        dialog = ZO_Dialogs_FindDialog(nameOrDialog)
+        dialog = ZO_Dialogs_FindDialog(nameOrDialog, filterFunction)
     else
         dialog = nameOrDialog
     end

@@ -242,6 +242,7 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_GUILD_SELF_LEFT_GUILD, RefreshChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
     self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, RefreshChannelDropdown)
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshChannelDropdown)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
