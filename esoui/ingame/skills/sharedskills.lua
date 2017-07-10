@@ -107,15 +107,6 @@ end
 function ZO_Skills_PurchaseAbility(skillType, skillLineIndex, abilityIndex)
     PlaySound(SOUNDS.ABILITY_SKILL_PURCHASED)
     PutPointIntoSkillAbility(skillType, skillLineIndex, abilityIndex)
-
-    local isPassive, isUltimate = select(4, GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex))
-    if isUltimate then
-        TriggerTutorial(TUTORIAL_TRIGGER_PURCHASED_ULTIMATE_ABILITY)
-    elseif isPassive then
-        TriggerTutorial(TUTORIAL_TRIGGER_PURCHASED_PASSIVE_ABILITY)
-    else
-        TriggerTutorial(TUTORIAL_TRIGGER_PURCHASED_ABILITY)
-    end
 end
 
 function ZO_Skills_UpgradeAbility(skillType, skillLineIndex, abilityIndex)

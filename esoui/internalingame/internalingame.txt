@@ -1,6 +1,7 @@
 ; Internal Ingame Script Files
-## DependsOn: ZO_InternalIngameLocalization ZO_IngameShared
+## DependsOn: ZO_InternalIngameLocalization ZO_PublicAllIngames
 
+EsoUI\InternalIngame\Globals\UnofficialClientStringOverrides.lua
 EsoUI\InternalIngame\Globals\bindings.xml
 
 EsoUI\InternalIngame\Scenes\InternalIngameSceneManager.lua

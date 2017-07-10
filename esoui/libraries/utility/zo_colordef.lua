@@ -42,8 +42,31 @@ function ZO_ColorDef:New(r, g, b, a)
     return c
 end
 
-function ZO_ColorDef:FromInterfaceColor(colorType, fieldValue)
+function ZO_ColorDef.FromInterfaceColor(colorType, fieldValue)
     return ZO_ColorDef:New(GetInterfaceColor(colorType, fieldValue))
+end
+
+do
+    local function ConsumeRightmostChannel(value)
+        local channel = value % 256
+        channel = channel / 255
+        value = zo_floor(value / 256)
+        return channel, value
+    end
+
+    function ZO_ColorDef.FromARGBHexadecimal(ARGBHexadecimal)
+        if #ARGBHexadecimal == 8 then
+            local value = tonumber(ARGBHexadecimal, 16)
+            if value then
+                local a, r, g, b
+                b, value = ConsumeRightmostChannel(value)
+                g, value = ConsumeRightmostChannel(value)
+                r, value = ConsumeRightmostChannel(value)
+                a, value = ConsumeRightmostChannel(value)
+                return ZO_ColorDef:New(r, g, b, a)
+            end
+        end
+    end
 end
 
 function ZO_ColorDef:UnpackRGB()
@@ -83,7 +106,15 @@ function ZO_ColorDef:Clone()
 end
 
 function ZO_ColorDef:ToHex()
-	return string.format("%.2x%.2x%.2x", zo_floor(self.r * 255), zo_floor(self.g * 255), zo_floor(self.b * 255))
+	return string.format("%.2x%.2x%.2x", zo_round(self.r * 255), zo_round(self.g * 255), zo_round(self.b * 255))
+end
+
+function ZO_ColorDef:ToARGBHexadecimal()
+    return ZO_ColorDef.ToARGBHexadecimal(self.r, self.g, self.b, self.a)
+end
+
+function ZO_ColorDef.ToARGBHexadecimal(r, g, b, a)
+    return string.format("%.2x%.2x%.2x%.2x", zo_round(a * 255), zo_round(r * 255), zo_round(g * 255), zo_round(b * 255))
 end
 
 function ZO_ColorDef:Colorize(text)

@@ -1,0 +1,12 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CurrencyTemplate" font="ZoFontGame" color="FFFFFF" horizontalAlignment="RIGHT" virtual="true">
+            <OnMouseEnter>
+                ZO_CurrencyTemplate_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CurrencyTemplate_OnMouseExit(self)
+            </OnMouseExit>
+        </Label>
+    </Controls>
+</GuiXml>

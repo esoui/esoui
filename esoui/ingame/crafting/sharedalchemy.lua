@@ -543,11 +543,11 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
 
     if self:HasItem() then
         if self.createsLevelLabel then
-            local craftingSubItemType, _, resultingItemLevel, championRequiredLevel = select(2, GetItemCraftingInfo(bagId, slotIndex))
+            local craftingSubItemType, _, resultingItemLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(bagId, slotIndex))
             local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
-            if championRequiredLevel and championRequiredLevel > 0 then
-                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, championRequiredLevel, itemTypeString))
+            if requiredChampionPoints and requiredChampionPoints > 0 then
+                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, requiredChampionPoints, itemTypeString))
             else
                 self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_LEVEL, resultingItemLevel, itemTypeString))
             end

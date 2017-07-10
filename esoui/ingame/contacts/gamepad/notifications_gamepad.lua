@@ -50,6 +50,10 @@ function ZO_GamepadFriendRequestProvider:New(notificationManager)
 end
 
 function ZO_GamepadFriendRequestProvider:Decline(data, button, openedFromKeybind)
+    local function IgnorePlayer()
+        ZO_PlatformIgnorePlayer(data.displayName, ZO_ID_REQUEST_TYPE_FRIEND_REQUEST, data.incomingFriendIndex)
+    end
+
     local dialogData = 
     {
         mainText = function()
@@ -62,17 +66,12 @@ function ZO_GamepadFriendRequestProvider:Decline(data, button, openedFromKeybind
         end,
 
         ignoreFunction = function()
-            if not IsConsoleUI() then
-                AddIgnore(data.displayName)
-            elseif ZO_DoesConsoleSupportTargetedIgnore() then
-                ZO_ShowConsoleIgnoreDialogFromDisplayNameOrFallback(data.displayName, ZO_ID_REQUEST_TYPE_FRIEND_REQUEST, data.incomingFriendIndex)
-            end
+            IgnorePlayer()
             PlaySound(SOUNDS.DEFAULT_CLICK)
         end,
 
         reportFunction = function()
-            SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-            ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(data.displayName)
+            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
         end,
     }
     ZO_Dialogs_ShowGamepadDialog(GAMEPAD_NOTIFICATIONS_CONFIRM_DECLINE_DIALOG_NAME, dialogData)
@@ -102,6 +101,10 @@ function ZO_GamepadGuildInviteProvider:CreateMessage(guildAlliance, guildName, i
 end
 
 function ZO_GamepadGuildInviteProvider:Decline(data, button, openedFromKeybind)
+    local function IgnorePlayer()
+        ZO_PlatformIgnorePlayer(data.displayName)
+    end
+
     local dialogData = 
     {
         mainText = function()
@@ -115,17 +118,12 @@ function ZO_GamepadGuildInviteProvider:Decline(data, button, openedFromKeybind)
         end,
 
         ignoreFunction = function()
-            if not IsConsoleUI() then
-                AddIgnore(data.displayName)
-            elseif ZO_DoesConsoleSupportTargetedIgnore() then
-                -- Guild invites only have the displayName, so that would be our fallback as well
-                ZO_ShowConsoleIgnoreDialogFromDisplayNameOrFallback(data.displayName, ZO_ID_REQUEST_TYPE_DISPLAY_NAME, data.displayName)
-            end
+            IgnorePlayer()
             PlaySound(SOUNDS.DEFAULT_CLICK)
         end,
 
         reportFunction = function()
-            ZO_Help_Customer_Service_Gamepad_SubmitReportPlayerSpammingTicket(data.displayName)
+            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
             RejectGuildInvite(data.guildId)
             PlaySound(SOUNDS.DIALOG_DECLINE)
         end,
@@ -365,12 +363,10 @@ function ZO_GamepadEsoPlusSubscriptionStatusProvider:New(notificationManager)
 end
 
 function ZO_GamepadEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
-    local helpCategoryIndex, helpIndex = GetEsoPlusSubscriptionInfoHelpIndices()
-    if helpCategoryIndex ~= nil then
-        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
+    if entryData.moreInfo then
+        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(entryData.helpCategoryIndex, entryData.helpIndex)
     end
 end
-
 
 --Notification Manager
 -------------------------

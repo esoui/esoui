@@ -69,7 +69,7 @@ do
     end
 
     function ZO_InventoryInfoBar_ConnectStandardBar(infoBar)
-        InventoryInfoBar_ConnectStandardBar_Common(infoBar, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS, UpdateInventorySlots, ZO_SharedInventory_ConnectPlayerCurrencyLabel, BAG_BACKPACK)
+        InventoryInfoBar_ConnectStandardBar_Common(infoBar, ZO_KEYBOARD_CURRENCY_OPTIONS, UpdateInventorySlots, ZO_SharedInventory_ConnectPlayerCurrencyLabel, BAG_BACKPACK)
     end
 
     function ZO_InventoryInfoBar_Gamepad_ConnectStandardBar(infoBar)

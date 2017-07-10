@@ -52,7 +52,7 @@ function ZO_CurrencyInputObject:GetMaxCurrency()
         return self.maxCurrency
     end
 
-    return MAX_PLAYER_MONEY --May need an enum for this if we pick a different max for other currency types.
+    return MAX_PLAYER_CURRENCY --May need an enum for this if we pick a different max for other currency types.
 end
 
 function ZO_CurrencyInputObject:GetTotalCurrency()

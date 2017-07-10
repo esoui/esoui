@@ -108,10 +108,11 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     local function OnInventoryUpdated(bagId)
         self:MarkDirty()
         local currentList = self:GetCurrentList()
-        if ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
-            self:OnUpdate() --don't wait for next update loop in case item was destroyed and scene/keybinds need immediate update
-        else
-            if self.scene:IsShowing() then
+        if self.scene:IsShowing() then
+            -- we only want to update immediately if we are in the gamepad inventory scene
+            if ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
+                self:OnUpdate() --don't wait for next update loop in case item was destroyed and scene/keybinds need immediate update
+            else
                 if currentList == self.categoryList then
                     self:RefreshCategoryList()
                 elseif currentList == self.itemList then
@@ -299,6 +300,8 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor)
         end
 
         self:RefreshActiveKeybinds()
+    else
+        self.actionMode = nil
     end
 end
 
@@ -1231,8 +1234,10 @@ function ZO_GamepadInventory:TryEquipItem(inventorySlot)
             RequestMoveItem(sourceBag, sourceSlot, BAG_WORN, self.selectedEquipSlot, 1)
         end
 
-        if IsItemBoPAndTradeable(sourceBag, sourceSlot) then
-            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_TRADE_BOP", {onAcceptCallback = DoEquip}, {mainTextParams = {GetItemName(sourceBag, sourceSlot)}})
+        if ZO_InventorySlot_WillItemBecomeBoundOnEquip(sourceBag, sourceSlot) then
+            local itemQuality = select(8, GetItemInfo(sourceBag, sourceSlot))
+            local itemQualityColor = GetItemQualityColor(itemQuality)
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = DoEquip}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot))}})
         else
             DoEquip()
         end

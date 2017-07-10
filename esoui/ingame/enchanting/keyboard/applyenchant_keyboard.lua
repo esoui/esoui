@@ -27,7 +27,15 @@ function ZO_ApplyEnchant:Initialize(control)
     local function PerformEnchant()
         local selectedData = ZO_InventorySlot_GetItemListDialog():GetSelectedItem()
         if selectedData then
-            EnchantItem(self.currentBag, self.currentIndex, selectedData.bag, selectedData.index)
+            local function DoEnchant()
+                EnchantItem(self.currentBag, self.currentIndex, selectedData.bag, selectedData.index)
+            end
+
+            if IsItemPlayerLocked(self.currentBag, self.currentIndex) then
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_ENCHANT_LOCKED_ITEM", { onAcceptCallback = DoEnchant }, { mainTextParams = { GetString(SI_PERFORM_ACTION_CONFIRMATION) } })
+            else
+                DoEnchant()
+            end
         end
     end
 

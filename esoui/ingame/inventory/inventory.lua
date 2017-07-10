@@ -1,5 +1,5 @@
 --Variables
-local PlayerInventory = nil
+local g_playerInventory = nil
 PLAYER_INVENTORY = nil
 
 INVENTORY_BACKPACK = 1
@@ -13,8 +13,9 @@ local SEARCH_TYPE_QUEST_ITEM = 2
 local SEARCH_TYPE_QUEST_TOOL = 3
 local CACHE_DATA = true
 local DONT_CACHE_DATA = false
-
+local DONT_USE_SHORT_FORMAT = false
 local PREVENT_LAYOUT = false
+local NOT_IS_GAMEPAD = false
 
 local searchButtonTexture = "EsoUI/Art/Buttons/searchButton_normal.dds"
 local searchButtonDownTexture = "EsoUI/Art/Buttons/searchButton_mouseDown.dds"
@@ -23,7 +24,6 @@ local cancelButtonDownTexture = "EsoUI/Art/Buttons/cancelButton_mouseDown.dds"
 
 local NEW_ICON_TEXTURE = "EsoUI/Art/Inventory/newItem_icon.dds"
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
-
 
 BANKING_INTERACTION =
 {
@@ -50,16 +50,16 @@ local function HandleTabSwitch(tabData)
     if tabData.descriptor == ITEMFILTERTYPE_QUEST then
         ZO_PlayerInventoryList:SetHidden(true)
         ZO_PlayerInventoryQuest:SetHidden(false)
-        PlayerInventory.selectedTabType = INVENTORY_QUEST_ITEM
+        g_playerInventory.selectedTabType = INVENTORY_QUEST_ITEM
     end
 
     if tabData.inventoryType == INVENTORY_BACKPACK then
         ZO_PlayerInventoryList:SetHidden(false)
         ZO_PlayerInventoryQuest:SetHidden(true)
-        PlayerInventory.selectedTabType = INVENTORY_BACKPACK
+        g_playerInventory.selectedTabType = INVENTORY_BACKPACK
     end
 
-    PlayerInventory:ChangeFilter(tabData)
+    g_playerInventory:ChangeFilter(tabData)
 end
 
 --Search Processors
@@ -94,13 +94,13 @@ local function ProcessInventoryItem(stringSearch, data, searchTerm, cache)
         end
     end
 
-    if(itemStyle ~= ITEMSTYLE_NONE) then
+    if itemStyle ~= 0 then
         local itemStyleName = ITEM_STYLE_NAME[itemStyle]
-        if(not itemStyleName) then
-            itemStyleName = GetString("SI_ITEMSTYLE", itemStyle):lower()
+        if not itemStyleName then
+            itemStyleName = zo_strlower(GetItemStyleName(itemStyle))
             ITEM_STYLE_NAME[itemStyle] = itemStyleName
         end
-        if(zo_plainstrfind(itemStyleName, searchTerm)) then
+        if zo_plainstrfind(itemStyleName, searchTerm) then
             return true
         end
     end
@@ -149,8 +149,8 @@ end
 
 local bankSortTypes =
 {
-    ZO_ComboBox:CreateItemEntry(GetString(SI_INVENTORY_SORT_TYPE_NAME), function() PlayerInventory:ChangeSort("name", INVENTORY_BANK) end),
-    ZO_ComboBox:CreateItemEntry(GetString(SI_INVENTORY_SORT_TYPE_PRICE), function() PlayerInventory:ChangeSort("stackSellPrice", INVENTORY_BANK) end),
+    ZO_ComboBox:CreateItemEntry(GetString(SI_INVENTORY_SORT_TYPE_NAME), function() g_playerInventory:ChangeSort("name", INVENTORY_BANK) end),
+    ZO_ComboBox:CreateItemEntry(GetString(SI_INVENTORY_SORT_TYPE_PRICE), function() g_playerInventory:ChangeSort("stackSellPrice", INVENTORY_BANK) end),
     -- NOTE: Bank cannot sort by age...items moved to the bank (or back again) do not have their age persisted yet.
 }
 
@@ -158,7 +158,7 @@ local function InitializeHeaderSort(inventoryType, inventory, headerControl)
     local sortHeaders = ZO_SortHeaderGroup:New(headerControl, true)
 
     local function OnSortHeaderClicked(key, order)
-        PlayerInventory:ChangeSort(key, inventoryType, order)
+        g_playerInventory:ChangeSort(key, inventoryType, order)
     end
 
     sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
@@ -198,7 +198,7 @@ local function OnInventoryItemRowHidden(rowControl, slot)
     slot.slotControl = nil
 end
 
-local function UpdateStatusControl(inventorySlot, slotData)
+function ZO_UpdateStatusControlIcons(inventorySlot, slotData)
     local statusControl = GetControl(inventorySlot, "StatusTexture")
 
     statusControl:ClearIcons()
@@ -217,6 +217,9 @@ local function UpdateStatusControl(inventorySlot, slotData)
     end
     if slotData.isGemmable then
         statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWN_GEMS))
+    end
+    if slotData.bagId == BAG_WORN then
+        statusControl:AddIcon(ZO_KEYBOARD_IS_EQUIPPED_ICON)
     end
 
     statusControl:Show()
@@ -274,7 +277,7 @@ local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
 
     slot.slotControl = rowControl
 
-    UpdateStatusControl(rowControl, slot)
+    ZO_UpdateStatusControlIcons(rowControl, slot)
     UpdateStatValueControl(rowControl, slot)
 end
 
@@ -315,7 +318,7 @@ local function SetupQuestRow(rowControl, questItem)
     ZO_Inventory_SetupSlot(inventorySlot, questItem.stackCount, questItem.iconFile)
     ZO_Inventory_SetupQuestSlot(inventorySlot, questItem.questIndex, questItem.toolIndex, questItem.stepIndex, questItem.conditionIndex)
 
-    UpdateStatusControl(rowControl, questItem)
+    ZO_UpdateStatusControlIcons(rowControl, questItem)
     UpdateStatValueControl(rowControl, questItem)
 end
 
@@ -372,10 +375,15 @@ end
 
 ZO_InventoryManager = ZO_Object:Subclass()
 
-function ZO_InventoryManager:New()
+function ZO_InventoryManager:New(...)
     local manager = ZO_Object.New(self)
+    manager:Initialize(...)
+    return manager
+end
 
-    manager.selectedTabType = INVENTORY_BACKPACK
+function ZO_InventoryManager:Initialize(control)
+    g_playerInventory = self
+    self.selectedTabType = INVENTORY_BACKPACK
 
     local backpackSearch = ZO_StringSearch:New(CACHE_DATA)
     backpackSearch:AddProcessor(SEARCH_TYPE_INVENTORY, ProcessInventoryItem)
@@ -471,9 +479,9 @@ function ZO_InventoryManager:New()
     }
 
     local function BackpackAltFreeSlotType()
-        if manager:IsBanking() then 
+        if self:IsBanking() then 
             return INVENTORY_BANK 
-        elseif manager:IsGuildBanking() then
+        elseif self:IsGuildBanking() then
             return INVENTORY_GUILD_BANK
         else
             return nil  --hide label
@@ -601,9 +609,9 @@ function ZO_InventoryManager:New()
     InitializeHeaderSort(INVENTORY_GUILD_BANK, inventories[INVENTORY_GUILD_BANK], ZO_GuildBankSortBy)
     InitializeHeaderSort(INVENTORY_CRAFT_BAG, inventories[INVENTORY_CRAFT_BAG], ZO_CraftBagSortBy)
 
-    manager.inventories = inventories
-    manager.searchToInventoryType = {}
-    manager.bagToInventoryType =
+    self.inventories = inventories
+    self.searchToInventoryType = {}
+    self.bagToInventoryType =
     {
         [BAG_BACKPACK] = INVENTORY_BACKPACK,
         [BAG_BANK] = INVENTORY_BANK,
@@ -612,10 +620,10 @@ function ZO_InventoryManager:New()
         [BAG_VIRTUAL] = INVENTORY_CRAFT_BAG,
     }
 
-    for inventoryType, inventoryData in pairs(manager.inventories) do
+    for inventoryType, inventoryData in pairs(self.inventories) do
         InitializeInventoryList(inventoryData)
         InitializeInventoryFilters(inventoryData)
-        manager.searchToInventoryType[inventoryData.stringSearch] = inventoryType
+        self.searchToInventoryType[inventoryData.stringSearch] = inventoryType
     end
 
     INVENTORY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_PlayerInventory)
@@ -623,42 +631,307 @@ function ZO_InventoryManager:New()
     INVENTORY_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if(newState == SCENE_FRAGMENT_SHOWING) then
             local UPDATE_EVEN_IF_HIDDEN = true
-            if manager.isListDirty[INVENTORY_BACKPACK] or manager.isListDirty[INVENTORY_QUEST_ITEM] then
-                manager:UpdateList(INVENTORY_BACKPACK, UPDATE_EVEN_IF_HIDDEN)
-                manager:UpdateList(INVENTORY_QUEST_ITEM, UPDATE_EVEN_IF_HIDDEN)
+            if self.isListDirty[INVENTORY_BACKPACK] or self.isListDirty[INVENTORY_QUEST_ITEM] then
+                self:UpdateList(INVENTORY_BACKPACK, UPDATE_EVEN_IF_HIDDEN)
+                self:UpdateList(INVENTORY_QUEST_ITEM, UPDATE_EVEN_IF_HIDDEN)
             end
-            manager:RefreshMoney()
-            manager:UpdateApparelSection()
+            self:RefreshMoney()
+            self:UpdateApparelSection()
             --Reseting the comparison stats here since its too later when the window is already hidden.
             ZO_CharacterWindowStats_HideComparisonValues()
         elseif(newState == SCENE_FRAGMENT_HIDDEN) then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             ZO_PlayerInventory_EndSearch(ZO_PlayerInventorySearchBox)
-            manager:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_BACKPACK)
+            self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_BACKPACK)
         end
     end)
 
     SHARED_INVENTORY:RegisterCallback("SlotAdded", function(bagId, slotIndex, newSlotData) 
-        local inventory = manager.bagToInventoryType[bagId]
+        local inventory = self.bagToInventoryType[bagId]
         if inventory then
-            manager:OnInventoryItemAdded(inventory, bagId, slotIndex, newSlotData) 
+            self:OnInventoryItemAdded(inventory, bagId, slotIndex, newSlotData) 
         end
     end)
 
     SHARED_INVENTORY:RegisterCallback("SlotRemoved", function(bagId, slotIndex, oldSlotData) 
-        local inventory = manager.bagToInventoryType[bagId]
+        local inventory = self.bagToInventoryType[bagId]
         if inventory then
-            manager:OnInventoryItemRemoved(inventory, bagId, slotIndex, oldSlotData)
+            self:OnInventoryItemRemoved(inventory, bagId, slotIndex, oldSlotData)
         end
     end)
 
-    self.capacityAnnouncementsInfo = {}
+    self.itemsLockedDueToDeath = IsUnitDead("player")
 
-    EVENT_MANAGER:RegisterForEvent("ZO_InventoryManager", EVENT_VISUAL_LAYER_CHANGED, function() self:UpdateApparelSection() end)
+    self:SetupInitialFilter()
 
-    return manager
+    self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
+    self:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
+    self:RefreshAllInventorySlots(INVENTORY_BANK)
+    self:RefreshAllQuests()
+    self:RefreshMoney()
+
+    self:CreateBankScene()
+    self:CreateGuildBankScene()
+    self:CreateCraftBagFragment()
+
+    self:RegisterForEvents(control)
 end
 
+do
+    local function OnRequestDestroyItem(eventCode, bag, slot, itemCount, name, needsConfirm)
+        local _, actualItemCount = GetItemInfo(bag, slot)
+        if itemCount == 0 and actualItemCount > 1 then
+            itemCount = actualItemCount
+        end
+
+        local itemLink = GetItemLink(bag, slot)
+        if(needsConfirm) then
+            local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
+            if IsInGamepadPreferredMode() then
+                dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
+            end
+            ZO_Dialogs_ShowPlatformDialog(dialogName, nil, {mainTextParams = {itemLink, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION)}})
+        else
+            ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, {mainTextParams = {itemLink, itemCount}})
+        end
+    end
+
+    local function OnCancelRequestDestroyItem()
+        ZO_Dialogs_ReleaseDialog("DESTROY_ITEM_PROMPT")
+        ZO_Dialogs_ReleaseDialog("CONFIRM_DESTROY_ITEM_PROMPT")
+    end
+
+    local function OnOpenBank()
+        if not IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Show("bank")
+        end
+    end
+
+    local function OnCloseBank()
+        if not IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Hide("bank")
+            if ZO_Dialogs_IsShowingDialog() then
+                ZO_Dialogs_ReleaseAllDialogs()
+            end
+        end
+    end
+
+    BUY_BAG_SPACE_INTERACTION =
+    {
+        type = "Buy Bag Space",
+        interactTypes = { INTERACTION_BUY_BAG_SPACE },
+    }
+
+    local function OnBuyBagSpace(eventCode, cost)
+        if IsInGamepadPreferredMode() then
+            BUY_BAG_SPACE_GAMEPAD:Show(cost)
+        else
+            if(not ZO_Dialogs_FindDialog("BUY_BAG_SPACE")) then
+                ZO_Dialogs_ShowDialog("BUY_BAG_SPACE", {cost = cost})
+                INTERACT_WINDOW:OnBeginInteraction(BUY_BAG_SPACE_INTERACTION)
+            end
+        end
+    end
+
+    local function OnBuyBankSpace(eventCode, cost)
+         if IsInGamepadPreferredMode() then
+            BUY_BANK_SPACE_GAMEPAD:Show(cost)
+        else
+            if(not ZO_Dialogs_FindDialog("BUY_BANK_SPACE")) then
+                ZO_Dialogs_ShowDialog("BUY_BANK_SPACE", {cost = cost})
+            end
+        end
+    end
+
+    local function OnCloseBuySpace()
+        ZO_Dialogs_ReleaseDialog("BUY_BAG_SPACE")
+        ZO_Dialogs_ReleaseDialog("BUY_BANK_SPACE")
+
+        BUY_BAG_SPACE_GAMEPAD:Hide()
+    end
+
+    local function HandleCursorPickup(eventCode, cursorType, unused1, unused2, unused3, unused4, unused5, unused6, itemSoundCategory)
+        if cursorType == MOUSE_CONTENT_INVENTORY_ITEM or cursorType == MOUSE_CONTENT_EQUIPPED_ITEM or cursorType == MOUSE_CONTENT_QUEST_ITEM then
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, false, SI_INVENTORY_LANDING_AREA_MOVE_TO_BANK)
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_MOVE_TO_BACKPACK)
+        elseif cursorType == MOUSE_CONTENT_STORE_ITEM then
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_BUY_ITEM)
+        elseif cursorType == MOUSE_CONTENT_STORE_BUYBACK_ITEM then
+            ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_BUYBACK_ITEM)
+        end
+
+        PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_PICKUP)
+    end
+
+    local function HandleCursorCleared(eventCode, oldCursorType)
+        ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, true)
+        ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, true)
+    end
+
+    function ZO_InventoryManager:RegisterForEvents(control)
+        control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function() self:UpdateApparelSection() end)
+    
+        --inventory events
+        local function OnFullInventoryUpdated(bagId)
+            if bagId == BAG_BACKPACK then
+                self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
+            elseif bagId == BAG_BANK then
+                self:RefreshAllInventorySlots(INVENTORY_BANK)
+                self:RefreshBankUpgradeKeybind()
+            elseif bagId == BAG_VIRTUAL then
+                self:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
+            end
+        end
+    
+        local function OnPlayerActivated()
+            self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
+            self:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
+        end
+    
+        local function RefreshMoney()
+            self:RefreshMoney()
+        end
+
+        SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", OnFullInventoryUpdated)
+        SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", function(bagId, slotIndex) self:OnInventorySlotUpdated(bagId, slotIndex) end)
+
+        control:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, function(event, bagId, slotIndex) self:OnInventorySlotLocked(bagId, slotIndex) end)
+        control:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, function(event, bagId, slotIndex) self:OnInventorySlotUnlocked(bagId, slotIndex) end)
+        control:RegisterForEvent(EVENT_MOUSE_REQUEST_DESTROY_ITEM, OnRequestDestroyItem)
+        control:RegisterForEvent(EVENT_CANCEL_MOUSE_REQUEST_DESTROY_ITEM, OnCancelRequestDestroyItem)
+        control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
+        control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
+        control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+        control:RegisterForEvent(EVENT_MONEY_UPDATE, RefreshMoney)
+        control:RegisterForEvent(EVENT_BANKED_MONEY_UPDATE, RefreshMoney)
+        control:RegisterForEvent(EVENT_GUILD_BANKED_MONEY_UPDATE, RefreshMoney)
+
+        --quest item events
+        local function OnQuestsUpdated()
+            --the quest we were planning to abandon may be gone, kill the prompt
+            ZO_Dialogs_ReleaseDialog("ABANDON_QUEST")
+            self:RefreshAllQuests()
+            CALLBACK_MANAGER:FireCallbacks("QuestUpdate")
+        end
+
+        local function OnSingleQuestUpdated(journalIndex)
+            self:RefreshQuest(journalIndex)
+            CALLBACK_MANAGER:FireCallbacks("QuestUpdate")
+        end
+
+        local function OnUpdateCooldowns()
+            self:UpdateItemCooldowns(INVENTORY_BACKPACK)
+            self:UpdateItemCooldowns(INVENTORY_QUEST_ITEM)
+        end
+
+        SHARED_INVENTORY:RegisterCallback("FullQuestUpdate", OnQuestsUpdated)
+        SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", OnSingleQuestUpdated)
+
+        control:RegisterForEvent(EVENT_ACTION_UPDATE_COOLDOWNS, OnUpdateCooldowns)
+
+        --bank events
+        control:RegisterForEvent(EVENT_OPEN_BANK, OnOpenBank)
+        control:RegisterForEvent(EVENT_CLOSE_BANK, OnCloseBank)
+
+        --guild bank events
+        local function OnOpenGuildBank()
+            if not IsInGamepadPreferredMode() then
+                self:OpenGuildBank()
+            end
+        end
+
+        local function OnCloseGuildBank()
+            if not IsInGamepadPreferredMode() then
+                self:CloseGuildBank()
+            end
+        end
+
+        local function OnGuildBankSelected(eventCode, guildId)
+            self:SetGuildBankLoading(guildId)
+        end
+
+        local function OnGuildBankDeselected()
+            self:OnGuildBankDeselected()
+        end
+
+        local function OnGuildBankItemsReady()
+            self:SetGuildBankLoaded()
+        end
+
+        local function OnGuildBankOpenError(eventCode, error)
+            self:OnGuildBankOpenError(error)
+        end
+
+        local function OnGuildSizeChanged()
+            self:GuildSizeChanged()
+        end
+
+        local function OnGuildRanksChanged(eventCode, guildId)
+            self:RefreshGuildBankMoneyOperationsPossible(guildId)
+        end
+
+        local function OnGuildRankChanged(eventCode, guildId)
+            self:RefreshGuildBankMoneyOperationsPossible(guildId)
+        end
+
+        local function OnGuildMemberRankChanged(eventCode, guildId, displayName)
+            if(displayName == GetDisplayName()) then
+                self:RefreshGuildBankMoneyOperationsPossible(guildId)
+            end
+        end
+
+        control:RegisterForEvent(EVENT_OPEN_GUILD_BANK, OnOpenGuildBank)
+        control:RegisterForEvent(EVENT_CLOSE_GUILD_BANK, OnCloseGuildBank)
+        control:RegisterForEvent(EVENT_GUILD_BANK_SELECTED, OnGuildBankSelected)
+        control:RegisterForEvent(EVENT_GUILD_BANK_DESELECTED, OnGuildBankDeselected)
+        control:RegisterForEvent(EVENT_GUILD_BANK_ITEMS_READY, OnGuildBankItemsReady)
+        control:RegisterForEvent(EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankOpenError)
+        control:RegisterForEvent(EVENT_GUILD_RANKS_CHANGED, OnGuildRanksChanged)
+        control:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, OnGuildRankChanged)
+        control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
+        control:RegisterForEvent(EVENT_GUILD_MEMBER_ADDED, OnGuildSizeChanged)
+        control:RegisterForEvent(EVENT_GUILD_MEMBER_REMOVED, OnGuildSizeChanged)
+
+        --inventory upgrade events
+
+        local function UpdateFreeSlotsBackpack()
+            self:UpdateFreeSlots(INVENTORY_BACKPACK)
+        end
+
+        local function UpdateFreeSlotsBank()
+            self:UpdateFreeSlots(INVENTORY_BANK)
+        end
+
+        control:RegisterForEvent(EVENT_INVENTORY_BUY_BAG_SPACE, OnBuyBagSpace)
+        control:RegisterForEvent(EVENT_INVENTORY_BOUGHT_BAG_SPACE, UpdateFreeSlotsBackpack)
+        control:RegisterForEvent(EVENT_MOUNT_INFO_UPDATED, UpdateFreeSlotsBackpack)
+        control:RegisterForEvent(EVENT_INVENTORY_BUY_BANK_SPACE, OnBuyBankSpace)
+        control:RegisterForEvent(EVENT_INVENTORY_BOUGHT_BANK_SPACE, UpdateFreeSlotsBank)
+        control:RegisterForEvent(EVENT_INVENTORY_CLOSE_BUY_SPACE, OnCloseBuySpace)
+
+        --player events
+
+        local function RefreshAllInventoryOverlays()
+            self:RefreshAllInventoryOverlays(INVENTORY_BACKPACK)
+        end
+
+        local function OnPlayerDead()
+            RefreshAllInventoryOverlays()
+            self.itemsLockedDueToDeath = true
+        end
+
+        local function OnPlayerAlive()
+            RefreshAllInventoryOverlays()
+            self.itemsLockedDueToDeath = false
+        end
+
+        control:RegisterForEvent(EVENT_PLAYER_DEAD, OnPlayerDead)
+        control:RegisterForEvent(EVENT_PLAYER_ALIVE, OnPlayerAlive)
+        control:RegisterForEvent(EVENT_LEVEL_UPDATE, RefreshAllInventoryOverlays)
+        control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+        control:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, RefreshAllInventoryOverlays)
+    end
+end
 
 --General
 ---------
@@ -674,11 +947,6 @@ function ZO_InventoryManager:ChangeSort(newSortKey, inventoryType, newSortOrder)
         self.inventories[INVENTORY_QUEST_ITEM].currentSortOrder = newSortOrder
         self:ApplySort(INVENTORY_QUEST_ITEM)
     end
-end
-
-local function ForceSortDataOnInventory(inventory, sortKey, sortOrder)
-    inventory.currentSortKey = sortKey
-    inventory.currentSortOrder = sortOrder
 end
 
 function ZO_InventoryManager:ApplySort(inventoryType)
@@ -721,63 +989,72 @@ function ZO_InventoryManager:GetTabFilterInfo(inventoryType, tabControl)
     return filterData.filterType, filterData.activeTabText, filterData.hiddenColumns
 end
 
--- Might need to make this generic...store in filter data?  Probably need a massive refactoring of how to determine which
--- columns are shown and what they are called when they're shown....
-local filterTypeToValueColumnName =
-{
-    [ITEMFILTERTYPE_ARMOR] = SI_INVENTORY_SORT_TYPE_ARMOR,
-    [ITEMFILTERTYPE_WEAPONS] = SI_INVENTORY_SORT_TYPE_POWER,
-}
+do
+    -- Might need to make this generic...store in filter data?  Probably need a massive refactoring of how to determine which
+    -- columns are shown and what they are called when they're shown....
+    local FILTER_TYPE_TO_VALUE_COLUMN_NAME =
+    {
+        [ITEMFILTERTYPE_ARMOR] = SI_INVENTORY_SORT_TYPE_ARMOR,
+        [ITEMFILTERTYPE_WEAPONS] = SI_INVENTORY_SORT_TYPE_POWER,
+    }
 
-function ZO_InventoryManager:UpdateColumnText(inventory)
-    local sortHeaders = inventory.sortHeaders
-    if(sortHeaders) then
-        sortHeaders:SetHeaderNameForKey("statValue", GetString(filterTypeToValueColumnName[inventory.currentFilter]))
+    function ZO_InventoryManager:UpdateColumnText(inventory)
+        local sortHeaders = inventory.sortHeaders
+        if(sortHeaders) then
+            sortHeaders:SetHeaderNameForKey("statValue", GetString(FILTER_TYPE_TO_VALUE_COLUMN_NAME[inventory.currentFilter]))
+        end
     end
 end
 
-function ZO_InventoryManager:ChangeFilter(filterTab)
-    local inventoryType = filterTab.inventoryType
-    local inventory = self.inventories[inventoryType]
-
-    local activeTabText
-    inventory.currentFilter, activeTabText, inventory.hiddenColumns = self:GetTabFilterInfo(inventoryType, filterTab)
-
-    local displayInventory = self:GetDisplayInventoryTable(inventoryType)
-    local activeTabControl = displayInventory.activeTab
-    if(activeTabControl) then
-        activeTabControl:SetText(activeTabText)
+do
+    local function ForceSortDataOnInventory(inventory, sortKey, sortOrder)
+        inventory.currentSortKey = sortKey
+        inventory.currentSortOrder = sortOrder
     end
 
-    self:UpdateColumnText(displayInventory)
+    function ZO_InventoryManager:ChangeFilter(filterTab)
+        local inventoryType = filterTab.inventoryType
+        local inventory = self.inventories[inventoryType]
 
-    -- Manage hiding columns that show/hide depending on the current filter.  If the sort was on a column that becomes hidden
-    -- then the sort needs to pick a new column.
-    local sortHeaders = displayInventory.sortHeaders
-    if sortHeaders then
-        sortHeaders:SetHeadersHiddenFromKeyList(inventory.hiddenColumns, true)
+        local activeTabText
+        inventory.currentFilter, activeTabText, inventory.hiddenColumns = self:GetTabFilterInfo(inventoryType, filterTab)
 
-        if inventory.hiddenColumns[inventory.currentSortKey] then
-            -- User wanted to sort by a column that's gone!
-            -- Fallback to name...the default sort is "statusSortOrder", but there are filters that hide that one, so "name" is the
-            -- only safe bet for now...
-            sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
-
-            -- Switch both inventory and displayInventory to the fallback
-            ForceSortDataOnInventory(inventory, "name", ZO_SORT_ORDER_UP)
-            ForceSortDataOnInventory(displayInventory, "name", ZO_SORT_ORDER_UP)
+        local displayInventory = self:GetDisplayInventoryTable(inventoryType)
+        local activeTabControl = displayInventory.activeTab
+        if(activeTabControl) then
+            activeTabControl:SetText(activeTabText)
         end
+
+        self:UpdateColumnText(displayInventory)
+
+        -- Manage hiding columns that show/hide depending on the current filter.  If the sort was on a column that becomes hidden
+        -- then the sort needs to pick a new column.
+        local sortHeaders = displayInventory.sortHeaders
+        if sortHeaders then
+            sortHeaders:SetHeadersHiddenFromKeyList(inventory.hiddenColumns, true)
+
+            if inventory.hiddenColumns[inventory.currentSortKey] then
+                -- User wanted to sort by a column that's gone!
+                -- Fallback to name...the default sort is "statusSortOrder", but there are filters that hide that one, so "name" is the
+                -- only safe bet for now...
+                sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+
+                -- Switch both inventory and displayInventory to the fallback
+                ForceSortDataOnInventory(inventory, "name", ZO_SORT_ORDER_UP)
+                ForceSortDataOnInventory(displayInventory, "name", ZO_SORT_ORDER_UP)
+            end
+        end
+
+        ZO_ScrollList_ResetToTop(inventory.listView)
+        self:UpdateList(inventoryType)
+
+        if inventoryType == INVENTORY_BACKPACK and INVENTORY_MENU_BAR then
+            INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
+        end
+
+        local isEmptyList = not ZO_ScrollList_HasVisibleData(inventory.listView)
+        self:UpdateEmptyBagLabel(inventoryType, isEmptyList)
     end
-
-    ZO_ScrollList_ResetToTop(inventory.listView)
-    self:UpdateList(inventoryType)
-
-    if inventoryType == INVENTORY_BACKPACK and INVENTORY_MENU_BAR then
-        INVENTORY_MENU_BAR:UpdateInventoryKeybinds()
-    end
-
-    local isEmptyList = not ZO_ScrollList_HasVisibleData(inventory.listView)
-    self:UpdateEmptyBagLabel(inventoryType, isEmptyList)
 end
 
 --Bag Window
@@ -824,23 +1101,18 @@ function ZO_InventoryManager:HideToggleSortOrderTooltip()
 end
 
 function ZO_InventoryManager:RefreshMoney()
+    local moneyBar, altMoneyBar = self:GetContextualMoneyControls()
     if self:IsBanking() then
-        self:RefreshUpgradePossible()
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerBankInfoBarMoney, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerInventoryInfoBarAltMoney, CURT_MONEY, GetBankedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_BANKED_CURRENCY_OPTIONS)
+        self:RefreshBankUpgradeKeybind()
+        ZO_CurrencyControl_SetSimpleCurrency(moneyBar, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_BANK_TOOLTIP_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(altMoneyBar, CURT_MONEY, GetBankedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_BANK_TOOLTIP_OPTIONS)
     elseif self:IsGuildBanking() then
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_GuildBankInfoBarMoney, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(moneyBar, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_GUILD_BANK_TOOLTIP_OPTIONS)
+        local obfuscateAmount = not DoesPlayerHaveGuildPermission(GetSelectedGuildBankId(), GUILD_PERMISSION_BANK_VIEW_GOLD)
+        ZO_CurrencyControl_SetSimpleCurrency(altMoneyBar, CURT_MONEY, GetGuildBankedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_GUILD_BANK_TOOLTIP_OPTIONS, nil, nil, obfuscateAmount)
+    else
+        ZO_CurrencyControl_SetSimpleCurrency(moneyBar, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end
-    ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerInventoryInfoBarMoney, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
-end
-
-function ZO_InventoryManager:RefreshTelvarStones()
-    if self:IsBanking() then
-        self:RefreshUpgradePossible()
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerBankInfoBarTelvarStones, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerInventoryInfoBarAltTelvarStones, CURT_TELVAR_STONES, GetBankedCurrencyAmount(CURT_TELVAR_STONES), ZO_KEYBOARD_BANKED_TELVAR_OPTIONS)
-    end
-    ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerInventoryInfoBarTelvarStones, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
 end
 
 function ZO_InventoryManager:UpdateFreeSlots(inventoryType)
@@ -1195,28 +1467,37 @@ do
         if ShouldClearAgeOnClose(slot, inventoryManager) then
             slot.clearAgeOnClose = nil
             SHARED_INVENTORY:ClearNewStatus(bagId, slotIndex)
+            return true
+        else
+            return false
         end
     end
 
     function ZO_InventoryManager:ClearNewStatusOnItemsThePlayerHasSeen(inventoryType)
         local inventory = self.inventories[inventoryType]
 
+        local anyNewStatusCleared = false
         for k, bagId in ipairs(inventory.backingBags) do
             local slotIndex = ZO_GetNextBagSlotIndex(bagId)
             while slotIndex do
-                TryClearNewStatus(inventory, bagId, slotIndex, self)
+                local newStatusCleared = TryClearNewStatus(inventory, bagId, slotIndex, self)
+                anyNewStatusCleared = anyNewStatusCleared or newStatusCleared
                 slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
             end
         end
 
-        self:ApplySort(inventoryType)
+        if anyNewStatusCleared then
+            if inventory.currentSortKey == "statusSortOrder" then
+                self:ApplySort(inventoryType)
+            end
 
-        if inventory.listView then
-            ZO_ScrollList_RefreshVisible(inventory.listView, slot, UpdateStatusControl)
-        end
+            if inventory.listView then
+                ZO_ScrollList_RefreshVisible(inventory.listView, slot, ZO_UpdateStatusControlIcons)
+            end
 
-        if MAIN_MENU_KEYBOARD then
-            MAIN_MENU_KEYBOARD:RefreshCategoryBar()
+            if MAIN_MENU_KEYBOARD then
+                MAIN_MENU_KEYBOARD:RefreshCategoryBar()
+            end
         end
     end
 end
@@ -1312,19 +1593,23 @@ do
         itemIds = itemIds or {}
 
         for k, bagId in ipairs(inventory.backingBags) do
-            local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-            local itemData
-            while slotIndex do
-                local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
-                if itemInstanceId then
-                    itemData = itemIds[itemInstanceId]
-                    itemIds[itemInstanceId] = UpdateItemTable(bagId, slotIndex, predicate, itemData)
-                end
-                slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
-            end
+            self:GenerateListOfVirtualStackedItemsFromBag(bagId, predicate, itemIds)
         end 
 
         return itemIds
+    end
+
+    function ZO_InventoryManager:GenerateListOfVirtualStackedItemsFromBag(bagId, predicate, itemIds)
+        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+        local itemData
+        while slotIndex do
+            local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+            if itemInstanceId then
+                itemData = itemIds[itemInstanceId]
+                itemIds[itemInstanceId] = UpdateItemTable(bagId, slotIndex, predicate, itemData)
+            end
+            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+        end
     end
 end
 
@@ -1373,20 +1658,13 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
     end
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_BACKPACK].filterBar, ITEMFILTERTYPE_ALL)
 
-    local visibilityOption = layoutData.bankInfoBarVisibilityOption
-    local hideTelvarInfo = visibilityOption == ZO_BACKPACK_LAYOUT_HIDE_ALL_BANK_INFO_BARS or visibilityOption == ZO_BACKPACK_LAYOUT_HIDE_ONLY_TELVAR_BANK_INFO_BARS
-    local hideMoneyInfo = visibilityOption == ZO_BACKPACK_LAYOUT_HIDE_ALL_BANK_INFO_BARS
-    local hideSlotInfo = visibilityOption == ZO_BACKPACK_LAYOUT_HIDE_ALL_BANK_INFO_BARS
+    local hideBankInfo = layoutData.hideBankInfo
 
-    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(hideMoneyInfo)
-    ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(hideSlotInfo)
-    ZO_PlayerInventoryInfoBarTelvarStones:SetHidden(hideTelvarInfo)
-    ZO_PlayerInventoryInfoBarAltTelvarStones:SetHidden(hideTelvarInfo)
+    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(hideBankInfo)
+    ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(hideBankInfo)
 
-    ZO_CraftBagInfoBarAltMoney:SetHidden(hideMoneyInfo)
-    ZO_CraftBagInfoBarAltFreeSlots:SetHidden(hideSlotInfo)
-    ZO_CraftBagInfoBarTelvarStones:SetHidden(hideTelvarInfo)
-    ZO_CraftBagInfoBarAltTelvarStones:SetHidden(hideTelvarInfo)
+    ZO_CraftBagInfoBarAltMoney:SetHidden(hideBankInfo)
+    ZO_CraftBagInfoBarAltFreeSlots:SetHidden(hideBankInfo)
 end
 
 function ZO_InventoryManager:ApplySharedBagLayout(inventoryControl, layoutData)
@@ -1506,53 +1784,55 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:New(...)
     return obj
 end
 
-function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, control, queryFunction, depositFunction, withdrawFunction, maxDepositFunction, maxWithdrawalFunction)
+function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, eligibleCurrencies, queryFunction, depositFunction, withdrawFunction, maxDepositFunction, maxWithdrawalFunction, canWithdrawFunction)
+    local control = CreateControlFromVirtual(prefix .. "CurrencyTransferDialog", GuiRoot, "ZO_PlayerBankDepositWithdrawCurrency")
+
     self.control = control
-    self.depositWithdrawCurrency = control:GetNamedChild("DepositWithdrawCurrency")
+    self.depositWithdrawButton = control:GetNamedChild("DepositWithdraw")
+    local container = control:GetNamedChild("Container")
+    local headersContainer = container:GetNamedChild("Headers")
+    self.withdrawDepositCurrencyHeaderLabel = headersContainer:GetNamedChild("WithdrawDeposit")
+    local amountsContainer = container:GetNamedChild("Amounts")
+    self.carriedCurrencyLabel = amountsContainer:GetNamedChild("Carried")
+    self.bankedCurrencyLabel = amountsContainer:GetNamedChild("Banked")
+    local currenciesComboBoxControl = amountsContainer:GetNamedChild("ComboBox")
+    self.depositWithdrawCurrency = container:GetNamedChild("DepositWithdrawCurrency")
+
     self.queryFunction = queryFunction
     self.maxDepositFunction = maxDepositFunction
     self.maxWithdrawalFunction = maxWithdrawalFunction
+    self.canWithdrawFunction = canWithdrawFunction
+    self.singularCurrency = NonContiguousCount(eligibleCurrencies) == 1
 
-    self.depositWithdrawButton = self.control:GetNamedChild("DepositWithdraw")
-    self.currencyType = CURT_MONEY  --default to gold
-
-    self.goldButton = control:GetNamedChild("GoldButton")
-    self.telvarButton = control:GetNamedChild("TelvarButton")
-
-    if self.goldButton and self.telvarButton then   --radio button logic for switching between gold/telvar
-        self.usesTelvarStones = true
-        self.bankingFeeLabel = self.control:GetNamedChild("BankingFee")
-        self.minDepositLabel = self.control:GetNamedChild("MinDeposit")
-
-        local function OnCurrencySelectionClicked(button)
-            if self.currencyType ~= button.currencyType then
-                self.currencyType = button.currencyType
-                self:ChangeCurrencyType()
-            end
-        end
-
-        self.goldButton.currencyType = CURT_MONEY
-        self.goldButton:SetHandler("OnClicked", OnCurrencySelectionClicked)
-
-        self.telvarButton.currencyType = CURT_TELVAR_STONES
-        self.telvarButton:SetHandler("OnClicked", OnCurrencySelectionClicked)
-
-        self.currencyTypeRadioGroup = ZO_RadioButtonGroup:New()
-        self.currencyTypeRadioGroup:Add(self.goldButton)
-        self.currencyTypeRadioGroup:Add(self.telvarButton)
-
-        local function IsButtonClicked(button)
-            return button.currencyType == self.currencyType
-        end
-        self.currencyTypeRadioGroup:UpdateFromData(IsButtonClicked)
+    if self.singularCurrency then
+        self.carriedCurrencyLabel:SetHidden(false)
+        self.bankedCurrencyLabel:SetHidden(false)
+    else
+        local comboBox = ZO_ComboBox:New(currenciesComboBoxControl)
+        comboBox:SetSortsItems(false)
+        comboBox:SetFont("ZoFontWinT1")
+        comboBox:SetSpacing(15)
+        comboBox:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
+        self.currenciesComboBox = comboBox
+        currenciesComboBoxControl:SetHidden(false)
     end
+
+    --Set the default currency
+    for _, currencyType in ipairs(ZO_CURRENCY_DISPLAY_ORDER) do
+        if eligibleCurrencies[currencyType] then
+            self.currencyType = currencyType
+            break
+        end
+    end
+    
+    self.eligibleEntries = eligibleCurrencies
 
     ZO_Dialogs_RegisterCustomDialog(prefix.."_WITHDRAW_GOLD",
     {
         customControl = control,
         title =
         {
-            text = SI_BANK_WITHDRAW_GOLD_TITLE,
+            text = SI_BANK_WITHDRAW_CURRENCY,
         },
         setup = function(dialog)
             self.withdrawMode = true
@@ -1562,7 +1842,7 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, control,
         {
             {
                 control = self.depositWithdrawButton,
-                text = SI_BANK_WITHDRAW_GOLD,
+                text = SI_BANK_WITHDRAW_BIND,
                 callback = function(dialog)
                                 local amount = ZO_DefaultCurrencyInputField_GetCurrency(self.depositWithdrawCurrency)
                                 if amount > 0 then
@@ -1571,7 +1851,7 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, control,
                             end,
             },
             {
-                control = self.control:GetNamedChild("Cancel"),
+                control = control:GetNamedChild("Cancel"),
                 text = SI_DIALOG_CANCEL,
             }
         }
@@ -1582,7 +1862,7 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, control,
         customControl = control,
         title =
         {
-            text = SI_BANK_DEPOSIT_GOLD_TITLE,
+            text = SI_BANK_DEPOSIT_CURRENCY,
         },
         setup = function(dialog)
             self.withdrawMode = false
@@ -1592,11 +1872,10 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, control,
         {
             {
                 control = self.depositWithdrawButton,
-                text = SI_BANK_DEPOSIT_GOLD,
+                text = SI_BANK_DEPOSIT_BIND,
                 callback = function(dialog)
                                 local amount = ZO_DefaultCurrencyInputField_GetCurrency(self.depositWithdrawCurrency)
-                                if (self.currencyType == CURT_TELVAR_STONES and amount >= GetTelvarStoneMinimumDeposit() and amount > GetTelvarStoneBankingFee()) 
-                                    or (self.currencyType == CURT_MONEY and amount > 0) then
+                                if amount > 0 then
                                     depositFunction(self.currencyType, amount)
                                 end
                             end,
@@ -1610,14 +1889,46 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, control,
 end
 
 function ZO_BankGenericCurrencyDepositWithdrawDialog:UpdateDepositWithdrawCurrency()
-    self.control:GetNamedChild("CarriedCurrency"):SetText(zo_strformat(SI_BANK_GOLD_AMOUNT_CARRIED, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(GetCarriedCurrencyAmount(self.currencyType), useShortFormat, self.currencyType)))
-    self.control:GetNamedChild("BankedCurrency"):SetText(zo_strformat(SI_BANK_GOLD_AMOUNT_BANKED, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(self.queryFunction(self.currencyType), useShortFormat, self.currencyType)))
+    local currentCurrencyType = self.currencyType
+    local obfuscateAmount = self.canWithdrawFunction and not self.canWithdrawFunction() or false
+    if self.singularCurrency then
+        local bankedText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(self.queryFunction(currentCurrencyType), DONT_USE_SHORT_FORMAT, currentCurrencyType, NOT_IS_GAMEPAD, obfuscateAmount)
+        local carriedText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(GetCarriedCurrencyAmount(currentCurrencyType), DONT_USE_SHORT_FORMAT, currentCurrencyType)
+        self.bankedCurrencyLabel:SetText(bankedText)
+        self.carriedCurrencyLabel:SetText(carriedText)
+    else
+        local comboBox = self.currenciesComboBox
+        comboBox:ClearItems()
+        
+        local function OnFilterChanged(comboBox, entryText, entry)
+            self:ChangeCurrencyType(entry.currencyType)
+        end
+
+        local currentlySelectedItemEntryIndex
+        for i, currencyType in ipairs(ZO_CURRENCY_DISPLAY_ORDER) do
+            if self.eligibleEntries[currencyType] then
+                local bankedText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(self.queryFunction(currencyType), DONT_USE_SHORT_FORMAT, currencyType, NOT_IS_GAMEPAD, obfuscateAmount)
+                local carriedText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(GetCarriedCurrencyAmount(currencyType), DONT_USE_SHORT_FORMAT, currencyType)
+                local combinedText = zo_strformat(SI_BANK_CURRENCY_TRANSFER_CURRENCY_PAIR_FORMAT, bankedText, carriedText)
+                local entry = comboBox:CreateItemEntry(combinedText, OnFilterChanged)
+                entry.currencyType = currencyType
+                comboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                if currencyType == currentCurrencyType then
+                    currentlySelectedItemEntryIndex = i
+                end
+            end
+        end
+
+        if currentlySelectedItemEntryIndex then
+            comboBox:SelectItemByIndex(currentlySelectedItemEntryIndex)
+        else
+            comboBox:SelectFirstItem()
+        end
+    end
 end
 
 function ZO_BankGenericCurrencyDepositWithdrawDialog:OnCurrencyInputAmountChanged(currencyAmount)
-    --Disable deposit button if you aren't meeting the minimum telvar fee or are depositing zero gold
-    if (self.currencyType == CURT_TELVAR_STONES and currencyAmount >= GetTelvarStoneMinimumDeposit() and currencyAmount > GetTelvarStoneBankingFee()) 
-        or (self.currencyType == CURT_MONEY and currencyAmount > 0) then
+    if currencyAmount > 0 then
         self.depositWithdrawButton:SetState(BSTATE_NORMAL, false)
     else
         self.depositWithdrawButton:SetState(BSTATE_DISABLED, true)
@@ -1625,50 +1936,20 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:OnCurrencyInputAmountChange
 end
 
 function ZO_BankGenericCurrencyDepositWithdrawDialog:SetupDeposit(dialog)
+    local currencyType = self.currencyType
     --Init Currency Input field
-    ZO_DefaultCurrencyInputField_Initialize(self.depositWithdrawCurrency, function(_, amount) self:OnCurrencyInputAmountChanged(amount) end, self.currencyType)
-
-    if self.usesTelvarStones then
-        if self.currencyType == CURT_TELVAR_STONES then
-            local bankFee = GetTelvarStoneBankingFee()
-            if bankFee > 0 then -- if telvar and fee setup labels and use total telvar
-                self.bankingFeeLabel:SetText(zo_strformat(SI_BANK_TELVAR_STONE_BANK_FEE, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(bankFee, useShortFormat, self.currencyType)))
-                self.bankingFeeLabel:SetHidden(false)
-                ZO_DefaultCurrencyInputField_SetCurrencyMax(self.depositWithdrawCurrency, GetCarriedCurrencyAmount(self.currencyType))
-            else
-                self.bankingFeeLabel:SetHidden(true)
-                ZO_DefaultCurrencyInputField_SetCurrencyMax(self.depositWithdrawCurrency, self.maxDepositFunction(self.currencyType))
-            end
-
-            local minDeposit = GetTelvarStoneMinimumDeposit()
-            if minDeposit > 0 then
-                self.minDepositLabel:SetText(zo_strformat(SI_BANK_TELVAR_STONE_MIN_DEPOSIT, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(minDeposit, useShortFormat, self.currencyType)))
-                self.minDepositLabel:SetHidden(false)
-            else
-               self.minDepositLabel:SetHidden(true)
-            end
-        else    --if gold hide both labels and use total gold as input max
-            self.bankingFeeLabel:SetHidden(true)
-            self.minDepositLabel:SetHidden(true)
-
-            ZO_DefaultCurrencyInputField_SetCurrencyMax(self.depositWithdrawCurrency, self.maxDepositFunction(self.currencyType))
-        end
-    else    --if gold only dialog just use total gold as max
-        ZO_DefaultCurrencyInputField_SetCurrencyMax(self.depositWithdrawCurrency, self.maxDepositFunction(self.currencyType))
-    end
+    ZO_DefaultCurrencyInputField_Initialize(self.depositWithdrawCurrency, function(_, amount) self:OnCurrencyInputAmountChanged(amount) end, currencyType)
+    ZO_DefaultCurrencyInputField_SetCurrencyMax(self.depositWithdrawCurrency, self.maxDepositFunction(currencyType))
 
     self:UpdateDepositWithdrawCurrency()
 
     self.depositWithdrawCurrency.OnBeginInput()
+
+    self.withdrawDepositCurrencyHeaderLabel:SetText(GetString(SI_BANK_CURRENCY_VALUE_ENTRY_DEPOSIT_HEADER))
 end
 
 function ZO_BankGenericCurrencyDepositWithdrawDialog:SetupWithdraw()
     self.depositWithdrawButton:SetState(BSTATE_NORMAL, false) --reenable in case deposit disabled it and the user cancelled
-
-    if self.usesTelvarStones then
-        self.bankingFeeLabel:SetHidden(true)
-        self.minDepositLabel:SetHidden(true)
-    end
 
     ZO_DefaultCurrencyInputField_Initialize(self.depositWithdrawCurrency, ON_CURRENCY_CHANGED, self.currencyType)
     ZO_DefaultCurrencyInputField_SetCurrencyMax(self.depositWithdrawCurrency, self.maxWithdrawalFunction(self.currencyType))
@@ -1676,15 +1957,19 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:SetupWithdraw()
     self:UpdateDepositWithdrawCurrency()
 
     self.depositWithdrawCurrency.OnBeginInput()
+
+    self.withdrawDepositCurrencyHeaderLabel:SetText(GetString(SI_BANK_CURRENCY_VALUE_ENTRY_WITHDRAW_HEADER))
 end
 
-function ZO_BankGenericCurrencyDepositWithdrawDialog:ChangeCurrencyType()
-    self:UpdateDepositWithdrawCurrency()
+function ZO_BankGenericCurrencyDepositWithdrawDialog:ChangeCurrencyType(currencyType)
+    if self.currencyType ~= currencyType then
+        self.currencyType = currencyType
 
-    if self.withdrawMode then
-        self:SetupWithdraw()
-    else
-        self:SetupDeposit()
+        if self.withdrawMode then
+            self:SetupWithdraw()
+        else
+            self:SetupDeposit()
+        end
     end
 end
 
@@ -1692,6 +1977,7 @@ function ZO_InventoryManager:CreateBankScene()
     BANK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_PlayerBank)
     BANK_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                         if(newState == SCENE_SHOWING) then
+                                                            self:RefreshMoney()
                                                             if self.isListDirty[INVENTORY_BANK] then
                                                                 local UPDATE_EVEN_IF_HIDDEN = true
                                                                 self:UpdateList(INVENTORY_BANK, UPDATE_EVEN_IF_HIDDEN)
@@ -1699,12 +1985,9 @@ function ZO_InventoryManager:CreateBankScene()
                                                         end
                                                     end)
 
-    ZO_BankGenericCurrencyDepositWithdrawDialog:New("BANK", ZO_PlayerBankDepositWithdrawCurrency, GetBankedCurrencyAmount, DepositCurrencyIntoBank, WithdrawCurrencyFromBank, GetMaxBankDeposit, GetMaxBankWithdrawal)
+    ZO_BankGenericCurrencyDepositWithdrawDialog:New("BANK", ZO_BANKABLE_CURRENCIES, GetBankedCurrencyAmount, DepositCurrencyIntoBank, WithdrawCurrencyFromBank, GetMaxBankDeposit, GetMaxBankWithdrawal)
 
-    --Bank Second Row set visible and first row Telvar stones
-    ZO_PlayerBankInfoBarTelvarStones:SetHidden(false)
     ZO_PlayerBankInfoBarAltMoney:SetHidden(false)
-    ZO_PlayerBankInfoBarAltTelvarStones:SetHidden(false)
     ZO_PlayerBankInfoBarAltFreeSlots:SetHidden(false)
 
     self.bankWithdrawTabKeybindButtonGroup = {
@@ -1724,7 +2007,7 @@ function ZO_InventoryManager:CreateBankScene()
             callback = DisplayBankUpgrade,
         },
         {
-            name = GetString(SI_BANK_WITHDRAW_GOLD_BIND),
+            name = GetString(SI_BANK_WITHDRAW_CURRENCY_BIND),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function() ZO_Dialogs_ShowDialog("BANK_WITHDRAW_GOLD") end,
         },
@@ -1740,7 +2023,7 @@ function ZO_InventoryManager:CreateBankScene()
     self.bankDepositTabKeybindButtonGroup = {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         {
-            name = GetString(SI_BANK_DEPOSIT_GOLD_BIND),
+            name = GetString(SI_BANK_DEPOSIT_CURRENCY_BIND),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function() ZO_Dialogs_ShowDialog("BANK_DEPOSIT_GOLD") end,
         },
@@ -1777,15 +2060,16 @@ function ZO_InventoryManager:CreateBankScene()
     
     local bankScene = ZO_InteractScene:New("bank", SCENE_MANAGER, BANKING_INTERACTION)
     bankScene:RegisterCallback("StateChange",   function(oldState, newState)
-                                                    if(newState == SCENE_SHOWING) then
+                                                    if newState == SCENE_SHOWING then
                                                         self:RefreshAllInventorySlots(INVENTORY_BANK)
                                                         self:UpdateFreeSlots(INVENTORY_BACKPACK)
-                                                        self:RefreshMoney()
-                                                        self:RefreshBankedGold()
-                                                        self:RefreshTelvarStones()
-                                                        self:RefreshBankedTelvarStones()
                                                         bankFragmentBar:SelectFragment(SI_BANK_WITHDRAW)
-                                                    elseif(newState == SCENE_HIDDEN) then
+
+                                                        TriggerTutorial(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED)
+                                                        if IsESOPlusSubscriber() then
+                                                            TriggerTutorial(TUTORIAL_TRIGGER_BANK_OPENED_AS_SUBSCRIBER)
+                                                        end
+                                                    elseif newState == SCENE_HIDDEN then
                                                         ZO_InventorySlot_RemoveMouseOverKeybinds()
                                                         ZO_PlayerInventory_EndSearch(ZO_PlayerBankSearchBox)
                                                         bankFragmentBar:Clear()
@@ -1797,8 +2081,7 @@ function ZO_InventoryManager:IsBanking()
     return GetInteractionType() == INTERACTION_BANK
 end
 
-function ZO_InventoryManager:RefreshUpgradePossible()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.bankDepositTabKeybindButtonGroup)
+function ZO_InventoryManager:RefreshBankUpgradeKeybind()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.bankWithdrawTabKeybindButtonGroup)
 end
 
@@ -1810,18 +2093,26 @@ function ZO_InventoryManager:GetBankItem(slotIndex, bagId)
     return inventory.slots[bagId][slotIndex]
 end
 
-function ZO_InventoryManager:RefreshBankedGold()
+function ZO_InventoryManager:GetContextualInfoBar()
     if self:IsBanking() then
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerBankInfoBarMoney, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerBankInfoBarAltMoney, CURT_MONEY, GetBankedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_BANKED_CURRENCY_OPTIONS)
+        if BANK_FRAGMENT:IsShowing() then
+            return ZO_PlayerBankInfoBar
+        end
+    elseif self:IsGuildBanking() then
+        if GUILD_BANK_FRAGMENT:IsShowing() then
+            return ZO_GuildBankInfoBar
+        end
     end
+    
+    -- default info bar
+    return ZO_PlayerInventoryInfoBar
 end
 
-function ZO_InventoryManager:RefreshBankedTelvarStones()
-    if self:IsBanking() then
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerBankInfoBarTelvarStones, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerBankInfoBarAltTelvarStones, CURT_TELVAR_STONES, GetBankedCurrencyAmount(CURT_TELVAR_STONES), ZO_KEYBOARD_BANKED_TELVAR_OPTIONS)
-    end
+function ZO_InventoryManager:GetContextualMoneyControls()
+    local infoBar = self:GetContextualInfoBar()
+    local moneyBar = infoBar:GetNamedChild("Money")
+    local altMoneyBar = infoBar:GetNamedChild("AltMoney")
+    return moneyBar, altMoneyBar
 end
 
 --Guild Bank
@@ -1831,14 +2122,18 @@ function ZO_InventoryManager:CreateGuildBankScene()
     GUILD_BANK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildBank)
     GUILD_BANK_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                             if(newState == SCENE_SHOWING) then
+                                                                self:RefreshMoney()
                                                                 if self.isListDirty[INVENTORY_GUILD_BANK] then
                                                                     local UPDATE_EVEN_IF_HIDDEN = true
                                                                     self:UpdateList(INVENTORY_GUILD_BANK, UPDATE_EVEN_IF_HIDDEN)
                                                                 end
                                                             end
                                                         end)
+    local function CanWithdrawFunction()
+        return DoesPlayerHaveGuildPermission(GetSelectedGuildBankId(), GUILD_PERMISSION_BANK_VIEW_GOLD)
+    end
 
-    ZO_BankGenericCurrencyDepositWithdrawDialog:New("GUILD_BANK", ZO_PlayerBankDepositWithdrawGold, GetGuildBankedCurrencyAmount, DepositCurrencyIntoGuildBank, WithdrawCurrencyFromGuildBank, GetMaxGuildBankDeposit, GetMaxGuildBankWithdrawal)
+    ZO_BankGenericCurrencyDepositWithdrawDialog:New("GUILD_BANK", ZO_GUILD_BANKABLE_CURRENCIES, GetGuildBankedCurrencyAmount, DepositCurrencyIntoGuildBank, WithdrawCurrencyFromGuildBank, GetMaxGuildBankDeposit, GetMaxGuildBankWithdrawal, CanWithdrawFunction)
 
     --Bank Second Row Infobar set visible
     ZO_GuildBankInfoBarAltMoney:SetHidden(false)
@@ -1862,7 +2157,7 @@ function ZO_InventoryManager:CreateGuildBankScene()
                         end,
         },
         {
-            name = GetString(SI_BANK_WITHDRAW_GOLD_BIND),
+            name = GetString(SI_BANK_WITHDRAW_CURRENCY_BIND),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function() ZO_Dialogs_ShowDialog("GUILD_BANK_WITHDRAW_GOLD") end,
             visible =   function()
@@ -1890,7 +2185,7 @@ function ZO_InventoryManager:CreateGuildBankScene()
                         end,
         },
         {
-            name = GetString(SI_BANK_DEPOSIT_GOLD_BIND),
+            name = GetString(SI_BANK_DEPOSIT_CURRENCY_BIND),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function() ZO_Dialogs_ShowDialog("GUILD_BANK_DEPOSIT_GOLD") end,
             visible =   function()
@@ -1924,7 +2219,6 @@ function ZO_InventoryManager:CreateGuildBankScene()
     local guildBankScene = ZO_InteractScene:New("guildBank", SCENE_MANAGER, GUILD_BANKING_INTERACTION)
     guildBankScene:RegisterCallback("StateChange",  function(oldState, newState)
                                                         if(newState == SCENE_SHOWING) then
-                                                            self:RefreshMoney()
                                                             self:UpdateFreeSlots(INVENTORY_BACKPACK)
                                                             guildBankFragmentBar:SelectFragment(SI_BANK_WITHDRAW)
                                                             ZO_SharedInventory_SelectAccessibleGuildBank(self.lastSuccessfulGuildBankId)
@@ -2006,7 +2300,7 @@ function ZO_InventoryManager:SetGuildBankLoaded()
     self.lastSuccessfulGuildBankId = GetSelectedGuildBankId()
     ZO_GuildBankBackpackLoading:Hide()
     self:RefreshAllGuildBankItems()
-    self:RefreshGuildBankedMoney()
+    self:RefreshMoney()
 end
 
 function ZO_InventoryManager:OnGuildBankOpenError(error)
@@ -2021,18 +2315,9 @@ end
 function ZO_InventoryManager:OnGuildBankDeselected()
     self:ClearAllGuildBankItems()
     ZO_SharedInventory_SelectAccessibleGuildBank(self.lastSuccessfulGuildBankId)
-    self:RefreshGuildBankedMoney()
+    self:RefreshMoney()
     ZO_Dialogs_ReleaseDialog("GUILD_BANK_WITHDRAW_GOLD")
     ZO_Dialogs_ReleaseDialog("GUILD_BANK_DEPOSIT_GOLD")
-end
-
-function ZO_InventoryManager:RefreshGuildBankedMoney()
-    if self:IsGuildBanking() then
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_GuildBankInfoBarMoney, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_GuildBankInfoBarAltMoney, CURT_MONEY, GetGuildBankedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_BANKED_CURRENCY_OPTIONS)
-        --refresh deposit window's guild bank label, RefreshMoney handles it's top info bar, but the guild info hasn't updated when MoneyUpdate fires
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_PlayerInventoryInfoBarAltMoney, CURT_MONEY, GetGuildBankedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_BANKED_CURRENCY_OPTIONS)
-    end
 end
 
 function ZO_InventoryManager:RefreshGuildBankMoneyOperationsPossible(guildId)
@@ -2099,7 +2384,7 @@ end
 ------------
 
 function ZO_InventoryManager_SetQuestToolData(slotControl, questIndex, toolIndex)
-    local questItems = PlayerInventory.inventories[INVENTORY_QUEST_ITEM].slots[questIndex]
+    local questItems = g_playerInventory.inventories[INVENTORY_QUEST_ITEM].slots[questIndex]
 
     if questItems then
         for i = 1, #questItems do
@@ -2117,30 +2402,14 @@ end
 --Event Handlers
 ----------------
 
-local function OnPlayerActivated()
-    PlayerInventory:RefreshAllInventorySlots(INVENTORY_BACKPACK)
-    PlayerInventory:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
-end
-
-local function OnFullInventoryUpdated(bagId)
-    if bagId == BAG_BACKPACK then
-        PlayerInventory:RefreshAllInventorySlots(INVENTORY_BACKPACK)
-    elseif bagId == BAG_BANK then
-        PlayerInventory:RefreshAllInventorySlots(INVENTORY_BANK)
-        PlayerInventory:RefreshUpgradePossible()
-    elseif bagId == BAG_VIRTUAL then
-        PlayerInventory:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
-    end
-end
-
 function ZO_InventoryManager:OnInventorySlotUpdated(bagId, slotIndex)
     local inventory = self.bagToInventoryType[bagId]
 
     if inventory then
-        PlayerInventory:RefreshInventorySlot(inventory, slotIndex, bagId)
+        self:RefreshInventorySlot(inventory, slotIndex, bagId)
         if inventory == INVENTORY_GUILD_BANK then
             -- For the deposit window while guild banking, the guild info isn't available when INVENTORY_BACKPACK updates.
-            PlayerInventory:RefreshInventorySlot(INVENTORY_BACKPACK, slotIndex, BAG_BACKPACK)
+            self:RefreshInventorySlot(INVENTORY_BACKPACK, slotIndex, BAG_BACKPACK)
         end
     end
 
@@ -2150,216 +2419,14 @@ end
 function ZO_InventoryManager:OnInventorySlotLocked(bagId, slotIndex)
     local inventory = self.bagToInventoryType[bagId]
     if inventory then
-        PlayerInventory:RefreshInventorySlotLocked(inventory, slotIndex, true, bagId)
+        self:RefreshInventorySlotLocked(inventory, slotIndex, true, bagId)
     end
 end
 
 function ZO_InventoryManager:OnInventorySlotUnlocked(bagId, slotIndex)
     local inventory = self.bagToInventoryType[bagId]
     if inventory then
-        PlayerInventory:RefreshInventorySlotLocked(inventory, slotIndex, false, bagId)
-    end
-end
-
-local function OnRequestDestroyItem(eventCode, bag, slot, itemCount, name, needsConfirm)
-    local _, actualItemCount = GetItemInfo(bag, slot)
-    if itemCount == 0 and actualItemCount > 1 then
-        itemCount = actualItemCount
-    end
-
-    local itemLink = GetItemLink(bag, slot)
-    if(needsConfirm) then
-        local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
-        if IsInGamepadPreferredMode() then
-            dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
-        end
-        ZO_Dialogs_ShowPlatformDialog(dialogName, nil, {mainTextParams = {itemLink, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION)}})
-    else
-        ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, {mainTextParams = {itemLink, itemCount}})
-    end
-end
-
-local function OnCancelRequestDestroyItem()
-    ZO_Dialogs_ReleaseDialog("DESTROY_ITEM_PROMPT")
-    ZO_Dialogs_ReleaseDialog("CONFIRM_DESTROY_ITEM_PROMPT")
-end
-
-local function OnLevelUpdate(eventCode, tag, level)
-    if tag == "player" then
-        PlayerInventory:RefreshAllInventoryOverlays(INVENTORY_BACKPACK)
-    end
-end
-
-local function OnChampionPointsGained()
-    PlayerInventory:RefreshAllInventoryOverlays(INVENTORY_BACKPACK)
-end
-
-local function OnQuestsUpdated()
-    --the quest we were planning to abandon may be gone, kill the prompt
-    ZO_Dialogs_ReleaseDialog("ABANDON_QUEST")
-    PlayerInventory:RefreshAllQuests()
-    CALLBACK_MANAGER:FireCallbacks("QuestUpdate")
-end
-
-local function OnSingleQuestUpdated(journalIndex)
-    PlayerInventory:RefreshQuest(journalIndex)
-    CALLBACK_MANAGER:FireCallbacks("QuestUpdate")
-end
-
-local function OnUpdateCooldowns(eventCode)
-    PlayerInventory:UpdateItemCooldowns(INVENTORY_BACKPACK)
-    PlayerInventory:UpdateItemCooldowns(INVENTORY_QUEST_ITEM)
-end
-
-local function OnOpenBank()
-    if not IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Show("bank")
-    end
-end
-
-local function OnCloseBank()
-    if not IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Hide("bank")
-    end
-end
-
-local function OnOpenGuildBank()
-    if not IsInGamepadPreferredMode() then
-        PlayerInventory:OpenGuildBank()
-    end
-end
-
-local function OnCloseGuildBank()
-    if not IsInGamepadPreferredMode() then
-        PlayerInventory:CloseGuildBank()
-    end
-end
-
-local function OnGuildBankSelected(eventCode, guildId)
-    PlayerInventory:SetGuildBankLoading(guildId)
-end
-
-local function OnGuildBankDeselected()
-    PlayerInventory:OnGuildBankDeselected()
-end
-
-local function OnGuildBankItemsReady()
-    PlayerInventory:SetGuildBankLoaded()
-end
-
-local function OnGuildBankOpenError(eventCode, error)
-    PlayerInventory:OnGuildBankOpenError(error)
-end
-
-local function OnMoneyUpdated(eventCode, newMoney, oldMoney, reason)
-    PlayerInventory:RefreshMoney()
-end
-
-local function OnBankedGoldUpdated(eventCode, newGold, oldGold)
-    PlayerInventory:RefreshBankedGold()
-end
-
-local function OnBankedTelvarStonesUpdated(eventCode, newStones, oldStones)
-    PlayerInventory:RefreshBankedTelvarStones()
-end
-
-local function OnGuildSizeChanged()
-    PlayerInventory:GuildSizeChanged()
-end
-
-local function OnGuildBankedMoneyUpdated(eventCode, newMoney, oldMoney)
-    PlayerInventory:RefreshGuildBankedMoney()
-end
-
-local function OnTelvarStonesUpdated(eventCode, newTelvarStones, oldTelvarStones, changeReason)
-    PlayerInventory:RefreshTelvarStones()
-end
-
-BUY_BAG_SPACE_INTERACTION =
-{
-    type = "Buy Bag Space",
-    interactTypes = { INTERACTION_BUY_BAG_SPACE },
-}
-
-local function OnBuyBagSpace(eventCode, cost)
-    if IsInGamepadPreferredMode() then
-        BUY_BAG_SPACE_GAMEPAD:Show(cost)
-    else
-        if(not ZO_Dialogs_FindDialog("BUY_BAG_SPACE")) then
-            ZO_Dialogs_ShowDialog("BUY_BAG_SPACE", {cost = cost})
-            INTERACT_WINDOW:OnBeginInteraction(BUY_BAG_SPACE_INTERACTION)
-        end
-    end
-end
-
-local function OnBoughtBagSpace()
-    PLAYER_INVENTORY:UpdateFreeSlots(INVENTORY_BACKPACK)
-end
-
-local function OnMountInfoUpdate()
-    PLAYER_INVENTORY:UpdateFreeSlots(INVENTORY_BACKPACK)
-end
-
-local function OnBuyBankSpace(eventCode, cost)
-     if IsInGamepadPreferredMode() then
-        BUY_BANK_SPACE_GAMEPAD:Show(cost)
-    else
-        if(not ZO_Dialogs_FindDialog("BUY_BANK_SPACE")) then
-            ZO_Dialogs_ShowDialog("BUY_BANK_SPACE", {cost = cost})
-        end
-    end
-end
-
-local function OnBoughtBankSpace()
-    PLAYER_INVENTORY:UpdateFreeSlots(INVENTORY_BANK)
-end
-
-local function OnCloseBuySpace()
-    ZO_Dialogs_ReleaseDialog("BUY_BAG_SPACE")
-    ZO_Dialogs_ReleaseDialog("BUY_BANK_SPACE")
-
-    BUY_BAG_SPACE_GAMEPAD:Hide()
-end
-
-local function OnPlayerDead()
-    PlayerInventory:RefreshAllInventoryOverlays(INVENTORY_BACKPACK)
-    PlayerInventory.itemsLockedDueToDeath = true
-end
-
-local function OnPlayerAlive()
-    PlayerInventory:RefreshAllInventoryOverlays(INVENTORY_BACKPACK)
-    PlayerInventory.itemsLockedDueToDeath = false
-end
-
-local function HandleCursorPickup(eventCode, cursorType, unused1, unused2, unused3, unused4, unused5, unused6, itemSoundCategory)
-    if cursorType == MOUSE_CONTENT_INVENTORY_ITEM or cursorType == MOUSE_CONTENT_EQUIPPED_ITEM or cursorType == MOUSE_CONTENT_QUEST_ITEM then
-        ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, false, SI_INVENTORY_LANDING_AREA_MOVE_TO_BANK)
-        ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_MOVE_TO_BACKPACK)
-    elseif cursorType == MOUSE_CONTENT_STORE_ITEM then
-        ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_BUY_ITEM)
-    elseif cursorType == MOUSE_CONTENT_STORE_BUYBACK_ITEM then
-        ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false, SI_INVENTORY_LANDING_AREA_BUYBACK_ITEM)
-    end
-
-    PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_PICKUP)
-end
-
-local function HandleCursorCleared(eventCode, oldCursorType)
-    ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, true)
-    ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, true)
-end
-
-local function OnGuildRanksChanged(_, guildId)
-    PlayerInventory:RefreshGuildBankMoneyOperationsPossible(guildId)
-end
-
-local function OnGuildRankChanged(_, guildId)
-    PlayerInventory:RefreshGuildBankMoneyOperationsPossible(guildId)
-end
-
-local function OnGuildMemberRankChanged(_, guildId, displayName)
-    if(displayName == GetDisplayName()) then
-        PlayerInventory:RefreshGuildBankMoneyOperationsPossible(guildId)
+        self:RefreshInventorySlotLocked(inventory, slotIndex, false, bagId)
     end
 end
 
@@ -2372,11 +2439,11 @@ end
 
 function ZO_PlayerInventory_OnSearchTextChanged(editBox)
     if editBox == ZO_PlayerInventorySearchBox then
-        PlayerInventory:UpdateList(PlayerInventory.selectedTabType)
+        g_playerInventory:UpdateList(g_playerInventory.selectedTabType)
     elseif editBox == ZO_CraftBagSearchBox then
-        PlayerInventory:UpdateList(INVENTORY_CRAFT_BAG)
+        g_playerInventory:UpdateList(INVENTORY_CRAFT_BAG)
     else
-        PlayerInventory:UpdateList(INVENTORY_BANK)
+        g_playerInventory:UpdateList(INVENTORY_BANK)
     end
 end
 
@@ -2420,76 +2487,8 @@ function ZO_PlayerInventory_InitSortHeaderIcon(header, icon, sortUpIcon, sortDow
 end
 
 function ZO_PlayerInventory_Initialize()
-    PlayerInventory = ZO_InventoryManager:New()
-    PLAYER_INVENTORY = PlayerInventory
-
-    PlayerInventory.itemsLockedDueToDeath = IsUnitDead("player")
-
-    PlayerInventory:SetupInitialFilter()
-
-    --inventory events
-    SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", OnFullInventoryUpdated)
-    SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", function(bagId, slotIndex) PLAYER_INVENTORY:OnInventorySlotUpdated(bagId, slotIndex) end)
-
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, function(event, bagId, slotIndex) PLAYER_INVENTORY:OnInventorySlotLocked(bagId, slotIndex) end)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, function(event, bagId, slotIndex) PLAYER_INVENTORY:OnInventorySlotUnlocked(bagId, slotIndex) end)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_MOUSE_REQUEST_DESTROY_ITEM, OnRequestDestroyItem)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_CANCEL_MOUSE_REQUEST_DESTROY_ITEM, OnCancelRequestDestroyItem)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, OnTelvarStonesUpdated)
-
-    --quest item events
-    SHARED_INVENTORY:RegisterCallback("FullQuestUpdate", OnQuestsUpdated)
-    SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", OnSingleQuestUpdated)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_ACTION_UPDATE_COOLDOWNS, OnUpdateCooldowns)
-
-    --bank events
-    ZO_PlayerInventory:RegisterForEvent(EVENT_OPEN_BANK, OnOpenBank)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_CLOSE_BANK, OnCloseBank)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_BANKED_MONEY_UPDATE, OnBankedGoldUpdated)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_BANKED_TELVAR_STONES_UPDATE, OnBankedTelvarStonesUpdated)
-
-    --guild bank events
-    ZO_PlayerInventory:RegisterForEvent(EVENT_OPEN_GUILD_BANK, OnOpenGuildBank)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_CLOSE_GUILD_BANK, OnCloseGuildBank)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_BANK_SELECTED, OnGuildBankSelected)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_BANK_DESELECTED, OnGuildBankDeselected)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_BANK_ITEMS_READY, OnGuildBankItemsReady)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankOpenError)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_BANKED_MONEY_UPDATE, OnGuildBankedMoneyUpdated)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_RANKS_CHANGED, OnGuildRanksChanged)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, OnGuildRankChanged)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_MEMBER_ADDED, OnGuildSizeChanged)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_GUILD_MEMBER_REMOVED, OnGuildSizeChanged)
-
-    --inventory upgrade events
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_BUY_BAG_SPACE, OnBuyBagSpace)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_BOUGHT_BAG_SPACE, OnBoughtBagSpace)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_MOUNT_INFO_UPDATED, OnMountInfoUpdate)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_BUY_BANK_SPACE, OnBuyBankSpace)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_BOUGHT_BANK_SPACE, OnBoughtBankSpace)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_INVENTORY_CLOSE_BUY_SPACE, OnCloseBuySpace)
-
-    --player events
-    ZO_PlayerInventory:RegisterForEvent(EVENT_PLAYER_DEAD, OnPlayerDead)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_PLAYER_ALIVE, OnPlayerAlive)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_LEVEL_UPDATE, OnLevelUpdate)
-    ZO_PlayerInventory:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, OnChampionPointsGained)
-
-    PlayerInventory:RefreshAllInventorySlots(INVENTORY_BACKPACK)
-    PlayerInventory:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
-    PlayerInventory:RefreshAllInventorySlots(INVENTORY_BANK)
-    PlayerInventory:RefreshAllQuests()
-    PlayerInventory:RefreshMoney()
-    PlayerInventory:RefreshTelvarStones()
-
-    PlayerInventory:CreateBankScene()
-    PlayerInventory:CreateGuildBankScene()
-    PlayerInventory:CreateCraftBagFragment()
+    -- ZO_PlayerInventory is used for event registration only. There are multiple inventory controls, but only one manager is needed.
+    PLAYER_INVENTORY = ZO_InventoryManager:New(ZO_PlayerInventory)
 end
 
 --Select Guild Bank Dialog

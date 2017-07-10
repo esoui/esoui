@@ -156,4 +156,4 @@ if IsSystemUsingHDR() then
     })
 end
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_CINEMATIC, ZO_OptionsPanel_Gamepad_Pregame_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_CINEMATIC, ZO_OptionsPanel_Gamepad_Pregame_ControlData)

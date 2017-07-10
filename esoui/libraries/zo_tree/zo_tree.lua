@@ -211,7 +211,18 @@ end
 function ZO_Tree:ToggleNode(treeNode)
     if treeNode:IsEnabled() and (not self.exclusive or not treeNode:IsOpen()) then
         if self.scrollControl and not treeNode:IsOpen() then
-            ZO_Scroll_SetScrollToTargetControl(self.scrollControl, treeNode:GetControl())
+            local rootChildren = self.rootNode:GetChildren()
+            local previousChildrenHeight = 0
+            for i = 1, #rootChildren do
+                local rootChild = rootChildren[i]
+                if rootChild:IsOpen() then
+                    previousChildrenHeight = previousChildrenHeight + rootChild.childrenHeight
+                end
+            end
+            -- new node's height subtracted from the previously openned nodes' heights
+            -- this is the change in height the tree will have, which will be needed to calculate the scroll's animation
+            local extentDelta = treeNode.childrenHeight - previousChildrenHeight
+            ZO_Scroll_SetScrollToTargetControl(self.scrollControl, treeNode:GetControl(), extentDelta)
             self.scrollTargetNode = treeNode
         end
         self:SetNodeOpen(treeNode, not treeNode:IsOpen(), USER_REQUESTED_OPEN)

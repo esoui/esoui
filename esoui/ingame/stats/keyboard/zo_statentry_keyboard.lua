@@ -13,7 +13,7 @@ function ZO_StatEntry_Keyboard:Initialize(control, statType, statObject)
     self.statObject = statObject
     self.tooltipAnchorSide = RIGHT
 
-    self.control.name:SetText(GetString("SI_DERIVEDSTATS", statType))
+    self.control.name:SetText(zo_strformat(SI_STAT_NAME_FORMAT, GetString("SI_DERIVEDSTATS", statType)))
     
     local function UpdateStatValue()
         self:UpdateStatValue()
@@ -117,7 +117,7 @@ function ZO_StatsEntry_OnMouseEnter(control)
 
             local value = statEntry:GetValue()
             local displayValue = statEntry:GetDisplayValue()
-            local statName = GetString("SI_DERIVEDSTATS", statType)
+            local statName = zo_strformat(SI_STAT_NAME_FORMAT, GetString("SI_DERIVEDSTATS", statType))
 
             InformationTooltip:AddLine(statName, "", ZO_NORMAL_TEXT:UnpackRGBA())
             InformationTooltip:AddLine(zo_strformat(description, displayValue))

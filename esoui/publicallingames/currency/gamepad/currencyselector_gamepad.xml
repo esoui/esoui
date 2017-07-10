@@ -1,0 +1,110 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GamepadCurrencySelector_ButtonBumpUpAnimation">
+            <Animations>
+                <TranslateAnimation duration="ZO_CURRENCY_SELECTOR_BUTTON_ANIMATION_DURATION_GAMEPAD" deltaX="0" deltaY="-5" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+      
+        <AnimationTimeline name="ZO_GamepadCurrencySelector_ButtonBumpDownAnimation">
+            <Animations>
+                <TranslateAnimation duration="ZO_CURRENCY_SELECTOR_BUTTON_ANIMATION_DURATION_GAMEPAD" deltaX="0" deltaY="5" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+  
+    <Controls>
+        <Control name="ZO_GamepadCurrencySelectorDigitTemplate" virtual="true">
+            <Dimensions x="25" y="50"/>
+            <Controls>
+                <Label name="$(parent)Display" font="ZoFontGamepad34" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <AnchorFill/>
+                </Label>
+
+                <Button name="$(parent)Decrease">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="TOP" relativeTo="$(parent)Backdrop"  relativePoint="BOTTOM" offsetY="3"/>
+                    <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds"
+                              pressed="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds"
+                              disabled="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds"/>
+                </Button>
+
+                <Button name="$(parent)Increase">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Backdrop"  relativePoint="TOP" offsetY="-3"/>
+                    <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/arrow_up.dds"
+                              pressed="EsoUI/Art/Miscellaneous/Gamepad/arrow_up.dds"
+                              disabled="EsoUI/Art/Miscellaneous/Gamepad/arrow_up.dds"/>
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadCurrencySelectorTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)Ones" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT"/>
+                </Control>
+
+                <Control name="$(parent)Tens" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Ones" relativePoint="LEFT"/>
+                </Control>
+
+                <Control name="$(parent)Hundreds" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tens" relativePoint="LEFT"/>
+                </Control>
+
+                <Label name="$(parent)Spacer1" font="ZoFontGamepad34" text="SI_DIGIT_GROUP_SEPARATOR">
+                    <Dimensions x="10"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Hundreds" relativePoint="LEFT"/>
+                </Label>
+
+                <Control name="$(parent)Thousands" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Spacer1" relativePoint="LEFT"/>
+                </Control>
+
+                <Control name="$(parent)TenThousands" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Thousands" relativePoint="LEFT"/>
+                </Control>
+
+                <Control name="$(parent)HundredThousands" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TenThousands" relativePoint="LEFT"/>
+                </Control>
+
+                <Label name="$(parent)Spacer2" font="ZoFontGamepad34" text="SI_DIGIT_GROUP_SEPARATOR">
+                    <Dimensions x="10"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)HundredThousands" relativePoint="LEFT"/>
+                </Label>
+
+                <Control name="$(parent)Millions" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Spacer2" relativePoint="LEFT"/>
+                </Control>
+
+                <Control name="$(parent)TenMillions" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Millions" relativePoint="LEFT"/>
+                </Control>
+
+                <Control name="$(parent)HundredMillions" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TenMillions" relativePoint="LEFT"/>
+                </Control>
+
+                <Label name="$(parent)Spacer3" font="ZoFontGamepad34" text="SI_DIGIT_GROUP_SEPARATOR">
+                    <Dimensions x="10"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)HundredMillions" relativePoint="LEFT"/>
+                </Label>
+
+                <Control name="$(parent)Billions" inherits="ZO_GamepadCurrencySelectorDigitTemplate">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Spacer3" relativePoint="LEFT"/>
+                </Control>
+            </Controls>
+        </Control>
+
+    </Controls>
+</GuiXml>

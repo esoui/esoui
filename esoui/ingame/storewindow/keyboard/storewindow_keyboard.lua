@@ -195,6 +195,10 @@ function ZO_StoreManager:New(container)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(manager.keybindStripDescriptor)
 
             manager:UpdateFreeSlots()
+        elseif not INVENTORY_FRAGMENT:IsHidden() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(manager.keybindStripDescriptor)
+
+            manager.modeBar:UpdateActiveKeybind()
         end
     end
 
@@ -477,7 +481,7 @@ function ZO_StoreManager:RefreshCurrency()
     local gold = (self.storeUsesMoney or repairAllCost > 0) and self.currentMoney or 0
 
     ZO_CurrencyControl_SetCurrencyData(self.currenyMoneyDisplay, CURT_MONEY, gold, self.storeUsesMoney)
-    ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
 
     -- We're laying out the player alternate currency labels this way to ensure that we never display more than two labels, even if 
     -- more than two are applicable to this store, and to ensure that they maintain a consistent priority
@@ -488,15 +492,15 @@ function ZO_StoreManager:RefreshCurrency()
     self.currency2Display.isInUse = false
     
     if self.storeUsesAP then
-        self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_ALTERNATE_CURRENCY_OPTIONS)
+        self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end
 
     if self.storeUsesTelvarStones then
-        self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
+        self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end 
 
     if self.storeUsesWritVouchers then
-        self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CARRIED_WRIT_VOUCHER_OPTIONS)
+        self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end 
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

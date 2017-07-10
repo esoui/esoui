@@ -365,10 +365,10 @@
 
         <Control name="ZO_ThinTallRightPanelBG" inherits="ZO_ThinRightPanelBG" virtual="true">
             <Dimensions y="645" />
-            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="-10"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="-90"/>
             <Controls>
                 <Texture name="$(parent)Left" override="true">
-                    <Dimensions y="900" />
+                    <Dimensions y="800" />
                 </Texture>
             </Controls>
         </Control>
@@ -447,66 +447,6 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_PanelBackgroundHorizontal" tier="LOW" layer="BACKGROUND" virtual="true">
-            <AnchorFill/>
-
-            <OnInitialized>
-                ZO_PanelBackgroundHorizontalDoRotations(self)
-            </OnInitialized>
-
-            <Controls>
-                <Texture name="$(parent)Center" color="000000">
-                    <AnchorFill />
-                </Texture>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/window_bg_falloff.dds">
-                    <Dimensions x="64"/>
-                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT"/>
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT"/>
-                </Texture>
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/window_bg_falloff.dds">
-                    <Dimensions x="64"/>
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT"/>
-                    <TextureCoords top="1" bottom="0" left="0" right="1"/>
-                </Texture>
-                <Texture name="$(parent)Top" textureFile="EsoUI/Art/Miscellaneous/window_edge.dds">
-                    <Dimensions y="4"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Left" relativePoint="TOPLEFT"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="TOPRIGHT"/>
-                </Texture>
-                <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Miscellaneous/window_edge.dds">
-                    <Dimensions y="4"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMRIGHT"/>
-                </Texture>
-            </Controls>
-        </Control>
-
-        <Backdrop name="ZO_PanelFrame" inherits="ZO_DefaultBackdrop" virtual="true">
-            <Anchor point="TOPLEFT" offsetX="0" offsetY="41"/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="0"/>
-        </Backdrop>
-
-        <Control name="ZO_BottomTabAnchor" virtual="true">
-            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="8" offsetY="-8"/>
-        </Control>
-
-        <Texture name="ZO_PanelBackgroundLeft" inherits="ZO_BackgroundLeft" virtual="true">
-            <Dimensions x="256" y="512"/>
-        </Texture>
-
-        <Texture name="ZO_PanelBackgroundRight" virtual="true">
-            <Dimensions x="128" y="512"/>
-        </Texture>
-
-        <Texture name="ZO_DoublePanelBackgroundLeft" inherits="ZO_BackgroundLeft" virtual="true">
-            <Dimensions x="512" y="512"/>
-        </Texture>
-
-        <Texture name="ZO_DoublePanelBackgroundRight" virtual="true">
-            <Dimensions x="256" y="512"/>
-        </Texture>
-
         <Control name="ZO_RightFullscreenPanelBG" virtual="true">
             <Dimensions x="640" />
             <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
@@ -564,60 +504,6 @@
 
             <TextureCoords left="0" right="1" top="0.01" bottom="1" />
         </Texture>
-
-        <Control name="ZO_VerticalFadingMenu" virtual="true">
-            <Controls>
-                <Texture name="$(parent)TopLeft" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_top.dds">
-                    <Dimensions x="16" y="16" />
-                    <Anchor point="TOPLEFT" />
-                    <TextureCoords left="0" right="0.25" top="0" bottom="1" />
-                </Texture>
-                <Texture name="$(parent)TopRight" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_top.dds">
-                    <Dimensions x="16" y="16" />
-                    <Anchor point="TOPRIGHT" />
-                    <TextureCoords left="0.75" right="1" top="0" bottom="1" />
-                </Texture>
-                <Texture name="$(parent)TopCenter" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_top.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopRight" relativePoint="BOTTOMLEFT" />
-                    <TextureCoords left="0.25" right="0.75" top="0" bottom="1" />
-                </Texture>
-
-                <Texture name="$(parent)BottomLeft" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_bottom.dds">
-                    <Dimensions x="16" y="64" />
-                    <Anchor point="BOTTOMLEFT" />
-                    <TextureCoords left="0" right="0.25" top="0" bottom="1" />
-                </Texture>
-                <Texture name="$(parent)BottomRight" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_bottom.dds">
-                    <Dimensions x="16" y="64" />
-                    <Anchor point="BOTTOMRIGHT" />
-                    <TextureCoords left="0.75" right="1" top="0" bottom="1" />
-                </Texture>
-                <Texture name="$(parent)BottomCenter" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_bottom.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)BottomLeft" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomRight" relativePoint="BOTTOMLEFT" />
-                    <TextureCoords left="0.25" right="0.75" top="0" bottom="1" />
-                </Texture>
-
-                <Texture name="$(parent)CenterLeft" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_middle.dds">
-                    <Dimensions x="16" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BottomLeft" relativePoint="TOPLEFT" />
-                    <TextureCoords left="0" right="0.25" top="0" bottom="1" />
-                </Texture>
-                <Texture name="$(parent)CenterRight" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_middle.dds">
-                    <Dimensions x="16" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopRight" relativePoint="BOTTOMRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomRight" relativePoint="TOPRIGHT" />
-                    <TextureCoords left="0.75" right="1" top="0" bottom="1" />
-                </Texture>
-                <Texture name="$(parent)CenterCenter" textureFile="EsoUI/Art/Miscellaneous/slottingFrame_vertical_middle.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)CenterLeft" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CenterRight" relativePoint="BOTTOMLEFT" />
-                    <TextureCoords left="0.25" right="0.75" top="0" bottom="1" />
-                </Texture>
-            </Controls>
-        </Control>
         
         <Cooldown name="ZO_DefaultCooldown" leadingEdgeTexture="EsoUI/Art/ActionBar/coolDown_leadingEdge.dds" fillColor="000000" alpha=".85" hidden="true" virtual="true">
             <AnchorFill />
@@ -825,10 +711,6 @@
                 </Texture>
             </Controls>
         </Cooldown>
-
-        <Texture name="ZO_UserAreaIconTexture" virtual="true">
-            <Dimensions x="24" y="24" />
-        </Texture> 
 
         <Texture name="ZO_ScalableBackgroundFadedEdge_BackgroundTexture" textureFile="EsoUI/Art/Windows/Gamepad/gp_HUD_Window.dds" virtual="true" />
         <Control name="ZO_ScalableBackgroundFadedEdge" virtual="true">

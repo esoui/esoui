@@ -419,7 +419,7 @@
                 <Texture name="$(parent)LeftBracket" tier="MEDIUM" resizeToFitFile="true">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BgContainer" relativePoint="TOPLEFT" offsetX="26" offsetY="-20"/>
                     <Controls>
-                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_left.dds" inherits="ZO_DifficultyBracketGlow">
+                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_left.dds" inherits="ZO_DifficultyBracketGlow" hidden="true">
                             <Anchor point="RIGHT"/>
                         </Texture>
                         <Texture name="$(parent)Glow" inherits="ZO_DifficultyBracketGlow">
@@ -430,7 +430,7 @@
                 <Texture name="$(parent)RightBracket" tier="MEDIUM" resizeToFitFile="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BgContainer" relativePoint="TOPRIGHT" offsetX="-26" offsetY="-20"/>
                     <Controls>
-                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_right.dds" inherits="ZO_DifficultyBracketGlow">
+                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_right.dds" inherits="ZO_DifficultyBracketGlow" hidden="true">
                             <Anchor point="RIGHT"/>
                         </Texture>
                         <Texture name="$(parent)Glow" inherits="ZO_DifficultyBracketGlow">

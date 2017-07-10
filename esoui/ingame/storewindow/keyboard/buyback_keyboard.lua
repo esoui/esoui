@@ -113,7 +113,7 @@ end
 function BuyBack:UpdateMoney()        
     if not self.control:IsControlHidden() then
         self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, self.currentMoney, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, self.currentMoney, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end
 end
 

@@ -691,6 +691,7 @@ local function CreateList(self)
         slot = slot + 1
     end
 
+    local numCharacterSlotsAdded = 0
     local characterDataList = ZO_CharacterSelect_GetCharacterDataList()
     if  #characterDataList > 0 then
         local isFirstEntry = true
@@ -709,6 +710,7 @@ local function CreateList(self)
                     data.slot = slot
                     data.type = ENTRY_TYPE_CHARACTER
                     slot = slot + 1
+                    numCharacterSlotsAdded = numCharacterSlotsAdded + 1
                     AddCharacterListEntry(template , data, self.characterList)
                 end
             end
@@ -734,6 +736,7 @@ local function CreateList(self)
                 data.slot = slot
                 data.type = ENTRY_TYPE_CHARACTER
                 slot = slot + 1
+                numCharacterSlotsAdded = numCharacterSlotsAdded + 1
                 AddCharacterListEntry(template, data, self.characterList)
             end
         end
@@ -742,11 +745,11 @@ local function CreateList(self)
 
     if self.serviceMode == SERVICE_TOKEN_NONE then
         -- Add Create New
-        if slot <= ZO_CharacterSelect_Gamepad_GetMaxCharacters() then
+        if numCharacterSlotsAdded < ZO_CharacterSelect_Gamepad_GetMaxCharacters() then
             local data = { index = slot, type = ENTRY_TYPE_CREATE_NEW, header = GetString(SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_HEADER), icon = CREATE_NEW_ICON, text = GetString(SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_ENTRY)}
             AddCharacterListEntry("ZO_GamepadMenuEntryTemplateWithHeader", data, self.characterList)
         end
-    elseif self.characterList:GetNumEntries() == 0 then
+    elseif numCharacterSlotsAdded == 0 then
         -- In a service mode, but no characters qualify for the service
         self.characterList:SetNoItemText(GetString(SI_SERVICE_NO_ELIGIBLE_CHARACTERS))
         ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorUseServiceToken)

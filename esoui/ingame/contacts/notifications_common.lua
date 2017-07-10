@@ -666,19 +666,21 @@ do
                                 notificationType = NOTIFICATION_TYPE_POINTS_RESET,
                                 message = GetString(SI_NOTIFICATIONS_POINTS_RESET_SKILLS),
                                 shortDisplayText = GetString(SI_SKILLS_FORCE_RESPEC_TITLE),
-                                pointType = POINT_TYPE_SKILL
+                                pointType = POINT_TYPE_SKILL,
+                                secsSinceRequest = ZO_NormalizeSecondsSince(0),
                             }
                         )
         end
 
         if pointResetCallbackObject:GetAttributesReset() then
-            table.insert(self.list,  
+            table.insert(self.list,
                             {
                                 dataType = NOTIFICATIONS_ALERT_DATA,
                                 notificationType = NOTIFICATION_TYPE_POINTS_RESET,
                                 message = GetString(SI_NOTIFICATIONS_POINTS_RESET_ATTRIBUTES),
                                 shortDisplayText = GetString(SI_ATTRIBUTE_FORCE_RESPEC_TITLE),
-                                pointType = POINT_TYPE_ATTRIBUTE
+                                pointType = POINT_TYPE_ATTRIBUTE,
+                                secsSinceRequest = ZO_NormalizeSecondsSince(0),
                             }
                         )
         end
@@ -1187,6 +1189,7 @@ function ZO_DuelInviteProvider:BuildNotificationList()
             message = zo_strformat(SI_DUEL_INVITE_MESSAGE, formattedInviterNames),
             shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, userFacingInviterName),
             characterNameForGamercard = ZO_StripGrammarMarkupFromCharacterName(duelPartnerCharacterName),
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
         })
     end
 end
@@ -1207,9 +1210,8 @@ ZO_EsoPlusSubscriptionStatusProvider = ZO_NotificationProvider:Subclass()
 function ZO_EsoPlusSubscriptionStatusProvider:New(notificationManager)
     local provider = ZO_NotificationProvider.New(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_SUBSCRIPTION_STATUS_CHANGED)
-    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_SUBSCRIPTION_NOTIFICATION_CLEARED)
-    provider.hasMoreInfo = GetEsoPlusSubscriptionInfoHelpIndices() ~= nil
+    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED)
+    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_FREE_TRIAL_NOTIFICATION_CLEARED)
 
     return provider
 end
@@ -1217,7 +1219,7 @@ end
 function ZO_EsoPlusSubscriptionStatusProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    if HasEsoPlusSubscriptionNotification() then
+    if HasEsoPlusFreeTrialNotification() then
         self:AddNotification()
     end
 end
@@ -1227,18 +1229,27 @@ function ZO_EsoPlusSubscriptionStatusProvider:AddNotification()
 
     local isSubscriber = IsESOPlusSubscriber()
     local message
+    local helpCategoryIndex
+    local helpIndex
     if isSubscriber then
         message = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_STARTED)
+        helpCategoryIndex, helpIndex = GetEsoPlusSubscriptionBenefitsInfoHelpIndices()
     else
         message = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_ENDED)
+        helpCategoryIndex, helpIndex = GetEsoPlusSubscriptionLapsedBenefitsInfoHelpIndices()
     end
+
+    local hasMoreInfo = helpCategoryIndex ~= nil
 
     local newListEntry = {
         notificationType = NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION,
         dataType = NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA,
         shortDisplayText = notificationTypeString,
         message = message,
-        moreInfo = self.hasMoreInfo,
+        moreInfo = hasMoreInfo,
+
+        helpCategoryIndex = helpCategoryIndex,
+        helpIndex = helpIndex,
 
         --For sorting
         displayName = notificationTypeString,
@@ -1249,11 +1260,11 @@ end
 
 function ZO_EsoPlusSubscriptionStatusProvider:Accept()
     ShowEsoPlusPage(MARKET_OPEN_OPERATION_NOTIFICATION)
-    ClearEsoPlusSubscriptionNotification()
+    ClearEsoPlusFreeTrialNotification()
 end
 
 function ZO_EsoPlusSubscriptionStatusProvider:Decline()
-    ClearEsoPlusSubscriptionNotification()
+    ClearEsoPlusFreeTrialNotification()
 end
 
 -- Sort List

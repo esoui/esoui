@@ -540,7 +540,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL), nil, nil, function() self.mailView.subjectEdit.edit:TakeFocus() end)
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_BODY_LABEL), nil, nil, function() self.mailView.bodyEdit.edit:TakeFocus() end)
     self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCarriedCurrencyAmount(CURT_MONEY)) end)
-    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), nil, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_MONEY) end)
+    self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), nil, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
 
 	self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox) 
                                                                     RefreshKeybind()

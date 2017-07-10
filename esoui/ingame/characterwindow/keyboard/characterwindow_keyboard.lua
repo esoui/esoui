@@ -117,16 +117,18 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
         stackCountLabel:SetText("")
     end
 
-    if(not disabled and copyFromLinkedFn) then
-        iconControl:SetDesaturation(0)
-        iconControl:SetColor(1, 0, 0, .5)
-    else
-        iconControl:SetColor(1, 1, 1, 1)
-
-        if(not disabled and locked) then
-            iconControl:SetDesaturation(1)
-        else
+    if not g_isReadOnly then
+        if(not disabled and copyFromLinkedFn) then
             iconControl:SetDesaturation(0)
+            iconControl:SetColor(1, 0, 0, .5)
+        else
+            iconControl:SetColor(1, 1, 1, 1)
+
+            if(not disabled and locked) then
+                iconControl:SetDesaturation(1)
+            else
+                iconControl:SetDesaturation(0)
+            end
         end
     end
 end

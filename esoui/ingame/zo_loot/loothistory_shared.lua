@@ -5,6 +5,7 @@ LOOT_ENTRY_TYPE_ITEM = 4
 LOOT_ENTRY_TYPE_COLLECTIBLE = 5
 LOOT_ENTRY_TYPE_MEDAL = 6
 LOOT_ENTRY_TYPE_SCORE = 7
+LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 8
 
 --
 --[[ ZO_LootHistory_Shared ]]--
@@ -47,9 +48,19 @@ do
 
         SetupIconOverlayText(control, data)
 
-        local hideCraftBagIcons = not data.isCraftBagItem
-        control.craftBagIcon:SetHidden(hideCraftBagIcons)
-        control.craftBagHighlight:SetHidden(hideCraftBagIcons)
+        if data.statusIcon then
+            control.statusIcon:SetTexture(data.statusIcon)
+            control.statusIcon:SetHidden(false)
+        else
+            control.statusIcon:SetHidden(true)
+        end
+
+        if data.highlight then
+            control.backgroundHighlight:SetTexture(data.highlight)
+            control.backgroundHighlight:SetHidden(false)
+        else
+            control.backgroundHighlight:SetHidden(true)
+        end
     end
 
     local function AreEntriesEqual(entry1, entry2)
@@ -65,13 +76,15 @@ do
         if data1EntryType == LOOT_ENTRY_TYPE_MONEY then
             return data1.moneyType == data2.moneyType
         elseif data1EntryType == LOOT_ENTRY_TYPE_ITEM then
-            return data1.itemId == data2.itemId and data1.quality == data2.quality
+            return data1.itemId == data2.itemId and data1.quality == data2.quality and data1.isStolen == data2.isStolen
         elseif data1EntryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
             return data1.collectibleId == data2.collectibleId
         elseif data1EntryType == LOOT_ENTRY_TYPE_MEDAL then
             return false -- Medals are always on their own line
         elseif data1EntryType == LOOT_ENTRY_TYPE_SCORE then
             return false -- scores are always on their own line (also expecting to only be showing one of these at a time)
+        elseif data1EntryType == LOOT_ENTRY_TYPE_SKILL_EXPERIENCE then
+            return data1.skillType == data2.skillType and data1.skillIndex == data2.skillIndex
         else
             return true
         end
@@ -254,7 +267,26 @@ function ZO_LootHistory_Shared:AddScoreEntry(score)
     self:InsertOrQueue(lootEntry)
 end
 
-function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual)
+function ZO_LootHistory_Shared:AddSkillEntry(skillType, skillIndex, skillXpAdded)
+    local skillName = GetSkillLineInfo(skillType, skillIndex)
+    local announcementIcon = GetSkillLineAnnouncementIcon(skillType, skillIndex)
+    local lootData = {
+                        text = skillName,
+                        icon = announcementIcon,
+                        stackCount = skillXpAdded,
+                        color = ZO_SELECTED_TEXT,
+                        skillType = skillType,
+                        skillIndex = skillIndex,
+                        entryType = LOOT_ENTRY_TYPE_SKILL_EXPERIENCE,
+                        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+                    }
+    local lootEntry = self:CreateLootEntry(lootData)
+    lootEntry.isPersistent = true
+    self:InsertOrQueue(lootEntry)
+end
+
+function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen)
     if not self.hidden or self:CanShowItemsInHistory() then
         local itemName
         local icon
@@ -280,6 +312,16 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
         end
 
+        local statusIcon
+        local highlight
+        if isVirtual then
+            statusIcon = self:GetCraftBagIcon()
+            highlight = self:GetCraftBagHighlight()
+        elseif isStolen then
+            statusIcon = self:GetStolenIcon()
+            highlight = self:GetStolenHighlight()
+        end
+
         local lootData = {
                             text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName),
                             icon = icon,
@@ -288,6 +330,9 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
                             itemId = itemId,
                             quality = quality,
                             isCraftBagItem = isVirtual,
+                            isStolen = isStolen,
+                            statusIcon = statusIcon,
+                            highlight = highlight,
                             entryType = LOOT_ENTRY_TYPE_ITEM,
                             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
                             showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
@@ -378,6 +423,20 @@ function ZO_LootHistory_Shared:OnBattlegroundScoreboardUpdated()
 end
 
 do
+    local ALLOWED_SKILL_TYPES = 
+    {
+        [SKILL_TYPE_GUILD] = true
+    }
+
+    function ZO_LootHistory_Shared:OnSkillExperienceUpdated(skillType, skillIndex, reason, rank, previousXP, currentXP)
+        local delta = currentXP - previousXP
+        if delta > 0 and ALLOWED_SKILL_TYPES[skillType] then
+            self:AddSkillEntry(skillType, skillIndex, delta)
+        end
+    end
+end
+
+do
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
     function ZO_LootHistory_Shared.GetStackCountStringFromData(data)
         return ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
@@ -423,15 +482,32 @@ function ZO_LootHistory_Shared:SetEntryTemplate()
 end
 
 function ZO_LootHistory_Shared:InitializeFragment()
+    -- To be overridden
 end
 
 function ZO_LootHistory_Shared:InitializeFadingControlBuffer(control)
+    -- To be overridden
 end
 
 function ZO_LootHistory_Shared:CanShowItemsInHistory()
     return false -- default value
 end
 
+function ZO_LootHistory_Shared:GetCraftBagIcon()
+    -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetStolenIcon()
+    -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetCraftBagHighlight()
+    -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetStolenHighlight()
+    -- To be overridden
+end
 
 -- global functions
 
@@ -440,6 +516,6 @@ function ZO_LootHistory_Shared_OnInitialized(control)
     control.iconOverlayText = control.icon:GetNamedChild("OverlayText")
     control.label = control:GetNamedChild("Label")
     control.background = control:GetNamedChild("Bg")
-    control.craftBagIcon = control.icon:GetNamedChild("CraftBagIcon")
-    control.craftBagHighlight = control.background:GetNamedChild("CraftBagHighlight")
+    control.statusIcon = control.icon:GetNamedChild("StatusIcon")
+    control.backgroundHighlight = control.background:GetNamedChild("Highlight")
 end

@@ -4,6 +4,8 @@ local GAMEPAD_SMITHING_CREATION_SCENE_NAME = "gamepad_smithing_creation"
 local GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME = "gamepad_smithing_deconstruct"
 local GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME = "gamepad_smithing_improvement"
 local GAMEPAD_SMITHING_RESEARCH_SCENE_NAME = "gamepad_smithing_research"
+GAMEPAD_SMITHING_CREATION_OPTIONS_SCENE_NAME = "gamepad_smithing_creation_options"
+
 
 local g_modeToSceneName =
 {
@@ -67,6 +69,14 @@ function ZO_Smithing_Gamepad:Initialize(control)
     self.deconstructionPanel = ZO_GamepadSmithingExtraction:New(maskControl:GetNamedChild("Deconstruction"), self.control:GetNamedChild("Deconstruction"), self, not REFINEMENT_ONLY, GAMEPAD_SMITHING_DECONSTRUCT_SCENE)
     self.researchPanel = ZO_GamepadSmithingResearch:New(maskControl:GetNamedChild("Research"), self, GAMEPAD_SMITHING_RESEARCH_SCENE)
 
+    --Whenever we leave a specific mode scene (either through back or pressing start) reset to the root mode
+    local specificModeSceneGroup = ZO_SceneGroup:New(GAMEPAD_SMITHING_REFINE_SCENE_NAME, GAMEPAD_SMITHING_CREATION_SCENE_NAME, GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME, GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME, GAMEPAD_SMITHING_RESEARCH_SCENE_NAME, GAMEPAD_SMITHING_CREATION_OPTIONS_SCENE_NAME)
+    specificModeSceneGroup:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_GROUP_HIDDEN then
+            self:ResetMode()
+        end
+    end)
+
     self:InitializeModeList()
     self:InitializeKeybindStripDescriptors()
 
@@ -88,7 +98,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
             self.researchPanel:SetCraftingType(craftingType, self.oldCraftingType, self.resetUIs)
             self.oldCraftingType = craftingType
 
-            self:SetMode(SMITHING_MODE_ROOT)
+            self:ResetMode()
             if self.resetUIs then
                 self.modeList:SetSelectedIndexWithoutAnimation(SMITHING_MODE_REFINMENT)
             end
@@ -211,6 +221,10 @@ function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
     local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem))
     self:AddModeEntry(recipeModeEntry)
     self.modeList:Commit()
+end
+
+function ZO_Smithing_Gamepad:ResetMode()
+    self.mode = SMITHING_MODE_ROOT
 end
 
 function ZO_Smithing_Gamepad:SetMode(mode)

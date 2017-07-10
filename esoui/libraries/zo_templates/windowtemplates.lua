@@ -67,13 +67,6 @@ function ZO_PlaySparkleAnimation(slotControl)
     animData.sparkle:SetHidden(false)
 end
 
-function ZO_PanelBackgroundHorizontalDoRotations(control)
-    GetControl(control, "Top"):SetTextureCoordsRotation(-math.pi / 2)
-    GetControl(control, "Left"):SetTextureCoordsRotation(math.pi / 2)
-    GetControl(control, "Right"):SetTextureCoordsRotation(-math.pi / 2)
-    GetControl(control, "Bottom"):SetTextureCoordsRotation(math.pi / 2)
-end
-
 function ZO_SetupSelectableItemRadialMenuEntryTemplate(template, selected, itemCount)
     if(itemCount) then
         template.count:SetHidden(false)

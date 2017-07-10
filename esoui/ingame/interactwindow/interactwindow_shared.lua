@@ -547,7 +547,7 @@ end
 
 function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
     local currencyType = currencyRewardToCurrencyType[rewardType]
-    if currencyType and (GetCarriedCurrencyAmount(currencyType) + rewardAmount >= MAX_PLAYER_MONEY) then
+    if currencyType and (GetCarriedCurrencyAmount(currencyType) + rewardAmount >= MAX_PLAYER_CURRENCY) then
         return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetString("SI_CURRENCYTYPE", currencyType))
     end        
 end

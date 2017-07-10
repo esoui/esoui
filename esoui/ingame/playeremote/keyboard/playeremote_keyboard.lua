@@ -142,7 +142,9 @@ function PlayerEmote_Keyboard:InitializeTree()
 end
 
 function PlayerEmote_Keyboard:InitializeEmoteControlPool()
-    local function EmoteTextControlFactory(control)
+    local function EmoteTextControlFactory(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("EmoteText", "ZO_PlayerEmote_Keyboard_EmoteText", pool, self.control)        
+
         if not self.firstEmoteInColumn then
             self.firstEmoteInColumn = control
             self.totalEmotesInCurrentColumn = 1
@@ -154,20 +156,21 @@ function PlayerEmote_Keyboard:InitializeEmoteControlPool()
                 self.firstEmoteInColumn = control
             else
                 self.totalEmotesInCurrentColumn = self.totalEmotesInCurrentColumn + 1
-                control:SetAnchor(TOPLEFT, self.lastEmote, BOTTOMLEFT, 0, 2)
+                control:SetAnchor(TOPLEFT, self.lastEmote, BOTTOMLEFT, 0, 0)
             end
         end
 
         self.lastEmote = control
+
+        return control
     end
 
     local function EmoteTextControlReset(control)
         control:SetText("")
     end
 
-    self.emoteControlPool = ZO_ControlPool:New("ZO_PlayerEmote_Keyboard_EmoteText", self.control)
-    self.emoteControlPool:SetCustomFactoryBehavior(EmoteTextControlFactory)
-    self.emoteControlPool:SetCustomResetBehavior(EmoteTextControlReset)
+    --Uses an object pool because we don't want the default control pool behavior of clearing anchors when a control is released back into the pool
+    self.emoteControlPool = ZO_ObjectPool:New(EmoteTextControlFactory, EmoteTextControlReset)
 end
 
 function PlayerEmote_Keyboard:UpdateCategories()

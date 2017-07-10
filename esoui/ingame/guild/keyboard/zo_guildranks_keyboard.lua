@@ -1,6 +1,23 @@
 local PLAY_SELECT_RANK_SOUND = true
 local ADD_RANK_DIALOG_NAME = "GUILD_ADD_RANK"
 
+local ZO_GUILD_RANKS_PERMISSIONS =
+{
+    {   GUILD_PERMISSION_CHAT,                  GUILD_PERMISSION_SET_MOTD           },
+    {   GUILD_PERMISSION_OFFICER_CHAT_WRITE,    GUILD_PERMISSION_DESCRIPTION_EDIT   },
+    {   GUILD_PERMISSION_OFFICER_CHAT_READ,     GUILD_PERMISSION_INVITE             },
+    {   nil,                                    nil                                 },
+    {   GUILD_PERMISSION_CLAIM_AVA_RESOURCE,    GUILD_PERMISSION_NOTE_READ          },
+    {   GUILD_PERMISSION_RELEASE_AVA_RESOURCE,  GUILD_PERMISSION_NOTE_EDIT          },
+    {   nil,                                    GUILD_PERMISSION_PROMOTE            },
+    {   GUILD_PERMISSION_BANK_DEPOSIT,          GUILD_PERMISSION_DEMOTE             },
+    {   GUILD_PERMISSION_BANK_WITHDRAW,         GUILD_PERMISSION_REMOVE             },
+    {   GUILD_PERMISSION_BANK_WITHDRAW_GOLD,    nil                                 },
+    {   GUILD_PERMISSION_BANK_VIEW_GOLD,        nil                                 },
+    {   GUILD_PERMISSION_GUILD_KIOSK_BID,       GUILD_PERMISSION_STORE_SELL         },  
+}
+
+
 --Guild Rank
 ----------------
 
@@ -494,16 +511,18 @@ end
 
 function ZO_GuildRanks_Keyboard:RefreshPermissions(rank, setType)
     local canPlayerEditPermissions = DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PERMISSION_EDIT)
+    setType = setType or SET_CHECK
     for i = 1, #self.permissionControls do
         local permissionControl = self.permissionControls[i]
         local permissionEnabled = rank:IsPermissionSet(permissionControl.permission)
-        if(setType == SET_CHECK) then
+        if setType == SET_CHECK then
             local checkBox = GetControl(permissionControl, "Check")
             ZO_CheckButton_SetCheckState(checkBox, permissionEnabled)
-            local enabled = canPlayerEditPermissions and CanEditGuildRankPermission(rank.id, permissionControl.permission)
+            local hasAnyRequisitePermissionsEnabled = ZO_GuildRanks_Shared.AreAnyRequisitePermissionsEnabled(permissionControl.permission, rank)
+            local enabled = canPlayerEditPermissions and CanEditGuildRankPermission(rank.id, permissionControl.permission) and not hasAnyRequisitePermissionsEnabled
             ZO_CheckButton_SetEnableState(checkBox, enabled)
-        elseif(setType == SET_ICON) then
-            if(permissionEnabled) then
+        elseif setType == SET_ICON then
+            if permissionEnabled then
                 local iconTexture = GetControl(permissionControl, "Icon")
                 iconTexture:SetHidden(false)
                 iconTexture:SetTexture(GetGuildRankSmallIcon(rank.iconIndex))

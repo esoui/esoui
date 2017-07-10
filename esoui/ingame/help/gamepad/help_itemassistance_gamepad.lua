@@ -23,19 +23,19 @@ function ZO_Help_ItemAssistance_Gamepad:GoToDetailsSourceScene()
     SCENE_MANAGER:Push("gamepad_inventory_root")
 end
 
-function ZO_Help_ItemAssistance_Gamepad:GetTitle()
+function ZO_Help_ItemAssistance_Gamepad:GetFieldEntryTitle()
    return GetString(SI_CUSTOMER_SERVICE_ITEM_ASSISTANCE)
 end
 
 function ZO_Help_ItemAssistance_Gamepad:RegisterDetails()
-    local savedDetails = self:GetSavedField(ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.DETAILS)
+    local savedDetails = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
     if savedDetails then
         SetCustomerServiceTicketItemTargetByLink(savedDetails)
     end
 end
 
 function ZO_Help_ItemAssistance_Gamepad:GetDisplayedDetails()
-    local savedDetails = self:GetSavedField(ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.DETAILS)
+    local savedDetails = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
     if savedDetails then
         return zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(savedDetails))
     else

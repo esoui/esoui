@@ -27,7 +27,7 @@
             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19" />
         </Label>
 
-        <Cooldown name="ZO_GamepadMenuEntryCooldownTemplate" inherits="ZO_DefaultCooldown" exludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" virtual="true">
+        <Cooldown name="ZO_GamepadMenuEntryCooldownTemplate" inherits="ZO_DefaultCooldown" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" />
         </Cooldown>
@@ -355,12 +355,6 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CurrencyTexture" relativePoint="BOTTOMLEFT" offsetX="-10"/>
                 </Control>
             </Controls>
-        </Control>
-
-        <Control name="ZO_GamepadGoldSpinnerContainerCenterNavAnchorsTemplate" virtual="true">
-            <Dimensions y="50"/>
-            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetY="483" offsetX="20" />
-            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="483" offsetX="-20" />
         </Control>
 
         <Control name="ZO_GamepadLoadingIconAndLabelTemplate" virtual="true">

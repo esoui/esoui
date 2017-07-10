@@ -3,9 +3,6 @@
 ABILITY_SLOT_TYPE_ACTIONBAR = 1
 ABILITY_SLOT_TYPE_QUICKSLOT = 2
 
-local BUTTON_LEFT = 1
-local BUTTON_RIGHT = 2
-
 local USE_BASE_ABILITY = true
 
 function ZO_ActionSlot_SetupSlot(iconControl, buttonControl, icon, normalFrame, downFrame, cooldownIconControl)
@@ -123,31 +120,30 @@ local AbilityClicked =
 {
     [ABILITY_SLOT_TYPE_ACTIONBAR] =
     {
-        [BUTTON_LEFT] =
+        [MOUSE_BUTTON_INDEX_LEFT] =
         {
             function(abilitySlot) 
                 return TryPlaceAction(abilitySlot)
             end,
         },
 
-        [BUTTON_RIGHT] =
+        [MOUSE_BUTTON_INDEX_RIGHT] =
         {
             function(abilitySlot)
                 return TryShowActionMenu(abilitySlot)
             end,
         },
-
     },
     [ABILITY_SLOT_TYPE_QUICKSLOT] =
     {
-        [BUTTON_LEFT] =
+        [MOUSE_BUTTON_INDEX_LEFT] =
         {
             function(abilitySlot)
                 return TryPlaceQuickslotAction(abilitySlot)
             end,
         },
 
-        [BUTTON_RIGHT] =
+        [MOUSE_BUTTON_INDEX_RIGHT] =
         {
             function(abilitySlot)
                 return TryShowQuickslotActionMenu(abilitySlot)
@@ -161,8 +157,7 @@ function ZO_AbilitySlot_OnSlotClicked(abilitySlot, buttonId)
 end
 
 local function TryClearQuickslot(abilitySlot)
-    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum)
-    then
+    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
         ClearSlot(abilitySlot.slotNum)
         return true
     end
@@ -172,7 +167,7 @@ local AbilityDoubleClicked =
 {
     [ABILITY_SLOT_TYPE_QUICKSLOT] =
     {
-        [BUTTON_LEFT] =
+        [MOUSE_BUTTON_INDEX_LEFT] =
         {
             function(abilitySlot)
                 return TryClearQuickslot(abilitySlot)

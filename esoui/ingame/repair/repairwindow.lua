@@ -96,7 +96,7 @@ end
 
 function ZO_Repair:UpdateMoney()
     if not self.control:IsControlHidden() then
-        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end
 end
 

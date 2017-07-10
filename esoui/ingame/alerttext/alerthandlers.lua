@@ -442,7 +442,7 @@ local AlertHandlers = {
 
     [EVENT_TRADING_HOUSE_ERROR] =   function(errorCode)
                                         if(errorCode == TRADING_HOUSE_RESULT_CANT_SELL_FOR_OVER_MAX_AMOUNT) then
-                                            return ERROR, zo_strformat(GetString("SI_TRADINGHOUSERESULT", errorCode), MAX_PLAYER_MONEY), SOUNDS.GENERAL_ALERT_ERROR
+                                            return ERROR, zo_strformat(GetString("SI_TRADINGHOUSERESULT", errorCode), MAX_PLAYER_CURRENCY), SOUNDS.GENERAL_ALERT_ERROR
                                         else
                                             return ERROR, GetString("SI_TRADINGHOUSERESULT", errorCode), SOUNDS.GENERAL_ALERT_ERROR
                                         end
@@ -493,13 +493,12 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_STYLE_LEARNED] = function(styleIndex, chapterIndex, isDefaultRacialStyle)
+    [EVENT_STYLE_LEARNED] = function(itemStyleId, chapterIndex, isDefaultRacialStyle)
         if not isDefaultRacialStyle then
-            local itemStyle = select(5, GetSmithingStyleItemInfo(styleIndex))
             if chapterIndex == ITEM_STYLE_CHAPTER_ALL then
-                return ALERT, zo_strformat(SI_NEW_STYLE_LEARNED, GetString("SI_ITEMSTYLE", itemStyle))
+                return ALERT, zo_strformat(SI_NEW_STYLE_LEARNED, GetItemStyleName(itemStyleId))
             else
-                return ALERT, zo_strformat(SI_NEW_STYLE_CHAPTER_LEARNED, GetString("SI_ITEMSTYLE", itemStyle), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
+                return ALERT, zo_strformat(SI_NEW_STYLE_CHAPTER_LEARNED, GetItemStyleName(itemStyleId), GetString("SI_ITEMSTYLECHAPTER", chapterIndex))
             end
         end
     end,
@@ -720,14 +719,6 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_QUICK_REPORT_TICKET_SENT] = function()
-        return ALERT, GetString(SI_QUICK_REPORT_TICKET_SENT)
-    end,
-
-    [EVENT_QUICK_REPORT_ALREADY_REPORTED] = function()
-        return ERROR, GetString(SI_QUICK_REPORT_ALREADY_REPORTED), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
     [EVENT_DISPLAY_ALERT] = function(alertText, soundId)
         if soundId == "" then
             soundId = nil
@@ -883,6 +874,10 @@ local AlertHandlers = {
 
     [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = function()
         return ALERT, GetString(SI_BATTLEGROUND_INACTIVITY_WARNING), SOUNDS.BATTLEGROUND_INACTIVITY_WARNING
+    end,
+
+    [EVENT_CRAFT_FAILED] = function(result)
+        return ALERT, GetString("SI_TRADESKILLRESULT", result)
     end,
 }
 

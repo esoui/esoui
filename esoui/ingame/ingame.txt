@@ -1,5 +1,5 @@
 ; Ingame Script Files
-## DependsOn: ZO_IngameLocalization ZO_AppAndInGame ZO_PregameAndIngame ZO_IngameShared
+## DependsOn: ZO_IngameLocalization ZO_AppAndInGame ZO_PregameAndIngame ZO_PublicAllIngames
 
 ## SavedVariables: ZO_Ingame_SavedVariables
 
@@ -566,6 +566,8 @@ EsoUI\InGame\TrialAccount\TrialAccount.lua
 EsoUI\InGame\TrialAccount\TrialAccount.xml
 
 EsoUI\Ingame\Help\HelpMechanicAssistanceData.lua
+EsoUI\Ingame\Help\HelpSubmitTicketData.lua
+EsoUI\Ingame\Help\Help_GenericTicketSubmission_Manager.lua
 EsoUI\InGame\Help\Keyboard\HelpScreenTemplate_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.xml
@@ -594,6 +596,7 @@ EsoUI\Ingame\Help\Gamepad\Help_Common_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Common_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_Root_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Root_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_GenericTicketSubmission_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Customer_Service_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Customer_Service_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_MechanicAssistance_Gamepad.lua
@@ -608,6 +611,8 @@ EsoUI\Ingame\Help\Gamepad\Help_Entries_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Entries_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_Legal_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Legal_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_SubmitFeedback_Gamepad.lua
+EsoUI\Ingame\Help\Gamepad\Help_SubmitFeedback_Gamepad.xml
 
 EsoUI\Ingame\Lockpick\Lockpick.lua
 EsoUI\Ingame\Lockpick\Lockpick.xml

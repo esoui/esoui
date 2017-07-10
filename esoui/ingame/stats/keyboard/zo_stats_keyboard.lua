@@ -225,6 +225,7 @@ function ZO_Stats:CreateAttributesSection()
     self:AddStatRow(STAT_SPELL_CRITICAL, STAT_CRITICAL_STRIKE)
     self:SetNextControlPadding(20)
     self:AddStatRow(STAT_SPELL_RESIST, STAT_PHYSICAL_RESIST)
+    self:SetNextControlPadding(0)
     self:AddStatRow(STAT_CRITICAL_RESISTANCE)
 end
 

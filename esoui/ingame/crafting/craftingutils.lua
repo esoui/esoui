@@ -49,6 +49,7 @@ function ZO_CraftingSlotBase:OnFailedValidation()
     -- intended to be overidden
 end
 
+-- Use to validate a list of virtually stacked items created from EnumerateInventorySlotsAndAddToScrollData
 function ZO_CraftingSlotBase:ValidateItemId(validItemIds)
     if self.bagId and self.slotIndex then
         -- An item might have been used up in a physical stack
@@ -71,6 +72,22 @@ function ZO_CraftingSlotBase:ValidateItemId(validItemIds)
         end
     end
     return true
+end
+
+-- Use to validate a list of slotDatas created from GetIndividualInventorySlotsAndAddToScrollData
+function ZO_CraftingSlotBase:ValidateSlottedItem(validItems)
+    if self.bagId and self.slotIndex then
+        for i, validItem in ipairs(validItems) do
+            if self:IsBagAndSlot(validItem.bagId, validItem.slotIndex) then
+                self:SetupItem(self.bagId, self.slotIndex)
+                self:OnPassedValidation()
+                return
+            end
+        end
+
+        self:SetItem(nil)
+        self:OnFailedValidation()
+    end
 end
 
 function ZO_CraftingSlotBase:SetItem(bagId, slotIndex)

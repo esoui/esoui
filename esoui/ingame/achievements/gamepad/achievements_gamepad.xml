@@ -11,15 +11,6 @@
             <Dimensions x="40" y="40" />
         </Texture>
 
-        <Backdrop name="ZO_Gamepad_Achievement_IconFrame" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" pixelRoundingEnabled="false" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8" />
-
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds" edgeFileWidth="64" edgeFileHeight="8" />
-            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
-        </Backdrop>
-
         <Control name="ZO_Gamepad_Achievement_Entry" virtual="true">
             <Dimensions x="55" y="55" />
             <Controls>

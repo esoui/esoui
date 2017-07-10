@@ -18,12 +18,35 @@ function MarketProduct_Keyboard:New(...)
     return ZO_MarketProductBase.New(self, ...)
 end
 
-function MarketProduct_Keyboard:Initialize(controlId, controlTemplate, parent, iconPool, owner, name, ...)
-    local control = CreateControlFromVirtual(name or controlTemplate, parent, controlTemplate, controlId)
-    ZO_MarketProductBase.Initialize(self, control, owner, ...)
-    self.iconPool = ZO_MetaPool:New(iconPool)
-    self.activeMarketProductIcon = nil
-    self:SetTextCalloutYOffset(-7)
+do
+    local TITLE_FONTS =
+    {
+        {
+            font = "ZoFontHeader3",
+            lineLimit = 3,
+        },
+        {
+            font = "ZoFontHeader2",
+            lineLimit = 4,
+        },
+        {
+            font = "ZoFontHeader",
+            lineLimit = 4,
+        },
+        {
+            font = "ZoFontWinH5",
+            lineLimit = 5,
+        },
+    }
+
+    function MarketProduct_Keyboard:Initialize(controlId, controlTemplate, parent, iconPool, owner, name, ...)
+        local control = CreateControlFromVirtual(name or controlTemplate, parent, controlTemplate, controlId)
+        ZO_MarketProductBase.Initialize(self, control, owner, ...)
+        self.iconPool = ZO_MetaPool:New(iconPool)
+        self.activeMarketProductIcon = nil
+        self:SetTextCalloutYOffset(-7)
+        ZO_FontAdjustingWrapLabel_OnInitialized(self.title, TITLE_FONTS, TEXT_WRAP_MODE_ELLIPSIS)
+    end
 end
 
 function MarketProduct_Keyboard:LayoutBackground(background)

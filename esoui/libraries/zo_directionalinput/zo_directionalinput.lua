@@ -154,9 +154,16 @@ function DirectionalInput:OnUpdate()
         self.inputDeviceConsumed[i] = false
     end
 
+    local deltaS = 0
+    local nowS = GetFrameTimeSeconds()
+    if self.lastUpdateS then
+        deltaS = nowS - self.lastUpdateS
+    end
+    self.lastUpdateS = nowS
+
     for index = #self.inputObjects, 1, -1 do
         local inputObject = self.inputObjects[index]
-        inputObject:UpdateDirectionalInput()
+        inputObject:UpdateDirectionalInput(deltaS)
     end
     self.updating = false
 

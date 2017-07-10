@@ -15,12 +15,16 @@ function ZO_ComboBox:New(container)
     return comboBox
 end
 
-function ZO_ComboBox:AddMenuItems()
-    for i = 1, #self.m_sortedItems
-    do
-        -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
-        local item = self.m_sortedItems[i]
-        AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, nil, self.m_font, self.m_normalColor, self.m_highlightColor)
+do
+    --Padding is handled using SetSpacing
+    local NO_PADDING_Y = 0
+
+    function ZO_ComboBox:AddMenuItems()
+        for i = 1, #self.m_sortedItems do
+            -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
+            local item = self.m_sortedItems[i]
+            AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, MENU_ADD_OPTION_LABEL, self.m_font, self.m_normalColor, self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment)
+        end
     end
 end
 

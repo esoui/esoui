@@ -85,9 +85,15 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
-        -- Clear selections
+        -- Clear selections / Cancel Research
         {
-            name = GetString(SI_CRAFTING_CLEAR_SELECTIONS),
+            name = function()
+                if self.mode == SMITHING_MODE_RESEARCH then
+                    return GetString(SI_CRAFTING_CANCEL_RESEARCH)
+                else
+                    return GetString(SI_CRAFTING_CLEAR_SELECTIONS)
+                end
+            end,
             keybind = "UI_SHORTCUT_NEGATIVE",
         
             callback = function()
@@ -97,6 +103,8 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                     self.deconstructionPanel:ClearSelections()
                 elseif self.mode == SMITHING_MODE_IMPROVEMENT then
                     self.improvementPanel:ClearSelections()
+                elseif self.mode == SMITHING_MODE_RESEARCH then
+                    return self.researchPanel:CancelResearch()
                 end 
                 
             end,
@@ -109,6 +117,8 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                         return self.deconstructionPanel:HasSelections() 
                     elseif self.mode == SMITHING_MODE_IMPROVEMENT then
                         return self.improvementPanel:HasSelections() 
+                    elseif self.mode == SMITHING_MODE_RESEARCH then
+                        return self.researchPanel:CanCancelResearch()
                     end 
                 end
             end,

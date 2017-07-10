@@ -51,6 +51,7 @@ function ZO_Gamepad_ParametricList_Screen:Initialize(control, createTabBar, acti
 
     self.headerContainer = container:GetNamedChild("HeaderContainer")
     control.header = self.headerContainer.header
+    local ALWAYS_ANIMATE = true
     self.headerFragment = ZO_ConveyorSceneFragment:New(self.headerContainer, ALWAYS_ANIMATE)
 
     self.header = control.header

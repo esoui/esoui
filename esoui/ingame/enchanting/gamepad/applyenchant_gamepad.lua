@@ -103,8 +103,20 @@ function ZO_ApplyEnchant_Gamepad:GetItemName(itemInfo)
     return itemInfo.name
 end
 
+function ZO_ApplyEnchant_Gamepad:ImproveItem()
+    if self.improvementKitBag and self.itemBag then
+        if IsItemPlayerLocked(self.itemBag, self.itemIndex) then
+            ZO_Dialogs_ShowPlatformDialog("GAMEPAD_CONFIRM_ENCHANT_LOCKED_ITEM", { onAcceptCallback = function() self:PerformItemImprovement() end })
+        else
+            self:PerformItemImprovement()
+        end
+    end
+end
+
 function ZO_ApplyEnchant_Gamepad:PerformItemImprovement()
-   EnchantItem(self.itemBag, self.itemIndex, self.improvementKitBag, self.improvementKitIndex)
+    EnchantItem(self.itemBag, self.itemIndex, self.improvementKitBag, self.improvementKitIndex)
+    PlaySound(self.improvementSound)
+    self:Hide()
 end
 
 function ZO_ApplyEnchant_Gamepad:GetItemTemplateName()

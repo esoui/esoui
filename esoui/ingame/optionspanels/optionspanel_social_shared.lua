@@ -42,7 +42,7 @@ do
                     end
                 end
             end
-            COLOR_PICKER:Show(OnColorSet, data.currentRed, data.currentGreen, data.currentBlue)
+            SYSTEMS:GetObject("colorPicker"):Show(OnColorSet, data.currentRed, data.currentGreen, data.currentBlue)
         end
     end
 
@@ -540,4 +540,4 @@ local ZO_OptionsPanel_Social_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_SOCIAL, ZO_OptionsPanel_Social_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_SOCIAL, ZO_OptionsPanel_Social_ControlData)

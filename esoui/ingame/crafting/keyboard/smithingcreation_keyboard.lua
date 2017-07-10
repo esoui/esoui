@@ -40,7 +40,7 @@ function ZO_SmithingCreation:Initialize(control, owner)
         local function OnTooltipMouseUp(control, button, upInside)
             if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
                 local link = ZO_LinkHandler_CreateChatLink(GetSmithingPatternResultLink, self:GetSelectedPatternIndex(), self:GetSelectedMaterialIndex(), 
-                    self:GetSelectedMaterialQuantity(), self:GetSelectedStyleIndex(), self:GetSelectedTraitIndex())
+                    self:GetSelectedMaterialQuantity(), self:GetSelectedItemStyleId(), self:GetSelectedTraitIndex())
                 if link ~= "" then
                     ClearMenu()
 
@@ -131,7 +131,7 @@ end
 
 function ZO_SmithingCreation:UpdateUniversalStyleItemCheckBox()
     local checkBox = self.useUniversalStyleItemCheckBox
-    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
+    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
     ZO_CheckButton_SetLabelText(checkBox, zo_strformat(SI_CRAFTING_USE_UNIVERSAL_STYLE_ITEM, universalStyleItemCount))
 end
 
@@ -239,7 +239,7 @@ function ZO_SmithingCreation_UniversalStyleItemOnMouseEnter(control)
     end
 
     InitializeTooltip(InformationTooltip, control, RIGHT, -10, -10)
-    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
+    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
     InformationTooltip:AddLine(zo_strformat(SI_CRAFTING_USE_UNIVERSAL_STYLE_ITEM, universalStyleItemCount), "", ZO_COLOR_UNIVERSAL_ITEM:UnpackRGBA())
     local r,g,b = ZO_NORMAL_TEXT:UnpackRGB()
     InformationTooltip:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_TOOLTIP), "", r, g, b)

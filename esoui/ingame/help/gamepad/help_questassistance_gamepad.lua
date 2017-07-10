@@ -19,12 +19,12 @@ function ZO_Help_QuestAssistance_Gamepad:GoToDetailsSourceScene()
     SCENE_MANAGER:Push("gamepad_quest_journal")
 end
 
-function ZO_Help_QuestAssistance_Gamepad:GetTitle()
+function ZO_Help_QuestAssistance_Gamepad:GetFieldEntryTitle()
    return GetString(SI_CUSTOMER_SERVICE_QUEST_ASSISTANCE)
 end
 
 function ZO_Help_QuestAssistance_Gamepad:RegisterDetails()
-    local savedDetails = self:GetSavedField(ZO_MECHANIC_ASSISTANCE_TICKET_FIELD.DETAILS)
+    local savedDetails = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
     if savedDetails then
         SetCustomerServiceTicketQuestTarget(savedDetails)
     end

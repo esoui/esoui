@@ -164,6 +164,13 @@ do
     FRAME_TARGET_CENTERED_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCenteredFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_CENTERED_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateCenteredFramingTarget)
 
+    local function CalculateOptionsFramingTarget()
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        return screenWidth * 0.75, .55 * screenHeight
+    end
+    FRAME_TARGET_OPTIONS_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateOptionsFramingTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_BLUR_OPTIONS_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateOptionsFramingTarget)
+
     local function CalculateGamepadFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
         return .65 * screenWidth, .55 * screenHeight
@@ -171,12 +178,25 @@ do
     FRAME_TARGET_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadFramingTarget)
 
+    local function CalculateGamepadOptionsFramingTarget()
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        return .8 * screenWidth, .55 * screenHeight
+    end
+    FRAME_TARGET_GAMEPAD_OPTIONS_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadOptionsFramingTarget, SetFrameLocalPlayerTarget)
+
     local function CalculateGamepadLeftFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
         return .35 * screenWidth, .55 * screenHeight
     end
     FRAME_TARGET_LEFT_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadLeftFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_LEFT_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadLeftFramingTarget)
+
+    local function CalculateGamepadTradingHouseFramingTarget()
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        return .75 * screenWidth, .55 * screenHeight
+    end
+    FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadTradingHouseFramingTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_TRADING_HOUSE_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadTradingHouseFramingTarget)
 
     local function CalculateGamepadRightFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()

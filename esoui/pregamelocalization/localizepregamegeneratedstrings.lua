@@ -216,7 +216,7 @@ EsoStrings =
     "<<t:1>><<2[// ($d)]>>", -- SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY
     "", -- Sync string for ClientKeyboardStrings last entry
     "", -- Sync string for ClientGamepadStrings first entry
-    "Gamepad (Beta)", -- SI_GAMEPAD_SECTION_HEADER
+    "Gamepad", -- SI_GAMEPAD_SECTION_HEADER
     "Select", -- SI_GAMEPAD_SELECT_OPTION
     "Toggle", -- SI_GAMEPAD_TOGGLE_OPTION
     "Back", -- SI_GAMEPAD_BACK_OPTION
@@ -225,7 +225,7 @@ EsoStrings =
     "Accept", -- SI_GAMEPAD_ACCEPT_OPTION
     "Invert Y", -- SI_GAMEPAD_OPTIONS_INVERT_Y
     "Templates", -- SI_GAMEPAD_OPTIONS_TEMPLATES
-    "Gamepad Mode (Beta)", -- SI_GAMEPAD_OPTIONS_GAMEPAD_MODE
+    "Gamepad Mode", -- SI_GAMEPAD_OPTIONS_GAMEPAD_MODE
     "Switches controls and the interface to be utilized by a gamepad.", -- SI_GAMEPAD_OPTIONS_GAMEPAD_MODE_TOOLTIP
     "Camera Sensitivity", -- SI_GAMEPAD_OPTIONS_CAMERA_SENSITIVITY
     "Vibration", -- SI_GAMEPAD_OPTIONS_CAMERA_VIBRATION
@@ -236,6 +236,7 @@ EsoStrings =
     "|t24:24:EsoUI/Art/currency/currency_crown.dds|t Crown Purchased", -- SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_CROWNS
     "Player Voice", -- SI_GAMEPAD_AUDIO_OPTIONS_VOICECHAT_VOLUME
     "Assign a Skill", -- SI_GAMEPAD_SKILLS_EMPTY_TOOLTIP
+    "Equipped <<1>>", -- SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM
     "None", -- SI_GAMEPAD_COLLECTIONS_EMPTY
     "Save Name", -- SI_GAMEPAD_COLLECTIONS_SAVE_NAME_OPTION
     "Buy ESO Plus", -- SI_GAMEPAD_MARKET_BUY_PLUS_TITLE
@@ -339,6 +340,7 @@ EsoStrings =
     "Armor", -- SI_ITEM_FORMAT_STR_ARMOR
     "Damage", -- SI_ITEM_FORMAT_STR_DAMAGE
     "Adds |cffffff<<1>>|r <<2>>.", -- SI_ITEM_FORMAT_STR_DERIVED_STAT
+    "Adds up to |cffffff<<1>>|r <<2>>.", -- SI_ITEM_FORMAT_STR_ARMOR_GLYPH_DERIVED_STAT
     "Adds <<1>> <<2>>.", -- SI_ITEM_FORMAT_STR_DERIVED_STAT_NO_COLOR
     "Only fits in an enchantment notch", -- SI_ITEM_FORMAT_STR_AUGMENT_ENCHANTMENT
     "Only fits in |cAFFF00Toughness|r notch.", -- SI_ITEM_FORMAT_STR_AUGMENT_TOUGHNESS
@@ -397,7 +399,7 @@ EsoStrings =
     "Unknown Recipe", -- SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE
     "potion", -- SI_ITEM_FORMAT_STR_POTION
     "poison", -- SI_ITEM_FORMAT_STR_POISON
-    "champion", -- SI_ITEM_FORMAT_STR_CHAMPION
+    "CP", -- SI_ITEM_FORMAT_STR_CHAMPION
     "<<1>>", -- SI_ITEM_FORMAT_STR_COLOR_NAME
     "Tradable For", -- SI_ITEM_FORMAT_STR_TRADE_BOP_TIMER_HEADER
     "Eligible Players", -- SI_ITEM_FORMAT_STR_TRADE_BOP_PLAYERS_HEADER
@@ -427,8 +429,12 @@ EsoStrings =
     "New", -- SI_MARKET_TILE_CALLOUT_NEW
     "Sale", -- SI_MARKET_TILE_CALLOUT_SALE
     "-<<X:1>>%", -- SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT
+    "ESO Plus Free Trial Available", -- SI_MARKET_FREE_TRIAL_TOOLTIP_HEADER
+    "Enjoy the benefits of ESO Plus through |cffffff<<1>>|r for free (Crown Stipend not included).", -- SI_MARKET_FREE_TRIAL_TOOLTIP_DESCRIPTION
+    "Press <<X:1>> to start your free trial.", -- SI_MARKET_FREE_TRIAL_TOOLTIP_START_INSTRUCTIONS
     "Crown Crate", -- SI_CROWN_CRATE_TOOLTIP_HEADER
     "This item allows you to craft items in any known style.", -- SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE
+    "|cffffffSeller:|r <<1>>", -- SI_TRADING_HOUSE_SEARCH_RESULT_SELLER_FORMATTER
     "Service", -- SI_SERVICE_TOOLTIP_TYPE
     "<<1>>", -- SI_SERVICE_TOOLTIP_HEADER_FORMATTER
     "This token allows you to change the name of |cffffff1|r character.", -- SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION
@@ -543,6 +549,7 @@ EsoStrings =
     "<<1>>:<<2>> AM", -- SI_TIME_FORMAT_CLOCK_AM
     "<<1>>:<<2>> PM", -- SI_TIME_FORMAT_CLOCK_PM
     "<<1>>:<<2>>", -- SI_TIME_FORMAT_CLOCK_TWENTY_FOUR_HOUR
+    "<<1>> <<2>>, <<3>>", -- SI_DATE_FORMAT_FULL_DATE
     "K", -- SI_NUMBER_SUFFIX_ONE_THOUSAND_UPPERCASE
     "-K", -- SI_NUMBER_SUFFIX_TEN_THOUSAND_UPPERCASE
     "M", -- SI_NUMBER_SUFFIX_ONE_MILLION_UPPERCASE
@@ -558,37 +565,6 @@ EsoStrings =
     "Upgrade", -- SI_CHAPTER_UPGRADE_DIALOG_TITLE
     "", -- Sync string for ClientSharedStrings last entry
     "", -- Sync string for EsoGameDataEnums first entry
-    "None", -- SI_ABILITYUPGRADELEVEL0
-    "Bronze", -- SI_ABILITYUPGRADELEVEL1
-    "Silver", -- SI_ABILITYUPGRADELEVEL2
-    "Gold", -- SI_ABILITYUPGRADELEVEL3
-    "None", -- SI_ARMORTYPE0
-    "Light", -- SI_ARMORTYPE1
-    "Medium", -- SI_ARMORTYPE2
-    "Heavy", -- SI_ARMORTYPE3
-    "Health", -- SI_COMBATMECHANICTYPE_2
-    "invalid mechanic", -- SI_COMBATMECHANICTYPE_1
-    "Magicka", -- SI_COMBATMECHANICTYPE0
-    "Werewolf", -- SI_COMBATMECHANICTYPE1
-    "Stamina", -- SI_COMBATMECHANICTYPE6
-    "Ultimate", -- SI_COMBATMECHANICTYPE10
-    "Mount Stamina", -- SI_COMBATMECHANICTYPE11
-    "Health Bonus", -- SI_COMBATMECHANICTYPE12
-    "None", -- SI_DAMAGETYPE0
-    "Generic", -- SI_DAMAGETYPE1
-    "Physical", -- SI_DAMAGETYPE2
-    "Fire", -- SI_DAMAGETYPE3
-    "Shock", -- SI_DAMAGETYPE4
-    "Oblivion", -- SI_DAMAGETYPE5
-    "Cold", -- SI_DAMAGETYPE6
-    "Earth", -- SI_DAMAGETYPE7
-    "Magic", -- SI_DAMAGETYPE8
-    "Drown", -- SI_DAMAGETYPE9
-    "Disease", -- SI_DAMAGETYPE10
-    "Poison", -- SI_DAMAGETYPE11
-    "Normal", -- SI_VULNERABILITYSTATUS0
-    "Vulnerable", -- SI_VULNERABILITYSTATUS1
-    "Resistant", -- SI_VULNERABILITYSTATUS2
     "Health", -- SI_ATTRIBUTES1
     "Magicka", -- SI_ATTRIBUTES2
     "Stamina", -- SI_ATTRIBUTES3
@@ -634,57 +610,6 @@ EsoStrings =
     "Mount Stamina", -- SI_DERIVEDSTATS48
     "Mount Stamina Regen Combat", -- SI_DERIVEDSTATS49
     "Mount Stamina Regen Moving", -- SI_DERIVEDSTATS50
-    "Head", -- SI_EQUIPTYPE1
-    "Neck", -- SI_EQUIPTYPE2
-    "Chest", -- SI_EQUIPTYPE3
-    "Shoulders", -- SI_EQUIPTYPE4
-    "One Handed", -- SI_EQUIPTYPE5
-    "Two Handed", -- SI_EQUIPTYPE6
-    "Off Hand", -- SI_EQUIPTYPE7
-    "Waist", -- SI_EQUIPTYPE8
-    "Legs", -- SI_EQUIPTYPE9
-    "Feet", -- SI_EQUIPTYPE10
-    "Appearance", -- SI_EQUIPTYPE11
-    "Ring", -- SI_EQUIPTYPE12
-    "Hand", -- SI_EQUIPTYPE13
-    "Main Hand", -- SI_EQUIPTYPE14
-    "Poison", -- SI_EQUIPTYPE15
-    "Head", -- SI_EQUIPSLOT0
-    "Neck", -- SI_EQUIPSLOT1
-    "Chest", -- SI_EQUIPSLOT2
-    "Shoulders", -- SI_EQUIPSLOT3
-    "Main Hand", -- SI_EQUIPSLOT4
-    "Off Hand", -- SI_EQUIPSLOT5
-    "Waist", -- SI_EQUIPSLOT6
-    "Wrist", -- SI_EQUIPSLOT7
-    "Legs", -- SI_EQUIPSLOT8
-    "Feet", -- SI_EQUIPSLOT9
-    "Appearance", -- SI_EQUIPSLOT10
-    "Ring 1", -- SI_EQUIPSLOT11
-    "Ring 2", -- SI_EQUIPSLOT12
-    "Poison", -- SI_EQUIPSLOT13
-    "Poison Back-Up", -- SI_EQUIPSLOT14
-    "Ranged", -- SI_EQUIPSLOT15
-    "Hands", -- SI_EQUIPSLOT16
-    "Class 1", -- SI_EQUIPSLOT17
-    "Class 2", -- SI_EQUIPSLOT18
-    "Class 3", -- SI_EQUIPSLOT19
-    "Main Hand Back-Up", -- SI_EQUIPSLOT20
-    "Off Hand Back-Up", -- SI_EQUIPSLOT21
-    "Head", -- SI_DYEABLESLOT0
-    "Chest", -- SI_DYEABLESLOT1
-    "Shoulders", -- SI_DYEABLESLOT2
-    "Waist", -- SI_DYEABLESLOT3
-    "Legs", -- SI_DYEABLESLOT4
-    "Feet", -- SI_DYEABLESLOT5
-    "Hands", -- SI_DYEABLESLOT6
-    "Off Hand", -- SI_DYEABLESLOT7
-    "Off Hand Back-Up", -- SI_DYEABLESLOT8
-    "Costume", -- SI_DYEABLESLOT9
-    "Hat", -- SI_DYEABLESLOT10
-    "Weapons", -- SI_EQUIPSLOTVISUALCATEGORY1
-    "Apparel", -- SI_EQUIPSLOTVISUALCATEGORY2
-    "Accessories", -- SI_EQUIPSLOTVISUALCATEGORY3
     "Age", -- SI_CHARACTERSLIDERCATEGORY0
     "Body", -- SI_CHARACTERSLIDERCATEGORY1
     "Face", -- SI_CHARACTERSLIDERCATEGORY2
@@ -758,574 +683,34 @@ EsoStrings =
     "Champion Gear", -- SI_CHARACTERCREATEDRESSINGOPTION2
     "No Collectibles", -- SI_CHARACTERCREATEDRESSINGOPTION3
     "Current Appearance", -- SI_CHARACTERCREATEDRESSINGOPTION4
-    "None", -- SI_ITEMSTYLE0
-    "Breton", -- SI_ITEMSTYLE1
-    "Redguard", -- SI_ITEMSTYLE2
-    "Orc", -- SI_ITEMSTYLE3
-    "Dark Elf", -- SI_ITEMSTYLE4
-    "Nord", -- SI_ITEMSTYLE5
-    "Argonian", -- SI_ITEMSTYLE6
-    "High Elf", -- SI_ITEMSTYLE7
-    "Wood Elf", -- SI_ITEMSTYLE8
-    "Khajiit", -- SI_ITEMSTYLE9
-    "Unique", -- SI_ITEMSTYLE10
-    "Thieves Guild", -- SI_ITEMSTYLE11
-    "Dark Brotherhood", -- SI_ITEMSTYLE12
-    "Malacath", -- SI_ITEMSTYLE13
-    "Dwemer", -- SI_ITEMSTYLE14
-    "Ancient Elf", -- SI_ITEMSTYLE15
-    "Akatosh", -- SI_ITEMSTYLE16
-    "Reach", -- SI_ITEMSTYLE17
-    "Bandit", -- SI_ITEMSTYLE18
-    "Primitive", -- SI_ITEMSTYLE19
-    "Daedric", -- SI_ITEMSTYLE20
-    "Trinimac", -- SI_ITEMSTYLE21
-    "Ancient Orc", -- SI_ITEMSTYLE22
-    "Daggerfall Covenant", -- SI_ITEMSTYLE23
-    "Ebonheart Pact", -- SI_ITEMSTYLE24
-    "Aldmeri Dominion", -- SI_ITEMSTYLE25
-    "Undaunted", -- SI_ITEMSTYLE26
-    "Craglorn", -- SI_ITEMSTYLE27
-    "Glass", -- SI_ITEMSTYLE28
-    "Xivkyn", -- SI_ITEMSTYLE29
-    "Soul Shriven", -- SI_ITEMSTYLE30
-    "Draugr", -- SI_ITEMSTYLE31
-    "Maormer", -- SI_ITEMSTYLE32
-    "Akaviri", -- SI_ITEMSTYLE33
-    "Imperial", -- SI_ITEMSTYLE34
-    "Yokudan", -- SI_ITEMSTYLE35
-    "Reach Winter", -- SI_ITEMSTYLE37
-    "Tsaesci", -- SI_ITEMSTYLE38
-    "Minotaur", -- SI_ITEMSTYLE39
-    "Ebony", -- SI_ITEMSTYLE40
-    "Abah's Watch", -- SI_ITEMSTYLE41
-    "Skinchanger", -- SI_ITEMSTYLE42
-    "Morag Tong", -- SI_ITEMSTYLE43
-    "Ra Gada", -- SI_ITEMSTYLE44
-    "Dro-m'Athra", -- SI_ITEMSTYLE45
-    "Assassins League", -- SI_ITEMSTYLE46
-    "Outlaw", -- SI_ITEMSTYLE47
-    "Redoran", -- SI_ITEMSTYLE48
-    "Hlaalu", -- SI_ITEMSTYLE49
-    "Ordinator", -- SI_ITEMSTYLE50
-    "Telvanni", -- SI_ITEMSTYLE51
-    "Buoyant Armiger", -- SI_ITEMSTYLE52
-    "Frostcaster", -- SI_ITEMSTYLE53
-    "Ashlander", -- SI_ITEMSTYLE54
-    "Worm Cult", -- SI_ITEMSTYLE55
-    "Silken Ring", -- SI_ITEMSTYLE56
-    "Mazzatun", -- SI_ITEMSTYLE57
-    "Grim Harlequin", -- SI_ITEMSTYLE58
-    "Hollowjack", -- SI_ITEMSTYLE59
-    "Unused 1", -- SI_ITEMSTYLE60
-    "Unused 2", -- SI_ITEMSTYLE61
-    "Unused 3", -- SI_ITEMSTYLE62
-    "Unused 4", -- SI_ITEMSTYLE63
-    "Unused 5", -- SI_ITEMSTYLE64
-    "Unused 6", -- SI_ITEMSTYLE65
-    "Unused 7", -- SI_ITEMSTYLE66
-    "Unused 8", -- SI_ITEMSTYLE67
-    "Unused 9", -- SI_ITEMSTYLE68
-    "Unused 10", -- SI_ITEMSTYLE69
-    "Unused 11", -- SI_ITEMSTYLE70
-    "Unused 12", -- SI_ITEMSTYLE71
-    "Unused 13", -- SI_ITEMSTYLE72
-    "Unused 14", -- SI_ITEMSTYLE73
-    "Unused 15", -- SI_ITEMSTYLE74
-    "Unused 16", -- SI_ITEMSTYLE75
-    "Unused 17", -- SI_ITEMSTYLE76
-    "Unused 18", -- SI_ITEMSTYLE77
-    "Unused 19", -- SI_ITEMSTYLE78
-    "Unused 20", -- SI_ITEMSTYLE79
-    "You can't use this collectible in this zone.", -- SI_COLLECTIBLEUSAGEBLOCKREASON1
-    "You can't use this collectible while swimming.", -- SI_COLLECTIBLEUSAGEBLOCKREASON2
-    "You can't use collectibles while dead.", -- SI_COLLECTIBLEUSAGEBLOCKREASON3
-    "You can't use this collectible.", -- SI_COLLECTIBLEUSAGEBLOCKREASON4
-    "You're the wrong gender to use this collectible", -- SI_COLLECTIBLEUSAGEBLOCKREASON5
-    "You're the wrong race to use this collectible", -- SI_COLLECTIBLEUSAGEBLOCKREASON6
-    "You're the wrong alliance to use this collectible", -- SI_COLLECTIBLEUSAGEBLOCKREASON7
-    "Your collectible cannot be used while placed in your house.", -- SI_COLLECTIBLEUSAGEBLOCKREASON8
-    "This collectible is not ready yet.", -- SI_COLLECTIBLEUSAGEBLOCKREASON9
-    "You're the wrong class to use this collectible.", -- SI_COLLECTIBLEUSAGEBLOCKREASON10
-    "Gender", -- SI_COLLECTIBLERESTRICTIONTYPE0
-    "Race", -- SI_COLLECTIBLERESTRICTIONTYPE1
-    "Alliance", -- SI_COLLECTIBLERESTRICTIONTYPE2
-    "Class", -- SI_COLLECTIBLERESTRICTIONTYPE3
-    "Low", -- SI_EQUIPMENTBONUS0
-    "Average", -- SI_EQUIPMENTBONUS1
-    "Fair", -- SI_EQUIPMENTBONUS2
-    "High", -- SI_EQUIPMENTBONUS3
-    "Superior", -- SI_EQUIPMENTBONUS4
-    "Extraordinary", -- SI_EQUIPMENTBONUS5
-    "Local Campaign", -- SI_BATTLEGROUNDQUERYCONTEXTTYPE1
-    "Home Campaign", -- SI_BATTLEGROUNDQUERYCONTEXTTYPE2
-    "Home and Local Campaign", -- SI_BATTLEGROUNDQUERYCONTEXTTYPE3
-    "Low", -- SI_CAMPAIGNPOPULATIONTYPE0
-    "Medium", -- SI_CAMPAIGNPOPULATIONTYPE1
-    "High", -- SI_CAMPAIGNPOPULATIONTYPE2
-    "Full", -- SI_CAMPAIGNPOPULATIONTYPE3
     "Overall", -- SI_LEADERBOARDTYPE0
     "Class", -- SI_LEADERBOARDTYPE1
     "Alliance", -- SI_LEADERBOARDTYPE2
     "House", -- SI_LEADERBOARDTYPE3
     "Battleground", -- SI_LEADERBOARDTYPE4
-    "None", -- SI_KEEPRESOURCETYPE0
-    "Wood", -- SI_KEEPRESOURCETYPE1
-    "Food", -- SI_KEEPRESOURCETYPE2
-    "Ore", -- SI_KEEPRESOURCETYPE3
-    "None", -- SI_KEEPRESOURCEPROVIDERTYPE0
-    "Lumbermill", -- SI_KEEPRESOURCEPROVIDERTYPE1
-    "Farm", -- SI_KEEPRESOURCEPROVIDERTYPE2
-    "Mine", -- SI_KEEPRESOURCEPROVIDERTYPE3
-    "Production", -- SI_KEEPUPGRADEPATH1
-    "Defense", -- SI_KEEPUPGRADEPATH2
     "Gold", -- SI_CURRENCYTYPE1
     "Alliance Points", -- SI_CURRENCYTYPE2
     "Tel Var Stones", -- SI_CURRENCYTYPE3
     "Writ Vouchers", -- SI_CURRENCYTYPE4
+    "Hidden Thing", -- SI_CURRENCYTYPE5
     "Crowns", -- SI_MARKETCURRENCYTYPE1
     "Crown Gems", -- SI_MARKETCURRENCYTYPE2
-    "None", -- SI_SIEGETYPE0
-    "Trebuchet", -- SI_SIEGETYPE1
-    "Ballista", -- SI_SIEGETYPE2
-    "Ram", -- SI_SIEGETYPE3
-    "Universal Siege", -- SI_SIEGETYPE4
-    "Catapult", -- SI_SIEGETYPE5
-    "Forward Camp", -- SI_SIEGETYPE6
-    "Monster", -- SI_SIEGETYPE7
-    "Oil", -- SI_SIEGETYPE8
-    "Battle Standard", -- SI_SIEGETYPE9
-    "Enemy", -- SI_TARGETTYPE0
-    "Ally", -- SI_TARGETTYPE1
-    "Self", -- SI_TARGETTYPE2
-    "None", -- SI_ITEMTYPE0
-    "Weapon", -- SI_ITEMTYPE1
-    "Armor", -- SI_ITEMTYPE2
-    "Augment", -- SI_ITEMTYPE3
-    "Food", -- SI_ITEMTYPE4
-    "Trophy", -- SI_ITEMTYPE5
-    "Siege", -- SI_ITEMTYPE6
-    "Potion", -- SI_ITEMTYPE7
-    "Motif", -- SI_ITEMTYPE8
-    "Tool", -- SI_ITEMTYPE9
-    "Ingredient", -- SI_ITEMTYPE10
-    "Additive", -- SI_ITEMTYPE11
-    "Drink", -- SI_ITEMTYPE12
-    "Costume", -- SI_ITEMTYPE13
-    "Disguise", -- SI_ITEMTYPE14
-    "Tabard", -- SI_ITEMTYPE15
-    "Lure", -- SI_ITEMTYPE16
-    "Raw Material", -- SI_ITEMTYPE17
-    "Container", -- SI_ITEMTYPE18
-    "Soul Gem", -- SI_ITEMTYPE19
-    "Weapon Glyph", -- SI_ITEMTYPE20
-    "Armor Glyph", -- SI_ITEMTYPE21
-    "Lockpick", -- SI_ITEMTYPE22
-    "Weapon Booster", -- SI_ITEMTYPE23
-    "Armor Booster", -- SI_ITEMTYPE24
-    "Enchantment Booster", -- SI_ITEMTYPE25
-    "Jewelry Glyph", -- SI_ITEMTYPE26
-    "Spice", -- SI_ITEMTYPE27
-    "Flavoring", -- SI_ITEMTYPE28
-    "Recipe", -- SI_ITEMTYPE29
-    "Poison", -- SI_ITEMTYPE30
-    "Reagent", -- SI_ITEMTYPE31
-    "Deprecated", -- SI_ITEMTYPE32
-    "Potion Solvent", -- SI_ITEMTYPE33
-    "Collectible", -- SI_ITEMTYPE34
-    "Raw Material", -- SI_ITEMTYPE35
-    "Material", -- SI_ITEMTYPE36
-    "Raw Material", -- SI_ITEMTYPE37
-    "Material", -- SI_ITEMTYPE38
-    "Raw Material", -- SI_ITEMTYPE39
-    "Material", -- SI_ITEMTYPE40
-    "Temper", -- SI_ITEMTYPE41
-    "Resin", -- SI_ITEMTYPE42
-    "Tannin", -- SI_ITEMTYPE43
-    "Style Material", -- SI_ITEMTYPE44
-    "Armor Trait", -- SI_ITEMTYPE45
-    "Weapon Trait", -- SI_ITEMTYPE46
-    "AvA Repair", -- SI_ITEMTYPE47
-    "Trash", -- SI_ITEMTYPE48
-    "Tablet", -- SI_ITEMTYPE49
-    "Mount", -- SI_ITEMTYPE50
-    "Potency Runestone", -- SI_ITEMTYPE51
-    "Aspect Runestone", -- SI_ITEMTYPE52
-    "Essence Runestone", -- SI_ITEMTYPE53
-    "Fish", -- SI_ITEMTYPE54
-    "Crown Repair", -- SI_ITEMTYPE55
-    "Treasure", -- SI_ITEMTYPE56
-    "Crown Item", -- SI_ITEMTYPE57
-    "Poison Solvent", -- SI_ITEMTYPE58
-    "Dye Stamp", -- SI_ITEMTYPE59
-    "Master Writ", -- SI_ITEMTYPE60
-    "Furnishing", -- SI_ITEMTYPE61
-    "Furnishing Material", -- SI_ITEMTYPE62
-    "Weapon", -- SI_SPECIALIZEDITEMTYPE250
-    "Armor", -- SI_SPECIALIZEDITEMTYPE300
-    "Augment", -- SI_SPECIALIZEDITEMTYPE350
-    "Meat Dish", -- SI_SPECIALIZEDITEMTYPE1
-    "Fruit Dish", -- SI_SPECIALIZEDITEMTYPE2
-    "Vegetable Dish", -- SI_SPECIALIZEDITEMTYPE3
-    "Savoury Dish", -- SI_SPECIALIZEDITEMTYPE4
-    "Ragout Dish", -- SI_SPECIALIZEDITEMTYPE5
-    "Entremet Dish", -- SI_SPECIALIZEDITEMTYPE6
-    "Gourmet Dish", -- SI_SPECIALIZEDITEMTYPE7
-    "Unique Dish", -- SI_SPECIALIZEDITEMTYPE8
-    "Treasure Map", -- SI_SPECIALIZEDITEMTYPE100
-    "Survey Report", -- SI_SPECIALIZEDITEMTYPE101
-    "Key Fragment", -- SI_SPECIALIZEDITEMTYPE102
-    "Museum Piece", -- SI_SPECIALIZEDITEMTYPE103
-    "Recipe Fragment", -- SI_SPECIALIZEDITEMTYPE104
-    "Scroll", -- SI_SPECIALIZEDITEMTYPE105
-    "Material Upgrader", -- SI_SPECIALIZEDITEMTYPE106
-    "Key", -- SI_SPECIALIZEDITEMTYPE107
-    "Runebox Fragment", -- SI_SPECIALIZEDITEMTYPE108
-    "Trebuchet", -- SI_SPECIALIZEDITEMTYPE400
-    "Ballista", -- SI_SPECIALIZEDITEMTYPE401
-    "Ram", -- SI_SPECIALIZEDITEMTYPE402
-    "Universal Siege", -- SI_SPECIALIZEDITEMTYPE403
-    "Catapult", -- SI_SPECIALIZEDITEMTYPE404
-    "Forward Camp", -- SI_SPECIALIZEDITEMTYPE405
-    "Monster", -- SI_SPECIALIZEDITEMTYPE406
-    "Oil", -- SI_SPECIALIZEDITEMTYPE407
-    "Battle Standard", -- SI_SPECIALIZEDITEMTYPE408
-    "Potion", -- SI_SPECIALIZEDITEMTYPE450
-    "Motif Book", -- SI_SPECIALIZEDITEMTYPE60
-    "Motif Chapter", -- SI_SPECIALIZEDITEMTYPE61
-    "Tool", -- SI_SPECIALIZEDITEMTYPE500
-    "Meat Ingredient", -- SI_SPECIALIZEDITEMTYPE40
-    "Vegetable Ingredient", -- SI_SPECIALIZEDITEMTYPE41
-    "Fruit Ingredient", -- SI_SPECIALIZEDITEMTYPE42
-    "Food Additive", -- SI_SPECIALIZEDITEMTYPE43
-    "Alcohol Ingredient", -- SI_SPECIALIZEDITEMTYPE44
-    "Tea Ingredient", -- SI_SPECIALIZEDITEMTYPE45
-    "Tonic Ingredient", -- SI_SPECIALIZEDITEMTYPE46
-    "Drink Additive", -- SI_SPECIALIZEDITEMTYPE47
-    "Rare Ingredient", -- SI_SPECIALIZEDITEMTYPE48
-    "Additive", -- SI_SPECIALIZEDITEMTYPE550
-    "Alcoholic Beverage", -- SI_SPECIALIZEDITEMTYPE20
-    "Tea Beverage", -- SI_SPECIALIZEDITEMTYPE21
-    "Tonic Beverage", -- SI_SPECIALIZEDITEMTYPE22
-    "Liqueur Beverage", -- SI_SPECIALIZEDITEMTYPE23
-    "Tincture Beverage", -- SI_SPECIALIZEDITEMTYPE24
-    "Cordial Tea Beverage", -- SI_SPECIALIZEDITEMTYPE25
-    "Distillate Beverage", -- SI_SPECIALIZEDITEMTYPE26
-    "Drink", -- SI_SPECIALIZEDITEMTYPE27
-    "Costume", -- SI_SPECIALIZEDITEMTYPE600
-    "Disguise", -- SI_SPECIALIZEDITEMTYPE650
-    "Tabard", -- SI_SPECIALIZEDITEMTYPE700
-    "Lure", -- SI_SPECIALIZEDITEMTYPE750
-    "Raw Material", -- SI_SPECIALIZEDITEMTYPE800
-    "Container", -- SI_SPECIALIZEDITEMTYPE850
-    "Soul Gem", -- SI_SPECIALIZEDITEMTYPE900
-    "Weapon Glyph", -- SI_SPECIALIZEDITEMTYPE950
-    "Armor Glyph", -- SI_SPECIALIZEDITEMTYPE1000
-    "Lockpick", -- SI_SPECIALIZEDITEMTYPE1050
-    "Weapon Booster", -- SI_SPECIALIZEDITEMTYPE1100
-    "Armor Booster", -- SI_SPECIALIZEDITEMTYPE1150
-    "Enchantment Booster", -- SI_SPECIALIZEDITEMTYPE1200
-    "Jewelry Glyph", -- SI_SPECIALIZEDITEMTYPE1250
-    "Spice", -- SI_SPECIALIZEDITEMTYPE1300
-    "Flavoring", -- SI_SPECIALIZEDITEMTYPE1350
-    "Food Recipe", -- SI_SPECIALIZEDITEMTYPE170
-    "Drink Recipe", -- SI_SPECIALIZEDITEMTYPE171
-    "Furnishing Diagram", -- SI_SPECIALIZEDITEMTYPE172
-    "Furnishing Pattern", -- SI_SPECIALIZEDITEMTYPE173
-    "Furnishing Schematic", -- SI_SPECIALIZEDITEMTYPE174
-    "Furnishing Formula", -- SI_SPECIALIZEDITEMTYPE175
-    "Furnishing Design", -- SI_SPECIALIZEDITEMTYPE176
-    "Furnishing Blueprint", -- SI_SPECIALIZEDITEMTYPE177
-    "Poison", -- SI_SPECIALIZEDITEMTYPE1400
-    "Herb", -- SI_SPECIALIZEDITEMTYPE150
-    "Fungus", -- SI_SPECIALIZEDITEMTYPE151
-    "Animal Parts", -- SI_SPECIALIZEDITEMTYPE152
-    "Potion Solvent", -- SI_SPECIALIZEDITEMTYPE1450
-    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1460
-    "Rare Fish", -- SI_SPECIALIZEDITEMTYPE80
-    "Monster Trophy", -- SI_SPECIALIZEDITEMTYPE81
-    "Raw Material", -- SI_SPECIALIZEDITEMTYPE1500
-    "Material", -- SI_SPECIALIZEDITEMTYPE1550
-    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1560
-    "Raw Material", -- SI_SPECIALIZEDITEMTYPE1600
-    "Material", -- SI_SPECIALIZEDITEMTYPE1650
-    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1660
-    "Raw Material", -- SI_SPECIALIZEDITEMTYPE1700
-    "Material", -- SI_SPECIALIZEDITEMTYPE1750
-    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1760
-    "Temper", -- SI_SPECIALIZEDITEMTYPE1800
-    "Resin", -- SI_SPECIALIZEDITEMTYPE1850
-    "Tannin", -- SI_SPECIALIZEDITEMTYPE1900
-    "Style Material", -- SI_SPECIALIZEDITEMTYPE1950
-    "Armor Trait", -- SI_SPECIALIZEDITEMTYPE2000
-    "Weapon Trait", -- SI_SPECIALIZEDITEMTYPE2050
-    "AvA Repair", -- SI_SPECIALIZEDITEMTYPE2100
-    "Trash", -- SI_SPECIALIZEDITEMTYPE2150
-    "Tablet", -- SI_SPECIALIZEDITEMTYPE2200
-    "Mount", -- SI_SPECIALIZEDITEMTYPE2250
-    "Potency Runestone", -- SI_SPECIALIZEDITEMTYPE2300
-    "Aspect Runestone", -- SI_SPECIALIZEDITEMTYPE2350
-    "Essence Runestone", -- SI_SPECIALIZEDITEMTYPE2400
-    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE2410
-    "Fish", -- SI_SPECIALIZEDITEMTYPE2450
-    "Crown Repair", -- SI_SPECIALIZEDITEMTYPE2500
-    "Treasure", -- SI_SPECIALIZEDITEMTYPE2550
-    "Crown Item", -- SI_SPECIALIZEDITEMTYPE2600
-    "Poison Solvent", -- SI_SPECIALIZEDITEMTYPE2650
-    "Dye Stamp", -- SI_SPECIALIZEDITEMTYPE2700
-    "Master Writ", -- SI_SPECIALIZEDITEMTYPE2750
-    "Furnishing", -- SI_SPECIALIZEDITEMTYPE210
-    "Light", -- SI_SPECIALIZEDITEMTYPE211
-    "Seating", -- SI_SPECIALIZEDITEMTYPE212
-    "Crafting Station", -- SI_SPECIALIZEDITEMTYPE213
-    "Target Dummy", -- SI_SPECIALIZEDITEMTYPE214
-    "All", -- SI_ITEMFILTERTYPE0
-    "Weapon", -- SI_ITEMFILTERTYPE1
-    "Apparel", -- SI_ITEMFILTERTYPE2
-    "Consumable", -- SI_ITEMFILTERTYPE3
-    "Materials", -- SI_ITEMFILTERTYPE4
-    "Miscellaneous", -- SI_ITEMFILTERTYPE5
-    "Slottable items", -- SI_ITEMFILTERTYPE6
-    "Quest", -- SI_ITEMFILTERTYPE7
-    "Buyback", -- SI_ITEMFILTERTYPE8
-    "Junk", -- SI_ITEMFILTERTYPE9
-    "Damaged Equipment", -- SI_ITEMFILTERTYPE11
-    "Collectible", -- SI_ITEMFILTERTYPE12
-    "Blacksmithing", -- SI_ITEMFILTERTYPE13
-    "Clothing", -- SI_ITEMFILTERTYPE14
-    "Woodworking", -- SI_ITEMFILTERTYPE15
-    "Alchemy", -- SI_ITEMFILTERTYPE16
-    "Enchanting", -- SI_ITEMFILTERTYPE17
-    "Provisioning", -- SI_ITEMFILTERTYPE18
-    "Style Materials", -- SI_ITEMFILTERTYPE19
-    "Trait Items", -- SI_ITEMFILTERTYPE20
-    "Furnishings", -- SI_ITEMFILTERTYPE21
-    "House with Template", -- SI_ITEMFILTERTYPE22
-    "No trait", -- SI_ITEMTRAITTYPE0
-    "Powered", -- SI_ITEMTRAITTYPE1
-    "Charged", -- SI_ITEMTRAITTYPE2
-    "Precise", -- SI_ITEMTRAITTYPE3
-    "Infused", -- SI_ITEMTRAITTYPE4
-    "Defending", -- SI_ITEMTRAITTYPE5
-    "Training", -- SI_ITEMTRAITTYPE6
-    "Sharpened", -- SI_ITEMTRAITTYPE7
-    "Decisive", -- SI_ITEMTRAITTYPE8
-    "Intricate", -- SI_ITEMTRAITTYPE9
-    "Ornate", -- SI_ITEMTRAITTYPE10
-    "Sturdy", -- SI_ITEMTRAITTYPE11
-    "Impenetrable", -- SI_ITEMTRAITTYPE12
-    "Reinforced", -- SI_ITEMTRAITTYPE13
-    "Well-fitted", -- SI_ITEMTRAITTYPE14
-    "Training", -- SI_ITEMTRAITTYPE15
-    "Infused", -- SI_ITEMTRAITTYPE16
-    "Prosperous", -- SI_ITEMTRAITTYPE17
-    "Divines", -- SI_ITEMTRAITTYPE18
-    "Ornate", -- SI_ITEMTRAITTYPE19
-    "Intricate", -- SI_ITEMTRAITTYPE20
-    "Healthy", -- SI_ITEMTRAITTYPE21
-    "Arcane", -- SI_ITEMTRAITTYPE22
-    "Robust", -- SI_ITEMTRAITTYPE23
-    "Ornate", -- SI_ITEMTRAITTYPE24
-    "Nirnhoned", -- SI_ITEMTRAITTYPE25
-    "Nirnhoned", -- SI_ITEMTRAITTYPE26
-    "Special", -- SI_ITEMTRAITTYPE27
-    "Aspect", -- SI_ENCHANTINGRUNECLASSIFICATION1
-    "Essence", -- SI_ENCHANTINGRUNECLASSIFICATION2
-    "Potency", -- SI_ENCHANTINGRUNECLASSIFICATION3
-    "Bind On Pickup", -- SI_BINDTYPE1
-    "Bind On Equip", -- SI_BINDTYPE2
-    "Backpack Bind On Pickup", -- SI_BINDTYPE3
-    "Worn", -- SI_ITEMQUALITY0
-    "Normal", -- SI_ITEMQUALITY1
-    "Fine", -- SI_ITEMQUALITY2
-    "Superior", -- SI_ITEMQUALITY3
-    "Epic", -- SI_ITEMQUALITY4
-    "Legendary", -- SI_ITEMQUALITY5
-    "None", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE0
-    "Befouled", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE1
-    "Rage", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE2
-    "Shock", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE3
-    "Crushing", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE4
-    "Disease Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE5
-    "Flame", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE6
-    "Fire Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE7
-    "Frost Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE8
-    "Frost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE9
-    "Hardening", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE10
-    "Health", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE11
-    "Health Recovery", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE12
-    "Magicka", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE13
-    "Magicka Recovery", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE14
-    "Poison Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE15
-    "Poison", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE16
-    "Stamina", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE17
-    "Stamina Recovery", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE18
-    "Weakening", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE19
-    "Absorb Health", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE20
-    "Shock Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE21
-    "Absorb Stamina", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE22
-    "Absorb Magicka", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE23
-    "Decrease Health", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE24
-    "Reduce Spell Cost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE25
-    "Reduce Feat Cost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE26
-    "Bashing", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE27
-    "Shielding", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE28
-    "Potion Boost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE29
-    "Potion Speed", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE30
-    "Increase Physical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE31
-    "Increase Magical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE32
-    "Decrease Physical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE33
-    "Decrease Magical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE34
-    "Other", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE35
     "None", -- SI_ALLIANCE0
     "Aldmeri Dominion", -- SI_ALLIANCE1
     "Ebonheart Pact", -- SI_ALLIANCE2
     "Daggerfall Covenant", -- SI_ALLIANCE3
-    "Opaque", -- SI_SPECIALSTATTYPES1
-    "do not translate", -- SI_WEAPONTYPE0
-    "Axe", -- SI_WEAPONTYPE1
-    "Hammer", -- SI_WEAPONTYPE2
-    "Sword", -- SI_WEAPONTYPE3
-    "Sword", -- SI_WEAPONTYPE4
-    "Axe", -- SI_WEAPONTYPE5
-    "Hammer", -- SI_WEAPONTYPE6
-    "do not translate", -- SI_WEAPONTYPE7
-    "Bow", -- SI_WEAPONTYPE8
-    "Healing Staff", -- SI_WEAPONTYPE9
-    "Rune", -- SI_WEAPONTYPE10
-    "Dagger", -- SI_WEAPONTYPE11
-    "Fire Staff", -- SI_WEAPONTYPE12
-    "Frost Staff", -- SI_WEAPONTYPE13
-    "Shield", -- SI_WEAPONTYPE14
-    "Lightning Staff", -- SI_WEAPONTYPE15
-    "do not translate", -- SI_GAMEPADWEAPONCATEGORY0
-    "One-Handed Melee", -- SI_GAMEPADWEAPONCATEGORY1
-    "Two-Handed Melee", -- SI_GAMEPADWEAPONCATEGORY2
-    "Bow", -- SI_GAMEPADWEAPONCATEGORY3
-    "Destruction Staff", -- SI_GAMEPADWEAPONCATEGORY4
-    "Restoration Staff", -- SI_GAMEPADWEAPONCATEGORY5
-    "Alchemy", -- SI_GAMEPADITEMCATEGORY0
-    "Amulet", -- SI_GAMEPADITEMCATEGORY1
-    "Axe", -- SI_GAMEPADITEMCATEGORY2
-    "Bait", -- SI_GAMEPADITEMCATEGORY3
-    "Blacksmith", -- SI_GAMEPADITEMCATEGORY4
-    "Bow", -- SI_GAMEPADITEMCATEGORY5
-    "Chest", -- SI_GAMEPADITEMCATEGORY6
-    "Clothier", -- SI_GAMEPADITEMCATEGORY7
-    "Consumable", -- SI_GAMEPADITEMCATEGORY8
-    "Costume", -- SI_GAMEPADITEMCATEGORY9
-    "Dagger", -- SI_GAMEPADITEMCATEGORY10
-    "Enchanting", -- SI_GAMEPADITEMCATEGORY11
-    "Feet", -- SI_GAMEPADITEMCATEGORY12
-    "Glyphs", -- SI_GAMEPADITEMCATEGORY13
-    "Hammer", -- SI_GAMEPADITEMCATEGORY14
-    "Hands", -- SI_GAMEPADITEMCATEGORY15
-    "Head", -- SI_GAMEPADITEMCATEGORY16
-    "Legs", -- SI_GAMEPADITEMCATEGORY17
-    "Potion", -- SI_GAMEPADITEMCATEGORY18
-    "Provisioning", -- SI_GAMEPADITEMCATEGORY19
-    "Ring", -- SI_GAMEPADITEMCATEGORY20
-    "Shield", -- SI_GAMEPADITEMCATEGORY21
-    "Shoulders", -- SI_GAMEPADITEMCATEGORY22
-    "Siege", -- SI_GAMEPADITEMCATEGORY23
-    "Spellcrafting", -- SI_GAMEPADITEMCATEGORY24
-    "Staff", -- SI_GAMEPADITEMCATEGORY25
-    "Material", -- SI_GAMEPADITEMCATEGORY26
-    "Soul Gem", -- SI_GAMEPADITEMCATEGORY27
-    "Sword", -- SI_GAMEPADITEMCATEGORY28
-    "Tool", -- SI_GAMEPADITEMCATEGORY29
-    "Trait Gem", -- SI_GAMEPADITEMCATEGORY30
-    "Trophy", -- SI_GAMEPADITEMCATEGORY31
-    "Waist", -- SI_GAMEPADITEMCATEGORY32
-    "Woodworking", -- SI_GAMEPADITEMCATEGORY33
-    "Weapons", -- SI_GAMEPADITEMCATEGORY34
-    "Heavy Armor", -- SI_GAMEPADITEMCATEGORY35
-    "Medium Armor", -- SI_GAMEPADITEMCATEGORY36
-    "Light Armor", -- SI_GAMEPADITEMCATEGORY37
-    "Jewelry", -- SI_GAMEPADITEMCATEGORY38
-    "", -- SI_ITEMSTYLECHAPTER0
-    "Helmet", -- SI_ITEMSTYLECHAPTER1
-    "Glove", -- SI_ITEMSTYLECHAPTER2
-    "Boot", -- SI_ITEMSTYLECHAPTER3
-    "Legs", -- SI_ITEMSTYLECHAPTER4
-    "Breastplate", -- SI_ITEMSTYLECHAPTER5
-    "Belt", -- SI_ITEMSTYLECHAPTER6
-    "Shoulder", -- SI_ITEMSTYLECHAPTER7
-    "Sword", -- SI_ITEMSTYLECHAPTER8
-    "Mace", -- SI_ITEMSTYLECHAPTER9
-    "Axe", -- SI_ITEMSTYLECHAPTER10
-    "Dagger", -- SI_ITEMSTYLECHAPTER11
-    "Staff", -- SI_ITEMSTYLECHAPTER12
-    "Shield", -- SI_ITEMSTYLECHAPTER13
-    "Bow", -- SI_ITEMSTYLECHAPTER14
     "Damage", -- SI_SCORETRACKERENTRYTYPE1
     "Healing", -- SI_SCORETRACKERENTRYTYPE2
     "Medal Score", -- SI_SCORETRACKERENTRYTYPE7
-    "Audio", -- SI_SETTINGSYSTEMPANEL0
-    "Video", -- SI_SETTINGSYSTEMPANEL1
-    "Camera", -- SI_SETTINGSYSTEMPANEL2
-    "Interface", -- SI_SETTINGSYSTEMPANEL3
-    "Gameplay", -- SI_SETTINGSYSTEMPANEL4
-    "Social", -- SI_SETTINGSYSTEMPANEL5
-    "Debug", -- SI_SETTINGSYSTEMPANEL6
-    "Cinematic", -- SI_SETTINGSYSTEMPANEL7
-    "Nameplates", -- SI_SETTINGSYSTEMPANEL8
-    "Combat", -- SI_SETTINGSYSTEMPANEL9
-    "High", -- SI_TEXTURERESOLUTIONCHOICE0
-    "Medium", -- SI_TEXTURERESOLUTIONCHOICE1
-    "Low", -- SI_TEXTURERESOLUTIONCHOICE2
-    "do not translate", -- SI_NAMEPLATEDISPLAYCHOICE0
-    "Never", -- SI_NAMEPLATEDISPLAYCHOICE1
-    "Always", -- SI_NAMEPLATEDISPLAYCHOICE2
-    "Injured", -- SI_NAMEPLATEDISPLAYCHOICE3
-    "All", -- SI_NAMEPLATEDISPLAYCHOICE4
-    "None", -- SI_NAMEPLATEDISPLAYCHOICE5
-    "Enemy", -- SI_NAMEPLATEDISPLAYCHOICE6
-    "Ally", -- SI_NAMEPLATEDISPLAYCHOICE7
-    "Targeted", -- SI_NAMEPLATEDISPLAYCHOICE8
-    "Injured or Targeted", -- SI_NAMEPLATEDISPLAYCHOICE9
-    "Left", -- SI_NAMEPLATEDISPLAYCHOICE10
-    "Center", -- SI_NAMEPLATEDISPLAYCHOICE11
-    "Off", -- SI_ACTIONBARSETTINGCHOICE0
-    "On", -- SI_ACTIONBARSETTINGCHOICE1
-    "Automatic", -- SI_ACTIONBARSETTINGCHOICE2
-    "Off", -- SI_COMPASSACTIVEQUESTSCHOICE0
-    "On", -- SI_COMPASSACTIVEQUESTSCHOICE1
-    "Focused", -- SI_COMPASSACTIVEQUESTSCHOICE2
-    "Don't Show", -- SI_RESOURCEBARSSETTINGCHOICE0
-    "Always Show", -- SI_RESOURCEBARSSETTINGCHOICE1
-    "Automatic", -- SI_RESOURCEBARSSETTINGCHOICE2
-    "Off", -- SI_RAIDLIFEVISIBILITYCHOICE0
-    "On", -- SI_RAIDLIFEVISIBILITYCHOICE1
-    "Automatic", -- SI_RAIDLIFEVISIBILITYCHOICE2
-    "Don't Show", -- SI_BUFFDEBUFFENABLEDCHOICE0
-    "Always Show", -- SI_BUFFDEBUFFENABLEDCHOICE1
-    "Automatic", -- SI_BUFFDEBUFFENABLEDCHOICE2
     "Trials", -- SI_RAIDCATEGORY0
     "Solo", -- SI_RAIDCATEGORY1
-    "Free", -- SI_SIEGECAMERACHOICE0
-    "Constrained", -- SI_SIEGECAMERACHOICE1
-    "Off", -- SI_QUICKCASTGROUNDABILITIESCHOICE0
-    "On", -- SI_QUICKCASTGROUNDABILITIESCHOICE1
-    "Automatic", -- SI_QUICKCASTGROUNDABILITIESCHOICE2
-    "|t16:16:EsoUI/Art/currency/currency_gold.dds|t Gold Purchased", -- SI_DEFAULTSOULGEMCHOICE0
-    "|t16:16:EsoUI/Art/currency/currency_crown.dds|t Crown Purchased", -- SI_DEFAULTSOULGEMCHOICE1
-    "Prefer <<1>>", -- SI_PRIMARYPLAYERNAMESETTING0
-    "Prefer Character Name", -- SI_PRIMARYPLAYERNAMESETTING1
-    "Off", -- SI_RESOURCENUMBERSSETTING0
-    "Number Only", -- SI_RESOURCENUMBERSSETTING1
-    "Percent Only", -- SI_RESOURCENUMBERSSETTING2
-    "Number and Percent", -- SI_RESOURCENUMBERSSETTING3
-    "Small", -- SI_GAMEPADCHATTEXTSIZESETTING22
-    "Medium", -- SI_GAMEPADCHATTEXTSIZESETTING27
-    "Large", -- SI_GAMEPADCHATTEXTSIZESETTING34
     "None", -- SI_BATTLEGROUNDGAMETYPE0
-    "Capture the flag", -- SI_BATTLEGROUNDGAMETYPE1
+    "Capture the Relic", -- SI_BATTLEGROUNDGAMETYPE1
     "Deathmatch", -- SI_BATTLEGROUNDGAMETYPE2
     "King of the Hill", -- SI_BATTLEGROUNDGAMETYPE3
     "Domination", -- SI_BATTLEGROUNDGAMETYPE4
     "Crazy King", -- SI_BATTLEGROUNDGAMETYPE5
-    "Murderball", -- SI_BATTLEGROUNDGAMETYPE6
+    "Chaosball", -- SI_BATTLEGROUNDGAMETYPE6
     "None", -- SI_BATTLEGROUNDLEADERBOARDTYPE0
     "Deathmatch", -- SI_BATTLEGROUNDLEADERBOARDTYPE1
     "Land Grab", -- SI_BATTLEGROUNDLEADERBOARDTYPE2
@@ -1380,42 +765,6 @@ EsoStrings =
     "5.0", -- SI_AUDIOSPEAKERCONFIGURATIONS6
     "Surround", -- SI_AUDIOSPEAKERCONFIGURATIONS7
     "7.1", -- SI_AUDIOSPEAKERCONFIGURATIONS8
-    "Common", -- SI_DYERARITY0
-    "Uncommon", -- SI_DYERARITY1
-    "Rare", -- SI_DYERARITY2
-    "Red", -- SI_DYEHUECATEGORY0
-    "Yellow", -- SI_DYEHUECATEGORY1
-    "Green", -- SI_DYEHUECATEGORY2
-    "Blue", -- SI_DYEHUECATEGORY3
-    "Purple", -- SI_DYEHUECATEGORY4
-    "Brown", -- SI_DYEHUECATEGORY5
-    "Grey", -- SI_DYEHUECATEGORY6
-    "Off", -- SI_SHADOWSCHOICE0
-    "Low", -- SI_SHADOWSCHOICE1
-    "Medium", -- SI_SHADOWSCHOICE2
-    "High", -- SI_SHADOWSCHOICE3
-    "Ultra", -- SI_SHADOWSCHOICE4
-    "PS4", -- SI_SHADOWSCHOICE5
-    "XB1", -- SI_SHADOWSCHOICE6
-    "Off", -- SI_REFLECTIONQUALITY0
-    "Low", -- SI_REFLECTIONQUALITY1
-    "Medium", -- SI_REFLECTIONQUALITY2
-    "High", -- SI_REFLECTIONQUALITY3
-    "Group", -- SI_QUESTTYPE1
-    "Main Story", -- SI_QUESTTYPE2
-    "Guild", -- SI_QUESTTYPE3
-    "Crafting", -- SI_QUESTTYPE4
-    "Dungeon", -- SI_QUESTTYPE5
-    "Raid", -- SI_QUESTTYPE6
-    "AvA", -- SI_QUESTTYPE7
-    "Class", -- SI_QUESTTYPE8
-    "QA Test", -- SI_QUESTTYPE9
-    "Group AvA", -- SI_QUESTTYPE10
-    "Grand AvA", -- SI_QUESTTYPE11
-    "Holiday Event", -- SI_QUESTTYPE12
-    "Battleground", -- SI_QUESTTYPE13
-    "Repeatable", -- SI_QUESTREPEATABLETYPE1
-    "Daily", -- SI_QUESTREPEATABLETYPE2
     "Solo Instance", -- SI_INSTANCETYPE1
     "Group Instance", -- SI_INSTANCETYPE2
     "Trial Instance", -- SI_INSTANCETYPE3
@@ -1474,47 +823,6 @@ EsoStrings =
     "Channels", -- SI_CHATCHANNELCATEGORYHEADERS1
     "Guilds", -- SI_CHATCHANNELCATEGORYHEADERS10
     "Combat", -- SI_CHATCHANNELCATEGORYHEADERS45
-    "Alliance War", -- SI_LFGACTIVITY1
-    "Normal", -- SI_LFGACTIVITY2
-    "Veteran", -- SI_LFGACTIVITY3
-    "Trial", -- SI_LFGACTIVITY4
-    "|t100%:100%:EsoUI/Art/Champion/champion_icon.dds|t Champion", -- SI_LFGACTIVITY5
-    "Home Show", -- SI_LFGACTIVITY6
-    "Non-Champion", -- SI_LFGACTIVITY7
-    "Below Level 50", -- SI_LFGACTIVITY8
-    "Damage", -- SI_LFGROLE1
-    "Tank", -- SI_LFGROLE2
-    "Healer", -- SI_LFGROLE4
-    "Undaunted Exploration Supplies", -- SI_LFGITEMREWARDTYPE1
-    "Premium Undaunted Exploration Supplies", -- SI_LFGITEMREWARDTYPE2
-    "You or a member of your group has not selected a role.", -- SI_ACTIVITYQUEUERESULT1
-    "You are not the group leader.", -- SI_ACTIVITYQUEUERESULT2
-    "Your group is too large.", -- SI_ACTIVITYQUEUERESULT3
-    "You or members of your group are not within the correct level range.", -- SI_ACTIVITYQUEUERESULT4
-    "You or members of your group are not in the correct location to queue for that activity.", -- SI_ACTIVITYQUEUERESULT5
-    "You or members of your group do not have the DLC unlocked for that activity.", -- SI_ACTIVITYQUEUERESULT6
-    "That option is not yet supported.", -- SI_ACTIVITYQUEUERESULT7
-    "You must select at least one activity to queue for.", -- SI_ACTIVITYQUEUERESULT8
-    "The members of this group are role incompatible.", -- SI_ACTIVITYQUEUERESULT9
-    "Cannot determine compatible region", -- SI_ACTIVITYQUEUERESULT10
-    "You cannot LFM solo", -- SI_ACTIVITYQUEUERESULT11
-    "You or a member of your group queued too recently", -- SI_ACTIVITYQUEUERESULT12
-    "Unable to queue at this time", -- SI_ACTIVITYQUEUERESULT13
-    "One or more members are offline", -- SI_ACTIVITYQUEUERESULT14
-    "Your place in the LFG queue expired", -- SI_ACTIVITYQUEUERESULT15
-    "Your desired LFG location is no longer valid", -- SI_ACTIVITYQUEUERESULT16
-    "One or more memebers current locations are no longer LFG compatible", -- SI_ACTIVITYQUEUERESULT17
-    "Current camapign and active camapign don't match.", -- SI_ACTIVITYQUEUERESULT18
-    "One or more members canceled Ready Check.", -- SI_ACTIVITYQUEUERESULT19
-    "The structure of the group changed.", -- SI_ACTIVITYQUEUERESULT20
-    "A different LFG search was initiated.", -- SI_ACTIVITYQUEUERESULT21
-    "Cannot queue for LFG while inside battleground.", -- SI_ACTIVITYQUEUERESULT22
-    "Not Queued", -- SI_ACTIVITYFINDERSTATUS0
-    "Queued", -- SI_ACTIVITYFINDERSTATUS1
-    "In Progress", -- SI_ACTIVITYFINDERSTATUS2
-    "Activity Complete", -- SI_ACTIVITYFINDERSTATUS3
-    "Ready Check", -- SI_ACTIVITYFINDERSTATUS4
-    "Forming Group", -- SI_ACTIVITYFINDERSTATUS5
     "You are in control of the dungeon mode.", -- SI_GROUPDIFFICULTYCHANGEREASON0
     "Unlocked once your character reaches Level 50.", -- SI_GROUPDIFFICULTYCHANGEREASON1
     "Only the group leader may change the mode of group dungeons.", -- SI_GROUPDIFFICULTYCHANGEREASON2
@@ -1557,93 +865,12 @@ EsoStrings =
     "I would like Poisons", -- SI_SHADOWYCONNECTIONCHOICE1
     "I would like a Guard Disguise", -- SI_SHADOWYCONNECTIONCHOICE2
     "I would like Armor and Weapons", -- SI_SHADOWYCONNECTIONCHOICE3
-    "Talk in Guild Chat", -- SI_GUILDPERMISSION1
-    "Invite Members", -- SI_GUILDPERMISSION2
-    "Remove Members", -- SI_GUILDPERMISSION3
-    "Promote Members", -- SI_GUILDPERMISSION4
-    "Demote Members", -- SI_GUILDPERMISSION5
-    "Edit Message of the Day", -- SI_GUILDPERMISSION6
-    "Read Member Notes", -- SI_GUILDPERMISSION7
-    "Edit Member Notes", -- SI_GUILDPERMISSION8
-    "Claim AvA Resource", -- SI_GUILDPERMISSION9
-    "Release AvA Resource", -- SI_GUILDPERMISSION10
-    "Read Officer Chat", -- SI_GUILDPERMISSION11
-    "Talk in Officer Chat", -- SI_GUILDPERMISSION12
-    "Edit About Us", -- SI_GUILDPERMISSION13
-    "Edit Recruitment", -- SI_GUILDPERMISSION14
-    "Deposit in Guild Bank", -- SI_GUILDPERMISSION15
-    "Withdraw from Guild Bank", -- SI_GUILDPERMISSION16
-    "Buy from Guild Store", -- SI_GUILDPERMISSION17
-    "Sell in Guild Store", -- SI_GUILDPERMISSION18
-    "Edit Guild Permissions", -- SI_GUILDPERMISSION19
-    "Use Guild Siege Equipment", -- SI_GUILDPERMISSION20
-    "Hire Guild Traders", -- SI_GUILDPERMISSION21
-    "Edit Guild Heraldry", -- SI_GUILDPERMISSION22
-    "Withdraw Gold from Guild Bank", -- SI_GUILDPERMISSION23
-    "View Gold in Guild Bank", -- SI_GUILDPERMISSION24
-    "View Withdraw History of Guild Bank", -- SI_GUILDPERMISSION25
-    "View Deposit History of Guild Bank", -- SI_GUILDPERMISSION26
-    "General", -- SI_GUILDHISTORYCATEGORY1
-    "Bank", -- SI_GUILDHISTORYCATEGORY2
-    "Store", -- SI_GUILDHISTORYCATEGORY3
-    "Combat", -- SI_GUILDHISTORYCATEGORY4
-    "Alliance War", -- SI_GUILDHISTORYCATEGORY5
-    "Roster", -- SI_GUILDHISTORYGENERALSUBCATEGORIES1
-    "Customization", -- SI_GUILDHISTORYGENERALSUBCATEGORIES2
-    "Unlocks", -- SI_GUILDHISTORYGENERALSUBCATEGORIES3
-    "Deposits", -- SI_GUILDHISTORYBANKSUBCATEGORIES1
-    "Withdrawals", -- SI_GUILDHISTORYBANKSUBCATEGORIES2
-    "Purchases", -- SI_GUILDHISTORYSTORESUBCATEGORIES1
-    "Hired Trader", -- SI_GUILDHISTORYSTORESUBCATEGORIES2
-    "Ownership", -- SI_GUILDHISTORYALLIANCEWARSUBCATEGORIES1
-    "<<1>> promoted <<2>> to <<3>>.", -- SI_GUILDEVENTTYPE3
-    "<<1>> demoted <<2>> to <<3>>.", -- SI_GUILDEVENTTYPE4
-    "<<1>> created guild.", -- SI_GUILDEVENTTYPE5
-    "<<1>> joined guild.", -- SI_GUILDEVENTTYPE7
-    "<<1>> left guild.", -- SI_GUILDEVENTTYPE8
-    "<<1>> kicked <<2>> from guild.", -- SI_GUILDEVENTTYPE12
-    "<<1>> deposited <<2>> <<t:3>>.", -- SI_GUILDEVENTTYPE13
-    "<<1>> withdrew <<2>> <<t:3>>.", -- SI_GUILDEVENTTYPE14
-    "<<1>> sold <<3>> <<t:4>> to <<2>> for <<5>>. <<6>> in taxes collected.", -- SI_GUILDEVENTTYPE15
-    "<<1>> claimed <<2>> in <<3>> campaign.", -- SI_GUILDEVENTTYPE16
-    "Guild lost <<1>> in <<2>> campaign.", -- SI_GUILDEVENTTYPE17
-    "<<1>> released <<2>> in <<3>> campaign.", -- SI_GUILDEVENTTYPE19
-    "<<1>> edited guild's heraldry for <<2>>.", -- SI_GUILDEVENTTYPE20
-    "<<1>> deposited <<2>>.", -- SI_GUILDEVENTTYPE21
-    "<<1>> withdrew <<2>>.", -- SI_GUILDEVENTTYPE22
-    "Lost bid to hire <<1>>. <<2>> refunded.", -- SI_GUILDEVENTTYPE23
-    "<<1>> bid <<2>> to hire <<3>>.", -- SI_GUILDEVENTTYPE24
-    "<<1>> hired <<3>> for <<2>>.", -- SI_GUILDEVENTTYPE25
-    "<<1>> picked up Battle Standard.", -- SI_GUILDEVENTTYPE27
-    "<<1>> put down Battle Standard.", -- SI_GUILDEVENTTYPE28
-    "<<1>> edited Message of the Day text.", -- SI_GUILDEVENTTYPE31
-    "<<1>> edited About Us text.", -- SI_GUILDEVENTTYPE32
-    "Reached enough members to unlock the Guild Store!", -- SI_GUILDEVENTTYPE33
-    "Guild no longer has enough members to use the Guild Store.", -- SI_GUILDEVENTTYPE34
-    "Reached enough members to unlock the Guild Bank!", -- SI_GUILDEVENTTYPE35
-    "Guild no longer has enough members to use the Guild Bank.", -- SI_GUILDEVENTTYPE36
-    "Reached enough members to unlock the Guild Standard!", -- SI_GUILDEVENTTYPE37
-    "Guild no longer has enough members to use the Guild Standard.", -- SI_GUILDEVENTTYPE38
-    "Reached enough members to unlock the Guild Tabard!", -- SI_GUILDEVENTTYPE39
-    "Guild no longer has enough members to use the Guild Tabard.", -- SI_GUILDEVENTTYPE40
-    "Reached enough members to unlock hiring Guild Traders!", -- SI_GUILDEVENTTYPE42
-    "Guild no longer has enough members to hire Guild Traders.", -- SI_GUILDEVENTTYPE43
     "Gamertag", -- SI_PLATFORMACCOUNTLABEL0
     "Online ID", -- SI_PLATFORMACCOUNTLABEL1
     "UserID", -- SI_PLATFORMACCOUNTLABEL2
     "Speed", -- SI_RIDINGTRAINTYPE1
     "Capacity", -- SI_RIDINGTRAINTYPE2
     "Stamina", -- SI_RIDINGTRAINTYPE3
-    "Normal", -- SI_CAMPAIGNRULESETTYPE1
-    "Hardcore", -- SI_CAMPAIGNRULESETTYPE2
-    "Special Events", -- SI_CAMPAIGNRULESETTYPE3
-    "None", -- SI_CAMPAIGNLEVELREQUIREMENTTYPE0
-    "Player Level", -- SI_CAMPAIGNLEVELREQUIREMENTTYPE1
-    "Champion Points", -- SI_CAMPAIGNLEVELREQUIREMENTTYPE2
-    "Majority control of Cyrodiil unlocks the gates to Imperial City", -- SI_IMPERIALCITYACCESSRULESTYPE0
-    "Unlocking the gates requires control of |cffffff<<1>>|r home keeps", -- SI_IMPERIALCITYACCESSRULESTYPE1
-    "Unlocking the gates requires control of |cffffff<<1>>|r home keeps and at least |cffffff1|r enemy keep", -- SI_IMPERIALCITYACCESSRULESTYPE2
-    "The gates of Imperial City are open to all alliances", -- SI_IMPERIALCITYACCESSRULESTYPE3
     "Online", -- SI_PLAYERSTATUS1
     "Away", -- SI_PLAYERSTATUS2
     "Do not disturb", -- SI_PLAYERSTATUS3
@@ -1770,38 +997,6 @@ EsoStrings =
     "You do not have enough Crown Gems to make this purchase.", -- SI_MARKETPURCHASABLERESULT13
     "We're sorry, this product doesn't seem to exist.", -- SI_MARKETPURCHASABLERESULT14
     "You already own this item!", -- SI_MARKETPURCHASABLERESULT15
-    "Invalid", -- SI_COLLECTIBLECATEGORYTYPE0
-    "DLC", -- SI_COLLECTIBLECATEGORYTYPE1
-    "Mount", -- SI_COLLECTIBLECATEGORYTYPE2
-    "Non-Combat Pet", -- SI_COLLECTIBLECATEGORYTYPE3
-    "Costume", -- SI_COLLECTIBLECATEGORYTYPE4
-    "Memento", -- SI_COLLECTIBLECATEGORYTYPE5
-    "Upgrade", -- SI_COLLECTIBLECATEGORYTYPE6
-    "Service", -- SI_COLLECTIBLECATEGORYTYPE7
-    "Assistant", -- SI_COLLECTIBLECATEGORYTYPE8
-    "Personality", -- SI_COLLECTIBLECATEGORYTYPE9
-    "Hat", -- SI_COLLECTIBLECATEGORYTYPE10
-    "Skin", -- SI_COLLECTIBLECATEGORYTYPE11
-    "Polymorph", -- SI_COLLECTIBLECATEGORYTYPE12
-    "Hair", -- SI_COLLECTIBLECATEGORYTYPE13
-    "Facial Hair / Horns", -- SI_COLLECTIBLECATEGORYTYPE14
-    "Facial Accessory", -- SI_COLLECTIBLECATEGORYTYPE15
-    "Piercing / Jewelry", -- SI_COLLECTIBLECATEGORYTYPE16
-    "Head Marking", -- SI_COLLECTIBLECATEGORYTYPE17
-    "Body Marking", -- SI_COLLECTIBLECATEGORYTYPE18
-    "House", -- SI_COLLECTIBLECATEGORYTYPE19
-    "Furniture", -- SI_COLLECTIBLECATEGORYTYPE20
-    "Emote", -- SI_COLLECTIBLECATEGORYTYPE21
-    "Chapter", -- SI_COLLECTIBLECATEGORYTYPE22
-    "Ability Skin", -- SI_COLLECTIBLECATEGORYTYPE23
-    "Bust", -- SI_SPECIALIZEDCOLLECTIBLETYPE1
-    "None", -- SI_HOUSECATEGORYTYPE0
-    "Staple", -- SI_HOUSECATEGORYTYPE1
-    "Classic", -- SI_HOUSECATEGORYTYPE2
-    "Notable", -- SI_HOUSECATEGORYTYPE3
-    "Not Collected", -- SI_COLLECTIBLEUNLOCKSTATE0
-    "ESO Plus Unlocked", -- SI_COLLECTIBLEUNLOCKSTATE1
-    "Collected", -- SI_COLLECTIBLEUNLOCKSTATE2
     "Invalid", -- SI_EMOTECATEGORY0
     "Ceremonial", -- SI_EMOTECATEGORY1
     "Cheers and Jeers", -- SI_EMOTECATEGORY2
@@ -1825,24 +1020,6 @@ EsoStrings =
     "EU", -- SI_MEGASERVER2
     "North America", -- SI_CONSOLESERVERCHOICE0
     "Europe", -- SI_CONSOLESERVERCHOICE1
-    "Custom", -- SI_HOUSEPERMISSIONPRESETSETTING0
-    "Decorator", -- SI_HOUSEPERMISSIONPRESETSETTING1
-    "Visitor", -- SI_HOUSEPERMISSIONPRESETSETTING2
-    "No Access", -- SI_HOUSEPERMISSIONDEFAULTACCESSSETTING0
-    "Visitor", -- SI_HOUSEPERMISSIONDEFAULTACCESSSETTING1
-    "Decorator", -- SI_HOUSEPERMISSIONDEFAULTACCESSSETTING2
-    "Use Objects", -- SI_HOUSEPERMISSIONSETTING1
-    "Use Assistants", -- SI_HOUSEPERMISSIONSETTING2
-    "Use Crafting Stations", -- SI_HOUSEPERMISSIONSETTING3
-    "Move Furniture", -- SI_HOUSEPERMISSIONSETTING4
-    "Place Temporary Items", -- SI_HOUSEPERMISSIONSETTING5
-    "Social Options", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES0
-    "General", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES1
-    "Visitors", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES2
-    "Banlist", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES3
-    "Guild Visitors", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES4
-    "Guild Banlist", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES5
-    "Templates", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES6
     "http://www.elderscrollsonline.com", -- SI_APPROVEDURLTYPE0
     "https://account.elderscrollsonline.com", -- SI_APPROVEDURLTYPE1
     "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", -- SI_APPROVEDURLTYPE2
@@ -1965,17 +1142,6 @@ EsoStrings =
     "Normal", -- SI_CADWELLPROGRESSIONLEVEL0
     "Silver", -- SI_CADWELLPROGRESSIONLEVEL1
     "Gold", -- SI_CADWELLPROGRESSIONLEVEL2
-    "One Hand and Shield", -- SI_WEAPONCONFIGTYPE1
-    "Dual Wield", -- SI_WEAPONCONFIGTYPE2
-    "Two Handed", -- SI_WEAPONCONFIGTYPE3
-    "Bow", -- SI_WEAPONCONFIGTYPE4
-    "Destruction Staff", -- SI_WEAPONCONFIGTYPE5
-    "Restoration Staff", -- SI_WEAPONCONFIGTYPE6
-    "Fire Staff", -- SI_WEAPONCONFIGTYPE7
-    "Frost Staff", -- SI_WEAPONCONFIGTYPE8
-    "Lightning Staff", -- SI_WEAPONCONFIGTYPE9
-    "One Handed", -- SI_WEAPONCONFIGTYPE10
-    "Unarmed", -- SI_WEAPONCONFIGTYPE11
     "Sony Entertainment Network", -- SI_PLATFORMSERVICETYPE1
     "Xbox Live", -- SI_PLATFORMSERVICETYPE2
     "DMM", -- SI_PLATFORMSERVICETYPE3
@@ -1988,34 +1154,6 @@ EsoStrings =
     "Name Change", -- SI_SERVICETOKENTYPE1
     "Race Change", -- SI_SERVICETOKENTYPE2
     "Appearance Change", -- SI_SERVICETOKENTYPE3
-    "This Dye Stamp has the same dyes as your current equipment.", -- SI_DYESTAMPUSERESULT1
-    "This Dye Stamp has no equipment it can affect.", -- SI_DYESTAMPUSERESULT2
-    "This Dye Stamp has the same dyes as your current costume and hat.", -- SI_DYESTAMPUSERESULT3
-    "This Dye Stamp has no costume or hat to affect.", -- SI_DYESTAMPUSERESULT4
-    "This Dye Stamp does not exist.", -- SI_DYESTAMPUSERESULT5
-    "This Dye Stamp cannot be used on a hidden costume or hat.", -- SI_DYESTAMPUSERESULT6
-    "You need <<1>> additional open inventory <<1[/slot/slots]>>", -- SI_LOOTCRATEOPENRESPONSE1
-    "The pack was not opened properly", -- SI_LOOTCRATEOPENRESPONSE2
-    "No item found for pack", -- SI_LOOTCRATEOPENRESPONSE3
-    "Pack does not exist", -- SI_LOOTCRATEOPENRESPONSE4
-    "Invalid tier data for pack", -- SI_LOOTCRATEOPENRESPONSE5
-    "You do not have any more crates of this type left", -- SI_LOOTCRATEOPENRESPONSE6
-    "The system is currently unavailable", -- SI_LOOTCRATEOPENRESPONSE7
-    "You do not have any crates to open. You can purchase more in the Crown Store.", -- SI_LOOTCRATEOPENRESPONSE8
-    "An item was broken down into gems", -- SI_CROWNGEMBALANCEREASON1
-    "Someone declined the invite. You were placed at the front of the queue.", -- SI_LFGREADYCHECKCANCELREASON1
-    "Ready check canceled, group was not viable.", -- SI_LFGREADYCHECKCANCELREASON2
-    "You or someone in your group declined the invite. You have exited the queue.", -- SI_LFGREADYCHECKCANCELREASON3
-    "Ready check succeeded, group formed!", -- SI_LFGREADYCHECKCANCELREASON4
-    "Activity no longer valid", -- SI_LFGREADYCHECKCANCELREASON5
-    "All", -- SI_GEMIFIABLEFILTERTYPE0
-    "Furnishings", -- SI_HOUSINGFURNISHINGLIMITTYPE1
-    "Trophy Collectibles", -- SI_HOUSINGFURNISHINGLIMITTYPE2
-    "Other Collectibles", -- SI_HOUSINGFURNISHINGLIMITTYPE3
-    "This house already has these permissions", -- SI_HOUSINGLOADPERMISSIONSRESULT0
-    "Permissions loaded successfully", -- SI_HOUSINGLOADPERMISSIONSRESULT1
-    "Treasure Type", -- SI_ITEMTAGCATEGORY1
-    "Furnishing Behavior", -- SI_ITEMTAGCATEGORY2
     "None", -- SI_BATTLEGROUNDALLIANCE0
     "Fire Drakes", -- SI_BATTLEGROUNDALLIANCE1
     "Pit Daemons", -- SI_BATTLEGROUNDALLIANCE2
@@ -2025,18 +1163,6 @@ EsoStrings =
     "<<X:1>> killed <<2>>", -- SI_BATTLEGROUNDKILLTYPE2
     "<<X:1>> stole the kill on <<2>>", -- SI_BATTLEGROUNDKILLTYPE3
     "<<X:1>> killed <<2>>", -- SI_BATTLEGROUNDKILLTYPE4
-    "All Themes", -- SI_FURNITURETHEMETYPE0
-    "Generic", -- SI_FURNITURETHEMETYPE1
-    "Breton", -- SI_FURNITURETHEMETYPE2
-    "High Elf", -- SI_FURNITURETHEMETYPE3
-    "Argonian", -- SI_FURNITURETHEMETYPE4
-    "Wood Elf", -- SI_FURNITURETHEMETYPE5
-    "Dark Elf", -- SI_FURNITURETHEMETYPE6
-    "Khajiit", -- SI_FURNITURETHEMETYPE7
-    "Nord", -- SI_FURNITURETHEMETYPE8
-    "Orc", -- SI_FURNITURETHEMETYPE9
-    "Redguard", -- SI_FURNITURETHEMETYPE10
-    "Imperial", -- SI_FURNITURETHEMETYPE11
     "Requires the |cffffff<<1>>|r upgrade.", -- SI_CHARACTERCREATEOPTIONRESTRICTIONREASON1
     "Requires the |cffffffMorrowind|r Chapter.", -- SI_CHARACTERCREATEOPTIONRESTRICTIONREASON2
     "Cannot play emote at this time.", -- SI_PLAYEREMOTEPLAYFAILURE0
@@ -2050,6 +1176,864 @@ EsoStrings =
     "Implicit Multi Loc Descriptor One", -- SI_MULTILOCALIZEDENUMTESTDESCONE4
     "Implicit Multi Loc Descriptor Two", -- SI_MULTILOCALIZEDENUMTESTDESCTWO4
     "", -- Sync string for EsoGameDataEnums last entry
+    "", -- Sync string for EsoGameDataEnums_Collectible first entry
+    "You can't use this collectible in this zone.", -- SI_COLLECTIBLEUSAGEBLOCKREASON1
+    "You can't use this collectible while swimming.", -- SI_COLLECTIBLEUSAGEBLOCKREASON2
+    "You can't use collectibles while dead.", -- SI_COLLECTIBLEUSAGEBLOCKREASON3
+    "You can't use this collectible.", -- SI_COLLECTIBLEUSAGEBLOCKREASON4
+    "You're the wrong gender to use this collectible", -- SI_COLLECTIBLEUSAGEBLOCKREASON5
+    "You're the wrong race to use this collectible", -- SI_COLLECTIBLEUSAGEBLOCKREASON6
+    "You're the wrong alliance to use this collectible", -- SI_COLLECTIBLEUSAGEBLOCKREASON7
+    "Your collectible cannot be used while placed in your house.", -- SI_COLLECTIBLEUSAGEBLOCKREASON8
+    "This collectible is not ready yet.", -- SI_COLLECTIBLEUSAGEBLOCKREASON9
+    "You're the wrong class to use this collectible.", -- SI_COLLECTIBLEUSAGEBLOCKREASON10
+    "Gender", -- SI_COLLECTIBLERESTRICTIONTYPE0
+    "Race", -- SI_COLLECTIBLERESTRICTIONTYPE1
+    "Alliance", -- SI_COLLECTIBLERESTRICTIONTYPE2
+    "Class", -- SI_COLLECTIBLERESTRICTIONTYPE3
+    "Invalid", -- SI_COLLECTIBLECATEGORYTYPE0
+    "DLC", -- SI_COLLECTIBLECATEGORYTYPE1
+    "Mount", -- SI_COLLECTIBLECATEGORYTYPE2
+    "Non-Combat Pet", -- SI_COLLECTIBLECATEGORYTYPE3
+    "Costume", -- SI_COLLECTIBLECATEGORYTYPE4
+    "Memento", -- SI_COLLECTIBLECATEGORYTYPE5
+    "Upgrade", -- SI_COLLECTIBLECATEGORYTYPE6
+    "Service", -- SI_COLLECTIBLECATEGORYTYPE7
+    "Assistant", -- SI_COLLECTIBLECATEGORYTYPE8
+    "Personality", -- SI_COLLECTIBLECATEGORYTYPE9
+    "Hat", -- SI_COLLECTIBLECATEGORYTYPE10
+    "Skin", -- SI_COLLECTIBLECATEGORYTYPE11
+    "Polymorph", -- SI_COLLECTIBLECATEGORYTYPE12
+    "Hair", -- SI_COLLECTIBLECATEGORYTYPE13
+    "Facial Hair / Horns", -- SI_COLLECTIBLECATEGORYTYPE14
+    "Facial Accessory", -- SI_COLLECTIBLECATEGORYTYPE15
+    "Piercing / Jewelry", -- SI_COLLECTIBLECATEGORYTYPE16
+    "Head Marking", -- SI_COLLECTIBLECATEGORYTYPE17
+    "Body Marking", -- SI_COLLECTIBLECATEGORYTYPE18
+    "House", -- SI_COLLECTIBLECATEGORYTYPE19
+    "Furniture", -- SI_COLLECTIBLECATEGORYTYPE20
+    "Emote", -- SI_COLLECTIBLECATEGORYTYPE21
+    "Chapter", -- SI_COLLECTIBLECATEGORYTYPE22
+    "Ability Skin", -- SI_COLLECTIBLECATEGORYTYPE23
+    "Bust", -- SI_SPECIALIZEDCOLLECTIBLETYPE1
+    "Not Collected", -- SI_COLLECTIBLEUNLOCKSTATE0
+    "ESO Plus Unlocked", -- SI_COLLECTIBLEUNLOCKSTATE1
+    "Collected", -- SI_COLLECTIBLEUNLOCKSTATE2
+    "", -- Sync string for EsoGameDataEnums_Collectible last entry
+    "", -- Sync string for EsoGameDataEnums_Dyeing first entry
+    "Head", -- SI_DYEABLESLOT0
+    "Chest", -- SI_DYEABLESLOT1
+    "Shoulders", -- SI_DYEABLESLOT2
+    "Waist", -- SI_DYEABLESLOT3
+    "Legs", -- SI_DYEABLESLOT4
+    "Feet", -- SI_DYEABLESLOT5
+    "Hands", -- SI_DYEABLESLOT6
+    "Off Hand", -- SI_DYEABLESLOT7
+    "Off Hand Back-Up", -- SI_DYEABLESLOT8
+    "Costume", -- SI_DYEABLESLOT9
+    "Hat", -- SI_DYEABLESLOT10
+    "Common", -- SI_DYERARITY0
+    "Uncommon", -- SI_DYERARITY1
+    "Rare", -- SI_DYERARITY2
+    "Red", -- SI_DYEHUECATEGORY0
+    "Yellow", -- SI_DYEHUECATEGORY1
+    "Green", -- SI_DYEHUECATEGORY2
+    "Blue", -- SI_DYEHUECATEGORY3
+    "Purple", -- SI_DYEHUECATEGORY4
+    "Brown", -- SI_DYEHUECATEGORY5
+    "Grey", -- SI_DYEHUECATEGORY6
+    "This Dye Stamp has the same dyes as your current equipment.", -- SI_DYESTAMPUSERESULT1
+    "This Dye Stamp has no equipment it can affect.", -- SI_DYESTAMPUSERESULT2
+    "This Dye Stamp has the same dyes as your current costume and hat.", -- SI_DYESTAMPUSERESULT3
+    "This Dye Stamp has no costume or hat to affect.", -- SI_DYESTAMPUSERESULT4
+    "This Dye Stamp does not exist.", -- SI_DYESTAMPUSERESULT5
+    "This Dye Stamp cannot be used on a hidden costume or hat.", -- SI_DYESTAMPUSERESULT6
+    "", -- Sync string for EsoGameDataEnums_Dyeing last entry
+    "", -- Sync string for EsoGameDataEnums_Furniture first entry
+    "", -- Sync string for EsoGameDataEnums_Furniture last entry
+    "", -- Sync string for EsoGameDataEnums_Housing first entry
+    "None", -- SI_HOUSECATEGORYTYPE0
+    "Staple", -- SI_HOUSECATEGORYTYPE1
+    "Classic", -- SI_HOUSECATEGORYTYPE2
+    "Notable", -- SI_HOUSECATEGORYTYPE3
+    "Custom", -- SI_HOUSEPERMISSIONPRESETSETTING0
+    "Decorator", -- SI_HOUSEPERMISSIONPRESETSETTING1
+    "Visitor", -- SI_HOUSEPERMISSIONPRESETSETTING2
+    "No Access", -- SI_HOUSEPERMISSIONDEFAULTACCESSSETTING0
+    "Visitor", -- SI_HOUSEPERMISSIONDEFAULTACCESSSETTING1
+    "Decorator", -- SI_HOUSEPERMISSIONDEFAULTACCESSSETTING2
+    "Use Objects", -- SI_HOUSEPERMISSIONSETTING1
+    "Use Assistants", -- SI_HOUSEPERMISSIONSETTING2
+    "Use Crafting Stations", -- SI_HOUSEPERMISSIONSETTING3
+    "Move Furniture", -- SI_HOUSEPERMISSIONSETTING4
+    "Place Temporary Items", -- SI_HOUSEPERMISSIONSETTING5
+    "Social Options", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES0
+    "General", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES1
+    "Visitors", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES2
+    "Banlist", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES3
+    "Guild Visitors", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES4
+    "Guild Banlist", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES5
+    "Templates", -- SI_HOUSEPERMISSIONOPTIONSCATEGORIES6
+    "Item Furnishings", -- SI_HOUSINGFURNISHINGLIMITTYPE0
+    "Other Items", -- SI_HOUSINGFURNISHINGLIMITTYPE1
+    "Collectible Furnishings", -- SI_HOUSINGFURNISHINGLIMITTYPE2
+    "Other Collectibles", -- SI_HOUSINGFURNISHINGLIMITTYPE3
+    "This house already has these permissions", -- SI_HOUSINGLOADPERMISSIONSRESULT0
+    "Permissions loaded successfully", -- SI_HOUSINGLOADPERMISSIONSRESULT1
+    "All Themes", -- SI_FURNITURETHEMETYPE0
+    "Generic", -- SI_FURNITURETHEMETYPE1
+    "Breton", -- SI_FURNITURETHEMETYPE2
+    "High Elf", -- SI_FURNITURETHEMETYPE3
+    "Argonian", -- SI_FURNITURETHEMETYPE4
+    "Wood Elf", -- SI_FURNITURETHEMETYPE5
+    "Dark Elf", -- SI_FURNITURETHEMETYPE6
+    "Khajiit", -- SI_FURNITURETHEMETYPE7
+    "Nord", -- SI_FURNITURETHEMETYPE8
+    "Orc", -- SI_FURNITURETHEMETYPE9
+    "Redguard", -- SI_FURNITURETHEMETYPE10
+    "Imperial", -- SI_FURNITURETHEMETYPE11
+    "", -- Sync string for EsoGameDataEnums_Housing last entry
+    "", -- Sync string for EsoGameDataEnums_Item first entry
+    "None", -- SI_ARMORTYPE0
+    "Light", -- SI_ARMORTYPE1
+    "Medium", -- SI_ARMORTYPE2
+    "Heavy", -- SI_ARMORTYPE3
+    "Head", -- SI_EQUIPTYPE1
+    "Neck", -- SI_EQUIPTYPE2
+    "Chest", -- SI_EQUIPTYPE3
+    "Shoulders", -- SI_EQUIPTYPE4
+    "One Handed", -- SI_EQUIPTYPE5
+    "Two Handed", -- SI_EQUIPTYPE6
+    "Off Hand", -- SI_EQUIPTYPE7
+    "Waist", -- SI_EQUIPTYPE8
+    "Legs", -- SI_EQUIPTYPE9
+    "Feet", -- SI_EQUIPTYPE10
+    "Appearance", -- SI_EQUIPTYPE11
+    "Ring", -- SI_EQUIPTYPE12
+    "Hand", -- SI_EQUIPTYPE13
+    "Main Hand", -- SI_EQUIPTYPE14
+    "Poison", -- SI_EQUIPTYPE15
+    "Head", -- SI_EQUIPSLOT0
+    "Neck", -- SI_EQUIPSLOT1
+    "Chest", -- SI_EQUIPSLOT2
+    "Shoulders", -- SI_EQUIPSLOT3
+    "Main Hand", -- SI_EQUIPSLOT4
+    "Off Hand", -- SI_EQUIPSLOT5
+    "Waist", -- SI_EQUIPSLOT6
+    "Wrist", -- SI_EQUIPSLOT7
+    "Legs", -- SI_EQUIPSLOT8
+    "Feet", -- SI_EQUIPSLOT9
+    "Appearance", -- SI_EQUIPSLOT10
+    "Ring 1", -- SI_EQUIPSLOT11
+    "Ring 2", -- SI_EQUIPSLOT12
+    "Poison", -- SI_EQUIPSLOT13
+    "Poison Back-Up", -- SI_EQUIPSLOT14
+    "Ranged", -- SI_EQUIPSLOT15
+    "Hands", -- SI_EQUIPSLOT16
+    "Class 1", -- SI_EQUIPSLOT17
+    "Class 2", -- SI_EQUIPSLOT18
+    "Class 3", -- SI_EQUIPSLOT19
+    "Main Hand Back-Up", -- SI_EQUIPSLOT20
+    "Off Hand Back-Up", -- SI_EQUIPSLOT21
+    "Weapons", -- SI_EQUIPSLOTVISUALCATEGORY1
+    "Apparel", -- SI_EQUIPSLOTVISUALCATEGORY2
+    "Accessories", -- SI_EQUIPSLOTVISUALCATEGORY3
+    "Low", -- SI_EQUIPMENTBONUS0
+    "Average", -- SI_EQUIPMENTBONUS1
+    "Fair", -- SI_EQUIPMENTBONUS2
+    "High", -- SI_EQUIPMENTBONUS3
+    "Superior", -- SI_EQUIPMENTBONUS4
+    "Extraordinary", -- SI_EQUIPMENTBONUS5
+    "None", -- SI_ITEMTYPE0
+    "Weapon", -- SI_ITEMTYPE1
+    "Armor", -- SI_ITEMTYPE2
+    "Augment", -- SI_ITEMTYPE3
+    "Food", -- SI_ITEMTYPE4
+    "Trophy", -- SI_ITEMTYPE5
+    "Siege", -- SI_ITEMTYPE6
+    "Potion", -- SI_ITEMTYPE7
+    "Motif", -- SI_ITEMTYPE8
+    "Tool", -- SI_ITEMTYPE9
+    "Ingredient", -- SI_ITEMTYPE10
+    "Additive", -- SI_ITEMTYPE11
+    "Drink", -- SI_ITEMTYPE12
+    "Costume", -- SI_ITEMTYPE13
+    "Disguise", -- SI_ITEMTYPE14
+    "Tabard", -- SI_ITEMTYPE15
+    "Lure", -- SI_ITEMTYPE16
+    "Raw Material", -- SI_ITEMTYPE17
+    "Container", -- SI_ITEMTYPE18
+    "Soul Gem", -- SI_ITEMTYPE19
+    "Weapon Glyph", -- SI_ITEMTYPE20
+    "Armor Glyph", -- SI_ITEMTYPE21
+    "Lockpick", -- SI_ITEMTYPE22
+    "Weapon Booster", -- SI_ITEMTYPE23
+    "Armor Booster", -- SI_ITEMTYPE24
+    "Enchantment Booster", -- SI_ITEMTYPE25
+    "Jewelry Glyph", -- SI_ITEMTYPE26
+    "Spice", -- SI_ITEMTYPE27
+    "Flavoring", -- SI_ITEMTYPE28
+    "Recipe", -- SI_ITEMTYPE29
+    "Poison", -- SI_ITEMTYPE30
+    "Reagent", -- SI_ITEMTYPE31
+    "Deprecated", -- SI_ITEMTYPE32
+    "Potion Solvent", -- SI_ITEMTYPE33
+    "Collectible", -- SI_ITEMTYPE34
+    "Raw Material", -- SI_ITEMTYPE35
+    "Material", -- SI_ITEMTYPE36
+    "Raw Material", -- SI_ITEMTYPE37
+    "Material", -- SI_ITEMTYPE38
+    "Raw Material", -- SI_ITEMTYPE39
+    "Material", -- SI_ITEMTYPE40
+    "Temper", -- SI_ITEMTYPE41
+    "Resin", -- SI_ITEMTYPE42
+    "Tannin", -- SI_ITEMTYPE43
+    "Style Material", -- SI_ITEMTYPE44
+    "Armor Trait", -- SI_ITEMTYPE45
+    "Weapon Trait", -- SI_ITEMTYPE46
+    "AvA Repair", -- SI_ITEMTYPE47
+    "Trash", -- SI_ITEMTYPE48
+    "Tablet", -- SI_ITEMTYPE49
+    "Mount", -- SI_ITEMTYPE50
+    "Potency Runestone", -- SI_ITEMTYPE51
+    "Aspect Runestone", -- SI_ITEMTYPE52
+    "Essence Runestone", -- SI_ITEMTYPE53
+    "Fish", -- SI_ITEMTYPE54
+    "Crown Repair", -- SI_ITEMTYPE55
+    "Treasure", -- SI_ITEMTYPE56
+    "Crown Item", -- SI_ITEMTYPE57
+    "Poison Solvent", -- SI_ITEMTYPE58
+    "Dye Stamp", -- SI_ITEMTYPE59
+    "Master Writ", -- SI_ITEMTYPE60
+    "Furnishing", -- SI_ITEMTYPE61
+    "Furnishing Material", -- SI_ITEMTYPE62
+    "Weapon", -- SI_SPECIALIZEDITEMTYPE250
+    "Armor", -- SI_SPECIALIZEDITEMTYPE300
+    "Augment", -- SI_SPECIALIZEDITEMTYPE350
+    "Meat Dish", -- SI_SPECIALIZEDITEMTYPE1
+    "Fruit Dish", -- SI_SPECIALIZEDITEMTYPE2
+    "Vegetable Dish", -- SI_SPECIALIZEDITEMTYPE3
+    "Savoury Dish", -- SI_SPECIALIZEDITEMTYPE4
+    "Ragout Dish", -- SI_SPECIALIZEDITEMTYPE5
+    "Entremet Dish", -- SI_SPECIALIZEDITEMTYPE6
+    "Gourmet Dish", -- SI_SPECIALIZEDITEMTYPE7
+    "Unique Dish", -- SI_SPECIALIZEDITEMTYPE8
+    "Treasure Map", -- SI_SPECIALIZEDITEMTYPE100
+    "Survey Report", -- SI_SPECIALIZEDITEMTYPE101
+    "Key Fragment", -- SI_SPECIALIZEDITEMTYPE102
+    "Museum Piece", -- SI_SPECIALIZEDITEMTYPE103
+    "Recipe Fragment", -- SI_SPECIALIZEDITEMTYPE104
+    "Scroll", -- SI_SPECIALIZEDITEMTYPE105
+    "Material Upgrader", -- SI_SPECIALIZEDITEMTYPE106
+    "Key", -- SI_SPECIALIZEDITEMTYPE107
+    "Runebox Fragment", -- SI_SPECIALIZEDITEMTYPE108
+    "Trebuchet", -- SI_SPECIALIZEDITEMTYPE400
+    "Ballista", -- SI_SPECIALIZEDITEMTYPE401
+    "Ram", -- SI_SPECIALIZEDITEMTYPE402
+    "Universal Siege", -- SI_SPECIALIZEDITEMTYPE403
+    "Catapult", -- SI_SPECIALIZEDITEMTYPE404
+    "Forward Camp", -- SI_SPECIALIZEDITEMTYPE405
+    "Monster", -- SI_SPECIALIZEDITEMTYPE406
+    "Oil", -- SI_SPECIALIZEDITEMTYPE407
+    "Battle Standard", -- SI_SPECIALIZEDITEMTYPE408
+    "Potion", -- SI_SPECIALIZEDITEMTYPE450
+    "Motif Book", -- SI_SPECIALIZEDITEMTYPE60
+    "Motif Chapter", -- SI_SPECIALIZEDITEMTYPE61
+    "Tool", -- SI_SPECIALIZEDITEMTYPE500
+    "Meat Ingredient", -- SI_SPECIALIZEDITEMTYPE40
+    "Vegetable Ingredient", -- SI_SPECIALIZEDITEMTYPE41
+    "Fruit Ingredient", -- SI_SPECIALIZEDITEMTYPE42
+    "Food Additive", -- SI_SPECIALIZEDITEMTYPE43
+    "Alcohol Ingredient", -- SI_SPECIALIZEDITEMTYPE44
+    "Tea Ingredient", -- SI_SPECIALIZEDITEMTYPE45
+    "Tonic Ingredient", -- SI_SPECIALIZEDITEMTYPE46
+    "Drink Additive", -- SI_SPECIALIZEDITEMTYPE47
+    "Rare Ingredient", -- SI_SPECIALIZEDITEMTYPE48
+    "Additive", -- SI_SPECIALIZEDITEMTYPE550
+    "Alcoholic Beverage", -- SI_SPECIALIZEDITEMTYPE20
+    "Tea Beverage", -- SI_SPECIALIZEDITEMTYPE21
+    "Tonic Beverage", -- SI_SPECIALIZEDITEMTYPE22
+    "Liqueur Beverage", -- SI_SPECIALIZEDITEMTYPE23
+    "Tincture Beverage", -- SI_SPECIALIZEDITEMTYPE24
+    "Cordial Tea Beverage", -- SI_SPECIALIZEDITEMTYPE25
+    "Distillate Beverage", -- SI_SPECIALIZEDITEMTYPE26
+    "Drink", -- SI_SPECIALIZEDITEMTYPE27
+    "Costume", -- SI_SPECIALIZEDITEMTYPE600
+    "Disguise", -- SI_SPECIALIZEDITEMTYPE650
+    "Tabard", -- SI_SPECIALIZEDITEMTYPE700
+    "Lure", -- SI_SPECIALIZEDITEMTYPE750
+    "Raw Material", -- SI_SPECIALIZEDITEMTYPE800
+    "Container", -- SI_SPECIALIZEDITEMTYPE850
+    "Event Container", -- SI_SPECIALIZEDITEMTYPE851
+    "Soul Gem", -- SI_SPECIALIZEDITEMTYPE900
+    "Weapon Glyph", -- SI_SPECIALIZEDITEMTYPE950
+    "Armor Glyph", -- SI_SPECIALIZEDITEMTYPE1000
+    "Lockpick", -- SI_SPECIALIZEDITEMTYPE1050
+    "Weapon Booster", -- SI_SPECIALIZEDITEMTYPE1100
+    "Armor Booster", -- SI_SPECIALIZEDITEMTYPE1150
+    "Enchantment Booster", -- SI_SPECIALIZEDITEMTYPE1200
+    "Jewelry Glyph", -- SI_SPECIALIZEDITEMTYPE1250
+    "Spice", -- SI_SPECIALIZEDITEMTYPE1300
+    "Flavoring", -- SI_SPECIALIZEDITEMTYPE1350
+    "Food Recipe", -- SI_SPECIALIZEDITEMTYPE170
+    "Drink Recipe", -- SI_SPECIALIZEDITEMTYPE171
+    "Furnishing Diagram", -- SI_SPECIALIZEDITEMTYPE172
+    "Furnishing Pattern", -- SI_SPECIALIZEDITEMTYPE173
+    "Furnishing Schematic", -- SI_SPECIALIZEDITEMTYPE174
+    "Furnishing Formula", -- SI_SPECIALIZEDITEMTYPE175
+    "Furnishing Design", -- SI_SPECIALIZEDITEMTYPE176
+    "Furnishing Blueprint", -- SI_SPECIALIZEDITEMTYPE177
+    "Poison", -- SI_SPECIALIZEDITEMTYPE1400
+    "Herb", -- SI_SPECIALIZEDITEMTYPE150
+    "Fungus", -- SI_SPECIALIZEDITEMTYPE151
+    "Animal Parts", -- SI_SPECIALIZEDITEMTYPE152
+    "Potion Solvent", -- SI_SPECIALIZEDITEMTYPE1450
+    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1460
+    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1465
+    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1560
+    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1660
+    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE1760
+    "Furnishing Material", -- SI_SPECIALIZEDITEMTYPE2410
+    "Rare Fish", -- SI_SPECIALIZEDITEMTYPE80
+    "Monster Trophy", -- SI_SPECIALIZEDITEMTYPE81
+    "Raw Material", -- SI_SPECIALIZEDITEMTYPE1500
+    "Material", -- SI_SPECIALIZEDITEMTYPE1550
+    "Raw Material", -- SI_SPECIALIZEDITEMTYPE1600
+    "Material", -- SI_SPECIALIZEDITEMTYPE1650
+    "Raw Material", -- SI_SPECIALIZEDITEMTYPE1700
+    "Material", -- SI_SPECIALIZEDITEMTYPE1750
+    "Temper", -- SI_SPECIALIZEDITEMTYPE1800
+    "Resin", -- SI_SPECIALIZEDITEMTYPE1850
+    "Tannin", -- SI_SPECIALIZEDITEMTYPE1900
+    "Style Material", -- SI_SPECIALIZEDITEMTYPE1950
+    "Armor Trait", -- SI_SPECIALIZEDITEMTYPE2000
+    "Weapon Trait", -- SI_SPECIALIZEDITEMTYPE2050
+    "AvA Repair", -- SI_SPECIALIZEDITEMTYPE2100
+    "Trash", -- SI_SPECIALIZEDITEMTYPE2150
+    "Tablet", -- SI_SPECIALIZEDITEMTYPE2200
+    "Mount", -- SI_SPECIALIZEDITEMTYPE2250
+    "Potency Runestone", -- SI_SPECIALIZEDITEMTYPE2300
+    "Aspect Runestone", -- SI_SPECIALIZEDITEMTYPE2350
+    "Essence Runestone", -- SI_SPECIALIZEDITEMTYPE2400
+    "Fish", -- SI_SPECIALIZEDITEMTYPE2450
+    "Crown Repair", -- SI_SPECIALIZEDITEMTYPE2500
+    "Treasure", -- SI_SPECIALIZEDITEMTYPE2550
+    "Crown Item", -- SI_SPECIALIZEDITEMTYPE2600
+    "Poison Solvent", -- SI_SPECIALIZEDITEMTYPE2650
+    "Dye Stamp", -- SI_SPECIALIZEDITEMTYPE2700
+    "Master Writ", -- SI_SPECIALIZEDITEMTYPE2750
+    "Furnishing", -- SI_SPECIALIZEDITEMTYPE210
+    "Light", -- SI_SPECIALIZEDITEMTYPE211
+    "Seating", -- SI_SPECIALIZEDITEMTYPE212
+    "Crafting Station", -- SI_SPECIALIZEDITEMTYPE213
+    "Target Dummy", -- SI_SPECIALIZEDITEMTYPE214
+    "All", -- SI_ITEMFILTERTYPE0
+    "Weapon", -- SI_ITEMFILTERTYPE1
+    "Apparel", -- SI_ITEMFILTERTYPE2
+    "Consumable", -- SI_ITEMFILTERTYPE3
+    "Materials", -- SI_ITEMFILTERTYPE4
+    "Miscellaneous", -- SI_ITEMFILTERTYPE5
+    "Slottable items", -- SI_ITEMFILTERTYPE6
+    "Quest", -- SI_ITEMFILTERTYPE7
+    "Buyback", -- SI_ITEMFILTERTYPE8
+    "Junk", -- SI_ITEMFILTERTYPE9
+    "Damaged Equipment", -- SI_ITEMFILTERTYPE11
+    "Collectible", -- SI_ITEMFILTERTYPE12
+    "Blacksmithing", -- SI_ITEMFILTERTYPE13
+    "Clothing", -- SI_ITEMFILTERTYPE14
+    "Woodworking", -- SI_ITEMFILTERTYPE15
+    "Alchemy", -- SI_ITEMFILTERTYPE16
+    "Enchanting", -- SI_ITEMFILTERTYPE17
+    "Provisioning", -- SI_ITEMFILTERTYPE18
+    "Style Materials", -- SI_ITEMFILTERTYPE19
+    "Trait Items", -- SI_ITEMFILTERTYPE20
+    "Furnishings", -- SI_ITEMFILTERTYPE21
+    "House with Template", -- SI_ITEMFILTERTYPE22
+    "No trait", -- SI_ITEMTRAITTYPE0
+    "Powered", -- SI_ITEMTRAITTYPE1
+    "Charged", -- SI_ITEMTRAITTYPE2
+    "Precise", -- SI_ITEMTRAITTYPE3
+    "Infused", -- SI_ITEMTRAITTYPE4
+    "Defending", -- SI_ITEMTRAITTYPE5
+    "Training", -- SI_ITEMTRAITTYPE6
+    "Sharpened", -- SI_ITEMTRAITTYPE7
+    "Decisive", -- SI_ITEMTRAITTYPE8
+    "Intricate", -- SI_ITEMTRAITTYPE9
+    "Ornate", -- SI_ITEMTRAITTYPE10
+    "Sturdy", -- SI_ITEMTRAITTYPE11
+    "Impenetrable", -- SI_ITEMTRAITTYPE12
+    "Reinforced", -- SI_ITEMTRAITTYPE13
+    "Well-fitted", -- SI_ITEMTRAITTYPE14
+    "Training", -- SI_ITEMTRAITTYPE15
+    "Infused", -- SI_ITEMTRAITTYPE16
+    "Prosperous", -- SI_ITEMTRAITTYPE17
+    "Divines", -- SI_ITEMTRAITTYPE18
+    "Ornate", -- SI_ITEMTRAITTYPE19
+    "Intricate", -- SI_ITEMTRAITTYPE20
+    "Healthy", -- SI_ITEMTRAITTYPE21
+    "Arcane", -- SI_ITEMTRAITTYPE22
+    "Robust", -- SI_ITEMTRAITTYPE23
+    "Ornate", -- SI_ITEMTRAITTYPE24
+    "Nirnhoned", -- SI_ITEMTRAITTYPE25
+    "Nirnhoned", -- SI_ITEMTRAITTYPE26
+    "Aspect", -- SI_ENCHANTINGRUNECLASSIFICATION1
+    "Essence", -- SI_ENCHANTINGRUNECLASSIFICATION2
+    "Potency", -- SI_ENCHANTINGRUNECLASSIFICATION3
+    "Bind On Pickup", -- SI_BINDTYPE1
+    "Bind On Equip", -- SI_BINDTYPE2
+    "Backpack Bind On Pickup", -- SI_BINDTYPE3
+    "Worn", -- SI_ITEMQUALITY0
+    "Normal", -- SI_ITEMQUALITY1
+    "Fine", -- SI_ITEMQUALITY2
+    "Superior", -- SI_ITEMQUALITY3
+    "Epic", -- SI_ITEMQUALITY4
+    "Legendary", -- SI_ITEMQUALITY5
+    "None", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE0
+    "Befouled", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE1
+    "Rage", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE2
+    "Shock", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE3
+    "Crushing", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE4
+    "Disease Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE5
+    "Flame", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE6
+    "Fire Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE7
+    "Frost Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE8
+    "Frost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE9
+    "Hardening", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE10
+    "Health", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE11
+    "Health Recovery", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE12
+    "Magicka", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE13
+    "Magicka Recovery", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE14
+    "Poison Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE15
+    "Poison", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE16
+    "Stamina", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE17
+    "Stamina Recovery", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE18
+    "Weakening", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE19
+    "Absorb Health", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE20
+    "Shock Resist", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE21
+    "Absorb Stamina", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE22
+    "Absorb Magicka", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE23
+    "Decrease Health", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE24
+    "Reduce Spell Cost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE25
+    "Reduce Feat Cost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE26
+    "Bashing", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE27
+    "Shielding", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE28
+    "Potion Boost", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE29
+    "Potion Speed", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE30
+    "Increase Physical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE31
+    "Increase Magical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE32
+    "Decrease Physical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE33
+    "Decrease Magical Harm", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE34
+    "Other", -- SI_ENCHANTMENTSEARCHCATEGORYTYPE35
+    "do not translate", -- SI_WEAPONTYPE0
+    "Axe", -- SI_WEAPONTYPE1
+    "Hammer", -- SI_WEAPONTYPE2
+    "Sword", -- SI_WEAPONTYPE3
+    "Sword", -- SI_WEAPONTYPE4
+    "Axe", -- SI_WEAPONTYPE5
+    "Hammer", -- SI_WEAPONTYPE6
+    "do not translate", -- SI_WEAPONTYPE7
+    "Bow", -- SI_WEAPONTYPE8
+    "Healing Staff", -- SI_WEAPONTYPE9
+    "Rune", -- SI_WEAPONTYPE10
+    "Dagger", -- SI_WEAPONTYPE11
+    "Fire Staff", -- SI_WEAPONTYPE12
+    "Frost Staff", -- SI_WEAPONTYPE13
+    "Shield", -- SI_WEAPONTYPE14
+    "Lightning Staff", -- SI_WEAPONTYPE15
+    "do not translate", -- SI_GAMEPADWEAPONCATEGORY0
+    "One-Handed Melee", -- SI_GAMEPADWEAPONCATEGORY1
+    "Two-Handed Melee", -- SI_GAMEPADWEAPONCATEGORY2
+    "Bow", -- SI_GAMEPADWEAPONCATEGORY3
+    "Destruction Staff", -- SI_GAMEPADWEAPONCATEGORY4
+    "Restoration Staff", -- SI_GAMEPADWEAPONCATEGORY5
+    "Alchemy", -- SI_GAMEPADITEMCATEGORY0
+    "Amulet", -- SI_GAMEPADITEMCATEGORY1
+    "Axe", -- SI_GAMEPADITEMCATEGORY2
+    "Bait", -- SI_GAMEPADITEMCATEGORY3
+    "Blacksmith", -- SI_GAMEPADITEMCATEGORY4
+    "Bow", -- SI_GAMEPADITEMCATEGORY5
+    "Chest", -- SI_GAMEPADITEMCATEGORY6
+    "Clothier", -- SI_GAMEPADITEMCATEGORY7
+    "Consumable", -- SI_GAMEPADITEMCATEGORY8
+    "Costume", -- SI_GAMEPADITEMCATEGORY9
+    "Dagger", -- SI_GAMEPADITEMCATEGORY10
+    "Enchanting", -- SI_GAMEPADITEMCATEGORY11
+    "Feet", -- SI_GAMEPADITEMCATEGORY12
+    "Glyphs", -- SI_GAMEPADITEMCATEGORY13
+    "Hammer", -- SI_GAMEPADITEMCATEGORY14
+    "Hands", -- SI_GAMEPADITEMCATEGORY15
+    "Head", -- SI_GAMEPADITEMCATEGORY16
+    "Legs", -- SI_GAMEPADITEMCATEGORY17
+    "Potion", -- SI_GAMEPADITEMCATEGORY18
+    "Provisioning", -- SI_GAMEPADITEMCATEGORY19
+    "Ring", -- SI_GAMEPADITEMCATEGORY20
+    "Shield", -- SI_GAMEPADITEMCATEGORY21
+    "Shoulders", -- SI_GAMEPADITEMCATEGORY22
+    "Siege", -- SI_GAMEPADITEMCATEGORY23
+    "Spellcrafting", -- SI_GAMEPADITEMCATEGORY24
+    "Staff", -- SI_GAMEPADITEMCATEGORY25
+    "Material", -- SI_GAMEPADITEMCATEGORY26
+    "Soul Gem", -- SI_GAMEPADITEMCATEGORY27
+    "Sword", -- SI_GAMEPADITEMCATEGORY28
+    "Tool", -- SI_GAMEPADITEMCATEGORY29
+    "Trait Gem", -- SI_GAMEPADITEMCATEGORY30
+    "Trophy", -- SI_GAMEPADITEMCATEGORY31
+    "Waist", -- SI_GAMEPADITEMCATEGORY32
+    "Woodworking", -- SI_GAMEPADITEMCATEGORY33
+    "Weapons", -- SI_GAMEPADITEMCATEGORY34
+    "Heavy Armor", -- SI_GAMEPADITEMCATEGORY35
+    "Medium Armor", -- SI_GAMEPADITEMCATEGORY36
+    "Light Armor", -- SI_GAMEPADITEMCATEGORY37
+    "Jewelry", -- SI_GAMEPADITEMCATEGORY38
+    "", -- SI_ITEMSTYLECHAPTER0
+    "Helmet", -- SI_ITEMSTYLECHAPTER1
+    "Glove", -- SI_ITEMSTYLECHAPTER2
+    "Boot", -- SI_ITEMSTYLECHAPTER3
+    "Legs", -- SI_ITEMSTYLECHAPTER4
+    "Breastplate", -- SI_ITEMSTYLECHAPTER5
+    "Belt", -- SI_ITEMSTYLECHAPTER6
+    "Shoulder", -- SI_ITEMSTYLECHAPTER7
+    "Sword", -- SI_ITEMSTYLECHAPTER8
+    "Mace", -- SI_ITEMSTYLECHAPTER9
+    "Axe", -- SI_ITEMSTYLECHAPTER10
+    "Dagger", -- SI_ITEMSTYLECHAPTER11
+    "Staff", -- SI_ITEMSTYLECHAPTER12
+    "Shield", -- SI_ITEMSTYLECHAPTER13
+    "Bow", -- SI_ITEMSTYLECHAPTER14
+    "One Hand and Shield", -- SI_WEAPONCONFIGTYPE1
+    "Dual Wield", -- SI_WEAPONCONFIGTYPE2
+    "Two Handed", -- SI_WEAPONCONFIGTYPE3
+    "Bow", -- SI_WEAPONCONFIGTYPE4
+    "Destruction Staff", -- SI_WEAPONCONFIGTYPE5
+    "Restoration Staff", -- SI_WEAPONCONFIGTYPE6
+    "Fire Staff", -- SI_WEAPONCONFIGTYPE7
+    "Frost Staff", -- SI_WEAPONCONFIGTYPE8
+    "Lightning Staff", -- SI_WEAPONCONFIGTYPE9
+    "One Handed", -- SI_WEAPONCONFIGTYPE10
+    "Unarmed", -- SI_WEAPONCONFIGTYPE11
+    "Treasure Type", -- SI_ITEMTAGCATEGORY1
+    "Furnishing Behavior", -- SI_ITEMTAGCATEGORY2
+    "", -- Sync string for EsoGameDataEnums_Item last entry
+    "", -- Sync string for EsoGameDataEnums_TimeFormat first entry
+    "January", -- SI_GREGORIANCALENDARMONTHS0
+    "February", -- SI_GREGORIANCALENDARMONTHS1
+    "March", -- SI_GREGORIANCALENDARMONTHS2
+    "April", -- SI_GREGORIANCALENDARMONTHS3
+    "May", -- SI_GREGORIANCALENDARMONTHS4
+    "June", -- SI_GREGORIANCALENDARMONTHS5
+    "July", -- SI_GREGORIANCALENDARMONTHS6
+    "August", -- SI_GREGORIANCALENDARMONTHS7
+    "September", -- SI_GREGORIANCALENDARMONTHS8
+    "October", -- SI_GREGORIANCALENDARMONTHS9
+    "November", -- SI_GREGORIANCALENDARMONTHS10
+    "December", -- SI_GREGORIANCALENDARMONTHS11
+    "", -- Sync string for EsoGameDataEnums_TimeFormat last entry
+    "", -- Sync string for EsoGameDataEnums_Trade first entry
+    "", -- Sync string for EsoGameDataEnums_Trade last entry
+    "", -- Sync string for EsoGameDataEnums_ActivityFinder first entry
+    "Alliance War", -- SI_LFGACTIVITY1
+    "Normal", -- SI_LFGACTIVITY2
+    "Veteran", -- SI_LFGACTIVITY3
+    "Trial", -- SI_LFGACTIVITY4
+    "|t100%:100%:EsoUI/Art/Champion/champion_icon.dds|t Champion", -- SI_LFGACTIVITY5
+    "Home Show", -- SI_LFGACTIVITY6
+    "Non-Champion", -- SI_LFGACTIVITY7
+    "Below Level 50", -- SI_LFGACTIVITY8
+    "Damage", -- SI_LFGROLE1
+    "Tank", -- SI_LFGROLE2
+    "Healer", -- SI_LFGROLE4
+    "Undaunted Exploration Supplies", -- SI_LFGITEMREWARDTYPE1
+    "Premium Undaunted Exploration Supplies", -- SI_LFGITEMREWARDTYPE2
+    "You or a member of your group has not selected a role.", -- SI_ACTIVITYQUEUERESULT1
+    "You are not the group leader.", -- SI_ACTIVITYQUEUERESULT2
+    "Your group is too large.", -- SI_ACTIVITYQUEUERESULT3
+    "You or members of your group are not within the correct level range.", -- SI_ACTIVITYQUEUERESULT4
+    "You or members of your group are not in the correct location to queue for that activity.", -- SI_ACTIVITYQUEUERESULT5
+    "You or members of your group do not have the DLC unlocked for that activity.", -- SI_ACTIVITYQUEUERESULT6
+    "That option is not yet supported.", -- SI_ACTIVITYQUEUERESULT7
+    "You must select at least one activity to queue for.", -- SI_ACTIVITYQUEUERESULT8
+    "The members of this group are role incompatible.", -- SI_ACTIVITYQUEUERESULT9
+    "Cannot determine compatible region", -- SI_ACTIVITYQUEUERESULT10
+    "You cannot LFM solo", -- SI_ACTIVITYQUEUERESULT11
+    "You or a member of your group queued too recently", -- SI_ACTIVITYQUEUERESULT12
+    "Unable to queue at this time", -- SI_ACTIVITYQUEUERESULT13
+    "One or more members are offline", -- SI_ACTIVITYQUEUERESULT14
+    "Your place in the LFG queue expired", -- SI_ACTIVITYQUEUERESULT15
+    "Your desired LFG location is no longer valid", -- SI_ACTIVITYQUEUERESULT16
+    "One or more memebers current locations are no longer LFG compatible", -- SI_ACTIVITYQUEUERESULT17
+    "Current camapign and active camapign don't match.", -- SI_ACTIVITYQUEUERESULT18
+    "One or more members canceled Ready Check.", -- SI_ACTIVITYQUEUERESULT19
+    "The structure of the group changed.", -- SI_ACTIVITYQUEUERESULT20
+    "A different LFG search was initiated.", -- SI_ACTIVITYQUEUERESULT21
+    "Cannot queue for LFG while inside battleground.", -- SI_ACTIVITYQUEUERESULT22
+    "Not Queued", -- SI_ACTIVITYFINDERSTATUS0
+    "Queued", -- SI_ACTIVITYFINDERSTATUS1
+    "In Progress", -- SI_ACTIVITYFINDERSTATUS2
+    "Activity Complete", -- SI_ACTIVITYFINDERSTATUS3
+    "Ready Check", -- SI_ACTIVITYFINDERSTATUS4
+    "Forming Group", -- SI_ACTIVITYFINDERSTATUS5
+    "Someone declined the invite. You were placed at the front of the queue.", -- SI_LFGREADYCHECKCANCELREASON1
+    "Ready check canceled, group was not viable.", -- SI_LFGREADYCHECKCANCELREASON2
+    "You or someone in your group declined the invite. You have exited the queue.", -- SI_LFGREADYCHECKCANCELREASON3
+    "Ready check succeeded, group formed!", -- SI_LFGREADYCHECKCANCELREASON4
+    "Activity no longer valid", -- SI_LFGREADYCHECKCANCELREASON5
+    "", -- Sync string for EsoGameDataEnums_ActivityFinder last entry
+    "", -- Sync string for EsoGameDataEnums_Client first entry
+    "", -- Sync string for EsoGameDataEnums_Client last entry
+    "", -- Sync string for EsoGameDataEnums_Guild first entry
+    "Talk in Guild Chat", -- SI_GUILDPERMISSION1
+    "Invite Members", -- SI_GUILDPERMISSION2
+    "Remove Members", -- SI_GUILDPERMISSION3
+    "Promote Members", -- SI_GUILDPERMISSION4
+    "Demote Members", -- SI_GUILDPERMISSION5
+    "Edit Message of the Day", -- SI_GUILDPERMISSION6
+    "Read Member Notes", -- SI_GUILDPERMISSION7
+    "Edit Member Notes", -- SI_GUILDPERMISSION8
+    "Claim AvA Resource", -- SI_GUILDPERMISSION9
+    "Release AvA Resource", -- SI_GUILDPERMISSION10
+    "Read Officer Chat", -- SI_GUILDPERMISSION11
+    "Talk in Officer Chat", -- SI_GUILDPERMISSION12
+    "Edit About Us", -- SI_GUILDPERMISSION13
+    "Edit Recruitment", -- SI_GUILDPERMISSION14
+    "Deposit in Guild Bank", -- SI_GUILDPERMISSION15
+    "Withdraw from Guild Bank", -- SI_GUILDPERMISSION16
+    "Buy from Guild Store", -- SI_GUILDPERMISSION17
+    "Sell in Guild Store", -- SI_GUILDPERMISSION18
+    "Edit Guild Permissions", -- SI_GUILDPERMISSION19
+    "Use Guild Siege Equipment", -- SI_GUILDPERMISSION20
+    "Hire Guild Traders", -- SI_GUILDPERMISSION21
+    "Edit Guild Heraldry", -- SI_GUILDPERMISSION22
+    "Withdraw Guild Bank Gold", -- SI_GUILDPERMISSION23
+    "View Guild Bank Gold", -- SI_GUILDPERMISSION24
+    "View Withdraw History of Guild Bank", -- SI_GUILDPERMISSION25
+    "View Deposit History of Guild Bank", -- SI_GUILDPERMISSION26
+    "General", -- SI_GUILDHISTORYCATEGORY1
+    "Bank", -- SI_GUILDHISTORYCATEGORY2
+    "Store", -- SI_GUILDHISTORYCATEGORY3
+    "Combat", -- SI_GUILDHISTORYCATEGORY4
+    "Alliance War", -- SI_GUILDHISTORYCATEGORY5
+    "Roster", -- SI_GUILDHISTORYGENERALSUBCATEGORIES1
+    "Customization", -- SI_GUILDHISTORYGENERALSUBCATEGORIES2
+    "Unlocks", -- SI_GUILDHISTORYGENERALSUBCATEGORIES3
+    "Deposits", -- SI_GUILDHISTORYBANKSUBCATEGORIES1
+    "Withdrawals", -- SI_GUILDHISTORYBANKSUBCATEGORIES2
+    "Purchases", -- SI_GUILDHISTORYSTORESUBCATEGORIES1
+    "Hired Trader", -- SI_GUILDHISTORYSTORESUBCATEGORIES2
+    "Ownership", -- SI_GUILDHISTORYALLIANCEWARSUBCATEGORIES1
+    "<<1>> invited <<2>> to the guild.", -- SI_GUILDEVENTTYPE1
+    "<<1>> promoted <<2>> to <<3>>.", -- SI_GUILDEVENTTYPE3
+    "<<1>> demoted <<2>> to <<3>>.", -- SI_GUILDEVENTTYPE4
+    "<<1>> created guild.", -- SI_GUILDEVENTTYPE5
+    "<<1>> joined the guild (invited by <<2>>).", -- SI_GUILDEVENTTYPE7
+    "<<1>> left guild.", -- SI_GUILDEVENTTYPE8
+    "<<1>> kicked <<2>> from guild.", -- SI_GUILDEVENTTYPE12
+    "<<1>> deposited <<2>> <<t:3>>.", -- SI_GUILDEVENTTYPE13
+    "<<1>> withdrew <<2>> <<t:3>>.", -- SI_GUILDEVENTTYPE14
+    "<<1>> sold <<3>> <<t:4>> to <<2>> for <<5>>. <<6>> in taxes collected.", -- SI_GUILDEVENTTYPE15
+    "<<1>> claimed <<2>> in <<3>> campaign.", -- SI_GUILDEVENTTYPE16
+    "Guild lost <<1>> in <<2>> campaign.", -- SI_GUILDEVENTTYPE17
+    "<<1>> released <<2>> in <<3>> campaign.", -- SI_GUILDEVENTTYPE19
+    "<<1>> edited guild's heraldry for <<2>>.", -- SI_GUILDEVENTTYPE20
+    "<<1>> deposited <<2>>.", -- SI_GUILDEVENTTYPE21
+    "<<1>> withdrew <<2>>.", -- SI_GUILDEVENTTYPE22
+    "Lost bid to hire <<1>>. <<2>> refunded.", -- SI_GUILDEVENTTYPE23
+    "<<1>> bid <<2>> to hire <<3>>.", -- SI_GUILDEVENTTYPE24
+    "<<1>> hired <<3>> for <<2>>.", -- SI_GUILDEVENTTYPE25
+    "<<1>> picked up Battle Standard.", -- SI_GUILDEVENTTYPE27
+    "<<1>> put down Battle Standard.", -- SI_GUILDEVENTTYPE28
+    "<<1>> edited Message of the Day text.", -- SI_GUILDEVENTTYPE31
+    "<<1>> edited About Us text.", -- SI_GUILDEVENTTYPE32
+    "Reached enough members to unlock the Guild Store!", -- SI_GUILDEVENTTYPE33
+    "Guild no longer has enough members to use the Guild Store.", -- SI_GUILDEVENTTYPE34
+    "Reached enough members to unlock the Guild Bank!", -- SI_GUILDEVENTTYPE35
+    "Guild no longer has enough members to use the Guild Bank.", -- SI_GUILDEVENTTYPE36
+    "Reached enough members to unlock the Guild Standard!", -- SI_GUILDEVENTTYPE37
+    "Guild no longer has enough members to use the Guild Standard.", -- SI_GUILDEVENTTYPE38
+    "Reached enough members to unlock the Guild Tabard!", -- SI_GUILDEVENTTYPE39
+    "Guild no longer has enough members to use the Guild Tabard.", -- SI_GUILDEVENTTYPE40
+    "Reached enough members to unlock hiring Guild Traders!", -- SI_GUILDEVENTTYPE42
+    "Guild no longer has enough members to hire Guild Traders.", -- SI_GUILDEVENTTYPE43
+    "Invited", -- SI_GUILDRANKS0
+    "Recruit", -- SI_GUILDRANKS1
+    "Member", -- SI_GUILDRANKS2
+    "Officer", -- SI_GUILDRANKS254
+    "Guildmaster", -- SI_GUILDRANKS255
+    "", -- Sync string for EsoGameDataEnums_Guild last entry
+    "", -- Sync string for EsoGameDataEnums_Quest first entry
+    "Repeatable", -- SI_QUESTREPEATABLETYPE1
+    "Daily", -- SI_QUESTREPEATABLETYPE2
+    "Group", -- SI_QUESTTYPE1
+    "Main Story", -- SI_QUESTTYPE2
+    "Guild", -- SI_QUESTTYPE3
+    "Crafting", -- SI_QUESTTYPE4
+    "Dungeon", -- SI_QUESTTYPE5
+    "Raid", -- SI_QUESTTYPE6
+    "AvA", -- SI_QUESTTYPE7
+    "Class", -- SI_QUESTTYPE8
+    "QA Test", -- SI_QUESTTYPE9
+    "Group AvA", -- SI_QUESTTYPE10
+    "Grand AvA", -- SI_QUESTTYPE11
+    "Holiday Event", -- SI_QUESTTYPE12
+    "Battleground", -- SI_QUESTTYPE13
+    "", -- Sync string for EsoGameDataEnums_Quest last entry
+    "", -- Sync string for EsoGameDataEnums_Chroma first entry
+    "", -- Sync string for EsoGameDataEnums_Chroma last entry
+    "", -- Sync string for EsoGameDataEnums_InterfaceColors first entry
+    "", -- Sync string for EsoGameDataEnums_InterfaceColors last entry
+    "", -- Sync string for EsoGameDataEnums_CrownCrate first entry
+    "You need <<1>> additional open inventory <<1[/slot/slots]>>", -- SI_LOOTCRATEOPENRESPONSE1
+    "The pack was not opened properly", -- SI_LOOTCRATEOPENRESPONSE2
+    "No item found for pack", -- SI_LOOTCRATEOPENRESPONSE3
+    "Pack does not exist", -- SI_LOOTCRATEOPENRESPONSE4
+    "Invalid tier data for pack", -- SI_LOOTCRATEOPENRESPONSE5
+    "You do not have any more crates of this type left", -- SI_LOOTCRATEOPENRESPONSE6
+    "The system is currently unavailable", -- SI_LOOTCRATEOPENRESPONSE7
+    "You do not have any crates to open. You can purchase more in the Crown Store.", -- SI_LOOTCRATEOPENRESPONSE8
+    "An item was broken down into gems", -- SI_CROWNGEMBALANCEREASON1
+    "All", -- SI_GEMIFIABLEFILTERTYPE0
+    "", -- Sync string for EsoGameDataEnums_CrownCrate last entry
+    "", -- Sync string for EsoGameDataEnums_Def first entry
+    "", -- Sync string for EsoGameDataEnums_Def last entry
+    "", -- Sync string for EsoGameDataEnums_Ability first entry
+    "None", -- SI_ABILITYUPGRADELEVEL0
+    "Bronze", -- SI_ABILITYUPGRADELEVEL1
+    "Silver", -- SI_ABILITYUPGRADELEVEL2
+    "Gold", -- SI_ABILITYUPGRADELEVEL3
+    "Enemy", -- SI_TARGETTYPE0
+    "Ally", -- SI_TARGETTYPE1
+    "Self", -- SI_TARGETTYPE2
+    "", -- Sync string for EsoGameDataEnums_Ability last entry
+    "", -- Sync string for EsoGameDataEnums_Combat first entry
+    "Health", -- SI_COMBATMECHANICTYPE_2
+    "invalid mechanic", -- SI_COMBATMECHANICTYPE_1
+    "Magicka", -- SI_COMBATMECHANICTYPE0
+    "Werewolf", -- SI_COMBATMECHANICTYPE1
+    "Stamina", -- SI_COMBATMECHANICTYPE6
+    "Ultimate", -- SI_COMBATMECHANICTYPE10
+    "Mount Stamina", -- SI_COMBATMECHANICTYPE11
+    "Health Bonus", -- SI_COMBATMECHANICTYPE12
+    "None", -- SI_DAMAGETYPE0
+    "Generic", -- SI_DAMAGETYPE1
+    "Physical", -- SI_DAMAGETYPE2
+    "Fire", -- SI_DAMAGETYPE3
+    "Shock", -- SI_DAMAGETYPE4
+    "Oblivion", -- SI_DAMAGETYPE5
+    "Cold", -- SI_DAMAGETYPE6
+    "Earth", -- SI_DAMAGETYPE7
+    "Magic", -- SI_DAMAGETYPE8
+    "Drown", -- SI_DAMAGETYPE9
+    "Disease", -- SI_DAMAGETYPE10
+    "Poison", -- SI_DAMAGETYPE11
+    "Normal", -- SI_VULNERABILITYSTATUS0
+    "Vulnerable", -- SI_VULNERABILITYSTATUS1
+    "Resistant", -- SI_VULNERABILITYSTATUS2
+    "", -- Sync string for EsoGameDataEnums_Combat last entry
+    "", -- Sync string for EsoGameDataEnums_Theater first entry
+    "", -- Sync string for EsoGameDataEnums_Theater last entry
+    "", -- Sync string for EsoGameDataEnums_AvA first entry
+    "Local Campaign", -- SI_BATTLEGROUNDQUERYCONTEXTTYPE1
+    "Home Campaign", -- SI_BATTLEGROUNDQUERYCONTEXTTYPE2
+    "Home and Local Campaign", -- SI_BATTLEGROUNDQUERYCONTEXTTYPE3
+    "Low", -- SI_CAMPAIGNPOPULATIONTYPE0
+    "Medium", -- SI_CAMPAIGNPOPULATIONTYPE1
+    "High", -- SI_CAMPAIGNPOPULATIONTYPE2
+    "Full", -- SI_CAMPAIGNPOPULATIONTYPE3
+    "None", -- SI_KEEPRESOURCETYPE0
+    "Wood", -- SI_KEEPRESOURCETYPE1
+    "Food", -- SI_KEEPRESOURCETYPE2
+    "Ore", -- SI_KEEPRESOURCETYPE3
+    "Production", -- SI_KEEPUPGRADEPATH1
+    "Defense", -- SI_KEEPUPGRADEPATH2
+    "None", -- SI_SIEGETYPE0
+    "Trebuchet", -- SI_SIEGETYPE1
+    "Ballista", -- SI_SIEGETYPE2
+    "Ram", -- SI_SIEGETYPE3
+    "Universal Siege", -- SI_SIEGETYPE4
+    "Catapult", -- SI_SIEGETYPE5
+    "Forward Camp", -- SI_SIEGETYPE6
+    "Monster", -- SI_SIEGETYPE7
+    "Oil", -- SI_SIEGETYPE8
+    "Battle Standard", -- SI_SIEGETYPE9
+    "Normal", -- SI_CAMPAIGNRULESETTYPE1
+    "Hardcore", -- SI_CAMPAIGNRULESETTYPE2
+    "Special Events", -- SI_CAMPAIGNRULESETTYPE3
+    "None", -- SI_CAMPAIGNLEVELREQUIREMENTTYPE0
+    "Player Level", -- SI_CAMPAIGNLEVELREQUIREMENTTYPE1
+    "Champion Points", -- SI_CAMPAIGNLEVELREQUIREMENTTYPE2
+    "Majority control of Cyrodiil unlocks the gates to Imperial City", -- SI_IMPERIALCITYACCESSRULESTYPE0
+    "Unlocking the gates requires control of |cffffff<<1>>|r home keeps", -- SI_IMPERIALCITYACCESSRULESTYPE1
+    "Unlocking the gates requires control of |cffffff<<1>>|r home keeps and at least |cffffff1|r enemy keep", -- SI_IMPERIALCITYACCESSRULESTYPE2
+    "The gates of Imperial City are open to all alliances", -- SI_IMPERIALCITYACCESSRULESTYPE3
+    "", -- Sync string for EsoGameDataEnums_AvA last entry
+    "", -- Sync string for EsoGameDataEnums_Settings first entry
+    "Audio", -- SI_SETTINGSYSTEMPANEL0
+    "Video", -- SI_SETTINGSYSTEMPANEL1
+    "Camera", -- SI_SETTINGSYSTEMPANEL2
+    "Interface", -- SI_SETTINGSYSTEMPANEL3
+    "Gameplay", -- SI_SETTINGSYSTEMPANEL4
+    "Social", -- SI_SETTINGSYSTEMPANEL5
+    "Debug", -- SI_SETTINGSYSTEMPANEL6
+    "Cinematic", -- SI_SETTINGSYSTEMPANEL7
+    "Nameplates", -- SI_SETTINGSYSTEMPANEL8
+    "Combat", -- SI_SETTINGSYSTEMPANEL9
+    "High", -- SI_TEXTURERESOLUTIONCHOICE0
+    "Medium", -- SI_TEXTURERESOLUTIONCHOICE1
+    "Low", -- SI_TEXTURERESOLUTIONCHOICE2
+    "do not translate", -- SI_NAMEPLATEDISPLAYCHOICE0
+    "Never", -- SI_NAMEPLATEDISPLAYCHOICE1
+    "Always", -- SI_NAMEPLATEDISPLAYCHOICE2
+    "Injured", -- SI_NAMEPLATEDISPLAYCHOICE3
+    "All", -- SI_NAMEPLATEDISPLAYCHOICE4
+    "None", -- SI_NAMEPLATEDISPLAYCHOICE5
+    "Enemy", -- SI_NAMEPLATEDISPLAYCHOICE6
+    "Ally", -- SI_NAMEPLATEDISPLAYCHOICE7
+    "Targeted", -- SI_NAMEPLATEDISPLAYCHOICE8
+    "Injured or Targeted", -- SI_NAMEPLATEDISPLAYCHOICE9
+    "Left", -- SI_NAMEPLATEDISPLAYCHOICE10
+    "Center", -- SI_NAMEPLATEDISPLAYCHOICE11
+    "Off", -- SI_ACTIONBARSETTINGCHOICE0
+    "On", -- SI_ACTIONBARSETTINGCHOICE1
+    "Automatic", -- SI_ACTIONBARSETTINGCHOICE2
+    "Off", -- SI_COMPASSACTIVEQUESTSCHOICE0
+    "On", -- SI_COMPASSACTIVEQUESTSCHOICE1
+    "Focused", -- SI_COMPASSACTIVEQUESTSCHOICE2
+    "Don't Show", -- SI_RESOURCEBARSSETTINGCHOICE0
+    "Always Show", -- SI_RESOURCEBARSSETTINGCHOICE1
+    "Automatic", -- SI_RESOURCEBARSSETTINGCHOICE2
+    "Off", -- SI_RAIDLIFEVISIBILITYCHOICE0
+    "On", -- SI_RAIDLIFEVISIBILITYCHOICE1
+    "Automatic", -- SI_RAIDLIFEVISIBILITYCHOICE2
+    "Don't Show", -- SI_BUFFDEBUFFENABLEDCHOICE0
+    "Always Show", -- SI_BUFFDEBUFFENABLEDCHOICE1
+    "Automatic", -- SI_BUFFDEBUFFENABLEDCHOICE2
+    "Free", -- SI_SIEGECAMERACHOICE0
+    "Constrained", -- SI_SIEGECAMERACHOICE1
+    "Off", -- SI_QUICKCASTGROUNDABILITIESCHOICE0
+    "On", -- SI_QUICKCASTGROUNDABILITIESCHOICE1
+    "Automatic", -- SI_QUICKCASTGROUNDABILITIESCHOICE2
+    "|t16:16:EsoUI/Art/currency/currency_gold.dds|t Gold Purchased", -- SI_DEFAULTSOULGEMCHOICE0
+    "|t16:16:EsoUI/Art/currency/currency_crown.dds|t Crown Purchased", -- SI_DEFAULTSOULGEMCHOICE1
+    "Prefer <<1>>", -- SI_PRIMARYPLAYERNAMESETTING0
+    "Prefer Character Name", -- SI_PRIMARYPLAYERNAMESETTING1
+    "Off", -- SI_RESOURCENUMBERSSETTING0
+    "Number Only", -- SI_RESOURCENUMBERSSETTING1
+    "Percent Only", -- SI_RESOURCENUMBERSSETTING2
+    "Number and Percent", -- SI_RESOURCENUMBERSSETTING3
+    "Small", -- SI_GAMEPADCHATTEXTSIZESETTING22
+    "Medium", -- SI_GAMEPADCHATTEXTSIZESETTING27
+    "Large", -- SI_GAMEPADCHATTEXTSIZESETTING34
+    "Off", -- SI_SHADOWSCHOICE0
+    "Low", -- SI_SHADOWSCHOICE1
+    "Medium", -- SI_SHADOWSCHOICE2
+    "High", -- SI_SHADOWSCHOICE3
+    "Ultra", -- SI_SHADOWSCHOICE4
+    "PS4", -- SI_SHADOWSCHOICE5
+    "XB1", -- SI_SHADOWSCHOICE6
+    "Off", -- SI_REFLECTIONQUALITY0
+    "Low", -- SI_REFLECTIONQUALITY1
+    "Medium", -- SI_REFLECTIONQUALITY2
+    "High", -- SI_REFLECTIONQUALITY3
+    "", -- Sync string for EsoGameDataEnums_Settings last entry
     "", -- Sync string for EsoMessageEnums first entry
     "Could not find a player named \"<<1>>\" to invite.", -- SI_GROUPINVITERESPONSE0
     "<<1>> accepted your group invitation.", -- SI_GROUPINVITERESPONSE1
@@ -2067,16 +2051,6 @@ EsoStrings =
     "Unable to join <<1>>. The group is full.", -- SI_GROUPINVITERESPONSE13
     "Unable to join <<1>>. You are already in a group.", -- SI_GROUPINVITERESPONSE14
     "<<1>> is currently in a battleground.", -- SI_GROUPINVITERESPONSE15
-    "You have no group.", -- SI_QUEUERESPONSE4
-    "Your group is too big for <<1>>.", -- SI_QUEUERESPONSE5
-    "You are too low level to queue for <<1>>.", -- SI_QUEUERESPONSE6
-    "You are too high level to queue for <<1>>.", -- SI_QUEUERESPONSE7
-    "Your group has too much level variance for <<1>>.", -- SI_QUEUERESPONSE8
-    "You must be group leader to group queue.", -- SI_QUEUERESPONSE9
-    "One or more group members could not queue for <<1>>.", -- SI_QUEUERESPONSE10
-    "You are already queued for <<1>>.", -- SI_QUEUERESPONSE11
-    "You are now solo queued because you left the group that you queued with.", -- SI_QUEUERESPONSE12
-    "You have been removed from the queue for <<1>> because you are too high level.", -- SI_QUEUERESPONSE13
     "Target is immune.", -- SI_ACTIONRESULT2000
     "You are busy.", -- SI_ACTIONRESULT2030
     "You can't do that while dead.", -- SI_ACTIONRESULT2060
@@ -2270,6 +2244,7 @@ EsoStrings =
     "You have reached your daily limit for selling stolen goods.", -- SI_STOREFAILURE23
     "You already have that collectible.", -- SI_STOREFAILURE24
     "You need more Writ Vouchers to buy that.", -- SI_STOREFAILURE25
+    "You need more HIDDEN_THING to buy that.", -- SI_STOREFAILURE26
     "<<1>> has declined your resurrection request.", -- SI_RESURRECTRESULT0
     "<<1>> is already considering a resurrection request.", -- SI_RESURRECTRESULT1
     "You can not resurrect <<1>>. You are already attempting to resurrect someone else with a soul gem.", -- SI_RESURRECTRESULT2
@@ -2380,6 +2355,33 @@ EsoStrings =
     "You are not trained in the correct tradeskill to refine that", -- SI_TRADESKILLRESULT73
     "Your rank is too low to refine that", -- SI_TRADESKILLRESULT74
     "Your inventory is full.", -- SI_TRADESKILLRESULT76
+    "Recipe Unknown", -- SI_TRADESKILLRESULT100
+    "Insufficient Rank", -- SI_TRADESKILLRESULT101
+    "Insufficient Quality Rank", -- SI_TRADESKILLRESULT102
+    "Can't Craft Yet", -- SI_TRADESKILLRESULT103
+    "Invalid Alchemy Base", -- SI_TRADESKILLRESULT104
+    "Insufficient Rank", -- SI_TRADESKILLRESULT105
+    "Invalid Alchemy Reagent", -- SI_TRADESKILLRESULT106
+    "Not Enough Alchemy Reagents", -- SI_TRADESKILLRESULT107
+    "Too Many Alchemy Reagents", -- SI_TRADESKILLRESULT108
+    "Invalid Rune", -- SI_TRADESKILLRESULT109
+    "Insufficient Rank", -- SI_TRADESKILLRESULT110
+    "Insufficient Quality Rank", -- SI_TRADESKILLRESULT111
+    "Invalid Crafting Material", -- SI_TRADESKILLRESULT112
+    "Invalid Crafting Pattern", -- SI_TRADESKILLRESULT113
+    "Invalid Style Material", -- SI_TRADESKILLRESULT114
+    "Invalid Trait Material", -- SI_TRADESKILLRESULT115
+    "Insufficient Quantity", -- SI_TRADESKILLRESULT116
+    "Invalid Improvement Material", -- SI_TRADESKILLRESULT117
+    "Item Not Improvable", -- SI_TRADESKILLRESULT118
+    "Improvement Failed", -- SI_TRADESKILLRESULT119
+    "Trait Not Learned Yet", -- SI_TRADESKILLRESULT120
+    "Invalid Tradeskill", -- SI_TRADESKILLRESULT121
+    "Invalid Trait", -- SI_TRADESKILLRESULT122
+    "No Available Research Slots", -- SI_TRADESKILLRESULT123
+    "Not Enough Traits Researched", -- SI_TRADESKILLRESULT124
+    "Invalid Item", -- SI_TRADESKILLRESULT125
+    "Already Researching Trait Line", -- SI_TRADESKILLRESULT126
     "You can't deconstruct an item that you are wearing.", -- SI_TRADESKILLRESULT127
     "Error <<1>>\nNo error.", -- SI_GLOBALERRORCODE0
     "Error <<1>>\nTimeout while waiting for the realm directory service.", -- SI_GLOBALERRORCODE100
@@ -2488,9 +2490,6 @@ EsoStrings =
     "Patch required. Please download and apply to access online features.", -- SI_PROFILELOGINERROR10
     "The Xbox Live Account selected does not have user-generated content privileges. Please select another account, or update your permissions.", -- SI_PROFILELOGINERROR11
     "There is not enough free space to create save data. Please free up additional space.", -- SI_PROFILELOGINERROR12
-    "This crafting skill is currently frozen. When you gain inspiration this skill will neither increase nor decrease.", -- SI_TRADESKILLADVANCEMODE0
-    "This crafting skill is currently set to level. When you gain inspiration this skill will increase.", -- SI_TRADESKILLADVANCEMODE1
-    "This crafting skill is currently set to de-level. When you gain inspiration this skill will decrease, allowing you to train other skills higher.", -- SI_TRADESKILLADVANCEMODE2
     "Local jump successful.", -- SI_JUMPRESULT0
     "Remote jump initiated.", -- SI_JUMPRESULT1
     "You lack the correct permissions to jump there.", -- SI_JUMPRESULT2
@@ -2602,11 +2601,6 @@ EsoStrings =
     "You cannot jump to that player while they are in the home show.", -- SI_SOCIALACTIONRESULT86
     "Failed to save housing permissions.", -- SI_SOCIALACTIONRESULT87
     "You don't have permission to visit this house.", -- SI_SOCIALACTIONRESULT88
-    "Invited", -- SI_GUILDRANKS0
-    "Recruit", -- SI_GUILDRANKS1
-    "Member", -- SI_GUILDRANKS2
-    "Officer", -- SI_GUILDRANKS254
-    "Guildmaster", -- SI_GUILDRANKS255
     "You are already queued for that campaign.", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE1
     "You don't have permission to queue for that campaign.", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE2
     "Unable to queue for campaign: internal error", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE3
@@ -2627,6 +2621,7 @@ EsoStrings =
     "You do not meet the level requirement for this campaign.", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE18
     "A group member does not meet the level requirement for this campaign.", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE19
     "Cannot queue for campaign from inside a battleground", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE20
+    "Cannot queue for campaign from this location", -- SI_QUEUEFORCAMPAIGNRESPONSETYPE21
     "You are not queued for that campaign.", -- SI_LEAVECAMPAIGNQUEUERESPONSETYPE1
     "Unable to leave queue: internal error", -- SI_LEAVECAMPAIGNQUEUERESPONSETYPE2
     "You are not queued for anything.", -- SI_LEAVECAMPAIGNQUEUERESPONSETYPE3
@@ -2722,11 +2717,11 @@ EsoStrings =
     "The furnishing could not be moved.", -- SI_HOUSINGREQUESTRESULT4
     "The furnishing could not be removed.", -- SI_HOUSINGREQUESTRESULT5
     "You do not have permission to do that in this house.", -- SI_HOUSINGREQUESTRESULT6
-    "You do not have room for any more items in this house.", -- SI_HOUSINGREQUESTRESULT8
+    "You do not have room for any more Item Furnishings in this house.", -- SI_HOUSINGREQUESTRESULT8
     "This home is listed in the Home Show.", -- SI_HOUSINGREQUESTRESULT9
     "You are not currently touring in the Home Show.", -- SI_HOUSINGREQUESTRESULT10
     "That furnishing is currently being moved by another player.", -- SI_HOUSINGREQUESTRESULT11
-    "You do not have room for any more Trophy Collectibles in this house.", -- SI_HOUSINGREQUESTRESULT14
+    "You do not have room for any more Collectible Furnishings in this house.", -- SI_HOUSINGREQUESTRESULT14
     "You do not have room for any more Other Collectibles in this house.", -- SI_HOUSINGREQUESTRESULT15
     "You do not have enough furnishings in your home to list in the Home Show.", -- SI_HOUSINGREQUESTRESULT18
     "You cannot place furnishing by the entrance.", -- SI_HOUSINGREQUESTRESULT20
@@ -2738,6 +2733,7 @@ EsoStrings =
     "You are not in a house.", -- SI_HOUSINGREQUESTRESULT28
     "You cannot edit a house while dead.", -- SI_HOUSINGREQUESTRESULT29
     "You must launder that item before placing.", -- SI_HOUSINGREQUESTRESULT31
+    "You do not have room for any more Other Items in this house.", -- SI_HOUSINGREQUESTRESULT32
     "", -- Sync string for EsoMessageEnums last entry
     "", -- Sync string for ZoGuiEnums first entry
     "Harvest Nodes", -- SI_MAPDISPLAYFILTER1
@@ -3629,3181 +3625,3177 @@ SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_GOLD = 211
 SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_CROWNS = 212 
 SI_GAMEPAD_AUDIO_OPTIONS_VOICECHAT_VOLUME = 213 
 SI_GAMEPAD_SKILLS_EMPTY_TOOLTIP = 214 
-SI_GAMEPAD_COLLECTIONS_EMPTY = 215 
-SI_GAMEPAD_COLLECTIONS_SAVE_NAME_OPTION = 216 
-SI_GAMEPAD_MARKET_BUY_PLUS_TITLE = 217 
-SI_GAMEPAD_MARKET_BUY_PLUS_TEXT_CONSOLE = 218 
-SI_GAMEPAD_MARKET_BUY_PLUS_DIALOG_KEYBIND_LABEL = 219 
-SI_GAMEPAD_MARKET_BUY_PLUS_KEYBIND_LABEL = 220 
-SI_GAMEPAD_DISCONNECTED_TITLE = 221 
-SI_GAMEPAD_DISCONNECTED_PS4_TEXT = 222 
-SI_GAMEPAD_DISCONNECTED_XBOX_TEXT = 223 
-SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT = 224 
-SI_FAILED_TO_FIND_PROFILE_ORBIS = 225 
-SI_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT = 226 
-SI_INVALID_NAME_DIALOG_TITLE = 227 
-SI_GAMEPAD_PLAYER_INVENTORY_CAPACITY_FOOTER_LABEL = 228 
-SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT = 229 
-SI_GAMEPAD_CONSOLE_WAIT_FOR_NAME_VALIDATION_TITLE = 230 
-SI_GAMEPAD_CONSOLE_WAIT_FOR_NAME_VALIDATION_TEXT = 231 
-SI_GAMEPAD_GENERIC_WAITING_TEXT = 232 
-SI_OPEN_FIRST_PARTY_STORE_KEYBIND = 233 
-SI_OPEN_CHAPTER_UPGRADE_CONSOLE = 234 
-SI_ENTER_CODE_DIALOG_TITLE = 235 
-SI_ENTER_CODE_DIALOG_BODY = 236 
-SI_ENTER_CODE_CONFIRM_BUTTON = 237 
-SI_NONSTR_CLIENTGAMEPADSTRINGS_LAST_ENTRY = 238 --Sync id for ClientGamepadStrings last entry
-SI_NONSTR_CLIENTSHAREDSTRINGS_FIRST_ENTRY = 239 --Sync id for ClientSharedStrings first entry
-SI_DIALOG_ACCEPT = 240 
-SI_DIALOG_DECLINE = 241 
-SI_DIALOG_YES = 242 
-SI_DIALOG_NO = 243 
-SI_DIALOG_CANCEL = 244 
-SI_DIALOG_CREATE = 245 
-SI_DIALOG_EXIT = 246 
-SI_DIALOG_REMOVE = 247 
-SI_DIALOG_CONFIRM = 248 
-SI_DIALOG_CLOSE = 249 
-SI_DIALOG_LOG_OUT_ENTER_CODE = 250 
-SI_DIALOG_LOG_OUT_UPGRADE = 251 
-SI_CANCEL = 252 
-SI_SAVE = 253 
-SI_OK = 254 
-SI_ERROR_REASON = 255 
-SI_REQUEST_NAME_INSTRUCTIONS = 256 
-SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER = 257 
-SI_ADD_ON_AUTHOR_LINE = 258 
-SI_FORMAT_ICON_TEXT = 259 
-SI_FORMAT_ICON_TEXT_NO_SPACE = 260 
-SI_GAME_MENU_LOGOUT = 261 
-SI_OPTIONS_RESET_TITLE = 262 
-SI_OPTIONS_RESET_PROMPT = 263 
-SI_OPTIONS_RESET_ALL_PROMPT = 264 
-SI_OPTIONS_RESET = 265 
-SI_OPTIONS_DEFAULTS = 266 
-SI_CHECK_BUTTON_OFF = 267 
-SI_CHECK_BUTTON_ON = 268 
-SI_CHECK_BUTTON_DISABLED = 269 
-SI_DIGIT_GROUP_SEPARATOR = 270 
-SI_DIGIT_GROUP_DECIMAL_SEPARATOR = 271 
-SI_LIST_COMMA_SEPARATOR = 272 
-SI_LIST_COMMA_AND_SEPARATOR = 273 
-SI_LIST_AND_SEPARATOR = 274 
-SI_LIST_ITEM_FORMATTER = 275 
-SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_SLASH_NAMES_FORMATTER = 276 
-SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_DISPLAY_NAMES_FORMATTER = 277 
-SI_COLLECTIBLE_TOOLTIP_EMOTE_SLASH_NAMES_FORMATTER = 278 
-SI_COLLECTIBLE_TOOLTIP_EMOTE_DISPLAY_NAME_FORMATTER = 279 
-SI_COLLECTIBLE_TOOLTIP_RESTRICTION_PAIR_FORMATTER = 280 
-SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER = 281 
-SI_ITEM_FORMAT_STR_EQUIPPED = 282 
-SI_ITEM_FORMAT_STR_EQUIPPED_SLOT = 283 
-SI_ITEM_FORMAT_STR_UNIQUE_EQUIPPED = 284 
-SI_ITEM_FORMAT_STR_UNIQUE = 285 
-SI_ITEM_FORMAT_STR_USE_ONLY_FROM_QUICKSLOT = 286 
-SI_ITEM_FORMAT_STR_BOUND = 287 
-SI_ITEM_FORMAT_STR_TRASH = 288 
-SI_ITEM_FORMAT_STR_BROAD_TYPE = 289 
-SI_ITEM_FORMAT_STR_TYPE_PLUS_EXTRA_INFO = 290 
-SI_ITEM_FORMAT_STR_SPECIFIC_TYPE = 291 
-SI_ITEM_FORMAT_STR_SPECIFIC_TYPE_UNIQUE = 292 
-SI_ITEM_FORMAT_STR_SPECIFIC_TYPE_UNIQUE_EQUIPPED = 293 
-SI_ITEM_FORMAT_STR_ARMOR_TYPE = 294 
-SI_ITEM_FORMAT_STR_ARMOR_TYPE_UNIQUE = 295 
-SI_ITEM_FORMAT_STR_ARMOR_TYPE_UNIQUE_EQUIPPED = 296 
-SI_ITEM_FORMAT_STR_TEXT1 = 297 
-SI_ITEM_FORMAT_STR_TEXT1_UNIQUE = 298 
-SI_ITEM_FORMAT_STR_TEXT1_UNIQUE_EQUIPPED = 299 
-SI_ITEM_FORMAT_STR_TEXT1_TEXT2 = 300 
-SI_ITEM_FORMAT_STR_TEXT1_TEXT2_UNIQUE = 301 
-SI_ITEM_FORMAT_STR_TEXT1_TEXT2_UNIQUE_EQUIPPED = 302 
-SI_ITEM_FORMAT_STR_TEXT1_ARMOR2 = 303 
-SI_ITEM_FORMAT_STR_TEXT1_ARMOR2_UNIQUE = 304 
-SI_ITEM_FORMAT_STR_TEXT1_ARMOR2_UNIQUE_EQUIPPED = 305 
-SI_ITEM_FORMAT_STR_KNOWN_ITEM_TYPE = 306 
-SI_ITEM_FORMAT_STR_UNKNOWN_ITEM_TYPE = 307 
-SI_ITEM_FORMAT_STR_AUGMENT_ITEM_TYPE = 308 
-SI_ITEM_FORMAT_STR_SIEGE_AUGMENT_ITEM_TYPE = 309 
-SI_ITEM_FORMAT_STR_REQ_NOTCH_ITEM_LEVEL = 310 
-SI_ITEM_FORMAT_STR_REQ_ARMOR = 311 
-SI_ITEM_FORMAT_STR_REQ_WEAPON = 312 
-SI_ITEM_FORMAT_STR_REQ_EQUIP = 313 
-SI_ITEM_FORMAT_STR_LEVEL = 314 
-SI_ITEM_FORMAT_STR_ARMOR = 315 
-SI_ITEM_FORMAT_STR_DAMAGE = 316 
-SI_ITEM_FORMAT_STR_DERIVED_STAT = 317 
-SI_ITEM_FORMAT_STR_DERIVED_STAT_NO_COLOR = 318 
-SI_ITEM_FORMAT_STR_AUGMENT_ENCHANTMENT = 319 
-SI_ITEM_FORMAT_STR_AUGMENT_TOUGHNESS = 320 
-SI_ITEM_FORMAT_STR_AUGMENT_AMMO = 321 
-SI_ITEM_FORMAT_STR_AUGMENT_PRECISION = 322 
-SI_ITEM_FORMAT_STR_AUGMENT_LAUNCH_VELOCITY = 323 
-SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_ENCHANTMENT_NOTCH = 324 
-SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_PRECISION_NOTCH = 325 
-SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_LAUNCH_VELOCITY_NOTCH = 326 
-SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_TOUGHNESS_NOTCH = 327 
-SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_AMMO_NOTCH = 328 
-SI_ITEM_FORMAT_STR_ON_USE = 329 
-SI_ITEM_FORMAT_STR_ON_USE_MULTI_EFFECT = 330 
-SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN = 331 
-SI_ITEM_FORMAT_STR_ON_USE_REMAINING_COOLDOWN = 332 
-SI_ITEM_FORMAT_STR_ENCHANT = 333 
-SI_ITEM_FORMAT_STR_ENCHANT_IRREPLACEABLE = 334 
-SI_ITEM_FORMAT_STR_ENCHANT_HEADER = 335 
-SI_ITEM_FORMAT_STR_ENCHANT_HEADER_NAMED = 336 
-SI_ITEM_FORMAT_STR_ENCHANT_HEADER_MULTI_EFFECT = 337 
-SI_ITEM_FORMAT_STR_ITEM_TRAIT_HEADER = 338 
-SI_ITEM_FORMAT_STR_ITEM_TRAIT_DESCRIPTION = 339 
-SI_ITEM_FORMAT_STR_CREATOR = 340 
-SI_ITEM_FORMAT_STR_TABARD = 341 
-SI_ITEM_FORMAT_STR_QUEST_ITEM = 342 
-SI_ITEM_FORMAT_STR_COLLECTIBLE = 343 
-SI_ITEM_FORMAT_STR_LOCKED = 344 
-SI_ITEM_FORMAT_STR_ON_COOLDOWN = 345 
-SI_ITEM_FORMAT_STR_ONLY_USABLE_FROM_ACTION_SLOT = 346 
-SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS = 347 
-SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_PERCENT = 348 
-SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_INACTIVE = 349 
-SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_INACTIVE_PERCENT = 350 
-SI_ITEM_FORMAT_STR_SET_PROC_BONUS = 351 
-SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS = 352 
-SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS_PERCENT = 353 
-SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS_INACTIVE = 354 
-SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS_INACTIVE_PERCENT = 355 
-SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROC_BONUS = 356 
-SI_ITEM_FORMAT_STR_SET_NAME = 357 
-SI_ITEM_FORMAT_STR_CRAFTED = 358 
-SI_ITEM_FORMAT_STR_EFFECTIVE_VALUE_OF_MAX = 359 
-SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_LEVEL = 360 
-SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_CHAMPION_POINTS = 361 
-SI_ITEM_FORMAT_STR_STYLE_MATERIAL = 362 
-SI_ITEM_FORMAT_STR_WOOD_MATERIAL_LEVEL = 363 
-SI_ITEM_FORMAT_STR_WOOD_MATERIAL_CHAMPION_POINTS = 364 
-SI_ITEM_FORMAT_STR_CLOTH_MATERIAL_LEVEL = 365 
-SI_ITEM_FORMAT_STR_CLOTH_MATERIAL_CHAMPION_POINTS = 366 
-SI_ITEM_FORMAT_STR_LEATHER_MATERIAL_LEVEL = 367 
-SI_ITEM_FORMAT_STR_LEATHER_MATERIAL_CHAMPION_POINTS = 368 
-SI_ITEM_FORMAT_STR_METAL_MATERIAL_LEVEL = 369 
-SI_ITEM_FORMAT_STR_METAL_MATERIAL_CHAMPION_POINTS = 370 
-SI_ITEM_FORMAT_STR_ARMOR_TRAIT = 371 
-SI_ITEM_FORMAT_STR_WEAPON_TRAIT = 372 
-SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE = 373 
-SI_ITEM_FORMAT_STR_POTION = 374 
-SI_ITEM_FORMAT_STR_POISON = 375 
-SI_ITEM_FORMAT_STR_CHAMPION = 376 
-SI_ITEM_FORMAT_STR_COLOR_NAME = 377 
-SI_ITEM_FORMAT_STR_TRADE_BOP_TIMER_HEADER = 378 
-SI_ITEM_FORMAT_STR_TRADE_BOP_PLAYERS_HEADER = 379 
-SI_ITEM_FORMAT_STR_TRADE_BOP_SECTION_FORMATTER_KEYBOARD = 380 
-SI_TOOLTIP_ITEM_TAG_FORMATER = 381 
-SI_ITEM_SUB_TYPE_BAIT = 382 
-SI_ITEM_SUB_TYPE_BOOK = 383 
-SI_DYE_STAMP_ITEM_DESCRIPTION = 384 
-SI_DYE_STAMP_COSTUME_DESCRIPTION = 385 
-SI_DYE_STAMP_REQUIRES_COLLECTIBLE = 386 
-SI_DYE_STAMP_REQUIRES_EQUIPMENT = 387 
-SI_DYE_STAMP_SAME_DYE_DATA = 388 
-SI_DYE_STAMP_NOT_USABLE_NOW = 389 
-SI_DYE_STAMP_COLLECTIBLES_HIDDEN = 390 
-SI_ENCHANTMENT_BOOSTER_DESCRIPTION = 391 
-SI_LORE_LIBRARY_IN_LIBRARY = 392 
-SI_LORE_LIBRARY_NOT_IN_LIBRARY = 393 
-SI_LORE_LIBRARY_USE_TO_LEARN = 394 
-SI_MARKET_PRODUCT_TOOLTIP_UPGRADE = 395 
-SI_MARKET_PRODUCT_TOOLTIP_BUNDLE = 396 
-SI_MARKET_PRODUCT_TOOLTIP_DLC = 397 
-SI_MARKET_PRODUCT_TOOLTIP_UNLOCK = 398 
-SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL = 399 
-SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION = 400 
-SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION = 401 
-SI_MARKET_PRODUCT_TOOLTIP_CHARACTER_SLOT_UPGRADE_DESCRIPTION = 402 
-SI_MARKET_TILE_CALLOUT_NEW = 403 
-SI_MARKET_TILE_CALLOUT_SALE = 404 
-SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT = 405 
-SI_CROWN_CRATE_TOOLTIP_HEADER = 406 
-SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE = 407 
-SI_SERVICE_TOOLTIP_TYPE = 408 
-SI_SERVICE_TOOLTIP_HEADER_FORMATTER = 409 
-SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION = 410 
-SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION = 411 
-SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION = 412 
-SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE = 413 
-SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT = 414 
-SI_TOOLTIP_COLLECTIBLE_NICKNAME = 415 
-SI_COLLECTIBLE_NAME_FORMATTER = 416 
-SI_MARKET_PRODUCT_NAME_FORMATTER = 417 
-SI_SCREEN_ADJUST_INSTRUCTIONS = 418 
-SI_SCREEN_ADJUST = 419 
-SI_SETTING_SHOW_SCREEN_ADJUST = 420 
-SI_SETTING_SHOW_SCREEN_ADJUST_DISABLED = 421 
-SI_GAMMA_CONFIRM = 422 
-SI_GAMMA_DECLINE = 423 
-SI_SETTING_SHOW_GAMMA_ADJUST = 424 
-SI_LONG_LOAD_TIME = 425 
-SI_QUEST_COMPLETE_FORMAT_STRING = 426 
-SI_QUEST_REWARD_MAX_CURRENCY_ERROR = 427 
-SI_CURRENCY_GOLD = 428 
-SI_CURRENCY_YOUR_ALLIANCE_POINTS = 429 
-SI_CURRENCY_TELVAR_STONES = 430 
-SI_CURRENCY_INSPIRATION = 431 
-SI_CURRENCY_RANK_POINTS = 432 
-SI_CURRENCY_CROWN = 433 
-SI_CURRENCY_CROWN_GEM = 434 
-SI_CURRENCY_WRIT_VOUCHERS = 435 
-SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT = 436 
-SI_CURRENCY_AMOUNT_WITH_ICON = 437 
-SI_MARKET_BUY_CROWNS = 438 
-SI_MARKET_CROWNS_TOOLTIP = 439 
-SI_MARKET_CROWN_GEMS_TOOLTIP = 440 
-SI_KEYBINDINGS_LAYER_GENERAL = 441 
-SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS = 442 
-SI_KEYBINDINGS_LAYER_SIEGE = 443 
-SI_KEYBINDINGS_LAYER_NOTIFICATIONS = 444 
-SI_KEYBINDINGS_LAYER_HOUSING_EDITOR = 445 
-SI_KEYBINDINGS_LAYER_HUD_HOUSING = 446 
-SI_KEYBINDINGS_LAYER_BATTLEGROUNDS = 447 
-SI_KEYBINDINGS_CATEGORY_MOVEMENT = 448 
-SI_KEYBINDINGS_CATEGORY_COMBAT = 449 
-SI_KEYBINDINGS_CATEGORY_TARGETING = 450 
-SI_KEYBINDINGS_CATEGORY_INTERACTION = 451 
-SI_KEYBINDINGS_CATEGORY_CAMERA = 452 
-SI_KEYBINDINGS_CATEGORY_USER_INTERFACE = 453 
-SI_KEYBINDINGS_CATEGORY_GENERAL = 454 
-SI_KEYBIND_STRIP_DISABLED_DIALOG_TITLE = 455 
-SI_KEYBIND_STRIP_DISABLED_DIALOG_TEXT = 456 
-SI_ACTION_IS_NOT_BOUND = 457 
-SI_TIME_DURATION_NOT_LONG_AGO = 458 
-SI_TIME_DURATION_AGO = 459 
-SI_TIME_DURATION_LEFT = 460 
-SI_TIME_FORMAT_MONTHS = 461 
-SI_TIME_FORMAT_DAYS = 462 
-SI_TIME_FORMAT_HOURS = 463 
-SI_TIME_FORMAT_MINUTES = 464 
-SI_TIME_FORMAT_SECONDS = 465 
-SI_TIME_FORMAT_MONTHS_DESC_SHORT = 466 
-SI_TIME_FORMAT_DAYS_DESC_SHORT = 467 
-SI_TIME_FORMAT_HOURS_DESC_SHORT = 468 
-SI_TIME_FORMAT_MINUTES_DESC_SHORT = 469 
-SI_TIME_FORMAT_SECONDS_DESC_SHORT = 470 
-SI_TIME_FORMAT_MONTHS_DESC = 471 
-SI_TIME_FORMAT_MONTHS_DESC_COLOR = 472 
-SI_TIME_FORMAT_DAYS_DESC = 473 
-SI_TIME_FORMAT_DAYS_DESC_COLOR = 474 
-SI_TIME_FORMAT_HOURS_DESC = 475 
-SI_TIME_FORMAT_HOURS_DESC_COLOR = 476 
-SI_TIME_FORMAT_MINUTES_DESC = 477 
-SI_TIME_FORMAT_MINUTES_DESC_COLOR = 478 
-SI_TIME_FORMAT_SECONDS_DESC = 479 
-SI_TIME_FORMAT_SECONDS_DESC_COLOR = 480 
-SI_TIME_FORMAT_DDHHMMSS = 481 
-SI_TIME_FORMAT_DDHHMMSS_DESC_SHORT = 482 
-SI_TIME_FORMAT_DDHHMMSSMS_DESC_SHORT = 483 
-SI_TIME_FORMAT_HHMMSS = 484 
-SI_TIME_FORMAT_HHMMSS_DESC_SHORT = 485 
-SI_TIME_FORMAT_HHMMSSMS_DESC_SHORT = 486 
-SI_TIME_FORMAT_MINUTES_COLON_SECONDS = 487 
-SI_TIME_FORMAT_MMSS_DESC_SHORT = 488 
-SI_TIME_FORMAT_MMSSMS_DESC_SHORT = 489 
-SI_TIME_FORMAT_SSMS_DESC_SHORT = 490 
-SI_TIME_FORMAT_SS_DESC_SHORT = 491 
-SI_TIME_FORMAT_ZERO_COLON_SECONDS = 492 
-SI_STR_TIME_DESC_SECONDS_ONLY = 493 
-SI_STR_TIME_DESC_SECONDS_ONLY_SHORT = 494 
-SI_STR_TIME_DESC_SECONDS_ONLY_MINIMAL = 495 
-SI_STR_TIME_DESC_MINUTES_AND_SECONDS = 496 
-SI_STR_TIME_DESC_MINUTES_AND_SECONDS_SHORT = 497 
-SI_STR_TIME_DESC_MINUTES_AND_SECONDS_SHORT_ZERO_SECS = 498 
-SI_STR_TIME_DESC_MINUTES_AND_SECONDS_MINIMAL = 499 
-SI_STR_TIME_DESC_MINUTES_AND_SECONDS_MINIMAL_HIDE_ZEROES = 500 
-SI_STR_TIME_UNKNOWN = 501 
-SI_STR_TIME_LESS_THAN_MINUTE = 502 
-SI_STR_TIME_LESS_THAN_MINUTE_SHORT = 503 
-SI_STR_TIME_GREATER_THAN_HOUR = 504 
-SI_STR_TIME_GREATER_THAN_HOUR_SHORT = 505 
-SI_STR_TIME_GREATER_THAN_HOUR_PLUS = 506 
-SI_STR_TIME_GREATER_THAN_HOUR_PLUS_SHORT = 507 
-SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS = 508 
-SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_SHORT = 509 
-SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_SHORT_ZERO_SECS = 510 
-SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_MINIMAL = 511 
-SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_MINIMAL_HIDE_ZEROES = 512 
-SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS = 513 
-SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_SHORT = 514 
-SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_SHORT_ZERO_SECS = 515 
-SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_MINIMAL = 516 
-SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_MINIMAL_HIDE_ZEROES = 517 
-SI_TIME_FORMAT_TIMESTAMP = 518 
-SI_TIME_FORMAT_CLOCK_AM = 519 
-SI_TIME_FORMAT_CLOCK_PM = 520 
-SI_TIME_FORMAT_CLOCK_TWENTY_FOUR_HOUR = 521 
-SI_NUMBER_SUFFIX_ONE_THOUSAND_UPPERCASE = 522 
-SI_NUMBER_SUFFIX_TEN_THOUSAND_UPPERCASE = 523 
-SI_NUMBER_SUFFIX_ONE_MILLION_UPPERCASE = 524 
-SI_NUMBER_SUFFIX_ONE_HUNDRED_MILLION_UPPERCASE = 525 
-SI_NUMBER_SUFFIX_ONE_BILLION_UPPERCASE = 526 
-SI_NUMBER_SUFFIX_ONE_THOUSAND_LOWERCASE = 527 
-SI_NUMBER_SUFFIX_TEN_THOUSAND_LOWERCASE = 528 
-SI_NUMBER_SUFFIX_ONE_MILLION_LOWERCASE = 529 
-SI_NUMBER_SUFFIX_ONE_HUNDRED_MILLION_LOWERCASE = 530 
-SI_NUMBER_SUFFIX_ONE_BILLION_LOWERCASE = 531 
-SI_ESO_PLUS_SUBSCRIPTION_LINK_TEXT = 532 
-SI_ESO_ACCOUNT_PAGE_LINK_TEXT = 533 
-SI_CHAPTER_UPGRADE_DIALOG_TITLE = 534 
-SI_NONSTR_CLIENTSHAREDSTRINGS_LAST_ENTRY = 535 --Sync id for ClientSharedStrings last entry
-SI_NONSTR_ESOGAMEDATAENUMS_FIRST_ENTRY = 536 --Sync id for EsoGameDataEnums first entry
-SI_ABILITYUPGRADELEVEL0 = 537 
-SI_ABILITYUPGRADELEVEL1 = 538 
-SI_ABILITYUPGRADELEVEL2 = 539 
-SI_ABILITYUPGRADELEVEL3 = 540 
-SI_ARMORTYPE0 = 541 
-SI_ARMORTYPE1 = 542 
-SI_ARMORTYPE2 = 543 
-SI_ARMORTYPE3 = 544 
-SI_COMBATMECHANICTYPE_2 = 545 
-SI_COMBATMECHANICTYPE_1 = 546 
-SI_COMBATMECHANICTYPE0 = 547 
-SI_COMBATMECHANICTYPE1 = 548 
-SI_COMBATMECHANICTYPE6 = 549 
-SI_COMBATMECHANICTYPE10 = 550 
-SI_COMBATMECHANICTYPE11 = 551 
-SI_COMBATMECHANICTYPE12 = 552 
-SI_DAMAGETYPE0 = 553 
-SI_DAMAGETYPE1 = 554 
-SI_DAMAGETYPE2 = 555 
-SI_DAMAGETYPE3 = 556 
-SI_DAMAGETYPE4 = 557 
-SI_DAMAGETYPE5 = 558 
-SI_DAMAGETYPE6 = 559 
-SI_DAMAGETYPE7 = 560 
-SI_DAMAGETYPE8 = 561 
-SI_DAMAGETYPE9 = 562 
-SI_DAMAGETYPE10 = 563 
-SI_DAMAGETYPE11 = 564 
-SI_VULNERABILITYSTATUS0 = 565 
-SI_VULNERABILITYSTATUS1 = 566 
-SI_VULNERABILITYSTATUS2 = 567 
-SI_ATTRIBUTES1 = 568 
-SI_ATTRIBUTES2 = 569 
-SI_ATTRIBUTES3 = 570 
-SI_DERIVEDSTATS1 = 571 
-SI_DERIVEDSTATS2 = 572 
-SI_DERIVEDSTATS3 = 573 
-SI_DERIVEDSTATS4 = 574 
-SI_DERIVEDSTATS5 = 575 
-SI_DERIVEDSTATS6 = 576 
-SI_DERIVEDSTATS7 = 577 
-SI_DERIVEDSTATS8 = 578 
-SI_DERIVEDSTATS9 = 579 
-SI_DERIVEDSTATS10 = 580 
-SI_DERIVEDSTATS11 = 581 
-SI_DERIVEDSTATS12 = 582 
-SI_DERIVEDSTATS13 = 583 
-SI_DERIVEDSTATS14 = 584 
-SI_DERIVEDSTATS16 = 585 
-SI_DERIVEDSTATS20 = 586 
-SI_DERIVEDSTATS22 = 587 
-SI_DERIVEDSTATS23 = 588 
-SI_DERIVEDSTATS24 = 589 
-SI_DERIVEDSTATS25 = 590 
-SI_DERIVEDSTATS26 = 591 
-SI_DERIVEDSTATS29 = 592 
-SI_DERIVEDSTATS30 = 593 
-SI_DERIVEDSTATS31 = 594 
-SI_DERIVEDSTATS32 = 595 
-SI_DERIVEDSTATS33 = 596 
-SI_DERIVEDSTATS34 = 597 
-SI_DERIVEDSTATS35 = 598 
-SI_DERIVEDSTATS37 = 599 
-SI_DERIVEDSTATS38 = 600 
-SI_DERIVEDSTATS39 = 601 
-SI_DERIVEDSTATS40 = 602 
-SI_DERIVEDSTATS41 = 603 
-SI_DERIVEDSTATS42 = 604 
-SI_DERIVEDSTATS43 = 605 
-SI_DERIVEDSTATS44 = 606 
-SI_DERIVEDSTATS45 = 607 
-SI_DERIVEDSTATS46 = 608 
-SI_DERIVEDSTATS47 = 609 
-SI_DERIVEDSTATS48 = 610 
-SI_DERIVEDSTATS49 = 611 
-SI_DERIVEDSTATS50 = 612 
-SI_EQUIPTYPE1 = 613 
-SI_EQUIPTYPE2 = 614 
-SI_EQUIPTYPE3 = 615 
-SI_EQUIPTYPE4 = 616 
-SI_EQUIPTYPE5 = 617 
-SI_EQUIPTYPE6 = 618 
-SI_EQUIPTYPE7 = 619 
-SI_EQUIPTYPE8 = 620 
-SI_EQUIPTYPE9 = 621 
-SI_EQUIPTYPE10 = 622 
-SI_EQUIPTYPE11 = 623 
-SI_EQUIPTYPE12 = 624 
-SI_EQUIPTYPE13 = 625 
-SI_EQUIPTYPE14 = 626 
-SI_EQUIPTYPE15 = 627 
-SI_EQUIPSLOT0 = 628 
-SI_EQUIPSLOT1 = 629 
-SI_EQUIPSLOT2 = 630 
-SI_EQUIPSLOT3 = 631 
-SI_EQUIPSLOT4 = 632 
-SI_EQUIPSLOT5 = 633 
-SI_EQUIPSLOT6 = 634 
-SI_EQUIPSLOT7 = 635 
-SI_EQUIPSLOT8 = 636 
-SI_EQUIPSLOT9 = 637 
-SI_EQUIPSLOT10 = 638 
-SI_EQUIPSLOT11 = 639 
-SI_EQUIPSLOT12 = 640 
-SI_EQUIPSLOT13 = 641 
-SI_EQUIPSLOT14 = 642 
-SI_EQUIPSLOT15 = 643 
-SI_EQUIPSLOT16 = 644 
-SI_EQUIPSLOT17 = 645 
-SI_EQUIPSLOT18 = 646 
-SI_EQUIPSLOT19 = 647 
-SI_EQUIPSLOT20 = 648 
-SI_EQUIPSLOT21 = 649 
-SI_DYEABLESLOT0 = 650 
-SI_DYEABLESLOT1 = 651 
-SI_DYEABLESLOT2 = 652 
-SI_DYEABLESLOT3 = 653 
-SI_DYEABLESLOT4 = 654 
-SI_DYEABLESLOT5 = 655 
-SI_DYEABLESLOT6 = 656 
-SI_DYEABLESLOT7 = 657 
-SI_DYEABLESLOT8 = 658 
-SI_DYEABLESLOT9 = 659 
-SI_DYEABLESLOT10 = 660 
-SI_EQUIPSLOTVISUALCATEGORY1 = 661 
-SI_EQUIPSLOTVISUALCATEGORY2 = 662 
-SI_EQUIPSLOTVISUALCATEGORY3 = 663 
-SI_CHARACTERSLIDERCATEGORY0 = 664 
-SI_CHARACTERSLIDERCATEGORY1 = 665 
-SI_CHARACTERSLIDERCATEGORY2 = 666 
-SI_CHARACTERSLIDERSUBCATEGORY0 = 667 
-SI_CHARACTERSLIDERSUBCATEGORY1 = 668 
-SI_CHARACTERSLIDERSUBCATEGORY2 = 669 
-SI_CHARACTERSLIDERSUBCATEGORY3 = 670 
-SI_CHARACTERSLIDERSUBCATEGORY4 = 671 
-SI_CHARACTERSLIDERSUBCATEGORY5 = 672 
-SI_CHARACTERSLIDERSUBCATEGORY6 = 673 
-SI_CHARACTERSLIDERSUBCATEGORY7 = 674 
-SI_CHARACTERSLIDERSUBCATEGORY8 = 675 
-SI_CHARACTERSLIDERSUBCATEGORY9 = 676 
-SI_CHARACTERSLIDERSUBCATEGORY10 = 677 
-SI_CHARACTERSLIDERSUBCATEGORY11 = 678 
-SI_CHARACTERSLIDERSUBCATEGORY12 = 679 
-SI_CHARACTERSLIDERSUBCATEGORY13 = 680 
-SI_CHARACTERSLIDERNAME0 = 681 
-SI_CHARACTERSLIDERNAME1 = 682 
-SI_CHARACTERSLIDERNAME2 = 683 
-SI_CHARACTERSLIDERNAME3 = 684 
-SI_CHARACTERSLIDERNAME4 = 685 
-SI_CHARACTERSLIDERNAME5 = 686 
-SI_CHARACTERSLIDERNAME6 = 687 
-SI_CHARACTERSLIDERNAME7 = 688 
-SI_CHARACTERSLIDERNAME8 = 689 
-SI_CHARACTERSLIDERNAME9 = 690 
-SI_CHARACTERSLIDERNAME10 = 691 
-SI_CHARACTERSLIDERNAME11 = 692 
-SI_CHARACTERSLIDERNAME12 = 693 
-SI_CHARACTERSLIDERNAME13 = 694 
-SI_CHARACTERSLIDERNAME14 = 695 
-SI_CHARACTERSLIDERNAME15 = 696 
-SI_CHARACTERSLIDERNAME16 = 697 
-SI_CHARACTERSLIDERNAME17 = 698 
-SI_CHARACTERSLIDERNAME18 = 699 
-SI_CHARACTERSLIDERNAME19 = 700 
-SI_CHARACTERSLIDERNAME20 = 701 
-SI_CHARACTERSLIDERNAME21 = 702 
-SI_CHARACTERSLIDERNAME22 = 703 
-SI_CHARACTERSLIDERNAME23 = 704 
-SI_CHARACTERSLIDERNAME24 = 705 
-SI_CHARACTERSLIDERNAME25 = 706 
-SI_CHARACTERSLIDERNAME26 = 707 
-SI_CHARACTERSLIDERNAME27 = 708 
-SI_CHARACTERSLIDERNAME28 = 709 
-SI_CHARACTERSLIDERNAME29 = 710 
-SI_CHARACTERSLIDERNAME30 = 711 
-SI_CHARACTERSLIDERNAME31 = 712 
-SI_CHARACTERSLIDERNAME32 = 713 
-SI_CHARACTERSLIDERNAME33 = 714 
-SI_CHARACTERSLIDERNAME34 = 715 
-SI_CHARACTERSLIDERNAME35 = 716 
-SI_CHARACTERSLIDERNAME36 = 717 
-SI_CHARACTERSLIDERNAME37 = 718 
-SI_CHARACTERSLIDERNAME38 = 719 
-SI_CHARACTERSLIDERNAME39 = 720 
-SI_CHARACTERSLIDERNAME40 = 721 
-SI_CHARACTERAPPEARANCENAME0 = 722 
-SI_CHARACTERAPPEARANCENAME1 = 723 
-SI_CHARACTERAPPEARANCENAME2 = 724 
-SI_CHARACTERAPPEARANCENAME3 = 725 
-SI_CHARACTERAPPEARANCENAME4 = 726 
-SI_CHARACTERAPPEARANCENAME5 = 727 
-SI_CHARACTERAPPEARANCENAME6 = 728 
-SI_CHARACTERAPPEARANCENAME7 = 729 
-SI_CHARACTERAPPEARANCENAME8 = 730 
-SI_CHARACTERAPPEARANCENAME9 = 731 
-SI_CHARACTERCREATEDRESSINGOPTION0 = 732 
-SI_CHARACTERCREATEDRESSINGOPTION1 = 733 
-SI_CHARACTERCREATEDRESSINGOPTION2 = 734 
-SI_CHARACTERCREATEDRESSINGOPTION3 = 735 
-SI_CHARACTERCREATEDRESSINGOPTION4 = 736 
-SI_ITEMSTYLE0 = 737 
-SI_ITEMSTYLE1 = 738 
-SI_ITEMSTYLE2 = 739 
-SI_ITEMSTYLE3 = 740 
-SI_ITEMSTYLE4 = 741 
-SI_ITEMSTYLE5 = 742 
-SI_ITEMSTYLE6 = 743 
-SI_ITEMSTYLE7 = 744 
-SI_ITEMSTYLE8 = 745 
-SI_ITEMSTYLE9 = 746 
-SI_ITEMSTYLE10 = 747 
-SI_ITEMSTYLE11 = 748 
-SI_ITEMSTYLE12 = 749 
-SI_ITEMSTYLE13 = 750 
-SI_ITEMSTYLE14 = 751 
-SI_ITEMSTYLE15 = 752 
-SI_ITEMSTYLE16 = 753 
-SI_ITEMSTYLE17 = 754 
-SI_ITEMSTYLE18 = 755 
-SI_ITEMSTYLE19 = 756 
-SI_ITEMSTYLE20 = 757 
-SI_ITEMSTYLE21 = 758 
-SI_ITEMSTYLE22 = 759 
-SI_ITEMSTYLE23 = 760 
-SI_ITEMSTYLE24 = 761 
-SI_ITEMSTYLE25 = 762 
-SI_ITEMSTYLE26 = 763 
-SI_ITEMSTYLE27 = 764 
-SI_ITEMSTYLE28 = 765 
-SI_ITEMSTYLE29 = 766 
-SI_ITEMSTYLE30 = 767 
-SI_ITEMSTYLE31 = 768 
-SI_ITEMSTYLE32 = 769 
-SI_ITEMSTYLE33 = 770 
-SI_ITEMSTYLE34 = 771 
-SI_ITEMSTYLE35 = 772 
-SI_ITEMSTYLE37 = 773 
-SI_ITEMSTYLE38 = 774 
-SI_ITEMSTYLE39 = 775 
-SI_ITEMSTYLE40 = 776 
-SI_ITEMSTYLE41 = 777 
-SI_ITEMSTYLE42 = 778 
-SI_ITEMSTYLE43 = 779 
-SI_ITEMSTYLE44 = 780 
-SI_ITEMSTYLE45 = 781 
-SI_ITEMSTYLE46 = 782 
-SI_ITEMSTYLE47 = 783 
-SI_ITEMSTYLE48 = 784 
-SI_ITEMSTYLE49 = 785 
-SI_ITEMSTYLE50 = 786 
-SI_ITEMSTYLE51 = 787 
-SI_ITEMSTYLE52 = 788 
-SI_ITEMSTYLE53 = 789 
-SI_ITEMSTYLE54 = 790 
-SI_ITEMSTYLE55 = 791 
-SI_ITEMSTYLE56 = 792 
-SI_ITEMSTYLE57 = 793 
-SI_ITEMSTYLE58 = 794 
-SI_ITEMSTYLE59 = 795 
-SI_ITEMSTYLE60 = 796 
-SI_ITEMSTYLE61 = 797 
-SI_ITEMSTYLE62 = 798 
-SI_ITEMSTYLE63 = 799 
-SI_ITEMSTYLE64 = 800 
-SI_ITEMSTYLE65 = 801 
-SI_ITEMSTYLE66 = 802 
-SI_ITEMSTYLE67 = 803 
-SI_ITEMSTYLE68 = 804 
-SI_ITEMSTYLE69 = 805 
-SI_ITEMSTYLE70 = 806 
-SI_ITEMSTYLE71 = 807 
-SI_ITEMSTYLE72 = 808 
-SI_ITEMSTYLE73 = 809 
-SI_ITEMSTYLE74 = 810 
-SI_ITEMSTYLE75 = 811 
-SI_ITEMSTYLE76 = 812 
-SI_ITEMSTYLE77 = 813 
-SI_ITEMSTYLE78 = 814 
-SI_ITEMSTYLE79 = 815 
-SI_COLLECTIBLEUSAGEBLOCKREASON1 = 816 
-SI_COLLECTIBLEUSAGEBLOCKREASON2 = 817 
-SI_COLLECTIBLEUSAGEBLOCKREASON3 = 818 
-SI_COLLECTIBLEUSAGEBLOCKREASON4 = 819 
-SI_COLLECTIBLEUSAGEBLOCKREASON5 = 820 
-SI_COLLECTIBLEUSAGEBLOCKREASON6 = 821 
-SI_COLLECTIBLEUSAGEBLOCKREASON7 = 822 
-SI_COLLECTIBLEUSAGEBLOCKREASON8 = 823 
-SI_COLLECTIBLEUSAGEBLOCKREASON9 = 824 
-SI_COLLECTIBLEUSAGEBLOCKREASON10 = 825 
-SI_COLLECTIBLERESTRICTIONTYPE0 = 826 
-SI_COLLECTIBLERESTRICTIONTYPE1 = 827 
-SI_COLLECTIBLERESTRICTIONTYPE2 = 828 
-SI_COLLECTIBLERESTRICTIONTYPE3 = 829 
-SI_EQUIPMENTBONUS0 = 830 
-SI_EQUIPMENTBONUS1 = 831 
-SI_EQUIPMENTBONUS2 = 832 
-SI_EQUIPMENTBONUS3 = 833 
-SI_EQUIPMENTBONUS4 = 834 
-SI_EQUIPMENTBONUS5 = 835 
-SI_BATTLEGROUNDQUERYCONTEXTTYPE1 = 836 
-SI_BATTLEGROUNDQUERYCONTEXTTYPE2 = 837 
-SI_BATTLEGROUNDQUERYCONTEXTTYPE3 = 838 
-SI_CAMPAIGNPOPULATIONTYPE0 = 839 
-SI_CAMPAIGNPOPULATIONTYPE1 = 840 
-SI_CAMPAIGNPOPULATIONTYPE2 = 841 
-SI_CAMPAIGNPOPULATIONTYPE3 = 842 
-SI_LEADERBOARDTYPE0 = 843 
-SI_LEADERBOARDTYPE1 = 844 
-SI_LEADERBOARDTYPE2 = 845 
-SI_LEADERBOARDTYPE3 = 846 
-SI_LEADERBOARDTYPE4 = 847 
-SI_KEEPRESOURCETYPE0 = 848 
-SI_KEEPRESOURCETYPE1 = 849 
-SI_KEEPRESOURCETYPE2 = 850 
-SI_KEEPRESOURCETYPE3 = 851 
-SI_KEEPRESOURCEPROVIDERTYPE0 = 852 
-SI_KEEPRESOURCEPROVIDERTYPE1 = 853 
-SI_KEEPRESOURCEPROVIDERTYPE2 = 854 
-SI_KEEPRESOURCEPROVIDERTYPE3 = 855 
-SI_KEEPUPGRADEPATH1 = 856 
-SI_KEEPUPGRADEPATH2 = 857 
-SI_CURRENCYTYPE1 = 858 
-SI_CURRENCYTYPE2 = 859 
-SI_CURRENCYTYPE3 = 860 
-SI_CURRENCYTYPE4 = 861 
-SI_MARKETCURRENCYTYPE1 = 862 
-SI_MARKETCURRENCYTYPE2 = 863 
-SI_SIEGETYPE0 = 864 
-SI_SIEGETYPE1 = 865 
-SI_SIEGETYPE2 = 866 
-SI_SIEGETYPE3 = 867 
-SI_SIEGETYPE4 = 868 
-SI_SIEGETYPE5 = 869 
-SI_SIEGETYPE6 = 870 
-SI_SIEGETYPE7 = 871 
-SI_SIEGETYPE8 = 872 
-SI_SIEGETYPE9 = 873 
-SI_TARGETTYPE0 = 874 
-SI_TARGETTYPE1 = 875 
-SI_TARGETTYPE2 = 876 
-SI_ITEMTYPE0 = 877 
-SI_ITEMTYPE1 = 878 
-SI_ITEMTYPE2 = 879 
-SI_ITEMTYPE3 = 880 
-SI_ITEMTYPE4 = 881 
-SI_ITEMTYPE5 = 882 
-SI_ITEMTYPE6 = 883 
-SI_ITEMTYPE7 = 884 
-SI_ITEMTYPE8 = 885 
-SI_ITEMTYPE9 = 886 
-SI_ITEMTYPE10 = 887 
-SI_ITEMTYPE11 = 888 
-SI_ITEMTYPE12 = 889 
-SI_ITEMTYPE13 = 890 
-SI_ITEMTYPE14 = 891 
-SI_ITEMTYPE15 = 892 
-SI_ITEMTYPE16 = 893 
-SI_ITEMTYPE17 = 894 
-SI_ITEMTYPE18 = 895 
-SI_ITEMTYPE19 = 896 
-SI_ITEMTYPE20 = 897 
-SI_ITEMTYPE21 = 898 
-SI_ITEMTYPE22 = 899 
-SI_ITEMTYPE23 = 900 
-SI_ITEMTYPE24 = 901 
-SI_ITEMTYPE25 = 902 
-SI_ITEMTYPE26 = 903 
-SI_ITEMTYPE27 = 904 
-SI_ITEMTYPE28 = 905 
-SI_ITEMTYPE29 = 906 
-SI_ITEMTYPE30 = 907 
-SI_ITEMTYPE31 = 908 
-SI_ITEMTYPE32 = 909 
-SI_ITEMTYPE33 = 910 
-SI_ITEMTYPE34 = 911 
-SI_ITEMTYPE35 = 912 
-SI_ITEMTYPE36 = 913 
-SI_ITEMTYPE37 = 914 
-SI_ITEMTYPE38 = 915 
-SI_ITEMTYPE39 = 916 
-SI_ITEMTYPE40 = 917 
-SI_ITEMTYPE41 = 918 
-SI_ITEMTYPE42 = 919 
-SI_ITEMTYPE43 = 920 
-SI_ITEMTYPE44 = 921 
-SI_ITEMTYPE45 = 922 
-SI_ITEMTYPE46 = 923 
-SI_ITEMTYPE47 = 924 
-SI_ITEMTYPE48 = 925 
-SI_ITEMTYPE49 = 926 
-SI_ITEMTYPE50 = 927 
-SI_ITEMTYPE51 = 928 
-SI_ITEMTYPE52 = 929 
-SI_ITEMTYPE53 = 930 
-SI_ITEMTYPE54 = 931 
-SI_ITEMTYPE55 = 932 
-SI_ITEMTYPE56 = 933 
-SI_ITEMTYPE57 = 934 
-SI_ITEMTYPE58 = 935 
-SI_ITEMTYPE59 = 936 
-SI_ITEMTYPE60 = 937 
-SI_ITEMTYPE61 = 938 
-SI_ITEMTYPE62 = 939 
-SI_SPECIALIZEDITEMTYPE250 = 940 
-SI_SPECIALIZEDITEMTYPE300 = 941 
-SI_SPECIALIZEDITEMTYPE350 = 942 
-SI_SPECIALIZEDITEMTYPE1 = 943 
-SI_SPECIALIZEDITEMTYPE2 = 944 
-SI_SPECIALIZEDITEMTYPE3 = 945 
-SI_SPECIALIZEDITEMTYPE4 = 946 
-SI_SPECIALIZEDITEMTYPE5 = 947 
-SI_SPECIALIZEDITEMTYPE6 = 948 
-SI_SPECIALIZEDITEMTYPE7 = 949 
-SI_SPECIALIZEDITEMTYPE8 = 950 
-SI_SPECIALIZEDITEMTYPE100 = 951 
-SI_SPECIALIZEDITEMTYPE101 = 952 
-SI_SPECIALIZEDITEMTYPE102 = 953 
-SI_SPECIALIZEDITEMTYPE103 = 954 
-SI_SPECIALIZEDITEMTYPE104 = 955 
-SI_SPECIALIZEDITEMTYPE105 = 956 
-SI_SPECIALIZEDITEMTYPE106 = 957 
-SI_SPECIALIZEDITEMTYPE107 = 958 
-SI_SPECIALIZEDITEMTYPE108 = 959 
-SI_SPECIALIZEDITEMTYPE400 = 960 
-SI_SPECIALIZEDITEMTYPE401 = 961 
-SI_SPECIALIZEDITEMTYPE402 = 962 
-SI_SPECIALIZEDITEMTYPE403 = 963 
-SI_SPECIALIZEDITEMTYPE404 = 964 
-SI_SPECIALIZEDITEMTYPE405 = 965 
-SI_SPECIALIZEDITEMTYPE406 = 966 
-SI_SPECIALIZEDITEMTYPE407 = 967 
-SI_SPECIALIZEDITEMTYPE408 = 968 
-SI_SPECIALIZEDITEMTYPE450 = 969 
-SI_SPECIALIZEDITEMTYPE60 = 970 
-SI_SPECIALIZEDITEMTYPE61 = 971 
-SI_SPECIALIZEDITEMTYPE500 = 972 
-SI_SPECIALIZEDITEMTYPE40 = 973 
-SI_SPECIALIZEDITEMTYPE41 = 974 
-SI_SPECIALIZEDITEMTYPE42 = 975 
-SI_SPECIALIZEDITEMTYPE43 = 976 
-SI_SPECIALIZEDITEMTYPE44 = 977 
-SI_SPECIALIZEDITEMTYPE45 = 978 
-SI_SPECIALIZEDITEMTYPE46 = 979 
-SI_SPECIALIZEDITEMTYPE47 = 980 
-SI_SPECIALIZEDITEMTYPE48 = 981 
-SI_SPECIALIZEDITEMTYPE550 = 982 
-SI_SPECIALIZEDITEMTYPE20 = 983 
-SI_SPECIALIZEDITEMTYPE21 = 984 
-SI_SPECIALIZEDITEMTYPE22 = 985 
-SI_SPECIALIZEDITEMTYPE23 = 986 
-SI_SPECIALIZEDITEMTYPE24 = 987 
-SI_SPECIALIZEDITEMTYPE25 = 988 
-SI_SPECIALIZEDITEMTYPE26 = 989 
-SI_SPECIALIZEDITEMTYPE27 = 990 
-SI_SPECIALIZEDITEMTYPE600 = 991 
-SI_SPECIALIZEDITEMTYPE650 = 992 
-SI_SPECIALIZEDITEMTYPE700 = 993 
-SI_SPECIALIZEDITEMTYPE750 = 994 
-SI_SPECIALIZEDITEMTYPE800 = 995 
-SI_SPECIALIZEDITEMTYPE850 = 996 
-SI_SPECIALIZEDITEMTYPE900 = 997 
-SI_SPECIALIZEDITEMTYPE950 = 998 
-SI_SPECIALIZEDITEMTYPE1000 = 999 
-SI_SPECIALIZEDITEMTYPE1050 = 1000 
-SI_SPECIALIZEDITEMTYPE1100 = 1001 
-SI_SPECIALIZEDITEMTYPE1150 = 1002 
-SI_SPECIALIZEDITEMTYPE1200 = 1003 
-SI_SPECIALIZEDITEMTYPE1250 = 1004 
-SI_SPECIALIZEDITEMTYPE1300 = 1005 
-SI_SPECIALIZEDITEMTYPE1350 = 1006 
-SI_SPECIALIZEDITEMTYPE170 = 1007 
-SI_SPECIALIZEDITEMTYPE171 = 1008 
-SI_SPECIALIZEDITEMTYPE172 = 1009 
-SI_SPECIALIZEDITEMTYPE173 = 1010 
-SI_SPECIALIZEDITEMTYPE174 = 1011 
-SI_SPECIALIZEDITEMTYPE175 = 1012 
-SI_SPECIALIZEDITEMTYPE176 = 1013 
-SI_SPECIALIZEDITEMTYPE177 = 1014 
-SI_SPECIALIZEDITEMTYPE1400 = 1015 
-SI_SPECIALIZEDITEMTYPE150 = 1016 
-SI_SPECIALIZEDITEMTYPE151 = 1017 
-SI_SPECIALIZEDITEMTYPE152 = 1018 
-SI_SPECIALIZEDITEMTYPE1450 = 1019 
-SI_SPECIALIZEDITEMTYPE1460 = 1020 
-SI_SPECIALIZEDITEMTYPE80 = 1021 
-SI_SPECIALIZEDITEMTYPE81 = 1022 
-SI_SPECIALIZEDITEMTYPE1500 = 1023 
-SI_SPECIALIZEDITEMTYPE1550 = 1024 
-SI_SPECIALIZEDITEMTYPE1560 = 1025 
-SI_SPECIALIZEDITEMTYPE1600 = 1026 
-SI_SPECIALIZEDITEMTYPE1650 = 1027 
-SI_SPECIALIZEDITEMTYPE1660 = 1028 
-SI_SPECIALIZEDITEMTYPE1700 = 1029 
-SI_SPECIALIZEDITEMTYPE1750 = 1030 
-SI_SPECIALIZEDITEMTYPE1760 = 1031 
-SI_SPECIALIZEDITEMTYPE1800 = 1032 
-SI_SPECIALIZEDITEMTYPE1850 = 1033 
-SI_SPECIALIZEDITEMTYPE1900 = 1034 
-SI_SPECIALIZEDITEMTYPE1950 = 1035 
-SI_SPECIALIZEDITEMTYPE2000 = 1036 
-SI_SPECIALIZEDITEMTYPE2050 = 1037 
-SI_SPECIALIZEDITEMTYPE2100 = 1038 
-SI_SPECIALIZEDITEMTYPE2150 = 1039 
-SI_SPECIALIZEDITEMTYPE2200 = 1040 
-SI_SPECIALIZEDITEMTYPE2250 = 1041 
-SI_SPECIALIZEDITEMTYPE2300 = 1042 
-SI_SPECIALIZEDITEMTYPE2350 = 1043 
-SI_SPECIALIZEDITEMTYPE2400 = 1044 
-SI_SPECIALIZEDITEMTYPE2410 = 1045 
-SI_SPECIALIZEDITEMTYPE2450 = 1046 
-SI_SPECIALIZEDITEMTYPE2500 = 1047 
-SI_SPECIALIZEDITEMTYPE2550 = 1048 
-SI_SPECIALIZEDITEMTYPE2600 = 1049 
-SI_SPECIALIZEDITEMTYPE2650 = 1050 
-SI_SPECIALIZEDITEMTYPE2700 = 1051 
-SI_SPECIALIZEDITEMTYPE2750 = 1052 
-SI_SPECIALIZEDITEMTYPE210 = 1053 
-SI_SPECIALIZEDITEMTYPE211 = 1054 
-SI_SPECIALIZEDITEMTYPE212 = 1055 
-SI_SPECIALIZEDITEMTYPE213 = 1056 
-SI_SPECIALIZEDITEMTYPE214 = 1057 
-SI_ITEMFILTERTYPE0 = 1058 
-SI_ITEMFILTERTYPE1 = 1059 
-SI_ITEMFILTERTYPE2 = 1060 
-SI_ITEMFILTERTYPE3 = 1061 
-SI_ITEMFILTERTYPE4 = 1062 
-SI_ITEMFILTERTYPE5 = 1063 
-SI_ITEMFILTERTYPE6 = 1064 
-SI_ITEMFILTERTYPE7 = 1065 
-SI_ITEMFILTERTYPE8 = 1066 
-SI_ITEMFILTERTYPE9 = 1067 
-SI_ITEMFILTERTYPE11 = 1068 
-SI_ITEMFILTERTYPE12 = 1069 
-SI_ITEMFILTERTYPE13 = 1070 
-SI_ITEMFILTERTYPE14 = 1071 
-SI_ITEMFILTERTYPE15 = 1072 
-SI_ITEMFILTERTYPE16 = 1073 
-SI_ITEMFILTERTYPE17 = 1074 
-SI_ITEMFILTERTYPE18 = 1075 
-SI_ITEMFILTERTYPE19 = 1076 
-SI_ITEMFILTERTYPE20 = 1077 
-SI_ITEMFILTERTYPE21 = 1078 
-SI_ITEMFILTERTYPE22 = 1079 
-SI_ITEMTRAITTYPE0 = 1080 
-SI_ITEMTRAITTYPE1 = 1081 
-SI_ITEMTRAITTYPE2 = 1082 
-SI_ITEMTRAITTYPE3 = 1083 
-SI_ITEMTRAITTYPE4 = 1084 
-SI_ITEMTRAITTYPE5 = 1085 
-SI_ITEMTRAITTYPE6 = 1086 
-SI_ITEMTRAITTYPE7 = 1087 
-SI_ITEMTRAITTYPE8 = 1088 
-SI_ITEMTRAITTYPE9 = 1089 
-SI_ITEMTRAITTYPE10 = 1090 
-SI_ITEMTRAITTYPE11 = 1091 
-SI_ITEMTRAITTYPE12 = 1092 
-SI_ITEMTRAITTYPE13 = 1093 
-SI_ITEMTRAITTYPE14 = 1094 
-SI_ITEMTRAITTYPE15 = 1095 
-SI_ITEMTRAITTYPE16 = 1096 
-SI_ITEMTRAITTYPE17 = 1097 
-SI_ITEMTRAITTYPE18 = 1098 
-SI_ITEMTRAITTYPE19 = 1099 
-SI_ITEMTRAITTYPE20 = 1100 
-SI_ITEMTRAITTYPE21 = 1101 
-SI_ITEMTRAITTYPE22 = 1102 
-SI_ITEMTRAITTYPE23 = 1103 
-SI_ITEMTRAITTYPE24 = 1104 
-SI_ITEMTRAITTYPE25 = 1105 
-SI_ITEMTRAITTYPE26 = 1106 
-SI_ITEMTRAITTYPE27 = 1107 
-SI_ENCHANTINGRUNECLASSIFICATION1 = 1108 
-SI_ENCHANTINGRUNECLASSIFICATION2 = 1109 
-SI_ENCHANTINGRUNECLASSIFICATION3 = 1110 
-SI_BINDTYPE1 = 1111 
-SI_BINDTYPE2 = 1112 
-SI_BINDTYPE3 = 1113 
-SI_ITEMQUALITY0 = 1114 
-SI_ITEMQUALITY1 = 1115 
-SI_ITEMQUALITY2 = 1116 
-SI_ITEMQUALITY3 = 1117 
-SI_ITEMQUALITY4 = 1118 
-SI_ITEMQUALITY5 = 1119 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE0 = 1120 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE1 = 1121 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE2 = 1122 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE3 = 1123 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE4 = 1124 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE5 = 1125 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE6 = 1126 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE7 = 1127 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE8 = 1128 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE9 = 1129 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE10 = 1130 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE11 = 1131 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE12 = 1132 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE13 = 1133 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE14 = 1134 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE15 = 1135 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE16 = 1136 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE17 = 1137 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE18 = 1138 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE19 = 1139 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE20 = 1140 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE21 = 1141 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE22 = 1142 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE23 = 1143 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE24 = 1144 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE25 = 1145 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE26 = 1146 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE27 = 1147 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE28 = 1148 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE29 = 1149 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE30 = 1150 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE31 = 1151 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE32 = 1152 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE33 = 1153 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE34 = 1154 
-SI_ENCHANTMENTSEARCHCATEGORYTYPE35 = 1155 
-SI_ALLIANCE0 = 1156 
-SI_ALLIANCE1 = 1157 
-SI_ALLIANCE2 = 1158 
-SI_ALLIANCE3 = 1159 
-SI_SPECIALSTATTYPES1 = 1160 
-SI_WEAPONTYPE0 = 1161 
-SI_WEAPONTYPE1 = 1162 
-SI_WEAPONTYPE2 = 1163 
-SI_WEAPONTYPE3 = 1164 
-SI_WEAPONTYPE4 = 1165 
-SI_WEAPONTYPE5 = 1166 
-SI_WEAPONTYPE6 = 1167 
-SI_WEAPONTYPE7 = 1168 
-SI_WEAPONTYPE8 = 1169 
-SI_WEAPONTYPE9 = 1170 
-SI_WEAPONTYPE10 = 1171 
-SI_WEAPONTYPE11 = 1172 
-SI_WEAPONTYPE12 = 1173 
-SI_WEAPONTYPE13 = 1174 
-SI_WEAPONTYPE14 = 1175 
-SI_WEAPONTYPE15 = 1176 
-SI_GAMEPADWEAPONCATEGORY0 = 1177 
-SI_GAMEPADWEAPONCATEGORY1 = 1178 
-SI_GAMEPADWEAPONCATEGORY2 = 1179 
-SI_GAMEPADWEAPONCATEGORY3 = 1180 
-SI_GAMEPADWEAPONCATEGORY4 = 1181 
-SI_GAMEPADWEAPONCATEGORY5 = 1182 
-SI_GAMEPADITEMCATEGORY0 = 1183 
-SI_GAMEPADITEMCATEGORY1 = 1184 
-SI_GAMEPADITEMCATEGORY2 = 1185 
-SI_GAMEPADITEMCATEGORY3 = 1186 
-SI_GAMEPADITEMCATEGORY4 = 1187 
-SI_GAMEPADITEMCATEGORY5 = 1188 
-SI_GAMEPADITEMCATEGORY6 = 1189 
-SI_GAMEPADITEMCATEGORY7 = 1190 
-SI_GAMEPADITEMCATEGORY8 = 1191 
-SI_GAMEPADITEMCATEGORY9 = 1192 
-SI_GAMEPADITEMCATEGORY10 = 1193 
-SI_GAMEPADITEMCATEGORY11 = 1194 
-SI_GAMEPADITEMCATEGORY12 = 1195 
-SI_GAMEPADITEMCATEGORY13 = 1196 
-SI_GAMEPADITEMCATEGORY14 = 1197 
-SI_GAMEPADITEMCATEGORY15 = 1198 
-SI_GAMEPADITEMCATEGORY16 = 1199 
-SI_GAMEPADITEMCATEGORY17 = 1200 
-SI_GAMEPADITEMCATEGORY18 = 1201 
-SI_GAMEPADITEMCATEGORY19 = 1202 
-SI_GAMEPADITEMCATEGORY20 = 1203 
-SI_GAMEPADITEMCATEGORY21 = 1204 
-SI_GAMEPADITEMCATEGORY22 = 1205 
-SI_GAMEPADITEMCATEGORY23 = 1206 
-SI_GAMEPADITEMCATEGORY24 = 1207 
-SI_GAMEPADITEMCATEGORY25 = 1208 
-SI_GAMEPADITEMCATEGORY26 = 1209 
-SI_GAMEPADITEMCATEGORY27 = 1210 
-SI_GAMEPADITEMCATEGORY28 = 1211 
-SI_GAMEPADITEMCATEGORY29 = 1212 
-SI_GAMEPADITEMCATEGORY30 = 1213 
-SI_GAMEPADITEMCATEGORY31 = 1214 
-SI_GAMEPADITEMCATEGORY32 = 1215 
-SI_GAMEPADITEMCATEGORY33 = 1216 
-SI_GAMEPADITEMCATEGORY34 = 1217 
-SI_GAMEPADITEMCATEGORY35 = 1218 
-SI_GAMEPADITEMCATEGORY36 = 1219 
-SI_GAMEPADITEMCATEGORY37 = 1220 
-SI_GAMEPADITEMCATEGORY38 = 1221 
-SI_ITEMSTYLECHAPTER0 = 1222 
-SI_ITEMSTYLECHAPTER1 = 1223 
-SI_ITEMSTYLECHAPTER2 = 1224 
-SI_ITEMSTYLECHAPTER3 = 1225 
-SI_ITEMSTYLECHAPTER4 = 1226 
-SI_ITEMSTYLECHAPTER5 = 1227 
-SI_ITEMSTYLECHAPTER6 = 1228 
-SI_ITEMSTYLECHAPTER7 = 1229 
-SI_ITEMSTYLECHAPTER8 = 1230 
-SI_ITEMSTYLECHAPTER9 = 1231 
-SI_ITEMSTYLECHAPTER10 = 1232 
-SI_ITEMSTYLECHAPTER11 = 1233 
-SI_ITEMSTYLECHAPTER12 = 1234 
-SI_ITEMSTYLECHAPTER13 = 1235 
-SI_ITEMSTYLECHAPTER14 = 1236 
-SI_SCORETRACKERENTRYTYPE1 = 1237 
-SI_SCORETRACKERENTRYTYPE2 = 1238 
-SI_SCORETRACKERENTRYTYPE7 = 1239 
-SI_SETTINGSYSTEMPANEL0 = 1240 
-SI_SETTINGSYSTEMPANEL1 = 1241 
-SI_SETTINGSYSTEMPANEL2 = 1242 
-SI_SETTINGSYSTEMPANEL3 = 1243 
-SI_SETTINGSYSTEMPANEL4 = 1244 
-SI_SETTINGSYSTEMPANEL5 = 1245 
-SI_SETTINGSYSTEMPANEL6 = 1246 
-SI_SETTINGSYSTEMPANEL7 = 1247 
-SI_SETTINGSYSTEMPANEL8 = 1248 
-SI_SETTINGSYSTEMPANEL9 = 1249 
-SI_TEXTURERESOLUTIONCHOICE0 = 1250 
-SI_TEXTURERESOLUTIONCHOICE1 = 1251 
-SI_TEXTURERESOLUTIONCHOICE2 = 1252 
-SI_NAMEPLATEDISPLAYCHOICE0 = 1253 
-SI_NAMEPLATEDISPLAYCHOICE1 = 1254 
-SI_NAMEPLATEDISPLAYCHOICE2 = 1255 
-SI_NAMEPLATEDISPLAYCHOICE3 = 1256 
-SI_NAMEPLATEDISPLAYCHOICE4 = 1257 
-SI_NAMEPLATEDISPLAYCHOICE5 = 1258 
-SI_NAMEPLATEDISPLAYCHOICE6 = 1259 
-SI_NAMEPLATEDISPLAYCHOICE7 = 1260 
-SI_NAMEPLATEDISPLAYCHOICE8 = 1261 
-SI_NAMEPLATEDISPLAYCHOICE9 = 1262 
-SI_NAMEPLATEDISPLAYCHOICE10 = 1263 
-SI_NAMEPLATEDISPLAYCHOICE11 = 1264 
-SI_ACTIONBARSETTINGCHOICE0 = 1265 
-SI_ACTIONBARSETTINGCHOICE1 = 1266 
-SI_ACTIONBARSETTINGCHOICE2 = 1267 
-SI_COMPASSACTIVEQUESTSCHOICE0 = 1268 
-SI_COMPASSACTIVEQUESTSCHOICE1 = 1269 
-SI_COMPASSACTIVEQUESTSCHOICE2 = 1270 
-SI_RESOURCEBARSSETTINGCHOICE0 = 1271 
-SI_RESOURCEBARSSETTINGCHOICE1 = 1272 
-SI_RESOURCEBARSSETTINGCHOICE2 = 1273 
-SI_RAIDLIFEVISIBILITYCHOICE0 = 1274 
-SI_RAIDLIFEVISIBILITYCHOICE1 = 1275 
-SI_RAIDLIFEVISIBILITYCHOICE2 = 1276 
-SI_BUFFDEBUFFENABLEDCHOICE0 = 1277 
-SI_BUFFDEBUFFENABLEDCHOICE1 = 1278 
-SI_BUFFDEBUFFENABLEDCHOICE2 = 1279 
-SI_RAIDCATEGORY0 = 1280 
-SI_RAIDCATEGORY1 = 1281 
-SI_SIEGECAMERACHOICE0 = 1282 
-SI_SIEGECAMERACHOICE1 = 1283 
-SI_QUICKCASTGROUNDABILITIESCHOICE0 = 1284 
-SI_QUICKCASTGROUNDABILITIESCHOICE1 = 1285 
-SI_QUICKCASTGROUNDABILITIESCHOICE2 = 1286 
-SI_DEFAULTSOULGEMCHOICE0 = 1287 
-SI_DEFAULTSOULGEMCHOICE1 = 1288 
-SI_PRIMARYPLAYERNAMESETTING0 = 1289 
-SI_PRIMARYPLAYERNAMESETTING1 = 1290 
-SI_RESOURCENUMBERSSETTING0 = 1291 
-SI_RESOURCENUMBERSSETTING1 = 1292 
-SI_RESOURCENUMBERSSETTING2 = 1293 
-SI_RESOURCENUMBERSSETTING3 = 1294 
-SI_GAMEPADCHATTEXTSIZESETTING22 = 1295 
-SI_GAMEPADCHATTEXTSIZESETTING27 = 1296 
-SI_GAMEPADCHATTEXTSIZESETTING34 = 1297 
-SI_BATTLEGROUNDGAMETYPE0 = 1298 
-SI_BATTLEGROUNDGAMETYPE1 = 1299 
-SI_BATTLEGROUNDGAMETYPE2 = 1300 
-SI_BATTLEGROUNDGAMETYPE3 = 1301 
-SI_BATTLEGROUNDGAMETYPE4 = 1302 
-SI_BATTLEGROUNDGAMETYPE5 = 1303 
-SI_BATTLEGROUNDGAMETYPE6 = 1304 
-SI_BATTLEGROUNDLEADERBOARDTYPE0 = 1305 
-SI_BATTLEGROUNDLEADERBOARDTYPE1 = 1306 
-SI_BATTLEGROUNDLEADERBOARDTYPE2 = 1307 
-SI_BATTLEGROUNDLEADERBOARDTYPE3 = 1308 
-SI_GROUPELECTIONFAILURE1 = 1309 
-SI_GROUPELECTIONFAILURE2 = 1310 
-SI_GROUPELECTIONFAILURE3 = 1311 
-SI_GROUPELECTIONFAILURE4 = 1312 
-SI_GROUPELECTIONFAILURE5 = 1313 
-SI_GROUPELECTIONFAILURE6 = 1314 
-SI_GROUPELECTIONFAILURE7 = 1315 
-SI_GROUPELECTIONFAILURE8 = 1316 
-SI_GROUPELECTIONFAILURE9 = 1317 
-SI_GROUPELECTIONFAILURE10 = 1318 
-SI_GROUPELECTIONFAILURE11 = 1319 
-SI_GROUPELECTIONFAILURE12 = 1320 
-SI_GROUPELECTIONFAILURE13 = 1321 
-SI_GROUPELECTIONRESULT1 = 1322 
-SI_GROUPELECTIONRESULT2 = 1323 
-SI_GROUPELECTIONRESULT3 = 1324 
-SI_GROUPELECTIONRESULT4 = 1325 
-SI_GROUPELECTIONRESULT5 = 1326 
-SI_GROUPELECTIONTYPE3 = 1327 
-SI_GROUPELECTIONTYPE4 = 1328 
-SI_GROUPLEAVEREASON0 = 1329 
-SI_GROUPLEAVEREASON1 = 1330 
-SI_GROUPLEAVEREASON2 = 1331 
-SI_GROUPLEAVEREASON4 = 1332 
-SI_RECIPECRAFTINGSYSTEM1 = 1333 
-SI_RECIPECRAFTINGSYSTEM2 = 1334 
-SI_RECIPECRAFTINGSYSTEM3 = 1335 
-SI_RECIPECRAFTINGSYSTEM4 = 1336 
-SI_RECIPECRAFTINGSYSTEM5 = 1337 
-SI_RECIPECRAFTINGSYSTEM6 = 1338 
-SI_SKILLTYPE1 = 1339 
-SI_SKILLTYPE2 = 1340 
-SI_SKILLTYPE3 = 1341 
-SI_SKILLTYPE4 = 1342 
-SI_SKILLTYPE5 = 1343 
-SI_SKILLTYPE6 = 1344 
-SI_SKILLTYPE7 = 1345 
-SI_SKILLTYPE8 = 1346 
-SI_SKILLTYPE9 = 1347 
-SI_MOUSEDESTROYITEMFAILEDREASON1 = 1348 
-SI_MOUSEDESTROYITEMFAILEDREASON2 = 1349 
-SI_AUDIOSPEAKERCONFIGURATIONS0 = 1350 
-SI_AUDIOSPEAKERCONFIGURATIONS1 = 1351 
-SI_AUDIOSPEAKERCONFIGURATIONS2 = 1352 
-SI_AUDIOSPEAKERCONFIGURATIONS3 = 1353 
-SI_AUDIOSPEAKERCONFIGURATIONS4 = 1354 
-SI_AUDIOSPEAKERCONFIGURATIONS5 = 1355 
-SI_AUDIOSPEAKERCONFIGURATIONS6 = 1356 
-SI_AUDIOSPEAKERCONFIGURATIONS7 = 1357 
-SI_AUDIOSPEAKERCONFIGURATIONS8 = 1358 
-SI_DYERARITY0 = 1359 
-SI_DYERARITY1 = 1360 
-SI_DYERARITY2 = 1361 
-SI_DYEHUECATEGORY0 = 1362 
-SI_DYEHUECATEGORY1 = 1363 
-SI_DYEHUECATEGORY2 = 1364 
-SI_DYEHUECATEGORY3 = 1365 
-SI_DYEHUECATEGORY4 = 1366 
-SI_DYEHUECATEGORY5 = 1367 
-SI_DYEHUECATEGORY6 = 1368 
-SI_SHADOWSCHOICE0 = 1369 
-SI_SHADOWSCHOICE1 = 1370 
-SI_SHADOWSCHOICE2 = 1371 
-SI_SHADOWSCHOICE3 = 1372 
-SI_SHADOWSCHOICE4 = 1373 
-SI_SHADOWSCHOICE5 = 1374 
-SI_SHADOWSCHOICE6 = 1375 
-SI_REFLECTIONQUALITY0 = 1376 
-SI_REFLECTIONQUALITY1 = 1377 
-SI_REFLECTIONQUALITY2 = 1378 
-SI_REFLECTIONQUALITY3 = 1379 
-SI_QUESTTYPE1 = 1380 
-SI_QUESTTYPE2 = 1381 
-SI_QUESTTYPE3 = 1382 
-SI_QUESTTYPE4 = 1383 
-SI_QUESTTYPE5 = 1384 
-SI_QUESTTYPE6 = 1385 
-SI_QUESTTYPE7 = 1386 
-SI_QUESTTYPE8 = 1387 
-SI_QUESTTYPE9 = 1388 
-SI_QUESTTYPE10 = 1389 
-SI_QUESTTYPE11 = 1390 
-SI_QUESTTYPE12 = 1391 
-SI_QUESTTYPE13 = 1392 
-SI_QUESTREPEATABLETYPE1 = 1393 
-SI_QUESTREPEATABLETYPE2 = 1394 
-SI_INSTANCETYPE1 = 1395 
-SI_INSTANCETYPE2 = 1396 
-SI_INSTANCETYPE3 = 1397 
-SI_INSTANCEDISPLAYTYPE1 = 1398 
-SI_INSTANCEDISPLAYTYPE2 = 1399 
-SI_INSTANCEDISPLAYTYPE3 = 1400 
-SI_INSTANCEDISPLAYTYPE4 = 1401 
-SI_INSTANCEDISPLAYTYPE5 = 1402 
-SI_INSTANCEDISPLAYTYPE6 = 1403 
-SI_INSTANCEDISPLAYTYPE7 = 1404 
-SI_INSTANCEDISPLAYTYPE8 = 1405 
-SI_INSTANCEDISPLAYTYPE9 = 1406 
-SI_CHATCHANNELCATEGORIES1 = 1407 
-SI_CHATCHANNELCATEGORIES2 = 1408 
-SI_CHATCHANNELCATEGORIES3 = 1409 
-SI_CHATCHANNELCATEGORIES4 = 1410 
-SI_CHATCHANNELCATEGORIES6 = 1411 
-SI_CHATCHANNELCATEGORIES7 = 1412 
-SI_CHATCHANNELCATEGORIES8 = 1413 
-SI_CHATCHANNELCATEGORIES9 = 1414 
-SI_CHATCHANNELCATEGORIES10 = 1415 
-SI_CHATCHANNELCATEGORIES11 = 1416 
-SI_CHATCHANNELCATEGORIES12 = 1417 
-SI_CHATCHANNELCATEGORIES13 = 1418 
-SI_CHATCHANNELCATEGORIES14 = 1419 
-SI_CHATCHANNELCATEGORIES15 = 1420 
-SI_CHATCHANNELCATEGORIES16 = 1421 
-SI_CHATCHANNELCATEGORIES17 = 1422 
-SI_CHATCHANNELCATEGORIES18 = 1423 
-SI_CHATCHANNELCATEGORIES19 = 1424 
-SI_CHATCHANNELCATEGORIES20 = 1425 
-SI_CHATCHANNELCATEGORIES21 = 1426 
-SI_CHATCHANNELCATEGORIES22 = 1427 
-SI_CHATCHANNELCATEGORIES23 = 1428 
-SI_CHATCHANNELCATEGORIES41 = 1429 
-SI_CHATCHANNELCATEGORIES42 = 1430 
-SI_CHATCHANNELCATEGORIES43 = 1431 
-SI_CHATCHANNELCATEGORIES44 = 1432 
-SI_CHATCHANNELCATEGORIES45 = 1433 
-SI_CHATCHANNELCATEGORIES46 = 1434 
-SI_CHATCHANNELCATEGORIES47 = 1435 
-SI_CHATCHANNELCATEGORIES48 = 1436 
-SI_CHATCHANNELCATEGORIES49 = 1437 
-SI_CHATCHANNELCATEGORIES50 = 1438 
-SI_CHATCHANNELCATEGORIES51 = 1439 
-SI_CHATCHANNELCATEGORIES52 = 1440 
-SI_CHATCHANNELCATEGORIES53 = 1441 
-SI_CHATCHANNELCATEGORIES54 = 1442 
-SI_CHATCHANNELCATEGORIES55 = 1443 
-SI_CHATCHANNELCATEGORIES56 = 1444 
-SI_CHATCHANNELCATEGORIES57 = 1445 
-SI_CHATCHANNELCATEGORIES58 = 1446 
-SI_CHATCHANNELCATEGORIES59 = 1447 
-SI_CHATCHANNELCATEGORIES60 = 1448 
-SI_CHATCHANNELCATEGORIES61 = 1449 
-SI_CHATCHANNELCATEGORYHEADERS1 = 1450 
-SI_CHATCHANNELCATEGORYHEADERS10 = 1451 
-SI_CHATCHANNELCATEGORYHEADERS45 = 1452 
-SI_LFGACTIVITY1 = 1453 
-SI_LFGACTIVITY2 = 1454 
-SI_LFGACTIVITY3 = 1455 
-SI_LFGACTIVITY4 = 1456 
-SI_LFGACTIVITY5 = 1457 
-SI_LFGACTIVITY6 = 1458 
-SI_LFGACTIVITY7 = 1459 
-SI_LFGACTIVITY8 = 1460 
-SI_LFGROLE1 = 1461 
-SI_LFGROLE2 = 1462 
-SI_LFGROLE4 = 1463 
-SI_LFGITEMREWARDTYPE1 = 1464 
-SI_LFGITEMREWARDTYPE2 = 1465 
-SI_ACTIVITYQUEUERESULT1 = 1466 
-SI_ACTIVITYQUEUERESULT2 = 1467 
-SI_ACTIVITYQUEUERESULT3 = 1468 
-SI_ACTIVITYQUEUERESULT4 = 1469 
-SI_ACTIVITYQUEUERESULT5 = 1470 
-SI_ACTIVITYQUEUERESULT6 = 1471 
-SI_ACTIVITYQUEUERESULT7 = 1472 
-SI_ACTIVITYQUEUERESULT8 = 1473 
-SI_ACTIVITYQUEUERESULT9 = 1474 
-SI_ACTIVITYQUEUERESULT10 = 1475 
-SI_ACTIVITYQUEUERESULT11 = 1476 
-SI_ACTIVITYQUEUERESULT12 = 1477 
-SI_ACTIVITYQUEUERESULT13 = 1478 
-SI_ACTIVITYQUEUERESULT14 = 1479 
-SI_ACTIVITYQUEUERESULT15 = 1480 
-SI_ACTIVITYQUEUERESULT16 = 1481 
-SI_ACTIVITYQUEUERESULT17 = 1482 
-SI_ACTIVITYQUEUERESULT18 = 1483 
-SI_ACTIVITYQUEUERESULT19 = 1484 
-SI_ACTIVITYQUEUERESULT20 = 1485 
-SI_ACTIVITYQUEUERESULT21 = 1486 
-SI_ACTIVITYQUEUERESULT22 = 1487 
-SI_ACTIVITYFINDERSTATUS0 = 1488 
-SI_ACTIVITYFINDERSTATUS1 = 1489 
-SI_ACTIVITYFINDERSTATUS2 = 1490 
-SI_ACTIVITYFINDERSTATUS3 = 1491 
-SI_ACTIVITYFINDERSTATUS4 = 1492 
-SI_ACTIVITYFINDERSTATUS5 = 1493 
-SI_GROUPDIFFICULTYCHANGEREASON0 = 1494 
-SI_GROUPDIFFICULTYCHANGEREASON1 = 1495 
-SI_GROUPDIFFICULTYCHANGEREASON2 = 1496 
-SI_GROUPDIFFICULTYCHANGEREASON3 = 1497 
-SI_GROUPDIFFICULTYCHANGEREASON4 = 1498 
-SI_ACTIVECOMBATTIPSETTING0 = 1499 
-SI_ACTIVECOMBATTIPSETTING1 = 1500 
-SI_ACTIVECOMBATTIPSETTING2 = 1501 
-SI_LOCKQUALITY1 = 1502 
-SI_LOCKQUALITY2 = 1503 
-SI_LOCKQUALITY3 = 1504 
-SI_LOCKQUALITY4 = 1505 
-SI_LOCKQUALITY5 = 1506 
-SI_LOCKQUALITY6 = 1507 
-SI_LOCKQUALITY7 = 1508 
-SI_GAMECAMERAACTIONTYPE1 = 1509 
-SI_GAMECAMERAACTIONTYPE2 = 1510 
-SI_GAMECAMERAACTIONTYPE3 = 1511 
-SI_GAMECAMERAACTIONTYPE4 = 1512 
-SI_GAMECAMERAACTIONTYPE5 = 1513 
-SI_GAMECAMERAACTIONTYPE6 = 1514 
-SI_GAMECAMERAACTIONTYPE7 = 1515 
-SI_GAMECAMERAACTIONTYPE8 = 1516 
-SI_GAMECAMERAACTIONTYPE9 = 1517 
-SI_GAMECAMERAACTIONTYPE10 = 1518 
-SI_GAMECAMERAACTIONTYPE11 = 1519 
-SI_GAMECAMERAACTIONTYPE12 = 1520 
-SI_GAMECAMERAACTIONTYPE13 = 1521 
-SI_GAMECAMERAACTIONTYPE15 = 1522 
-SI_GAMECAMERAACTIONTYPE16 = 1523 
-SI_GAMECAMERAACTIONTYPE17 = 1524 
-SI_GAMECAMERAACTIONTYPE18 = 1525 
-SI_GAMECAMERAACTIONTYPE19 = 1526 
-SI_GAMECAMERAACTIONTYPE20 = 1527 
-SI_GAMECAMERAACTIONTYPE21 = 1528 
-SI_GAMECAMERAACTIONTYPE23 = 1529 
-SI_GAMECAMERAACTIONTYPE24 = 1530 
-SI_GAMECAMERAACTIONTYPE25 = 1531 
-SI_GAMECAMERAACTIONTYPE26 = 1532 
-SI_SHADOWYCONNECTIONCHOICE1 = 1533 
-SI_SHADOWYCONNECTIONCHOICE2 = 1534 
-SI_SHADOWYCONNECTIONCHOICE3 = 1535 
-SI_GUILDPERMISSION1 = 1536 
-SI_GUILDPERMISSION2 = 1537 
-SI_GUILDPERMISSION3 = 1538 
-SI_GUILDPERMISSION4 = 1539 
-SI_GUILDPERMISSION5 = 1540 
-SI_GUILDPERMISSION6 = 1541 
-SI_GUILDPERMISSION7 = 1542 
-SI_GUILDPERMISSION8 = 1543 
-SI_GUILDPERMISSION9 = 1544 
-SI_GUILDPERMISSION10 = 1545 
-SI_GUILDPERMISSION11 = 1546 
-SI_GUILDPERMISSION12 = 1547 
-SI_GUILDPERMISSION13 = 1548 
-SI_GUILDPERMISSION14 = 1549 
-SI_GUILDPERMISSION15 = 1550 
-SI_GUILDPERMISSION16 = 1551 
-SI_GUILDPERMISSION17 = 1552 
-SI_GUILDPERMISSION18 = 1553 
-SI_GUILDPERMISSION19 = 1554 
-SI_GUILDPERMISSION20 = 1555 
-SI_GUILDPERMISSION21 = 1556 
-SI_GUILDPERMISSION22 = 1557 
-SI_GUILDPERMISSION23 = 1558 
-SI_GUILDPERMISSION24 = 1559 
-SI_GUILDPERMISSION25 = 1560 
-SI_GUILDPERMISSION26 = 1561 
-SI_GUILDHISTORYCATEGORY1 = 1562 
-SI_GUILDHISTORYCATEGORY2 = 1563 
-SI_GUILDHISTORYCATEGORY3 = 1564 
-SI_GUILDHISTORYCATEGORY4 = 1565 
-SI_GUILDHISTORYCATEGORY5 = 1566 
-SI_GUILDHISTORYGENERALSUBCATEGORIES1 = 1567 
-SI_GUILDHISTORYGENERALSUBCATEGORIES2 = 1568 
-SI_GUILDHISTORYGENERALSUBCATEGORIES3 = 1569 
-SI_GUILDHISTORYBANKSUBCATEGORIES1 = 1570 
-SI_GUILDHISTORYBANKSUBCATEGORIES2 = 1571 
-SI_GUILDHISTORYSTORESUBCATEGORIES1 = 1572 
-SI_GUILDHISTORYSTORESUBCATEGORIES2 = 1573 
-SI_GUILDHISTORYALLIANCEWARSUBCATEGORIES1 = 1574 
-SI_GUILDEVENTTYPE3 = 1575 
-SI_GUILDEVENTTYPE4 = 1576 
-SI_GUILDEVENTTYPE5 = 1577 
-SI_GUILDEVENTTYPE7 = 1578 
-SI_GUILDEVENTTYPE8 = 1579 
-SI_GUILDEVENTTYPE12 = 1580 
-SI_GUILDEVENTTYPE13 = 1581 
-SI_GUILDEVENTTYPE14 = 1582 
-SI_GUILDEVENTTYPE15 = 1583 
-SI_GUILDEVENTTYPE16 = 1584 
-SI_GUILDEVENTTYPE17 = 1585 
-SI_GUILDEVENTTYPE19 = 1586 
-SI_GUILDEVENTTYPE20 = 1587 
-SI_GUILDEVENTTYPE21 = 1588 
-SI_GUILDEVENTTYPE22 = 1589 
-SI_GUILDEVENTTYPE23 = 1590 
-SI_GUILDEVENTTYPE24 = 1591 
-SI_GUILDEVENTTYPE25 = 1592 
-SI_GUILDEVENTTYPE27 = 1593 
-SI_GUILDEVENTTYPE28 = 1594 
-SI_GUILDEVENTTYPE31 = 1595 
-SI_GUILDEVENTTYPE32 = 1596 
-SI_GUILDEVENTTYPE33 = 1597 
-SI_GUILDEVENTTYPE34 = 1598 
-SI_GUILDEVENTTYPE35 = 1599 
-SI_GUILDEVENTTYPE36 = 1600 
-SI_GUILDEVENTTYPE37 = 1601 
-SI_GUILDEVENTTYPE38 = 1602 
-SI_GUILDEVENTTYPE39 = 1603 
-SI_GUILDEVENTTYPE40 = 1604 
-SI_GUILDEVENTTYPE42 = 1605 
-SI_GUILDEVENTTYPE43 = 1606 
-SI_PLATFORMACCOUNTLABEL0 = 1607 
-SI_PLATFORMACCOUNTLABEL1 = 1608 
-SI_PLATFORMACCOUNTLABEL2 = 1609 
-SI_RIDINGTRAINTYPE1 = 1610 
-SI_RIDINGTRAINTYPE2 = 1611 
-SI_RIDINGTRAINTYPE3 = 1612 
-SI_CAMPAIGNRULESETTYPE1 = 1613 
-SI_CAMPAIGNRULESETTYPE2 = 1614 
-SI_CAMPAIGNRULESETTYPE3 = 1615 
-SI_CAMPAIGNLEVELREQUIREMENTTYPE0 = 1616 
-SI_CAMPAIGNLEVELREQUIREMENTTYPE1 = 1617 
-SI_CAMPAIGNLEVELREQUIREMENTTYPE2 = 1618 
-SI_IMPERIALCITYACCESSRULESTYPE0 = 1619 
-SI_IMPERIALCITYACCESSRULESTYPE1 = 1620 
-SI_IMPERIALCITYACCESSRULESTYPE2 = 1621 
-SI_IMPERIALCITYACCESSRULESTYPE3 = 1622 
-SI_PLAYERSTATUS1 = 1623 
-SI_PLAYERSTATUS2 = 1624 
-SI_PLAYERSTATUS3 = 1625 
-SI_PLAYERSTATUS4 = 1626 
-SI_DUELSTATE1 = 1627 
-SI_DUELSTATE2 = 1628 
-SI_DUELSTATE3 = 1629 
-SI_DUELSTATE4 = 1630 
-SI_DUELSTATE5 = 1631 
-SI_DUELRESULT0 = 1632 
-SI_DUELRESULT1 = 1633 
-SI_NOTIFICATIONTYPE1 = 1634 
-SI_NOTIFICATIONTYPE2 = 1635 
-SI_NOTIFICATIONTYPE3 = 1636 
-SI_NOTIFICATIONTYPE4 = 1637 
-SI_NOTIFICATIONTYPE5 = 1638 
-SI_NOTIFICATIONTYPE6 = 1639 
-SI_NOTIFICATIONTYPE7 = 1640 
-SI_NOTIFICATIONTYPE8 = 1641 
-SI_NOTIFICATIONTYPE9 = 1642 
-SI_NOTIFICATIONTYPE10 = 1643 
-SI_NOTIFICATIONTYPE11 = 1644 
-SI_NOTIFICATIONTYPE12 = 1645 
-SI_NOTIFICATIONTYPE13 = 1646 
-SI_NOTIFICATIONTYPE14 = 1647 
-SI_NOTIFICATIONTYPE15 = 1648 
-SI_NOTIFICATIONTYPE16 = 1649 
-SI_NOTIFICATIONTYPE17 = 1650 
-SI_NOTIFICATIONTYPE18 = 1651 
-SI_NOTIFICATIONTYPE19 = 1652 
-SI_MAPFILTER1 = 1653 
-SI_MAPFILTER2 = 1654 
-SI_MAPFILTER3 = 1655 
-SI_MAPFILTER4 = 1656 
-SI_MAPFILTER5 = 1657 
-SI_MAPFILTER6 = 1658 
-SI_MAPFILTER7 = 1659 
-SI_MAPFILTER8 = 1660 
-SI_MAPFILTER9 = 1661 
-SI_MAPFILTER10 = 1662 
-SI_MAPFILTER12 = 1663 
-SI_MAPTRANSITLINEALLIANCE1 = 1664 
-SI_MAPTRANSITLINEALLIANCE2 = 1665 
-SI_GAMEPADTEMPLATE0 = 1666 
-SI_GAMEPADTEMPLATE1 = 1667 
-SI_GAMEPADTEMPLATE2 = 1668 
-SI_GAMEPADTEMPLATE3 = 1669 
-SI_GAMEPADTEMPLATE4 = 1670 
-SI_GAMEPADTEMPLATE5 = 1671 
-SI_GAMEPADTEMPLATE6 = 1672 
-SI_GAMEPADTEMPLATE7 = 1673 
-SI_PICKPOCKETDIFFICULTYTYPE0 = 1674 
-SI_PICKPOCKETDIFFICULTYTYPE1 = 1675 
-SI_PICKPOCKETDIFFICULTYTYPE2 = 1676 
-SI_PICKPOCKETDIFFICULTYTYPE3 = 1677 
-SI_PROSPECTIVEPICKPOCKETRESULT1 = 1678 
-SI_PROSPECTIVEPICKPOCKETRESULT2 = 1679 
-SI_PROSPECTIVEPICKPOCKETRESULT3 = 1680 
-SI_PROSPECTIVEPICKPOCKETRESULT4 = 1681 
-SI_INFAMYTHRESHOLDSTYPE0 = 1682 
-SI_INFAMYTHRESHOLDSTYPE1 = 1683 
-SI_INFAMYTHRESHOLDSTYPE2 = 1684 
-SI_INFAMYTHRESHOLDSTYPE3 = 1685 
-SI_JUSTICEALLEGIANCE1 = 1686 
-SI_JUSTICEALLEGIANCE2 = 1687 
-SI_MONSTERSOCIALCLASS2 = 1688 
-SI_MONSTERSOCIALCLASS3 = 1689 
-SI_MONSTERSOCIALCLASS4 = 1690 
-SI_MONSTERSOCIALCLASS5 = 1691 
-SI_MONSTERSOCIALCLASS6 = 1692 
-SI_MONSTERSOCIALCLASS7 = 1693 
-SI_MONSTERSOCIALCLASS8 = 1694 
-SI_MONSTERSOCIALCLASS9 = 1695 
-SI_MONSTERSOCIALCLASS10 = 1696 
-SI_MONSTERSOCIALCLASS11 = 1697 
-SI_MONSTERSOCIALCLASS12 = 1698 
-SI_MONSTERSOCIALCLASS13 = 1699 
-SI_MONSTERSOCIALCLASS14 = 1700 
-SI_MONSTERSOCIALCLASS15 = 1701 
-SI_MONSTERSOCIALCLASS16 = 1702 
-SI_MONSTERSOCIALCLASS17 = 1703 
-SI_MONSTERSOCIALCLASS18 = 1704 
-SI_MONSTERSOCIALCLASS19 = 1705 
-SI_MONSTERSOCIALCLASS20 = 1706 
-SI_MONSTERSOCIALCLASS21 = 1707 
-SI_MONSTERSOCIALCLASS22 = 1708 
-SI_MONSTERSOCIALCLASS23 = 1709 
-SI_MONSTERSOCIALCLASS24 = 1710 
-SI_MONSTERSOCIALCLASS25 = 1711 
-SI_MONSTERSOCIALCLASS26 = 1712 
-SI_MONSTERSOCIALCLASS27 = 1713 
-SI_MONSTERSOCIALCLASS28 = 1714 
-SI_MONSTERSOCIALCLASS29 = 1715 
-SI_MONSTERSOCIALCLASS30 = 1716 
-SI_MONSTERSOCIALCLASS31 = 1717 
-SI_MONSTERSOCIALCLASS32 = 1718 
-SI_MONSTERSOCIALCLASS33 = 1719 
-SI_MONSTERSOCIALCLASS34 = 1720 
-SI_MONSTERSOCIALCLASS35 = 1721 
-SI_MONSTERSOCIALCLASS36 = 1722 
-SI_MONSTERSOCIALCLASS37 = 1723 
-SI_MONSTERSOCIALCLASS38 = 1724 
-SI_MONSTERSOCIALCLASS39 = 1725 
-SI_MONSTERSOCIALCLASS40 = 1726 
-SI_MONSTERSOCIALCLASS41 = 1727 
-SI_MONSTERSOCIALCLASS42 = 1728 
-SI_MONSTERSOCIALCLASS43 = 1729 
-SI_MONSTERSOCIALCLASS44 = 1730 
-SI_MONSTERSOCIALCLASS45 = 1731 
-SI_MONSTERSOCIALCLASS46 = 1732 
-SI_MARKETPURCHASABLERESULT0 = 1733 
-SI_MARKETPURCHASABLERESULT1 = 1734 
-SI_MARKETPURCHASABLERESULT2 = 1735 
-SI_MARKETPURCHASABLERESULT3 = 1736 
-SI_MARKETPURCHASABLERESULT4 = 1737 
-SI_MARKETPURCHASABLERESULT5 = 1738 
-SI_MARKETPURCHASABLERESULT6 = 1739 
-SI_MARKETPURCHASABLERESULT7 = 1740 
-SI_MARKETPURCHASABLERESULT8 = 1741 
-SI_MARKETPURCHASABLERESULT9 = 1742 
-SI_MARKETPURCHASABLERESULT10 = 1743 
-SI_MARKETPURCHASABLERESULT11 = 1744 
-SI_MARKETPURCHASABLERESULT12 = 1745 
-SI_MARKETPURCHASABLERESULT13 = 1746 
-SI_MARKETPURCHASABLERESULT14 = 1747 
-SI_MARKETPURCHASABLERESULT15 = 1748 
-SI_COLLECTIBLECATEGORYTYPE0 = 1749 
-SI_COLLECTIBLECATEGORYTYPE1 = 1750 
-SI_COLLECTIBLECATEGORYTYPE2 = 1751 
-SI_COLLECTIBLECATEGORYTYPE3 = 1752 
-SI_COLLECTIBLECATEGORYTYPE4 = 1753 
-SI_COLLECTIBLECATEGORYTYPE5 = 1754 
-SI_COLLECTIBLECATEGORYTYPE6 = 1755 
-SI_COLLECTIBLECATEGORYTYPE7 = 1756 
-SI_COLLECTIBLECATEGORYTYPE8 = 1757 
-SI_COLLECTIBLECATEGORYTYPE9 = 1758 
-SI_COLLECTIBLECATEGORYTYPE10 = 1759 
-SI_COLLECTIBLECATEGORYTYPE11 = 1760 
-SI_COLLECTIBLECATEGORYTYPE12 = 1761 
-SI_COLLECTIBLECATEGORYTYPE13 = 1762 
-SI_COLLECTIBLECATEGORYTYPE14 = 1763 
-SI_COLLECTIBLECATEGORYTYPE15 = 1764 
-SI_COLLECTIBLECATEGORYTYPE16 = 1765 
-SI_COLLECTIBLECATEGORYTYPE17 = 1766 
-SI_COLLECTIBLECATEGORYTYPE18 = 1767 
-SI_COLLECTIBLECATEGORYTYPE19 = 1768 
-SI_COLLECTIBLECATEGORYTYPE20 = 1769 
-SI_COLLECTIBLECATEGORYTYPE21 = 1770 
-SI_COLLECTIBLECATEGORYTYPE22 = 1771 
-SI_COLLECTIBLECATEGORYTYPE23 = 1772 
-SI_SPECIALIZEDCOLLECTIBLETYPE1 = 1773 
-SI_HOUSECATEGORYTYPE0 = 1774 
-SI_HOUSECATEGORYTYPE1 = 1775 
-SI_HOUSECATEGORYTYPE2 = 1776 
-SI_HOUSECATEGORYTYPE3 = 1777 
-SI_COLLECTIBLEUNLOCKSTATE0 = 1778 
-SI_COLLECTIBLEUNLOCKSTATE1 = 1779 
-SI_COLLECTIBLEUNLOCKSTATE2 = 1780 
-SI_EMOTECATEGORY0 = 1781 
-SI_EMOTECATEGORY1 = 1782 
-SI_EMOTECATEGORY2 = 1783 
-SI_EMOTECATEGORY3 = 1784 
-SI_EMOTECATEGORY4 = 1785 
-SI_EMOTECATEGORY5 = 1786 
-SI_EMOTECATEGORY6 = 1787 
-SI_EMOTECATEGORY7 = 1788 
-SI_EMOTECATEGORY8 = 1789 
-SI_EMOTECATEGORY9 = 1790 
-SI_EMOTECATEGORY10 = 1791 
-SI_EMOTECATEGORY11 = 1792 
-SI_EMOTECATEGORY12 = 1793 
-SI_EMOTECATEGORY13 = 1794 
-SI_EMOTECATEGORY14 = 1795 
-SI_MARKETFILTERVIEW1 = 1796 
-SI_MARKETFILTERVIEW2 = 1797 
-SI_MARKETFILTERVIEW3 = 1798 
-SI_MEGASERVER0 = 1799 
-SI_MEGASERVER1 = 1800 
-SI_MEGASERVER2 = 1801 
-SI_CONSOLESERVERCHOICE0 = 1802 
-SI_CONSOLESERVERCHOICE1 = 1803 
-SI_HOUSEPERMISSIONPRESETSETTING0 = 1804 
-SI_HOUSEPERMISSIONPRESETSETTING1 = 1805 
-SI_HOUSEPERMISSIONPRESETSETTING2 = 1806 
-SI_HOUSEPERMISSIONDEFAULTACCESSSETTING0 = 1807 
-SI_HOUSEPERMISSIONDEFAULTACCESSSETTING1 = 1808 
-SI_HOUSEPERMISSIONDEFAULTACCESSSETTING2 = 1809 
-SI_HOUSEPERMISSIONSETTING1 = 1810 
-SI_HOUSEPERMISSIONSETTING2 = 1811 
-SI_HOUSEPERMISSIONSETTING3 = 1812 
-SI_HOUSEPERMISSIONSETTING4 = 1813 
-SI_HOUSEPERMISSIONSETTING5 = 1814 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES0 = 1815 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES1 = 1816 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES2 = 1817 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES3 = 1818 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES4 = 1819 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES5 = 1820 
-SI_HOUSEPERMISSIONOPTIONSCATEGORIES6 = 1821 
-SI_APPROVEDURLTYPE0 = 1822 
-SI_APPROVEDURLTYPE1 = 1823 
-SI_APPROVEDURLTYPE2 = 1824 
-SI_APPROVEDURLTYPE3 = 1825 
-SI_APPROVEDURLTYPE4 = 1826 
-SI_APPROVEDURLTYPE5 = 1827 
-SI_APPROVEDURLTYPEDMM0 = 1828 
-SI_APPROVEDURLTYPEDMM1 = 1829 
-SI_APPROVEDURLTYPEDMM2 = 1830 
-SI_APPROVEDURLTYPEDMM3 = 1831 
-SI_APPROVEDURLTYPEDMM4 = 1832 
-SI_APPROVEDURLTYPEDMM5 = 1833 
-SI_APPROVEDURLTYPESTEAM0 = 1834 
-SI_APPROVEDURLTYPESTEAM1 = 1835 
-SI_APPROVEDURLTYPESTEAM2 = 1836 
-SI_APPROVEDURLTYPESTEAM3 = 1837 
-SI_APPROVEDURLTYPESTEAM4 = 1838 
-SI_APPROVEDURLTYPESTEAM5 = 1839 
-SI_DUNGEONDIFFICULTY1 = 1840 
-SI_DUNGEONDIFFICULTY2 = 1841 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS0 = 1842 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS1 = 1843 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS2 = 1844 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS3 = 1845 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS4 = 1846 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS5 = 1847 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS6 = 1848 
-SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS7 = 1849 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES0 = 1850 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES1 = 1851 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES2 = 1852 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES3 = 1853 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES4 = 1854 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES5 = 1855 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES6 = 1856 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES7 = 1857 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES8 = 1858 
-SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES9 = 1859 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES0 = 1860 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1 = 1861 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES2 = 1862 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES3 = 1863 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 = 1864 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES101 = 1865 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES102 = 1866 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES103 = 1867 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES104 = 1868 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES201 = 1869 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES202 = 1870 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES203 = 1871 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES204 = 1872 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES205 = 1873 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES206 = 1874 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES207 = 1875 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES208 = 1876 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES209 = 1877 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES210 = 1878 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES211 = 1879 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES212 = 1880 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES301 = 1881 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES302 = 1882 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES303 = 1883 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES304 = 1884 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES305 = 1885 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES401 = 1886 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES402 = 1887 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES403 = 1888 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES404 = 1889 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES405 = 1890 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406 = 1891 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES407 = 1892 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501 = 1893 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES502 = 1894 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503 = 1895 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES504 = 1896 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES505 = 1897 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES506 = 1898 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES507 = 1899 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES508 = 1900 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES509 = 1901 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES510 = 1902 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES601 = 1903 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES602 = 1904 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES603 = 1905 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES604 = 1906 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES605 = 1907 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES606 = 1908 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES607 = 1909 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES608 = 1910 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES609 = 1911 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES610 = 1912 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES611 = 1913 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES612 = 1914 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES701 = 1915 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES702 = 1916 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES703 = 1917 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES704 = 1918 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES705 = 1919 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES801 = 1920 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES802 = 1921 
-SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES803 = 1922 
-SI_CUSTOMERSERVICEASKFORHELPCATEGORIES0 = 1923 
-SI_CUSTOMERSERVICEASKFORHELPCATEGORIES1 = 1924 
-SI_CUSTOMERSERVICEASKFORHELPCATEGORIES2 = 1925 
-SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES0 = 1926 
-SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES1 = 1927 
-SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES2 = 1928 
-SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES0 = 1929 
-SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES2 = 1930 
-SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES3 = 1931 
-SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES4 = 1932 
-SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES5 = 1933 
-SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY0 = 1934 
-SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY1 = 1935 
-SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY2 = 1936 
-SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY3 = 1937 
-SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY4 = 1938 
-SI_CHAMPIONPOINTACTIVEREASON1 = 1939 
-SI_CHAMPIONPOINTACTIVEREASON2 = 1940 
-SI_CADWELLPROGRESSIONLEVEL0 = 1941 
-SI_CADWELLPROGRESSIONLEVEL1 = 1942 
-SI_CADWELLPROGRESSIONLEVEL2 = 1943 
-SI_WEAPONCONFIGTYPE1 = 1944 
-SI_WEAPONCONFIGTYPE2 = 1945 
-SI_WEAPONCONFIGTYPE3 = 1946 
-SI_WEAPONCONFIGTYPE4 = 1947 
-SI_WEAPONCONFIGTYPE5 = 1948 
-SI_WEAPONCONFIGTYPE6 = 1949 
-SI_WEAPONCONFIGTYPE7 = 1950 
-SI_WEAPONCONFIGTYPE8 = 1951 
-SI_WEAPONCONFIGTYPE9 = 1952 
-SI_WEAPONCONFIGTYPE10 = 1953 
-SI_WEAPONCONFIGTYPE11 = 1954 
-SI_PLATFORMSERVICETYPE1 = 1955 
-SI_PLATFORMSERVICETYPE2 = 1956 
-SI_PLATFORMSERVICETYPE3 = 1957 
-SI_PLATFORMSERVICETYPE4 = 1958 
-SI_PLATFORMSTORELABEL0 = 1959 
-SI_PLATFORMSTORELABEL1 = 1960 
-SI_PLATFORMSTORELABEL2 = 1961 
-SI_PLATFORMSTORELABEL3 = 1962 
-SI_PLATFORMSTORELABEL4 = 1963 
-SI_SERVICETOKENTYPE1 = 1964 
-SI_SERVICETOKENTYPE2 = 1965 
-SI_SERVICETOKENTYPE3 = 1966 
-SI_DYESTAMPUSERESULT1 = 1967 
-SI_DYESTAMPUSERESULT2 = 1968 
-SI_DYESTAMPUSERESULT3 = 1969 
-SI_DYESTAMPUSERESULT4 = 1970 
-SI_DYESTAMPUSERESULT5 = 1971 
-SI_DYESTAMPUSERESULT6 = 1972 
-SI_LOOTCRATEOPENRESPONSE1 = 1973 
-SI_LOOTCRATEOPENRESPONSE2 = 1974 
-SI_LOOTCRATEOPENRESPONSE3 = 1975 
-SI_LOOTCRATEOPENRESPONSE4 = 1976 
-SI_LOOTCRATEOPENRESPONSE5 = 1977 
-SI_LOOTCRATEOPENRESPONSE6 = 1978 
-SI_LOOTCRATEOPENRESPONSE7 = 1979 
-SI_LOOTCRATEOPENRESPONSE8 = 1980 
-SI_CROWNGEMBALANCEREASON1 = 1981 
-SI_LFGREADYCHECKCANCELREASON1 = 1982 
-SI_LFGREADYCHECKCANCELREASON2 = 1983 
-SI_LFGREADYCHECKCANCELREASON3 = 1984 
-SI_LFGREADYCHECKCANCELREASON4 = 1985 
-SI_LFGREADYCHECKCANCELREASON5 = 1986 
-SI_GEMIFIABLEFILTERTYPE0 = 1987 
-SI_HOUSINGFURNISHINGLIMITTYPE1 = 1988 
-SI_HOUSINGFURNISHINGLIMITTYPE2 = 1989 
-SI_HOUSINGFURNISHINGLIMITTYPE3 = 1990 
-SI_HOUSINGLOADPERMISSIONSRESULT0 = 1991 
-SI_HOUSINGLOADPERMISSIONSRESULT1 = 1992 
-SI_ITEMTAGCATEGORY1 = 1993 
-SI_ITEMTAGCATEGORY2 = 1994 
-SI_BATTLEGROUNDALLIANCE0 = 1995 
-SI_BATTLEGROUNDALLIANCE1 = 1996 
-SI_BATTLEGROUNDALLIANCE2 = 1997 
-SI_BATTLEGROUNDALLIANCE3 = 1998 
-SI_BATTLEGROUNDKILLTYPE0 = 1999 
-SI_BATTLEGROUNDKILLTYPE1 = 2000 
-SI_BATTLEGROUNDKILLTYPE2 = 2001 
-SI_BATTLEGROUNDKILLTYPE3 = 2002 
-SI_BATTLEGROUNDKILLTYPE4 = 2003 
-SI_FURNITURETHEMETYPE0 = 2004 
-SI_FURNITURETHEMETYPE1 = 2005 
-SI_FURNITURETHEMETYPE2 = 2006 
-SI_FURNITURETHEMETYPE3 = 2007 
-SI_FURNITURETHEMETYPE4 = 2008 
-SI_FURNITURETHEMETYPE5 = 2009 
-SI_FURNITURETHEMETYPE6 = 2010 
-SI_FURNITURETHEMETYPE7 = 2011 
-SI_FURNITURETHEMETYPE8 = 2012 
-SI_FURNITURETHEMETYPE9 = 2013 
-SI_FURNITURETHEMETYPE10 = 2014 
-SI_FURNITURETHEMETYPE11 = 2015 
-SI_CHARACTERCREATEOPTIONRESTRICTIONREASON1 = 2016 
-SI_CHARACTERCREATEOPTIONRESTRICTIONREASON2 = 2017 
-SI_PLAYEREMOTEPLAYFAILURE0 = 2018 
-SI_PLAYEREMOTEPLAYFAILURE1 = 2019 
-SI_MULTILOCALIZEDENUMTEST1 = 2020 
-SI_MULTILOCALIZEDENUMTEST2 = 2021 
-SI_MULTILOCALIZEDENUMTEST3 = 2022 
-SI_MULTILOCALIZEDENUMTESTDESCONE3 = 2023 
-SI_MULTILOCALIZEDENUMTESTDESCTWO3 = 2024 
-SI_MULTILOCALIZEDENUMTEST4 = 2025 
-SI_MULTILOCALIZEDENUMTESTDESCONE4 = 2026 
-SI_MULTILOCALIZEDENUMTESTDESCTWO4 = 2027 
-SI_NONSTR_ESOGAMEDATAENUMS_LAST_ENTRY = 2028 --Sync id for EsoGameDataEnums last entry
-SI_NONSTR_ESOMESSAGEENUMS_FIRST_ENTRY = 2029 --Sync id for EsoMessageEnums first entry
-SI_GROUPINVITERESPONSE0 = 2030 
-SI_GROUPINVITERESPONSE1 = 2031 
-SI_GROUPINVITERESPONSE2 = 2032 
-SI_GROUPINVITERESPONSE3 = 2033 
-SI_GROUPINVITERESPONSE4 = 2034 
-SI_GROUPINVITERESPONSE5 = 2035 
-SI_GROUPINVITERESPONSE6 = 2036 
-SI_GROUPINVITERESPONSE7 = 2037 
-SI_GROUPINVITERESPONSE8 = 2038 
-SI_GROUPINVITERESPONSE9 = 2039 
-SI_GROUPINVITERESPONSE10 = 2040 
-SI_GROUPINVITERESPONSE11 = 2041 
-SI_GROUPINVITERESPONSE12 = 2042 
-SI_GROUPINVITERESPONSE13 = 2043 
-SI_GROUPINVITERESPONSE14 = 2044 
-SI_GROUPINVITERESPONSE15 = 2045 
-SI_QUEUERESPONSE4 = 2046 
-SI_QUEUERESPONSE5 = 2047 
-SI_QUEUERESPONSE6 = 2048 
-SI_QUEUERESPONSE7 = 2049 
-SI_QUEUERESPONSE8 = 2050 
-SI_QUEUERESPONSE9 = 2051 
-SI_QUEUERESPONSE10 = 2052 
-SI_QUEUERESPONSE11 = 2053 
-SI_QUEUERESPONSE12 = 2054 
-SI_QUEUERESPONSE13 = 2055 
-SI_ACTIONRESULT2000 = 2056 
-SI_ACTIONRESULT2030 = 2057 
-SI_ACTIONRESULT2060 = 2058 
-SI_ACTIONRESULT2100 = 2059 
-SI_ACTIONRESULT2520 = 2060 
-SI_ACTIONRESULT2600 = 2061 
-SI_ACTIONRESULT2605 = 2062 
-SI_ACTIONRESULT2610 = 2063 
-SI_ACTIONRESULT2611 = 2064 
-SI_ACTIONRESULT2612 = 2065 
-SI_ACTIONRESULT2613 = 2066 
-SI_ACTIONRESULT2620 = 2067 
-SI_ACTIONRESULT2630 = 2068 
-SI_ACTIONRESULT2640 = 2069 
-SI_ACTIONRESULT2700 = 2070 
-SI_ACTIONRESULT2800 = 2071 
-SI_ACTIONRESULT2810 = 2072 
-SI_ACTIONRESULT2900 = 2073 
-SI_ACTIONRESULT2910 = 2074 
-SI_ACTIONRESULT3030 = 2075 
-SI_ACTIONRESULT3040 = 2076 
-SI_ACTIONRESULT3050 = 2077 
-SI_ACTIONRESULT3060 = 2078 
-SI_ACTIONRESULT3070 = 2079 
-SI_ACTIONRESULT3080 = 2080 
-SI_ACTIONRESULT3090 = 2081 
-SI_ACTIONRESULT3100 = 2082 
-SI_ACTIONRESULT3110 = 2083 
-SI_ACTIONRESULT3120 = 2084 
-SI_ACTIONRESULT3140 = 2085 
-SI_ACTIONRESULT3150 = 2086 
-SI_ACTIONRESULT3160 = 2087 
-SI_ACTIONRESULT3170 = 2088 
-SI_ACTIONRESULT3180 = 2089 
-SI_ACTIONRESULT3190 = 2090 
-SI_ACTIONRESULT3200 = 2091 
-SI_ACTIONRESULT3210 = 2092 
-SI_ACTIONRESULT3220 = 2093 
-SI_ACTIONRESULT3230 = 2094 
-SI_ACTIONRESULT3240 = 2095 
-SI_ACTIONRESULT3400 = 2096 
-SI_ACTIONRESULT3410 = 2097 
-SI_ACTIONRESULT3420 = 2098 
-SI_ACTIONRESULT3430 = 2099 
-SI_ACTIONRESULT3440 = 2100 
-SI_CHARACTERCREATEEDITERROR0 = 2101 
-SI_CHARACTERCREATEEDITERROR1 = 2102 
-SI_CHARACTERCREATEEDITERROR2 = 2103 
-SI_CHARACTERCREATEEDITERROR3 = 2104 
-SI_CHARACTERCREATEEDITERROR4 = 2105 
-SI_CHARACTERCREATEEDITERROR5 = 2106 
-SI_CHARACTERCREATEEDITERROR6 = 2107 
-SI_CHARACTERCREATEEDITERROR7 = 2108 
-SI_CHARACTERCREATEEDITERROR8 = 2109 
-SI_CHARACTERCREATEEDITERROR9 = 2110 
-SI_CHARACTERCREATEEDITERROR10 = 2111 
-SI_CHARACTERCREATEEDITERROR11 = 2112 
-SI_CHARACTERCREATEEDITERROR12 = 2113 
-SI_CHARACTERCREATEEDITERROR13 = 2114 
-SI_CHARACTERCREATEEDITERROR14 = 2115 
-SI_CHARACTERCREATEEDITERROR15 = 2116 
-SI_CHARACTERCREATEEDITERROR16 = 2117 
-SI_CHARACTERCREATEEDITERROR17 = 2118 
-SI_CHARACTERCREATEEDITERROR18 = 2119 
-SI_CHARACTERCREATEEDITERROR19 = 2120 
-SI_CHARACTERCREATEEDITERROR20 = 2121 
-SI_CHARACTERCREATEEDITERROR21 = 2122 
-SI_CHARACTERCREATEEDITERROR22 = 2123 
-SI_CHARACTERCREATEEDITERROR23 = 2124 
-SI_CHARACTERCREATEEDITERROR25 = 2125 
-SI_CHARACTERCREATEEDITERROR26 = 2126 
-SI_CHARACTERCREATEEDITERROR27 = 2127 
-SI_CHARACTERCREATEEDITERROR28 = 2128 
-SI_CHARACTERCREATEEDITERROR29 = 2129 
-SI_CHARACTERCREATEEDITERROR31 = 2130 
-SI_CHARACTERCREATEEDITERROR32 = 2131 
-SI_CHARACTERCREATEEDITERROR33 = 2132 
-SI_NAMINGERROR1 = 2133 
-SI_NAMINGERROR2 = 2134 
-SI_NAMINGERROR3 = 2135 
-SI_NAMINGERROR4 = 2136 
-SI_NAMINGERROR5 = 2137 
-SI_NAMINGERROR6 = 2138 
-SI_NAMINGERROR7 = 2139 
-SI_NAMINGERROR8 = 2140 
-SI_NAMINGERROR9 = 2141 
-SI_NAMINGERROR10 = 2142 
-SI_NAMINGERROR11 = 2143 
-SI_NAMINGERROR12 = 2144 
-SI_NAMINGERROR13 = 2145 
-SI_ACCOUNTNAMINGERROR1 = 2146 
-SI_ACCOUNTNAMINGERROR2 = 2147 
-SI_ACCOUNTNAMINGERROR3 = 2148 
-SI_ACCOUNTNAMINGERROR4 = 2149 
-SI_ACCOUNTNAMINGERROR5 = 2150 
-SI_ACCOUNTNAMINGERROR6 = 2151 
-SI_ACCOUNTNAMINGERROR7 = 2152 
-SI_GENDER0 = 2153 
-SI_GENDER1 = 2154 
-SI_GENDER2 = 2155 
-SI_SENDMAILRESULT1 = 2156 
-SI_SENDMAILRESULT2 = 2157 
-SI_SENDMAILRESULT3 = 2158 
-SI_SENDMAILRESULT4 = 2159 
-SI_SENDMAILRESULT5 = 2160 
-SI_SENDMAILRESULT6 = 2161 
-SI_SENDMAILRESULT7 = 2162 
-SI_SENDMAILRESULT8 = 2163 
-SI_SENDMAILRESULT9 = 2164 
-SI_SENDMAILRESULT10 = 2165 
-SI_SENDMAILRESULT11 = 2166 
-SI_SENDMAILRESULT12 = 2167 
-SI_SENDMAILRESULT13 = 2168 
-SI_SENDMAILRESULT14 = 2169 
-SI_SENDMAILRESULT15 = 2170 
-SI_SENDMAILRESULT16 = 2171 
-SI_LOOTITEMRESULT2 = 2172 
-SI_LOOTITEMRESULT3 = 2173 
-SI_LOOTITEMRESULT6 = 2174 
-SI_LOOTITEMRESULT8 = 2175 
-SI_LOOTITEMRESULT9 = 2176 
-SI_HOTBARRESULT1 = 2177 
-SI_HOTBARRESULT2 = 2178 
-SI_HOTBARRESULT3 = 2179 
-SI_HOTBARRESULT4 = 2180 
-SI_HOTBARRESULT5 = 2181 
-SI_HOTBARRESULT6 = 2182 
-SI_HOTBARRESULT7 = 2183 
-SI_HOTBARRESULT8 = 2184 
-SI_HOTBARRESULT9 = 2185 
-SI_ABILITYPROGRESSIONRESULT1 = 2186 
-SI_ABILITYPROGRESSIONRESULT2 = 2187 
-SI_ABILITYPROGRESSIONRESULT3 = 2188 
-SI_ABILITYPROGRESSIONRESULT4 = 2189 
-SI_ABILITYPROGRESSIONRESULT5 = 2190 
-SI_ABILITYPROGRESSIONRESULT6 = 2191 
-SI_ABILITYPROGRESSIONRESULT7 = 2192 
-SI_ABILITYPROGRESSIONRESULT8 = 2193 
-SI_ABILITYPROGRESSIONRESULT9 = 2194 
-SI_ABILITYPROGRESSIONRESULT10 = 2195 
-SI_RESPECRESULT0 = 2196 
-SI_RESPECRESULT1 = 2197 
-SI_RESPECRESULT2 = 2198 
-SI_RESPECRESULT3 = 2199 
-SI_FASTTRAVELKEEPRESULT1 = 2200 
-SI_FASTTRAVELKEEPRESULT2 = 2201 
-SI_FASTTRAVELKEEPRESULT3 = 2202 
-SI_FASTTRAVELKEEPRESULT4 = 2203 
-SI_FASTTRAVELKEEPRESULT5 = 2204 
-SI_FASTTRAVELKEEPRESULT6 = 2205 
-SI_FASTTRAVELKEEPRESULT7 = 2206 
-SI_FASTTRAVELKEEPRESULT8 = 2207 
-SI_FASTTRAVELKEEPRESULT9 = 2208 
-SI_FASTTRAVELKEEPRESULT10 = 2209 
-SI_FASTTRAVELKEEPRESULT11 = 2210 
-SI_FASTTRAVELKEEPRESULT12 = 2211 
-SI_FASTTRAVELKEEPRESULT14 = 2212 
-SI_UNASSIGNCAMPAIGNRESULT1 = 2213 
-SI_UNASSIGNCAMPAIGNRESULT2 = 2214 
-SI_UNASSIGNCAMPAIGNRESULT3 = 2215 
-SI_UNASSIGNCAMPAIGNRESULT4 = 2216 
-SI_UNASSIGNCAMPAIGNRESULT5 = 2217 
-SI_UNASSIGNCAMPAIGNRESULT6 = 2218 
-SI_BUGCATEGORY0 = 2219 
-SI_BUGCATEGORY1 = 2220 
-SI_BUGCATEGORY2 = 2221 
-SI_BUGCATEGORY3 = 2222 
-SI_BUGCATEGORY4 = 2223 
-SI_BUGCATEGORY5 = 2224 
-SI_BUGCATEGORY6 = 2225 
-SI_BUGCATEGORY7 = 2226 
-SI_BUGCATEGORY8 = 2227 
-SI_BUGCATEGORY9 = 2228 
-SI_BUGCATEGORY10 = 2229 
-SI_STOREFAILURE3 = 2230 
-SI_STOREFAILURE4 = 2231 
-SI_STOREFAILURE5 = 2232 
-SI_STOREFAILURE6 = 2233 
-SI_STOREFAILURE7 = 2234 
-SI_STOREFAILURE8 = 2235 
-SI_STOREFAILURE9 = 2236 
-SI_STOREFAILURE12 = 2237 
-SI_STOREFAILURE13 = 2238 
-SI_STOREFAILURE14 = 2239 
-SI_STOREFAILURE15 = 2240 
-SI_STOREFAILURE17 = 2241 
-SI_STOREFAILURE18 = 2242 
-SI_STOREFAILURE19 = 2243 
-SI_STOREFAILURE20 = 2244 
-SI_STOREFAILURE22 = 2245 
-SI_STOREFAILURE23 = 2246 
-SI_STOREFAILURE24 = 2247 
-SI_STOREFAILURE25 = 2248 
-SI_RESURRECTRESULT0 = 2249 
-SI_RESURRECTRESULT1 = 2250 
-SI_RESURRECTRESULT2 = 2251 
-SI_RESURRECTRESULT3 = 2252 
-SI_RESURRECTRESULT4 = 2253 
-SI_SOULGEMITEMCHARGINGREASON0 = 2254 
-SI_SOULGEMITEMCHARGINGREASON1 = 2255 
-SI_ITEMREPAIRREASON0 = 2256 
-SI_ITEMREPAIRREASON1 = 2257 
-SI_ITEMREPAIRREASON2 = 2258 
-SI_ITEMLAUNDERRESULT1 = 2259 
-SI_ITEMLAUNDERRESULT2 = 2260 
-SI_ITEMLAUNDERRESULT3 = 2261 
-SI_ITEMLAUNDERRESULT4 = 2262 
-SI_ITEMLAUNDERRESULT5 = 2263 
-SI_ITEMLAUNDERRESULT6 = 2264 
-SI_ITEMLAUNDERRESULT7 = 2265 
-SI_MOUNTFAILUREREASON0 = 2266 
-SI_MOUNTFAILUREREASON1 = 2267 
-SI_MOUNTFAILUREREASON2 = 2268 
-SI_MOUNTFAILUREREASON3 = 2269 
-SI_MOUNTFAILUREREASON4 = 2270 
-SI_PLEDGEOFMARARESULT0 = 2271 
-SI_PLEDGEOFMARARESULT1 = 2272 
-SI_PLEDGEOFMARARESULT2 = 2273 
-SI_PLEDGEOFMARARESULT3 = 2274 
-SI_PLEDGEOFMARARESULT4 = 2275 
-SI_PLEDGEOFMARARESULT5 = 2276 
-SI_PLEDGEOFMARARESULT6 = 2277 
-SI_PLEDGEOFMARARESULT7 = 2278 
-SI_DUELINVITEFAILREASON1 = 2279 
-SI_DUELINVITEFAILREASON2 = 2280 
-SI_DUELINVITEFAILREASON3 = 2281 
-SI_DUELINVITEFAILREASON4 = 2282 
-SI_DUELINVITEFAILREASON5 = 2283 
-SI_DUELINVITEFAILREASON6 = 2284 
-SI_DUELINVITEFAILREASON7 = 2285 
-SI_DUELINVITEFAILREASON8 = 2286 
-SI_DUELINVITEFAILREASON9 = 2287 
-SI_DUELINVITEFAILREASON10 = 2288 
-SI_DUELINVITEFAILREASON11 = 2289 
-SI_DUELINVITEFAILREASON12 = 2290 
-SI_DUELINVITEFAILREASON13 = 2291 
-SI_DUELINVITEFAILREASON14 = 2292 
-SI_DUELINVITEFAILREASON15 = 2293 
-SI_DUELINVITEFAILREASON16 = 2294 
-SI_DUELINVITEFAILREASON17 = 2295 
-SI_DUELINVITEFAILREASON18 = 2296 
-SI_DUELINVITEFAILREASON19 = 2297 
-SI_DUELINVITEFAILREASON20 = 2298 
-SI_DUELINVITEFAILREASON21 = 2299 
-SI_DUELINVITEFAILREASON22 = 2300 
-SI_TRADEACTIONRESULT0 = 2301 
-SI_TRADEACTIONRESULT1 = 2302 
-SI_TRADEACTIONRESULT2 = 2303 
-SI_TRADEACTIONRESULT3 = 2304 
-SI_TRADEACTIONRESULT4 = 2305 
-SI_TRADEACTIONRESULT5 = 2306 
-SI_TRADEACTIONRESULT6 = 2307 
-SI_TRADEACTIONRESULT8 = 2308 
-SI_TRADEACTIONRESULT9 = 2309 
-SI_TRADEACTIONRESULT12 = 2310 
-SI_TRADEACTIONRESULT13 = 2311 
-SI_TRADEACTIONRESULT14 = 2312 
-SI_TRADEACTIONRESULT41 = 2313 
-SI_TRADEACTIONRESULT42 = 2314 
-SI_TRADEACTIONRESULT43 = 2315 
-SI_TRADEACTIONRESULT44 = 2316 
-SI_TRADEACTIONRESULT45 = 2317 
-SI_TRADEACTIONRESULT46 = 2318 
-SI_TRADEACTIONRESULT62 = 2319 
-SI_TRADEACTIONRESULT63 = 2320 
-SI_TRADEACTIONRESULT64 = 2321 
-SI_TRADEACTIONRESULT65 = 2322 
-SI_TRADEACTIONRESULT66 = 2323 
-SI_TRADEACTIONRESULT80 = 2324 
-SI_TRADESKILLRESULT9 = 2325 
-SI_TRADESKILLRESULT10 = 2326 
-SI_TRADESKILLRESULT11 = 2327 
-SI_TRADESKILLRESULT12 = 2328 
-SI_TRADESKILLRESULT13 = 2329 
-SI_TRADESKILLRESULT14 = 2330 
-SI_TRADESKILLRESULT16 = 2331 
-SI_TRADESKILLRESULT17 = 2332 
-SI_TRADESKILLRESULT18 = 2333 
-SI_TRADESKILLRESULT19 = 2334 
-SI_TRADESKILLRESULT20 = 2335 
-SI_TRADESKILLRESULT21 = 2336 
-SI_TRADESKILLRESULT30 = 2337 
-SI_TRADESKILLRESULT31 = 2338 
-SI_TRADESKILLRESULT32 = 2339 
-SI_TRADESKILLRESULT33 = 2340 
-SI_TRADESKILLRESULT34 = 2341 
-SI_TRADESKILLRESULT35 = 2342 
-SI_TRADESKILLRESULT36 = 2343 
-SI_TRADESKILLRESULT50 = 2344 
-SI_TRADESKILLRESULT51 = 2345 
-SI_TRADESKILLRESULT52 = 2346 
-SI_TRADESKILLRESULT53 = 2347 
-SI_TRADESKILLRESULT54 = 2348 
-SI_TRADESKILLRESULT55 = 2349 
-SI_TRADESKILLRESULT56 = 2350 
-SI_TRADESKILLRESULT57 = 2351 
-SI_TRADESKILLRESULT58 = 2352 
-SI_TRADESKILLRESULT70 = 2353 
-SI_TRADESKILLRESULT71 = 2354 
-SI_TRADESKILLRESULT72 = 2355 
-SI_TRADESKILLRESULT73 = 2356 
-SI_TRADESKILLRESULT74 = 2357 
-SI_TRADESKILLRESULT76 = 2358 
-SI_TRADESKILLRESULT127 = 2359 
-SI_GLOBALERRORCODE0 = 2360 
-SI_GLOBALERRORCODE100 = 2361 
-SI_GLOBALERRORCODE101 = 2362 
-SI_GLOBALERRORCODE102 = 2363 
-SI_GLOBALERRORCODE103 = 2364 
-SI_GLOBALERRORCODE104 = 2365 
-SI_GLOBALERRORCODE105 = 2366 
-SI_GLOBALERRORCODE106 = 2367 
-SI_GLOBALERRORCODE107 = 2368 
-SI_GLOBALERRORCODE108 = 2369 
-SI_GLOBALERRORCODE109 = 2370 
-SI_GLOBALERRORCODE110 = 2371 
-SI_GLOBALERRORCODE200 = 2372 
-SI_GLOBALERRORCODE201 = 2373 
-SI_GLOBALERRORCODE202 = 2374 
-SI_GLOBALERRORCODE203 = 2375 
-SI_GLOBALERRORCODE204 = 2376 
-SI_GLOBALERRORCODE206 = 2377 
-SI_GLOBALERRORCODE207 = 2378 
-SI_GLOBALERRORCODE301 = 2379 
-SI_GLOBALERRORCODE302 = 2380 
-SI_GLOBALERRORCODE303 = 2381 
-SI_GLOBALERRORCODE304 = 2382 
-SI_GLOBALERRORCODE305 = 2383 
-SI_GLOBALERRORCODE306 = 2384 
-SI_GLOBALERRORCODE307 = 2385 
-SI_GLOBALERRORCODE308 = 2386 
-SI_GLOBALERRORCODE309 = 2387 
-SI_GLOBALERRORCODE310 = 2388 
-SI_GLOBALERRORCODE311 = 2389 
-SI_GLOBALERRORCODE312 = 2390 
-SI_GLOBALERRORCODE313 = 2391 
-SI_GLOBALERRORCODE314 = 2392 
-SI_GLOBALERRORCODE315 = 2393 
-SI_GLOBALERRORCODE316 = 2394 
-SI_GLOBALERRORCODE317 = 2395 
-SI_GLOBALERRORCODE318 = 2396 
-SI_GLOBALERRORCODE319 = 2397 
-SI_GLOBALERRORCODE320 = 2398 
-SI_GLOBALERRORCODE321 = 2399 
-SI_GLOBALERRORCODE322 = 2400 
-SI_GLOBALERRORCODE323 = 2401 
-SI_GLOBALERRORCODE324 = 2402 
-SI_GLOBALERRORCODE325 = 2403 
-SI_GLOBALERRORCODE326 = 2404 
-SI_GLOBALERRORCODE327 = 2405 
-SI_GLOBALERRORCODE328 = 2406 
-SI_GLOBALERRORCODE329 = 2407 
-SI_GLOBALERRORCODE330 = 2408 
-SI_GLOBALERRORCODE331 = 2409 
-SI_GLOBALERRORCODE332 = 2410 
-SI_GLOBALERRORCODE333 = 2411 
-SI_GLOBALERRORCODE334 = 2412 
-SI_GLOBALERRORCODE335 = 2413 
-SI_GLOBALERRORCODE400 = 2414 
-SI_ACCOUNTCREATELINKERROR2 = 2415 
-SI_ACCOUNTCREATELINKERROR3 = 2416 
-SI_ACCOUNTCREATELINKERROR6000 = 2417 
-SI_ACCOUNTCREATELINKERROR12002 = 2418 
-SI_ACCOUNTCREATELINKERROR12004 = 2419 
-SI_ACCOUNTCREATELINKERROR12037 = 2420 
-SI_ACCOUNTCREATELINKERROR12038 = 2421 
-SI_ACCOUNTCREATELINKERROR12039 = 2422 
-SI_ACCOUNTCREATELINKERROR12100 = 2423 
-SI_ACCOUNTCREATELINKERROR12101 = 2424 
-SI_ACCOUNTCREATELINKERROR12102 = 2425 
-SI_ACCOUNTCREATELINKERROR12104 = 2426 
-SI_LOGINAUTHERROR2 = 2427 
-SI_LOGINAUTHERROR3 = 2428 
-SI_LOGINAUTHERROR4 = 2429 
-SI_LOGINAUTHERROR5 = 2430 
-SI_LOGINAUTHERROR3000 = 2431 
-SI_LOGINAUTHERROR8004 = 2432 
-SI_LOGINAUTHERROR8005 = 2433 
-SI_LOGINAUTHERROR8007 = 2434 
-SI_LOGINAUTHERROR8008 = 2435 
-SI_LOGINAUTHERROR8009 = 2436 
-SI_LOGINAUTHERROR8010 = 2437 
-SI_LOGINAUTHERROR8011 = 2438 
-SI_LOGINAUTHERROR8012 = 2439 
-SI_LOGINAUTHERROR8013 = 2440 
-SI_LOGINAUTHERROR13000 = 2441 
-SI_LOGINAUTHERROR13002 = 2442 
-SI_LOGINAUTHERROR13003 = 2443 
-SI_LOGINAUTHERROR13004 = 2444 
-SI_LOGINAUTHERROR14000 = 2445 
-SI_LOGINAUTHERROR14002 = 2446 
-SI_LOGINAUTHERROR5000 = 2447 
-SI_LOGINAUTHERROR17001 = 2448 
-SI_LOGOUTERROR2 = 2449 
-SI_LOGOUTERROR3 = 2450 
-SI_LOGOUTERROR4 = 2451 
-SI_LOGOUTERROR5 = 2452 
-SI_LOGOUTERROR6 = 2453 
-SI_LOGOUTERROR7 = 2454 
-SI_LOGOUTERROR8 = 2455 
-SI_PROFILELOGINERROR2 = 2456 
-SI_PROFILELOGINERROR3 = 2457 
-SI_PROFILELOGINERROR4 = 2458 
-SI_PROFILELOGINERROR5 = 2459 
-SI_PROFILELOGINERROR6 = 2460 
-SI_PROFILELOGINERROR7 = 2461 
-SI_PROFILELOGINERROR8 = 2462 
-SI_PROFILELOGINERROR9 = 2463 
-SI_PROFILELOGINERROR10 = 2464 
-SI_PROFILELOGINERROR11 = 2465 
-SI_PROFILELOGINERROR12 = 2466 
-SI_TRADESKILLADVANCEMODE0 = 2467 
-SI_TRADESKILLADVANCEMODE1 = 2468 
-SI_TRADESKILLADVANCEMODE2 = 2469 
-SI_JUMPRESULT0 = 2470 
-SI_JUMPRESULT1 = 2471 
-SI_JUMPRESULT2 = 2472 
-SI_JUMPRESULT3 = 2473 
-SI_JUMPRESULT4 = 2474 
-SI_JUMPRESULT5 = 2475 
-SI_JUMPRESULT6 = 2476 
-SI_JUMPRESULT7 = 2477 
-SI_JUMPRESULT8 = 2478 
-SI_JUMPRESULT9 = 2479 
-SI_JUMPRESULT10 = 2480 
-SI_JUMPRESULT11 = 2481 
-SI_JUMPRESULT12 = 2482 
-SI_JUMPRESULT13 = 2483 
-SI_JUMPRESULT14 = 2484 
-SI_JUMPRESULT15 = 2485 
-SI_JUMPRESULT16 = 2486 
-SI_JUMPRESULT17 = 2487 
-SI_JUMPRESULT18 = 2488 
-SI_JUMPRESULT19 = 2489 
-SI_JUMPRESULT20 = 2490 
-SI_JUMPRESULT21 = 2491 
-SI_JUMPRESULT22 = 2492 
-SI_SOCIALACTIONRESULT1 = 2493 
-SI_SOCIALACTIONRESULT2 = 2494 
-SI_SOCIALACTIONRESULT3 = 2495 
-SI_SOCIALACTIONRESULT4 = 2496 
-SI_SOCIALACTIONRESULT5 = 2497 
-SI_SOCIALACTIONRESULT6 = 2498 
-SI_SOCIALACTIONRESULT7 = 2499 
-SI_SOCIALACTIONRESULT8 = 2500 
-SI_SOCIALACTIONRESULT9 = 2501 
-SI_SOCIALACTIONRESULT10 = 2502 
-SI_SOCIALACTIONRESULT11 = 2503 
-SI_SOCIALACTIONRESULT12 = 2504 
-SI_SOCIALACTIONRESULT13 = 2505 
-SI_SOCIALACTIONRESULT14 = 2506 
-SI_SOCIALACTIONRESULT15 = 2507 
-SI_SOCIALACTIONRESULT16 = 2508 
-SI_SOCIALACTIONRESULT17 = 2509 
-SI_SOCIALACTIONRESULT18 = 2510 
-SI_SOCIALACTIONRESULT19 = 2511 
-SI_SOCIALACTIONRESULT20 = 2512 
-SI_SOCIALACTIONRESULT21 = 2513 
-SI_SOCIALACTIONRESULT22 = 2514 
-SI_SOCIALACTIONRESULT23 = 2515 
-SI_SOCIALACTIONRESULT24 = 2516 
-SI_SOCIALACTIONRESULT25 = 2517 
-SI_SOCIALACTIONRESULT26 = 2518 
-SI_SOCIALACTIONRESULT27 = 2519 
-SI_SOCIALACTIONRESULT28 = 2520 
-SI_SOCIALACTIONRESULT29 = 2521 
-SI_SOCIALACTIONRESULT30 = 2522 
-SI_SOCIALACTIONRESULT31 = 2523 
-SI_SOCIALACTIONRESULT32 = 2524 
-SI_SOCIALACTIONRESULT33 = 2525 
-SI_SOCIALACTIONRESULT34 = 2526 
-SI_SOCIALACTIONRESULT35 = 2527 
-SI_SOCIALACTIONRESULT36 = 2528 
-SI_SOCIALACTIONRESULT37 = 2529 
-SI_SOCIALACTIONRESULT38 = 2530 
-SI_SOCIALACTIONRESULT39 = 2531 
-SI_SOCIALACTIONRESULT40 = 2532 
-SI_SOCIALACTIONRESULT41 = 2533 
-SI_SOCIALACTIONRESULT42 = 2534 
-SI_SOCIALACTIONRESULT43 = 2535 
-SI_SOCIALACTIONRESULT44 = 2536 
-SI_SOCIALACTIONRESULT45 = 2537 
-SI_SOCIALACTIONRESULT46 = 2538 
-SI_SOCIALACTIONRESULT47 = 2539 
-SI_SOCIALACTIONRESULT48 = 2540 
-SI_SOCIALACTIONRESULT49 = 2541 
-SI_SOCIALACTIONRESULT50 = 2542 
-SI_SOCIALACTIONRESULT51 = 2543 
-SI_SOCIALACTIONRESULT52 = 2544 
-SI_SOCIALACTIONRESULT53 = 2545 
-SI_SOCIALACTIONRESULT54 = 2546 
-SI_SOCIALACTIONRESULT55 = 2547 
-SI_SOCIALACTIONRESULT56 = 2548 
-SI_SOCIALACTIONRESULT57 = 2549 
-SI_SOCIALACTIONRESULT58 = 2550 
-SI_SOCIALACTIONRESULT59 = 2551 
-SI_SOCIALACTIONRESULT60 = 2552 
-SI_SOCIALACTIONRESULT61 = 2553 
-SI_SOCIALACTIONRESULT62 = 2554 
-SI_SOCIALACTIONRESULT63 = 2555 
-SI_SOCIALACTIONRESULT64 = 2556 
-SI_SOCIALACTIONRESULT65 = 2557 
-SI_SOCIALACTIONRESULT66 = 2558 
-SI_SOCIALACTIONRESULT67 = 2559 
-SI_SOCIALACTIONRESULT68 = 2560 
-SI_SOCIALACTIONRESULT69 = 2561 
-SI_SOCIALACTIONRESULT70 = 2562 
-SI_SOCIALACTIONRESULT71 = 2563 
-SI_SOCIALACTIONRESULT72 = 2564 
-SI_SOCIALACTIONRESULT73 = 2565 
-SI_SOCIALACTIONRESULT74 = 2566 
-SI_SOCIALACTIONRESULT75 = 2567 
-SI_SOCIALACTIONRESULT76 = 2568 
-SI_SOCIALACTIONRESULT77 = 2569 
-SI_SOCIALACTIONRESULT78 = 2570 
-SI_SOCIALACTIONRESULT79 = 2571 
-SI_SOCIALACTIONRESULT80 = 2572 
-SI_SOCIALACTIONRESULT81 = 2573 
-SI_SOCIALACTIONRESULT82 = 2574 
-SI_SOCIALACTIONRESULT83 = 2575 
-SI_SOCIALACTIONRESULT84 = 2576 
-SI_SOCIALACTIONRESULT85 = 2577 
-SI_SOCIALACTIONRESULT86 = 2578 
-SI_SOCIALACTIONRESULT87 = 2579 
-SI_SOCIALACTIONRESULT88 = 2580 
-SI_GUILDRANKS0 = 2581 
-SI_GUILDRANKS1 = 2582 
-SI_GUILDRANKS2 = 2583 
-SI_GUILDRANKS254 = 2584 
-SI_GUILDRANKS255 = 2585 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE1 = 2586 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE2 = 2587 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE3 = 2588 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE4 = 2589 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE5 = 2590 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE6 = 2591 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE7 = 2592 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE8 = 2593 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE9 = 2594 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE10 = 2595 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE11 = 2596 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE12 = 2597 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE13 = 2598 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE14 = 2599 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE15 = 2600 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE16 = 2601 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE17 = 2602 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE18 = 2603 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE19 = 2604 
-SI_QUEUEFORCAMPAIGNRESPONSETYPE20 = 2605 
-SI_LEAVECAMPAIGNQUEUERESPONSETYPE1 = 2606 
-SI_LEAVECAMPAIGNQUEUERESPONSETYPE2 = 2607 
-SI_LEAVECAMPAIGNQUEUERESPONSETYPE3 = 2608 
-SI_LEAVECAMPAIGNQUEUERESPONSETYPE4 = 2609 
-SI_LEAVECAMPAIGNQUEUERESPONSETYPE5 = 2610 
-SI_CAMPAIGNREASSIGNMENTERRORREASON5 = 2611 
-SI_CAMPAIGNREASSIGNMENTERRORREASON13 = 2612 
-SI_CAMPAIGNREASSIGNMENTERRORREASON14 = 2613 
-SI_CAMPAIGNREASSIGNMENTERRORREASON15 = 2614 
-SI_GUILDBANKRESULT2 = 2615 
-SI_GUILDBANKRESULT3 = 2616 
-SI_GUILDBANKRESULT4 = 2617 
-SI_GUILDBANKRESULT5 = 2618 
-SI_GUILDBANKRESULT6 = 2619 
-SI_GUILDBANKRESULT7 = 2620 
-SI_GUILDBANKRESULT8 = 2621 
-SI_GUILDBANKRESULT9 = 2622 
-SI_GUILDBANKRESULT10 = 2623 
-SI_GUILDBANKRESULT11 = 2624 
-SI_GUILDBANKRESULT13 = 2625 
-SI_GUILDBANKRESULT14 = 2626 
-SI_GUILDBANKRESULT15 = 2627 
-SI_GUILDBANKRESULT16 = 2628 
-SI_GUILDBANKRESULT17 = 2629 
-SI_GUILDBANKRESULT18 = 2630 
-SI_GUILDKIOSKRESULT3 = 2631 
-SI_GUILDKIOSKRESULT4 = 2632 
-SI_GUILDKIOSKRESULT5 = 2633 
-SI_GUILDKIOSKRESULT6 = 2634 
-SI_GUILDKIOSKRESULT7 = 2635 
-SI_GUILDKIOSKRESULT8 = 2636 
-SI_GUILDKIOSKRESULT9 = 2637 
-SI_GUILDKIOSKRESULT10 = 2638 
-SI_GUILDKIOSKRESULT11 = 2639 
-SI_GUILDKIOSKRESULT13 = 2640 
-SI_GUILDKIOSKRESULT14 = 2641 
-SI_TRADINGHOUSERESULT1 = 2642 
-SI_TRADINGHOUSERESULT2 = 2643 
-SI_TRADINGHOUSERESULT3 = 2644 
-SI_TRADINGHOUSERESULT4 = 2645 
-SI_TRADINGHOUSERESULT5 = 2646 
-SI_TRADINGHOUSERESULT6 = 2647 
-SI_TRADINGHOUSERESULT7 = 2648 
-SI_TRADINGHOUSERESULT8 = 2649 
-SI_TRADINGHOUSERESULT9 = 2650 
-SI_TRADINGHOUSERESULT10 = 2651 
-SI_TRADINGHOUSERESULT11 = 2652 
-SI_TRADINGHOUSERESULT12 = 2653 
-SI_TRADINGHOUSERESULT13 = 2654 
-SI_TRADINGHOUSERESULT14 = 2655 
-SI_TRADINGHOUSERESULT15 = 2656 
-SI_TRADINGHOUSERESULT16 = 2657 
-SI_TRADINGHOUSERESULT17 = 2658 
-SI_TRADINGHOUSERESULT18 = 2659 
-SI_TRADINGHOUSERESULT19 = 2660 
-SI_TRADINGHOUSERESULT20 = 2661 
-SI_TRADINGHOUSERESULT21 = 2662 
-SI_TRADINGHOUSERESULT22 = 2663 
-SI_TRADINGHOUSERESULT23 = 2664 
-SI_TRADINGHOUSERESULT24 = 2665 
-SI_TRADINGHOUSERESULT25 = 2666 
-SI_CLAIMKEEPRESULTTYPE2 = 2667 
-SI_CLAIMKEEPRESULTTYPE3 = 2668 
-SI_CLAIMKEEPRESULTTYPE4 = 2669 
-SI_CLAIMKEEPRESULTTYPE5 = 2670 
-SI_CLAIMKEEPRESULTTYPE6 = 2671 
-SI_CLAIMKEEPRESULTTYPE7 = 2672 
-SI_CLAIMKEEPRESULTTYPE8 = 2673 
-SI_CLAIMKEEPRESULTTYPE9 = 2674 
-SI_CLAIMKEEPRESULTTYPE10 = 2675 
-SI_CLAIMKEEPRESULTTYPE11 = 2676 
-SI_CLAIMKEEPRESULTTYPE12 = 2677 
-SI_CLAIMKEEPRESULTTYPE13 = 2678 
-SI_CLAIMKEEPRESULTTYPE14 = 2679 
-SI_CLAIMKEEPRESULTTYPE15 = 2680 
-SI_CLAIMKEEPRESULTTYPE16 = 2681 
-SI_RELEASEKEEPRESULTTYPE2 = 2682 
-SI_RELEASEKEEPRESULTTYPE3 = 2683 
-SI_RELEASEKEEPRESULTTYPE4 = 2684 
-SI_RELEASEKEEPRESULTTYPE5 = 2685 
-SI_RELEASEKEEPRESULTTYPE6 = 2686 
-SI_RELEASEKEEPRESULTTYPE7 = 2687 
-SI_RELEASEKEEPRESULTTYPE8 = 2688 
-SI_RELEASEKEEPRESULTTYPE9 = 2689 
-SI_RELEASEKEEPRESULTTYPE10 = 2690 
-SI_TRIALACCOUNTRESTRICTIONTYPE1 = 2691 
-SI_TRIALACCOUNTRESTRICTIONTYPE2 = 2692 
-SI_TRIALACCOUNTRESTRICTIONTYPE3 = 2693 
-SI_TRIALACCOUNTRESTRICTIONTYPE4 = 2694 
-SI_HOUSINGREQUESTRESULT1 = 2695 
-SI_HOUSINGREQUESTRESULT2 = 2696 
-SI_HOUSINGREQUESTRESULT3 = 2697 
-SI_HOUSINGREQUESTRESULT4 = 2698 
-SI_HOUSINGREQUESTRESULT5 = 2699 
-SI_HOUSINGREQUESTRESULT6 = 2700 
-SI_HOUSINGREQUESTRESULT8 = 2701 
-SI_HOUSINGREQUESTRESULT9 = 2702 
-SI_HOUSINGREQUESTRESULT10 = 2703 
-SI_HOUSINGREQUESTRESULT11 = 2704 
-SI_HOUSINGREQUESTRESULT14 = 2705 
-SI_HOUSINGREQUESTRESULT15 = 2706 
-SI_HOUSINGREQUESTRESULT18 = 2707 
-SI_HOUSINGREQUESTRESULT20 = 2708 
-SI_HOUSINGREQUESTRESULT23 = 2709 
-SI_HOUSINGREQUESTRESULT24 = 2710 
-SI_HOUSINGREQUESTRESULT25 = 2711 
-SI_HOUSINGREQUESTRESULT26 = 2712 
-SI_HOUSINGREQUESTRESULT27 = 2713 
-SI_HOUSINGREQUESTRESULT28 = 2714 
-SI_HOUSINGREQUESTRESULT29 = 2715 
-SI_HOUSINGREQUESTRESULT31 = 2716 
-SI_NONSTR_ESOMESSAGEENUMS_LAST_ENTRY = 2717 --Sync id for EsoMessageEnums last entry
-SI_NONSTR_ZOGUIENUMS_FIRST_ENTRY = 2718 --Sync id for ZoGuiEnums first entry
-SI_MAPDISPLAYFILTER1 = 2719 
-SI_MAPDISPLAYFILTER2 = 2720 
-SI_MAPDISPLAYFILTER3 = 2721 
-SI_MAPDISPLAYFILTER5 = 2722 
-SI_ADDONLOADSTATE0 = 2723 
-SI_ADDONLOADSTATE1 = 2724 
-SI_ADDONLOADSTATE2 = 2725 
-SI_ADDONLOADSTATE3 = 2726 
-SI_ADDONLOADSTATE4 = 2727 
-SI_ADDONLOADSTATE5 = 2728 
-SI_ADDONLOADSTATE6 = 2729 
-SI_KEYCODE0 = 2730 
-SI_KEYCODE1 = 2731 
-SI_KEYCODE2 = 2732 
-SI_KEYCODE3 = 2733 
-SI_KEYCODE4 = 2734 
-SI_KEYCODE5 = 2735 
-SI_KEYCODE6 = 2736 
-SI_KEYCODE7 = 2737 
-SI_KEYCODE8 = 2738 
-SI_KEYCODE9 = 2739 
-SI_KEYCODE10 = 2740 
-SI_KEYCODE11 = 2741 
-SI_KEYCODE12 = 2742 
-SI_KEYCODE13 = 2743 
-SI_KEYCODE14 = 2744 
-SI_KEYCODE15 = 2745 
-SI_KEYCODE16 = 2746 
-SI_KEYCODE17 = 2747 
-SI_KEYCODE18 = 2748 
-SI_KEYCODE19 = 2749 
-SI_KEYCODE20 = 2750 
-SI_KEYCODE21 = 2751 
-SI_KEYCODE22 = 2752 
-SI_KEYCODE23 = 2753 
-SI_KEYCODE24 = 2754 
-SI_KEYCODE25 = 2755 
-SI_KEYCODE26 = 2756 
-SI_KEYCODE27 = 2757 
-SI_KEYCODE28 = 2758 
-SI_KEYCODE29 = 2759 
-SI_KEYCODE30 = 2760 
-SI_KEYCODE31 = 2761 
-SI_KEYCODE32 = 2762 
-SI_KEYCODE33 = 2763 
-SI_KEYCODE34 = 2764 
-SI_KEYCODE35 = 2765 
-SI_KEYCODE36 = 2766 
-SI_KEYCODE37 = 2767 
-SI_KEYCODE38 = 2768 
-SI_KEYCODE39 = 2769 
-SI_KEYCODE40 = 2770 
-SI_KEYCODE41 = 2771 
-SI_KEYCODE42 = 2772 
-SI_KEYCODE43 = 2773 
-SI_KEYCODE44 = 2774 
-SI_KEYCODE45 = 2775 
-SI_KEYCODE46 = 2776 
-SI_KEYCODE47 = 2777 
-SI_KEYCODE48 = 2778 
-SI_KEYCODE49 = 2779 
-SI_KEYCODE50 = 2780 
-SI_KEYCODE51 = 2781 
-SI_KEYCODE52 = 2782 
-SI_KEYCODE53 = 2783 
-SI_KEYCODE54 = 2784 
-SI_KEYCODE55 = 2785 
-SI_KEYCODE56 = 2786 
-SI_KEYCODE57 = 2787 
-SI_KEYCODE58 = 2788 
-SI_KEYCODE59 = 2789 
-SI_KEYCODE60 = 2790 
-SI_KEYCODE61 = 2791 
-SI_KEYCODE62 = 2792 
-SI_KEYCODE63 = 2793 
-SI_KEYCODE64 = 2794 
-SI_KEYCODE65 = 2795 
-SI_KEYCODE66 = 2796 
-SI_KEYCODE67 = 2797 
-SI_KEYCODE68 = 2798 
-SI_KEYCODE69 = 2799 
-SI_KEYCODE70 = 2800 
-SI_KEYCODE71 = 2801 
-SI_KEYCODE72 = 2802 
-SI_KEYCODE73 = 2803 
-SI_KEYCODE74 = 2804 
-SI_KEYCODE75 = 2805 
-SI_KEYCODE76 = 2806 
-SI_KEYCODE77 = 2807 
-SI_KEYCODE78 = 2808 
-SI_KEYCODE79 = 2809 
-SI_KEYCODE80 = 2810 
-SI_KEYCODE81 = 2811 
-SI_KEYCODE82 = 2812 
-SI_KEYCODE83 = 2813 
-SI_KEYCODE84 = 2814 
-SI_KEYCODE85 = 2815 
-SI_KEYCODE86 = 2816 
-SI_KEYCODE87 = 2817 
-SI_KEYCODE88 = 2818 
-SI_KEYCODE89 = 2819 
-SI_KEYCODE90 = 2820 
-SI_KEYCODE91 = 2821 
-SI_KEYCODE92 = 2822 
-SI_KEYCODE93 = 2823 
-SI_KEYCODE94 = 2824 
-SI_KEYCODE95 = 2825 
-SI_KEYCODE96 = 2826 
-SI_KEYCODE97 = 2827 
-SI_KEYCODE98 = 2828 
-SI_KEYCODE99 = 2829 
-SI_KEYCODE100 = 2830 
-SI_KEYCODE101 = 2831 
-SI_KEYCODE102 = 2832 
-SI_KEYCODE103 = 2833 
-SI_KEYCODE104 = 2834 
-SI_KEYCODE105 = 2835 
-SI_KEYCODE106 = 2836 
-SI_KEYCODE107 = 2837 
-SI_KEYCODE108 = 2838 
-SI_KEYCODE109 = 2839 
-SI_KEYCODE110 = 2840 
-SI_KEYCODE111 = 2841 
-SI_KEYCODE112 = 2842 
-SI_KEYCODE113 = 2843 
-SI_KEYCODE114 = 2844 
-SI_KEYCODE115 = 2845 
-SI_KEYCODE116 = 2846 
-SI_KEYCODE117 = 2847 
-SI_KEYCODE118 = 2848 
-SI_KEYCODE119 = 2849 
-SI_KEYCODE120 = 2850 
-SI_KEYCODE121 = 2851 
-SI_KEYCODE122 = 2852 
-SI_KEYCODE123 = 2853 
-SI_KEYCODE124 = 2854 
-SI_KEYCODE125 = 2855 
-SI_KEYCODE126 = 2856 
-SI_KEYCODE127 = 2857 
-SI_KEYCODE128 = 2858 
-SI_KEYCODE129 = 2859 
-SI_KEYCODE130 = 2860 
-SI_KEYCODE131 = 2861 
-SI_KEYCODE132 = 2862 
-SI_KEYCODE133 = 2863 
-SI_KEYCODE134 = 2864 
-SI_KEYCODE135 = 2865 
-SI_KEYCODE136 = 2866 
-SI_KEYCODE137 = 2867 
-SI_KEYCODE138 = 2868 
-SI_KEYCODE139 = 2869 
-SI_KEYCODE140 = 2870 
-SI_KEYCODE141 = 2871 
-SI_KEYCODE142 = 2872 
-SI_KEYCODE143 = 2873 
-SI_KEYCODE144 = 2874 
-SI_KEYCODE145 = 2875 
-SI_KEYCODE146 = 2876 
-SI_KEYCODE147 = 2877 
-SI_KEYCODE148 = 2878 
-SI_KEYCODE149 = 2879 
-SI_KEYCODE150 = 2880 
-SI_KEYCODE151 = 2881 
-SI_KEYCODE152 = 2882 
-SI_KEYCODE153 = 2883 
-SI_KEYCODE154 = 2884 
-SI_KEYCODE155 = 2885 
-SI_KEYCODE156 = 2886 
-SI_KEYCODE157 = 2887 
-SI_KEYCODE158 = 2888 
-SI_KEYCODE159 = 2889 
-SI_KEYCODE160 = 2890 
-SI_KEYCODE161 = 2891 
-SI_KEYCODE162 = 2892 
-SI_KEYCODE163 = 2893 
-SI_KEYCODE164 = 2894 
-SI_KEYCODE165 = 2895 
-SI_KEYCODE166 = 2896 
-SI_KEYCODE167 = 2897 
-SI_KEYCODE168 = 2898 
-SI_KEYCODE169 = 2899 
-SI_KEYCODE170 = 2900 
-SI_KEYCODE171 = 2901 
-SI_KEYCODE172 = 2902 
-SI_KEYCODE173 = 2903 
-SI_KEYCODE174 = 2904 
-SI_KEYCODE175 = 2905 
-SI_KEYCODE176 = 2906 
-SI_KEYCODE177 = 2907 
-SI_KEYCODE178 = 2908 
-SI_KEYCODE179 = 2909 
-SI_KEYCODE180 = 2910 
-SI_KEYCODE181 = 2911 
-SI_KEYCODE182 = 2912 
-SI_KEYCODE183 = 2913 
-SI_KEYCODE184 = 2914 
-SI_KEYCODE185 = 2915 
-SI_KEYCODE186 = 2916 
-SI_KEYCODE187 = 2917 
-SI_KEYCODE188 = 2918 
-SI_KEYCODE189 = 2919 
-SI_KEYCODE190 = 2920 
-SI_NONSTR_ZOGUIENUMS_LAST_ENTRY = 2921 --Sync id for ZoGuiEnums last entry
-SI_NONSTR_ZORENDERENUMS_FIRST_ENTRY = 2922 --Sync id for ZoRenderEnums first entry
-SI_GRAPHICSPRESETS0 = 2923 
-SI_GRAPHICSPRESETS1 = 2924 
-SI_GRAPHICSPRESETS2 = 2925 
-SI_GRAPHICSPRESETS3 = 2926 
-SI_GRAPHICSPRESETS4 = 2927 
-SI_GRAPHICSPRESETS5 = 2928 
-SI_GRAPHICSPRESETS6 = 2929 
-SI_GRAPHICSPRESETS7 = 2930 
-SI_GRAPHICSPRESETS8 = 2931 
-SI_GRAPHICSPRESETS9 = 2932 
-SI_CONSOLEENHANCEDRENDERQUALITY0 = 2933 
-SI_CONSOLEENHANCEDRENDERQUALITY1 = 2934 
-SI_FULLSCREENMODE0 = 2935 
-SI_FULLSCREENMODE1 = 2936 
-SI_FULLSCREENMODE2 = 2937 
-SI_SUBSAMPLINGMODE0 = 2938 
-SI_SUBSAMPLINGMODE1 = 2939 
-SI_SUBSAMPLINGMODE2 = 2940 
-SI_PARTICLEDENSITY0 = 2941 
-SI_PARTICLEDENSITY1 = 2942 
-SI_PARTICLEDENSITY2 = 2943 
-SI_PARTICLEDENSITY3 = 2944 
-SI_ARTMETRICSCHOICE0 = 2945 
-SI_ARTMETRICSCHOICE1 = 2946 
-SI_ARTMETRICSCHOICE2 = 2947 
-SI_ARTMETRICSCHOICE3 = 2948 
-SI_ARTMETRICSCHOICE4 = 2949 
-SI_NONSTR_ZORENDERENUMS_LAST_ENTRY = 2950 --Sync id for ZoRenderEnums last entry
-SI_NONSTR_CONSOLESTRINGS_FIRST_ENTRY = 2951 --Sync id for ConsoleStrings first entry
-SI_PRESS_START_PROFILE = 2952 
-SI_SAVE_ERROR_TITLE = 2953 
-SI_LOAD_ERROR_TITLE = 2954 
-SI_OUT_OF_SPACE = 2955 
-SI_CORRUPT_SAVE = 2956 
-SI_FAILED_LOAD = 2957 
-SI_FAILED_SAVE = 2958 
-SI_SAVE_DEST_REMOVED_STORAGE = 2959 
-SI_NO_SAVE_CONTINUE = 2960 
-SI_NO_SAVE_DEVICE = 2961 
-SI_ALLOW_OVERWRITE = 2962 
-SI_PROFILE_PRIVILEGES_FAILED_ERROR_TEXT = 2963 
-SI_CHARACTER_SELECT_LOAD_IN_PROGRESS = 2964 
-SI_DIALOG_INSTALLATION_PROGRESS = 2965 
-SI_PROFILE_LOAD_FAILED_TITLE = 2966 
-SI_LOGIN_FLOW_CREATE_ACCT_FULLNAME = 2967 
-SI_PROFILE_LOADING_DIALOG_TITLE = 2968 
-SI_PROFILE_LOADING_DIALOG_TEXT = 2969 
-SI_ORBIS_PRESENCE_CHARACTER_TYPE = 2970 
-SI_ORBIS_PRESENCE_CHARACTER_TYPE_CHAMPION = 2971 
-SI_ORBIS_PRESENCE_LOCATION = 2972 
-SI_ORBIS_PRESENCE_PREGAME = 2973 
-SI_ORBIS_FEED_LAUNCH_GAME_BUTTON_TEXT_EN = 2974 
-SI_ORBIS_FEED_LAUNCH_GAME_BUTTON_TEXT_FR = 2975 
-SI_ORBIS_FEED_LAUNCH_GAME_BUTTON_TEXT_DE = 2976 
-SI_ORBIS_OPEN_INVITE_DIALOG = 2977 
-SI_SESSION_INVITE_TITLE = 2978 
-SI_SESSION_INVITE_TEXT = 2979 
-SI_GAMEPLAY_OPTIONS_TITLE = 2980 
-SI_OPTIONS_ALL_NAMEPLATES_GAMEPAD = 2981 
-SI_OPTIONS_ALL_HEALTHBARS_GAMEPAD = 2982 
-SI_OPTIONS_PLAYER_NAMEPLATE_GAMEPAD = 2983 
-SI_OPTIONS_PLAYER_HEALTH_BAR_GAMEPAD = 2984 
-SI_OPTIONS_FRIENDLY_NPC_NAMEPLATE_GAMEPAD = 2985 
-SI_OPTIONS_FRIENDLY_NPC_HEALTH_BAR_GAMEPAD = 2986 
-SI_OPTIONS_FRIENDLY_PLAYER_NAMEPLATE_GAMEPAD = 2987 
-SI_OPTIONS_FRIENDLY_PLAYER_HEALTH_BAR_GAMEPAD = 2988 
-SI_OPTIONS_ENEMY_NPC_NAMEPLATE_GAMEPAD = 2989 
-SI_OPTIONS_ENEMY_NPC_HEALTH_BAR_GAMEPAD = 2990 
-SI_OPTIONS_ENEMY_PLAYER_NAMEPLATE_GAMEPAD = 2991 
-SI_OPTIONS_ENEMY_PLAYER_HEALTH_BAR_GAMEPAD = 2992 
-SI_OPTIONS_ENABLE_VOICE_GAMEPAD = 2993 
-SI_OPTIONS_ESO_STORE_OPTION_GAMEPAD = 2994 
-SI_OPTIONS_GLOW_OPTION_GAMEPAD = 2995 
-SI_OPTIONS_CAMERA_LOCK_COMBAT_VALUES_GAMEPAD = 2996 
-SI_OPTIONS_CAMERA_COMBAT_DISTANCE_GAMEPAD = 2997 
-SI_OPTIONS_CAMERA_NON_COMBAT_DISTANCE_GAMEPAD = 2998 
-SI_OPTIONS_VIBRATION_GAMEPAD = 2999 
-SI_OPTIONS_AUDIO_AND_VIDEO_GAMEPAD = 3000 
-SI_OPTIONS_TARGET_GLOW_INTENSITY_GAMEPAD = 3001 
-SI_OPTIONS_INTERACTABLES_GLOW_INTENSITY_GAMEPAD = 3002 
-SI_OPTIONS_VOICE_GAMEPAD = 3003 
-SI_CAMERA_OPTIONS_TITLE = 3004 
-SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_GAMEPAD = 3005 
-SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_GAMEPAD = 3006 
-SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED = 3007 
-SI_LOGIN_DIALOG_TITLE_LINK_FAILED = 3008 
-SI_UNEXPECTED_ERROR = 3009 
-SI_PLAYERS_MET_TITLE_GROUP = 3010 
-SI_PLAYERS_MET_TITLE_WHISPER = 3011 
-SI_PLAYERS_MET_TITLE_TRADE = 3012 
-SI_PLAYERS_MET_TITLE_KILL = 3013 
-SI_PLAYERS_MET_TITLE_DUEL = 3014 
-SI_REQUEST_NAME_DEFAULT_TEXT_CONSOLE = 3015 
-SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_NO_SUCH_PLAYER = 3016 
-SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_NOT_ALLOWED = 3017 
-SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_GLOBALLY_RESTRICTED = 3018 
-SI_NONSTR_CONSOLESTRINGS_LAST_ENTRY = 3019 --Sync id for ConsoleStrings last entry
-SI_NONSTR_PREGAMEKEYBOARDSTRINGS_FIRST_ENTRY = 3020 --Sync id for PregameKeyboardStrings first entry
-SI_CREATE_CHARACTER_BODY_TRIANGLE_LABEL = 3021 
-SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL = 3022 
-SI_CREATE_CHARACTER_TRIANGLE_MUSCULAR = 3023 
-SI_CREATE_CHARACTER_TRIANGLE_FAT = 3024 
-SI_CREATE_CHARACTER_TRIANGLE_THIN = 3025 
-SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR = 3026 
-SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT = 3027 
-SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN = 3028 
-SI_CREATE_CHARACTER_BUCKET_TITLE_RACE = 3029 
-SI_CREATE_CHARACTER_BUCKET_TITLE_CLASS = 3030 
-SI_CREATE_CHARACTER_BUCKET_TITLE_GENDER = 3031 
-SI_CREATE_CHARACTER_BUCKET_TITLE_BODY = 3032 
-SI_CREATE_CHARACTER_BUCKET_TITLE_FACE = 3033 
-SI_CREATE_CHARACTER_TITLE_NAME = 3034 
-SI_CREATE_CHARACTER_BUTTON = 3035 
-SI_SAVE_CHARACTER_BUTTON = 3036 
-SI_CREATE_CHARACTER_RACE_SELECTOR_TOOLTIP = 3037 
-SI_CREATE_CHARACTER_CLASS_SELECTOR_TOOLTIP = 3038 
-SI_CREATE_CHARACTER_ALLIANCE_SELECTOR_TOOLTIP = 3039 
-SI_CREATE_CHARACTER_SELECTOR_TOKEN_DISABLED = 3040 
-SI_CREATE_CHARACTER_VOICE_A = 3041 
-SI_CREATE_CHARACTER_VOICE_B = 3042 
-SI_CREATE_CHARACTER_VOICE_C = 3043 
-SI_CREATE_CHARACTER_VOICE_D = 3044 
-SI_CREATE_CHARACTER_VOICE_E = 3045 
-SI_CREATE_CHARACTER_VOICE_F = 3046 
-SI_CREATE_CHARACTER_VOICE_G = 3047 
-SI_CREATE_CHARACTER_VOICE_H = 3048 
-SI_CREATE_CHARACTER_ALLIANCE_LABEL = 3049 
-SI_CREATE_CHARACTER_RACE_LABEL = 3050 
-SI_RANDOMIZE_APPEARANCE_BUTTON = 3051 
-SI_ACCOUNT_NAME = 3052 
-SI_PASSWORD = 3053 
-SI_LOGIN = 3054 
-SI_LOGIN_CHARACTER = 3055 
-SI_RENAME_CHARACTER = 3056 
-SI_ADDON_MANAGEMENT = 3057 
-SI_CREATE_CHARACTER = 3058 
-SI_SERVER_NAME = 3059 
-SI_SERVER_STATUS = 3060 
-SI_SELECT_SERVER = 3061 
-SI_SERVER_SELECT_TITLE = 3062 
-SI_SERVER_SELECT_CHARACTER_WARNING = 3063 
-SI_BACK_UP_ONE_MENU = 3064 
-SI_DELETE_CHARACTER = 3065 
-SI_DELETE_CHARACTER_NUM_DELETES = 3066 
-SI_DELETE_CHARACTER_MAX_ENABLED_TOOLTIP = 3067 
-SI_DELETE_CHARACTER_ENABLED_TOOLTIP = 3068 
-SI_DELETE_CHARACTER_DISABLED_TOOLTIP = 3069 
-SI_DELETE_CHARACTER_DIALOG_TEXT = 3070 
-SI_DELETE_CHARACTER_CONFIRMATION_BUTTON = 3071 
-SI_DELETE_CHARACTER_CONFIRMATION_TEXT = 3072 
-SI_TEMPLATE_ID_LABEL = 3073 
-SI_TEMPLATE_NONE = 3074 
-SI_CHARACTER_SELECT_LEVEL_CLASS = 3075 
-SI_CHARACTER_SELECT_LEVEL_CHAMPION_CLASS = 3076 
-SI_CHARACTER_SELECT_CHAMPION_CLASS = 3077 
-SI_CHARACTER_SELECT_LEVEL = 3078 
-SI_CHARACTER_SELECT_NAME = 3079 
-SI_CHARACTER_SELECT_RACE = 3080 
-SI_CHARACTER_SELECT_CLASS = 3081 
-SI_CHARACTER_SELECT_ALLIANCE = 3082 
-SI_CHARACTER_SELECT_LOCATION = 3083 
-SI_CHARACTER_SELECT_RACE_CLASS_LOCATION = 3084 
-SI_CHARACTER_SELECT_SLOTS = 3085 
-SI_UNKNOWN_CLASS = 3086 
-SI_UNKNOWN_RANK = 3087 
-SI_UNKNOWN_LOCATION = 3088 
-SI_UNKNOWN_ALLIANCE = 3089 
-SI_SERVER_LOCKED = 3090 
-SI_SERVER_STATUS_UP = 3091 
-SI_SERVER_STATUS_DOWN = 3092 
-SI_SERVER_STATUS_OUT = 3093 
-SI_SERVER_STATUS_LOCKED = 3094 
-SI_SERVER_STATUS_INVALID = 3095 
-SI_PATCHOPTION_LIVE = 3096 
-SI_PATCHOPTION_PATCH = 3097 
-SI_PREGAME_OPEN_OPTIONS = 3098 
-SI_BAD_LOGIN = 3099 
-SI_AUTHENTICATION_SERVER_DOWN = 3100 
-SI_QUIT = 3101 
-SI_VERSION = 3102 
-SI_TRY_AGAIN = 3103 
-SI_APPLY = 3104 
-SI_REMEMBER_ACCOUNT = 3105 
-SI_LOGIN_REQUESTED = 3106 
-SI_LOGIN_TIME_OUT = 3107 
-SI_LOGIN_ACCOUNT_REQUIRED = 3108 
-SI_LOGIN_ACCOUNT_REQUIRED_ESO = 3109 
-SI_CONNECTING_TO_REALM = 3110 
-SI_DISCONNECTED_FROM_SERVER = 3111 
-SI_UNKNOWN_ERROR = 3112 
-SI_SELECTED_SERVER_X_IS_UNAVAILABLE = 3113 
-SI_CHARACTER_LOAD_REQUESTED = 3114 
-SI_WORLD_LIST_REQUESTED = 3115 
-SI_PROMPT_TITLE_DELETE_SELECTED_CHARACTER = 3116 
-SI_PROMPT_TITLE_CONNECTING_TO_REALM = 3117 
-SI_PROMPT_TITLE_SERVER_UNAVAILABLE = 3118 
-SI_PROMPT_TITLE_SERVER_FULL = 3119 
-SI_PROMPT_TITLE_PLEASE_WAIT = 3120 
-SI_LOGIN_QUEUE_TEXT = 3121 
-SI_LOGIN_QUEUE_CANCEL_TEXT = 3122 
-SI_OVERFLOW_DIALOG_TITLE = 3123 
-SI_OVERFLOW_DIALOG_TEXT = 3124 
-SI_OVERFLOW_DIALOG_LIST_ENTRY_1 = 3125 
-SI_OVERFLOW_DIALOG_LIST_ENTRY_2 = 3126 
-SI_OVERFLOW_DIALOG_LIST_ENTRY_3 = 3127 
-SI_OVERFLOW_DIALOG_LIST_ENTRY_4 = 3128 
-SI_OVERFLOW_DIALOG_FOOTER = 3129 
-SI_OVERFLOW_DIALOG_CANCEL_BUTTON = 3130 
-SI_OVERFLOW_DIALOG_OVERFLOW_BUTTON = 3131 
-SI_OVERFLOW_DIALOG_QUEUE_BUTTON = 3132 
-SI_ERROR_DIALOG_HELP = 3133 
-SI_DIALOG_TITLE_SERVER_UNAVAILABLE = 3134 
-SI_DIALOG_TITLE_LOGGING_IN = 3135 
-SI_DIALOG_TITLE_LOGIN_ERROR = 3136 
-SI_DIALOG_TITLE_SERVER_LOCKED = 3137 
-SI_EULA_BUTTON_AGREE = 3138 
-SI_EULA_BUTTON_DISAGREE = 3139 
-SI_WINDOW_TITLE_EULA = 3140 
-SI_SPLASH_SCREEN_COPYRIGHT = 3141 
-SI_SERVER_MAINTENANCE_DIALOG_TITLE = 3142 
-SI_SERVER_MAINTENANCE_DIALOG_TEXT = 3143 
-SI_SERVER_MAINTENANCE_LOGIN_BUTTON_TIMER = 3144 
-SI_OTP_DIALOG_TITLE = 3145 
-SI_OTP_DIALOG_SUBMIT = 3146 
-SI_OTP_DIALOG_CANCEL = 3147 
-SI_PROVIDE_OTP_INITIAL_DIALOG_TEXT = 3148 
-SI_PROVIDE_OTP_SUBSEQUENT_DIALOG_TEXT = 3149 
-SI_VIDEO_PLAYBACK_CONFIRM_CANCEL = 3150 
-SI_GAME_MENU_PLAY = 3151 
-SI_GAME_MENU_SERVER = 3152 
-SI_GAME_MENU_BACK = 3153 
-SI_GAME_MENU_CHARACTERS = 3154 
-SI_GAME_MENU_PREVIEW = 3155 
-SI_CAPS_LOCK_PASSWORD_WARNING = 3156 
-SI_TRUSTED_MACHINE_BUTTON_TOOLTIP = 3157 
-SI_UNTRUSTED_MACHINE_BUTTON_TOOLTIP = 3158 
-SI_DIALOG_TITLE_PAYMENT_EXPIRED = 3159 
-SI_DIALOG_TEXT_PAYMENT_EXPIRED = 3160 
-SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE = 3161 
-SI_BAD_CLIENT_VERSION_TITLE = 3162 
-SI_BAD_CLIENT_VERSION_TEXT = 3163 
-SI_PEGI_COUNTRY_SELECT_TITLE = 3164 
-SI_PEGI_COUNTRY_SELECT_TEXT = 3165 
-SI_PEGI_AGREEMENT_TITLE = 3166 
-SI_PEGI_AGREEMENT_TEXT = 3167 
-SI_PEGI_AGREEMENT_DECLINE_TITLE = 3168 
-SI_PEGI_AGREEMENT_DECLINE_TEXT = 3169 
-SI_PEGI_AGREEMENT_LINK_TEXT = 3170 
-SI_KEYBOARD_ACCOUNTSETUP_PLEASE_WAIT_DIALOG_HEADER = 3171 
-SI_KEYBOARD_ACCOUNTSETUP_PLEASE_WAIT_DIALOG_BODY = 3172 
-SI_KEYBOARD_ACCOUNTSETUP_LABEL = 3173 
-SI_KEYBOARD_ACCOUNTSETUP_NEW_ACCOUNT = 3174 
-SI_KEYBOARD_ACCOUNTSETUP_EXISTING_ACCOUNT = 3175 
-SI_KEYBOARD_CREATEACCOUNT_DIALOG_HEADER = 3176 
-SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_CREATED_DIALOG_HEADER = 3177 
-SI_KEYBOARD_CREATEACCOUNT_SUCCESS_DIALOG_BODY_FORMAT = 3178 
-SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL = 3179 
-SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_DESCRIPTION = 3180 
-SI_KEYBOARD_LINKACCOUNT_LABEL = 3181 
-SI_KEYBOARD_LINKACCOUNT_DIALOG_HEADER = 3182 
-SI_KEYBOARD_LINKACCOUNT_CONFIRM_2_FORMAT = 3183 
-SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_HEADER = 3184 
-SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_FORMAT = 3185 
-SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING = 3186 
-SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM = 3187 
-SI_KEYBOARD_LINKED_LOGIN_ERROR_MESSAGE = 3188 
-SI_KEYBOARD_PLEASE_RESTART_GAME = 3189 
-SI_KEYBOARD_ACCOUNT_CHAMPION_POINTS = 3190 
-SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_ONLY = 3191 
-SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_OR_CODE = 3192 
-SI_NONSTR_PREGAMEKEYBOARDSTRINGS_LAST_ENTRY = 3193 --Sync id for PregameKeyboardStrings last entry
-SI_NONSTR_PREGAMEGAMEPADSTRINGS_FIRST_ENTRY = 3194 --Sync id for PregameGamepadStrings first entry
-SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_CHARACTER = 3195 
-SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_BODY_TYPE = 3196 
-SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD_TYPE = 3197 
-SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD = 3198 
-SI_CREATE_CHARACTER_GAMEPAD_CLASS_LABEL = 3199 
-SI_CREATE_CHARACTER_GAMEPAD_FINISH = 3200 
-SI_CREATE_CHARACTER_GAMEPAD_ENTER_NAME = 3201 
-SI_CREATE_CHARACTER_GAMEPAD_RANDOMIZE = 3202 
-SI_CREATE_CHARACTER_GAMEPAD_LOCK_VALUE = 3203 
-SI_CREATE_CHARACTER_GAMEPAD_UNLOCK_VALUE = 3204 
-SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT = 3205 
-SI_CREATE_CHARACTER_GAMEPAD_USE_TEMPLATE = 3206 
-SI_CREATE_CHARACTER_GAMEPAD_TEST_VOICE = 3207 
-SI_CREATE_CHARACTER_GAMEPAD_GENDER_SLIDER_NAME = 3208 
-SI_CREATE_CHARACTER_GAMEPAD_FINISH_TITLE = 3209 
-SI_CREATE_CHARACTER_GAMEPAD_FINISH_DONE = 3210 
-SI_CREATE_CHARACTER_GAMEPAD_FINISH_SELECT = 3211 
-SI_CREATE_CHARACTER_GAMEPAD_FINISH_BACK = 3212 
-SI_CREATE_CHARACTER_GAMEPAD_EDIT = 3213 
-SI_CREATE_CHARACTER_GAMEPAD_CREATING = 3214 
-SI_CREATE_CHARACTER_GAMEPAD_CREATING_CHARACTER = 3215 
-SI_CREATE_CHARACTER_TEMPLATE_SELECT_TITLE = 3216 
-SI_CREATE_CHARACTER_TEMPLATE_SELECT_DESCRIPTION = 3217 
-SI_CREATE_CHARACTER_GAMEPAD_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT = 3218 
-SI_DELETE_CHARACTER_DIALOG_GAMEPAD_CONTINUE = 3219 
-SI_DELETE_CHARACTER_DIALOG_GAMEPAD_TITLE = 3220 
-SI_DELETE_CHARACTER_DIALOG_GAMEPAD_TEXT = 3221 
-SI_DELETE_CHARACTER_DISABLED_GAMEPAD_TITLE = 3222 
-SI_DELETE_CHARACTER_DISABLED_GAMEPAD_TEXT = 3223 
-SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TITLE = 3224 
-SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TEXT = 3225 
-SI_DELETE_CHARACTER_GAMEPAD_DIALOG_TEXT = 3226 
-SI_DELETE_CHARACTER_GAMEPAD_DELETING = 3227 
-SI_DELETE_CHARACTER_GAMEPAD_DELETING_CHARACTER = 3228 
-SI_DELETE_CHARACTER_GAMEPAD_DIALOG_TITLE_DELETED = 3229 
-SI_DELETE_CHARACTER_GAMEPAD_DIALOG_TEXT_DELETED = 3230 
-SI_CHARACTER_SELECT_RANK_NAME = 3231 
-SI_CHARACTER_SELECT_RACE_LABEL = 3232 
-SI_CHARACTER_SELECT_CLASS_LABEL = 3233 
-SI_CHARACTER_SELECT_ALLIANCE_LABEL = 3234 
-SI_CHARACTER_SELECT_GRADE_LABEL = 3235 
-SI_CHARACTER_SELECT_LOCATION_LABEL = 3236 
-SI_CHARACTER_SELECT_GAMEPAD_PLAY = 3237 
-SI_CHARACTER_SELECT_GAMEPAD_OPTIONS = 3238 
-SI_CHARACTER_SELECT_GAMEPAD_CHAPTER_HEADER = 3239 
-SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS_HEADER = 3240 
-SI_CHARACTER_SELECT_GAMEPAD_RENAME_HEADER = 3241 
-SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_HEADER = 3242 
-SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_ENTRY = 3243 
-SI_CHARACTER_SELECT_GAMEPAD_DELETE = 3244 
-SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW = 3245 
-SI_CHARACTER_SELECT_GAMEPAD_RENAME = 3246 
-SI_CHARACTER_SELECT_GAMEPAD_RENAMING = 3247 
-SI_CHARACTER_SELECT_GAMEPAD_RENAMING_CHARACTER = 3248 
-SI_CHARACTER_SELECT_GAMEPAD_RENAME_TEXT = 3249 
-SI_CHARACTER_SELECT_GAMEPAD_DELETE_CANCEL = 3250 
-SI_CHARACTER_SELECT_GAMEPAD_LOGIN = 3251 
-SI_CHARACTER_SELECT_GAMEPAD_LOGIN_TEXT = 3252 
-SI_CHARACTER_SELECT_GAMEPAD_LOGIN_CANCEL = 3253 
-SI_CHARACTER_SELECT_GAMEPAD_LOGIN_ERROR = 3254 
-SI_CHARACTER_SELECT_GAMEPAD_LOGIN_ERROR_TEXT = 3255 
-SI_CHARACTER_SELECT_GAMEPAD_LOGIN_ERROR_EXIT = 3256 
-SI_CHARACTER_SELECT_GAMEPAD_SELECT_CHARACTER = 3257 
-SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS = 3258 
-SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS_COUNTER = 3259 
-SI_CHARACTER_SELECT_PROFILE_LABEL = 3260 
-SI_CHARACTER_SELECT_GAMEPAD_ZOOM_KEYBIND = 3261 
-SI_CHARACTER_SELECT_GAMEPAD_ROTATE_KEYBIND = 3262 
-SI_CHARACTER_SELECT_CHAMPION_POINTS_LABEL = 3263 
-SI_GAMEPAD_WORLD_SELECT_REFRESH = 3264 
-SI_GAMEPAD_VIDEO_PLAYBACK_CONFIRM_CANCEL = 3265 
-SI_CONSOLE_PREGAME_PRESS_BUTTON = 3266 
-SI_CONSOLE_PREGAME_LOADING = 3267 
-SI_CONSOLE_PREGANE_TRIAL_ADVANCE = 3268 
-SI_CONSOLE_CREATEACCOUNT_DESCRIPTION = 3269 
-SI_CONSOLE_CREATEACCOUNT_NOCOUNTRY = 3270 
-SI_CONSOLE_CREATEACCOUNT_NOEMAIL = 3271 
-SI_CONSOLE_CREATEACCOUNT_BADAGE = 3272 
-SI_CONSOLE_CREATEACCOUNT_AUTOFILL = 3273 
-SI_CONSOLE_LINKACCOUNT_HEADER = 3274 
-SI_CONSOLE_LINKACCOUNT_DESCRIPTION = 3275 
-SI_CONSOLE_LINKACCOUNT_NOUSERNAME = 3276 
-SI_CONSOLE_LINKACCOUNT_NOPASSWORD = 3277 
-SI_CONSOLE_RESEND_VERIFY_EMAIL_KEYBIND = 3278 
-SI_CONSOLE_RESEND_VERIFY_EMAIL_SUCCEEDED_TITLE = 3279 
-SI_CONSOLE_RESEND_VERIFY_EMAIL_SUCCEEDED_TEXT = 3280 
-SI_CONSOLE_RESEND_VERIFY_EMAIL_FAILED_TITLE = 3281 
-SI_CONSOLE_RESEND_VERIFY_EMAIL_FAILED_TEXT = 3282 
-SI_CONSOLE_LINKACCOUNT_CONFIRM_2_XBOX = 3283 
-SI_CONSOLE_LINKACCOUNT_CONFIRM_2_PS4 = 3284 
-SI_CONSOLE_LINKACCOUNT_CONFIRM_3_XBOX = 3285 
-SI_CONSOLE_LINKACCOUNT_CONFIRM_3_PS4 = 3286 
-SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_XBOX = 3287 
-SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_PS4 = 3288 
-SI_CONSOLE_CREATELINKACCOUNT_OVERVIEW = 3289 
-SI_CONSOLE_ERROR_GENERIC = 3290 
-SI_CONSOLE_LEGAL_DECLINE_HEADER = 3291 
-SI_CONSOLE_LEGAL_DECLINE_PROMPT = 3292 
-SI_CONSOLE_LEGAL_BUTTON_AGREE = 3293 
-SI_CONSOLE_LEGAL_BUTTON_DISAGREE = 3294 
-SI_GAME_STARTUP_CHANGE_PROFILE = 3295 
-SI_GAME_STARTUP_HEADER = 3296 
-SI_GAME_STARTUP_SERVER_SELECT = 3297 
-SI_GAME_STARTUP_PLAY = 3298 
-SI_CONSOLE_GAME_DOWNLOAD_UPDATE = 3299 
-SI_CONSOLE_GAME_DOWNLOAD_UPDATING = 3300 
-SI_FREE_TRIAL_EXPIRED_ANNOUNCEMENT = 3301 
-SI_FREE_TRIAL_MENU_ENTRY_PURCHASE = 3302 
-SI_FREE_TRIAL_PURCHASE_KEYBIND = 3303 
-SI_FREE_TRIAL_PURCHASE_DIALOG_HEADER = 3304 
-SI_FREE_TRIAL_PURCHASE_DIALOG_BODY = 3305 
-SI_FREE_TRIAL_PLATFORM_STORE_PS4 = 3306 
-SI_EXTRA_INFO_SERVICE_TOKENS_HEADER = 3307 
-SI_SERVICE_NO_ELIGIBLE_CHARACTERS = 3308 
-SI_SERVICE_USE_SERVICE_KEYBIND = 3309 
-SI_SERVICE_BACK_KEYBIND = 3310 
-SI_SERVICE_TOKEN_COUNT_TOKENS_HEADER = 3311 
-SI_SERVICE_TOKEN_INSTRUCTIONS = 3312 
-SI_NONSTR_PREGAMEGAMEPADSTRINGS_LAST_ENTRY = 3313 --Sync id for PregameGamepadStrings last entry
-SI_NONSTR_PREGAMESHAREDSTRINGS_FIRST_ENTRY = 3314 --Sync id for PregameSharedStrings first entry
-SI_GAME_MENU_CREDITS = 3315 
-SI_GAME_MENU_PLAY_CINEMATIC = 3316 
-SI_GAME_MENU_SERVER_SELECT = 3317 
-SI_CHARACTER_SELECT_LEVEL_VALUE = 3318 
-SI_CHARACTER_SELECT_LEVEL_CHAMPION = 3319 
-SI_PROMPT_TITLE_SKIP_TUTORIAL = 3320 
-SI_PROMPT_BODY_SKIP_TUTORIAL = 3321 
-SI_PROMPT_PLAY_TUTORIAL_BUTTON = 3322 
-SI_PROMPT_SKIP_TUTORIAL_BUTTON = 3323 
-SI_PROMPT_BACK_TUTORIAL_BUTTON = 3324 
-SI_CHARACTER_EDIT_CONFIRM_CHANGES_TITLE = 3325 
-SI_CHARACTER_EDIT_CONFIRM_CHANGES_BODY = 3326 
-SI_CHARACTER_EDIT_SAVING_CHANGES_TITLE = 3327 
-SI_CHARACTER_EDIT_SAVING_CHANGES_BODY = 3328 
-SI_CHARACTER_EDIT_SAVE_SUCCESS_TITLE = 3329 
-SI_CHARACTER_EDIT_SAVE_SUCCESS_BODY = 3330 
-SI_CHARACTER_EDIT_SAVE_ERROR_TITLE = 3331 
-SI_CHARACTER_EDIT_REVERT_CHANGES_TITLE = 3332 
-SI_CHARACTER_EDIT_REVERT_CHANGES_BODY = 3333 
-SI_LOGIN_ANNOUNCEMENTS_TITLE = 3334 
-SI_LOGIN_ANNOUNCEMENTS_FAILURE = 3335 
-SI_HELP_URL = 3336 
-SI_CREATEACCOUNT_CREATING_ACCOUNT = 3337 
-SI_CREATEACCOUNT_HEADER = 3338 
-SI_CREATEACCOUNT_COUNTRY = 3339 
-SI_CREATEACCOUNT_SELECT_COUNTRY = 3340 
-SI_CREATEACCOUNT_EMAIL = 3341 
-SI_CREATEACCOUNT_AGE = 3342 
-SI_CREATEACCOUNT_EMAIL_SIGNUP = 3343 
-SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON = 3344 
-SI_CREATEACCOUNT_SUCCESS_HEADER = 3345 
-SI_CREATEACCOUNT_SUCCESS_NOTE_1 = 3346 
-SI_CREATEACCOUNT_SUCCESS_NOTE_2 = 3347 
-SI_CREATEACCOUNT_SUCCESS_NOTE_3 = 3348 
-SI_CREATEACCOUNT_ERROR_HEADER = 3349 
-SI_CREATEACCOUNT_FAILURE_MESSAGE = 3350 
-SI_LINKACCOUNT_LINKING_ACCOUNT = 3351 
-SI_LINKACCOUNT_CONFIRM_1 = 3352 
-SI_LINKACCOUNT_ERROR_HEADER = 3353 
-SI_LINKACCOUNT_FAILURE_MESSAGE = 3354 
-SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT = 3355 
-SI_ADDITIONAL_CHARACTER_SLOTS_HEADER = 3356 
-SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION = 3357 
-SI_CHARACTER_SELECT_RENAME_CHARACTER_TITLE = 3358 
-SI_CHARACTER_SELECT_RENAME_CHARACTER_FROM_TOKEN_TITLE = 3359 
-SI_CHARACTER_SELECT_RACE_CHANGE_FROM_TOKEN_TITLE = 3360 
-SI_CHARACTER_SELECT_APPEARANCE_CHANGE_FROM_TOKEN_TITLE = 3361 
-SI_CHARACTER_SELECT_RENAME_SAVE_NEW_NAME = 3362 
-SI_RENAME_CHARACTER_NAME_LABEL = 3363 
-SI_RENAME_CHARACTER_BACK_KEYBIND = 3364 
-SI_RENAME_CHARACTER_NAME_IN_USE_ERROR_HEADER = 3365 
-SI_RENAME_CHARACTER_NAME_IN_USE_ERROR_BODY = 3366 
-SI_RENAME_CHARACTER_GENERIC_ERROR_HEADER = 3367 
-SI_RENAME_CHARACTER_SUCCESS_HEADER = 3368 
-SI_RENAME_CHARACTER_SUCCESS_BODY = 3369 
-SI_RENAME_CHARACTER_RENAMING_DIALOG_HEADER = 3370 
-SI_RENAME_CHARACTER_RENAMING_DIALOG_BODY = 3371 
-SI_SERVICE_ERROR_DIALOG_CHARACTER_INELIGIBLE_HEADER = 3372 
-SI_SERVICE_ERROR_DIALOG_CHARACTER_INELIGIBLE_BODY = 3373 
-SI_SERVICES_DIALOG_HEADER_FORMAT = 3374 
-SI_SERVICES_DIALOG_BODY_FORMAT = 3375 
-SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE = 3376 
-SI_CHAPTER_UPGRADE_CONTINUE = 3377 
-SI_CHAPTER_UPGRADE_REGISTRATION_SUMMARY_HEADER = 3378 
-SI_CHAPTER_UPGRADE_CODE_ENTRY_HEADER = 3379 
-SI_CHAPTER_UPGRADE_DIGITAL_UPGRADE_HEADER = 3380 
-SI_CHAPTER_UPGRADE_ENTER_CODE_BUTTON = 3381 
-SI_CHAPTER_UPGRADE_PURCHASE_BUTTON = 3382 
-SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_TITLE = 3383 
-SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT = 3384 
-SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY = 3385 
-SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE = 3386 
-SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT = 3387 
-SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER = 3388 
-SI_NONSTR_PREGAMESHAREDSTRINGS_LAST_ENTRY = 3389 --Sync id for PregameSharedStrings last entry
+SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM = 215 
+SI_GAMEPAD_COLLECTIONS_EMPTY = 216 
+SI_GAMEPAD_COLLECTIONS_SAVE_NAME_OPTION = 217 
+SI_GAMEPAD_MARKET_BUY_PLUS_TITLE = 218 
+SI_GAMEPAD_MARKET_BUY_PLUS_TEXT_CONSOLE = 219 
+SI_GAMEPAD_MARKET_BUY_PLUS_DIALOG_KEYBIND_LABEL = 220 
+SI_GAMEPAD_MARKET_BUY_PLUS_KEYBIND_LABEL = 221 
+SI_GAMEPAD_DISCONNECTED_TITLE = 222 
+SI_GAMEPAD_DISCONNECTED_PS4_TEXT = 223 
+SI_GAMEPAD_DISCONNECTED_XBOX_TEXT = 224 
+SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT = 225 
+SI_FAILED_TO_FIND_PROFILE_ORBIS = 226 
+SI_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT = 227 
+SI_INVALID_NAME_DIALOG_TITLE = 228 
+SI_GAMEPAD_PLAYER_INVENTORY_CAPACITY_FOOTER_LABEL = 229 
+SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT = 230 
+SI_GAMEPAD_CONSOLE_WAIT_FOR_NAME_VALIDATION_TITLE = 231 
+SI_GAMEPAD_CONSOLE_WAIT_FOR_NAME_VALIDATION_TEXT = 232 
+SI_GAMEPAD_GENERIC_WAITING_TEXT = 233 
+SI_OPEN_FIRST_PARTY_STORE_KEYBIND = 234 
+SI_OPEN_CHAPTER_UPGRADE_CONSOLE = 235 
+SI_ENTER_CODE_DIALOG_TITLE = 236 
+SI_ENTER_CODE_DIALOG_BODY = 237 
+SI_ENTER_CODE_CONFIRM_BUTTON = 238 
+SI_NONSTR_CLIENTGAMEPADSTRINGS_LAST_ENTRY = 239 --Sync id for ClientGamepadStrings last entry
+SI_NONSTR_CLIENTSHAREDSTRINGS_FIRST_ENTRY = 240 --Sync id for ClientSharedStrings first entry
+SI_DIALOG_ACCEPT = 241 
+SI_DIALOG_DECLINE = 242 
+SI_DIALOG_YES = 243 
+SI_DIALOG_NO = 244 
+SI_DIALOG_CANCEL = 245 
+SI_DIALOG_CREATE = 246 
+SI_DIALOG_EXIT = 247 
+SI_DIALOG_REMOVE = 248 
+SI_DIALOG_CONFIRM = 249 
+SI_DIALOG_CLOSE = 250 
+SI_DIALOG_LOG_OUT_ENTER_CODE = 251 
+SI_DIALOG_LOG_OUT_UPGRADE = 252 
+SI_CANCEL = 253 
+SI_SAVE = 254 
+SI_OK = 255 
+SI_ERROR_REASON = 256 
+SI_REQUEST_NAME_INSTRUCTIONS = 257 
+SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER = 258 
+SI_ADD_ON_AUTHOR_LINE = 259 
+SI_FORMAT_ICON_TEXT = 260 
+SI_FORMAT_ICON_TEXT_NO_SPACE = 261 
+SI_GAME_MENU_LOGOUT = 262 
+SI_OPTIONS_RESET_TITLE = 263 
+SI_OPTIONS_RESET_PROMPT = 264 
+SI_OPTIONS_RESET_ALL_PROMPT = 265 
+SI_OPTIONS_RESET = 266 
+SI_OPTIONS_DEFAULTS = 267 
+SI_CHECK_BUTTON_OFF = 268 
+SI_CHECK_BUTTON_ON = 269 
+SI_CHECK_BUTTON_DISABLED = 270 
+SI_DIGIT_GROUP_SEPARATOR = 271 
+SI_DIGIT_GROUP_DECIMAL_SEPARATOR = 272 
+SI_LIST_COMMA_SEPARATOR = 273 
+SI_LIST_COMMA_AND_SEPARATOR = 274 
+SI_LIST_AND_SEPARATOR = 275 
+SI_LIST_ITEM_FORMATTER = 276 
+SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_SLASH_NAMES_FORMATTER = 277 
+SI_COLLECTIBLE_TOOLTIP_PERSONALITY_OVERRIDES_DISPLAY_NAMES_FORMATTER = 278 
+SI_COLLECTIBLE_TOOLTIP_EMOTE_SLASH_NAMES_FORMATTER = 279 
+SI_COLLECTIBLE_TOOLTIP_EMOTE_DISPLAY_NAME_FORMATTER = 280 
+SI_COLLECTIBLE_TOOLTIP_RESTRICTION_PAIR_FORMATTER = 281 
+SI_COLLECTIBLE_TOOLTIP_NOT_USABLE_BY_CHARACTER = 282 
+SI_ITEM_FORMAT_STR_EQUIPPED = 283 
+SI_ITEM_FORMAT_STR_EQUIPPED_SLOT = 284 
+SI_ITEM_FORMAT_STR_UNIQUE_EQUIPPED = 285 
+SI_ITEM_FORMAT_STR_UNIQUE = 286 
+SI_ITEM_FORMAT_STR_USE_ONLY_FROM_QUICKSLOT = 287 
+SI_ITEM_FORMAT_STR_BOUND = 288 
+SI_ITEM_FORMAT_STR_TRASH = 289 
+SI_ITEM_FORMAT_STR_BROAD_TYPE = 290 
+SI_ITEM_FORMAT_STR_TYPE_PLUS_EXTRA_INFO = 291 
+SI_ITEM_FORMAT_STR_SPECIFIC_TYPE = 292 
+SI_ITEM_FORMAT_STR_SPECIFIC_TYPE_UNIQUE = 293 
+SI_ITEM_FORMAT_STR_SPECIFIC_TYPE_UNIQUE_EQUIPPED = 294 
+SI_ITEM_FORMAT_STR_ARMOR_TYPE = 295 
+SI_ITEM_FORMAT_STR_ARMOR_TYPE_UNIQUE = 296 
+SI_ITEM_FORMAT_STR_ARMOR_TYPE_UNIQUE_EQUIPPED = 297 
+SI_ITEM_FORMAT_STR_TEXT1 = 298 
+SI_ITEM_FORMAT_STR_TEXT1_UNIQUE = 299 
+SI_ITEM_FORMAT_STR_TEXT1_UNIQUE_EQUIPPED = 300 
+SI_ITEM_FORMAT_STR_TEXT1_TEXT2 = 301 
+SI_ITEM_FORMAT_STR_TEXT1_TEXT2_UNIQUE = 302 
+SI_ITEM_FORMAT_STR_TEXT1_TEXT2_UNIQUE_EQUIPPED = 303 
+SI_ITEM_FORMAT_STR_TEXT1_ARMOR2 = 304 
+SI_ITEM_FORMAT_STR_TEXT1_ARMOR2_UNIQUE = 305 
+SI_ITEM_FORMAT_STR_TEXT1_ARMOR2_UNIQUE_EQUIPPED = 306 
+SI_ITEM_FORMAT_STR_KNOWN_ITEM_TYPE = 307 
+SI_ITEM_FORMAT_STR_UNKNOWN_ITEM_TYPE = 308 
+SI_ITEM_FORMAT_STR_AUGMENT_ITEM_TYPE = 309 
+SI_ITEM_FORMAT_STR_SIEGE_AUGMENT_ITEM_TYPE = 310 
+SI_ITEM_FORMAT_STR_REQ_NOTCH_ITEM_LEVEL = 311 
+SI_ITEM_FORMAT_STR_REQ_ARMOR = 312 
+SI_ITEM_FORMAT_STR_REQ_WEAPON = 313 
+SI_ITEM_FORMAT_STR_REQ_EQUIP = 314 
+SI_ITEM_FORMAT_STR_LEVEL = 315 
+SI_ITEM_FORMAT_STR_ARMOR = 316 
+SI_ITEM_FORMAT_STR_DAMAGE = 317 
+SI_ITEM_FORMAT_STR_DERIVED_STAT = 318 
+SI_ITEM_FORMAT_STR_ARMOR_GLYPH_DERIVED_STAT = 319 
+SI_ITEM_FORMAT_STR_DERIVED_STAT_NO_COLOR = 320 
+SI_ITEM_FORMAT_STR_AUGMENT_ENCHANTMENT = 321 
+SI_ITEM_FORMAT_STR_AUGMENT_TOUGHNESS = 322 
+SI_ITEM_FORMAT_STR_AUGMENT_AMMO = 323 
+SI_ITEM_FORMAT_STR_AUGMENT_PRECISION = 324 
+SI_ITEM_FORMAT_STR_AUGMENT_LAUNCH_VELOCITY = 325 
+SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_ENCHANTMENT_NOTCH = 326 
+SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_PRECISION_NOTCH = 327 
+SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_LAUNCH_VELOCITY_NOTCH = 328 
+SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_TOUGHNESS_NOTCH = 329 
+SI_ITEM_FORMAT_STR_AUGMEMTATION_EMPTY_AMMO_NOTCH = 330 
+SI_ITEM_FORMAT_STR_ON_USE = 331 
+SI_ITEM_FORMAT_STR_ON_USE_MULTI_EFFECT = 332 
+SI_ITEM_FORMAT_STR_ON_USE_COOLDOWN = 333 
+SI_ITEM_FORMAT_STR_ON_USE_REMAINING_COOLDOWN = 334 
+SI_ITEM_FORMAT_STR_ENCHANT = 335 
+SI_ITEM_FORMAT_STR_ENCHANT_IRREPLACEABLE = 336 
+SI_ITEM_FORMAT_STR_ENCHANT_HEADER = 337 
+SI_ITEM_FORMAT_STR_ENCHANT_HEADER_NAMED = 338 
+SI_ITEM_FORMAT_STR_ENCHANT_HEADER_MULTI_EFFECT = 339 
+SI_ITEM_FORMAT_STR_ITEM_TRAIT_HEADER = 340 
+SI_ITEM_FORMAT_STR_ITEM_TRAIT_DESCRIPTION = 341 
+SI_ITEM_FORMAT_STR_CREATOR = 342 
+SI_ITEM_FORMAT_STR_TABARD = 343 
+SI_ITEM_FORMAT_STR_QUEST_ITEM = 344 
+SI_ITEM_FORMAT_STR_COLLECTIBLE = 345 
+SI_ITEM_FORMAT_STR_LOCKED = 346 
+SI_ITEM_FORMAT_STR_ON_COOLDOWN = 347 
+SI_ITEM_FORMAT_STR_ONLY_USABLE_FROM_ACTION_SLOT = 348 
+SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS = 349 
+SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_PERCENT = 350 
+SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_INACTIVE = 351 
+SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_INACTIVE_PERCENT = 352 
+SI_ITEM_FORMAT_STR_SET_PROC_BONUS = 353 
+SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS = 354 
+SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS_PERCENT = 355 
+SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS_INACTIVE = 356 
+SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROPERTY_BONUS_INACTIVE_PERCENT = 357 
+SI_ITEM_FORMAT_STR_SET_NO_COUNT_PROC_BONUS = 358 
+SI_ITEM_FORMAT_STR_SET_NAME = 359 
+SI_ITEM_FORMAT_STR_CRAFTED = 360 
+SI_ITEM_FORMAT_STR_EFFECTIVE_VALUE_OF_MAX = 361 
+SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_LEVEL = 362 
+SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_CHAMPION_POINTS = 363 
+SI_ITEM_FORMAT_STR_STYLE_MATERIAL = 364 
+SI_ITEM_FORMAT_STR_WOOD_MATERIAL_LEVEL = 365 
+SI_ITEM_FORMAT_STR_WOOD_MATERIAL_CHAMPION_POINTS = 366 
+SI_ITEM_FORMAT_STR_CLOTH_MATERIAL_LEVEL = 367 
+SI_ITEM_FORMAT_STR_CLOTH_MATERIAL_CHAMPION_POINTS = 368 
+SI_ITEM_FORMAT_STR_LEATHER_MATERIAL_LEVEL = 369 
+SI_ITEM_FORMAT_STR_LEATHER_MATERIAL_CHAMPION_POINTS = 370 
+SI_ITEM_FORMAT_STR_METAL_MATERIAL_LEVEL = 371 
+SI_ITEM_FORMAT_STR_METAL_MATERIAL_CHAMPION_POINTS = 372 
+SI_ITEM_FORMAT_STR_ARMOR_TRAIT = 373 
+SI_ITEM_FORMAT_STR_WEAPON_TRAIT = 374 
+SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE = 375 
+SI_ITEM_FORMAT_STR_POTION = 376 
+SI_ITEM_FORMAT_STR_POISON = 377 
+SI_ITEM_FORMAT_STR_CHAMPION = 378 
+SI_ITEM_FORMAT_STR_COLOR_NAME = 379 
+SI_ITEM_FORMAT_STR_TRADE_BOP_TIMER_HEADER = 380 
+SI_ITEM_FORMAT_STR_TRADE_BOP_PLAYERS_HEADER = 381 
+SI_ITEM_FORMAT_STR_TRADE_BOP_SECTION_FORMATTER_KEYBOARD = 382 
+SI_TOOLTIP_ITEM_TAG_FORMATER = 383 
+SI_ITEM_SUB_TYPE_BAIT = 384 
+SI_ITEM_SUB_TYPE_BOOK = 385 
+SI_DYE_STAMP_ITEM_DESCRIPTION = 386 
+SI_DYE_STAMP_COSTUME_DESCRIPTION = 387 
+SI_DYE_STAMP_REQUIRES_COLLECTIBLE = 388 
+SI_DYE_STAMP_REQUIRES_EQUIPMENT = 389 
+SI_DYE_STAMP_SAME_DYE_DATA = 390 
+SI_DYE_STAMP_NOT_USABLE_NOW = 391 
+SI_DYE_STAMP_COLLECTIBLES_HIDDEN = 392 
+SI_ENCHANTMENT_BOOSTER_DESCRIPTION = 393 
+SI_LORE_LIBRARY_IN_LIBRARY = 394 
+SI_LORE_LIBRARY_NOT_IN_LIBRARY = 395 
+SI_LORE_LIBRARY_USE_TO_LEARN = 396 
+SI_MARKET_PRODUCT_TOOLTIP_UPGRADE = 397 
+SI_MARKET_PRODUCT_TOOLTIP_BUNDLE = 398 
+SI_MARKET_PRODUCT_TOOLTIP_DLC = 399 
+SI_MARKET_PRODUCT_TOOLTIP_UNLOCK = 400 
+SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL = 401 
+SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION = 402 
+SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION = 403 
+SI_MARKET_PRODUCT_TOOLTIP_CHARACTER_SLOT_UPGRADE_DESCRIPTION = 404 
+SI_MARKET_TILE_CALLOUT_NEW = 405 
+SI_MARKET_TILE_CALLOUT_SALE = 406 
+SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT = 407 
+SI_MARKET_FREE_TRIAL_TOOLTIP_HEADER = 408 
+SI_MARKET_FREE_TRIAL_TOOLTIP_DESCRIPTION = 409 
+SI_MARKET_FREE_TRIAL_TOOLTIP_START_INSTRUCTIONS = 410 
+SI_CROWN_CRATE_TOOLTIP_HEADER = 411 
+SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE = 412 
+SI_TRADING_HOUSE_SEARCH_RESULT_SELLER_FORMATTER = 413 
+SI_SERVICE_TOOLTIP_TYPE = 414 
+SI_SERVICE_TOOLTIP_HEADER_FORMATTER = 415 
+SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION = 416 
+SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION = 417 
+SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION = 418 
+SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE = 419 
+SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT = 420 
+SI_TOOLTIP_COLLECTIBLE_NICKNAME = 421 
+SI_COLLECTIBLE_NAME_FORMATTER = 422 
+SI_MARKET_PRODUCT_NAME_FORMATTER = 423 
+SI_SCREEN_ADJUST_INSTRUCTIONS = 424 
+SI_SCREEN_ADJUST = 425 
+SI_SETTING_SHOW_SCREEN_ADJUST = 426 
+SI_SETTING_SHOW_SCREEN_ADJUST_DISABLED = 427 
+SI_GAMMA_CONFIRM = 428 
+SI_GAMMA_DECLINE = 429 
+SI_SETTING_SHOW_GAMMA_ADJUST = 430 
+SI_LONG_LOAD_TIME = 431 
+SI_QUEST_COMPLETE_FORMAT_STRING = 432 
+SI_QUEST_REWARD_MAX_CURRENCY_ERROR = 433 
+SI_CURRENCY_GOLD = 434 
+SI_CURRENCY_YOUR_ALLIANCE_POINTS = 435 
+SI_CURRENCY_TELVAR_STONES = 436 
+SI_CURRENCY_INSPIRATION = 437 
+SI_CURRENCY_RANK_POINTS = 438 
+SI_CURRENCY_CROWN = 439 
+SI_CURRENCY_CROWN_GEM = 440 
+SI_CURRENCY_WRIT_VOUCHERS = 441 
+SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT = 442 
+SI_CURRENCY_AMOUNT_WITH_ICON = 443 
+SI_MARKET_BUY_CROWNS = 444 
+SI_MARKET_CROWNS_TOOLTIP = 445 
+SI_MARKET_CROWN_GEMS_TOOLTIP = 446 
+SI_KEYBINDINGS_LAYER_GENERAL = 447 
+SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS = 448 
+SI_KEYBINDINGS_LAYER_SIEGE = 449 
+SI_KEYBINDINGS_LAYER_NOTIFICATIONS = 450 
+SI_KEYBINDINGS_LAYER_HOUSING_EDITOR = 451 
+SI_KEYBINDINGS_LAYER_HUD_HOUSING = 452 
+SI_KEYBINDINGS_LAYER_BATTLEGROUNDS = 453 
+SI_KEYBINDINGS_CATEGORY_MOVEMENT = 454 
+SI_KEYBINDINGS_CATEGORY_COMBAT = 455 
+SI_KEYBINDINGS_CATEGORY_TARGETING = 456 
+SI_KEYBINDINGS_CATEGORY_INTERACTION = 457 
+SI_KEYBINDINGS_CATEGORY_CAMERA = 458 
+SI_KEYBINDINGS_CATEGORY_USER_INTERFACE = 459 
+SI_KEYBINDINGS_CATEGORY_GENERAL = 460 
+SI_KEYBIND_STRIP_DISABLED_DIALOG_TITLE = 461 
+SI_KEYBIND_STRIP_DISABLED_DIALOG_TEXT = 462 
+SI_ACTION_IS_NOT_BOUND = 463 
+SI_TIME_DURATION_NOT_LONG_AGO = 464 
+SI_TIME_DURATION_AGO = 465 
+SI_TIME_DURATION_LEFT = 466 
+SI_TIME_FORMAT_MONTHS = 467 
+SI_TIME_FORMAT_DAYS = 468 
+SI_TIME_FORMAT_HOURS = 469 
+SI_TIME_FORMAT_MINUTES = 470 
+SI_TIME_FORMAT_SECONDS = 471 
+SI_TIME_FORMAT_MONTHS_DESC_SHORT = 472 
+SI_TIME_FORMAT_DAYS_DESC_SHORT = 473 
+SI_TIME_FORMAT_HOURS_DESC_SHORT = 474 
+SI_TIME_FORMAT_MINUTES_DESC_SHORT = 475 
+SI_TIME_FORMAT_SECONDS_DESC_SHORT = 476 
+SI_TIME_FORMAT_MONTHS_DESC = 477 
+SI_TIME_FORMAT_MONTHS_DESC_COLOR = 478 
+SI_TIME_FORMAT_DAYS_DESC = 479 
+SI_TIME_FORMAT_DAYS_DESC_COLOR = 480 
+SI_TIME_FORMAT_HOURS_DESC = 481 
+SI_TIME_FORMAT_HOURS_DESC_COLOR = 482 
+SI_TIME_FORMAT_MINUTES_DESC = 483 
+SI_TIME_FORMAT_MINUTES_DESC_COLOR = 484 
+SI_TIME_FORMAT_SECONDS_DESC = 485 
+SI_TIME_FORMAT_SECONDS_DESC_COLOR = 486 
+SI_TIME_FORMAT_DDHHMMSS = 487 
+SI_TIME_FORMAT_DDHHMMSS_DESC_SHORT = 488 
+SI_TIME_FORMAT_DDHHMMSSMS_DESC_SHORT = 489 
+SI_TIME_FORMAT_HHMMSS = 490 
+SI_TIME_FORMAT_HHMMSS_DESC_SHORT = 491 
+SI_TIME_FORMAT_HHMMSSMS_DESC_SHORT = 492 
+SI_TIME_FORMAT_MINUTES_COLON_SECONDS = 493 
+SI_TIME_FORMAT_MMSS_DESC_SHORT = 494 
+SI_TIME_FORMAT_MMSSMS_DESC_SHORT = 495 
+SI_TIME_FORMAT_SSMS_DESC_SHORT = 496 
+SI_TIME_FORMAT_SS_DESC_SHORT = 497 
+SI_TIME_FORMAT_ZERO_COLON_SECONDS = 498 
+SI_STR_TIME_DESC_SECONDS_ONLY = 499 
+SI_STR_TIME_DESC_SECONDS_ONLY_SHORT = 500 
+SI_STR_TIME_DESC_SECONDS_ONLY_MINIMAL = 501 
+SI_STR_TIME_DESC_MINUTES_AND_SECONDS = 502 
+SI_STR_TIME_DESC_MINUTES_AND_SECONDS_SHORT = 503 
+SI_STR_TIME_DESC_MINUTES_AND_SECONDS_SHORT_ZERO_SECS = 504 
+SI_STR_TIME_DESC_MINUTES_AND_SECONDS_MINIMAL = 505 
+SI_STR_TIME_DESC_MINUTES_AND_SECONDS_MINIMAL_HIDE_ZEROES = 506 
+SI_STR_TIME_UNKNOWN = 507 
+SI_STR_TIME_LESS_THAN_MINUTE = 508 
+SI_STR_TIME_LESS_THAN_MINUTE_SHORT = 509 
+SI_STR_TIME_GREATER_THAN_HOUR = 510 
+SI_STR_TIME_GREATER_THAN_HOUR_SHORT = 511 
+SI_STR_TIME_GREATER_THAN_HOUR_PLUS = 512 
+SI_STR_TIME_GREATER_THAN_HOUR_PLUS_SHORT = 513 
+SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS = 514 
+SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_SHORT = 515 
+SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_SHORT_ZERO_SECS = 516 
+SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_MINIMAL = 517 
+SI_STR_TIME_DESC_HOURS_MINUTES_AND_SECONDS_MINIMAL_HIDE_ZEROES = 518 
+SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS = 519 
+SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_SHORT = 520 
+SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_SHORT_ZERO_SECS = 521 
+SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_MINIMAL = 522 
+SI_STR_TIME_DESC_DAYS_HOURS_MINUTES_AND_SECONDS_MINIMAL_HIDE_ZEROES = 523 
+SI_TIME_FORMAT_TIMESTAMP = 524 
+SI_TIME_FORMAT_CLOCK_AM = 525 
+SI_TIME_FORMAT_CLOCK_PM = 526 
+SI_TIME_FORMAT_CLOCK_TWENTY_FOUR_HOUR = 527 
+SI_DATE_FORMAT_FULL_DATE = 528 
+SI_NUMBER_SUFFIX_ONE_THOUSAND_UPPERCASE = 529 
+SI_NUMBER_SUFFIX_TEN_THOUSAND_UPPERCASE = 530 
+SI_NUMBER_SUFFIX_ONE_MILLION_UPPERCASE = 531 
+SI_NUMBER_SUFFIX_ONE_HUNDRED_MILLION_UPPERCASE = 532 
+SI_NUMBER_SUFFIX_ONE_BILLION_UPPERCASE = 533 
+SI_NUMBER_SUFFIX_ONE_THOUSAND_LOWERCASE = 534 
+SI_NUMBER_SUFFIX_TEN_THOUSAND_LOWERCASE = 535 
+SI_NUMBER_SUFFIX_ONE_MILLION_LOWERCASE = 536 
+SI_NUMBER_SUFFIX_ONE_HUNDRED_MILLION_LOWERCASE = 537 
+SI_NUMBER_SUFFIX_ONE_BILLION_LOWERCASE = 538 
+SI_ESO_PLUS_SUBSCRIPTION_LINK_TEXT = 539 
+SI_ESO_ACCOUNT_PAGE_LINK_TEXT = 540 
+SI_CHAPTER_UPGRADE_DIALOG_TITLE = 541 
+SI_NONSTR_CLIENTSHAREDSTRINGS_LAST_ENTRY = 542 --Sync id for ClientSharedStrings last entry
+SI_NONSTR_ESOGAMEDATAENUMS_FIRST_ENTRY = 543 --Sync id for EsoGameDataEnums first entry
+SI_ATTRIBUTES1 = 544 
+SI_ATTRIBUTES2 = 545 
+SI_ATTRIBUTES3 = 546 
+SI_DERIVEDSTATS1 = 547 
+SI_DERIVEDSTATS2 = 548 
+SI_DERIVEDSTATS3 = 549 
+SI_DERIVEDSTATS4 = 550 
+SI_DERIVEDSTATS5 = 551 
+SI_DERIVEDSTATS6 = 552 
+SI_DERIVEDSTATS7 = 553 
+SI_DERIVEDSTATS8 = 554 
+SI_DERIVEDSTATS9 = 555 
+SI_DERIVEDSTATS10 = 556 
+SI_DERIVEDSTATS11 = 557 
+SI_DERIVEDSTATS12 = 558 
+SI_DERIVEDSTATS13 = 559 
+SI_DERIVEDSTATS14 = 560 
+SI_DERIVEDSTATS16 = 561 
+SI_DERIVEDSTATS20 = 562 
+SI_DERIVEDSTATS22 = 563 
+SI_DERIVEDSTATS23 = 564 
+SI_DERIVEDSTATS24 = 565 
+SI_DERIVEDSTATS25 = 566 
+SI_DERIVEDSTATS26 = 567 
+SI_DERIVEDSTATS29 = 568 
+SI_DERIVEDSTATS30 = 569 
+SI_DERIVEDSTATS31 = 570 
+SI_DERIVEDSTATS32 = 571 
+SI_DERIVEDSTATS33 = 572 
+SI_DERIVEDSTATS34 = 573 
+SI_DERIVEDSTATS35 = 574 
+SI_DERIVEDSTATS37 = 575 
+SI_DERIVEDSTATS38 = 576 
+SI_DERIVEDSTATS39 = 577 
+SI_DERIVEDSTATS40 = 578 
+SI_DERIVEDSTATS41 = 579 
+SI_DERIVEDSTATS42 = 580 
+SI_DERIVEDSTATS43 = 581 
+SI_DERIVEDSTATS44 = 582 
+SI_DERIVEDSTATS45 = 583 
+SI_DERIVEDSTATS46 = 584 
+SI_DERIVEDSTATS47 = 585 
+SI_DERIVEDSTATS48 = 586 
+SI_DERIVEDSTATS49 = 587 
+SI_DERIVEDSTATS50 = 588 
+SI_CHARACTERSLIDERCATEGORY0 = 589 
+SI_CHARACTERSLIDERCATEGORY1 = 590 
+SI_CHARACTERSLIDERCATEGORY2 = 591 
+SI_CHARACTERSLIDERSUBCATEGORY0 = 592 
+SI_CHARACTERSLIDERSUBCATEGORY1 = 593 
+SI_CHARACTERSLIDERSUBCATEGORY2 = 594 
+SI_CHARACTERSLIDERSUBCATEGORY3 = 595 
+SI_CHARACTERSLIDERSUBCATEGORY4 = 596 
+SI_CHARACTERSLIDERSUBCATEGORY5 = 597 
+SI_CHARACTERSLIDERSUBCATEGORY6 = 598 
+SI_CHARACTERSLIDERSUBCATEGORY7 = 599 
+SI_CHARACTERSLIDERSUBCATEGORY8 = 600 
+SI_CHARACTERSLIDERSUBCATEGORY9 = 601 
+SI_CHARACTERSLIDERSUBCATEGORY10 = 602 
+SI_CHARACTERSLIDERSUBCATEGORY11 = 603 
+SI_CHARACTERSLIDERSUBCATEGORY12 = 604 
+SI_CHARACTERSLIDERSUBCATEGORY13 = 605 
+SI_CHARACTERSLIDERNAME0 = 606 
+SI_CHARACTERSLIDERNAME1 = 607 
+SI_CHARACTERSLIDERNAME2 = 608 
+SI_CHARACTERSLIDERNAME3 = 609 
+SI_CHARACTERSLIDERNAME4 = 610 
+SI_CHARACTERSLIDERNAME5 = 611 
+SI_CHARACTERSLIDERNAME6 = 612 
+SI_CHARACTERSLIDERNAME7 = 613 
+SI_CHARACTERSLIDERNAME8 = 614 
+SI_CHARACTERSLIDERNAME9 = 615 
+SI_CHARACTERSLIDERNAME10 = 616 
+SI_CHARACTERSLIDERNAME11 = 617 
+SI_CHARACTERSLIDERNAME12 = 618 
+SI_CHARACTERSLIDERNAME13 = 619 
+SI_CHARACTERSLIDERNAME14 = 620 
+SI_CHARACTERSLIDERNAME15 = 621 
+SI_CHARACTERSLIDERNAME16 = 622 
+SI_CHARACTERSLIDERNAME17 = 623 
+SI_CHARACTERSLIDERNAME18 = 624 
+SI_CHARACTERSLIDERNAME19 = 625 
+SI_CHARACTERSLIDERNAME20 = 626 
+SI_CHARACTERSLIDERNAME21 = 627 
+SI_CHARACTERSLIDERNAME22 = 628 
+SI_CHARACTERSLIDERNAME23 = 629 
+SI_CHARACTERSLIDERNAME24 = 630 
+SI_CHARACTERSLIDERNAME25 = 631 
+SI_CHARACTERSLIDERNAME26 = 632 
+SI_CHARACTERSLIDERNAME27 = 633 
+SI_CHARACTERSLIDERNAME28 = 634 
+SI_CHARACTERSLIDERNAME29 = 635 
+SI_CHARACTERSLIDERNAME30 = 636 
+SI_CHARACTERSLIDERNAME31 = 637 
+SI_CHARACTERSLIDERNAME32 = 638 
+SI_CHARACTERSLIDERNAME33 = 639 
+SI_CHARACTERSLIDERNAME34 = 640 
+SI_CHARACTERSLIDERNAME35 = 641 
+SI_CHARACTERSLIDERNAME36 = 642 
+SI_CHARACTERSLIDERNAME37 = 643 
+SI_CHARACTERSLIDERNAME38 = 644 
+SI_CHARACTERSLIDERNAME39 = 645 
+SI_CHARACTERSLIDERNAME40 = 646 
+SI_CHARACTERAPPEARANCENAME0 = 647 
+SI_CHARACTERAPPEARANCENAME1 = 648 
+SI_CHARACTERAPPEARANCENAME2 = 649 
+SI_CHARACTERAPPEARANCENAME3 = 650 
+SI_CHARACTERAPPEARANCENAME4 = 651 
+SI_CHARACTERAPPEARANCENAME5 = 652 
+SI_CHARACTERAPPEARANCENAME6 = 653 
+SI_CHARACTERAPPEARANCENAME7 = 654 
+SI_CHARACTERAPPEARANCENAME8 = 655 
+SI_CHARACTERAPPEARANCENAME9 = 656 
+SI_CHARACTERCREATEDRESSINGOPTION0 = 657 
+SI_CHARACTERCREATEDRESSINGOPTION1 = 658 
+SI_CHARACTERCREATEDRESSINGOPTION2 = 659 
+SI_CHARACTERCREATEDRESSINGOPTION3 = 660 
+SI_CHARACTERCREATEDRESSINGOPTION4 = 661 
+SI_LEADERBOARDTYPE0 = 662 
+SI_LEADERBOARDTYPE1 = 663 
+SI_LEADERBOARDTYPE2 = 664 
+SI_LEADERBOARDTYPE3 = 665 
+SI_LEADERBOARDTYPE4 = 666 
+SI_CURRENCYTYPE1 = 667 
+SI_CURRENCYTYPE2 = 668 
+SI_CURRENCYTYPE3 = 669 
+SI_CURRENCYTYPE4 = 670 
+SI_CURRENCYTYPE5 = 671 
+SI_MARKETCURRENCYTYPE1 = 672 
+SI_MARKETCURRENCYTYPE2 = 673 
+SI_ALLIANCE0 = 674 
+SI_ALLIANCE1 = 675 
+SI_ALLIANCE2 = 676 
+SI_ALLIANCE3 = 677 
+SI_SCORETRACKERENTRYTYPE1 = 678 
+SI_SCORETRACKERENTRYTYPE2 = 679 
+SI_SCORETRACKERENTRYTYPE7 = 680 
+SI_RAIDCATEGORY0 = 681 
+SI_RAIDCATEGORY1 = 682 
+SI_BATTLEGROUNDGAMETYPE0 = 683 
+SI_BATTLEGROUNDGAMETYPE1 = 684 
+SI_BATTLEGROUNDGAMETYPE2 = 685 
+SI_BATTLEGROUNDGAMETYPE3 = 686 
+SI_BATTLEGROUNDGAMETYPE4 = 687 
+SI_BATTLEGROUNDGAMETYPE5 = 688 
+SI_BATTLEGROUNDGAMETYPE6 = 689 
+SI_BATTLEGROUNDLEADERBOARDTYPE0 = 690 
+SI_BATTLEGROUNDLEADERBOARDTYPE1 = 691 
+SI_BATTLEGROUNDLEADERBOARDTYPE2 = 692 
+SI_BATTLEGROUNDLEADERBOARDTYPE3 = 693 
+SI_GROUPELECTIONFAILURE1 = 694 
+SI_GROUPELECTIONFAILURE2 = 695 
+SI_GROUPELECTIONFAILURE3 = 696 
+SI_GROUPELECTIONFAILURE4 = 697 
+SI_GROUPELECTIONFAILURE5 = 698 
+SI_GROUPELECTIONFAILURE6 = 699 
+SI_GROUPELECTIONFAILURE7 = 700 
+SI_GROUPELECTIONFAILURE8 = 701 
+SI_GROUPELECTIONFAILURE9 = 702 
+SI_GROUPELECTIONFAILURE10 = 703 
+SI_GROUPELECTIONFAILURE11 = 704 
+SI_GROUPELECTIONFAILURE12 = 705 
+SI_GROUPELECTIONFAILURE13 = 706 
+SI_GROUPELECTIONRESULT1 = 707 
+SI_GROUPELECTIONRESULT2 = 708 
+SI_GROUPELECTIONRESULT3 = 709 
+SI_GROUPELECTIONRESULT4 = 710 
+SI_GROUPELECTIONRESULT5 = 711 
+SI_GROUPELECTIONTYPE3 = 712 
+SI_GROUPELECTIONTYPE4 = 713 
+SI_GROUPLEAVEREASON0 = 714 
+SI_GROUPLEAVEREASON1 = 715 
+SI_GROUPLEAVEREASON2 = 716 
+SI_GROUPLEAVEREASON4 = 717 
+SI_RECIPECRAFTINGSYSTEM1 = 718 
+SI_RECIPECRAFTINGSYSTEM2 = 719 
+SI_RECIPECRAFTINGSYSTEM3 = 720 
+SI_RECIPECRAFTINGSYSTEM4 = 721 
+SI_RECIPECRAFTINGSYSTEM5 = 722 
+SI_RECIPECRAFTINGSYSTEM6 = 723 
+SI_SKILLTYPE1 = 724 
+SI_SKILLTYPE2 = 725 
+SI_SKILLTYPE3 = 726 
+SI_SKILLTYPE4 = 727 
+SI_SKILLTYPE5 = 728 
+SI_SKILLTYPE6 = 729 
+SI_SKILLTYPE7 = 730 
+SI_SKILLTYPE8 = 731 
+SI_SKILLTYPE9 = 732 
+SI_MOUSEDESTROYITEMFAILEDREASON1 = 733 
+SI_MOUSEDESTROYITEMFAILEDREASON2 = 734 
+SI_AUDIOSPEAKERCONFIGURATIONS0 = 735 
+SI_AUDIOSPEAKERCONFIGURATIONS1 = 736 
+SI_AUDIOSPEAKERCONFIGURATIONS2 = 737 
+SI_AUDIOSPEAKERCONFIGURATIONS3 = 738 
+SI_AUDIOSPEAKERCONFIGURATIONS4 = 739 
+SI_AUDIOSPEAKERCONFIGURATIONS5 = 740 
+SI_AUDIOSPEAKERCONFIGURATIONS6 = 741 
+SI_AUDIOSPEAKERCONFIGURATIONS7 = 742 
+SI_AUDIOSPEAKERCONFIGURATIONS8 = 743 
+SI_INSTANCETYPE1 = 744 
+SI_INSTANCETYPE2 = 745 
+SI_INSTANCETYPE3 = 746 
+SI_INSTANCEDISPLAYTYPE1 = 747 
+SI_INSTANCEDISPLAYTYPE2 = 748 
+SI_INSTANCEDISPLAYTYPE3 = 749 
+SI_INSTANCEDISPLAYTYPE4 = 750 
+SI_INSTANCEDISPLAYTYPE5 = 751 
+SI_INSTANCEDISPLAYTYPE6 = 752 
+SI_INSTANCEDISPLAYTYPE7 = 753 
+SI_INSTANCEDISPLAYTYPE8 = 754 
+SI_INSTANCEDISPLAYTYPE9 = 755 
+SI_CHATCHANNELCATEGORIES1 = 756 
+SI_CHATCHANNELCATEGORIES2 = 757 
+SI_CHATCHANNELCATEGORIES3 = 758 
+SI_CHATCHANNELCATEGORIES4 = 759 
+SI_CHATCHANNELCATEGORIES6 = 760 
+SI_CHATCHANNELCATEGORIES7 = 761 
+SI_CHATCHANNELCATEGORIES8 = 762 
+SI_CHATCHANNELCATEGORIES9 = 763 
+SI_CHATCHANNELCATEGORIES10 = 764 
+SI_CHATCHANNELCATEGORIES11 = 765 
+SI_CHATCHANNELCATEGORIES12 = 766 
+SI_CHATCHANNELCATEGORIES13 = 767 
+SI_CHATCHANNELCATEGORIES14 = 768 
+SI_CHATCHANNELCATEGORIES15 = 769 
+SI_CHATCHANNELCATEGORIES16 = 770 
+SI_CHATCHANNELCATEGORIES17 = 771 
+SI_CHATCHANNELCATEGORIES18 = 772 
+SI_CHATCHANNELCATEGORIES19 = 773 
+SI_CHATCHANNELCATEGORIES20 = 774 
+SI_CHATCHANNELCATEGORIES21 = 775 
+SI_CHATCHANNELCATEGORIES22 = 776 
+SI_CHATCHANNELCATEGORIES23 = 777 
+SI_CHATCHANNELCATEGORIES41 = 778 
+SI_CHATCHANNELCATEGORIES42 = 779 
+SI_CHATCHANNELCATEGORIES43 = 780 
+SI_CHATCHANNELCATEGORIES44 = 781 
+SI_CHATCHANNELCATEGORIES45 = 782 
+SI_CHATCHANNELCATEGORIES46 = 783 
+SI_CHATCHANNELCATEGORIES47 = 784 
+SI_CHATCHANNELCATEGORIES48 = 785 
+SI_CHATCHANNELCATEGORIES49 = 786 
+SI_CHATCHANNELCATEGORIES50 = 787 
+SI_CHATCHANNELCATEGORIES51 = 788 
+SI_CHATCHANNELCATEGORIES52 = 789 
+SI_CHATCHANNELCATEGORIES53 = 790 
+SI_CHATCHANNELCATEGORIES54 = 791 
+SI_CHATCHANNELCATEGORIES55 = 792 
+SI_CHATCHANNELCATEGORIES56 = 793 
+SI_CHATCHANNELCATEGORIES57 = 794 
+SI_CHATCHANNELCATEGORIES58 = 795 
+SI_CHATCHANNELCATEGORIES59 = 796 
+SI_CHATCHANNELCATEGORIES60 = 797 
+SI_CHATCHANNELCATEGORIES61 = 798 
+SI_CHATCHANNELCATEGORYHEADERS1 = 799 
+SI_CHATCHANNELCATEGORYHEADERS10 = 800 
+SI_CHATCHANNELCATEGORYHEADERS45 = 801 
+SI_GROUPDIFFICULTYCHANGEREASON0 = 802 
+SI_GROUPDIFFICULTYCHANGEREASON1 = 803 
+SI_GROUPDIFFICULTYCHANGEREASON2 = 804 
+SI_GROUPDIFFICULTYCHANGEREASON3 = 805 
+SI_GROUPDIFFICULTYCHANGEREASON4 = 806 
+SI_ACTIVECOMBATTIPSETTING0 = 807 
+SI_ACTIVECOMBATTIPSETTING1 = 808 
+SI_ACTIVECOMBATTIPSETTING2 = 809 
+SI_LOCKQUALITY1 = 810 
+SI_LOCKQUALITY2 = 811 
+SI_LOCKQUALITY3 = 812 
+SI_LOCKQUALITY4 = 813 
+SI_LOCKQUALITY5 = 814 
+SI_LOCKQUALITY6 = 815 
+SI_LOCKQUALITY7 = 816 
+SI_GAMECAMERAACTIONTYPE1 = 817 
+SI_GAMECAMERAACTIONTYPE2 = 818 
+SI_GAMECAMERAACTIONTYPE3 = 819 
+SI_GAMECAMERAACTIONTYPE4 = 820 
+SI_GAMECAMERAACTIONTYPE5 = 821 
+SI_GAMECAMERAACTIONTYPE6 = 822 
+SI_GAMECAMERAACTIONTYPE7 = 823 
+SI_GAMECAMERAACTIONTYPE8 = 824 
+SI_GAMECAMERAACTIONTYPE9 = 825 
+SI_GAMECAMERAACTIONTYPE10 = 826 
+SI_GAMECAMERAACTIONTYPE11 = 827 
+SI_GAMECAMERAACTIONTYPE12 = 828 
+SI_GAMECAMERAACTIONTYPE13 = 829 
+SI_GAMECAMERAACTIONTYPE15 = 830 
+SI_GAMECAMERAACTIONTYPE16 = 831 
+SI_GAMECAMERAACTIONTYPE17 = 832 
+SI_GAMECAMERAACTIONTYPE18 = 833 
+SI_GAMECAMERAACTIONTYPE19 = 834 
+SI_GAMECAMERAACTIONTYPE20 = 835 
+SI_GAMECAMERAACTIONTYPE21 = 836 
+SI_GAMECAMERAACTIONTYPE23 = 837 
+SI_GAMECAMERAACTIONTYPE24 = 838 
+SI_GAMECAMERAACTIONTYPE25 = 839 
+SI_GAMECAMERAACTIONTYPE26 = 840 
+SI_SHADOWYCONNECTIONCHOICE1 = 841 
+SI_SHADOWYCONNECTIONCHOICE2 = 842 
+SI_SHADOWYCONNECTIONCHOICE3 = 843 
+SI_PLATFORMACCOUNTLABEL0 = 844 
+SI_PLATFORMACCOUNTLABEL1 = 845 
+SI_PLATFORMACCOUNTLABEL2 = 846 
+SI_RIDINGTRAINTYPE1 = 847 
+SI_RIDINGTRAINTYPE2 = 848 
+SI_RIDINGTRAINTYPE3 = 849 
+SI_PLAYERSTATUS1 = 850 
+SI_PLAYERSTATUS2 = 851 
+SI_PLAYERSTATUS3 = 852 
+SI_PLAYERSTATUS4 = 853 
+SI_DUELSTATE1 = 854 
+SI_DUELSTATE2 = 855 
+SI_DUELSTATE3 = 856 
+SI_DUELSTATE4 = 857 
+SI_DUELSTATE5 = 858 
+SI_DUELRESULT0 = 859 
+SI_DUELRESULT1 = 860 
+SI_NOTIFICATIONTYPE1 = 861 
+SI_NOTIFICATIONTYPE2 = 862 
+SI_NOTIFICATIONTYPE3 = 863 
+SI_NOTIFICATIONTYPE4 = 864 
+SI_NOTIFICATIONTYPE5 = 865 
+SI_NOTIFICATIONTYPE6 = 866 
+SI_NOTIFICATIONTYPE7 = 867 
+SI_NOTIFICATIONTYPE8 = 868 
+SI_NOTIFICATIONTYPE9 = 869 
+SI_NOTIFICATIONTYPE10 = 870 
+SI_NOTIFICATIONTYPE11 = 871 
+SI_NOTIFICATIONTYPE12 = 872 
+SI_NOTIFICATIONTYPE13 = 873 
+SI_NOTIFICATIONTYPE14 = 874 
+SI_NOTIFICATIONTYPE15 = 875 
+SI_NOTIFICATIONTYPE16 = 876 
+SI_NOTIFICATIONTYPE17 = 877 
+SI_NOTIFICATIONTYPE18 = 878 
+SI_NOTIFICATIONTYPE19 = 879 
+SI_MAPFILTER1 = 880 
+SI_MAPFILTER2 = 881 
+SI_MAPFILTER3 = 882 
+SI_MAPFILTER4 = 883 
+SI_MAPFILTER5 = 884 
+SI_MAPFILTER6 = 885 
+SI_MAPFILTER7 = 886 
+SI_MAPFILTER8 = 887 
+SI_MAPFILTER9 = 888 
+SI_MAPFILTER10 = 889 
+SI_MAPFILTER12 = 890 
+SI_MAPTRANSITLINEALLIANCE1 = 891 
+SI_MAPTRANSITLINEALLIANCE2 = 892 
+SI_GAMEPADTEMPLATE0 = 893 
+SI_GAMEPADTEMPLATE1 = 894 
+SI_GAMEPADTEMPLATE2 = 895 
+SI_GAMEPADTEMPLATE3 = 896 
+SI_GAMEPADTEMPLATE4 = 897 
+SI_GAMEPADTEMPLATE5 = 898 
+SI_GAMEPADTEMPLATE6 = 899 
+SI_GAMEPADTEMPLATE7 = 900 
+SI_PICKPOCKETDIFFICULTYTYPE0 = 901 
+SI_PICKPOCKETDIFFICULTYTYPE1 = 902 
+SI_PICKPOCKETDIFFICULTYTYPE2 = 903 
+SI_PICKPOCKETDIFFICULTYTYPE3 = 904 
+SI_PROSPECTIVEPICKPOCKETRESULT1 = 905 
+SI_PROSPECTIVEPICKPOCKETRESULT2 = 906 
+SI_PROSPECTIVEPICKPOCKETRESULT3 = 907 
+SI_PROSPECTIVEPICKPOCKETRESULT4 = 908 
+SI_INFAMYTHRESHOLDSTYPE0 = 909 
+SI_INFAMYTHRESHOLDSTYPE1 = 910 
+SI_INFAMYTHRESHOLDSTYPE2 = 911 
+SI_INFAMYTHRESHOLDSTYPE3 = 912 
+SI_JUSTICEALLEGIANCE1 = 913 
+SI_JUSTICEALLEGIANCE2 = 914 
+SI_MONSTERSOCIALCLASS2 = 915 
+SI_MONSTERSOCIALCLASS3 = 916 
+SI_MONSTERSOCIALCLASS4 = 917 
+SI_MONSTERSOCIALCLASS5 = 918 
+SI_MONSTERSOCIALCLASS6 = 919 
+SI_MONSTERSOCIALCLASS7 = 920 
+SI_MONSTERSOCIALCLASS8 = 921 
+SI_MONSTERSOCIALCLASS9 = 922 
+SI_MONSTERSOCIALCLASS10 = 923 
+SI_MONSTERSOCIALCLASS11 = 924 
+SI_MONSTERSOCIALCLASS12 = 925 
+SI_MONSTERSOCIALCLASS13 = 926 
+SI_MONSTERSOCIALCLASS14 = 927 
+SI_MONSTERSOCIALCLASS15 = 928 
+SI_MONSTERSOCIALCLASS16 = 929 
+SI_MONSTERSOCIALCLASS17 = 930 
+SI_MONSTERSOCIALCLASS18 = 931 
+SI_MONSTERSOCIALCLASS19 = 932 
+SI_MONSTERSOCIALCLASS20 = 933 
+SI_MONSTERSOCIALCLASS21 = 934 
+SI_MONSTERSOCIALCLASS22 = 935 
+SI_MONSTERSOCIALCLASS23 = 936 
+SI_MONSTERSOCIALCLASS24 = 937 
+SI_MONSTERSOCIALCLASS25 = 938 
+SI_MONSTERSOCIALCLASS26 = 939 
+SI_MONSTERSOCIALCLASS27 = 940 
+SI_MONSTERSOCIALCLASS28 = 941 
+SI_MONSTERSOCIALCLASS29 = 942 
+SI_MONSTERSOCIALCLASS30 = 943 
+SI_MONSTERSOCIALCLASS31 = 944 
+SI_MONSTERSOCIALCLASS32 = 945 
+SI_MONSTERSOCIALCLASS33 = 946 
+SI_MONSTERSOCIALCLASS34 = 947 
+SI_MONSTERSOCIALCLASS35 = 948 
+SI_MONSTERSOCIALCLASS36 = 949 
+SI_MONSTERSOCIALCLASS37 = 950 
+SI_MONSTERSOCIALCLASS38 = 951 
+SI_MONSTERSOCIALCLASS39 = 952 
+SI_MONSTERSOCIALCLASS40 = 953 
+SI_MONSTERSOCIALCLASS41 = 954 
+SI_MONSTERSOCIALCLASS42 = 955 
+SI_MONSTERSOCIALCLASS43 = 956 
+SI_MONSTERSOCIALCLASS44 = 957 
+SI_MONSTERSOCIALCLASS45 = 958 
+SI_MONSTERSOCIALCLASS46 = 959 
+SI_MARKETPURCHASABLERESULT0 = 960 
+SI_MARKETPURCHASABLERESULT1 = 961 
+SI_MARKETPURCHASABLERESULT2 = 962 
+SI_MARKETPURCHASABLERESULT3 = 963 
+SI_MARKETPURCHASABLERESULT4 = 964 
+SI_MARKETPURCHASABLERESULT5 = 965 
+SI_MARKETPURCHASABLERESULT6 = 966 
+SI_MARKETPURCHASABLERESULT7 = 967 
+SI_MARKETPURCHASABLERESULT8 = 968 
+SI_MARKETPURCHASABLERESULT9 = 969 
+SI_MARKETPURCHASABLERESULT10 = 970 
+SI_MARKETPURCHASABLERESULT11 = 971 
+SI_MARKETPURCHASABLERESULT12 = 972 
+SI_MARKETPURCHASABLERESULT13 = 973 
+SI_MARKETPURCHASABLERESULT14 = 974 
+SI_MARKETPURCHASABLERESULT15 = 975 
+SI_EMOTECATEGORY0 = 976 
+SI_EMOTECATEGORY1 = 977 
+SI_EMOTECATEGORY2 = 978 
+SI_EMOTECATEGORY3 = 979 
+SI_EMOTECATEGORY4 = 980 
+SI_EMOTECATEGORY5 = 981 
+SI_EMOTECATEGORY6 = 982 
+SI_EMOTECATEGORY7 = 983 
+SI_EMOTECATEGORY8 = 984 
+SI_EMOTECATEGORY9 = 985 
+SI_EMOTECATEGORY10 = 986 
+SI_EMOTECATEGORY11 = 987 
+SI_EMOTECATEGORY12 = 988 
+SI_EMOTECATEGORY13 = 989 
+SI_EMOTECATEGORY14 = 990 
+SI_MARKETFILTERVIEW1 = 991 
+SI_MARKETFILTERVIEW2 = 992 
+SI_MARKETFILTERVIEW3 = 993 
+SI_MEGASERVER0 = 994 
+SI_MEGASERVER1 = 995 
+SI_MEGASERVER2 = 996 
+SI_CONSOLESERVERCHOICE0 = 997 
+SI_CONSOLESERVERCHOICE1 = 998 
+SI_APPROVEDURLTYPE0 = 999 
+SI_APPROVEDURLTYPE1 = 1000 
+SI_APPROVEDURLTYPE2 = 1001 
+SI_APPROVEDURLTYPE3 = 1002 
+SI_APPROVEDURLTYPE4 = 1003 
+SI_APPROVEDURLTYPE5 = 1004 
+SI_APPROVEDURLTYPEDMM0 = 1005 
+SI_APPROVEDURLTYPEDMM1 = 1006 
+SI_APPROVEDURLTYPEDMM2 = 1007 
+SI_APPROVEDURLTYPEDMM3 = 1008 
+SI_APPROVEDURLTYPEDMM4 = 1009 
+SI_APPROVEDURLTYPEDMM5 = 1010 
+SI_APPROVEDURLTYPESTEAM0 = 1011 
+SI_APPROVEDURLTYPESTEAM1 = 1012 
+SI_APPROVEDURLTYPESTEAM2 = 1013 
+SI_APPROVEDURLTYPESTEAM3 = 1014 
+SI_APPROVEDURLTYPESTEAM4 = 1015 
+SI_APPROVEDURLTYPESTEAM5 = 1016 
+SI_DUNGEONDIFFICULTY1 = 1017 
+SI_DUNGEONDIFFICULTY2 = 1018 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS0 = 1019 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS1 = 1020 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS2 = 1021 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS3 = 1022 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS4 = 1023 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS5 = 1024 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS6 = 1025 
+SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS7 = 1026 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES0 = 1027 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES1 = 1028 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES2 = 1029 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES3 = 1030 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES4 = 1031 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES5 = 1032 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES6 = 1033 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES7 = 1034 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES8 = 1035 
+SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES9 = 1036 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES0 = 1037 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES1 = 1038 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES2 = 1039 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES3 = 1040 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES4 = 1041 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES101 = 1042 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES102 = 1043 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES103 = 1044 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES104 = 1045 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES201 = 1046 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES202 = 1047 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES203 = 1048 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES204 = 1049 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES205 = 1050 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES206 = 1051 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES207 = 1052 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES208 = 1053 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES209 = 1054 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES210 = 1055 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES211 = 1056 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES212 = 1057 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES301 = 1058 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES302 = 1059 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES303 = 1060 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES304 = 1061 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES305 = 1062 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES401 = 1063 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES402 = 1064 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES403 = 1065 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES404 = 1066 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES405 = 1067 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES406 = 1068 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES407 = 1069 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES501 = 1070 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES502 = 1071 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES503 = 1072 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES504 = 1073 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES505 = 1074 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES506 = 1075 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES507 = 1076 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES508 = 1077 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES509 = 1078 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES510 = 1079 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES601 = 1080 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES602 = 1081 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES603 = 1082 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES604 = 1083 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES605 = 1084 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES606 = 1085 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES607 = 1086 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES608 = 1087 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES609 = 1088 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES610 = 1089 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES611 = 1090 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES612 = 1091 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES701 = 1092 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES702 = 1093 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES703 = 1094 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES704 = 1095 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES705 = 1096 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES801 = 1097 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES802 = 1098 
+SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES803 = 1099 
+SI_CUSTOMERSERVICEASKFORHELPCATEGORIES0 = 1100 
+SI_CUSTOMERSERVICEASKFORHELPCATEGORIES1 = 1101 
+SI_CUSTOMERSERVICEASKFORHELPCATEGORIES2 = 1102 
+SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES0 = 1103 
+SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES1 = 1104 
+SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES2 = 1105 
+SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES0 = 1106 
+SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES2 = 1107 
+SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES3 = 1108 
+SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES4 = 1109 
+SI_CUSTOMERSERVICEITEMASSISTANCECATEGORIES5 = 1110 
+SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY0 = 1111 
+SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY1 = 1112 
+SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY2 = 1113 
+SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY3 = 1114 
+SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY4 = 1115 
+SI_CHAMPIONPOINTACTIVEREASON1 = 1116 
+SI_CHAMPIONPOINTACTIVEREASON2 = 1117 
+SI_CADWELLPROGRESSIONLEVEL0 = 1118 
+SI_CADWELLPROGRESSIONLEVEL1 = 1119 
+SI_CADWELLPROGRESSIONLEVEL2 = 1120 
+SI_PLATFORMSERVICETYPE1 = 1121 
+SI_PLATFORMSERVICETYPE2 = 1122 
+SI_PLATFORMSERVICETYPE3 = 1123 
+SI_PLATFORMSERVICETYPE4 = 1124 
+SI_PLATFORMSTORELABEL0 = 1125 
+SI_PLATFORMSTORELABEL1 = 1126 
+SI_PLATFORMSTORELABEL2 = 1127 
+SI_PLATFORMSTORELABEL3 = 1128 
+SI_PLATFORMSTORELABEL4 = 1129 
+SI_SERVICETOKENTYPE1 = 1130 
+SI_SERVICETOKENTYPE2 = 1131 
+SI_SERVICETOKENTYPE3 = 1132 
+SI_BATTLEGROUNDALLIANCE0 = 1133 
+SI_BATTLEGROUNDALLIANCE1 = 1134 
+SI_BATTLEGROUNDALLIANCE2 = 1135 
+SI_BATTLEGROUNDALLIANCE3 = 1136 
+SI_BATTLEGROUNDKILLTYPE0 = 1137 
+SI_BATTLEGROUNDKILLTYPE1 = 1138 
+SI_BATTLEGROUNDKILLTYPE2 = 1139 
+SI_BATTLEGROUNDKILLTYPE3 = 1140 
+SI_BATTLEGROUNDKILLTYPE4 = 1141 
+SI_CHARACTERCREATEOPTIONRESTRICTIONREASON1 = 1142 
+SI_CHARACTERCREATEOPTIONRESTRICTIONREASON2 = 1143 
+SI_PLAYEREMOTEPLAYFAILURE0 = 1144 
+SI_PLAYEREMOTEPLAYFAILURE1 = 1145 
+SI_MULTILOCALIZEDENUMTEST1 = 1146 
+SI_MULTILOCALIZEDENUMTEST2 = 1147 
+SI_MULTILOCALIZEDENUMTEST3 = 1148 
+SI_MULTILOCALIZEDENUMTESTDESCONE3 = 1149 
+SI_MULTILOCALIZEDENUMTESTDESCTWO3 = 1150 
+SI_MULTILOCALIZEDENUMTEST4 = 1151 
+SI_MULTILOCALIZEDENUMTESTDESCONE4 = 1152 
+SI_MULTILOCALIZEDENUMTESTDESCTWO4 = 1153 
+SI_NONSTR_ESOGAMEDATAENUMS_LAST_ENTRY = 1154 --Sync id for EsoGameDataEnums last entry
+SI_NONSTR_ESOGAMEDATAENUMS_COLLECTIBLE_FIRST_ENTRY = 1155 --Sync id for EsoGameDataEnums_Collectible first entry
+SI_COLLECTIBLEUSAGEBLOCKREASON1 = 1156 
+SI_COLLECTIBLEUSAGEBLOCKREASON2 = 1157 
+SI_COLLECTIBLEUSAGEBLOCKREASON3 = 1158 
+SI_COLLECTIBLEUSAGEBLOCKREASON4 = 1159 
+SI_COLLECTIBLEUSAGEBLOCKREASON5 = 1160 
+SI_COLLECTIBLEUSAGEBLOCKREASON6 = 1161 
+SI_COLLECTIBLEUSAGEBLOCKREASON7 = 1162 
+SI_COLLECTIBLEUSAGEBLOCKREASON8 = 1163 
+SI_COLLECTIBLEUSAGEBLOCKREASON9 = 1164 
+SI_COLLECTIBLEUSAGEBLOCKREASON10 = 1165 
+SI_COLLECTIBLERESTRICTIONTYPE0 = 1166 
+SI_COLLECTIBLERESTRICTIONTYPE1 = 1167 
+SI_COLLECTIBLERESTRICTIONTYPE2 = 1168 
+SI_COLLECTIBLERESTRICTIONTYPE3 = 1169 
+SI_COLLECTIBLECATEGORYTYPE0 = 1170 
+SI_COLLECTIBLECATEGORYTYPE1 = 1171 
+SI_COLLECTIBLECATEGORYTYPE2 = 1172 
+SI_COLLECTIBLECATEGORYTYPE3 = 1173 
+SI_COLLECTIBLECATEGORYTYPE4 = 1174 
+SI_COLLECTIBLECATEGORYTYPE5 = 1175 
+SI_COLLECTIBLECATEGORYTYPE6 = 1176 
+SI_COLLECTIBLECATEGORYTYPE7 = 1177 
+SI_COLLECTIBLECATEGORYTYPE8 = 1178 
+SI_COLLECTIBLECATEGORYTYPE9 = 1179 
+SI_COLLECTIBLECATEGORYTYPE10 = 1180 
+SI_COLLECTIBLECATEGORYTYPE11 = 1181 
+SI_COLLECTIBLECATEGORYTYPE12 = 1182 
+SI_COLLECTIBLECATEGORYTYPE13 = 1183 
+SI_COLLECTIBLECATEGORYTYPE14 = 1184 
+SI_COLLECTIBLECATEGORYTYPE15 = 1185 
+SI_COLLECTIBLECATEGORYTYPE16 = 1186 
+SI_COLLECTIBLECATEGORYTYPE17 = 1187 
+SI_COLLECTIBLECATEGORYTYPE18 = 1188 
+SI_COLLECTIBLECATEGORYTYPE19 = 1189 
+SI_COLLECTIBLECATEGORYTYPE20 = 1190 
+SI_COLLECTIBLECATEGORYTYPE21 = 1191 
+SI_COLLECTIBLECATEGORYTYPE22 = 1192 
+SI_COLLECTIBLECATEGORYTYPE23 = 1193 
+SI_SPECIALIZEDCOLLECTIBLETYPE1 = 1194 
+SI_COLLECTIBLEUNLOCKSTATE0 = 1195 
+SI_COLLECTIBLEUNLOCKSTATE1 = 1196 
+SI_COLLECTIBLEUNLOCKSTATE2 = 1197 
+SI_NONSTR_ESOGAMEDATAENUMS_COLLECTIBLE_LAST_ENTRY = 1198 --Sync id for EsoGameDataEnums_Collectible last entry
+SI_NONSTR_ESOGAMEDATAENUMS_DYEING_FIRST_ENTRY = 1199 --Sync id for EsoGameDataEnums_Dyeing first entry
+SI_DYEABLESLOT0 = 1200 
+SI_DYEABLESLOT1 = 1201 
+SI_DYEABLESLOT2 = 1202 
+SI_DYEABLESLOT3 = 1203 
+SI_DYEABLESLOT4 = 1204 
+SI_DYEABLESLOT5 = 1205 
+SI_DYEABLESLOT6 = 1206 
+SI_DYEABLESLOT7 = 1207 
+SI_DYEABLESLOT8 = 1208 
+SI_DYEABLESLOT9 = 1209 
+SI_DYEABLESLOT10 = 1210 
+SI_DYERARITY0 = 1211 
+SI_DYERARITY1 = 1212 
+SI_DYERARITY2 = 1213 
+SI_DYEHUECATEGORY0 = 1214 
+SI_DYEHUECATEGORY1 = 1215 
+SI_DYEHUECATEGORY2 = 1216 
+SI_DYEHUECATEGORY3 = 1217 
+SI_DYEHUECATEGORY4 = 1218 
+SI_DYEHUECATEGORY5 = 1219 
+SI_DYEHUECATEGORY6 = 1220 
+SI_DYESTAMPUSERESULT1 = 1221 
+SI_DYESTAMPUSERESULT2 = 1222 
+SI_DYESTAMPUSERESULT3 = 1223 
+SI_DYESTAMPUSERESULT4 = 1224 
+SI_DYESTAMPUSERESULT5 = 1225 
+SI_DYESTAMPUSERESULT6 = 1226 
+SI_NONSTR_ESOGAMEDATAENUMS_DYEING_LAST_ENTRY = 1227 --Sync id for EsoGameDataEnums_Dyeing last entry
+SI_NONSTR_ESOGAMEDATAENUMS_FURNITURE_FIRST_ENTRY = 1228 --Sync id for EsoGameDataEnums_Furniture first entry
+SI_NONSTR_ESOGAMEDATAENUMS_FURNITURE_LAST_ENTRY = 1229 --Sync id for EsoGameDataEnums_Furniture last entry
+SI_NONSTR_ESOGAMEDATAENUMS_HOUSING_FIRST_ENTRY = 1230 --Sync id for EsoGameDataEnums_Housing first entry
+SI_HOUSECATEGORYTYPE0 = 1231 
+SI_HOUSECATEGORYTYPE1 = 1232 
+SI_HOUSECATEGORYTYPE2 = 1233 
+SI_HOUSECATEGORYTYPE3 = 1234 
+SI_HOUSEPERMISSIONPRESETSETTING0 = 1235 
+SI_HOUSEPERMISSIONPRESETSETTING1 = 1236 
+SI_HOUSEPERMISSIONPRESETSETTING2 = 1237 
+SI_HOUSEPERMISSIONDEFAULTACCESSSETTING0 = 1238 
+SI_HOUSEPERMISSIONDEFAULTACCESSSETTING1 = 1239 
+SI_HOUSEPERMISSIONDEFAULTACCESSSETTING2 = 1240 
+SI_HOUSEPERMISSIONSETTING1 = 1241 
+SI_HOUSEPERMISSIONSETTING2 = 1242 
+SI_HOUSEPERMISSIONSETTING3 = 1243 
+SI_HOUSEPERMISSIONSETTING4 = 1244 
+SI_HOUSEPERMISSIONSETTING5 = 1245 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES0 = 1246 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES1 = 1247 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES2 = 1248 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES3 = 1249 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES4 = 1250 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES5 = 1251 
+SI_HOUSEPERMISSIONOPTIONSCATEGORIES6 = 1252 
+SI_HOUSINGFURNISHINGLIMITTYPE0 = 1253 
+SI_HOUSINGFURNISHINGLIMITTYPE1 = 1254 
+SI_HOUSINGFURNISHINGLIMITTYPE2 = 1255 
+SI_HOUSINGFURNISHINGLIMITTYPE3 = 1256 
+SI_HOUSINGLOADPERMISSIONSRESULT0 = 1257 
+SI_HOUSINGLOADPERMISSIONSRESULT1 = 1258 
+SI_FURNITURETHEMETYPE0 = 1259 
+SI_FURNITURETHEMETYPE1 = 1260 
+SI_FURNITURETHEMETYPE2 = 1261 
+SI_FURNITURETHEMETYPE3 = 1262 
+SI_FURNITURETHEMETYPE4 = 1263 
+SI_FURNITURETHEMETYPE5 = 1264 
+SI_FURNITURETHEMETYPE6 = 1265 
+SI_FURNITURETHEMETYPE7 = 1266 
+SI_FURNITURETHEMETYPE8 = 1267 
+SI_FURNITURETHEMETYPE9 = 1268 
+SI_FURNITURETHEMETYPE10 = 1269 
+SI_FURNITURETHEMETYPE11 = 1270 
+SI_NONSTR_ESOGAMEDATAENUMS_HOUSING_LAST_ENTRY = 1271 --Sync id for EsoGameDataEnums_Housing last entry
+SI_NONSTR_ESOGAMEDATAENUMS_ITEM_FIRST_ENTRY = 1272 --Sync id for EsoGameDataEnums_Item first entry
+SI_ARMORTYPE0 = 1273 
+SI_ARMORTYPE1 = 1274 
+SI_ARMORTYPE2 = 1275 
+SI_ARMORTYPE3 = 1276 
+SI_EQUIPTYPE1 = 1277 
+SI_EQUIPTYPE2 = 1278 
+SI_EQUIPTYPE3 = 1279 
+SI_EQUIPTYPE4 = 1280 
+SI_EQUIPTYPE5 = 1281 
+SI_EQUIPTYPE6 = 1282 
+SI_EQUIPTYPE7 = 1283 
+SI_EQUIPTYPE8 = 1284 
+SI_EQUIPTYPE9 = 1285 
+SI_EQUIPTYPE10 = 1286 
+SI_EQUIPTYPE11 = 1287 
+SI_EQUIPTYPE12 = 1288 
+SI_EQUIPTYPE13 = 1289 
+SI_EQUIPTYPE14 = 1290 
+SI_EQUIPTYPE15 = 1291 
+SI_EQUIPSLOT0 = 1292 
+SI_EQUIPSLOT1 = 1293 
+SI_EQUIPSLOT2 = 1294 
+SI_EQUIPSLOT3 = 1295 
+SI_EQUIPSLOT4 = 1296 
+SI_EQUIPSLOT5 = 1297 
+SI_EQUIPSLOT6 = 1298 
+SI_EQUIPSLOT7 = 1299 
+SI_EQUIPSLOT8 = 1300 
+SI_EQUIPSLOT9 = 1301 
+SI_EQUIPSLOT10 = 1302 
+SI_EQUIPSLOT11 = 1303 
+SI_EQUIPSLOT12 = 1304 
+SI_EQUIPSLOT13 = 1305 
+SI_EQUIPSLOT14 = 1306 
+SI_EQUIPSLOT15 = 1307 
+SI_EQUIPSLOT16 = 1308 
+SI_EQUIPSLOT17 = 1309 
+SI_EQUIPSLOT18 = 1310 
+SI_EQUIPSLOT19 = 1311 
+SI_EQUIPSLOT20 = 1312 
+SI_EQUIPSLOT21 = 1313 
+SI_EQUIPSLOTVISUALCATEGORY1 = 1314 
+SI_EQUIPSLOTVISUALCATEGORY2 = 1315 
+SI_EQUIPSLOTVISUALCATEGORY3 = 1316 
+SI_EQUIPMENTBONUS0 = 1317 
+SI_EQUIPMENTBONUS1 = 1318 
+SI_EQUIPMENTBONUS2 = 1319 
+SI_EQUIPMENTBONUS3 = 1320 
+SI_EQUIPMENTBONUS4 = 1321 
+SI_EQUIPMENTBONUS5 = 1322 
+SI_ITEMTYPE0 = 1323 
+SI_ITEMTYPE1 = 1324 
+SI_ITEMTYPE2 = 1325 
+SI_ITEMTYPE3 = 1326 
+SI_ITEMTYPE4 = 1327 
+SI_ITEMTYPE5 = 1328 
+SI_ITEMTYPE6 = 1329 
+SI_ITEMTYPE7 = 1330 
+SI_ITEMTYPE8 = 1331 
+SI_ITEMTYPE9 = 1332 
+SI_ITEMTYPE10 = 1333 
+SI_ITEMTYPE11 = 1334 
+SI_ITEMTYPE12 = 1335 
+SI_ITEMTYPE13 = 1336 
+SI_ITEMTYPE14 = 1337 
+SI_ITEMTYPE15 = 1338 
+SI_ITEMTYPE16 = 1339 
+SI_ITEMTYPE17 = 1340 
+SI_ITEMTYPE18 = 1341 
+SI_ITEMTYPE19 = 1342 
+SI_ITEMTYPE20 = 1343 
+SI_ITEMTYPE21 = 1344 
+SI_ITEMTYPE22 = 1345 
+SI_ITEMTYPE23 = 1346 
+SI_ITEMTYPE24 = 1347 
+SI_ITEMTYPE25 = 1348 
+SI_ITEMTYPE26 = 1349 
+SI_ITEMTYPE27 = 1350 
+SI_ITEMTYPE28 = 1351 
+SI_ITEMTYPE29 = 1352 
+SI_ITEMTYPE30 = 1353 
+SI_ITEMTYPE31 = 1354 
+SI_ITEMTYPE32 = 1355 
+SI_ITEMTYPE33 = 1356 
+SI_ITEMTYPE34 = 1357 
+SI_ITEMTYPE35 = 1358 
+SI_ITEMTYPE36 = 1359 
+SI_ITEMTYPE37 = 1360 
+SI_ITEMTYPE38 = 1361 
+SI_ITEMTYPE39 = 1362 
+SI_ITEMTYPE40 = 1363 
+SI_ITEMTYPE41 = 1364 
+SI_ITEMTYPE42 = 1365 
+SI_ITEMTYPE43 = 1366 
+SI_ITEMTYPE44 = 1367 
+SI_ITEMTYPE45 = 1368 
+SI_ITEMTYPE46 = 1369 
+SI_ITEMTYPE47 = 1370 
+SI_ITEMTYPE48 = 1371 
+SI_ITEMTYPE49 = 1372 
+SI_ITEMTYPE50 = 1373 
+SI_ITEMTYPE51 = 1374 
+SI_ITEMTYPE52 = 1375 
+SI_ITEMTYPE53 = 1376 
+SI_ITEMTYPE54 = 1377 
+SI_ITEMTYPE55 = 1378 
+SI_ITEMTYPE56 = 1379 
+SI_ITEMTYPE57 = 1380 
+SI_ITEMTYPE58 = 1381 
+SI_ITEMTYPE59 = 1382 
+SI_ITEMTYPE60 = 1383 
+SI_ITEMTYPE61 = 1384 
+SI_ITEMTYPE62 = 1385 
+SI_SPECIALIZEDITEMTYPE250 = 1386 
+SI_SPECIALIZEDITEMTYPE300 = 1387 
+SI_SPECIALIZEDITEMTYPE350 = 1388 
+SI_SPECIALIZEDITEMTYPE1 = 1389 
+SI_SPECIALIZEDITEMTYPE2 = 1390 
+SI_SPECIALIZEDITEMTYPE3 = 1391 
+SI_SPECIALIZEDITEMTYPE4 = 1392 
+SI_SPECIALIZEDITEMTYPE5 = 1393 
+SI_SPECIALIZEDITEMTYPE6 = 1394 
+SI_SPECIALIZEDITEMTYPE7 = 1395 
+SI_SPECIALIZEDITEMTYPE8 = 1396 
+SI_SPECIALIZEDITEMTYPE100 = 1397 
+SI_SPECIALIZEDITEMTYPE101 = 1398 
+SI_SPECIALIZEDITEMTYPE102 = 1399 
+SI_SPECIALIZEDITEMTYPE103 = 1400 
+SI_SPECIALIZEDITEMTYPE104 = 1401 
+SI_SPECIALIZEDITEMTYPE105 = 1402 
+SI_SPECIALIZEDITEMTYPE106 = 1403 
+SI_SPECIALIZEDITEMTYPE107 = 1404 
+SI_SPECIALIZEDITEMTYPE108 = 1405 
+SI_SPECIALIZEDITEMTYPE400 = 1406 
+SI_SPECIALIZEDITEMTYPE401 = 1407 
+SI_SPECIALIZEDITEMTYPE402 = 1408 
+SI_SPECIALIZEDITEMTYPE403 = 1409 
+SI_SPECIALIZEDITEMTYPE404 = 1410 
+SI_SPECIALIZEDITEMTYPE405 = 1411 
+SI_SPECIALIZEDITEMTYPE406 = 1412 
+SI_SPECIALIZEDITEMTYPE407 = 1413 
+SI_SPECIALIZEDITEMTYPE408 = 1414 
+SI_SPECIALIZEDITEMTYPE450 = 1415 
+SI_SPECIALIZEDITEMTYPE60 = 1416 
+SI_SPECIALIZEDITEMTYPE61 = 1417 
+SI_SPECIALIZEDITEMTYPE500 = 1418 
+SI_SPECIALIZEDITEMTYPE40 = 1419 
+SI_SPECIALIZEDITEMTYPE41 = 1420 
+SI_SPECIALIZEDITEMTYPE42 = 1421 
+SI_SPECIALIZEDITEMTYPE43 = 1422 
+SI_SPECIALIZEDITEMTYPE44 = 1423 
+SI_SPECIALIZEDITEMTYPE45 = 1424 
+SI_SPECIALIZEDITEMTYPE46 = 1425 
+SI_SPECIALIZEDITEMTYPE47 = 1426 
+SI_SPECIALIZEDITEMTYPE48 = 1427 
+SI_SPECIALIZEDITEMTYPE550 = 1428 
+SI_SPECIALIZEDITEMTYPE20 = 1429 
+SI_SPECIALIZEDITEMTYPE21 = 1430 
+SI_SPECIALIZEDITEMTYPE22 = 1431 
+SI_SPECIALIZEDITEMTYPE23 = 1432 
+SI_SPECIALIZEDITEMTYPE24 = 1433 
+SI_SPECIALIZEDITEMTYPE25 = 1434 
+SI_SPECIALIZEDITEMTYPE26 = 1435 
+SI_SPECIALIZEDITEMTYPE27 = 1436 
+SI_SPECIALIZEDITEMTYPE600 = 1437 
+SI_SPECIALIZEDITEMTYPE650 = 1438 
+SI_SPECIALIZEDITEMTYPE700 = 1439 
+SI_SPECIALIZEDITEMTYPE750 = 1440 
+SI_SPECIALIZEDITEMTYPE800 = 1441 
+SI_SPECIALIZEDITEMTYPE850 = 1442 
+SI_SPECIALIZEDITEMTYPE851 = 1443 
+SI_SPECIALIZEDITEMTYPE900 = 1444 
+SI_SPECIALIZEDITEMTYPE950 = 1445 
+SI_SPECIALIZEDITEMTYPE1000 = 1446 
+SI_SPECIALIZEDITEMTYPE1050 = 1447 
+SI_SPECIALIZEDITEMTYPE1100 = 1448 
+SI_SPECIALIZEDITEMTYPE1150 = 1449 
+SI_SPECIALIZEDITEMTYPE1200 = 1450 
+SI_SPECIALIZEDITEMTYPE1250 = 1451 
+SI_SPECIALIZEDITEMTYPE1300 = 1452 
+SI_SPECIALIZEDITEMTYPE1350 = 1453 
+SI_SPECIALIZEDITEMTYPE170 = 1454 
+SI_SPECIALIZEDITEMTYPE171 = 1455 
+SI_SPECIALIZEDITEMTYPE172 = 1456 
+SI_SPECIALIZEDITEMTYPE173 = 1457 
+SI_SPECIALIZEDITEMTYPE174 = 1458 
+SI_SPECIALIZEDITEMTYPE175 = 1459 
+SI_SPECIALIZEDITEMTYPE176 = 1460 
+SI_SPECIALIZEDITEMTYPE177 = 1461 
+SI_SPECIALIZEDITEMTYPE1400 = 1462 
+SI_SPECIALIZEDITEMTYPE150 = 1463 
+SI_SPECIALIZEDITEMTYPE151 = 1464 
+SI_SPECIALIZEDITEMTYPE152 = 1465 
+SI_SPECIALIZEDITEMTYPE1450 = 1466 
+SI_SPECIALIZEDITEMTYPE1460 = 1467 
+SI_SPECIALIZEDITEMTYPE1465 = 1468 
+SI_SPECIALIZEDITEMTYPE1560 = 1469 
+SI_SPECIALIZEDITEMTYPE1660 = 1470 
+SI_SPECIALIZEDITEMTYPE1760 = 1471 
+SI_SPECIALIZEDITEMTYPE2410 = 1472 
+SI_SPECIALIZEDITEMTYPE80 = 1473 
+SI_SPECIALIZEDITEMTYPE81 = 1474 
+SI_SPECIALIZEDITEMTYPE1500 = 1475 
+SI_SPECIALIZEDITEMTYPE1550 = 1476 
+SI_SPECIALIZEDITEMTYPE1600 = 1477 
+SI_SPECIALIZEDITEMTYPE1650 = 1478 
+SI_SPECIALIZEDITEMTYPE1700 = 1479 
+SI_SPECIALIZEDITEMTYPE1750 = 1480 
+SI_SPECIALIZEDITEMTYPE1800 = 1481 
+SI_SPECIALIZEDITEMTYPE1850 = 1482 
+SI_SPECIALIZEDITEMTYPE1900 = 1483 
+SI_SPECIALIZEDITEMTYPE1950 = 1484 
+SI_SPECIALIZEDITEMTYPE2000 = 1485 
+SI_SPECIALIZEDITEMTYPE2050 = 1486 
+SI_SPECIALIZEDITEMTYPE2100 = 1487 
+SI_SPECIALIZEDITEMTYPE2150 = 1488 
+SI_SPECIALIZEDITEMTYPE2200 = 1489 
+SI_SPECIALIZEDITEMTYPE2250 = 1490 
+SI_SPECIALIZEDITEMTYPE2300 = 1491 
+SI_SPECIALIZEDITEMTYPE2350 = 1492 
+SI_SPECIALIZEDITEMTYPE2400 = 1493 
+SI_SPECIALIZEDITEMTYPE2450 = 1494 
+SI_SPECIALIZEDITEMTYPE2500 = 1495 
+SI_SPECIALIZEDITEMTYPE2550 = 1496 
+SI_SPECIALIZEDITEMTYPE2600 = 1497 
+SI_SPECIALIZEDITEMTYPE2650 = 1498 
+SI_SPECIALIZEDITEMTYPE2700 = 1499 
+SI_SPECIALIZEDITEMTYPE2750 = 1500 
+SI_SPECIALIZEDITEMTYPE210 = 1501 
+SI_SPECIALIZEDITEMTYPE211 = 1502 
+SI_SPECIALIZEDITEMTYPE212 = 1503 
+SI_SPECIALIZEDITEMTYPE213 = 1504 
+SI_SPECIALIZEDITEMTYPE214 = 1505 
+SI_ITEMFILTERTYPE0 = 1506 
+SI_ITEMFILTERTYPE1 = 1507 
+SI_ITEMFILTERTYPE2 = 1508 
+SI_ITEMFILTERTYPE3 = 1509 
+SI_ITEMFILTERTYPE4 = 1510 
+SI_ITEMFILTERTYPE5 = 1511 
+SI_ITEMFILTERTYPE6 = 1512 
+SI_ITEMFILTERTYPE7 = 1513 
+SI_ITEMFILTERTYPE8 = 1514 
+SI_ITEMFILTERTYPE9 = 1515 
+SI_ITEMFILTERTYPE11 = 1516 
+SI_ITEMFILTERTYPE12 = 1517 
+SI_ITEMFILTERTYPE13 = 1518 
+SI_ITEMFILTERTYPE14 = 1519 
+SI_ITEMFILTERTYPE15 = 1520 
+SI_ITEMFILTERTYPE16 = 1521 
+SI_ITEMFILTERTYPE17 = 1522 
+SI_ITEMFILTERTYPE18 = 1523 
+SI_ITEMFILTERTYPE19 = 1524 
+SI_ITEMFILTERTYPE20 = 1525 
+SI_ITEMFILTERTYPE21 = 1526 
+SI_ITEMFILTERTYPE22 = 1527 
+SI_ITEMTRAITTYPE0 = 1528 
+SI_ITEMTRAITTYPE1 = 1529 
+SI_ITEMTRAITTYPE2 = 1530 
+SI_ITEMTRAITTYPE3 = 1531 
+SI_ITEMTRAITTYPE4 = 1532 
+SI_ITEMTRAITTYPE5 = 1533 
+SI_ITEMTRAITTYPE6 = 1534 
+SI_ITEMTRAITTYPE7 = 1535 
+SI_ITEMTRAITTYPE8 = 1536 
+SI_ITEMTRAITTYPE9 = 1537 
+SI_ITEMTRAITTYPE10 = 1538 
+SI_ITEMTRAITTYPE11 = 1539 
+SI_ITEMTRAITTYPE12 = 1540 
+SI_ITEMTRAITTYPE13 = 1541 
+SI_ITEMTRAITTYPE14 = 1542 
+SI_ITEMTRAITTYPE15 = 1543 
+SI_ITEMTRAITTYPE16 = 1544 
+SI_ITEMTRAITTYPE17 = 1545 
+SI_ITEMTRAITTYPE18 = 1546 
+SI_ITEMTRAITTYPE19 = 1547 
+SI_ITEMTRAITTYPE20 = 1548 
+SI_ITEMTRAITTYPE21 = 1549 
+SI_ITEMTRAITTYPE22 = 1550 
+SI_ITEMTRAITTYPE23 = 1551 
+SI_ITEMTRAITTYPE24 = 1552 
+SI_ITEMTRAITTYPE25 = 1553 
+SI_ITEMTRAITTYPE26 = 1554 
+SI_ENCHANTINGRUNECLASSIFICATION1 = 1555 
+SI_ENCHANTINGRUNECLASSIFICATION2 = 1556 
+SI_ENCHANTINGRUNECLASSIFICATION3 = 1557 
+SI_BINDTYPE1 = 1558 
+SI_BINDTYPE2 = 1559 
+SI_BINDTYPE3 = 1560 
+SI_ITEMQUALITY0 = 1561 
+SI_ITEMQUALITY1 = 1562 
+SI_ITEMQUALITY2 = 1563 
+SI_ITEMQUALITY3 = 1564 
+SI_ITEMQUALITY4 = 1565 
+SI_ITEMQUALITY5 = 1566 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE0 = 1567 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE1 = 1568 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE2 = 1569 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE3 = 1570 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE4 = 1571 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE5 = 1572 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE6 = 1573 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE7 = 1574 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE8 = 1575 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE9 = 1576 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE10 = 1577 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE11 = 1578 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE12 = 1579 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE13 = 1580 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE14 = 1581 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE15 = 1582 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE16 = 1583 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE17 = 1584 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE18 = 1585 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE19 = 1586 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE20 = 1587 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE21 = 1588 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE22 = 1589 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE23 = 1590 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE24 = 1591 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE25 = 1592 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE26 = 1593 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE27 = 1594 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE28 = 1595 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE29 = 1596 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE30 = 1597 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE31 = 1598 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE32 = 1599 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE33 = 1600 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE34 = 1601 
+SI_ENCHANTMENTSEARCHCATEGORYTYPE35 = 1602 
+SI_WEAPONTYPE0 = 1603 
+SI_WEAPONTYPE1 = 1604 
+SI_WEAPONTYPE2 = 1605 
+SI_WEAPONTYPE3 = 1606 
+SI_WEAPONTYPE4 = 1607 
+SI_WEAPONTYPE5 = 1608 
+SI_WEAPONTYPE6 = 1609 
+SI_WEAPONTYPE7 = 1610 
+SI_WEAPONTYPE8 = 1611 
+SI_WEAPONTYPE9 = 1612 
+SI_WEAPONTYPE10 = 1613 
+SI_WEAPONTYPE11 = 1614 
+SI_WEAPONTYPE12 = 1615 
+SI_WEAPONTYPE13 = 1616 
+SI_WEAPONTYPE14 = 1617 
+SI_WEAPONTYPE15 = 1618 
+SI_GAMEPADWEAPONCATEGORY0 = 1619 
+SI_GAMEPADWEAPONCATEGORY1 = 1620 
+SI_GAMEPADWEAPONCATEGORY2 = 1621 
+SI_GAMEPADWEAPONCATEGORY3 = 1622 
+SI_GAMEPADWEAPONCATEGORY4 = 1623 
+SI_GAMEPADWEAPONCATEGORY5 = 1624 
+SI_GAMEPADITEMCATEGORY0 = 1625 
+SI_GAMEPADITEMCATEGORY1 = 1626 
+SI_GAMEPADITEMCATEGORY2 = 1627 
+SI_GAMEPADITEMCATEGORY3 = 1628 
+SI_GAMEPADITEMCATEGORY4 = 1629 
+SI_GAMEPADITEMCATEGORY5 = 1630 
+SI_GAMEPADITEMCATEGORY6 = 1631 
+SI_GAMEPADITEMCATEGORY7 = 1632 
+SI_GAMEPADITEMCATEGORY8 = 1633 
+SI_GAMEPADITEMCATEGORY9 = 1634 
+SI_GAMEPADITEMCATEGORY10 = 1635 
+SI_GAMEPADITEMCATEGORY11 = 1636 
+SI_GAMEPADITEMCATEGORY12 = 1637 
+SI_GAMEPADITEMCATEGORY13 = 1638 
+SI_GAMEPADITEMCATEGORY14 = 1639 
+SI_GAMEPADITEMCATEGORY15 = 1640 
+SI_GAMEPADITEMCATEGORY16 = 1641 
+SI_GAMEPADITEMCATEGORY17 = 1642 
+SI_GAMEPADITEMCATEGORY18 = 1643 
+SI_GAMEPADITEMCATEGORY19 = 1644 
+SI_GAMEPADITEMCATEGORY20 = 1645 
+SI_GAMEPADITEMCATEGORY21 = 1646 
+SI_GAMEPADITEMCATEGORY22 = 1647 
+SI_GAMEPADITEMCATEGORY23 = 1648 
+SI_GAMEPADITEMCATEGORY24 = 1649 
+SI_GAMEPADITEMCATEGORY25 = 1650 
+SI_GAMEPADITEMCATEGORY26 = 1651 
+SI_GAMEPADITEMCATEGORY27 = 1652 
+SI_GAMEPADITEMCATEGORY28 = 1653 
+SI_GAMEPADITEMCATEGORY29 = 1654 
+SI_GAMEPADITEMCATEGORY30 = 1655 
+SI_GAMEPADITEMCATEGORY31 = 1656 
+SI_GAMEPADITEMCATEGORY32 = 1657 
+SI_GAMEPADITEMCATEGORY33 = 1658 
+SI_GAMEPADITEMCATEGORY34 = 1659 
+SI_GAMEPADITEMCATEGORY35 = 1660 
+SI_GAMEPADITEMCATEGORY36 = 1661 
+SI_GAMEPADITEMCATEGORY37 = 1662 
+SI_GAMEPADITEMCATEGORY38 = 1663 
+SI_ITEMSTYLECHAPTER0 = 1664 
+SI_ITEMSTYLECHAPTER1 = 1665 
+SI_ITEMSTYLECHAPTER2 = 1666 
+SI_ITEMSTYLECHAPTER3 = 1667 
+SI_ITEMSTYLECHAPTER4 = 1668 
+SI_ITEMSTYLECHAPTER5 = 1669 
+SI_ITEMSTYLECHAPTER6 = 1670 
+SI_ITEMSTYLECHAPTER7 = 1671 
+SI_ITEMSTYLECHAPTER8 = 1672 
+SI_ITEMSTYLECHAPTER9 = 1673 
+SI_ITEMSTYLECHAPTER10 = 1674 
+SI_ITEMSTYLECHAPTER11 = 1675 
+SI_ITEMSTYLECHAPTER12 = 1676 
+SI_ITEMSTYLECHAPTER13 = 1677 
+SI_ITEMSTYLECHAPTER14 = 1678 
+SI_WEAPONCONFIGTYPE1 = 1679 
+SI_WEAPONCONFIGTYPE2 = 1680 
+SI_WEAPONCONFIGTYPE3 = 1681 
+SI_WEAPONCONFIGTYPE4 = 1682 
+SI_WEAPONCONFIGTYPE5 = 1683 
+SI_WEAPONCONFIGTYPE6 = 1684 
+SI_WEAPONCONFIGTYPE7 = 1685 
+SI_WEAPONCONFIGTYPE8 = 1686 
+SI_WEAPONCONFIGTYPE9 = 1687 
+SI_WEAPONCONFIGTYPE10 = 1688 
+SI_WEAPONCONFIGTYPE11 = 1689 
+SI_ITEMTAGCATEGORY1 = 1690 
+SI_ITEMTAGCATEGORY2 = 1691 
+SI_NONSTR_ESOGAMEDATAENUMS_ITEM_LAST_ENTRY = 1692 --Sync id for EsoGameDataEnums_Item last entry
+SI_NONSTR_ESOGAMEDATAENUMS_TIMEFORMAT_FIRST_ENTRY = 1693 --Sync id for EsoGameDataEnums_TimeFormat first entry
+SI_GREGORIANCALENDARMONTHS0 = 1694 
+SI_GREGORIANCALENDARMONTHS1 = 1695 
+SI_GREGORIANCALENDARMONTHS2 = 1696 
+SI_GREGORIANCALENDARMONTHS3 = 1697 
+SI_GREGORIANCALENDARMONTHS4 = 1698 
+SI_GREGORIANCALENDARMONTHS5 = 1699 
+SI_GREGORIANCALENDARMONTHS6 = 1700 
+SI_GREGORIANCALENDARMONTHS7 = 1701 
+SI_GREGORIANCALENDARMONTHS8 = 1702 
+SI_GREGORIANCALENDARMONTHS9 = 1703 
+SI_GREGORIANCALENDARMONTHS10 = 1704 
+SI_GREGORIANCALENDARMONTHS11 = 1705 
+SI_NONSTR_ESOGAMEDATAENUMS_TIMEFORMAT_LAST_ENTRY = 1706 --Sync id for EsoGameDataEnums_TimeFormat last entry
+SI_NONSTR_ESOGAMEDATAENUMS_TRADE_FIRST_ENTRY = 1707 --Sync id for EsoGameDataEnums_Trade first entry
+SI_NONSTR_ESOGAMEDATAENUMS_TRADE_LAST_ENTRY = 1708 --Sync id for EsoGameDataEnums_Trade last entry
+SI_NONSTR_ESOGAMEDATAENUMS_ACTIVITYFINDER_FIRST_ENTRY = 1709 --Sync id for EsoGameDataEnums_ActivityFinder first entry
+SI_LFGACTIVITY1 = 1710 
+SI_LFGACTIVITY2 = 1711 
+SI_LFGACTIVITY3 = 1712 
+SI_LFGACTIVITY4 = 1713 
+SI_LFGACTIVITY5 = 1714 
+SI_LFGACTIVITY6 = 1715 
+SI_LFGACTIVITY7 = 1716 
+SI_LFGACTIVITY8 = 1717 
+SI_LFGROLE1 = 1718 
+SI_LFGROLE2 = 1719 
+SI_LFGROLE4 = 1720 
+SI_LFGITEMREWARDTYPE1 = 1721 
+SI_LFGITEMREWARDTYPE2 = 1722 
+SI_ACTIVITYQUEUERESULT1 = 1723 
+SI_ACTIVITYQUEUERESULT2 = 1724 
+SI_ACTIVITYQUEUERESULT3 = 1725 
+SI_ACTIVITYQUEUERESULT4 = 1726 
+SI_ACTIVITYQUEUERESULT5 = 1727 
+SI_ACTIVITYQUEUERESULT6 = 1728 
+SI_ACTIVITYQUEUERESULT7 = 1729 
+SI_ACTIVITYQUEUERESULT8 = 1730 
+SI_ACTIVITYQUEUERESULT9 = 1731 
+SI_ACTIVITYQUEUERESULT10 = 1732 
+SI_ACTIVITYQUEUERESULT11 = 1733 
+SI_ACTIVITYQUEUERESULT12 = 1734 
+SI_ACTIVITYQUEUERESULT13 = 1735 
+SI_ACTIVITYQUEUERESULT14 = 1736 
+SI_ACTIVITYQUEUERESULT15 = 1737 
+SI_ACTIVITYQUEUERESULT16 = 1738 
+SI_ACTIVITYQUEUERESULT17 = 1739 
+SI_ACTIVITYQUEUERESULT18 = 1740 
+SI_ACTIVITYQUEUERESULT19 = 1741 
+SI_ACTIVITYQUEUERESULT20 = 1742 
+SI_ACTIVITYQUEUERESULT21 = 1743 
+SI_ACTIVITYQUEUERESULT22 = 1744 
+SI_ACTIVITYFINDERSTATUS0 = 1745 
+SI_ACTIVITYFINDERSTATUS1 = 1746 
+SI_ACTIVITYFINDERSTATUS2 = 1747 
+SI_ACTIVITYFINDERSTATUS3 = 1748 
+SI_ACTIVITYFINDERSTATUS4 = 1749 
+SI_ACTIVITYFINDERSTATUS5 = 1750 
+SI_LFGREADYCHECKCANCELREASON1 = 1751 
+SI_LFGREADYCHECKCANCELREASON2 = 1752 
+SI_LFGREADYCHECKCANCELREASON3 = 1753 
+SI_LFGREADYCHECKCANCELREASON4 = 1754 
+SI_LFGREADYCHECKCANCELREASON5 = 1755 
+SI_NONSTR_ESOGAMEDATAENUMS_ACTIVITYFINDER_LAST_ENTRY = 1756 --Sync id for EsoGameDataEnums_ActivityFinder last entry
+SI_NONSTR_ESOGAMEDATAENUMS_CLIENT_FIRST_ENTRY = 1757 --Sync id for EsoGameDataEnums_Client first entry
+SI_NONSTR_ESOGAMEDATAENUMS_CLIENT_LAST_ENTRY = 1758 --Sync id for EsoGameDataEnums_Client last entry
+SI_NONSTR_ESOGAMEDATAENUMS_GUILD_FIRST_ENTRY = 1759 --Sync id for EsoGameDataEnums_Guild first entry
+SI_GUILDPERMISSION1 = 1760 
+SI_GUILDPERMISSION2 = 1761 
+SI_GUILDPERMISSION3 = 1762 
+SI_GUILDPERMISSION4 = 1763 
+SI_GUILDPERMISSION5 = 1764 
+SI_GUILDPERMISSION6 = 1765 
+SI_GUILDPERMISSION7 = 1766 
+SI_GUILDPERMISSION8 = 1767 
+SI_GUILDPERMISSION9 = 1768 
+SI_GUILDPERMISSION10 = 1769 
+SI_GUILDPERMISSION11 = 1770 
+SI_GUILDPERMISSION12 = 1771 
+SI_GUILDPERMISSION13 = 1772 
+SI_GUILDPERMISSION14 = 1773 
+SI_GUILDPERMISSION15 = 1774 
+SI_GUILDPERMISSION16 = 1775 
+SI_GUILDPERMISSION17 = 1776 
+SI_GUILDPERMISSION18 = 1777 
+SI_GUILDPERMISSION19 = 1778 
+SI_GUILDPERMISSION20 = 1779 
+SI_GUILDPERMISSION21 = 1780 
+SI_GUILDPERMISSION22 = 1781 
+SI_GUILDPERMISSION23 = 1782 
+SI_GUILDPERMISSION24 = 1783 
+SI_GUILDPERMISSION25 = 1784 
+SI_GUILDPERMISSION26 = 1785 
+SI_GUILDHISTORYCATEGORY1 = 1786 
+SI_GUILDHISTORYCATEGORY2 = 1787 
+SI_GUILDHISTORYCATEGORY3 = 1788 
+SI_GUILDHISTORYCATEGORY4 = 1789 
+SI_GUILDHISTORYCATEGORY5 = 1790 
+SI_GUILDHISTORYGENERALSUBCATEGORIES1 = 1791 
+SI_GUILDHISTORYGENERALSUBCATEGORIES2 = 1792 
+SI_GUILDHISTORYGENERALSUBCATEGORIES3 = 1793 
+SI_GUILDHISTORYBANKSUBCATEGORIES1 = 1794 
+SI_GUILDHISTORYBANKSUBCATEGORIES2 = 1795 
+SI_GUILDHISTORYSTORESUBCATEGORIES1 = 1796 
+SI_GUILDHISTORYSTORESUBCATEGORIES2 = 1797 
+SI_GUILDHISTORYALLIANCEWARSUBCATEGORIES1 = 1798 
+SI_GUILDEVENTTYPE1 = 1799 
+SI_GUILDEVENTTYPE3 = 1800 
+SI_GUILDEVENTTYPE4 = 1801 
+SI_GUILDEVENTTYPE5 = 1802 
+SI_GUILDEVENTTYPE7 = 1803 
+SI_GUILDEVENTTYPE8 = 1804 
+SI_GUILDEVENTTYPE12 = 1805 
+SI_GUILDEVENTTYPE13 = 1806 
+SI_GUILDEVENTTYPE14 = 1807 
+SI_GUILDEVENTTYPE15 = 1808 
+SI_GUILDEVENTTYPE16 = 1809 
+SI_GUILDEVENTTYPE17 = 1810 
+SI_GUILDEVENTTYPE19 = 1811 
+SI_GUILDEVENTTYPE20 = 1812 
+SI_GUILDEVENTTYPE21 = 1813 
+SI_GUILDEVENTTYPE22 = 1814 
+SI_GUILDEVENTTYPE23 = 1815 
+SI_GUILDEVENTTYPE24 = 1816 
+SI_GUILDEVENTTYPE25 = 1817 
+SI_GUILDEVENTTYPE27 = 1818 
+SI_GUILDEVENTTYPE28 = 1819 
+SI_GUILDEVENTTYPE31 = 1820 
+SI_GUILDEVENTTYPE32 = 1821 
+SI_GUILDEVENTTYPE33 = 1822 
+SI_GUILDEVENTTYPE34 = 1823 
+SI_GUILDEVENTTYPE35 = 1824 
+SI_GUILDEVENTTYPE36 = 1825 
+SI_GUILDEVENTTYPE37 = 1826 
+SI_GUILDEVENTTYPE38 = 1827 
+SI_GUILDEVENTTYPE39 = 1828 
+SI_GUILDEVENTTYPE40 = 1829 
+SI_GUILDEVENTTYPE42 = 1830 
+SI_GUILDEVENTTYPE43 = 1831 
+SI_GUILDRANKS0 = 1832 
+SI_GUILDRANKS1 = 1833 
+SI_GUILDRANKS2 = 1834 
+SI_GUILDRANKS254 = 1835 
+SI_GUILDRANKS255 = 1836 
+SI_NONSTR_ESOGAMEDATAENUMS_GUILD_LAST_ENTRY = 1837 --Sync id for EsoGameDataEnums_Guild last entry
+SI_NONSTR_ESOGAMEDATAENUMS_QUEST_FIRST_ENTRY = 1838 --Sync id for EsoGameDataEnums_Quest first entry
+SI_QUESTREPEATABLETYPE1 = 1839 
+SI_QUESTREPEATABLETYPE2 = 1840 
+SI_QUESTTYPE1 = 1841 
+SI_QUESTTYPE2 = 1842 
+SI_QUESTTYPE3 = 1843 
+SI_QUESTTYPE4 = 1844 
+SI_QUESTTYPE5 = 1845 
+SI_QUESTTYPE6 = 1846 
+SI_QUESTTYPE7 = 1847 
+SI_QUESTTYPE8 = 1848 
+SI_QUESTTYPE9 = 1849 
+SI_QUESTTYPE10 = 1850 
+SI_QUESTTYPE11 = 1851 
+SI_QUESTTYPE12 = 1852 
+SI_QUESTTYPE13 = 1853 
+SI_NONSTR_ESOGAMEDATAENUMS_QUEST_LAST_ENTRY = 1854 --Sync id for EsoGameDataEnums_Quest last entry
+SI_NONSTR_ESOGAMEDATAENUMS_CHROMA_FIRST_ENTRY = 1855 --Sync id for EsoGameDataEnums_Chroma first entry
+SI_NONSTR_ESOGAMEDATAENUMS_CHROMA_LAST_ENTRY = 1856 --Sync id for EsoGameDataEnums_Chroma last entry
+SI_NONSTR_ESOGAMEDATAENUMS_INTERFACECOLORS_FIRST_ENTRY = 1857 --Sync id for EsoGameDataEnums_InterfaceColors first entry
+SI_NONSTR_ESOGAMEDATAENUMS_INTERFACECOLORS_LAST_ENTRY = 1858 --Sync id for EsoGameDataEnums_InterfaceColors last entry
+SI_NONSTR_ESOGAMEDATAENUMS_CROWNCRATE_FIRST_ENTRY = 1859 --Sync id for EsoGameDataEnums_CrownCrate first entry
+SI_LOOTCRATEOPENRESPONSE1 = 1860 
+SI_LOOTCRATEOPENRESPONSE2 = 1861 
+SI_LOOTCRATEOPENRESPONSE3 = 1862 
+SI_LOOTCRATEOPENRESPONSE4 = 1863 
+SI_LOOTCRATEOPENRESPONSE5 = 1864 
+SI_LOOTCRATEOPENRESPONSE6 = 1865 
+SI_LOOTCRATEOPENRESPONSE7 = 1866 
+SI_LOOTCRATEOPENRESPONSE8 = 1867 
+SI_CROWNGEMBALANCEREASON1 = 1868 
+SI_GEMIFIABLEFILTERTYPE0 = 1869 
+SI_NONSTR_ESOGAMEDATAENUMS_CROWNCRATE_LAST_ENTRY = 1870 --Sync id for EsoGameDataEnums_CrownCrate last entry
+SI_NONSTR_ESOGAMEDATAENUMS_DEF_FIRST_ENTRY = 1871 --Sync id for EsoGameDataEnums_Def first entry
+SI_NONSTR_ESOGAMEDATAENUMS_DEF_LAST_ENTRY = 1872 --Sync id for EsoGameDataEnums_Def last entry
+SI_NONSTR_ESOGAMEDATAENUMS_ABILITY_FIRST_ENTRY = 1873 --Sync id for EsoGameDataEnums_Ability first entry
+SI_ABILITYUPGRADELEVEL0 = 1874 
+SI_ABILITYUPGRADELEVEL1 = 1875 
+SI_ABILITYUPGRADELEVEL2 = 1876 
+SI_ABILITYUPGRADELEVEL3 = 1877 
+SI_TARGETTYPE0 = 1878 
+SI_TARGETTYPE1 = 1879 
+SI_TARGETTYPE2 = 1880 
+SI_NONSTR_ESOGAMEDATAENUMS_ABILITY_LAST_ENTRY = 1881 --Sync id for EsoGameDataEnums_Ability last entry
+SI_NONSTR_ESOGAMEDATAENUMS_COMBAT_FIRST_ENTRY = 1882 --Sync id for EsoGameDataEnums_Combat first entry
+SI_COMBATMECHANICTYPE_2 = 1883 
+SI_COMBATMECHANICTYPE_1 = 1884 
+SI_COMBATMECHANICTYPE0 = 1885 
+SI_COMBATMECHANICTYPE1 = 1886 
+SI_COMBATMECHANICTYPE6 = 1887 
+SI_COMBATMECHANICTYPE10 = 1888 
+SI_COMBATMECHANICTYPE11 = 1889 
+SI_COMBATMECHANICTYPE12 = 1890 
+SI_DAMAGETYPE0 = 1891 
+SI_DAMAGETYPE1 = 1892 
+SI_DAMAGETYPE2 = 1893 
+SI_DAMAGETYPE3 = 1894 
+SI_DAMAGETYPE4 = 1895 
+SI_DAMAGETYPE5 = 1896 
+SI_DAMAGETYPE6 = 1897 
+SI_DAMAGETYPE7 = 1898 
+SI_DAMAGETYPE8 = 1899 
+SI_DAMAGETYPE9 = 1900 
+SI_DAMAGETYPE10 = 1901 
+SI_DAMAGETYPE11 = 1902 
+SI_VULNERABILITYSTATUS0 = 1903 
+SI_VULNERABILITYSTATUS1 = 1904 
+SI_VULNERABILITYSTATUS2 = 1905 
+SI_NONSTR_ESOGAMEDATAENUMS_COMBAT_LAST_ENTRY = 1906 --Sync id for EsoGameDataEnums_Combat last entry
+SI_NONSTR_ESOGAMEDATAENUMS_THEATER_FIRST_ENTRY = 1907 --Sync id for EsoGameDataEnums_Theater first entry
+SI_NONSTR_ESOGAMEDATAENUMS_THEATER_LAST_ENTRY = 1908 --Sync id for EsoGameDataEnums_Theater last entry
+SI_NONSTR_ESOGAMEDATAENUMS_AVA_FIRST_ENTRY = 1909 --Sync id for EsoGameDataEnums_AvA first entry
+SI_BATTLEGROUNDQUERYCONTEXTTYPE1 = 1910 
+SI_BATTLEGROUNDQUERYCONTEXTTYPE2 = 1911 
+SI_BATTLEGROUNDQUERYCONTEXTTYPE3 = 1912 
+SI_CAMPAIGNPOPULATIONTYPE0 = 1913 
+SI_CAMPAIGNPOPULATIONTYPE1 = 1914 
+SI_CAMPAIGNPOPULATIONTYPE2 = 1915 
+SI_CAMPAIGNPOPULATIONTYPE3 = 1916 
+SI_KEEPRESOURCETYPE0 = 1917 
+SI_KEEPRESOURCETYPE1 = 1918 
+SI_KEEPRESOURCETYPE2 = 1919 
+SI_KEEPRESOURCETYPE3 = 1920 
+SI_KEEPUPGRADEPATH1 = 1921 
+SI_KEEPUPGRADEPATH2 = 1922 
+SI_SIEGETYPE0 = 1923 
+SI_SIEGETYPE1 = 1924 
+SI_SIEGETYPE2 = 1925 
+SI_SIEGETYPE3 = 1926 
+SI_SIEGETYPE4 = 1927 
+SI_SIEGETYPE5 = 1928 
+SI_SIEGETYPE6 = 1929 
+SI_SIEGETYPE7 = 1930 
+SI_SIEGETYPE8 = 1931 
+SI_SIEGETYPE9 = 1932 
+SI_CAMPAIGNRULESETTYPE1 = 1933 
+SI_CAMPAIGNRULESETTYPE2 = 1934 
+SI_CAMPAIGNRULESETTYPE3 = 1935 
+SI_CAMPAIGNLEVELREQUIREMENTTYPE0 = 1936 
+SI_CAMPAIGNLEVELREQUIREMENTTYPE1 = 1937 
+SI_CAMPAIGNLEVELREQUIREMENTTYPE2 = 1938 
+SI_IMPERIALCITYACCESSRULESTYPE0 = 1939 
+SI_IMPERIALCITYACCESSRULESTYPE1 = 1940 
+SI_IMPERIALCITYACCESSRULESTYPE2 = 1941 
+SI_IMPERIALCITYACCESSRULESTYPE3 = 1942 
+SI_NONSTR_ESOGAMEDATAENUMS_AVA_LAST_ENTRY = 1943 --Sync id for EsoGameDataEnums_AvA last entry
+SI_NONSTR_ESOGAMEDATAENUMS_SETTINGS_FIRST_ENTRY = 1944 --Sync id for EsoGameDataEnums_Settings first entry
+SI_SETTINGSYSTEMPANEL0 = 1945 
+SI_SETTINGSYSTEMPANEL1 = 1946 
+SI_SETTINGSYSTEMPANEL2 = 1947 
+SI_SETTINGSYSTEMPANEL3 = 1948 
+SI_SETTINGSYSTEMPANEL4 = 1949 
+SI_SETTINGSYSTEMPANEL5 = 1950 
+SI_SETTINGSYSTEMPANEL6 = 1951 
+SI_SETTINGSYSTEMPANEL7 = 1952 
+SI_SETTINGSYSTEMPANEL8 = 1953 
+SI_SETTINGSYSTEMPANEL9 = 1954 
+SI_TEXTURERESOLUTIONCHOICE0 = 1955 
+SI_TEXTURERESOLUTIONCHOICE1 = 1956 
+SI_TEXTURERESOLUTIONCHOICE2 = 1957 
+SI_NAMEPLATEDISPLAYCHOICE0 = 1958 
+SI_NAMEPLATEDISPLAYCHOICE1 = 1959 
+SI_NAMEPLATEDISPLAYCHOICE2 = 1960 
+SI_NAMEPLATEDISPLAYCHOICE3 = 1961 
+SI_NAMEPLATEDISPLAYCHOICE4 = 1962 
+SI_NAMEPLATEDISPLAYCHOICE5 = 1963 
+SI_NAMEPLATEDISPLAYCHOICE6 = 1964 
+SI_NAMEPLATEDISPLAYCHOICE7 = 1965 
+SI_NAMEPLATEDISPLAYCHOICE8 = 1966 
+SI_NAMEPLATEDISPLAYCHOICE9 = 1967 
+SI_NAMEPLATEDISPLAYCHOICE10 = 1968 
+SI_NAMEPLATEDISPLAYCHOICE11 = 1969 
+SI_ACTIONBARSETTINGCHOICE0 = 1970 
+SI_ACTIONBARSETTINGCHOICE1 = 1971 
+SI_ACTIONBARSETTINGCHOICE2 = 1972 
+SI_COMPASSACTIVEQUESTSCHOICE0 = 1973 
+SI_COMPASSACTIVEQUESTSCHOICE1 = 1974 
+SI_COMPASSACTIVEQUESTSCHOICE2 = 1975 
+SI_RESOURCEBARSSETTINGCHOICE0 = 1976 
+SI_RESOURCEBARSSETTINGCHOICE1 = 1977 
+SI_RESOURCEBARSSETTINGCHOICE2 = 1978 
+SI_RAIDLIFEVISIBILITYCHOICE0 = 1979 
+SI_RAIDLIFEVISIBILITYCHOICE1 = 1980 
+SI_RAIDLIFEVISIBILITYCHOICE2 = 1981 
+SI_BUFFDEBUFFENABLEDCHOICE0 = 1982 
+SI_BUFFDEBUFFENABLEDCHOICE1 = 1983 
+SI_BUFFDEBUFFENABLEDCHOICE2 = 1984 
+SI_SIEGECAMERACHOICE0 = 1985 
+SI_SIEGECAMERACHOICE1 = 1986 
+SI_QUICKCASTGROUNDABILITIESCHOICE0 = 1987 
+SI_QUICKCASTGROUNDABILITIESCHOICE1 = 1988 
+SI_QUICKCASTGROUNDABILITIESCHOICE2 = 1989 
+SI_DEFAULTSOULGEMCHOICE0 = 1990 
+SI_DEFAULTSOULGEMCHOICE1 = 1991 
+SI_PRIMARYPLAYERNAMESETTING0 = 1992 
+SI_PRIMARYPLAYERNAMESETTING1 = 1993 
+SI_RESOURCENUMBERSSETTING0 = 1994 
+SI_RESOURCENUMBERSSETTING1 = 1995 
+SI_RESOURCENUMBERSSETTING2 = 1996 
+SI_RESOURCENUMBERSSETTING3 = 1997 
+SI_GAMEPADCHATTEXTSIZESETTING22 = 1998 
+SI_GAMEPADCHATTEXTSIZESETTING27 = 1999 
+SI_GAMEPADCHATTEXTSIZESETTING34 = 2000 
+SI_SHADOWSCHOICE0 = 2001 
+SI_SHADOWSCHOICE1 = 2002 
+SI_SHADOWSCHOICE2 = 2003 
+SI_SHADOWSCHOICE3 = 2004 
+SI_SHADOWSCHOICE4 = 2005 
+SI_SHADOWSCHOICE5 = 2006 
+SI_SHADOWSCHOICE6 = 2007 
+SI_REFLECTIONQUALITY0 = 2008 
+SI_REFLECTIONQUALITY1 = 2009 
+SI_REFLECTIONQUALITY2 = 2010 
+SI_REFLECTIONQUALITY3 = 2011 
+SI_NONSTR_ESOGAMEDATAENUMS_SETTINGS_LAST_ENTRY = 2012 --Sync id for EsoGameDataEnums_Settings last entry
+SI_NONSTR_ESOMESSAGEENUMS_FIRST_ENTRY = 2013 --Sync id for EsoMessageEnums first entry
+SI_GROUPINVITERESPONSE0 = 2014 
+SI_GROUPINVITERESPONSE1 = 2015 
+SI_GROUPINVITERESPONSE2 = 2016 
+SI_GROUPINVITERESPONSE3 = 2017 
+SI_GROUPINVITERESPONSE4 = 2018 
+SI_GROUPINVITERESPONSE5 = 2019 
+SI_GROUPINVITERESPONSE6 = 2020 
+SI_GROUPINVITERESPONSE7 = 2021 
+SI_GROUPINVITERESPONSE8 = 2022 
+SI_GROUPINVITERESPONSE9 = 2023 
+SI_GROUPINVITERESPONSE10 = 2024 
+SI_GROUPINVITERESPONSE11 = 2025 
+SI_GROUPINVITERESPONSE12 = 2026 
+SI_GROUPINVITERESPONSE13 = 2027 
+SI_GROUPINVITERESPONSE14 = 2028 
+SI_GROUPINVITERESPONSE15 = 2029 
+SI_ACTIONRESULT2000 = 2030 
+SI_ACTIONRESULT2030 = 2031 
+SI_ACTIONRESULT2060 = 2032 
+SI_ACTIONRESULT2100 = 2033 
+SI_ACTIONRESULT2520 = 2034 
+SI_ACTIONRESULT2600 = 2035 
+SI_ACTIONRESULT2605 = 2036 
+SI_ACTIONRESULT2610 = 2037 
+SI_ACTIONRESULT2611 = 2038 
+SI_ACTIONRESULT2612 = 2039 
+SI_ACTIONRESULT2613 = 2040 
+SI_ACTIONRESULT2620 = 2041 
+SI_ACTIONRESULT2630 = 2042 
+SI_ACTIONRESULT2640 = 2043 
+SI_ACTIONRESULT2700 = 2044 
+SI_ACTIONRESULT2800 = 2045 
+SI_ACTIONRESULT2810 = 2046 
+SI_ACTIONRESULT2900 = 2047 
+SI_ACTIONRESULT2910 = 2048 
+SI_ACTIONRESULT3030 = 2049 
+SI_ACTIONRESULT3040 = 2050 
+SI_ACTIONRESULT3050 = 2051 
+SI_ACTIONRESULT3060 = 2052 
+SI_ACTIONRESULT3070 = 2053 
+SI_ACTIONRESULT3080 = 2054 
+SI_ACTIONRESULT3090 = 2055 
+SI_ACTIONRESULT3100 = 2056 
+SI_ACTIONRESULT3110 = 2057 
+SI_ACTIONRESULT3120 = 2058 
+SI_ACTIONRESULT3140 = 2059 
+SI_ACTIONRESULT3150 = 2060 
+SI_ACTIONRESULT3160 = 2061 
+SI_ACTIONRESULT3170 = 2062 
+SI_ACTIONRESULT3180 = 2063 
+SI_ACTIONRESULT3190 = 2064 
+SI_ACTIONRESULT3200 = 2065 
+SI_ACTIONRESULT3210 = 2066 
+SI_ACTIONRESULT3220 = 2067 
+SI_ACTIONRESULT3230 = 2068 
+SI_ACTIONRESULT3240 = 2069 
+SI_ACTIONRESULT3400 = 2070 
+SI_ACTIONRESULT3410 = 2071 
+SI_ACTIONRESULT3420 = 2072 
+SI_ACTIONRESULT3430 = 2073 
+SI_ACTIONRESULT3440 = 2074 
+SI_CHARACTERCREATEEDITERROR0 = 2075 
+SI_CHARACTERCREATEEDITERROR1 = 2076 
+SI_CHARACTERCREATEEDITERROR2 = 2077 
+SI_CHARACTERCREATEEDITERROR3 = 2078 
+SI_CHARACTERCREATEEDITERROR4 = 2079 
+SI_CHARACTERCREATEEDITERROR5 = 2080 
+SI_CHARACTERCREATEEDITERROR6 = 2081 
+SI_CHARACTERCREATEEDITERROR7 = 2082 
+SI_CHARACTERCREATEEDITERROR8 = 2083 
+SI_CHARACTERCREATEEDITERROR9 = 2084 
+SI_CHARACTERCREATEEDITERROR10 = 2085 
+SI_CHARACTERCREATEEDITERROR11 = 2086 
+SI_CHARACTERCREATEEDITERROR12 = 2087 
+SI_CHARACTERCREATEEDITERROR13 = 2088 
+SI_CHARACTERCREATEEDITERROR14 = 2089 
+SI_CHARACTERCREATEEDITERROR15 = 2090 
+SI_CHARACTERCREATEEDITERROR16 = 2091 
+SI_CHARACTERCREATEEDITERROR17 = 2092 
+SI_CHARACTERCREATEEDITERROR18 = 2093 
+SI_CHARACTERCREATEEDITERROR19 = 2094 
+SI_CHARACTERCREATEEDITERROR20 = 2095 
+SI_CHARACTERCREATEEDITERROR21 = 2096 
+SI_CHARACTERCREATEEDITERROR22 = 2097 
+SI_CHARACTERCREATEEDITERROR23 = 2098 
+SI_CHARACTERCREATEEDITERROR25 = 2099 
+SI_CHARACTERCREATEEDITERROR26 = 2100 
+SI_CHARACTERCREATEEDITERROR27 = 2101 
+SI_CHARACTERCREATEEDITERROR28 = 2102 
+SI_CHARACTERCREATEEDITERROR29 = 2103 
+SI_CHARACTERCREATEEDITERROR31 = 2104 
+SI_CHARACTERCREATEEDITERROR32 = 2105 
+SI_CHARACTERCREATEEDITERROR33 = 2106 
+SI_NAMINGERROR1 = 2107 
+SI_NAMINGERROR2 = 2108 
+SI_NAMINGERROR3 = 2109 
+SI_NAMINGERROR4 = 2110 
+SI_NAMINGERROR5 = 2111 
+SI_NAMINGERROR6 = 2112 
+SI_NAMINGERROR7 = 2113 
+SI_NAMINGERROR8 = 2114 
+SI_NAMINGERROR9 = 2115 
+SI_NAMINGERROR10 = 2116 
+SI_NAMINGERROR11 = 2117 
+SI_NAMINGERROR12 = 2118 
+SI_NAMINGERROR13 = 2119 
+SI_ACCOUNTNAMINGERROR1 = 2120 
+SI_ACCOUNTNAMINGERROR2 = 2121 
+SI_ACCOUNTNAMINGERROR3 = 2122 
+SI_ACCOUNTNAMINGERROR4 = 2123 
+SI_ACCOUNTNAMINGERROR5 = 2124 
+SI_ACCOUNTNAMINGERROR6 = 2125 
+SI_ACCOUNTNAMINGERROR7 = 2126 
+SI_GENDER0 = 2127 
+SI_GENDER1 = 2128 
+SI_GENDER2 = 2129 
+SI_SENDMAILRESULT1 = 2130 
+SI_SENDMAILRESULT2 = 2131 
+SI_SENDMAILRESULT3 = 2132 
+SI_SENDMAILRESULT4 = 2133 
+SI_SENDMAILRESULT5 = 2134 
+SI_SENDMAILRESULT6 = 2135 
+SI_SENDMAILRESULT7 = 2136 
+SI_SENDMAILRESULT8 = 2137 
+SI_SENDMAILRESULT9 = 2138 
+SI_SENDMAILRESULT10 = 2139 
+SI_SENDMAILRESULT11 = 2140 
+SI_SENDMAILRESULT12 = 2141 
+SI_SENDMAILRESULT13 = 2142 
+SI_SENDMAILRESULT14 = 2143 
+SI_SENDMAILRESULT15 = 2144 
+SI_SENDMAILRESULT16 = 2145 
+SI_LOOTITEMRESULT2 = 2146 
+SI_LOOTITEMRESULT3 = 2147 
+SI_LOOTITEMRESULT6 = 2148 
+SI_LOOTITEMRESULT8 = 2149 
+SI_LOOTITEMRESULT9 = 2150 
+SI_HOTBARRESULT1 = 2151 
+SI_HOTBARRESULT2 = 2152 
+SI_HOTBARRESULT3 = 2153 
+SI_HOTBARRESULT4 = 2154 
+SI_HOTBARRESULT5 = 2155 
+SI_HOTBARRESULT6 = 2156 
+SI_HOTBARRESULT7 = 2157 
+SI_HOTBARRESULT8 = 2158 
+SI_HOTBARRESULT9 = 2159 
+SI_ABILITYPROGRESSIONRESULT1 = 2160 
+SI_ABILITYPROGRESSIONRESULT2 = 2161 
+SI_ABILITYPROGRESSIONRESULT3 = 2162 
+SI_ABILITYPROGRESSIONRESULT4 = 2163 
+SI_ABILITYPROGRESSIONRESULT5 = 2164 
+SI_ABILITYPROGRESSIONRESULT6 = 2165 
+SI_ABILITYPROGRESSIONRESULT7 = 2166 
+SI_ABILITYPROGRESSIONRESULT8 = 2167 
+SI_ABILITYPROGRESSIONRESULT9 = 2168 
+SI_ABILITYPROGRESSIONRESULT10 = 2169 
+SI_RESPECRESULT0 = 2170 
+SI_RESPECRESULT1 = 2171 
+SI_RESPECRESULT2 = 2172 
+SI_RESPECRESULT3 = 2173 
+SI_FASTTRAVELKEEPRESULT1 = 2174 
+SI_FASTTRAVELKEEPRESULT2 = 2175 
+SI_FASTTRAVELKEEPRESULT3 = 2176 
+SI_FASTTRAVELKEEPRESULT4 = 2177 
+SI_FASTTRAVELKEEPRESULT5 = 2178 
+SI_FASTTRAVELKEEPRESULT6 = 2179 
+SI_FASTTRAVELKEEPRESULT7 = 2180 
+SI_FASTTRAVELKEEPRESULT8 = 2181 
+SI_FASTTRAVELKEEPRESULT9 = 2182 
+SI_FASTTRAVELKEEPRESULT10 = 2183 
+SI_FASTTRAVELKEEPRESULT11 = 2184 
+SI_FASTTRAVELKEEPRESULT12 = 2185 
+SI_FASTTRAVELKEEPRESULT14 = 2186 
+SI_UNASSIGNCAMPAIGNRESULT1 = 2187 
+SI_UNASSIGNCAMPAIGNRESULT2 = 2188 
+SI_UNASSIGNCAMPAIGNRESULT3 = 2189 
+SI_UNASSIGNCAMPAIGNRESULT4 = 2190 
+SI_UNASSIGNCAMPAIGNRESULT5 = 2191 
+SI_UNASSIGNCAMPAIGNRESULT6 = 2192 
+SI_BUGCATEGORY0 = 2193 
+SI_BUGCATEGORY1 = 2194 
+SI_BUGCATEGORY2 = 2195 
+SI_BUGCATEGORY3 = 2196 
+SI_BUGCATEGORY4 = 2197 
+SI_BUGCATEGORY5 = 2198 
+SI_BUGCATEGORY6 = 2199 
+SI_BUGCATEGORY7 = 2200 
+SI_BUGCATEGORY8 = 2201 
+SI_BUGCATEGORY9 = 2202 
+SI_BUGCATEGORY10 = 2203 
+SI_STOREFAILURE3 = 2204 
+SI_STOREFAILURE4 = 2205 
+SI_STOREFAILURE5 = 2206 
+SI_STOREFAILURE6 = 2207 
+SI_STOREFAILURE7 = 2208 
+SI_STOREFAILURE8 = 2209 
+SI_STOREFAILURE9 = 2210 
+SI_STOREFAILURE12 = 2211 
+SI_STOREFAILURE13 = 2212 
+SI_STOREFAILURE14 = 2213 
+SI_STOREFAILURE15 = 2214 
+SI_STOREFAILURE17 = 2215 
+SI_STOREFAILURE18 = 2216 
+SI_STOREFAILURE19 = 2217 
+SI_STOREFAILURE20 = 2218 
+SI_STOREFAILURE22 = 2219 
+SI_STOREFAILURE23 = 2220 
+SI_STOREFAILURE24 = 2221 
+SI_STOREFAILURE25 = 2222 
+SI_STOREFAILURE26 = 2223 
+SI_RESURRECTRESULT0 = 2224 
+SI_RESURRECTRESULT1 = 2225 
+SI_RESURRECTRESULT2 = 2226 
+SI_RESURRECTRESULT3 = 2227 
+SI_RESURRECTRESULT4 = 2228 
+SI_SOULGEMITEMCHARGINGREASON0 = 2229 
+SI_SOULGEMITEMCHARGINGREASON1 = 2230 
+SI_ITEMREPAIRREASON0 = 2231 
+SI_ITEMREPAIRREASON1 = 2232 
+SI_ITEMREPAIRREASON2 = 2233 
+SI_ITEMLAUNDERRESULT1 = 2234 
+SI_ITEMLAUNDERRESULT2 = 2235 
+SI_ITEMLAUNDERRESULT3 = 2236 
+SI_ITEMLAUNDERRESULT4 = 2237 
+SI_ITEMLAUNDERRESULT5 = 2238 
+SI_ITEMLAUNDERRESULT6 = 2239 
+SI_ITEMLAUNDERRESULT7 = 2240 
+SI_MOUNTFAILUREREASON0 = 2241 
+SI_MOUNTFAILUREREASON1 = 2242 
+SI_MOUNTFAILUREREASON2 = 2243 
+SI_MOUNTFAILUREREASON3 = 2244 
+SI_MOUNTFAILUREREASON4 = 2245 
+SI_PLEDGEOFMARARESULT0 = 2246 
+SI_PLEDGEOFMARARESULT1 = 2247 
+SI_PLEDGEOFMARARESULT2 = 2248 
+SI_PLEDGEOFMARARESULT3 = 2249 
+SI_PLEDGEOFMARARESULT4 = 2250 
+SI_PLEDGEOFMARARESULT5 = 2251 
+SI_PLEDGEOFMARARESULT6 = 2252 
+SI_PLEDGEOFMARARESULT7 = 2253 
+SI_DUELINVITEFAILREASON1 = 2254 
+SI_DUELINVITEFAILREASON2 = 2255 
+SI_DUELINVITEFAILREASON3 = 2256 
+SI_DUELINVITEFAILREASON4 = 2257 
+SI_DUELINVITEFAILREASON5 = 2258 
+SI_DUELINVITEFAILREASON6 = 2259 
+SI_DUELINVITEFAILREASON7 = 2260 
+SI_DUELINVITEFAILREASON8 = 2261 
+SI_DUELINVITEFAILREASON9 = 2262 
+SI_DUELINVITEFAILREASON10 = 2263 
+SI_DUELINVITEFAILREASON11 = 2264 
+SI_DUELINVITEFAILREASON12 = 2265 
+SI_DUELINVITEFAILREASON13 = 2266 
+SI_DUELINVITEFAILREASON14 = 2267 
+SI_DUELINVITEFAILREASON15 = 2268 
+SI_DUELINVITEFAILREASON16 = 2269 
+SI_DUELINVITEFAILREASON17 = 2270 
+SI_DUELINVITEFAILREASON18 = 2271 
+SI_DUELINVITEFAILREASON19 = 2272 
+SI_DUELINVITEFAILREASON20 = 2273 
+SI_DUELINVITEFAILREASON21 = 2274 
+SI_DUELINVITEFAILREASON22 = 2275 
+SI_TRADEACTIONRESULT0 = 2276 
+SI_TRADEACTIONRESULT1 = 2277 
+SI_TRADEACTIONRESULT2 = 2278 
+SI_TRADEACTIONRESULT3 = 2279 
+SI_TRADEACTIONRESULT4 = 2280 
+SI_TRADEACTIONRESULT5 = 2281 
+SI_TRADEACTIONRESULT6 = 2282 
+SI_TRADEACTIONRESULT8 = 2283 
+SI_TRADEACTIONRESULT9 = 2284 
+SI_TRADEACTIONRESULT12 = 2285 
+SI_TRADEACTIONRESULT13 = 2286 
+SI_TRADEACTIONRESULT14 = 2287 
+SI_TRADEACTIONRESULT41 = 2288 
+SI_TRADEACTIONRESULT42 = 2289 
+SI_TRADEACTIONRESULT43 = 2290 
+SI_TRADEACTIONRESULT44 = 2291 
+SI_TRADEACTIONRESULT45 = 2292 
+SI_TRADEACTIONRESULT46 = 2293 
+SI_TRADEACTIONRESULT62 = 2294 
+SI_TRADEACTIONRESULT63 = 2295 
+SI_TRADEACTIONRESULT64 = 2296 
+SI_TRADEACTIONRESULT65 = 2297 
+SI_TRADEACTIONRESULT66 = 2298 
+SI_TRADEACTIONRESULT80 = 2299 
+SI_TRADESKILLRESULT9 = 2300 
+SI_TRADESKILLRESULT10 = 2301 
+SI_TRADESKILLRESULT11 = 2302 
+SI_TRADESKILLRESULT12 = 2303 
+SI_TRADESKILLRESULT13 = 2304 
+SI_TRADESKILLRESULT14 = 2305 
+SI_TRADESKILLRESULT16 = 2306 
+SI_TRADESKILLRESULT17 = 2307 
+SI_TRADESKILLRESULT18 = 2308 
+SI_TRADESKILLRESULT19 = 2309 
+SI_TRADESKILLRESULT20 = 2310 
+SI_TRADESKILLRESULT21 = 2311 
+SI_TRADESKILLRESULT30 = 2312 
+SI_TRADESKILLRESULT31 = 2313 
+SI_TRADESKILLRESULT32 = 2314 
+SI_TRADESKILLRESULT33 = 2315 
+SI_TRADESKILLRESULT34 = 2316 
+SI_TRADESKILLRESULT35 = 2317 
+SI_TRADESKILLRESULT36 = 2318 
+SI_TRADESKILLRESULT50 = 2319 
+SI_TRADESKILLRESULT51 = 2320 
+SI_TRADESKILLRESULT52 = 2321 
+SI_TRADESKILLRESULT53 = 2322 
+SI_TRADESKILLRESULT54 = 2323 
+SI_TRADESKILLRESULT55 = 2324 
+SI_TRADESKILLRESULT56 = 2325 
+SI_TRADESKILLRESULT57 = 2326 
+SI_TRADESKILLRESULT58 = 2327 
+SI_TRADESKILLRESULT70 = 2328 
+SI_TRADESKILLRESULT71 = 2329 
+SI_TRADESKILLRESULT72 = 2330 
+SI_TRADESKILLRESULT73 = 2331 
+SI_TRADESKILLRESULT74 = 2332 
+SI_TRADESKILLRESULT76 = 2333 
+SI_TRADESKILLRESULT100 = 2334 
+SI_TRADESKILLRESULT101 = 2335 
+SI_TRADESKILLRESULT102 = 2336 
+SI_TRADESKILLRESULT103 = 2337 
+SI_TRADESKILLRESULT104 = 2338 
+SI_TRADESKILLRESULT105 = 2339 
+SI_TRADESKILLRESULT106 = 2340 
+SI_TRADESKILLRESULT107 = 2341 
+SI_TRADESKILLRESULT108 = 2342 
+SI_TRADESKILLRESULT109 = 2343 
+SI_TRADESKILLRESULT110 = 2344 
+SI_TRADESKILLRESULT111 = 2345 
+SI_TRADESKILLRESULT112 = 2346 
+SI_TRADESKILLRESULT113 = 2347 
+SI_TRADESKILLRESULT114 = 2348 
+SI_TRADESKILLRESULT115 = 2349 
+SI_TRADESKILLRESULT116 = 2350 
+SI_TRADESKILLRESULT117 = 2351 
+SI_TRADESKILLRESULT118 = 2352 
+SI_TRADESKILLRESULT119 = 2353 
+SI_TRADESKILLRESULT120 = 2354 
+SI_TRADESKILLRESULT121 = 2355 
+SI_TRADESKILLRESULT122 = 2356 
+SI_TRADESKILLRESULT123 = 2357 
+SI_TRADESKILLRESULT124 = 2358 
+SI_TRADESKILLRESULT125 = 2359 
+SI_TRADESKILLRESULT126 = 2360 
+SI_TRADESKILLRESULT127 = 2361 
+SI_GLOBALERRORCODE0 = 2362 
+SI_GLOBALERRORCODE100 = 2363 
+SI_GLOBALERRORCODE101 = 2364 
+SI_GLOBALERRORCODE102 = 2365 
+SI_GLOBALERRORCODE103 = 2366 
+SI_GLOBALERRORCODE104 = 2367 
+SI_GLOBALERRORCODE105 = 2368 
+SI_GLOBALERRORCODE106 = 2369 
+SI_GLOBALERRORCODE107 = 2370 
+SI_GLOBALERRORCODE108 = 2371 
+SI_GLOBALERRORCODE109 = 2372 
+SI_GLOBALERRORCODE110 = 2373 
+SI_GLOBALERRORCODE200 = 2374 
+SI_GLOBALERRORCODE201 = 2375 
+SI_GLOBALERRORCODE202 = 2376 
+SI_GLOBALERRORCODE203 = 2377 
+SI_GLOBALERRORCODE204 = 2378 
+SI_GLOBALERRORCODE206 = 2379 
+SI_GLOBALERRORCODE207 = 2380 
+SI_GLOBALERRORCODE301 = 2381 
+SI_GLOBALERRORCODE302 = 2382 
+SI_GLOBALERRORCODE303 = 2383 
+SI_GLOBALERRORCODE304 = 2384 
+SI_GLOBALERRORCODE305 = 2385 
+SI_GLOBALERRORCODE306 = 2386 
+SI_GLOBALERRORCODE307 = 2387 
+SI_GLOBALERRORCODE308 = 2388 
+SI_GLOBALERRORCODE309 = 2389 
+SI_GLOBALERRORCODE310 = 2390 
+SI_GLOBALERRORCODE311 = 2391 
+SI_GLOBALERRORCODE312 = 2392 
+SI_GLOBALERRORCODE313 = 2393 
+SI_GLOBALERRORCODE314 = 2394 
+SI_GLOBALERRORCODE315 = 2395 
+SI_GLOBALERRORCODE316 = 2396 
+SI_GLOBALERRORCODE317 = 2397 
+SI_GLOBALERRORCODE318 = 2398 
+SI_GLOBALERRORCODE319 = 2399 
+SI_GLOBALERRORCODE320 = 2400 
+SI_GLOBALERRORCODE321 = 2401 
+SI_GLOBALERRORCODE322 = 2402 
+SI_GLOBALERRORCODE323 = 2403 
+SI_GLOBALERRORCODE324 = 2404 
+SI_GLOBALERRORCODE325 = 2405 
+SI_GLOBALERRORCODE326 = 2406 
+SI_GLOBALERRORCODE327 = 2407 
+SI_GLOBALERRORCODE328 = 2408 
+SI_GLOBALERRORCODE329 = 2409 
+SI_GLOBALERRORCODE330 = 2410 
+SI_GLOBALERRORCODE331 = 2411 
+SI_GLOBALERRORCODE332 = 2412 
+SI_GLOBALERRORCODE333 = 2413 
+SI_GLOBALERRORCODE334 = 2414 
+SI_GLOBALERRORCODE335 = 2415 
+SI_GLOBALERRORCODE400 = 2416 
+SI_ACCOUNTCREATELINKERROR2 = 2417 
+SI_ACCOUNTCREATELINKERROR3 = 2418 
+SI_ACCOUNTCREATELINKERROR6000 = 2419 
+SI_ACCOUNTCREATELINKERROR12002 = 2420 
+SI_ACCOUNTCREATELINKERROR12004 = 2421 
+SI_ACCOUNTCREATELINKERROR12037 = 2422 
+SI_ACCOUNTCREATELINKERROR12038 = 2423 
+SI_ACCOUNTCREATELINKERROR12039 = 2424 
+SI_ACCOUNTCREATELINKERROR12100 = 2425 
+SI_ACCOUNTCREATELINKERROR12101 = 2426 
+SI_ACCOUNTCREATELINKERROR12102 = 2427 
+SI_ACCOUNTCREATELINKERROR12104 = 2428 
+SI_LOGINAUTHERROR2 = 2429 
+SI_LOGINAUTHERROR3 = 2430 
+SI_LOGINAUTHERROR4 = 2431 
+SI_LOGINAUTHERROR5 = 2432 
+SI_LOGINAUTHERROR3000 = 2433 
+SI_LOGINAUTHERROR8004 = 2434 
+SI_LOGINAUTHERROR8005 = 2435 
+SI_LOGINAUTHERROR8007 = 2436 
+SI_LOGINAUTHERROR8008 = 2437 
+SI_LOGINAUTHERROR8009 = 2438 
+SI_LOGINAUTHERROR8010 = 2439 
+SI_LOGINAUTHERROR8011 = 2440 
+SI_LOGINAUTHERROR8012 = 2441 
+SI_LOGINAUTHERROR8013 = 2442 
+SI_LOGINAUTHERROR13000 = 2443 
+SI_LOGINAUTHERROR13002 = 2444 
+SI_LOGINAUTHERROR13003 = 2445 
+SI_LOGINAUTHERROR13004 = 2446 
+SI_LOGINAUTHERROR14000 = 2447 
+SI_LOGINAUTHERROR14002 = 2448 
+SI_LOGINAUTHERROR5000 = 2449 
+SI_LOGINAUTHERROR17001 = 2450 
+SI_LOGOUTERROR2 = 2451 
+SI_LOGOUTERROR3 = 2452 
+SI_LOGOUTERROR4 = 2453 
+SI_LOGOUTERROR5 = 2454 
+SI_LOGOUTERROR6 = 2455 
+SI_LOGOUTERROR7 = 2456 
+SI_LOGOUTERROR8 = 2457 
+SI_PROFILELOGINERROR2 = 2458 
+SI_PROFILELOGINERROR3 = 2459 
+SI_PROFILELOGINERROR4 = 2460 
+SI_PROFILELOGINERROR5 = 2461 
+SI_PROFILELOGINERROR6 = 2462 
+SI_PROFILELOGINERROR7 = 2463 
+SI_PROFILELOGINERROR8 = 2464 
+SI_PROFILELOGINERROR9 = 2465 
+SI_PROFILELOGINERROR10 = 2466 
+SI_PROFILELOGINERROR11 = 2467 
+SI_PROFILELOGINERROR12 = 2468 
+SI_JUMPRESULT0 = 2469 
+SI_JUMPRESULT1 = 2470 
+SI_JUMPRESULT2 = 2471 
+SI_JUMPRESULT3 = 2472 
+SI_JUMPRESULT4 = 2473 
+SI_JUMPRESULT5 = 2474 
+SI_JUMPRESULT6 = 2475 
+SI_JUMPRESULT7 = 2476 
+SI_JUMPRESULT8 = 2477 
+SI_JUMPRESULT9 = 2478 
+SI_JUMPRESULT10 = 2479 
+SI_JUMPRESULT11 = 2480 
+SI_JUMPRESULT12 = 2481 
+SI_JUMPRESULT13 = 2482 
+SI_JUMPRESULT14 = 2483 
+SI_JUMPRESULT15 = 2484 
+SI_JUMPRESULT16 = 2485 
+SI_JUMPRESULT17 = 2486 
+SI_JUMPRESULT18 = 2487 
+SI_JUMPRESULT19 = 2488 
+SI_JUMPRESULT20 = 2489 
+SI_JUMPRESULT21 = 2490 
+SI_JUMPRESULT22 = 2491 
+SI_SOCIALACTIONRESULT1 = 2492 
+SI_SOCIALACTIONRESULT2 = 2493 
+SI_SOCIALACTIONRESULT3 = 2494 
+SI_SOCIALACTIONRESULT4 = 2495 
+SI_SOCIALACTIONRESULT5 = 2496 
+SI_SOCIALACTIONRESULT6 = 2497 
+SI_SOCIALACTIONRESULT7 = 2498 
+SI_SOCIALACTIONRESULT8 = 2499 
+SI_SOCIALACTIONRESULT9 = 2500 
+SI_SOCIALACTIONRESULT10 = 2501 
+SI_SOCIALACTIONRESULT11 = 2502 
+SI_SOCIALACTIONRESULT12 = 2503 
+SI_SOCIALACTIONRESULT13 = 2504 
+SI_SOCIALACTIONRESULT14 = 2505 
+SI_SOCIALACTIONRESULT15 = 2506 
+SI_SOCIALACTIONRESULT16 = 2507 
+SI_SOCIALACTIONRESULT17 = 2508 
+SI_SOCIALACTIONRESULT18 = 2509 
+SI_SOCIALACTIONRESULT19 = 2510 
+SI_SOCIALACTIONRESULT20 = 2511 
+SI_SOCIALACTIONRESULT21 = 2512 
+SI_SOCIALACTIONRESULT22 = 2513 
+SI_SOCIALACTIONRESULT23 = 2514 
+SI_SOCIALACTIONRESULT24 = 2515 
+SI_SOCIALACTIONRESULT25 = 2516 
+SI_SOCIALACTIONRESULT26 = 2517 
+SI_SOCIALACTIONRESULT27 = 2518 
+SI_SOCIALACTIONRESULT28 = 2519 
+SI_SOCIALACTIONRESULT29 = 2520 
+SI_SOCIALACTIONRESULT30 = 2521 
+SI_SOCIALACTIONRESULT31 = 2522 
+SI_SOCIALACTIONRESULT32 = 2523 
+SI_SOCIALACTIONRESULT33 = 2524 
+SI_SOCIALACTIONRESULT34 = 2525 
+SI_SOCIALACTIONRESULT35 = 2526 
+SI_SOCIALACTIONRESULT36 = 2527 
+SI_SOCIALACTIONRESULT37 = 2528 
+SI_SOCIALACTIONRESULT38 = 2529 
+SI_SOCIALACTIONRESULT39 = 2530 
+SI_SOCIALACTIONRESULT40 = 2531 
+SI_SOCIALACTIONRESULT41 = 2532 
+SI_SOCIALACTIONRESULT42 = 2533 
+SI_SOCIALACTIONRESULT43 = 2534 
+SI_SOCIALACTIONRESULT44 = 2535 
+SI_SOCIALACTIONRESULT45 = 2536 
+SI_SOCIALACTIONRESULT46 = 2537 
+SI_SOCIALACTIONRESULT47 = 2538 
+SI_SOCIALACTIONRESULT48 = 2539 
+SI_SOCIALACTIONRESULT49 = 2540 
+SI_SOCIALACTIONRESULT50 = 2541 
+SI_SOCIALACTIONRESULT51 = 2542 
+SI_SOCIALACTIONRESULT52 = 2543 
+SI_SOCIALACTIONRESULT53 = 2544 
+SI_SOCIALACTIONRESULT54 = 2545 
+SI_SOCIALACTIONRESULT55 = 2546 
+SI_SOCIALACTIONRESULT56 = 2547 
+SI_SOCIALACTIONRESULT57 = 2548 
+SI_SOCIALACTIONRESULT58 = 2549 
+SI_SOCIALACTIONRESULT59 = 2550 
+SI_SOCIALACTIONRESULT60 = 2551 
+SI_SOCIALACTIONRESULT61 = 2552 
+SI_SOCIALACTIONRESULT62 = 2553 
+SI_SOCIALACTIONRESULT63 = 2554 
+SI_SOCIALACTIONRESULT64 = 2555 
+SI_SOCIALACTIONRESULT65 = 2556 
+SI_SOCIALACTIONRESULT66 = 2557 
+SI_SOCIALACTIONRESULT67 = 2558 
+SI_SOCIALACTIONRESULT68 = 2559 
+SI_SOCIALACTIONRESULT69 = 2560 
+SI_SOCIALACTIONRESULT70 = 2561 
+SI_SOCIALACTIONRESULT71 = 2562 
+SI_SOCIALACTIONRESULT72 = 2563 
+SI_SOCIALACTIONRESULT73 = 2564 
+SI_SOCIALACTIONRESULT74 = 2565 
+SI_SOCIALACTIONRESULT75 = 2566 
+SI_SOCIALACTIONRESULT76 = 2567 
+SI_SOCIALACTIONRESULT77 = 2568 
+SI_SOCIALACTIONRESULT78 = 2569 
+SI_SOCIALACTIONRESULT79 = 2570 
+SI_SOCIALACTIONRESULT80 = 2571 
+SI_SOCIALACTIONRESULT81 = 2572 
+SI_SOCIALACTIONRESULT82 = 2573 
+SI_SOCIALACTIONRESULT83 = 2574 
+SI_SOCIALACTIONRESULT84 = 2575 
+SI_SOCIALACTIONRESULT85 = 2576 
+SI_SOCIALACTIONRESULT86 = 2577 
+SI_SOCIALACTIONRESULT87 = 2578 
+SI_SOCIALACTIONRESULT88 = 2579 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE1 = 2580 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE2 = 2581 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE3 = 2582 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE4 = 2583 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE5 = 2584 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE6 = 2585 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE7 = 2586 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE8 = 2587 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE9 = 2588 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE10 = 2589 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE11 = 2590 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE12 = 2591 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE13 = 2592 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE14 = 2593 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE15 = 2594 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE16 = 2595 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE17 = 2596 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE18 = 2597 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE19 = 2598 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE20 = 2599 
+SI_QUEUEFORCAMPAIGNRESPONSETYPE21 = 2600 
+SI_LEAVECAMPAIGNQUEUERESPONSETYPE1 = 2601 
+SI_LEAVECAMPAIGNQUEUERESPONSETYPE2 = 2602 
+SI_LEAVECAMPAIGNQUEUERESPONSETYPE3 = 2603 
+SI_LEAVECAMPAIGNQUEUERESPONSETYPE4 = 2604 
+SI_LEAVECAMPAIGNQUEUERESPONSETYPE5 = 2605 
+SI_CAMPAIGNREASSIGNMENTERRORREASON5 = 2606 
+SI_CAMPAIGNREASSIGNMENTERRORREASON13 = 2607 
+SI_CAMPAIGNREASSIGNMENTERRORREASON14 = 2608 
+SI_CAMPAIGNREASSIGNMENTERRORREASON15 = 2609 
+SI_GUILDBANKRESULT2 = 2610 
+SI_GUILDBANKRESULT3 = 2611 
+SI_GUILDBANKRESULT4 = 2612 
+SI_GUILDBANKRESULT5 = 2613 
+SI_GUILDBANKRESULT6 = 2614 
+SI_GUILDBANKRESULT7 = 2615 
+SI_GUILDBANKRESULT8 = 2616 
+SI_GUILDBANKRESULT9 = 2617 
+SI_GUILDBANKRESULT10 = 2618 
+SI_GUILDBANKRESULT11 = 2619 
+SI_GUILDBANKRESULT13 = 2620 
+SI_GUILDBANKRESULT14 = 2621 
+SI_GUILDBANKRESULT15 = 2622 
+SI_GUILDBANKRESULT16 = 2623 
+SI_GUILDBANKRESULT17 = 2624 
+SI_GUILDBANKRESULT18 = 2625 
+SI_GUILDKIOSKRESULT3 = 2626 
+SI_GUILDKIOSKRESULT4 = 2627 
+SI_GUILDKIOSKRESULT5 = 2628 
+SI_GUILDKIOSKRESULT6 = 2629 
+SI_GUILDKIOSKRESULT7 = 2630 
+SI_GUILDKIOSKRESULT8 = 2631 
+SI_GUILDKIOSKRESULT9 = 2632 
+SI_GUILDKIOSKRESULT10 = 2633 
+SI_GUILDKIOSKRESULT11 = 2634 
+SI_GUILDKIOSKRESULT13 = 2635 
+SI_GUILDKIOSKRESULT14 = 2636 
+SI_TRADINGHOUSERESULT1 = 2637 
+SI_TRADINGHOUSERESULT2 = 2638 
+SI_TRADINGHOUSERESULT3 = 2639 
+SI_TRADINGHOUSERESULT4 = 2640 
+SI_TRADINGHOUSERESULT5 = 2641 
+SI_TRADINGHOUSERESULT6 = 2642 
+SI_TRADINGHOUSERESULT7 = 2643 
+SI_TRADINGHOUSERESULT8 = 2644 
+SI_TRADINGHOUSERESULT9 = 2645 
+SI_TRADINGHOUSERESULT10 = 2646 
+SI_TRADINGHOUSERESULT11 = 2647 
+SI_TRADINGHOUSERESULT12 = 2648 
+SI_TRADINGHOUSERESULT13 = 2649 
+SI_TRADINGHOUSERESULT14 = 2650 
+SI_TRADINGHOUSERESULT15 = 2651 
+SI_TRADINGHOUSERESULT16 = 2652 
+SI_TRADINGHOUSERESULT17 = 2653 
+SI_TRADINGHOUSERESULT18 = 2654 
+SI_TRADINGHOUSERESULT19 = 2655 
+SI_TRADINGHOUSERESULT20 = 2656 
+SI_TRADINGHOUSERESULT21 = 2657 
+SI_TRADINGHOUSERESULT22 = 2658 
+SI_TRADINGHOUSERESULT23 = 2659 
+SI_TRADINGHOUSERESULT24 = 2660 
+SI_TRADINGHOUSERESULT25 = 2661 
+SI_CLAIMKEEPRESULTTYPE2 = 2662 
+SI_CLAIMKEEPRESULTTYPE3 = 2663 
+SI_CLAIMKEEPRESULTTYPE4 = 2664 
+SI_CLAIMKEEPRESULTTYPE5 = 2665 
+SI_CLAIMKEEPRESULTTYPE6 = 2666 
+SI_CLAIMKEEPRESULTTYPE7 = 2667 
+SI_CLAIMKEEPRESULTTYPE8 = 2668 
+SI_CLAIMKEEPRESULTTYPE9 = 2669 
+SI_CLAIMKEEPRESULTTYPE10 = 2670 
+SI_CLAIMKEEPRESULTTYPE11 = 2671 
+SI_CLAIMKEEPRESULTTYPE12 = 2672 
+SI_CLAIMKEEPRESULTTYPE13 = 2673 
+SI_CLAIMKEEPRESULTTYPE14 = 2674 
+SI_CLAIMKEEPRESULTTYPE15 = 2675 
+SI_CLAIMKEEPRESULTTYPE16 = 2676 
+SI_RELEASEKEEPRESULTTYPE2 = 2677 
+SI_RELEASEKEEPRESULTTYPE3 = 2678 
+SI_RELEASEKEEPRESULTTYPE4 = 2679 
+SI_RELEASEKEEPRESULTTYPE5 = 2680 
+SI_RELEASEKEEPRESULTTYPE6 = 2681 
+SI_RELEASEKEEPRESULTTYPE7 = 2682 
+SI_RELEASEKEEPRESULTTYPE8 = 2683 
+SI_RELEASEKEEPRESULTTYPE9 = 2684 
+SI_RELEASEKEEPRESULTTYPE10 = 2685 
+SI_TRIALACCOUNTRESTRICTIONTYPE1 = 2686 
+SI_TRIALACCOUNTRESTRICTIONTYPE2 = 2687 
+SI_TRIALACCOUNTRESTRICTIONTYPE3 = 2688 
+SI_TRIALACCOUNTRESTRICTIONTYPE4 = 2689 
+SI_HOUSINGREQUESTRESULT1 = 2690 
+SI_HOUSINGREQUESTRESULT2 = 2691 
+SI_HOUSINGREQUESTRESULT3 = 2692 
+SI_HOUSINGREQUESTRESULT4 = 2693 
+SI_HOUSINGREQUESTRESULT5 = 2694 
+SI_HOUSINGREQUESTRESULT6 = 2695 
+SI_HOUSINGREQUESTRESULT8 = 2696 
+SI_HOUSINGREQUESTRESULT9 = 2697 
+SI_HOUSINGREQUESTRESULT10 = 2698 
+SI_HOUSINGREQUESTRESULT11 = 2699 
+SI_HOUSINGREQUESTRESULT14 = 2700 
+SI_HOUSINGREQUESTRESULT15 = 2701 
+SI_HOUSINGREQUESTRESULT18 = 2702 
+SI_HOUSINGREQUESTRESULT20 = 2703 
+SI_HOUSINGREQUESTRESULT23 = 2704 
+SI_HOUSINGREQUESTRESULT24 = 2705 
+SI_HOUSINGREQUESTRESULT25 = 2706 
+SI_HOUSINGREQUESTRESULT26 = 2707 
+SI_HOUSINGREQUESTRESULT27 = 2708 
+SI_HOUSINGREQUESTRESULT28 = 2709 
+SI_HOUSINGREQUESTRESULT29 = 2710 
+SI_HOUSINGREQUESTRESULT31 = 2711 
+SI_HOUSINGREQUESTRESULT32 = 2712 
+SI_NONSTR_ESOMESSAGEENUMS_LAST_ENTRY = 2713 --Sync id for EsoMessageEnums last entry
+SI_NONSTR_ZOGUIENUMS_FIRST_ENTRY = 2714 --Sync id for ZoGuiEnums first entry
+SI_MAPDISPLAYFILTER1 = 2715 
+SI_MAPDISPLAYFILTER2 = 2716 
+SI_MAPDISPLAYFILTER3 = 2717 
+SI_MAPDISPLAYFILTER5 = 2718 
+SI_ADDONLOADSTATE0 = 2719 
+SI_ADDONLOADSTATE1 = 2720 
+SI_ADDONLOADSTATE2 = 2721 
+SI_ADDONLOADSTATE3 = 2722 
+SI_ADDONLOADSTATE4 = 2723 
+SI_ADDONLOADSTATE5 = 2724 
+SI_ADDONLOADSTATE6 = 2725 
+SI_KEYCODE0 = 2726 
+SI_KEYCODE1 = 2727 
+SI_KEYCODE2 = 2728 
+SI_KEYCODE3 = 2729 
+SI_KEYCODE4 = 2730 
+SI_KEYCODE5 = 2731 
+SI_KEYCODE6 = 2732 
+SI_KEYCODE7 = 2733 
+SI_KEYCODE8 = 2734 
+SI_KEYCODE9 = 2735 
+SI_KEYCODE10 = 2736 
+SI_KEYCODE11 = 2737 
+SI_KEYCODE12 = 2738 
+SI_KEYCODE13 = 2739 
+SI_KEYCODE14 = 2740 
+SI_KEYCODE15 = 2741 
+SI_KEYCODE16 = 2742 
+SI_KEYCODE17 = 2743 
+SI_KEYCODE18 = 2744 
+SI_KEYCODE19 = 2745 
+SI_KEYCODE20 = 2746 
+SI_KEYCODE21 = 2747 
+SI_KEYCODE22 = 2748 
+SI_KEYCODE23 = 2749 
+SI_KEYCODE24 = 2750 
+SI_KEYCODE25 = 2751 
+SI_KEYCODE26 = 2752 
+SI_KEYCODE27 = 2753 
+SI_KEYCODE28 = 2754 
+SI_KEYCODE29 = 2755 
+SI_KEYCODE30 = 2756 
+SI_KEYCODE31 = 2757 
+SI_KEYCODE32 = 2758 
+SI_KEYCODE33 = 2759 
+SI_KEYCODE34 = 2760 
+SI_KEYCODE35 = 2761 
+SI_KEYCODE36 = 2762 
+SI_KEYCODE37 = 2763 
+SI_KEYCODE38 = 2764 
+SI_KEYCODE39 = 2765 
+SI_KEYCODE40 = 2766 
+SI_KEYCODE41 = 2767 
+SI_KEYCODE42 = 2768 
+SI_KEYCODE43 = 2769 
+SI_KEYCODE44 = 2770 
+SI_KEYCODE45 = 2771 
+SI_KEYCODE46 = 2772 
+SI_KEYCODE47 = 2773 
+SI_KEYCODE48 = 2774 
+SI_KEYCODE49 = 2775 
+SI_KEYCODE50 = 2776 
+SI_KEYCODE51 = 2777 
+SI_KEYCODE52 = 2778 
+SI_KEYCODE53 = 2779 
+SI_KEYCODE54 = 2780 
+SI_KEYCODE55 = 2781 
+SI_KEYCODE56 = 2782 
+SI_KEYCODE57 = 2783 
+SI_KEYCODE58 = 2784 
+SI_KEYCODE59 = 2785 
+SI_KEYCODE60 = 2786 
+SI_KEYCODE61 = 2787 
+SI_KEYCODE62 = 2788 
+SI_KEYCODE63 = 2789 
+SI_KEYCODE64 = 2790 
+SI_KEYCODE65 = 2791 
+SI_KEYCODE66 = 2792 
+SI_KEYCODE67 = 2793 
+SI_KEYCODE68 = 2794 
+SI_KEYCODE69 = 2795 
+SI_KEYCODE70 = 2796 
+SI_KEYCODE71 = 2797 
+SI_KEYCODE72 = 2798 
+SI_KEYCODE73 = 2799 
+SI_KEYCODE74 = 2800 
+SI_KEYCODE75 = 2801 
+SI_KEYCODE76 = 2802 
+SI_KEYCODE77 = 2803 
+SI_KEYCODE78 = 2804 
+SI_KEYCODE79 = 2805 
+SI_KEYCODE80 = 2806 
+SI_KEYCODE81 = 2807 
+SI_KEYCODE82 = 2808 
+SI_KEYCODE83 = 2809 
+SI_KEYCODE84 = 2810 
+SI_KEYCODE85 = 2811 
+SI_KEYCODE86 = 2812 
+SI_KEYCODE87 = 2813 
+SI_KEYCODE88 = 2814 
+SI_KEYCODE89 = 2815 
+SI_KEYCODE90 = 2816 
+SI_KEYCODE91 = 2817 
+SI_KEYCODE92 = 2818 
+SI_KEYCODE93 = 2819 
+SI_KEYCODE94 = 2820 
+SI_KEYCODE95 = 2821 
+SI_KEYCODE96 = 2822 
+SI_KEYCODE97 = 2823 
+SI_KEYCODE98 = 2824 
+SI_KEYCODE99 = 2825 
+SI_KEYCODE100 = 2826 
+SI_KEYCODE101 = 2827 
+SI_KEYCODE102 = 2828 
+SI_KEYCODE103 = 2829 
+SI_KEYCODE104 = 2830 
+SI_KEYCODE105 = 2831 
+SI_KEYCODE106 = 2832 
+SI_KEYCODE107 = 2833 
+SI_KEYCODE108 = 2834 
+SI_KEYCODE109 = 2835 
+SI_KEYCODE110 = 2836 
+SI_KEYCODE111 = 2837 
+SI_KEYCODE112 = 2838 
+SI_KEYCODE113 = 2839 
+SI_KEYCODE114 = 2840 
+SI_KEYCODE115 = 2841 
+SI_KEYCODE116 = 2842 
+SI_KEYCODE117 = 2843 
+SI_KEYCODE118 = 2844 
+SI_KEYCODE119 = 2845 
+SI_KEYCODE120 = 2846 
+SI_KEYCODE121 = 2847 
+SI_KEYCODE122 = 2848 
+SI_KEYCODE123 = 2849 
+SI_KEYCODE124 = 2850 
+SI_KEYCODE125 = 2851 
+SI_KEYCODE126 = 2852 
+SI_KEYCODE127 = 2853 
+SI_KEYCODE128 = 2854 
+SI_KEYCODE129 = 2855 
+SI_KEYCODE130 = 2856 
+SI_KEYCODE131 = 2857 
+SI_KEYCODE132 = 2858 
+SI_KEYCODE133 = 2859 
+SI_KEYCODE134 = 2860 
+SI_KEYCODE135 = 2861 
+SI_KEYCODE136 = 2862 
+SI_KEYCODE137 = 2863 
+SI_KEYCODE138 = 2864 
+SI_KEYCODE139 = 2865 
+SI_KEYCODE140 = 2866 
+SI_KEYCODE141 = 2867 
+SI_KEYCODE142 = 2868 
+SI_KEYCODE143 = 2869 
+SI_KEYCODE144 = 2870 
+SI_KEYCODE145 = 2871 
+SI_KEYCODE146 = 2872 
+SI_KEYCODE147 = 2873 
+SI_KEYCODE148 = 2874 
+SI_KEYCODE149 = 2875 
+SI_KEYCODE150 = 2876 
+SI_KEYCODE151 = 2877 
+SI_KEYCODE152 = 2878 
+SI_KEYCODE153 = 2879 
+SI_KEYCODE154 = 2880 
+SI_KEYCODE155 = 2881 
+SI_KEYCODE156 = 2882 
+SI_KEYCODE157 = 2883 
+SI_KEYCODE158 = 2884 
+SI_KEYCODE159 = 2885 
+SI_KEYCODE160 = 2886 
+SI_KEYCODE161 = 2887 
+SI_KEYCODE162 = 2888 
+SI_KEYCODE163 = 2889 
+SI_KEYCODE164 = 2890 
+SI_KEYCODE165 = 2891 
+SI_KEYCODE166 = 2892 
+SI_KEYCODE167 = 2893 
+SI_KEYCODE168 = 2894 
+SI_KEYCODE169 = 2895 
+SI_KEYCODE170 = 2896 
+SI_KEYCODE171 = 2897 
+SI_KEYCODE172 = 2898 
+SI_KEYCODE173 = 2899 
+SI_KEYCODE174 = 2900 
+SI_KEYCODE175 = 2901 
+SI_KEYCODE176 = 2902 
+SI_KEYCODE177 = 2903 
+SI_KEYCODE178 = 2904 
+SI_KEYCODE179 = 2905 
+SI_KEYCODE180 = 2906 
+SI_KEYCODE181 = 2907 
+SI_KEYCODE182 = 2908 
+SI_KEYCODE183 = 2909 
+SI_KEYCODE184 = 2910 
+SI_KEYCODE185 = 2911 
+SI_KEYCODE186 = 2912 
+SI_KEYCODE187 = 2913 
+SI_KEYCODE188 = 2914 
+SI_KEYCODE189 = 2915 
+SI_KEYCODE190 = 2916 
+SI_NONSTR_ZOGUIENUMS_LAST_ENTRY = 2917 --Sync id for ZoGuiEnums last entry
+SI_NONSTR_ZORENDERENUMS_FIRST_ENTRY = 2918 --Sync id for ZoRenderEnums first entry
+SI_GRAPHICSPRESETS0 = 2919 
+SI_GRAPHICSPRESETS1 = 2920 
+SI_GRAPHICSPRESETS2 = 2921 
+SI_GRAPHICSPRESETS3 = 2922 
+SI_GRAPHICSPRESETS4 = 2923 
+SI_GRAPHICSPRESETS5 = 2924 
+SI_GRAPHICSPRESETS6 = 2925 
+SI_GRAPHICSPRESETS7 = 2926 
+SI_GRAPHICSPRESETS8 = 2927 
+SI_GRAPHICSPRESETS9 = 2928 
+SI_CONSOLEENHANCEDRENDERQUALITY0 = 2929 
+SI_CONSOLEENHANCEDRENDERQUALITY1 = 2930 
+SI_FULLSCREENMODE0 = 2931 
+SI_FULLSCREENMODE1 = 2932 
+SI_FULLSCREENMODE2 = 2933 
+SI_SUBSAMPLINGMODE0 = 2934 
+SI_SUBSAMPLINGMODE1 = 2935 
+SI_SUBSAMPLINGMODE2 = 2936 
+SI_PARTICLEDENSITY0 = 2937 
+SI_PARTICLEDENSITY1 = 2938 
+SI_PARTICLEDENSITY2 = 2939 
+SI_PARTICLEDENSITY3 = 2940 
+SI_ARTMETRICSCHOICE0 = 2941 
+SI_ARTMETRICSCHOICE1 = 2942 
+SI_ARTMETRICSCHOICE2 = 2943 
+SI_ARTMETRICSCHOICE3 = 2944 
+SI_ARTMETRICSCHOICE4 = 2945 
+SI_NONSTR_ZORENDERENUMS_LAST_ENTRY = 2946 --Sync id for ZoRenderEnums last entry
+SI_NONSTR_CONSOLESTRINGS_FIRST_ENTRY = 2947 --Sync id for ConsoleStrings first entry
+SI_PRESS_START_PROFILE = 2948 
+SI_SAVE_ERROR_TITLE = 2949 
+SI_LOAD_ERROR_TITLE = 2950 
+SI_OUT_OF_SPACE = 2951 
+SI_CORRUPT_SAVE = 2952 
+SI_FAILED_LOAD = 2953 
+SI_FAILED_SAVE = 2954 
+SI_SAVE_DEST_REMOVED_STORAGE = 2955 
+SI_NO_SAVE_CONTINUE = 2956 
+SI_NO_SAVE_DEVICE = 2957 
+SI_ALLOW_OVERWRITE = 2958 
+SI_PROFILE_PRIVILEGES_FAILED_ERROR_TEXT = 2959 
+SI_CHARACTER_SELECT_LOAD_IN_PROGRESS = 2960 
+SI_DIALOG_INSTALLATION_PROGRESS = 2961 
+SI_PROFILE_LOAD_FAILED_TITLE = 2962 
+SI_LOGIN_FLOW_CREATE_ACCT_FULLNAME = 2963 
+SI_PROFILE_LOADING_DIALOG_TITLE = 2964 
+SI_PROFILE_LOADING_DIALOG_TEXT = 2965 
+SI_ORBIS_PRESENCE_CHARACTER_TYPE = 2966 
+SI_ORBIS_PRESENCE_CHARACTER_TYPE_CHAMPION = 2967 
+SI_ORBIS_PRESENCE_LOCATION = 2968 
+SI_ORBIS_PRESENCE_PREGAME = 2969 
+SI_ORBIS_FEED_LAUNCH_GAME_BUTTON_TEXT_EN = 2970 
+SI_ORBIS_FEED_LAUNCH_GAME_BUTTON_TEXT_FR = 2971 
+SI_ORBIS_FEED_LAUNCH_GAME_BUTTON_TEXT_DE = 2972 
+SI_ORBIS_OPEN_INVITE_DIALOG = 2973 
+SI_SESSION_INVITE_TITLE = 2974 
+SI_SESSION_INVITE_TEXT = 2975 
+SI_GAMEPLAY_OPTIONS_TITLE = 2976 
+SI_OPTIONS_ALL_NAMEPLATES_GAMEPAD = 2977 
+SI_OPTIONS_ALL_HEALTHBARS_GAMEPAD = 2978 
+SI_OPTIONS_PLAYER_NAMEPLATE_GAMEPAD = 2979 
+SI_OPTIONS_PLAYER_HEALTH_BAR_GAMEPAD = 2980 
+SI_OPTIONS_FRIENDLY_NPC_NAMEPLATE_GAMEPAD = 2981 
+SI_OPTIONS_FRIENDLY_NPC_HEALTH_BAR_GAMEPAD = 2982 
+SI_OPTIONS_FRIENDLY_PLAYER_NAMEPLATE_GAMEPAD = 2983 
+SI_OPTIONS_FRIENDLY_PLAYER_HEALTH_BAR_GAMEPAD = 2984 
+SI_OPTIONS_ENEMY_NPC_NAMEPLATE_GAMEPAD = 2985 
+SI_OPTIONS_ENEMY_NPC_HEALTH_BAR_GAMEPAD = 2986 
+SI_OPTIONS_ENEMY_PLAYER_NAMEPLATE_GAMEPAD = 2987 
+SI_OPTIONS_ENEMY_PLAYER_HEALTH_BAR_GAMEPAD = 2988 
+SI_OPTIONS_ENABLE_VOICE_GAMEPAD = 2989 
+SI_OPTIONS_ESO_STORE_OPTION_GAMEPAD = 2990 
+SI_OPTIONS_GLOW_OPTION_GAMEPAD = 2991 
+SI_OPTIONS_CAMERA_LOCK_COMBAT_VALUES_GAMEPAD = 2992 
+SI_OPTIONS_CAMERA_COMBAT_DISTANCE_GAMEPAD = 2993 
+SI_OPTIONS_CAMERA_NON_COMBAT_DISTANCE_GAMEPAD = 2994 
+SI_OPTIONS_VIBRATION_GAMEPAD = 2995 
+SI_OPTIONS_AUDIO_AND_VIDEO_GAMEPAD = 2996 
+SI_OPTIONS_TARGET_GLOW_INTENSITY_GAMEPAD = 2997 
+SI_OPTIONS_INTERACTABLES_GLOW_INTENSITY_GAMEPAD = 2998 
+SI_OPTIONS_VOICE_GAMEPAD = 2999 
+SI_CAMERA_OPTIONS_TITLE = 3000 
+SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_GAMEPAD = 3001 
+SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_GAMEPAD = 3002 
+SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED = 3003 
+SI_LOGIN_DIALOG_TITLE_LINK_FAILED = 3004 
+SI_UNEXPECTED_ERROR = 3005 
+SI_PLAYERS_MET_TITLE_GROUP = 3006 
+SI_PLAYERS_MET_TITLE_WHISPER = 3007 
+SI_PLAYERS_MET_TITLE_TRADE = 3008 
+SI_PLAYERS_MET_TITLE_KILL = 3009 
+SI_PLAYERS_MET_TITLE_DUEL = 3010 
+SI_REQUEST_NAME_DEFAULT_TEXT_CONSOLE = 3011 
+SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_NO_SUCH_PLAYER = 3012 
+SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_NOT_ALLOWED = 3013 
+SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_GLOBALLY_RESTRICTED = 3014 
+SI_NONSTR_CONSOLESTRINGS_LAST_ENTRY = 3015 --Sync id for ConsoleStrings last entry
+SI_NONSTR_PREGAMEKEYBOARDSTRINGS_FIRST_ENTRY = 3016 --Sync id for PregameKeyboardStrings first entry
+SI_CREATE_CHARACTER_BODY_TRIANGLE_LABEL = 3017 
+SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL = 3018 
+SI_CREATE_CHARACTER_TRIANGLE_MUSCULAR = 3019 
+SI_CREATE_CHARACTER_TRIANGLE_FAT = 3020 
+SI_CREATE_CHARACTER_TRIANGLE_THIN = 3021 
+SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR = 3022 
+SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT = 3023 
+SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN = 3024 
+SI_CREATE_CHARACTER_BUCKET_TITLE_RACE = 3025 
+SI_CREATE_CHARACTER_BUCKET_TITLE_CLASS = 3026 
+SI_CREATE_CHARACTER_BUCKET_TITLE_GENDER = 3027 
+SI_CREATE_CHARACTER_BUCKET_TITLE_BODY = 3028 
+SI_CREATE_CHARACTER_BUCKET_TITLE_FACE = 3029 
+SI_CREATE_CHARACTER_TITLE_NAME = 3030 
+SI_CREATE_CHARACTER_BUTTON = 3031 
+SI_SAVE_CHARACTER_BUTTON = 3032 
+SI_CREATE_CHARACTER_RACE_SELECTOR_TOOLTIP = 3033 
+SI_CREATE_CHARACTER_CLASS_SELECTOR_TOOLTIP = 3034 
+SI_CREATE_CHARACTER_ALLIANCE_SELECTOR_TOOLTIP = 3035 
+SI_CREATE_CHARACTER_SELECTOR_TOKEN_DISABLED = 3036 
+SI_CREATE_CHARACTER_VOICE_A = 3037 
+SI_CREATE_CHARACTER_VOICE_B = 3038 
+SI_CREATE_CHARACTER_VOICE_C = 3039 
+SI_CREATE_CHARACTER_VOICE_D = 3040 
+SI_CREATE_CHARACTER_VOICE_E = 3041 
+SI_CREATE_CHARACTER_VOICE_F = 3042 
+SI_CREATE_CHARACTER_VOICE_G = 3043 
+SI_CREATE_CHARACTER_VOICE_H = 3044 
+SI_CREATE_CHARACTER_ALLIANCE_LABEL = 3045 
+SI_CREATE_CHARACTER_RACE_LABEL = 3046 
+SI_RANDOMIZE_APPEARANCE_BUTTON = 3047 
+SI_ACCOUNT_NAME = 3048 
+SI_PASSWORD = 3049 
+SI_LOGIN = 3050 
+SI_LOGIN_CHARACTER = 3051 
+SI_RENAME_CHARACTER = 3052 
+SI_ADDON_MANAGEMENT = 3053 
+SI_CREATE_CHARACTER = 3054 
+SI_SERVER_NAME = 3055 
+SI_SERVER_STATUS = 3056 
+SI_SELECT_SERVER = 3057 
+SI_SERVER_SELECT_TITLE = 3058 
+SI_SERVER_SELECT_CHARACTER_WARNING = 3059 
+SI_BACK_UP_ONE_MENU = 3060 
+SI_DELETE_CHARACTER = 3061 
+SI_DELETE_CHARACTER_NUM_DELETES = 3062 
+SI_DELETE_CHARACTER_MAX_ENABLED_TOOLTIP = 3063 
+SI_DELETE_CHARACTER_ENABLED_TOOLTIP = 3064 
+SI_DELETE_CHARACTER_DISABLED_TOOLTIP = 3065 
+SI_DELETE_CHARACTER_DIALOG_TEXT = 3066 
+SI_DELETE_CHARACTER_CONFIRMATION_BUTTON = 3067 
+SI_DELETE_CHARACTER_CONFIRMATION_TEXT = 3068 
+SI_TEMPLATE_ID_LABEL = 3069 
+SI_TEMPLATE_NONE = 3070 
+SI_CHARACTER_SELECT_LEVEL_CLASS = 3071 
+SI_CHARACTER_SELECT_LEVEL_CHAMPION_CLASS = 3072 
+SI_CHARACTER_SELECT_CHAMPION_CLASS = 3073 
+SI_CHARACTER_SELECT_LEVEL = 3074 
+SI_CHARACTER_SELECT_NAME = 3075 
+SI_CHARACTER_SELECT_RACE = 3076 
+SI_CHARACTER_SELECT_CLASS = 3077 
+SI_CHARACTER_SELECT_ALLIANCE = 3078 
+SI_CHARACTER_SELECT_LOCATION = 3079 
+SI_CHARACTER_SELECT_RACE_CLASS_LOCATION = 3080 
+SI_CHARACTER_SELECT_SLOTS = 3081 
+SI_UNKNOWN_CLASS = 3082 
+SI_UNKNOWN_RANK = 3083 
+SI_UNKNOWN_LOCATION = 3084 
+SI_UNKNOWN_ALLIANCE = 3085 
+SI_SERVER_LOCKED = 3086 
+SI_SERVER_STATUS_UP = 3087 
+SI_SERVER_STATUS_DOWN = 3088 
+SI_SERVER_STATUS_OUT = 3089 
+SI_SERVER_STATUS_LOCKED = 3090 
+SI_SERVER_STATUS_INVALID = 3091 
+SI_PATCHOPTION_LIVE = 3092 
+SI_PATCHOPTION_PATCH = 3093 
+SI_PREGAME_OPEN_OPTIONS = 3094 
+SI_BAD_LOGIN = 3095 
+SI_AUTHENTICATION_SERVER_DOWN = 3096 
+SI_QUIT = 3097 
+SI_VERSION = 3098 
+SI_TRY_AGAIN = 3099 
+SI_APPLY = 3100 
+SI_REMEMBER_ACCOUNT = 3101 
+SI_LOGIN_REQUESTED = 3102 
+SI_LOGIN_TIME_OUT = 3103 
+SI_LOGIN_ACCOUNT_REQUIRED = 3104 
+SI_LOGIN_ACCOUNT_REQUIRED_ESO = 3105 
+SI_CONNECTING_TO_REALM = 3106 
+SI_DISCONNECTED_FROM_SERVER = 3107 
+SI_UNKNOWN_ERROR = 3108 
+SI_SELECTED_SERVER_X_IS_UNAVAILABLE = 3109 
+SI_CHARACTER_LOAD_REQUESTED = 3110 
+SI_WORLD_LIST_REQUESTED = 3111 
+SI_PROMPT_TITLE_DELETE_SELECTED_CHARACTER = 3112 
+SI_PROMPT_TITLE_CONNECTING_TO_REALM = 3113 
+SI_PROMPT_TITLE_SERVER_UNAVAILABLE = 3114 
+SI_PROMPT_TITLE_SERVER_FULL = 3115 
+SI_PROMPT_TITLE_PLEASE_WAIT = 3116 
+SI_LOGIN_QUEUE_TEXT = 3117 
+SI_LOGIN_QUEUE_CANCEL_TEXT = 3118 
+SI_OVERFLOW_DIALOG_TITLE = 3119 
+SI_OVERFLOW_DIALOG_TEXT = 3120 
+SI_OVERFLOW_DIALOG_LIST_ENTRY_1 = 3121 
+SI_OVERFLOW_DIALOG_LIST_ENTRY_2 = 3122 
+SI_OVERFLOW_DIALOG_LIST_ENTRY_3 = 3123 
+SI_OVERFLOW_DIALOG_LIST_ENTRY_4 = 3124 
+SI_OVERFLOW_DIALOG_FOOTER = 3125 
+SI_OVERFLOW_DIALOG_CANCEL_BUTTON = 3126 
+SI_OVERFLOW_DIALOG_OVERFLOW_BUTTON = 3127 
+SI_OVERFLOW_DIALOG_QUEUE_BUTTON = 3128 
+SI_ERROR_DIALOG_HELP = 3129 
+SI_DIALOG_TITLE_SERVER_UNAVAILABLE = 3130 
+SI_DIALOG_TITLE_LOGGING_IN = 3131 
+SI_DIALOG_TITLE_LOGIN_ERROR = 3132 
+SI_DIALOG_TITLE_SERVER_LOCKED = 3133 
+SI_EULA_BUTTON_AGREE = 3134 
+SI_EULA_BUTTON_DISAGREE = 3135 
+SI_WINDOW_TITLE_EULA = 3136 
+SI_SPLASH_SCREEN_COPYRIGHT = 3137 
+SI_SERVER_MAINTENANCE_DIALOG_TITLE = 3138 
+SI_SERVER_MAINTENANCE_DIALOG_TEXT = 3139 
+SI_SERVER_MAINTENANCE_LOGIN_BUTTON_TIMER = 3140 
+SI_OTP_DIALOG_TITLE = 3141 
+SI_OTP_DIALOG_SUBMIT = 3142 
+SI_OTP_DIALOG_CANCEL = 3143 
+SI_PROVIDE_OTP_INITIAL_DIALOG_TEXT = 3144 
+SI_PROVIDE_OTP_SUBSEQUENT_DIALOG_TEXT = 3145 
+SI_VIDEO_PLAYBACK_CONFIRM_CANCEL = 3146 
+SI_GAME_MENU_PLAY = 3147 
+SI_GAME_MENU_SERVER = 3148 
+SI_GAME_MENU_BACK = 3149 
+SI_GAME_MENU_CHARACTERS = 3150 
+SI_GAME_MENU_PREVIEW = 3151 
+SI_CAPS_LOCK_PASSWORD_WARNING = 3152 
+SI_TRUSTED_MACHINE_BUTTON_TOOLTIP = 3153 
+SI_UNTRUSTED_MACHINE_BUTTON_TOOLTIP = 3154 
+SI_DIALOG_TITLE_PAYMENT_EXPIRED = 3155 
+SI_DIALOG_TEXT_PAYMENT_EXPIRED = 3156 
+SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE = 3157 
+SI_BAD_CLIENT_VERSION_TITLE = 3158 
+SI_BAD_CLIENT_VERSION_TEXT = 3159 
+SI_PEGI_COUNTRY_SELECT_TITLE = 3160 
+SI_PEGI_COUNTRY_SELECT_TEXT = 3161 
+SI_PEGI_AGREEMENT_TITLE = 3162 
+SI_PEGI_AGREEMENT_TEXT = 3163 
+SI_PEGI_AGREEMENT_DECLINE_TITLE = 3164 
+SI_PEGI_AGREEMENT_DECLINE_TEXT = 3165 
+SI_PEGI_AGREEMENT_LINK_TEXT = 3166 
+SI_KEYBOARD_ACCOUNTSETUP_PLEASE_WAIT_DIALOG_HEADER = 3167 
+SI_KEYBOARD_ACCOUNTSETUP_PLEASE_WAIT_DIALOG_BODY = 3168 
+SI_KEYBOARD_ACCOUNTSETUP_LABEL = 3169 
+SI_KEYBOARD_ACCOUNTSETUP_NEW_ACCOUNT = 3170 
+SI_KEYBOARD_ACCOUNTSETUP_EXISTING_ACCOUNT = 3171 
+SI_KEYBOARD_CREATEACCOUNT_DIALOG_HEADER = 3172 
+SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_CREATED_DIALOG_HEADER = 3173 
+SI_KEYBOARD_CREATEACCOUNT_SUCCESS_DIALOG_BODY_FORMAT = 3174 
+SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL = 3175 
+SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_DESCRIPTION = 3176 
+SI_KEYBOARD_LINKACCOUNT_LABEL = 3177 
+SI_KEYBOARD_LINKACCOUNT_DIALOG_HEADER = 3178 
+SI_KEYBOARD_LINKACCOUNT_CONFIRM_2_FORMAT = 3179 
+SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_HEADER = 3180 
+SI_KEYBOARD_LINKACCOUNT_ACCOUNTS_LINKED_DIALOG_BODY_FORMAT = 3181 
+SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING = 3182 
+SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM = 3183 
+SI_KEYBOARD_LINKED_LOGIN_ERROR_MESSAGE = 3184 
+SI_KEYBOARD_PLEASE_RESTART_GAME = 3185 
+SI_KEYBOARD_ACCOUNT_CHAMPION_POINTS = 3186 
+SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_ONLY = 3187 
+SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_OR_CODE = 3188 
+SI_NONSTR_PREGAMEKEYBOARDSTRINGS_LAST_ENTRY = 3189 --Sync id for PregameKeyboardStrings last entry
+SI_NONSTR_PREGAMEGAMEPADSTRINGS_FIRST_ENTRY = 3190 --Sync id for PregameGamepadStrings first entry
+SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_CHARACTER = 3191 
+SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_BODY_TYPE = 3192 
+SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD_TYPE = 3193 
+SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD = 3194 
+SI_CREATE_CHARACTER_GAMEPAD_CLASS_LABEL = 3195 
+SI_CREATE_CHARACTER_GAMEPAD_FINISH = 3196 
+SI_CREATE_CHARACTER_GAMEPAD_ENTER_NAME = 3197 
+SI_CREATE_CHARACTER_GAMEPAD_RANDOMIZE = 3198 
+SI_CREATE_CHARACTER_GAMEPAD_LOCK_VALUE = 3199 
+SI_CREATE_CHARACTER_GAMEPAD_UNLOCK_VALUE = 3200 
+SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT = 3201 
+SI_CREATE_CHARACTER_GAMEPAD_USE_TEMPLATE = 3202 
+SI_CREATE_CHARACTER_GAMEPAD_TEST_VOICE = 3203 
+SI_CREATE_CHARACTER_GAMEPAD_GENDER_SLIDER_NAME = 3204 
+SI_CREATE_CHARACTER_GAMEPAD_FINISH_TITLE = 3205 
+SI_CREATE_CHARACTER_GAMEPAD_FINISH_DONE = 3206 
+SI_CREATE_CHARACTER_GAMEPAD_FINISH_SELECT = 3207 
+SI_CREATE_CHARACTER_GAMEPAD_FINISH_BACK = 3208 
+SI_CREATE_CHARACTER_GAMEPAD_EDIT = 3209 
+SI_CREATE_CHARACTER_GAMEPAD_CREATING = 3210 
+SI_CREATE_CHARACTER_GAMEPAD_CREATING_CHARACTER = 3211 
+SI_CREATE_CHARACTER_TEMPLATE_SELECT_TITLE = 3212 
+SI_CREATE_CHARACTER_TEMPLATE_SELECT_DESCRIPTION = 3213 
+SI_CREATE_CHARACTER_GAMEPAD_INVALID_NAME_DIALOG_INSTRUCTION_FORMAT = 3214 
+SI_DELETE_CHARACTER_DIALOG_GAMEPAD_CONTINUE = 3215 
+SI_DELETE_CHARACTER_DIALOG_GAMEPAD_TITLE = 3216 
+SI_DELETE_CHARACTER_DIALOG_GAMEPAD_TEXT = 3217 
+SI_DELETE_CHARACTER_DISABLED_GAMEPAD_TITLE = 3218 
+SI_DELETE_CHARACTER_DISABLED_GAMEPAD_TEXT = 3219 
+SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TITLE = 3220 
+SI_CONFIRM_DELETE_CHARACTER_DIALOG_GAMEPAD_TEXT = 3221 
+SI_DELETE_CHARACTER_GAMEPAD_DIALOG_TEXT = 3222 
+SI_DELETE_CHARACTER_GAMEPAD_DELETING = 3223 
+SI_DELETE_CHARACTER_GAMEPAD_DELETING_CHARACTER = 3224 
+SI_DELETE_CHARACTER_GAMEPAD_DIALOG_TITLE_DELETED = 3225 
+SI_DELETE_CHARACTER_GAMEPAD_DIALOG_TEXT_DELETED = 3226 
+SI_CHARACTER_SELECT_RANK_NAME = 3227 
+SI_CHARACTER_SELECT_RACE_LABEL = 3228 
+SI_CHARACTER_SELECT_CLASS_LABEL = 3229 
+SI_CHARACTER_SELECT_ALLIANCE_LABEL = 3230 
+SI_CHARACTER_SELECT_GRADE_LABEL = 3231 
+SI_CHARACTER_SELECT_LOCATION_LABEL = 3232 
+SI_CHARACTER_SELECT_GAMEPAD_PLAY = 3233 
+SI_CHARACTER_SELECT_GAMEPAD_OPTIONS = 3234 
+SI_CHARACTER_SELECT_GAMEPAD_CHAPTER_HEADER = 3235 
+SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS_HEADER = 3236 
+SI_CHARACTER_SELECT_GAMEPAD_RENAME_HEADER = 3237 
+SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_HEADER = 3238 
+SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW_ENTRY = 3239 
+SI_CHARACTER_SELECT_GAMEPAD_DELETE = 3240 
+SI_CHARACTER_SELECT_GAMEPAD_CREATE_NEW = 3241 
+SI_CHARACTER_SELECT_GAMEPAD_RENAME = 3242 
+SI_CHARACTER_SELECT_GAMEPAD_RENAMING = 3243 
+SI_CHARACTER_SELECT_GAMEPAD_RENAMING_CHARACTER = 3244 
+SI_CHARACTER_SELECT_GAMEPAD_RENAME_TEXT = 3245 
+SI_CHARACTER_SELECT_GAMEPAD_DELETE_CANCEL = 3246 
+SI_CHARACTER_SELECT_GAMEPAD_LOGIN = 3247 
+SI_CHARACTER_SELECT_GAMEPAD_LOGIN_TEXT = 3248 
+SI_CHARACTER_SELECT_GAMEPAD_LOGIN_CANCEL = 3249 
+SI_CHARACTER_SELECT_GAMEPAD_LOGIN_ERROR = 3250 
+SI_CHARACTER_SELECT_GAMEPAD_LOGIN_ERROR_TEXT = 3251 
+SI_CHARACTER_SELECT_GAMEPAD_LOGIN_ERROR_EXIT = 3252 
+SI_CHARACTER_SELECT_GAMEPAD_SELECT_CHARACTER = 3253 
+SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS = 3254 
+SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS_COUNTER = 3255 
+SI_CHARACTER_SELECT_PROFILE_LABEL = 3256 
+SI_CHARACTER_SELECT_GAMEPAD_ZOOM_KEYBIND = 3257 
+SI_CHARACTER_SELECT_GAMEPAD_ROTATE_KEYBIND = 3258 
+SI_CHARACTER_SELECT_CHAMPION_POINTS_LABEL = 3259 
+SI_GAMEPAD_WORLD_SELECT_REFRESH = 3260 
+SI_GAMEPAD_VIDEO_PLAYBACK_CONFIRM_CANCEL = 3261 
+SI_CONSOLE_PREGAME_PRESS_BUTTON = 3262 
+SI_CONSOLE_PREGAME_LOADING = 3263 
+SI_CONSOLE_PREGANE_TRIAL_ADVANCE = 3264 
+SI_CONSOLE_CREATEACCOUNT_DESCRIPTION = 3265 
+SI_CONSOLE_CREATEACCOUNT_NOCOUNTRY = 3266 
+SI_CONSOLE_CREATEACCOUNT_NOEMAIL = 3267 
+SI_CONSOLE_CREATEACCOUNT_BADAGE = 3268 
+SI_CONSOLE_CREATEACCOUNT_AUTOFILL = 3269 
+SI_CONSOLE_LINKACCOUNT_HEADER = 3270 
+SI_CONSOLE_LINKACCOUNT_DESCRIPTION = 3271 
+SI_CONSOLE_LINKACCOUNT_NOUSERNAME = 3272 
+SI_CONSOLE_LINKACCOUNT_NOPASSWORD = 3273 
+SI_CONSOLE_RESEND_VERIFY_EMAIL_KEYBIND = 3274 
+SI_CONSOLE_RESEND_VERIFY_EMAIL_SUCCEEDED_TITLE = 3275 
+SI_CONSOLE_RESEND_VERIFY_EMAIL_SUCCEEDED_TEXT = 3276 
+SI_CONSOLE_RESEND_VERIFY_EMAIL_FAILED_TITLE = 3277 
+SI_CONSOLE_RESEND_VERIFY_EMAIL_FAILED_TEXT = 3278 
+SI_CONSOLE_LINKACCOUNT_CONFIRM_2_XBOX = 3279 
+SI_CONSOLE_LINKACCOUNT_CONFIRM_2_PS4 = 3280 
+SI_CONSOLE_LINKACCOUNT_CONFIRM_3_XBOX = 3281 
+SI_CONSOLE_LINKACCOUNT_CONFIRM_3_PS4 = 3282 
+SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_XBOX = 3283 
+SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_PS4 = 3284 
+SI_CONSOLE_CREATELINKACCOUNT_OVERVIEW = 3285 
+SI_CONSOLE_ERROR_GENERIC = 3286 
+SI_CONSOLE_LEGAL_DECLINE_HEADER = 3287 
+SI_CONSOLE_LEGAL_DECLINE_PROMPT = 3288 
+SI_CONSOLE_LEGAL_BUTTON_AGREE = 3289 
+SI_CONSOLE_LEGAL_BUTTON_DISAGREE = 3290 
+SI_GAME_STARTUP_CHANGE_PROFILE = 3291 
+SI_GAME_STARTUP_HEADER = 3292 
+SI_GAME_STARTUP_SERVER_SELECT = 3293 
+SI_GAME_STARTUP_PLAY = 3294 
+SI_CONSOLE_GAME_DOWNLOAD_UPDATE = 3295 
+SI_CONSOLE_GAME_DOWNLOAD_UPDATING = 3296 
+SI_FREE_TRIAL_EXPIRED_ANNOUNCEMENT = 3297 
+SI_FREE_TRIAL_MENU_ENTRY_PURCHASE = 3298 
+SI_FREE_TRIAL_PURCHASE_KEYBIND = 3299 
+SI_FREE_TRIAL_PURCHASE_DIALOG_HEADER = 3300 
+SI_FREE_TRIAL_PURCHASE_DIALOG_BODY = 3301 
+SI_FREE_TRIAL_PLATFORM_STORE_PS4 = 3302 
+SI_EXTRA_INFO_SERVICE_TOKENS_HEADER = 3303 
+SI_SERVICE_NO_ELIGIBLE_CHARACTERS = 3304 
+SI_SERVICE_USE_SERVICE_KEYBIND = 3305 
+SI_SERVICE_BACK_KEYBIND = 3306 
+SI_SERVICE_TOKEN_COUNT_TOKENS_HEADER = 3307 
+SI_SERVICE_TOKEN_INSTRUCTIONS = 3308 
+SI_NONSTR_PREGAMEGAMEPADSTRINGS_LAST_ENTRY = 3309 --Sync id for PregameGamepadStrings last entry
+SI_NONSTR_PREGAMESHAREDSTRINGS_FIRST_ENTRY = 3310 --Sync id for PregameSharedStrings first entry
+SI_GAME_MENU_CREDITS = 3311 
+SI_GAME_MENU_PLAY_CINEMATIC = 3312 
+SI_GAME_MENU_SERVER_SELECT = 3313 
+SI_CHARACTER_SELECT_LEVEL_VALUE = 3314 
+SI_CHARACTER_SELECT_LEVEL_CHAMPION = 3315 
+SI_PROMPT_TITLE_SKIP_TUTORIAL = 3316 
+SI_PROMPT_BODY_SKIP_TUTORIAL = 3317 
+SI_PROMPT_PLAY_TUTORIAL_BUTTON = 3318 
+SI_PROMPT_SKIP_TUTORIAL_BUTTON = 3319 
+SI_PROMPT_BACK_TUTORIAL_BUTTON = 3320 
+SI_CHARACTER_EDIT_CONFIRM_CHANGES_TITLE = 3321 
+SI_CHARACTER_EDIT_CONFIRM_CHANGES_BODY = 3322 
+SI_CHARACTER_EDIT_SAVING_CHANGES_TITLE = 3323 
+SI_CHARACTER_EDIT_SAVING_CHANGES_BODY = 3324 
+SI_CHARACTER_EDIT_SAVE_SUCCESS_TITLE = 3325 
+SI_CHARACTER_EDIT_SAVE_SUCCESS_BODY = 3326 
+SI_CHARACTER_EDIT_SAVE_ERROR_TITLE = 3327 
+SI_CHARACTER_EDIT_REVERT_CHANGES_TITLE = 3328 
+SI_CHARACTER_EDIT_REVERT_CHANGES_BODY = 3329 
+SI_LOGIN_ANNOUNCEMENTS_TITLE = 3330 
+SI_LOGIN_ANNOUNCEMENTS_FAILURE = 3331 
+SI_HELP_URL = 3332 
+SI_CREATEACCOUNT_CREATING_ACCOUNT = 3333 
+SI_CREATEACCOUNT_HEADER = 3334 
+SI_CREATEACCOUNT_COUNTRY = 3335 
+SI_CREATEACCOUNT_SELECT_COUNTRY = 3336 
+SI_CREATEACCOUNT_EMAIL = 3337 
+SI_CREATEACCOUNT_AGE = 3338 
+SI_CREATEACCOUNT_EMAIL_SIGNUP = 3339 
+SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON = 3340 
+SI_CREATEACCOUNT_SUCCESS_HEADER = 3341 
+SI_CREATEACCOUNT_SUCCESS_NOTE_1 = 3342 
+SI_CREATEACCOUNT_SUCCESS_NOTE_2 = 3343 
+SI_CREATEACCOUNT_SUCCESS_NOTE_3 = 3344 
+SI_CREATEACCOUNT_ERROR_HEADER = 3345 
+SI_CREATEACCOUNT_FAILURE_MESSAGE = 3346 
+SI_LINKACCOUNT_LINKING_ACCOUNT = 3347 
+SI_LINKACCOUNT_CONFIRM_1 = 3348 
+SI_LINKACCOUNT_ERROR_HEADER = 3349 
+SI_LINKACCOUNT_FAILURE_MESSAGE = 3350 
+SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT = 3351 
+SI_ADDITIONAL_CHARACTER_SLOTS_HEADER = 3352 
+SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION = 3353 
+SI_CHARACTER_SELECT_RENAME_CHARACTER_TITLE = 3354 
+SI_CHARACTER_SELECT_RENAME_CHARACTER_FROM_TOKEN_TITLE = 3355 
+SI_CHARACTER_SELECT_RACE_CHANGE_FROM_TOKEN_TITLE = 3356 
+SI_CHARACTER_SELECT_APPEARANCE_CHANGE_FROM_TOKEN_TITLE = 3357 
+SI_CHARACTER_SELECT_RENAME_SAVE_NEW_NAME = 3358 
+SI_RENAME_CHARACTER_NAME_LABEL = 3359 
+SI_RENAME_CHARACTER_BACK_KEYBIND = 3360 
+SI_RENAME_CHARACTER_NAME_IN_USE_ERROR_HEADER = 3361 
+SI_RENAME_CHARACTER_NAME_IN_USE_ERROR_BODY = 3362 
+SI_RENAME_CHARACTER_GENERIC_ERROR_HEADER = 3363 
+SI_RENAME_CHARACTER_SUCCESS_HEADER = 3364 
+SI_RENAME_CHARACTER_SUCCESS_BODY = 3365 
+SI_RENAME_CHARACTER_RENAMING_DIALOG_HEADER = 3366 
+SI_RENAME_CHARACTER_RENAMING_DIALOG_BODY = 3367 
+SI_SERVICE_ERROR_DIALOG_CHARACTER_INELIGIBLE_HEADER = 3368 
+SI_SERVICE_ERROR_DIALOG_CHARACTER_INELIGIBLE_BODY = 3369 
+SI_SERVICES_DIALOG_HEADER_FORMAT = 3370 
+SI_SERVICES_DIALOG_BODY_FORMAT = 3371 
+SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE = 3372 
+SI_CHAPTER_UPGRADE_CONTINUE = 3373 
+SI_CHAPTER_UPGRADE_REGISTRATION_SUMMARY_HEADER = 3374 
+SI_CHAPTER_UPGRADE_CODE_ENTRY_HEADER = 3375 
+SI_CHAPTER_UPGRADE_DIGITAL_UPGRADE_HEADER = 3376 
+SI_CHAPTER_UPGRADE_ENTER_CODE_BUTTON = 3377 
+SI_CHAPTER_UPGRADE_PURCHASE_BUTTON = 3378 
+SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_TITLE = 3379 
+SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT = 3380 
+SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY = 3381 
+SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE = 3382 
+SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT = 3383 
+SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER = 3384 
+SI_NONSTR_PREGAMESHAREDSTRINGS_LAST_ENTRY = 3385 --Sync id for PregameSharedStrings last entry
 
 -- Setup string versions
 
@@ -6838,8 +6830,8 @@ SafeAddVersion(SI_OPEN_CHAPTER_UPGRADE_STEAM, 1)
 SafeAddVersion(SI_OPEN_ENTER_CODE_PAGE, 2)
 SafeAddVersion(SI_LOGOUT_DISALLOWED, 1)
 SafeAddVersion(SI_TOOLTIP_ITEM_NAME, 1)
-SafeAddVersion(SI_GAMEPAD_SECTION_HEADER, 2)
-SafeAddVersion(SI_GAMEPAD_OPTIONS_GAMEPAD_MODE, 2)
+SafeAddVersion(SI_GAMEPAD_SECTION_HEADER, 3)
+SafeAddVersion(SI_GAMEPAD_OPTIONS_GAMEPAD_MODE, 3)
 SafeAddVersion(SI_GAMEPAD_DISCONNECTED_PS4_TEXT, 1)
 SafeAddVersion(SI_GAMEPAD_DISCONNECTED_XBOX_TEXT, 1)
 SafeAddVersion(SI_FAILED_TO_FIND_PROFILE_ORBIS, 1)
@@ -6876,9 +6868,11 @@ SafeAddVersion(SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS_INACTIVE_PERCENT, 1)
 SafeAddVersion(SI_ITEM_FORMAT_STR_SET_PROC_BONUS, 5)
 SafeAddVersion(SI_ITEM_FORMAT_STR_SET_NAME, 4)
 SafeAddVersion(SI_ITEM_FORMAT_STR_CREATES_ALCHEMY_ITEM_OF_LEVEL, 1)
+SafeAddVersion(SI_ITEM_FORMAT_STR_CHAMPION, 1)
 SafeAddVersion(SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION, 1)
 SafeAddVersion(SI_MARKET_TILE_CALLOUT_NEW, 1)
 SafeAddVersion(SI_MARKET_TILE_CALLOUT_SALE, 1)
+SafeAddVersion(SI_MARKET_FREE_TRIAL_TOOLTIP_DESCRIPTION, 1)
 SafeAddVersion(SI_ITEM_DESCRIPTION_UNIVERSAL_STYLE, 1)
 SafeAddVersion(SI_MARKET_PRODUCT_NAME_FORMATTER, 1)
 SafeAddVersion(SI_LONG_LOAD_TIME, 1)
@@ -6929,10 +6923,6 @@ SafeAddVersion(SI_DERIVEDSTATS31, 1)
 SafeAddVersion(SI_DERIVEDSTATS33, 1)
 SafeAddVersion(SI_DERIVEDSTATS34, 1)
 SafeAddVersion(SI_DERIVEDSTATS35, 3)
-SafeAddVersion(SI_EQUIPTYPE11, 2)
-SafeAddVersion(SI_EQUIPSLOT10, 2)
-SafeAddVersion(SI_EQUIPSLOT20, 1)
-SafeAddVersion(SI_EQUIPSLOT21, 1)
 SafeAddVersion(SI_CHARACTERSLIDERNAME5, 1)
 SafeAddVersion(SI_CHARACTERSLIDERNAME8, 1)
 SafeAddVersion(SI_CHARACTERSLIDERNAME14, 1)
@@ -6963,36 +6953,157 @@ SafeAddVersion(SI_CHARACTERAPPEARANCENAME4, 1)
 SafeAddVersion(SI_CHARACTERCREATEDRESSINGOPTION2, 2)
 SafeAddVersion(SI_CHARACTERCREATEDRESSINGOPTION3, 1)
 SafeAddVersion(SI_CHARACTERCREATEDRESSINGOPTION4, 1)
-SafeAddVersion(SI_ITEMSTYLE4, 2)
-SafeAddVersion(SI_ITEMSTYLE7, 2)
-SafeAddVersion(SI_ITEMSTYLE8, 2)
-SafeAddVersion(SI_ITEMSTYLE16, 1)
-SafeAddVersion(SI_ITEMSTYLE38, 2)
-SafeAddVersion(SI_ITEMSTYLE39, 1)
-SafeAddVersion(SI_ITEMSTYLE40, 1)
-SafeAddVersion(SI_ITEMSTYLE41, 1)
-SafeAddVersion(SI_ITEMSTYLE42, 2)
-SafeAddVersion(SI_ITEMSTYLE43, 1)
-SafeAddVersion(SI_ITEMSTYLE44, 1)
-SafeAddVersion(SI_ITEMSTYLE45, 1)
-SafeAddVersion(SI_ITEMSTYLE46, 1)
-SafeAddVersion(SI_ITEMSTYLE47, 1)
-SafeAddVersion(SI_ITEMSTYLE48, 1)
-SafeAddVersion(SI_ITEMSTYLE49, 1)
-SafeAddVersion(SI_ITEMSTYLE50, 1)
-SafeAddVersion(SI_ITEMSTYLE51, 1)
-SafeAddVersion(SI_ITEMSTYLE52, 1)
-SafeAddVersion(SI_ITEMSTYLE53, 1)
-SafeAddVersion(SI_ITEMSTYLE54, 1)
-SafeAddVersion(SI_ITEMSTYLE55, 1)
-SafeAddVersion(SI_ITEMSTYLE56, 1)
-SafeAddVersion(SI_ITEMSTYLE57, 1)
-SafeAddVersion(SI_ITEMSTYLE58, 1)
-SafeAddVersion(SI_ITEMSTYLE59, 1)
+SafeAddVersion(SI_RAIDCATEGORY1, 1)
+SafeAddVersion(SI_BATTLEGROUNDGAMETYPE1, 2)
+SafeAddVersion(SI_BATTLEGROUNDGAMETYPE6, 1)
+SafeAddVersion(SI_GROUPELECTIONFAILURE1, 1)
+SafeAddVersion(SI_GROUPELECTIONFAILURE2, 1)
+SafeAddVersion(SI_GROUPELECTIONFAILURE10, 1)
+SafeAddVersion(SI_GROUPLEAVEREASON0, 1)
+SafeAddVersion(SI_GROUPLEAVEREASON1, 2)
+SafeAddVersion(SI_RECIPECRAFTINGSYSTEM3, 1)
+SafeAddVersion(SI_SKILLTYPE4, 1)
+SafeAddVersion(SI_SKILLTYPE6, 1)
+SafeAddVersion(SI_INSTANCETYPE1, 2)
+SafeAddVersion(SI_INSTANCETYPE2, 2)
+SafeAddVersion(SI_INSTANCETYPE3, 2)
+SafeAddVersion(SI_INSTANCEDISPLAYTYPE2, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES6, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES7, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES10, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES11, 2)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES12, 2)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES13, 3)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES14, 3)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES15, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES16, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES17, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES18, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES19, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES41, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES42, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES43, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES44, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES45, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES46, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES47, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES48, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES49, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES50, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES51, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES52, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES53, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES54, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES55, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES56, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES57, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES58, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES59, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES60, 1)
+SafeAddVersion(SI_CHATCHANNELCATEGORIES61, 1)
+SafeAddVersion(SI_GROUPDIFFICULTYCHANGEREASON1, 2)
+SafeAddVersion(SI_GROUPDIFFICULTYCHANGEREASON4, 2)
+SafeAddVersion(SI_ACTIVECOMBATTIPSETTING0, 2)
+SafeAddVersion(SI_ACTIVECOMBATTIPSETTING2, 2)
+SafeAddVersion(SI_LOCKQUALITY1, 1)
+SafeAddVersion(SI_LOCKQUALITY2, 1)
+SafeAddVersion(SI_LOCKQUALITY3, 1)
+SafeAddVersion(SI_LOCKQUALITY4, 1)
+SafeAddVersion(SI_LOCKQUALITY5, 1)
+SafeAddVersion(SI_LOCKQUALITY6, 1)
+SafeAddVersion(SI_LOCKQUALITY7, 2)
+SafeAddVersion(SI_GAMECAMERAACTIONTYPE1, 1)
+SafeAddVersion(SI_GAMECAMERAACTIONTYPE21, 2)
+SafeAddVersion(SI_PLAYERSTATUS1, 1)
+SafeAddVersion(SI_PLAYERSTATUS2, 1)
+SafeAddVersion(SI_PLAYERSTATUS3, 1)
+SafeAddVersion(SI_NOTIFICATIONTYPE13, 1)
+SafeAddVersion(SI_MAPFILTER12, 1)
+SafeAddVersion(SI_GAMEPADTEMPLATE0, 1)
+SafeAddVersion(SI_GAMEPADTEMPLATE2, 3)
+SafeAddVersion(SI_GAMEPADTEMPLATE3, 1)
+SafeAddVersion(SI_GAMEPADTEMPLATE4, 1)
+SafeAddVersion(SI_GAMEPADTEMPLATE5, 4)
+SafeAddVersion(SI_MONSTERSOCIALCLASS2, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS3, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS4, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS5, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS6, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS7, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS8, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS9, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS10, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS11, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS12, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS13, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS14, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS15, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS16, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS17, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS18, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS19, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS20, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS21, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS22, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS23, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS24, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS25, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS26, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS27, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS28, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS29, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS30, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS31, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS32, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS33, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS34, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS35, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS36, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS37, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS38, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS39, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS40, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS41, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS42, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS43, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS44, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS45, 1)
+SafeAddVersion(SI_MONSTERSOCIALCLASS46, 1)
+SafeAddVersion(SI_MARKETPURCHASABLERESULT4, 1)
+SafeAddVersion(SI_MARKETPURCHASABLERESULT11, 1)
+SafeAddVersion(SI_EMOTECATEGORY1, 1)
+SafeAddVersion(SI_EMOTECATEGORY2, 1)
+SafeAddVersion(SI_EMOTECATEGORY3, 1)
+SafeAddVersion(SI_EMOTECATEGORY4, 1)
+SafeAddVersion(SI_EMOTECATEGORY8, 1)
+SafeAddVersion(SI_APPROVEDURLTYPE2, 1)
+SafeAddVersion(SI_APPROVEDURLTYPESTEAM2, 1)
+SafeAddVersion(SI_CUSTOMERSERVICEASKFORHELPCATEGORIES2, 1)
+SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES1, 1)
+SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES2, 1)
+SafeAddVersion(SI_PLATFORMSERVICETYPE1, 1)
+SafeAddVersion(SI_MULTILOCALIZEDENUMTESTDESCONE3, 2)
+SafeAddVersion(SI_MULTILOCALIZEDENUMTEST4, 1)
 SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON1, 1)
 SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON2, 1)
 SafeAddVersion(SI_COLLECTIBLEUSAGEBLOCKREASON4, 1)
-SafeAddVersion(SI_SIEGETYPE6, 1)
+SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE3, 1)
+SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE5, 1)
+SafeAddVersion(SI_COLLECTIBLEUNLOCKSTATE0, 1)
+SafeAddVersion(SI_COLLECTIBLEUNLOCKSTATE1, 3)
+SafeAddVersion(SI_COLLECTIBLEUNLOCKSTATE2, 1)
+SafeAddVersion(SI_DYESTAMPUSERESULT1, 1)
+SafeAddVersion(SI_DYESTAMPUSERESULT2, 1)
+SafeAddVersion(SI_HOUSINGFURNISHINGLIMITTYPE0, 1)
+SafeAddVersion(SI_HOUSINGFURNISHINGLIMITTYPE2, 1)
+SafeAddVersion(SI_HOUSINGFURNISHINGLIMITTYPE3, 1)
+SafeAddVersion(SI_FURNITURETHEMETYPE3, 1)
+SafeAddVersion(SI_FURNITURETHEMETYPE5, 1)
+SafeAddVersion(SI_FURNITURETHEMETYPE6, 1)
+SafeAddVersion(SI_EQUIPTYPE11, 2)
+SafeAddVersion(SI_EQUIPSLOT10, 2)
+SafeAddVersion(SI_EQUIPSLOT20, 1)
+SafeAddVersion(SI_EQUIPSLOT21, 1)
 SafeAddVersion(SI_ITEMTYPE4, 1)
 SafeAddVersion(SI_ITEMTYPE5, 1)
 SafeAddVersion(SI_ITEMTYPE8, 2)
@@ -7063,63 +7174,6 @@ SafeAddVersion(SI_ENCHANTMENTSEARCHCATEGORYTYPE31, 1)
 SafeAddVersion(SI_ENCHANTMENTSEARCHCATEGORYTYPE32, 1)
 SafeAddVersion(SI_ENCHANTMENTSEARCHCATEGORYTYPE33, 1)
 SafeAddVersion(SI_ENCHANTMENTSEARCHCATEGORYTYPE34, 1)
-SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE1, 1)
-SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE2, 1)
-SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE3, 2)
-SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE8, 1)
-SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE9, 1)
-SafeAddVersion(SI_ACTIONBARSETTINGCHOICE0, 1)
-SafeAddVersion(SI_ACTIONBARSETTINGCHOICE1, 1)
-SafeAddVersion(SI_RAIDLIFEVISIBILITYCHOICE0, 1)
-SafeAddVersion(SI_RAIDLIFEVISIBILITYCHOICE1, 1)
-SafeAddVersion(SI_RAIDCATEGORY1, 1)
-SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING22, 1)
-SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING27, 1)
-SafeAddVersion(SI_GROUPELECTIONFAILURE1, 1)
-SafeAddVersion(SI_GROUPELECTIONFAILURE2, 1)
-SafeAddVersion(SI_GROUPELECTIONFAILURE10, 1)
-SafeAddVersion(SI_GROUPLEAVEREASON0, 1)
-SafeAddVersion(SI_GROUPLEAVEREASON1, 2)
-SafeAddVersion(SI_RECIPECRAFTINGSYSTEM3, 1)
-SafeAddVersion(SI_SKILLTYPE4, 1)
-SafeAddVersion(SI_SKILLTYPE6, 1)
-SafeAddVersion(SI_INSTANCETYPE1, 2)
-SafeAddVersion(SI_INSTANCETYPE2, 2)
-SafeAddVersion(SI_INSTANCETYPE3, 2)
-SafeAddVersion(SI_INSTANCEDISPLAYTYPE2, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES6, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES7, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES10, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES11, 2)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES12, 2)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES13, 3)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES14, 3)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES15, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES16, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES17, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES18, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES19, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES41, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES42, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES43, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES44, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES45, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES46, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES47, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES48, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES49, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES50, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES51, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES52, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES53, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES54, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES55, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES56, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES57, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES58, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES59, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES60, 1)
-SafeAddVersion(SI_CHATCHANNELCATEGORIES61, 1)
 SafeAddVersion(SI_LFGACTIVITY1, 2)
 SafeAddVersion(SI_LFGACTIVITY2, 2)
 SafeAddVersion(SI_LFGACTIVITY3, 2)
@@ -7127,21 +7181,12 @@ SafeAddVersion(SI_LFGITEMREWARDTYPE1, 2)
 SafeAddVersion(SI_LFGITEMREWARDTYPE2, 2)
 SafeAddVersion(SI_ACTIVITYQUEUERESULT1, 1)
 SafeAddVersion(SI_ACTIVITYQUEUERESULT6, 1)
-SafeAddVersion(SI_GROUPDIFFICULTYCHANGEREASON1, 2)
-SafeAddVersion(SI_GROUPDIFFICULTYCHANGEREASON4, 2)
-SafeAddVersion(SI_ACTIVECOMBATTIPSETTING0, 2)
-SafeAddVersion(SI_ACTIVECOMBATTIPSETTING2, 2)
-SafeAddVersion(SI_LOCKQUALITY1, 1)
-SafeAddVersion(SI_LOCKQUALITY2, 1)
-SafeAddVersion(SI_LOCKQUALITY3, 1)
-SafeAddVersion(SI_LOCKQUALITY4, 1)
-SafeAddVersion(SI_LOCKQUALITY5, 1)
-SafeAddVersion(SI_LOCKQUALITY6, 1)
-SafeAddVersion(SI_LOCKQUALITY7, 2)
-SafeAddVersion(SI_GAMECAMERAACTIONTYPE1, 1)
-SafeAddVersion(SI_GAMECAMERAACTIONTYPE21, 2)
+SafeAddVersion(SI_LFGREADYCHECKCANCELREASON1, 1)
+SafeAddVersion(SI_LFGREADYCHECKCANCELREASON3, 1)
 SafeAddVersion(SI_GUILDPERMISSION7, 1)
 SafeAddVersion(SI_GUILDPERMISSION21, 1)
+SafeAddVersion(SI_GUILDPERMISSION23, 1)
+SafeAddVersion(SI_GUILDPERMISSION24, 1)
 SafeAddVersion(SI_GUILDHISTORYCATEGORY1, 2)
 SafeAddVersion(SI_GUILDHISTORYCATEGORY2, 1)
 SafeAddVersion(SI_GUILDHISTORYCATEGORY3, 2)
@@ -7149,7 +7194,7 @@ SafeAddVersion(SI_GUILDHISTORYCATEGORY4, 2)
 SafeAddVersion(SI_GUILDEVENTTYPE3, 1)
 SafeAddVersion(SI_GUILDEVENTTYPE4, 1)
 SafeAddVersion(SI_GUILDEVENTTYPE5, 1)
-SafeAddVersion(SI_GUILDEVENTTYPE7, 1)
+SafeAddVersion(SI_GUILDEVENTTYPE7, 2)
 SafeAddVersion(SI_GUILDEVENTTYPE8, 1)
 SafeAddVersion(SI_GUILDEVENTTYPE12, 1)
 SafeAddVersion(SI_GUILDEVENTTYPE13, 2)
@@ -7163,91 +7208,22 @@ SafeAddVersion(SI_GUILDEVENTTYPE24, 4)
 SafeAddVersion(SI_GUILDEVENTTYPE25, 4)
 SafeAddVersion(SI_GUILDEVENTTYPE27, 1)
 SafeAddVersion(SI_GUILDEVENTTYPE28, 1)
-SafeAddVersion(SI_CAMPAIGNLEVELREQUIREMENTTYPE2, 3)
-SafeAddVersion(SI_PLAYERSTATUS1, 1)
-SafeAddVersion(SI_PLAYERSTATUS2, 1)
-SafeAddVersion(SI_PLAYERSTATUS3, 1)
-SafeAddVersion(SI_NOTIFICATIONTYPE13, 1)
-SafeAddVersion(SI_MAPFILTER12, 1)
-SafeAddVersion(SI_GAMEPADTEMPLATE0, 1)
-SafeAddVersion(SI_GAMEPADTEMPLATE2, 3)
-SafeAddVersion(SI_GAMEPADTEMPLATE3, 1)
-SafeAddVersion(SI_GAMEPADTEMPLATE4, 1)
-SafeAddVersion(SI_GAMEPADTEMPLATE5, 4)
-SafeAddVersion(SI_MONSTERSOCIALCLASS2, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS3, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS4, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS5, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS6, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS7, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS8, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS9, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS10, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS11, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS12, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS13, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS14, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS15, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS16, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS17, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS18, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS19, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS20, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS21, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS22, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS23, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS24, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS25, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS26, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS27, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS28, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS29, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS30, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS31, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS32, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS33, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS34, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS35, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS36, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS37, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS38, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS39, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS40, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS41, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS42, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS43, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS44, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS45, 1)
-SafeAddVersion(SI_MONSTERSOCIALCLASS46, 1)
-SafeAddVersion(SI_MARKETPURCHASABLERESULT4, 1)
-SafeAddVersion(SI_MARKETPURCHASABLERESULT11, 1)
-SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE3, 1)
-SafeAddVersion(SI_COLLECTIBLECATEGORYTYPE5, 1)
-SafeAddVersion(SI_COLLECTIBLEUNLOCKSTATE0, 1)
-SafeAddVersion(SI_COLLECTIBLEUNLOCKSTATE1, 3)
-SafeAddVersion(SI_COLLECTIBLEUNLOCKSTATE2, 1)
-SafeAddVersion(SI_EMOTECATEGORY1, 1)
-SafeAddVersion(SI_EMOTECATEGORY2, 1)
-SafeAddVersion(SI_EMOTECATEGORY3, 1)
-SafeAddVersion(SI_EMOTECATEGORY4, 1)
-SafeAddVersion(SI_EMOTECATEGORY8, 1)
-SafeAddVersion(SI_APPROVEDURLTYPE2, 1)
-SafeAddVersion(SI_APPROVEDURLTYPESTEAM2, 1)
-SafeAddVersion(SI_CUSTOMERSERVICEASKFORHELPCATEGORIES2, 1)
-SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES1, 1)
-SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES2, 1)
-SafeAddVersion(SI_PLATFORMSERVICETYPE1, 1)
-SafeAddVersion(SI_DYESTAMPUSERESULT1, 1)
-SafeAddVersion(SI_DYESTAMPUSERESULT2, 1)
+SafeAddVersion(SI_GUILDRANKS255, 1)
 SafeAddVersion(SI_LOOTCRATEOPENRESPONSE6, 1)
 SafeAddVersion(SI_LOOTCRATEOPENRESPONSE8, 1)
-SafeAddVersion(SI_LFGREADYCHECKCANCELREASON1, 1)
-SafeAddVersion(SI_LFGREADYCHECKCANCELREASON3, 1)
-SafeAddVersion(SI_FURNITURETHEMETYPE3, 1)
-SafeAddVersion(SI_FURNITURETHEMETYPE5, 1)
-SafeAddVersion(SI_FURNITURETHEMETYPE6, 1)
-SafeAddVersion(SI_MULTILOCALIZEDENUMTESTDESCONE3, 2)
-SafeAddVersion(SI_MULTILOCALIZEDENUMTEST4, 1)
+SafeAddVersion(SI_SIEGETYPE6, 1)
+SafeAddVersion(SI_CAMPAIGNLEVELREQUIREMENTTYPE2, 3)
+SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE1, 1)
+SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE2, 1)
+SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE3, 2)
+SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE8, 1)
+SafeAddVersion(SI_NAMEPLATEDISPLAYCHOICE9, 1)
+SafeAddVersion(SI_ACTIONBARSETTINGCHOICE0, 1)
+SafeAddVersion(SI_ACTIONBARSETTINGCHOICE1, 1)
+SafeAddVersion(SI_RAIDLIFEVISIBILITYCHOICE0, 1)
+SafeAddVersion(SI_RAIDLIFEVISIBILITYCHOICE1, 1)
+SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING22, 1)
+SafeAddVersion(SI_GAMEPADCHATTEXTSIZESETTING27, 1)
 SafeAddVersion(SI_GROUPINVITERESPONSE0, 1)
 SafeAddVersion(SI_GROUPINVITERESPONSE1, 2)
 SafeAddVersion(SI_GROUPINVITERESPONSE2, 2)
@@ -7362,7 +7338,6 @@ SafeAddVersion(SI_SOCIALACTIONRESULT75, 1)
 SafeAddVersion(SI_SOCIALACTIONRESULT76, 1)
 SafeAddVersion(SI_SOCIALACTIONRESULT77, 1)
 SafeAddVersion(SI_SOCIALACTIONRESULT78, 1)
-SafeAddVersion(SI_GUILDRANKS255, 1)
 SafeAddVersion(SI_QUEUEFORCAMPAIGNRESPONSETYPE18, 1)
 SafeAddVersion(SI_QUEUEFORCAMPAIGNRESPONSETYPE19, 1)
 SafeAddVersion(SI_QUEUEFORCAMPAIGNRESPONSETYPE20, 1)
@@ -7386,6 +7361,9 @@ SafeAddVersion(SI_CLAIMKEEPRESULTTYPE8, 1)
 SafeAddVersion(SI_CLAIMKEEPRESULTTYPE11, 1)
 SafeAddVersion(SI_CLAIMKEEPRESULTTYPE15, 1)
 SafeAddVersion(SI_CLAIMKEEPRESULTTYPE16, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT8, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT14, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT15, 1)
 SafeAddVersion(SI_MAPDISPLAYFILTER5, 1)
 SafeAddVersion(SI_ADDONLOADSTATE4, 1)
 SafeAddVersion(SI_ADDONLOADSTATE5, 1)
@@ -7474,7 +7452,7 @@ SafeAddVersion(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, 1)
 SafeAddVersion(SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER, 1)
 
 -- Define a function to allow users/mods to add their own strings using the preferred string definition method on an order independent basis
-local nextCustomId = 3391
+local nextCustomId = 3387
 
 function ZO_CreateStringId(stringId, stringToAdd)
     _G[stringId] = nextCustomId

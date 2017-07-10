@@ -151,7 +151,7 @@ function ChampionPerks:Initialize(control)
             SetShouldRenderWorld(true)
         elseif newState == SCENE_HIDDEN then
             if self:HasUnsavedChanges() and AreChampionPointsActive() then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
             end
             self:ResetToZoomedOut()
             self:RemoveSharedKeybinds()
@@ -238,9 +238,8 @@ function ChampionPerks:SetupCustomConfirmDialog()
         },
         setup = function(dialog)
             if SCENE_MANAGER:IsCurrentSceneGamepad() then
-                local icon = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 24, 24)
-                gamepadData.data1.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetCarriedCurrencyAmount(CURT_MONEY)) , icon)
-                gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), icon)
+                gamepadData.data1.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetCarriedCurrencyAmount(CURT_MONEY)) , ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
                 dialog.setupFunc(dialog, gamepadData)
             else
                 ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY,  GetCarriedCurrencyAmount(CURT_MONEY))
@@ -2200,6 +2199,7 @@ function ChampionPerks:CleanDirty()
         self:RefreshChosenConstellationInfo()
         self:RefreshSelectedConstellationInfo()
         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+        self.hasUnsavedChanges = self:HasUnsavedChanges()
         self.dirty = false
     end
 end
@@ -2240,6 +2240,13 @@ function ChampionPerks:OnPlayerActivated()
     if SYSTEMS:IsShowing("champion") then
         --Refresh confirm and redistribute keybinds (which can be disabled by being in an AvA campaign) on loading into a new zone
         self:RefreshApplicableSharedKeybinds()
+    end
+    --If we jumped somewhere just reset everything to zero since the backend was destroyed which means C++ thinks we have no pending points.
+    --If the system isn't initialized this means that the UI was reloaded so we don't clear in that case.
+    if self.initialized and self.hasUnsavedChanges then
+        self:ResetPendingPoints()
+        self:MarkDirty()
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_RESET_ALERT))
     end
 end
 

@@ -16,7 +16,7 @@ local ZO_OptionsPanel_Social_UI_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToSystem(SETTING_PANEL_SOCIAL, SETTING_TYPE_UI, ZO_OptionsPanel_Social_UI_ControlData)
+ZO_SharedOptions.AddTableToSystem(SETTING_PANEL_SOCIAL, SETTING_TYPE_UI, ZO_OptionsPanel_Social_UI_ControlData)
 
 local ZO_OptionsPanel_Social_Custom_ControlData =
 {
@@ -33,4 +33,4 @@ local ZO_OptionsPanel_Social_Custom_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToSystem(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, ZO_OptionsPanel_Social_Custom_ControlData)
+ZO_SharedOptions.AddTableToSystem(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, ZO_OptionsPanel_Social_Custom_ControlData)

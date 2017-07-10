@@ -77,9 +77,10 @@
                     <AnchorFill/>
                 </Backdrop>
 
-                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" maxLineCount="3" wrapMode="ELLIPSIS" mouseEnabled="true" override="true">
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" override="true">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/>
+
                     <OnMouseEnter>
                         ZO_MarketProduct_OnMouseEnter(self:GetParent())
                     </OnMouseEnter>

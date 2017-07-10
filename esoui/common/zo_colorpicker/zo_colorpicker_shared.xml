@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ColorPicker_Shared" virtual="true">
+            <Controls>
+                <Control name="$(parent)Content">
+                    <Controls>
+                        <ColorSelect name="$(parent)ColorSelect">
+                            <Controls>
+                                <Texture name="$(parent)Thumb" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" layer="2"/>
+                            </Controls>
+                        </ColorSelect>
+
+                        <Slider name="$(parent)Value">
+                            <Anchor point="LEFT" relativeTo="$(parent)ColorSelect" relativePoint="RIGHT" offsetX="35" />
+                        </Slider>
+
+                        <Slider name="$(parent)Alpha">
+                            <Anchor point="TOP" relativeTo="$(parent)ColorSelect" relativePoint="BOTTOM" offsetY="15" />
+                        </Slider>
+
+                        <Label name="$(parent)AlphaLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_ALPHA">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Alpha" relativePoint="TOPLEFT" offsetX="-10" />
+                        </Label>                        
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

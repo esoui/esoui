@@ -144,7 +144,7 @@ function ZO_SmithingImprovement:OnSlotChanged()
 end
 
 function ZO_SmithingImprovement:Improve()
-	self:SharedImprove("CONFIRM_IMPROVE_ITEM")
+	self:SharedImprove()
 end
 
 do
@@ -190,6 +190,8 @@ end
 function ZO_SmithingImprovementInventory:Initialize(owner, control, ...)
     ZO_CraftingInventory.Initialize(self, control, ...)
 
+    self:ShowStatusHeader()
+
     local infoBar = control:GetNamedChild("InfoBar")
     local backpack = control:GetNamedChild("Backpack")
 
@@ -226,8 +228,9 @@ function ZO_SmithingImprovementInventory:ChangeFilter(filterData)
 end
 
 function ZO_SmithingImprovementInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data)
-    self.owner:OnInventoryUpdate(validItemIds)
+    local USE_WORN_BAG = true
+    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+    self.owner:OnInventoryUpdate(validItems)
 
     self.noItemsLabel:SetHidden(#data > 0)
 end

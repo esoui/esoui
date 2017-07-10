@@ -8,7 +8,12 @@ local SCROLL_TYPE_ITEM = 1
 function ZO_CraftingInventory:Initialize(control, slotType, noDragging)
     ZO_SharedCraftingInventory.Initialize(self, control, slotType)
 
-    local sortHeaders = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
+    local sortByHeaderControl = control:GetNamedChild("SortBy")
+    local sortHeaders = ZO_SortHeaderGroup:New(sortByHeaderControl, true)
+
+    self.statusHeader = sortByHeaderControl:GetNamedChild("Status")
+    -- only certain craft inventories need to show this
+    self.statusHeader:SetHidden(true)
 
     local function OnSortHeaderClicked(key, order)
         self:ChangeSort(key, order)
@@ -87,6 +92,8 @@ function ZO_CraftingInventory:GetDefaultTemplateSetupFunction()
 
         ZO_Inventory_BindSlot(inventorySlot, self.baseSlotType or SLOT_TYPE_CRAFTING_COMPONENT, data.slotIndex, data.bagId)
         inventorySlot.owner = self
+
+        ZO_UpdateStatusControlIcons(rowControl, data)
 
         if noDragging then
             rowControl:SetHandler("OnDragStart", nil)
@@ -185,10 +192,10 @@ function ZO_CraftingInventory:SetSortColumnHidden(columns, hidden)
     self.sortHeaders:SetHeadersHiddenFromKeyList(columns, hidden)
 end
 
-function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDataType, data, customDataGetFunction, validItemIds)
+function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDataType, data, customDataGetFunction, slotData)
     local icon, _, sellPrice, meetsUsageRequirements, _, _, _, quality = GetItemInfo(bagId, slotIndex)
 
-    data[#data + 1] = ZO_ScrollList_CreateDataEntry(scrollDataType, {
+    local newScrollData = ZO_ScrollList_CreateDataEntry(scrollDataType, {
         name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex)),
         icon = icon,
         stackCount = totalStack,
@@ -198,9 +205,19 @@ function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDa
         meetsUsageRequirements = meetsUsageRequirements,
         custom = customDataGetFunction and customDataGetFunction(bagId, slotIndex),
 
+        statusSortOrder = 0, -- default value in case there is no slotData
         bagId = bagId,
         slotIndex = slotIndex,
     })
+    if slotData then
+        newScrollData.data.brandNew = slotData.brandNew
+        newScrollData.data.stolen = slotData.stolen
+        newScrollData.data.isPlayerLocked = slotData.isPlayerLocked
+        newScrollData.data.isBoPTradeable = slotData.isBoPTradeable
+        newScrollData.data.isGemmable = slotData.isGemmable
+        newScrollData.data.statusSortOrder = slotData.statusSortOrder
+    end
+    data[#data + 1] = newScrollData
 end
 
 function ZO_CraftingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
@@ -212,12 +229,28 @@ function ZO_CraftingInventory:EnumerateInventorySlotsAndAddToScrollData(predicat
 
     for itemId, itemInfo in pairs(list) do
         if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType) then
-            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction, validItemIds)
+            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction)
         end
         self.itemCounts[itemId] = itemInfo.stack
     end
 
     return list
+end
+
+function ZO_CraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data, useWornBag)
+    local bagsToUse = useWornBag and ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN or ZO_ALL_CRAFTING_INVENTORY_BAGS_WITHOUT_WORN
+    local filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(predicate, unpack(bagsToUse))
+
+    ZO_ClearTable(self.itemCounts)
+
+    for i, slotData in pairs(filteredDataTable) do
+        if not filterFunction or filterFunction(slotData.bagId, slotData.slotIndex, filterType) then
+            self:AddItemData(slotData.bagId, slotData.slotIndex, slotData.stackCount, self:GetScrollDataType(slotData.bagId, slotData.slotIndex), data, self.customDataGetFunction, slotData)
+        end
+        self.itemCounts[i] = slotData.stackCount
+    end
+
+    return filteredDataTable
 end
 
 function ZO_CraftingInventory:ChangeSort(sortKey, sortOrder)
@@ -241,8 +274,9 @@ local sortKeys =
     stackCount = { tiebreaker = "slotIndex", isNumeric = true },
     name = { tiebreaker = "quality" },
     quality = { tiebreaker = "stackCount", isNumeric = true },
+    statusSortOrder = { tiebreaker = "name", isNumeric = true },
     stackSellPrice = { tiebreaker = "name", isNumeric = true },
-    custom = { tiebreaker = "name" },
+    custom = { tiebreaker = "name"},
 }
 
 function ZO_CraftingInventory:SortData()
@@ -256,6 +290,10 @@ function ZO_CraftingInventory:SortData()
     end
 
     table.sort(scrollData, self.sortFunction)
+end
+
+function ZO_CraftingInventory:ShowStatusHeader()
+    self.statusHeader:SetHidden(false)
 end
 
 function ZO_CraftingInventory_FilterButtonOnMouseEnter(self)

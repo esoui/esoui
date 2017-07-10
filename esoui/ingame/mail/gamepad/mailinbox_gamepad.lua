@@ -516,8 +516,7 @@ end
 function ZO_MailInbox_Gamepad:ReportPlayer()
     if IsMailReportable(self:GetActiveMailData()) then
         local displayName = self:GetActiveMailSender()
-        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-        ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(displayName, function() ZO_PlatformIgnorePlayer(displayName) end)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_MAIL_INBOX_CANNOT_REPORT))
     end

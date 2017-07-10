@@ -174,6 +174,7 @@ function LoreReader:OnHide()
 end
 
 local READER_MEDIA = {
+    [BOOK_MEDIUM_NONE] = {}, -- Intentionally left blank to cause UI errors if referenced.
     [BOOK_MEDIUM_YELLOWED_PAPER] = {
         NumPages = 2,
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_paperBook.dds",

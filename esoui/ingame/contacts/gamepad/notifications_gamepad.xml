@@ -1,7 +1,5 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_GamepadNotificationsLoadingLabel" virtual="true" inherits="ZO_LoadingText" font="ZoFontGamepad27"/>
-        <Label name="ZO_GamepadNotificationsRowLabel" font="ZoFontGamepad27" wrapMode="ELLIPSIS" virtual="true"/>
         <Control name="ZO_GamepadNotificationsBaseRow" virtual="true" inherits="ZO_GamepadMenuEntryTemplate">
         </Control>
         <Control name="ZO_GamepadNotificationsRequestRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">

@@ -27,9 +27,6 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_GamepadGuildHistoryTriggerButtonLabelTemplate" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" />
-        <Label name="ZO_GamepadGuildHistoryHeaderLabelTemplate" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" verticalAlignment="CENTER" virtual="true" />
-
         <TopLevelControl name="ZO_GuildHistory_Gamepad" tier="MEDIUM" hidden="true" inherits="ZO_GuildHomeContentAnchor">
             <OnInitialized>
                 ZO_GuildHistory_Gamepad_Initialize(self)

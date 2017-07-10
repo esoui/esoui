@@ -89,6 +89,25 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_GamepadOptionsColorRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+            <OnInitialized>
+                self.GetHeight = function(control)
+                    return control:GetNamedChild("Name"):GetTextHeight() + control:GetNamedChild("Border"):GetHeight()
+                end
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GamepadOptionsNameTemplate"/>
+                <Backdrop name="$(parent)Border" inherits="ZO_DefaultBackdrop_Gamepad">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM"/>
+                </Backdrop>
+                <Texture name="$(parent)Color" inherits="ZO_PixelUnitsControl">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Border" offsetX="6" offsetY="6"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border" offsetX="-6" offsetY="-6"/>
+                </Texture>
+            </Controls>
+        </Control>
+
         <Label name="ZO_GamepadOptionsInfoPanelLabelCenter" text="" horizontalAlignment="CENTER" tier="HIGH" font="ZoFontGamepad25" modifyTextType="UPPERCASE" virtual="true">
             <Dimensions x="280" />
             <Controls>

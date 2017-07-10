@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ItemPreview_KeyboardTopLevel" tier="LOW" layer="BACKGROUND" mouseEnabled="true" hidden="true">
+            <OnInitialized>
+                ZO_ItemPreview_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+
+                <!-- Control is given level 1 so that we can click the next/previous buttons to change between preview states -->
+                <Control name="$(parent)RotationArea" mouseEnabled="true" level="1">
+                    <AnchorFill/>
+                </Control>
+
+                <Label name="$(parent)VariationLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" level="2" hidden="true">
+                    <Dimensions x="350"/>
+                    <Anchor point="BOTTOM" offsetY="-10" />
+                </Label>
+
+                <Button name="$(parent)PreviewVariationLeftArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)VariationLabel" relativePoint="LEFT" offsetX="-16" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)PreviewVariationRightArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)VariationLabel" relativePoint="RIGHT" offsetX="16" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                    />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

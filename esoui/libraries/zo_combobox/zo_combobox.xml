@@ -12,7 +12,9 @@
             </OnMouseUp>
             
             <Controls>
-                <Control name="$(parent)BG" inherits="ZO_InsetBackground"/>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill />
+                </Backdrop>
                 
                 <Label name="$(parent)SelectedItemText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
                     <Anchor point="TOPLEFT" offsetX="8" />

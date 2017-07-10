@@ -68,3 +68,17 @@ function ZO_GetInviteInstructions()
     end
     return instructions
 end
+
+function ZO_PlatformIgnorePlayer(displayName, idRequestType, ...)
+    if not IsIgnored(displayName) then
+        if not IsConsoleUI() then
+            AddIgnore(displayName)
+        else
+            if not idRequestType or idRequestType == ZO_ID_REQUEST_TYPE_DISPLAY_NAME then
+                ZO_ShowConsoleIgnoreDialog(displayName)
+            else
+                ZO_ShowConsoleIgnoreDialogFromDisplayNameOrFallback(displayName, idRequestType, ...)
+            end
+        end
+    end
+end

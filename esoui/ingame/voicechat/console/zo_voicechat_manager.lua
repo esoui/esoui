@@ -418,6 +418,11 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
 
         --Special case for handling the group being destroyed while zoning.
         if not IsUnitGrouped("player") then
+            local bgChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+			if bgChannel.isAvailable then
+				self:ClearAndSwapChannel(bgChannel)
+			end
+
             local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
             self:ClearAndSwapChannel(groupChannel)
         end
@@ -570,7 +575,15 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         if channelType == VOICE_CHANNEL_NONE then
             return
         elseif channelType == VOICE_CHANNEL_BATTLEGROUP then
+
+			local currentGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+			if currentGroupChannel.isAvailable then
+				TryClearPassiveChannel(currentGroupChannel)
+				TryClearActiveChannel(currentGroupChannel)
+			end
+
 			self:SetAndSwapDesiredActiveChannel(self:GetChannel(channelData))
+
 		elseif channelType == VOICE_CHANNEL_GUILD then
             local guildId = channelData.guildId
             local guildRoomNumber = channelData.guildRoomNumber
@@ -618,7 +631,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
                 return
             end
         end
-
+		
         local channel = self:GetChannel(channelData)
         channel.isAvailable = false
         channel.isJoined = false
@@ -631,6 +644,18 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
             self:RemoveGuildChannelRoom(channel.channelName, channel.guildId, channel.guildRoomNumber)
             self.guildIdsDirty = true
         end
+
+		if channelData.channelType == VOICE_CHANNEL_BATTLEGROUP then
+			local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+			if groupChannel.isAvailable then
+				self:SetAndSwapDesiredActiveChannel(groupChannel)
+			else
+				local areaChannel = self.channelData[VOICE_CHANNEL_AREA]
+				if areaChannel.isAvailable then
+					self:SetAndSwapDesiredActiveChannel(areaChannel)
+				end
+			end
+		end
 
         self:FireCallbacks("ChannelsUpdate")
     end
@@ -831,13 +856,13 @@ function ZO_VoiceChat_Manager:OnUpdate()
     elseif desiredActiveChannel.isAvailable and desiredActiveChannel ~= activeChannel then
         --Enforce not being able to be active and passive in two non-Area channels
         if desiredActiveChannel ~= passiveChannel and desiredActiveChannel.channelType ~= VOICE_CHANNEL_AREA then
-            if activeChannel and activeChannel.channelType ~= VOICE_CHANNEL_AREA then
-                self:LeaveChannel(activeChannel)
-                return
-            elseif passiveChannel and passiveChannel.channelType ~= VOICE_CHANNEL_AREA then
-                self:LeaveChannel(passiveChannel)
-                return
-            end
+			if activeChannel and activeChannel.channelType ~= VOICE_CHANNEL_AREA then
+				self:LeaveChannel(activeChannel)
+				return
+			elseif passiveChannel and passiveChannel.channelType ~= VOICE_CHANNEL_AREA then
+				self:LeaveChannel(passiveChannel)
+				return
+			end
         end
 
         local skipDelay = desiredActiveChannel == passiveChannel --we don't need to delay the next request if we're already joined to the channel

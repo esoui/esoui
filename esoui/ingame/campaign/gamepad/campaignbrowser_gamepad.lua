@@ -299,7 +299,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeHeader()
         data1HeaderText = GetString(SI_CURRENCY_ALLIANCE_POINTS),
 
         data1Text = function(control)
-            ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetAlliancePoints(), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+            ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
             return true
         end,
     }
@@ -909,7 +909,7 @@ end
 function ZO_CampaignBrowser_Gamepad:GetTextParamsForSetHomeDialog()
     local nowCost, endCost = ZO_SelectHomeCampaign_GetCost()
     local isFree = nowCost == 0
-    local numAlliancePoints = GetAlliancePoints()
+    local numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
     local hasEnough = nowCost <= numAlliancePoints
 
     local warning = GetString(SI_SELECT_CAMPAIGN_COOLDOWN_WARNING)

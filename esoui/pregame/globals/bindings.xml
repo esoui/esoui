@@ -15,7 +15,11 @@
 
             <Action name="TOGGLE_FULLSCREEN" rebindable="false">
                 <Down>ToggleFullScreen()</Down>
-            </Action>        
+            </Action>
+
+            <Action name="TAKE_SCREENSHOT" rebindable="false">
+                <Up>TakeScreenshot()</Up>
+            </Action>
         </Category>
     </Layer>
     <Layer name="GamepadShortcuts">

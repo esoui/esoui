@@ -173,6 +173,12 @@ function ZO_Provisioner:InitializeTabs()
 end
 
 function ZO_Provisioner:OnTabFilterChanged(filterData)
+    -- we are switching from the furnishing tab to another tab, make sure the end the preview if there is one
+    if self.filterType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING then
+        if SYSTEMS:GetObject("itemPreview"):IsInteractionCameraPreviewEnabled() then
+            self:TogglePreviewMode()
+        end
+    end
     self.activeTab:SetText(GetString(filterData.activeTabText))
     self.filterType = filterData.descriptor
     if self.savedVars then

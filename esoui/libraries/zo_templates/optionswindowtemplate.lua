@@ -7,6 +7,7 @@ OPTIONS_CUSTOM = 5
 OPTIONS_HORIZONTAL_SCROLL_LIST = 6
 OPTIONS_FINITE_LIST = 7
 OPTIONS_INVOKE_CALLBACK = 8  --used for two special controls in gamepad pregame
+OPTIONS_COLOR = 9
 
 local function GetControlType(control)
     return control.optionsManager:GetControlTypeFromControl(control)
@@ -43,6 +44,11 @@ DONT_SAVE_CURRENT_VALUES    = 2
 local ENABLED_STATE = 1
 local DISABLED_STATE = .5
 
+local function SetupColorOptionActivated(control, activated)
+    control:GetNamedChild("Color"):SetAlpha(activated and ENABLED_STATE or DISABLED_STATE)
+    control:GetNamedChild("Border"):SetAlpha(activated and ENABLED_STATE or DISABLED_STATE)
+end
+
 local activateOptionControl =
 {
     [OPTIONS_DROPDOWN] =    function(control)
@@ -64,6 +70,14 @@ local activateOptionControl =
                                 GetControl(control, "SliderBackdrop"):SetAlpha(ENABLED_STATE)
                                 GetControl(control, "ValueLabel"):SetAlpha(ENABLED_STATE)
                             end,
+
+    [OPTIONS_COLOR] =       function(control)
+                                SetupColorOptionActivated(control, true)
+                            end,
+
+    [OPTIONS_INVOKE_CALLBACK] = function(control)
+                                    control:GetNamedChild("Button"):SetEnabled(true)
+                                end,
 }
 
 local deactivateOptionControl =
@@ -87,6 +101,15 @@ local deactivateOptionControl =
                                 GetControl(control, "SliderBackdrop"):SetAlpha(DISABLED_STATE)
                                 GetControl(control, "ValueLabel"):SetAlpha(DISABLED_STATE)
                             end,
+
+    [OPTIONS_COLOR] =       function(control)
+                                SetupColorOptionActivated(control, false)
+                            end,
+
+    [OPTIONS_INVOKE_CALLBACK] = function(control)
+                                    control:GetNamedChild("Button"):SetEnabled(false)
+                                end,
+
 }
 
 local function UpdateOptionControlState(control, updateTable, stateType)
@@ -99,10 +122,12 @@ local function UpdateOptionControlState(control, updateTable, stateType)
     local nameControl = GetControl(control, "Name")
     local boxControl = GetControl(control, "Checkbox")
 
-    if stateType == ENABLED_STATE then
-        nameControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-    else
-        nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    if nameControl then
+        if stateType == ENABLED_STATE then
+            nameControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        else
+            nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+        end
     end
 
     if boxControl then
@@ -135,8 +160,24 @@ function ZO_Options_SetOptionInactive(control)
     UpdateOptionControlState(control, deactivateOptionControl, DISABLED_STATE)
 end
 
+function ZO_SetControlActiveFromPredicate(control, predicate)
+    if predicate() then
+        ZO_Options_SetOptionActive(control)
+    else
+        ZO_Options_SetOptionInactive(control)
+    end
+end
+
 function ZO_Options_SetOptionActiveOrInactive(control, active)
     UpdateOptionControlState(control, active and activateOptionControl or deactivateOptionControl, active and ENABLED_STATE or DISABLED_STATE)
+end
+
+function ZO_Options_IsOptionActive(control)
+    if IsGamepadOption(control) then
+        return control.data.enabled
+    else
+        return control.state == ENABLED_STATE
+    end
 end
 
 function ZO_Options_ShowAssociatedWarning(control)
@@ -338,6 +379,21 @@ local updateControlFromSettings =
                                 end
 
                                 return currentChoice
+                            end,
+
+    [OPTIONS_COLOR] =       function(control)
+                                local data = control.data
+                                local currentChoice = GetSettingFromControl(control)
+                                local color = ZO_ColorDef.FromARGBHexadecimal(currentChoice)
+                                if color then
+                                    control:GetNamedChild("Color"):SetColor(color:UnpackRGB())
+                                end
+                                --Gamepad has to setup controls out of a pool so it needs to update enabled state all the time instead
+                                --of just once like keyboard. This should probably be done as a call to setting the activated state in
+                                --the gamepad code instead as part of the option update in gamepad only.
+                                if IsGamepadOption(control) then
+                                    SetupColorOptionActivated(control, ZO_Options_IsOptionActive(control))
+                                end
                             end,
 }
 
@@ -648,6 +704,40 @@ function ZO_Options_CheckBoxOnMouseExit(control)
 
         checkBoxControl:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
         checkBoxControl:SetNormalFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+    end
+end
+
+function ZO_Options_ColorOnClicked(control)
+    local data = control.data
+    if ZO_Options_IsOptionActive(control) then
+        local currentChoice = GetSettingFromControl(control)
+        local color = ZO_ColorDef.FromARGBHexadecimal(currentChoice)
+        if color then
+            local function OnColorSet(r, g, b)
+                control:GetNamedChild("Color"):SetColor(r, g, b)
+                local ARGBHexadecimal = ZO_ColorDef.ToARGBHexadecimal(r, g, b, 1)
+                SetSetting(data.system, data.settingId, ARGBHexadecimal)
+            end
+            SYSTEMS:GetObject("colorPicker"):Show(OnColorSet, color:UnpackRGB())
+        end
+    end
+end
+
+function ZO_Options_ColorOnMouseUp(control, upInside)
+    if upInside then
+        ZO_Options_ColorOnClicked(control)
+    end
+end
+
+function ZO_Options_SetupInvokeCallback(control, selected, text)
+    if IsGamepadOption(control) then
+        GetControl(control, "Name"):SetText(text)
+    else
+        local button = control:GetNamedChild("Button")
+        button:SetText(text)
+        button:SetHandler("OnClicked", function()
+            control.data.callback()
+        end)
     end
 end
 

@@ -32,8 +32,7 @@
 
         <Control name="ZO_GamepadSmithingImprovementFloatingContent" virtual="true">
             <Controls>
-                <Control name="$(parent)BoosterContainer">
-                    <Dimensions y="ZO_GAMEPAD_SMITHING_IMPROVEMENT_BOOSTER_AREA_HEIGHT" />
+                <Control name="$(parent)BoosterContainer" resizeToFitDescendents="true">
                     <Anchor point="TOP" relativeTo="GuiRoot" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
                     <Controls>
                         <Texture name="$(parent)Frame" layer="BACKGROUND" textureFile="EsoUI/Art/Crafting/Gamepad/gp_smithing_temperChart_frame.dds">
@@ -63,7 +62,7 @@
                         </Texture>
 
                         <Label name="$(parent)Header" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT" offsetY="8"/>
+                            <Anchor point="TOP" offsetY="-8"/>
                         </Label>
 
                         <Label name="$(parent)Normal" inherits="ZO_GamepadSmithingImprovementQualityLabel">

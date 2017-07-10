@@ -2093,15 +2093,23 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
         end
     end
 
+    local function IgnoreSelectedPlayer()
+        if not IsIgnored(rawName) then
+            AddIgnore(playerName)
+        end
+    end
+
     AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_WHISPER), function() self:StartTextEntry(nil, CHAT_CHANNEL_WHISPER, playerName) end)
     if(not IsIgnored(rawName)) then
-        AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_IGNORE), function() AddIgnore(playerName) end)
+        AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_IGNORE), IgnoreSelectedPlayer)
     end
     if(not IsFriend(rawName)) then
         AddMenuItem(GetString(SI_CHAT_PLAYER_CONTEXT_ADD_FRIEND), function() ZO_Dialogs_ShowDialog("REQUEST_FRIEND", {name = rawName}) end)
     end
 
-    AddMenuItem(zo_strformat(SI_CHAT_PLAYER_CONTEXT_REPORT, rawName), function() ZO_ReportPlayerDialog_Show(playerName, REPORT_PLAYER_REASON_CHAT_SPAM, rawName) end)
+    AddMenuItem(zo_strformat(SI_CHAT_PLAYER_CONTEXT_REPORT, rawName), function()
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(playerName, IgnoreSelectedPlayer)
+    end)
 
     if(ZO_Menu_GetNumMenuItems() > 0) then
         ShowMenu()
@@ -2460,10 +2468,8 @@ end
 
 function ZO_ChatSystem_OnAgentChatClicked()
     local isChatRequested = GetAgentChatRequestInfo()
-    if(isChatRequested) then
+    if isChatRequested then
         AcceptAgentChat()
-    else
-        ZO_FEEDBACK:OpenBrowserByType(BROWSER_TYPE_AGENT_CHAT)
     end
 end
 

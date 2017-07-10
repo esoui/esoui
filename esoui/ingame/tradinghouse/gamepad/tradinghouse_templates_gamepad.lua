@@ -4,7 +4,7 @@ ZO_TRADINGHOUSE_TIMELEFT_GAMEPAD_OFFSET_Y = 40
 -- Base List
 ------------------
 
-ZO_GamepadTradingHouse_BaseList = ZO_Object:Subclass() 
+ZO_GamepadTradingHouse_BaseList = ZO_Object:Subclass()
 
 function ZO_GamepadTradingHouse_BaseList:New(...)
     local list = ZO_Object.New(self)
@@ -27,11 +27,11 @@ function ZO_GamepadTradingHouse_BaseList:UpdateKeybind()
 end
 
 function ZO_GamepadTradingHouse_BaseList:Hide()
-	SCENE_MANAGER:RemoveFragmentGroup(self:GetFragmentGroup())
+    SCENE_MANAGER:RemoveFragmentGroup(self:GetFragmentGroup())
 end
 
 function ZO_GamepadTradingHouse_BaseList:Show()
-	SCENE_MANAGER:AddFragmentGroup(self:GetFragmentGroup())
+    SCENE_MANAGER:AddFragmentGroup(self:GetFragmentGroup())
 end
 
 function ZO_GamepadTradingHouse_BaseList:SetEventCallback(event, callback)
@@ -76,11 +76,11 @@ function ZO_GamepadTradingHouse_BaseList:InitializeList()
 end
 
 function ZO_GamepadTradingHouse_BaseList:InitializeEvents()
-	--should be overridden
+    --should be overridden
 end
 
 function ZO_GamepadTradingHouse_BaseList:GetFragmentGroup()
-	assert(false) -- This should never be reached, must be overridden
+    assert(false) -- This should never be reached, must be overridden
 end
 
 function ZO_GamepadTradingHouse_BaseList:OnInitialInteraction()
@@ -146,27 +146,27 @@ function ZO_GamepadTradingHouse_ItemList:Initialize(control)
 end
 
 function ZO_GamepadTradingHouse_ItemList:GetKeyBind()
-	return self.keybindStripDescriptor
+    return self.keybindStripDescriptor
 end
 
 function ZO_GamepadTradingHouse_ItemList:SetFragment(fragment)
-	self.fragment = fragment
+    self.fragment = fragment
     fragment:RegisterCallback("StateChange", function(oldState, newState)
-		if newState == SCENE_SHOWING then
+        if newState == SCENE_SHOWING then
             self:UpdateList()
             if not self.awaitingResponse then
                 self.itemList:Activate()
             end
             
-			KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self:OnShowing()
-		elseif newState == SCENE_SHOWN then
+        elseif newState == SCENE_SHOWN then
             self:OnShown()
         elseif newState == SCENE_HIDING then
-			self:OnHiding()
+            self:OnHiding()
             self.itemList:Deactivate()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-		elseif newState == SCENE_HIDDEN then
+        elseif newState == SCENE_HIDDEN then
             self:OnHidden()
         end
     end)
@@ -179,7 +179,7 @@ end
 -- Functions to be overridden
 
 function ZO_GamepadTradingHouse_ItemList:UpdateList()
-	--should be overridden
+    --should be overridden
 end
 
 ----------------------
@@ -228,22 +228,22 @@ local tradingHouseSortOptions = {
 }
 
 function ZO_GamepadTradingHouse_SortableItemList:GetKeyBind()
-	return self.keybindStripDescriptor
+    return self.keybindStripDescriptor
 end
 
 function ZO_GamepadTradingHouse_SortableItemList:SetFragment(fragment)
-	self.fragment = fragment
+    self.fragment = fragment
     fragment:RegisterCallback("StateChange", function(oldState, newState)
-		if newState == SCENE_SHOWING then
+        if newState == SCENE_SHOWING then
             self:Activate()
-			self:RequestListUpdate()
-			KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            self:RequestListUpdate()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self:OnShowing()
-		elseif newState == SCENE_SHOWN then
+        elseif newState == SCENE_SHOWN then
             self:OnShown()
         elseif newState == SCENE_HIDING then
-			self:OnHiding()
-			self:Deactivate()
+            self:OnHiding()
+            self:Deactivate()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         elseif newState == SCENE_HIDDEN then
             self:OnHidden()
@@ -309,5 +309,7 @@ end
 --[[ Globals ]]--
 
 function ZO_TradingHouse_ItemListRow_Gamepad_OnInitialized(control)
-	ZO_SharedGamepadEntry_OnInitialized(control)
+    ZO_SharedGamepadEntry_OnInitialized(control)
+    ZO_SharedGamepadEntry_SetHeightFromLabels(control)
+    control.price = control:GetNamedChild("Price")
 end

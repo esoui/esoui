@@ -446,6 +446,12 @@ function ZO_GamepadCollectionsBook:ShowList(list, dontUpdateTitle)
         if self.notificationIdToClear or targetData.data.isNew then
             self.clearNewStatusOnSelectionChanged = true
         end
+
+        if targetData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
+            if IsESOPlusSubscriber() then
+                TriggerTutorial(TUTORIAL_TRIGGER_COLLECTIONS_DLC_OPENED_AS_SUBSCRIBER)
+            end
+        end
     else
         self:RefreshHeader()
     end

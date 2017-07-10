@@ -22,8 +22,8 @@ function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, .
     local specializedBookScene = ZO_Scene:New(self.sceneName, SCENE_MANAGER)
 
     specializedBookScene:RegisterCallback("StateChange", function(oldState, newState)
-                                                             if(newState == SCENE_SHOWN) then
-                                                                 self:RefreshListIfDirty()
+                                                             if newState == SCENE_SHOWN then
+                                                                 self:OnSceneShown()
                                                              end
                                                          end)
 end
@@ -324,4 +324,8 @@ function ZO_SpecializedCollectionsBook_Keyboard:OnCollectionUpdated()
     else
         self:RefreshList()
     end
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:OnSceneShown()
+    self:RefreshListIfDirty()
 end

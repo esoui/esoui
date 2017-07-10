@@ -14,9 +14,6 @@
         <AlphaAnimation name="FadeInOutAnimation" duration="200" startAlpha="0" endAlpha="1" />
 
         <AnimationTimeline name="LoadingCompleteAnimation">
-            <OnPlay>
-                SharedLoadingCompleteAnimation_OnPlay(self)
-            </OnPlay>
             <OnStop>
                 SharedLoadingCompleteAnimation_OnStop(self)
             </OnStop>

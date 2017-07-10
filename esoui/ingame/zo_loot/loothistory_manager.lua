@@ -105,25 +105,27 @@ do
                     local lootType = LOOT_TYPE_ITEM
                     local itemId = GetItemInstanceId(bagId, slotId)
                     local isVirtual = bagId == BAG_VIRTUAL
-                    OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, nil, itemId, isVirtual)
+                    local isStolen = IsItemStolen(bagId, slotId)
+                    OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, nil, itemId, isVirtual, isStolen)
                 end
             end
         end
 
         local IS_NOT_VIRTUAL = false
 
-        local function OnLootReceived(receivedBy, itemLinkOrName, stackCount, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId)
+        local function OnLootReceived(receivedBy, itemLinkOrName, stackCount, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId, isStolen)
             -- This includes any loot event, only display if this was the player's loot and wasn't an inventory item
             -- OnInventorySlotUpdate() must be used for Inventory Items so that we know what bag they went into
             -- we also are going to handle quest items through the QuestToolUpdated event
             if lootedBySelf and not IGNORED_LOOT_TYPES[lootType] then
-                OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, IS_NOT_VIRTUAL)
+                OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, IS_NOT_VIRTUAL, isStolen)
             end
         end
 
+        local IS_NOT_STOLEN = false
         local function OnQuestToolUpdate(questIndex, questName, countDelta, questItemIcon, questItemId, questItemName)
             if countDelta > 0 then
-                OnNewItemReceived(questItemName, countDelta, nil, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL)
+                OnNewItemReceived(questItemName, countDelta, nil, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN)
             end
         end
 
@@ -140,6 +142,7 @@ do
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CROWN_GEM_UPDATE, function(eventId, ...) OnCrownGemUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MEDAL_AWARDED, function(eventId, ...) OnMedalAwarded(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_SCOREBOARD_UPDATED, function(eventId, ...) OnBattlegroundScoreboardUpdated(...) end)
+        -- TODO: wait for icons to be made before allowing skill experience from guilds to come through loot history
     end
 end
 

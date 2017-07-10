@@ -345,14 +345,32 @@ function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl, scrollInstan
     end
 end
 
-function ZO_Scroll_SetScrollToTargetControl(self, targetControl)
+function ZO_Scroll_SetScrollToTargetControl(self, targetControl, extentDelta)
     self.targetControl = targetControl
     if targetControl == nil then
         self.savedTargetControlDistance = nil
+        self.savedGradientOffset = nil
     else
-        local scrollTop = self.scroll:GetTop()
+        local scroll = self.scroll
+        local scrollMin, scrollMax = self.scrollbar:GetMinMax()
+        local _, verticalOffset = scroll:GetScrollOffsets()
+        local _, verticalExtents = scroll:GetScrollExtents()
+        local scrollTop = scroll:GetTop()
         local controlTop = self.targetControl:GetTop()
         local scrollDistance = controlTop - scrollTop
+        self.savedGradientOffset = 0
+        if self.useFadeGradient then
+            -- calculate the final gradient height if we were to put our targetControl at its final position
+            if extentDelta then
+                -- For animating controls, this is the delta height from
+                -- the control now to where it would be at the end of the animation
+                verticalExtents = verticalExtents + extentDelta
+            end
+            verticalOffset = zo_clamp(verticalOffset + scrollDistance, 0, verticalExtents)
+            local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
+            local gradientHeight = zo_min(finalValue - scrollMin, MAX_FADE_VALUE)
+            self.savedGradientOffset = gradientHeight / 2 -- divide by 2 for effect
+        end
         self.savedTargetControlDistance = scrollDistance
     end
 end
@@ -376,7 +394,7 @@ end
 
 function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
     local scroll = self.scroll
-    local _, verticalOffset = scroll:GetScrollOffsets()  
+    local _, verticalOffset = scroll:GetScrollOffsets()
     local _, verticalExtents   = scroll:GetScrollExtents()
     local scrollEnabled = (verticalExtents > 0 or verticalOffset > 0)
     local scrollbar  = self.scrollbar
@@ -416,43 +434,22 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
                     local controlTop = self.targetControl:GetTop()
                     local scrollDistanceToControl = controlTop - scrollTop
                     local distanceFromControlToTop = self.savedTargetControlDistance
+                    local gradientOffset = self.savedGradientOffset
 
                     if self.targetControlPercentageToTop then
                         -- calculate the percentage of the distance from where the control started
                         -- to ease from it's current position into its final position 
                         -- at the top of the scroll viewport (offset by the graident)
                         distanceFromControlToTop = distanceFromControlToTop * (1 - self.targetControlPercentageToTop)
+                        -- Ease into the gradient offset for a nice smooth effect
+                        gradientOffset = gradientOffset * self.targetControlPercentageToTop
                     end
 
-                    local finalControlDistance = scrollDistanceToControl - distanceFromControlToTop
+                    local finalControlDistance = scrollDistanceToControl - distanceFromControlToTop - gradientOffset
                     verticalOffset = zo_clamp(verticalOffset + finalControlDistance, 0, verticalExtents)
-
                 end
                 local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
                 scrollbar:SetValue(finalValue)
-
-                -- Second pass for gradient since the gradient is calcualted based on the scrollBar Value.
-                -- We will take the value without gradient concidered, check if the target control is within that gradient,
-                -- and if so, force it out of the gradient area (it is important to note that this delta will cause the gradient
-                -- to be changed again, but it is not worth going down that rabbit hole)
-                if self.useFadeGradient and self.targetControl then
-                    -- the controls position has changed since the scrollBar has set a new value
-                    local controlTop = self.targetControl:GetTop()
-                    -- see how much of a gradient we should have at the current position
-                    local gradientHeight = zo_min(finalValue - scrollMin, MAX_FADE_VALUE)
-                    -- calculate what the target control's distance to top
-                    local finalScrollDistanceToControl = controlTop - scrollTop
-                    -- check to see if we need to move the control because it is inside the gradient
-                    if finalScrollDistanceToControl < gradientHeight then
-                        -- calculate the delta we need to move the target control out of the gradient
-                        local distanceFix = gradientHeight - finalScrollDistanceToControl
-                        -- recalculate the vertical offset with the delta
-                        verticalOffset = zo_clamp(verticalOffset - distanceFix, 0, verticalExtents)
-                        -- set the new scrollBar value with the gradient accounted for
-                        local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
-                        scrollbar:SetValue(finalValue)
-                    end
-                end
 
                 -- If the previous and current scrollBar values are the same, 
                 -- the onValueChanged function will not be invoked to update the scroll child position.

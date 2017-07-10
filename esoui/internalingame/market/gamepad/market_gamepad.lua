@@ -311,6 +311,14 @@ function GamepadMarket:InitializeKeybindDescriptors()
             callback = ZO_GamepadMarket_ShowBuyPlusDialog,
             visible = function() return not IsESOPlusSubscriber() end,
         },
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name = GetString(SI_MARKET_START_TRIAL_KEYBIND_TEXT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function() self:PurchaseFreeTrialMarketProductInternal(self.freeTrialMarketProductId, self.freeTrialPresentationIndex, function() self:RefreshProducts() end, OnPurchaseEnd) end,
+            visible = function() return self.shouldShowFreeTrial end,
+            gamepadOrder = 2,
+        },
         MARKET_BUY_CROWNS_BUTTON,
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
     }
@@ -501,9 +509,14 @@ do
     end
 
     local SUBCATEGORY_GEM_FORMATTED_ICON = zo_iconFormat("EsoUI/Art/currency/gamepad/gp_crown_gems.dds", 32, 32)
-    function GamepadMarket:AddTopLevelCategory(categoryIndex, tabIndex, name, numSubCategories, categoryType)
-        name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
-        
+    local CATEGORY_NEW_FORMATTED_ICON = zo_iconFormat(ZO_GAMEPAD_NEW_ICON_32, 32, 32)
+    function GamepadMarket:AddTopLevelCategory(categoryIndex, tabIndex, name, numSubCategories, categoryType, containsNewProducts)
+        if containsNewProducts then
+            name = zo_strformat(SI_FORMAT_ICON_TEXT, CATEGORY_NEW_FORMATTED_ICON, name)
+        else
+            name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
+        end
+
         local categoryData = CreateCategoryData(name, self.contentContainer.scrollChild, categoryIndex, tabIndex, numSubCategories, categoryType)
 
         local hasChildren = numSubCategories > 0
@@ -569,11 +582,19 @@ do
             self.featuredCategoryIndex = nil
             if hasFeaturedCategory then
                 self.featuredCategoryIndex = firstIndex
-                self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, self.featuredCategoryIndex, GetString(SI_MARKET_FEATURED_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_FEATURED)
+                local hasNewFeaturedProducts = HasNewFeaturedMarketProducts()
+                self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, self.featuredCategoryIndex, GetString(SI_MARKET_FEATURED_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_FEATURED, hasNewFeaturedProducts)
+            end
+
+            local showNewOnEsoPlusCateogry = false
+            self:UpdateFreeTrialProduct()
+            if self.shouldShowFreeTrial then
+                local freeTrialIsNew = select(4, GetMarketProductInfo(self.freeTrialMarketProductId))
+                showNewOnEsoPlusCateogry = freeTrialIsNew
             end
 
             self.esoPlusCategoryIndex = hasFeaturedCategory and GetNextTabIndex() or firstIndex
-            self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, self.esoPlusCategoryIndex, GetString(SI_MARKET_ESO_PLUS_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS)
+            self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, self.esoPlusCategoryIndex, GetString(SI_MARKET_ESO_PLUS_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS, showNewOnEsoPlusCateogry)
 
             -- adding in the custom categories offsets our market product cateogry indices
             -- so even though a category is index 1 from data, it might actually be index 3
@@ -583,7 +604,8 @@ do
             local numCategories = GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE)
             for i = 1, numCategories do
                 local name, numSubCategories = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, i)
-                self:AddTopLevelCategory(i, GetNextTabIndex(), name, numSubCategories)
+                local topLevelHasNewProducts = MarketProductCategoryOrSubCategoriesContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, i)
+                self:AddTopLevelCategory(i, GetNextTabIndex(), name, numSubCategories, ZO_MARKET_CATEGORY_TYPE_NONE, topLevelHasNewProducts)
             end
 
             self.categoriesInitialized = true
@@ -760,10 +782,9 @@ function GamepadMarket:SetCurrentKeybinds(keybindDescriptor)
     end
 end
 
+local TEXTURE_SCALE_PERCENT = 100
 function GamepadMarket:DisplayEsoPlusOffer()
     self:ClearMarketProducts()
-
-    self:SetCurrentKeybinds(self.esoPluskeybindStripDescriptor)
 
     self:ResetGrid()
 
@@ -814,9 +835,29 @@ function GamepadMarket:DisplayEsoPlusOffer()
 
     control:GetNamedChild("MembershipInfoStatus"):SetText(GetString(statusText))
 
+    self:UpdateFreeTrialProduct()
+
     self:UpdateCategoryAnimationDirection()
 
+    -- set keybind after setting self.hasFreeTrialProduct so the keybinds are updated correctly
+    self:SetCurrentKeybinds(self.esoPluskeybindStripDescriptor)
+
     ZO_GamepadMarket_GridScreen.FinishBuild(self)
+
+    if self.shouldShowFreeTrial then
+        -- the keybind here should match the actual kebind in the keybind strip to start the free trial
+        local PREFER_GAMEPAD_MODE = true
+        local keybindString
+        local key, mod1, mod2, mod3, mod4 = GetIngameHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_SECONDARY", PREFER_GAMEPAD_MODE)
+        if key ~= KEY_INVALID then
+            keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT, TEXTURE_SCALE_PERCENT)
+        else
+            keybindString = ZO_Keybindings_GenerateKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
+        end
+        GAMEPAD_TOOLTIPS:LayoutEsoPlusTrialNotification(GAMEPAD_RIGHT_TOOLTIP, self.freeTrialMarketProductId, keybindString)
+    else
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    end
 end
 
 function GamepadMarket:LayoutMarketProducts(marketProductPresentations, disableLTOGrouping)
@@ -926,6 +967,10 @@ do
 
     function GamepadMarket:PurchaseMarketProductInternal(marketProductId, presentationIndex, onPurchaseSuccessCallback, onPurchaseEndCallback)
         PURCHASE_MANAGER:BeginPurchase(marketProductId, presentationIndex, FROM_CROWN_STORE, onPurchaseSuccessCallback, onPurchaseEndCallback)
+    end
+
+    function GamepadMarket:PurchaseFreeTrialMarketProductInternal(marketProductId, presentationIndex, onPurchaseSuccessCallback, onPurchaseEndCallback)
+        PURCHASE_MANAGER:BeginFreeTrialPurchase(marketProductId, presentationIndex, FROM_CROWN_STORE, onPurchaseSuccessCallback, onPurchaseEndCallback)
     end
 
     function GamepadMarket:OnShowBuyCrownsDialog()
@@ -1068,6 +1113,11 @@ function GamepadMarket:GetCategoryData(categoryIndex)
     end
 end
 
+function GamepadMarket:RefreshEsoPlusPage()
+    self:DisplayEsoPlusOffer()
+    self:RefreshKeybinds()
+end
+
 -- overrides from ZO_Market_Shared
 
 function GamepadMarket:AddKeybinds()
@@ -1090,175 +1140,6 @@ ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE.centerAnchorOffset = -230
 function ZO_GamepadMarketKeybindStrip_RefreshStyle()
     local currencyStyle = MARKET_CURRENCY_GAMEPAD:ModifyKeybindStripStyleForCurrency(ZO_GAMEPAD_KEYBIND_STRIP_MARKET_GAMEPAD_STYLE)
     KEYBIND_STRIP:SetStyle(currencyStyle)
-end
-
---
--- [[ Market Product Tooltip ]]--
---
-
-do
-    local MarketTooltipMixin = {}
-    do
-        local BUNDLE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_BUNDLE)
-        local DLC_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_DLC)
-        local UPGRADE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_UPGRADE)
-        local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
-        local SERVICE_HEADER = GetString(SI_SERVICE_TOOLTIP_TYPE)
-        local QUALITY_NORMAL = nil
-
-        local NO_CATEGORY_NAME = nil
-        local NO_NICKNAME = nil
-        local IS_PURCHASEABLE = true
-        local BLANK_HINT = ""
-        local HIDE_VISUAL_LAYER_INFO = false
-        local NO_COOLDOWN = nil
-        local HIDE_BLOCK_REASON = false
-
-        function MarketTooltipMixin:AddInstantUnlockEligibilityFailures(...)
-            local count = select("#", ...)
-            if count > 0 then
-                local ineligibilitySection = self:AcquireSection(self:GetStyle("instantUnlockIneligibilitySection"))
-                for i = 1, count do
-                    local errorStringId = select(i, ...)
-                    if errorStringId ~= 0 then
-                        ineligibilitySection:AddLine(GetErrorString(errorStringId), self:GetStyle("instantUnlockIneligibilityLine"))
-                    end
-                end
-                self:AddSection(ineligibilitySection)
-            end
-        end
-
-        function MarketTooltipMixin:LayoutMarketProduct(productId)
-            local productType = GetMarketProductType(productId)
-            -- For some market product types we can just use other tooltip layouts
-            if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-                local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(productId)
-                self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
-                return
-            elseif productType == MARKET_PRODUCT_TYPE_ITEM then
-                local itemLink = GetMarketProductItemLink(productId)
-                local stackCount = GetMarketProductStackCount(productId)
-                self:LayoutItemWithStackCountSimple(itemLink, stackCount)
-                return
-            end
-
-            --things added to the topSection stack upwards
-            local topSection = self:AcquireSection(self:GetStyle("topSection"))
-
-            local instantUnlockType = MARKET_INSTANT_UNLOCK_NONE
-            if productType == MARKET_PRODUCT_TYPE_BUNDLE then
-                if DoesMarketProductContainDLC(productId) and GetMarketProductNumBundledProducts(productId) == 1 then
-                    topSection:AddLine(DLC_HEADER)
-                else
-                    topSection:AddLine(BUNDLE_HEADER)
-                end
-            elseif productType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
-                local crateId = GetMarketProductCrownCrateId(productId)
-                local crateCount = GetCrownCrateCount(crateId)
-                if crateCount > 0 then
-                    local topSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
-                    topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_crown_crate.dds", 24, 24, crateCount))
-                    topSection:AddSection(topSubsection)
-                end
-            elseif productType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
-                instantUnlockType = GetMarketProductInstantUnlockType(productId)
-                if instantUnlockType ~= MARKET_INSTANT_UNLOCK_NONE then
-                    if IsMarketInstantUnlockServiceToken(productId) then
-                        topSection:AddLine(SERVICE_HEADER)
-                    else
-                        topSection:AddLine(UPGRADE_HEADER)
-                    end
-                end
-            end
-
-            self:AddSection(topSection)
-
-            -- Name
-            local displayName = GetMarketProductDisplayName(productId)
-            local stackCount = GetMarketProductStackCount(productId)
-            if stackCount > 1 then
-                displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, displayName, stackCount)
-            else
-                displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
-            end
-            self:AddLine(displayName, QUALITY_NORMAL, self:GetStyle("title"))
-
-            local tooltipLines = {}
-            if IsMarketInstantUnlockUpgrade(productId) then
-                local statsSection = self:AcquireSection(self:GetStyle("baseStatsSection"))
-                local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-                statValuePair:SetStat(UNLOCK_LABEL, self:GetStyle("statValuePairStat"))
-            
-                local currentUnlock
-                local maxUnlock
-                local unlockDescription
-
-                if instantUnlockType == MARKET_INSTANT_UNLOCK_PLAYER_BACKPACK then
-                    currentUnlock = GetCurrentBackpackUpgrade()
-                    maxUnlock = GetMaxBackpackUpgrade()
-                    unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION, GetNumBackpackSlotsPerUpgrade())
-                elseif instantUnlockType == MARKET_INSTANT_UNLOCK_PLAYER_BANK then
-                    currentUnlock = GetCurrentBankUpgrade()
-                    maxUnlock = GetMaxBankUpgrade()
-                    unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION, GetNumBankSlotsPerUpgrade())
-                elseif instantUnlockType == MARKET_INSTANT_UNLOCK_CHARACTER_SLOT then
-                    currentUnlock = GetCurrentCharacterSlotsUpgrade()
-                    maxUnlock = GetMaxCharacterSlotsUpgrade()
-                    unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_CHARACTER_SLOT_UPGRADE_DESCRIPTION, GetNumCharacterSlotsPerUpgrade())
-                end
-
-                table.insert(tooltipLines, unlockDescription)
-
-                statValuePair:SetValue(zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL, currentUnlock, maxUnlock), self:GetStyle("statValuePairValue"))
-                statsSection:AddStatValuePair(statValuePair)
-                self:AddSection(statsSection)
-            elseif IsMarketInstantUnlockServiceToken(productId) then
-                local tokenDescription
-                local tokenUsageRequirement = GetString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT) -- All tokens only usable from character select
-                local tokenCountString
-
-                if instantUnlockType == MARKET_INSTANT_UNLOCK_RENAME_TOKEN then
-                    tokenDescription = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
-                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_NAME_CHANGE))
-                elseif instantUnlockType == MARKET_INSTANT_UNLOCK_RACE_CHANGE_TOKEN then
-                    tokenDescription = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
-                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
-                elseif instantUnlockType == MARKET_INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
-                    tokenDescription = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
-                    tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
-                end
-
-                table.insert(tooltipLines, tokenDescription)
-                table.insert(tooltipLines, tokenUsageRequirement)
-                table.insert(tooltipLines, tokenCountString)
-            else
-                table.insert(tooltipLines, GetMarketProductDescription(productId))
-            end
-
-            -- Description
-            local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
-            for i = 1, #tooltipLines do
-                bodySection:AddLine(tooltipLines[i], self:GetStyle("bodyDescription"))
-            end
-            self:AddSection(bodySection)
-
-            --Instant Unlock Restrictions
-            if instantUnlockType ~= MARKET_INSTANT_UNLOCK_NONE then
-                local GET_CACHED_STATE = true
-                local purchaseState = GetMarketProductPurchaseState(productId, GET_CACHED_STATE)
-                if purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
-                    self:AddInstantUnlockEligibilityFailures(GetMarketProductEligibilityErrorStringIds(productId))
-                end
-            end
-        end
-    end
-
-    -- Using a mixin because adding a method to ZO_Tooltip doesn't work with GAMEPAD_TOOLTIPS if the method is added after ZO_Tooltip_Gamepad.lua is loaded
-    local rightTooltip = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    zo_mixin(rightTooltip, MarketTooltipMixin)
-
-    local leftTooltip = GAMEPAD_TOOLTIPS:GetTooltip(GAMEPAD_LEFT_TOOLTIP)
-    zo_mixin(leftTooltip, MarketTooltipMixin)
 end
 
 --

@@ -111,7 +111,7 @@ function InventoryWalletManager:ApplySort()
 end
 
 function InventoryWalletManager:RefreshCurrency()
-    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
 end
 
 function InventoryWalletManager:UpdateFreeSlots()

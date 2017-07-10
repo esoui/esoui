@@ -11,7 +11,11 @@ function ZO_Subtitle:New(...)
 end
 
 do
-    local CHARACTERS_PER_SECOND = 10
+    local CHARACTERS_PER_SECOND_DEFAULT = 10
+    local CHARACTERS_PER_SECOND_OVERRIDE =
+    {
+        ["jp"] = 5,
+    }
     local MIN_DISPLAY_LENGTH_SECONDS = 3
     local MAX_DISPLAY_LENGTH_SECONDS = 12
     function ZO_Subtitle:Initialize(messageType, speaker, message)
@@ -22,7 +26,9 @@ do
         self.startTimeSeconds = 0
 
         local messageLength = ZoUTF8StringLength(message)
-        self.displayLengthSeconds = zo_clamp(messageLength / CHARACTERS_PER_SECOND, MIN_DISPLAY_LENGTH_SECONDS, MAX_DISPLAY_LENGTH_SECONDS)
+        local language = GetCVar("Language.2")
+        local charactersPerSecond = CHARACTERS_PER_SECOND_OVERRIDE[language] or CHARACTERS_PER_SECOND_DEFAULT
+        self.displayLengthSeconds = zo_clamp(messageLength / charactersPerSecond, MIN_DISPLAY_LENGTH_SECONDS, MAX_DISPLAY_LENGTH_SECONDS)
     end
 end
 

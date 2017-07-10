@@ -23,7 +23,19 @@ function ZO_SharedSmithingResearch:Initialize(control, owner, slotContainerName)
         self:HandleDirtyEvent()
     end
 
-    self.control:RegisterForEvent(EVENT_FINISHED_SMITHING_TRAIT_RESEARCH, HandleDirtyEvent)
+    local function OnResearchComplete(eventId, craftingType, researchLineIndex, traitIndex)
+        local cancelDialog = ZO_Dialogs_FindDialog("CONFIRM_CANCEL_RESEARCH")
+        if cancelDialog then
+            local data = cancelDialog.data
+            if data.craftingType == craftingType and data.researchLineIndex == researchLineIndex and data.traitIndex == traitIndex then
+                ZO_Dialogs_ReleaseDialog("CONFIRM_CANCEL_RESEARCH")
+            end
+        end
+        self:HandleDirtyEvent()
+    end
+
+    self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, OnResearchComplete)
+    self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, HandleDirtyEvent)
 
     self.dirty = true
 end
@@ -95,6 +107,7 @@ function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl,
 
         ZO_ItemSlot_SetAlwaysShowStackCount(control, researchableCount > 0)
         ZO_ItemSlot_SetupSlot(control, researchableCount, data.icon)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     local function EqualityFunction(leftData, rightData)
@@ -113,6 +126,7 @@ end
 
 function ZO_SharedSmithingResearch:OnControlsAcquired()
     -- Subclasses must implement this function if needed.
+    self.owner:OnResearchSlotChanged()
 end
 
 function ZO_SharedSmithingResearch:HandleDirtyEvent()
@@ -303,6 +317,15 @@ function ZO_SharedSmithingResearch:IsResearchable()
     return self.activeRow and self.activeRow.researchable and self:CanResearchCurrentTraitLine()
 end
 
+function ZO_SharedSmithingResearch:IsResearching()
+    if self.activeRow then
+        local activeRow = self.activeRow
+        local durationSecs, timeRemainingSecs = GetSmithingResearchLineTraitTimes(activeRow.craftingType, activeRow.researchLineIndex, activeRow.traitIndex)
+        return durationSecs ~= nil
+    end
+    return false
+end
+
 function ZO_SharedSmithingResearch:GetSelectedData()
     return self.researchLineList:GetSelectedData()
 end
@@ -329,4 +352,24 @@ function ZO_SharedSmithingResearch:CanResearchCurrentTraitLine()
         end
     end
     return canResearchCurrentTraitLine
+end
+
+function ZO_SharedSmithingResearch:CanCancelResearch()
+    return self.numTraits and not self:CanResearchCurrentTraitLine()
+end
+
+function ZO_SharedSmithingResearch:CancelResearch()
+    local dialogData = {}
+    dialogData.craftingType = self.craftingType
+    dialogData.researchLineIndex = self.researchLineIndex
+
+    local dialogParams = {}
+    local researchingTrait = self:FindResearchingTraitIndex(self.craftingType, self.researchLineIndex, self.numTraits)
+    local traitType, traitDescription, known = GetSmithingResearchLineTraitInfo(self.craftingType, self.researchLineIndex, researchingTrait)
+    local researchLineName = GetSmithingResearchLineInfo(self.craftingType, self.researchLineIndex)
+    dialogData.traitIndex = researchingTrait
+    dialogParams.mainTextParams = { researchLineName, GetString("SI_ITEMTRAITTYPE", traitType), GetString(SI_PERFORM_ACTION_CONFIRMATION) }
+
+    local dialogName = IsInGamepadPreferredMode() and ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG or "CONFIRM_CANCEL_RESEARCH"
+    ZO_Dialogs_ShowPlatformDialog(dialogName, dialogData, dialogParams)
 end

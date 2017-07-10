@@ -3,46 +3,22 @@
         <Button name="ZO_SmithingResearchSlot" inherits="ZO_ItemSlot" virtual="true">
             <Dimensions x="48" y="43" />
             <OnInitialized>
-                self.nameLabel = self:GetNamedChild("Name")
-                self.statusLabel = self:GetNamedChild("Status")
-                self.lockIcon = self:GetNamedChild("LockIcon")
-                self.timerIcon = self:GetNamedChild("TimerIcon")
+                ZO_SmithingResearchSlot_OnInitialized(self)
             </OnInitialized>
             
             <Textures mouseOver="" pressedMouseOver="" />
 
             <OnMouseDoubleClick>
-                if self.owner:IsResearchable() then
-                    self.owner:Research()
-                end
+                ZO_SmithingResearchSlot_OnMouseDoubleClick(self)
             </OnMouseDoubleClick>
             <OnClicked>
-                if button == MOUSE_BUTTON_INDEX_RIGHT and self.owner:IsResearchable() then
-                    ClearMenu()
-                    AddMenuItem(GetString(SI_ITEM_ACTION_RESEARCH), function() self.owner:Research(self) end)
-                    ShowMenu(self)
-                end
+                ZO_SmithingResearchSlot_OnClicked(self, button)
             </OnClicked>
-            <OnDragStart />
-            <OnReceiveDrag />
-
             <OnMouseEnter>
-                if not self.fadeAnimation then
-                    self.fadeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", self:GetNamedChild("Highlight"))
-                    self.scaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", self.icon)
-                end
-                self.fadeAnimation:PlayForward()
-                self.scaleAnimation:PlayForward()
-
-                self.owner:OnResearchRowActivate(self)
+                ZO_SmithingResearchSlot_OnMouseEnter(self)
             </OnMouseEnter>
             <OnMouseExit>
-                if self.fadeAnimation then
-                    self.fadeAnimation:PlayBackward()
-                    self.scaleAnimation:PlayBackward()
-                end
-                
-                self.owner:OnResearchRowDeactivate(self)
+                ZO_SmithingResearchSlot_OnMouseExit(self)
             </OnMouseExit>
 
             <Controls>

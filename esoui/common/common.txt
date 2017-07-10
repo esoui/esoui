@@ -69,3 +69,16 @@ EsoUI\Common\RzChroma\RzChroma_Templates.lua
 EsoUI\Common\RzChroma\RzChroma_Templates.xml
 EsoUI\Common\RzChroma\RzChroma_Manager.lua
 EsoUI\Common\RzChroma\RzChroma_Effects.lua
+
+EsoUI\Common\ZO_ColorPicker\ZO_ColorPicker_Shared.lua
+EsoUI\Common\ZO_ColorPicker\ZO_ColorPicker_Shared.xml
+EsoUI\Common\ZO_ColorPicker\Keyboard\ZO_ColorPicker_Keyboard.lua
+EsoUI\Common\ZO_ColorPicker\Keyboard\ZO_ColorPicker_Keyboard.xml
+EsoUI\Common\ZO_ColorPicker\Gamepad\ZO_ColorPicker_Gamepad.lua
+EsoUI\Common\ZO_ColorPicker\Gamepad\ZO_ColorPicker_Gamepad.xml
+
+EsoUI\Common\Tooltip\TooltipStyles.lua
+EsoUI\Common\Tooltip\CommonTooltips.lua
+
+EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
+EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml

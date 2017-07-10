@@ -1,7 +1,5 @@
 <GuiXml>
     <Controls>
-        <Texture name="ZO_CampaignScoring_Icon_Gamepad" inherits="ZO_CampaignScoring_IconTemplate" virtual="true" />
-
         <Control name="ZO_CampaignScoringAllianceSection_Gamepad" inherits="ZO_CampaignScoringAllianceSectionTemplate" virtual="true" override="true">
             <Dimensions y="200"/>
             

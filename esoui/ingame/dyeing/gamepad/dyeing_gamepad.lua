@@ -107,7 +107,11 @@ function ZO_Dyeing_Gamepad:Initialize(control)
             MAIN_MENU_MANAGER:SetBlockingScene(GAMEPAD_DYEING_ROOT_SCENE_NAME, OnBlockingSceneActivated)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptorRoot)
             ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+
             TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
+            if IsESOPlusSubscriber() then
+                TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER)
+            end
         elseif newState == SCENE_HIDDEN then
             self.modeList:Deactivate()
             ZO_GamepadGenericHeader_Deactivate(self.header)

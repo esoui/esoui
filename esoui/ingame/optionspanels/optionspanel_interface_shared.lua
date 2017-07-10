@@ -1,11 +1,3 @@
-local function SetControlActiveFromPredicate(control, predicate)
-    if predicate() then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
-end
-
 function ZO_OptionsPanel_Interface_ChatBubbleSpeedSliderValueFunc(value)
     if value <= .5 then
         return GetString(SI_INTERFACE_OPTIONS_FADE_RATE_VERY_SLOW)
@@ -330,4 +322,4 @@ local ZO_OptionsPanel_Interface_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_INTERFACE, ZO_OptionsPanel_Interface_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_INTERFACE, ZO_OptionsPanel_Interface_ControlData)

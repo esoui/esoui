@@ -173,7 +173,7 @@
         </TopLevelControl>
             
         <TopLevelControl name="ZO_BattlegroundScoreboardTopLevel_Gamepad_Template" virtual="true">
-            <Anchor point="TOPLEFT" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_BackgroundNestedBg" relativePoint="TOPRIGHT" offsetX="-250"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_4_BackgroundNestedBg" relativePoint="BOTTOMLEFT" />
         </TopLevelControl>
             

@@ -95,6 +95,28 @@
             </Animations>
         </AnimationTimeline>
 
+        <AnimationTimeline name="ZO_CrownCratePackShowFromSide">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_SHOW_FROM_SIDE_MOVE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <AlphaAnimation startAlpha="0.8" endAlpha="1" duration="ZO_CROWN_CRATES_PACK_SHOW_FROM_SIDE_MOVE_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCratePackHideAndExitSide">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PACK_HIDE_AND_EXIT_SIDE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <AlphaAnimation startAlpha="1" endAlpha="0.2" duration="ZO_CROWN_CRATES_PACK_HIDE_AND_EXIT_SIDE_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+
         <AnimationTimeline name="ZO_CrownCratePackOpen">
             <Animations>
                 <Rotate3DAnimation duration="ZO_CROWN_CRATES_PACK_CHOOSE_MOVE_DURATION_MS" startPitch="ZO_CROWN_CRATES_PACK_OPEN_START_YAW_RADIANS" endPitch="ZO_CROWN_CRATES_PACK_OPEN_END_YAW_RADIANS">
@@ -119,5 +141,64 @@
                 </Control>
             </Controls>
         </Control>
+
+        <Control name="ZO_PackChoosingPageChangeFrame" layer="OVERLAY" tier="HIGH" hidden="true" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Button name="$(parent)LeftArrow">
+                    <Dimensions x="64" y="64" />
+                    <Controls>
+                        <Texture name="$(parent)GamepadDirectionIndicator" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" hidden="true">
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                            <Dimensions x="32" y="64" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)PageHeader" relativePoint="LEFT" offsetX="-5"/>
+                        </Texture>
+                    </Controls>
+                </Button>
+
+                <Button name="$(parent)RightArrow">
+                    <Dimensions x="64" y="64" />
+                    <Controls>
+                        <Texture name="$(parent)GamepadDirectionIndicator" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" hidden="true">
+                            <Dimensions x="32" y="64" />
+                            <Anchor point="LEFT" relativeTo="$(parent)PageHeader" relativePoint="RIGHT" offsetX="5"/>
+                        </Texture>
+                    </Controls>
+                </Button>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_PackChoosingPageIndicator_Keyboard_Template" virtual="true">
+            <Anchor point="LEFT" relativeTo="ZO_CrownCratesGemsCounter" relativePoint="RIGHT" offsetX="15" />
+            <Controls>
+                <Label name="$(parent)PageHeader" font="ZoFontKeybindStripDescription" />
+                <Label name="$(parent)PageIndicator" font="ZoFontKeybindStripDescription" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PackChoosingPageIndicator_Gamepad_Template" virtual="true">
+            <Anchor point="RIGHT" relativeTo="ZO_CrownCratesGemsCounter" relativePoint="LEFT" offsetX="-15" />
+            <Controls>
+                <Label name="$(parent)PageHeader" font="ZoFontGamepad42" />
+                <Label name="$(parent)PageIndicator" font="ZoFontGamepad42" />
+            </Controls>
+        </TopLevelControl>
+
+        <!-- this needs to be a top level control so that it can render over the keybind strip while other crown crate controls don't -->
+        <TopLevelControl name="ZO_PackChoosingPageIndicator" resizeToFitDescendents="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <OnInitialized>
+                self.pageLabel = self:GetNamedChild("PageHeader")
+                self.pageIndicator = self:GetNamedChild("PageIndicator")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)PageHeader" text="SI_CROWN_CRATE_PAGE_HEADER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOMLEFT"/>
+                </Label>
+                <Label name="$(parent)PageIndicator" >
+                    <Anchor point="LEFT" relativeTo="$(parent)PageHeader" relativePoint="RIGHT" offsetX="8"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

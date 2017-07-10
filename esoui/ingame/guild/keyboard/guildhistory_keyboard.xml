@@ -20,6 +20,9 @@
                 </Label>
             </Controls>
         </Control>
+        <Control name="ZO_GuildHistoryRowTwoLines" inherits="ZO_GuildHistoryRow" virtual="true">
+            <Dimensions y="60"/>
+        </Control>
 
         <TopLevelControl name="ZO_GuildHistory" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
@@ -41,6 +44,10 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ActivityLogHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-35" offsetY="-32"/>
                 </Control>
+
+                <Label name="$(parent)NoEntriesMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)List" />
+                </Label>
 
                 <Control name="$(parent)Loading" inherits="ZO_Loading">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-20" offsetY="-12"/>

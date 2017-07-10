@@ -120,9 +120,6 @@ EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.lua
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.xml
 EsoUI\Libraries\ZO_TimeLockedDialog\ZO_TimeLockedDialog.lua
 
-EsoUI\Libraries\ZO_ColorPicker\ZO_ColorPicker.lua
-EsoUI\Libraries\ZO_ColorPicker\ZO_ColorPicker.xml
-
 EsoUI\Libraries\ZO_SavingEditBox\ZO_SavingEditBox.lua
 EsoUI\Libraries\ZO_SavingEditBox\ZO_SavingEditBox.xml
 

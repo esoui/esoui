@@ -1,11 +1,3 @@
-local function SetControlActiveFromPredicate(control, predicate)
-    if predicate() then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
-end
-
 local function AreNameplatesEnabled()
     return tonumber(GetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_NAMEPLATES)) ~= 0
 end
@@ -49,7 +41,7 @@ local function CreateNameplateDimmingOption(option, stringsPrefix, dependsOnOpti
     end
     
     local function SetupDimmingOptionEnabled(control)
-         SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
+         ZO_SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
     end
 
     local dependsOnOptionEventName = string.format("NameplateType%d_Changed", dependsOnOption)
@@ -111,7 +103,7 @@ local function CreateHealthbarDimmingOption(option, stringsPrefix, dependsOnOpti
     end
     
     local function SetupDimmingOptionEnabled(control)
-         SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
+         ZO_SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
     end
 
     local dependsOnOptionEventName = string.format("HealthbarType%d_Changed", dependsOnOption)
@@ -456,4 +448,4 @@ local ZO_OptionsPanel_Nameplates_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_NAMEPLATES, ZO_OptionsPanel_Nameplates_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_NAMEPLATES, ZO_OptionsPanel_Nameplates_ControlData)

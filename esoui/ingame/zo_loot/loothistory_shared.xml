@@ -42,7 +42,7 @@
                             <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1"/>
                         </Label>
 
-                        <Texture name="$(parent)CraftBagIcon" hidden="true">
+                        <Texture name="$(parent)StatusIcon" hidden="true">
                             <Dimensions x="40" y="40" />
                         </Texture>
                     </Controls>
@@ -56,7 +56,7 @@
                 <Texture name="$(parent)Bg">
                     <AnchorFill />
                     <Controls>
-                        <Texture name="$(parent)CraftBagHighlight" hidden="true" />
+                        <Texture name="$(parent)Highlight" hidden="true" />
                     </Controls>
                 </Texture>
             </Controls>

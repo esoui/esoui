@@ -193,10 +193,6 @@ local function ApplyPlatformStyleToAssistedTexture(assistedTexture, assistedHead
     assistedTexture:SetInheritAlpha(constants.HEADER_INHERIT_ALPHA)
 end
 
-local function AreHelpTooltipsShowing()
-    return GetSetting_Bool(SETTING_TYPE_TOOLTIPS, TOOLTIP_SETTING_QUEST_PANEL_CATEGORY)
-end
-
 local function IsQuestTrackerVisible()
     return false
 end
@@ -1224,12 +1220,6 @@ function ZO_TrackedHeader_MouseUp(label, button, upInside)
 end
 
 function ZO_QuestTracker_ShowTrackedHeaderTooltip(trackedLabel)  
-    if(AreHelpTooltipsShowing()) then
-        local header = trackedLabel
-        InitializeTooltip(InformationTooltip, header, TOPRIGHT, -40, 0)
-        SetTooltipText(InformationTooltip, GetString(SI_QUEST_TRACKER_UBER_TIP), ZO_TOOLTIP_INSTRUCTIONAL_COLOR)
-    end
-
     local trackerControl = trackedLabel:GetParent():GetParent()
     trackerControl.tracker:DoHeaderNameHighlight(trackedLabel, MOUSE_ENTER)
 end

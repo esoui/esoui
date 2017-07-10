@@ -2,7 +2,7 @@
 -- Match Info Panel --
 ----------------------
 
-ZO_BATTLEGROUND_MATCH_INFO_MEDAL_ANCHOR_PADDING_Y_KEYBOARD = 20
+ZO_BATTLEGROUND_MATCH_INFO_MEDAL_ANCHOR_PADDING_Y_KEYBOARD = 10
 
 ZO_BattlegroundMatchInfo_Keyboard = ZO_BattlegroundMatchInfo_Shared:Subclass()
 

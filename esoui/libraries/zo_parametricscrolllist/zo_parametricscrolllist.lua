@@ -459,7 +459,7 @@ function ZO_ParametricScrollList:SetSelectedIndexWithoutAnimation(selectedIndex,
     self:EnableAnimation(true)
 end
 
-function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType)
+function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType, blockSelectionChangedCallback)
     self:SetJumping(false)
 
     if self.enabled or allowEvenIfDisabled then
@@ -467,8 +467,10 @@ function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisa
         self.targetSelectedIndex = zo_clamp(selectedIndex, 1, #self.dataList)
         local reachedTargetIndex = (self.targetSelectedIndex == self:CalculateSelectedIndexOffsetWithDrag())
 
-        self:FireCallbacks("TargetDataChanged", self, self:GetDataForDataIndex(self.targetSelectedIndex), self:GetDataForDataIndex(oldTargetSelectedIndex), reachedTargetIndex, self.targetSelectedIndex)
-        
+        if not blockSelectionChangedCallback then
+            self:FireCallbacks("TargetDataChanged", self, self:GetDataForDataIndex(self.targetSelectedIndex), self:GetDataForDataIndex(oldTargetSelectedIndex), reachedTargetIndex, self.targetSelectedIndex)
+        end
+
         if self.targetSelectedIndex and self.selectedIndex then
             local moveAmount = zo_abs(self.targetSelectedIndex - self.selectedIndex)
             if jumpType and moveAmount > 0 then
@@ -670,7 +672,8 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
 
         local ALLOW_EVEN_IF_DISABLED = true
         local FORCE_ANIMATION = true
-        self:SetSelectedIndex(matchingIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION)
+        local DEFAULT_JUMP_TYPE = nil
+        self:SetSelectedIndex(matchingIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION, DEFAULT_JUMP_TYPE, blockSelectionChangedCallback)
 
         local INITIAL_UPDATE = true
         local RESELECTING_DURING_REBUILD = true

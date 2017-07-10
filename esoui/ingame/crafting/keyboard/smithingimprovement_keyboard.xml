@@ -2,25 +2,6 @@
     <Controls>
         <Label name="ZO_SmithingImprovementQualityLabel" font="ZoFontWinH5" virtual="true" />
 
-        <Texture name="ZO_SmithingImprovementIcon" mouseEnabled="true" tier="MEDIUM" virtual="true">
-            <Dimensions x="48" y="48"/>
-            <OnMouseEnter>
-                InitializeTooltip(ItemTooltip)
-                local row = self:GetParent()
-                ItemTooltip:SetSmithingImprovementItem(GetCraftingInteractionType(), row.index)
-                ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, self)
-            </OnMouseEnter>
-            <OnMouseExit>
-                ClearTooltip(ItemTooltip)
-            </OnMouseExit>
-            <Controls>
-                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
-                    <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
-                </Label>
-            </Controls>
-        </Texture>
-
         <Texture name="ZO_SmithingImprovementBoosterTexture" virtual="true">
             <Dimensions x="128" y="64" />
             <Controls>

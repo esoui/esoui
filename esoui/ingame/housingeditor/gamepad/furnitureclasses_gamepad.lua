@@ -334,16 +334,7 @@ do
                     if furnitureObject.bagId and furnitureObject.slotIndex then
                         GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, furnitureObject.bagId, furnitureObject.slotIndex)
                     elseif furnitureObject.marketProductId then
-                        local productId = furnitureObject.marketProductId
-                        local productType = GetMarketProductType(productId)
-                        if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-                            local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(productId)
-                            GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_RIGHT_TOOLTIP, collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
-                        elseif productType == MARKET_PRODUCT_TYPE_ITEM then
-                            local itemLink = GetMarketProductItemLink(productId)
-                            local stackCount = GetMarketProductStackCount(productId)
-                            GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_RIGHT_TOOLTIP, itemLink, stackCount)
-                        end
+                        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, furnitureObject.marketProductId)
                     elseif furnitureObject.collectibleId then
                         local collectibleId = furnitureObject.collectibleId
                         local name, description, _, _, _, purchasable, _, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
@@ -618,8 +609,13 @@ function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
         return self:BuildChangeUserGroupPermissionsOption()
     end
 
+    local function ShouldShowGamerCardOption()
+        return IsConsoleUI() and (self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE)
+    end
+
     self:AddOptionTemplate(groupingId, BuildChangeUserGroupPermissionsOption, ZO_HousingSettingsList_Gamepad.SelectedDataHasPreset)
     self:AddOptionTemplate(groupingId, BuildRemoveUserGroupOption)
+    self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ShouldShowGamerCardOption)
 end
 
 function ZO_HousingSettingsList_Gamepad:SelectedDataHasPreset()

@@ -144,6 +144,13 @@ function DLCBook_Keyboard:SearchSelectedDLCInStore()
     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
 end
 
+function DLCBook_Keyboard:OnSceneShown()
+    ZO_SpecializedCollectionsBook_Keyboard.OnSceneShown(self)
+    if IsESOPlusSubscriber() then
+        TriggerTutorial(TUTORIAL_TRIGGER_COLLECTIONS_DLC_OPENED_AS_SUBSCRIBER)
+    end
+end
+
 ----------
 --Events--
 ----------

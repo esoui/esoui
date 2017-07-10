@@ -18,8 +18,8 @@ local INSTANCE_DISPLAY_TYPE_ICONS =
     [INSTANCE_DISPLAY_TYPE_RAID] = "EsoUI/Art/loadingTips/loadingTip_raidDungeon.dds",
     [INSTANCE_DISPLAY_TYPE_GROUP_DELVE] = "EsoUI/Art/loadingTips/loadingTip_groupDelve.dds",
     [INSTANCE_DISPLAY_TYPE_GROUP_AREA] = "EsoUI/Art/Icons/mapKey/mapKey_groupArea.dds",
-    [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_publicDungeon.dds",
-    [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
+    [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/loadingTips/loadingTip_dungeon.dds",
+    [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/loadingTips/loadingTip_delve.dds",
     [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
 }
 
@@ -56,6 +56,12 @@ end
 
 LoadingScreen_Base = {}
 
+function LoadingScreen_Base:Log(text)
+    if WriteToInterfaceLog then
+        WriteToInterfaceLog(self:GetSystemName().." - "..text)
+    end
+end
+
 function LoadingScreen_Base:Initialize()
     self.seenZones = {}
     self.currentRotation = 0
@@ -84,8 +90,10 @@ function LoadingScreen_Base:Initialize()
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_RESUME_FROM_SUSPEND, function(...) self:OnResumeFromSuspend(...) end)
 
     local function OnSubsystemLoadComplete(eventCode, system)
-        if LoadingScreen_Base_CanHide() then
+        self:Log(string.format("Load Screen - System %d Complete", system))
+        if GetNumTotalSubsystemsToLoad() == GetNumLoadedSubsystems() and not IsWaitingForTeleport() then
             --If the last systems we were waiting on all finish in the same frame we could call Hide several times
+            self:Log("Load Screen - Systems Loaded and No Teleport")
             self:Hide()
         end
     end
@@ -94,10 +102,6 @@ function LoadingScreen_Base:Initialize()
 
     self:SizeLoadingTexture()
     self:InitializeAnimations()
-end
-
-function LoadingScreen_Base_CanHide()
-    return GetNumTotalSubsystemsToLoad() == GetNumLoadedSubsystems() and not IsWaitingForTeleport()
 end
 
 function LoadingScreen_Base:SizeLoadingTexture()
@@ -114,11 +118,13 @@ function LoadingScreen_Base:SizeLoadingTexture()
 end
 
 function LoadingScreen_Base:OnAreaLoadStarted(evt, worldId, instanceNum, zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+    self:Log("Load Screen - OnAreaLoadStarted")
     self:UpdateBattlegroundId(instanceDisplayType)
     self:QueueShow(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
 end
 
 function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+    self:Log("Load Screen - OnPrepareForJump")
     self:UpdateBattlegroundId(instanceDisplayType)
     self:QueueShow(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
 end
@@ -132,12 +138,15 @@ function LoadingScreen_Base:OnResumeFromSuspend(evt)
 end
 
 function LoadingScreen_Base:QueueShow(...)
+    self:Log("Load Screen - Queue Show")
     if self:IsPreferredScreen() then
         if not self.hasShownFirstTip then
+            self:Log("Load Screen - Queue Show - Show")
             self.hasShownFirstTip = true
             self.lastUpdate = GetFrameTimeMilliseconds()
             self:Show(...)
         else
+            self:Log("Load Screen - Queue Show - Added to Pending")
             table.insert(self.pendingLoadingTips, {...})
         end
     end
@@ -158,12 +167,12 @@ local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
 }
 
 function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
-    self.timeShowingTipMS = 0
-    self.loadScreenTextureLoaded = false
+    self:Log("Load Screen - Show")
+
+    --First configure the visuals
     self:SizeLoadingTexture()
 
     local isDefaultTexture = "" == loadingTexture
-
     if isDefaultTexture then
         loadingTexture = GetRandomLoadingScreenTexture()
     end
@@ -229,21 +238,45 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, inst
         end
     end
 
-    SetGuiHidden("app", false)
-    self:SetHidden(false)
-    self.bgTexture:SetHidden(false)
+    --Then if we are presently hiding the UI then stop that and reset it to the start. This will trigger the actions on the
+    --animation finishing causing it to hide the load screen and remove the keybinds so this needs to be done before we show
+    --the load screen and add the keybinds
+    if self.animations:IsPlaying() then
+        self.animations:PlayInstantlyToStart()
+    end
 
-    --fade in the spinner on first showing the screen
+    --Here we begin showing the load screen.
+
+    --First show the whole GUI, this needs to be done immediately to show anything
+    SetGuiHidden("app", false)
+    --also show the loadscreen top level
+    self:SetHidden(false)
+    --also show the solid black texture that blocks out the world
+    self.bgTexture:SetHidden(false)
+    --also add the keybinds
+    if not IsActionLayerActiveByNameApp("LoadingScreen") then
+        PushActionLayerByNameApp("LoadingScreen")
+    end
+    --also fade in the spinner
     self.spinnerFadeAnimation:PlayForward()
+    self.timeShowingTipMS = 0
+
+    --For the main animation that brings in the art (as well as some other things) we are waiting until the texture is loaded in memory. This
+    --is checked continuously in update
+    self.loadScreenTextureLoaded = false
 end
 
 function LoadingScreen_Base:Hide()
+    self:Log("Load Screen - Hide")
+
     --if it is hidden or already hiding then return
     if self:IsHidden() or
         (self.animations:IsPlaying() and self.animations:IsPlayingBackward()) or
         (self.spinnerFadeAnimation:IsPlaying() and self.spinnerFadeAnimation:IsPlayingBackward()) then
             return
     end
+
+    self:Log("Load Screen - Hide - Wasn't Already Hiding")
 
     --Hide the black BG on the start of hiding so the load screen fades with the world
     self.bgTexture:SetHidden(true)
@@ -321,17 +354,10 @@ function LoadingScreen_Base:ClearBattlegroundId()
     self.battlegroundId = 0
 end
 
-function SharedLoadingCompleteAnimation_OnPlay(self)
-    if not self:IsPlayingBackward() then
-        if not IsActionLayerActiveByNameApp("LoadingScreen") then
-            PushActionLayerByNameApp("LoadingScreen")
-        end
-    end
-end
-
-function SharedLoadingCompleteAnimation_OnStop(self)
-    if self:IsPlayingBackward() then
-        self.control:SetHidden(true)
+function SharedLoadingCompleteAnimation_OnStop(timeline)
+    --We finally get rid of the load screen entirely when it is animated out
+    if timeline:IsPlayingBackward() then
+        timeline.control:SetHidden(true)
         SetGuiHidden("app", true)
         RemoveActionLayerByNameApp("LoadingScreen")
     end

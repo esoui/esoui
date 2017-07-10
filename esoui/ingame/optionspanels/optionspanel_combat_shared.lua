@@ -1,11 +1,3 @@
-local function SetControlActiveFromPredicate(control, predicate)
-    if predicate() then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
-end
-
 -- SCT settings helper functions
 
 local function IsSCTEnabled()
@@ -13,7 +5,7 @@ local function IsSCTEnabled()
 end
 
 local function OnSCTEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsSCTEnabled)
+    ZO_SetControlActiveFromPredicate(control, IsSCTEnabled)
 end
 
 local function IsSCTAndOutgoingEnabled()
@@ -21,7 +13,7 @@ local function IsSCTAndOutgoingEnabled()
 end
 
 local function OnSCTOrOutgoingEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsSCTAndOutgoingEnabled)
+    ZO_SetControlActiveFromPredicate(control, IsSCTAndOutgoingEnabled)
 end
 
 local function IsSCTAndIncomingEnabled()
@@ -29,7 +21,7 @@ local function IsSCTAndIncomingEnabled()
 end
 
 local function OnSCTOrIncomingEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsSCTAndIncomingEnabled)
+    ZO_SetControlActiveFromPredicate(control, IsSCTAndIncomingEnabled)
 end
 
 local function GenerateSCTOutgoingOption(optionType)
@@ -77,7 +69,7 @@ local function IsBuffDebuffEnabled()
 end
 
 local function OnBuffDebuffEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsBuffDebuffEnabled)
+    ZO_SetControlActiveFromPredicate(control, IsBuffDebuffEnabled)
 end
 
 local function AreBuffsEnabled()
@@ -85,7 +77,7 @@ local function AreBuffsEnabled()
 end
 
 local function OnBuffsEnabledChanged(control)
-    SetControlActiveFromPredicate(control, AreBuffsEnabled)
+    ZO_SetControlActiveFromPredicate(control, AreBuffsEnabled)
 end
 
 local function AreDebuffsEnabled()
@@ -93,7 +85,7 @@ local function AreDebuffsEnabled()
 end
 
 local function OnDebuffsEnabledChanged(control)
-    SetControlActiveFromPredicate(control, AreDebuffsEnabled)
+    ZO_SetControlActiveFromPredicate(control, AreDebuffsEnabled)
 end
 
 local function AreDebuffsForTargetEnabled()
@@ -101,7 +93,7 @@ local function AreDebuffsForTargetEnabled()
 end
 
 local function OnDebuffsEnabledForTargetChanged(control)
-    SetControlActiveFromPredicate(control, AreDebuffsForTargetEnabled)
+    ZO_SetControlActiveFromPredicate(control, AreDebuffsForTargetEnabled)
 end
 
 local ZO_OptionsPanel_Combat_ControlData =
@@ -413,4 +405,4 @@ local ZO_OptionsPanel_Combat_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_COMBAT, ZO_OptionsPanel_Combat_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_COMBAT, ZO_OptionsPanel_Combat_ControlData)

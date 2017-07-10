@@ -742,7 +742,7 @@ do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
                 local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
 
-                if i == 1 and self.responding then
+                if i == 1 and (self.responding or self.showingNotificationMenu) then
                     self:StopInteraction()
                 end
                 break
@@ -929,11 +929,15 @@ function ZO_PlayerToPlayer:StopInteraction()
     elseif self.responding then
         self.responding = false
         if self.showingNotificationMenu then
-            RETICLE:RequestHidden(false)
-            LockCameraRotation(false)
             self:GetRadialMenu():SelectCurrentEntry()
-            self.showingNotificationMenu = false
         end
+    end
+
+    if self.showingNotificationMenu then
+        RETICLE:RequestHidden(false)
+        LockCameraRotation(false)
+        self:GetRadialMenu():Clear()
+        self.showingNotificationMenu = false
     end
 end
 
@@ -1428,14 +1432,11 @@ do
         end
 
         --Report--
-        local reportCallback
-        if IsInGamepadPreferredMode() then
-            local dialogData = { characterName = currentTargetCharacterName, displayName = currentTargetDisplayName,}
-            reportCallback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REPORT_PLAYER_DIALOG", dialogData, {mainTextParams = {formattedPlayerNames}}) end              
-        else
-            reportCallback = function() ZO_ReportPlayerDialog_Show(primaryName, REPORT_PLAYER_REASON_BOTTING, formattedPlayerNames) end
+        local function ReportCallback()
+            local nameToReport = IsInGamepadPreferredMode() and currentTargetDisplayName or primaryName
+            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(nameToReport)
         end
-		self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
+        self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
         
         --Duel--
         local duelState, partnerCharacterName, partnerDisplayName = GetDuelInfo()

@@ -25,7 +25,7 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:Initialize(control, customer
 
     self.helpExtraInfoTitle:SetText(self:GetExtraInfoText())
     
-    control:RegisterForEvent(EVENT_CUSTOMER_SERVICE_TICKET_SUBMITTED, function (...)
+    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceTicketSubmitted", function (...)
                                                                         if fragment:IsShowing() then
                                                                             self:OnCustomerServiceTicketSubmitted(...)
                                                                         end
@@ -76,7 +76,7 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:InitializeTextBoxes()
 
     self.description = self.control:GetNamedChild("DescriptionBodyField")
     self.description:SetMaxInputChars(MAX_HELP_DESCRIPTION_BODY)
-    ZO_EditDefaultText_Initialize(self.description, GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_ASK_FOR_HELP))
+    ZO_EditDefaultText_Initialize(self.description, GetString(SI_CUSTOMER_SERVICE_DEFAULT_DESCRIPTION_TEXT_GENERIC))
 
     --Storing the text field and adding handlers to the visibility events so the Submit Button can be enabled/disabled when the player has typed something in
     --The Submit Button is disabled if the description text is empty
@@ -183,14 +183,8 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:AttemptToSendTicket()
     SubmitCustomerServiceTicket()
 end
 
-function ZO_HelpMechanicAssistanceTemplate_Keyboard:OnCustomerServiceTicketSubmitted(eventCode, response, success)
-    ZO_Dialogs_ReleaseDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
-
+function ZO_HelpMechanicAssistanceTemplate_Keyboard:OnCustomerServiceTicketSubmitted(response, success)
     if success then
-        ZO_Dialogs_ShowDialog("HELP_ASK_FOR_HELP_SUBMIT_TICKET_SUCCESSFUL_DIALOG", nil, {mainTextParams = {response}})
-
         self:ClearFields()
-    else
-        ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG", nil, {mainTextParams = {response}})
     end
 end

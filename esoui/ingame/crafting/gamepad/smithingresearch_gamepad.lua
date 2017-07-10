@@ -1,5 +1,6 @@
 local CONFIRM_SCENE_NAME = "gamepad_smithing_research_confirm"
 local CONFIRM_TEMPLATE_NAME = "ZO_GamepadSubMenuEntryTemplate"
+ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG = "GAMEPAD_CONFIRM_CANCEL_RESEARCH"
 
 ZO_GamepadSmithingResearch = ZO_SharedSmithingResearch:Subclass()
 
@@ -22,8 +23,6 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
             
 			self.owner:SetEnableSkillBar(true)
 
-			DIRECTIONAL_INPUT:Activate(self, self.panelContent)
-
             local savedFilter = self.typeFilter
 
             local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(GetCraftingInteractionType())
@@ -35,7 +34,6 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
 
             self:Refresh()
         elseif newState == SCENE_HIDDEN then
-			DIRECTIONAL_INPUT:Deactivate(self)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.focus:Deactivate()
 			self.owner:SetEnableSkillBar(false)
@@ -49,7 +47,7 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
         if newState == SCENE_SHOWING then
             local function AddEntry(data)
                 local entry = ZO_GamepadEntryData:New(data.name)
-                entry:InitializeCraftingInventoryVisualData(data)
+                entry:InitializeCraftingInventoryVisualData(data.bag, data.index, data.stack)
 			    self.confirmList:AddEntry(CONFIRM_TEMPLATE_NAME, entry)
             end
 
@@ -85,6 +83,7 @@ function ZO_GamepadSmithingResearch:PerformDeferredInitialization()
     self:InitializeKeybindStripDescriptors()
     self:InitializeConfirmList()
     self:InitializeFocusItems()
+    self:InitializeConfirmDestroyDialog()
     self:AnchorTimerBar()
 end
 
@@ -183,6 +182,25 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
                 end
             end
         },
+
+        -- Cancel research
+        {
+            keybind = "UI_SHORTCUT_SECONDARY",
+            
+            name = function()
+                return GetString(SI_CRAFTING_CANCEL_RESEARCH)
+            end,
+
+            callback = function()
+                self:CancelResearch()
+            end,
+
+            visible = function()
+                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                    return self:CanCancelResearch()
+                end
+            end
+        },
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
@@ -204,19 +222,64 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
+function ZO_GamepadSmithingResearch:InitializeConfirmDestroyDialog()
+    local function ReleaseDialog()
+        ZO_Dialogs_ReleaseDialogOnButtonPress(ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG,
+    {
+        blockDialogReleaseOnPress = true,
+        canQueue = true,
+
+        gamepadInfo = 
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+            allowRightStickPassThrough = true,
+        },
+
+        setup = function(dialog)
+            self.destroyConfirmText = nil
+            dialog:setupFunc()
+        end,
+
+        title =
+        {
+            text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_TITLE,
+        },
+
+        mainText = 
+        {
+            text = SI_GAMEPAD_CRAFTING_CONFIRM_CANCEL_RESEARCH_DESCRIPTION,
+        },
+      
+        buttons =
+        {
+            {
+                onShowCooldown = 2000,
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_YES),
+                callback = function(dialog)
+                    local data = dialog.data
+                    CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
+                    ReleaseDialog()
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = GetString(SI_NO),
+                callback = function()
+                    ReleaseDialog()
+                end,
+            },
+        }
+    })
+end
+
 function ZO_GamepadSmithingResearch:AcceptResearch(bagId, slotIndex)
     ResearchSmithingTrait(bagId, slotIndex)
     --go back to the trait selection screen
     SCENE_MANAGER:HideCurrentScene()
-end
-
-do
-	local g_lastInputTime = GetFrameTimeMilliseconds()
-	local MSEC_UNTIL_NEXT_INPUT_ALLOWED = 150
-	local STICK_MAG_REQUIRED_TO_MOVE_LIST = 0.5
-
-	function ZO_GamepadSmithingResearch:UpdateDirectionalInput()
-	end
 end
 
 function ZO_GamepadSmithingResearch:InitializeConfirmList()
@@ -298,6 +361,7 @@ function ZO_GamepadSmithingResearch:RefreshFocusItems(focusIndex)
 end
 
 function ZO_GamepadSmithingResearch:OnControlsAcquired()
+    ZO_SharedSmithingResearch.OnControlsAcquired(self)
     local savedFocusIndex = self.focus:GetFocus()
     self.focus:RemoveAllEntries()
     self:RefreshFocusItems(savedFocusIndex)

@@ -58,7 +58,8 @@ function ZO_AddOnManager:Initialize(control, allowReload)
                                                 end
                                             end)
 
-    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:RefreshData() end)
+    --Uses a namespace event registration because ZO_ReanchorControlForLeftSidePanel registers EVENT_SCREEN_RESIZED on the control
+    EVENT_MANAGER:RegisterForEvent("AddOnManager", EVENT_SCREEN_RESIZED, function() self:RefreshData() end)
     ZO_ReanchorControlForLeftSidePanel(self.control)
 end
 

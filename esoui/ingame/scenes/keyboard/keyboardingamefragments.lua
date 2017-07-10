@@ -16,6 +16,14 @@ RIGHT_BG_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     forcePreparePreview = false,
 })
 
+RIGHT_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = 950,
+    dynamicFramingConsumedWidth = 1150,
+    dynamicFramingConsumedHeight = 300,
+    previewInEmptyWorld = true,
+})
+
 FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = 0,
     paddingRight = 950,

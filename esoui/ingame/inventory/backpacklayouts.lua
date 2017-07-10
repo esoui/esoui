@@ -2,10 +2,6 @@
 -- Backpack Layout Fragment
 ----------------------------------------
 
-ZO_BACKPACK_LAYOUT_HIDE_ALL_BANK_INFO_BARS = 1
-ZO_BACKPACK_LAYOUT_SHOW_ALL_BANK_INFO_BARS = 2
-ZO_BACKPACK_LAYOUT_HIDE_ONLY_TELVAR_BANK_INFO_BARS = 3
-
 ZO_BackpackLayoutFragment = ZO_SceneFragment:Subclass()
 local DEFAULT_BACKPACK_LAYOUT_DATA =
 {
@@ -18,7 +14,7 @@ local DEFAULT_BACKPACK_LAYOUT_DATA =
     emptyLabelOffsetY = 100,
     sortByHeaderWidth = 576,
     sortByNameWidth = 241,
-    bankInfoBarVisibilityOption = ZO_BACKPACK_LAYOUT_HIDE_ALL_BANK_INFO_BARS,
+    hideBankInfo = true,
 }
 
 function ZO_BackpackLayoutFragment:New(...)
@@ -70,7 +66,7 @@ BACKPACK_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         additionalFilter = function (slot)
             return (not slot.stolen)
         end,
-        bankInfoBarVisibilityOption = ZO_BACKPACK_LAYOUT_SHOW_ALL_BANK_INFO_BARS,
+        hideBankInfo = false,
     })
 
 BACKPACK_GUILD_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
@@ -81,7 +77,7 @@ BACKPACK_GUILD_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         additionalFilter = function (slot)
             return (not slot.stolen) and (not slot.isPlayerLocked)
         end,
-        bankInfoBarVisibilityOption = ZO_BACKPACK_LAYOUT_HIDE_ONLY_TELVAR_BANK_INFO_BARS,
+        hideBankInfo = false,
     })
 
 BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(

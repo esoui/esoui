@@ -363,27 +363,32 @@ local function OnDialogHidden(dialog)
 end
 
 -- this always gets called
-function ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText)
+function ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText)
     if dialog.gamepadInfo and dialog.gamepadInfo.RefreshTextOverride then
-        dialog.gamepadInfo.RefreshTextOverride(dialog, title, mainText)
+        dialog.gamepadInfo.RefreshTextOverride(dialog, title, mainText, warningText)
     else
-    local headerData = dialog.headerData
+        local headerData = dialog.headerData
         if headerData then
-    ZO_ClearTable(headerData) -- make sure we are not bringing over header data from the previous setup.
-    headerData.titleText = title
-    headerData.titleTextAlignment = TEXT_ALIGN_LEFT
+            ZO_ClearTable(headerData) -- make sure we are not bringing over header data from the previous setup.
+            headerData.titleText = title
+            headerData.titleTextAlignment = TEXT_ALIGN_LEFT
         end
 
         if dialog.mainTextControl then
-    dialog.mainTextControl:SetText(mainText)
-    dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+            dialog.mainTextControl:SetText(mainText)
+            dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+        end
+
+        if dialog.warningTextControl and warningText then
+            dialog.warningTextControl:SetText(warningText)
+            dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
         end
 
         if not ZO_GenericGamepadDialog_RefreshHeaderData(dialog, dialog.data) and headerData then
             -- refresh the header, but only if ZO_GenericGamepadDialog_RefreshHeaderData didn't already
-        ZO_GamepadGenericHeader_Refresh(dialog.header, headerData)
+            ZO_GamepadGenericHeader_Refresh(dialog.header, headerData)
+        end
     end
-end
 end
 
 function ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
@@ -483,6 +488,7 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
     dialog.scrollChild = container:GetNamedChild("ScrollChild")
     dialog.scrollIndicator = container:GetNamedChild("ScrollIndicator")
     dialog.mainTextControl = dialog.scrollChild:GetNamedChild("MainText")
+    dialog.warningTextControl = dialog.scrollChild:GetNamedChild("WarningText")
     end
 end
 

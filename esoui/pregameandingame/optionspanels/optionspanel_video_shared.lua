@@ -446,4 +446,4 @@ for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_MIN_VALUE, CONSOLE_ENHANCED_R
     end
 end
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_VIDEO, ZO_OptionsPanel_Video_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_VIDEO, ZO_OptionsPanel_Video_ControlData)

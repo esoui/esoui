@@ -120,11 +120,11 @@ end
 
 --Items can now be converted to more styles than just imperial
 CanConvertItemStyleToImperial = function(itemToBagId, itemToSlotIndex)
-    return CanConvertItemStyle(itemToBagId, itemToSlotIndex, ITEMSTYLE_RACIAL_IMPERIAL)
+    return CanConvertItemStyle(itemToBagId, itemToSlotIndex, GetImperialStyleId())
 end
 
 ConvertItemStyleToImperial = function(itemToBagId, itemToSlotIndex)
-    ConvertItemStyle(itemToBagId, itemToSlotIndex, ITEMSTYLE_RACIAL_IMPERIAL)
+    ConvertItemStyle(itemToBagId, itemToSlotIndex, GetImperialStyleId())
 end
 
 --renamed this type
@@ -234,3 +234,122 @@ GetQuestItemTooltipInfo = function(questIndex, stepIndex, conditionIndex)
     local tooltipText = GetQuestItemTooltipText(questItemId)
     return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM), itemName, tooltipText    
 end
+
+GetNumGuildPermissions = function()
+    return GUILD_PERMISSION_MAX_VALUE
+end
+
+-- The Great Currency Migration of '17
+
+function GetBankedMoney()
+    return GetBankedCurrencyAmount(CURT_MONEY)
+end
+
+function DepositMoneyIntoBank(amount)
+    DepositCurrencyIntoBank(CURT_MONEY, amount)
+end
+
+function WithdrawMoneyFromBank(amount)
+    WithdrawCurrencyFromBank(CURT_MONEY, amount)
+end
+
+function GetBankedTelvarStones()
+    return GetBankedCurrencyAmount(CURT_TELVAR_STONES)
+end
+
+function DepositTelvarStonesIntoBank(amount)
+    return DepositCurrencyIntoBank(CURT_TELVAR_STONES, amount)
+end
+
+function WithdrawTelvarStonesFromBank(amount)
+    WithdrawCurrencyFromBank(CURT_TELVAR_STONES, amount)
+end
+
+function GetAlliancePoints()
+    return GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
+end
+
+MAX_PLAYER_MONEY = MAX_PLAYER_CURRENCY
+
+-- Removal of ItemStyle Enum
+
+function GetNumSmithingStyleItems()
+    return GetHighestItemStyleId()
+end
+
+function GetFirstKnownStyleIndex()
+    return GetFirstKnownItemStyleId()
+end
+
+function GetSmithingStyleItemInfo(itemStyleId)
+    local styleItemLink = GetItemStyleMaterialLink(validItemStyleId)
+    local alwaysHideIfLocked = GetItemStyleInfo(validItemStyleId)
+    local name = GetItemLinkName(styleItemLink)
+    local icon, sellPrice, meetsUsageRequirement = GetItemLinkInfo(styleItemLink)
+    local quality = GetItemLinkQuality(styleItemLink)
+    return name, icon, sellPrice, meetsUsageRequirement, itemStyleId, quality, alwaysHideIfLocked
+end
+
+ITEMSTYLE_NONE                      = 0
+ITEMSTYLE_RACIAL_BRETON             = 1
+ITEMSTYLE_RACIAL_REDGUARD           = 2
+ITEMSTYLE_RACIAL_ORC                = 3
+ITEMSTYLE_RACIAL_DARK_ELF           = 4
+ITEMSTYLE_RACIAL_NORD               = 5
+ITEMSTYLE_RACIAL_ARGONIAN           = 6
+ITEMSTYLE_RACIAL_HIGH_ELF           = 7
+ITEMSTYLE_RACIAL_WOOD_ELF           = 8
+ITEMSTYLE_RACIAL_KHAJIIT            = 9
+ITEMSTYLE_UNIQUE                    = 10
+ITEMSTYLE_ORG_THIEVES_GUILD         = 11
+ITEMSTYLE_ORG_DARK_BROTHERHOOD      = 12
+ITEMSTYLE_DEITY_MALACATH            = 13
+ITEMSTYLE_AREA_DWEMER               = 14
+ITEMSTYLE_AREA_ANCIENT_ELF          = 15
+ITEMSTYLE_DEITY_AKATOSH             = 16
+ITEMSTYLE_AREA_REACH                = 17
+ITEMSTYLE_ENEMY_BANDIT              = 18
+ITEMSTYLE_ENEMY_PRIMITIVE           = 19
+ITEMSTYLE_ENEMY_DAEDRIC             = 20
+ITEMSTYLE_DEITY_TRINIMAC            = 21
+ITEMSTYLE_AREA_ANCIENT_ORC          = 22
+ITEMSTYLE_ALLIANCE_DAGGERFALL       = 23
+ITEMSTYLE_ALLIANCE_EBONHEART        = 24
+ITEMSTYLE_ALLIANCE_ALDMERI          = 25
+ITEMSTYLE_UNDAUNTED                 = 26
+ITEMSTYLE_RAIDS_CRAGLORN            = 27
+ITEMSTYLE_GLASS                     = 28
+ITEMSTYLE_AREA_XIVKYN               = 29
+ITEMSTYLE_AREA_SOUL_SHRIVEN         = 30
+ITEMSTYLE_ENEMY_DRAUGR              = 31
+ITEMSTYLE_ENEMY_MAORMER             = 32
+ITEMSTYLE_AREA_AKAVIRI              = 33
+ITEMSTYLE_RACIAL_IMPERIAL           = 34
+ITEMSTYLE_AREA_YOKUDAN              = 35
+ITEMSTYLE_UNIVERSAL                 = 36
+ITEMSTYLE_AREA_REACH_WINTER         = 37
+ITEMSTYLE_AREA_TSAESCI              = 38
+ITEMSTYLE_ENEMY_MINOTAUR            = 39
+ITEMSTYLE_EBONY                     = 40
+ITEMSTYLE_ORG_ABAHS_WATCH           = 41
+ITEMSTYLE_HOLIDAY_SKINCHANGER       = 42
+ITEMSTYLE_ORG_MORAG_TONG            = 43
+ITEMSTYLE_AREA_RA_GADA              = 44
+ITEMSTYLE_ENEMY_DROMOTHRA           = 45
+ITEMSTYLE_ORG_ASSASSINS             = 46
+ITEMSTYLE_ORG_OUTLAW                = 47
+ITEMSTYLE_ORG_REDORAN               = 48
+ITEMSTYLE_ORG_HLAALU                = 49
+ITEMSTYLE_ORG_ORDINATOR             = 50
+ITEMSTYLE_ORG_TELVANNI              = 51
+ITEMSTYLE_ORG_BUOYANT_ARMIGER       = 52
+ITEMSTYLE_HOLIDAY_FROSTCASTER       = 53
+ITEMSTYLE_AREA_ASHLANDER            = 54
+ITEMSTYLE_ORG_WORM_CULT             = 55
+ITEMSTYLE_ENEMY_SILKEN_RING         = 56
+ITEMSTYLE_ENEMY_MAZZATUN            = 57
+ITEMSTYLE_HOLIDAY_GRIM_HARLEQUIN    = 58
+ITEMSTYLE_HOLIDAY_HOLLOWJACK        = 59
+
+ITEMSTYLE_MIN_VALUE                 = 1
+ITEMSTYLE_MAX_VALUE                 = GetHighestItemStyleId()

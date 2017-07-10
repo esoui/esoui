@@ -10,7 +10,7 @@
                     <Controls>
                         <Label name="$(parent)OverlayText" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                         
-                        <Texture name="$(parent)CraftBagIcon" textureFile="EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds" override="true">
+                        <Texture name="$(parent)StatusIcon" override="true">
                             <Anchor point="LEFT" relativeTo="$(grandparent)" relativePoint="RIGHT" offsetX="-5"/>
                         </Texture>
                     </Controls>
@@ -23,7 +23,7 @@
                 <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
                     <TextureCoords left="0.8" right="0" top="0" bottom=".78125" />
                     <Controls>
-                        <Texture name="$(parent)CraftBagHighlight" textureFile="EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds" override="true">
+                        <Texture name="$(parent)Highlight" override="true">
                             <Dimensions y="50"/>
                             <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
                             <Anchor point="BOTTOMLEFT" />

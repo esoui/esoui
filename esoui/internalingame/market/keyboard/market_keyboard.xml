@@ -1,16 +1,11 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_MarketChildlessCategory" inherits="ZO_IconHeader" virtual="true">
+        <Control name="ZO_MarketChildlessCategory" inherits="ZO_MarketCategoryWithChildren" virtual="true">
             <OnInitialized>
                 ZO_IconHeader_OnInitialized(self)
                 self.OnMouseUp = ZO_TreeEntry_OnMouseUp
                 self.SetSelected = ZO_IconHeader_Setup
             </OnInitialized>
-            <Controls>
-                <Label name="$(parent)Text" override="true">
-                    <DimensionConstraints maxX="ZO_MARKET_CATEGORY_LABEL_WIDTH"/>
-                </Label>
-            </Controls>
         </Control>
 
         <Control name="ZO_MarketCategoryWithChildren" inherits="ZO_IconHeader" virtual="true">
@@ -18,6 +13,15 @@
                 <Label name="$(parent)Text" override="true">
                     <DimensionConstraints maxX="ZO_MARKET_CATEGORY_LABEL_WIDTH"/>
                 </Label>
+
+                <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                </Texture>
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)MultiIcon" relativePoint="RIGHT" offsetX="18" />
+                </Texture>
             </Controls>
         </Control>
 
@@ -27,7 +31,7 @@
             </OnMouseUp>
 
             <Controls>
-                <Texture name="$(parent)Icon" hidden="true">
+                <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" hidden="true">
                     <Dimensions x="20" y="20"/>
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-2"/>
                 </Texture>
@@ -49,9 +53,9 @@
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Crafting/smithing_leftArrow_down.dds" override="true">
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
                     <Controls>
-                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Crafting/smithing_leftArrow_over.dds" override="true" />
+                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true" />
                     </Controls>
                 </Texture>
 
@@ -97,8 +101,8 @@
 
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
                     <Dimensions x="ZO_MARKET_CATEGORY_CONTAINER_WIDTH" />
-                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="72"/>
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-130"/>
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="72"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-130"/>
                 </Control>
 
                 <Control name="$(parent)EntryList" inherits="ZO_ScrollContainer">
@@ -151,17 +155,26 @@
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)BenefitsTitle" relativePoint="BOTTOMLEFT" offsetY="4" />
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BenefitsTitle" relativePoint="BOTTOMRIGHT" offsetY="4" />
                                 </Control>
-
-                                <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION">
-                                    <Dimensions x="230" />
-                                    <Anchor point="TOP" relativeTo="$(parent)BenefitsLineContainer" relativePoint="BOTTOM" offsetY="50" />
-
-                                    <OnClicked>
-                                        ZO_MarketCurrencyBuySubscription_OnClicked(self)
-                                    </OnClicked>
-                                </Button>
                             </Controls>
                         </Control>
+
+                        <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION">
+                            <Dimensions x="230" />
+                            <Anchor point="TOP" relativeTo="$(parent)Scroll" relativePoint="BOTTOM" offsetY="30" />
+
+                            <OnClicked>
+                                ZO_MarketSubscribeButton_OnClicked(self)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)FreeTrialButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_FREE_TRIAL">
+                            <Dimensions x="230" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)SubscribeButton" relativePoint="LEFT" offsetX="-40" />
+
+                            <OnClicked>
+                                ZO_MarketFreeTrialButton_OnClicked(self)
+                            </OnClicked>
+                        </Button>
                     </Controls>
                 </Control>
             </Controls>

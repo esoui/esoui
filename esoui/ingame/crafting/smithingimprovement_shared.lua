@@ -114,8 +114,8 @@ function ZO_SharedSmithingImprovement:GetBoosterRowForQuality(quality)
     end
 end
 
-function ZO_SharedSmithingImprovement:OnInventoryUpdate(validItemIds)
-    self.improvementSlot:ValidateItemId(validItemIds)
+function ZO_SharedSmithingImprovement:OnInventoryUpdate(validItems)
+    self.improvementSlot:ValidateSlottedItem(validItems)
     self:OnSlotChanged()
 end
 
@@ -222,7 +222,7 @@ function ZO_SharedSmithingImprovement:IsSlotted(bagId, slotIndex)
     return self.improvementSlot:IsBagAndSlot(bagId, slotIndex)
 end
 
-function ZO_SharedSmithingImprovement:SharedImprove(dialogName)
+function ZO_SharedSmithingImprovement:SharedImprove()
 	if IsPerformingCraftProcess() then
         -- Handle edge case where player hits R and E at the same time.
         return
@@ -231,12 +231,26 @@ function ZO_SharedSmithingImprovement:SharedImprove(dialogName)
     local itemToImproveBagId, itemToImproveSlotIndex, craftingType = self:GetCurrentImprovementParams()
     local numBoostersToApply = self:GetNumBoostersToApply()
 
+    local isItemLocked = IsItemPlayerLocked(itemToImproveBagId, itemToImproveSlotIndex)
+
     local chance = GetSmithingImprovementChance(itemToImproveBagId, itemToImproveSlotIndex, numBoostersToApply, craftingType)
+    if isItemLocked and chance < 100 then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_CRAFTING_ALERT_CANT_IMPROVE_LOCKED_ITEM))
+        return
+    end
+
     local improveItemLink = GetItemLink(itemToImproveBagId, itemToImproveSlotIndex)
-    local boosterName = GetSmithingImprovementItemLink(craftingType, self:GetBoosterRowForQuality(self.currentQuality).index)
+    local dialogName = "CONFIRM_IMPROVE_ITEM"
+    if isItemLocked then
+        if IsInGamepadPreferredMode() then
+            dialogName = "GAMEPAD_CONFIRM_IMPROVE_LOCKED_ITEM"
+        else
+            dialogName = "CONFIRM_IMPROVE_LOCKED_ITEM"
+        end
+    end
 
     local function ShowImprovementDialog()
-        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply }, {mainTextParams = { chance, improveItemLink, numBoostersToApply, boosterName}})
+        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply, chance = chance, }, {mainTextParams = { chance, improveItemLink, GetString(SI_PERFORM_ACTION_CONFIRMATION)}})
     end
 
 	if IsItemBoPAndTradeable(itemToImproveBagId, itemToImproveSlotIndex) then
@@ -324,8 +338,8 @@ function ZO_SharedSmithingImprovement_GetImprovementTooltipSounds()
     end
 end
 
-function ZO_SharedSmithingImprovement_CanItemBeImproved(bagId, slotIndex)
-    return CanItemBeSmithingImproved(bagId, slotIndex, GetCraftingInteractionType()) and not IsItemPlayerLocked(bagId, slotIndex)
+function ZO_SharedSmithingImprovement_CanItemBeImproved(itemData)
+    return CanItemBeSmithingImproved(itemData.bagId, itemData.slotIndex, GetCraftingInteractionType())
 end
 
 function ZO_SharedSmithingImprovement_GetPrimaryFilterType(...)

@@ -75,7 +75,7 @@ end
 
 local function UpdateMenuDimensions(menuEntry)
     if(ZO_Menu.currentIndex > 0) then
-        local textWidth, textHeight = GetControl(menuEntry.item, "Name"):GetTextDimensions()
+        local textWidth, textHeight = menuEntry.item.nameLabel:GetTextDimensions()
         local checkboxWidth, checkboxHeight = 0, 0
         if(menuEntry.checkbox) then
             checkboxWidth, checkboxHeight = menuEntry.checkbox:GetDesiredWidth(), menuEntry.checkbox:GetDesiredHeight()
@@ -251,13 +251,13 @@ function GetMenuPadding()
     return ZO_Menu.menuPad
 end
 
-function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highlightColor, itemYPad)
+function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highlightColor, itemYPad, horizontalAlignment)
     local menuItemControl = ZO_Menu.itemPool:AcquireObject()
     menuItemControl.OnSelect = myfunction
     menuItemControl.menuIndex = ZO_Menu.currentIndex
 
     local checkboxItemControl
-    if(itemType == MENU_ADD_OPTION_CHECKBOX) then
+    if itemType == MENU_ADD_OPTION_CHECKBOX then
         checkboxItemControl = ZO_Menu.checkBoxPool:AcquireObject()
         ZO_CheckButton_SetToggleFunction(checkboxItemControl, myfunction)
         checkboxItemControl.menuIndex = ZO_Menu.currentIndex
@@ -270,16 +270,21 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
 
     table.insert(ZO_Menu.items, { item = menuItemControl, checkbox = checkboxItemControl, itemYPad = itemYPad })
     
+    local nameLabel = menuItemControl.nameLabel
+
     menuItemControl:ClearAnchors()
     menuItemControl:SetHidden(false)
+    -- We need to reset these anchors first so the label can get it's proper size for the parent to reference
+    nameLabel:ClearAnchors()
+    nameLabel:SetAnchor(TOPLEFT)
 
-    if(checkboxItemControl) then
+    if checkboxItemControl then
         checkboxItemControl:ClearAnchors()
         checkboxItemControl:SetHidden(false)
     end
 
-    if(ZO_Menu.nextAnchor == ZO_Menu) then
-        if(checkboxItemControl) then
+    if ZO_Menu.nextAnchor == ZO_Menu then
+        if checkboxItemControl then
             checkboxItemControl:SetAnchor(TOPLEFT, ZO_Menu.nextAnchor, TOPLEFT, ZO_Menu.menuPad, ZO_Menu.menuPad + itemYPad)
             menuItemControl:SetAnchor(TOPLEFT, checkboxItemControl, TOPRIGHT, 0, 0)
         else
@@ -296,8 +301,6 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
 
     ZO_Menu.nextAnchor = checkboxItemControl or menuItemControl
 
-    local nameControl = GetControl(menuItemControl, "Name")
-
     if myFont == nil then
         if not IsInGamepadPreferredMode() then
             myFont = "ZoFontGame"
@@ -306,14 +309,23 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
         end
     end
     
-    nameControl.normalColor = normalColor or DEFAULT_TEXT_COLOR
-    nameControl.highlightColor = highlightColor or DEFAULT_TEXT_HIGHLIGHT
+    nameLabel.normalColor = normalColor or DEFAULT_TEXT_COLOR
+    nameLabel.highlightColor = highlightColor or DEFAULT_TEXT_HIGHLIGHT
     
     -- NOTE: Must set text AFTER the current index has been incremented.
-    nameControl:SetFont(myFont)
-    nameControl:SetText(mytext)
+    nameLabel:SetFont(myFont)
+    nameLabel:SetText(mytext)
     UpdateMenuDimensions(ZO_Menu.items[#ZO_Menu.items])
-    nameControl:SetColor(nameControl.normalColor:UnpackRGBA())
+
+    -- Now that we know how the label wil size, finish the anchors if we need the label to be right aligned
+    -- Right align won't work if the label has no width
+    horizontalAlignment = horizontalAlignment or TEXT_ALIGN_LEFT
+    nameLabel:SetHorizontalAlignment(horizontalAlignment)
+    if horizontalAlignment == TEXT_ALIGN_RIGHT then
+        nameLabel:SetAnchor(TOPRIGHT)
+    end
+
+    nameLabel:SetColor(nameLabel.normalColor:UnpackRGBA())
 
     if(currentOnMenuItemAddedCallback) then
         currentOnMenuItemAddedCallback()
@@ -337,15 +349,13 @@ function ZO_Menu_SelectItem(control)
    
     ZO_MenuHighlight:SetHidden(false)
     
-    local nameControl = GetControl(control, "Name")
-    nameControl:SetColor(nameControl.highlightColor:UnpackRGBA())
+    control.nameLabel:SetColor(control.nameLabel.highlightColor:UnpackRGBA())
 end
 
 function ZO_Menu_UnselectItem(control)
     ZO_MenuHighlight:SetHidden(true)
 
-    local nameControl = GetControl(control, "Name")
-    nameControl:SetColor(nameControl.normalColor:UnpackRGBA())
+    control.nameLabel:SetColor(control.nameLabel.normalColor:UnpackRGBA())
 end
 
 function ZO_Menu_SetSelectedIndex(index)
@@ -392,7 +402,7 @@ end
 function ZO_Menu_GetSelectedText()
     local control = ZO_Menu.items[selectedIndex].item
     if(control) then
-        return GetControl(control, "Name"):GetText()
+        return control.nameLabel:GetText()
     end
 end
 
@@ -456,7 +466,9 @@ local function ResetCheckbox(checkbox)
 end
     
 local function EntryFactory(pool)
-    return ZO_ObjectPool_CreateControl("ZO_MenuItem", pool, ZO_Menu)
+    local control = ZO_ObjectPool_CreateControl("ZO_MenuItem", pool, ZO_Menu)
+    control.nameLabel = control:GetNamedChild("Name")
+    return control
 end
 
 local function CheckBoxFactory(pool)

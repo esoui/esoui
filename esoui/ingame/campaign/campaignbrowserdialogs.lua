@@ -183,7 +183,7 @@ function SelectHomeCampaign:SetupCost()
     self.setOnEndLabel:SetHidden(hideJoinOptions)
 
     if(not free) then
-        local numAlliancePoints = GetAlliancePoints()
+        local numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
         ZO_CurrencyControl_SetSimpleCurrency(self.balance, CURT_ALLIANCE_POINTS, numAlliancePoints, CURRENCY_OPTIONS)
 
         local notEnough = cost > numAlliancePoints
@@ -397,7 +397,7 @@ function AbandonHomeCampaign:SetupCost()
         local notEnough
 
         if (useAlliancePoints) then
-            local numAlliancePoints = GetAlliancePoints()
+            local numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
             ZO_CurrencyControl_SetSimpleCurrency(self.balance, CURT_ALLIANCE_POINTS, numAlliancePoints, CURRENCY_OPTIONS)
 
             notEnough = cost > numAlliancePoints

@@ -276,7 +276,8 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
     if isGamepadDialog then
         local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
         mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
-        ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText)
+        warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningTextParams)
+        ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText)
     else
         textControl = dialog:GetNamedChild("Text")
         mainText = dialogInfo.mainText
@@ -378,6 +379,7 @@ end
 -- An "editBox" field, which adds an edit box to the dialog. It can specify:
 --      textType = The type of input the edit box accepts.
 --      To get the value in the editbox, use ZO_Dialogs_GetEditBoxText.
+-- A "warning" table, which works the same way as "mainText", which shows some red text at the bottom of the dialog to call attention to the specific action that is occuring
 -- Finally, the is a "buttons" table, in which each member corresponds to a button. Dialogs support a maximum of 2 buttons.
 -- If the buttons table is present, each of it's members in turn MUST contain a "text" field. Also, each button can optionally contain:
 --      A "callback" function field (whose first parameter should always be "dialog"....use "dialog.data[i]" to reference the ith data member passed in).
@@ -457,6 +459,16 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
         SetDialogTextFormatted(dialog, titleControl, title, textParams.titleParams)
     elseif titleControl and isGamepad then
         SetDialogTextFormatted(dialog, titleControl, "")
+    end
+
+    -- Warning Text
+    local warningLabel = dialog:GetNamedChild("WarningText")
+    local warning = dialogInfo.warning
+
+    if warning then
+        SetDialogTextFormatted(dialog, warningLabel, warning, textParams.warningParams)
+    elseif warningLabel and isGamepad then
+        SetDialogTextFormatted(dialog, warningLabel, "")
     end
 
     --Buttons
@@ -662,6 +674,12 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
             controlAbove = radioButtonContainer
         end
+
+        if dialogInfo.warning then
+            warningLabel:SetAnchor(TOPLEFT, controlAbove, BOTTOMLEFT, 0, 15)
+            warningLabel:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 15)
+            controlAbove = warningLabel
+        end
             
         -- Handle button centering
         local btn1 = dialog:GetNamedChild("Button1")
@@ -753,8 +771,10 @@ function ZO_Dialogs_InitializeDialog(dialog, isGamepad)
     local buttonExtraText2Control = dialog:GetNamedChild("ButtonExtraText2")
     local editContainer = dialog:GetNamedChild("Edit")
     local editControl = dialog:GetNamedChild("EditBox")
+    local warningLabel = dialog:GetNamedChild("WarningText")
 
     textControl:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    warningLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     buttonExtraText1Control:SetHidden(true)
     buttonExtraText2Control:SetHidden(true)
     button1Control:SetState(BSTATE_NORMAL, false)
@@ -762,6 +782,7 @@ function ZO_Dialogs_InitializeDialog(dialog, isGamepad)
     button1Control:SetKeybindEnabled(true)
     button2Control:SetKeybindEnabled(true)
     editContainer:SetHidden(true)
+    warningLabel:SetHidden(true)
     editControl:SetText("")
     editControl:LoseFocus()
        
@@ -962,7 +983,7 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
             end
         else
             local textControl = dialog:GetNamedChild("Text")
-            if(textTable) then
+            if textTable then
                 dialog.mainText = textTable
             end
         
@@ -974,11 +995,33 @@ end
 function ZO_Dialogs_UpdateDialogTitleText(dialog, textTable, params)
     if dialog then
         local titleControl = dialog:GetNamedChild("Title")
-        if titleControl then
+        if textTable then
             dialog.title = textTable
         end
         
         SetDialogTextFormatted(dialog, titleControl, dialog.title, params)
+    end
+end
+
+function ZO_Dialogs_UpdateDialogWarningText(dialog, textTable, params)
+    if dialog then
+        if dialog.isGamepad then
+            if dialog.info and dialog.headerData then
+                textTable = textTable or dialog.info.warning
+
+                local warningText = GetFormattedText(dialog, textTable, params)
+                if warningText and warningText ~= "" then
+                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, dialog.mainTextControl:GetText(), warningText)
+                end
+            end
+        else
+            local warningLabel = dialog:GetNamedChild("WarningText")
+            if textTable then
+                dialog.warning = textTable
+            end
+        
+            SetDialogTextFormatted(dialog, warningLabel, dialog.warning, params)
+        end
     end
 end
 

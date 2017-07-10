@@ -5,7 +5,7 @@
 local function InitializeBaseComboBox(control)
     local comboBox = ZO_ComboBox_ObjectFromContainer(control)
 
-    if(not control.hasInitializedComboBox) then
+    if not control.hasInitializedComboBox then
         comboBox:SetSortsItems(false)
         comboBox:SetFont("ZoFontWinT1")
         comboBox:SetSpacing(4)
@@ -56,9 +56,9 @@ end
 function ZO_TradingHouse_UpdateComboBox(control, entryData, callback)
     control:SetHidden(entryData == nil)
 
-    if(entryData) then
+    if entryData then
         local comboBox = ZO_ComboBox_ObjectFromContainer(control)
-        if(comboBox) then
+        if comboBox then
             comboBox:ClearItems()
             ZO_TradingHouse_InitializeRangeComboBox(control, entryData, callback)
         end
@@ -146,14 +146,14 @@ end
 
 function ZO_TradingHouseManager:InitializeScene()
     local function SceneStateChange(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             PLAYER_INVENTORY:SetTradingHouseModeEnabled(true)
-        elseif(newState == SCENE_HIDING) then
+        elseif newState == SCENE_HIDING then
             SetPendingItemPost(BAG_BACKPACK, 0, 0)
             ClearMenu()
             PLAYER_INVENTORY:SetTradingHouseModeEnabled(false)
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_HIDDEN then
             self:ClearSearchResults()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
@@ -163,8 +163,6 @@ function ZO_TradingHouseManager:InitializeScene()
 end
 
 function ZO_TradingHouseManager:InitializeKeybindDescriptor()
-    local tradingHouse = self
-
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -173,36 +171,36 @@ function ZO_TradingHouseManager:InitializeKeybindDescriptor()
         {
             keybind = "UI_SHORTCUT_SECONDARY",
             name = function()
-                if(tradingHouse:IsInSearchMode()) then
+                if self:IsInSearchMode() then
                     return GetString(SI_TRADING_HOUSE_DO_SEARCH)
-                elseif(tradingHouse:IsInSellMode()) then
+                elseif self:IsInSellMode() then
                     return GetString(SI_TRADING_HOUSE_POST_ITEM)
                 end
             end,
 
             callback = function()
-                if(tradingHouse:CanSearch()) then
-                    tradingHouse:DoSearch()
-                elseif(tradingHouse:CanPostWithMoneyCheck()) then
-                    tradingHouse:PostPendingItem()
+                if self:CanSearch() then
+                    self:DoSearch()
+                elseif self:CanPostWithMoneyCheck() then
+                    self:PostPendingItem()
                 end
             end,
 
             visible = function()
-                if(tradingHouse:IsInSearchMode()) then
+                if self:IsInSearchMode() then
                     return true
-                elseif(tradingHouse:IsInSellMode()) then
-                    return tradingHouse:CanPost()
+                elseif self:IsInSellMode() then
+                    return self:CanPost()
                 end
 
                 return false
             end,
 
             enabled = function()
-                if(tradingHouse:IsInSearchMode()) then
-                    return tradingHouse.m_searchAllowed and (GetTradingHouseCooldownRemaining() == 0)
-                elseif (tradingHouse:IsInSellMode()) then
-                    return tradingHouse:HasEnoughMoneyToPostPendingItem()
+                if self:IsInSearchMode() then
+                    return self.m_searchAllowed and (GetTradingHouseCooldownRemaining() == 0)
+                elseif self:IsInSellMode() then
+                    return self:HasEnoughMoneyToPostPendingItem()
                 end
 
                 return true
@@ -213,7 +211,7 @@ function ZO_TradingHouseManager:InitializeKeybindDescriptor()
         {
             name = function()
                 local selectedGuildId = GetSelectedTradingHouseGuildId()
-                if(selectedGuildId) then
+                if selectedGuildId then
                     return GetGuildName(selectedGuildId) -- TODO: Incorrect...this needs to pull from the guilds that the trading house has access to.
                 end
             end,
@@ -231,12 +229,24 @@ function ZO_TradingHouseManager:InitializeKeybindDescriptor()
             name = GetString(SI_TRADING_HOUSE_RESET_SEARCH),
             keybind = "UI_SHORTCUT_NEGATIVE",
             visible =   function()
-                            return tradingHouse:IsInSearchMode()
+                            return self:IsInSearchMode()
                         end,
             callback =  function()
                             self:ResetAllSearchData()
                         end,
-        }
+        },
+
+        --End Preview
+        {
+            name = GetString(SI_CRAFTING_EXIT_PREVIEW_MODE),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible =   function()
+                            return self:IsInSearchMode() and ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled()
+                        end,
+            callback =  function()
+                            self:TogglePreviewMode()
+                        end,
+        },
     }
 end
 
@@ -302,18 +312,24 @@ function ZO_TradingHouseManager:HandleTabSwitch(tabData)
     self.m_postedItemsList:SetHidden(notListingsMode)
     self.m_postedItemsHeader:SetHidden(notListingsMode)
 
-    if(mode == ZO_TRADING_HOUSE_MODE_SELL) then
+    if mode == ZO_TRADING_HOUSE_MODE_SELL then
         SCENE_MANAGER:AddFragment(INVENTORY_FRAGMENT)
     else
         SCENE_MANAGER:RemoveFragment(INVENTORY_FRAGMENT)
     end
 
-    if(mode == ZO_TRADING_HOUSE_MODE_LISTINGS) then
-        self:RequestListings()
+    if mode == ZO_TRADING_HOUSE_MODE_LISTINGS then
+        self:TryRequestListings()
     end
 
-    if(mode == ZO_TRADING_HOUSE_MODE_SELL) then
+    if mode == ZO_TRADING_HOUSE_MODE_SELL then
         self:UpdateListingCounts()
+    end
+
+    if notBrowseMode then
+        if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
+            self:TogglePreviewMode()
+        end
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -380,14 +396,14 @@ function ZO_TradingHouseManager:InitializeSearchNavigationBar(control)
     local moneyControl = self.m_nagivationBar:GetNamedChild("Money")
     local function UpdateMoney()
         self.m_playerMoney[CURT_MONEY] = GetCarriedCurrencyAmount(CURT_MONEY)
-        ZO_CurrencyControl_SetSimpleCurrency(moneyControl, CURT_MONEY, self.m_playerMoney[CURT_MONEY], ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(moneyControl, CURT_MONEY, self.m_playerMoney[CURT_MONEY], ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
     end
 
     moneyControl:RegisterForEvent(EVENT_MONEY_UPDATE, UpdateMoney)
     UpdateMoney()
 
     local function UpdateAlliancePoints()
-        self.m_playerMoney[CURT_ALLIANCE_POINTS] = GetAlliancePoints()
+        self.m_playerMoney[CURT_ALLIANCE_POINTS] = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
     end
 
     moneyControl:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, UpdateAlliancePoints)
@@ -398,7 +414,7 @@ function ZO_TradingHouseManager:InitializeSearchNavigationBar(control)
 end
 
 function ZO_TradingHouseManager:ToggleLevelRangeMode()
-    if(self.m_levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_LEVEL) then
+    if self.m_levelRangeFilterType == TRADING_HOUSE_FILTER_TYPE_LEVEL then
         self.m_levelRangeFilterType = TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS
         self.m_levelRangeToggle:SetState(BSTATE_PRESSED, true)
         self.m_levelRangeLabel:SetText(GetString(SI_TRADING_HOUSE_BROWSE_CHAMPION_POINTS_RANGE_LABEL))
@@ -555,14 +571,6 @@ function ZO_TradingHouseManager:InitializeListings(control)
     ZO_ScrollList_AddResizeOnScreenResize(postedItemsList)
 end
 
-function ZO_TradingHouseManager:RequestListings()
-    if(self:IsAwaitingResponse()) then
-        self:QueueListingRequest()
-    else
-        RequestTradingHouseListings()
-    end
-end
-
 function ZO_TradingHouseManager:OnListingsRequestSuccess()
     local list = self.m_postedItemsList
     local scrollData = ZO_ScrollList_GetDataList(list)
@@ -570,7 +578,7 @@ function ZO_TradingHouseManager:OnListingsRequestSuccess()
 
     for i = 1, GetNumTradingHouseListings() do
         local itemData = ZO_TradingHouse_CreateItemData(i, GetTradingHouseListingItemInfo)
-        if(itemData) then
+        if itemData then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(ITEM_LISTINGS_DATA_TYPE, itemData)
         end
     end
@@ -579,7 +587,7 @@ function ZO_TradingHouseManager:OnListingsRequestSuccess()
 end
 
 function ZO_TradingHouseManager:RefreshListingsIfNecessary()
-    if(GetNumTradingHouseListings() > 0) then
+    if GetNumTradingHouseListings() > 0 then
         self:OnListingsRequestSuccess()
     end
 end
@@ -587,7 +595,7 @@ end
 function ZO_TradingHouseManager:OnPendingPostItemUpdated(slotId, isPending)
     self.m_pendingSaleIsValid = false
 
-    if(isPending) then
+    if isPending then
         self.m_pendingItemSlot = slotId
         self:SetupPendingPost(slotId)
     else
@@ -605,7 +613,7 @@ end
 
 function ZO_TradingHouseManager:UpdateListingCounts()
     local currentListings, maxListings = GetTradingHouseListingCounts()
-    if(currentListings < maxListings) then
+    if currentListings < maxListings then
         self.m_currentListings:SetText(zo_strformat(SI_TRADING_HOUSE_LISTING_COUNT, currentListings, maxListings))
     else
         self.m_currentListings:SetText(zo_strformat(SI_TRADING_HOUSE_LISTING_COUNT_FULL, currentListings, maxListings))
@@ -634,7 +642,7 @@ function ZO_TradingHouseManager:SetPendingPostPrice(sellPrice)
 
     self:SetInvoicePriceColors(ZO_DEFAULT_ENABLED_COLOR)
 
-    if(self.m_pendingItemSlot) then
+    if self.m_pendingItemSlot then
         local listingFee, tradingHouseCut, profit = GetTradingHousePostPriceInfo(sellPrice)
 
         ZO_CurrencyControl_SetSimpleCurrency(self.m_invoiceListingFee, CURT_MONEY, listingFee, INVOICE_CURRENCY_OPTIONS)
@@ -642,7 +650,7 @@ function ZO_TradingHouseManager:SetPendingPostPrice(sellPrice)
         ZO_CurrencyControl_SetSimpleCurrency(self.m_invoiceProfit, CURT_MONEY, profit, INVOICE_CURRENCY_OPTIONS)
 
         -- verify the user has enough cash
-        if((GetCarriedCurrencyAmount(CURT_MONEY) - listingFee) >= 0) then
+        if (GetCarriedCurrencyAmount(CURT_MONEY) - listingFee) >= 0 then
             self.m_pendingSaleIsValid = true
         else
             self.m_pendingSaleIsValid = false
@@ -662,7 +670,7 @@ function ZO_TradingHouseManager:GetPendingPostPrice()
 end
 
 function ZO_TradingHouseManager:SetupPendingPost()
-    if(self.m_pendingItemSlot) then
+    if self.m_pendingItemSlot then
         local icon, stackCount, sellPrice = GetItemInfo(BAG_BACKPACK, self.m_pendingItemSlot)
         ZO_Inventory_BindSlot(self.m_pendingItem, SLOT_TYPE_TRADING_HOUSE_POST_ITEM, self.m_pendingItemSlot, BAG_BACKPACK)
         ZO_ItemSlot_SetupSlot(self.m_pendingItem, stackCount, icon)
@@ -690,7 +698,7 @@ function ZO_TradingHouseManager:ClearPendingPost()
 end
 
 function ZO_TradingHouseManager:PostPendingItem()
-    if(self.m_pendingItemSlot and self.m_pendingSaleIsValid) then
+    if self.m_pendingItemSlot and self.m_pendingSaleIsValid then
         local stackCount = ZO_InventorySlot_GetStackCount(self.m_pendingItem)
         local desiredPrice = self.m_invoiceSellPrice.sellPrice or 0
         RequestPostItemOnTradingHouse(BAG_BACKPACK, self.m_pendingItemSlot, stackCount, desiredPrice)
@@ -701,9 +709,15 @@ function ZO_TradingHouseManager:ChangeSort(key, order)
     self.m_search:ChangeSort(key, order)
 end
 
-function ZO_TradingHouseManager:QueueListingRequest()
-    if not self:IsWaitingForResponseType(TRADING_HOUSE_RESULT_LISTINGS_PENDING) then
-        self.m_requestListingsOnResponseReceived = true
+function ZO_TradingHouseManager:TryRequestListings()
+    if self:CanRequestListing() then
+        self.requestListings = false
+        RequestTradingHouseListings()
+    else
+        -- only queue the request if we are not currently waiting for a listings response
+        if not self:IsWaitingForResponseType(TRADING_HOUSE_RESULT_LISTINGS_PENDING) then
+            self.requestListings = true
+        end
     end
 end
 
@@ -716,26 +730,26 @@ function ZO_TradingHouseManager:OnResponseReceived(responseType, result)
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
-    if(responseType == TRADING_HOUSE_RESULT_POST_PENDING) then
-        if(success) then
+    if responseType == TRADING_HOUSE_RESULT_POST_PENDING then
+        if success then
             self:OnPostSuccess()
             self:RefreshListingsIfNecessary()
         end
-    elseif(responseType == TRADING_HOUSE_RESULT_SEARCH_PENDING) then
-        if(success) then
+    elseif responseType == TRADING_HOUSE_RESULT_SEARCH_PENDING then
+        if success then
             -- Hide the fictional "awaiting search results" animation?
         end
-    elseif(responseType == TRADING_HOUSE_RESULT_PURCHASE_PENDING) then
-        if(success) then
+    elseif responseType == TRADING_HOUSE_RESULT_PURCHASE_PENDING then
+        if success then
             self:OnPurchaseSuccess()
         end
-    elseif(responseType == TRADING_HOUSE_RESULT_LISTINGS_PENDING) then
-        if(success) then
+    elseif responseType == TRADING_HOUSE_RESULT_LISTINGS_PENDING then
+        if success then
             self:OnListingsRequestSuccess()
-            self.m_requestListingsOnResponseReceived = nil -- make sure that we don't request again right after we get an answer.
+            self.requestListings = false -- make sure that we don't request again right after we get an answer.
         end
-    elseif(responseType == TRADING_HOUSE_RESULT_CANCEL_SALE_PENDING) then
-        if(success) then
+    elseif responseType == TRADING_HOUSE_RESULT_CANCEL_SALE_PENDING then
+        if success then
             -- Refresh all listings when the cancel goes through
             -- This doesn't need to ensure that the listings were received because the interface to cancel a listing requires that
             -- the listings have been received from the server.
@@ -743,9 +757,8 @@ function ZO_TradingHouseManager:OnResponseReceived(responseType, result)
         end
     end
 
-    if(self.m_requestListingsOnResponseReceived) then
-        self.m_requestListingsOnResponseReceived = nil
-        RequestTradingHouseListings()
+    if self.requestListings then
+        self:TryRequestListings()
     end
 end
 
@@ -852,7 +865,7 @@ function ZO_TradingHouseManager:ClearListedItems()
 end
 
 local function ResetSearchFilter(entryIndex, entryData)
-    if(entryData.filterObject) then -- need to check, because some entries don't have filters
+    if entryData.filterObject then -- need to check, because some entries don't have filters
         entryData.filterObject:Reset()
     end
 end
@@ -870,7 +883,7 @@ function ZO_TradingHouseManager:ResetAllSearchData()
 end
 
 function ZO_TradingHouseManager:OpenTradingHouse()
-    if(not self.m_initialized) then
+    if not self.m_initialized then
         self:RunInitialSetup(self.m_control)
         self.m_initialized = true
     end
@@ -890,13 +903,30 @@ function ZO_TradingHouseManager:CloseTradingHouse()
     end
 end
 
+function ZO_TradingHouseManager:TogglePreviewMode()
+    ITEM_PREVIEW_KEYBOARD:ToggleInteractionCameraPreview(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, RIGHT_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_TradingHouseManager:PreviewSearchResult(tradingHouseIndex)
+    if not ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
+        self:TogglePreviewMode()
+    end
+
+    ITEM_PREVIEW_KEYBOARD:PreviewTradingHouseSearchResultAsFurniture(tradingHouseIndex)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+
+
 -- Select Active Guild for Trading House Dialog
 ----------------------
 
 local function SelectTradingHouseGuildDialogInitialize(dialogControl, tradingHouseManager)
     local function SelectTradingHouseGuild(selectedGuildId)
-        if(selectedGuildId) then
-            if(SelectTradingHouseGuildId(selectedGuildId)) then
+        if selectedGuildId then
+            if SelectTradingHouseGuildId(selectedGuildId) then
                 tradingHouseManager:UpdateForGuildChange()
             end
         end
@@ -909,7 +939,7 @@ local function SelectTradingHouseGuildDialogInitialize(dialogControl, tradingHou
 end
 
 function ZO_TradingHouseManager:UpdateStatus()
-    if(not self.m_changeGuildDialog) then
+    if not self.m_changeGuildDialog then
         self.m_changeGuildDialog = ZO_SelectTradingHouseGuildDialog
         SelectTradingHouseGuildDialogInitialize(self.m_changeGuildDialog, self)
     end
@@ -927,6 +957,9 @@ function ZO_TradingHouseManager:OnSearchCooldownUpdate(cooldownMilliseconds)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdatePagingButtons()
     self:UpdateSortHeaders()
+    if self.requestListings then
+        self:TryRequestListings()
+    end
 end
 
 function ZO_TradingHouseManager:UpdateForGuildChange()
@@ -989,7 +1022,7 @@ local function SetupTradingHouseItemDialog(dialogControl, itemInfoFn, slotIndex,
     costLabelStringId = costLabelStringFunction(currencyType)
     local costControl = dialogControl:GetNamedChild("Cost")
     costControl:SetHidden(costLabelStringId == nil)
-    if(costLabelStringId) then
+    if costLabelStringId then
         costControl:SetText(zo_strformat(costLabelStringId, ZO_CurrencyControl_FormatCurrency(purchasePrice)))
     end
 end
@@ -1040,7 +1073,7 @@ local function PurchaseItemDialogInitialize(dialogControl, tradingHouseManager)
 end
 
 function ZO_TradingHouseManager:ConfirmPendingPurchase(pendingPurchaseIndex)
-    if(not self.m_purchaseDialog) then
+    if not self.m_purchaseDialog then
         self.m_purchaseDialog = ZO_TradingHousePurchaseItemDialog
         PurchaseItemDialogInitialize(self.m_purchaseDialog, self)
     end
@@ -1084,7 +1117,7 @@ local function PurchaseGuildSpecificItemDialogInitialize(dialogControl, tradingH
 end
 
 function ZO_TradingHouseManager:ConfirmPendingGuildSpecificPurchase(guildSpecificItemIndex)
-    if(not self.m_purchaseGuildSpecificDialog) then
+    if not self.m_purchaseGuildSpecificDialog then
         self.m_purchaseGuildSpecificDialog = ZO_TradingHousePurchaseItemDialog
         PurchaseGuildSpecificItemDialogInitialize(self.m_purchaseGuildSpecificDialog, self)
     end
@@ -1143,7 +1176,7 @@ local function CancelListingDialogInitialize(dialogControl, tradingHouseManager)
 end
 
 function ZO_TradingHouseManager:ShowCancelListingConfirmation(listingIndex)
-    if(not self.m_cancelListingDialog) then
+    if not self.m_cancelListingDialog then
         self.m_cancelListingDialog = ZO_TradingHouseCancelListingDialog
         CancelListingDialogInitialize(self.m_cancelListingDialog, self)
     end
@@ -1157,11 +1190,11 @@ end
 --]]
 
 function ZO_TradingHouseManager:CanBuyItem(inventorySlot)
-    if(not self:IsAtTradingHouse()) then
+    if not self:IsAtTradingHouse() then
         return false
     end
 
-    if(inventorySlot.sellerName == self.m_currentDisplayName) then
+    if inventorySlot.sellerName == self.m_currentDisplayName then
         return false
     end
 
@@ -1169,7 +1202,7 @@ function ZO_TradingHouseManager:CanBuyItem(inventorySlot)
 end
 
 function ZO_TradingHouseManager:VerifyBuyItemAndShowErrors(inventorySlot)
-    if(inventorySlot.purchasePrice > self.m_playerMoney[inventorySlot.currencyType]) then
+    if inventorySlot.purchasePrice > self.m_playerMoney[inventorySlot.currencyType] then
         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, SOUNDS.PLAYER_ACTION_INSUFFICIENT_GOLD, SI_TRADING_HOUSE_ERROR_NOT_ENOUGH_GOLD)
         return false
     end
@@ -1201,16 +1234,16 @@ end
 local function SetPostPriceCallback(moneyInput, gold, eventType)
     local tradingHouse = moneyInput:GetContext()
 
-    if(eventType == "confirm") then
+    if eventType == "confirm" then
         tradingHouse:SetPendingPostPrice(gold)
         tradingHouse.m_invoiceSellPrice:SetHidden(false)
-    elseif(eventType == "cancel") then
+    elseif eventType == "cancel" then
         tradingHouse.m_invoiceSellPrice:SetHidden(false)
     end
 end
 
 function ZO_TradingHouseManager:BeginSetPendingPostPrice(anchorTo)
-    if(self:HasValidPendingItemPost()) then
+    if self:HasValidPendingItemPost() then
         self.m_invoiceSellPrice:SetHidden(true)
         CURRENCY_INPUT:SetContext(self)
         CURRENCY_INPUT:Show(SetPostPriceCallback, false, self:GetPendingPostPrice(), CURT_MONEY, anchorTo, 18)
@@ -1229,11 +1262,57 @@ function ZO_TradingHouseManager:AllowSearch()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_TradingHouse_Shared:InitializeFilterFactory(entry, filterFactory)
+function ZO_TradingHouseManager:InitializeFilterFactory(entry, filterFactory)
     entry.filterObject = filterFactory:New(self.m_browseItems)
 end
 
 --[[ Globals ]]--
+
+function ZO_TradingHouse_OnSearchResultClicked(searchResultSlot, button)
+    -- left button for an inventory slot click will only try and drag and drop, but that
+    -- should be handled for us by the OnReceiveDrag handler, so if we left click
+    -- we'll do our custom behavior
+    if button ~= MOUSE_BUTTON_INDEX_LEFT then
+        ZO_InventorySlot_OnSlotClicked(searchResultSlot, button)
+    else
+        local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(searchResultSlot)
+
+        local cursor = MOUSE_CURSOR_DO_NOT_CARE
+        local slotType = ZO_InventorySlot_GetType(inventorySlot)
+        if slotType == SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT then
+            local tradingHouseIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+            local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
+            local itemType = GetItemLinkItemType(itemLink)
+            if itemType == ITEMTYPE_FURNISHING then
+                TRADING_HOUSE:PreviewSearchResult(tradingHouseIndex)
+            end
+        end
+    end
+end
+
+function ZO_TradingHouse_OnSearchResultMouseEnter(searchResultSlot)
+    ZO_InventorySlot_OnMouseEnter(searchResultSlot)
+
+    local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(searchResultSlot)
+
+    local cursor = MOUSE_CURSOR_DO_NOT_CARE
+    local slotType = ZO_InventorySlot_GetType(inventorySlot)
+    if slotType == SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT then
+        local tradingHouseIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+        local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
+        local itemType = GetItemLinkItemType(itemLink)
+        if itemType == ITEMTYPE_FURNISHING then
+            cursor = MOUSE_CURSOR_PREVIEW
+        end
+    end
+
+    WINDOW_MANAGER:SetMouseCursor(cursor)
+end
+
+function ZO_TradingHouse_OnSearchResultMouseExit(searchResultSlot)
+    ZO_InventorySlot_OnMouseExit(searchResultSlot)
+    WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+end
 
 function ZO_TradingHouse_OnInitialized(self)
     TRADING_HOUSE = ZO_TradingHouseManager:New(self)

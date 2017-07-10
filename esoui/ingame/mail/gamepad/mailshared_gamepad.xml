@@ -2,7 +2,6 @@
     <Controls>
         <Label name="ZO_Mail_Gamepad_Label" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true" />
         <Label name="ZO_Mail_Gamepad_Value" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
-        <Label name="ZO_Mail_Gamepad_ValueBackground" inherits="ZO_MailInbox_Gamepad_Value" virtual="true" />
 
         <Button name="ZO_MailAttachmentSlot_Gamepad" inherits="ZO_InventorySlot_Gamepad" virtual="true">
             <Dimensions x="55" y="55" />

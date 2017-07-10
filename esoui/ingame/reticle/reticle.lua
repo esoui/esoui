@@ -53,7 +53,6 @@ do
         self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function(event, ...) self:SetupReticle(...) end)
         self.control:RegisterForEvent(EVENT_IMPACTFUL_HIT, function(event, ...) self:OnImpactfulHit(...) end)
         self.control:RegisterForEvent(EVENT_NO_INTERACT_TARGET, function(event, ...) PlaySound(SOUNDS.NO_INTERACT_TARGET) end)
-        self.control:RegisterForEvent(EVENT_RETICLE_TARGET_CHANGED, function(event, ...) self:OnReticleTargetChanged(...) end)    
      
         local hideUnbound = false
         self.interactKeybindButton:SetKeybind("GAME_CAMERA_INTERACT", hideUnbound, "GAMEPAD_JUMP_OR_INTERACT")
@@ -82,22 +81,33 @@ function ZO_Reticle:OnDisguiseStateChanged(newState)
     self.stealthIcon:OnDisguiseStateChanged(newState)
 end
 
-function ZO_Reticle:OnReticleTargetChanged()
-    self:ClearStealingItemTimestamp()
-end
+-- Used for tutorials that are only shown after hovering on an appropriate target for a certain amount of time
+-- Currently used by STOLEN_ITEM_TARGETED, OWNED_LOCK_VIEWED, and LIVESTOCK_TARGETED
+local TUTORIAL_HOVER_TIME_SECONDS = 0.75
 
-local STEALING_TUTORIAL_SHOWN_AFTER_SECONDS = 1.5
+function ZO_Reticle:HandleDelayedTutorial(tutorialType, currentFrameTimeSeconds)
+    if not self.delayedTutorialType then
+        if tutorialType ~= TUTORIAL_TYPE_NONE then
+            -- We've reticled over something, from nothing
+            self.delayedTutorialType = tutorialType
+            self.delayedTutorialTimestampSeconds = currentFrameTimeSeconds        
+        end
+    else
+        if self.delayedTutorialType ~= tutorialType then
+            if tutorialType == TUTORIAL_TYPE_NONE then
+                -- We've reticled over nothing, from something 
+                self.delayedTutorialType = nil
+                self.delayedTutorialTimestampSeconds = nil
+            else
+                -- We've reticled over something, from something else
+                self.delayedTutorialType = tutorialType
+                self.delayedTutorialTimestampSeconds = currentFrameTimeSeconds        
+            end
+        end
+    end
 
-function ZO_Reticle:ClearStealingItemTimestamp()
-    self.stealingItemTimestampSeconds = nil
-end
-
-function ZO_Reticle:TryHandlingStealingTutorial(currentFrameTimeSeconds)
-    if self.stealingItemTimestampSeconds == nil then
-        self.stealingItemTimestampSeconds = currentFrameTimeSeconds
-    elseif currentFrameTimeSeconds - self.stealingItemTimestampSeconds >= STEALING_TUTORIAL_SHOWN_AFTER_SECONDS then
-        TriggerTutorial(TUTORIAL_TRIGGER_STOLEN_ITEM_TARGETED)
-        self.stealingItemTimestampSeconds = nil
+    if self.delayedTutorialTimestampSeconds and self.delayedTutorialType and currentFrameTimeSeconds - self.delayedTutorialTimestampSeconds >= TUTORIAL_HOVER_TIME_SECONDS then
+        TriggerTutorial(self.delayedTutorialType)
     end
 end
 
@@ -127,36 +137,18 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
         local additionalInfoLabelColor = ZO_CONTRAST_TEXT
         self.interactKeybindButton:ShowKeyIcon()
 
-        local isOwnedOrCriminalInteract = isOwned or isCriminalInteract
-
         if action and interactableName then
+            if isOwned or isCriminalInteract then
+                interactKeybindButtonColor = ZO_ERROR_COLOR
+            end
+
             if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET, action))
-
-                local isStealingPossible = false
-                if (isOwnedOrCriminalInteract) then 
-                    interactKeybindButtonColor = ZO_ERROR_COLOR
-
-                    if isOwned and additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE then
-                        -- Assuming that the only INSTANCE_TYPE owned interactables are doors and that everything else is pilferable...
-                        self:TryHandlingStealingTutorial(currentFrameTimeSeconds)
-                        isStealingPossible = true
-                    end
-                end
-
-                if not isStealingPossible then
-                    self:ClearStealingItemTimestamp()
-                end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_EMPTY then
                 self.interactKeybindButton:SetText(zo_strformat(SI_FORMAT_BULLET_TEXT, GetString(SI_GAME_CAMERA_ACTION_EMPTY)))
                 self.interactKeybindButton:HideKeyIcon()
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_LOCKED then
-                local lockQuality = context
-                self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO, action, GetString("SI_LOCKQUALITY", lockQuality)))
-                if (isOwnedOrCriminalInteract) then 
-                    TriggerTutorial(TUTORIAL_TRIGGER_OWNED_LOCK_VIEWED)
-                    interactKeybindButtonColor = ZO_ERROR_COLOR
-                end
+                self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO, action, GetString("SI_LOCKQUALITY", context)))
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_FISHING_NODE then
                 self.additionalInfo:SetHidden(false)
                 self.additionalInfo:SetText(GetString(SI_HOLD_TO_SELECT_BAIT))
@@ -311,6 +303,8 @@ function ZO_Reticle:OnUpdate(currentFrameTimeSeconds)
     end
 
     self:UpdateInteractText(currentFrameTimeSeconds)
+
+    self:HandleDelayedTutorial(GetGameCameraTargetHoverTutorial(), currentFrameTimeSeconds)
 end
 
 function ZO_Reticle:RequestHidden(hidden)

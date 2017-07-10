@@ -27,13 +27,6 @@
             <Textures mouseOver="" pressedMouseOver="" />
         </Button>
 
-        <Texture name="ZO_SmithingListHighlight" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha=".35" virtual="true">
-            <Dimensions x="128" y="128" />
-            <OnInitialized>
-                self.pulseAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("SmithingHorizontalScrollListPulse", self)
-            </OnInitialized>
-        </Texture>
-
         <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
             <Dimensions x="500" y="125" />
 

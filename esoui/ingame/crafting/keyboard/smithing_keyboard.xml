@@ -1,9 +1,5 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_SmithingPatternLabel" font="ZoFontWinH3" inherits="ZO_SelectableLabel" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
-            <Dimensions y="70" />
-        </Label>
-
         <TopLevelControl name="ZO_SmithingTopLevel" hidden="true">
             <AnchorFill />
 

@@ -3,6 +3,7 @@ ZO_CROWN_CRATES_ANIMATION_MANUAL_GEMIFY_SET = "manualGemifySet"
 ZO_MANUAL_GEMIFY_SET_SWING_DURATION = 300
 ZO_MANUAL_GEMIFY_SET_SWING_START_MAGNITUDE_DEGREES = 8
 ZO_MANUAL_GEMIFY_SET_SWING_END_MAGNITUDE_DEGREES = 1
+ZO_GEMIFY_CARD_PITCH_OFFSET_DEGREES = 170
 
 --Card
 
@@ -16,7 +17,8 @@ function ZO_CrownGemificationCard:Initialize(...)
     ZO_CrownCratesCard.Initialize(self, ...)
 
     for _, textureControl in ipairs(self.textureControls) do
-        textureControl:SetTextureCoords(ZO_CROWN_CRATES_CARD_LEFT_COORD, ZO_CROWN_CRATES_CARD_RIGHT_COORD, ZO_CROWN_CRATES_CARD_TOP_COORD, ZO_CROWN_CRATES_CARD_BOTTOM_COORD)
+        -- use the same logic as in ZO_CrownCratesCard:RefreshTextureCoords() to lineup the effect with the texture
+        textureControl:SetTextureCoords(ZO_CROWN_CRATES_CARD_LEFT_COORD, ZO_CROWN_CRATES_CARD_RIGHT_COORD, ZO_CROWN_CRATES_CARD_BOTTOM_COORD, ZO_CROWN_CRATES_CARD_TOP_COORD)
     end
 
     self.cardTextureControl:SetAlpha(1)
@@ -38,7 +40,7 @@ function ZO_ManualGemifySwing_OnUpdate(animation, progress)
     local control = animation:GetAnimatedControl()
     local waveValue = -1 * math.sin(progress * math.pi)
     local magnitudeValue = zo_lerp(ZO_MANUAL_GEMIFY_SET_SWING_START_MAGNITUDE_DEGREES, ZO_MANUAL_GEMIFY_SET_SWING_END_MAGNITUDE_DEGREES, progress)
-    control:Set3DRenderSpaceOrientation(math.rad(waveValue * magnitudeValue), 0, 0)
+    control:Set3DRenderSpaceOrientation(math.rad(waveValue * magnitudeValue + ZO_GEMIFY_CARD_PITCH_OFFSET_DEGREES), 0, 0)
 end
 
 function ZO_CrownGemificationCard:SetGemifiable(gemifiable)
@@ -72,7 +74,6 @@ end
 function ZO_CrownGemificationCard:Refresh3DCardPosition()
     local cameraPlaneMetrics = self.owner:GetCameraPlaneMetrics()
     self.control:Set3DRenderSpaceOrigin(0, 0, cameraPlaneMetrics.depthFromCamera)
-    self.control:Set3DRenderSpaceOrientation(math.rad(10), 0, 0)
 end
 
 function ZO_CrownGemificationCard:Refresh2DCardPosition()

@@ -56,7 +56,6 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.triggerKeybinds, self.list)
 
     local function SelectionChangedCallback(list, selectedData)
-        local selectedControl = list:GetTargetControl()
         if self.selectedDataCallback then
             self.selectedDataCallback(list, selectedData)
         end

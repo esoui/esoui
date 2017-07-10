@@ -41,7 +41,8 @@
             </Controls>
         </Label>      
 
-        <Control name="ZO_Gamepad_InfoBar" virtual="true" inherits="ZO_GamepadGrid_Nav1Anchors">
+        <Control name="ZO_Gamepad_InfoBar" virtual="true">
+            <Dimensions x="480" />
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" offsetY="217" />
             <Controls>
                 <Texture name="$(parent)TopRail" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDivider.dds">
@@ -55,39 +56,6 @@
                     <Anchor point="BOTTOMLEFT" offsetY="22" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-60" offsetY="14" />
                 </Texture>
-            </Controls>
-        </Control>
-
-        <Label name="ZO_Gamepad_InfoBarHeaderTemplate" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_Gamepad_InfoBar" offsetY="-61"/>
-        </Label>
-        
-        <Control name="ZO_Gamepad_Nav7Background" virtual="true" >
-            <Anchor point="TOPLEFT" />
-            <Anchor point="BOTTOMRIGHT" />
-            <Controls>
-                <Scroll name="$(parent)TempBg">
-                    <AnchorFill />
-                    <FadeGradient x1="0" y1="1" size1="75" x2="0" y2="-1" size2="75" />
-
-                    <Controls>
-                        <Texture color="DD000000">
-                            <AnchorFill />
-                        </Texture>
-
-                        <Texture color="AAFFFFFF">
-                            <Dimensions x="2" />
-                            <Anchor point="TOPLEFT" offsetX="2"/>
-                            <Anchor point="BOTTOMLEFT" offsetX="2" />
-                        </Texture>
-
-                        <Texture color="AAFFFFFF">
-                            <Dimensions x="2" />
-                            <Anchor point="TOPRIGHT" offsetX="-2" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-2" />
-                        </Texture>
-                    </Controls>
-                </Scroll>
             </Controls>
         </Control>
 

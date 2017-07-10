@@ -9,10 +9,8 @@ end
 
 function ZO_InventoryItemImprovement_Gamepad:Initialize(control, title, sceneName, message, noItemMessage, confirmString, improvementSound, 
                                                         improvementKitPredicate, sortComparator)
-    self.isInitialized = false
     self.sceneName = sceneName
     self.message = message
-    self.noItemMessage = noItemMessage
     self.confirmString = confirmString
     self.improvementSound = improvementSound
     self.improvementKitPredicate = improvementKitPredicate
@@ -23,20 +21,18 @@ function ZO_InventoryItemImprovement_Gamepad:Initialize(control, title, sceneNam
         messageText = self.message
     }
 
-    self:SetupScene(OnStateChanged)
+    self:SetupScene()
 
-    local DONT_CREATE_TAB_BAR = false
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, DONT_CREATE_TABBAR, ACTIVATE_ON_SHOW, self:GetScene())
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, self:GetScene())
+
+    self.itemList = self:GetMainList()
+    self.itemList:SetNoItemText(noItemMessage)
 end
 
 function ZO_InventoryItemImprovement_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(
-            function() 
-                SCENE_MANAGER:HideCurrentScene()
-            end),
         {
             name = self.confirmString,
             keybind = "UI_SHORTCUT_PRIMARY",
@@ -49,31 +45,35 @@ function ZO_InventoryItemImprovement_Gamepad:InitializeKeybindStripDescriptors()
         }
     }
 
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.itemList)
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
-function ZO_InventoryItemImprovement_Gamepad:PerformDeferredInitialization()
-    if self.isInitialized then return end
-    
+function ZO_InventoryItemImprovement_Gamepad:OnDeferredInitialize()
     self.enumeratedList = {}
     self.currentEntrySubLabels = {}
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
-    self.isInitialized = true
+
+    self:SetListsUseTriggerKeybinds(true)
+end
+
+-- override of ZO_Gamepad_ParametricList_Screen:OnShowing
+function ZO_InventoryItemImprovement_Gamepad:OnShowing()
+    -- we're just going to update every time we show the scene instead of updating off of inventory events
+    self:PerformUpdate()
 end
 
 function ZO_InventoryItemImprovement_Gamepad:GetScene()
     return SCENE_MANAGER:GetScene(self.sceneName)
 end
 
+local function ItemSetupFunc(control, data, selected, ...)
+    control.selected = selected
+    ZO_SharedGamepadEntry_OnSetup(control, data, selected, ...)
+end
+
+-- Override of ZO_Gamepad_ParametricList_Screen:SetupList(list)
 function ZO_InventoryItemImprovement_Gamepad:SetupList(list)
-    local function ItemSetupFunc(control, data, selected, ...)
-        control.selected = selected
-        ZO_SharedGamepadEntry_OnSetup(control, data, selected, ...)
-    end
-    
     list:AddDataTemplate(self:GetItemTemplateName(), ItemSetupFunc)
-    self.itemList = list
-    self.itemList:SetNoItemText(self.noItemMessage)
 end
 
 function ZO_InventoryItemImprovement_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
@@ -150,10 +150,11 @@ function ZO_InventoryItemImprovement_Gamepad:UpdateList()
 end
 
 function ZO_InventoryItemImprovement_Gamepad:PerformUpdate()
-    self:PerformDeferredInitialization()
     self:ClearTooltip()
     self:ResetTooltipToDefault()
     self:UpdateList()
+
+    self.dirty = false
 end
 
 function ZO_InventoryItemImprovement_Gamepad:ImproveItem()

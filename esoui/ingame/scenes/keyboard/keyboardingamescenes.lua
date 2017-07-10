@@ -138,6 +138,7 @@ TRADING_HOUSE_SCENE:AddFragment(TRADING_HOUSE_FRAGMENT)
 TRADING_HOUSE_SCENE:AddFragment(BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT)
 TRADING_HOUSE_SCENE:AddFragment(TRADING_HOUSE_WINDOW_SOUNDS)
 TRADING_HOUSE_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+TRADING_HOUSE_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 
 ----------------
 --Interact Scene
@@ -582,6 +583,7 @@ furnitureBrowserScene:AddFragment(HOUSING_FURNITURE_BROWSER_MENU_FRAGMENT)
 furnitureBrowserScene:AddFragment(HOUSING_FURNITURE_BROWSER_TITLE_FRAGMENT)
 furnitureBrowserScene:AddFragment(FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 furnitureBrowserScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+furnitureBrowserScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 
 -------------------------------
 -- Dye Stamp Confirmation Scene
@@ -639,7 +641,6 @@ bankScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
 bankScene:AddFragment(BANK_MENU_FRAGMENT)
 bankScene:AddFragment(BANK_WINDOW_SOUNDS)
 bankScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
-bankScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED))
 
 -------------------
 --Guild Bank Scene

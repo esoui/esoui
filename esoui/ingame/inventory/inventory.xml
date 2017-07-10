@@ -42,6 +42,22 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_StatusSortHeader" inherits="ZO_SortHeaderIcon" virtual="true">
+            <Dimensions x="16" y="32" />
+            <Anchor point="LEFT" offsetX="8"/>
+            <OnInitialized>
+                ZO_PlayerInventory_InitSortHeaderIcon(self,
+                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
+                "statusSortOrder",
+                ZO_SORT_ORDER_DOWN)
+
+                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
+            </OnInitialized>
+        </Control>
+
         <!-- Player Inventory -->
 
         <TopLevelControl name="ZO_PlayerInventory" mouseEnabled="true" hidden="true" allowBringToTop="false">
@@ -65,21 +81,7 @@
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
                     <Controls>
-                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
-                            <Dimensions x="16" y="32" />
-                            <Anchor point="LEFT" offsetX="8"/>
-                            <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeaderIcon(self,
-                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
-                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
-                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
-                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
-                                "statusSortOrder",
-                                ZO_SORT_ORDER_DOWN)
-
-                                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
-                            </OnInitialized>
-                        </Control>
+                        <Control name="$(parent)New" inherits="ZO_StatusSortHeader" />
                         <Control name="$(parent)Name" inherits="ZO_SortHeader">
                             <Dimensions x="241" y="20" />
                             <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="88" />
@@ -154,6 +156,21 @@
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
                     <Controls>
+                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
+                            <Dimensions x="16" y="32" />
+                            <Anchor point="LEFT" offsetX="8"/>
+                            <OnInitialized>
+                                ZO_PlayerInventory_InitSortHeaderIcon(self,
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                                "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
+                                "statusSortOrder",
+                                ZO_SORT_ORDER_DOWN)
+
+                                ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_STATUS), BOTTOMRIGHT, 0, 32)
+                            </OnInitialized>
+                        </Control>
                         <Control name="$(parent)Name" inherits="ZO_SortHeader">
                             <Dimensions x="280" y="20" />
                             <Anchor point="LEFT" offsetX="73" />
@@ -197,78 +214,56 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_PlayerBankDepositWithdrawGold" inherits="ZO_CustomDialogBase">
+        <TopLevelControl name="ZO_PlayerBankDepositWithdrawCurrency" inherits="ZO_CustomDialogBase" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" font="ZoFontGame"/>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20" />
 
-                <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
-                    <Dimensions x="115"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="18" />
-                </Backdrop>
+                    <Controls>
+                        <Control name="$(parent)Headers" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                            <ResizeToFitPadding height="10" />
+                            
+                            <Controls>
+                                <Label name="$(parent)Banked" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_BANK_CURRENCY_AMOUNT_BANKED_HEADER">
+                                    <Anchor point="TOPRIGHT" offsetY="7" />
+                                </Label>
 
-                <Label name="$(parent)CarriedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DepositWithdrawCurrency" relativePoint="BOTTOMRIGHT" offsetX="18" offsetY="28" />
-                </Label>
+                                <Label name="$(parent)Carried" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_BANK_CURRENCY_AMOUNT_CARRIED_HEADER">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Banked" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                                </Label>
 
-                <Label name="$(parent)BankedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CarriedCurrency" relativePoint="BOTTOMRIGHT" offsetY="16" />
-                </Label>
+                                <Label name="$(parent)WithdrawDeposit" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Carried" relativePoint="BOTTOMRIGHT" offsetY="32" />
+                                </Label>
+                            </Controls>
+                        </Control>
 
-                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
-                <Control name="$(parent)DepositWithdraw" inherits="ZO_CustomDialogButton"/>
-            </Controls>
-        </TopLevelControl>
+                        <Control name="$(parent)Amounts">
+                            <Dimensions x="200" y="70" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="TOPRIGHT" offsetX="10" />
+                            
+                            <Controls>
+                                <Label name="$(parent)Banked" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                    <Anchor point="TOPRIGHT" offsetX="-22" offsetY="7" />
+                                </Label>
 
-        <TopLevelControl name="ZO_PlayerBankDepositWithdrawCurrency" inherits="ZO_CustomDialogBase">
-            <Controls>
-                <Button name="$(parent)GoldButton" mouseOverBlendMode="ADD" inherits="ZO_RadioButton">
-                    <Dimensions x="48" y="48" />
-                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="15"/>
-                    <Textures
-                        normal="EsoUI/Art/Bank/bank_tabIcon_gold_up.dds"
-                        pressed="EsoUI/Art/Bank/bank_tabIcon_gold_down.dds"
-                        mouseOver="EsoUI/Art/Bank/bank_tabIcon_gold_over.dds"
-                    />
-                </Button>
-                <Button name="$(parent)TelvarButton" mouseOverBlendMode="ADD" inherits="ZO_RadioButton">
-                    <Dimensions x="48" y="48" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)GoldButton" relativePoint="LEFT" offsetX="-5" />
-                    <Textures
-                        normal="EsoUI/Art/Bank/bank_tabIcon_telvar_up.dds"
-                        pressed="EsoUI/Art/Bank/bank_tabIcon_telvar_down.dds"
-                        mouseOver="EsoUI/Art/Bank/bank_tabIcon_telvar_over.dds"
-                    />
-                </Button>
-                <Label name="$(parent)Title" override="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)TelvarButton" relativePoint="LEFT" offsetX="-180" />
-                </Label>
+                                <Label name="$(parent)Carried" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Banked" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                                </Label>
 
-                <Texture name="$(parent)Divider" excludeFromResizeToFitExtents="false" override="true">
-                    <Dimensions x="550" y="8"/>
-                    <Anchor point="TOP" offsetY="72" />
-                    <TextureCoords left="0.1328125" right="0.8671875" top="0" bottom="1" />
-                </Texture>
-
-                <Label name="$(parent)CarriedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="5" />
-                </Label>
-
-                <Label name="$(parent)BankedCurrency" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5" />
-                </Label>
-
-                <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
-                    <Dimensions x="180"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="75"/>
-                </Backdrop>
-
-                <Label name="$(parent)BankingFee" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DepositWithdrawCurrency" relativePoint="BOTTOMRIGHT" offsetX="18" offsetY="5" />
-                </Label>
-
-                <Label name="$(parent)MinDeposit" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BankingFee" relativePoint="BOTTOMRIGHT" />
-                </Label>
+                                <Control name="$(parent)ComboBox" inherits="ZO_ComboBox" hidden="true">
+                                    <AnchorFill />
+                                </Control>
+                            </Controls>
+                        </Control>
+                        
+                        <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMRIGHT" offsetX="-39" offsetY="20" />
+                        </Backdrop>
+                    </Controls>
+                </Control>
 
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)DepositWithdraw" inherits="ZO_CustomDialogButton"/>

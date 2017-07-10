@@ -243,9 +243,9 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
     self.noSolventOrReagentsLabel = control:GetNamedChild("NoSolventOrReagentsLabel")
 
     local function IngredientSortOrder(bagId, slotIndex)
-        local itemType, _, requiredLevel, requiredVetRank = select(2, GetItemCraftingInfo(bagId, slotIndex))
-        if requiredVetRank then
-            requiredLevel = requiredLevel + requiredVetRank
+        local itemType, _, requiredLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(bagId, slotIndex))
+        if requiredChampionPoints then
+            requiredLevel = requiredLevel + requiredChampionPoints
         end
 
         if itemType == ITEMTYPE_POISON_BASE then
@@ -264,7 +264,7 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
         self:CreateNewTabFilterData(nil, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
     }
 
-    self:SetSortColumnHidden({ stackSellPrice = true }, true)
+    self:SetSortColumnHidden({ stackSellPrice = true, statusSortOrder = true }, true)
 end
 
 function ZO_AlchemyInventory:IsLocked(bagId, slotIndex)

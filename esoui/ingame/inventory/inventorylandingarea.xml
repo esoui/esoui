@@ -9,18 +9,10 @@
             </OnReceiveDrag>
 
             <OnMouseUp>
-                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
                     ZO_InventoryLandingArea_DropCursor(self)
                 end
             </OnMouseUp>
-
-            <OnMouseEnter>
-                ZO_InventoryLandingArea_ShowHintTooltip(self)
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                ZO_InventoryLandingArea_HideHintTooltip(self)
-            </OnMouseExit>
 
             <Controls>
                 <Backdrop name="$(parent)BG" hidden="true">
@@ -31,11 +23,6 @@
 
                     <Insets left="4" top="4" right="-4" bottom="-4" />
                 </Backdrop>
-
-                <Label name="$(parent)HintText" hidden="true" font="ZoFontGame" horizontalAlignment="CENTER" verticalAlignment="CENTER">
-                    <Anchor point="TOPLEFT" offsetX="8" offsetY="8"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-8" offsetY="-8"/>
-                </Label>
             </Controls>
         </Control>
     </Controls>

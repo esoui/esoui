@@ -744,6 +744,10 @@ ESO_Dialogs["MAIL_RETURN_ATTACHMENTS"] =
 
 ESO_Dialogs["TOO_FREQUENT_BUG_SCREENSHOT"] = 
 {
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
     mainText = 
     {
         text = SI_TOO_FREQUENT_BUG_SCREENSHOT,
@@ -1493,36 +1497,133 @@ ESO_Dialogs["CONFIRM_CLEAR_MAIL_COMPOSE"] =
     },
 }
 
-ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
-{
-    canQueue = true,
-	gamepadInfo =
+do
+    local function GetImproveWarningText(data)
+        if data.chance == 100 then
+            return ""
+        else
+            return zo_strformat(SI_SMITHING_IMPROVE_ITEM_WARNING, GetItemLink(data.bagId, data.slotIndex))
+        end
+    end
+
+    ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
     {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_SMITHING_IMPROVE_ITEM_TITLE,
-    },
-    mainText =
-    {
-        text = SI_SMITHING_IMPROVE_ITEM_CONFIRM,
-    },
-    buttons =
-    {
-        [1] =
+        canQueue = true,
+	    gamepadInfo =
         {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
-            end,
+            dialogType = GAMEPAD_DIALOGS.BASIC,
         },
-        [2] =
+        title =
         {
-            text = SI_DIALOG_CANCEL,
+            text = SI_SMITHING_IMPROVE_ITEM_TITLE,
         },
-    },
-}
+        mainText =
+        {
+            text = SI_SMITHING_IMPROVE_ITEM_CONFIRM,
+        },
+        warning =
+        {
+            text = function(dialog)
+                return GetImproveWarningText(dialog.data)
+            end
+        },
+        buttons =
+        {
+            [1] =
+            {
+                text = SI_DIALOG_ACCEPT,
+                callback = function(dialog)
+                    ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
+                end,
+            },
+            [2] =
+            {
+                text = SI_DIALOG_CANCEL,
+            },
+        },
+    }
+
+    ESO_Dialogs["CONFIRM_IMPROVE_LOCKED_ITEM"] =
+    {
+        canQueue = true,
+        title =
+        {
+            text = SI_SMITHING_IMPROVE_ITEM_TITLE,
+        },
+        mainText =
+        {
+            text = SI_SMITHING_IMPROVE_LOCKED_ITEM_CONFIRM,
+        },
+        editBox =
+        {       
+	        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+        },
+        warning =
+        {
+            text = function(dialog)
+                return GetImproveWarningText(dialog.data)
+            end
+        },
+        buttons =
+        {
+            [1] =
+            {
+                requiresTextInput = true,
+                text = SI_DIALOG_ACCEPT,
+                callback = function(dialog)
+                    local data = dialog.data
+                    local confirmAction = ZO_Dialogs_GetEditBoxText(dialog)
+				    local compareString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+				    if confirmAction and confirmAction == compareString then
+                        ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
+                    end
+                end,
+            },
+            [2] =
+            {
+                text = SI_DIALOG_CANCEL,
+            },
+        },
+    }
+
+    ESO_Dialogs["GAMEPAD_CONFIRM_IMPROVE_LOCKED_ITEM"] =
+    {
+        canQueue = true,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_SMITHING_IMPROVE_ITEM_TITLE,
+        },
+        mainText =
+        {
+            text = SI_GAMEPAD_CRAFTING_CONFIRM_IMPROVE_LOCKED_ITEM,
+        },
+        warning =
+        {
+            text = function(dialog)
+                return GetImproveWarningText(dialog.data)
+            end
+        },
+        buttons =
+        {
+            [1] =
+            {
+                onShowCooldown = 2000,
+                text = SI_DIALOG_ACCEPT,
+                callback = function(dialog)
+                    ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
+                end,
+            },
+            [2] =
+            {
+                text = SI_DIALOG_CANCEL,
+            },
+        },
+    }
+end
 
 ESO_Dialogs["CONFIRM_CONVERT_STYLE"] =
 {
@@ -2595,12 +2696,35 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_TICKET_FAILED_REASON"] =
     }
 }
 
+ESO_Dialogs["HELP_CUSTOMER_SERVICE_GAMEPAD_SUBMITTING_TICKET"] =
+{
+    setup = function(dialog)
+        dialog:setupFunc()
+    end,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.COOLDOWN,
+        allowShowOnNextScene = true,
+    },
+    showLoadingIcon = true,
+    canQueue = true,
+    title =
+    {
+        text = GetString(SI_CUSTOMER_SERVICE_SUBMITTING_TICKET),
+    },
+    loading =
+    {
+        text = GetString(SI_CUSTOMER_SERVICE_SUBMITTING),
+    },
+}
+
 ESO_Dialogs["HELP_CUSTOMER_SERVICE_GAMEPAD_TICKET_SUBMITTED"] =
 {
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
+    canQueue = true,
     title =
     {
         text = SI_GAMEPAD_HELP_TICKET_SUBMITTED_DIALOG_HEADER,
@@ -2620,6 +2744,33 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_GAMEPAD_TICKET_SUBMITTED"] =
         },
     },
 }
+
+ESO_Dialogs["HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    mustChoose = true,
+    title =
+    {
+        text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_CONFIRMATION),
+    },
+    mainText =
+    {
+        text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBMIT_CONFIRMATION), 
+    },
+       
+    buttons =
+    {
+        {
+            keybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_EXIT,
+        },
+    },
+}
+
 
 ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] = 
 {
@@ -3060,11 +3211,11 @@ ESO_Dialogs["CONFIRM_MODIFY_TRADE_BOP"] =
     },
     title =
     {
-        text = SI_DAILOG_TRADE_BOP_BINDING_ITEM_TITLE,
+        text = SI_DIALOG_CONFIRM_BINDING_ITEM_TITLE,
     },
     mainText =
     {
-        text = SI_DAILOG_TRADE_BOP_MODIFYING_ITEM_BODY,
+        text = SI_DIALOG_TRADE_BOP_MODIFYING_ITEM_BODY,
     },
     buttons =
     {
@@ -3081,7 +3232,7 @@ ESO_Dialogs["CONFIRM_MODIFY_TRADE_BOP"] =
     },
 }
 
-ESO_Dialogs["CONFIRM_EQUIP_TRADE_BOP"] =
+ESO_Dialogs["CONFIRM_EQUIP_ITEM"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -3090,11 +3241,11 @@ ESO_Dialogs["CONFIRM_EQUIP_TRADE_BOP"] =
     },
     title =
     {
-        text = SI_DAILOG_TRADE_BOP_BINDING_ITEM_TITLE,
+        text = SI_DIALOG_CONFIRM_BINDING_ITEM_TITLE,
     },
     mainText =
     {
-        text = SI_DAILOG_TRADE_BOP_EQUIPPING_ITEM_BODY,
+        text = SI_DIALOG_CONFIRM_EQUIPPING_ITEM_BODY,
     },
     buttons =
     {
@@ -3379,6 +3530,51 @@ ESO_Dialogs["CONFIRM_LEAVE_BATTLEGROUND"] =
     }
 }
 
+ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_DESCRIPTION,
+    },
+    editBox =
+    {       
+	    matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    },
+    warning = 
+    {
+        text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_WARNING
+    },
+    buttons =
+    {
+        [1] =
+        {
+            requiresTextInput = true,
+            text =      SI_YES,
+            callback =  function(dialog)
+                            local data = dialog.data
+                            local confirmAction = ZO_Dialogs_GetEditBoxText(dialog)
+							local compareString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+							if confirmAction and confirmAction == compareString then
+                                CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
+                            end
+                        end,
+        },
+        [2] =
+        {
+            text =      SI_NO,
+        }
+    }
+}
+
 ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
 {
     canQueue = true,
@@ -3430,4 +3626,69 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             dialogData.expirationCallback()
         end
     end,
+}
+
+ESO_Dialogs["CONFIRM_ENCHANT_LOCKED_ITEM"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_DESCRIPTION,
+    },
+    editBox =
+    {       
+	    matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    },
+    buttons =
+    {
+        [1] =
+        {
+            requiresTextInput = true,
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                local data = dialog.data
+                data.onAcceptCallback()
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    }
+}
+
+ESO_Dialogs["GAMEPAD_CONFIRM_ENCHANT_LOCKED_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_GAMEPAD_ENCHANTING_CONFIRM_ENCHANT_LOCKED_ITEM,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            onShowCooldown = 2000,
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.onAcceptCallback()
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
 }

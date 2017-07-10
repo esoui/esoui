@@ -268,7 +268,7 @@ function SkillBarType:New(barTypeId, ...)
 end
 
 function SkillBarType:Initialize(barTypeClass, barTypeId, skillType, skillIndex, ...)
-    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, ...)
+    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, skillType, skillIndex, ...)
     self.skillType = skillType
     self.skillIndex = skillIndex
     self:SetBarGradient(ZO_SKILL_XP_BAR_GRADIENT_COLORS)

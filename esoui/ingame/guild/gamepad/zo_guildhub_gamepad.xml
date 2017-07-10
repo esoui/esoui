@@ -2,10 +2,6 @@
     <Controls>
         <Label name="ZO_GamepadGuildHubText" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Label name="ZO_GamepadGuildHubHighlightText" font="ZoFontGamepad34" virtual="true"/>
-        <Control name="AllianceSelectorListItemRulerTemplate" virtual="true">
-            <Anchor point="TOPLEFT" />
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75"/>
-        </Control>
 
         <TopLevelControl name="ZO_GamepadGuildHubTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>

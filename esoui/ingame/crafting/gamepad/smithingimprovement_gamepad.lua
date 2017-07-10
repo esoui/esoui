@@ -52,9 +52,14 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
     self:InitializeInventory()
     self:InitializeKeybindStripDescriptors()
 
+    local ADDITIONAL_OVERBINDS = nil
+    local DONT_USE_KEYBIND_STRIP = false
+    self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT, ADDITIONAL_OVERBINDS, DONT_USE_KEYBIND_STRIP)
+
     -- set up inventory keybinds and tooltips
     self.inventory.list:SetOnSelectedDataChangedCallback(function(list, selectedData)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
             self.tooltip.tip:ClearLines()
             self.tooltip.tip:LayoutBagItem(selectedData.bagId, selectedData.slotIndex)
@@ -133,7 +138,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             end
 
             -- used to update extraction slot UI with text / etc., PC does this as well
-            self:RemoveItemFromWorkbench()
+            self:RemoveItemFromCraft()
 
             if self.selectedItem then
                 self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
@@ -141,6 +146,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             self.owner:SetEnableSkillBar(true)
         elseif newState == SCENE_HIDDEN then
+            self.itemActions:SetInventorySlot(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
             self:SetInventoryActive(false)
@@ -173,7 +179,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
         if SCENE_MANAGER:IsShowing("gamepad_smithing_improvement") then
-            self:RemoveItemFromWorkbench()
+            self:RemoveItemFromCraft()
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             self:SetInventoryActive(true)
 
@@ -198,7 +204,7 @@ function ZO_GamepadSmithingImprovement:ChangeMode(mode)
     -- used to update improvement slot UI with text / etc., PC does this as well
     -- note that on gamepad this gives a possibly unwanted side effect of losing the active item when switching filters
     if not GAMEPAD_CRAFTING_RESULTS:IsCraftInProgress() then
-        self:RemoveItemFromWorkbench()
+        self:RemoveItemFromCraft()
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -257,7 +263,7 @@ end
 
 function ZO_GamepadSmithingImprovement:InitializeInventory()
     self.inventoryControl = self.panelControl:GetNamedChild("Inventory")
-    self.inventory = ZO_GamepadImprovementInventory:New(self, self.inventoryControl)
+    self.inventory = ZO_GamepadImprovementInventory:New(self, self.inventoryControl, SLOT_TYPE_CRAFTING_COMPONENT)
 end
 
 function ZO_GamepadSmithingImprovement:IsCurrentSelected()
@@ -287,9 +293,11 @@ function ZO_GamepadSmithingImprovement:UpdateSelection()
     self.inventory:PerformFullRefresh()
 end
 
-function ZO_GamepadSmithingImprovement:AddItemToWorkbench()
-    local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
-    self:AddItemToCraft(bagId, slotIndex)
+function ZO_GamepadSmithingImprovement:AddItemToCraft(bagId, slotIndex)
+    ZO_SharedSmithingImprovement.AddItemToCraft(self, bagId, slotIndex)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
@@ -310,7 +318,13 @@ function ZO_GamepadSmithingImprovement:AddItemToWorkbench()
     end
 end
 
-function ZO_GamepadSmithingImprovement:RemoveItemFromWorkbench()
+function ZO_GamepadSmithingImprovement:RemoveItemFromCraft()
+    ZO_SharedSmithingImprovement.RemoveItemFromCraft(self)
+
+     -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+
     self:SetImprovementSlotItem(nil)
     self:UpdateSelection()
 
@@ -370,7 +384,7 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
                 if self:IsCurrentSelected() then
-                    self:RemoveItemFromWorkbench()
+                    self:RemoveItemFromCraft()
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
                 else
                     SCENE_MANAGER:HideCurrentScene()
@@ -389,7 +403,7 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and not self:IsCurrentSelected() end,
             callback = function() 
-                self:AddItemToWorkbench()
+                self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
         },
@@ -404,6 +418,18 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
             callback = function() self:ConfirmImprove() end,
 
             visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() and self:CanImprove() end,
+        },
+
+        -- Item Options
+        {
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                self:ShowItemActions()
+            end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:CurrentSelection() ~= nil
+            end
         },
     }
 
@@ -468,7 +494,7 @@ function ZO_GamepadSmithingImprovement:OnSlotChanged()
 end
 
 function ZO_GamepadSmithingImprovement:Improve()
-    self:SharedImprove("CONFIRM_IMPROVE_ITEM")
+    self:SharedImprove()
 end
 
 function ZO_GamepadSmithingImprovement:HighlightBoosterRow(rowToHighlight)
@@ -537,6 +563,31 @@ function ZO_GamepadSmithingImprovement:SetInventoryActive(active)
     end
 end
 
+function ZO_GamepadSmithingImprovement:AddKeybinds()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingImprovement:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingImprovement:ShowItemActions()
+    self:RemoveKeybinds()
+
+    local function OnActionsFinishedCallback()
+        self:AddKeybinds()
+    end
+
+    local dialogData = 
+    {
+        targetData = self.inventory:CurrentSelection(),
+        finishedCallback = OnActionsFinishedCallback,
+        itemActions = self.itemActions,
+    }
+
+    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
+end
+
 do
     local QUALITY_TEXTURES = {
         [ITEM_QUALITY_NORMAL] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_normal2fine.dds",
@@ -573,6 +624,7 @@ function ZO_GamepadImprovementInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.noItemsLabel = control.noItemsLabel
     self.filterType = ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
+    self:SetCustomSort(function(bagId, slotIndex) return bagId end) -- sort equipped items (BAG_WORN) to the top of the list
 end
 
 function ZO_GamepadImprovementInventory:GetCurrentFilterType()
@@ -580,8 +632,9 @@ function ZO_GamepadImprovementInventory:GetCurrentFilterType()
 end
 
 function ZO_GamepadImprovementInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data)
-    self.owner:OnInventoryUpdate(validItemIds)
+    local USE_WORN_BAG = true
+    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+    self.owner:OnInventoryUpdate(validItems)
 
     self.noItemsLabel:SetHidden(#data > 0)
 

@@ -1,13 +1,17 @@
+local CURRENCY_ICON_SIZE = 24
+
 local function LogPurchaseClose(dialog)
-    if not dialog.info.dontLogClose then
-        if dialog.info.logPurchasedMarketId then
-            OnMarketEndPurchase(dialog.data.marketProductId)
-        else
-            OnMarketEndPurchase()
+    if dialog.data then
+        if not dialog.data.dontLogClose then
+            if dialog.data.logPurchasedMarketId then
+                OnMarketEndPurchase(dialog.data.marketProductId)
+            else
+                OnMarketEndPurchase()
+            end
         end
+        dialog.data.dontLogClose = false
+        dialog.data.logPurchasedMarketId = false
     end
-    dialog.info.dontLogClose = false
-    dialog.info.logPurchasedMarketId = false
 end
 
 ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] = 
@@ -27,7 +31,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
         {
             text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
             callback =  function(dialog)
-                            dialog.info.dontLogClose = true
+                            dialog.data.dontLogClose = true
                             -- the MARKET_PURCHASE_CONFIRMATION dialog will be queued to show once this one is hidden
                             ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", dialog.data)
                         end,
@@ -87,7 +91,50 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT"] =
     },
 }
 
-local CURRENCY_ICON_SIZE = 24
+ESO_Dialogs["MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION"] =
+{
+    finishedCallback = LogPurchaseClose,
+    title =
+    {
+        text = SI_MARKET_PURCHASE_FREE_TRIAL_TITLE
+    },
+    mainText =
+    {
+        text =  function(dialog)
+                    local endTimeString = GetMarketProductEndTimeString(dialog.data.marketProductId)
+                    local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(UI_ONLY_CURRENCY_CROWNS, CURRENCY_ICON_SIZE)
+                    return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
+                end,
+    },
+    canQueue = true,
+    buttons =
+    {
+        {
+            text = SI_MARKET_CONFIRM_PURCHASE_LABEL,
+            callback =  function(dialog)
+                            dialog.data.logPurchasedMarketId = true
+                            local marketProductId = dialog.data.marketProductId
+                            local presentationIndex = dialog.data.presentationIndex
+
+                            local name, description, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
+                            local productQuality = GetMarketProductQuality(marketProductId)
+
+                            -- set this up for the MARKET_PURCHASING dialog
+                            local color = GetItemQualityColor(productQuality)
+                            local productName = color:Colorize(name)
+                            local hasItems = GetMarketProductNumItems(marketProductId) > 0 -- TODO: Consider consumable specific check
+                            -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
+                            ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = productName, hasItems = hasItems, marketProductId = marketProductId, presentationIndex = presentationIndex})
+                            BuyMarketProduct(marketProductId, presentationIndex)
+                        end,
+        },
+
+        {
+            text = SI_DIALOG_DECLINE,
+        },
+    }
+}
+
 local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     local marketProductId = data.marketProductId
     local presentationIndex = data.presentationIndex
@@ -146,7 +193,7 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
                     control =   self:GetNamedChild("Confirm"),
                     text =      SI_MARKET_CONFIRM_PURCHASE_LABEL,
                     callback =  function(dialog)
-                                    dialog.info.logPurchasedMarketId = true
+                                    dialog.data.logPurchasedMarketId = true
                                     local marketProductId = dialog.data.marketProductId
                                     local presentationIndex = dialog.data.presentationIndex
                                     -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
@@ -173,8 +220,8 @@ local function OnMarketPurchaseResult(data, result, tutorialTrigger)
     end
 end
 
-local TRANSACTION_COMPLETE_TITLE_TEXT = { text = SI_MARKET_PURCHASING_COMPLETE_TITLE }
-local TRANSACTION_FAILED_TITLE_TEXT = { text = SI_MARKET_PURCHASING_FAILED_TITLE }
+local TRANSACTION_COMPLETE_TITLE_TEXT = { text = GetString(SI_MARKET_PURCHASING_COMPLETE_TITLE) }
+local TRANSACTION_FAILED_TITLE_TEXT = { text = GetString(SI_MARKET_PURCHASING_FAILED_TITLE) }
 local g_transactionCompleteMainText = {text = "", align = TEXT_ALIGN_CENTER }
 local LOADING_DELAY = 500 -- delay is in milliseconds
 local SHOW_LOADING_ICON = true
@@ -206,6 +253,9 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                 enableUseProductButton = not useProductInfo.enabled or useProductInfo.enabled()
                 g_transactionCompleteMainText.text = zo_strformat(useProductInfo.transactionCompleteText, dialog.data.itemName, stackCount)
                 useProductControl:SetText(useProductInfo.buttonText)
+                if useProductInfo.transactionCompleteTitleText then
+                    titleText = { text = useProductInfo.transactionCompleteTitleText }
+                end
             else
                 if stackCount > 1 then
                     g_transactionCompleteMainText.text = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, dialog.data.itemName, stackCount)

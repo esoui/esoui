@@ -9,9 +9,6 @@
         </AnimationTimeline>
 
         <AnimationTimeline name="GamepadLoadingCompleteAnimation">
-            <OnPlay>
-                SharedLoadingCompleteAnimation_OnPlay(self)
-            </OnPlay>
             <OnStop>
                 SharedLoadingCompleteAnimation_OnStop(self)
             </OnStop>

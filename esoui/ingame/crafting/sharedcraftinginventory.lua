@@ -110,6 +110,23 @@ function ZO_SharedCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(pr
     return nil
 end
 
+assert(7 == BAG_MAX_VALUE) -- if you add a new bag, check to see if you need to add it to crafting inventories
+
+ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN = 
+{
+    BAG_BACKPACK, BAG_BANK, BAG_SUBSCRIBER_BANK, BAG_WORN
+}
+
+ZO_ALL_CRAFTING_INVENTORY_BAGS_WITHOUT_WORN = 
+{
+    BAG_BACKPACK, BAG_BANK, BAG_SUBSCRIBER_BANK
+}
+
+function ZO_SharedCraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data, useWornBag)
+    -- intended to be overwritten
+    return nil
+end
+
 function ZO_SharedCraftingInventory:GetStackCount(bagId, slotIndex)
     local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
     return self.itemCounts[itemInstanceId] or 0

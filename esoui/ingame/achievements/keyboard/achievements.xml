@@ -205,7 +205,7 @@
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_AchievementPopup" hidden="true" clampedToScreen="true" movable="true" mouseEnabled="true">
+        <TopLevelControl name="ZO_AchievementPopup" hidden="true" clampedToScreen="true" movable="true" mouseEnabled="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS">
             <Dimensions x="565" y="88" />
             <Anchor point="CENTER" />
             <Controls>

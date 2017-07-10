@@ -348,8 +348,7 @@ function ZO_MurderballObjectiveStateIndicator:Reset()
 end
 
 function ZO_MurderballObjectiveStateIndicator:ShouldShow()
-    local holdingAlliance = GetCarryableObjectiveHoldingAllianceInfo(self:GetObjectiveIds())
-    return holdingAlliance ~= ALLIANCE_NONE
+    return true
 end
 
 function ZO_MurderballObjectiveStateIndicator.Matches(keepId, objectiveId, battlegroundContext)

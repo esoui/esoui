@@ -1,0 +1,135 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ColorPicker_Keyboard_TopLevel" inherits="ZO_ColorPicker_Shared ZO_CustomDialogBase">
+            <Dimensions x="512" y="256" />
+            <Anchor point="CENTER" offsetY="-45" />
+
+            <OnInitialized>
+                ZO_ColorPicker_Keyboard_TopLevel_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Content" override="true" inherits="ZO_DialogContentAnchors">
+                    <Controls>
+                        <ColorSelect name="$(parent)ColorSelect" override="true" mouseEnabled="true">
+                            <Anchor point="TOP" />
+                            <Dimensions x="128" y="128" />
+
+                            <Controls>
+                                <Texture name="$(parent)Thumb" override="true" textureFile="EsoUI/Art/Miscellaneous/colorPicker_pip.dds">
+                                    <Dimensions x="32" y="32" />
+                                </Texture>
+                            </Controls>
+                        </ColorSelect>
+
+                        <Control name="$(parent)Preview">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)ColorSelect" relativePoint="LEFT" offsetX="-25" />
+
+                            <Controls>
+                                <Texture name="$(parent)Border" textureFile="EsoUI/Art/Miscellaneous/colorPicker_swatchFrame.dds">
+                                    <Anchor point="CENTER"/>
+                                    <Dimensions x="64" y="64" />
+                                </Texture>
+
+                                <Texture name="$(parent)TextureTop" layer="OVERLAY">
+                                    <Anchor point="TOP" offsetY="3" />
+                                    <Dimensions x="58" y="29" />
+                                </Texture>
+                                <Label name="$(parent)TopLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_NEW">
+                                    <Anchor point="BOTTOM" relativeTo="$(parent)TextureTop" relativePoint="TOP" offsetY="-5" />
+                                </Label>
+
+                                <Texture name="$(parent)TextureBottom" layer="OVERLAY">
+                                    <Anchor point="BOTTOM" offsetY="-3" />
+                                    <Dimensions x="58" y="29" />
+                                </Texture>
+                                <Label name="$(parent)BottomLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_CURRENT">
+                                    <Anchor point="TOP" relativeTo="$(parent)TextureBottom" relativePoint="BOTTOM" offsetY="5" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                        
+                        <Slider name="$(parent)Value" override="true" dragFromThumb="false" tier="HIGH" mouseEnabled="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)ColorSelect" relativePoint="RIGHT" offsetX="35" />
+                            <Dimensions x="22" y="122" />
+                            <Limits min="0" max="1"/>
+
+                            <ThumbTexture
+                                textureFile="EsoUI/Art/Miscellaneous/colorPicker_slider_vertical.dds"
+                                thumbWidth="64"
+                                thumbHeight="32"
+                                flushWithSliderExtents="false"
+                            />
+
+                            <Controls>
+                                <Texture name="$(parent)Texture">
+                                    <Dimensions x="22" y="128" />
+                                    <Anchor point="CENTER" />
+                                </Texture>
+                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Miscellaneous/colorPicker_sliderFrame.dds">
+                                    <TextureCoords left="0" right="0.6875" top="0" bottom="1" />
+                                    <Dimensions x="22" y="128" />
+                                    <Anchor point="CENTER" />
+                                </Texture>
+                            </Controls>
+                        </Slider>
+
+                        <Slider name="$(parent)Alpha" override="true" dragFromThumb="false" tier="HIGH" orientation="HORIZONTAL" mouseEnabled="true">
+                            <Dimensions x="122" y="22" />
+                            <Limits min="0" max="1"/>
+
+                            <ThumbTexture
+                                textureFile="EsoUI/Art/Miscellaneous/colorPicker_slider_vertical.dds"
+                                thumbWidth="64"
+                                thumbHeight="32"
+                                flushWithSliderExtents="false"
+                            />
+
+                            <Controls>
+                                <Texture name="$(parent)Texture">
+                                    <Dimensions x="128" y="22" />
+                                    <Anchor point="CENTER" />
+                                </Texture>
+                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Miscellaneous/colorPicker_sliderFrame.dds">
+                                    <TextureCoords left="0" right="0.6875" top="0" bottom="1" />
+                                    <Dimensions x="22" y="128" />
+                                    <Anchor point="CENTER" />
+                                    <OnInitialized>
+                                        self:SetTextureRotation(math.pi / 2)
+                                    </OnInitialized>
+                                </Texture>
+                            </Controls>
+                        </Slider>
+                        
+                        <Label name="$(parent)AlphaLabel" override="true" font="ZoFontWinH4"/>
+
+                        <Control name="$(parent)Spinners" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOM" />
+                            <Controls>
+                                <Control name="$(parent)Red" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" />
+                                </Control>
+
+                                <Control name="$(parent)Green" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Red" relativePoint="RIGHT" offsetX="10" />
+                                </Control>
+
+                                <Control name="$(parent)Blue" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Green" relativePoint="RIGHT" offsetX="10" />
+                                </Control>
+
+                                <Control name="$(parent)Alpha" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Blue" relativePoint="RIGHT" offsetX="10" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

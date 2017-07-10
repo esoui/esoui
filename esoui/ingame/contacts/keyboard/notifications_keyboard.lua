@@ -38,16 +38,22 @@ end
 function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybind)
     ClearMenu()
 
+    local function IgnorePlayer()
+        if not IsIgnored(data.displayName) then
+            AddIgnore(data.displayName)
+        end
+    end
+
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_DECLINE), function()
                                                                 RejectFriendRequest(data.displayName)
                                                                 PlaySound(SOUNDS.DIALOG_DECLINE)
                                                              end)
-    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER), function()
-                                                                    AddIgnore(data.displayName)
-                                                                    PlaySound(SOUNDS.DEFAULT_CLICK)
-                                                                   end)
+    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER),  function()
+                                                                        IgnorePlayer()
+                                                                        PlaySound(SOUNDS.DEFAULT_CLICK)
+                                                                    end)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
-                                                                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
+                                                                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
                                                                     end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
@@ -76,10 +82,17 @@ end
 function ZO_KeyboardGuildInviteProvider:Decline(data, button, openedFromKeybind)
     ClearMenu()
 
+    local function IgnorePlayer()
+        if not IsIgnored(data.displayName) then
+            AddIgnore(data.displayName)
+        end
+    end
+
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_DECLINE), function() RejectGuildInvite(data.guildId) end)
-    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER), function() AddIgnore(data.displayName) end)
+    AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_IGNORE_PLAYER), IgnorePlayer)
     AddMenuItem(GetString(SI_NOTIFICATIONS_REQUEST_REPORT_SPAMMING), function()
-                                                                        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER)
+                                                                        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(data.displayName, IgnorePlayer)
+                                                                        RejectGuildInvite(data.guildId)
                                                                     end)
 
     if(openedFromKeybind == NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND) then
@@ -211,9 +224,8 @@ function ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(notificationManager)
 end
 
 function ZO_KeyboardEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
-    local helpCategoryIndex, helpIndex = GetEsoPlusSubscriptionInfoHelpIndices()
-    if helpCategoryIndex ~= nil then
-        HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+    if entryData.moreInfo then
+        HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
     end
 end
 

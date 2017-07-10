@@ -49,6 +49,22 @@ function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
            or currentSceneName == "crownCrateGamepad" or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
 end
 
+function ZO_LootHistory_Gamepad:GetCraftBagIcon()
+    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds"
+end
+
+function ZO_LootHistory_Gamepad:GetStolenIcon()
+    return "EsoUI/Art/Inventory/GamePad/gp_inventory_icon_stolenItem.dds"
+end
+
+function ZO_LootHistory_Gamepad:GetCraftBagHighlight()
+    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds"
+end
+
+function ZO_LootHistory_Gamepad:GetStolenHighlight()
+    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight_stolen.dds"
+end
+
 function ZO_LootHistory_Gamepad_OnInitialized(control)
     LOOT_HISTORY_GAMEPAD = ZO_LootHistory_Gamepad:New(control)
     SYSTEMS:RegisterGamepadObject(ZO_LOOT_HISTORY_NAME, LOOT_HISTORY_GAMEPAD)

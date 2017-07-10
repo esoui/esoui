@@ -1,0 +1,113 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ColorPicker_Gamepad_TopLevel" resizeToFitDescendents="true" inherits="ZO_CustomCenteredGamepadDialogTemplate ZO_ColorPicker_Shared">
+            <OnInitialized>
+                ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(self)
+                ZO_ColorPicker_Gamepad_TopLevel_OnInitialized(self)
+            </OnInitialized>
+            <ResizeToFitPadding width="40" height="72" />
+
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGamepad42" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="38"/>
+                    <Dimensions x="560"/>
+                </Label>
+
+                <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="60"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="-60" offsetY="30" />
+                </Control>
+
+                <Control name="$(parent)Content" override="true">
+                    <Dimensions x="420"/>
+                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="30"/>
+                    <Controls>
+                        <Control name="$(parent)Preview">
+                            <Anchor point="TOPLEFT" offsetY="60"/>
+
+                            <Controls>
+                                <Backdrop name="$(parent)Border" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true"/>
+                                    
+                                <Texture name="$(parent)TextureTop" layer="OVERLAY">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Dimensions x="94" y="46" />
+                                </Texture>
+                                <Label name="$(parent)TopLabel" font="ZoFontGamepad25" excludeFromResizeToFitExtents="true" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_NEW">
+                                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-5" />
+                                </Label>
+
+                                <Texture name="$(parent)TextureBottom" layer="OVERLAY">
+                                    <Dimensions x="94" y="46" />
+                                </Texture>
+                                <Label name="$(parent)BottomLabel" font="ZoFontGamepad25" excludeFromResizeToFitExtents="true" modifyTextType="UPPERCASE" text="SI_COLOR_PICKER_CURRENT">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="5" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                            
+                        <ColorSelect name="$(parent)ColorSelect" override="true" mouseEnabled="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)Preview" relativePoint="RIGHT" offsetX="40"/>
+                            <Dimensions x="204" y="204" />
+
+                            <Controls>
+                                <Texture name="$(parent)Thumb" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_colorPicker_pip.dds" override="true">
+                                    <Dimensions x="32" y="32" />
+                                </Texture>
+
+                                <Texture name="$(parent)Binding">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
+                                    <Dimensions x="64" y="64"/>
+                                </Texture>
+                            </Controls>
+                        </ColorSelect>
+
+                        <Slider name="$(parent)Value" override="true" dragFromThumb="false" tier="HIGH" mouseEnabled="true">
+                            <Anchor point="LEFT" relativeTo="$(parent)ColorSelect" relativePoint="RIGHT" offsetX="40"/>
+                            <Dimensions x="14" y="190" />
+                            <Limits min="0" max="1"/>
+
+                            <ThumbTexture
+                                textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_colorPicker_slider_vertical.dds"
+                                thumbWidth="64"
+                                thumbHeight="32"
+                                flushWithSliderExtents="false"
+                            />
+
+                            <Controls>
+                                <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop_Gamepad"/>
+                                <Texture name="$(parent)Texture" level="1">
+                                    <AnchorFill/>                                    
+                                </Texture>
+                                <Texture name="$(parent)Binding">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="16"/>
+                                    <Dimensions x="64" y="64"/>
+                                </Texture>
+                            </Controls>
+                        </Slider>
+
+                        <Slider name="$(parent)Alpha" override="true" dragFromThumb="false" tier="HIGH" orientation="HORIZONTAL" mouseEnabled="true">
+                            <Dimensions x="122" y="14" />
+                            <Limits min="0" max="1"/>
+
+                            <ThumbTexture
+                                textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_colorPicker_slider_vertical.dds"
+                                thumbWidth="64"
+                                thumbHeight="32"
+                                flushWithSliderExtents="false"
+                            />
+
+                            <Controls>
+                                <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop_Gamepad"/>
+                                <Texture name="$(parent)Texture" level="1">
+                                    <AnchorFill/>
+                                </Texture>
+                            </Controls>
+                        </Slider>
+
+                        <Label name="$(parent)AlphaLabel" override="true" font="ZoFontWinH4"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -70,11 +70,6 @@ function MailInbox:Initialize(control)
 end
 
 function MailInbox:InitializeKeybindDescriptors()
-    local function ReportAndDeleteCallback()
-        self:RecordSelectedMailAsReported()
-        self:Delete()
-    end
-
     self.selectionKeybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -150,7 +145,13 @@ function MailInbox:InitializeKeybindDescriptors()
             callback = function()
                 if(self.mailId) then
                     local senderDisplayName = GetMailSender(self.mailId)
-                    ZO_ReportPlayerDialog_Show(senderDisplayName, REPORT_PLAYER_REASON_MAIL_SPAM, nil, ReportAndDeleteCallback)
+                    local function ReportCallback()
+                        self:RecordSelectedMailAsReported()
+                        if not IsIgnored() then
+                            AddIgnore(senderDisplayName)
+                        end
+                    end
+                    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(senderDisplayName, ReportCallback)
                 end
             end,
         },
@@ -355,7 +356,7 @@ function MailInbox:TryTakeAll()
             self.pendingAcceptCOD = true
         else
             if attachedMoney > 0 then
-                if ((GetCarriedCurrencyAmount(CURT_MONEY) + attachedMoney) > MAX_PLAYER_MONEY) then
+                if ((GetCarriedCurrencyAmount(CURT_MONEY) + attachedMoney) > MAX_PLAYER_CURRENCY) then
                     ZO_AlertEvent(EVENT_UI_ERROR, SI_MONEY_ATTACHMENT_WILL_EXCEED_MAXIMUM)
                     return
                 end
@@ -392,7 +393,7 @@ end
 function MailInbox:ConfirmDelete(mailId)
     if not IsMailReturnable(mailId) then
         DeleteMail(mailId, true)
-		PlaySound(SOUNDS.MAIL_ITEM_DELETED)
+        PlaySound(SOUNDS.MAIL_ITEM_DELETED)
     end
 end
 

@@ -224,22 +224,6 @@
             </OnInitialized>
         </Button>
 
-        <Button name="ZO_BladeHeader" font="ZoFontGame" endCapWidth="22" verticalAlignment="CENTER" virtual="true">
-            <Dimensions x="200" y="28"/>
-            <PressedOffset x="2" y="2" />
-
-            <OnInitialized>
-                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_BLADE)
-            </OnInitialized>
-            
-            <FontColors
-                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
-                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
-                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
-                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
-            />
-        </Button>
-
         <Button name="ZO_TreeButtonArrow" virtual="true">
             <Dimensions x="32" y="32"/>
             <OnInitialized>
@@ -264,16 +248,6 @@
                 pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
                 mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
                 disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
-            />
-        </Button>
-
-        <Button name="ZO_SwitchButton" virtual="true">
-            <Dimensions x="32" y="32"/>
-            <Textures
-                normal="EsoUI/Art/Buttons/switch_up.dds"
-                pressed="EsoUI/Art/Buttons/switch_down.dds"
-                mouseOver="EsoUI/Art/Buttons/generic32x32MouseOver.dds"
-                disabled="EsoUI/Art/Buttons/switch_disabled.dds"
             />
         </Button>
 

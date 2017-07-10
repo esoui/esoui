@@ -442,7 +442,7 @@ function ZO_QuickslotManager:ApplySort()
 end
 
 function ZO_QuickslotManager:RefreshCurrency(value)
-    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, value, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, value, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
 end
 
 function ZO_QuickslotManager:ValidateOrClearAllQuickslots()

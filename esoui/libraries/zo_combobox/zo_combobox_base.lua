@@ -279,7 +279,12 @@ function ZO_ComboBox_Base:SetEnabled(enabled)
 end
 
 function ZO_ComboBox_Base:GetControl()
-	return self.m_container
+    return self.m_container
+end
+
+function ZO_ComboBox_Base:SetHorizontalAlignment(alignment)
+    self.horizontalAlignment = alignment
+    self.m_selectedItemText:SetHorizontalAlignment(alignment)
 end
 
 --[[

@@ -122,7 +122,7 @@
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
                     <Dimensions x="270" />
-                    <Anchor point="TOPLEFT" offsetX="77" offsetY="20" />
+                    <Anchor point="TOPLEFT" offsetX="93" offsetY="20" />
                 </Label>
 
                 <Label name="$(parent)Trait1" inherits="ZO_AlchemyIconTraitLabel" >

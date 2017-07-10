@@ -87,6 +87,10 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowEsoPlusPage()
     end
 
+    local function OnEsoPlusSubscriptionStatusChanged(eventId)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnEsoPlusSubscriptionStatusChanged()
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
@@ -97,6 +101,7 @@ function Market_Singleton:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_BUY_CROWNS_DIALOG, OnShowBuyCrownsDialog)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, OnEsoPlusSubscriptionStatusChanged)
 end
 
 function Market_Singleton:RequestOpenMarket()
@@ -279,7 +284,11 @@ end
 
 function ZO_Market_Shared:UpdateCurrentCategory()
     if self.currentCategoryData then
-        self:RefreshProducts()
+        if self.currentCategoryData.categoryIndex == ZO_MARKET_ESO_PLUS_CATEGORY_INDEX then
+            self:RefreshEsoPlusPage()
+        else
+            self:RefreshProducts()
+        end
     end
 end
 
@@ -314,8 +323,24 @@ function ZO_Market_Shared:OnShowEsoPlusPage()
     self:RequestShowCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX)
 end
 
+function ZO_Market_Shared:OnEsoPlusSubscriptionStatusChanged()
+    self:UpdateCurrentCategory()
+end
+
 function ZO_Market_Shared:OnShowBuyCrownsDialog()
     -- To be overridden
+end
+
+function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, targetMarketProductId)
+    SetOpenMarketSource(openSource)
+    if openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_PRODUCT or openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then
+        self:OnShowMarketProduct(targetMarketProductId)
+    elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_FEATURED_CATEGORY then
+        SCENE_MANAGER:Show("show_market")
+        self:RequestShowCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX)
+    elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY then
+        self:OnShowEsoPlusPage()
+    end
 end
 
 function ZO_Market_Shared:UpdateMarket(marketState)
@@ -531,6 +556,13 @@ do
         end,
     }
 
+    local ESO_PLUS =
+    {
+        transactionCompleteTitleText = GetString(SI_MARKET_PURCHASE_FREE_TRIAL_SUCCESS_TITLE_TEXT),
+        transactionCompleteText = GetString(SI_MARKET_PURCHASE_FREE_TRIAL_SUCCESS_TEXT),
+        visible = function() return false end,
+    }
+
     function ZO_Market_Shared.GetUseProductInfo(marketProductId)
         if DoesMarketProductContainServiceToken(marketProductId) then
             return SERVICE_TOKEN
@@ -564,6 +596,11 @@ do
                 }
 
                 return houseInfo
+            elseif marketProductType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
+                local instantUnlockType = GetMarketProductInstantUnlockType(marketProductId)
+                if instantUnlockType == MARKET_INSTANT_UNLOCK_ESO_PLUS then
+                    return ESO_PLUS
+                end
             end
         end
     end
@@ -770,6 +807,18 @@ function ZO_Market_Shared:UpdateMarketCurrencies()
     self:UpdateCrownGemBalance(GetPlayerCrownGems())
 end
 
+function ZO_Market_Shared:UpdateFreeTrialProduct()
+    self.hasFreeTrialProduct = false
+    -- check if there is an active eso plus product, but only grab the first one
+    self.freeTrialMarketProductId, self.freeTrialPresentationIndex = GetActiveMarketProductListingsForEsoPlus(MARKET_DISPLAY_GROUP_CROWN_STORE)
+    if self.freeTrialMarketProductId ~= nil and self.freeTrialMarketProductId > 0 then
+        local costAfterDiscount = select(4, GetMarketProductPricingByPresentation(self.freeTrialMarketProductId, self.freeTrialPresentationIndex))
+        self.hasFreeTrialProduct = costAfterDiscount == 0
+    end
+
+    self.shouldShowFreeTrial = not IsESOPlusSubscriber() and self.hasFreeTrialProduct
+end
+
 function ZO_Market_Shared.GetMarketProductPreviewType(marketProduct)
     if marketProduct then
         if marketProduct:IsBundle() then
@@ -873,6 +922,9 @@ end
 function ZO_Market_Shared:PurchaseMarketProduct(marketProductId, presentationIndex)
 end
 
+function ZO_Market_Shared:RefreshEsoPlusPage()
+end
+
 function ZO_Market_Shared:RemoveActionLayerForTutorial()
     assert(false) -- must be overridden
 end
@@ -907,8 +959,10 @@ end
 --[[Search]]--
 --------------
 function ZO_Market_Shared:SearchStart(searchString)
-    self.searchString = searchString
-    StartMarketProductSearch(MARKET_DISPLAY_GROUP_CROWN_STORE, searchString)
+    if searchString ~= self.searchString then
+        self.searchString = searchString
+        StartMarketProductSearch(MARKET_DISPLAY_GROUP_CROWN_STORE, searchString)
+    end
 end
 
 function ZO_Market_Shared:HasValidSearchString()

@@ -445,8 +445,10 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_BGPIN_FLAG_STORM_LORDS_AURA]                  = { level = 94, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flag_halo_purple.dds", tint = GetObjectiveAuraPinTint, insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_NEUTRAL]                           = { level = 93, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flag_pin_neutral.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_NEUTRAL_AURA]                      = { level = 92, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flag_halo_neutral.dds", tint = GetObjectiveAuraPinTint, insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MURDERBALL]                             = { level = 91, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderball.dds"},
-    [MAP_PIN_TYPE_BGPIN_MURDERBALL_AURA]                        = { level = 90, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderball_halo.dds", tint = GetObjectiveAuraPinTint},
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_NEUTRAL]                     = { level = 91, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderball_neutral.dds"},
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_FIRE_DRAKES]                 = { level = 91, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderball_orange.dds"},
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_PIT_DAEMONS]                 = { level = 91, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderball_green.dds"},
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_STORM_LORDS]                 = { level = 91, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderball_purple.dds"},
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_FIRE_DRAKES]               = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_pin_orange.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_PIT_DAEMONS]               = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_pin_green.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_STORM_LORDS]               = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_pin_purple.dds", insetX = 15, insetY = 11},
@@ -478,6 +480,7 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_PIT_DAEMONS]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_green.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_STORM_LORDS]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_purple.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_NEUTRAL]                     = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_neutral.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_SPAWN_NEUTRAL]               = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_murderballSpawn_pin_neutral.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_ARTIFACT_RETURN_ALDMERI]                      = { level = 80, texture = "EsoUI/Art/MapPins/AvA_flagBase_Aldmeri.dds"},
     [MAP_PIN_TYPE_ARTIFACT_RETURN_EBONHEART]                    = { level = 80, texture = "EsoUI/Art/MapPins/AvA_flagBase_Ebonheart.dds"},
     [MAP_PIN_TYPE_ARTIFACT_RETURN_DAGGERFALL]                   = { level = 80, texture = "EsoUI/Art/MapPins/AvA_flagBase_Daggerfall.dds"},
@@ -663,7 +666,10 @@ ZO_MapPin.OBJECTIVE_PIN_TYPES =
     [MAP_PIN_TYPE_BGPIN_FLAG_PIT_DAEMONS] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_STORM_LORDS] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_NEUTRAL] = true,
-    [MAP_PIN_TYPE_BGPIN_MURDERBALL] = true,
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_STORM_LORDS] = true,
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_AURA] = true,
@@ -671,7 +677,6 @@ ZO_MapPin.OBJECTIVE_PIN_TYPES =
     [MAP_PIN_TYPE_BGPIN_FLAG_FIRE_DRAKES_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_PIT_DAEMONS_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_STORM_LORDS_AURA] = true,
-    [MAP_PIN_TYPE_BGPIN_MURDERBALL_AURA] = true,
 }
 
 ZO_MapPin.SPAWN_OBJECTIVE_PIN_TYPES =
@@ -680,6 +685,7 @@ ZO_MapPin.SPAWN_OBJECTIVE_PIN_TYPES =
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_PIT_DAEMONS] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_STORM_LORDS] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_MURDERBALL_SPAWN_NEUTRAL] = true,
 }
 
 ZO_MapPin.RETURN_OBJECTIVE_PIN_TYPES =
@@ -1251,7 +1257,11 @@ do
         [MAP_PIN_TYPE_BGPIN_FLAG_RETURN_FIRE_DRAKES]                =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_FLAG_RETURN_PIT_DAEMONS]                =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_FLAG_RETURN_STORM_LORDS]                =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MURDERBALL]                             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MURDERBALL_NEUTRAL]                     =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MURDERBALL_FIRE_DRAKES]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MURDERBALL_PIT_DAEMONS]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MURDERBALL_STORM_LORDS]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MURDERBALL_SPAWN_NEUTRAL]               =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
     }
 end
 

@@ -152,18 +152,31 @@ function ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex)
     return ZO_SharedSmithingExtraction_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex))
 end
 
+function ZO_SharedSmithingExtraction_IsExtractableItem(itemData)
+    return ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem(itemData.bagId, itemData.slotIndex) and not IsItemPlayerLocked(itemData.bagId, itemData.slotIndex)
+end
+
+function ZO_SharedSmithingExtraction_IsRefinableItem(bagId, slotIndex)
+    return ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem(bagId, slotIndex)
+end
+
 function ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem(bagId, slotIndex)
-    return CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, GetCraftingInteractionType()) and not IsItemPlayerLocked(bagId, slotIndex)
+    return CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, GetCraftingInteractionType())
 end
 
 function ZO_SharedSmithingExtraction_DoesItemPassFilter(bagId, slotIndex, filterType)
-    return ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex) == filterType and not IsItemPlayerLocked(bagId, slotIndex)
+    return ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex) == filterType
 end
 
-function ZO_SharedSmithingExtraction:OnInventoryUpdate(validItemIds)
-    if not self.extractionSlot:ValidateItemId(validItemIds) then
-        self:OnSlotChanged()
+function ZO_SharedSmithingExtraction:OnInventoryUpdate(validItems, filterType)
+    -- since we use this class for both refinement and extraction, but the lists for each are generated in different ways
+    -- we need to branch our logic when dealing with those lists so that they can be handled properly
+    if filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+        self.extractionSlot:ValidateItemId(validItems)
+    else
+        self.extractionSlot:ValidateSlottedItem(validItems)
     end
+    self:OnSlotChanged()
 end
 
 function ZO_SharedSmithingExtraction:ShowAppropriateSlotDropCallouts()

@@ -1,5 +1,3 @@
-local GAMEPAD_SMITHING_CREATION_OPTIONS_SCENE_NAME = "gamepad_smithing_creation_options"
-
 local GAMEPAD_SMITHING_CREATION_OPTIONS_TEMPLATE = "ZO_CheckBoxTemplate_Gamepad"
 
 local GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS = 1
@@ -169,6 +167,9 @@ function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
 
     self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.resultTooltip = self.floatingControl:GetNamedChild("ResultTooltip")
+    self.resultTooltip.ClearLines = function(tooltip)
+                                            tooltip.tip:ClearLines()
+                                       end
 
     self:InitializeOptionList()
     self:SetupSavedVars()
@@ -343,7 +344,7 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
         name =  function()
-                    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(ZO_ADJUSTED_UNIVERSAL_STYLE_ITEM_INDEX)
+                    local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
                     local universalStyleItemCountString = zo_strformat(GetString(SI_GAMEPAD_SMITHING_UNIVERSAL_STYLE_ITEM_COUNT), universalStyleItemCount)
 
                     if universalStyleItemCount == 0 then
@@ -670,21 +671,8 @@ function ZO_GamepadSmithingCreation:RefreshFilters()
     end
 end
 
-function ZO_GamepadSmithingCreation:UpdateTooltipInternal()
-    if self:AreSelectionsValid() then
-        self.resultTooltip:SetHidden(false)
-        self.resultTooltip.tip:ClearLines()
-        self:SetupResultTooltip(self:GetAllCraftingParameters())
-    else
-        self.resultTooltip:SetHidden(true)
-    end
-end
-
-function ZO_GamepadSmithingCreation:SetupResultTooltip(selectedPatternIndex, selectedMaterialIndex, selectedMaterialQuantity, selectedStyleIndex, selectedTraitIndex)
-    -- The smithing style list starts at index 2, but the itemstyle enum starts at 1...kick this down to be in sync for proper tooltip style display
-    selectedStyleIndex = selectedStyleIndex - 1
-        
-    self.resultTooltip.tip:LayoutPendingSmithingItem(selectedPatternIndex, selectedMaterialIndex, selectedMaterialQuantity, selectedStyleIndex, selectedTraitIndex)
+function ZO_GamepadSmithingCreation:SetupResultTooltip(selectedPatternIndex, selectedMaterialIndex, selectedMaterialQuantity, selectedStyleId, selectedTraitIndex)
+    self.resultTooltip.tip:LayoutPendingSmithingItem(selectedPatternIndex, selectedMaterialIndex, selectedMaterialQuantity, selectedStyleId, selectedTraitIndex)
 end
 
 function ZO_GamepadSmithingCreation:ActivateMaterialQuantitySpinner()

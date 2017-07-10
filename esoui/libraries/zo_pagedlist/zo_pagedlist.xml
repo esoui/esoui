@@ -1,11 +1,10 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_PagedListLabelTemplate" font="ZoFontGamepadBold54" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" />
-        <Label name="ZO_PagedListValueTemplate" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER" virtual="true" />
+        <Label name="ZO_PagedListLabelTemplate" font="ZoFontGamepadBold48" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" />
         <Control name="ZO_PagedListFooterBar" virtual="true">
             <Dimensions y="64" />
-            <Anchor point="BOTTOMLEFT" offsetY="-20" />
-            <Anchor point="BOTTOMRIGHT" offsetY="-20" />
+            <Anchor point="BOTTOMLEFT" offsetY="-10" />
+            <Anchor point="BOTTOMRIGHT" offsetY="-10" />
             <Controls>
                 <Label name="$(parent)PageNumberText" inherits="ZO_PagedListLabelTemplate">
                     <Anchor point="CENTER" />

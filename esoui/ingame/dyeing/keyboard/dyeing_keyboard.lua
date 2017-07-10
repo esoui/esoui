@@ -45,7 +45,12 @@ function ZO_Dyeing:Initialize(control)
     DYEING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             MAIN_MENU_MANAGER:SetBlockingScene("dyeing", OnBlockingSceneActivated)
+
             TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
+            if IsESOPlusSubscriber() then
+                TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER)
+            end
+
             self:UpdateOptionControls()
 
             InitializePendingDyes(self.mode)

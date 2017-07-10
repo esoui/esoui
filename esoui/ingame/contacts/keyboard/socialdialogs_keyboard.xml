@@ -78,37 +78,6 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_ReportPlayerDialog" inherits="ZO_CustomDialogBase" hidden="true">
-            <OnInitialized>
-                ZO_ReportPlayerDialog_OnInitialized(self)
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)Header" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-                
-                <Control name="$(parent)ReportSpam" inherits="ZO_DialogButton">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="26" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="26" />
-                </Control>
-
-                <Label name="$(parent)SpamText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_DIALOG_TEXT_REPORT_PLAYER_FOR_SPAM">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ReportSpam" relativePoint="BOTTOMLEFT" offsetY="10" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ReportSpam" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                </Label>
-
-                <Control name="$(parent)OpenTicket" inherits="ZO_DialogButton">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SpamText" relativePoint="BOTTOMLEFT" offsetY="26" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SpamText" relativePoint="BOTTOMRIGHT" offsetY="26" />
-                </Control>
-
-                <Label name="$(parent)OpenTicketText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_DIALOG_TEXT_REPORT_PLAYER_OPEN_TICKET">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)OpenTicket" relativePoint="BOTTOMLEFT" offsetY="10" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OpenTicket" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                </Label>
-
-                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
-            </Controls>
-        </TopLevelControl>
-
         <TopLevelControl name="ZO_CreateGuildDialog" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_CreateGuildDialog_OnInitialized(self)

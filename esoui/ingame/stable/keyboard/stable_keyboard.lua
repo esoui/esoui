@@ -176,7 +176,7 @@ function ZO_Stable_Keyboard:UpdateMountInfo()
 end
 
 function ZO_Stable_Keyboard:UpdateStrips()
-    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, STABLE_MANAGER.currentMoney, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS, nil, not STABLE_MANAGER:CanAffordTraining())
+    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, STABLE_MANAGER.currentMoney, ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS, nil, not STABLE_MANAGER:CanAffordTraining())
 end
 
 function ZO_Stable_Keyboard:IsPreferredScreen()

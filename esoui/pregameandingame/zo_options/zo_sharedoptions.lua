@@ -81,6 +81,8 @@ function ZO_SharedOptions:InitializeControl(control, selected, isKeyboardControl
         GetControl(control, "Name"):SetText(text)
         ZO_Options_SetupSlider(control, selected)
     elseif controlType == OPTIONS_INVOKE_CALLBACK  then
+        ZO_Options_SetupInvokeCallback(control, selected, text)
+    elseif controlType == OPTIONS_COLOR then
         GetControl(control, "Name"):SetText(text)
     elseif controlType == OPTIONS_CUSTOM then
         if data.customSetupFunction then
@@ -93,12 +95,20 @@ function ZO_SharedOptions:InitializeControl(control, selected, isKeyboardControl
     end
 end
 
-function ZO_SharedOptions:IsControlTypeAnOption(data)
-	local controlType = self:GetControlType(data.controlType)
-    return controlType == OPTIONS_DROPDOWN
-			or controlType == OPTIONS_CHECKBOX
-			or controlType == OPTIONS_SLIDER
-			or controlType == OPTIONS_HORIZONTAL_SCROLL_LIST
+do
+    local OPTION_CONTROL_TYPES =
+    {
+        [OPTIONS_DROPDOWN] = true,
+        [OPTIONS_CHECKBOX] = true,
+        [OPTIONS_SLIDER] = true,
+        [OPTIONS_HORIZONTAL_SCROLL_LIST] = true,
+        [OPTIONS_COLOR] = true,
+    }
+
+    function ZO_SharedOptions:IsControlTypeAnOption(data)
+	    local controlType = self:GetControlType(data.controlType)
+        return OPTION_CONTROL_TYPES[controlType]
+    end
 end
 
 function ZO_SharedOptions:LoadDefaults(control, data) 
@@ -115,7 +125,7 @@ function ZO_SharedOptions:GetSettingsData(panel, system, settingId)
     return ZO_SharedOptions_SettingsData[panel][system][settingId]
 end
 
-function ZO_SharedOptions:AddTableToPanel(panel, table)
+function ZO_SharedOptions.AddTableToPanel(panel, table)
     for key, entry in pairs(table) do
         if(ZO_SharedOptions_SettingsData[panel] == nil) then
             ZO_SharedOptions_SettingsData[panel] = {}
@@ -124,7 +134,7 @@ function ZO_SharedOptions:AddTableToPanel(panel, table)
     end
 end
 
-function ZO_SharedOptions:AddTableToSystem(panel, system, table)
+function ZO_SharedOptions.AddTableToSystem(panel, system, table)
     for key, entry in pairs(table) do
         if(ZO_SharedOptions_SettingsData[panel] == nil) then
             ZO_SharedOptions_SettingsData[panel] = {}

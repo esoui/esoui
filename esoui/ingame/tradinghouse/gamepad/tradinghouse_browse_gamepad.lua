@@ -199,7 +199,7 @@ end
 function ZO_GamepadTradingHouse_Browse:FocusPriceSelector(selectedPriceAmountControl)
     if not self.selectedPriceAmountControl then
         self.priceSelector:SetClampValues(CLAMP_VALUES)
-        self.priceSelector:SetMaxValue(MAX_PLAYER_MONEY)
+        self.priceSelector:SetMaxValue(MAX_PLAYER_CURRENCY)
 
         if self.priceSelectorMode == MIN_PRICE_SELECTOR_MODE then
             self.priceSelector:SetValue(self.minPrice)
@@ -498,7 +498,7 @@ function ZO_GamepadTradingHouse_Browse:PerformDeferredInitialization()
     if self.isInitialized then return end
 
     self.minPrice = MIN_POSTING_AMOUNT
-    self.maxPrice = MAX_PLAYER_MONEY
+    self.maxPrice = MAX_PLAYER_CURRENCY
     self.minLevel = MINIMUM_PLAYER_LEVEL
     self.maxLevel = GetMaxLevel()
 
@@ -663,7 +663,7 @@ end
 
 function ZO_GamepadTradingHouse_Browse:ResetFilterValuesToDefaults()
     self:SetMinPriceAmount(MIN_POSTING_AMOUNT)
-    self:SetMaxPriceAmount(MAX_PLAYER_MONEY)
+    self:SetMaxPriceAmount(MAX_PLAYER_CURRENCY)
     self.validPrice = true
 
     -- If the slider control exists we update it directly which will in turn call ZO_GuildStoreBrowse_SliderOnValueChanged

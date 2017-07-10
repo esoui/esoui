@@ -1,58 +1,6 @@
 local HELP_CUSTOMER_SERVICE_INCOMPLETED_FIELDS_DIALOG = "HELP_CUSTOMER_SERVICE_INCOMPLETED_FIELDS_DIALOG"
 local lastSubmitTime = 0
 
-local HELP_SUBMIT_FEEDBACK_SUBCATEGORY =
-{
-	--Will Replace Subcategories With Enums--
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_ALLIANCE_WAR] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_ALLIANCE_WAR_GRAVEYARD,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_ALLIANCE_WAR_SIEGE,
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_AUDIO] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_AUDIO_MUSIC,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_AUDIO_OTHER,
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_CHARACTERS] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_CHARACTERS_ABILITIES,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_CHARACTERS_TARGETING,
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_COMBAT] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_COMBAT_ABILITY,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_COMBAT_NPC,
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_ITEMS] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_ITEMS_ARMOR,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_ITEMS_WEAPONS,
-		detailsTitle = GetString(SI_CUSTOMER_SERVICE_ITEM_NAME),
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_GAME_SYSTEM] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_GAME_SYSTEM_CHAT,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_GAME_SYSTEM_VENDOR,
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_GRAPHICS] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_GRAPHICS_ART_ANIMATION,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_GRAPHICS_WEATHER,
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_QUESTS] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_QUESTS_DIALOG_VOICEOVER,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_QUESTS_REWARDS,
-		detailsTitle = GetString(SI_CUSTOMER_SERVICE_QUEST_NAME),
-	},
-	[CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_TEXT] =
-	{
-		minValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_TEXT_DIALOG_VOICEOVER,
-		maxValue = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_TEXT_BOOKS,
-	},
-}
-
 local HelpSubmitFeedback_Keyboard = ZO_HelpScreenTemplate_Keyboard:Subclass()
 
 function HelpSubmitFeedback_Keyboard:New(...)
@@ -87,12 +35,11 @@ function HelpSubmitFeedback_Keyboard:Initialize(control)
 	self.helpCategoryComboBoxControl = self.helpScrollChild:GetNamedChild("CategoryComboBox")
 	self.helpSubcategoryComboBoxControl = self.helpScrollChild:GetNamedChild("SubcategoryComboBox")
 
-	control:RegisterForEvent(EVENT_CUSTOMER_SERVICE_FEEDBACK_SUBMITTED, function (...) self:OnCustomerServiceFeedbackSubmitted(...) end)
+    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceFeedbackSubmitted", function (...) self:OnCustomerServiceFeedbackSubmitted(...) end)
 
 	self:InitializeTextBox()
 	self:InitializeComboBoxes()
 	self:InitializeCheckButton()
-	self:InitializeDialogs()
 end
 
 function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
@@ -166,49 +113,30 @@ function HelpSubmitFeedback_Keyboard:InitializeCheckButton()
 	ZO_CheckButton_SetUnchecked(self.helpAttachScreenshotCheckButton)
 end
 
-function HelpSubmitFeedback_Keyboard:InitializeDialogs()
-	ZO_Dialogs_RegisterCustomDialog("HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG",
-	{
-		canQueue = true,
-        mustChoose = true,
-		title =
-		{
-			text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_CONFIRMATION),
-		},
-        mainText =
-        {
-			text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBMIT_CONFIRMATION), 
-        },
-       
-        buttons =
-        {
-			{
-				keybind = "DIALOG_NEGATIVE",
-				text = SI_DIALOG_EXIT,
-			},
-        },		
-	})
-end
-
 function HelpSubmitFeedback_Keyboard:UpdateSubcategories()
 	local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
 
 	self.helpSubcategoryComboBox:ClearItems()
 
-	self.subcategoryIndex = HELP_SUBMIT_FEEDBACK_SUBCATEGORY[categoryIndex]
+    local subcategoryData = ZO_HELP_SUBMIT_FEEDBACK_FIELD_DATA[ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY]
+    self.subcategoryContextualData = subcategoryData.categoryContextualData[categoryIndex]
 
-	if self.subcategoryIndex == nil then
+	if self.subcategoryContextualData == nil then
 		self:SetSubcategoryContentHidden(true)
 	else
 		self:SetSubcategoryContentHidden(false)
 
+        local function OnSubcategoryChanged()
+            self:UpdateSubmitButton()
+        end
+
 		--Add Select Subcategory Entry in the Subcategory Combo Box
-		local defaultEntry = ZO_ComboBox:CreateItemEntry(GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES",CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_NONE), OnImpactChanged)
+		local defaultEntry = ZO_ComboBox:CreateItemEntry(GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES",CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_NONE), OnSubcategoryChanged)
 		defaultEntry.index = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_NONE
 		self.helpSubcategoryComboBox:AddItem(defaultEntry, ZO_COMBOBOX_UPDATE_NOW)
 
-		for i = self.subcategoryIndex.minValue, self.subcategoryIndex.maxValue do
-			local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES",i), function() self:UpdateSubmitButton() end)
+		for i = self.subcategoryContextualData.minValue, self.subcategoryContextualData.maxValue do
+			local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES",i), OnSubcategoryChanged)
 			entry.index = i
 			self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
 		end
@@ -221,10 +149,10 @@ end
 function HelpSubmitFeedback_Keyboard:UpdateDetailsComponents()
 	self.details:SetText("")
 
-	if self.subcategoryIndex then
-		if self.subcategoryIndex.detailsTitle then
+	if self.subcategoryContextualData then
+		if self.subcategoryContextualData.detailsTitle then
 			self:SetDetailsContentHidden(false)
-			self.helpDetailsTitle:SetText(self.subcategoryIndex.detailsTitle)
+			self.helpDetailsTitle:SetText(self.subcategoryContextualData.detailsTitle)
 		else
 			self:SetDetailsContentHidden(true)
 		end
@@ -295,25 +223,11 @@ function HelpSubmitFeedback_Keyboard:AttemptToSendFeedback()
 		subcategoryId = self.helpSubcategoryComboBox:GetSelectedItemData().index
 	end
 
-    if attachScreenshot and (lastSubmitTime + 30000) > GetFrameTimeMilliseconds() then
-        ZO_Dialogs_ShowDialog("TOO_FREQUENT_BUG_SCREENSHOT")
-    else
-        ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
-        ReportFeedback(impactId, categoryId, subcategoryId, detailsText, descriptionText, attachScreenshot)
-        SCENE_MANAGER:ShowBaseScene()
-        lastSubmitTime = GetFrameTimeMilliseconds()
-    end
+    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:AttemptToSendFeedback(impactId, categoryId, subcategoryId, detailsText, descriptionText, attachScreenshot)
 end
 
 function HelpSubmitFeedback_Keyboard:OnCustomerServiceFeedbackSubmitted(eventCode, response, success)
-	ZO_Dialogs_ReleaseDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
-
-	if success then
-		ZO_Dialogs_ShowDialog("HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG", nil, {mainTextParams = {response}})
-	else
-		ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG", nil, {mainTextParams = {response}})
-	end
-	self:ClearFields()
+    self:ClearFields()
 end
 
 --Global XML

@@ -80,7 +80,7 @@ function ZO_Synergy:SetHidden(hidden)
 end
 
 function ZO_Synergy:IsVisible()
-    return not SHARED_INFORMATION_AREA:IsHidden(self)
+    return not SHARED_INFORMATION_AREA:IsHidden(self) and not SHARED_INFORMATION_AREA:IsSuppressed()
 end
 
 function ZO_Synergy_OnInitialized(control)

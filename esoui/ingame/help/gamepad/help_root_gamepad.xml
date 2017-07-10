@@ -1,6 +1,12 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_Gamepad_HelpWebsiteTemplate" font="ZoFontGamepad34" horizontalAlignment="CENTER" color="C5C29E" text="SI_GAMEPAD_HELP_WEBSITE" virtual="true"/>
+
+        <Control name="ZO_Gamepad_Help_EditLockedEntry_MultiLine" inherits="ZO_Gamepad_TextEditLockedEntry_FullWidth" virtual="true">
+            <Dimensions y="135"/>
+        </Control>
+
+        <Control name="ZO_Gamepad_Help_Dropdown_Item" inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
         
         <TopLevelControl name="ZO_Gamepad_Help_Root" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>

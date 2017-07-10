@@ -19,10 +19,10 @@
                     <Anchor point="CENTER" relativePoint="LEFT" />
                     
                     <Textures
-                        normal="EsoUI/Art/Crafting/smithing_leftArrow_up.dds"
-                        pressed="EsoUI/Art/Crafting/smithing_leftArrow_down.dds"
-                        mouseOver="EsoUI/Art/Crafting/smithing_leftArrow_over.dds"
-                        disabled="EsoUI/Art/Crafting/smithing_leftArrow_disabled.dds"
+                        normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"
                     />
                     <OnClicked>
                         self:GetParent().horizontalScrollList:MoveRight()
@@ -33,10 +33,10 @@
                     <Dimensions x="64" y="64" />
                     <Anchor point="CENTER" relativePoint="RIGHT" />
                     <Textures
-                        normal="EsoUI/Art/Crafting/smithing_rightArrow_up.dds"
-                        pressed="EsoUI/Art/Crafting/smithing_rightArrow_down.dds"
-                        mouseOver="EsoUI/Art/Crafting/smithing_rightArrow_over.dds"
-                        disabled="EsoUI/Art/Crafting/smithing_rightArrow_disabled.dds"
+                        normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"
                     />
                     <OnClicked>
                         self:GetParent().horizontalScrollList:MoveLeft()
@@ -47,6 +47,6 @@
                     <Anchor point="CENTER" />
                 </Label>
             </Controls>
-        </Control>    
+        </Control>
     </Controls>
 </GuiXml>

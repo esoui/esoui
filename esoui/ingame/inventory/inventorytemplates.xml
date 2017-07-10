@@ -23,15 +23,6 @@
             <Dimensions y="64"/>
 
             <Controls>
-                <Label name="$(parent)Money" override="true">
-                    <Dimensions x="160"/>
-                </Label>
-                
-                <Label name="$(parent)TelvarStones" inherits="ZO_CurrencyTemplate" hidden="true">
-                    <Dimensions x="160"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Money" relativePoint="LEFT" />
-                </Label>
-
                 <Label name="$(parent)AltFreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
                     <Dimensions y="32" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)FreeSlots" relativePoint="BOTTOMLEFT" offsetY="-9"/>
@@ -39,11 +30,6 @@
 
                 <Label name="$(parent)AltMoney" inherits="ZO_CurrencyTemplate"  hidden="true">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Money" relativePoint="BOTTOMRIGHT" offsetY="1"/>
-                </Label>
-
-                <Label name="$(parent)AltTelvarStones" inherits="ZO_CurrencyTemplate" hidden="true">
-                    <Dimensions x="160"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TelvarStones" relativePoint="BOTTOMRIGHT" offsetY="1" hidden="true"/>
                 </Label>
             </Controls>
         </Control>

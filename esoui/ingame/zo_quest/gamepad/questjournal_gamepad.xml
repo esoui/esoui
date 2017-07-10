@@ -4,9 +4,8 @@
         <Label name="ZO_QuestJournal_ConditionBulletLabel_Gamepad" font="ZoFontGamepad34" virtual="true"/>
         <Label name="ZO_QuestJournal_DetailText_Gamepad" inherits="ZO_QuestJournal_DetailControl" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
         <Label name="ZO_QuestJournal_TasksText_Gamepad" inherits="ZO_QuestJournal_StepControl" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />
-        <Label name="ZO_QuestJournal_StepText_Gamepad" inherits="ZO_QuestJournal_StepControl" font="ZoFontGamepad34" virtual="true" />
-
-        <Control name= "ZO_QuestJournal_CompletedTaskIcon_Gamepad" virtual="true">
+        
+        <Control name="ZO_QuestJournal_CompletedTaskIcon_Gamepad" virtual="true">
             <Dimensions x="16" y="16"/>
             <Controls>
                 <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Journal/Gamepad/gp_journalCheck.dds">

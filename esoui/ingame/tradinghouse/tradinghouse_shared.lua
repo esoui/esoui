@@ -270,6 +270,11 @@ function ZO_TradingHouse_Shared:InitializeSharedEvents()
     end
     
     local function OnSearchCooldownUpdate(_, cooldownMilliseconds)
+        if cooldownMilliseconds == 0 then
+            self.hasSearchCooldown = false
+        else
+            self.hasSearchCooldown = true
+        end
         self:OnSearchCooldownUpdate(cooldownMilliseconds)
     end
     
@@ -437,6 +442,13 @@ function ZO_TradingHouse_Shared:ShouldAddGuildSpecificItemToList(itemData)
     return true
 end
 
+function ZO_TradingHouse_Shared:HasSearchCooldown()
+    return self.hasSearchCooldown
+end
+
+function ZO_TradingHouse_Shared:CanRequestListing()
+    return not self:HasSearchCooldown() and not self:IsAwaitingResponse()
+end
 
 --[[ Functions to be overridden ]]--
 

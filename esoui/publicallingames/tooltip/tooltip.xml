@@ -1,0 +1,302 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="DelayedTooltipFadeAnimation">
+            <Animations>
+                <AlphaAnimation delay="200" duration="200" startAlpha="0.0" endAlpha="1.0"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <!--
+            There is only one Tooltip top level window for the entire screen.
+            It's dimensions/position is really unimportant, the children will all be laid out correctly.
+            This does mean that ALL tooltips will draw together in a batch though.
+        -->
+
+        <Control name="ZO_TooltipMoneyLine" virtual="true">
+            <Controls>
+                <Label name="$(parent)Reason" font="ZoFontGame">
+                    <Anchor point="TOPLEFT"  offsetY="2"/>
+                </Label>
+                <Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Reason" offsetY="-2" offsetX="3"/>
+                </Label>   
+            </Controls>
+        </Control>
+
+        <StatusBar name="TooltipStatusBar" level="500" virtual="true" textureFile="EsoUI/Art/ItemToolTip/item_chargeMeter_bar_genericFill.dds">
+            <Dimensions y="6" />
+            <LeadingEdge textureFile="EsoUI/Art/ItemToolTip/item_chargeMeter_bar_leadingEdge.dds" width="4" height="4" />
+
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+        </StatusBar>
+
+        <StatusBar name="TooltipStatusBarGloss" level="550" textureFile="EsoUI/Art/ItemToolTip/item_chargeMeter_bar_genericFill_gloss.dds" virtual="true">
+            <AnchorFill />
+            <LeadingEdge textureFile="EsoUI/Art/ItemToolTip/item_chargeMeter_bar_leadingEdge_gloss.dds" width="4" height="4" />
+        </StatusBar>
+
+        <Control name="TooltipStatusBarContainer" virtual="true">
+            <Dimensions x="240" y="8"/>
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/ItemToolTip/item_chargeMeter.dds">
+                    <Dimensions x="240" y="8"/>
+                    <Anchor point="TOP" />
+                    <TextureCoords left="0" right="0.9375" top="0" bottom="1" />
+                </Texture>
+
+                <StatusBar name="$(parent)BarLeft" inherits="TooltipStatusBar" barAlignment="REVERSE">
+                    <Anchor point="LEFT" relativeTo="$(parent)BG" offsetX="3" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)BG" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="TooltipStatusBarGloss" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+                <StatusBar name="$(parent)BarRight" inherits="TooltipStatusBar">
+                    <Anchor point="RIGHT" relativeTo="$(parent)BG" offsetX="-3" />
+                    <Anchor point="LEFT" relativeTo="$(parent)BG" relativePoint="CENTER" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="TooltipStatusBarGloss" />
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </Control>
+
+        <Tooltip name="ItemTooltipBase" inherits="ZO_BaseTooltip" virtual="true" headerVerticalOffset="11">
+            <ResizeToFitPadding width="32" height="57"/>
+            <DimensionConstraints minX="416" maxX="416" />
+            <OnCleared>
+                ZO_ItemTooltip_Cleared(self)
+            </OnCleared>
+
+            <OnAddGameData>
+                ZO_ItemTooltip_OnAddGameData(...)
+            </OnAddGameData>
+
+            <Controls>
+                <Control name="$(parent)Charges" inherits="TooltipStatusBarContainer" hidden="true" />
+                <Control name="$(parent)Condition" inherits="TooltipStatusBarContainer" hidden="true" />
+                <Control name="$(parent)SellPrice" inherits="ZO_TooltipMoneyLine" hidden="true"/>
+            </Controls>
+        </Tooltip>
+
+        <Tooltip name="ZO_ItemIconTooltip" inherits="ItemTooltipBase" virtual="true">
+            <Anchor point="BOTTOM" offsetY="-245"/>
+
+            <OnCleared>
+                ZO_ItemIconTooltip_Cleared(self)
+            </OnCleared>
+
+            <OnAddGameData>
+                ZO_ItemIconTooltip_OnAddGameData(...)
+            </OnAddGameData>
+
+            <Controls>
+                <Texture name="$(parent)FadeLeft" textureFile="EsoUI/Art/ItemToolTip/iconStrip.dds" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="100" y="4" />
+                    <TextureCoords left="1" right="0" />
+                    <Anchor point="TOPRIGHT" relativePoint="TOP" />
+                </Texture>
+                <Texture name="$(parent)FadeRight" textureFile="EsoUI/Art/ItemToolTip/iconStrip.dds" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="100" y="4" />
+
+                    <Anchor point="TOPLEFT" relativePoint="TOP" />
+                </Texture>
+
+                <Texture name="$(parent)Icon" excludeFromResizeToFitExtents="true" layer="OVERLAY">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativePoint="TOP"/>
+                </Texture>
+            </Controls>
+        </Tooltip>
+
+        <TopLevelControl name="TooltipTopLevel" virtual="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS">
+            <AnchorFill/>
+        </TopLevelControl>
+
+        <TopLevelControl name="GameTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="GameTooltip" inherits="ZO_BaseTooltip" />
+            </Controls>
+        </TopLevelControl>
+
+        <StatusBar name="AbilityTooltipProgressionBar" inherits="ZO_ArrowStatusBarWithBG" virtual="true" />
+
+        <TopLevelControl name="AbilityTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="AbilityTooltip" inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="40"/>
+                    <DimensionConstraints minX="384" maxX="384" />
+                    <OnInitialized>
+                        ZO_AbilityTooltip_Initialize(self)
+                    </OnInitialized>
+
+                    <OnCleared>
+                        ZO_AbilityTooltip_Cleared(self)
+                    </OnCleared>
+
+                    <OnAddGameData>
+                        ZO_AbilityTooltip_OnAddGameData(...)
+                    </OnAddGameData>
+
+                    <Controls>
+                        <StatusBar name="$(parent)Progression" inherits="AbilityTooltipProgressionBar" hidden="true" />
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ItemTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ItemTooltip" inherits="ZO_ItemIconTooltip">
+                    <OnHide>
+                        ComparativeTooltip1:SetHidden(true)
+                        ComparativeTooltip2:SetHidden(true)
+                    </OnHide>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ItemTooltipEquippedInfo" virtual="true" hidden="true" excludeFromResizeToFitExtents="true">
+            <Dimensions x="256" y="32" />
+            <Anchor point="BOTTOM" relativePoint="TOP" offsetY="9" />
+            
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Tooltips/toolTip_equippedLabel_bg.dds">
+                    <AnchorFill />
+                </Texture>
+
+                <Label name="$(parent)Text" font="ZoFontGameBold" color="000000" modifyTextType="UPPERCASE" styleColor="FFFFFFCC">
+                    <Anchor point="CENTER" offsetY="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ComparativeTooltip1TopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ComparativeTooltip1"  inherits="ItemTooltipBase">
+                    <OnInitialized>
+                        self:SetAsComparativeTooltip1()
+                        self.topClampedToScreenInset = -24
+                    </OnInitialized>
+
+                    <Controls>
+                        <Control name="$(parent)EquippedInfo" inherits="ItemTooltipEquippedInfo" />
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ComparativeTooltip2TopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ComparativeTooltip2"  inherits="ItemTooltipBase">
+                    <OnInitialized>
+                        self:SetAsComparativeTooltip2()
+                        self.topClampedToScreenInset = -24
+                    </OnInitialized>
+
+                    <Controls>
+                        <Control name="$(parent)EquippedInfo" inherits="ItemTooltipEquippedInfo" />
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <Tooltip name="ZO_AchievementTooltipTemplate" inherits="ZO_BaseTooltip" headerVerticalOffset="10" virtual="true">
+            <ResizeToFitPadding width="32" height="35"/>
+            <DimensionConstraints minX="416" maxX="416" />
+        </Tooltip>
+
+        <TopLevelControl name="AchievementTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="AchievementTooltip" inherits="ZO_AchievementTooltipTemplate" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="PopupTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="PopupTooltip" inherits="ZO_ItemIconTooltip" mouseEnabled="true" movable="true">
+                    <ResizeToFitPadding width="48" height="57"/>
+                    <DimensionConstraints minX="416" maxX="416" />
+                    
+                    <Anchor point="CENTER" relativePoint="CENTER" />
+                    <OnHide>
+                        self.lastLink = nil
+                    </OnHide>
+
+                    <Controls>
+                        <Button name="$(parent)Close" inherits="ZO_CloseButton" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPRIGHT" offsetX="-6" offsetY="6" />
+                            <OnClicked>
+                                self:GetParent():SetHidden(true)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="InformationTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="InformationTooltip"  inherits="ZO_BaseTooltip">
+                    <Controls>
+                        <Control name="$(parent)SellPrice" inherits="ZO_TooltipMoneyLine" hidden="true"/>
+                    </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="SkillTooltipUpgradeLine" virtual="true" layer="1" resizeToFitDescendents="true">
+            <Dimensions y="16"/>
+            <Controls>
+                <Texture name="$(parent)ArrowTex" textureFile="EsoUI/Art/Tooltips/greenArrow.dds" layer="1">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="16" y="16" />
+                </Texture>
+
+                <Label name="$(parent)SourceText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ArrowTex" relativePoint="LEFT" offsetX="-3" />
+                </Label>
+
+                <Label name="$(parent)DestText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" relativeTo="$(parent)ArrowTex" relativePoint="RIGHT" offsetX="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="SkillTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="SkillTooltip"  inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="40"/>
+                    <DimensionConstraints minX="384" maxX="384" />
+                    <OnAddGameData>
+                        ZO_SkillTooltip_OnAddGameData(...)
+                    </OnAddGameData>
+
+                    <OnCleared>
+                        ZO_SkillTooltip_ClearSkillUpgrades(self)
+                    </OnCleared>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="KeepUpgradeTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="KeepUpgradeTooltip" inherits="ZO_BaseTooltip">
+                    <ResizeToFitPadding width="32" height="35"/>
+                </Tooltip>                
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -12,6 +12,10 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
 
+    local ADDITIONAL_MOUSEOVER_BINDS = nil
+    local DONT_USE_KEYBIND_STRIP = false
+    self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT, ADDITIONAL_MOUSEOVER_BINDS, DONT_USE_KEYBIND_STRIP)
+
     if refinementOnly then
         self.mode = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
     else
@@ -25,6 +29,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
     self.inventory.list:SetOnSelectedDataChangedCallback(function(list, selectedData)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
             local SHOW_COMBINED_COUNT = true
             GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex, nil, SHOW_COMBINED_COUNT)
@@ -66,7 +71,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
             end
 
             -- used to update extraction slot UI with text / etc., PC does this as well
-            self:RemoveItemFromWorkbench()
+            self:RemoveItemFromCraft()
 
             self.owner:SetEnableSkillBar(true)
 
@@ -75,6 +80,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
             self.inventory:HandleDirtyEvent()
         elseif newState == SCENE_HIDDEN then
+            self.itemActions:SetInventorySlot(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
             self.inventory:Deactivate()
@@ -108,8 +114,7 @@ function ZO_GamepadSmithingExtraction:ChangeMode(mode)
     self.inventory:HandleDirtyEvent()
     -- used to update extraction slot UI with text / etc., PC does this as well
     -- note that on gamepad this gives a possibly unwanted side effect of losing the active item when switching filters
-    self:RemoveItemFromWorkbench()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self:RemoveItemFromCraft()
 end
 
 function ZO_GamepadSmithingExtraction:AddEntry(name, mode, allowed, tabBarEntries)
@@ -136,7 +141,7 @@ end
 
 function ZO_GamepadSmithingExtraction:InitializeInventory(refinementOnly)
     local inventory = self.panelControl:GetNamedChild("Inventory")
-    self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, refinementOnly)
+    self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, refinementOnly, SLOT_TYPE_CRAFTING_COMPONENT)
 
     -- turn refinement stacks red if they don't have a large enough quantity in them to be refineable
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
@@ -207,9 +212,11 @@ do
     end
 end
 
-function ZO_GamepadSmithingExtraction:AddItemToWorkbench()
-    local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
-    self:AddItemToCraft(bagId, slotIndex)
+function ZO_GamepadSmithingExtraction:AddItemToCraft(bagId, slotIndex)
+    ZO_SharedSmithingExtraction.AddItemToCraft(self, bagId, slotIndex)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
@@ -224,8 +231,11 @@ function ZO_GamepadSmithingExtraction:AddItemToWorkbench()
     end
 end
 
-function ZO_GamepadSmithingExtraction:RemoveItemFromWorkbench()
-    self:ClearSelections()
+function ZO_GamepadSmithingExtraction:RemoveItemFromCraft()
+    ZO_SharedSmithingExtraction.RemoveItemFromCraft(self)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
@@ -233,6 +243,7 @@ function ZO_GamepadSmithingExtraction:RemoveItemFromWorkbench()
 end
 
 function ZO_GamepadSmithingExtraction:ConfirmRefineOrDestroy()
+    self.itemActions:SetInventorySlot(nil)
     self:Extract()
 end
 
@@ -269,9 +280,9 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
                         end,
             callback = function()
                 if self:IsCurrentSelected() then
-                    self:RemoveItemFromWorkbench()
+                    self:RemoveItemFromCraft()
                 else
-                    self:AddItemToWorkbench()
+                    self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
@@ -295,23 +306,47 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
             visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasEnoughToRefine() and self:HasSelections() end,
         },
 
-        -- Clear selections
+        -- Item Options
         {
-            name = function()
-                return GetString(SI_CRAFTING_CLEAR_SELECTIONS)
-            end,
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() end,
             callback = function()
-                self:RemoveItemFromWorkbench()
-                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                self:ShowItemActions()
             end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:CurrentSelection() ~= nil
+            end
         },
     }
 
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.inventory.list)
     ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(self.keybindStripDescriptor)
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingExtraction:AddKeybinds()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingExtraction:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingExtraction:ShowItemActions()
+    self:RemoveKeybinds()
+
+    local function OnActionsFinishedCallback()
+        self:AddKeybinds()
+    end
+
+    local dialogData = 
+    {
+        targetData = self.inventory:CurrentSelection(),
+        finishedCallback = OnActionsFinishedCallback,
+        itemActions = self.itemActions,
+    }
+
+    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
 end
 
 ZO_GamepadExtractionInventory = ZO_GamepadCraftingInventory:Subclass()
@@ -333,8 +368,13 @@ function ZO_GamepadExtractionInventory:Initialize(owner, control, refinementOnly
 end
 
 function ZO_GamepadExtractionInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
-    self.owner:OnInventoryUpdate(validItemIds)
+    local validItems
+    if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+    else
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+    end
+    self.owner:OnInventoryUpdate(validItems, self.filterType)
 
     -- handle no items in a filter cases / show text to the user
     self.noItemsLabel:SetHidden(#data > 0)

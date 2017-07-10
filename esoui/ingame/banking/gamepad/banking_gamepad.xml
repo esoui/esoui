@@ -40,22 +40,6 @@
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="3" hidden="true" />
                             <Anchor point="TOP" offsetY="130" />
                         </Control>
-
-                        <Label name="$(parent)FirstLabel" hidden="true" maxLineCount="1" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" >
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RootSpacer" relativePoint="BOTTOMLEFT" offsetX="35" offsetY="40" />
-                        </Label>
-
-                        <Label name="$(parent)FirstValue" hidden="true" maxLineCount="1" font="ZoFontGamepadHeaderDataValue" wrapMode="ELLIPSIS">
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RootSpacer" relativePoint="BOTTOMRIGHT" offsetX="-35" offsetY="40"/>
-                        </Label>
-
-                        <Label name="$(parent)SecondLabel" hidden="true" maxLineCount="1" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" >
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)FirstLabel" relativePoint="BOTTOMLEFT" offsetY="40" />
-                        </Label>
-
-                        <Label name="$(parent)SecondValue" hidden="true" maxLineCount="1" font="ZoFontGamepadHeaderDataValue" wrapMode="ELLIPSIS">
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FirstValue" relativePoint="BOTTOMRIGHT" offsetY="40" />
-                        </Label>
                     </Controls>
                 </Control>
             </Controls>

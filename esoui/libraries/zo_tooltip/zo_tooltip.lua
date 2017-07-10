@@ -172,9 +172,9 @@ function ZO_TooltipStyledObject:GetStyles()
     return self.styles
 end
 
-function ZO_TooltipStyledObject:SetStyles(...)    
+function ZO_TooltipStyledObject:SetStyles(...)
     self.styles = {...}
-    self:ApplyStyles()    
+    self:ApplyStyles()
 end
 
 function ZO_TooltipStyledObject:ApplyStyles()
@@ -664,7 +664,7 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
         local centerOffsetPrimary = ((self.innerPrimaryDimension - self.primaryCursor) / 2) * self.primaryCursorDirection
         for i = 1, self.contentsControl:GetNumChildren() do
             local childControl = self.contentsControl:GetChild(i)
-			local childSecondaryOffset = self:IsVertical() and childControl.offsetX or childControl.offsetY
+            local childSecondaryOffset = self:IsVertical() and childControl.offsetX or childControl.offsetY
             if childSecondaryOffset == self.secondaryCursor then
                 local modifiedOffsetX = childControl.offsetX + (self:IsVertical() and 0 or centerOffsetPrimary)
                 local modifiedOffsetY = childControl.offsetY + (self:IsVertical() and centerOffsetPrimary or 0)
@@ -858,7 +858,7 @@ function ZO_TooltipSection:AcquireStatValueSlider(...)
     return statValueSlider
 end
 
-function ZO_TooltipSection:AddStatValuePair(statValuePair)    
+function ZO_TooltipSection:AddStatValuePair(statValuePair)
     self:AddDimensionedControl(statValuePair)
     statValuePair:UpdateFontOffset()
 end
@@ -889,8 +889,9 @@ end
 ZO_Tooltip = {}
 
 function ZO_Tooltip:Initialize(control, styleNamespace, style)
-    zo_mixin(control, ZO_TooltipStyledObject, ZO_TooltipSection, self)    
+    zo_mixin(control, ZO_TooltipStyledObject, ZO_TooltipSection, self)
     ZO_TooltipSection.Initialize(control)
+
     control.styleNamespace = styleNamespace
     control:SetStyles(control:GetStyle(style or "tooltip"))
     control:SetClearOnHidden(true)
@@ -920,9 +921,9 @@ local RELATIVE_POINT_FROM_POINT =
 
 function ZO_Tooltip:SetOwner(owner, point, offsetX, offsetY, relativePoint)
     self.owner = owner
-    if(owner) then
+    if owner then
         self:ClearAnchors()
-        if(relativePoint == nil) then
+        if relativePoint == nil then
             relativePoint = RELATIVE_POINT_FROM_POINT[point]
         end
         self:SetAnchor(point, owner, relativePoint, offsetX or 0, offsetY or 0)
@@ -935,4 +936,24 @@ end
 
 function ZO_Tooltip:GetStyle(styleName)
     return self.styleNamespace[styleName]
+end
+
+function ZO_Tooltip:LayoutTitleAndDescriptionTooltip(title, description)
+    self:LayoutTitleAndMultiSectionDescriptionTooltip(title, description)
+end
+
+function ZO_Tooltip:LayoutTitleAndMultiSectionDescriptionTooltip(title, ...)
+    --Title
+    if title then
+        local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
+        headerSection:AddLine(title, self:GetStyle("title"))
+        self:AddSection(headerSection)
+    end
+
+    --Body
+    for i = 1, select("#", ...) do
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+        bodySection:AddLine(select(i, ...), self:GetStyle("bodyDescription"))
+        self:AddSection(bodySection)
+    end
 end

@@ -14,6 +14,7 @@ GUILD_HISTORY_CATEGORIES =
                 gamepadIcon = "EsoUI/Art/Guild/gamepad/gp_guild_menuIcon_roster.dds",
                 events = {
                     [GUILD_EVENT_GUILD_CREATE] = true,
+                    [GUILD_EVENT_GUILD_INVITE] = true,
                     [GUILD_EVENT_GUILD_JOIN] = true,
                     [GUILD_EVENT_GUILD_PROMOTE] = true,
                     [GUILD_EVENT_GUILD_DEMOTE] = true,
@@ -65,7 +66,8 @@ GUILD_HISTORY_CATEGORIES =
                     [GUILD_EVENT_BANKITEM_ADDED] = true,
                     [GUILD_EVENT_BANKGOLD_ADDED] = true,
                     [GUILD_EVENT_BANKGOLD_KIOSK_BID_REFUND] = true,
-                }
+                },
+                gatingPermission = GUILD_PERMISSION_BANK_VIEW_DEPOSIT_HISTORY,
             },
             [GUILD_HISTORY_BANK_WITHDRAWALS] =
             {
@@ -77,7 +79,8 @@ GUILD_HISTORY_CATEGORIES =
                     [GUILD_EVENT_BANKGOLD_PURCHASE_HERALDRY] = true,
                     [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = true,
                     [GUILD_EVENT_HERALDRY_EDITED] = true,
-                }
+                },
+                gatingPermission = GUILD_PERMISSION_BANK_VIEW_WITHDRAW_HISTORY,
             },
         },
     },
@@ -152,6 +155,10 @@ local function GetGoldString(amount)
     return zo_strformat(SI_GUILD_EVENT_GOLD_FOMART, color:Colorize(ZO_CurrencyControl_FormatCurrency(amount)), goldIcon)
 end
 
+local function IsInvalidParam(param)
+    return not param or param == "" or param == GetString(SI_GUILD_HISTORY_DEFAULT_PARSED_TEXT)
+end
+
 local function DefaultEventFormat(eventType, param1, param2, param3, param4, param5)
     local contrastColor = GetContrastTextColor()
     local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
@@ -199,12 +206,23 @@ local function KioskRefundEventFormat(eventType, kiosk, gold)
                                         GetGoldString(gold))
 end
 
+local function GuildJoinedEventFormat(eventType, joinerDisplayName, optionalInviterDisplayName)
+    if IsInvalidParam(optionalInviterDisplayName) then
+        local contrastColor = GetContrastTextColor()
+        local userFacingJoinerDisplayName = ZO_FormatUserFacingDisplayName(joinerDisplayName)
+        return zo_strformat(SI_GUILDEVENTTYPEDEPRECATED7, contrastColor:Colorize(userFacingJoinerDisplayName))
+    else
+        return DefaultEventFormatWithTwoDisplayNames(eventType, joinerDisplayName, optionalInviterDisplayName)
+    end
+end
+
 GUILD_EVENT_EVENT_FORMAT =
 {                                                                           -- Event Values passed to function
     [GUILD_EVENT_GUILD_PROMOTE] = DefaultEventFormatWithTwoDisplayNames,    -- (eventType, displayName1, displayName2, rankName)
     [GUILD_EVENT_GUILD_DEMOTE] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2, rankName)
     [GUILD_EVENT_GUILD_CREATE] = DefaultEventFormatWithDisplayName,         -- (eventType, displayName)
-    [GUILD_EVENT_GUILD_JOIN] = DefaultEventFormatWithDisplayName,           -- (eventType, displayName)
+    [GUILD_EVENT_GUILD_INVITE] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2)
+    [GUILD_EVENT_GUILD_JOIN] = GuildJoinedEventFormat,                      -- (eventType, joinerDisplayName, optionalInviterDisplayName)
     [GUILD_EVENT_GUILD_LEAVE] = DefaultEventFormatWithDisplayName,          -- (eventType, displayName)
     [GUILD_EVENT_GUILD_KICKED] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2)
     [GUILD_EVENT_BANKITEM_ADDED] = BankItemEventFormat,                     -- (eventType, displayName, itemQuantity, itemName)
@@ -255,4 +273,37 @@ function ComputeGuildHistoryEventSubcategory(eventType, category)
             end
         end
     end
+end
+
+function ZO_GuildHistory_GetNoEntriesText(categoryId, subcategoryId, guildId)
+    local categoryData = GUILD_HISTORY_CATEGORIES[categoryId]
+    if not categoryData then
+        return GetString(SI_GUILD_HISTORY_NO_ENTRIES)
+    end
+
+    if subcategoryId then
+        local subcategoryData = categoryData.subcategories[subcategoryId]
+        if subcategoryData.gatingPermission and not DoesPlayerHaveGuildPermission(guildId, subcategoryData.gatingPermission) then
+            return GetString(SI_GUILD_CANT_VIEW_HISTORY)
+        end
+    else
+        local numSubcategories = #categoryData.subcategories
+        local numPermissionsFailed = 0
+        for i, subcategoryData in ipairs(categoryData.subcategories) do
+            if subcategoryData.gatingPermission and not DoesPlayerHaveGuildPermission(guildId, subcategoryData.gatingPermission) then
+                numPermissionsFailed = numPermissionsFailed + 1
+            else
+                -- subcategory was not gated or permission was met, we can show the generic message
+                break
+            end
+        end
+
+        if numPermissionsFailed == numSubcategories then
+            return GetString(SI_GUILD_CANT_VIEW_HISTORY)
+        else
+            return GetString(SI_GUILD_HISTORY_NO_ENTRIES)
+        end
+    end
+
+    return GetString(SI_GUILD_HISTORY_NO_ENTRIES)
 end

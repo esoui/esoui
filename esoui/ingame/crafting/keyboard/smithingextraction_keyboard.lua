@@ -40,6 +40,8 @@ function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnl
     self.owner = owner
     self.noItemsLabel = control:GetNamedChild("NoItemsLabel")
 
+    self:ShowStatusHeader()
+
     if refinementOnly then
         self:SetFilters{
             self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS, GetString(SI_SMITHING_EXTRACTION_RAW_MATERIALS_TAB), "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_disabled.dds"),
@@ -70,7 +72,7 @@ function ZO_SmithingExtractionInventory:AddListDataTypes()
 end
 
 function ZO_SmithingExtractionInventory:IsLocked(bagId, slotIndex)
-    return ZO_CraftingInventory.IsLocked(self, bagId, slotIndex) or self.owner:IsSlotted(bagId, slotIndex)
+    return ZO_CraftingInventory.IsLocked(self, bagId, slotIndex) or self.owner:IsSlotted(bagId, slotIndex) or IsItemPlayerLocked(bagId, slotIndex)
 end
 
 function ZO_SmithingExtractionInventory:ChangeFilter(filterData)
@@ -95,8 +97,13 @@ function ZO_SmithingExtractionInventory:GetCurrentFilterType()
 end
 
 function ZO_SmithingExtractionInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
-    self.owner:OnInventoryUpdate(validItemIds)
+    local validItems
+    if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+    else
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+    end
+    self.owner:OnInventoryUpdate(validItems, self.filterType)
 
     self.noItemsLabel:SetHidden(#data > 0)
 end

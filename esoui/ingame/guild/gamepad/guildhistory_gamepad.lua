@@ -390,7 +390,7 @@ function ZO_GuildHistory_Gamepad:PopulateActivityList()
     end
 
     -- Update the number of displayed items here. We do not want to include the "no items" item
-    --  added just below.
+    -- added just below.
     self.displayedItems = (displayIndex - 1)
 
     if displayIndex == 1 then
@@ -398,7 +398,8 @@ function ZO_GuildHistory_Gamepad:PopulateActivityList()
             -- Display a "no items" item if there are truly no items.
             local displayItem = self.activityListItems[displayIndex]
             displayItem:SetHidden(false)
-            displayItem.text:SetText(GetString(SI_GAMEPAD_GUILD_HISTORY_FINAL_ITEM))
+            local noEntriesText = ZO_GuildHistory_GetNoEntriesText(categoryId, subcategoryId, self.guildId)
+            displayItem.text:SetText(noEntriesText)
             displayItem.time:SetText("")
             displayItem.description = nil
             displayIndex = displayIndex + 1

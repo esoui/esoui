@@ -8,7 +8,7 @@
                     <Controls>
                         <Label name="$(parent)OverlayText" override="true" font="ZoFontGameOutline" />
                         
-                        <Texture name="$(parent)CraftBagIcon" textureFile="EsoUI/Art/HUD/lootHistory_icon_craftBag.dds" override="true">
+                        <Texture name="$(parent)StatusIcon" override="true">
                             <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>
                         </Texture>
                     </Controls>
@@ -21,7 +21,7 @@
                     <Anchor point="TOPLEFT" offsetX="-50"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="50"/>
                     <Controls>
-                        <Texture name="$(parent)CraftBagHighlight" textureFile="EsoUI/Art/HUD/lootHistory_highlight.dds" override="true">
+                        <Texture name="$(parent)Highlight" override="true">
                             <TextureCoords left="0" right="1" top="0" bottom=".75" />
                             <Dimensions x="128" y="50" />
                             <Anchor point="TOPLEFT" offsetX="-20"/>

@@ -1,15 +1,5 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_Gamepad_Help_EditEntry_MultiLine" inherits="ZO_Gamepad_TextEditEntry_FullWidth_Multiline" virtual="true">
-            <Dimensions y="135"/>
-        </Control>
-
-        <Control name="ZO_Gamepad_Help_EditLockedEntry_MultiLine" inherits="ZO_Gamepad_TextEditLockedEntry_FullWidth" virtual="true">
-            <Dimensions y="135"/>
-        </Control>
-        
-        <Control name="ZO_Gamepad_Help_Dropdown_Item" inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
-        
         <TopLevelControl name="ZO_Help_Customer_Service_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_Help_Customer_Service_Gamepad_OnInitialize(self)

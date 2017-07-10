@@ -652,22 +652,15 @@ function RegisterForLoadingUpdates()
     end
 end
 
---
--- This can only be called from pregame, because of the way that the SetGuiHidden function is exposed.
---
-local function ShowGui(eventCode, guiName, desiredState)
-    local hidePregame = (guiName ~= "pregame")
-    SetGuiHidden("pregame", hidePregame)
-    SetGuiHidden("app", not hidePregame)
+local function OnShowPregameGuiInState(eventCode, desiredState)
+    SetGuiHidden("pregame", false)
 
-    if(guiName == "pregame") then
-        if(initialStateOverrideFn) then
-            desiredState = initialStateOverrideFn()
-        end
+    if initialStateOverrideFn then
+        desiredState = initialStateOverrideFn()
+    end
 
-        if(desiredState and (desiredState ~= "")) then
-            PregameStateManager_SetState(desiredState, true)
-        end
+    if desiredState and desiredState ~= "" then
+        PregameStateManager_SetState(desiredState, true)
     end
 end
 
@@ -685,5 +678,5 @@ function PregameStateManager_ClearError()
 end
 
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_LIST_RECEIVED, OnCharacterListReceived)
-EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_GUI, ShowGui)
+EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_PREGAME_GUI_IN_STATE, OnShowPregameGuiInState)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelected)

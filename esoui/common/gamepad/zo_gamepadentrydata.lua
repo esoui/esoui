@@ -53,6 +53,8 @@ end
 
 function ZO_GamepadEntryData:InitializeTradingHouseVisualData(itemData)
     self:InitializeInventoryVisualData(itemData)
+    self:SetSubLabelColors(ZO_NORMAL_TEXT)
+    self:SetShowUnselectedSublabels(true)
 end
 
 function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, stackCount, quality)
@@ -88,10 +90,10 @@ function ZO_GamepadEntryData:InitializeImprovementKitVisualData(bag, index, stac
     self:SetSubLabelColors(ZO_NORMAL_TEXT)
 end
 
-function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(itemInfo, customSortData)
-    self:SetStackCount(itemInfo.stack)
-    self.bagId = itemInfo.bag
-    self.slotIndex = itemInfo.index
+function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, slotData)
+    self:SetStackCount(stackCount)
+    self.bagId = bagId
+    self.slotIndex = slotIndex
 
     local itemName = GetItemName(self.bagId, self.slotIndex)
     local icon, _, sellPrice, meetsUsageRequirements, _, _, _, quality = GetItemInfo(self.bagId, self.slotIndex)
@@ -103,6 +105,15 @@ function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(itemInfo, cus
     self.itemType = GetItemType(self.bagId, self.slotIndex)
     self.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTYPE", self.itemType))
     self.customSortData = customSortData
+    self.slotData = slotData
+    if slotData then
+        self.brandNew = slotData.brandNew
+        self.stolen = slotData.stolen
+        self.isPlayerLocked = slotData.isPlayerLocked
+        self.isBoPTradeable = slotData.isBoPTradeable
+        self.isGemmable = slotData.isGemmable
+        self.statusSortOrder = slotData.statusSortOrder
+    end
 
     self:SetNameColors(self:GetColorsBasedOnQuality(self.quality))
     self.subLabelSelectedColor = self.selectedNameColor

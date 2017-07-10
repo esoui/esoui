@@ -60,7 +60,6 @@ function ZO_GamepadSocialDialogs:New()
     object:InitializeAddIgnoreDialog()
     object:InitializeInviteMemberDialog()
     object:InitializeGroupInviteDialog()
-    object:InitializeReportPlayerDialog()
     return object   
 end
 
@@ -658,96 +657,6 @@ function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
                 end,
             },
         }
-    })
-end
-
-----------------------
--- Report Player
-----------------------
-local headerData = 
-{
-    titleText = GetString(SI_GAMEPAD_HELP_DETAILS),
-    messageTextAlignment = TEXT_ALIGN_LEFT,
-}
-
-local function SetupTooltip(entryData)
-    headerData.messageText = entryData.tooltip
-    GAMEPAD_TOOLTIPS:ShowGenericHeader(GAMEPAD_LEFT_DIALOG_TOOLTIP, headerData)
-end
-
-local function SetupReportEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-
-    if (selected) then
-        SetupTooltip(data)
-    end
-end
-
-local function ReportPlayerBotting(displayName)
-    ZO_Help_Customer_Service_Gamepad_SubmitReportPlayerSpammingTicket(displayName)
-end
-
-local function ReportPlayerDefault(displayName)
-    ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
-    SCENE_MANAGER:Show("helpCustomerServiceGamepad")
-end
-
-function ZO_GamepadSocialDialogs:InitializeReportPlayerDialog()
-    local targetCharacterName = ""
-    local targetDisplayName = ""
-
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_REPORT_PLAYER_DIALOG",
-    {
-        setup = function(dialog, data)
-                    targetCharacterName = data.characterName
-                    targetDisplayName = data.displayName
-                    dialog:setupFunc()
-                    ZO_GenericGamepadDialog_ShowTooltip(dialog)
-                end,
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
-        },
-        title = 
-        {
-            text = GetString(SI_DIALOG_TITLE_REPORT_PLAYER),
-        },
-        mainText = 
-        {
-            text = GetString(SI_GAMEPAD_HELP_PLAYER_NAME),
-        },
-        parametricList =
-        {
-            {
-                template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
-                    text = GetString(SI_DIALOG_BUTTON_REPORT_PLAYER),
-                    tooltip = GetString(SI_DIALOG_TEXT_REPORT_PLAYER_OPEN_TICKET),
-                    setup = SetupReportEntry,
-                    callback =  function(entryData)
-                                    ReportPlayerDefault(targetDisplayName)
-                                end
-                }
-            },
-        },
-        buttons =
-        {
-            [1] =
-            {
-                text =      SI_GAMEPAD_SELECT_OPTION,
-                callback =  function(dialog)
-                                local targetData = dialog.entryList:GetTargetData()
-                                if targetData and targetData.callback then
-                                    targetData.callback(targetData)
-                                    ZO_GenericGamepadDialog_HideTooltip(dialog)
-                                end
-                            end,
-            },
-            [2] =
-            {
-                text =      SI_DIALOG_CANCEL,
-            },
-        },
     })
 end
 

@@ -228,8 +228,14 @@ end
 function ZO_MarketAnnouncement_Base:OnMarketAnnouncementViewCrownStoreKeybind()
     local targetData = self.carousel:GetSelectedData()
     local marketProductId = targetData.marketProduct:GetId()
-    SetOpenMarketSource(MARKET_OPEN_OPERATION_ANNOUNCEMENT)
-    SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowMarketProduct(marketProductId)
+    local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
+
+    local targetMarketProductId = marketProductId
+    if openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then
+        targetMarketProductId = GetMarketProductOpenMarketBehaviorNavigateToOtherProductId(marketProductId)
+    end
+
+    SYSTEMS:GetObject(ZO_MARKET_NAME):RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, targetMarketProductId)
 end
 
 -- Functions to be overridden

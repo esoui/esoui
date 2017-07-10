@@ -229,6 +229,55 @@ function ZO_SmithingResearchSelect:SetupDialog(craftingType, researchLineIndex, 
     listDialog:AddCustomControl(self.control, LIST_DIALOG_CUSTOM_CONTROL_LOCATION_BOTTOM)
 end
 
+--Global XML
+
+function ZO_SmithingResearchSlot_OnInitialized(self)
+    self.nameLabel = self:GetNamedChild("Name")
+    self.statusLabel = self:GetNamedChild("Status")
+    self.lockIcon = self:GetNamedChild("LockIcon")
+    self.timerIcon = self:GetNamedChild("TimerIcon")
+end
+
+function ZO_SmithingResearchSlot_OnMouseDoubleClick(self)
+    if self.owner:IsResearchable() then
+        self.owner:Research()
+    end
+end
+
+function ZO_SmithingResearchSlot_OnClicked(self, button)
+    if button == MOUSE_BUTTON_INDEX_RIGHT then
+        if self.owner:IsResearchable() then
+            ClearMenu()
+            AddMenuItem(GetString(SI_ITEM_ACTION_RESEARCH), function() self.owner:Research(self) end)
+            ShowMenu(self)
+        elseif self.owner:IsResearching() then
+            ClearMenu()
+            AddMenuItem(GetString(SI_CRAFTING_CANCEL_RESEARCH), function() self.owner:CancelResearch() end)
+            ShowMenu(self)
+        end
+    end
+end
+
+function ZO_SmithingResearchSlot_OnMouseEnter(self)
+    if not self.fadeAnimation then
+        self.fadeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", self:GetNamedChild("Highlight"))
+        self.scaleAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", self.icon)
+    end
+    self.fadeAnimation:PlayForward()
+    self.scaleAnimation:PlayForward()
+
+    self.owner:OnResearchRowActivate(self)
+end
+
+function ZO_SmithingResearchSlot_OnMouseExit(self)
+    if self.fadeAnimation then
+        self.fadeAnimation:PlayBackward()
+        self.scaleAnimation:PlayBackward()
+    end
+                
+    self.owner:OnResearchRowDeactivate(self)
+end
+
 function ZO_SmithingResearchSelect_OnInitialize(control)
     SMITHING_RESEARCH_SELECT = ZO_SmithingResearchSelect:New(control)
 end

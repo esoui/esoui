@@ -62,6 +62,7 @@ function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, justUnloc
 end
 
 function CollectionsBook_Singleton:OnCollectionUpdated(...)
+    self:ClearCachedNewStatusForAllCollectibles()
     self:FireCallbacks("OnCollectionUpdated", ...)
 end
 
@@ -146,7 +147,7 @@ function CollectionsBook_Singleton.GetCategoryCollectibleIds(categoryIndex, subC
 end
 
 function CollectionsBook_Singleton:ClearCachedNewStatusForAllCollectibles()
-    self.categoriesWithNewCollectibles = {}
+    ZO_ClearTable(self.categoriesWithNewCollectibles)
 end
 
 function CollectionsBook_Singleton:ClearCachedNewStatusForCollectible(collectibleId)

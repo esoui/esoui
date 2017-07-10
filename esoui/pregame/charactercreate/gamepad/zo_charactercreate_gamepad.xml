@@ -2,8 +2,6 @@
     <Controls>
         <Control name="ZO_CharacterCreateEntry_Gamepad" resizeToFitDescendents="true" virtual="true" />
 
-        <Control name="ZO_CharacterCreateNameEntry_Gamepad" inherits="ZO_GamepadTextFieldItem ZO_GamepadWhiteSelectorHighlight" virtual="true"/>
-
         <Label name="CCLabel_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
         <Button name="SelectorButton_Gamepad" level="3" hidden="true" virtual="true" clickSound="Click_CC_Selector">

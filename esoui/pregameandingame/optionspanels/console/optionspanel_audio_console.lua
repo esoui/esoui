@@ -12,4 +12,4 @@ local ZO_OptionsPanel_Audio_ControlData =
         },
 }
 
-SYSTEMS:GetObject("options"):AddTableToSystem(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, ZO_OptionsPanel_Audio_ControlData)
+ZO_SharedOptions.AddTableToSystem(SETTING_PANEL_AUDIO, SETTING_TYPE_AUDIO, ZO_OptionsPanel_Audio_ControlData)

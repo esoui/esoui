@@ -122,7 +122,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="195" offsetY="120" />
                 </Control>
 
-                <Control name="$(parent)BGLeft" inherits="ZO_LeftFullscreenPanelBG">
+                <Control name="$(parent)BGLeft" inherits="ZO_LeftFullscreenPanelBG" alpha=".55">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="-300"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-300" offsetY="120" />
                 </Control>
@@ -131,6 +131,7 @@
 
                 <Label name="$(parent)ExtraCharacterSlots" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Dimensions x="350" />
+                    <Anchor point="TOP" relativeTo="$(parent)CharacterSlots" relativePoint="BOTTOM" offsetY="3" />
                 </Label>
 
                 <Control name="$(parent)ScrollList" inherits="ZO_ScrollList">
@@ -141,7 +142,8 @@
                 <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation" />
 
                 <Button name="$(parent)Login" inherits="ZO_ExtraLargeButton" modifyTextType="UPPERCASE" font="ZoFontWinH2" text="SI_LOGIN_CHARACTER">
-                    <Anchor point="BOTTOM" relativeTo="$(parent)CharacterViewport" offsetY="-14"/>
+                    <PressedOffset x="2" y="2" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)CharacterViewport" offsetX="-215" offsetY="-14"/>
                     <Dimensions x="230" y="67"/>
                     <OnClicked>
                         ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)

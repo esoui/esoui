@@ -24,9 +24,11 @@
                     <TextureCoords left="0" right="1" top="0" bottom=".625" />
                 </Texture>
 
+                <Control name="$(parent)Status" inherits="ZO_InventoryStatusIcon" />
+
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="60" offsetY="26" />
                 </Button>
             </Controls>
         </Control>
@@ -35,7 +37,7 @@
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
                     <Dimensions x="270" />
-                    <Anchor point="LEFT" offsetX="73" />
+                    <Anchor point="LEFT" offsetX="90" />
                 </Label>
 
                 <Label name="$(parent)Custom" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
@@ -82,9 +84,11 @@
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
                     <Controls>
+                        <Control name="$(parent)Status" inherits="ZO_StatusSortHeader" hidden="true" />
+
                         <Control name="$(parent)Name" inherits="ZO_SortHeader">
                             <Dimensions x="270" y="20" />
-                            <Anchor point="LEFT" offsetX="73" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="66" />
                             <OnInitialized>
                                 ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, nil, "name")
                             </OnInitialized>

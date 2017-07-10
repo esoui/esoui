@@ -41,8 +41,9 @@ ZO_CROWN_CRATES_PACK_SELECTED_ROLL_RADIANS = math.rad(0)
 ZO_CROWN_CRATES_PACK_SELECTION_DURATION_MS = 300
 ZO_CROWN_CRATES_PACK_SELECTION_OFFSET_Y_UI = 40
 
+ZO_CROWN_CRATES_PACK_SHOW_FROM_SIDE_MOVE_DURATION_MS = 500
+
 ZO_CROWN_CRATES_PACK_HIDE_DURATION_MS = 200
-ZO_CROWN_CRATES_PACK_HIDE_END_YAW_RADIANS = math.rad(0)
 ZO_CROWN_CRATES_PACK_HIDE_OFFSET_Y_UI = -40
 
 ZO_CROWN_CRATES_PACK_CHOOSE_MOVE_DURATION_MS = 650
@@ -55,7 +56,10 @@ ZO_CROWN_CRATES_PACK_CHOOSEN_YAW_RADIANS = math.rad(0)
 ZO_CROWN_CRATES_PACK_CHOOSEN_ROLL_RADIANS = math.rad(0)
 
 ZO_CROWN_CRATES_PACK_OPEN_START_YAW_RADIANS = math.rad(0)
-ZO_CROWN_CRATES_PACK_OPEN_END_YAW_RADIANS = math.rad(15) 
+ZO_CROWN_CRATES_PACK_OPEN_END_YAW_RADIANS = math.rad(15)
+
+ZO_CROWN_CRATES_PACK_HIDE_AND_EXIT_SIDE_DURATION_MS = 500
+ZO_CROWN_CRATES_PACK_HIDE_AND_EXIT_SIDE_OFFSET_X_UI = -2000
 
 --Show Info
 ZO_CROWN_CRATES_PACK_INFO_AREA_HEIGHT_UI = ZO_CROWN_CRATES_PACK_OFFSET_Y_UI
@@ -74,6 +78,13 @@ ZO_CROWN_CRATES_ANIMATION_PACK_GLOW = "packGlow"
 ZO_CROWN_CRATES_ANIMATION_PACK_HIDE = "packHide"
 ZO_CROWN_CRATES_ANIMATION_PACK_CHOOSE = "packChoose"
 ZO_CROWN_CRATES_ANIMATION_PACK_OPEN = "packOpen"
+ZO_CROWN_CRATES_ANIMATION_PACK_SHOW_FROM_SIDE = "packShowFromSide"
+ZO_CROWN_CRATES_ANIMATION_PACK_HIDE_AND_EXIT_SIDE = "packHideAndExitSide"
+
+ZO_CROWN_CRATES_PAGE_CHANGE_ARROW_OFFSET_X_UI = 50
+
+ZO_CROWN_CRATES_PAGE_LEFT = -1
+ZO_CROWN_CRATES_PAGE_RIGHT = 1
 
 ZO_CrownCratesPack = ZO_CrownCratesAnimatable:Subclass()
 
@@ -82,9 +93,9 @@ function ZO_CrownCratesPack:New(...)
 end
 
 function ZO_CrownCratesPack:Initialize(control, owner)
-	local crownCratesManager = owner:GetOwner()
+    local crownCratesManager = owner:GetOwner()
     ZO_CrownCratesAnimatable.Initialize(self, control, crownCratesManager)
-	self.stateMachine = owner:GetStateMachine()
+    self.stateMachine = owner:GetStateMachine()
 
     control:Create3DRenderSpace()
     self.control = control
@@ -119,7 +130,7 @@ function ZO_CrownCratesPack:Initialize(control, owner)
     lid.back:SetTextureCoords(0/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 512/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 512/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT, (512 + ZO_CROWN_CRATES_PACK_TEXTURE_LID_HEIGHT)/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT)
     lid.top:SetTextureCoords(0/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 512/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 0/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT, 512/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT)
     lid.bottom:SetTextureCoords(512/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 1024/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 512/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT, 1024/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT)
-	
+    
     --Body (Drawn Second)
     local body = owner:CreateRectagularPrism(self.box, ZO_CROWN_CRATES_PACK_WIDTH_WORLD, ZO_CROWN_CRATES_PACK_HEIGHT_WORLD - ZO_CROWN_CRATES_PACK_LID_THICKNESS_WORLD, ZO_CROWN_CRATES_PACK_DEPTH_WORLD, 0.5, 0.5, 0.5)
     body:SetDrawTier(DT_MEDIUM)
@@ -146,7 +157,7 @@ function ZO_CrownCratesPack:Initialize(control, owner)
     local glowFront = owner:CreateCenteredFace(body, ZO_CROWN_CRATES_PACK_WIDTH_WORLD, ZO_CROWN_CRATES_PACK_HEIGHT_WORLD - ZO_CROWN_CRATES_PACK_LID_THICKNESS_WORLD)
     local frontOriginX, frontOriginY, frontOriginZ = body.front:Get3DRenderSpaceOrigin()
     glowFront:SetBlendMode(TEX_BLEND_MODE_ADD)
-	glowFront:Set3DRenderSpaceOrigin(frontOriginX, frontOriginY, frontOriginZ - 0.0001)
+    glowFront:Set3DRenderSpaceOrigin(frontOriginX, frontOriginY, frontOriginZ - 0.0001)
     body.glowFront = glowFront
     body.glowFront:SetTextureCoords(512/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, 1024/ZO_CROWN_CRATES_PACK_TEXTURE_WIDTH, ZO_CROWN_CRATES_PACK_TEXTURE_LID_HEIGHT/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT, 512/ZO_CROWN_CRATES_PACK_TEXTURE_HEIGHT)
     body.glowFront:SetDrawLevel(0)
@@ -176,7 +187,7 @@ function ZO_CrownCratesPack:Initialize(control, owner)
     self.boxMouseInputGroup = ZO_MouseInputGroup:New(box)
     self.boxMouseInputGroup:Add(frontMousePlane, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
     self.boxMouseInputGroup:Add(lid.top, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-        
+
     --where ... is a list of controls to add the handlers to
     local function AddUpHandler(...)
         local function OnMouseUp() owner:PackOnMouseUp(self) end
@@ -187,7 +198,7 @@ function ZO_CrownCratesPack:Initialize(control, owner)
         end
     end
     AddUpHandler(frontMousePlane, lid.top)
-    
+
     self:Reset()
 end
 
@@ -261,11 +272,11 @@ function ZO_CrownCratesPack:Reset()
     self.rootX = nil
     self.rootY = nil
     self.rootZ = nil
-    self.frontMousePlane:SetMouseEnabled(false)
-    box.lid.top:SetMouseEnabled(false)
+    self:SetPackMouseEnabled(false)
 end
 
 function ZO_CrownCratesPack:InitializeForShow(crateId, visualSlotIndex)
+    self:Reset()
     self.crateId = crateId
     local visualCrateId = crateId
     if not visualCrateId then
@@ -273,29 +284,29 @@ function ZO_CrownCratesPack:InitializeForShow(crateId, visualSlotIndex)
     end
     self.visualCrateId = visualCrateId
     self.visualSlotIndex = visualSlotIndex
-    
+
     local isPlaceholderCrate = self:IsPlaceholderCrate()
     if visualCrateId then
         local normalTexture = GetCrownCratePackNormalTexture(visualCrateId)
         local box = self.box
         box:SetAlpha(isPlaceholderCrate and ZO_CROWN_CRATES_PACK_PLACEHOLDER_ALPHA or ZO_CROWN_CRATES_PACK_NORMAL_ALPHA)
-        
-		local body = box.body
-		body.front:SetTexture(normalTexture)
-		body.glowFront:SetTexture(normalTexture)
-		body.back:SetTexture(normalTexture)
-		body.left:SetTexture(normalTexture)
-		body.right:SetTexture(normalTexture)
-		body.top:SetTexture(normalTexture)
-		body.bottom:SetTexture(normalTexture)
+
+        local body = box.body
+        body.front:SetTexture(normalTexture)
+        body.glowFront:SetTexture(normalTexture)
+        body.back:SetTexture(normalTexture)
+        body.left:SetTexture(normalTexture)
+        body.right:SetTexture(normalTexture)
+        body.top:SetTexture(normalTexture)
+        body.bottom:SetTexture(normalTexture)
 
         local lid = box.lid
         lid.front:SetTexture(normalTexture)
-		lid.back:SetTexture(normalTexture)
-		lid.left:SetTexture(normalTexture)
-		lid.right:SetTexture(normalTexture)
-		lid.top:SetTexture(normalTexture)
-		lid.bottom:SetTexture(normalTexture)
+        lid.back:SetTexture(normalTexture)
+        lid.left:SetTexture(normalTexture)
+        lid.right:SetTexture(normalTexture)
+        lid.top:SetTexture(normalTexture)
+        lid.bottom:SetTexture(normalTexture)
     end
 
     if isPlaceholderCrate then
@@ -340,6 +351,11 @@ function ZO_CrownCratesPack:CanSelect()
     return self.stateMachine:IsCurrentStateByName("MANIFEST")
 end
 
+function ZO_CrownCratesPack:SetPackMouseEnabled(enabled)
+    self.frontMousePlane:SetMouseEnabled(enabled)
+    self.box.lid.top:SetMouseEnabled(enabled)
+end
+
 function ZO_CrownCratesPack:Show(startX, startY, startZ, endX, endY, endZ)
     self.control:SetHidden(false)
     self.control:Set3DRenderSpaceOrientation(ZO_CROWN_CRATES_PACK_SHOW_START_PITCH_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_START_YAW_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_START_ROLL_RADIANS)
@@ -349,8 +365,7 @@ function ZO_CrownCratesPack:Show(startX, startY, startZ, endX, endY, endZ)
             self.owner:OnManifestPackInComplete()
             --Mouse input on the crate is not enabled until it is finished showing. This will prevent the case where the mouse enters the 
             --crate and then exits it again as it flips and then enters once more but we suppress the enter because of the bounce prevention logic.
-            self.frontMousePlane:SetMouseEnabled(true)
-            self.box.lid.top:SetMouseEnabled(true)
+            self:SetPackMouseEnabled(true)
         end
     end)
 
@@ -360,6 +375,35 @@ function ZO_CrownCratesPack:Show(startX, startY, startZ, endX, endY, endZ)
     local rotateAnimation = animationTimeline:GetAnimation(2)
     rotateAnimation:SetRotationValues(ZO_CROWN_CRATES_PACK_SHOW_START_PITCH_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_START_YAW_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_START_ROLL_RADIANS,
         ZO_CROWN_CRATES_PACK_SHOW_END_PITCH_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_END_YAW_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_END_ROLL_RADIANS)
+
+    self:StartAnimation(animationTimeline)
+
+    self.rootX = endX
+    self.rootY = endY
+    self.rootZ = endZ
+end
+
+function ZO_CrownCratesPack:ShowFromSide(endX, endY, endZ, direction)
+    self.control:SetHidden(false)
+    self.control:Set3DRenderSpaceOrientation(ZO_CROWN_CRATES_PACK_SHOW_END_PITCH_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_START_YAW_RADIANS, ZO_CROWN_CRATES_PACK_SHOW_START_ROLL_RADIANS)
+
+    local animationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_PACK_SHOW_FROM_SIDE, self.control, function(timeline, completedPlaying)
+        if completedPlaying then
+            self.owner:OnManifestPackInComplete()
+            --Mouse input on the crate is not enabled until it is finished showing. This will prevent the case where the mouse enters the 
+            --crate and then exits it again as it flips and then enters once more but we suppress the enter because of the bounce prevention logic.
+            self:SetPackMouseEnabled(true)
+        end
+    end)
+
+    local translateAnimation = animationTimeline:GetAnimation(1)
+
+    local startY = endY
+    local startZ = endZ
+    local offsetX = -ZO_CROWN_CRATES_PACK_HIDE_AND_EXIT_SIDE_OFFSET_X_UI * direction
+    local manifestPlaneMetrics = self.owner:GetManifestCameraPlaneMetrics()
+    local startX = endX + ZO_CrownCrates.ConvertUIUnitsToWorldUnits(manifestPlaneMetrics, offsetX)
+    translateAnimation:SetTranslateOffsets(startX, startY, startZ, endX, endY, endZ)
 
     self:StartAnimation(animationTimeline)
 
@@ -486,7 +530,32 @@ function ZO_CrownCratesPack:Hide()
     local endY = startY + ZO_CrownCrates.ConvertUIUnitsToWorldUnits(manifestPlaneMetrics, ZO_CROWN_CRATES_PACK_HIDE_OFFSET_Y_UI)
     local endZ = startZ
     translateAnimation:SetTranslateOffsets(startX, startY, startZ, endX, endY, endZ)
-   
+
+    self:StartAnimation(timeline)
+
+    self:StartGlowDown()
+    self:HideInfo()
+end
+
+function ZO_CrownCratesPack:HideAndExitToSide(direction)
+    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_PACK_GLOW)
+    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_PACK_SELECT)
+    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_PACK_DESELECT)
+
+    local timeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_PACK_HIDE_AND_EXIT_SIDE, self.control, function(timeline, completedPlaying)
+        if completedPlaying then
+            self.owner:OnManifestPackOutComplete()
+        end
+    end)
+    local translateAnimation = timeline:GetAnimation(1)
+    local startX, startY, startZ = self.control:Get3DRenderSpaceOrigin()
+    local endY = startY
+    local endZ = startZ
+    local offsetX = ZO_CROWN_CRATES_PACK_HIDE_AND_EXIT_SIDE_OFFSET_X_UI * direction
+    local manifestPlaneMetrics = self.owner:GetManifestCameraPlaneMetrics()
+    local endX = startX + ZO_CrownCrates.ConvertUIUnitsToWorldUnits(manifestPlaneMetrics, offsetX)
+    translateAnimation:SetTranslateOffsets(startX, startY, startZ, endX, endY, endZ)
+
     self:StartAnimation(timeline)
 
     self:StartGlowDown()
@@ -510,7 +579,7 @@ function ZO_CrownCratesPack:Choose()
     local endY = startY + ZO_CrownCrates.ConvertUIUnitsToWorldUnits(manifestPlaneMetrics, ZO_CROWN_CRATES_PACK_CHOOSE_OFFSET_Y_UI)
     local endZ = startZ
     translateAnimation:SetTranslateOffsets(startX, startY, startZ, endX, endY, endZ)
-   
+
     local rotateAnimation = timeline:GetAnimation(2)
     local startPitch, startYaw, startRoll = self.control:Get3DRenderSpaceOrientation()
     rotateAnimation:SetRotationValues(startPitch, startYaw, startRoll, ZO_CROWN_CRATES_PACK_CHOOSEN_PITCH_RADIANS, ZO_CROWN_CRATES_PACK_CHOOSEN_YAW_RADIANS, ZO_CROWN_CRATES_PACK_CHOOSEN_ROLL_RADIANS)
@@ -520,7 +589,7 @@ function ZO_CrownCratesPack:Choose()
     self:StartGlowUp()
 
     local boxOpenTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_PACK_OPEN, self.box.lid)
-    self:StartAnimation(boxOpenTimeline) 
+    self:StartAnimation(boxOpenTimeline)
 
     self:HideInfo()
 end
@@ -529,7 +598,7 @@ end
 --Crown Crates Pack Choosing--
 ------------------------------
 
-ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE = 5
+ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE = 4
 
 ZO_CrownCratesPackChoosing = ZO_Object:Subclass()
 
@@ -550,28 +619,45 @@ function ZO_CrownCratesPackChoosing:Initialize(owner)
 end
 
 function ZO_CrownCratesPackChoosing:GetStateMachine()
-	return self.stateMachine
+    return self.stateMachine
 end
 
 function ZO_CrownCratesPackChoosing:SetStateMachine(stateMachine)
-	self.stateMachine = stateMachine
+    self.stateMachine = stateMachine
 end
 
 function ZO_CrownCratesPackChoosing:GetOwner()
-	return self.owner
+    return self.owner
 end
 
 function ZO_CrownCratesPackChoosing:InitializePackPool()
     local reset = function(pack)
         pack:Reset()
-    end    
+    end
     local factory = function(pool)
                         local pack = ZO_CrownCratesPack:New(CreateControlFromVirtual("$(parent)Pack", self.owner:GetControl(), "ZO_CrownCratePack", self.nextPackIndex), self)
                         self.nextPackIndex = self.nextPackIndex + 1
-                        return pack          
+                        return pack
                     end
-    
+
     self.packPool = ZO_ObjectPool:New(factory, reset)
+
+    self.pageChangeFrameControl = CreateControlFromVirtual("$(parent)PageChangeFrame", self.owner:GetControl(), "ZO_PackChoosingPageChangeFrame")
+    self.leftArrow = self.pageChangeFrameControl:GetNamedChild("LeftArrow")
+    self.rightArrow = self.pageChangeFrameControl:GetNamedChild("RightArrow")
+    self.leftArrowGamepadDirectionIndicator = self.leftArrow:GetNamedChild("GamepadDirectionIndicator")
+    self.rightArrowGamepadDirectionIndicator = self.rightArrow:GetNamedChild("GamepadDirectionIndicator")
+
+    self.leftArrow:SetHandler("OnClicked", function() self:RequestPreviousPage() end)
+    self.rightArrow:SetHandler("OnClicked", function() self:RequestNextPage() end)
+
+    self.pageIndicatorContainer = ZO_PackChoosingPageIndicator
+    self.pageIndicatorLabel = self.pageIndicatorContainer.pageIndicator
+
+    self:SetNumPages(1)
+    self:SetCurrentPage(1)
+
+    ZO_PlatformStyle:New(function() self:RefreshPlatformStyle() end)
 end
 
 function ZO_CrownCratesPackChoosing:InitializeKeybinds()
@@ -617,7 +703,21 @@ function ZO_CrownCratesPackChoosing:InitializeKeybinds()
                     return true
                 end
                 return false, GetString("SI_LOOTCRATEOPENRESPONSE", LOOT_CRATE_OPEN_RESPONSE_OUT_OF_ALL_LOOT_CRATES)
-            end
+            end,
+        },
+
+        {
+            ethereal = true,
+            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+            callback = function() self:RequestNextPage() end,
+            enabled = function() return self.showPagination end,
+        },
+
+        {
+            ethereal = true,
+            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
+            callback = function() self:RequestPreviousPage() end,
+            enabled = function() return self.showPagination end,
         },
 
         ZO_CROWN_CRATES_BUY_CRATES_KEYBIND_GAMEPAD,
@@ -636,13 +736,95 @@ function ZO_CrownCratesPackChoosing:GetManifestCameraPlaneMetrics()
     return self.manifestCameraPlaneMetrics
 end
 
+do
+    local KEYBOARD_ARROW_BUTTON_TEXTURES =
+    {
+        LEFT = {
+            NORMAL = "EsoUI/Art/Buttons/large_leftArrow_up.dds",
+            PRESSED = "EsoUI/Art/Buttons/large_leftArrow_down.dds",
+            MOUSEOVER = "EsoUI/Art/Buttons/large_leftArrow_over.dds",
+            DISABLED = "EsoUI/Art/Buttons/large_leftArrow_disabled.dds",
+        },
+        RIGHT = {
+            NORMAL = "EsoUI/Art/Buttons/large_rightArrow_up.dds",
+            PRESSED = "EsoUI/Art/Buttons/large_rightArrow_down.dds",
+            MOUSEOVER = "EsoUI/Art/Buttons/large_rightArrow_over.dds",
+            DISABLED = "EsoUI/Art/Buttons/large_rightArrow_disabled.dds",
+        },
+    }
+
+    local LEFT_SHOULDER_TEXTURE = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER)
+    local RIGHT_SHOULDER_TEXTURE = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER)
+
+    local GAMEPAD_ARROW_BUTTON_TEXTURES =
+    {
+        LEFT = {
+            NORMAL = LEFT_SHOULDER_TEXTURE,
+            PRESSED = LEFT_SHOULDER_TEXTURE,
+            MOUSEOVER = LEFT_SHOULDER_TEXTURE,
+            DISABLED = LEFT_SHOULDER_TEXTURE,
+        },
+        RIGHT = {
+            NORMAL = RIGHT_SHOULDER_TEXTURE,
+            PRESSED = RIGHT_SHOULDER_TEXTURE,
+            MOUSEOVER = RIGHT_SHOULDER_TEXTURE,
+            DISABLED = RIGHT_SHOULDER_TEXTURE,
+        },
+    }
+
+    local function SetButtonTextures(btn, textures)
+        btn:SetNormalTexture(textures.NORMAL)
+        btn:SetPressedTexture(textures.PRESSED)
+        btn:SetMouseOverTexture(textures.MOUSEOVER)
+        btn:SetDisabledTexture(textures.DISABLED)
+    end
+
+    function ZO_CrownCratesPackChoosing:RefreshPlatformStyle()
+        self.leftArrow:ClearAnchors()
+        self.rightArrow:ClearAnchors()
+        self.pageIndicatorContainer:ClearAnchors()
+
+        local buttonTextures
+        local isGamepadMode = IsInGamepadPreferredMode()
+        if isGamepadMode then
+            buttonTextures = GAMEPAD_ARROW_BUTTON_TEXTURES
+        else
+            buttonTextures = KEYBOARD_ARROW_BUTTON_TEXTURES
+        end
+
+        self.leftArrowGamepadDirectionIndicator:SetHidden(not isGamepadMode)
+        self.rightArrowGamepadDirectionIndicator:SetHidden(not isGamepadMode)
+
+        -- we're aiming to get a point at the middle of the crates for anchoring, but we'll subtract 25 to get it to look a bit better
+        local arrowYOffset = ZO_CROWN_CRATES_PACK_OFFSET_Y_UI + ZO_CrownCrates.GetBottomOffsetUI() + (ZO_CROWN_CRATES_PACK_WIDTH_UI* 0.5) - 25
+        local arrowXOffset = ZO_CROWN_CRATES_PAGE_CHANGE_ARROW_OFFSET_X_UI
+
+        self.leftArrow:SetAnchor(BOTTOMLEFT, nil, BOTTOMLEFT, arrowXOffset, -arrowYOffset)
+        self.rightArrow:SetAnchor(BOTTOMRIGHT, nil, BOTTOMRIGHT, -arrowXOffset, -arrowYOffset)
+
+        SetButtonTextures(self.leftArrow, buttonTextures.LEFT)
+        SetButtonTextures(self.rightArrow, buttonTextures.RIGHT)
+
+        ApplyTemplateToControl(self.pageIndicatorContainer, ZO_GetPlatformTemplate("ZO_PackChoosingPageIndicator"))
+    end
+end
+
+function ZO_CrownCratesPackChoosing:HidePageControls(setHidden)
+    self.pageChangeFrameControl:SetHidden(setHidden)
+    self.pageIndicatorContainer:SetHidden(setHidden)
+end
+
 function ZO_CrownCratesPackChoosing:ResetPacks()
     self.packPool:ReleaseAllObjects()
-    self.currentPage = nil
     self.crateIds = nil
     self.chosenPack = nil
     ZO_ClearNumericallyIndexedTable(self.packsInVisualOrder)
     self.selectedPack = nil
+    self:HidePageControls(true)
+end
+
+function ZO_CrownCratesPackChoosing:HasInitializedPacks()
+    return self.crateIds ~= nil
 end
 
 function ZO_CrownCratesPackChoosing:CreateRectagularPrism(parentControl, width, height, depth, registrationX, registrationY, registrationZ, texture)
@@ -651,7 +833,7 @@ function ZO_CrownCratesPackChoosing:CreateRectagularPrism(parentControl, width, 
 
     local centerX = width * (0.5 - registrationX)
     local centerY = height * (0.5 - registrationY)
-    local centerZ = depth * (0.5 - registrationZ) 
+    local centerZ = depth * (0.5 - registrationZ)
 
     --Front
     local frontFace = self:CreateCenteredFace(prism, width, height)
@@ -702,35 +884,55 @@ function ZO_CrownCratesPackChoosing:GetPack(packIndex)
     return self.packPool:AcquireObject(packIndex)
 end
 
-function ZO_CrownCratesPackChoosing:Show()
+function ZO_CrownCratesPackChoosing:UpdatePackData()
     local crateIds = {}
     for crateId in ZO_GetNextOwnedCrownCrateIdIter do
         table.insert(crateIds, crateId)
     end
+    -- sort so the newest crates should be at the front
+    table.sort(crateIds, function(a, b) return a > b end)
+
     self.crateIds = crateIds
-    self.currentPage = 1
+
     if #self.crateIds > 0 then
-        self.numPages = zo_ceil(#self.crateIds / ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE)
+        self:SetNumPages(zo_ceil(#self.crateIds / ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE))
     else
-        self.numPages = 0
+        self:SetNumPages(1)
     end
+
+    if self.currentPage > self.numPages then
+        self:SetCurrentPage(self.numPages)
+    end
+
+    self.showPagination = self.numPages > 1
+end
+
+function ZO_CrownCratesPackChoosing:Show()
+    if not self:HasInitializedPacks() then
+        self:UpdatePackData()
+    end
+
     self:StartShowAnimation()
 end
 
 function ZO_CrownCratesPackChoosing:AnimateChoice()
     self.chosenPack:Choose()
 
-    for _, pack in ipairs(self.packPool:GetActiveObjects()) do
+    for _, pack in ipairs(self.packsInVisualOrder) do
         if pack ~= self.chosenPack then
             pack:Hide()
         end
     end
+
+    self:HidePageControls(true)
 end
 
 function ZO_CrownCratesPackChoosing:Hide()
     for _, pack in ipairs(self.packPool:GetActiveObjects()) do
         pack:Hide()
     end
+
+    self:HidePageControls(true)
 end
 
 function ZO_CrownCratesPackChoosing:ComputeSlotCenterWorldPosition(planeMetrics, spacingUI, bottomOffsetUI, bottomOffsetWorld, slotIndex, totalSlots)
@@ -744,6 +946,13 @@ function ZO_CrownCratesPackChoosing:ComputeSlotCenterWorldPosition(planeMetrics,
     local z = planeMetrics.depthFromCamera + ZO_CROWN_CRATES_PACK_DEPTH_WORLD * 0.5
 
     return x, y, z
+end
+
+function ZO_CrownCratesPackChoosing:GetCurrentPageIndices()
+    local startIndex = 1 + (self.currentPage - 1) * ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE
+    local pageEndIndex = self.currentPage * ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE
+    local endIndex = zo_min(pageEndIndex, #self.crateIds)
+    return startIndex, endIndex, pageEndIndex
 end
 
 function ZO_CrownCratesPackChoosing:StartPackShowAnimation(packIndex, numPacks, crateId)
@@ -761,9 +970,7 @@ end
 
 function ZO_CrownCratesPackChoosing:StartShowAnimation()
     if #self.crateIds > 0 then
-        local startIndex = 1 + (self.currentPage - 1) * ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE
-        local endIndex = self.currentPage * ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE
-        endIndex = zo_min(endIndex, #self.crateIds)
+        local startIndex, endIndex = self:GetCurrentPageIndices()
         ZO_ClearNumericallyIndexedTable(self.packsInVisualOrder)
 
         local packIndex = 1
@@ -771,6 +978,44 @@ function ZO_CrownCratesPackChoosing:StartShowAnimation()
         for i = startIndex, endIndex do
             local crateId = self.crateIds[i]
             self:StartPackShowAnimation(packIndex, numPacks, crateId)
+            packIndex = packIndex + 1
+        end
+    else
+        self:StartPackShowAnimation(1, 1)
+    end
+end
+
+function ZO_CrownCratesPackChoosing:StartPackShowNewPageAnimation(packIndex, numPacks, crateId, direction)
+    local pack = self:GetPack(packIndex)
+    pack:InitializeForShow(crateId, packIndex)
+    local endX, endY, endZ = self:ComputeSlotCenterWorldPosition(self.manifestCameraPlaneMetrics, ZO_CROWN_CRATES_PACK_SPACING_UI, ZO_CROWN_CRATES_PACK_OFFSET_Y_UI + ZO_CrownCrates.GetBottomOffsetUI(), 0, packIndex, numPacks)
+
+    if not direction then
+        direction = ZO_CROWN_CRATES_PAGE_RIGHT
+    end
+
+    local callbackDelay
+    if direction == ZO_CROWN_CRATES_PAGE_RIGHT then
+        callbackDelay = (packIndex - 1) * ZO_CROWN_CRATES_PACK_SHOW_SPACING_MS + 1
+    else
+        callbackDelay = (numPacks - packIndex) * ZO_CROWN_CRATES_PACK_SHOW_SPACING_MS + 1
+    end
+    pack:CallLater(function()
+        pack:ShowFromSide(endX, endY, endZ, direction)
+    end, callbackDelay)
+    self.packsInVisualOrder[packIndex] = pack
+end
+
+function ZO_CrownCratesPackChoosing:StartPageShowAnimation()
+    if #self.crateIds > 0 then
+        local startIndex, endIndex = self:GetCurrentPageIndices()
+        ZO_ClearNumericallyIndexedTable(self.packsInVisualOrder)
+
+        local packIndex = 1
+        local numPacks = endIndex - startIndex + 1
+        for i = startIndex, endIndex do
+            local crateId = self.crateIds[i]
+            self:StartPackShowNewPageAnimation(packIndex, numPacks, crateId, self.pageDirection)
             packIndex = packIndex + 1
         end
     else
@@ -794,7 +1039,7 @@ function ZO_CrownCratesPackChoosing:Choose(chosenPack)
                 ZO_AlertEvent(EVENT_CROWN_CRATE_OPEN_RESPONSE, crownCrateId, LOOT_CRATE_OPEN_RESPONSE_FAIL_NO_INVENTORY_SPACE)
             end
         end
-    end    
+    end
 end
 
 function ZO_CrownCratesPackChoosing:OnManifestPackInComplete()
@@ -803,6 +1048,24 @@ end
 
 function ZO_CrownCratesPackChoosing:OnManifestPackOutComplete()
     self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_OUT_COMPLETE)
+end
+
+function ZO_CrownCratesPackChoosing:RefreshPageIndicator()
+    self.pageIndicatorLabel:SetText(zo_strformat(SI_CROWN_CRATE_PAGE_INDICATOR_FORMAT, self.currentPage, self.numPages))
+end
+
+function ZO_CrownCratesPackChoosing:SetCurrentPage(newPage)
+    if self.currentPage ~= newPage then
+        self.currentPage = newPage
+        self:RefreshPageIndicator()
+    end
+end
+
+function ZO_CrownCratesPackChoosing:SetNumPages(pageCount)
+    if self.numPages ~= pageCount then
+        self.numPages = pageCount
+        self:RefreshPageIndicator()
+    end
 end
 
 function ZO_CrownCratesPackChoosing:GetCurrentPage()
@@ -819,8 +1082,60 @@ function ZO_CrownCratesPackChoosing:GetNextPage()
     return page > self.numPages and 1 or page
 end
 
+function ZO_CrownCratesPackChoosing:PageOutActivePacks(direction)
+    local numPacks = #self.packsInVisualOrder
+    for packIndex, pack in ipairs(self.packsInVisualOrder) do
+        local callbackDelay
+        if direction == ZO_CROWN_CRATES_PAGE_RIGHT then
+            callbackDelay = (packIndex - 1) * ZO_CROWN_CRATES_PACK_SHOW_SPACING_MS + 1
+        else
+            callbackDelay = (numPacks - packIndex) * ZO_CROWN_CRATES_PACK_SHOW_SPACING_MS + 1
+        end
+        pack:CallLater(function()
+                        pack:HideAndExitToSide(direction)
+                    end, callbackDelay)
+    end
+    ZO_ClearNumericallyIndexedTable(self.packsInVisualOrder)
+end
+
+function ZO_CrownCratesPackChoosing:RequestPreviousPage()
+    local previousPage = self:GetPreviousPage()
+    if previousPage ~= self.currentPage then
+        self.pageDirection = ZO_CROWN_CRATES_PAGE_LEFT
+        self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_PAGE_OUT)
+    end
+end
+
+function ZO_CrownCratesPackChoosing:RequestNextPage()
+    local nextPage = self:GetNextPage()
+    if nextPage ~= self.currentPage then
+        self.pageDirection = ZO_CROWN_CRATES_PAGE_RIGHT
+        self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.MANIFEST_PAGE_OUT)
+    end
+end
+
+function ZO_CrownCratesPackChoosing:ResetAllPacks()
+   for _, pack in ipairs(self.packPool:GetActiveObjects()) do
+        pack:Reset()
+    end
+end
+
+function ZO_CrownCratesPackChoosing:SetupForPageIn()
+    if self.pageDirection == ZO_CROWN_CRATES_PAGE_LEFT then
+        self:SetCurrentPage(self:GetPreviousPage())
+    else
+        self:SetCurrentPage(self:GetNextPage())
+    end
+
+    self:ResetAllPacks()
+end
+
+function ZO_CrownCratesPackChoosing:StartPageOutAnimation()
+    self:PageOutActivePacks(self.pageDirection)
+end
+
 function ZO_CrownCratesPackChoosing:GetNumPacksToDisplayOnPage(page)
-    if self.crateIds then
+    if self:HasInitializedPacks() then
         if page > 0 and page < self.numPages then
             return ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE
         elseif page == self.numPages then
@@ -848,6 +1163,24 @@ function ZO_CrownCratesPackChoosing:RemoveManifestKeybinds()
         else
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keyboardManifestKeybindStripDescriptor)
         end
+    end
+end
+
+function ZO_CrownCratesPackChoosing:OnActivate()
+    self:AddManifestKeybinds()
+    self:RefreshSelectedPack()
+    self:HidePageControls(not self.showPagination)
+    if self.showPagination then
+        self.leftArrow:SetEnabled(true)
+        self.rightArrow:SetEnabled(true)
+    end
+end
+
+function ZO_CrownCratesPackChoosing:OnDeactivate()
+    self:RemoveManifestKeybinds()
+    if self.showPagination then
+        self.leftArrow:SetEnabled(false)
+        self.rightArrow:SetEnabled(false)
     end
 end
 

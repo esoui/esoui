@@ -1056,10 +1056,6 @@ function UnitFrame:RefreshUnit(unitChanged)
             local localPlayerIsTarget = AreUnitsEqual("player", "reticleover")
             validTarget = UnitFrames:IsTargetOfTargetEnabled() and not localPlayerIsTarget
         end
-
-        if IsUnitLivestock(self.unitTag) then
-            TriggerTutorial(TUTORIAL_TRIGGER_LIVESTOCK_TARGETED)
-        end
     end
 
     if(unitChanged or self.hasTarget ~= validTarget) then
@@ -1295,7 +1291,7 @@ function UnitFrame:SetPlatformDifficultyTextures(difficulty)
 end
 
 function UnitFrame:UpdateDifficulty()
-    if(self.leftBracket) then
+    if self.leftBracket then
         local difficulty = GetUnitDifficulty(self:GetUnitTag())
 
         --show difficulty for neutral and hostile NPCs
@@ -1307,10 +1303,10 @@ function UnitFrame:UpdateDifficulty()
         self.leftBracketUnderlay:SetHidden(true)
         self.rightBracketUnderlay:SetHidden(true)
 
-        if(showsDifficulty) then
+        if showsDifficulty then
             self:SetPlatformDifficultyTextures(difficulty)
 
-            if(difficulty == MONSTER_DIFFICULTY_DEADLY) then
+            if difficulty == MONSTER_DIFFICULTY_DEADLY and not IsInGamepadPreferredMode() then
                 self.leftBracketUnderlay:SetHidden(false)
                 self.rightBracketUnderlay:SetHidden(false)
             end

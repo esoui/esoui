@@ -169,6 +169,8 @@
                     </Controls>
                 </Backdrop>
 
+                <Label name="$(parent)WarningText" inherits="ZO_SmallKeyMarkupLabel" lineSpacing="0" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" />
+
                 <Control name="$(parent)RadioButtonContainer" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
                 </Control>
@@ -181,5 +183,5 @@
                 ZO_TwoButtonDialog_OnInitialized(self, 1)
             </OnInitialized>
         </TopLevelControl>
-</Controls>
+    </Controls>
 </GuiXml>

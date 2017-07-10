@@ -416,7 +416,7 @@ function ZO_SharedInventoryManager:ComputeDynamicStatusMask(...)
 end
 
 function ZO_SharedInventoryManager:RefreshStatusSortOrder(slotData)
-    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isBoPTradeable, slotData.brandNew)
+    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isBoPTradeable, slotData.brandNew, slotData.bagId == BAG_WORN)
 end
 
 function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagId, slotIndex, isNewItem)
@@ -592,11 +592,11 @@ do
     end
 
     local function UpdateAlliancePoints(alliancePointsLabel, alliancePointsOptions)
-        ZO_CurrencyControl_SetSimpleCurrency(alliancePointsLabel, CURT_ALLIANCE_POINTS, GetAlliancePoints(), alliancePointsOptions)
+        ZO_CurrencyControl_SetSimpleCurrency(alliancePointsLabel, CURT_ALLIANCE_POINTS, GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS), alliancePointsOptions)
     end
 
     local function UpdateBankedMoney(currencyLabel, currencyOptions)
-        ZO_CurrencyControl_SetSimpleCurrency(currencyLabel, CURT_MONEY, GetBankedMoney(), currencyOptions)
+        ZO_CurrencyControl_SetSimpleCurrency(currencyLabel, CURT_MONEY, GetBankedCurrencyAmount(CURT_MONEY), currencyOptions)
     end
 
     local function UpdateGuildBankedMoney(currencyLabel, currencyOptions)
@@ -638,7 +638,7 @@ do
     end
 
     function ZO_SharedInventory_ConnectBankedCurrencyLabel(currencyLabel, currencyOptions)
-        ConnectPlayerLabel(currencyLabel, currencyOptions, EVENT_BANKED_MONEY_UPDATE, UpdateBankedMoney)
+        ConnectPlayerLabel(currencyLabel, currencyOptions, EVENT_BANKED_CURRENCY_UPDATE, UpdateBankedMoney)
     end
 
     function ZO_SharedInventory_ConnectGuildBankedCurrencyLabel(currencyLabel, currencyOptions)

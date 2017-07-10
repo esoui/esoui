@@ -1,22 +1,6 @@
 --Guild Rank
 ----------------
 
-ZO_GUILD_RANKS_PERMISSIONS =
-{
-    {   GUILD_PERMISSION_CHAT,                  GUILD_PERMISSION_SET_MOTD           },
-    {   GUILD_PERMISSION_OFFICER_CHAT_WRITE,    GUILD_PERMISSION_DESCRIPTION_EDIT   },
-    {   GUILD_PERMISSION_OFFICER_CHAT_READ,     GUILD_PERMISSION_INVITE             },
-    {   nil,                                    nil                                 },
-    {   GUILD_PERMISSION_CLAIM_AVA_RESOURCE,    GUILD_PERMISSION_NOTE_READ          },
-    {   GUILD_PERMISSION_RELEASE_AVA_RESOURCE,  GUILD_PERMISSION_NOTE_EDIT          },
-    {   nil,                                    GUILD_PERMISSION_PROMOTE            },
-    {   GUILD_PERMISSION_BANK_DEPOSIT,          GUILD_PERMISSION_DEMOTE             },
-    {   GUILD_PERMISSION_BANK_WITHDRAW,         GUILD_PERMISSION_REMOVE             },
-    {   nil,                                    nil                                 },
-    {   GUILD_PERMISSION_BANK_WITHDRAW_GOLD,    nil                                 },
-    {   GUILD_PERMISSION_STORE_SELL,            GUILD_PERMISSION_GUILD_KIOSK_BID    },
-}
-
 ZO_GuildRank_Shared = ZO_Object:Subclass()
 
 function ZO_GuildRank_Shared:New(guildRanksObject, guildId, index, customName)
@@ -24,6 +8,7 @@ function ZO_GuildRank_Shared:New(guildRanksObject, guildId, index, customName)
 
     rank.guildId = guildId
     rank.index = index
+    rank.guildRanksObject = guildRanksObject
 
     rank.permissionSet = {}
     if(rank:IsNewRank()) then
@@ -31,7 +16,7 @@ function ZO_GuildRank_Shared:New(guildRanksObject, guildId, index, customName)
         rank.name = customName
         rank.hasCustomName = true
         rank.iconIndex = guildRanksObject:GetUnusedIconIndex()
-        for i = 1, GetNumGuildPermissions() do
+        for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
             rank.permissionSet[i] = false
         end
     else
@@ -39,7 +24,7 @@ function ZO_GuildRank_Shared:New(guildRanksObject, guildId, index, customName)
         rank.name = GetFinalGuildRankName(guildId, index)
         rank.hasCustomName = GetGuildRankCustomName(guildId, index) ~= ""
         rank.iconIndex = GetGuildRankIconIndex(guildId, index)
-        for i = 1, GetNumGuildPermissions() do
+        for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
             rank.permissionSet[i] = DoesGuildRankHavePermission(guildId, index, i)
         end
     end
@@ -95,6 +80,23 @@ end
 
 function ZO_GuildRank_Shared:SetPermission(permission, enabled)
     self.permissionSet[permission] = enabled
+    if enabled then
+        local numDependencies = GetNumGuildPermissionDependencies(permission)
+        for i = 1, numDependencies do
+            local dependency = GetGuildPermissionDependency(permission, i)
+            if dependency >= GUILD_PERMISSION_MIN_VALUE and dependency <= GUILD_PERMISSION_MAX_VALUE then
+                self:SetPermission(dependency, enabled)
+            end
+        end
+    end
+
+    -- make sure the view gold permission and the bank history permissions are all set to the same value
+    if permission == GUILD_PERMISSION_BANK_VIEW_GOLD then
+        self.permissionSet[GUILD_PERMISSION_BANK_VIEW_WITHDRAW_HISTORY] = enabled
+        self.permissionSet[GUILD_PERMISSION_BANK_VIEW_DEPOSIT_HISTORY] = enabled
+    end
+
+    self.guildRanksObject:RefreshPermissions(self)
 end
 
 function ZO_GuildRank_Shared:GetPermissions()
@@ -129,7 +131,7 @@ function ZO_GuildRank_Shared:NeedsSave()
         return true
     end
 
-    for i = 1, GetNumGuildPermissions() do
+    for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
         if(self.permissionSet[i] ~= DoesGuildRankHavePermission(self.guildId, self.index, i)) then
             return true
         end
@@ -150,7 +152,7 @@ end
 
 function ZO_GuildRank_Shared:CopyPermissionsFrom(copyRank)
     ZO_ClearNumericallyIndexedTable(self.permissionSet)
-    for i = 1, GetNumGuildPermissions() do
+    for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
         self.permissionSet[i] = copyRank.permissionSet[i]
     end
 end
@@ -371,8 +373,23 @@ function ZO_GuildRanks_Shared:GetRankById(rankId)
     end
 end
 
-
 function ZO_GuildRanks_Shared:GetRankIndexById(rankId)
     local rank, index = self:GetRankById(rankId)
     return index
+end
+
+function ZO_GuildRanks_Shared:RefreshPermissions(rank)
+    assert(false) -- override in derived function
+end
+
+function ZO_GuildRanks_Shared.AreAnyRequisitePermissionsEnabled(dependencyPermission, rank)
+    local numRequisitePermissions = GetNumGuildPermissionRequisites(dependencyPermission)
+    for i = 1, numRequisitePermissions do
+        local requisitePermission = GetGuildPermissionRequisite(dependencyPermission, i)
+        if rank:IsPermissionSet(requisitePermission) then
+            return true
+        end
+    end
+
+    return false
 end

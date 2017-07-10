@@ -390,11 +390,13 @@ CSH[EVENT_SKILL_RANK_UPDATE] = function(skillType, lineIndex, rank)
     -- crafting skill updates get deferred if they're increased while crafting animations are in progress
     -- ZO_Skills_TieSkillInfoHeaderToCraftingSkill handles triggering the deferred center screen announce in that case
     if skillType ~= SKILL_TYPE_RACIAL and (skillType ~= SKILL_TYPE_TRADESKILL or not ZO_CraftingUtils_IsPerformingCraftProcess()) then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
-        local lineName = GetSkillLineInfo(skillType, lineIndex)
-        messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, rank))
-        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
-        return messageParams
+        local lineName, _, discovered = GetSkillLineInfo(skillType, lineIndex)
+        if discovered then
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
+            messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, rank))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
+            return messageParams
+        end
     end
 end
 
@@ -611,7 +613,8 @@ CSH[EVENT_CAPTURE_AREA_STATE_CHANGED] = function(objectiveKeepId, objectiveId, b
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL)  then
         if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_CAPTURED then
             local text, soundId
-            local captureAreaIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), 80, 80)
+            --150% because the icon textures contain a good bit of empty space
+            local captureAreaIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
             if owningAlliance == GetUnitBattlegroundAlliance("player") then
                 text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_CAPTURED, GetColoredBattlegroundYourTeamText(owningAlliance), captureAreaIcon)
                 soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_CAPTURED_OWN_TEAM
@@ -626,7 +629,8 @@ end
 
 CSH[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, originalOwnerAlliance, holderAlliance, lastHolderAlliance, pinType)
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
-        local flagIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), 80, 80)
+        --150% because the icon textures contain a good bit of empty space
+        local flagIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
         if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_TAKEN then
             local text, soundId
             if holderAlliance == GetUnitBattlegroundAlliance("player") then
@@ -665,7 +669,8 @@ end
 
 CSH[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, holderRawCharacterName, holderDisplayName, lastHolderRawCharacterName, lastHolderDisplayName, pinType)
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
-        local murderballIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), 80, 80)
+        --150% because the icon textures contain a good bit of empty space
+        local murderballIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
         if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_TAKEN then
             local text, soundId
             if holderAlliance == GetUnitBattlegroundAlliance("player") then
@@ -687,7 +692,7 @@ CSH[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiveKeepId, objectiveId, bat
             end
             return CreatePvPMessageParams(soundId, text, CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_RETURNED or objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_RETURNED_BY_TIMER then
-            return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_MURDERBALL_RETURNED, zo_strformat(SI_BATTLEGROUND_FLAG_RETURNED, objectiveName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+            return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_MURDERBALL_RETURNED, zo_strformat(SI_BATTLEGROUND_FLAG_RETURNED, murderballIcon), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         end
     end
 end
@@ -1020,10 +1025,10 @@ CSH[EVENT_RIDING_SKILL_IMPROVEMENT] = function(ridingSkill, previous, current, s
     return messageParams
 end
 
-CSH[EVENT_ESO_PLUS_SUBSCRIPTION_STATUS_CHANGED] = function(hasSubscription)
+CSH[EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED] = function(hasFreeTrial)
     local text
     local soundId
-    if hasSubscription then
+    if hasFreeTrial then
         text = GetString(SI_ESO_PLUS_FREE_TRIAL_STARTED)
         soundId = SOUNDS.ESO_PLUS_TRIAL_STARTED
     else
