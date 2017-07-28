@@ -107,7 +107,8 @@ GUILD_HISTORY_CATEGORIES =
                     [GUILD_EVENT_BANKGOLD_KIOSK_BID] = true,
                     [GUILD_EVENT_BANKGOLD_KIOSK_BID_REFUND] = true,
                     [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = true,
-                }
+                },
+                gatingPermission = GUILD_PERMISSION_BANK_VIEW_GOLD,
             },
         },
     },

@@ -99,10 +99,7 @@ function ZO_GamepadTradingHouse_BrowseResults:CanPreviewTradingHouseItem(data)
     if data and not data.isGuildSpecificItem then
         local tradingHouseIndex = ZO_Inventory_GetSlotIndex(data)
         local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
-        local itemType = GetItemLinkItemType(itemLink)
-        if itemType == ITEMTYPE_FURNISHING then
-            return true
-        end
+        return ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
     end
 
     return false

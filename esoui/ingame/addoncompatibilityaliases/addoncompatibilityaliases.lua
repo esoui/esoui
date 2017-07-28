@@ -282,8 +282,8 @@ function GetFirstKnownStyleIndex()
 end
 
 function GetSmithingStyleItemInfo(itemStyleId)
-    local styleItemLink = GetItemStyleMaterialLink(validItemStyleId)
-    local alwaysHideIfLocked = GetItemStyleInfo(validItemStyleId)
+    local styleItemLink = GetItemStyleMaterialLink(itemStyleId)
+    local alwaysHideIfLocked = GetItemStyleInfo(itemStyleId)
     local name = GetItemLinkName(styleItemLink)
     local icon, sellPrice, meetsUsageRequirement = GetItemLinkInfo(styleItemLink)
     local quality = GetItemLinkQuality(styleItemLink)

@@ -18,6 +18,12 @@
                 </Texture>
                 <Button name="$(parent)Check" inherits="ZO_CheckButton">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                    <OnMouseEnter>
+                        ZO_GuildRankPermission_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildRankPermission_OnMouseExit(self)
+                    </OnMouseExit>
                     <OnInitialized>
                         ZO_CheckButton_SetToggleFunction(self, ZO_GuildPermissionCheck_OnToggled)
                     </OnInitialized>

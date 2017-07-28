@@ -1654,14 +1654,14 @@ local actionHandlers =
 
     ["mark_as_junk"] =  function(inventorySlot, slotActions)
                             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if(not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
+                            if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
                             end
                         end,
 
     ["unmark_as_junk"] =    function(inventorySlot, slotActions)
                                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if(not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
+                                if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
                                     slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, false) end, "secondary")
                                 end
                             end,
@@ -1763,7 +1763,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_STORE_BUY] =                     { "buy", "buy_multiple", "link_to_chat", "report_item" },
     [SLOT_TYPE_STORE_BUYBACK] =                 { "buyback", "link_to_chat", "report_item" },
     [SLOT_TYPE_BUY_MULTIPLE] =                  NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "link_to_chat", "mark_as_locked", "unmark_as_locked", "mark_as_junk", "unmark_as_junk", "report_item" },
+    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
     [SLOT_TYPE_GUILD_BANK_ITEM] =               { "guild_bank_withdraw", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =        { "mail_detach", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_ATTACHMENT] =               NON_INTERACTABLE_ITEM_ACTIONS,

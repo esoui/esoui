@@ -494,3 +494,14 @@ end
 function ZO_ItemPreview_Shared:SetPreviewBufferMS(previewBufferMS)
     self.previewBufferMS = previewBufferMS
 end
+
+function ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
+    local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+    if itemType == ITEMTYPE_FURNISHING then
+        return true
+    elseif itemType == ITEMTYPE_RECIPE then
+        return IsItemLinkFurnitureRecipe(itemLink)
+    end
+
+    return false
+end

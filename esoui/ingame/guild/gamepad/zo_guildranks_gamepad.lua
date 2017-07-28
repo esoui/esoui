@@ -848,14 +848,21 @@ end
 
 function ZO_GuildRanks_Gamepad:RefreshChangePermissions()
     local selectedPermissionControl = self:GetSelectedPermissionControl()
-    if(selectedPermissionControl ~= nil) then
+    if selectedPermissionControl ~= nil then
         local iconControl = selectedPermissionControl:GetNamedChild("Icon")
         if(iconControl ~= nil) then
             self.selectorBoxControl:SetAnchor(CENTER, iconControl, CENTER, 0, 1)
         end
         
+        local permission = selectedPermissionControl.permission
         self.selectorBoxControl.selectedRank = self.selectedRank
-        self.selectorBoxControl.selectedPermission = selectedPermissionControl.permission
+        self.selectorBoxControl.selectedPermission = permission
+
+        local permissionInfo = ZO_GuildRanks_Shared.GetToolTipInfoForPermission(permission)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+        if permissionInfo then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, permissionInfo)
+        end
     end
 
     self:RefreshPermissions(self.selectedRank)
@@ -1084,6 +1091,7 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                     self:ActivateOptionsList(REFRESH_SCREEN)
                     self:RefreshPermissions(self.selectedRank)
+                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
                 else
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                     self:ActivateRankList(REFRESH_SCREEN)

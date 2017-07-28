@@ -764,6 +764,19 @@ function ZO_GuildRankIconSelector_OnMouseClicked(self)
     GUILD_RANKS:GuildRankIconSelector_OnMouseClicked(self)
 end
 
+function ZO_GuildRankPermission_OnMouseEnter(self)
+    local permission = self:GetParent().permission
+    local permissionInfo = ZO_GuildRanks_Shared.GetToolTipInfoForPermission(permission)
+    if permissionInfo then
+        InitializeTooltip(InformationTooltip, self, TOPRIGHT, -10, -10, TOPLEFT)
+        InformationTooltip:AddLine(permissionInfo, "", ZO_NORMAL_TEXT:UnpackRGB())
+    end
+end
+
+function ZO_GuildRankPermission_OnMouseExit(self)
+    ClearTooltip(InformationTooltip)
+end
+
 function ZO_GuildPermissionCheck_OnToggled(self, checked)
     GUILD_RANKS:GuildPermission_OnToggled(self:GetParent().permission, checked)
 end

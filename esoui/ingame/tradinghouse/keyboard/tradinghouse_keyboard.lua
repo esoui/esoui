@@ -1268,6 +1268,21 @@ end
 
 --[[ Globals ]]--
 
+local function GetTradingHouseIndexForPreviewFromSlot(storeEntrySlot)
+    local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(storeEntrySlot)
+
+    local slotType = ZO_InventorySlot_GetType(inventorySlot)
+    if slotType == SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT then
+        local tradingHouseIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+        local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
+        if ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink) then
+            return tradingHouseIndex
+        end
+    end
+
+    return nil
+end
+
 function ZO_TradingHouse_OnSearchResultClicked(searchResultSlot, button)
     -- left button for an inventory slot click will only try and drag and drop, but that
     -- should be handled for us by the OnReceiveDrag handler, so if we left click
@@ -1275,17 +1290,9 @@ function ZO_TradingHouse_OnSearchResultClicked(searchResultSlot, button)
     if button ~= MOUSE_BUTTON_INDEX_LEFT then
         ZO_InventorySlot_OnSlotClicked(searchResultSlot, button)
     else
-        local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(searchResultSlot)
-
-        local cursor = MOUSE_CURSOR_DO_NOT_CARE
-        local slotType = ZO_InventorySlot_GetType(inventorySlot)
-        if slotType == SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT then
-            local tradingHouseIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
-            local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
-            local itemType = GetItemLinkItemType(itemLink)
-            if itemType == ITEMTYPE_FURNISHING then
-                TRADING_HOUSE:PreviewSearchResult(tradingHouseIndex)
-            end
+        local tradingHouseIndex = GetTradingHouseIndexForPreviewFromSlot(searchResultSlot)
+        if tradingHouseIndex ~= nil then
+            TRADING_HOUSE:PreviewSearchResult(tradingHouseIndex)
         end
     end
 end
@@ -1293,17 +1300,11 @@ end
 function ZO_TradingHouse_OnSearchResultMouseEnter(searchResultSlot)
     ZO_InventorySlot_OnMouseEnter(searchResultSlot)
 
-    local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(searchResultSlot)
+    local tradingHouseIndex = GetTradingHouseIndexForPreviewFromSlot(searchResultSlot)
 
     local cursor = MOUSE_CURSOR_DO_NOT_CARE
-    local slotType = ZO_InventorySlot_GetType(inventorySlot)
-    if slotType == SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT then
-        local tradingHouseIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
-        local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
-        local itemType = GetItemLinkItemType(itemLink)
-        if itemType == ITEMTYPE_FURNISHING then
-            cursor = MOUSE_CURSOR_PREVIEW
-        end
+    if tradingHouseIndex ~= nil then
+        cursor = MOUSE_CURSOR_PREVIEW
     end
 
     WINDOW_MANAGER:SetMouseCursor(cursor)

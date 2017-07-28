@@ -393,3 +393,16 @@ function ZO_GuildRanks_Shared.AreAnyRequisitePermissionsEnabled(dependencyPermis
 
     return false
 end
+
+do
+
+    local PERMISSION_INFO = 
+    {
+        [GUILD_PERMISSION_GUILD_KIOSK_BID] = zo_strformat(SI_GUILD_PERMISSION_INFO_ONE_DEPENDENCY, GetString("SI_GUILDPERMISSION", GUILD_PERMISSION_BANK_VIEW_GOLD)) .. "\n\n" .. GetString(SI_GUILD_PERMISSION_INFO_GUILD_KIOSK_BID),
+        [GUILD_PERMISSION_BANK_WITHDRAW_GOLD] = zo_strformat(SI_GUILD_PERMISSION_INFO_ONE_DEPENDENCY, GetString("SI_GUILDPERMISSION", GUILD_PERMISSION_BANK_VIEW_GOLD)),
+        [GUILD_PERMISSION_BANK_VIEW_GOLD] = GetString(SI_GUILD_PERMISSION_INFO_BANK_VIEW_GOLD)
+    }
+    function ZO_GuildRanks_Shared.GetToolTipInfoForPermission(permission)
+        return PERMISSION_INFO[permission]
+    end
+end
