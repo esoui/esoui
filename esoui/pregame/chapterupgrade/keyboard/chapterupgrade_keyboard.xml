@@ -3,17 +3,6 @@
         <Label name="ZO_ChapterUpgrade_Keyboard_HeaderLabel" font="ZoFontWinH2" virtual="true" />
 
         <Label name="ZO_ChapterUpgrade_Keyboard_InfoLabel" font="ZoFontWinH3" virtual="true" />
-
-        <Control name="ZO_ChapterUpgrade_Keyboard_InstructionsSection" virtual="true">
-            <Controls>
-                <Control name="$(parent)Container" override="true">
-                    <Controls>
-                        <Label name="$(parent)Header" override="true" inherits="ZO_ChapterUpgrade_Keyboard_HeaderLabel" />
-                        <Label name="$(parent)Instructions" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InfoLabel" />
-                    </Controls>
-                </Control>
-            </Controls>
-        </Control>
         
         <Button name="ZO_ChapterUpgradeButton_Keyboard" font="ZoFontWinH2" inherits="ZO_ExtraLargeButton" virtual="true">
             <Dimensions x="230" y="60"/>
@@ -26,10 +15,10 @@
             <Controls>
                 <Control name="$(parent)TextContainer" override="true">
                     <Controls>
+                        <Label name="$(parent)ChapterSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Keyboard_HeaderLabel"/>
+                        <Label name="$(parent)ChapterSummary" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InfoLabel" />
                         <Label name="$(parent)RegistrationSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Keyboard_HeaderLabel"/>
                         <Label name="$(parent)RegistrationSummary" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InfoLabel" />
-                        <Label name="$(parent)CodeEntry" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InstructionsSection" />
-                        <Label name="$(parent)DigitalUpgrade" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InstructionsSection" />
                     </Controls>
                 </Control>
 

@@ -3,17 +3,6 @@
         <Label name="ZO_ChapterUpgrade_Gamepad_HeaderLabel" font="ZoFontGamepadBold27" virtual="true" />
 
         <Label name="ZO_ChapterUpgrade_Gamepad_InfoLabel" font="ZoFontGamepadCondensed34" virtual="true" />
-
-        <Control name="ZO_ChapterUpgrade_Gamepad_InstructionsSection" virtual="true">
-            <Controls>
-                <Control name="$(parent)Container" override="true">
-                    <Controls>
-                        <Label name="$(parent)Header" override="true" inherits="ZO_ChapterUpgrade_Gamepad_HeaderLabel" />
-                        <Label name="$(parent)Instructions" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InfoLabel" />
-                    </Controls>
-                </Control>
-            </Controls>
-        </Control>
         
         <Button name="ZO_ChapterUpgradeButton_Gamepad" font="ZoFontGamepadBold48"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" tier="HIGH" verticalAlignment="CENTER" virtual="true">
             <Dimensions x="295" y="90"/>
@@ -50,16 +39,23 @@
             <Controls>
 
                 <Control name="$(parent)TextContainer" override="true">
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetY="-150" />
                     <Controls>
+                        <Label name="$(parent)ChapterSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Gamepad_HeaderLabel" />
+                        <Label name="$(parent)ChapterSummary" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InfoLabel" />
                         <Label name="$(parent)RegistrationSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Gamepad_HeaderLabel" />
                         <Label name="$(parent)RegistrationSummary" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InfoLabel" />
-                        <Label name="$(parent)CodeEntry" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InstructionsSection" />
-                        <Label name="$(parent)DigitalUpgrade" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InstructionsSection" />
                     </Controls>
                 </Control>
 
-                <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" />
-                <Button name="$(parent)EnterCodeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" />
+                <Button name="$(parent)EnterCodeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" >
+                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="150" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TextContainerRegistrationSummary" relativePoint="LEFT" constrains="X" />
+                </Button>
+                <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" >
+                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="150" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EnterCodeButton" relativePoint="RIGHT" offsetX="70" constrains="X" />
+                </Button>
             </Controls>
         </TopLevelControl>
     </Controls>

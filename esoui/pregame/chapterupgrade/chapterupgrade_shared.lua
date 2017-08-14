@@ -23,9 +23,9 @@ function ZO_ChapterUpgrade_Shared:Initialize(control, sceneName)
     self.logoTexture = control:GetNamedChild("Logo")
 
     local textContainer = control:GetNamedChild("TextContainer")
+    self.chapterSummaryHeaderControl = textContainer:GetNamedChild("ChapterSummaryHeader")
+    self.chapterSummaryControl = textContainer:GetNamedChild("ChapterSummary")
     self.registrationSummaryControl = textContainer:GetNamedChild("RegistrationSummary")
-    self.codeEntryInstructionsControl = textContainer:GetNamedChild("CodeEntryContainerInstructions")
-    self.digitalUpgradeInstructionsControl = textContainer:GetNamedChild("DigitalUpgradeContainerInstructions")
 
     local sceneFragment = ZO_FadeSceneFragment:New(control)
     local scene = ZO_Scene:New(sceneName, SCENE_MANAGER)
@@ -59,14 +59,14 @@ end
 
 function ZO_ChapterUpgrade_Shared:PerformDeferredInitialize()
     if not self.initialized then
-        local backgroundTexture, registrationSummary, codeEntryInstructions, digitalUpgradeInstructions = GetCurrentChapterRegistrationInfo()
+        local backgroundTexture, registrationSummary, codeEntryInstructions, digitalUpgradeInstructions, chapterSummaryHeader, chapterSummary = GetCurrentChapterRegistrationInfo()
         local logoTexture = GetCurrentChapterLargeLogoFileIndex()
         self.backgroundImage:SetTexture(backgroundTexture)
         self:ResizeBackground()
         self.logoTexture:SetTexture(logoTexture)
         self.registrationSummaryControl:SetText(registrationSummary)
-        self.codeEntryInstructionsControl:SetText(codeEntryInstructions)
-        self.digitalUpgradeInstructionsControl:SetText(digitalUpgradeInstructions)
+        self.chapterSummaryHeaderControl:SetText(chapterSummaryHeader)
+        self.chapterSummaryControl:SetText(chapterSummary)
         self.initialized = true
     end
 end

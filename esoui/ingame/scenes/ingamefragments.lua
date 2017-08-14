@@ -169,7 +169,6 @@ do
         return screenWidth * 0.75, .55 * screenHeight
     end
     FRAME_TARGET_OPTIONS_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateOptionsFramingTarget, SetFrameLocalPlayerTarget)
-    FRAME_TARGET_BLUR_OPTIONS_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateOptionsFramingTarget)
 
     local function CalculateGamepadFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()

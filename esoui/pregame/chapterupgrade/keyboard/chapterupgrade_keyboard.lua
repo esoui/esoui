@@ -13,8 +13,6 @@ function ChapterUpgrade_Keyboard:Initialize(control)
         local enterCodeButton = control:GetNamedChild("EnterCodeButton")
         enterCodeButton:SetHidden(true)
         local textContainer = control:GetNamedChild("TextContainer")
-        local codeEntryContainerControl = textContainer:GetNamedChild("CodeEntryContainer")
-        codeEntryContainerControl:SetHidden(true)
     end
 end
 

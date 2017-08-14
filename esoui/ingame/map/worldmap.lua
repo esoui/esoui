@@ -6540,8 +6540,6 @@ do
                 name = GetString(SI_GAMEPAD_WORLD_MAP_OPTIONS),
                 keybind = "UI_SHORTCUT_TERTIARY",
                 callback = function()
-                    ZO_WorldMap_SetGamepadKeybindsShown(false)
-
                     ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
 
                     -- Hide Legend if it is showing
