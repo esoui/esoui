@@ -113,11 +113,5 @@
                 </Texture>
             </Controls>
         </Control>
-
-        <Control name="ZO_SmithingPanelAnchors" virtual="true">
-            <Dimensions x="565" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-        </Control>
     </Controls>
 </GuiXml>

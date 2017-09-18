@@ -24,8 +24,10 @@ local FOCUS_ENTRY_SCALE = 1.3
 function ZO_Dyeing_RadialMenu_Gamepad:New(control, template, sharedHighlight)
     local DISABLE_MOUSE = false
     local SELECT_IN_CENTER = true
-
-    return ZO_RadialMenu.New(self, sharedHighlight, control, template, nil, nil, nil, {ZO_DI_LEFT_STICK}, DISABLE_MOUSE, SELECT_IN_CENTER)
+    local DEFAULT_ANIMATION_TEMPLATE = nil
+    local DEFAULT_ENTRY_ANIMATION_TEMPLATE = nil
+    local DEFAULT_ACTION_LAYER_NAME = nil
+    return ZO_RadialMenu.New(self, sharedHighlight, control, template, DEFAULT_ANIMATION_TEMPLATE, DEFAULT_ENTRY_ANIMATION_TEMPLATE, DEFAULT_ACTION_LAYER_NAME, {ZO_DI_LEFT_STICK}, DISABLE_MOUSE, SELECT_IN_CENTER)
 end
 
 function ZO_Dyeing_RadialMenu_Gamepad:Initialize(sharedHighlight, ...)
@@ -34,7 +36,6 @@ function ZO_Dyeing_RadialMenu_Gamepad:Initialize(sharedHighlight, ...)
     self.swatchInterpolator = ZO_SimpleControlScaleInterpolator:New(1.0, FOCUS_ENTRY_SCALE)
     self:ResetToDefaultPositon()
     self.currentlyActive = false
-    self.controlsBySlot = {}
     self.isAllFocused = false
     self.previousSelectedControl = nil
     self:SetCustomControlSetUpFunction(function(control, data) data.setupFunc(control, data) end)
@@ -52,9 +53,9 @@ end
 
 function ZO_Dyeing_RadialMenu_Gamepad:FocusAll()
     if not self.isAllFocused then
-        for entrySlot, control in pairs(self.controlsBySlot) do
-            if control.shouldHighlight then
-                self.swatchInterpolator:ScaleUp(control)
+        for _, entry in ipairs(self:GetEntries()) do
+            if entry.control.shouldHighlight then
+                self.swatchInterpolator:ScaleUp(entry.control)
             end
         end
         self.isAllFocused = true
@@ -63,16 +64,16 @@ end
 
 function ZO_Dyeing_RadialMenu_Gamepad:DefocusAll()
     if self.isAllFocused then
-        for entrySlot, control in pairs(self.controlsBySlot) do
-            self.swatchInterpolator:ScaleDown(control)
+        for _, entry in ipairs(self:GetEntries()) do
+            self.swatchInterpolator:ScaleDown(entry.control)
         end
         self.isAllFocused = false
     end
 end
 
-function ZO_Dyeing_RadialMenu_Gamepad:HighlightAll(dyeSlot)
-    for entrySlot, control in pairs(self.controlsBySlot) do
-        ZO_Dyeing_Gamepad_Highlight(control, control.dyeControls[dyeSlot])
+function ZO_Dyeing_RadialMenu_Gamepad:HighlightAll(dyeChannel)
+    for _, entry in ipairs(self:GetEntries()) do
+        ZO_Dyeing_Gamepad_Highlight(entry.control, entry.control.dyeControls[dyeChannel])
     end
 end
 

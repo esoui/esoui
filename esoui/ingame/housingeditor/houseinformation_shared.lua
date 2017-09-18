@@ -64,7 +64,7 @@ do
         local furnishingLimits = self.infoSection:GetNamedChild("FurnishingLimits")
         local lastRow = nil
         self.limitRows = {}
-        for i = HOUSING_FURNISHING_LIMIT_TYPE_MIN_VALUE, HOUSING_FURNISHING_LIMIT_TYPE_MAX_VALUE do
+        for i = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
             local furnishingLimitRow = CreateControlFromVirtual(furnishingLimits:GetName().."Row"..i, furnishingLimits, self.rowTemplate)
     
             if not lastRow then
@@ -109,7 +109,7 @@ do
     function ZO_HouseInformation_Shared:UpdateLimits()
         local currentHouseId = GetCurrentZoneHouseId()
     
-        for i = HOUSING_FURNISHING_LIMIT_TYPE_MIN_VALUE, HOUSING_FURNISHING_LIMIT_TYPE_MAX_VALUE do
+        for i = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
             local limit = GetHouseFurnishingPlacementLimit(currentHouseId, i)
             local currentlyPlaced = GetNumHouseFurnishingsPlaced(i)
             UpdateRow(self.limitRows[i], GetString("SI_HOUSINGFURNISHINGLIMITTYPE", i), zo_strformat(SI_HOUSE_INFORMATION_COUNT_FORMAT, currentlyPlaced, limit))

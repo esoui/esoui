@@ -111,6 +111,7 @@ function WorldMapFilterPanel_Gamepad:SetupDropDown(control, data, selected, rese
     control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, data.disabled))
 
     local dropDown = ZO_ComboBox_ObjectFromContainer(control:GetNamedChild("Selector"))
+    dropDown:SetSortsItems(false)
     dropDown:SetDeactivatedCallback(function() self:UnfocusDropDown() end)
 
     local function OnOptionChanged(_, entryText, entry)

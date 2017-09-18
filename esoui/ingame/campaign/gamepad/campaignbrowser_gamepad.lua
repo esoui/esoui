@@ -293,13 +293,15 @@ function ZO_CampaignBrowser_Gamepad:SetCurrentMode(mode)
 end
 
 function ZO_CampaignBrowser_Gamepad:InitializeHeader()
+    local IS_PLURAL = false
+    local IS_UPPER = false
     self.headerData = {
         titleText = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_CAMPAIGNS_HEADER),
 
-        data1HeaderText = GetString(SI_CURRENCY_ALLIANCE_POINTS),
+        data1HeaderText = GetCurrencyName(CURT_ALLIANCE_POINTS, IS_PLURAL, IS_UPPER),
 
         data1Text = function(control)
-            ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+            ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
             return true
         end,
     }
@@ -891,25 +893,26 @@ end
 
 function ZO_CampaignBrowser_Gamepad:GetPriceMessage(cost, hasEnough, useGold)
     if useGold then
+        local goldIconMarkup = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
         if hasEnough then
-            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_GOLD_PRICE), cost)
+            return zo_strformat(ZO_SELECTED_TEXT:Colorize(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE)), cost, goldIconMarkup)
         else
-            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_GOLD_PRICE_NOT_ENOUGH), cost)
+            return zo_strformat(ZO_ERROR_COLOR:Colorize(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE)), cost, goldIconMarkup)
         end
     else
+        local alliancePointIconMarkup = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_ALLIANCE_POINTS)
         if hasEnough then
-            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE), cost)
+            return zo_strformat(ZO_SELECTED_TEXT:Colorize(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE)), cost, alliancePointIconMarkup)
         else
-            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE_NOT_ENOUGH), cost)
+            return zo_strformat(ZO_ERROR_COLOR:Colorize(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_PRICE)), cost, alliancePointIconMarkup)
         end 
     end
-
 end
 
 function ZO_CampaignBrowser_Gamepad:GetTextParamsForSetHomeDialog()
     local nowCost, endCost = ZO_SelectHomeCampaign_GetCost()
     local isFree = nowCost == 0
-    local numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
+    local numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
     local hasEnough = nowCost <= numAlliancePoints
 
     local warning = GetString(SI_SELECT_CAMPAIGN_COOLDOWN_WARNING)

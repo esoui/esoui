@@ -143,22 +143,14 @@
                         </Label>
 
                         <Control name="$(parent)RewardsSection" override="true">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" offsetX="20" offsetY="-130" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="-250" />
                             
                             <Controls>
-                                <Control name="$(parent)Entries" override="true">
-                                    <Anchor point="BOTTOMLEFT" />
-                                    
-                                    <Controls>
-                                        <Control name="$(parent)ItemReward" override="true">
-                                            <Anchor point="BOTTOMLEFT" />
-                                        </Control>
-                                    </Controls>
-                                </Control>
+                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2" />
                                 
-                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2">
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Entries" relativePoint="TOPLEFT" offsetY="-20" />
-                                </Label>
+                                <Control name="$(parent)Entries" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Control>
                             </Controls>
                         </Control>
 

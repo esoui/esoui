@@ -12,6 +12,7 @@ function ZO_StatEntry_Keyboard:Initialize(control, statType, statObject)
     self.statType = statType
     self.statObject = statObject
     self.tooltipAnchorSide = RIGHT
+    self.currentStatDelta = 0
 
     self.control.name:SetText(zo_strformat(SI_STAT_NAME_FORMAT, GetString("SI_DERIVEDSTATS", statType)))
     
@@ -73,16 +74,18 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
         if statChanged then 
             valueLabel:SetText(displayValue)
         end
-        self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())       
+        self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+
+        self:UpdateStatComparisonValue()
     end
 end
 
-function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
-    if statDelta and statDelta ~= 0 then
-        local comparisonStatValue = self:GetValue() + statDelta
+function ZO_StatEntry_Keyboard:UpdateStatComparisonValue()
+    if not self.control:IsHidden() and not self.control.comparisonValue:IsHidden() and self.currentStatDelta and self.currentStatDelta ~= 0 then
+        local comparisonStatValue = self:GetValue() + self.currentStatDelta
         local color
         local icon
-        if statDelta > 0 then
+        if self.currentStatDelta > 0 then
             color = ZO_SUCCEEDED_TEXT
             icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
         else
@@ -92,15 +95,22 @@ function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
 
         comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
         comparisonValueString = color:Colorize(comparisonValueString)
+        self.control.comparisonValue:SetText(comparisonValueString)  
+    end
+end
 
+function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
+    if statDelta and statDelta ~= 0 then
+        self.currentStatDelta = statDelta
         self.control.value:SetHidden(true)
         self.control.comparisonValue:SetHidden(false)
-        self.control.comparisonValue:SetText(comparisonValueString)
+        self:UpdateStatComparisonValue()
     end
 end
 
 function ZO_StatEntry_Keyboard:HideComparisonValue()
     if not self.control.comparisonValue:IsHidden() then
+        self.currentStatDelta = 0
         self.control.comparisonValue:SetText("")
         self.control.comparisonValue:SetHidden(true)
         self.control.value:SetHidden(false)

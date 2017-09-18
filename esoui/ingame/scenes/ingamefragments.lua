@@ -170,6 +170,14 @@ do
     end
     FRAME_TARGET_OPTIONS_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateOptionsFramingTarget, SetFrameLocalPlayerTarget)
 
+    local function CalculateStoreWindowTarget()
+        local x = zo_lerp(0, ZO_SharedRightPanelBackground:GetLeft(), .5)
+        local y = zo_lerp(0, ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
+        return x, y
+    end
+    FRAME_TARGET_STORE_WINDOW_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStoreWindowTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_BLUR_STORE_WINDOW_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStoreWindowTarget)
+
     local function CalculateGamepadFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
         return .65 * screenWidth, .55 * screenHeight
@@ -738,6 +746,7 @@ MEDIUM_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumRightPa
 MEDIUM_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumLeftPanelBackground)
 MEDIUM_SHORT_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumShortRightPanelBackground)
 MEDIUM_SHORT_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumShortLeftPanelBackground)
+MEDIUM_TALL_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumTallLeftPanelBackground)
 WIDE_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideRightPanelBackground)
 WIDE_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideLeftPanelBackground)
 TREE_UNDERLAY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedTreeUnderlay)
@@ -818,9 +827,6 @@ CROWN_CRATES_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_CrownCratesTopLevel)
 
 HOUSING_FURNITURE_BROWSER_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HOUSING_BROWSER_TITLE)
 
---Gamepad fragments
-local ALWAYS_ANIMATE = true
-
 ALCHEMY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AlchemyTopLevel)
 ENCHANTING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_EnchantingTopLevel)
 SMITHING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SmithingTopLevel)
@@ -832,10 +838,15 @@ COLLECTIONS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_COLLECTIONS_MENU_ROOT_TI
 JOURNAL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_QUEST_JOURNAL_MENU_JOURNAL)
 HELP_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HELP_TITLE)
 
+RESTYLE_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_RESTYLE_STATION_MENU_ROOT_TITLE)
+
 CHAMPION_PERKS_CONSTELLATIONS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_ChampionPerks)
 
 PLAYER_MENU_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_MainMenu_Gamepad)
 PLAYER_MENU_FRAGMENT:SetHideOnSceneHidden(true)
+
+--Gamepad fragments
+local ALWAYS_ANIMATE = true
 
 OPTIONS_MENU_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadOptionsTopLevelInfoPanel)
 

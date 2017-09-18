@@ -470,6 +470,9 @@ EsoUI\Ingame\Mail\Gamepad\MailSend_Gamepad.xml
 EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.lua
 EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.xml
 
+EsoUI\Ingame\Restyle\Restyle_Manager.lua
+EsoUI\Ingame\Restyle\Restyle_Shared.lua
+
 EsoUI\Ingame\Dyeing\DyeingToolBase.lua
 EsoUI\Ingame\Dyeing\DyeingToolDye.lua
 EsoUI\Ingame\Dyeing\DyeingToolFill.lua
@@ -494,6 +497,13 @@ EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.xml
 EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.xml
+
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheet_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheet_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\Restyle_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\Restyle_Keyboard.xml
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
 
 EsoUI\Ingame\Achievements\Achievements_Shared.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.lua
@@ -627,8 +637,8 @@ EsoUI\Ingame\Crafting\CraftingEnchantExtractSlotAnimation.lua
 EsoUI\Ingame\Crafting\CraftingSmithingExtractSlotAnimation.lua
 
 EsoUI\Ingame\Crafting\SharedCraftingInventory.lua
-EsoUI\Ingame\Crafting\CraftingInventory.lua
-EsoUI\Ingame\Crafting\CraftingInventory.xml
+EsoUI\Ingame\Crafting\Keyboard\CraftingInventory.lua
+EsoUI\Ingame\Crafting\Keyboard\CraftingInventory.xml
 EsoUI\Ingame\Crafting\Gamepad\GamepadCraftingInventory.lua
 EsoUI\Ingame\Crafting\Gamepad\GamepadCraftingInventory.xml
 
@@ -693,6 +703,19 @@ EsoUI\Ingame\Crafting\Keyboard\Smithing_Keyboard.lua
 EsoUI\Ingame\Crafting\Keyboard\Smithing_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.xml
+
+EsoUI\Ingame\Retrait\ZO_RetraitStation_Manager.lua
+EsoUI\Ingame\Retrait\ZO_RetraitStation_Retrait_Base.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Retrait_Keyboard.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Retrait_Keyboard.xml
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Retrait_Gamepad.lua
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Retrait_Gamepad.xml
+
+EsoUI\Ingame\Retrait\ZO_RetraitStation_Base.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.xml
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Gamepad.lua
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Gamepad.xml
 
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.xml

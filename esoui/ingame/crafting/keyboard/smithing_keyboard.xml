@@ -1,5 +1,11 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_SmithingPanelAnchors" virtual="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+        </Control>
+        
         <TopLevelControl name="ZO_SmithingTopLevel" hidden="true">
             <AnchorFill />
 
@@ -17,13 +23,8 @@
                     <Dimensions x="550"/>
                 </Control>
 
-                <Label name="$(parent)ActiveTab" font="ZoFontHeader2" verticalAlignment="CENTER" modifyTextType="UPPERCASE">
-                    <Dimensions y="64" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)ModeBar" relativePoint="LEFT" offsetX="-10"/>
-                </Label>
-
                 <Control name="$(parent)RefinementPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />
-                <Control name="$(parent)CreationPanel" inherits="ZO_SmithingCreationPanel ZO_SmithingPanelAnchors" />
+                <Control name="$(parent)CreationPanel" inherits="ZO_SmithingCreationPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)ImprovementPanel" inherits="ZO_SmithingImprovementPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)DeconstructionPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)ResearchPanel" inherits="ZO_SmithingResearchPanel ZO_SmithingPanelAnchors" hidden="true" />

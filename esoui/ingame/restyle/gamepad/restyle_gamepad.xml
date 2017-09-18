@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_RestyleTopLevel_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Restyle_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Controls>
+                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <Control name="$(parent)DyePanel" inherits="ZO_DyeItems_Gamepad" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

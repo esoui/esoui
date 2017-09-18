@@ -37,7 +37,7 @@ end
 local function SetupListing(control, data, selected, selectedDuringRebuild, enabled, activated)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 
-    local notEnoughMoney = data.purchasePrice > GetCarriedCurrencyAmount(CURT_MONEY)
+    local notEnoughMoney = data.purchasePrice > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
     ZO_CurrencyControl_SetSimpleCurrency(control.price, CURT_MONEY, data.purchasePrice, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, notEnoughMoney)
 end
 

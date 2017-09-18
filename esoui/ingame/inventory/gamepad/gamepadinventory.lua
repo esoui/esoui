@@ -92,14 +92,13 @@ function ZO_GamepadInventory:OnDeferredInitialize()
         end
     end
 
+    self.control:RegisterForEvent(EVENT_CURRENCY_UPDATE, RefreshCurrencies)
+    self.control:RegisterForEvent(EVENT_CURRENCY_CAPS_CHANGED, RefreshCurrencies)
+
     local function RefreshSelectedData()
         if not self.control:IsHidden() then
             self:SetSelectedInventoryData(self.currentlySelectedData)
         end
-    end
-
-    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
-        self.control:RegisterForEvent(info.event, RefreshCurrencies)
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_DEAD, RefreshSelectedData)
@@ -531,7 +530,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
             callback = function()
                 local targetData = self.itemList:GetTargetData()
-                if(ZO_InventorySlot_CanDestroyItem(targetData) and ZO_InventorySlot_InitiateDestroyItem(targetData)) then
+                if ZO_InventorySlot_CanDestroyItem(targetData) and ZO_InventorySlot_InitiateDestroyItem(targetData) then
                     self.itemList:Deactivate()
                     self.listWaitingOnDestroyRequest = self.itemList
                 end
@@ -703,6 +702,9 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
             GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER))
         end
     elseif selectedData.isCurrencyEntry then
+        local statText = ""
+        local valueText = GetString(SI_INVENTORY_CURRENCIES)
+        GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, statText, valueText)
         GAMEPAD_TOOLTIPS:LayoutCurrencies(GAMEPAD_LEFT_TOOLTIP)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
@@ -781,15 +783,15 @@ end
 function ZO_GamepadInventory:RefreshCategoryList()
     self.categoryList:Clear()
 
-	-- Currencies
-	do
-		local name = GetString(SI_INVENTORY_CURRENCIES)
-        local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_currencies.dds" 
+    -- Currencies
+    do
+        local name = GetString(SI_INVENTORY_CURRENCIES)
+        local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_currencies.dds"
         local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, false)
-		data.isCurrencyEntry = true
+        data.isCurrencyEntry = true
         data:SetIconTintOnSelection(true)
         self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
-	end
+    end
 
     -- Supplies
     -- Supplies is a catch all category for non-equipment items that don't fall into one of the specific categories below
@@ -1025,14 +1027,13 @@ function ZO_GamepadInventory:RefreshItemList()
     local nonEquipableFilterType = targetCategoryData.filterType
     local filteredDataTable
 
-    local isQuestItem = nonEquipableFilterType == ITEMFILTERTYPE_QUEST
+    local isQuestItemFilter = nonEquipableFilterType == ITEMFILTERTYPE_QUEST
     --special case for quest items
-    if isQuestItem then
+    if isQuestItemFilter then
         filteredDataTable = {}
         local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
         for _, questItems in pairs(questCache) do
             for _, questItem in pairs(questItems) do
-                ZO_InventorySlot_SetType(questItem, SLOT_TYPE_QUEST_ITEM)
                 table.insert(filteredDataTable, questItem)
             end
         end
@@ -1042,53 +1043,60 @@ function ZO_GamepadInventory:RefreshItemList()
         filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(comparator, BAG_BACKPACK, BAG_WORN)
         for _, itemData in pairs(filteredDataTable) do
             itemData.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestItemCategoryDescription(itemData))
-            if itemData.bagId == BAG_WORN then
-                itemData.isEquippedInCurrentCategory = false
-                itemData.isEquippedInAnotherCategory = false
-                if itemData.slotIndex == filteredEquipSlot then
-                    itemData.isEquippedInCurrentCategory = true
-                else
-                    itemData.isEquippedInAnotherCategory = true
-                end
-
-                itemData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE)
-            else
-                local slotIndex = GetItemCurrentActionBarSlot(itemData.bagId, itemData.slotIndex)
-                itemData.isEquippedInCurrentCategory = slotIndex and true or nil
-            end
-            ZO_InventorySlot_SetType(itemData, SLOT_TYPE_GAMEPAD_INVENTORY_ITEM)
         end
     end
+
     table.sort(filteredDataTable, ZO_GamepadInventory_DefaultItemSortComparator)
 
     local lastBestItemCategoryName
     for i, itemData in ipairs(filteredDataTable) do
         local nextItemData = filteredDataTable[i + 1]
 
-        local data = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
-        data:InitializeInventoryVisualData(itemData)
+        local entryData = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
+        entryData:InitializeInventoryVisualData(itemData)
+
+        if itemData.bagId == BAG_WORN then
+            entryData.isEquippedInCurrentCategory = false
+            entryData.isEquippedInAnotherCategory = false
+            if itemData.slotIndex == filteredEquipSlot then
+                entryData.isEquippedInCurrentCategory = true
+            else
+                entryData.isEquippedInAnotherCategory = true
+            end
+
+            entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE)
+        else
+            local slotIndex = GetItemCurrentActionBarSlot(itemData.bagId, itemData.slotIndex)
+            entryData.isEquippedInCurrentCategory = slotIndex and true or nil
+        end
 
         local remaining, duration
-        if isQuestItem then 
+        if isQuestItemFilter then
             if itemData.toolIndex then
                 remaining, duration = GetQuestToolCooldownInfo(itemData.questIndex, itemData.toolIndex)
             elseif itemData.stepIndex and itemData.conditionIndex then
                 remaining, duration = GetQuestItemCooldownInfo(itemData.questIndex, itemData.stepIndex, itemData.conditionIndex)
             end
+
+            ZO_InventorySlot_SetType(entryData, SLOT_TYPE_QUEST_ITEM)
         else
             remaining, duration = GetItemCooldownInfo(itemData.bagId, itemData.slotIndex)
+
+            ZO_InventorySlot_SetType(entryData, SLOT_TYPE_GAMEPAD_INVENTORY_ITEM)
         end
         if remaining > 0 and duration > 0 then
-            data:SetCooldown(remaining, duration)
+            entryData:SetCooldown(remaining, duration)
         end
+
+        entryData:SetIgnoreTraitInformation(true)
 
         if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
             lastBestItemCategoryName = itemData.bestItemCategoryName
-            
-            data:SetHeader(lastBestItemCategoryName)
-            self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", data)
+
+            entryData:SetHeader(lastBestItemCategoryName)
+            self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", entryData)
         else
-            self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", data)
+            self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
         end
     end
 
@@ -1168,7 +1176,7 @@ function ZO_GamepadInventory:RefreshHeader(blockCallback)
 end
 
 local function UpdateGold(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
     return true
 end
 
@@ -1228,7 +1236,7 @@ function ZO_GamepadInventory:InitializeHeader()
 end
 
 function ZO_GamepadInventory:TryEquipItem(inventorySlot)
-    if(self.selectedEquipSlot) then
+    if self.selectedEquipSlot then
         local sourceBag, sourceSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
         local function DoEquip()
             RequestMoveItem(sourceBag, sourceSlot, BAG_WORN, self.selectedEquipSlot, 1)

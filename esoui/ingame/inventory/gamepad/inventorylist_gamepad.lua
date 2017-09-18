@@ -31,7 +31,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     self.entrySetupCallback = entrySetupCallback
     self.categorizationFunction = categorizationFunction
     self.sortFunction = sortFunction
-    self.dataBySlotIndex = {}
+    self.dataByBagAndSlotIndex = {}
     self.isDirty = true
     self.useTriggers = (useTriggers ~= false) -- nil => true
     self.template = template or DEFAULT_TEMPLATE
@@ -40,6 +40,10 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
         self.inventoryTypes = inventoryType
     else
         self.inventoryTypes = { inventoryType }
+    end
+
+    for i, bagId in ipairs(self.inventoryTypes) do
+        self.dataByBagAndSlotIndex[bagId] = {}
     end
 
     local function VendorEntryTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -90,7 +94,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     local function OnSingleSlotInventoryUpdate(bagId, slotIndex)
         for k, inventoryType in ipairs(self.inventoryTypes) do
             if bagId == inventoryType then
-                local entry = self.dataBySlotIndex[slotIndex]
+                local entry = self.dataByBagAndSlotIndex[bagId][slotIndex]
                 if entry then
                     local itemData = SHARED_INVENTORY:GenerateSingleSlotData(inventoryType, slotIndex)
                     if itemData then
@@ -389,7 +393,9 @@ function ZO_GamepadInventoryList:RefreshList()
     self.isDirty = false
 
     self.list:Clear()
-    self.dataBySlotIndex = {}
+    for i, bagId in ipairs(self.inventoryTypes) do
+        self.dataByBagAndSlotIndex[bagId] = {}
+    end
 
     local slots = self:GenerateSlotTable()
     local currentBestCategoryName = nil
@@ -406,7 +412,7 @@ function ZO_GamepadInventoryList:RefreshList()
             self.list:AddEntry(self.template, entry)
         end
 
-        self.dataBySlotIndex[itemData.slotIndex] = entry
+        self.dataByBagAndSlotIndex[itemData.bagId][itemData.slotIndex] = entry
     end
 
     self.list:Commit()

@@ -36,7 +36,7 @@ do
         self.crownsCurrencyLabel:SetText(currencyString)
     end
 
-    function ZO_MarketCurrency_Keyboard:OnCrownGemsUpdated(currentCurrency, difference)
+    function ZO_MarketCurrency_Keyboard:OnCrownGemsUpdated(currentCurrency, difference, reason)
         local gemsIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), CURRENCY_ICON_SIZE)
         local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(currentCurrency), gemsIcon)
         self.gemsCurrencyLabel:SetText(currencyString)

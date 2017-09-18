@@ -17,7 +17,7 @@
                 </Label>
                 <Control name="$(parent)BattlegroundScoreHud" override="true">
                     <ClearAnchors/>
-                    <Anchor point="TOPRIGHT" offsetX="-2" offsetY="58"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)State" relativePoint="BOTTOMLEFT" offsetX="-20"/>
                 </Control>
             </Controls>
         </TopLevelControl>
@@ -39,7 +39,7 @@
                 </Label>
                 <Control name="$(parent)BattlegroundScoreHud" override="true">
                     <ClearAnchors/>
-                    <Anchor point="TOPRIGHT" offsetX="3" offsetY="85"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)State" relativePoint="BOTTOMRIGHT" offsetX="3"/>
                 </Control>
             </Controls>
         </TopLevelControl>

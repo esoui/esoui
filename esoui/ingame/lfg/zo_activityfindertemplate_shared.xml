@@ -1,15 +1,18 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_ActivityFinderTemplateRewardTemplate_Shared" resizeToFitDescendents="true" virtual="true">
-            <DimensionConstraints minY="64" />
-
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+                self.text = self:GetNamedChild("Text")
+            </OnInitialized>
+            
             <Controls>
-                <Texture name="$(parent)Icon" layer="CONTROLS" hidden="true" >
+                <Texture name="$(parent)Icon" layer="CONTROLS">
                     <Dimensions x="64" y="64" />
                     <Anchor point="LEFT" />
                 </Texture>
 
-                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true" >
+                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="3" wrapMode="ELLIPSIS">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
                 </Label>
             </Controls>
@@ -39,26 +42,15 @@
 
                 <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
 
-                <Control name="$(parent)RewardsSection" resizeToFitDescendents="true">
+                <Control name="$(parent)RewardsSection" resizeToFitDescendents="true" hidden="true">
                     <Controls>
-                        <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true" />
+                        <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
 
                         <Control name="$(parent)Entries" resizeToFitDescendents="true">
                             <Controls>
-                                <Control name="$(parent)ItemReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared">
-                                    <Controls>
-                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/LFG/LFG_bonus_letter.dds" />
-                                    </Controls>
-                                </Control>
-
-                                <Control name="$(parent)Padding">
-                                    <Dimensions x="ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING" />
-                                    <Anchor point="LEFT" relativeTo="$(parent)ItemReward" relativePoint="RIGHT" />
-                                </Control>
-                                
-                                <Control name="$(parent)XPReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared">
-                                    <Anchor point="LEFT" relativeTo="$(parent)Padding" relativePoint="RIGHT" />
-                                    
+                                <Control name="$(parent)XPReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared" hidden="true">
                                     <Controls>
                                         <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Icons/Icon_Experience.dds" />
                                     </Controls>

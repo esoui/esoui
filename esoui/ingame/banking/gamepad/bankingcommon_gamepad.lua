@@ -196,7 +196,7 @@ function ZO_BankingCommon_Gamepad:InitializeWithdrawDepositKeybindDescriptor()
 end
 
 function ZO_BankingCommon_Gamepad:SetSelectorCurrency(currencyType)
-    self.selectorCurrency:SetTexture(ZO_CURRENCIES_DATA[currencyType].gamepadTexture)
+    self.selectorCurrency:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(currencyType))
 end
 
 function ZO_BankingCommon_Gamepad:UpdateInput()
@@ -394,18 +394,22 @@ end
 
 function ZO_BankingCommon_Gamepad:SetSimpleCurrency(control, amount, currencyType, colorMinValueForMode, options, obfuscateAmount)
     options.color = nil -- Reset the color
-    
+
     if self:IsInWithdrawMode() then
         if (colorMinValueForMode == self.mode and amount == 0) or (colorMinValueForMode ~= self.mode and amount == self:GetMaxBankedFunds(currencyType)) then
             options.color = ZO_ERROR_COLOR
         end
     elseif self:IsInDepositMode() then
-        if (colorMinValueForMode == self.mode and amount == 0) or (colorMinValueForMode ~= self.mode and amount == GetMaxCarriedCurrencyAmount(currencyType)) then
+        if (colorMinValueForMode == self.mode and amount == 0) or (colorMinValueForMode ~= self.mode and amount == GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER)) then
             options.color = ZO_ERROR_COLOR
         end
     end
 
-    ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, amount, options, nil, nil, obfuscateAmount)
+    local displayOptions =
+    {
+        obfuscateAmount = obfuscateAmount,
+    }
+    ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, amount, options, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
 end
 
 function ZO_BankingCommon_Gamepad:RecolorCapacityHeader(control, usedSlots, bagSize, recolorMode)
@@ -445,15 +449,14 @@ end
 
 function ZO_BankingCommon_Gamepad:OnTargetChanged(list, targetData)
     self:SetCurrencyType(targetData and targetData.currencyType or nil)
-    self:LayoutInventoryItemTooltip(targetData)
+    self:LayoutBankingEntryTooltip(targetData)
     self:OnTargetChangedCallback()
 
     self:RefreshHeaderData()
 end
 
-function ZO_BankingCommon_Gamepad:LayoutInventoryItemTooltip(inventoryData)
+function ZO_BankingCommon_Gamepad:LayoutBankingEntryTooltip(inventoryData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
-
     if inventoryData and inventoryData.bagId then
         GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
     end

@@ -1,51 +1,41 @@
-local ZO_Dyeing = ZO_Object:Subclass()
+local BECAUSE_OF_REBUILD = true
 
-local SWATCHES_LAYOUT_OPTIONS = {
-        padding = 6,
-        leftMargin = 27,
-        topMargin = 18,
-        rightMargin = 0,
-        bottomMargin = 0,
-        selectionScale = ZO_DYEING_SWATCH_SELECTION_SCALE,
-    }
+ZO_Dyeing_Keyboard = ZO_Object:Subclass()
 
-function ZO_Dyeing:New(...)
-    local dyeing = ZO_Object.New(self)
-    dyeing:Initialize(...)
-    return dyeing
+local SWATCHES_LAYOUT_OPTIONS = 
+{
+    padding = 6,
+    leftMargin = 27,
+    topMargin = 18,
+    rightMargin = 0,
+    bottomMargin = 0,
+    selectionScale = ZO_DYEING_SWATCH_SELECTION_SCALE,
+}
+
+function ZO_Dyeing_Keyboard:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
-function ZO_Dyeing:Initialize(control)
+function ZO_Dyeing_Keyboard:Initialize(control)
     self.control = control
-    self.pane = self.control:GetNamedChild("Pane")
+    self.pane = control:GetNamedChild("Pane")
     self.noDyesLabel = self.pane:GetNamedChild("NoDyesLabel")
-    self.paneScrollChild = self.control:GetNamedChild("Pane"):GetNamedChild("ScrollChild")
-    self.sharedHighlight = self.control:GetNamedChild("SharedHighlight")
-    self.sharedHighlight:SetParent(self.paneScrollChild)
-    self.mode = DYE_MODE_EQUIPMENT
+    self.paneScrollChild = self.pane:GetNamedChild("ScrollChild")
+    self.sharedHighlight = self.paneScrollChild:GetNamedChild("SharedHighlight")
 
     self.savedSetInterpolator = ZO_SimpleControlScaleInterpolator:New(.9, 1.0)
 
-    self:InitializeTabs()
     self:InitializeSortsAndFilters()
     self:InitializeTools()
     self:InitializeSavedSets()
     self:InitializeSwatchPool()
     self:InitializeHeaderPool()
-    self:InitializeEquipmentSheet()
-    self:InitializeCollectibleSheet()
-    self:InitializeKeybindStripDescriptors()
-
-    local function OnBlockingSceneActivated()
-        self:AttemptExit()
-    end
-
-    DYEING_SCENE = ZO_InteractScene:New("dyeing", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
-    SYSTEMS:RegisterKeyboardRootScene("dyeing", DYEING_SCENE)
-    DYEING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            MAIN_MENU_MANAGER:SetBlockingScene("dyeing", OnBlockingSceneActivated)
-
+    
+    KEYBOARD_DYEING_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    KEYBOARD_DYEING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
             TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
             if IsESOPlusSubscriber() then
                 TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER)
@@ -53,49 +43,33 @@ function ZO_Dyeing:Initialize(control)
 
             self:UpdateOptionControls()
 
-            InitializePendingDyes(self.mode)
-
-            KEYBIND_STRIP:RemoveDefaultExit()
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-
             if self.dyeLayoutDirty then
                 self:LayoutDyes()
             end
             self:RefreshSavedSets()
-
-            self.equipmentSheet:MarkViewDirty()
-            self.collectibleSheet:MarkViewDirty()
 
             if not ZO_MenuBar_GetSelectedDescriptor(self.toolsTabs) then
                 self.suppressSounds = true
                 ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
                 self.suppressSounds = false
             end
-
-            local IS_ENABLED = true
-            if CanUseCollectibleDyeing() then
-                ZO_MenuBar_SetDescriptorEnabled(self.tabs, DYE_MODE_COLLECTIBLE, IS_ENABLED)
-            else
-                -- if we have the collectible tab selected, switch tabs it before disabling it
-                -- so the highlights setup correctly
-                local selectedTabType = ZO_MenuBar_GetSelectedDescriptor(self.tabs)
-                if selectedTabType == DYE_MODE_COLLECTIBLE then
-                    ZO_MenuBar_SelectDescriptor(self.tabs, DYE_MODE_EQUIPMENT)
-                end
-                ZO_MenuBar_SetDescriptorEnabled(self.tabs, DYE_MODE_COLLECTIBLE, not IS_ENABLED)
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            if ZO_MenuBar_GetSelectedDescriptor(self.toolsTabs) then
+                self.suppressSounds = true
+                ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
+                self.suppressSounds = false
             end
-        elseif newState == SCENE_HIDDEN then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            KEYBIND_STRIP:RestoreDefaultExit()
-            MAIN_MENU_MANAGER:ClearBlockingScene(OnBlockingSceneActivated)
         end
     end)
+    self.fragment = KEYBOARD_DYEING_FRAGMENT
 
     local function UpdateDyeLayout()
         self:DirtyDyeLayout()
     end
+
     self.control:RegisterForEvent(EVENT_UNLOCKED_DYES_UPDATED, UpdateDyeLayout)
     ZO_DYEING_MANAGER:RegisterForDyeListUpdates(UpdateDyeLayout)
+    ZO_DYEING_MANAGER:RegisterCallback("UpdateSearchResults", UpdateDyeLayout)
 
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
@@ -111,100 +85,19 @@ function ZO_Dyeing:Initialize(control)
     self:DirtyDyeLayout()
 end
 
-function ZO_Dyeing:OnTabFilterChanged(tabData)
-    self.activeTab:SetText(GetString(tabData.activeTabText))
-end
+function ZO_Dyeing_Keyboard:OnToolChanged(tool)
+    local currentSheet = ZO_RESTYLE_KEYBOARD:GetCurrentSheet()
 
-function ZO_Dyeing:SetMode(mode)
-    if self.mode ~= mode then
-        self.mode = mode
-
-        self.equipmentSheet.control:SetHidden(mode ~= DYE_MODE_EQUIPMENT)
-        self.collectibleSheet.control:SetHidden(mode ~= DYE_MODE_COLLECTIBLE)
-
-        -- make sure the current sheet has the latest dye data for its slots
-        InitializePendingDyes(mode)
-
-        local currentSheet = self:GetCurrentSheet()
-        currentSheet:MarkViewDirty()
-    end
-end
-
-function ZO_Dyeing:HandleTabChange(tabData, nextMode)
-    if ZO_Dyeing_AreTherePendingDyes(self.mode) then
-        self.pendingTabData = tabData
-        self.pendingMode = nextMode
-        if ZO_Dyeing_AreAllItemsBound(self.mode) then
-            ZO_Dialogs_ShowDialog("SWTICH_DYE_MODE")
-        else
-            ZO_Dialogs_ShowDialog("SWTICH_DYE_MODE_BIND")
-        end
-    else
-        self:OnTabFilterChanged(tabData)
-        self:SetMode(nextMode)
-    end
-end
-
-function ZO_Dyeing:InitializeTabs()
-    local function GenerateTab(name, mode, normal, pressed, highlight, disabled, customTooltip)
-        return {
-            activeTabText = name,
-            categoryName = name,
-
-            descriptor = mode,
-            normal = normal,
-            pressed = pressed,
-            highlight = highlight,
-            disabled = disabled,
-            CustomTooltipFunction = customTooltip,
-            alwaysShowTooltip = true,
-            callback = function(tabData, playerDriven) 
-                            if playerDriven then 
-                                self:HandleTabChange(tabData, mode) 
-                            end 
-                       end,
-        }
-    end
-
-    self.tabs = self.control:GetNamedChild("Tabs")
-    self.activeTab = self.control:GetNamedChild("TabsLabel")
-
-    ZO_MenuBar_AddButton(self.tabs, GenerateTab(SI_DYEING_DYE_EQUIPMENT_TAB, DYE_MODE_EQUIPMENT, "EsoUI/Art/Dye/dyes_tabIcon_dye_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_dye_disabled.dds"))
-    ZO_MenuBar_AddButton(self.tabs, GenerateTab(SI_DYEING_DYE_COLLECTIBLE_TAB, DYE_MODE_COLLECTIBLE, "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_up.dds", "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_down.dds", "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_over.dds", "EsoUI/Art/Dye/dyes_tabIcon_costumeDye_disabled.dds", function(...) self:LayoutCollectionAppearanceTooltip(...) end))
-
-    ZO_MenuBar_SelectDescriptor(self.tabs, DYE_MODE_EQUIPMENT)
-    self.activeTab:SetText(GetString(SI_DYEING_DYE_EQUIPMENT_TAB))
-end
-
-function ZO_Dyeing:LayoutCollectionAppearanceTooltip(tooltip)
-    local description
-    local title
-    if CanUseCollectibleDyeing() then
-        title = zo_strformat(SI_DYEING_COLLECTIBLE_STATUS, ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_UNLOCKED)))
-        description = GetString(SI_DYEING_COLLECTIBLE_TAB_DESCRIPTION_UNLOCKED)
-    else
-        title = zo_strformat(SI_DYEING_COLLECTIBLE_STATUS, ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_LOCKED)))
-        description = GetString(SI_DYEING_COLLECTIBLE_TAB_DESCRIPTION_LOCKED)
-    end
-
-    SetTooltipText(tooltip, title)
-    local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
-    tooltip:AddLine(description, "", r, g, b)
-end
-
-function ZO_Dyeing:OnToolChanged(tool)
-    local currentSheet = self:GetCurrentSheet()
-
-    local mousedOverDyeableSlot, mousedOverDyeChannel = currentSheet:GetMousedOverDyeableSlotInfo()
+    local mousedOverDyeableSlotData, mousedOverDyeChannel = currentSheet:GetMousedOverDyeableSlotInfo()
     local mousedOverSavedSetIndex
-    if not mousedOverDyeableSlot then
+    if not mousedOverDyeableSlotData then
         mousedOverSavedSetIndex, mousedOverDyeChannel = self:GetMousedOverSavedSetInfo()
     end
 
     local lastTool = self.activeTool
-    if self.activeTool then
-        if mousedOverDyeableSlot and mousedOverDyeChannel then
-            self:OnDyeSlotExit(mousedOverDyeableSlot, mousedOverDyeChannel)
+    if lastTool then
+        if mousedOverDyeableSlotData and mousedOverDyeChannel then
+            ZO_RESTYLE_KEYBOARD:OnDyeSlotExit(mousedOverDyeableSlotData, mousedOverDyeChannel)
         elseif mousedOverSavedSetIndex and mousedOverDyeChannel then
             self:OnSavedSetDyeSlotExit(mousedOverSavedSetIndex, mousedOverDyeChannel)
         end
@@ -216,8 +109,8 @@ function ZO_Dyeing:OnToolChanged(tool)
     if self.activeTool then
         self.activeTool:Activate(lastTool, self.suppressSounds)
 
-        if mousedOverDyeableSlot and mousedOverDyeChannel then
-            self:OnDyeSlotEnter(mousedOverDyeableSlot, mousedOverDyeChannel)
+        if mousedOverDyeableSlotType and mousedOverDyeChannel then
+            ZO_RESTYLE_KEYBOARD:OnDyeSlotEnter(mousedOverDyeableSlotData, mousedOverDyeChannel)
         elseif mousedOverSavedSetIndex and mousedOverDyeChannel then
             self:OnSavedSetDyeSlotEnter(mousedOverSavedSetIndex, mousedOverDyeChannel)
         end
@@ -237,7 +130,7 @@ function ZO_Dyeing:OnToolChanged(tool)
     end
 end
 
-function ZO_Dyeing:InitializeTools()
+function ZO_Dyeing_Keyboard:InitializeTools()
     local function GenerateTab(tool, tooltip, normal, pressed, highlight, disabled)
         return {
             descriptor = tool,
@@ -269,7 +162,7 @@ function ZO_Dyeing:InitializeTools()
 end
 
 local SKIP_ANIM = true
-function ZO_Dyeing:InitializeSavedSets()
+function ZO_Dyeing_Keyboard:InitializeSavedSets()
     local function UpdateSelectedState(savedSet)
         if savedSet.mousedOver or savedSet.selected then
             self.savedSetInterpolator:ScaleUp(savedSet)
@@ -342,46 +235,16 @@ end
 
 local HIGHLIGHT_DIMENSIONS = 5
 
-function ZO_Dyeing:InitializeSwatchPool()
+function ZO_Dyeing_Keyboard:InitializeSwatchPool()
     local CANNOT_SELECT_LOCKED = false
     self.swatchPool = ZO_Dyeing_InitializeSwatchPool(self, self.sharedHighlight, self.paneScrollChild, "ZO_DyeingSwatch", CANNOT_SELECT_LOCKED, HIGHLIGHT_DIMENSIONS)
 end
 
-function ZO_Dyeing:InitializeHeaderPool()
+function ZO_Dyeing_Keyboard:InitializeHeaderPool()
     self.headerPool = ZO_ControlPool:New("ZO_DyeingHeader", self.paneScrollChild)
 end
 
-function ZO_Dyeing:InitializeEquipmentSheet()
-    local function OnEquipmentDyeSlotClicked(...)
-        self:OnDyeSlotClicked(...)
-    end
-
-    local function OnEquipmentDyeSlotEnter(...)
-        self:OnDyeSlotEnter(...)
-    end
-
-    local function OnEquipmentDyeSlotExit(...)
-        self:OnDyeSlotExit(...)
-    end
-    self.equipmentSheet = ZO_DyeingSlotsSheet:New(self.control:GetNamedChild("EquipmentSheet"), OnEquipmentDyeSlotClicked, OnEquipmentDyeSlotEnter, OnEquipmentDyeSlotExit)
-end
-
-function ZO_Dyeing:InitializeCollectibleSheet()
-    local function OnCollectibleDyeSlotClicked(...)
-        self:OnDyeSlotClicked(...)
-    end
-
-    local function OnCollectibleDyeSlotEnter(...)
-        self:OnDyeSlotEnter(...)
-    end
-
-    local function OnCollectibleDyeSlotExit(...)
-        self:OnDyeSlotExit(...)
-    end
-    self.collectibleSheet = ZO_DyeingSlotsSheet:New(self.control:GetNamedChild("CollectibleSheet"), OnCollectibleDyeSlotClicked, OnCollectibleDyeSlotEnter, OnCollectibleDyeSlotExit)
-end
-
-function ZO_Dyeing:InitializeSortsAndFilters()
+function ZO_Dyeing_Keyboard:InitializeSortsAndFilters()
     self.showLockedCheckBox = self.control:GetNamedChild("ShowLocked")
 
     local function OnFilterChanged(checkButton, isChecked)
@@ -416,107 +279,43 @@ function ZO_Dyeing:InitializeSortsAndFilters()
     self.sortDropDown:UpdateItems()
 end
 
-function ZO_Dyeing:UpdateOptionControls()
+function ZO_Dyeing_Keyboard:UpdateOptionControls()
     self.sortDropDown:SelectItem(self.savedVars.sortStyle == ZO_DYEING_SORT_STYLE_RARITY and self.sortByRarityEntry or self.sortByHueEntry)
     ZO_CheckButton_SetCheckState(self.showLockedCheckBox, self.savedVars.showLocked)
 end
 
-function ZO_Dyeing:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-        -- Apply dye
-        {
-            name = GetString(SI_DYEING_COMMIT),
-            keybind = "UI_SHORTCUT_SECONDARY",
-
-            visible = function() return ZO_Dyeing_AreTherePendingDyes(self.mode) end,
-            callback = function() self:CommitSelection() end,
-        },
-
-        -- Uniform Randomize
-        {
-            name = GetString(SI_DYEING_RANDOMIZE),
-            keybind = "UI_SHORTCUT_TERTIARY",
-
-            callback = function() self:UniformRandomize() end,
-        },
-
-        -- Undo
-        {
-            name = GetString(SI_DYEING_UNDO),
-            keybind = "UI_SHORTCUT_NEGATIVE",
-            visible = function() return ZO_Dyeing_AreTherePendingDyes(self.mode) end,
-            callback = function() self:UndoPendingChanges() end,
-        },
-
-        -- Special exit button
-        {
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            name = GetString(SI_EXIT_BUTTON),
-            keybind = "UI_SHORTCUT_EXIT",
-            callback = function() self:AttemptExit() end,
-        },
-    }
-end
-
-function ZO_Dyeing:DirtyDyeLayout()
-    if SCENE_MANAGER:IsShowing("dyeing") then
+function ZO_Dyeing_Keyboard:DirtyDyeLayout()
+    if self.fragment:IsShowing() then
         self:LayoutDyes()
     else
         self.dyeLayoutDirty = true
     end
 end
 
-function ZO_Dyeing:OnDyeSlotClicked(dyeableSlot, dyeChannel, button)
+function ZO_Dyeing_Keyboard:OnDyeSlotClicked(restyleSlotData, dyeChannel, button)
     if self.activeTool then
-        self.activeTool:OnClicked(dyeableSlot, dyeChannel, button)
+        self.activeTool:OnClicked(restyleSlotData, dyeChannel, button)
     end
 end
 
-function ZO_Dyeing:OnSavedSetDyeSlotClicked(dyeSetIndex, dyeChannel, button)
+function ZO_Dyeing_Keyboard:OnSavedSetDyeSlotClicked(dyeSetIndex, dyeChannel, button)
     if self.activeTool then
         self.activeTool:OnSavedSetClicked(dyeSetIndex, dyeChannel, button)
     end
 end
 
 do
-    local NON_PLAYER_DYE_NOT_KNOWN = false
+    local UNKNOWN_DYE = false
     local IS_NON_PLAYER_DYE = true
 
-    function ZO_Dyeing:OnDyeSlotEnter(dyeableSlot, dyeChannel, dyeControl)
-        if self.activeTool then
-            local highlightSlot, highlightDyeChannel = self.activeTool:GetHighlightRules(dyeableSlot, dyeChannel)
-            self:GetCurrentSheet():ToggleDyeableSlotHightlight(highlightSlot, true, highlightDyeChannel)
-            WINDOW_MANAGER:SetMouseCursor(self.activeTool:GetCursorType(dyeableSlot, dyeChannel))
-        end
-        local dyeId = select(dyeChannel, GetPendingSlotDyes(dyeableSlot))
-        local swatch = self.dyeIdToSwatch[dyeId]
-        if swatch then
-            ZO_Dyeing_CreateTooltipOnMouseEnter(swatch, swatch.dyeName, swatch.known, swatch.achievementId)
-        else
-            local dyeName, _, _, _, achievementId = GetDyeInfoById(dyeId)
-            if dyeName ~= "" then
-                ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, NON_PLAYER_DYE_NOT_KNOWN, achievementId, IS_NON_PLAYER_DYE)
-            end
-        end
-    end
-
-    function ZO_Dyeing:OnDyeSlotExit(dyeableSlot, dyeChannel)
-        self:GetCurrentSheet():ToggleDyeableSlotHightlight(nil, false, nil)
-        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
-        ZO_Dyeing_ClearTooltipOnMouseExit()
-    end
-
-    function ZO_Dyeing:OnSavedSetDyeSlotEnter(dyeSetIndex, dyeChannel, dyeControl)
+    function ZO_Dyeing_Keyboard:OnSavedSetDyeSlotEnter(dyeSetIndex, dyeChannel, dyeControl)
         if self.activeTool then
             if self.activeTool:HasSavedSetSelection() then
                 self.savedSets[dyeSetIndex]:OnMouseEnter()
             else
                 local highlightSlot, highlightDyeChannel = self.activeTool:GetHighlightRules(dyeSetIndex, dyeChannel)
                 self:ToggleSavedSetHightlight(highlightSlot, true, highlightDyeChannel)
-                WINDOW_MANAGER:SetMouseCursor(self.activeTool:GetCursorType(dyeSetIndex, dyeChannel))
+                WINDOW_MANAGER:SetMouseCursor(self.activeTool:GetCursorType())
             end
         end
         local dyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
@@ -526,12 +325,12 @@ do
         else
             -- Technically should never be able to get here, but you never know
             local dyeName, _, _, _, achievementId = GetDyeInfoById(dyeId)
-            ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, NON_PLAYER_DYE_NOT_KNOWN, achievementId, IS_NON_PLAYER_DYE)
+            ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, UNKNOWN_DYE, achievementId, IS_NON_PLAYER_DYE)
         end
     end
 end
 
-function ZO_Dyeing:OnSavedSetDyeSlotExit(dyeSetIndex, dyeChannel)
+function ZO_Dyeing_Keyboard:OnSavedSetDyeSlotExit(dyeSetIndex, dyeChannel)
     if self.activeTool == nil or not self.activeTool:HasSavedSetSelection() then
         self:ToggleSavedSetHightlight(nil, false, nil)
     end
@@ -540,33 +339,19 @@ function ZO_Dyeing:OnSavedSetDyeSlotExit(dyeSetIndex, dyeChannel)
     ZO_Dyeing_ClearTooltipOnMouseExit()
 end
 
-function ZO_Dyeing:GetSelectedDyeId()
+function ZO_Dyeing_Keyboard:GetSelectedDyeId()
     return self.selectedDyeId
 end
 
-function ZO_Dyeing:GetSelectedSavedSetIndex()
+function ZO_Dyeing_Keyboard:GetSelectedSavedSetIndex()
     return self.selectedSavedSetIndex
 end
 
-function ZO_Dyeing:GetMousedOverSavedSetInfo()
+function ZO_Dyeing_Keyboard:GetMousedOverSavedSetInfo()
     return self.mousedOverSavedSetIndex, self.mousedOverSavedSetDyeChannel
 end
 
-function ZO_Dyeing:OnPendingDyesChanged(dyeableSlot)
-    local currentSheet = self:GetCurrentSheet()
-
-    if dyeableSlot then
-        currentSheet:RefreshDyeableSlotDyes(dyeableSlot)
-    else
-        currentSheet:MarkViewDirty()
-    end
-
-    if SCENE_MANAGER:IsShowing("dyeing") then
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-    end
-end
-
-function ZO_Dyeing:OnSavedSetSlotChanged(dyeSetIndex)
+function ZO_Dyeing_Keyboard:OnSavedSetSlotChanged(dyeSetIndex)
     if dyeSetIndex then
         self:RefreshSavedSet(dyeSetIndex)
     else
@@ -574,98 +359,18 @@ function ZO_Dyeing:OnSavedSetSlotChanged(dyeSetIndex)
     end
 end
 
-function ZO_Dyeing:AttemptExit(exitingToAchievementId)
-    self.exitingToAchievementId = exitingToAchievementId
-
-    if ZO_Dyeing_AreTherePendingDyes(self.mode) then
-        if ZO_Dyeing_AreAllItemsBound(self.mode) then
-            if self.exitingToAchievementId then
-                ZO_Dialogs_ShowDialog("EXIT_DYE_UI_TO_ACHIEVEMENT")
-            else
-                ZO_Dialogs_ShowDialog("EXIT_DYE_UI")
-            end
-        else
-            if self.exitingToAchievementId then
-                ZO_Dialogs_ShowDialog("EXIT_DYE_UI_TO_ACHIEVEMENT_BIND")
-            else
-                ZO_Dialogs_ShowDialog("EXIT_DYE_UI_BIND")
-            end
-        end
-    else
-        self:ConfirmExit()
-    end
-end
-
-function ZO_Dyeing:ConfirmExit(applyChanges)
-    if applyChanges then
-        self:ConfirmCommitSelection()
-        PlaySound(SOUNDS.DYEING_APPLY_CHANGES_FROM_DIALOGUE)
-    end
-    if self.exitingToAchievementId then
-        SYSTEMS:GetObject("achievements"):ShowAchievement(self.exitingToAchievementId)
-        self.exitingToAchievementId = nil
-    else
-        SCENE_MANAGER:ShowBaseScene()
-    end
-end
-
-function ZO_Dyeing:ConfirmSwitchMode(applyChanges)
-    if applyChanges then
-        self:ConfirmCommitSelection()
-        PlaySound(SOUNDS.DYEING_APPLY_CHANGES_FROM_DIALOGUE)
-    else
-        self:UndoPendingChanges()
-    end
-
-    self:OnTabFilterChanged(self.pendingTabData)
-    self:SetMode(self.pendingMode)
-
-    self.pendingTabData = nil
-    self.pendingMode = nil
-end
-
-function ZO_Dyeing:CommitSelection()
-    if ZO_Dyeing_AreAllItemsBound(self.mode) then
-        self:ConfirmCommitSelection()
-        PlaySound(SOUNDS.DYEING_APPLY_CHANGES)
-    else
-        ZO_Dialogs_ShowDialog("CONFIRM_APPLY_DYE")
-    end
-end
-
-function ZO_Dyeing:ConfirmCommitSelection()
-    ApplyPendingDyes()
-    InitializePendingDyes(self.mode)
-    self:OnPendingDyesChanged()
-end
-
-function ZO_Dyeing:CancelExitToAchievements()
-    self.exitingToAchievementId = nil
-end
-
-function ZO_Dyeing:CancelExit()
+function ZO_Dyeing_Keyboard:CancelExit()
     MAIN_MENU_MANAGER:CancelBlockingSceneNextScene()
 end
 
-function ZO_Dyeing:UniformRandomize()
-    ZO_Dyeing_UniformRandomize(self.mode, function() return self:GetRandomUnlockedDyeId() end)
-    self:OnPendingDyesChanged()
-end
-
-function ZO_Dyeing:GetRandomUnlockedDyeId()
+function ZO_Dyeing_Keyboard:GetRandomUnlockedDyeId()
     if #self.unlockedDyeIds > 0 then
         return self.unlockedDyeIds[zo_random(1, #self.unlockedDyeIds)]
     end
     return nil
 end
 
-function ZO_Dyeing:UndoPendingChanges()
-    InitializePendingDyes(self.mode)
-    self:OnPendingDyesChanged()
-    PlaySound(SOUNDS.DYEING_UNDO_CHANGES)
-end
-
-function ZO_Dyeing:SwitchToDyeingWithDyeId(dyeId, suppressSounds)
+function ZO_Dyeing_Keyboard:SwitchToDyeingWithDyeId(dyeId, suppressSounds)
     local swatch = self.dyeIdToSwatch[dyeId]
     if swatch then -- super edge case check (most likely only an internal issue) for having a non-player dye in your saved sets
         self.suppressSounds = suppressSounds
@@ -683,11 +388,11 @@ function ZO_Dyeing:SwitchToDyeingWithDyeId(dyeId, suppressSounds)
     end
 end
 
-function ZO_Dyeing:DoesDyeIdExistInPlayerDyes(dyeId)
+function ZO_Dyeing_Keyboard:DoesDyeIdExistInPlayerDyes(dyeId)
     return self.dyeIdToSwatch[dyeId] ~= nil
 end
 
-function ZO_Dyeing:SetSelectedDyeId(dyeId, becauseOfRebuild, becauseToolChange)
+function ZO_Dyeing_Keyboard:SetSelectedDyeId(dyeId, becauseOfRebuild, becauseToolChange)
     if self.selectedDyeId ~= dyeId or becauseOfRebuild then
         if not becauseOfRebuild then
             local oldSwatch = self.dyeIdToSwatch[self.selectedDyeId]
@@ -713,7 +418,7 @@ function ZO_Dyeing:SetSelectedDyeId(dyeId, becauseOfRebuild, becauseToolChange)
     end
 end
 
-function ZO_Dyeing:SetSelectedSavedSetIndex(dyeSetIndex)
+function ZO_Dyeing_Keyboard:SetSelectedSavedSetIndex(dyeSetIndex)
     if self.selectedSavedSetIndex ~= dyeSetIndex then
         if self.selectedSavedSetIndex then
             self.savedSets[self.selectedSavedSetIndex]:SetSelected(false)
@@ -732,7 +437,7 @@ function ZO_Dyeing:SetSelectedSavedSetIndex(dyeSetIndex)
     end
 end
 
-function ZO_Dyeing:ToggleSavedSetHightlightBySlotControl(slotControl, isHighlighted, dyeChannel)
+function ZO_Dyeing_Keyboard:ToggleSavedSetHightlightBySlotControl(slotControl, isHighlighted, dyeChannel)
     if dyeChannel ~= nil then
         slotControl.dyeControls[dyeChannel].highlightTexture:SetHidden(not isHighlighted)
     else
@@ -742,7 +447,7 @@ function ZO_Dyeing:ToggleSavedSetHightlightBySlotControl(slotControl, isHighligh
     end
 end
 
-function ZO_Dyeing:ToggleSavedSetHightlight(dyeSetIndex, isHighlighted, dyeChannel)
+function ZO_Dyeing_Keyboard:ToggleSavedSetHightlight(dyeSetIndex, isHighlighted, dyeChannel)
     if dyeSetIndex ~= nil then
         local slotControl = self.savedSets[dyeSetIndex]
         self:ToggleSavedSetHightlightBySlotControl(slotControl, isHighlighted, dyeChannel)
@@ -753,21 +458,29 @@ function ZO_Dyeing:ToggleSavedSetHightlight(dyeSetIndex, isHighlighted, dyeChann
     end
 end
 
-function ZO_Dyeing:LayoutDyes()
-    self.dyeLayoutDirty = false
+do
+    local USE_SEARCH_RESULTS = true
 
-    local _, _, unlockedDyeIds, dyeIdToSwatch = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS, self.pane)
-    self.unlockedDyeIds = unlockedDyeIds
-    self.dyeIdToSwatch = dyeIdToSwatch
+    function ZO_Dyeing_Keyboard:LayoutDyes()
+        self.dyeLayoutDirty = false
 
-    local anyDyesToSwatch = (next(dyeIdToSwatch) ~= nil)
-    self.noDyesLabel:SetHidden(anyDyesToSwatch)
-    if self.selectedDyeId then
-        self:SetSelectedDyeId(self.selectedDyeId, true)
+        local _, _, unlockedDyeIds, dyeIdToSwatch = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS, self.pane, USE_SEARCH_RESULTS)
+        self.unlockedDyeIds = unlockedDyeIds
+        self.dyeIdToSwatch = dyeIdToSwatch
+
+        local anyDyesToSwatch = (next(dyeIdToSwatch) ~= nil)
+        self.noDyesLabel:SetHidden(anyDyesToSwatch)
+        if self.selectedDyeId then
+            self:SetSelectedDyeId(self.selectedDyeId, BECAUSE_OF_REBUILD)
+        end
     end
 end
 
-function ZO_Dyeing:RefreshSavedSet(dyeSetIndex)
+function ZO_Dyeing_Keyboard:AttemptExit(exitingToAchievementId)
+    ZO_RESTYLE_KEYBOARD:AttemptExit(exitingToAchievementId)
+end
+
+function ZO_Dyeing_Keyboard:RefreshSavedSet(dyeSetIndex)
     local savedSetSwatch = self.savedSets[dyeSetIndex]
     for dyeChannel, dyeControl in ipairs(savedSetSwatch.dyeControls) do
         local currentDyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
@@ -775,160 +488,27 @@ function ZO_Dyeing:RefreshSavedSet(dyeSetIndex)
     end
 end
 
-function ZO_Dyeing:RefreshSavedSets()
+function ZO_Dyeing_Keyboard:RefreshSavedSets()
     for dyeSetIndex in ipairs(self.savedSets) do
         self:RefreshSavedSet(dyeSetIndex)
     end
 end
 
-function ZO_Dyeing:GetCurrentSheet()
-    local selectedTabType = self.mode
-    if selectedTabType == DYE_MODE_EQUIPMENT then
-        return self.equipmentSheet
-    elseif selectedTabType == DYE_MODE_COLLECTIBLE then
-        return self.collectibleSheet
+function ZO_Dyeing_Keyboard:GetSwatchControlFromDyeId(dyeId)
+    return self.dyeIdToSwatch[dyeId]
+end
+
+function ZO_Dyeing_Keyboard:GetActiveTool()
+    if self.fragment:IsShowing() then
+        return self.activeTool
     end
+    return nil
 end
 
-function ZO_Dyeing:GetMode()
-    return self.mode
+function ZO_Dyeing_Keyboard:OnPendingDyesChanged(restyleSlotData)
+    ZO_RESTYLE_KEYBOARD:OnPendingDyesChanged(restyleSlotData)
 end
 
-ZO_DyeingSlotsSheet = ZO_Object:Subclass()
-
-function ZO_DyeingSlotsSheet:New(...)
-    local dyeingSlotsSheet = ZO_Object.New(self)
-    dyeingSlotsSheet:Initialize(...)
-    return dyeingSlotsSheet
-end
-
-function ZO_DyeingSlotsSheet:Initialize(control, onSlotClickedCallback, onSlotEnterCallback, onSlotExitCallback)
-    self.control = control
-    self.slots = self.control.slots
-
-    self:InitializeOnSlotCallbacks(onSlotClickedCallback, onSlotEnterCallback, onSlotExitCallback)
-
-    local function OnFullInventoryUpdated()
-        self:MarkViewDirty()
-    end
-
-    --Filtered on bagId == BAG_WORN
-    local function OnInventorySlotUpdated(eventCode, bagId, slotIndex)
-        self:MarkViewDirty()
-    end
-
-    control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnFullInventoryUpdated)
-    control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySlotUpdated)
-    control:AddFilterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_WORN)
-
-    self:MarkViewDirty()
-end
-
-function ZO_DyeingSlotsSheet:InitializeOnSlotCallbacks(onSlotClickedCallback, onSlotEnterCallback, onSlotExitCallback)
-    for dyeableSlot, slotControl in pairs(self.control.slots) do
-        for i, dyeControl in ipairs(slotControl.dyeControls) do
-            dyeControl:SetHandler("OnMouseUp", function(dyeControl, button, upInside)
-                if upInside then
-                    onSlotClickedCallback(dyeableSlot, i, button)
-                end
-            end)
-
-            dyeControl:SetHandler("OnMouseEnter", function(dyeControl)
-                self.mousedOverDyeableSlot = dyeableSlot
-                self.mousedOverDyeChannel = i
-                onSlotEnterCallback(dyeableSlot, i, dyeControl)
-            end)
-
-            dyeControl:SetHandler("OnMouseExit", function(dyeControl)
-                self.mousedOverDyeableSlot = nil
-                self.mousedOverDyeChannel = nil
-                onSlotExitCallback(dyeableSlot, i)
-            end)
-        end
-    end
-end
-
-function ZO_DyeingSlotsSheet:GetMousedOverDyeableSlotInfo()
-    return self.mousedOverDyeableSlot, self.mousedOverDyeChannel
-end
-
-function ZO_DyeingSlotsSheet:MarkViewDirty()
-    if SCENE_MANAGER:IsShowing("dyeing") then
-        self:RefreshView()
-    else
-        self.dirty = true
-    end
-end
-
-function ZO_DyeingSlotsSheet:RefreshView()
-    self.dirty = false
-    for dyeableSlot, slotControl in pairs(self.slots) do
-        ZO_Dyeing_SetupDyeableSlotControl(slotControl.slot, dyeableSlot)
-        self:RefreshDyeableSlotDyes(dyeableSlot)
-    end
-end
-
-function ZO_DyeingSlotsSheet:RefreshDyeableSlotDyes(dyeableSlot)
-    local slotControl = self.slots[dyeableSlot]
-    ZO_Dyeing_RefreshDyeableSlotControlDyes(slotControl, dyeableSlot)
-
-    if dyeableSlot == DYEABLE_SLOT_OFF_HAND or dyeableSlot == DYEABLE_SLOT_BACKUP_OFF then
-        local activeDyeableSlot = ZO_Dyeing_GetActiveOffhandDyeableSlot()
-        slotControl:SetHidden(dyeableSlot ~= activeDyeableSlot)
-    end
-end
-
-function ZO_DyeingSlotsSheet:ToggleDyeableSlotHightlightBySlotControl(slotControl, isHighlighted, dyeChannel)
-    if dyeChannel ~= nil then
-        slotControl.dyeControls[dyeChannel].highlightTexture:SetHidden(not isHighlighted)
-    else
-        for dyeChannel, dyeControl in ipairs(slotControl.dyeControls) do
-            dyeControl.highlightTexture:SetHidden(not isHighlighted)
-        end
-    end
-end
-
-function ZO_DyeingSlotsSheet:ToggleDyeableSlotHightlight(dyeableSlot, isHighlighted, dyeChannel)
-    if dyeableSlot ~= nil then
-        local slotControl = self.slots[dyeableSlot]
-        self:ToggleDyeableSlotHightlightBySlotControl(slotControl, isHighlighted, dyeChannel)
-    else
-        for _, slotControl in pairs(self.slots) do
-            self:ToggleDyeableSlotHightlightBySlotControl(slotControl, isHighlighted, dyeChannel)
-        end
-    end
-end
-
-function ZO_Dyeing_OnInitialized(control)
-    DYEING = ZO_Dyeing:New(control)
-    SYSTEMS:RegisterKeyboardObject("dyeing", DYEING)
-end
-
-local SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON = true, true, true
-function ZO_DyeableSlot_OnMouseEnter(control)
-    local equipSlot = GetEquipSlotFromDyeableSlot(control.dyeableSlot)
-    local collectibleCategoryType = GetCollectibleCategoryFromDyeableSlot(control.dyeableSlot)
-    if equipSlot ~= EQUIP_SLOT_NONE then
-        ZO_InventorySlot_OnMouseEnter(control)
-    elseif collectibleCategoryType ~= COLLECTIBLE_CATEGORY_TYPE_INVALID then
-        local collectibleId = GetDyeableSlotId(control.dyeableSlot)
-        if collectibleId > 0 then
-            InitializeTooltip(ItemTooltip, control, LEFT, 5, 0, RIGHT)
-            ItemTooltip:SetCollectible(collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
-        else
-            InitializeTooltip(InformationTooltip, control, LEFT, 5, 0, RIGHT)
-            SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_DYEABLESLOT", control.dyeableSlot)))
-        end
-    end
-end
-
-function ZO_DyeableSlot_OnMouseExit(control)
-    local equipSlot = GetEquipSlotFromDyeableSlot(control.dyeableSlot)
-    local collectibleCategoryType = GetCollectibleCategoryFromDyeableSlot(control.dyeableSlot)
-    if equipSlot ~= EQUIP_SLOT_NONE then
-        ZO_InventorySlot_OnMouseExit(control)
-    elseif collectibleCategoryType ~= COLLECTIBLE_CATEGORY_TYPE_INVALID then
-        ClearTooltip(ItemTooltip)
-        ClearTooltip(InformationTooltip)
-    end
+function ZO_Dyeing_Keyboard_OnInitialized(control)
+    ZO_DYEING_KEYBOARD = ZO_Dyeing_Keyboard:New(control)
 end

@@ -50,6 +50,10 @@
             ZO_MenuBar_SetData(menuBar, barData)
 
             NOTE: Calls to ZO_MenuBar_SetData after buttons have been added is not supported.  If the template changes midstream, you're really doing something wrong.  Stop that.
+
+            If you want to create a tab that does not show up on the tab bar, but is selectable programmatically (Ex. trading house sellable items tab)
+            You must set the "hidden" value to false, but you must also set "ignoreVisibleCheck" to true.
+            this will cause the button to not show up on the tab bar, but if you were to select it using ZO_MenuBar_SelectDescriptor
 --]]
 
 --[[
@@ -561,7 +565,7 @@ end
 function MenuBar:SelectDescriptor(descriptor, skipAnimation)
     local buttonObject = self:ButtonObjectForDescriptor(descriptor)
     if(buttonObject) then
-        if IsVisible(buttonObject.m_buttonData) then
+        if IsVisible(buttonObject.m_buttonData) or buttonObject.m_buttonData.ignoreVisibleCheck then
             if(self.m_clickedButton and (self.m_clickedButton.m_buttonData == buttonObject.m_buttonData)) then
                 return
             end
@@ -647,6 +651,26 @@ end
 
 function ZO_MenuBar_AddButton(self, buttonData)
     return self.m_object:AddButton(buttonData)
+end
+
+function ZO_MenuBar_GenerateButtonTabData(self, name, mode, normal, pressed, highlight, disabled, customTooltipFunction, alwaysShowTooltip, playerDrivenCallback)
+    return {
+        activeTabText = name,
+        categoryName = name,
+
+        descriptor = mode,
+        normal = normal,
+        pressed = pressed,
+        highlight = highlight,
+        disabled = disabled,
+        CustomTooltipFunction = customTooltipFunction,
+        alwaysShowTooltip = alwaysShowTooltip ~= false,
+        callback = function(tabData, playerDriven) 
+                        if playerDriven then 
+                            playerDrivenCallback(tabData, mode) 
+                        end 
+                    end,
+    }
 end
 
 function ZO_MenuBar_GetButtonControl(self, descriptor)

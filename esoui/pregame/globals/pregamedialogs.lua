@@ -1274,3 +1274,30 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
         end
     end,
 }
+
+ESO_Dialogs["32_BIT_CLIENT_WARNING"] = 
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_DIALOG_CLIENT_VERSION_UPGRADE_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_DIALOG_CLIENT_VERSION_UPGRADE_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_URL_DIALOG_OPEN,
+            callback =  function(dialog)
+                            OpenURLByType(dialog.data.urlType)
+                        end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}

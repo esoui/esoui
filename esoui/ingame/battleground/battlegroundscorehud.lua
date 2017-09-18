@@ -181,7 +181,7 @@ function ZO_BattlegroundScoreHud:CreateTeamSections()
     end
 
     self.teamSections = {}
-    for bgAlliance = BATTLEGROUND_ALLIANCE_FIRE_DRAKES, BATTLEGROUND_ALLIANCE_MAX_VALUE do
+    for bgAlliance = BATTLEGROUND_ALLIANCE_ITERATION_BEGIN, BATTLEGROUND_ALLIANCE_ITERATION_END do
         local control = CreateControlFromVirtual("$(parent)Section", self.teamsControl, "ZO_BattlegroundTeamSection", bgAlliance)
         table.insert(self.teamSections, ZO_BattlegroundTeamSection:New(control, bgAlliance))
     end

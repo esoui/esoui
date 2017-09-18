@@ -3,7 +3,7 @@
         <Control name="ZO_GamepadBuyBagSpaceGoldAndLabel" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <AnchorFill />
+                    <Anchor point="TOPLEFT" />
                 </Label>
           
                 <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate" font="ZoFontGamepad34">
@@ -20,14 +20,16 @@
                 </Label>
 
                 <Control name="$(parent)MyGold" inherits="ZO_GamepadBuyBagSpaceGoldAndLabel">
+                    <OnInitialized>
+                        local IS_PLURAL = false
+                        local IS_UPPER = false
+                        self:GetNamedChild("Label"):SetText(GetCurrencyName(CURT_MONEY, IS_PLURAL, IS_UPPER))
+                    </OnInitialized>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Info" relativePoint="BOTTOMLEFT" offsetY="30" />
-                    <Controls>
-                        <Label name="$(parent)Label" override="true" text="SI_CURRENCY_GOLD" />
-                    </Controls>
                 </Control>
               
                 <Control name="$(parent)Cost" inherits="ZO_GamepadBuyBagSpaceGoldAndLabel">
-                  <Anchor point="TOPLEFT" relativeTo="$(parent)MyGold" relativePoint="BOTTOMLEFT" offsetY="38" />
+                  <Anchor point="TOPLEFT" relativeTo="$(parent)MyGoldLabel" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Controls>
                         <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_BUY_BAG_SPACE_COST" />
                     </Controls>

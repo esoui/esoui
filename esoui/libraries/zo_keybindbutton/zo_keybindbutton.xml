@@ -48,5 +48,21 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Control name="ZO_KeybindButton_ChromaBehavior" virtual="true">
+            <OnInitialized>
+                ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnEffectivelyShown>
+                ZO_KeybindButton_ChromaBehavior_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+
+            <OnEffectivelyHidden>
+                ZO_KeybindButton_ChromaBehavior_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
+        </Control>
+
+        <Control name="ZO_KeybindButtonChroma" inherits="ZO_KeybindButton ZO_KeybindButton_ChromaBehavior" virtual="true" />
     </Controls>
 </GuiXml>

@@ -30,7 +30,7 @@ function CampaignBrowser:New(control)
     manager.sortHeaderGroup:SelectHeaderByKey("name")
 
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_SELECTION_DATA_CHANGED, function() manager:OnCampaignSelectionDataChanged() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() manager:RefreshVisible() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() manager:OnAssignedCampaignChanged() end)
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_GUEST_CAMPAIGN_CHANGED, function() manager:RefreshVisible() end)
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_JOINED, function(_, campaignId, group) manager:OnCampaignQueueJoined(campaignId) end)
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_LEFT, function(_, campaignId, group) manager:OnCampaignQueueLeft(campaignId) end)
@@ -46,6 +46,7 @@ function CampaignBrowser:New(control)
     CAMPAIGN_BROWSER_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
                                                                 if(newState == SCENE_SHOWING) then
                                                                     QueryCampaignSelectionData()
+                                                                    manager:SelectAssignedCampainRulesetNode()
                                                                     KEYBIND_STRIP:AddKeybindButtonGroup(manager.keybindStripDescriptor)
                                                                 elseif(newState == SCENE_HIDDEN) then                                                             
                                                                     KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
@@ -475,27 +476,43 @@ function CampaignBrowser:BuildCategories()
     self.rulesetTypes = self.campaignBrowser:BuildCategoriesList()
 
     self.tree:Reset()
+    
+    for rulesetType, rulesetIds in pairs(self.rulesetTypes) do
+        local hasEnoughEntriesForAParentCategory = #rulesetIds > 1
 
-    for i = 1, GetNumCampaignRulesetTypes() do
-        local rulesetIds = self.rulesetTypes[i]
-        if(rulesetIds) then
-            local numRulesetIds = 0
-            for _, _ in pairs(rulesetIds) do
-                numRulesetIds = numRulesetIds + 1
-            end
+        local parentCategory
+        if hasEnoughEntriesForAParentCategory then
+            parentCategory = self.tree:AddNode("ZO_RulesetTypeHeader", rulesetType, nil, SOUNDS.CAMPAIGN_BLADE_SELECTED)
+        end
 
-            if(numRulesetIds == 1) then
-                self.tree:AddNode("ZO_RulesetEntry", {rulesetId = rulesetIds[1], noHeader = true}, nil, SOUNDS.DEFAULT_CLICK)
-            else
-                local parent = self.tree:AddNode("ZO_RulesetTypeHeader", i, nil, SOUNDS.CAMPAIGN_BLADE_SELECTED)
-                for _, rulesetId in pairs(rulesetIds) do
-                    self.tree:AddNode("ZO_RulesetEntry", {rulesetId = rulesetId, noHeader = false}, parent, SOUNDS.DEFAULT_CLICK)
-                end
-            end
+        for _, rulesetId in pairs(rulesetIds) do
+            self.tree:AddNode("ZO_RulesetEntry", {rulesetId = rulesetId, noHeader = not hasEnoughEntriesForAParentCategory}, parentCategory, SOUNDS.DEFAULT_CLICK)
         end
     end
 
     self.tree:Commit()
+    self:SelectAssignedCampainRulesetNode()
+end
+
+
+function CampaignBrowser:SelectAssignedCampainRulesetNode()
+    if self.tree then
+        local assignedCampaignId = GetAssignedCampaignId()
+        local assignedCampaignRulesetId = GetCampaignRulesetId(assignedCampaignId)
+
+        if assignedCampaignRulesetId ~= 0 then
+            local START_AT_ROOT = nil
+            self.tree:ExecuteOnSubTree(START_AT_ROOT, function(node)
+                if node:GetTemplate() == "ZO_RulesetEntry" then
+                    local nodeData = node:GetData()
+                    if nodeData.rulesetId == assignedCampaignRulesetId then
+                        self.tree:SelectNode(node)
+                        return true
+                    end
+                end
+            end)
+        end
+    end
 end
 
 function CampaignBrowser:FilterScrollList()
@@ -567,6 +584,11 @@ end
 
 function CampaignBrowser:OnCampaignSelectionDataChanged()
     self:RefreshData()
+end
+
+function CampaignBrowser:OnAssignedCampaignChanged()
+    self:SelectAssignedCampainRulesetNode()
+    self:RefreshVisible()
 end
 
 function CampaignBrowser:OnCampaignQueueJoined(campaignId)

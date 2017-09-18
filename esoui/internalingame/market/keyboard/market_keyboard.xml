@@ -40,9 +40,7 @@
 
         <Label name="ZO_Market_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" modifyTextType="UPPERCASE" virtual="true"/>
 
-        <Label name="ZO_Market_SubscriptionBenefitLine" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
-            <Dimensions x="475" />
-        </Label>
+        <Label name="ZO_Market_SubscriptionBenefitLine" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
         <Control name="ZO_MarketFragmentBackLabel" inherits="ZO_IconHeader" virtual="true">
             <OnInitialized>
@@ -133,7 +131,7 @@
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfoBanner" offsetX="-20" offsetY="45" />
                                 </Label>
 
-                                <Label name="$(parent)MembershipInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL" modifyTextType="UPPERCASE">
+                                <Label name="$(parent)MembershipInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL_KEYBOARD">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoTitle" relativePoint="BOTTOMLEFT" />
                                 </Label>
 
@@ -247,6 +245,21 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_MarketListHeader" virtual="true">
+            <Dimensions x="509" y="ZO_MARKET_LIST_ENTRY_HEIGHT" />
+
+            <OnInitialized>
+                self.nameControl = self:GetNamedChild("Name")
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS">
+                    <Dimensions x="450" />
+                    <Anchor point="LEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="ZO_KeyboardMarketProductList" mouseEnabled="true" hidden="true" virtual="true">
             <Controls>
 
@@ -255,18 +268,18 @@
                 </Control>
 
                 <Label name="$(parent)ListHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" offsetX="280" offsetY="62" />
-                    <Anchor point="TOPRIGHT" offsetX="-12" offsetY="62" />
+                    <Anchor point="TOPLEFT" offsetX="280" offsetY="37" />
+                    <Anchor point="TOPRIGHT" offsetX="-12" offsetY="37" />
                 </Label>
 
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ListHeader" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ListHeader" relativePoint="BOTTOMLEFT" offsetY="40"/>
                     <Dimensions x="633" y="584" /> <!-- static dimensions so the list calculates its height correctly -->
                 </Control>
 
                 <Label name="$(parent)ContentHeader" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ListHeader" relativePoint="TOPLEFT" offsetY="-30"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ListHeader" relativePoint="TOPRIGHT" offsetY="-30"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ListHeader" relativePoint="TOPLEFT" offsetY="-5"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ListHeader" relativePoint="TOPRIGHT" offsetY="-5"/>
                 </Label>
 
             </Controls>
@@ -317,6 +330,5 @@
             </Controls>
         </TopLevelControl>
 
-    
-</Controls>
+    </Controls>
 </GuiXml>

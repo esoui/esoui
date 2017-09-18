@@ -102,7 +102,7 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
     end
 
-    for i = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_MIN_VALUE, CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_MAX_VALUE do
+    for i = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITERATION_BEGIN, CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITERATION_END do
         local name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", i)
         if name ~= nil then
             local entry = ZO_ComboBox:CreateItemEntry(name, OnCategoryChanged)
@@ -200,6 +200,7 @@ function HelpAskForHelp_Keyboard:UpdateDetailsComponents()
     if mainArray == nil then
         self:SetDetailsContentHidden(true)
     else
+        ZO_DefaultEdit_SetEnabled(self.details, true)
         local title = mainArray.detailsTitle
         if title == nil then
             self:SetDetailsContentHidden(true)
@@ -237,7 +238,7 @@ function HelpAskForHelp_Keyboard:UpdateSubmitButton()
 
     if self.helpCategoryComboBox == nil or self.helpSubcategoryComboBox == nil or self.descriptionDefaultTextField == nil or self.details == nil then
         enableSubmitButton = false
-    elseif self.helpCategoryComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_MIN_VALUE then
+    elseif self.helpCategoryComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_NONE then
         enableSubmitButton = false
     elseif not self.helpSubcategoryComboBoxControl:IsHidden() and self.helpSubcategoryComboBox:GetSelectedItemData().index <= 0 then
         enableSubmitButton = false
@@ -303,6 +304,7 @@ function HelpAskForHelp_Keyboard:OpenAskForHelp(category, subcategory, playerNam
 
     if playerName then
         self:SetDetailsText(playerName)
+        ZO_DefaultEdit_SetEnabled(self.details, false)
     end
 end
 
@@ -341,6 +343,8 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     if categoryIndex == CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER then
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
     end
+
+    ZO_DefaultEdit_SetEnabled(self.details, true)
 
     SubmitCustomerServiceTicket()
 end

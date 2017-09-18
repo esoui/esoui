@@ -40,6 +40,7 @@ CreateSlotType("SLOT_TYPE_LAUNDER")
 CreateSlotType("SLOT_TYPE_GAMEPAD_INVENTORY_ITEM")
 CreateSlotType("SLOT_TYPE_COLLECTIONS_INVENTORY")
 CreateSlotType("SLOT_TYPE_CRAFT_BAG_ITEM")
+CreateSlotType("SLOT_TYPE_PENDING_RETRAIT_ITEM")
 
 local UpdateMouseoverCommand
 
@@ -256,7 +257,7 @@ function ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
     return buttonPart, listPart, multiIconPart
 end
 
-local function SetListHighlightHidden(listPart, hidden)
+function ZO_InventorySlot_SetHighlightHidden(listPart, hidden)
     if listPart then
         local highlight = listPart:GetNamedChild("Highlight")
         if highlight and (highlight:GetType() == CT_TEXTURE) then
@@ -1165,6 +1166,8 @@ local function CanItemBeAddedToCraft(inventorySlot)
         return ZO_Enchanting_GetVisibleEnchanting():CanItemBeAddedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         return ZO_Smithing_GetActiveObject():CanItemBeAddedToCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        return SYSTEMS:GetObject("retrait"):CanItemBeAddedToCraft(bag, slot)
     end
 
     return false
@@ -1178,6 +1181,8 @@ local function IsItemAlreadySlottedToCraft(inventorySlot)
         return ZO_Enchanting_GetVisibleEnchanting():IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         return ZO_Smithing_GetActiveObject():IsItemAlreadySlottedToCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        return SYSTEMS:GetObject("retrait"):IsItemAlreadySlottedToCraft(bag, slot)
     end
     return false
 end
@@ -1190,6 +1195,8 @@ local function TryAddItemToCraft(inventorySlot)
         ZO_Enchanting_GetVisibleEnchanting():AddItemToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         ZO_Smithing_GetActiveObject():AddItemToCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        SYSTEMS:GetObject("retrait"):AddItemToCraft(bag, slot)
     end
     UpdateMouseoverCommand(inventorySlot)
 end
@@ -1202,6 +1209,8 @@ local function TryRemoveItemFromCraft(inventorySlot)
        ZO_Enchanting_GetVisibleEnchanting():RemoveItemFromCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         ZO_Smithing_GetActiveObject():RemoveItemFromCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        SYSTEMS:GetObject("retrait"):RemoveItemFromCraft(bag, slot)
     end
     UpdateMouseoverCommand(inventorySlot)
 end
@@ -1213,6 +1222,7 @@ local function IsCraftingSlotType(slotType)
         or slotType == SLOT_TYPE_SMITHING_STYLE
         or slotType == SLOT_TYPE_SMITHING_TRAIT
         or slotType == SLOT_TYPE_SMITHING_BOOSTER
+        or slotType == SLOT_TYPE_PENDING_RETRAIT_ITEM
 end
 
 local function ShouldHandleClick(inventorySlot)
@@ -1427,6 +1437,7 @@ local linkHelperActions =
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetInventoryCollectibleLink, inventorySlot)) end,
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
 }
 
 ---- Quickslot Action Handlers ----
@@ -1785,6 +1796,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          { "remove_from_craft", "link_to_chat", "report_item" },
 }
 
 -- Checks to see if a certain slot type should completely disable all actions
@@ -2171,6 +2183,17 @@ local InventoryEnter =
             return true, ItemTooltip
         end
     },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
+    {
+        function(inventorySlot)
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            if bag and index then
+                ItemTooltip:SetBagItem(bag, index)
+                return true, ItemTooltip
+            end
+            return false
+        end
+    },
 }
 
 local g_mouseoverCommand
@@ -2219,13 +2242,14 @@ local NoComparisionTooltip =
     [SLOT_TYPE_SMITHING_TRAIT] = true,
     [SLOT_TYPE_SMITHING_BOOSTER] = true,
     [SLOT_TYPE_LIST_DIALOG_ITEM] = true,
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] = true,
 }
 
 function ZO_InventorySlot_OnMouseEnter(inventorySlot)
     local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
 
     if inventorySlot.slotControlType == "listSlot" then
-        if((ZO_InventorySlot_GetStackCount(buttonPart) > 0) or (ZO_InventorySlot_GetStackCount(listPart) > 0)) then
+        if (ZO_InventorySlot_GetStackCount(buttonPart) > 0) or (ZO_InventorySlot_GetStackCount(listPart) > 0) then
             if not buttonPart.animation then
                 buttonPart.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", buttonPart)
             end
@@ -2245,7 +2269,7 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
     InitializeTooltip(ItemTooltip)
     InitializeTooltip(InformationTooltip)
 
-    SetListHighlightHidden(listPart, false)
+    ZO_InventorySlot_SetHighlightHidden(listPart, false)
 
     local success, tooltipUsed = RunHandlers(InventoryEnter, buttonPart)
     if success then
@@ -2364,7 +2388,7 @@ function ZO_InventorySlot_OnMouseExit(inventorySlot)
 
     UpdateMouseoverCommand(nil)
 
-    SetListHighlightHidden(listPart, true)
+    ZO_InventorySlot_SetHighlightHidden(listPart, true)
 
     --Perform any additional MouseExit actions
     if ZO_Enchanting_IsSceneShowing() then
@@ -2521,6 +2545,24 @@ local InventoryDragStart =
             return true
         end
     },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
+    {
+        function(inventorySlot)
+            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                if bag and index then
+                    if ZO_RETRAIT_STATION_KEYBOARD then
+                        local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
+                        if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
+                            ZO_RETRAIT_STATION_KEYBOARD:RemoveItemFromCraft(bagId, slotIndex)
+                            PickupInventoryItem(bag, index)
+                        end
+                    end
+                end
+            end
+            return true
+        end
+    },
 }
 
 function ZO_InventorySlot_OnDragStart(inventorySlot)
@@ -2635,6 +2677,25 @@ local InventoryReceiveDrag =
             return PlaceInventoryItemInStorage(inventorySlot)
         end
     },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
+    {
+        function(inventorySlot)
+            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
+                if bagId and slotIndex then
+                    ClearCursor()
+                    if ZO_RETRAIT_STATION_KEYBOARD then
+                        local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
+                        if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
+                            ZO_RETRAIT_STATION_KEYBOARD:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                        end
+                    end
+                    return true
+                end
+            end
+            return false
+        end
+    },
 }
 
 function ZO_InventorySlot_OnReceiveDrag(inventorySlot)
@@ -2653,6 +2714,31 @@ function ZO_InventorySlot_WillItemBecomeBoundOnEquip(bagId, slotIndex)
     local notAlreadyBound = not IsItemBound(bagId, slotIndex) and GetItemBindType(bagId, slotIndex) == BIND_TYPE_ON_EQUIP
     local hasSufficientQuality = itemQuality >= ITEM_QUALITY_ARCANE
     return (notAlreadyBound and hasSufficientQuality) or IsItemBoPAndTradeable(bagId, slotIndex)
+end
+
+function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, false)
+
+    local slotData = control:GetParent().dataEntry.data
+    local traitInformation = slotData.traitInformation
+
+    if traitInformation and traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
+        local itemTrait = GetItemTrait(slotData.bagId, slotData.slotIndex)
+        local traitName = GetString("SI_ITEMTRAITTYPE", itemTrait)
+        local traitInformationString = GetString("SI_ITEMTRAITINFORMATION", traitInformation)
+        InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
+        InformationTooltip:AddLine(zo_strformat(SI_INVENTORY_TRAIT_STATUS_TOOLTIP, traitName, ZO_SELECTED_TEXT:Colorize(traitInformationString)), "", ZO_NORMAL_TEXT:UnpackRGB())
+        if traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
+            InformationTooltip:AddLine(GetString(SI_INVENTORY_TRAIT_STATUS_RETRAITED_NOT_RESEARCHABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
+        end
+    end
+end
+
+function ZO_InventorySlot_TraitInfo_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, true)
 end
 
 do

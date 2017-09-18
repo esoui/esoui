@@ -2,36 +2,88 @@
     <Controls>
         <Control name="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" virtual="true">
             <Controls>
-                <Button name="$(parent)Button" override="true" inherits="ZO_DefaultButton">
-                    <Dimensions x="200" />
-                </Button>
+                <Control name="$(parent)Button" override="true" mouseEnabled="true" resizeToFitDescendents="true">
+                    <Dimensions y="28" />
+                    <DimensionConstraints minX="200"/>
+                    <ResizeToFitPadding width="40" />
+                    <OnMouseEnter>
+                        ZO_HousingPreviewDialog_PurchaseOptionButton_Keyboard_OnMouseEnter(...)
+                    </OnMouseEnter>
 
-                <Label name="$(parent)CurrencyNameLabel" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+                    <OnMouseExit>
+                        ZO_HousingPreviewDialog_PurchaseOptionButton_Keyboard_OnMouseExit(...)
+                    </OnMouseExit>
 
-                <Label name="$(parent)ErrorLabel" override="true"  font="ZoFontWinH4" />
+                    <OnMouseUp>
+                        ZO_HousingPreviewDialog_PurchaseOptionButton_Keyboard_OnMouseUp(...)
+                    </OnMouseUp>
+
+
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Buttons/ESO_buttonLarge_normal.dds" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Texture>
+
+                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds" blendMode="ADD" excludeFromResizeToFitExtents="true" hidden="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Texture>
+
+                        <Label name="$(parent)Price" override="true" font="ZoFontGameBold" />
+
+                        <Label name="$(parent)PreviousPrice" override="true" font="ZoFontGameBold" />
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)ErrorLabel" override="true" font="ZoFontWinH4" mouseEnabled="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="5" />
+
+                    <OnMouseEnter>
+                        ZO_HousingPreviewDialog_PurchaseOptionErrorLabel_Keyboard_OnMouseEnter(...)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_HousingPreviewDialog_PurchaseOptionErrorLabel_Keyboard_OnMouseExit(...)
+                    </OnMouseExit>
+                </Label>
+
+                <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="5" />
+                    <Controls>
+                        <Control name="$(parent)Background" override="true">
+                            <AnchorFill />
+                            <Controls>
+                                <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                                <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Label>
             </Controls>
         </Control>
-        
+
         <TopLevelControl name="ZO_HousingPreviewDialog_Keyboard" inherits="ZO_CustomDialogFrame ZO_HousingPreviewDialog_Shared">
             <ResizeToFitPadding width="10" height="30" />
-            
+
             <OnInitialized>
                 ZO_HousingPreviewDialog_Keyboard_OnInitialized(self)
             </OnInitialized>
-            
+
             <Controls>
                 <Button name="$(parent)Close" inherits="ZO_CloseButton" excludeFromResizeToFitExtents="true">
                     <Dimensions x="16" y="16" />
                     <Anchor point="TOPRIGHT" offsetX="-8" offsetY="6" />
                     <OnClicked>
-                        HOUSING_PREVIEW_DIALOG_KEYBOARD:ReleaseDialog()
+                        ZO_HOUSING_PREVIEW_DIALOG_KEYBOARD:ReleaseDialog()
                     </OnClicked>
                 </Button>
-                
+
                 <Texture name="$(parent)HouseImage" override="true">
                     <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
                 </Texture>
-                
+
                 <Label name="$(parent)Title" override="true" font="ZoFontWinH2" />
 
                 <Control name="$(parent)Details" override="true">
@@ -45,13 +97,13 @@
                         <Label name="$(parent)HouseTypeData" override="true" font="ZoFontWinH4" />
                     </Controls>
                 </Control>
-                
+
                 <Label name="$(parent)NotAvailableText" override="true" font="ZoFontWinH2" />
-                
+
                 <Control name="$(parent)Template" override="true">
                     <Controls>
                         <Label name="$(parent)Header" override="true" font="ZoFontWinH4" text="SI_HOUSING_TEMPLATE_HEADER_WITH_COLON" />
-                        
+
                         <Control name="$(parent)ComboBox" override="true" inherits="ZO_ComboBox">
                             <Dimensions x="300" y="32" />
                         </Control>
@@ -66,35 +118,11 @@
 
                 <Control name="$(parent)PurchaseOptions" override="true">
                     <Controls>
-                        <Control name="$(parent)Gold" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard">
-                            <Controls>
-                                <Button name="$(parent)Button" override="true">
-                                    <OnClicked>
-                                        ZO_HousingPreviewDialog_Keyboard_BuyForGoldButton_OnClicked(self, button)
-                                    </OnClicked>
-                                </Button>
-                            </Controls>
-                        </Control>
+                        <Control name="$(parent)Gold" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" />
 
-                        <Control name="$(parent)Crowns" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard">
-                            <Controls>
-                                <Button name="$(parent)Button" override="true">
-                                    <OnClicked>
-                                        ZO_HousingPreviewDialog_Keyboard_BuyFromMarketButton_OnClicked(self, button)
-                                    </OnClicked>
-                                </Button>
-                            </Controls>
-                        </Control>
+                        <Control name="$(parent)Crowns" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" />
 
-                        <Control name="$(parent)CrownGems" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard">
-                            <Controls>
-                                <Button name="$(parent)Button" override="true">
-                                    <OnClicked>
-                                        ZO_HousingPreviewDialog_Keyboard_BuyFromMarketButton_OnClicked(self, button)
-                                    </OnClicked>
-                                </Button>
-                            </Controls>
-                        </Control>
+                        <Control name="$(parent)CrownGems" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" />
                     </Controls>
                 </Control>
             </Controls>

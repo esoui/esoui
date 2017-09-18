@@ -86,16 +86,16 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
         local savedValue = self:GetSavedField(fieldType)
         local savedDropdownIndex = 1
         local currentDropdownIndex = 1
-        local minEnumValue
-        local maxEnumValue
+        local enumIterationBegin
+        local enumIterationEnd
         local fieldData = ZO_HELP_SUBMIT_FEEDBACK_FIELD_DATA[fieldType]
         if fieldData.categoryContextualData then
             local contextualData = fieldData.categoryContextualData[self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY)]
-            minEnumValue = contextualData.minValue
-            maxEnumValue = contextualData.maxValue
+            enumIterationBegin = contextualData.iterationBegin
+            enumIterationEnd = contextualData.iterationEnd
         else
-            minEnumValue = fieldData.minValue
-            maxEnumValue = fieldData.maxValue
+            enumIterationBegin = fieldData.iterationBegin
+            enumIterationEnd = fieldData.iterationEnd
         end
 
         local function AddEntry(enumValue)
@@ -116,7 +116,7 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
             AddEntry(fieldData.universallyAddEnum)
         end
 
-        for enumValue = minEnumValue, maxEnumValue do
+        for enumValue = enumIterationBegin, enumIterationEnd do
             AddEntry(enumValue)
         end
 

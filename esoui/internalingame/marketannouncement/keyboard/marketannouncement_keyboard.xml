@@ -22,14 +22,14 @@
 
                 <Label name="$(parent)Purchased" font="ZoFontHeader3" override="true"/>
                 
-                <Label name="$(parent)TextCallout" font="ZoMarketAnnouncementCalloutFont" override="true">
+                <Label name="$(parent)TextCallout" override="true" font="ZoMarketAnnouncementCalloutFont">
                     <Controls>
-                        <Control name="$(parent)Background" override="true">
+                        <Control name="$(parent)Background" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL">
                             <Dimensions y="32"/>
                             <Controls>
-                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" override="true"/>
-                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
-                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
                             </Controls>
                         </Control>
                     </Controls>

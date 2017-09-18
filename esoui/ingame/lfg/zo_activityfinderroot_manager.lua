@@ -192,7 +192,7 @@ function ActivityFinderRoot_Manager:InitializeLocationData()
     local sortedLocationsData = {}
     local randomActivityTypeGroupSizeRanges = {}
 
-    for activityType = LFG_ACTIVITY_MIN_VALUE, LFG_ACTIVITY_MAX_VALUE do
+    for activityType = LFG_ACTIVITY_ITERATION_BEGIN, LFG_ACTIVITY_ITERATION_END do
         local numActivities = GetNumActivitiesByType(activityType)
         local numActivitySets = GetNumActivitySetsByType(activityType)
         local specificLookupActivityData = {}

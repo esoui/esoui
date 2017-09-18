@@ -1,35 +1,5 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_CollectibleIconHeader" inherits="ZO_IconHeader" virtual="true">
-            <Controls>
-                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
-                </Texture>
-
-                <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="16" />
-                </Texture>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_CollectibleChildlessCategory" inherits="ZO_CollectibleIconHeader" virtual="true">
-            <OnInitialized>
-                ZO_IconHeader_OnInitialized(self)
-                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
-                self.SetSelected = ZO_IconHeader_Setup
-            </OnInitialized>
-        </Control>
-
-        <Label name="ZO_CollectibleSubCategory" inherits="ZO_JournalSubCategory" virtual="true" >
-            <Controls>
-                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
-                    <Dimensions x="24" y="24" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
-                </Texture>
-            </Controls>
-        </Label>
-        
         <Control name="ZO_CollectibleSticker" mouseEnabled="true" virtual="true">
             <Dimensions x="ZO_COLLECTIBLE_STICKER_SINGLE_WIDTH" y="ZO_COLLECTIBLE_STICKER_SINGLE_HEIGHT" />
 
@@ -179,14 +149,11 @@
                                     <OnTextChanged>
                                         ZO_CollectionsBook_OnSearchTextChanged(self)
                                     </OnTextChanged>
-                                    <OnEnter>
-                                        ZO_CollectionsBook_OnSearchEnterKeyPressed(self)
-                                    </OnEnter>
                                 </EditBox>
                             </Controls>
                         </Backdrop>
                         
-                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_COLLECTIONS_BOOK_SEARCH_FILTER_BY">
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
                             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
                         </Label>
 
@@ -194,12 +161,7 @@
                             <Anchor point="TOP" relativeTo="$(parent)ContentList" relativePoint="TOP" />
                         </Label>
 
-                        <Control name="$(parent)SummaryInset" override="true">
-                            <Controls>
-                                <Texture name="$(parent)Divider" override="true" hidden="false" />
-                                <Label name="$(parent)RecentTitle" override="true" hidden="false" text="SI_COLLECTIONS_BOOK_RECENT" />
-                            </Controls>
-                        </Control>
+                        <Control name="$(parent)SummaryInset" override="true" hidden="true" />
                     </Controls>
                 </Control>
                 

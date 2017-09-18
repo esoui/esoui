@@ -39,8 +39,16 @@
             </OnInitialized>
         </Control>
 
+        <Control name="Options_Camera_ScreenShake" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_AssassinationCamera" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_CAMERA, SETTING_TYPE_CAMERA, CAMERA_SETTING_SCREEN_SHAKE)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
         <Control name="Options_Camera_FirstPersonSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Camera_AssassinationCamera" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Camera_ScreenShake" relativePoint="BOTTOMLEFT" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_CAMERA, SI_CAMERA_OPTIONS_FIRST_PERSON)
                 ZO_OptionsWindow_InitializeControl(self)

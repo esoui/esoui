@@ -1,6 +1,7 @@
 ZO_SortHeaderGroup = ZO_CallbackObject:Subclass()
 ZO_SortHeaderGroup.HEADER_CLICKED = "HeaderClicked"
 ZO_SortHeaderGroup.SUPPRESS_CALLBACKS = true
+ZO_SortHeaderGroup.FORCE_RESELECT = true
 
 local SORT_ARROW_UP = "EsoUI/Art/Miscellaneous/list_sortUp.dds"
 local SORT_ARROW_DOWN = "EsoUI/Art/Miscellaneous/list_sortDown.dds"
@@ -146,7 +147,7 @@ function ZO_SortHeaderGroup:IsCurrentSelectedHeader(header)
     return self.selectedSortHeader == header
 end
 
-function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceReselect)
+function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceReselect, forceSortDirection)
     if self:IsEnabled() then
         local resetSortDir = false
         if forceReselect or not self:IsCurrentSelectedHeader(header) then
@@ -154,7 +155,9 @@ function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceRese
             resetSortDir = true
         end
 
-        if resetSortDir then
+        if forceSortDirection ~= nil then
+            self.sortDirection = forceSortDirection
+        elseif resetSortDir then
             self.sortDirection = header.initialDirection
         else
             self.sortDirection = not self.sortDirection
@@ -176,10 +179,10 @@ function ZO_SortHeaderGroup:HeaderForKey(key)
     end
 end
 
-function ZO_SortHeaderGroup:SelectHeaderByKey(key, suppressCallbacks, forceReselect)
+function ZO_SortHeaderGroup:SelectHeaderByKey(key, suppressCallbacks, forceReselect, forceSortDirection)
     local header = self:HeaderForKey(key)
     if(header) then
-        self:OnHeaderClicked(header, suppressCallbacks, forceReselect)
+        self:OnHeaderClicked(header, suppressCallbacks, forceReselect, forceSortDirection)
     end
 end
 

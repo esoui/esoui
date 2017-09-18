@@ -25,7 +25,7 @@ function HelpCharacterStuck_Keyboard:Initialize(control)
 end
 
 function HelpCharacterStuck_Keyboard:UpdateCost()
-	local cost = zo_min(GetRecallCost(), GetCarriedCurrencyAmount(CURT_MONEY))
+	local cost = zo_min(GetRecallCost(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
   	local DONT_USE_SHORT_FORMAT = false
 	local costText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(cost, DONT_USE_SHORT_FORMAT, CURT_MONEY)
 

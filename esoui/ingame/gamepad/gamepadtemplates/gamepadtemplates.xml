@@ -345,9 +345,12 @@
                     <Anchor point="BOTTOMRIGHT" offsetY="60" />
                 </Backdrop>
 
-                <Texture name="$(parent)CurrencyTexture" textureFile="EsoUI/Art/currency/gamepad/gp_gold.dds">
+                <Texture name="$(parent)CurrencyTexture">
                     <Dimensions x="28" y="28"/>
                     <Anchor point="RIGHT" offsetX="-35"/>
+                    <OnInitialized>
+                        self:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_MONEY))
+                    </OnInitialized>
                 </Texture>
 
                 <Control name="$(parent)Selector" inherits="ZO_GamepadCurrencySelectorTemplate">

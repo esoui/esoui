@@ -85,13 +85,13 @@ BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         inventoryTopOffsetY = 3, -- less than default because we are showing a search box not an inventory menu
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
         width = 670,
-        backpackOffsetY = 128,
-        sortByOffsetY = 96,
+        backpackOffsetY = 140,
+        sortByOffsetY = 110,
         sortByHeaderWidth = 690,
         sortByNameWidth = 341,
-        additionalFilter = function (slot)
-            return (slot.quality ~= ITEM_QUALITY_TRASH) and (not slot.stolen) and (not slot.isPlayerLocked)
-        end,
+        selectedTab = ITEMFILTERTYPE_TRADING_HOUSE,
+        useSearchBar = true,
+        hideTabBar = true,
     })
 
 BACKPACK_MAIL_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(

@@ -153,7 +153,7 @@ function ZO_Fence_Keyboard:OnEnterLaunder(totalLaunders, laundersUsed)
 
     local function ColorCost(control, data, scrollList)
         priceControl = control:GetNamedChild("SellPrice")
-        ZO_CurrencyControl_SetCurrencyData(priceControl, CURT_MONEY, data.stackLaunderPrice, CURRENCY_DONT_SHOW_ALL, (GetCarriedCurrencyAmount(CURT_MONEY) < data.stackLaunderPrice))
+        ZO_CurrencyControl_SetCurrencyData(priceControl, CURT_MONEY, data.stackLaunderPrice, CURRENCY_DONT_SHOW_ALL, (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < data.stackLaunderPrice))
         ZO_CurrencyControl_SetCurrency(priceControl, ZO_KEYBOARD_CURRENCY_OPTIONS)
     end
 

@@ -139,10 +139,6 @@
                 <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
                     <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
                     <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-175" />
-
-                    <Controls>
-                        <Label name="$(parent)NoItemsLabel" text="SI_SMITHING_NOTHING_TO_IMPROVE" inherits="ZO_CraftingInventoryNoItemLabel" />
-                    </Controls>
                 </Control>
                 
                 <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">

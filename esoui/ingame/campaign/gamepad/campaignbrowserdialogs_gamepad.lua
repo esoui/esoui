@@ -28,7 +28,7 @@ local function InitializeCampaignSelectDialog(screen)
             screen.nowCost = nowCost
             screen.endCost = endCost
             screen.isFree = screen.nowCost == 0
-            screen.numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
+            screen.numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
             screen.hasEnough = screen.nowCost <= screen.numAlliancePoints
 
             dialog:setupFunc()
@@ -460,7 +460,7 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
             screen.nowCost = nowCost
             screen.endCost = endCost
             screen.isFree = screen.nowCost == 0
-            screen.numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
+            screen.numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
             screen.hasEnoughNow = screen.nowCost <= screen.numAlliancePoints
             screen.hasEnoughEnd = screen.endCost <= screen.numAlliancePoints
 
@@ -576,8 +576,8 @@ local function InitializeCampaignAbandonHomeConfirmDialog(screen)
             local alliancePointCost, goldCost = ZO_AbandonHomeCampaign_GetCost()
             screen.alliancePointCost = alliancePointCost
             screen.goldCost = goldCost
-            screen.numAlliancePoints = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
-            screen.numGoldAvailable = GetCurrentMoney()
+            screen.numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+            screen.numGoldAvailable = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
             screen.hasEnoughAlliancePoints = screen.alliancePointCost <= screen.numAlliancePoints
             screen.hasEnoughGold = screen.goldCost <= screen.numGoldAvailable
 

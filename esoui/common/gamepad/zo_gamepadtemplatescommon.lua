@@ -240,6 +240,12 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIc
                 icon:SetDesaturation(data.iconDesaturation)
             end
 
+            if data.textureSampleProcessingWeights then
+                for type, weight in pairs(data.textureSampleProcessingWeights) do
+                    icon:SetTextureSampleProcessingWeight(type, weight)
+                end
+            end
+
             if stackCountLabel then
                 local stackCount = data.stackCount
                 if stackCount and stackCount > 1 then
@@ -322,7 +328,7 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         end
 
         if data.isGemmable then
-            statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWN_GEMS))
+            statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
         end
 
         if data.isMailAttached then
@@ -359,6 +365,10 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
 
         if data.isLocked then
             statusIndicator:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32)
+        end
+
+        if data.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not data.ignoreTraitInformation then
+            statusIndicator:AddIcon(GetPlatformTraitInformationIcon(data.traitInformation))
         end
 
         statusIndicator:Show()

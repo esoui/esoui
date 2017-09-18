@@ -128,10 +128,10 @@ function ZO_HousingFurnitureBrowser_Keyboard.SetupFurnitureRow(rowControl, furni
         statusControl:AddIcon("EsoUI/Art/Inventory/inventory_stolenItem_icon.dds")
     end
     if furnitureObject:IsGemmable() then
-        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWN_GEMS))
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
     end
     if furnitureObject:IsFromCrownStore() then
-        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWNS))
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS))
     end
 
     statusControl:Show()

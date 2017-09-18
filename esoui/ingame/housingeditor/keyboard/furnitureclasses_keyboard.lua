@@ -549,6 +549,29 @@ function ZO_HousingSettingsList_CreateScrollData(displayName, currentHouse, user
            }
 end
 
+function ZO_HousingSettingsTheme_SetupDropdown(dropdown, callback)
+    local comboBox = ZO_ComboBox_ObjectFromContainer(dropdown)
+    comboBox:SetSortsItems(false)
+    comboBox:SetFont("ZoFontWinT1")
+    comboBox:SetSpacing(4)
+    
+    local function OnThemeChanged(comboBox, entryText, entry)
+        dropdown.furnitureTheme = entry.furnitureTheme
+        SHARED_FURNITURE:SetPlacementFurnitureTheme(entry.furnitureTheme)
+    end
+
+    for furnitureTheme = FURNITURE_THEME_TYPE_ITERATION_BEGIN, FURNITURE_THEME_TYPE_ITERATION_END do
+        if DoesFurnitureThemeShowInBrowser(furnitureTheme) then
+            local themeName = GetString("SI_FURNITURETHEMETYPE", furnitureTheme)
+            local entry = comboBox:CreateItemEntry(themeName, callback)
+            entry.furnitureTheme = furnitureTheme
+            comboBox:AddItem(entry)
+        end
+    end
+
+    comboBox:SelectItemByIndex(1)
+end
+
 --
 --[[ ZO_HousingSettingsVisitorList_Keyboard ]]--
 --

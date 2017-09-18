@@ -51,12 +51,12 @@ function ZO_HouseSettings_Manager:Initialize()
     self.permissionPresets = {}
     self.defaultAccessSettings = {}
 
-    for i = HOUSE_PERMISSION_PRESET_SETTING_MIN_VALUE, HOUSE_PERMISSION_PRESET_SETTING_MAX_VALUE do
+    for i = HOUSE_PERMISSION_PRESET_SETTING_ITERATION_BEGIN, HOUSE_PERMISSION_PRESET_SETTING_ITERATION_END do
         local presetName = GetString("SI_HOUSEPERMISSIONPRESETSETTING", i)
         self.permissionPresets[i] = presetName
     end
 
-    for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_MIN_VALUE, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_MAX_VALUE do
+    for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_BEGIN, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_END do
         local presetName = GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", i)
         self.defaultAccessSettings[i] = presetName
     end

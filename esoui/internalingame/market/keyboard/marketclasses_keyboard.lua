@@ -96,6 +96,7 @@ end
 function MarketProduct_Keyboard:Reset()
     ZO_MarketProductBase.Reset(self)
     self.iconPool:ReleaseAllObjects()
+    self.parentMarketProductId = nil
 end
 
 function MarketProduct_Keyboard:Refresh()
@@ -111,7 +112,7 @@ function MarketProduct_Keyboard:RefreshAsChild()
     self.activeMarketProductIcon = nil
     local productId = self:GetId()
     if productId > 0 then
-        self:ShowAsChild(productId)
+        self:ShowAsChild(productId, self.parentMarketProductId)
     end
 end
 
@@ -232,25 +233,26 @@ function MarketProduct_Keyboard:IsActivelyPreviewing()
     -- To Be Overridden
 end
 
-function MarketProduct_Keyboard:ShowAsChild(marketProductId)
-    self:Show(marketProductId, ZO_INVALID_PRESENTATION_INDEX)
-
-    -- we want to show collectibles that we currently own as collected in the bundle viewer
-    local productType = self:GetProductType()
-    local collectibleOwned = false
-    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-        local owned, isPlaceholder = select(6, GetMarketProductCollectibleInfo(self:GetId()))
-        if not isPlaceholder then
-            collectibleOwned = owned
+function MarketProduct_Keyboard:GetPurchaseState()
+    if self.parentMarketProductId then
+        local parentPurchaseState = GetMarketProductPurchaseState(self.parentMarketProductId)
+        if parentPurchaseState == MARKET_PRODUCT_PURCHASE_STATE_PURCHASED then
+            return parentPurchaseState
         end
-    elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
-        -- Show bundles that have all their collectibles unlocked as collected
-        collectibleOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
     end
 
-    self.purchaseLabelControl:SetHidden(not collectibleOwned)
+    return ZO_MarketProductBase.GetPurchaseState(self)
+end
 
-    if collectibleOwned then
+function MarketProduct_Keyboard:ShowAsChild(marketProductId, parentMarketProductId)
+    self.parentMarketProductId = parentMarketProductId
+    self:Show(marketProductId, ZO_INVALID_PRESENTATION_INDEX)
+
+    local allCollectiblesOwned = self:AreAllCollectiblesUnlocked()
+
+    self.purchaseLabelControl:SetHidden(not allCollectiblesOwned)
+
+    if allCollectiblesOwned then
         self.purchaseLabelControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     end
 
@@ -334,8 +336,8 @@ function ZO_MarketProductBundle:Initialize(controlId, parent, iconPool, owner)
     MarketProduct_Keyboard.Initialize(self, controlId, "ZO_MarketProductBundle_Keyboard", parent, iconPool, owner)
 end
 
-function ZO_MarketProductBundle:PerformLayout(description, icon, background, isNew, isFeatured)
-    iconControls = self:CreateChildIconControlTable(self:IsPurchaseLocked())
+function ZO_MarketProductBundle:PerformLayout(background)
+    local iconControls = self:CreateChildIconControlTable(self:IsPurchaseLocked())
     self:LayoutIcons(iconControls)
 end
 
@@ -411,7 +413,7 @@ function ZO_MarketProductIndividual:Initialize(controlId, parent, iconPool, owne
 end
 
 local SINGLE_ICON_SIZE = 64
-function ZO_MarketProductIndividual:PerformLayout(description, icon, background, isNew, isFeatured)
+function ZO_MarketProductIndividual:PerformLayout(background)
     local productType = self:GetProductType()
     if productType ~= MARKET_PRODUCT_TYPE_NONE then
         local marketProductIcon = self:InitializeMarketProductIcon(self.marketProductId, self:IsPurchaseLocked())

@@ -52,9 +52,9 @@ end
 function ZO_LootSceneFragment:Show()
     SHARED_INFORMATION_AREA:SetHidden(self.control, false)
 
-	local OPEN_LOOT_WINDOW = false
+    local OPEN_LOOT_WINDOW = false
     ZO_PlayMonsterLootSound(OPEN_LOOT_WINDOW)
-	
+    
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, true, TUTORIAL_SUPPRESSED_BY_LOOT)
     if self.animateShow then
         self.alphaControl:SetAlpha(0)
@@ -167,8 +167,8 @@ end
 function ZO_Loot:SetUpLootItem(control, data)
     local nameControl = GetControl(control, "Name")
 
-    if data.currencyType == CURT_MONEY or data.currencyType == CURT_TELVAR_STONES or data.currencyType == CURT_WRIT_VOUCHERS then
-        nameControl:SetText(ZO_CurrencyControl_BuildCurrencyString(data.currencyType, data.currencyAmount))
+    if data.currencyType and data.currencyType ~= CURT_NONE then
+        nameControl:SetText(zo_strformat(SI_LOOT_CURRENCY_FORMAT, ZO_Currency_FormatPlatform(data.currencyType, data.currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
         nameControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     else
         if data.itemType == LOOT_TYPE_COLLECTIBLE then
@@ -207,57 +207,57 @@ function ZO_Loot:SetUpBlankLootItem(control, data)
     control:SetHidden(false)
 end
 
-local BLANK_DATA =
-{
-}
-
-function ZO_Loot:UpdateList()
-    local scrollData = ZO_ScrollList_GetDataList(self.list)
-    ZO_ScrollList_Clear(self.list)
-
+do
+    local BLANK_DATA = {}
     local STOLEN = true
-    local numLootItems = GetNumLootItems()
-    local unownedMoney, ownedMoney = GetLootCurrency(CURT_MONEY)
-    local telvarStones = GetLootCurrency(CURT_TELVAR_STONES)
-	local writVouchers = GetLootCurrency(CURT_WRIT_VOUCHERS)
-    self.itemCount = 0
 
-    -- Assume that there's only stolen stuff present in this window until proven otherwise
-    self.nonStolenItemsPresent = false
+    function ZO_Loot:UpdateList()
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
+        ZO_ScrollList_Clear(self.list)
 
-    -- Add unowned currency and items
-    self:UpdateListAddLootCurrency(scrollData, CURT_MONEY, LOOT_MONEY_ICON, unownedMoney, not STOLEN)
-    self:UpdateListAddLootCurrency(scrollData, CURT_TELVAR_STONES, LOOT_TELVAR_STONE_ICON, telvarStones, not STOLEN)
-	self:UpdateListAddLootCurrency(scrollData, CURT_WRIT_VOUCHERS, LOOT_WRIT_VOUCHER_ICON, writVouchers, not STOLEN)
-    self:UpdateListAddLootItems(scrollData, numLootItems, not STOLEN)
+        self.itemCount = 0
+        -- Assume that there's only stolen stuff present in this window until proven otherwise
+        self.nonStolenItemsPresent = false
 
-    -- Add owned money and items
-    self:UpdateListAddLootCurrency(scrollData, CURT_MONEY, LOOT_MONEY_ICON, ownedMoney, STOLEN)
-    self:UpdateListAddLootItems(scrollData, numLootItems, STOLEN)
-    
-    self.itemCount = #scrollData
+        local numLootItems = GetNumLootItems()
+        local currencyInfo = LOOT_SHARED:GetLootCurrencyInformation()
 
-    for i = #scrollData + 1, NUM_VISIBLE_LOOT_SLOTS do
-        scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_LOOT_BLANK, BLANK_DATA)
+        -- Add non-stolen (unowned) currency and items
+        for currencyType, currencyInfo in pairs(currencyInfo) do
+            self:UpdateListAddLootCurrency(scrollData, currencyType, currencyInfo.currencyAmount, not STOLEN)
+        end
+        self:UpdateListAddLootItems(scrollData, numLootItems, not STOLEN)
+
+        -- Add stolen (owned) money and items
+        for currencyType, currencyInfo in pairs(currencyInfo) do
+            self:UpdateListAddLootCurrency(scrollData, currencyType, currencyInfo.stolenCurrencyAmount, STOLEN)
+        end
+        self:UpdateListAddLootItems(scrollData, numLootItems, STOLEN)
+
+        self.itemCount = #scrollData
+
+        for i = #scrollData + 1, NUM_VISIBLE_LOOT_SLOTS do
+            scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_LOOT_BLANK, BLANK_DATA)
+        end
+
+        ZO_ScrollList_Commit(self.list)
+
+        -- this text depends on the list itself
+        self:UpdateAllControlText()
     end
-
-    ZO_ScrollList_Commit(self.list)
-    
-    -- this text deponds on the list itself
-    self:UpdateAllControlText()
 end
 
-function ZO_Loot:UpdateListAddLootCurrency(scrollData, currencyType, currencyIcon, currencyAmount, isCurrencyStolen)
-    local currencyData =
-    {
-        currencyType = currencyType,
-        currencyAmount = currencyAmount,
-        icon = currencyIcon,
-        count = 1,
-        isStolen = isCurrencyStolen,
-    }
+function ZO_Loot:UpdateListAddLootCurrency(scrollData, currencyType, currencyAmount, isCurrencyStolen)
+    if currencyAmount > 0 then
+        local currencyData =
+        {
+            currencyType = currencyType,
+            currencyAmount = currencyAmount,
+            icon = GetCurrencyLootKeyboardIcon(currencyType),
+            count = 1,
+            isStolen = isCurrencyStolen,
+        }
 
-    if currencyData.currencyAmount > 0 then
         scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_LOOT_ITEM, currencyData)
 
         if not currencyData.isStolen then
@@ -310,7 +310,7 @@ function ZO_Loot:UpdateLootWindow(name, actionName, isOwned)
     self.title:SetText(name)
 
     self.keyButton:SetText(actionName)
-	self.keyButton:SetEnabled(false)
+    self.keyButton:SetEnabled(false)
     self.keyButton:SetNormalTextColor(self.nonStolenItemsPresent and ZO_NORMAL_TEXT or ZO_ERROR_COLOR)
 
     if self.itemCount == 0 then

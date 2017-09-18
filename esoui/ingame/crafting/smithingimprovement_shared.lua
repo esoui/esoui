@@ -17,10 +17,10 @@ function ZO_SharedSmithingImprovement:Initialize(listControl, boosterContainerCo
     self.owner = owner
 
     self.listControl = listControl
-	self.resultTooltip = resultTooltipControl
+    self.resultTooltip = resultTooltipControl
     self.boosterContainer = boosterContainerControl
 
-	self:InitializeSlots()
+    self:InitializeSlots()
     self:InitializeRows()
 
     self:HandleDirtyEvent()
@@ -195,13 +195,13 @@ function ZO_SharedSmithingImprovement:SetImprovementSlotItem(bagId, slotIndex)
 end
 
 function ZO_SharedSmithingImprovement:OnFilterChanged(filterType)
-	if self.awaitingLabel then
-		if filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
-			self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_ARMOR))
-		elseif filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
-			self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_WEAPON))
-		end
-	end
+    if self.awaitingLabel then
+        if filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
+            self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_ARMOR))
+        elseif filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
+            self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_WEAPON))
+        end
+    end
 
     self.improvementSlot:OnFilterChanged(filterType)
 end
@@ -222,8 +222,8 @@ function ZO_SharedSmithingImprovement:IsSlotted(bagId, slotIndex)
     return self.improvementSlot:IsBagAndSlot(bagId, slotIndex)
 end
 
-function ZO_SharedSmithingImprovement:SharedImprove()
-	if IsPerformingCraftProcess() then
+function ZO_SharedSmithingImprovement:Improve()
+    if IsPerformingCraftProcess() then
         -- Handle edge case where player hits R and E at the same time.
         return
     end
@@ -253,7 +253,7 @@ function ZO_SharedSmithingImprovement:SharedImprove()
         ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply, chance = chance, }, {mainTextParams = { chance, improveItemLink, GetString(SI_PERFORM_ACTION_CONFIRMATION)}})
     end
 
-	if IsItemBoPAndTradeable(itemToImproveBagId, itemToImproveSlotIndex) then
+    if IsItemBoPAndTradeable(itemToImproveBagId, itemToImproveSlotIndex) then
         ZO_Dialogs_ShowPlatformDialog("CONFIRM_MODIFY_TRADE_BOP", {onAcceptCallback = ShowImprovementDialog}, {mainTextParams={GetItemName(itemToImproveBagId, itemToImproveSlotIndex)}})
     else
         ShowImprovementDialog()
@@ -289,12 +289,16 @@ function ZO_SmithingImprovementSlot:SetItem(bagId, slotIndex)
         PlaySound(SOUNDS.SMITHING_ITEM_TO_IMPROVE_REMOVED)
     end
 
+    self:RefreshName()
+end
+
+function ZO_SmithingImprovementSlot:RefreshName()
     if self.nameLabel then
         if self:HasItem() then
             self.nameLabel:SetHidden(false)
-            self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex)))
+            self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(self.bagId, self.slotIndex)))
 
-            local quality = select(8, GetItemInfo(bagId, slotIndex))
+            local quality = select(8, GetItemInfo(self.bagId, self.slotIndex))
             self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
         else
             self.nameLabel:SetHidden(true)

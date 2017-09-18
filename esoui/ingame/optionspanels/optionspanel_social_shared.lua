@@ -254,6 +254,18 @@ local ZO_OptionsPanel_Social_ControlData =
             text = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES,
             tooltipText = SI_SOCIAL_OPTIONS_AUTO_DECLINE_DUEL_INVITES_TOOLTIP,
         },
+        --Options_Social_AvANotifications
+        [UI_SETTING_SHOW_AVA_NOTIFICATIONS] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_SOCIAL,
+            settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
+            text = SI_SOCIAL_OPTIONS_SHOW_AVA_NOTIFICATIONS,
+            tooltipText = SI_SOCIAL_OPTIONS_SHOW_AVA_NOTIFICATIONS_TOOLTIP,
+            valid = {AVA_NOTIFICATIONS_SETTING_CHOICE_DONT_SHOW, AVA_NOTIFICATIONS_SETTING_CHOICE_AUTOMATIC, AVA_NOTIFICATIONS_SETTING_CHOICE_ALWAYS_SHOW,},
+            valueStringPrefix = "SI_AVANOTIFICATIONSSETTINGCHOICE",
+        },
     },
 
     --Custom

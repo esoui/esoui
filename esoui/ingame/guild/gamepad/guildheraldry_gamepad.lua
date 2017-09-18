@@ -196,18 +196,19 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeKeybindStripDescriptors()
             name = function()
                 local pendingCost = GetPendingHeraldryCost()
                 local heraldryFunds = GetHeraldryGuildBankedMoney()
+                local gamepadGoldIconMarkup =  ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
 
                 if IsCreatingHeraldryForFirstTime() then
                     if heraldryFunds and pendingCost <= heraldryFunds then
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY, ZO_CurrencyControl_FormatCurrency(pendingCost), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY, ZO_CurrencyControl_FormatCurrency(pendingCost), gamepadGoldIconMarkup)
                     else
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), gamepadGoldIconMarkup)
                     end
                 else
                     if heraldryFunds and pendingCost <= heraldryFunds then
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES, ZO_CurrencyControl_FormatCurrency(pendingCost), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES, ZO_CurrencyControl_FormatCurrency(pendingCost), gamepadGoldIconMarkup)
                     else
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), gamepadGoldIconMarkup)
                     end
                 end
             end,

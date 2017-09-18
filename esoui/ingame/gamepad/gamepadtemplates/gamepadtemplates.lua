@@ -85,7 +85,7 @@ function ZO_GamepadQuantitySpinner:OnValueChanged(newValue)
 
     if self.unitPrice then
         local totalCost = newValue * self.unitPrice
-        local notEnough = not self.ignoreInvalidCost and totalCost > GetCarriedCurrencyAmount(self.currencyType) or false
+        local notEnough = not self.ignoreInvalidCost and totalCost > GetCurrencyAmount(self.currencyType, CURRENCY_LOCATION_CHARACTER) or false
         ZO_CurrencyControl_SetSimpleCurrency(self.currencyControl, self.currencyType, totalCost, ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT, CURRENCY_SHOW_ALL, notEnough)
     end
 end

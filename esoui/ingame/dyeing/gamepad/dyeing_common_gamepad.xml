@@ -4,16 +4,12 @@
 
         <Control name="ZO_DyeingEquipSlotDyeSwatch_Gamepad" virtual="true">
             <OnInitialized>
-                self.swatchTexture = self:GetNamedChild("SwatchTexture")
-                self.background = self:GetNamedChild("Background")
-                self.invalidTexture = self:GetNamedChild("InvalidTexture")
-                self.edgeFrame = self:GetNamedChild("EdgeFrame")
+                ZO_Dyeing_Equip_Slot_Initialize(self)
             </OnInitialized>
             <Dimensions x="24" y="26"/>
             <Controls>
                 <Texture name="$(parent)SwatchTexture" level="2">
-                    <Anchor point="CENTER" />
-                    <Dimensions x="24" y="26"/>
+                    <AnchorFill/>
                 </Texture>
 
                 <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH">
@@ -36,10 +32,6 @@
         <Control name="ZO_DyeingPresetDyeSwatch_Gamepad" inherits="ZO_DyeingEquipSlotDyeSwatch_Gamepad" virtual="true">
             <Dimensions x="22" y="68" />
             <Controls>
-                <Texture name="$(parent)SwatchTexture" level="2" override="true">
-                    <AnchorFill/>
-                </Texture>
-
                 <Backdrop name="$(parent)EdgeFrame" edgeColor="000000" centerColor="00000000" tier="HIGH" override="true">
                     <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_tooTipblack_edgeFrame_8-thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
                     <Insets left="2" top="2" right="-2" bottom="-2" />
@@ -48,16 +40,16 @@
                 </Backdrop>
             </Controls>
         </Control>
-
+        
         <Control name="ZO_DyeingSwatchSlotDyes_Gamepad" virtual="true">
+            <Dimensions x="80" y="26" />
             <OnInitialized>
                 self.dyeControls = {
-                    self:GetNamedChild("Primary"),
-                    self:GetNamedChild("Secondary"),
-                    self:GetNamedChild("Accent"),
+                self:GetNamedChild("Primary"),
+                self:GetNamedChild("Secondary"),
+                self:GetNamedChild("Accent"),
                 }
             </OnInitialized>
-            <Dimensions x="80" y="26" />
             <Controls>
                 <Control name="$(parent)Secondary" inherits="ZO_DyeingEquipSlotDyeSwatch_Gamepad">
                     <Anchor point="TOP" />

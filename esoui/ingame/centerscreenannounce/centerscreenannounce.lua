@@ -1,4 +1,3 @@
-local CSA_INACTIVE = 0
 CSA_CATEGORY_SMALL_TEXT = 1
 CSA_CATEGORY_LARGE_TEXT = 2
 CSA_CATEGORY_NO_TEXT = 3
@@ -240,6 +239,14 @@ end
 
 function ZO_CenterScreenMessageParams:GetEndOfRaidData()
     return self.endOfRaidData
+end
+
+function ZO_CenterScreenMessageParams:MarkIsAvAEvent()
+    self.avaEvent = true
+end
+
+function ZO_CenterScreenMessageParams:IsAvAEvent()
+    return self.avaEvent
 end
 
 function ZO_CenterScreenMessageParams:CallExpiringCallback()
@@ -1465,6 +1472,7 @@ do
         local category = messageParams:GetCategory()
         if category ~= nil then
             local csaType = messageParams:GetCSAType()
+            local isAvAEvent = messageParams:IsAvAEvent()
             local barParams = messageParams:GetBarParams()
             if category == CSA_CATEGORY_NO_TEXT and barParams == nil then
                 return
@@ -1477,6 +1485,10 @@ do
 
             -- prevent unwanted announcements that have been specified as supressed
             if self:GetSupressAnnouncementByType(csaType) then
+                return
+            end
+
+            if isAvAEvent and not self:CanShowAvAEvent() then
                 return
             end
 
@@ -1593,6 +1605,17 @@ function CenterScreenAnnounce:ResumeAnnouncementByType(csaType)
     if self.suppressAnnouncements and self.suppressAnnouncements[csaType] then
         self.suppressAnnouncements[csaType] = self.suppressAnnouncements[csaType] - 1
     end
+end
+
+function CenterScreenAnnounce:CanShowAvAEvent()
+    local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_AVA_NOTIFICATIONS))
+    if setting == ACTION_BAR_SETTING_CHOICE_ON then
+        return true
+    elseif setting == ACTION_BAR_SETTING_CHOICE_AUTOMATIC then
+        return IsPlayerInAvAWorld()
+    end
+
+    return false
 end
 
 -- Exposed so that external code can add custom events with appropriate priorities

@@ -1,0 +1,33 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_MarketTextCallout_Base" modifyTextType="UPPERCASE" virtual="true">
+            <Controls>
+                <Control name="$(parent)Background">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" />
+                    <Controls>
+                        <Texture name="$(parent)Center">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <DimensionConstraints minX="0" />
+                            <AnchorFill />
+                        </Texture>
+                        <Texture name="$(parent)Left">
+                            <TextureCoords left="0" right="1" top="0" bottom="1" />
+                            <Dimensions x="16"/>
+                            <DimensionConstraints minX="16" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Center" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Center" relativePoint="BOTTOMLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)Right">
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                            <Dimensions x="16"/>
+                            <DimensionConstraints minX="16" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Center" relativePoint="TOPRIGHT"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Center" relativePoint="BOTTOMRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Label>
+    </Controls>
+</GuiXml>

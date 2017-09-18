@@ -8,108 +8,39 @@ local NOT_ENOUGH_COLOR = ZO_ERROR_COLOR
 local DEFAULT_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_ENABLED))
 local DEFAULT_GAMEPAD_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_TEXT_COLOR_SELECTED))
 
---These are used when we want to represent some item using the UI's currency symbols
---but they aren't "real" currencies tracked on the player object
-local UI_ONLY_CURRENCY_START = 1000
-UI_ONLY_CURRENCY_INSPIRATION = UI_ONLY_CURRENCY_START
-UI_ONLY_CURRENCY_CROWNS = UI_ONLY_CURRENCY_INSPIRATION + 1
-UI_ONLY_CURRENCY_CROWN_GEMS = UI_ONLY_CURRENCY_CROWNS + 1
-
-ZO_CURRENCIES_DATA =
-{
-    [CURT_MONEY] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/currency_gold.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_GOLD) ),
-        name = GetString(SI_CURRENCY_GOLD),
-        formatString = SI_MONEY_FORMAT,
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE,
-        gamepadTexture64 = "EsoUI/Art/currency/gamepad/gp_gold_64.dds",
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-    [CURT_ALLIANCE_POINTS] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/alliancePoints.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_ALLIANCE_POINTS) ),
-        name = GetString(SI_CURRENCY_ALLIANCE_POINTS),
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_ALLIANCE_POINTS_TEXTURE,
-        gamepadTexture64 = "EsoUI/Art/currency/gamepad/gp_alliancePoints_64.dds",
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-    [CURT_TELVAR_STONES] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/currency_telvar.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_TELVAR_STONES) ),
-        name = GetString(SI_CURRENCY_TELVAR_STONES),
-        formatString = SI_TELVAR_STONE_FORMAT,
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_TELVAR_STONES_TEXTURE,
-        gamepadTexture64 = "EsoUI/Art/currency/gamepad/gp_telvar_64.dds",
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-	[CURT_WRIT_VOUCHERS] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/currency_writvoucher.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_WRIT_VOUCHERS) ),
-        name = GetString(SI_CURRENCY_WRIT_VOUCHERS),
-        formatString = SI_WRIT_VOUCHER_FORMAT,
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_WRIT_VOUCHER_TEXTURE,
-        gamepadTexture64 = "EsoUI/Art/currency/gamepad/gp_writvoucher_64.dds",
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-    
-    [UI_ONLY_CURRENCY_INSPIRATION] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/currency_inspiration.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_INSPIRATION) ),
-        name = GetString(SI_CURRENCY_INSPIRATION),
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_INSPIRATION_POINTS_TEXTURE,
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-    [UI_ONLY_CURRENCY_CROWNS] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/currency_crown.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_GOLD) ),
-        name = GetString(SI_CURRENCY_CROWN),
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE,
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-    [UI_ONLY_CURRENCY_CROWN_GEMS] =
-    {
-        keyboardTexture = "EsoUI/Art/currency/currency_crown_gems.dds",
-        color = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_GOLD) ),
-        name = GetString(SI_CURRENCY_CROWN_GEM),
-        gamepadTexture = ZO_GAMEPAD_CURRENCY_ICON_CROWN_GEMS_TEXTURE,
-        gamepadColor = DEFAULT_GAMEPAD_COLOR
-    },
-}
-
+ZO_CURRENCIES_DATA = {}
 local g_currenciesData = ZO_CURRENCIES_DATA -- These APIs are called a lot, so let's not spam global lookup
+
+do
+    for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
+        if IsCurrencyValid(currencyType) then 
+            local IS_PLURAL = false
+            local IS_UPPER = false
+            local currencyInfo =
+            {
+                amountLabel = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER),
+                color = ZO_ColorDef:New(GetCurrencyKeyboardColor(currencyType)),
+                gamepadColor = ZO_ColorDef:New(GetCurrencyGamepadColor(currencyType)),
+                isDefaultLowercase = IsCurrencyDefaultNameLowercase(currencyType),
+            }
+
+            local keyboardTexture, keyboardPercentOfLineSize = GetCurrencyKeyboardIcon(currencyType)
+            currencyInfo.keyboardTexture = keyboardTexture
+            currencyInfo.keyboardPercentOfLineSize = keyboardPercentOfLineSize .. "%"
+
+            local gamepadTexture, gamepadPercentOfLineSize = GetCurrencyGamepadIcon(currencyType)
+            currencyInfo.gamepadTexture = gamepadTexture
+            currencyInfo.gamepadPercentOfLineSize = gamepadPercentOfLineSize .. "%"
+
+            g_currenciesData[currencyType] = currencyInfo
+        end
+    end
+end
 
 ZO_MARKET_CURRENCY_TO_UI_CURRENCY =
 {
-    [MKCT_CROWNS] = UI_ONLY_CURRENCY_CROWNS,
-    [MKCT_CROWN_GEMS] = UI_ONLY_CURRENCY_CROWN_GEMS,
-}
-
-ZO_BANKABLE_CURRENCIES =
-{
-    [CURT_MONEY] = true,
-    [CURT_TELVAR_STONES] = true,
-    [CURT_ALLIANCE_POINTS] = true,
-    [CURT_WRIT_VOUCHERS] = true,
-}
-
-ZO_GUILD_BANKABLE_CURRENCIES =
-{
-    [CURT_MONEY] = true,
-}
-
-ZO_CURRENCY_DISPLAY_ORDER =
-{
-    CURT_MONEY,
-    CURT_TELVAR_STONES,
-    CURT_ALLIANCE_POINTS,
-    CURT_WRIT_VOUCHERS,
+    [MKCT_CROWNS] = CURT_CROWNS,
+    [MKCT_CROWN_GEMS] = CURT_CROWN_GEMS,
 }
 
 function ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
@@ -117,8 +48,6 @@ function ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
 end
 
 local ICON_PADDING = 4
-local KEYBOARD_TEXTURE_SIZE = 16
-local GAMEPAD_TEXTURE_SIZE = 28
 local ITEM_ICON_TEXTURE_SIZE = 32
 local MULTI_CURRENCY_PADDING = 8 -- the amount of space between each currency type in a control
 
@@ -142,7 +71,7 @@ local DEFAULT_CURRENCY_OPTIONS =
     and set up the display parameters.
 --]]
 function ZO_CurrencyControl_InitializeDisplayTypes(control, ...)
-    if(control.currencyArgs == nil) then
+    if control.currencyArgs == nil then
         local currencyArgs = {}
 
         for i = 1, select("#", ...) do
@@ -164,23 +93,26 @@ function ZO_CurrencyControl_InitializeDisplayTypes(control, ...)
 end
 
 -- Use this function if you have a currency control that constantly needs to show arbitrary currency types, but only ever one (non-item) currency at a time
-local function DynamicSetCurrencyData(control, currencyType, amount, showAll, notEnough, obfuscateAmount)
-    if(control.currencyArgs == nil) then
+local function DynamicSetCurrencyData(control, currencyType, amount, showAll, notEnough, displayOptions)
+    if control.currencyArgs == nil then
         control.currencyArgs = {{}}
     end
 
-    if(showAll == nil) then showAll = CURRENCY_SHOW_ALL end
-    if(notEnough == nil) then notEnough = CURRENCY_IGNORE_HAS_ENOUGH end
+    if showAll == nil then showAll = CURRENCY_SHOW_ALL end
+    if notEnough == nil then notEnough = CURRENCY_IGNORE_HAS_ENOUGH end
 
     local displayData = control.currencyArgs[1]
-    displayData.obfuscateAmount = obfuscateAmount
 
-    if(showAll or (amount > 0)) then
+    if showAll or (amount > 0) then
         control.numUsedCurrencies = 1
         displayData.type = currencyType
         displayData.amount = amount
         displayData.isUsed = true
         displayData.notEnough = notEnough
+        if displayOptions then
+            displayData.obfuscateAmount = displayOptions.obfuscateAmount
+            displayData.currencyCapAmount = displayOptions.currencyCapAmount
+        end
     else
         control.numUsedCurrencies = 0
         displayData.isUsed = false
@@ -191,9 +123,9 @@ local function GetDisplayDataForCurrencyType(control, currencyType, offset)
     local currentOffset = 1 -- used for finding the right item currency type
 
     for _, data in ipairs(control.currencyArgs) do
-        if(data.type == currencyType) then
-            if(offset ~= nil) then
-                if(offset == currentOffset) then
+        if data.type == currencyType then
+            if offset ~= nil then
+                if offset == currentOffset then
                     return data
                 else
                     currentOffset = currentOffset + 1
@@ -206,15 +138,15 @@ local function GetDisplayDataForCurrencyType(control, currencyType, offset)
 end
 
 function ZO_CurrencyControl_SetCurrencyData(control, currencyType, amount, showAll, notEnough, entryIndex, offset)
-    if((control.currencyArgs == nil) or (currencyType == nil)) then return end
+    if (control.currencyArgs == nil) or (currencyType == nil) then return end
 
     local displayData = GetDisplayDataForCurrencyType(control, currencyType, offset)
 
-    if(displayData) then
-        if(showAll == nil) then showAll = CURRENCY_SHOW_ALL end
-        if(notEnough == nil) then notEnough = CURRENCY_IGNORE_HAS_ENOUGH end
+    if displayData then
+        if showAll == nil then showAll = CURRENCY_SHOW_ALL end
+        if notEnough == nil then notEnough = CURRENCY_IGNORE_HAS_ENOUGH end
 
-        if(showAll or (amount > 0)) then
+        if showAll or (amount > 0) then
             displayData.type = currencyType
             displayData.amount = amount
             displayData.isUsed = true
@@ -222,10 +154,10 @@ function ZO_CurrencyControl_SetCurrencyData(control, currencyType, amount, showA
 
             control.numUsedCurrencies = control.numUsedCurrencies + 1
 
-            -- NOTE: Certain currency types always determine the notEnough value automatically.  This could be calculated
+            -- NOTE: Certain currency types always determine the notEnough value automatically. This could be calculated
             -- externally...might need updates if that value can change after a currency control has been formatted.
-            if(currencyType == CURT_ALLIANCE_POINTS) then
-                displayData.notEnough = amount > GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
+            if currencyType == CURT_ALLIANCE_POINTS then
+                displayData.notEnough = amount > GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
             end
         else
             displayData.isUsed = false
@@ -251,25 +183,18 @@ function ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, 
 
     local iconMarkup
     local iconSize
+    local currencyInfo = g_currenciesData[currencyType]
     if isGamepad then
-        iconSize =  GAMEPAD_TEXTURE_SIZE
-        iconMarkup = g_currenciesData[currencyType].gamepadTexture
+        iconSize =  currencyInfo.gamepadPercentOfLineSize
+        iconMarkup = currencyInfo.gamepadTexture
     else
-        iconSize = KEYBOARD_TEXTURE_SIZE
-        iconMarkup = g_currenciesData[currencyType].keyboardTexture
+        iconSize = currencyInfo.keyboardPercentOfLineSize
+        iconMarkup = currencyInfo.keyboardTexture
     end
 
     iconMarkup = zo_iconFormat(iconMarkup, iconSize, iconSize)
 
     return zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, formattedCurrency, iconMarkup)
-end
-
-function ZO_CurrencyControl_BuildCurrencyString(currencyType, currencyAmount)
-    if g_currenciesData[currencyType].formatString then
-        return zo_strformat(g_currenciesData[currencyType].formatString, ZO_CurrencyControl_FormatCurrency(currencyAmount))
-    end
-
-    return ""
 end
 
 function ZO_CurrencyTemplate_OnMouseEnter(control)
@@ -289,7 +214,7 @@ function ZO_CurrencyTemplate_OnMouseEnter(control)
         end
         
         if useDefaultText then
-            SetTooltipText(InformationTooltip, zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, g_currenciesData[control.type].name))
+            SetTooltipText(InformationTooltip, zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, g_currenciesData[control.type].amountLabel))
         end
 
         ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, control)
@@ -300,9 +225,12 @@ function ZO_CurrencyTemplate_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
 end
 
-function ZO_CurrencyControl_SetSimpleCurrency(self, currencyType, amount, options, showAll, notEnough, obfuscateAmount)
-    DynamicSetCurrencyData(self, currencyType, amount, showAll, notEnough, obfuscateAmount)
-    ZO_CurrencyControl_SetCurrency(self, options)
+-- displayOptions is a table of additional display options to modify how the currency appears in the control
+--     obfuscateAmount - will not show the passed in currency amount, but will instead show SI_CURRENCY_OBFUSCATE_VALUE
+--     currencyCapAmount - if specified, the formatted currency amount will also show the currency cap in the format amount/cap
+function ZO_CurrencyControl_SetSimpleCurrency(labelControl, currencyType, amount, options, showAll, notEnough, displayOptions)
+    DynamicSetCurrencyData(labelControl, currencyType, amount, showAll, notEnough, displayOptions)
+    ZO_CurrencyControl_SetCurrency(labelControl, options)
 end
 
 local g_currencyStringFormatTable = {}
@@ -310,14 +238,13 @@ local g_currencyStringFormatTable = {}
 function ZO_CurrencyControl_SetCurrency(self, options)
     if self.currencyArgs == nil then return end
 
-    local showTooltips = true
-    local iconSide = RIGHT
-    local iconSize = nil
-    local overrideColor = nil
     options = options or DEFAULT_CURRENCY_OPTIONS
+
     local isGamepad = options.isGamepad
+
     -- Show tooltips by default, only if showTooltips was explicitly set to false in options should
     -- tooltips be turned off.
+    local showTooltips = true
     if options.showTooltips == false then
         showTooltips = false
     end
@@ -326,14 +253,17 @@ function ZO_CurrencyControl_SetCurrency(self, options)
         self:SetFont(options.font)
     end
 
+    local iconSide = RIGHT
     if options.iconSide then
         iconSide = options.iconSide
     end
 
+    local iconSize = nil
     if options.iconSize then
         iconSize = options.iconSize
     end
 
+    local overrideColor = nil
     if options.color then
         if type(options.color) == "function" then
             overrideColor = options.color()
@@ -350,36 +280,20 @@ function ZO_CurrencyControl_SetCurrency(self, options)
     for _, currencyData in ipairs(self.currencyArgs) do
         local currencyType = currencyData.type
         local currencyStaticInfo = g_currenciesData[currencyType]
-        
+
         if currencyData.isUsed and currencyStaticInfo then
-            local amount = currencyData.amount
-            local formattedAmount = ZO_CurrencyControl_FormatCurrency(amount, options.useShortFormat, currencyData.obfuscateAmount)
             local color
-            local currencyMarkup, iconMarkup
-
-            if currencyStaticInfo then
-                if not iconSize then
-                    iconSize = isGamepad and GAMEPAD_TEXTURE_SIZE or KEYBOARD_TEXTURE_SIZE
-                end
-                iconMarkup = zo_iconFormat(isGamepad and currencyStaticInfo.gamepadTexture or currencyStaticInfo.keyboardTexture, iconSize, iconSize)
-            else
-                --unreachable without CURT_ITEM?
-                iconMarkup = zo_iconFormat(tostring(currencyData.keyboardTexture), iconSize or ITEM_ICON_TEXTURE_SIZE, iconSize or ITEM_ICON_TEXTURE_SIZE)
-            end
-
             if currencyData.notEnough then
                 color = NOT_ENOUGH_COLOR
             else
                 if overrideColor then
                     color = overrideColor
-                elseif currencyStaticInfo then
-                    color = isGamepad and currencyStaticInfo.gamepadColor or currencyStaticInfo.color or DEFAULT_COLOR
                 else
-                    color = currencyData.color or DEFAULT_COLOR
+                    color = isGamepad and currencyStaticInfo.gamepadColor or currencyStaticInfo.color or DEFAULT_COLOR
                 end
             end
 
-            -- If there are not multiple currencies then we can just set the color on the label.  Otherwise, text must be colorized per currency fragment
+            -- If there are not multiple currencies then we can just set the color on the label. Otherwise, text must be colorized per currency fragment
             if self.numUsedCurrencies == 1 then
                 self:SetColor(color:UnpackRGBA())
             else
@@ -387,13 +301,25 @@ function ZO_CurrencyControl_SetCurrency(self, options)
                 table.insert(g_currencyStringFormatTable, color:ToHex())
             end
 
+            if not iconSize then
+                iconSize = isGamepad and currencyStaticInfo.gamepadPercentOfLineSize or currencyStaticInfo.keyboardPercentOfLineSize
+            end
+
+            local iconMarkup = zo_iconFormat(isGamepad and currencyStaticInfo.gamepadTexture or currencyStaticInfo.keyboardTexture, iconSize, iconSize)
+            local formattedAmount = ZO_CurrencyControl_FormatCurrency(currencyData.amount, options.useShortFormat, currencyData.obfuscateAmount)
+
+            if not currencyData.obfuscateAmount and currencyData.currencyCapAmount then
+                local formattedCap = ZO_CurrencyControl_FormatCurrency(currencyData.currencyCapAmount, options.useShortFormat)
+                formattedAmount = formattedAmount .. "/" .. formattedCap
+            end
+
             if iconSide == LEFT then
-                currencyMarkup = string.format("|u%d:%d:currency:%s|u", ICON_PADDING, multiCurrencyPad, formattedAmount)
+                local currencyMarkup = string.format("|u%d:%d:currency:%s|u", ICON_PADDING, multiCurrencyPad, formattedAmount)
 
                 table.insert(g_currencyStringFormatTable, iconMarkup)
                 table.insert(g_currencyStringFormatTable, currencyMarkup)
             else -- Treat everything else as the default of going on the right
-                currencyMarkup = string.format("|u%d:%d:currency:%s|u", multiCurrencyPad, ICON_PADDING, formattedAmount)
+                local currencyMarkup = string.format("|u%d:%d:currency:%s|u", multiCurrencyPad, ICON_PADDING, formattedAmount)
 
                 table.insert(g_currencyStringFormatTable, currencyMarkup)
                 table.insert(g_currencyStringFormatTable, iconMarkup)
@@ -417,7 +343,7 @@ function ZO_CurrencyControl_SetCurrency(self, options)
 end
 
 local function OnMouseUpWrapper(self, button, upInside, ctrl, alt, shift)
-    if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
         self.currencyClickHandler()
     end
 end
@@ -425,11 +351,25 @@ end
 function ZO_CurrencyControl_SetClickHandler(self, handler)
     self.currencyClickHandler = handler
 
-    if(handler) then
+    if handler then
         self:SetHandler("OnMouseUp", OnMouseUpWrapper)
     else
         self:SetHandler("OnMouseUp", nil)
     end
+end
+
+--[[
+
+Augmented Currency API
+
+]]--
+
+function ZO_Currency_GetKeyboardCurrencyIcon(currencyType)
+    return g_currenciesData[currencyType].keyboardTexture
+end
+
+function ZO_Currency_GetGamepadCurrencyIcon(currencyType)
+    return g_currenciesData[currencyType].gamepadTexture
 end
 
 function ZO_Currency_GetPlatformCurrencyIcon(currencyType)
@@ -440,21 +380,14 @@ function ZO_Currency_GetPlatformCurrencyIcon(currencyType)
     end
 end
 
-function ZO_Currency_GetPlatformFormattedGoldIcon()
-    if IsInGamepadPreferredMode() then
-        return zo_iconFormat("EsoUI/Art/currency/gamepad/gp_gold.dds", 24, 24)
-    else
-        return zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 16, 16)
-    end
-end
-
 function ZO_Currency_GetKeyboardFormattedCurrencyIcon(currencyType, overrideIconSize, inheritColor)
     local iconFormatter = zo_iconFormat
     if inheritColor then
         iconFormatter = zo_iconFormatInheritColor
     end
-    local iconSize = overrideIconSize or KEYBOARD_TEXTURE_SIZE
-    return iconFormatter(g_currenciesData[currencyType].keyboardTexture, iconSize, iconSize)
+    local currencyInfo = g_currenciesData[currencyType]
+    local iconSize = overrideIconSize or currencyInfo.keyboardPercentOfLineSize
+    return iconFormatter(currencyInfo.keyboardTexture, iconSize, iconSize)
 end
 
 function ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType, overrideIconSize, inheritColor)
@@ -462,7 +395,8 @@ function ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType, overrideIconS
     if inheritColor then
         iconFormatter = zo_iconFormatInheritColor
     end
-    local iconSize = overrideIconSize or GAMEPAD_TEXTURE_SIZE
+    local currencyInfo = g_currenciesData[currencyType]
+    local iconSize = overrideIconSize or currencyInfo.gamepadPercentOfLineSize
     return iconFormatter(g_currenciesData[currencyType].gamepadTexture, iconSize, iconSize)
 end
 
@@ -471,11 +405,99 @@ function ZO_Currency_GetPlatformFormattedCurrencyIcon(currencyType, overrideIcon
     if inheritColor then
         iconFormatter = zo_iconFormatInheritColor
     end
+    local currencyInfo = g_currenciesData[currencyType]
     if IsInGamepadPreferredMode() then
-        local iconSize = overrideIconSize or GAMEPAD_TEXTURE_SIZE
+        local iconSize = overrideIconSize or currencyInfo.gamepadPercentOfLineSize
         return iconFormatter(g_currenciesData[currencyType].gamepadTexture, iconSize, iconSize)
     else
-        local iconSize = overrideIconSize or KEYBOARD_TEXTURE_SIZE
+        local iconSize = overrideIconSize or currencyInfo.keyboardPercentOfLineSize
         return iconFormatter(g_currenciesData[currencyType].keyboardTexture, iconSize, iconSize)
     end
+end
+
+ZO_CURRENCY_FORMAT_AMOUNT_NAME = 1
+ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME = 2
+ZO_CURRENCY_FORMAT_PARENTHETICAL_AMOUNT = 3
+ZO_CURRENCY_FORMAT_AMOUNT_ICON = 4
+ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON = 5
+ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON = 6
+ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON = 7
+
+local function GetCurrencyColor(currencyType, isGamepad)
+    if isGamepad then
+        return g_currenciesData[currencyType].gamepadColor
+    else
+        return g_currenciesData[currencyType].color
+    end
+end
+
+local function GetCurrencyIconMarkup(currencyType, isGamepad)
+    if isGamepad then
+        return ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType)
+    else
+        return ZO_Currency_GetKeyboardFormattedCurrencyIcon(currencyType)
+    end
+end
+
+--The return of this function is intended to be formatted into another string
+function ZO_Currency_Format(currencyAmount, currencyType, formatType, isGamepad, extraOptions)
+    local formattedAmount
+    if currencyAmount then
+        formattedAmount = ZO_CurrencyControl_FormatCurrency(currencyAmount)
+        if extraOptions and extraOptions.showCap then
+            local currencyLocation = extraOptions.currencyLocation
+            if IsCurrencyCapped(currencyType, currencyLocation) then
+                local maxPossible = GetMaxPossibleCurrency(currencyType, currencyLocation)
+                local formattedCap = ZO_CurrencyControl_FormatCurrency(maxPossible)
+                formattedAmount = formattedAmount .. "/" .. formattedCap
+            end
+        end
+    end
+
+    --We use string format to preserve the gender markup on currencyName.
+    if formatType == ZO_CURRENCY_FORMAT_AMOUNT_NAME then
+        local currencyInfo = g_currenciesData[currencyType]
+        local currencyName = GetCurrencyName(currencyType, IsCountSingularForm(currencyAmount), currencyInfo.isDefaultLowercase)
+        return string.format("%s %s", formattedAmount, currencyName)
+    elseif formatType == ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME then
+        local currencyInfo = g_currenciesData[currencyType]
+        local currencyName = GetCurrencyName(currencyType, IsCountSingularForm(currencyAmount), currencyInfo.isDefaultLowercase)
+        return string.format("|cffffff%s %s|r", formattedAmount, currencyName)
+    elseif formatType == ZO_CURRENCY_FORMAT_PARENTHETICAL_AMOUNT then
+        return string.format("(%s)", formattedAmount)
+    elseif formatType == ZO_CURRENCY_FORMAT_AMOUNT_ICON then
+        local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad)
+        local color = GetCurrencyColor(currencyType, isGamepad)
+        return string.format("%s|u0:6%%:currency:|u%s", color:Colorize(formattedAmount), iconMarkup)
+    elseif formatType == ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON then
+        local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad)
+        return string.format("|cffffff%s|r|u0:6%%:currency:|u%s", formattedAmount, iconMarkup)
+    elseif formatType == ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON then
+        local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad)
+        return string.format("%s|u0:6%%:currency:|u%s", ZO_ERROR_COLOR:Colorize(formattedAmount), iconMarkup)
+    elseif formatType == ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON then
+        local IS_PLURAL = false
+        local currencyInfo = g_currenciesData[currencyType]
+        local currencyName = GetCurrencyName(currencyType, IS_PLURAL, currencyInfo.isDefaultLowercase)
+        local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad)
+        return string.format("|u0:6%%:currency:%s|u%s", currencyName, iconMarkup)
+    end
+end
+
+function ZO_Currency_FormatKeyboard(currencyType, currencyAmount, formatType, extraOptions)
+    local IS_KEYBOARD = false
+    return ZO_Currency_Format(currencyAmount, currencyType, formatType, IS_KEYBOARD, extraOptions)
+end
+
+function ZO_Currency_FormatGamepad(currencyType, currencyAmount, formatType, extraOptions)
+    local IS_GAMEPAD = true
+    return ZO_Currency_Format(currencyAmount, currencyType, formatType, IS_GAMEPAD, extraOptions)
+end
+
+function ZO_Currency_FormatPlatform(currencyType, currencyAmount, formatType, extraOptions)
+   return ZO_Currency_Format(currencyAmount, currencyType, formatType, IsInGamepadPreferredMode(), extraOptions)
+end
+
+function ZO_Currency_GetAmountLabel(currencyType)
+    return g_currenciesData[currencyType].amountLabel
 end

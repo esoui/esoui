@@ -27,12 +27,18 @@ function GuildHistoryManager:Initialize(control)
 
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareGuildEvents(listEntry1, listEntry2) end
     self.nextRequestNewestTime = 0
-    control:SetHandler("OnUpdate",
-        function(control, time)
-            if(time > self.nextRequestNewestTime) then
+
+    self.updateFunction = function(control, time)
+            local forceUpdate = not time
+            time = time or GetFrameTimeSeconds()
+            if forceUpdate or time > self.nextRequestNewestTime then
                 self.nextRequestNewestTime = time + REQUEST_NEWEST_TIME
-                if(self.selectedCategory and self.guildId) then
-                    self:RequestNewest()
+                if forceUpdate then
+                    self.selectedSubcategory = nil
+                    self:RefreshData()   
+                end     
+                if self.selectedCategory and self.guildId then
+                    self:RequestNewest(forceUpdate)
                 end
             end
             if self.requestCount > 0 then
@@ -42,7 +48,9 @@ function GuildHistoryManager:Initialize(control)
                     self.loading:Show()
                 end
             end
-        end) 
+        end
+
+    control:SetHandler("OnUpdate", self.updateFunction)
     self:SetUpdateInterval(60)
 
     self:InitializeKeybindDescriptors()
@@ -50,6 +58,8 @@ function GuildHistoryManager:Initialize(control)
     
     control:RegisterForEvent(EVENT_GUILD_HISTORY_CATEGORY_UPDATED, function(_, guildId, category) self:OnGuildHistoryCategoryUpdated(guildId, category) end)
     control:RegisterForEvent(EVENT_GUILD_HISTORY_RESPONSE_RECEIVED, function() self:OnGuildHistoryResponseReceived() end)
+    control:RegisterForEvent(EVENT_GUILD_HISTORY_REFRESHED, function() self.updateFunction() end)
+    control:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, function() self.updateFunction() end)
 
     GUILD_HISTORY_SCENE = ZO_Scene:New("guildHistory", SCENE_MANAGER)
     GUILD_HISTORY_SCENE:RegisterCallback("StateChange",     function(oldState, state)
@@ -266,16 +276,16 @@ function GuildHistoryManager:SortScrollList()
     end
 end
 
-function GuildHistoryManager:RequestNewest(force)
-    if (GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()) or force then
-        if(RequestGuildHistoryCategoryNewest(self.guildId, self.selectedCategory)) then
+function GuildHistoryManager:RequestNewest(forceUpdate)
+    if (GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()) or forceUpdate then
+        if RequestGuildHistoryCategoryNewest(self.guildId, self.selectedCategory) then
             self:IncrementRequestCount()
         end
     end
 end
 
-function GuildHistoryManager:RequestOlder(force)
-    if (GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()) or force then
+function GuildHistoryManager:RequestOlder(forceUpdate)
+    if (GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()) or forceUpdate then
         if(RequestGuildHistoryCategoryOlder(self.guildId, self.selectedCategory)) then
             self:IncrementRequestCount()
         end

@@ -183,6 +183,59 @@ function ZO_BattlegroundObjectiveStateIndicator.Matches(keepId, objectiveId, bat
     assert(false)
 end
 
+--Fake Indicator
+--These are used to show objectives that do not yet exist, and are used on a gameType by gameType basis
+
+ZO_FakeBattlegroundObjectiveIndicator = ZO_BattlegroundObjectiveStateIndicator:Subclass()
+
+function ZO_FakeBattlegroundObjectiveIndicator:New(...)
+    return ZO_BattlegroundObjectiveStateIndicator.New(self, ...)
+end
+
+function ZO_FakeBattlegroundObjectiveIndicator:Initialize(id, manager)
+    local parent = manager:GetIndicatorControlContainer()
+    local control = CreateControlFromVirtual("$(parent)FakeIndicator", parent, "ZO_BattlegroundObjectiveStatePin", id)
+    control:SetHidden(true)
+    ZO_BattlegroundObjectiveStateIndicator.Initialize(self, control, manager)
+end
+
+function ZO_FakeBattlegroundObjectiveIndicator:Update()
+    self:RemoveFromContainingLayout()
+    self:RefreshPinTextures()
+    self:MoveToLayout()
+end
+
+function ZO_FakeBattlegroundObjectiveIndicator:Setup(pinType)
+    self.pinType = pinType
+    self:Update()
+end
+
+do
+    local FAKE_INDICATOR_COLOR = 0.5
+    local FAKE_INDICATOR_ALPHA = 0.8
+    function ZO_FakeBattlegroundObjectiveIndicator:RefreshPinTextures()
+        local pinTexturePath = ZO_MapPin.GetStaticPinTexture(self.pinType)
+        self.pinTexture:SetTexture(pinTexturePath)
+        self.pinTexture:SetColor(FAKE_INDICATOR_COLOR, FAKE_INDICATOR_COLOR, FAKE_INDICATOR_COLOR, FAKE_INDICATOR_ALPHA)
+        self.auraPinTexture:SetHidden(true)
+    end
+end
+
+function ZO_FakeBattlegroundObjectiveIndicator:GetSortOrder()
+    -- fake indicators are always shown on the right
+    return 1000000000
+end
+
+function ZO_FakeBattlegroundObjectiveIndicator:ShouldShow()
+    -- we are creating these specifically because we want to show them
+    return true
+end
+
+function ZO_FakeBattlegroundObjectiveIndicator.Matches(keepId, objectiveId, battlegroundContext)
+    -- fake indicators are never a real objective
+    return false
+end
+
 --General Capture Area Indicator
 
 ZO_CaptureAreaObjectiveStateIndicator = ZO_BattlegroundObjectiveStateIndicator:Subclass()
@@ -246,6 +299,14 @@ function ZO_CrazyKingObjectiveStateIndicator:Initialize(id, manager)
     ZO_CaptureAreaObjectiveStateIndicator.Initialize(self, control, manager)
 end
 
+function ZO_CrazyKingObjectiveStateIndicator:GetSortOrder()
+    return GetObjectiveVirtualId(self:GetObjectiveIds())
+end
+
+function ZO_CrazyKingObjectiveStateIndicator:ShouldShow()
+    return IsObjectiveObjectVisible(self:GetObjectiveIds())
+end
+
 --Domination Indicator
 
 ZO_DominationObjectiveStateIndicator = ZO_CaptureAreaObjectiveStateIndicator:Subclass()
@@ -279,7 +340,7 @@ function ZO_CTFObjectiveStateIndicator:New(...)
 end
 
 function ZO_CTFObjectiveStateIndicator:GetSortOrder()
-    return self.designation
+    return self.pinType
 end
 
 function ZO_CTFObjectiveStateIndicator:Initialize(id, manager)
@@ -291,7 +352,7 @@ end
 
 function ZO_CTFObjectiveStateIndicator:Setup(keepId, objectiveId, battlegroundContext)
     ZO_BattlegroundObjectiveStateIndicator.Setup(self, keepId, objectiveId, battlegroundContext)
-    self.designation = GetObjectiveDesignation(keepId, objectiveId, battlegroundContext)
+    self.pinType = GetObjectivePinInfo(keepId, objectiveId, battlegroundContext)
     self:GetControl():RegisterForEvent(EVENT_CAPTURE_FLAG_STATE_CHANGED, function(_, ...) self:OnCaptureFlagStateChanged(...) end)
     self:Update()
 end
@@ -368,6 +429,7 @@ end
 function ZO_BattlegroundObjectiveStateIndicatorManager:Initialize(scoreHud)
     self.gameType = BATTLEGROUND_GAME_TYPE_NONE
     self.indicatorPoolsByGameType = {}
+    self.fakeindicatorPoolsByGameType = {}
     self.scoreHud = scoreHud
 end
 
@@ -403,6 +465,33 @@ do
     function ZO_BattlegroundObjectiveStateIndicatorManager:GetIndicatorClassForGameType(gameType)
         return INDICATOR_CLASS_BY_GAME_TYPE[gameType]
     end
+
+    local FAKE_INDICATOR_CLASS_BY_GAME_TYPE =
+    {
+        [BATTLEGROUND_GAME_TYPE_CRAZY_KING] = ZO_FakeBattlegroundObjectiveIndicator,
+    }
+
+    function ZO_BattlegroundObjectiveStateIndicatorManager:GetFakeIndicatorClassForGameType(gameType)
+        return FAKE_INDICATOR_CLASS_BY_GAME_TYPE[gameType]
+    end
+
+    local FAKE_INDICATOR_PIN_TYPES_BY_GAME_TYPE =
+    {
+        [BATTLEGROUND_GAME_TYPE_CRAZY_KING] = MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_NEUTRAL,
+    }
+
+    function ZO_BattlegroundObjectiveStateIndicatorManager:GetFakeIndicatorPinTypeForGameType(gameType)
+        return FAKE_INDICATOR_PIN_TYPES_BY_GAME_TYPE[gameType]
+    end
+
+    local FAKE_INDICATOR_EVENT_BY_GAME_TYPE =
+    {
+        [BATTLEGROUND_GAME_TYPE_CRAZY_KING] = EVENT_CAPTURE_AREA_STATE_CHANGED,
+    }
+
+    function ZO_BattlegroundObjectiveStateIndicatorManager:GetFakeIndicatorEventForGameType(gameType)
+        return FAKE_INDICATOR_EVENT_BY_GAME_TYPE[gameType]
+    end
 end
 
 function ZO_BattlegroundObjectiveStateIndicatorManager:GetIndicatorPoolForGameType(gameType)
@@ -421,10 +510,33 @@ function ZO_BattlegroundObjectiveStateIndicatorManager:GetIndicatorPoolForGameTy
     return pool
 end
 
+function ZO_BattlegroundObjectiveStateIndicatorManager:GetFakeIndicatorPoolForGameType(gameType)
+    local pool = self.fakeindicatorPoolsByGameType[gameType]
+    if not pool then
+        local fakeIndicatorClass = self:GetFakeIndicatorClassForGameType(gameType)
+        if fakeIndicatorClass then
+            local function Factory(objectPool)
+                return fakeIndicatorClass:New(objectPool:GetNextControlId(), self)
+            end
+            local function Reset(fakeIndicator)
+                fakeIndicator:Reset()
+            end
+            pool = ZO_ObjectPool:New(Factory, Reset)
+            self.fakeindicatorPoolsByGameType[gameType] = pool
+        end
+    end
+    return pool
+end
+
 function ZO_BattlegroundObjectiveStateIndicatorManager:ResetIndicators()
     if self.gameType ~= BATTLEGROUND_GAME_TYPE_NONE then
         local indicatorPool = self:GetIndicatorPoolForGameType(self.gameType)
         indicatorPool:ReleaseAllObjects()
+        local fakeIndicatorPool = self:GetFakeIndicatorPoolForGameType(self.gameType)
+        if fakeIndicatorPool then
+            fakeIndicatorPool:ReleaseAllObjects()
+            EVENT_MANAGER:UnregisterForEvent("battlegroundObjectiveStateDisplay", self:GetFakeIndicatorEventForGameType(self.gameType))
+        end
     end
 end
 
@@ -440,6 +552,38 @@ function ZO_BattlegroundObjectiveStateIndicatorManager:BuildIndicators()
                         local indicator = indicatorPool:AcquireObject()
                         indicator:Setup(keepId, objectiveId, battlegroundContext)
                     end
+                end
+            end
+        end
+
+        self:UpdateFakeIndicators()
+    end
+end
+
+function ZO_BattlegroundObjectiveStateIndicatorManager:UpdateFakeIndicators()
+    local fakeIndicatorPool = self:GetFakeIndicatorPoolForGameType(self.gameType)
+    if fakeIndicatorPool then
+        fakeIndicatorPool:ReleaseAllObjects()
+
+        local battlegroundState = GetCurrentBattlegroundState()
+        if battlegroundState == BATTLEGROUND_STATE_RUNNING then
+            local indicatorPool = self:GetIndicatorPoolForGameType(self.gameType)
+            local activeObjects = indicatorPool:GetActiveObjects()
+            local numShown = 0
+            for i, indicator in pairs(activeObjects) do
+                if indicator:ShouldShow() then
+                    numShown = numShown + 1
+                end 
+            end
+
+            local maxSequencedObjectives = GetBattlegroundMaxActiveSequencedObjectives(GetCurrentBattlegroundId())
+            if maxSequencedObjectives > 0 and numShown < maxSequencedObjectives then
+                EVENT_MANAGER:RegisterForEvent("battlegroundObjectiveStateDisplay", self:GetFakeIndicatorEventForGameType(self.gameType), function(eventId, ...) self:UpdateFakeIndicators(...) end)
+                local missingObjectives = maxSequencedObjectives - numShown
+                local pinType = self:GetFakeIndicatorPinTypeForGameType(self.gameType)
+                for i = 1, missingObjectives do
+                    local fakeIndicator = fakeIndicatorPool:AcquireObject()
+                    fakeIndicator:Setup(pinType)
                 end
             end
         end

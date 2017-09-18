@@ -110,6 +110,10 @@ function ZO_SharedAlchemy:GetReagentSlotOffset(thirdSlotUnlocked)
     -- Should be overriden for screen-specific spacing
 end
 
+function ZO_SharedAlchemy:UpdateTooltip()
+    -- Should be overridden
+end
+
 function ZO_SharedAlchemy:UpdateTooltipLayout()
     -- Should be overridden
 end
@@ -459,17 +463,6 @@ function ZO_SharedAlchemy:FindReagentSlotIndexBySlotControl(slotControl)
         if slot:IsSlotControl(slotControl) then
             return i
         end
-    end
-end
-
-function ZO_SharedAlchemy:UpdateTooltip()
-    -- if we are in recipe mode then we shouldn't show the alchemy tooltip
-    if self:IsCraftable() and self.mode ~= ZO_ALCHEMY_MODE_RECIPES then
-        self.tooltip:SetHidden(false)
-        self.tooltip:ClearLines()
-        self:UpdateTooltipLayout()
-    else
-        self.tooltip:SetHidden(true)
     end
 end
 

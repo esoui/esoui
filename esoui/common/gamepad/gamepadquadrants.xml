@@ -362,6 +362,12 @@
             </Controls>
         </TopLevelControl>
 
+
+        <Control name="ZO_AnchoredToQuadrant_2_3_Background" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background"/>
+        </Control>
+
         <!-- Quadrant_2_3_4 -->
 
         <Control name="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors" virtual="true">

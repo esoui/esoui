@@ -87,12 +87,10 @@ ITEM_TRAIT_TYPE_WEAPON_WEIGHTED = ITEM_TRAIT_TYPE_WEAPON_DECISIVE
 
 --Dyeing Changed
 SetPendingEquippedItemDye = function(equipSlot, primary, secondary, accent)
-                                local dyeableSlot = GetEquipSlotFromDyeableSlot(equipSlot)
-                                SetPendingSlotDyes(dyeableSlot, primary, secondary, accent)
+                                SetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot, primary, secondary, accent)
                             end
 GetPendingEquippedItemDye = function(equipSlot)
-                                local dyeableSlot = GetEquipSlotFromDyeableSlot(equipSlot)
-                                return GetPendingSlotDyes(dyeableSlot)
+                                return GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
                             end
 
 -- Removed 'by-zone' scaling for OneTamriel. Zone is no longer relevant to quest rewards.
@@ -239,38 +237,6 @@ GetNumGuildPermissions = function()
     return GUILD_PERMISSION_MAX_VALUE
 end
 
--- The Great Currency Migration of '17
-
-function GetBankedMoney()
-    return GetBankedCurrencyAmount(CURT_MONEY)
-end
-
-function DepositMoneyIntoBank(amount)
-    DepositCurrencyIntoBank(CURT_MONEY, amount)
-end
-
-function WithdrawMoneyFromBank(amount)
-    WithdrawCurrencyFromBank(CURT_MONEY, amount)
-end
-
-function GetBankedTelvarStones()
-    return GetBankedCurrencyAmount(CURT_TELVAR_STONES)
-end
-
-function DepositTelvarStonesIntoBank(amount)
-    return DepositCurrencyIntoBank(CURT_TELVAR_STONES, amount)
-end
-
-function WithdrawTelvarStonesFromBank(amount)
-    WithdrawCurrencyFromBank(CURT_TELVAR_STONES, amount)
-end
-
-function GetAlliancePoints()
-    return GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
-end
-
-MAX_PLAYER_MONEY = MAX_PLAYER_CURRENCY
-
 -- Removal of ItemStyle Enum
 
 function GetNumSmithingStyleItems()
@@ -353,3 +319,129 @@ ITEMSTYLE_HOLIDAY_HOLLOWJACK        = 59
 
 ITEMSTYLE_MIN_VALUE                 = 1
 ITEMSTYLE_MAX_VALUE                 = GetHighestItemStyleId()
+
+--Currency Generalization
+
+function GetCurrentMoney()
+    return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+end
+
+function GetCarriedCurrencyAmount(currencyType)
+    return GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER)
+end
+
+function GetBankedCurrencyAmount(currencyType)
+    return GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK)
+end
+
+function GetGuildBankedMoney()
+    return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_GUILD_BANK)
+end
+
+function GetGuildBankedCurrencyAmount(currencyType)
+    return GetCurrencyAmount(currencyType, CURRENCY_LOCATION_GUILD_BANK)
+end
+
+function GetMaxCarriedCurrencyAmount(currencyType)
+    return GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER)
+end
+
+function GetMaxBankCurrencyAmount(currencyType)
+    return GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_BANK)
+end
+
+function GetMaxGuildBankCurrencyAmount(currencyType)
+    return GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_GUILD_BANK)
+end
+
+function GetMaxBankWithdrawal(currencyType)
+    return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_BANK, CURRENCY_LOCATION_CHARACTER)
+end
+
+function GetMaxBankDeposit(currencyType)
+    return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_BANK)
+end
+
+function GetMaxGuildBankWithdrawal(currencyType)
+    return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_GUILD_BANK, CURRENCY_LOCATION_CHARACTER)
+end
+
+function GetMaxGuildBankDeposit(currencyType)
+    return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_GUILD_BANK)
+end
+
+function DepositCurrencyIntoBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_BANK)
+end
+
+function WithdrawCurrencyFromBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_BANK, CURRENCY_LOCATION_CHARACTER)
+end
+
+function DepositMoneyIntoGuildBank(amount)
+    TransferCurrency(CURT_MONEY, amount, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_GUILD_BANK)
+end
+
+function WithdrawMoneyFromGuildBank(amount)
+    TransferCurrency(CURT_MONEY, amount, CURRENCY_LOCATION_GUILD_BANK, CURRENCY_LOCATION_CHARACTER)
+end
+
+function DepositCurrencyIntoGuildBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_GUILD_BANK)
+end
+
+function WithdrawCurrencyFromGuildBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_GUILD_BANK, CURRENCY_LOCATION_CHARACTER)
+end
+
+function GetBankedMoney()
+    return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_BANK)
+end
+
+function DepositMoneyIntoBank(amount)
+    DepositCurrencyIntoBank(CURT_MONEY, amount)
+end
+
+function WithdrawMoneyFromBank(amount)
+    WithdrawCurrencyFromBank(CURT_MONEY, amount)
+end
+
+function GetBankedTelvarStones()
+    return GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_BANK)
+end
+
+function DepositTelvarStonesIntoBank(amount)
+    DepositCurrencyIntoBank(CURT_TELVAR_STONES, amount)
+end
+
+function WithdrawTelvarStonesFromBank(amount)
+    WithdrawCurrencyFromBank(CURT_TELVAR_STONES, amount)
+end
+
+function GetAlliancePoints()
+    return GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+end
+
+MAX_PLAYER_MONEY = MAX_PLAYER_CURRENCY
+
+function ZO_Currency_GetPlatformFormattedGoldIcon()
+    return ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY)
+end
+
+-- Battleground pin enum fixup
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_NEUTRAL
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_FIRE_DRAKES
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_PIT_DAEMONS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_STORM_LORDS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_NEUTRAL
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_FIRE_DRAKES
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_PIT_DAEMONS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_STORM_LORDS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_NEUTRAL
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_FIRE_DRAKES
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_PIT_DAEMONS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_STORM_LORDS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_NEUTRAL
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_FIRE_DRAKES
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_PIT_DAEMONS
+MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS

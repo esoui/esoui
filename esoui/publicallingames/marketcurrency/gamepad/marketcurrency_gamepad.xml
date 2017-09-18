@@ -27,19 +27,19 @@
 
             <Controls>
                 <Control name="$(parent)Crowns" inherits="ZO_MarketCurrencyLabel_Gamepad">
+                    <OnInitialized>
+                        self:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWNS))
+                        self:GetNamedChild("Icon"):SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS))
+                    </OnInitialized>
                     <Anchor point="BOTTOMRIGHT"/>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/currency_crown.dds" override="true" />
-                        <Label name="$(parent)Label" text="SI_CURRENCY_CROWN" override="true" />
-                    </Controls>
                 </Control>
 
                 <Control name="$(parent)Gems" inherits="ZO_MarketCurrencyLabel_Gamepad">
+                    <OnInitialized>
+                        self:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWN_GEMS))
+                        self:GetNamedChild("Icon"):SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWN_GEMS))
+                    </OnInitialized>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Crowns" relativePoint="BOTTOMLEFT" offsetX="-10" />
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/currency/gamepad/gp_crown_gems.dds" override="true" />
-                        <Label name="$(parent)Label" text="SI_CURRENCY_CROWN_GEM" override="true" />
-                    </Controls>
                 </Control>
 
             </Controls>

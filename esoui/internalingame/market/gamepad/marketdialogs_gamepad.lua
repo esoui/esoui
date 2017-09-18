@@ -131,7 +131,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
 
     if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
         buyCrownsMainText = SI_GAMEPAD_MARKET_BUY_CROWNS_TEXT_LABEL
-        g_buyCrownsTextParams = { mainTextParams = { ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName } }
+        local NO_AMOUNT = nil
+        g_buyCrownsTextParams = { mainTextParams = { ZO_Currency_FormatKeyboard(CURT_CROWNS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON), consoleStoreName } }
         
         local OpenConsoleStoreToPurchaseCrowns = function()
             ShowConsoleESOCrownPacksUI()
@@ -306,7 +307,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text =  function(dialog)
                         local endTimeString = GetMarketProductEndTimeString(self.marketProductId)
-                        local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(UI_ONLY_CURRENCY_CROWNS, CURRENCY_ICON_SIZE)
+                        local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, CURRENCY_ICON_SIZE)
                         return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
                     end,
         },

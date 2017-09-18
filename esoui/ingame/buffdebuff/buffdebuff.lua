@@ -274,7 +274,7 @@ function ZO_BuffDebuff:RegisterForEvents()
 
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
-            for i = BUFFS_SETTING_MIN_VALUE, BUFFS_SETTING_MAX_VALUE do
+            for i = BUFFS_SETTING_ITERATION_BEGIN, BUFFS_SETTING_ITERATION_END do
                 OnInterfaceSettingChanged(i)
             end
             self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)

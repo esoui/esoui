@@ -62,7 +62,7 @@ function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
 		self:UpdateSubmitButton()
 	end
 
-	for i = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_IMPACT_MIN_VALUE, CUSTOMER_SERVICE_SUBMIT_FEEDBACK_IMPACT_MAX_VALUE do
+	for i = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_IMPACT_ITERATION_BEGIN, CUSTOMER_SERVICE_SUBMIT_FEEDBACK_IMPACT_ITERATION_END do
 		local name = GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKIMPACTS", i)
 		if name ~= nil then
 			local entry = ZO_ComboBox:CreateItemEntry(name, function() self:UpdateSubmitButton() end)
@@ -73,7 +73,7 @@ function HelpSubmitFeedback_Keyboard:InitializeComboBoxes()
 
 	self.helpImpactComboBox:SelectItemByIndex(1)
 
-	for i = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_MIN_VALUE, CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_MAX_VALUE do
+	for i = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_ITERATION_BEGIN, CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_ITERATION_END do
 		local name = GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKCATEGORIES", i)
 		if name ~= nil then
 			local entry = ZO_ComboBox:CreateItemEntry(name, OnCategoryChanged)
@@ -135,7 +135,7 @@ function HelpSubmitFeedback_Keyboard:UpdateSubcategories()
 		defaultEntry.index = CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBCATEGORY_NONE
 		self.helpSubcategoryComboBox:AddItem(defaultEntry, ZO_COMBOBOX_UPDATE_NOW)
 
-		for i = self.subcategoryContextualData.minValue, self.subcategoryContextualData.maxValue do
+		for i = self.subcategoryContextualData.iterationBegin, self.subcategoryContextualData.iterationEnd do
 			local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_CUSTOMERSERVICESUBMITFEEDBACKSUBCATEGORIES",i), OnSubcategoryChanged)
 			entry.index = i
 			self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
@@ -188,9 +188,9 @@ function HelpSubmitFeedback_Keyboard:UpdateSubmitButton()
 
 	if self.helpCategoryComboBox == nil or self.helpImpactComboBox == nil or self.helpSubcategoryComboBox == nil or self.descriptionDefaultTextField == nil then
 		enableSubmitButton = false
-	elseif self.helpImpactComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_SUBMIT_FEEDBACK_IMPACT_MIN_VALUE then
+	elseif self.helpImpactComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_SUBMIT_FEEDBACK_IMPACT_ITERATION_BEGIN then
 		enableSubmitButton = false
-	elseif self.helpCategoryComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_MIN_VALUE then
+	elseif self.helpCategoryComboBox:GetSelectedItemData().index <= CUSTOMER_SERVICE_SUBMIT_FEEDBACK_CATEGORY_ITERATION_BEGIN then
 		enableSubmitButton = false
 	elseif not self.helpSubcategoryComboBoxControl:IsHidden() and self.helpSubcategoryComboBox:GetSelectedItemData().index <= 0 then
 		enableSubmitButton = false

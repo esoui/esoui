@@ -183,7 +183,7 @@ end
 
 function MailSend:UpdatePostageMoney()
     local postageAmount = GetQueuedMailPostage()
-    ZO_CurrencyControl_SetSimpleCurrency(self.postageCurrency, CURT_MONEY, postageAmount, nil, CURRENCY_SHOW_ALL, postageAmount > GetCarriedCurrencyAmount(CURT_MONEY))
+    ZO_CurrencyControl_SetSimpleCurrency(self.postageCurrency, CURT_MONEY, postageAmount, nil, CURRENCY_SHOW_ALL, postageAmount > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
 end
 
 function MailSend:SetSendMoneyMode(sendMoneyMode)

@@ -159,7 +159,7 @@ do
         local equipType = select(6, GetItemInfo(BAG_WORN, mainHandSlot))
         local isUsingTwoHanded = equipType == EQUIP_TYPE_TWO_HAND
 
-        for equipSlot = EQUIP_SLOT_MIN_VALUE, EQUIP_SLOT_MAX_VALUE do
+        for equipSlot = EQUIP_SLOT_ITERATION_BEGIN, EQUIP_SLOT_ITERATION_END do
             -- filter out an "non-combat" slots as well as the inactive weapon pair
             if IsActiveCombatRelatedEquipmentSlot(equipSlot) then
                 local considerSlotForOverallRating = true
@@ -199,8 +199,8 @@ do
         local playerLevel = GetUnitLevel("player")
         local playerChampionPoints = GetUnitChampionPoints("player")
         local averageRelativeEquipmentBonusRating = GetUnitEquipmentBonusRatingRelativeToLevel("player", averageEquipmentBonusRating)
-        local equipmentBonus = EQUIPMENT_BONUS_MIN_VALUE
-        for thresholdNumber = EQUIPMENT_BONUS_MAX_VALUE, EQUIPMENT_BONUS_MIN_VALUE, -1 do
+        local equipmentBonus = EQUIPMENT_BONUS_ITERATION_BEGIN
+        for thresholdNumber = EQUIPMENT_BONUS_ITERATION_END, EQUIPMENT_BONUS_ITERATION_BEGIN, -1 do
             local thresholdValue = GetEquipmentBonusThreshold(playerLevel, playerChampionPoints, thresholdNumber)
             if averageRelativeEquipmentBonusRating >= thresholdValue then
                 equipmentBonus = thresholdNumber
@@ -216,7 +216,7 @@ do
 
         local lastIcon
         --we setup 2 fewer icons than the number of EQUIPMENT_BONUS levels: the lowest equipment bonus level is all empty icons, and the highest adds a bonus icon separately
-        for iconNumber = EQUIPMENT_BONUS_MIN_VALUE, EQUIPMENT_BONUS_MAX_VALUE - 2 do 
+        for iconNumber = EQUIPMENT_BONUS_ITERATION_BEGIN, EQUIPMENT_BONUS_ITERATION_END - 2 do 
             local equipmentBonusIconControl = self.equipmentBonus.iconPool:AcquireObject()
             local equipmentBonusIconTexture
             if iconNumber < self.equipmentBonus.value then
@@ -235,7 +235,7 @@ do
         end
 
         --add bonus icon if at the highest level
-        if self.equipmentBonus.value == EQUIPMENT_BONUS_MAX_VALUE then
+        if self.equipmentBonus.value == EQUIPMENT_BONUS_END then
             local equipmentBonusIconControl = self.equipmentBonus.iconPool:AcquireObject()
             equipmentBonusIconControl:SetTexture(EQUIPMENT_BONUS_GOLD_TEXTURE)
             equipmentBonusIconControl:SetAnchor(BOTTOMLEFT, lastIcon, BOTTOMRIGHT, 4, 0)

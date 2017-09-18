@@ -90,7 +90,7 @@ function ZO_GamepadEntryData:InitializeImprovementKitVisualData(bag, index, stac
     self:SetSubLabelColors(ZO_NORMAL_TEXT)
 end
 
-function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, slotData)
+function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, customBestCategoryNameFunction, slotData)
     self:SetStackCount(stackCount)
     self.bagId = bagId
     self.slotIndex = slotIndex
@@ -103,16 +103,16 @@ function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIn
     self.meetsUsageRequirement = meetsUsageRequirements
     self.quality = quality
     self.itemType = GetItemType(self.bagId, self.slotIndex)
-    self.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTYPE", self.itemType))
     self.customSortData = customSortData
-    self.slotData = slotData
+
     if slotData then
-        self.brandNew = slotData.brandNew
-        self.stolen = slotData.stolen
-        self.isPlayerLocked = slotData.isPlayerLocked
-        self.isBoPTradeable = slotData.isBoPTradeable
-        self.isGemmable = slotData.isGemmable
-        self.statusSortOrder = slotData.statusSortOrder
+        ZO_ShallowTableCopy(slotData, self)
+    end
+
+    if customBestCategoryNameFunction then
+        customBestCategoryNameFunction(self)
+    else
+        self.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTYPE", self.itemType))
     end
 
     self:SetNameColors(self:GetColorsBasedOnQuality(self.quality))
@@ -133,7 +133,7 @@ function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, quality, va
     self:SetFontScaleOnSelection(false)    --item entries don't grow on selection
     
     if isQuest then
-        self:SetNameColors(LOOT_QUEST_COLOR)
+        self:SetNameColors(LOOT_QUEST_COLOR, LOOT_QUEST_COLOR)
     elseif quality then
         self:SetNameColors(self:GetColorsBasedOnQuality(quality))
     else
@@ -154,6 +154,10 @@ function ZO_GamepadEntryData:SetText(text)
     self.text = text
 end
 
+function ZO_GamepadEntryData:GetText()
+    return self.text
+end
+
 function ZO_GamepadEntryData:SetFontScaleOnSelection(active)
     self.fontScaleOnSelection = active
 end
@@ -168,6 +172,10 @@ end
 
 function ZO_GamepadEntryData:SetDataSource(source)
     self.dataSource = source
+end
+
+function ZO_GamepadEntryData:SetIgnoreTraitInformation(ignoreTraitInformation)
+    self.ignoreTraitInformation = ignoreTraitInformation
 end
 
 function ZO_GamepadEntryData:GetColorsBasedOnQuality(quality)
@@ -296,8 +304,23 @@ function ZO_GamepadEntryData:SetIconTint(selectedColor, unselectedColor)
     self.unselectedIconTint = unselectedColor
 end
 
+-- If this is set for one data entry in a list for a given data type, it must be set for all entries in that list for that data type
+-- Otherwise it will not be reset when the control gets recycled
 function ZO_GamepadEntryData:SetIconDesaturation(desaturation)
     self.iconDesaturation = desaturation
+end
+
+-- See comment for SetIconDesaturation
+function ZO_GamepadEntryData:SetIconSampleProcessingWeight(type, weight)
+    if not self.textureSampleProcessingWeights then
+        self.textureSampleProcessingWeights = {}
+    end
+    self.textureSampleProcessingWeights[type] = weight
+end
+
+-- See comment for SetIconDesaturation
+function ZO_GamepadEntryData:SetIconSampleProcessingWeightTable(typeToWeightTable)
+    self.textureSampleProcessingWeights = typeToWeightTable
 end
 
 function ZO_GamepadEntryData:AddSubLabel(text)

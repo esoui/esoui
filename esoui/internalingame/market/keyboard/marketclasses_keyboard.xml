@@ -48,25 +48,24 @@
         </Button>
 
         <Control name="ZO_MarketProductTemplate_Keyboard" inherits="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
-            
             <OnMouseEnter>
                 ZO_MarketProduct_OnMouseEnter(self) 
             </OnMouseEnter>
-            
+
             <OnMouseExit>
                 ZO_MarketProduct_OnMouseExit(self)
             </OnMouseExit>
-            
+
             <OnMouseUp>
                 if upInside then
                     self.marketProduct:OnClicked(button)
                 end
             </OnMouseUp>
-            
+
             <OnMouseDoubleClick>
                 self.marketProduct:OnDoubleClicked(button)
             </OnMouseDoubleClick>
-            
+
             <Controls>
                 <Backdrop name="$(parent)OverlayBorder" override="true">
                     <Edge file="EsoUI/Art/Market/Keyboard/market_cel_dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
@@ -118,31 +117,31 @@
                 <Label name="$(parent)Purchased" font="ZoFontWinH4" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                 </Label>
-                
-                <Label name="$(parent)TextCallout" font="ZoFontWinT1" override="true">
+
+                <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard">
                     <Controls>
-                        <Control name="$(parent)Background" override="true">
+                        <Control name="$(parent)Background" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL">
                             <Dimensions y="32"/>
                             <Controls>
-                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" override="true"/>
-                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
-                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Center" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Left" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Right" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
                             </Controls>
                         </Control>
                     </Controls>
                 </Label>
-                
+
                 <Label name="$(parent)BundledProducts" font="ZoFontHeader3" override="true">
                     <Anchor point="BOTTOMRIGHT" offsetX="-15" offsetY="-6"/>
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontWinH4" override="true" />
                     </Controls>
                 </Label>
-                
+
                 <Texture name="$(parent)BundleIndicator" textureFile="EsoUI/Art/Market/Keyboard/market_bundleFlag.dds" override="true" />
             </Controls>
         </Control>
-        
+
         <Control name="ZO_MarketProduct_Keyboard" inherits="ZO_MarketProductTemplate_Keyboard" virtual="true">
             <Dimensions x="ZO_MARKET_PRODUCT_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
             
@@ -153,7 +152,7 @@
                 </Texture>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_MarketProductBundle_Keyboard" inherits="ZO_MarketProductTemplate_Keyboard" virtual="true">
             <Dimensions x="ZO_MARKET_PRODUCT_BUNDLE_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
             

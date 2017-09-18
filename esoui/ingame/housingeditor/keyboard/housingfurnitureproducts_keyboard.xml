@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_HousingFurnitureProductsPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" hidden="true" >
+        <TopLevelControl name="ZO_HousingFurnitureProductsPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserListWithSearchAndTheme_Keyboard" hidden="true" >
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>

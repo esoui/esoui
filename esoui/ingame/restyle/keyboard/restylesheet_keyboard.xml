@@ -1,0 +1,66 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_RestyleSlotsSheet_ItemSlot_Keyboard" inherits="ZO_ItemSlot_Shared" mouseOverBlendMode="ADD" virtual="true" />
+
+        <Control name="ZO_RestyleSlotsSheet_Slot_Keyboard" virtual="true">
+            <Dimensions x="134" y="64" />
+
+            <Controls>
+                <Button name="$(parent)ItemSlot" inherits="ZO_RestyleSlotsSheet_ItemSlot_Keyboard" >
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="LEFT" />
+
+                    <Textures mouseOver="" pressedMouseOver="" />
+                </Button>
+
+                <Control name="$(parent)Dyes" inherits="ZO_DyeingSwatchSlotDyes">
+                    <Anchor point="RIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_RestyleSlotsSheet_Container" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Control name="$(parent)Slots" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-10"/>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider">
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_RestyleSlotsSheet_Keyboard" mouseEnabled="true" hidden="true" virtual="true">
+            <AnchorFill />
+            
+            <Controls>
+                <Control name="$(parent)TitleDivider" inherits="ZO_LeftPanel_HorizontalDivider">
+                    <Anchor point="TOPLEFT" offsetY="42" />
+                    <Anchor point="TOPRIGHT" offsetY="42" />
+                </Control>
+                
+                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" />
+                </Label>
+
+                <Control name="$(parent)PrimaryContainer" inherits="ZO_RestyleSlotsSheet_Container">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleDivider" relativePoint="BOTTOMLEFT" offsetY="17" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-17" />
+                </Control>
+
+                <Control name="$(parent)SecondaryContainer" inherits="ZO_RestyleSlotsSheet_Container" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-17" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,10 +1,6 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GamepadCraftingInventoryTemplate" inherits="ZO_VerticalParametricScrollListTemplate" virtual="true" hidden="false">
-            <OnInitialized>
-                self.noItemsLabel = self:GetNamedChild("NoItemsLabel")
-            </OnInitialized>
-
             <OnEffectivelyShown>
                 self.owner:OnShow()
             </OnEffectivelyShown>

@@ -173,7 +173,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
     elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store/Upgrade Chapter
         local icon
         if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_DLC then
-            icon = ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE
+            icon = ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS)
         end
         self:LayoutIconStringLine(wayshrineSection, icon, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
     elseif IsUnitDead("player") then -- NO BUTTON: Dead
@@ -188,7 +188,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         if premiumTimeLeft == 0 then --BUTTON: Recall
             local cost = GetRecallCost(nodeIndex)
             local currency = GetRecallCurrency(nodeIndex)
-            local hasEnoughMoney = (cost <= GetCarriedCurrencyAmount(currency))
+            local hasEnoughMoney = (cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER))
 
             if cost > 0 then
                 self:AddMoney(wayshrineSection, cost, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_RECALL_COST), not hasEnoughMoney, self.tooltip:GetStyle("mapLocationTooltipContentLeftLabel"), self.tooltip:GetStyle("mapRecallCost"))

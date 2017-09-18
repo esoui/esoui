@@ -120,7 +120,7 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeHeader()
 	end
 
     local function UpdateGold(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
 		return true
     end
 
@@ -221,7 +221,7 @@ end
 function ZO_GamepadTradingHouse_CreateListing:SetListingPrice(price, isPreview)
     local listingFee, tradingHouseCut, profit = GetTradingHousePostPriceInfo(price)
     
-    self.validPrice = (GetCarriedCurrencyAmount(CURT_MONEY) >= listingFee) and (price > 0) and (price <= MAX_PLAYER_CURRENCY)
+    self.validPrice = (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= listingFee) and (price > 0) and (price <= MAX_PLAYER_CURRENCY)
     local HAS_ERROR = not self.validPrice
 
     self.listingFee = listingFee

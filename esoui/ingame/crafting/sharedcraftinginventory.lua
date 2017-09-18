@@ -15,8 +15,8 @@ function ZO_SharedCraftingInventory:Initialize(control, slotType, connectInfoFn,
 
     self:InitializeList()
 
-	if not connectInfoFn then connectInfoFn = ZO_InventoryInfoBar_ConnectStandardBar end
-	if not connectInfoControl then connectInfoControl = control:GetNamedChild("InfoBar") end
+    if not connectInfoFn then connectInfoFn = ZO_InventoryInfoBar_ConnectStandardBar end
+    if not connectInfoControl then connectInfoControl = control:GetNamedChild("InfoBar") end
     if connectInfoControl then connectInfoFn(connectInfoControl) end
 
     local function HandleInventoryChanged()
@@ -140,3 +140,6 @@ function ZO_SharedCraftingInventory:Hide()
     self.control:SetHidden(true)
 end
 
+function ZO_SharedCraftingInventory:SetNoItemLabelText(text)
+    -- intended to be overwritten
+end

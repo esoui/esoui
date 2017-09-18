@@ -104,15 +104,17 @@ function ZO_HousingPreview_Manager:UpdateHouseMarketData(marketState)
                         local marketProductId = marketProductListings[i]
                         local presentationIndex = marketProductListings[i + 1]
 
-                        local currencyType, _, _, costAfterDiscount = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
+                        local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
 
-                        --Don't allow the same currency twice.  This is a nonsense scenario but technically possible.
+                        --Don't allow the same currency twice. This is a nonsense scenario but technically possible.
                         if not houseTemplateData.marketPurchaseOptions[currencyType] then
                             local marketPurchaseData =
                             {
                                 marketProductId = marketProductId,
                                 presentationIndex = presentationIndex,
-                                cost = costAfterDiscount,
+                                cost = cost,
+                                costAfterDiscount = costAfterDiscount,
+                                discountPercent = discountPercent,
                             }
                             houseTemplateData.marketPurchaseOptions[currencyType] = marketPurchaseData
                             houseTemplateData.name = houseTemplateData.name or GetMarketProductDisplayName(marketProductId)
@@ -170,4 +172,4 @@ function ZO_HousingPreview_Manager:RequestOpenMarket()
     end
 end
 
-HOUSE_PREVIEW_MANAGER = ZO_HousingPreview_Manager:New()
+ZO_HOUSE_PREVIEW_MANAGER = ZO_HousingPreview_Manager:New()

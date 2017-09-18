@@ -202,10 +202,13 @@ end
 
 do
     local function SetupItem(control, data)
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+        if data.entryColor then
+            control:SetColor(data.entryColor:UnpackRGB())
+        else
+            control:SetColor(ZO_SELECTED_TEXT:UnpackRGB())
+        end
 
-        control:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, data.text))
-        control:SetColor(r, g, b, 1)
+        control:SetText(data.text)
 
         local inventorySlot = GetControl(control, "Button")
         ZO_Inventory_SetupSlot(inventorySlot, data.stack, data.icon, data.meetsUsageRequirement)
@@ -245,11 +248,25 @@ function ZO_CraftingResults_Keyboard:IsActive()
 end
 
 function ZO_CraftingResults_Keyboard:DisplayCraftingResult(itemInfo)
+    local entryText
+    local entryColor
+    local itemQualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemInfo.quality))
+    if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        local itemTrait = GetItemLinkTraitInfo(itemInfo.itemLink)
+        local itemTraitString = GetString("SI_ITEMTRAITTYPE", itemTrait)
+        local itemNameString = itemQualityColor:Colorize(itemInfo.name)
+        entryText = zo_strformat(SI_KEYBOARD_RETRAIT_COMPLETED_RESULT_FORMATTER, itemNameString, itemTraitString)
+        entryColor = ZO_NORMAL_TEXT
+    else
+        entryText = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name)
+        entryColor = itemQualityColor
+    end
+
     local entry = {
-        lines = {
-            {text = itemInfo.name, icon = itemInfo.icon, stack = itemInfo.stack, meetsUsageRequirement = itemInfo.meetsUsageRequirement, quality = itemInfo.quality, itemInstanceId = itemInfo.itemInstanceId}
+            lines = {
+                {text = entryText, icon = itemInfo.icon, stack = itemInfo.stack, meetsUsageRequirement = itemInfo.meetsUsageRequirement, entryColor = entryColor, itemInstanceId = itemInfo.itemInstanceId}
+            }
         }
-    }
     self.notifier:AddEntry(CRAFTING_RESULTS_TEMPLATE, entry)
 end
 

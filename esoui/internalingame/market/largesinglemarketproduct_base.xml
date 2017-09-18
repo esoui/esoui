@@ -43,19 +43,18 @@
                     <Anchor point="BOTTOMLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y"/>
                 </Label>
 
-                <Label name="$(parent)TextCallout" override="true">
+                <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad">
                     <Controls>
-                        <Control name="$(parent)Background" override="true">
-                            <Dimensions y="64"/>
+                        <Control name="$(parent)Background" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL">
                             <Controls>
-                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_center.dds" override="true"/>
-                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_fadedCap.dds" override="true"/>
-                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Center" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Left" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Right" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
                             </Controls>
                         </Control>
                     </Controls>
                 </Label>
-                
+
                 <Texture name="$(parent)BundleIndicator" textureFile="EsoUI/Art/Market/Gamepad/gp_market_bundleFlag.dds" override="true" />
             </Controls>
         </Control>

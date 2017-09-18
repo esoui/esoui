@@ -1,7 +1,7 @@
 <GuiXml> 
     <Controls>
         <Control name="ZO_LootHistory_GamepadEntry" inherits="ZO_LootHistory_SharedEntry" virtual="true">
-            <Dimensions x="315" y="50" />
+            <Dimensions x="315" y="58" />
             <Anchor point="BOTTOMLEFT"/>
 
             <Controls>
@@ -15,16 +15,35 @@
                         </Texture>
                     </Controls>
                 </Texture>
-                
-                <Label name="$(parent)Label" override="true" font="ZoFontGamepad34" maxLineCount="1">
+
+                <Label name="$(parent)Label" verticalAlignment="CENTER">
                     <Dimensions x="220"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad34",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad22",
+                                lineLimit = 2,
+                            },
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
-              
+
                 <Texture name="$(parent)Bg" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
                     <TextureCoords left="0.8" right="0" top="0" bottom=".78125" />
                     <Controls>
                         <Texture name="$(parent)Highlight" override="true">
-                            <Dimensions y="50"/>
+                            <Dimensions y="58"/>
                             <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
                             <Anchor point="BOTTOMLEFT" />
                             <Anchor point="BOTTOMRIGHT" offsetX="45"/>

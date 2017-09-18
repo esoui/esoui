@@ -597,10 +597,6 @@ function ZO_PlayerToPlayer:SetHidden(hidden)
     SHARED_INFORMATION_AREA:SetHidden(self.container, hidden)
 end
 
-function ZO_PlayerToPlayer:IsHidden()
-    return SHARED_INFORMATION_AREA:IsHidden(self.container)
-end
-
 local INCOMING_MESSAGE_TEXT = {
     [INTERACT_TYPE_GROUP_INVITE] = GetString(SI_NOTIFICATION_GROUP_INVITE),
     [INTERACT_TYPE_QUEST_SHARE] = GetString(SI_NOTIFICATION_SHARE_QUEST_INVITE),
@@ -853,7 +849,6 @@ end
 
 function ZO_PlayerToPlayer:OnEndSoulGemResurrection()
     self.resurrectProgressAnimation:PlayBackward()
-    self.targetLabel:SetHidden(true)
 end
 
 function ZO_PlayerToPlayer:SetDelayPromptTime(timeMs)
@@ -1189,18 +1184,28 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         self.shouldShowNotificationKeybindLayer = false
 
-        local hideSelf = not self.isInteracting
-
+        local hideSelf, hideTargetLabel
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
         if isReticleTargetInteractable and self:TryShowingResurrectLabel() then
             hideSelf = false
+            hideTargetLabel = false
         elseif not self.isInteracting and (self.showingNotificationMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then
             hideSelf = false
+            hideTargetLabel = false
         elseif not self.isInteracting and isReticleTargetInteractable and self:TryShowingStandardInteractLabel() then
             hideSelf = not self:ShouldShowPromptAfterDelay()
+            hideTargetLabel = hideSelf
+        elseif self.isInteracting then
+            hideSelf = false
+            hideTargetLabel = true
+        else
+            hideSelf = true
+            hideTargetLabel = true
         end
-        
+
         self:SetHidden(hideSelf)
+		self.targetLabel:SetHidden(hideTargetLabel)
+		
         self.promptKeybindButton1:SetHidden(not self.shouldShowNotificationKeybindLayer)
         self.promptKeybindButton2:SetHidden(not self.shouldShowNotificationKeybindLayer)
 
@@ -1466,20 +1471,6 @@ do
         self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
 
         self:GetRadialMenu():Show()
-    end
-end
-
-function ZO_PlayerToPlayer_OnKeybindEffectivelyShown(control)
-    if ZO_RZCHROMA_EFFECTS then
-        local keybindAction = control:GetKeyboardKeybind()
-        ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect(keybindAction)
-    end
-end
-
-function ZO_PlayerToPlayer_OnKeybindEffectivelyHidden(control)
-    if ZO_RZCHROMA_EFFECTS then
-        local keybindAction = control:GetKeyboardKeybind()
-        ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect(keybindAction)
     end
 end
 

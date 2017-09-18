@@ -144,16 +144,8 @@ end
 
 local function GetGoldString(amount)
     local color = GetContrastTextColor()
-    local goldIcon = "EsoUI/Art/currency/currency_gold.dds"
-    local iconSize = 16
-
-    if IsInGamepadPreferredMode() then
-        goldIcon = ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE
-        iconSize = 24
-    end
-
-    local goldIcon = zo_iconFormat(goldIcon, iconSize, iconSize)
-    return zo_strformat(SI_GUILD_EVENT_GOLD_FOMART, color:Colorize(ZO_CurrencyControl_FormatCurrency(amount)), goldIcon)
+    local formattedGoldIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY)
+    return zo_strformat(SI_GUILD_EVENT_GOLD_FOMART, color:Colorize(ZO_CurrencyControl_FormatCurrency(amount)), formattedGoldIcon)
 end
 
 local function IsInvalidParam(param)

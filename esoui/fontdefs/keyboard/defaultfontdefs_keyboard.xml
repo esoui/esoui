@@ -89,6 +89,7 @@
     <Font name="ZoFontBookNote" font="$(HANDWRITTEN_FONT)|22" />
     <Font name="ZoFontBookScroll" font="$(HANDWRITTEN_FONT)|26" />
     <Font name="ZoFontBookTablet" font="$(STONE_TABLET_FONT)|30|soft-shadow-thick" />
+    <Font name="ZoFontBookMetal" font="$(STONE_TABLET_FONT)|30|soft-shadow-thin" />
 
     <!-- In Game Book Title Fonts-->
     <Font name="ZoFontBookPaperTitle" font="$(ANTIQUE_FONT)|30" />
@@ -98,4 +99,5 @@
     <Font name="ZoFontBookNoteTitle" font="$(HANDWRITTEN_FONT)|32" />
     <Font name="ZoFontBookScrollTitle" font="$(HANDWRITTEN_FONT)|34" />
     <Font name="ZoFontBookTabletTitle" font="$(STONE_TABLET_FONT)|48|soft-shadow-thick" />
+    <Font name="ZoFontBookMetalTitle" font="$(STONE_TABLET_FONT)|48|soft-shadow-thin" />
 </GuiXml>

@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GridScrollListEmptyRow_Keyboard" inherits="ZO_SortFilterListEmptyRow_Keyboard" virtual="true">
+            <Controls>
+                <Label name="$(parent)Message" override="true" font="ZoFontGame" />
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GridScrollList_Entry_Header_Template_Keyboard" font="ZoFontWinH2" maxLineCount="1"  wrapMode="ELLIPSIS" virtual="true" />
+
+        <Control name="ZO_GridScrollList_Entry_Template_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_KEYBOARD" />
+            <Controls>
+                <Texture name="$(parent)Icon" level="1">
+                    <AnchorFill />
+                </Texture>
+
+                <Backdrop name="$(parent)BorderedBackground" centerColor="FFFFFFFF">
+                    <AnchorFill/>
+                    <Edge file="EsoUI/Art/Tooltips/UI-Border.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+                    <Center file="EsoUI/Art/Tooltips/UI-TooltipCenter.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

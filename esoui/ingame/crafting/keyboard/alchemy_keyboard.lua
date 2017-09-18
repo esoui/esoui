@@ -163,8 +163,15 @@ function ZO_Alchemy:InitializeKeybindStripDescriptors()
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
-function ZO_Alchemy:UpdateTooltipLayout()
-    self.tooltip:SetPendingAlchemyItem(self:GetAllCraftingBagAndSlots())
+function ZO_Alchemy:UpdateTooltip()
+    -- if we are in recipe mode then we shouldn't show the alchemy tooltip
+    if self:IsCraftable() and self.mode ~= ZO_ALCHEMY_MODE_RECIPES then
+        self.tooltip:SetHidden(false)
+        self.tooltip:ClearLines()
+        self.tooltip:SetPendingAlchemyItem(self:GetAllCraftingBagAndSlots())
+    else
+        self.tooltip:SetHidden(true)
+    end
 end
 
 function ZO_Alchemy:OnItemReceiveDrag(slotControl, bagId, slotIndex)
@@ -240,7 +247,6 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
     ZO_CraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
-    self.noSolventOrReagentsLabel = control:GetNamedChild("NoSolventOrReagentsLabel")
 
     local function IngredientSortOrder(bagId, slotIndex)
         local itemType, _, requiredLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(bagId, slotIndex))
@@ -255,7 +261,7 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
         end
     end
 
-    self:SetCustomSortHeader("", IngredientSortOrder)
+    self:SetCustomSort(IngredientSortOrder)
     self.sortKey = "custom"
 
     self:SetFilters{
@@ -264,7 +270,7 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
         self:CreateNewTabFilterData(nil, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
     }
 
-    self:SetSortColumnHidden({ stackSellPrice = true, statusSortOrder = true }, true)
+    self:SetSortColumnHidden({ stackSellPrice = true, statusSortOrder = true, traitInformationSortOrder = true }, true)
 end
 
 function ZO_AlchemyInventory:IsLocked(bagId, slotIndex)
@@ -353,11 +359,11 @@ function ZO_AlchemyInventory:ChangeFilter(filterData)
     self.filterType = filterData.descriptor
 
     if self.filterType == ITEMTYPE_REAGENT then
-        self.noSolventOrReagentsLabel:SetText(GetString(SI_ALCHEMY_NO_REAGENTS))
+        self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_REAGENTS))
     elseif self.filterType == IsAlchemySolvent then
-        self.noSolventOrReagentsLabel:SetText(GetString(SI_ALCHEMY_NO_SOLVENTS))
+        self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_SOLVENTS))
     else
-        self.noSolventOrReagentsLabel:SetText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
+        self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
     end
 
     self:HandleDirtyEvent()
@@ -367,7 +373,7 @@ function ZO_AlchemyInventory:Refresh(data)
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Alchemy_IsAlchemyItem, ZO_Alchemy_DoesAlchemyItemPassFilter, self.filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
-    self.noSolventOrReagentsLabel:SetHidden(#data > 0)
+    self:SetNoItemLabelHidden(#data > 0)
 end
 
 function ZO_AlchemyInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

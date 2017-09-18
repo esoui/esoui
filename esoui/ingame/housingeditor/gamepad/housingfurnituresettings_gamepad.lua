@@ -173,7 +173,7 @@ do
                                             end
 
             local allDefaultAccessSettings = HOUSE_SETTINGS_MANAGER:GetAllDefaultAccessSettings()
-            for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_MIN_VALUE, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_MAX_VALUE do
+            for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_BEGIN, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_END do
                 local entryData = 
                 {
                     text = allDefaultAccessSettings[i],
@@ -1024,6 +1024,7 @@ do
             gamepadInfo =
             {
                 dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+                allowShowOnNextScene = true
             },
             setup = function(dialog)
                 SetupCopyDialog(dialog, dialogName)

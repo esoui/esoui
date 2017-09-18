@@ -5,7 +5,6 @@
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("Name")
                 self.statusLabel = self:GetNamedChild("Status")
-                self.lockIcon = self:GetNamedChild("LockIcon")
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
 
@@ -15,10 +14,6 @@
                     <Anchor point="LEFT" />
                 </Texture>
 
-                <Texture name="$(parent)LockIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER"/>
-                </Texture>
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds">
                     <Dimensions x="32" y="32" />
                     <Anchor point="CENTER"/>
@@ -74,11 +69,11 @@
                                     </OnInitialized>
                                     <AnchorFill/>
                                 </StatusBar>
-                                                
+
                                 <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                     <Anchor point="CENTER" />
                                 </Label>
-                                                
+
                                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds" tier="HIGH">
                                     <Dimensions x="32" y="32" />
                                     <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT"/>
@@ -111,7 +106,7 @@
                             <Anchor point="BOTTOMRIGHT"/>
                         </Control>
                     </Controls>
-                </Control>                
+                </Control>
             </Controls>
         </Control>
     </Controls>

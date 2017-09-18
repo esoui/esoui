@@ -47,7 +47,7 @@ function ZO_MarketCurrency_Gamepad:OnCrownsUpdated(currentCurrency, difference)
     self:FireCallbacks("OnCurrencyUpdated")
 end
 
-function ZO_MarketCurrency_Gamepad:OnCrownGemsUpdated(currentCurrency, difference)
+function ZO_MarketCurrency_Gamepad:OnCrownGemsUpdated(currentCurrency, difference, reason)
     self.gemAmountControl:SetText(ZO_CommaDelimitNumber(currentCurrency))
     self:FireCallbacks("OnCurrencyUpdated")
 end

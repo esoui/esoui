@@ -1,6 +1,6 @@
 TRADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Trade)
 GROUP_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMenu_Keyboard)
-DYEING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DyeingTopLevel)
+RESTYLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_RestyleTopLevel_Keyboard)
 ACHIEVEMENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Achievements)
 CADWELLS_ALMANAC_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Cadwell)
 STABLES_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StableWindowMenu)
@@ -37,6 +37,14 @@ CRAFTING_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = 245,
     paddingRight = 605,
     dynamicFramingConsumedWidth = 1050,
+    dynamicFramingConsumedHeight = 300,
+    previewInEmptyWorld = true,
+})
+
+RIGHT_PANEL_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = 550,
+    dynamicFramingConsumedWidth = 550,
     dynamicFramingConsumedHeight = 300,
     previewInEmptyWorld = true,
 })

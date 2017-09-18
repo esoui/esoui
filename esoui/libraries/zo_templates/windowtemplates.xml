@@ -207,6 +207,15 @@
             </OnInitialized>
         </Texture>
 
+        <Texture name="ZO_TallListSelectedHighlight" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight.dds" alpha="0" level="1" virtual="true">
+            <AnchorFill />
+            <TextureCoords left="0" right="1" top="0" bottom=".625" />
+
+            <OnInitialized>
+                self.nonRecolorable = true
+            </OnInitialized>
+        </Texture>
+
         <Texture name="ZO_ThinListBgStrip" textureFile="EsoUI/Art/Contacts/social_list_bgStrip.dds" virtual="true">
             <TextureCoords top="0" bottom="0.90625" left="0" right=".7607"/>
             <AnchorFill/>
@@ -240,10 +249,10 @@
             <Anchor point="RIGHT" offsetX="-14" offsetY="17" />
         </TopLevelControl>
         
-        <TopLevelControl name="ZO_RightPanelFootPrint" virtual="true">
+        <Control name="ZO_RightPanelFootPrint" virtual="true">
             <Dimensions x="930" y="690" />
             <Anchor point="RIGHT" offsetY="32" />
-        </TopLevelControl>
+        </Control>
 
         <TopLevelControl name="ZO_RightFootPrintBackground" allowBringToTop="false" virtual="true">
             <Dimensions x="960" y="750" />
@@ -413,6 +422,21 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_MediumTallLeftPanelBG" allowBringToTop="false" virtual="true">
+            <Dimensions x="366" y="750" />
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="20"/>
+            <Controls>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
+                    <Dimensions x="64" y="1024" />
+                    <Anchor point="TOPRIGHT" offsetX="65" offsetY="-75" />
+                </Texture>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <Dimensions x="1024" y="1024" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Right" relativePoint="TOPLEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_WideRightPanelBG" inherits="ZO_ThinRightPanelBG" virtual="true">
             <Dimensions x="535" y="500" />
         </Control>
@@ -543,6 +567,16 @@
             <Dimensions x="512" y="8"/>
         </Texture>
 
+        <Control name="ZO_LeftPanel_HorizontalDivider" virtual="true">
+            <Dimensions y="8" />
+            <Controls>
+                <Texture name="$(parent)Texture" inherits="ZO_HorizontalDivider">
+                    <Anchor point="TOPLEFT" offsetX="-140" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="100" />
+                </Texture>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_WideHorizontalDivider" virtual="true">
             <Dimensions x="550" y="4"/>
             <Controls>

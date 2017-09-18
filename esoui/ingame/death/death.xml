@@ -51,7 +51,7 @@
                         <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton">
                             <Anchor point="TOPLEFT"/>
                         </Control>
-                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
                         </Control>
                     </Controls>
@@ -73,7 +73,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_DeathReviveButton" inherits="ZO_KeybindButton" virtual="true">
+        <Control name="ZO_DeathReviveButton" inherits="ZO_KeybindButtonChroma" virtual="true">
             <Controls>
                 <Label name="$(parent)ReviveText" excludeFromResizeToFitExtents="true"/>
             </Controls>
@@ -118,10 +118,10 @@
                 <Control name="$(parent)Buttons" resizeToFitDescendents="true">
                     <Anchor point="TOP" offsetY="32"/>
                     <Controls>
-                        <Control name="$(grandparent)Button1" inherits="ZO_KeybindButton">
+                        <Control name="$(grandparent)Button1" inherits="ZO_KeybindButtonChroma">
                             <Anchor point="TOPLEFT"/>
                         </Control>
-                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
                         </Control>
                     </Controls>
@@ -158,7 +158,7 @@
                         <Control name="$(grandparent)Button1" inherits="ZO_DeathReviveButton">
                             <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Button2" relativePoint="TOPLEFT" offsetX="-40"/>
                         </Control>
-                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
                         </Control>
                     </Controls>
@@ -284,13 +284,13 @@
                             <Anchor point="TOPLEFT" offsetY="32"/>
                             <Anchor point="TOPRIGHT" offsetY="32"/>
                             <Controls>
-                                <Control name="$(grandparent)Button2" inherits="ZO_KeybindButton">
+                                <Control name="$(grandparent)Button2" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOP"/>
                                 </Control>
-                                <Control name="$(grandparent)Button1" inherits="ZO_KeybindButton">
+                                <Control name="$(grandparent)Button1" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Button2" relativePoint="TOPLEFT" offsetX="-40"/>
                                 </Control>
-                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
                                 </Control>
                             </Controls>
@@ -311,7 +311,7 @@
                         <Control name="$(parent)Buttons" resizeToFitDescendents="true">
                             <Anchor point="TOP" offsetY="32"/>
                             <Controls>
-                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT"/>
                                 </Control>
                             </Controls>
@@ -326,7 +326,7 @@
                             <Anchor point="TOP" offsetY="32"/>
                             <Controls>
                                 <Label name="$(grandparent)RespawnTimerText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" excludeFromResizeToFitExtents="true" />
-                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="140"/>
                                 </Control>
                             </Controls>
@@ -364,7 +364,7 @@
                                 <Control name="$(grandparent)Button2" inherits="ZO_DeathReviveButton">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button1" relativePoint="TOPRIGHT" offsetX="40"/>
                                 </Control>
-                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButton">
+                                <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)Button2" relativePoint="TOPRIGHT" offsetX="40"/>
                                 </Control>
                             </Controls>

@@ -100,7 +100,7 @@ do
         local failsRestriction = false
         local restrictionsSection = self:AcquireSection(self:GetStyle("collectionsRestrictionsSection"))
 
-        for restrictionType = COLLECTIBLE_RESTRICTION_TYPE_MIN_VALUE, COLLECTIBLE_RESTRICTION_TYPE_MAX_VALUE do
+        for restrictionType = COLLECTIBLE_RESTRICTION_TYPE_ITERATION_BEGIN, COLLECTIBLE_RESTRICTION_TYPE_ITERATION_END do
             local hasRestrictions, passesRestrictions, allowedNamesString = GetCollectibleRestrictionsByType(collectibleId, restrictionType)
             if hasRestrictions then
                 local statValuePair = restrictionsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))

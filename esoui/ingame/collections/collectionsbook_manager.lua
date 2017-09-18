@@ -3,6 +3,7 @@
 --
 
 ZO_COLLECTIONS_SYSTEM_NAME = "collections"
+ZO_COLLECTIONS_SEARCH_ROOT = "root"
 
 local CollectionsBook_Singleton = ZO_CallbackObject:Subclass()
 
@@ -15,7 +16,11 @@ end
 function CollectionsBook_Singleton:Initialize()
     self.ownedHouses = {}
     self.categoriesWithNewCollectibles = {}
+    self.searchString = ""
+    self.searchResults = {}
+    self.searchSpecializationFilters = {}
 
+    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) self:OnCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTION_UPDATED, function(eventId, ...) self:OnCollectionUpdated(...) end)
@@ -25,6 +30,65 @@ function CollectionsBook_Singleton:Initialize()
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
 
     self:RefreshOwnedHouses()
+end
+
+function CollectionsBook_Singleton:SetSearchString(searchString)
+    self.searchString = searchString or ""
+    StartCollectibleSearch(searchString)
+end
+
+function CollectionsBook_Singleton:SetSearchCategorySpecializationFilters(...)
+    local argCount = select("#", ...)
+    if argCount == NonContiguousCount(self.searchSpecializationFilters) then
+        local noChange = true
+        for i = 1, argCount do
+            local categorySpecialization = select(i, ...)
+            if not self.searchSpecializationFilters[categorySpecialization] then
+                noChange = false
+                break
+            end
+        end
+
+        if noChange then
+            return
+        end
+    end
+
+    ZO_ClearTable(self.searchSpecializationFilters)
+    for i = 1, argCount do
+        local categorySpecialization = select(i, ...)
+        self.searchSpecializationFilters[categorySpecialization] = true
+    end
+    self:UpdateSearchResults()
+end
+
+function CollectionsBook_Singleton:UpdateSearchResults()
+    ZO_ClearTable(self.searchResults)
+
+    local numResults = GetNumCollectiblesSearchResults()
+    for i = 1, numResults do
+        local categoryIndex, subcategoryIndex, collectibleIndex = GetCollectiblesSearchResult(i)
+        local categorySpecialization = GetCollectibleCategorySpecialization(categoryIndex)
+        if self.searchSpecializationFilters[categorySpecialization] or NonContiguousCount(self.searchSpecializationFilters) == 0 then
+            if not self.searchResults[categoryIndex] then
+                self.searchResults[categoryIndex] = {}
+            end
+            local effectiveSubCategory = subcategoryIndex or ZO_COLLECTIONS_SEARCH_ROOT
+            if not self.searchResults[categoryIndex][effectiveSubCategory] then
+                self.searchResults[categoryIndex][effectiveSubCategory] = {}
+            end
+
+            self.searchResults[categoryIndex][effectiveSubCategory][collectibleIndex] = true
+        end
+    end
+    self:FireCallbacks("UpdateSearchResults")
+end
+
+function CollectionsBook_Singleton:GetSearchResults()
+    if zo_strlen(self.searchString) > 1 then
+        return self.searchResults
+    end
+    return nil
 end
 
 function CollectionsBook_Singleton:BrowseToCollectible(...)
@@ -240,6 +304,47 @@ do
         end
 
         return false
+    end
+end
+
+do
+    local function ShouldAddCollectibleToList(topLevelCategoryIndex, subCategoryIndex, entryIndex, ...)
+        local collectibleId = GetCollectibleId(topLevelCategoryIndex, subCategoryIndex, entryIndex)
+        if not IsCollectibleUnlocked(collectibleId) then
+            return false
+        end
+        local collectibleCategoryType = GetCollectibleCategoryType(collectibleId)
+        for i = 1, select("#", ...) do
+            local filterFunction = select(i, ...)
+            if not filterFunction(collectibleCategoryType) then
+                return false
+            end
+        end
+
+        return true
+    end
+
+    function CollectionsBook_Singleton.GetCollectibleIdsFromTopLevelCategory(topLevelCategoryIndex, ...) --... are filter functions that takes COLLECTIBLE_CATEGORY_TYPE as an argument
+        local foundCollectibleIds = {}
+        local _, numSubCategories, numCollectibles = GetCollectibleCategoryInfo(topLevelCategoryIndex)
+        for entryIndex = 1, numCollectibles do
+            if ShouldAddCollectibleToList(topLevelCategoryIndex, nil, entryIndex, ...) then
+                local collectibleId = GetCollectibleId(topLevelCategoryIndex, nil, entryIndex)
+                table.insert(foundCollectibleIds, collectibleId)
+            end
+        end
+
+        for subCategoryIndex = 1, numSubCategories do
+            local _, subCategoryEntries = GetCollectibleSubCategoryInfo(topLevelCategoryIndex, subCategoryIndex)
+            for entryIndex = 1, subCategoryEntries do
+                if ShouldAddCollectibleToList(topLevelCategoryIndex, subCategoryIndex, entryIndex, ...) then
+                    local collectibleId = GetCollectibleId(topLevelCategoryIndex, subCategoryIndex, entryIndex)
+                    table.insert(foundCollectibleIds, collectibleId)
+                end
+            end
+        end
+
+        return foundCollectibleIds
     end
 end
 

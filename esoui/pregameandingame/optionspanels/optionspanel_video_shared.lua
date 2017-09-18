@@ -340,6 +340,15 @@ local ZO_OptionsPanel_Video_ControlData =
             showValueMin = 0,
             showValueMax = 100,
         },
+        [GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_SHOW_ADDITIONAL_ALLY_EFFECTS,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_SHOW_ADDITIONAL_ALLY_EFFECTS_TOOLTIP,
+        },
     },
 
     --UI Settings
@@ -424,7 +433,7 @@ local ZO_OptionsPanel_Video_ControlData =
 
 function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
     local numValidOptions = 0
-    for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_MIN_VALUE, CONSOLE_ENHANCED_RENDER_QUALITY_MAX_VALUE do
+    for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_BEGIN, CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_END do
         if DoesSystemSupportConsoleEnhancedRenderQuality(settingValue) then
             numValidOptions = numValidOptions + 1
         end
@@ -440,7 +449,7 @@ end
 --Dynamically determine which console render quality settings are allowed on this system
 local renderQualitySetting = ZO_OptionsPanel_Video_ControlData[SETTING_TYPE_GRAPHICS][GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY]
 renderQualitySetting.valid = {}
-for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_MIN_VALUE, CONSOLE_ENHANCED_RENDER_QUALITY_MAX_VALUE do
+for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_BEGIN, CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_END do
     if DoesSystemSupportConsoleEnhancedRenderQuality(settingValue) then
         table.insert(renderQualitySetting.valid, settingValue)
     end

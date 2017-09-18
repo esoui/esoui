@@ -54,6 +54,10 @@ local pregameStates =
             end
 
             AttemptQuickLaunch()
+
+            if not Is64BitClient() then
+                ZO_Dialogs_ShowDialog("32_BIT_CLIENT_WARNING", { urlType = APPROVED_URL_ESO_CLIENT_VERSION_UPGRADE }, { mainTextParams = { GetString("SI_APPROVEDURLTYPE", APPROVED_URL_ESO_CLIENT_VERSION_UPGRADE) } })
+            end
         end,
 
         OnExit = function()

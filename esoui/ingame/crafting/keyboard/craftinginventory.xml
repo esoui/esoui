@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CraftingInventoryComponentRow" inherits="ZO_PlayerInventorySlot" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                self.owner:SetMousedOverRow(self)
+                ZO_InventorySlot_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.owner:SetMousedOverRow(nil)
+                ZO_InventorySlot_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_CraftingInventoryTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
+            <OnMouseEnter>
+                ZO_CraftingInventory_FilterButtonOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_CraftingInventory_FilterButtonOnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Control name="ZO_CraftingInventoryTemplate" virtual="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+            
+            <OnEffectivelyShown>
+                self.owner:OnShow()
+            </OnEffectivelyShown>
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders"/>
+
+                <Control name="$(parent)Backpack" inherits="ZO_InventoryList"/>
+
+                <Label name="$(parent)NoItemsLabel" font="ZoFontWinH4" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backpack" />
+                </Label>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

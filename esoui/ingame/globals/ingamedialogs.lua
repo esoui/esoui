@@ -171,9 +171,9 @@ ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
     {
         text = SI_CONFIRM_DESTROY_ITEM_PROMPT,
     },
-	editBox =
-    {       
-	    matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+    editBox =
+    {
+        matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
     },
     noChoiceCallback =  function()
                             RespondToDestroyRequest(false)
@@ -184,13 +184,13 @@ ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
             requiresTextInput = true,
             text =      SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
             callback =  function(dialog)
-							local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
-							local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
-							if confirmDelete and confirmDelete ~= compareString then
-								RespondToDestroyRequest(false)
-							else
-								RespondToDestroyRequest(true)
-							end
+                            local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
+                            local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+                            if confirmDelete and confirmDelete ~= compareString then
+                                RespondToDestroyRequest(false)
+                            else
+                                RespondToDestroyRequest(true)
+                            end
                         end,
         },        
         {
@@ -314,7 +314,7 @@ ESO_Dialogs["BUY_BANK_SPACE"] =
     },
     updateFn = function(dialog)
         local cost = dialog.data.cost
-        if cost > GetCarriedCurrencyAmount(CURT_MONEY) then
+        if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_BUY_BANK_SPACE_CANNOT_AFFORD })
         else
@@ -358,7 +358,7 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
     },
     updateFn = function(dialog)
         local cost = dialog.data.cost
-        if cost > GetCarriedCurrencyAmount(CURT_MONEY) then
+        if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_BUY_BAG_SPACE_CANNOT_AFFORD })
         else
@@ -394,7 +394,7 @@ ESO_Dialogs["REPAIR_ALL"] =
                         end,
             enabled =   function(dialogOrDescriptor)
                             local dialog = dialogOrDescriptor.dialog or dialogOrDescriptor  -- if .dialog is defined, we're running in Gamepad UI
-                            local canAfford = dialog.data.cost <= GetCarriedCurrencyAmount(CURT_MONEY)
+                            local canAfford = dialog.data.cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
 
                             if canAfford then
                                 return true
@@ -417,7 +417,7 @@ ESO_Dialogs["REPAIR_ALL"] =
         local cost = dialog.data.cost
         local buttonState
         
-        if cost > GetCarriedCurrencyAmount(CURT_MONEY) then
+        if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             buttonState = BSTATE_DISABLED
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_REPAIR_ALL_CANNOT_AFFORD })
         else
@@ -496,7 +496,7 @@ ESO_Dialogs["CANT_BUYBACK_FROM_FENCE"] =
     },
     mainText = 
     {
-        text = zo_strformat(SI_STOLEN_ITEM_CANNOT_BUYBACK_TEXT),
+        text = SI_STOLEN_ITEM_CANNOT_BUYBACK_TEXT,
     },
     buttons =
     {
@@ -672,7 +672,7 @@ ESO_Dialogs["MAIL_TAKE_ATTACHMENT_COD"] =
      
     updateFn = function(dialog)
         local codAmount = dialog.data.codAmount
-        if codAmount > GetCarriedCurrencyAmount(CURT_MONEY) then
+        if codAmount > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_MAIL_COD_NOT_ENOUGH_MONEY })
         else
@@ -808,7 +808,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
             local destination = dialog.data.nodeIndex
             local cost = GetRecallCost(destination)
             local currency = GetRecallCurrency(destination)
-            local canAffordRecall = cost <= GetCarriedCurrencyAmount(currency)
+            local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
 
             if cooldown == 0 or cost == 0 then
                 if canAffordRecall then
@@ -837,7 +837,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
             visible = function(dialog)
                 local destination = dialog.data.nodeIndex
                 local currency = GetRecallCurrency(destination)
-                return GetRecallCost(destination) <= GetCarriedCurrencyAmount(currency)
+                return GetRecallCost(destination) <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
             end,
         },        
         {
@@ -861,7 +861,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
         if not IsInGamepadPreferredMode() then
             local cost = GetRecallCost(destination)
             local currency = GetRecallCurrency(destination)
-            local canAffordRecall = cost <= GetCarriedCurrencyAmount(currency)
+            local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
 
             if canAffordRecall then
                 ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
@@ -894,7 +894,7 @@ ESO_Dialogs["LOG_OUT"] =
         {
             text = SI_DIALOG_YES,
             callback = function(dialog)
-	            Logout()
+                Logout()
             end
         },
         {
@@ -918,7 +918,7 @@ ESO_Dialogs["QUIT"] =
         {
             text = SI_DIALOG_YES,
             callback = function(dialog)
-		        Quit()
+                Quit()
             end
         },
         {
@@ -941,7 +941,7 @@ ESO_Dialogs["ADD_IGNORE"] =
     {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
         autoComplete = 
-        { 
+        {
             includeFlags = { AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT },
             excludeFlags = {AUTO_COMPLETE_FLAG_FRIEND },
             onlineOnly = AUTO_COMPLETION_ONLINE_OR_OFFLINE, 
@@ -979,10 +979,10 @@ ESO_Dialogs["GUILD_INVITE"] =
         text = SI_REQUEST_NAME_INSTRUCTIONS,
     },
     editBox =
-    {    
+    {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
         autoComplete = 
-        { 
+        {
             includeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }, 
             -- don't exclude guild, might want to invite a guild member from one guild to another
             onlineOnly = AUTO_COMPLETION_ONLINE_OR_OFFLINE, 
@@ -1021,10 +1021,10 @@ ESO_Dialogs["GROUP_INVITE"] =
         text = SI_REQUEST_NAME_INSTRUCTIONS,
     },
     editBox =
-    {    
+    {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
         autoComplete = 
-        { 
+        {
             includeFlags = { AUTO_COMPLETE_FLAG_ALL }, 
             excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }, 
             onlineOnly = AUTO_COMPLETION_ONLINE, 
@@ -1454,7 +1454,7 @@ ESO_Dialogs["CONFIRM_RELEASE_KEEP_OWNERSHIP"] =
     },
     updateFn = function(dialog)
         local keepId = dialog.data.keepId
-        local keepName = GetKeepName(keepId)    
+        local keepName = GetKeepName(keepId)
         local time = GetSecondsUntilKeepClaimAvailable(keepId, BGQUERY_LOCAL)
     
         if(time == 0) then
@@ -1509,7 +1509,7 @@ do
     ESO_Dialogs["CONFIRM_IMPROVE_ITEM"] =
     {
         canQueue = true,
-	    gamepadInfo =
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
         },
@@ -1533,7 +1533,8 @@ do
             {
                 text = SI_DIALOG_ACCEPT,
                 callback = function(dialog)
-                    ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
+                    local data = dialog.data
+                    ImproveSmithingItem(data.bagId, data.slotIndex, data.boostersToApply)
                 end,
             },
             [2] =
@@ -1555,8 +1556,8 @@ do
             text = SI_SMITHING_IMPROVE_LOCKED_ITEM_CONFIRM,
         },
         editBox =
-        {       
-	        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+        {
+            matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
         },
         warning =
         {
@@ -1572,11 +1573,7 @@ do
                 text = SI_DIALOG_ACCEPT,
                 callback = function(dialog)
                     local data = dialog.data
-                    local confirmAction = ZO_Dialogs_GetEditBoxText(dialog)
-				    local compareString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-				    if confirmAction and confirmAction == compareString then
-                        ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
-                    end
+                    ImproveSmithingItem(data.bagId, data.slotIndex, data.boostersToApply)
                 end,
             },
             [2] =
@@ -1614,7 +1611,8 @@ do
                 onShowCooldown = 2000,
                 text = SI_DIALOG_ACCEPT,
                 callback = function(dialog)
-                    ImproveSmithingItem(dialog.data.bagId, dialog.data.slotIndex, dialog.data.boostersToApply)
+                    local data = dialog.data
+                    ImproveSmithingItem(data.bagId, data.slotIndex, data.boostersToApply)
                 end,
             },
             [2] =
@@ -1918,7 +1916,7 @@ ESO_Dialogs["FIXING_STUCK"] =
     mustChoose = true,
     showLoadingIcon = true,
     buttons =
-    { 
+    {
     },
 }
 
@@ -1942,7 +1940,7 @@ ESO_Dialogs["CONFIRM_APPLY_DYE"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmCommitSelection()
+                SYSTEMS:GetObject("restyle"):ConfirmCommitSelection()
                 PlaySound(SOUNDS.DYEING_ACCEPT_BINDING)
             end,
             clickSound = SOUNDS.DYEING_APPLY_CHANGES,
@@ -1969,18 +1967,18 @@ ESO_Dialogs["EXIT_DYE_UI_BIND"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmExit(true)
+                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
             end
         },
         {
             text = SI_DIALOG_DECLINE,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmExit(false)
+                SYSTEMS:GetObject("restyle"):ConfirmExit(false)
             end
         },
     },
     noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("dyeing"):CancelExit()
+        SYSTEMS:GetObject("restyle"):CancelExit()
     end,
 }
 
@@ -2005,18 +2003,18 @@ ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
         {
             text = SI_YES,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing").dyeItemsPanel:ExitWithoutSave()
+                SYSTEMS:GetObject("restyle").dyeingPanel:ExitWithoutSave()
             end
         },
         {
             text = SI_NO,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):CancelExit()
+                SYSTEMS:GetObject("restyle"):CancelExit()
             end
         },
     },
     noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("dyeing"):CancelExit()
+        SYSTEMS:GetObject("restyle"):CancelExit()
     end,
 }
 
@@ -2042,18 +2040,18 @@ ESO_Dialogs["EXIT_DYE_UI_TO_ACHIEVEMENT_BIND"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmExit(true)
+                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
             end
         },
         {
             text = SI_DIALOG_CANCEL,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):CancelExitToAchievements()
+                SYSTEMS:GetObject("restyle"):CancelExitToAchievements()
             end
         }  
     },
     noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("dyeing"):CancelExit()
+        SYSTEMS:GetObject("restyle"):CancelExit()
     end,
 }
 
@@ -2073,13 +2071,13 @@ ESO_Dialogs["EXIT_DYE_UI"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmExit(true)
+                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
             end
         },
         {
             text = SI_DIALOG_DECLINE,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmExit(false)
+                SYSTEMS:GetObject("restyle"):ConfirmExit(false)
             end
         },
     }
@@ -2106,13 +2104,13 @@ ESO_Dialogs["EXIT_DYE_UI_TO_ACHIEVEMENT"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmExit(true)
+                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
             end
         },
         {
             text = SI_DIALOG_CANCEL,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):CancelExitToAchievements()
+                SYSTEMS:GetObject("restyle"):CancelExitToAchievements()
             end
         }  
     }
@@ -2134,13 +2132,13 @@ ESO_Dialogs["SWTICH_DYE_MODE"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(true)
+                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(true)
             end
         },
         {
             text = SI_DIALOG_DECLINE,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(false)
+                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(false)
             end
         },
     }
@@ -2162,18 +2160,18 @@ ESO_Dialogs["SWTICH_DYE_MODE_BIND"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(true)
+                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(true)
             end
         },
         {
             text = SI_DIALOG_DECLINE,
             callback = function(dialog)
-                SYSTEMS:GetObject("dyeing"):ConfirmSwitchMode(false)
+                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(false)
             end
         },
     },
     noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("dyeing"):CancelExit()
+        SYSTEMS:GetObject("restyle"):CancelExit()
     end,
 }
 
@@ -3546,8 +3544,8 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
         text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_DESCRIPTION,
     },
     editBox =
-    {       
-	    matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    {
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
     },
     warning = 
     {
@@ -3561,11 +3559,7 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
             text =      SI_YES,
             callback =  function(dialog)
                             local data = dialog.data
-                            local confirmAction = ZO_Dialogs_GetEditBoxText(dialog)
-							local compareString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-							if confirmAction and confirmAction == compareString then
-                                CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
-                            end
+                            CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
                         end,
         },
         [2] =
@@ -3640,8 +3634,8 @@ ESO_Dialogs["CONFIRM_ENCHANT_LOCKED_ITEM"] =
         text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_DESCRIPTION,
     },
     editBox =
-    {       
-	    matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    {
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
     },
     buttons =
     {
@@ -3684,6 +3678,104 @@ ESO_Dialogs["GAMEPAD_CONFIRM_ENCHANT_LOCKED_ITEM"] =
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
                 dialog.data.onAcceptCallback()
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                local data = dialog.data
+                RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_RETRAIT_LOCKED_ITEM"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM,
+    },
+    editBox =
+    {
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+    },
+    buttons =
+    {
+        [1] =
+        {
+            requiresTextInput = true,
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                local data = dialog.data
+                RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            onShowCooldown = 2000,
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                local data = dialog.data
+                RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
             end,
         },
         [2] =

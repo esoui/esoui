@@ -123,6 +123,7 @@ end
 function ZO_Tree:AddTemplate(template, setupFunction, selectionFunction, equalityFunction, childIndent, childSpacing)    
     self.templateInfo[template] =
     {
+        template = template,
         childIndent = childIndent,
         childSpacing = childSpacing,
         setupFunction = setupFunction,
@@ -315,7 +316,10 @@ end
 
 function ZO_Tree:ExecuteOnSubTree(treeRoot, func)
     if(treeRoot) then
-        func(treeRoot)
+        local stopIteration = func(treeRoot)
+        if stopIteration then
+            return
+        end
     else
         treeRoot = self.rootNode
     end
@@ -385,7 +389,8 @@ ZO_TreeNode = ZO_Object:Subclass()
 function ZO_TreeNode:New(tree, templateInfo, parentNode, data, childIndent, childSpacing, open)
     local node = ZO_Object.New(self)
 
-    if(templateInfo) then
+    if templateInfo then
+        node.templateInfo = templateInfo
         local control = templateInfo.objectPool:AcquireObject()
         node.control = control
         control.node = node
@@ -693,6 +698,10 @@ end
 
 function ZO_TreeNode:GetData()
     return self.data
+end
+
+function ZO_TreeNode:GetTemplate()
+    return self.templateInfo.template
 end
 
 function ZO_TreeNode:RefreshControl(userRequested)

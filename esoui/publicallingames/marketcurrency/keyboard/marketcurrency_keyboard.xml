@@ -48,22 +48,17 @@
 
                             <OnInitialized>
                                 self.currencyType = MKCT_CROWNS
+                                self:GetNamedChild("CurrencyName"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWNS))
                             </OnInitialized>
-                            <Controls>
-                                <Label name="$(parent)CurrencyName" text="SI_CURRENCY_CROWN" override="true" />
-                            </Controls>
                         </Control>
 
                         <Control name="$(parent)Gems" inherits="ZO_Market_LabelCurrencyPair">
                             <Anchor point="BOTTOM" relativeTo="$(parent)Crowns" relativePoint="TOP" offsetY="-5" />
                             <OnInitialized>
                                 self.currencyType = MKCT_CROWN_GEMS
+                                self:GetNamedChild("CurrencyName"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWN_GEMS))
                             </OnInitialized>
-                            <Controls>
-                                <Label name="$(parent)CurrencyName" text="SI_CURRENCY_CROWN_GEM" override="true" />
-                            </Controls>
                         </Control>
-
                     </Controls>
                 </Control>
             </Controls>

@@ -57,11 +57,7 @@
                     </Controls>
                 </Control>
                 
-                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
-                    <Controls>
-                        <Label name="$(parent)NoRunesLabel" inherits="ZO_CraftingInventoryNoItemLabel" />
-                    </Controls>
-                </Control>
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
 
                 <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip">
                     <Anchor point="BOTTOM" offsetY="-285"/>

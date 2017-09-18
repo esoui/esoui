@@ -144,6 +144,7 @@ end
 function GamepadMarket:OnShowing()
     self:PerformDeferredInitialization()
     ZO_Market_Shared.OnShowing(self)
+    self:RefreshTabBarVisible()
 end
 
 function GamepadMarket:OnShown()
@@ -309,7 +310,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_MARKET_BUY_PLUS_KEYBIND_LABEL),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = ZO_GamepadMarket_ShowBuyPlusDialog,
-            visible = function() return not IsESOPlusSubscriber() end,
+            visible = function() return not IsESOPlusSubscriber() or IsOnESOPlusFreeTrial() end,
         },
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -508,16 +509,20 @@ do
         }
     end
 
-    local SUBCATEGORY_GEM_FORMATTED_ICON = zo_iconFormat("EsoUI/Art/currency/gamepad/gp_crown_gems.dds", 32, 32)
-    local CATEGORY_NEW_FORMATTED_ICON = zo_iconFormat(ZO_GAMEPAD_NEW_ICON_32, 32, 32)
-    function GamepadMarket:AddTopLevelCategory(categoryIndex, tabIndex, name, numSubCategories, categoryType, containsNewProducts)
-        if containsNewProducts then
-            name = zo_strformat(SI_FORMAT_ICON_TEXT, CATEGORY_NEW_FORMATTED_ICON, name)
-        else
-            name = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
+    local SUBCATEGORY_GEM_FORMATTED_ICON = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_CROWN_GEMS)
+    function GamepadMarket:AddTopLevelCategory(categoryIndex, tabIndex, name, numSubCategories, categoryType, containsNewProductsFunction)
+        -- cache the possible category names so we don't reformat the string everytime we change categories
+        local formattedBaseName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
+        local formattedNameWithNew = zo_iconTextFormat(ZO_GAMEPAD_NEW_ICON_32, 32, 32, name)
+        local nameFunction = function()
+            if containsNewProductsFunction and containsNewProductsFunction() then
+                return formattedNameWithNew
+            else
+                return formattedBaseName
+            end
         end
 
-        local categoryData = CreateCategoryData(name, self.contentContainer.scrollChild, categoryIndex, tabIndex, numSubCategories, categoryType)
+        local categoryData = CreateCategoryData(formattedBaseName, self.contentContainer.scrollChild, categoryIndex, tabIndex, numSubCategories, categoryType)
 
         local hasChildren = numSubCategories > 0
         if hasChildren then
@@ -544,10 +549,10 @@ do
         end
 
         categoryData.fragment:RegisterCallback("StateChange", OnCategoryFragmentStateChanged)
-        
+
         local tabEntry =
         {
-            text = name,
+            text = nameFunction,
             categoryData = categoryData,
             callback = function()
                 self:OnCategorySelected(categoryData)
@@ -582,19 +587,22 @@ do
             self.featuredCategoryIndex = nil
             if hasFeaturedCategory then
                 self.featuredCategoryIndex = firstIndex
-                local hasNewFeaturedProducts = HasNewFeaturedMarketProducts()
-                self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, self.featuredCategoryIndex, GetString(SI_MARKET_FEATURED_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_FEATURED, hasNewFeaturedProducts)
+                self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, self.featuredCategoryIndex, GetString(SI_MARKET_FEATURED_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_FEATURED, function() return HasNewFeaturedMarketProducts() end)
             end
 
-            local showNewOnEsoPlusCateogry = false
-            self:UpdateFreeTrialProduct()
-            if self.shouldShowFreeTrial then
-                local freeTrialIsNew = select(4, GetMarketProductInfo(self.freeTrialMarketProductId))
-                showNewOnEsoPlusCateogry = freeTrialIsNew
+            local showNewOnEsoPlusCategoryFunction = function()
+                local showNewOnEsoPlusCategory = false
+                self:UpdateFreeTrialProduct()
+                if self.shouldShowFreeTrial then
+                    local freeTrialIsNew = select(4, GetMarketProductInfo(self.freeTrialMarketProductId))
+                    showNewOnEsoPlusCategory = freeTrialIsNew
+                end
+
+                return showNewOnEsoPlusCategory
             end
 
             self.esoPlusCategoryIndex = hasFeaturedCategory and GetNextTabIndex() or firstIndex
-            self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, self.esoPlusCategoryIndex, GetString(SI_MARKET_ESO_PLUS_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS, showNewOnEsoPlusCateogry)
+            self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, self.esoPlusCategoryIndex, GetString(SI_MARKET_ESO_PLUS_CATEGORY), ZERO_SUBCATEGORIES, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS, showNewOnEsoPlusCategoryFunction)
 
             -- adding in the custom categories offsets our market product cateogry indices
             -- so even though a category is index 1 from data, it might actually be index 3
@@ -604,8 +612,7 @@ do
             local numCategories = GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE)
             for i = 1, numCategories do
                 local name, numSubCategories = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, i)
-                local topLevelHasNewProducts = MarketProductCategoryOrSubCategoriesContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, i)
-                self:AddTopLevelCategory(i, GetNextTabIndex(), name, numSubCategories, ZO_MARKET_CATEGORY_TYPE_NONE, topLevelHasNewProducts)
+                self:AddTopLevelCategory(i, GetNextTabIndex(), name, numSubCategories, ZO_MARKET_CATEGORY_TYPE_NONE, function() return MarketProductCategoryOrSubCategoriesContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, i) end)
             end
 
             self.categoriesInitialized = true
@@ -809,7 +816,7 @@ function GamepadMarket:DisplayEsoPlusOffer()
         benefitLine:ClearAnchors()
         if i == 1 then -- first left side line
             benefitLine:SetAnchor(TOPLEFT, lineContainer, TOPLEFT, 0, 4)
-            benefitLine:SetAnchor(TOPRIGHT, lineContainer, CENTER, 0, 4)
+            benefitLine:SetAnchor(TOPRIGHT, lineContainer, CENTER, -14, 4)
         else
             --rest of the left side
             if i <= numLeftSideLines then
@@ -818,7 +825,7 @@ function GamepadMarket:DisplayEsoPlusOffer()
             else
                 -- right side layout
                 if i == firstRightSideLineIndex then
-                    benefitLine:SetAnchor(TOPLEFT, lineContainer, CENTER, 0, 4)
+                    benefitLine:SetAnchor(TOPLEFT, lineContainer, CENTER, 14, 4)
                     benefitLine:SetAnchor(TOPRIGHT, lineContainer, TOPRIGHT, 0, 4)
                 else
                     benefitLine:SetAnchor(TOPLEFT, controlToAnchorTo, BOTTOMLEFT, 0, 4)
@@ -830,10 +837,15 @@ function GamepadMarket:DisplayEsoPlusOffer()
         controlToAnchorTo = benefitLine
     end
 
-    local isSubscribed = IsESOPlusSubscriber()
-    local statusText = isSubscribed and SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_ACTIVE or SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_NOT_ACTIVE
+    local statusText, generateTextFunction = self:GetEsoPlusStatusText()
 
-    control:GetNamedChild("MembershipInfoStatus"):SetText(GetString(statusText))
+    local statusLabel = control:GetNamedChild("MembershipInfoStatus")
+    statusLabel:SetText(GetString(statusText))
+    if generateTextFunction then
+        statusLabel:SetHandler("OnUpdate", function(control) control:SetText(generateTextFunction()) end)
+    else
+        statusLabel:SetHandler("OnUpdate", nil)
+    end
 
     self:UpdateFreeTrialProduct()
 
@@ -881,16 +893,15 @@ function GamepadMarket:LayoutMarketProducts(marketProductPresentations, disableL
         local marketProduct = self.currentCategoryMarketProductPool:AcquireObject()
         marketProduct:Show(id, presentationIndex)
 
-        local name, description, icon, isNew, isFeatured = marketProduct:GetMarketProductInfo()
-        local isLimitedTime = marketProduct:IsLimitedTimeProduct()
+        local name = marketProduct:GetName()
         local doesContainDLC = DoesMarketProductContainDLC(id)
 
         if doesContainDLC and categoryType == ZO_MARKET_CATEGORY_TYPE_FEATURED then
             self:AddProductToLabeledGroupTable(self.dlcProducts, name, marketProduct)
         else
-            if isLimitedTime and not disableLTOGrouping then
+            if marketProduct:IsLimitedTimeProduct() and not disableLTOGrouping then
                 self:AddProductToLabeledGroupTable(self.limitedTimedOfferProducts, name, marketProduct)
-            elseif isFeatured then
+            elseif marketProduct:GetIsFeatured() then
                 self:AddProductToLabeledGroupTable(self.featuredProducts, name, marketProduct)
             else
                 self:AddMarketProductToLabeledGroupOrGeneralGroup(name, marketProduct, id)
@@ -1497,6 +1508,7 @@ end
 
 function GamepadMarketProductListScene:ShowCrownCrateContents(marketProductId)
     self.headerData.titleText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductDisplayName(marketProductId))
+    self.headerData.messageText = GetString(SI_MARKET_CRATE_LIST_HEADER)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     local marketProducts = ZO_Market_Shared.GetCrownCrateContentsProductInfo(marketProductId)
@@ -1505,16 +1517,12 @@ function GamepadMarketProductListScene:ShowCrownCrateContents(marketProductId)
                                     return ZO_Market_Shared.CompareCrateMarketProducts(...)
                                 end)
 
-    local firstEntry = marketProducts[1]
-    if firstEntry then
-        firstEntry.header = GetString(SI_MARKET_CRATE_LIST_HEADER)
-    end
-
     self:ShowMarketProducts(marketProducts)
 end
 
 function GamepadMarketProductListScene:ShowMarketProductBundleContents(marketProductId)
     self.headerData.titleText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductDisplayName(marketProductId))
+    self.headerData.messageText = nil
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     local marketProducts = ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId)
@@ -1532,6 +1540,8 @@ function GamepadMarketProductListScene:ShowMarketProducts(marketProducts)
 
     ZO_ClearNumericallyIndexedTable(self.previewProducts)
 
+    local lastHeaderName = nil
+
     for i = 1, #marketProducts do
         local productInfo = marketProducts[i]
         local productId = productInfo.productId
@@ -1545,9 +1555,16 @@ function GamepadMarketProductListScene:ShowMarketProducts(marketProducts)
         entryData.quality = productInfo.quality or ITEM_QUALITY_NORMAL
         entryData:SetNameColors(entryData:GetColorsBasedOnQuality(entryData.quality))
 
-        if productInfo.header ~= nil then
-            entryData:SetHeader(productInfo.header)
+        -- check if we should add a header
+        local productHeader = productInfo.headerName
+        if productHeader and lastHeaderName ~= productHeader then
+            local headerString = productHeader
+            if productInfo.headerColor then
+                headerString = productInfo.headerColor:Colorize(headerString)
+            end
+            entryData:SetHeader(headerString)
             self.list:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", entryData)
+            lastHeaderName = productHeader
         else
             self.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
         end

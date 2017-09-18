@@ -41,7 +41,7 @@ end
 function ZO_JournalProgressBook_Common:InitializeCategoryTemplates()
     self.parentCategoryTemplate = "ZO_IconHeader"
     self.childlessCategoryTemplate = "ZO_IconChildlessHeader"
-    self.subCategoryTemplate = "ZO_JournalSubCategory"
+    self.subCategoryTemplate = "ZO_TreeLabelSubCategory"
 end
 
 function ZO_JournalProgressBook_Common:InitializeChildIndentAndSpacing()
@@ -246,7 +246,17 @@ function ZO_JournalProgressBook_Common:GetCategoryInfoFromData(data, parentData)
     if not data.isFakedSubcategory and parentData then
         return select(2, self:GetSubCategoryInfo(parentData.categoryIndex, data.categoryIndex))
     else
-        return select(3, self:GetCategoryInfo(data.categoryIndex))
+        --The general category includes all achievements that aren't assigned a specific subcategory. We get the total number of points
+        --under the top level level category then subtracts all of the points that are attributed to a specific subcategory to get the stats for general.
+        local numSubCategories, numAchievements, earnedPoints, totalPoints, hidesPoints = select(2, self:GetCategoryInfo(data.categoryIndex))
+        if parentData then
+            for subCategoryIndex = 1, numSubCategories do
+                local subCategoryEarned, subCategoryTotal = select(3, self:GetSubCategoryInfo(parentData.categoryIndex, subCategoryIndex))
+                earnedPoints = earnedPoints - subCategoryEarned
+                totalPoints = totalPoints - subCategoryTotal
+            end
+        end
+        return numAchievements, earnedPoints, totalPoints, hidesPoints
     end
 end
 

@@ -2,8 +2,6 @@
 -- If we change the font of reticle in the future, we'll probably need to upgrade this magic number to meet the new position.
 ZO_INTERACT_CENTER_OFFSET = 15 + ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SELECTED_HEIGHT / 2
 
-local GAMEPAD_INTERACT_GOLD_ICON = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 28, 28)
-
 --Gamepad Interaction
 ---------------------
 
@@ -225,8 +223,8 @@ function ZO_GamepadInteraction:UpdateChatterOptions(optionCount, backToTOCOption
 end
 
 function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
-
-    local rewardData = self:GetRewardData(journalQuestIndex)
+    local IS_GAMEPAD = true
+    local rewardData = self:GetRewardData(journalQuestIndex, IS_GAMEPAD)
 
     if #rewardData == 0 then
         return
@@ -293,10 +291,6 @@ function ZO_GamepadInteraction:RefreshList()
     if self.itemList then
         self.itemList:RefreshVisible()
     end
-end
-
-function ZO_GamepadInteraction:GetInteractGoldIcon()
-    return GAMEPAD_INTERACT_GOLD_ICON
 end
 
 function ZO_GamepadInteraction:UpdateClemencyOnTimeComplete(control, data)

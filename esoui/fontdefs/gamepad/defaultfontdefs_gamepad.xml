@@ -52,7 +52,8 @@
     <Font name="ZoFontGamepadBookLetter" font="$(HANDWRITTEN_FONT)|30" />
     <Font name="ZoFontGamepadBookNote" font="$(HANDWRITTEN_FONT)|32" />
     <Font name="ZoFontGamepadBookScroll" font="$(HANDWRITTEN_FONT)|36" />
-    <Font name="ZoFontGamepadBookTablet" font="$(STONE_TABLET_FONT)|40|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBookTablet" font="$(STONE_TABLET_FONT)|30|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBookMetal" font="$(STONE_TABLET_FONT)|30|soft-shadow-thin" />
     
     <!-- In Game Book Title Fonts-->
     <Font name="ZoFontGamepadBookPaperTitle" font="$(ANTIQUE_FONT)|40" />
@@ -61,7 +62,8 @@
     <Font name="ZoFontGamepadBookLetterTitle" font="$(HANDWRITTEN_FONT)|40" />
     <Font name="ZoFontGamepadBookNoteTitle" font="$(HANDWRITTEN_FONT)|42" />
     <Font name="ZoFontGamepadBookScrollTitle" font="$(HANDWRITTEN_FONT)|44" />
-    <Font name="ZoFontGamepadBookTabletTitle" font="$(STONE_TABLET_FONT)|58|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBookTabletTitle" font="$(STONE_TABLET_FONT)|40|soft-shadow-thick" />
+    <Font name="ZoFontGamepadBookMetalTitle" font="$(STONE_TABLET_FONT)|40|soft-shadow-thin" />
     
     <!-- Header fonts-->
     <Font name="ZoFontGamepadHeaderDataValue" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_42)|soft-shadow-thick" />

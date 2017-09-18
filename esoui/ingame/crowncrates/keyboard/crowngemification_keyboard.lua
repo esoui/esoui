@@ -183,7 +183,7 @@ function ZO_CrownGemification_Keyboard:SetupGemifiable(control, data)
 
     local sellPriceControl = GetControl(control, "SellPrice")
     sellPriceControl:SetHidden(false)
-    ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, UI_ONLY_CURRENCY_CROWN_GEMS, data.gemTotal)
+    ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_CROWN_GEMS, data.gemTotal)
 
     local hasEnoughForAConversion = data.maxGemifies > 0
     local NOT_LOCKED = false

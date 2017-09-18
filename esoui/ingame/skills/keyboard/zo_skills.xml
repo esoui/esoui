@@ -268,15 +268,14 @@
             </Controls>
         </TopLevelControl>
 
-        <Control name="ZO_SkillIconHeader" inherits="ZO_IconHeader" virtual="true">
+        <Control name="ZO_SkillIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <OnInitialized>
                 ZO_SkillIconHeader_OnInitialized(self)
             </OnInitialized>
             
             <Controls>
-                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                <Texture name="$(parent)StatusIcon" override="true">
                     <Dimensions x="28" y="28" />
-                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
                 </Texture>
 
                 <Texture name="$(parent)Icon" override="true">

@@ -356,7 +356,7 @@ function MailInbox:TryTakeAll()
             self.pendingAcceptCOD = true
         else
             if attachedMoney > 0 then
-                if ((GetCarriedCurrencyAmount(CURT_MONEY) + attachedMoney) > MAX_PLAYER_CURRENCY) then
+                if ((GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) + attachedMoney) > MAX_PLAYER_CURRENCY) then
                     ZO_AlertEvent(EVENT_UI_ERROR, SI_MONEY_ATTACHMENT_WILL_EXCEED_MAXIMUM)
                     return
                 end

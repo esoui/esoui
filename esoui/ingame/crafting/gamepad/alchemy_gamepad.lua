@@ -27,7 +27,7 @@ end
 
 function ZO_GamepadAlchemy:Initialize(control)
     ZO_SharedAlchemy.Initialize(self, control)
-    
+
     local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_ALCHEMY)
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
     ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
@@ -376,14 +376,14 @@ function ZO_GamepadAlchemy:UpdateTooltip()
     if self:IsCraftable() then
         self.tooltip:SetHidden(false)
         self.tooltip.tip:ClearLines()
-        self:UpdateTooltipLayout()
+        local solventBagId, solventSlotIndex, reagent1BagId, reagent1SlotIndex, reagent2BagId, reagent2SlotIndex, reagent3BagId, reagent3SlotIndex = self:GetAllCraftingBagAndSlots()
+        local itemLink, prospectiveAlchemyResult = GetAlchemyResultingItemLink(solventBagId, solventSlotIndex, reagent1BagId, reagent1SlotIndex, reagent2BagId, reagent2SlotIndex, reagent3BagId, reagent3SlotIndex)
+        local solventType = GetItemType(solventBagId, solventSlotIndex)
+        local itemTypeString = GetString(solventType == ITEMTYPE_POTION_BASE and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
+        self.tooltip.tip:LayoutAlchemyPreview(itemLink, itemTypeString, prospectiveAlchemyResult)
     else
         self.tooltip:SetHidden(true)
     end
-end
-
-function ZO_GamepadAlchemy:UpdateTooltipLayout()
-    self.tooltip.tip:LayoutAlchemyPreview(self:GetAllCraftingBagAndSlots())
 end
 
 function ZO_GamepadAlchemy:GetAllSlots()
@@ -419,7 +419,7 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = NO_FILTER
 
-    self.list:SetNoItemText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
+    self:SetNoItemLabelText(GetString(SI_ALCHEMY_NO_SOLVENTS_OR_REAGENTS))
 
     self:SetCustomSort(function(bagId, slotIndex)
         local _, craftingSubItemType, _, requiredLevel, requiredChampionPoints = GetItemCraftingInfo(bagId, slotIndex)

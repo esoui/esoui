@@ -7,7 +7,9 @@ ZO_CHROMA_EFFECT_DRAW_LEVEL =
     UNDERLAY_LOW =  1, --Blanket layer, like fallback but more specific, e.g.: alliance color when known
     UNDERLAY_HIGH = 2, --Blanket layer, an extra underlay that goes overtop of UNDERLAY_LOW, e.g.: specialized hot zones
     ANIMATION =  300, --Ripples and highlights, usually blending with effects underneath
-    ACTIVE_KEY =  400, --For lighting up relevant keys, typically regardless of the effects underneath, but can blend if necessary
+    ACTIVE_KEY_ACTION =  400, --For lighting up relevant keys, typically regardless of the effects underneath, but can blend if necessary
+    ACTIVE_KEY_UI =  410, --For lighting up relevant keys, typically regardless of the effects underneath, but can blend if necessary
+    DEATH = 450, --The glows for death cover pretty much everything else, with the exception of COVER
     COVER =  500, --For when you need to just cover up all the other effects
 }
 
@@ -89,7 +91,7 @@ ZO_CHROMA_ANIMATION_TIMER_DATA =
     DEATH_PULSATE = { animationClass = ZO_ChromaPulsateTimer, animationName = "ZO_ChromaDeathPulsateAnimation", minValue = .33, maxValue = 1, startValue = .33, useAlpha = false, restartOnAdd = false, deleteOnComplete = false, },
     QUICKSLOT_ONE_PULSE = { animationClass = ZO_ChromaAnimationTimer, animationName = "ZO_ChromaOnePulseAnimation", minValue = .11, maxValue = 1, startValue = .33, useAlpha = true, restartOnAdd = true, deleteOnComplete = true, },
     ULTIMATE_ONE_PULSE = { animationClass = ZO_ChromaAnimationTimer, animationName = "ZO_ChromaOnePulseAnimation", minValue = .5, maxValue = 1, startValue = .5, useAlpha = false, restartOnAdd = true, deleteOnComplete = false, },
-    PLAYER_TO_PLAYER_PROMPT_PULSATE = { animationClass = ZO_ChromaPulsateTimer, animationName = "ZO_ChromaSteadyPulsateAnimation", minValue = .3, maxValue = 1, startValue = .3, useAlpha = false, restartOnAdd = true, deleteOnComplete = false, },
+    KEYBIND_PROMPT_PULSATE = { animationClass = ZO_ChromaPulsateTimer, animationName = "ZO_ChromaSteadyPulsateAnimation", minValue = .3, maxValue = 1, startValue = .3, useAlpha = false, restartOnAdd = true, deleteOnComplete = false, },
 }
 
 do

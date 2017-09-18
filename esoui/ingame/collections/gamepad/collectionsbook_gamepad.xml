@@ -143,6 +143,7 @@
                         </Control>
                     </Controls>
                 </Control>
+                <Control name="$(parent)GridListPanel" inherits="ZO_AnchoredToQuadrant_2_3_Background ZO_GridScrollList_Gamepad" hidden="true" />
             </Controls>
         </TopLevelControl>
     </Controls>

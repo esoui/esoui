@@ -32,17 +32,6 @@ local RETAIN_SELECTIONS = true
 local CHECK_SLOT = true
 local CHECK_CHANNEL = true
 
--- Interact Scenes
-local GAMEPAD_DYEING_ROOT_SCENE_NAME = "gamepad_dyeing_root"
-local GAMEPAD_DYEING_ITEMS_SCENE_NAME = "gamepad_dyeing_items"
-
-local MODE_TO_SCENE_NAME =
-{
-    [DYE_MODE_SELECTION] = GAMEPAD_DYEING_ROOT_SCENE_NAME,
-    [DYE_MODE_EQUIPMENT] = GAMEPAD_DYEING_ITEMS_SCENE_NAME,
-    [DYE_MODE_COLLECTIBLE] = GAMEPAD_DYEING_ITEMS_SCENE_NAME,
-}
-
 -- Tool Tip Styles
 local ZO_Dyeing_Gamepad_Tooltip_Styles = ZO_ShallowTableCopy(ZO_TOOLTIP_STYLES)
 
@@ -64,180 +53,7 @@ ZO_Dyeing_Gamepad_Tooltip_Styles.conditionOrChargeBarSection.paddingTop = 10
 ZO_Dyeing_Gamepad_Tooltip_Styles.conditionOrChargeBarSection.customSpacing = nil
 ZO_Dyeing_Gamepad_Tooltip_Styles.conditionOrChargeBarSection.widthPercent = 100
 
--- The main class.
-local ZO_Dyeing_Gamepad = ZO_Object:Subclass()
-
-function ZO_Dyeing_Gamepad:New(...)
-    local dyeing = ZO_Object.New(self)
-    dyeing:Initialize(...)
-    return dyeing
-end
-
-function ZO_Dyeing_Gamepad:Initialize(control)
-    self.control = control
-    self.header = control:GetNamedChild("HeaderContainer"):GetNamedChild("Header")
-
-    GAMEPAD_DYEING_ROOT_SCENE = ZO_InteractScene:New(GAMEPAD_DYEING_ROOT_SCENE_NAME, SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
-    GAMEPAD_DYEING_ITEMS_SCENE = ZO_InteractScene:New(GAMEPAD_DYEING_ITEMS_SCENE_NAME, SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
-
-    self:InitializeModeList()
-    self:InitializeKeybindStripDescriptorsRoot()
-
-    local function OnBlockingSceneActivated()
-        self:AttemptExit()
-    end
-
-    SYSTEMS:RegisterGamepadRootScene("dyeing", GAMEPAD_DYEING_ROOT_SCENE)
-
-    self.dyeItemsPanel = ZO_Dyeing_Slots_Panel_Gamepad:New(self.control:GetNamedChild("DyeItems"), self, GAMEPAD_DYEING_ITEMS_SCENE)
-
-    ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
-
-    self.headerData =
-    {  
-        titleText = GetString(SI_GAMEPAD_DYEING_ROOT_TITLE)
-    }
-
-    GAMEPAD_DYEING_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:SetMode(DYE_MODE_SELECTION)
-            self.modeList:Activate()
-            local currentlySelectedData = self.modeList:GetTargetData()
-            self:UpdateOptionLeftTooltip(currentlySelectedData.mode)
-            MAIN_MENU_MANAGER:SetBlockingScene(GAMEPAD_DYEING_ROOT_SCENE_NAME, OnBlockingSceneActivated)
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptorRoot)
-            ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
-
-            TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
-            if IsESOPlusSubscriber() then
-                TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER)
-            end
-        elseif newState == SCENE_HIDDEN then
-            self.modeList:Deactivate()
-            ZO_GamepadGenericHeader_Deactivate(self.header)
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptorRoot)
-            MAIN_MENU_MANAGER:ClearBlockingScene(OnBlockingSceneActivated)
-        end
-    end)
-end
-
-function ZO_Dyeing_Gamepad:SetMode(mode)
-    if self.mode ~= mode then
-        self.mode = mode
-        InitializePendingDyes(mode)
-        SCENE_MANAGER:Push(MODE_TO_SCENE_NAME[mode])
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptorRoot)
-    end
-end
-
-function ZO_Dyeing_Gamepad:GetMode()
-    return self.mode
-end
-
-local function ZO_DyeingGamepadRootEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    if data.mode == DYE_MODE_COLLECTIBLE and not CanUseCollectibleDyeing() then
-        if selected then
-            control.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
-        else
-            control.label:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGBA())
-        end
-    end
-end
-
-function ZO_Dyeing_Gamepad:InitializeModeList()
-    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("Mask"):GetNamedChild("Container"):GetNamedChild("RootList"))
-    self.modeList:SetAlignToScreenCenter(true)
-    self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_DyeingGamepadRootEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-
-    local function AddEntry(name, mode, icon)
-        local data = ZO_GamepadEntryData:New(GetString(name), icon)
-        data:SetIconTintOnSelection(true)
-        data.mode = mode
-        self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", data)
-    end
-
-    self.modeList:SetOnSelectedDataChangedCallback(
-        function(list, selectedData)
-            self.currentlySelectedOptionData = selectedData
-            self:UpdateOptionLeftTooltip(selectedData.mode)
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptorRoot)
-        end
-    )
-
-    self.modeList:Clear()
-    AddEntry(SI_DYEING_DYE_EQUIPMENT_TAB, DYE_MODE_EQUIPMENT, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_EQUIPMENTDye.dds")
-    AddEntry(SI_DYEING_DYE_COLLECTIBLE_TAB, DYE_MODE_COLLECTIBLE, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_costumeDye.dds")
-    self.modeList:Commit()
-end
-
-function ZO_Dyeing_Gamepad:UpdateOptionLeftTooltip(mode)
-    if mode == DYE_MODE_EQUIPMENT then
-        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_EQUIPMENT_TAB), GetString(SI_GAMEPAD_DYEING_EQUIPMENT_DESCRIPTION))
-    elseif mode == DYE_MODE_COLLECTIBLE then
-        local descriptionOne
-        local descriptionTwo
-        if CanUseCollectibleDyeing() then
-            descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_UNLOCKED))
-            descriptionTwo = GetString(SI_DYEING_COLLECTIBLE_TAB_DESCRIPTION_UNLOCKED)
-        else
-            descriptionOne = ZO_DEFAULT_ENABLED_COLOR:Colorize(GetString(SI_ESO_PLUS_STATUS_LOCKED))
-            descriptionTwo = GetString(SI_DYEING_COLLECTIBLE_TAB_DESCRIPTION_LOCKED)
-        end
-        GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_COLLECTIBLE_TAB), descriptionOne, descriptionTwo)
-    end
-end
-
-function ZO_Dyeing_Gamepad:InitializeKeybindStripDescriptorsRoot()
-    self.keybindStripDescriptorRoot =
-    {
-        -- Select mode.
-        {
-            keybind = "UI_SHORTCUT_PRIMARY",
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
-            name = function()
-                return GetString(SI_GAMEPAD_SELECT_OPTION)
-            end,
-        
-            callback = function()
-                local targetData = self.modeList:GetTargetData()
-                self:SetMode(targetData.mode)
-            end,
-            visible = function()
-                local targetData = self.modeList:GetTargetData()
-                if targetData.mode == DYE_MODE_COLLECTIBLE then
-                    return CanUseCollectibleDyeing()
-                end
-                return true
-            end
-        },
-    }
-
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptorRoot, GAME_NAVIGATION_TYPE_BUTTON)
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptorRoot, self.modeList)
-end
-
-function ZO_Dyeing_Gamepad:CancelExit()
-    MAIN_MENU_MANAGER:CancelBlockingSceneNextScene()
-end
-
-function ZO_Dyeing_Gamepad:ExitWithoutSave()
-    SCENE_MANAGER:HideCurrentScene()
-end
-
-function ZO_Dyeing_Gamepad:UndoPendingChanges()
-    InitializePendingDyes(self.mode)
-    PlaySound(SOUNDS.DYEING_UNDO_CHANGES)
-end
-
-function ZO_Dyeing_Gamepad:AttemptExit()
-    self:ExitWithoutSave()
-end
-
-function ZO_Dyeing_Gamepad:ConfirmCommitSelection()
-    self.dyeItemsPanel:ConfirmCommitSelection()
-end
+local GAMEPAD_DYEING_SCENE_NAME = "gamepad_dyeing"
 
 --[[ ZO_Dyeing_Slots_Panel_Gamepad ]]--
 
@@ -249,12 +65,15 @@ function ZO_Dyeing_Slots_Panel_Gamepad:New(...)
     return dyeItems
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:Initialize(control, owner, scene)
+function ZO_Dyeing_Slots_Panel_Gamepad:Initialize(control, owner)
     self.control = control
     self.owner = owner
-    self.scene = scene
 
-    scene:RegisterCallback("StateChange", function(oldState, newState)
+    GAMEPAD_DYEING_SCENE = ZO_InteractScene:New(GAMEPAD_DYEING_SCENE_NAME, SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
+
+    self.scene = GAMEPAD_DYEING_SCENE
+
+    GAMEPAD_DYEING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.mode = self.owner:GetMode()
             self:PerformDeferredInitialization()
@@ -329,9 +148,9 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_DYEING_RANDOMIZE),
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             callback = function()
-                            ZO_Dyeing_UniformRandomize(self.mode, function() return self.dyesList:GetRandomUnlockedDyeId() end)
+                            local primaryDyeId, secondaryDyeId, accentDyeId = ZO_Dyeing_UniformRandomize(self.mode, function() return self.dyesList:GetRandomUnlockedDyeId() end)
                             self:OnPendingDyesChanged()
-                            self:SetupRandomizeSwatch()
+                            self:SetupRandomizeSwatch(primaryDyeId, secondaryDyeId, accentDyeId)
                         end,
             visible = function()
                             return (self.visibleRadialMenu == self.dyeableSlotsMenu) and ((self.selectionMode == SELECTION_DYE) or (self.selectionMode == SELECTION_SAVED)) and (self.dyesList:GetNumUnlockedDyes() > 0)
@@ -343,7 +162,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_DYEING_UNDO),
             keybind = "UI_SHORTCUT_LEFT_STICK",
             callback = function()
-                            InitializePendingDyes(self.mode)
+                            InitializePendingDyes()
                             self:OnPendingDyesChanged()
                             PlaySound(SOUNDS.DYEING_UNDO_CHANGES)
                         end,
@@ -373,7 +192,6 @@ end
 function ZO_Dyeing_Slots_Panel_Gamepad:OnDropdownDeactivated()
     self:ActivateMainList()
 end
-
 
 function ZO_Dyeing_Slots_Panel_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
     dropdown:ClearItems()
@@ -614,7 +432,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:PerformDeferredInitialization()
             self.centerSwatch:SetTextureRotation(rotation)
         elseif self.activeTool == self.setFillTool then
             local dyeControls = self.centerSwatchSaved.dyeControls
-            for i=1, #dyeControls do
+            for i = 1, #dyeControls do
                 dyeControls[i]:SetTextureRotation(rotation)
             end
         end
@@ -1018,6 +836,9 @@ function ZO_Dyeing_Slots_Panel_Gamepad:NavigateBack()
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:ActivateCurrentSelection()
+    local selectedDyeableSlotEntry = self.dyeableSlotsMenu.selectedEntry
+    local selectedDyeableSlotData = selectedDyeableSlotEntry and selectedDyeableSlotEntry.data
+
     if (self.selectionMode == SELECTION_DYE) or (self.selectionMode == SELECTION_SAVED) then
         self:SetupCenterSwatch()
 
@@ -1038,47 +859,35 @@ function ZO_Dyeing_Slots_Panel_Gamepad:ActivateCurrentSelection()
         end
 
     elseif self.selectionMode == SELECTION_SLOT then
-        local selectedEntry = self.dyeableSlotsMenu.selectedEntry
-        if not selectedEntry then
-            -- It should be impossible to get to this state as CanViewCurrentSelection should
-            --  return false in this case.
-            assert(false)
-        else
-            local dyeableSlot = selectedEntry.data.dyeableSlot
-            if dyeableSlot and IsDyeableSlotDyeable(dyeableSlot) then
-                local highlightSlot, highlightDyeChannel = self.activeTool:GetHighlightRules(dyeableSlot, CHECK_CHANNEL)
-                if highlightSlot and highlightDyeChannel then
-                    -- Tool wants a specific dyeable slot and channel selection,
-                    --  so move on to selecting a channel.
-                    self:SwitchToDyeableSlotDyeSelection()
-                elseif highlightSlot then
-                    -- Tool selects all channels at once, so just activate the tool.
-                    self.activeTool:OnLeftClicked(dyeableSlot, nil)
-                elseif highlightDyeChannel then
-                    -- Tool selects all dyeable slots at once, but only a single channel.
-                    self:SwitchToDyeableSlotDyeMultiSelection()
-                else
-                    -- Tool selects all dyeable slots and channels at once.
-                    -- TODO: Implement if this becomes a valid option.
-                    assert(false)
-                end
+        if selectedDyeableSlotData and selectedDyeableSlotData:IsDataDyeable() then
+            local highlightSlot, highlightDyeChannel = self.activeTool:GetHighlightRules(selectedDyeableSlotData:GetRestyleSlotType(), CHECK_CHANNEL)
+            if highlightSlot and highlightDyeChannel then
+                -- Tool wants a specific dyeable slot and channel selection,
+                --  so move on to selecting a channel.
+                self:SwitchToDyeableSlotDyeSelection()
+            elseif highlightSlot then
+                local NO_CHANNEL = nil
+                -- Tool selects all channels at once, so just activate the tool.
+                self.activeTool:OnLeftClicked(selectedDyeableSlotData, NO_CHANNEL)
+            elseif highlightDyeChannel then
+                -- Tool selects all dyeable slots at once, but only a single channel.
+                self:SwitchToDyeableSlotDyeMultiSelection()
+            else
+                -- Tool selects all dyeable slots and channels at once.
+                -- TODO: Implement if this becomes a valid option.
+                assert(false)
             end
         end
-
     elseif self.selectionMode == SELECTION_SLOT_COLOR then
-        local selectedEntry = self.dyeableSlotsMenu.selectedEntry
-        local selectedDyeableSlot = selectedEntry and selectedEntry.data.dyeableSlot
-
         local selectedChannelData = self.activeSlotControl.dyeSelector:GetFocusItem()
         local selectedChannel = selectedChannelData.slotIndex
 
-        self.activeTool:OnLeftClicked(selectedDyeableSlot, selectedChannel)
-
+        self.activeTool:OnLeftClicked(selectedDyeableSlotData, selectedChannel)
     elseif self.selectionMode == SELECTION_SLOT_MULTICOLOR then
         local selectedChannelData = self.channelMultiFocus:GetFocusItem()
         local selectedChannel = selectedChannelData.slotIndex
-
-        self.activeTool:OnLeftClicked(nil, selectedChannel)
+        local anySlot = ZO_Dyeing_GetSlotsForMode(self.mode)[1]
+        self.activeTool:OnLeftClicked(anySlot, selectedChannel)
     elseif self.selectionMode == SELECTION_SAVED_LIST then
         self:SwitchToSetPresetSwatch()
     elseif self.selectionMode == SELECTION_SAVED_SWATCH then
@@ -1095,7 +904,6 @@ function ZO_Dyeing_Slots_Panel_Gamepad:ActivateCurrentSelection()
     else
         -- All selection modes should be handled above.
         assert(false)
-
     end
 end
 
@@ -1114,16 +922,13 @@ function ZO_Dyeing_Slots_Panel_Gamepad:CanViewCurrentSelection()
             return false
         end
 
-        local dyeableSlot = selectedEntry.data.dyeableSlot
-        if not dyeableSlot then
-            return true
-        end
+        local restyleSlotData = selectedEntry.data
 
-        if not IsDyeableSlotDyeable(dyeableSlot) then
+        if not restyleSlotData:IsDataDyeable() then
             return false
         end
 
-        local icon = GetDyeableSlotIcon(dyeableSlot)
+        local icon = restyleSlotData:GetIcon()
         return icon ~= ZO_NO_TEXTURE_FILE
     elseif self.selectionMode == SELECTION_SLOT_COLOR then
         if not self.activeSlotControl then
@@ -1149,39 +954,36 @@ function ZO_Dyeing_Slots_Panel_Gamepad:CanViewCurrentSelection()
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:CanActivateCurrentSelection()
-	if self.selectionMode == SELECTION_SLOT_COLOR then
-		if not self.activeSlotControl then
+    if self.selectionMode == SELECTION_SLOT_COLOR then
+        if not self.activeSlotControl then
             return false
         end
-		local selectedEntry = self.dyeableSlotsMenu.selectedEntry
+        local selectedEntry = self.dyeableSlotsMenu.selectedEntry
         if not selectedEntry then
             return false
         end
 
-		local dyeableSlot = selectedEntry.data.dyeableSlot
         local selectedChannelData = self.activeSlotControl.dyeSelector:GetFocusItem()
         local selectedChannel = selectedChannelData and selectedChannelData.slotIndex
-		local isChannelDyeableTable = {AreDyeableSlotDyeChannelsDyeable(dyeableSlot)}
-		if selectedChannel ~= nil then
-			return isChannelDyeableTable[selectedChannel]
-		end
+        local isChannelDyeableTable = {selectedEntry.data:AreDyeChannelsDyeable()}
+        if selectedChannel ~= nil then
+            return isChannelDyeableTable[selectedChannel]
+        end
 
-		return false
-	end
+        return false
+    end
 
-	return true
+    return true
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:UpdateDirectionalInput()
     -- Camera Spin.
     local x = DIRECTIONAL_INPUT:GetX(ZO_DI_RIGHT_STICK)
     if x ~= 0 then
-        -- TODO: Make this work with gamepad right-stick.
         BeginInteractCameraSpin()
         self.isSpinning = true
     else
         if self.isSpinning then
-            -- TODO: Make this work with gamepad right-stick.
             EndInteractCameraSpin()
             self.isSpinning = false
         end
@@ -1207,7 +1009,7 @@ end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:ConfirmCommitSelection()
     ApplyPendingDyes()
-    InitializePendingDyes(self.mode)
+    InitializePendingDyes()
     self:OnPendingDyesChanged()
     self:SwitchToTab(DYE_TAB_INDEX)
     self:SwitchToDyeSelection()
@@ -1311,14 +1113,14 @@ function ZO_Dyeing_Slots_Panel_Gamepad:ExitWithoutSave()
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:UndoPendingChanges()
-    InitializePendingDyes(self.mode)
+    InitializePendingDyes()
     PlaySound(SOUNDS.DYEING_UNDO_CHANGES)
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:OnPendingDyesChanged()
     self.dyeableSlotsMenu:PerformLayout()
 
-    if SCENE_MANAGER:IsShowing(GAMEPAD_DYEING_ITEMS_SCENE_NAME) then
+    if SCENE_MANAGER:IsShowing(GAMEPAD_DYEING_SCENE_NAME) then
         self:RefreshKeybindStrip()
     end
 end
@@ -1384,11 +1186,10 @@ function ZO_Dyeing_Slots_Panel_Gamepad:SetupCenterSwatch()
     end
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:SetupRandomizeSwatch()
+function ZO_Dyeing_Slots_Panel_Gamepad:SetupRandomizeSwatch(primaryDyeId, secondaryDyeId, accentDyeId)
     self.centerSwatchSaved:GetNamedChild("Primary"):SetTexture(PRIMARY_COLOR_SWATCH_NO_POINT)
     self.centerSwatchSaved:GetNamedChild("Keybind"):SetHidden(true)
-    local modeSlotData = ZO_Dyeing_GetSlotsForMode(self.mode)
-    local dyeInfo = {GetPendingSlotDyes(modeSlotData[1].dyeableSlot)}
+    local dyeInfo = { primaryDyeId, secondaryDyeId, accentDyeId }
     for i = 1, #self.centerSwatchSaved.dyeControls do
         local dyeId = dyeInfo[i]
         local r, g, b, a = GetDyeColor(dyeId)
@@ -1417,29 +1218,28 @@ function ZO_Dyeing_Slots_Panel_Gamepad:RadialMenuSelectionChanged(selectedEntry)
     self.rightTipContents:ClearLines()
 
     if (self.selectionMode == SELECTION_SLOT) or (self.selectionMode == SELECTION_SLOT_COLOR) then
-        if selectedEntry and selectedEntry.data.dyeableSlot then
+        if selectedEntry and selectedEntry.data.GetRestyleSlotType then
             -- User has an dyeable slot selected.
-            local data = selectedEntry.data
-            local dyeableSlot = data.dyeableSlot
+            local restyleSlotData = selectedEntry.data
+            local restyleSlotType = restyleSlotData:GetRestyleSlotType()
 
-            local equipSlot = GetEquipSlotFromDyeableSlot(dyeableSlot)
-            local layoutEquipment = equipSlot ~= EQUIP_SLOT_NONE
             local itemLink
-            local icon = GetDyeableSlotIcon(dyeableSlot)
+            local icon = restyleSlotData:GetIcon()
             if icon == ZO_NO_TEXTURE_FILE then
                 -- Nothing is in the slot.
-                icon = ZO_Character_GetEmptyDyeableSlotTexture(dyeableSlot)
-                local slotName = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_DYEABLESLOT", dyeableSlot))
+                icon = ZO_Restyle_GetEmptySlotTexture(restyleSlotData)
+                local defaultDescriptor = ZO_GetRestyleSlotTypeDefaultDescriptor(restyleSlotData)
+                local slotName = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, defaultDescriptor)
                 self.rightTipContents:AddItemTitle(itemLink, slotName)
             else
-                if layoutEquipment then
+                if restyleSlotData:IsEquipment() then
                     -- An item is equipped in the slot.
-                    itemLink = GetItemLink(BAG_WORN, equipSlot)
+                    itemLink = GetItemLink(BAG_WORN, restyleSlotType)
                     self.rightTipContents:AddItemTitle(itemLink)
                     self.rightTipContents:AddBaseStats(itemLink)
                     self.rightTipContents:AddConditionBar(itemLink)
                 else
-                    local collectibleName = GetCollectibleInfo(GetDyeableSlotId(dyeableSlot))
+                    local collectibleName = GetCollectibleInfo(restyleSlotData:GetId())
                     self.rightTipContents:AddLine(collectibleName, nil, self.rightTipContents:GetStyle("title"))
                 end
             end
@@ -1471,16 +1271,17 @@ function ZO_Dyeing_Slots_Panel_Gamepad:RadialMenuSelectionChanged(selectedEntry)
     end
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:RefreshDyeableSlotDyes(dyeableSlot)
-    ZO_Dyeing_RefreshDyeableSlotControlDyes(slotControl, dyeableSlot)
+function ZO_Dyeing_Slots_Panel_Gamepad:RefreshDyeableSlotDyes(dyeableSlotData)
+    ZO_Dyeing_RefreshDyeableSlotControlDyes(slotControl.dyeControls, dyeableSlotData)
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:GetMode()
     return self.mode
 end
 
-
-function ZO_Dyeing_Gamepad_OnInitialized(control)
-    DYEING_GAMEPAD = ZO_Dyeing_Gamepad:New(control)
-    SYSTEMS:RegisterGamepadObject("dyeing", DYEING_GAMEPAD)
+function ZO_Dyeing_Equip_Slot_Initialize(self)
+    self.swatchTexture = self:GetNamedChild("SwatchTexture")
+    self.background = self:GetNamedChild("Background")
+    self.invalidTexture = self:GetNamedChild("InvalidTexture")
+    self.edgeFrame = self:GetNamedChild("EdgeFrame")
 end

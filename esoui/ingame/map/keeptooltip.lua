@@ -60,8 +60,6 @@ local function Reset(self)
     self.historyPercent = 1.0
 end
 
-local KEYBOARD_TEL_VAR_ICON_TEXT = zo_iconFormat("EsoUI/Art/currency/currency_telvar.dds", 16, 16)
-local GAMEPAD_TEL_VAR_ICON_TEXT = zo_iconFormat("EsoUI/Art/currency/currency_telvar_32.dds", 24, 24)
 local DISTRICT_BONUS_VALUE_FORMAT = GetString(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_FORMAT)
 local DISTRICT_BONUS_RESTRICTION_TEXT = GetString(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_RESTRICTION_TEXT)
 
@@ -169,7 +167,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
             if(keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
                 local telVarBonusText = GetDistrictTelVarBonusText(keepId, battlegroundContext, alliance)
                 if telVarBonusText then
-                    local finalBonusText = zo_strformat(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT, telVarBonusText, KEYBOARD_TEL_VAR_ICON_TEXT)
+                    local finalBonusText = zo_strformat(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT, telVarBonusText, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_TELVAR_STONES))
                     AddLine(self, finalBonusText, KEEP_TOOLTIP_NORMAL_LINE)
                     AddLine(self, DISTRICT_BONUS_RESTRICTION_TEXT, KEEP_TOOLTIP_NORMAL_LINE)
                 end
@@ -385,7 +383,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
             if(keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
                 local telVarBonusText = GetDistrictTelVarBonusText(keepId, battlegroundContext, keepAlliance)
                 if telVarBonusText then
-                    local finalBonusText = zo_strformat(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT_FORMAT, telVarBonusText, GAMEPAD_TEL_VAR_ICON_TEXT)
+                    local finalBonusText = zo_strformat(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT_FORMAT, telVarBonusText, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_TELVAR_STONES))
                     local cityBonusSection = keepSection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
                     self:LayoutIconStringLine(cityBonusSection, nil, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_HEADER), self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
                     self:LayoutIconStringLine(cityBonusSection, nil, finalBonusText, self.tooltip:GetStyle("mapLocationKeepClaimed"), self.tooltip:GetStyle("keepBaseTooltipContent"))
@@ -526,7 +524,7 @@ local function LayoutImperialCityTooltip_Gamepad(self, battlegroundContext, isLo
 
     if lockedText then
         local collectibleLockedSection = citySection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
-        self:LayoutIconStringLine(collectibleLockedSection, ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE, lockedText, self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
+        self:LayoutIconStringLine(collectibleLockedSection, ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS), lockedText, self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
         citySection:AddSection(collectibleLockedSection)
     end
     self.tooltip:AddSection(citySection)

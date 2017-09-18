@@ -15,6 +15,13 @@ local GUILD_HUB_DISPLAY_MODE =
     SINGLE_GUILD_LIST = 2,
 }
 
+local GUILD_HUB_SINGLE_GUILD_LIST_OPTION = {
+    ROSTER = 1,
+    RANKS = 2,
+    HERALDRY = 3,
+    HISTORY = 4
+}
+
 local function SetupRequestEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
     local isValid = enabled
     if data.validInput then
@@ -24,6 +31,10 @@ local function SetupRequestEntry(control, data, selected, reselectingDuringRebui
     end
 
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, isValid, active)
+end
+
+local function EqualityFunction(leftData, rightData)
+    return leftData.optionId == rightData.optionId 
 end
 
 local ZO_GamepadGuildHub = ZO_Gamepad_ParametricList_Screen:Subclass()
@@ -96,8 +107,8 @@ end
 ------------
 
 local function SetupOptionsList(list)
-    list:AddDataTemplate(GAMEPAD_OPTIONS_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    list:AddDataTemplateWithHeader(GAMEPAD_OPTIONS_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplate(GAMEPAD_OPTIONS_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplateWithHeader(GAMEPAD_OPTIONS_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction, "ZO_GamepadMenuEntryHeaderTemplate")
 end
 
 function ZO_GamepadGuildHub:PerformDeferredInitializationHub()
@@ -755,9 +766,9 @@ end
 -- Option List --
 -----------------
 function ZO_GamepadGuildHub:SetupList(list)
-    list:AddDataTemplate(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplateWithHeader(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    list:AddDataTemplateWithHeader(GAMEPAD_CREATE_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplate(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction)
+    list:AddDataTemplateWithHeader(GAMEPAD_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplateWithHeader(GAMEPAD_CREATE_GUILD_LIST_ENTRY, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunction, "ZO_GamepadMenuEntryHeaderTemplate")
 end
 
 do
@@ -882,6 +893,7 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
         title = GetString(SI_WINDOW_TITLE_GUILD_ROSTER)
         data = ZO_GamepadEntryData:New(title)
         data:SetIconTintOnSelection(true)
+        data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.ROSTER
         data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRoster() end)
         self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
     end
@@ -892,12 +904,14 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
     end
     title = GetString(title)
     data = ZO_GamepadEntryData:New(title)
+    data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.RANK
     data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRanks() end, title)
     self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
 
     if DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_HERALDRY) and IsPlayerAllowedToEditHeraldry(guildId) and not showEditRankHeaderTitle then
         title = GetString(SI_WINDOW_TITLE_GUILD_HERALDRY)
         data = ZO_GamepadEntryData:New(title)
+        data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.HERALDRY
         data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowHeraldry() end, title)
         self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
     end
@@ -905,6 +919,7 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
     if not showEditRankHeaderTitle then
         title = GetString(SI_WINDOW_TITLE_GUILD_HISTORY)
         data = ZO_GamepadEntryData:New(title)
+        data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.HISTORY
         data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowHistory() end, title)
         self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
     end

@@ -130,14 +130,14 @@
                         <Control name="$(parent)Button1" inherits="ZO_DialogButton" tier="MEDIUM">
                             <Anchor point="BOTTOMRIGHT" offsetY="-12" />
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "LOOT_ALL", ZO_LootActionButtonCallback_LootAll, GetString(SI_LOOT_TAKE_ALL))
+                                ZO_ChromaKeybindButtonTemplate_Setup(self, "LOOT_ALL", ZO_LootActionButtonCallback_LootAll, GetString(SI_LOOT_TAKE_ALL))
                             </OnInitialized>
                         </Control>
 
                         <Control name="$(parent)Button2" inherits="ZO_DialogButton" hidden="true" tier="MEDIUM">
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Button1" relativePoint="BOTTOMLEFT" offsetX="-10" />
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "LOOT_ITEM", ZO_LootActionButtonCallback_LootItem, GetString(SI_LOOT_TAKE))
+                                ZO_ChromaKeybindButtonTemplate_Setup(self, "LOOT_ITEM", ZO_LootActionButtonCallback_LootItem, GetString(SI_LOOT_TAKE))
                             </OnInitialized>
                         </Control>
                     </Controls>

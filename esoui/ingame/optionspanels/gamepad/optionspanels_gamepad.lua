@@ -88,6 +88,11 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_SCREEN_SHAKE,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY,
         },
@@ -323,6 +328,12 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
+        },
+
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
         },
     },
     [SETTING_PANEL_INTERFACE] =

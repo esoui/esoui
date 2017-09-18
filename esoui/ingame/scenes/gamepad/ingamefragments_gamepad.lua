@@ -31,6 +31,7 @@ GAMEPAD_COLLECTIONS_BOOK_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadCollect
 GAMEPAD_COLLECTIONS_BOOK_FRAGMENT:SetHideOnSceneHidden(true)
 GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadCollectionsDLCPanel, true)
 GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadCollectionsHousingPanel, true)
+GAMEPAD_COLLECTIONS_BOOK_GRID_LIST_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadCollectionsGridListPanel, true)
 
 GAMEPAD_ACTIVITY_FINDER_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_ActivityFinderRoot_Gamepad)
 GAMEPAD_ACTIVITY_FINDER_FRAGMENT:SetHideOnSceneHidden(true)
@@ -58,10 +59,9 @@ GAMEPAD_GUILD_HUB_FRAGMENT:SetHideOnSceneHidden(true)
 GAMEPAD_GUILD_HOME_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadGuildHomeTopLevel)
 GAMEPAD_GUILD_HOME_FRAGMENT:SetHideOnSceneHidden(true)
 
-GAMEPAD_DYEING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DyeGamepadTopLevel)
-GAMEPAD_DYEING_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_DYEING_ROOT_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_DyeGamepadTopLevelMaskContainer)
-GAMEPAD_DYEING_ITEMS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DyeGamepadTopLevelDyeItems)
+GAMEPAD_RESTYLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_RestyleTopLevel_Gamepad)
+GAMEPAD_RESTYLE_ROOT_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_RestyleTopLevel_GamepadMaskContainer)
+GAMEPAD_RESTYLE_DYEING_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_RestyleTopLevel_GamepadDyePanel)
 
 GAMEPAD_INVENTORY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadInventoryTopLevel)
 GAMEPAD_INVENTORY_FRAGMENT:SetHideOnSceneHidden(true)

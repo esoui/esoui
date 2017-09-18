@@ -1,3 +1,6 @@
+ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_WIDTH = ZO_GAMEPAD_QUADRANT_2_3_WIDTH
+ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_HEIGHT = (ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_WIDTH / ZO_HOUSING_PREVIEW_IMAGE_CANVAS_WIDTH) * ZO_HOUSING_PREVIEW_IMAGE_CANVAS_HEIGHT
+
 local HousingPreviewDialog_Gamepad = ZO_HousingPreviewDialog_Shared:Subclass()
 
 function HousingPreviewDialog_Gamepad:New(...)
@@ -19,6 +22,7 @@ function HousingPreviewDialog_Gamepad:InitializeFoci()
     self.sectionSwitcher = ZO_GamepadFocus:New(self.templateComboBoxControl, nil, MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.templateContainerFocusSwitcher = ZO_GamepadFocus:New(self.templateContainer, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.purchaseOptionsFocusSwitcher = ZO_GamepadFocus:New(self.purchaseOptionsControl, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
+    self.purchaseOptionsFocusSwitcher:SetFocusChangedCallback(function(...) self:OnPurchaseSelectionChanged(...) end)
 
     local templateFocusData =
     {
@@ -97,8 +101,8 @@ function HousingPreviewDialog_Gamepad:SelectFocusedPurchaseOption()
     end
 end
 
-function HousingPreviewDialog_Gamepad:SetupPurchaseOptionControl(control, price, gameCurrency, marketCurrency, errorStringId)
-    ZO_HousingPreviewDialog_Shared.SetupPurchaseOptionControl(self, control, price, gameCurrency, marketCurrency, errorStringId)
+function HousingPreviewDialog_Gamepad:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId)
+    ZO_HousingPreviewDialog_Shared.SetupPurchaseOptionControl(self, control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId)
 
     local highlightColor = errorStringId and ZO_DEFAULT_DISABLED_COLOR or ZO_DEFAULT_ENABLED_COLOR
     control.button:GetNamedChild("Highlight"):SetEdgeColor(highlightColor:UnpackRGB())
@@ -123,6 +127,16 @@ function HousingPreviewDialog_Gamepad:OnFilterChanged(entryData)
     end
 
     self.templateComboBoxControl:SetHeight(self.templateComboBox:GetHeight())
+end
+
+function HousingPreviewDialog_Gamepad:OnPurchaseSelectionChanged(selectionData)
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_QUAD1_TOOLTIP)
+    if selectionData and selectionData.control then
+        local button = selectionData.control.button
+        if button.errorString then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_QUAD1_TOOLTIP, button.errorString)
+        end
+    end
 end
 
 function HousingPreviewDialog_Gamepad:BuildDialogInfo()
@@ -181,6 +195,8 @@ function HousingPreviewDialog_Gamepad:OnDialogReleased()
     SCENE_MANAGER:SetInUIMode(false)
 end
 
+-- Global XML functions
+
 function ZO_HousingPreviewDialog_Gamepad_OnInitialized(control)
-    HOUSING_PREVIEW_DIALOG_GAMEPAD = HousingPreviewDialog_Gamepad:New(control)
+    ZO_HOUSING_PREVIEW_DIALOG_GAMEPAD = HousingPreviewDialog_Gamepad:New(control)
 end

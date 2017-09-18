@@ -879,6 +879,23 @@ local AlertHandlers = {
     [EVENT_CRAFT_FAILED] = function(result)
         return ALERT, GetString("SI_TRADESKILLRESULT", result)
     end,
+
+    [EVENT_RETRAIT_RESPONSE] = function(result)
+        if result ~= RETRAIT_RESPONSE_SUCCESS then
+            return ALERT, GetString("SI_RETRAITRESPONSE", result)
+        end
+    end,
+
+    [EVENT_LORE_BOOK_LEARNED] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, isMaxRank)
+        if guildReputationIndex == 0 or isMaxRank then
+            -- We only want to fire this event if a player is not part of the guild or if they've reached max level in the guild.
+            -- Otherwise, the _SKILL_EXPERIENCE version of this event will send a center screen message instead.
+            local hidden = select(5, GetLoreCollectionInfo(categoryIndex, collectionIndex))
+            if not hidden then
+                return ALERT, GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED), SOUNDS.BOOK_ACQUIRED, true
+            end
+        end
+    end,
 }
 
 function ZO_AlertText_GetHandlers()

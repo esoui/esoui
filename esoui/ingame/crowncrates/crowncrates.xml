@@ -12,7 +12,11 @@
             <Controls>
                 <Label name="$(parent)GemsHeader" font="ZoFontKeybindStripDescription" />
                 <Label name="$(parent)Gems" font="ZoFontKeybindStripDescription" />
-                <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/currency/currency_crown_gems.dds" />
+                <Texture name="$(parent)GemIcon">
+                    <OnInitialized>
+                        self:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_CROWN_GEMS))
+                    </OnInitialized>
+                </Texture>
             </Controls>
         </Control>
 
@@ -21,7 +25,11 @@
             <Controls>
                 <Label name="$(parent)GemsHeader" font="ZoFontGamepad42" />
                 <Label name="$(parent)Gems" font="ZoFontGamepad42" />
-                <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/currency/gamepad/gp_crown_gems.dds" />
+                <Texture name="$(parent)GemIcon">
+                    <OnInitialized>
+                        self:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWN_GEMS))
+                    </OnInitialized>
+                </Texture>
             </Controls>
         </Control>
 
@@ -30,6 +38,7 @@
             <OnInitialized>
                 self.gemsLabel = self:GetNamedChild("Gems")
                 self.gemsIcon = self:GetNamedChild("GemIcon")
+                self.gemsIcon:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_CROWN_GEMS))
                 self.gemsHeaderLabel = self:GetNamedChild("GemsHeader")
             </OnInitialized>
             <Controls>
@@ -39,7 +48,7 @@
                 <Label name="$(parent)Gems" font="ZoFontKeybindStripDescription">
                     <Anchor point="LEFT" relativeTo="$(parent)GemsHeader" relativePoint="RIGHT" offsetX="8"/>
                 </Label>
-                <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/currency/currency_crown_gems.dds">
+                <Texture name="$(parent)GemIcon">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Gems" relativePoint="RIGHT" offsetX="16"/>
                 </Texture>

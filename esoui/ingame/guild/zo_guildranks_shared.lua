@@ -16,7 +16,7 @@ function ZO_GuildRank_Shared:New(guildRanksObject, guildId, index, customName)
         rank.name = customName
         rank.hasCustomName = true
         rank.iconIndex = guildRanksObject:GetUnusedIconIndex()
-        for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
+        for i = GUILD_PERMISSION_ITERATION_BEGIN, GUILD_PERMISSION_ITERATION_END do
             rank.permissionSet[i] = false
         end
     else
@@ -24,7 +24,7 @@ function ZO_GuildRank_Shared:New(guildRanksObject, guildId, index, customName)
         rank.name = GetFinalGuildRankName(guildId, index)
         rank.hasCustomName = GetGuildRankCustomName(guildId, index) ~= ""
         rank.iconIndex = GetGuildRankIconIndex(guildId, index)
-        for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
+        for i = GUILD_PERMISSION_ITERATION_BEGIN, GUILD_PERMISSION_ITERATION_END do
             rank.permissionSet[i] = DoesGuildRankHavePermission(guildId, index, i)
         end
     end
@@ -84,7 +84,7 @@ function ZO_GuildRank_Shared:SetPermission(permission, enabled)
         local numDependencies = GetNumGuildPermissionDependencies(permission)
         for i = 1, numDependencies do
             local dependency = GetGuildPermissionDependency(permission, i)
-            if dependency >= GUILD_PERMISSION_MIN_VALUE and dependency <= GUILD_PERMISSION_MAX_VALUE then
+            if dependency >= GUILD_PERMISSION_ITERATION_BEGIN and dependency <= GUILD_PERMISSION_ITERATION_END then
                 self:SetPermission(dependency, enabled)
             end
         end
@@ -131,7 +131,7 @@ function ZO_GuildRank_Shared:NeedsSave()
         return true
     end
 
-    for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
+    for i = GUILD_PERMISSION_ITERATION_BEGIN, GUILD_PERMISSION_ITERATION_END do
         if(self.permissionSet[i] ~= DoesGuildRankHavePermission(self.guildId, self.index, i)) then
             return true
         end
@@ -152,7 +152,7 @@ end
 
 function ZO_GuildRank_Shared:CopyPermissionsFrom(copyRank)
     ZO_ClearNumericallyIndexedTable(self.permissionSet)
-    for i = GUILD_PERMISSION_CHAT, GUILD_PERMISSION_MAX_VALUE do
+    for i = GUILD_PERMISSION_ITERATION_BEGIN, GUILD_PERMISSION_ITERATION_END do
         self.permissionSet[i] = copyRank.permissionSet[i]
     end
 end

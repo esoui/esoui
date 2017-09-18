@@ -411,7 +411,7 @@ function ActionButton:UpdateCooldown(options)
 
         self.slot:SetHandler("OnUpdate", function() self:RefreshCooldown() end)
         if updateChromaQuickslot then
-            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("UI_SHORTCUT_QUICK_SLOTS")
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("ACTION_BUTTON_9")
         end
     else
         if self.showingCooldown then
@@ -431,7 +431,7 @@ function ActionButton:UpdateCooldown(options)
             anim:GetTimeline():PlayFromStart()
 
             if updateChromaQuickslot then
-                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("UI_SHORTCUT_QUICK_SLOTS")
+                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_9")
             end
         end
 

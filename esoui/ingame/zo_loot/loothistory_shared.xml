@@ -47,12 +47,7 @@
                         </Texture>
                     </Controls>
                 </Texture>
-                
-                <Label name="$(parent)Label" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2">
-                    <Dimensions x="240"/>
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
-                </Label>
-              
+
                 <Texture name="$(parent)Bg">
                     <AnchorFill />
                     <Controls>

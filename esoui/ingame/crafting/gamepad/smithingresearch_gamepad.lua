@@ -20,23 +20,23 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             local tabBarEntries = self:GenerateTabBarEntries()
             self.focus:Activate()
-            
-			self.owner:SetEnableSkillBar(true)
+
+            self.owner:SetEnableSkillBar(true)
 
             local savedFilter = self.typeFilter
 
             local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(GetCraftingInteractionType())
-            
+
             ZO_GamepadCraftingUtils_SetupGenericHeader(self.owner, titleString, tabBarEntries)
             ZO_GamepadCraftingUtils_RefreshGenericHeader(self.owner)
 
             self:SetupTabBar(tabBarEntries, savedFilter)
 
             self:Refresh()
-        elseif newState == SCENE_HIDDEN then
+        elseif newState == SCENE_HIDING then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.focus:Deactivate()
-			self.owner:SetEnableSkillBar(false)
+            self.owner:SetEnableSkillBar(false)
             ZO_GamepadGenericHeader_Deactivate(self.owner.header)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
         end
@@ -48,18 +48,21 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
             local function AddEntry(data)
                 local entry = ZO_GamepadEntryData:New(data.name)
                 entry:InitializeCraftingInventoryVisualData(data.bag, data.index, data.stack)
-			    self.confirmList:AddEntry(CONFIRM_TEMPLATE_NAME, entry)
+                self.confirmList:AddEntry(CONFIRM_TEMPLATE_NAME, entry)
             end
 
             local function IsResearchableItem(bagId, slotIndex)
-                return CanItemBeSmithingTraitResearched(bagId, slotIndex, self.confirmCraftingType, self.confirmResearchLineIndex, self.confirmTraitIndex) and not IsItemPlayerLocked(bagId, slotIndex)
+                return ZO_SharedSmithingResearch.IsResearchableItem(bagId, slotIndex, self.confirmCraftingType, self.confirmResearchLineIndex, self.confirmTraitIndex)
             end
 
             local confirmPanel = self.panelContent:GetNamedChild("Confirm")
             confirmPanel:GetNamedChild("SelectionText"):SetText(GetString(SI_GAMEPAD_SMITHING_RESEARCH_SELECT_ITEM))
 
             self.confirmList:Clear()
-            local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsResearchableItem))
+
+            local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsResearchableItem)
+            PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, virtualInventoryList)
+
             for itemId, itemInfo in pairs(virtualInventoryList) do
                 itemInfo.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(itemInfo.bag, itemInfo.index))
                 AddEntry(itemInfo)
@@ -68,7 +71,7 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
 
             self.confirmList:Activate()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.confirmKeybindStripDescriptor)
-        elseif newState == SCENE_HIDDEN then
+        elseif newState == SCENE_HIDING then
             self.confirmList:Deactivate()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.confirmKeybindStripDescriptor)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
@@ -162,12 +165,12 @@ end
 function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
-		alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
         -- Perform research
         {
             keybind = "UI_SHORTCUT_PRIMARY",
-            
+
             name = function()
                 return GetString(SI_ITEM_ACTION_RESEARCH)
             end,
@@ -186,7 +189,7 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
         -- Cancel research
         {
             keybind = "UI_SHORTCUT_SECONDARY",
-            
+
             name = function()
                 return GetString(SI_CRAFTING_CANCEL_RESEARCH)
             end,
@@ -206,9 +209,6 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 
-    -- Confirm research keybind descriptor.
-    self.confirmKeybindStripDescriptor = {}
-
     local function ConfirmResearch()
         local targetData = self.confirmList:GetTargetData()
         if targetData then
@@ -218,7 +218,19 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
         end
     end
 
-    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, ConfirmResearch, GetString(SI_SMITHING_RESEARCH_DIALOG_CONFIRM), nil, nil, SOUNDS.SMITHING_START_RESEARCH)
+    -- Confirm research keybind descriptor.
+    self.confirmKeybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        {
+            keybind = "UI_SHORTCUT_PRIMARY",
+            name = GetString(SI_SMITHING_RESEARCH_DIALOG_CONFIRM),
+            callback = ConfirmResearch,
+            sound = SOUNDS.SMITHING_START_RESEARCH,
+        },
+    }
+
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
@@ -391,19 +403,7 @@ function ZO_GamepadSmithingResearch:Research()
     end
 end
 
-do
-    local TRAIT_COLORS = {
-        ZO_NORMAL_TEXT,
-        ZO_SELECTED_TEXT,
-    }
-
-    function ZO_GamepadSmithingResearch:GetTraitColors()
-        return TRAIT_COLORS[1], TRAIT_COLORS[2]
-    end
-end
-
-function ZO_GamepadSmithingResearch:GetResearchTimeString(...)
-    local count, time = ...
+function ZO_GamepadSmithingResearch:GetResearchTimeString(count, time)
     time = ZO_PrefixIconNameFormatter("timer", time)
     return zo_strformat(SI_GAMEPAD_SMITHING_RESEARCH_TIME_FOR_NEXT, count, time)
 end
@@ -415,15 +415,11 @@ end
 function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine, known, duration, traitIndex)
     local iconControl = GetControl(slotControl, "Icon")
 
-    local selectedColor, normalColor = self:GetTraitColors()
-
-    slotControl.lockIcon:SetHidden(true)
-
     if known then
-        slotControl.nameLabel:SetColor(selectedColor:UnpackRGBA())
+        slotControl.nameLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
         slotControl.statusLabel:SetText("")
-        
+
         slotControl.timerIcon:SetHidden(true)
 
         iconControl:SetDesaturation(0)
@@ -433,19 +429,18 @@ function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine,
 
         slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_IN_PROGRESS))
         slotControl.statusLabel:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
-		
+
         slotControl.timerIcon:SetHidden(false)
-		slotControl.timerIcon:SetAlpha(1)
-		slotControl.timerIcon:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
+        slotControl.timerIcon:SetColor(ZO_SECOND_CONTRAST_TEXT:UnpackRGBA())
 
         iconControl:SetDesaturation(0)
         iconControl:SetAlpha(.3)
     elseif researchLine.itemTraitCounts and researchLine.itemTraitCounts[traitIndex] then
-        slotControl.nameLabel:SetColor(normalColor:UnpackRGBA())
+        slotControl.nameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
 
         slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_RESEARCHABLE))
-        slotControl.statusLabel:SetColor(normalColor:UnpackRGBA())
-        
+        slotControl.statusLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+
         slotControl.timerIcon:SetHidden(true)
 
         iconControl:SetDesaturation(0)
@@ -457,7 +452,7 @@ function ZO_GamepadSmithingResearch:SetupTraitDisplay(slotControl, researchLine,
 
         slotControl.statusLabel:SetText(GetString(SI_SMITHING_RESEARCH_UNKNOWN))
         slotControl.statusLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-        
+
         slotControl.timerIcon:SetHidden(true)
 
         iconControl:SetDesaturation(1)

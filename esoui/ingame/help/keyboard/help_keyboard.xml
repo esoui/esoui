@@ -89,7 +89,7 @@
                 </Label>
 
                 <Label name="$(parent)NoMatchMessage" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_HELP_NO_MATCHES" modifyTextType="UPPERCASE" hidden="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)DetailsTitle" />
+                    <Dimensions x="490" />
                 </Label>
 
                 <Label name="$(parent)DetailsBody1" inherits="ZO_SmallKeyMarkupLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

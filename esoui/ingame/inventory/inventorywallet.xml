@@ -19,7 +19,7 @@
                     <Anchor point="LEFT" offsetX="53" />
                 </Label>
 
-                <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate">
+                <Label name="$(parent)Amount" font="ZoFontGame">
                     <Anchor point="RIGHT" offsetX="-5" />
                 </Label>
 

@@ -34,7 +34,9 @@ function ZO_GamepadBankInventoryList:RefreshList()
 
     self.list:AddEntry("ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
 
-    self.dataBySlotIndex = {}
+    for i, bagId in ipairs(self.inventoryTypes) do
+        self.dataByBagAndSlotIndex[bagId] = {}
+    end
 
     local slots = self:GenerateSlotTable()
     local currentBestCategoryName = nil
@@ -51,7 +53,7 @@ function ZO_GamepadBankInventoryList:RefreshList()
             self.list:AddEntry(self.template, entry)
         end
 
-        self.dataBySlotIndex[itemData.slotIndex] = entry
+        self.dataByBagAndSlotIndex[itemData.bagId][itemData.slotIndex] = entry
     end
 
     self.list:Commit()
@@ -170,13 +172,16 @@ function ZO_GamepadBanking:InitializeLists()
         end
     end)
 
-    for _, currencyType in ipairs(ZO_CURRENCY_DISPLAY_ORDER) do
-        local currencyData = ZO_CURRENCIES_DATA[currencyType]
-        local entryData = ZO_GamepadEntryData:New(currencyData.name, currencyData.gamepadTexture64)
-        entryData:SetIconTintOnSelection(true)
-        entryData:SetIconDisabledTintOnSelection(true)
-        entryData.currencyType = currencyType
-        self.currenciesList:AddEntry("ZO_GamepadBankCurrencySelectorTemplate", entryData)
+    for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
+        if CanCurrencyBeStoredInLocation(currencyType, CURRENCY_LOCATION_BANK) then
+            local IS_PLURAL = false
+            local IS_UPPER = false
+            local entryData = ZO_GamepadEntryData:New(GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER), ZO_Currency_GetGamepadCurrencyIcon(currencyType))
+            entryData:SetIconTintOnSelection(true)
+            entryData:SetIconDisabledTintOnSelection(true)
+            entryData.currencyType = currencyType
+            self.currenciesList:AddEntry("ZO_GamepadBankCurrencySelectorTemplate", entryData)
+        end
     end
 
     local DEFAULT_RESELECT = nil
@@ -193,9 +198,9 @@ function ZO_GamepadBanking:RefreshCurrenciesList()
             local enabled = false
 
             if self:IsInWithdrawMode() then
-                enabled = GetBankedCurrencyAmount(currencyType) ~= 0 and GetCarriedCurrencyAmount(currencyType) ~= GetMaxCarriedCurrencyAmount(currencyType)
+                enabled = GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) ~= GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER) and GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) ~= 0
             elseif self:IsInDepositMode() then
-                enabled = GetBankedCurrencyAmount(currencyType) ~= GetMaxBankCurrencyAmount(currencyType) and GetCarriedCurrencyAmount(currencyType) ~= 0
+                enabled = GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) ~= GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_BANK) and GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) ~= 0
             end
 
             entryData:SetEnabled(enabled)
@@ -238,19 +243,16 @@ function ZO_GamepadBanking:UpdateKeybinds()
     end
 end
 
-function ZO_GamepadBanking:RefreshCurrenciesTooltipShown()
+function ZO_GamepadBanking:LayoutBankingEntryTooltip(inventoryData)
+    ZO_BankingCommon_Gamepad.LayoutBankingEntryTooltip(self, inventoryData)
     if self:IsCurrentList("withdraw") or self:IsCurrentList("deposit") then
-        local targetData = self:GetTargetData()
-        if targetData and targetData.isCurrenciesMenuEntry then
-            GAMEPAD_TOOLTIPS:LayoutBankCurrencies(GAMEPAD_LEFT_TOOLTIP, ZO_BANKABLE_CURRENCIES)
-            return
+        if inventoryData and inventoryData.isCurrenciesMenuEntry then
+            GAMEPAD_TOOLTIPS:LayoutBankCurrencies(GAMEPAD_LEFT_TOOLTIP)
         end
     end
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
 end
 
 function ZO_GamepadBanking:OnTargetChangedCallback()
-    self:RefreshCurrenciesTooltipShown()
     self:UpdateKeybinds()
 end
 
@@ -297,19 +299,19 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             name = function()
                 local cost = GetNextBankUpgradePrice()
-                if GetCarriedCurrencyAmount(CURT_MONEY) >= cost then
-                    return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_CurrencyControl_FormatCurrency(cost), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
+                    return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
                 end
-                return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
             end,
             visible = function()
                 return IsBankUpgradeAvailable()
             end,
             enabled = function()
-                return GetCarriedCurrencyAmount(CURT_MONEY) >= GetNextBankUpgradePrice()
+                return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= GetNextBankUpgradePrice()
             end,
             callback = function()
-                if GetNextBankUpgradePrice() > GetCarriedCurrencyAmount(CURT_MONEY) then
+                if GetNextBankUpgradePrice() > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_BUY_BANK_SPACE_CANNOT_AFFORD))
                 else
                     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
@@ -362,7 +364,7 @@ end
 
 function ZO_GamepadBanking:GetWithdrawMoneyAmount()
     if self:GetCurrencyType() then  --returns nil if on an item
-        return GetBankedCurrencyAmount(self:GetCurrencyType())
+        return GetCurrencyAmount(self:GetCurrencyType(), CURRENCY_LOCATION_BANK)
     end
 end
 
@@ -375,21 +377,21 @@ function ZO_GamepadBanking:DoesObfuscateWithdrawAmount()
 end
 
 function ZO_GamepadBanking:GetMaxBankedFunds(currencyType)
-    return GetMaxBankCurrencyAmount(currencyType)
+    return GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_BANK)
 end
 
 function ZO_GamepadBanking:GetDepositMoneyAmount()
     if self:GetCurrencyType() then  
-        return GetCarriedCurrencyAmount(self:GetCurrencyType())
+        return GetCurrencyAmount(self:GetCurrencyType(), CURRENCY_LOCATION_CHARACTER)
     end
 end
 
 function ZO_GamepadBanking:DepositFunds(currencyType, amount)
-    DepositCurrencyIntoBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_BANK)
 end
 
 function ZO_GamepadBanking:WithdrawFunds(currencyType, amount)
-    WithdrawCurrencyFromBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_BANK, CURRENCY_LOCATION_CHARACTER)
 end
 
 function ZO_GamepadBanking:CreateEventTable()
@@ -438,7 +440,7 @@ function ZO_GamepadBanking:CreateEventTable()
     local function OnInventoryUpdate()
         self:RefreshHeaderData()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
-        self:LayoutInventoryItemTooltip(self:GetTargetData())
+        self:LayoutBankingEntryTooltip(self:GetTargetData())
     end
     
     self.eventTable =
@@ -457,22 +459,22 @@ function ZO_GamepadBanking:CanTransferSelectedFunds()
         local currencyType = inventoryData.currencyType
         if currencyType then
             if self:IsInWithdrawMode() then
-                if GetBankedCurrencyAmount(currencyType) ~= 0 and GetCarriedCurrencyAmount(currencyType) ~= GetMaxCarriedCurrencyAmount(currencyType) then
+                if GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) ~= 0 and GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) ~= GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER) then
                      return true
                 else
-                    if GetCarriedCurrencyAmount(currencyType) == GetMaxCarriedCurrencyAmount(currencyType) then
+                    if GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) == GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER) then
                         return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your inventory is full"
-                    elseif GetBankedCurrencyAmount(currencyType) == 0 then
+                    elseif GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) == 0 then
                         return false, GetString(SI_INVENTORY_ERROR_NO_BANK_FUNDS) -- "No bank funds"
                     end
                 end
             elseif self:IsInDepositMode() then
-                if GetBankedCurrencyAmount(currencyType) ~= GetMaxBankCurrencyAmount(currencyType) and GetCarriedCurrencyAmount(currencyType) ~= 0 then
+                if GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) ~= GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_BANK) and GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) ~= 0 then
                     return true
                 else
-                    if GetBankedCurrencyAmount(currencyType) == GetMaxBankCurrencyAmount(currencyType) then
+                    if GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) == GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_BANK) then
                         return false, GetString(SI_INVENTORY_ERROR_BANK_FULL) -- "Your bank is full"
-                    elseif GetCarriedCurrencyAmount(currencyType) == 0 then
+                    elseif GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) == 0 then
                         return false, GetString(SI_INVENTORY_ERROR_NO_PLAYER_FUNDS) -- "No player funds"
                     end
                 end
@@ -486,9 +488,9 @@ function ZO_GamepadBanking:PerformWithdrawDepositFunds()
     local inventoryData = self:GetTargetData()
     if inventoryData.currencyType then
         if self:IsInWithdrawMode() then 
-            self:SetMaxInputFunction(GetMaxBankWithdrawal)
+            self:SetMaxInputFunction(function(currencyType) return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_BANK, CURRENCY_LOCATION_CHARACTER) end)
         elseif self:IsInDepositMode() then
-            self:SetMaxInputFunction(GetMaxBankDeposit) 
+            self:SetMaxInputFunction(function(currencyType) return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_BANK) end) 
         end
         self:ShowSelector()
     end
@@ -562,7 +564,7 @@ function ZO_BuyBankSpace_Gamepad:Initialize(control)
                 keybind = "DIALOG_PRIMARY",
                 text = function()
                     local costString = ZO_CurrencyControl_FormatCurrency(self.cost)
-                    return zo_strformat(SI_GAMEPAD_BANK_UPGRADE_ACCEPT, costString, ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                    return zo_strformat(SI_GAMEPAD_BANK_UPGRADE_ACCEPT, costString, ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY))
                 end,
                 callback =  function(dialog)
                     BuyBankSpace()

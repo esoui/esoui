@@ -27,7 +27,6 @@ local ACHIEVEMENT_DATE_LABEL_EXPECTED_WIDTH = 60
 local NUM_RECENT_ACHIEVEMENTS_TO_SHOW = 6
 
 local SAVE_EXPANDED = true
-local DONT_REBUILD_CONTENT_LIST = true
 
 local PREFIX_LABEL = 1
 local HEADER_LABEL = 2
@@ -899,9 +898,9 @@ function IconAchievement:OnMouseExit()
 end
 
 function IconAchievement:OnClicked(button)
-    if(button == MOUSE_BUTTON_INDEX_LEFT) then
-        self.control.owner:ShowAchievement(GetLastCompletedAchievementInLine(self:GetId()))
-    elseif(button == MOUSE_BUTTON_INDEX_RIGHT) then
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        self.control.owner:ShowAchievement(self:GetId())
+    elseif button == MOUSE_BUTTON_INDEX_RIGHT then
         Achievement.OnClicked(self, button)
     end
 end
@@ -1031,24 +1030,46 @@ function Achievements:OnAchievementAwarded(achievementId)
         local oldPrevious = updatedAchievement:GetAnchoredToAchievement()
         local oldNext = updatedAchievement:GetDependentAnchoredAchievement()
 
-        local nextAchievementId = GetAchievementId(categoryIndex, subCategoryIndex, achievementIndex + 1)
-        if nextAchievementId == 0 then
-            -- It's possible there is no next achievement, so we'll just bail here since we should be at
-            -- the bottom of the list
-            return
+        -- find the achievement that comes after this one
+        -- since we may have a filter applied, it might not be the very next one in the category
+        -- so we'll have to search until we find one that is in self.achievementsById (i.e. currently showing)
+        local newNext
+        local nextAchievementIndex = achievementIndex
+        local nextAchievementId = achievementId
+        while nextAchievementId ~= 0 do
+            local nextAchievementIndex = nextAchievementIndex + 1
+            nextAchievementId = GetAchievementId(categoryIndex, subCategoryIndex, nextAchievementIndex)
+            if nextAchievementId == 0 then
+                -- It's possible there is no next achievement, so we'll just bail here since we should be at
+                -- the bottom of the list
+                break
+            end
+
+            -- see if the next achivement id is in self.achievementsById and therefor being shown
+            -- if this comes back as nil, then it' sprobably been filtered out
+            newNext = self.achievementsById[self:GetBaseAchievementId(nextAchievementId)]
+            if newNext then
+                if newNext == updatedAchievement then
+                    -- nextAchievementId could be the next achievement in the same line, so newNext could be
+                    -- the same achievement as updatedAchievement
+                    return
+                else
+                    break
+                end
+            end
         end
 
-        local newNext = self.achievementsById[self:GetBaseAchievementId(nextAchievementId)]
-        if newNext == updatedAchievement then
-            -- nextAchievementId could be the next achievement in the same line, so newNext could be
-            -- the same achievement as updatedAchievement
-            return
+        -- Get the achievement that should come before our updated achievement
+        -- if we didn't find a newNext then our achievement should be at the end of the list
+        local newPrevious
+        if newNext then
+            newPrevious = newNext:GetAnchoredToAchievement()
+        else
+            newPrevious = self.achievementsById[#self.achievementsById]
         end
-
-        local newPrevious = newNext:GetAnchoredToAchievement()
         if newPrevious == updatedAchievement then
-            -- alternatively, we get the achievement that is the very next one that happens already anchored to updatedAchievement
-            -- so newPrevious could be the same achievement as updatedAchievement
+            -- alternatively, the achievement that is the very next one happens to be anchored to
+            -- updatedAchievement so newPrevious could be the same achievement as updatedAchievement
             return
         end
 
@@ -1091,27 +1112,32 @@ function Achievements:OnAchievementUpdated(achievementId)
             -- Only update if the achievement is in the category you're currently viewing
             -- An achievement can only be in one category, and switching categories does a full refresh anyway
             if categoryIndex == selectedCategoryIndex and subCategoryIndex == selectedSubCategoryIndex then
-                self:UpdateCategoryLabels(data, SAVE_EXPANDED, DONT_REBUILD_CONTENT_LIST)
-                local baseAchievementId = self:GetBaseAchievementId(achievementId)
+                -- We might have filtered the achievement list we are viewing, and since an achievement has updated
+                -- it's possible we need to remove it from the list, so we'll just rebuild the whole list
+                local dontRebuildContentList = ZO_ShouldShowAchievement(self.categoryFilter.filterType, achievementId)
+                self:UpdateCategoryLabels(data, SAVE_EXPANDED, dontRebuildContentList)
+                if dontRebuildContentList then
+                    local baseAchievementId = self:GetBaseAchievementId(achievementId)
 
-                -- Must use base here because in a line, all of the remaining achievements get an update,
-                -- but you only want the lowest one that hasn't been completed
-                -- e.g.: Ids 1, 2, 3.  1 complete, 2 and 3 in progress.  2 and 3 both get updates.
-                -- 2 calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (good).
-                -- 3 calls ZO_GetNextInProgressAchievementInLine, returns 3 as next in progress (bad).
-                -- 1 (base for 2 AND 3) calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (best).
-                if ZO_GetNextInProgressAchievementInLine(baseAchievementId) == achievementId then
-                    local updatedAchievement = self.achievementsById[baseAchievementId]
+                    -- Must use base here because in a line, all of the remaining achievements get an update,
+                    -- but you only want the lowest one that hasn't been completed
+                    -- e.g.: Ids 1, 2, 3.  1 complete, 2 and 3 in progress.  2 and 3 both get updates.
+                    -- 2 calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (good).
+                    -- 3 calls ZO_GetNextInProgressAchievementInLine, returns 3 as next in progress (bad).
+                    -- 1 (base for 2 AND 3) calls ZO_GetNextInProgressAchievementInLine, returns 2 as next in progress (best).
+                    if ZO_GetNextInProgressAchievementInLine(baseAchievementId) == achievementId then
+                        local updatedAchievement = self.achievementsById[baseAchievementId]
 
-                    if not updatedAchievement then
-                        updatedAchievement = self.achievementPool:AcquireObject()
-                        self.achievementsById[baseAchievementId] = updatedAchievement
+                        if not updatedAchievement then
+                            updatedAchievement = self.achievementPool:AcquireObject()
+                            self.achievementsById[baseAchievementId] = updatedAchievement
+                        end
+
+                        updatedAchievement:Show(achievementId)
+                        updatedAchievement:RefreshExpandedView()
+
+                        return updatedAchievement
                     end
-
-                    updatedAchievement:Show(achievementId)
-                    updatedAchievement:RefreshExpandedView()
-
-                    return updatedAchievement
                 end
             end
         end
@@ -1167,13 +1193,13 @@ function Achievements:ShowAchievement(achievementId)
 
     else
         self.queuedShowAchievement = nil
-
-        local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(achievementId)
+        local lastAchievementIdInLine = GetLastCompletedAchievementInLine(achievementId)
+        local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(lastAchievementIdInLine)
 
         if self:OpenCategory(categoryIndex, subCategoryIndex) then
             -- convert the given achievement id into one that exists in the list of achievements
             -- this is mostly for achievements in a line
-            local baseAchievementId = self:GetBaseAchievementId(achievementId)
+            local baseAchievementId = self:GetBaseAchievementId(lastAchievementIdInLine)
 
             -- Reset filters if this achievement isn't showing
             if not self.achievementsById[baseAchievementId] then
@@ -1318,6 +1344,7 @@ function Achievements:LayoutAchievements(achievements)
             local achievement = self.achievementPool:AcquireObject()
             local baseAchievementId = self:GetBaseAchievementId(id)
             self.achievementsById[baseAchievementId] = achievement
+            -- i here is the same as the achievementIndex for the achievement
             achievement:SetIndex(i)
 
             achievement:Show(ZO_GetNextInProgressAchievementInLine(id))

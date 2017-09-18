@@ -34,7 +34,7 @@
                 </Button>
 
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="342" y="20" />
+                    <Dimensions x="325" y="20" />
                     <Anchor point="BOTTOMLEFT" relativePoint="LEFT" offsetX="57" />
                 </Label>
 
@@ -44,9 +44,20 @@
                 </Label>
 
                 <Label name="$(parent)TimeRemaining" font="ZoFontGameShadow">
-                    <Dimensions x="140" y="20" />
+                    <Dimensions x="80" y="20" />
                     <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
                 </Label>
+
+                <Texture name="$(parent)TraitInfo" mouseEnabled="true" inherits="ZO_MultiIcon">
+                    <Dimensions x="22" y="22" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TimeRemaining" relativePoint="RIGHT" offsetX="30" />
+                    <OnMouseEnter>
+                        ZO_TradingHouse_SearchResult_TraitInfo_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_TradingHouse_SearchResult_TraitInfo_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
 
                 <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
                     <Anchor point="RIGHT" offsetX="-5" />
@@ -142,19 +153,18 @@
                             <Anchor point="TOPRIGHT" />
 
                             <Controls>
-                                <Label name="$(parent)Name" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TRADING_HOUSE_SELECT_AN_ITEM_TO_SELL">
-                                    <Dimensions y="70" />
+                                <Label name="$(parent)Name" font="ZoFontWinH4" maxLineCount="3" inherits="ZO_TooltipIfTruncatedLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TRADING_HOUSE_SELECT_AN_ITEM_TO_SELL">
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="TOPRIGHT" />
                                 </Label>
 
                                 <Button name="$(parent)Item" mouseEnabled="true" inherits="ZO_InventorySlotNoMouseover">
                                     <Dimensions x="64" y="64" />
-                                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" />
+                                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10"/>
                                 </Button>
 
                                 <Label name="$(parent)ListingCount" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOP" relativeTo="$(parent)Item" relativePoint="BOTTOM" offsetY="15" />
+                                    <Anchor point="TOP" relativeTo="$(parent)Item" relativePoint="BOTTOM" offsetY="10" />
                                 </Label>
                             </Controls>
                         </Control>
@@ -558,7 +568,7 @@
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SearchResults" relativePoint="TOPRIGHT" offsetX="-19" />
                             <Controls>
                                 <Control name="$(parent)Name" inherits="ZO_SortHeader" mouseEnabled="false">
-                                    <Dimensions x="338" y="20" />
+                                    <Dimensions x="320" y="20" />
                                     <Anchor point="LEFT" />
                                     <OnInitialized>
                                         -- Looks like a sort header...but it's not.
@@ -574,7 +584,7 @@
                                 </Control>
                                 <Control name="$(parent)TimeRemaining" inherits="ZO_SortHeader">
                                     <Dimensions x="140" y="20" />
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Price" relativePoint="LEFT" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Price" relativePoint="LEFT" offsetX="-18" />
                                     <OnInitialized>
                                         ZO_PlayerInventory_InitSortHeader(self, SI_TRADING_HOUSE_SORT_TYPE_TIME, TEXT_ALIGN_LEFT, TRADING_HOUSE_SORT_EXPIRY_TIME)
                                     </OnInitialized>

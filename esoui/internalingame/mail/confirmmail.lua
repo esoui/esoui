@@ -38,13 +38,11 @@ EVENT_MANAGER:RegisterForEvent("ZoConfirmMail", EVENT_CONFIRM_SEND_MAIL, functio
     ZO_Dialogs_ReleaseDialog("CONFIRM_MAIL")
     local confirmText
     if numAttachments > 0 and attachedMoney > 0 then
-        local textStringId = IsInGamepadPreferredMode() and SI_GAMEPAD_CONFIRM_MAIL_GOLD_AND_ITEMS or SI_CONFIRM_MAIL_GOLD_AND_ITEMS
-        confirmText = zo_strformat(textStringId, attachedMoney, numAttachments, ZO_FormatUserFacingDisplayName(to))
+        confirmText = zo_strformat(SI_CONFIRM_MAIL_GOLD_AND_ITEMS, ZO_Currency_FormatPlatform(CURT_MONEY, attachedMoney, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON), numAttachments, ZO_FormatUserFacingDisplayName(to))
     elseif numAttachments > 0 then
         confirmText = zo_strformat(SI_CONFIRM_MAIL_ITEMS, numAttachments, ZO_FormatUserFacingDisplayName(to))
     else
-        local textStringId = IsInGamepadPreferredMode() and SI_GAMEPAD_CONFIRM_MAIL_GOLD or SI_CONFIRM_MAIL_GOLD
-        confirmText = zo_strformat(textStringId, attachedMoney, ZO_FormatUserFacingDisplayName(to))
+        confirmText = zo_strformat(SI_CONFIRM_MAIL_GOLD, ZO_Currency_FormatPlatform(CURT_MONEY, attachedMoney, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON), ZO_FormatUserFacingDisplayName(to))
     end
     ZO_Dialogs_ShowPlatformDialog("CONFIRM_MAIL", { to = to, subject = subject, body = body }, {mainTextParams = { confirmText }})
 end)

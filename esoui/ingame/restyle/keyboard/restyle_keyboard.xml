@@ -1,0 +1,87 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_RestyleTopLevel_Keyboard" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Restyle_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RightPanel" inherits="ZO_RightPanelFootPrint">
+                    <Controls>
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="28" />
+                            <Dimensions x="240"/>
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_RESTYLE_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized>
+                                    <OnTextChanged>
+                                        ZO_Restyle_Keyboard_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
+                        </Label>
+
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="353" />
+                            <Anchor point="TOPLEFT" offsetX="-28" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                        </Control>
+
+                        <Control name="$(parent)Tabs" inherits="ZO_LabelButtonBar">
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="-10" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Sheets">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumTallLeftPanelBackground" offsetX="20" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumTallLeftPanelBackground" offsetX="-40" />
+                </Control>
+
+                <Control name="$(parent)RotationArea" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" offsetX="392" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-980" offsetY="-85" />
+
+                    <OnMouseEnter>
+                        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+                    </OnMouseExit>
+
+                    <OnMouseDown>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                            self.isRotating = true
+                            BeginInteractCameraSpin()
+                        end
+                    </OnMouseDown>
+
+                    <OnMouseUp>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                            if self.isRotating then
+                                self.isRotating = false
+                                EndInteractCameraSpin()
+                            end
+                        end
+                    </OnMouseUp>
+
+                    <OnEffectivelyHidden>
+                        if self.isRotating then
+                            self.isRotating = false
+                            EndInteractCameraSpin()
+                        end
+                    </OnEffectivelyHidden>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -22,7 +22,7 @@ function ZO_SmithingImprovement:Initialize(control, owner)
                     end
 
                     AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
-                    
+
                     ShowMenu(self)
                 end
             end
@@ -45,10 +45,10 @@ function ZO_SmithingImprovement:SetHidden(hidden)
 end
 
 function ZO_SmithingImprovement:InitializeSlots()
-	local slotContainer = self.control:GetNamedChild("SlotContainer")
+    local slotContainer = self.control:GetNamedChild("SlotContainer")
     self.improvementSlot = ZO_SmithingImprovementSlot:New(self, slotContainer:GetNamedChild("ImprovementSlot"), SLOT_TYPE_PENDING_CRAFTING_COMPONENT, self.inventory)
     self.boosterSlot = slotContainer:GetNamedChild("BoosterSlot")
-    
+
     ZO_InventorySlot_SetType(self.boosterSlot, SLOT_TYPE_SMITHING_BOOSTER)
     ZO_ItemSlot_SetAlwaysShowStackCount(self.boosterSlot, true)
 
@@ -69,7 +69,7 @@ function ZO_SmithingImprovement:InitializeSlots()
 end
 
 function ZO_SmithingImprovement:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
-	ZO_SharedSmithingImprovement.SetCraftingType(self, craftingType, oldCraftingType, isCraftingTypeDifferent)
+    ZO_SharedSmithingImprovement.SetCraftingType(self, craftingType, oldCraftingType, isCraftingTypeDifferent)
     if isCraftingTypeDifferent then
         self.inventory:SetActiveFilterByDescriptor(nil)
     end
@@ -115,6 +115,7 @@ function ZO_SmithingImprovement:OnSlotChanged()
             self:RefreshImprovementChance()
 
             self:HighlightBoosterRow(row)
+            self.improvementSlot:RefreshName()
         else
             self:ClearSelections()
             return
@@ -135,16 +136,12 @@ function ZO_SmithingImprovement:OnSlotChanged()
     if hasItem then
         self.resultTooltip:SetHidden(false)
         self.resultTooltip:ClearLines()
-		self:SetupResultTooltip(self:GetCurrentImprovementParams())
+        self:SetupResultTooltip(self:GetCurrentImprovementParams())
     else
         self.resultTooltip:SetHidden(true)
     end
 
     self.inventory:HandleVisibleDirtyEvent()
-end
-
-function ZO_SmithingImprovement:Improve()
-	self:SharedImprove()
 end
 
 do
@@ -190,8 +187,6 @@ end
 function ZO_SmithingImprovementInventory:Initialize(owner, control, ...)
     ZO_CraftingInventory.Initialize(self, control, ...)
 
-    self:ShowStatusHeader()
-
     local infoBar = control:GetNamedChild("InfoBar")
     local backpack = control:GetNamedChild("Backpack")
 
@@ -200,7 +195,6 @@ function ZO_SmithingImprovementInventory:Initialize(owner, control, ...)
     infoBar:SetAnchor(TOPRIGHT, backpack, BOTTOMRIGHT, 0, 145)
 
     self.owner = owner
-    self.noItemsLabel = control:GetNamedChild("NoItemsLabel")
 
     self:SetFilters{
         self:CreateNewTabFilterData(ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanSmithingApparelPatternsBeCraftedHere),
@@ -218,9 +212,9 @@ function ZO_SmithingImprovementInventory:ChangeFilter(filterData)
     self.filterType = filterData.descriptor
 
     if self.filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
-        self.noItemsLabel:SetText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
+        self:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
     elseif self.filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
-        self.noItemsLabel:SetText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
+        self:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
     end
 
     self.owner:OnFilterChanged(self.filterType)
@@ -232,7 +226,7 @@ function ZO_SmithingImprovementInventory:Refresh(data)
     local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
     self.owner:OnInventoryUpdate(validItems)
 
-    self.noItemsLabel:SetHidden(#data > 0)
+    self:SetNoItemLabelHidden(#data > 0)
 end
 
 function ZO_SmithingImprovementInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

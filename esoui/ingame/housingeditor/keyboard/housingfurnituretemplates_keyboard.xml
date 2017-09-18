@@ -102,31 +102,11 @@
                     </Controls>
                 </Label>
 
-                <Label name="$(parent)TextCallout" font="ZoFontWinT1" modifyTextType="UPPERCASE">
+                <Label name="$(parent)TextCallout" inherits="ZO_MarketTextCallout_Keyboard" >
                     <Anchor point="RIGHT" relativeTo="$(parent)PreviousCost" relativePoint="LEFT" offsetX="-10" />
                     <Controls>
-                        <Control name="$(parent)Background">
+                        <Control name="$(parent)Background" override="true">
                             <AnchorFill />
-                            <Controls>
-                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds">
-                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
-                                    <AnchorFill />
-                                </Texture>
-                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds">
-                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
-                                    <Dimensions x="16"/>
-                                    <DimensionConstraints minX="16" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Center" relativePoint="TOPLEFT"/>
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Center" relativePoint="BOTTOMLEFT"/>
-                                </Texture>
-                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds">
-                                    <TextureCoords left="1" right="0" top="0" bottom="1" />
-                                    <Dimensions x="16"/>
-                                    <DimensionConstraints minX="16" />
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Center" relativePoint="TOPRIGHT"/>
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Center" relativePoint="BOTTOMRIGHT"/>
-                                </Texture>
-                            </Controls>
                         </Control>
                     </Controls>
                 </Label>

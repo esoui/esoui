@@ -1,38 +1,50 @@
-ZO_DYEABLE_EQUIP_SLOTS = {}
-ZO_DYEABLE_COLLECTIBLE_SLOTS = {}
+ZO_DYEABLE_SLOTS = 
+{
+    [RESTYLE_MODE_EQUIPMENT] = {},
+    [RESTYLE_MODE_COLLECTIBLE] = {},
+}
 
-function ZO_Dyeing_DyeableSlotGamepadSortComparator(left, right)
-    return left.gamepadOrder < right.gamepadOrder
-end
+ZO_DYEABLE_SORT_ORDER_OVERRIDE = 
+{
+    [RESTYLE_MODE_EQUIPMENT] =
+    {
+        [EQUIP_SLOT_OFF_HAND] = 100,
+        [EQUIP_SLOT_BACKUP_OFF] = 100,
+    },
+}
 
-function ZO_Dyeing_InitializeDyeableSlotsTables()
-    ZO_ClearNumericallyIndexedTable(ZO_DYEABLE_EQUIP_SLOTS)
-    ZO_ClearNumericallyIndexedTable(ZO_DYEABLE_COLLECTIBLE_SLOTS)
-
-    local numDyeableEquipSlots = GetNumDyeableEquipSlots()
-    local numDyeableCollectibleCategories = GetNumDyeableCollectibleCategories()
-
-    for i = 1, numDyeableEquipSlots do
-        local dyeableEquipSlotData =
-        {
-            dyeableSlot = GetDyeableEquipSlot(i),
-            gamepadOrder = GetDyeableEquipSlotGamepadOrder(i)
-        }
-        table.insert(ZO_DYEABLE_EQUIP_SLOTS, dyeableEquipSlotData)
+do
+    local function DyeableSlotSortComparator(left, right)
+        local leftSortOrder = left:GetSortOrder()
+        local rightSortOrder = right:GetSortOrder()
+        if leftSortOrder == rightSortOrder then
+            return left:GetRestyleSlotType() < right:GetRestyleSlotType()
+        else
+            return leftSortOrder < rightSortOrder
+        end
     end
 
-    for j = 1, numDyeableCollectibleCategories do
-        local dyeableCollectibleCategoryData =
-        {
-            dyeableSlot = GetDyeableCollectibleCategory(j),
-            gamepadOrder = GetDyeableCollectibleCategoryGamepadOrder(i)
-        }
-        table.insert(ZO_DYEABLE_COLLECTIBLE_SLOTS, dyeableCollectibleCategoryData)
+    --TODO: Make this local again
+    function ZO_IterateDyeableSlotData(restyleMode, iterationBegin, iterationEnd)
+        local slotsTable = ZO_DYEABLE_SLOTS[restyleMode]
+        local sortOverrideTable = ZO_DYEABLE_SORT_ORDER_OVERRIDE[restyleMode]
+        for restyleSlotType = iterationBegin, iterationEnd do
+            if IsRestyleSlotTypeDyeable(restyleMode, restyleSlotType) then
+                local sortOrder = 0
+                if sortOverrideTable and sortOverrideTable[restyleSlotType] then
+                    sortOrder = sortOverrideTable[restyleSlotType]
+                end
+                local dyeableSlotData = ZO_RestyleSlotData:New(restyleMode, ZO_RESTYLE_DEFAULT_SET_INDEX, restyleSlotType)
+                dyeableSlotData:SetSortOrder(sortOrder)
+                table.insert(slotsTable, dyeableSlotData)
+            end
+        end
+        table.sort(slotsTable, DyeableSlotSortComparator)
     end
 
-    if IsInGamepadPreferredMode() then
-        table.sort(ZO_DYEABLE_EQUIP_SLOTS, ZO_Dyeing_DyeableSlotGamepadSortComparator)
-        table.sort(ZO_DYEABLE_COLLECTIBLE_SLOTS, ZO_Dyeing_DyeableSlotGamepadSortComparator)
+    function ZO_Dyeing_InitializeDyeableSlotsTables()
+        ZO_IterateDyeableSlotData(RESTYLE_MODE_EQUIPMENT, EQUIP_SLOT_ITERATION_BEGIN, EQUIP_SLOT_ITERATION_END)
+        ZO_IterateDyeableSlotData(RESTYLE_MODE_COLLECTIBLE, COLLECTIBLE_CATEGORY_TYPE_ITERATION_BEGIN, COLLECTIBLE_CATEGORY_TYPE_ITERATION_END)
     end
 end
 
@@ -58,19 +70,18 @@ ZO_DYEING_STATION_INTERACTION =
 {
     type = "Dyeing Station",
     End = function()
-        SYSTEMS:HideScene("dyeing")
+        SYSTEMS:HideScene("restyle")
     end,
     interactTypes = { INTERACTION_DYE_STATION },
 }
 
 -- Shared Show Events
 EVENT_MANAGER:RegisterForEvent("Dyeing_Shared", EVENT_DYEING_STATION_INTERACT_START, function(eventCode)
-    ZO_Dyeing_InitializeDyeableSlotsTables()
-    SYSTEMS:ShowScene("dyeing")
+    SYSTEMS:ShowScene("restyle")
 end)
 
 EVENT_MANAGER:RegisterForEvent("Dyeing_Shared", EVENT_DYEING_STATION_INTERACT_END, function(eventCode)
-    SYSTEMS:HideScene("dyeing")
+    SYSTEMS:HideScene("restyle")
 end)
 
 -- Shared Functions
@@ -180,34 +191,14 @@ function ZO_Dyeing_InitializeSwatchPool(owner, sharedHighlight, parentControl, t
     return swatchPool
 end
 
-do
-    local STACK_COUNT = 1
-
-    function ZO_Dyeing_SetupDyeableSlotControl(control, dyeableSlot)
-        local icon = GetDyeableSlotIcon(dyeableSlot)
-        if icon == ZO_NO_TEXTURE_FILE then
-            icon = ZO_Character_GetEmptyDyeableSlotTexture(dyeableSlot)
-        end
-
-        local equipSlot = GetEquipSlotFromDyeableSlot(dyeableSlot)
-        if equipSlot ~= EQUIP_SLOT_NONE then
-            ZO_Inventory_BindSlot(control, SLOT_TYPE_DYEABLE_EQUIPMENT, equipSlot, BAG_WORN)
-        end
-
-        control.dyeableSlot = dyeableSlot
-
-        ZO_ItemSlot_SetupSlot(control, STACK_COUNT, icon)
-    end
-end
-
 function ZO_Dyeing_DyeSortComparator(left, right)
     return left.sortKey < right.sortKey
 end
 
-function ZO_Dyeing_RefreshDyeableSlotControlDyes_Colors(slotControl, dyeableSlot, ...)
-    local isDyeable = IsDyeableSlotDyeable(dyeableSlot)
-    local isChannelDyeableTable = {AreDyeableSlotDyeChannelsDyeable(dyeableSlot)}
-    for dyeChannel, dyeControl in ipairs(slotControl.dyeControls) do
+function ZO_Dyeing_RefreshDyeableSlotControlDyes_Colors(dyeControls, restyleSlotData, ...)
+    local isDyeable = restyleSlotData:IsDataDyeable()
+    local isChannelDyeableTable = {restyleSlotData:AreDyeChannelsDyeable()}
+    for dyeChannel, dyeControl in ipairs(dyeControls) do
         if isDyeable then
             dyeControl:SetHidden(false)
             local currentDyeId = select(dyeChannel, ...)
@@ -222,17 +213,8 @@ local function GetFrameForDyeChannel(empty)
     return empty and "EsoUI/Art/Dye/dye_amorSlot_empty.dds" or "EsoUI/Art/Dye/dye_amorSlot.dds"
 end
 
-function ZO_Dyeing_RefreshDyeableSlotControlDyes(slotControl, dyeableSlot)
-    ZO_Dyeing_RefreshDyeableSlotControlDyes_Colors(slotControl, dyeableSlot, GetPendingSlotDyes(dyeableSlot))
-end
-
-function ZO_Dyeing_GetActiveOffhandDyeableSlot()
-    local activeWeaponPair = GetActiveWeaponPairInfo()
-    if activeWeaponPair == ACTIVE_WEAPON_PAIR_BACKUP then
-        return DYEABLE_SLOT_BACKUP_OFF
-    end
-
-    return DYEABLE_SLOT_OFF_HAND
+function ZO_Dyeing_RefreshDyeableSlotControlDyes(dyeControls, restyleSlotData)
+    ZO_Dyeing_RefreshDyeableSlotControlDyes_Colors(dyeControls, restyleSlotData, restyleSlotData:GetPendingDyes())
 end
 
 function ZO_DyeingUtils_SetSlotDyeSwatchDyeId(dyeChannel, dyeControl, dyeId, isDyeable)   
@@ -288,66 +270,45 @@ function ZO_DyeingUtils_GetHeaderTextFromSortType(sortStyleType, rarityOrHueCate
     end
 end
 
-function ZO_Dyeing_UniformRandomize(mode, getRandomUnlockedDyeIdFunction)
+function ZO_Dyeing_UniformRandomize(restyleMode, getRandomUnlockedDyeIdFunction)
     local primaryDyeId = getRandomUnlockedDyeIdFunction()
     local secondaryDyeId = getRandomUnlockedDyeIdFunction()
     local accentDyeId = getRandomUnlockedDyeIdFunction()
     
-    local slots = ZO_Dyeing_GetSlotsForMode(mode)
-    local activeDyeableSlot = ZO_Dyeing_GetActiveOffhandDyeableSlot()
+    local slots = ZO_Dyeing_GetSlotsForMode(restyleMode)
 
     for i, dyeableSlotData in ipairs(slots) do
-        local dyeableSlot = dyeableSlotData.dyeableSlot
         --don't randomly dye the shield in your other weapon set
-        if (dyeableSlot ~= DYEABLE_SLOT_OFF_HAND and dyeableSlot ~= DYEABLE_SLOT_BACKUP_OFF)
-            or dyeableSlot == activeDyeableSlot then
-                local isPrimaryChannelDyeable, isSecondaryChannelDyeable, isAccentChannelDyeable = AreDyeableSlotDyeChannelsDyeable(dyeableSlot)
-                local finalPrimaryDyeId = isPrimaryChannelDyeable and primaryDyeId or INVALID_DYE_ID
-                local finalSecondaryDyeId = isSecondaryChannelDyeable and secondaryDyeId or INVALID_DYE_ID
-                local finalAccentDyeId = isAccentChannelDyeable and accentDyeId or INVALID_DYE_ID
-                SetPendingSlotDyes(dyeableSlot, finalPrimaryDyeId, finalSecondaryDyeId, finalAccentDyeId)
+        if not dyeableSlotData:ShouldBeHidden() then
+            local isPrimaryChannelDyeable, isSecondaryChannelDyeable, isAccentChannelDyeable = dyeableSlotData:AreDyeChannelsDyeable()
+            local finalPrimaryDyeId = isPrimaryChannelDyeable and primaryDyeId or INVALID_DYE_ID
+            local finalSecondaryDyeId = isSecondaryChannelDyeable and secondaryDyeId or INVALID_DYE_ID
+            local finalAccentDyeId = isAccentChannelDyeable and accentDyeId or INVALID_DYE_ID
+            dyeableSlotData:SetPendingDyes(finalPrimaryDyeId, finalSecondaryDyeId, finalAccentDyeId)
         end
     end
 
     PlaySound(SOUNDS.DYEING_RANDOMIZE_DYES)
+    return primaryDyeId, secondaryDyeId, accentDyeId
 end
 
-function ZO_Dyeing_AreTherePendingDyes(mode)
-    local slots = ZO_Dyeing_GetSlotsForMode(mode)
+function ZO_Dyeing_AreTherePendingDyes(restyleMode)
+    local slots = ZO_Dyeing_GetSlotsForMode(restyleMode)
     for i, dyeableSlotData in ipairs(slots) do
-        if ZO_Dyeing_AreTherePendingDyesForDyeableSlot(dyeableSlotData.dyeableSlot) then
+        if dyeableSlotData:AreTherePendingDyeChanges() then
             return true
         end
     end
     return false
 end
 
-do
-    local NUM_DYE_CHANNELS = 3
-    function ZO_Dyeing_AreTherePendingDyesForDyeableSlot(dyeableSlot)
-        local currentDyes = { GetDyeableSlotCurrentDyes(dyeableSlot) }
-        local pendingDyes = { GetPendingSlotDyes(dyeableSlot) }
-        for j = 1, NUM_DYE_CHANNELS do
-            local currentColor = currentDyes[j]
-            local pendingColor = pendingDyes[j]
-            if currentColor ~= pendingColor then
-                return true
-            end
-        end
-
-        return false
-    end
-end
-
-function ZO_Dyeing_AreAllItemsBound(mode)
-    local slots = ZO_Dyeing_GetSlotsForMode(mode)
-
-    if mode == DYE_MODE_EQUIPMENT then
-        local activeWeaponPair = GetActiveWeaponPairInfo()
-        local doNotCheckThisSlot = ZO_Dyeing_GetOppositeOffHandDyeableSlot(activeWeaponPair)
+function ZO_Dyeing_AreAllItemsBound(restyleMode)
+    if restyleMode == RESTYLE_MODE_EQUIPMENT then
+        local slots = ZO_Dyeing_GetSlotsForMode(restyleMode)
+        local doNotCheckThisSlot = ZO_Restyle_GetOppositeOffHandEquipSlotType()
         for i, dyeableSlotData in ipairs(slots) do
-            local dyeableSlot = dyeableSlotData.dyeableSlot
-            if doNotCheckThisSlot ~= dyeableSlot and IsDyeableSlotDyeable(dyeableSlot) and not IsDyeableSlotBound(dyeableSlot) and ZO_Dyeing_AreTherePendingDyesForDyeableSlot(dyeableSlot) then
+            local restyleSlotType = dyeableSlotData:GetRestyleSlotType()
+            if doNotCheckThisSlot ~= restyleSlotType and dyeableSlotData:IsDataDyeable() and not IsRestyleEquipmentSlotBound(restyleSlotType) and dyeableSlotData:AreTherePendingDyeChanges() then
                 return false
             end
         end
@@ -355,20 +316,8 @@ function ZO_Dyeing_AreAllItemsBound(mode)
     return true
 end
 
-function ZO_Dyeing_GetOppositeOffHandDyeableSlot(activeWeaponPair)
-    if activeWeaponPair == ACTIVE_WEAPON_PAIR_MAIN then
-        return DYEABLE_SLOT_BACKUP_OFF
-    elseif activeWeaponPair == ACTIVE_WEAPON_PAIR_BACKUP then
-        return DYEABLE_SLOT_OFF_HAND
-    end
-end
-
 function ZO_Dyeing_GetSlotsForMode(mode)
-    if mode == DYE_MODE_EQUIPMENT then
-        return ZO_DYEABLE_EQUIP_SLOTS
-    elseif mode == DYE_MODE_COLLECTIBLE then
-        return ZO_DYEABLE_COLLECTIBLE_SLOTS
-    end
+    return ZO_DYEABLE_SLOTS[mode]
 end
 
 do
@@ -495,14 +444,14 @@ local function GetOrCreateDyeParentCategory(sortStyle, activeSwatches, rarity, h
     end
 end
 
-function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPool, layoutOptions, container)
+function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPool, layoutOptions, container, useSearchResults)
     local activeSwatches = {}
     local swatchByDyeId = {}
 
     swatchPool:ReleaseAllObjects()
 
-    for i=1, GetNumDyes() do
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey, dyeId = GetDyeInfo(i)
+    local function AddDye(dyeIndex)
+        local dyeName, known, rarity, hueCategory, achievementId, r, g, b, sortKey, dyeId = GetDyeInfo(dyeIndex)
 
         if known or includeLocked then
             local parentCategory = GetOrCreateDyeParentCategory(sortStyle, activeSwatches, rarity, hueCategory)
@@ -518,6 +467,17 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
 
             table.insert(parentCategory, swatch)
             swatchByDyeId[dyeId] = swatch
+        end
+    end
+
+    local searchResults = useSearchResults and ZO_DYEING_MANAGER:GetSearchResults()
+    if searchResults then
+        for searchResultIndex, dyeIndex in ipairs(searchResults) do
+            AddDye(dyeIndex)
+        end
+    else
+        for dyeIndex = 1, GetNumDyes() do
+            AddDye(dyeIndex)
         end
     end
 
@@ -607,12 +567,21 @@ function ZO_DyeingSwatch_OnMouseExit(swatch)
 end
 
 do
-    local INFORMATION_TOOLTIP_X_OFFSET = -15
+    local INFORMATION_TOOLTIP_X_OFFSET = 15
     local INFORMATION_TOOLTIP_VERTICAL_PADDING = 10
     local INFORMATION_TOOLTIP_RETURN_VALUE_Y_POSITION = 2
-    function ZO_Dyeing_CreateTooltipOnMouseEnter(control, dyeName, isDyeKnown, achievementId, nonPlayerDye)
+    function ZO_Dyeing_CreateTooltipOnMouseEnter(control, dyeName, isDyeKnown, achievementId, nonPlayerDye, isRightAnchored)
         if control then
-            InitializeTooltip(InformationTooltip, control:GetParent(), TOPRIGHT, INFORMATION_TOOLTIP_X_OFFSET, select(INFORMATION_TOOLTIP_RETURN_VALUE_Y_POSITION, control:GetCenter()) - control:GetParent():GetTop())
+            local anchorPoint
+            local xOffset
+            if isRightAnchored == false then
+                anchorPoint = TOPLEFT
+                xOffset = INFORMATION_TOOLTIP_X_OFFSET
+            else
+                anchorPoint = TOPRIGHT
+                xOffset = -INFORMATION_TOOLTIP_X_OFFSET
+            end
+            InitializeTooltip(InformationTooltip, control:GetParent(), anchorPoint, xOffset, select(INFORMATION_TOOLTIP_RETURN_VALUE_Y_POSITION, control:GetCenter()) - control:GetParent():GetTop())
     
             SetTooltipText(InformationTooltip, zo_strformat(SI_DYEING_SWATCH_TOOLTIP_TITLE, dyeName))
             InformationTooltip:AddVerticalPadding(INFORMATION_TOOLTIP_VERTICAL_PADDING)
@@ -630,25 +599,6 @@ function ZO_Dyeing_ClearTooltipOnMouseExit()
     ClearTooltip(InformationTooltip)
 end
 
-local DYEABLE_SLOT_TEXTURES =
-{
-    [DYEABLE_SLOT_HEAD]       = "EsoUI/Art/CharacterWindow/gearSlot_head.dds",
-    [DYEABLE_SLOT_CHEST]      = "EsoUI/Art/CharacterWindow/gearSlot_chest.dds",
-    [DYEABLE_SLOT_SHOULDERS]  = "EsoUI/Art/CharacterWindow/gearSlot_shoulders.dds",
-    [DYEABLE_SLOT_OFF_HAND]   = "EsoUI/Art/CharacterWindow/gearSlot_offHand.dds",
-    [DYEABLE_SLOT_WAIST]      = "EsoUI/Art/CharacterWindow/gearSlot_belt.dds",
-    [DYEABLE_SLOT_LEGS]       = "EsoUI/Art/CharacterWindow/gearSlot_legs.dds",
-    [DYEABLE_SLOT_FEET]       = "EsoUI/Art/CharacterWindow/gearSlot_feet.dds",
-    [DYEABLE_SLOT_HAND]       = "EsoUI/Art/CharacterWindow/gearSlot_hands.dds",
-    [DYEABLE_SLOT_BACKUP_OFF] = "EsoUI/Art/CharacterWindow/gearSlot_offHand.dds",
-    [DYEABLE_SLOT_COSTUME]    = "EsoUI/Art/Dye/dye_costume.dds",
-    [DYEABLE_SLOT_HAT]        = "EsoUI/Art/Dye/dye_hat.dds",
-}
-
-function ZO_Character_GetEmptyDyeableSlotTexture(dyeableSlot)
-    return DYEABLE_SLOT_TEXTURES[dyeableSlot]
-end
-
 --
 --[[ Dyeing Singleton ]]--
 --
@@ -657,7 +607,39 @@ local Dyeing_Manager = ZO_CallbackObject:Subclass()
 
 function Dyeing_Manager:New(...)
     local dyeing = ZO_CallbackObject.New(self)
+    dyeing:Initialize(...)
     return dyeing
+end
+
+function Dyeing_Manager:Initialize()
+    ZO_Dyeing_InitializeDyeableSlotsTables()
+    
+    self.searchString = ""
+    self.searchResults = {}
+
+    EVENT_MANAGER:RegisterForEvent("Dyeing_Manager", EVENT_DYES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
+end
+
+function Dyeing_Manager:SetSearchString(searchString)
+    self.searchString = searchString or ""
+    StartDyesSearch(searchString)
+end
+
+function Dyeing_Manager:UpdateSearchResults()
+    ZO_ClearNumericallyIndexedTable(self.searchResults)
+
+    for i = 1, GetNumDyesSearchResults() do
+        table.insert(self.searchResults, GetDyesSearchResult(i))
+    end
+
+    self:FireCallbacks("UpdateSearchResults")
+end
+
+function Dyeing_Manager:GetSearchResults()
+    if zo_strlen(self.searchString) > 1 then
+        return self.searchResults
+    end
+    return nil
 end
 
 function Dyeing_Manager:RegisterForDyeListUpdates(callback)

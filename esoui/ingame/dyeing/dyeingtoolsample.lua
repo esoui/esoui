@@ -18,8 +18,8 @@ function ZO_DyeingToolSample:HasSwatchSelection()
     return false
 end
 
-function ZO_DyeingToolSample:OnLeftClicked(dyeableSlot, dyeChannel)
-    local dyeId = select(dyeChannel, GetPendingSlotDyes(dyeableSlot))
+function ZO_DyeingToolSample:OnLeftClicked(restyleSlotData, dyeChannel)
+    local dyeId = select(dyeChannel, restyleSlotData:GetPendingDyes())
     if dyeId > INVALID_DYE_ID then
         local _, known = GetDyeInfoById(dyeId)
         local isPlayerDye = self.owner:DoesDyeIdExistInPlayerDyes(dyeId)
@@ -48,6 +48,6 @@ function ZO_DyeingToolSample:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
     end
 end
 
-function ZO_DyeingToolSample:GetCursorType(dyeableSlot, dyeChannel)
+function ZO_DyeingToolSample:GetCursorType()
     return MOUSE_CURSOR_SAMPLE
 end

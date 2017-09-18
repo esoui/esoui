@@ -404,7 +404,8 @@ function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
             requiredLevel = requiredLevel,
             requiredCP = requiredCP,
             purchasePrice = purchasePrice,
-            currencyType = currencyType
+            currencyType = currencyType,
+            isGuildSpecificItem = true,
         }
 
         return result

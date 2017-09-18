@@ -73,6 +73,15 @@ local function GetBestItemCategoryDescription(itemData)
     end
 end
 
+local function GetBestSellItemCategoryDescription(itemData)
+    local traitType = GetItemTrait(itemData.bagId, itemData.slotIndex)
+    if traitType == ITEM_TRAIT_TYPE_WEAPON_ORNATE or traitType == ITEM_TRAIT_TYPE_ARMOR_ORNATE or traitType == ITEM_TRAIT_TYPE_JEWELRY_ORNATE then
+        return GetString("SI_ITEMTRAITTYPE", traitType)
+    else
+        return GetBestItemCategoryDescription(itemData)
+    end
+end
+
 local defaultSortKeys =
 {
     bestGamepadItemCategoryName = { tiebreaker = "name" },
@@ -81,10 +90,15 @@ local defaultSortKeys =
     requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
     iconFile = { tiebreaker = "uniqueId" },
     uniqueId = { isId64 = true },
+    customSortOrder = { tiebreaker = "bestGamepadItemCategoryName", isNumeric = true },
 }
 
 local function ItemSortFunc(data1, data2)
      return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", defaultSortKeys, ZO_SORT_ORDER_UP)
+end
+
+local function SellSortFunc(data1, data2)
+     return ZO_TableOrderingFunction(data1, data2, "customSortOrder", defaultSortKeys, ZO_SORT_ORDER_UP)
 end
 
 local BagSortKeys = 
@@ -150,7 +164,8 @@ local function GetSellItems()
             itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
 
             itemData.storeGroup = GetItemStoreGroup(itemData)
-            itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
+            itemData.bestGamepadItemCategoryName = GetBestSellItemCategoryDescription(itemData)
+            itemData.customSortOrder = ZO_InventoryUtils_Gamepad_GetSellItemCustomSortOrder(itemData)
             table.insert(unequippedItems, itemData)
         end
     end
@@ -208,7 +223,7 @@ local function GatherDamagedEquipmentFromBag(bagId, itemTable)
                     local damagedItem = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
                     damagedItem.condition = condition
                     damagedItem.repairCost = repairCost
-                    damagedItem.invalidPrice = repairCost > GetCarriedCurrencyAmount(CURT_MONEY)
+                    damagedItem.invalidPrice = repairCost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
                     damagedItem.isEquippedInCurrentCategory = damagedItem.bagId == BAG_WORN
                     damagedItem.storeGroup = GetItemStoreGroup(damagedItem)
                     damagedItem.bestGamepadItemCategoryName = GetBestItemCategoryDescription(damagedItem)
@@ -313,7 +328,7 @@ end
 local MODE_TO_UPDATE_FUNC = {
         [ZO_MODE_STORE_BUY] =          {updateFunc = GetBuyItems,           sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_BUY_BACK] =     {updateFunc = GetBuybackItems,       sortFunc = ItemSortFunc},
-        [ZO_MODE_STORE_SELL] =         {updateFunc = GetSellItems,          sortFunc = ItemSortFunc},
+        [ZO_MODE_STORE_SELL] =         {updateFunc = GetSellItems,          sortFunc = SellSortFunc},
         [ZO_MODE_STORE_REPAIR] =       {updateFunc = GetRepairItems,        sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_SELL_STOLEN] =  {updateFunc = GetStolenSellItems,    sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_LAUNDER] =      {updateFunc = GetLaunderItems,       sortFunc = ItemSortFunc},

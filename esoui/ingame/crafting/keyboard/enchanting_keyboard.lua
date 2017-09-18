@@ -238,8 +238,10 @@ end
 function ZO_EnchantingInventory:Initialize(owner, control, ...)
     local inventory = ZO_CraftingInventory.Initialize(self, control, ...)
     self.owner = owner
-    self.noRunesLabel = control:GetNamedChild("NoRunesLabel")
     self.filterType = NO_FILTER
+
+    local SET_HIDDEN = true
+    self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true }, SET_HIDDEN)
 end
 
 
@@ -264,18 +266,18 @@ function ZO_EnchantingInventory:ChangeFilter(filterData)
     ZO_CraftingInventory.ChangeFilter(self, filterData)
 
     if self.owner:GetEnchantingMode() == ENCHANTING_MODE_EXTRACTION then
-        self.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_GLYPHS))
+        self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_GLYPHS))
     else
         self.filterType = filterData.descriptor
 
         if self.filterType == ENCHANTING_RUNE_ASPECT then
-            self.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_ASPECT_RUNES))
+            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_ASPECT_RUNES))
         elseif self.filterType == ENCHANTING_RUNE_ESSENCE then
-            self.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_ESSENCE_RUNES))
+            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_ESSENCE_RUNES))
         elseif self.filterType == ENCHANTING_RUNE_POTENCY then
-            self.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_POTENCY_RUNES))
+            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_POTENCY_RUNES))
         else
-            self.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_RUNES))
+            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
         end
     end
 
@@ -323,7 +325,7 @@ function ZO_EnchantingInventory:Refresh(data)
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(IsEnchantingItem, DoesEnchantingItemPassFilter, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
-    self.noRunesLabel:SetHidden(#data > 0)
+    self:SetNoItemLabelHidden(#data > 0)
 end
 
 function ZO_EnchantingInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

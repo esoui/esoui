@@ -229,7 +229,7 @@ end
 
 do
     local function UpdatePlayerGold(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
         return true
     end
 
@@ -385,7 +385,7 @@ function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
                                     if(IsUnitDead("player")) then
                                         ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_DEAD)
                                     else
-                                        self:ShowGoldSliderControl(self.offeredMoney[TRADE_ME] or 0, GetCarriedCurrencyAmount(CURT_MONEY))
+                                        self:ShowGoldSliderControl(self.offeredMoney[TRADE_ME] or 0, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
                                     end
                                end
         self:AddOfferListEntry(list, ATTACH_GOLD_TEXT, ATTACH_GOLD_ICON, actionFunction, MODIFY_TEXT_TYPE_UPPERCASE)

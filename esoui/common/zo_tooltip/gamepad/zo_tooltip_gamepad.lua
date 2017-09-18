@@ -48,6 +48,7 @@ GAMEPAD_RIGHT_TOOLTIP = "GAMEPAD_RIGHT_TOOLTIP"
 GAMEPAD_MOVABLE_TOOLTIP = "GAMEPAD_MOVABLE_TOOLTIP"
 GAMEPAD_LEFT_DIALOG_TOOLTIP = "GAMEPAD_LEFT_DIALOG_TOOLTIP"
 GAMEPAD_QUAD3_TOOLTIP = "GAMEPAD_QUAD3_TOOLTIP"
+GAMEPAD_QUAD1_TOOLTIP = "GAMEPAD_QUAD1_TOOLTIP"
 
 GAMEPAD_TOOLTIP_NORMAL_BG = 1
 GAMEPAD_TOOLTIP_DARK_BG = 2
@@ -70,6 +71,7 @@ function ZO_GamepadTooltip:Initialize(control, dialogControl)
     self:InitializeTooltip(GAMEPAD_RIGHT_TOOLTIP, self.control, "Right", AUTO_SHOW_BG, LEFT)
     self:InitializeTooltip(GAMEPAD_MOVABLE_TOOLTIP, self.control, "Movable", AUTO_SHOW_BG, RIGHT)
     self:InitializeTooltip(GAMEPAD_QUAD3_TOOLTIP, self.control, "Quadrant3", AUTO_SHOW_BG, RIGHT)
+    self:InitializeTooltip(GAMEPAD_QUAD1_TOOLTIP, self.control, "Quadrant1", AUTO_SHOW_BG, RIGHT)
     self:InitializeTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, self.dialogControl, "Left", AUTO_SHOW_BG, RIGHT)
 end
 

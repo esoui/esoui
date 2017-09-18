@@ -160,7 +160,7 @@ function ZO_SharedSmithingResearch:GenerateResearchTraitCounts(virtualInventoryL
 
     for itemId, itemInfo in pairs(virtualInventoryList) do
         local traitIndex = GetTraitIndexForItem(itemInfo.bag, itemInfo.index, craftingType, researchLineIndex, numTraits)
-        if traitIndex and not IsItemPlayerLocked(itemInfo.bag, itemInfo.index) then
+        if traitIndex then
             counts = counts or {}
             counts[traitIndex] = (counts[traitIndex] or 0) + 1
         end
@@ -186,45 +186,57 @@ function ZO_SharedSmithingResearch:FindResearchingTraitIndex(craftingType, resea
     return nil, areAllTraitsKnown
 end
 
-function ZO_SharedSmithingResearch:Refresh()
-    self.dirty = false
+do
+    local function IsNotLockedOrRetraitedItem(bagId, slotIndex)
+        return not IsItemPlayerLocked(bagId, slotIndex) and GetItemTraitInformation(bagId, slotIndex) ~= ITEM_TRAIT_INFORMATION_RETRAITED
+    end
 
-    self.researchLineList:Clear()
-    local craftingType = GetCraftingInteractionType()
+    function ZO_SharedSmithingResearch.IsResearchableItem(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
+        return CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
+                and IsNotLockedOrRetraitedItem(bagId, slotIndex)
+    end
 
-    local numCurrentlyResearching = 0
+    function ZO_SharedSmithingResearch:Refresh()
+        self.dirty = false
 
-    local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, nil, PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK))
+        self.researchLineList:Clear()
+        local craftingType = GetCraftingInteractionType()
 
-    for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do
-        local name, icon, numTraits, timeRequiredForNextResearchSecs = GetSmithingResearchLineInfo(craftingType, researchLineIndex)
-        if numTraits > 0 then
-            local researchingTraitIndex, areAllTraitsKnown = self:FindResearchingTraitIndex(craftingType, researchLineIndex, numTraits)
-            if researchingTraitIndex then
-                numCurrentlyResearching = numCurrentlyResearching + 1
-            end
+        local numCurrentlyResearching = 0
 
-            if DetermineResearchLineFilterType(craftingType, researchLineIndex) == self.typeFilter then
-                local itemTraitCounts = self:GenerateResearchTraitCounts(virtualInventoryList, craftingType, researchLineIndex, numTraits)
-                local data = { craftingType = craftingType, researchLineIndex = researchLineIndex, name = name, icon = icon, numTraits = numTraits, timeRequiredForNextResearchSecs = timeRequiredForNextResearchSecs, researchingTraitIndex = researchingTraitIndex, areAllTraitsKnown = areAllTraitsKnown, itemTraitCounts = itemTraitCounts }
-                self.researchLineList:AddEntry(data)
+        local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsNotLockedOrRetraitedItem)
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsNotLockedOrRetraitedItem, virtualInventoryList)
+
+        for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do
+            local name, icon, numTraits, timeRequiredForNextResearchSecs = GetSmithingResearchLineInfo(craftingType, researchLineIndex)
+            if numTraits > 0 then
+                local researchingTraitIndex, areAllTraitsKnown = self:FindResearchingTraitIndex(craftingType, researchLineIndex, numTraits)
+                if researchingTraitIndex then
+                    numCurrentlyResearching = numCurrentlyResearching + 1
+                end
+
+                if DetermineResearchLineFilterType(craftingType, researchLineIndex) == self.typeFilter then
+                    local itemTraitCounts = self:GenerateResearchTraitCounts(virtualInventoryList, craftingType, researchLineIndex, numTraits)
+                    local data = { craftingType = craftingType, researchLineIndex = researchLineIndex, name = name, icon = icon, numTraits = numTraits, timeRequiredForNextResearchSecs = timeRequiredForNextResearchSecs, researchingTraitIndex = researchingTraitIndex, areAllTraitsKnown = areAllTraitsKnown, itemTraitCounts = itemTraitCounts }
+                    self.researchLineList:AddEntry(data)
+                end
             end
         end
-    end
 
-    self.researchLineList:Commit()
+        self.researchLineList:Commit()
 
-    local maxResearchable = GetMaxSimultaneousSmithingResearch(craftingType)
-    if numCurrentlyResearching >= maxResearchable then
-        self.atMaxResearchLimit = true
-    else
-        self.atMaxResearchLimit = false
-    end
+        local maxResearchable = GetMaxSimultaneousSmithingResearch(craftingType)
+        if numCurrentlyResearching >= maxResearchable then
+            self.atMaxResearchLimit = true
+        else
+            self.atMaxResearchLimit = false
+        end
 
-    self:RefreshCurrentResearchStatusDisplay(numCurrentlyResearching, maxResearchable)
+        self:RefreshCurrentResearchStatusDisplay(numCurrentlyResearching, maxResearchable)
 
-    if self.activeRow then
-        self:OnResearchRowActivate(self.activeRow)
+        if self.activeRow then
+            self:OnResearchRowActivate(self.activeRow)
+        end
     end
 end
 

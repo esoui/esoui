@@ -37,7 +37,7 @@ end
 function ZO_CollectionsInventorySingleton:BuildCollectionsData()
     ZO_ClearTable(self.collectionsData)
 
-    for categoryType = COLLECTIBLE_CATEGORY_TYPE_MIN_VALUE, COLLECTIBLE_CATEGORY_TYPE_MAX_VALUE do
+    for categoryType = COLLECTIBLE_CATEGORY_TYPE_ITERATION_BEGIN, COLLECTIBLE_CATEGORY_TYPE_ITERATION_END do
         for i = 1, GetTotalCollectiblesByCategoryType(categoryType) do
             local collectibleId = GetCollectibleIdFromType(categoryType, i)
             self:BuildSingleCollectionsData(collectibleId)
@@ -99,8 +99,11 @@ function ZO_CollectionsInventorySingleton:GetSingleCollectibleData(collectibleId
     return data
 end
 
-function ZO_CollectionsInventorySingleton:GetQuickslotData()
-    return self:GetCollectionsData(IsCollectibleCategoryUsable, IsCollectibleCategorySlottable)
+function ZO_CollectionsInventorySingleton:GetQuickslotData(filteredCategoryType)
+    local function FilterCollectibleCategoryType(categoryType)
+        return not filteredCategoryType or categoryType == filteredCategoryType 
+    end
+    return self:GetCollectionsData(IsCollectibleCategoryUsable, IsCollectibleCategorySlottable, FilterCollectibleCategoryType)
 end
 
 function ZO_CollectionsInventorySingleton:GetCollectibleInventoryDisplayName(data)

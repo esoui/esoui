@@ -18,11 +18,10 @@ function ZO_DyeingToolFill:GetHighlightRules(dyeableSlot, dyeChannel)
     return nil, dyeChannel
 end
 
-function ZO_DyeingToolFill:OnLeftClicked(_, dyeChannel)
-    local currentMode = self.owner:GetMode()
-    local slots = ZO_Dyeing_GetSlotsForMode(currentMode)
+function ZO_DyeingToolFill:OnLeftClicked(restyleSlotData, dyeChannel)
+    local slots = ZO_Dyeing_GetSlotsForMode(restyleSlotData:GetRestyleMode())
     for i, dyeableSlotData in ipairs(slots) do
-        SetPendingSlotDyes(dyeableSlotData.dyeableSlot, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), GetPendingSlotDyes(dyeableSlotData.dyeableSlot)))
+        dyeableSlotData:SetPendingDyes(zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), dyeableSlotData:GetPendingDyes()))
     end
 
     self.owner:OnPendingDyesChanged(nil)
@@ -40,6 +39,6 @@ function ZO_DyeingToolFill:OnSavedSetLeftClicked(_, dyeChannel)
     PlaySound(SOUNDS.DYEING_TOOL_FILL_USED)
 end
 
-function ZO_DyeingToolFill:GetCursorType(dyeableSlot, dyeChannel)
+function ZO_DyeingToolFill:GetCursorType()
     return MOUSE_CURSOR_FILL
 end

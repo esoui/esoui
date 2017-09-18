@@ -144,18 +144,17 @@ function ZO_GuildHeraldryManager_Keyboard:InitializeKeybindStripDescriptors()
                 local pendingCost = GetPendingHeraldryCost()
                 local heraldryFunds = GetHeraldryGuildBankedMoney()
 
-                if IsCreatingHeraldryForFirstTime() then
-                    if heraldryFunds and pendingCost <= heraldryFunds then
-                        return zo_strformat(SI_GUILD_HERALDRY_PURCHASE_HERALDRY, pendingCost)
-                    else
-                        return zo_strformat(SI_GUILD_HERALDRY_PURCHASE_HERALDRY_NOT_ENOUGH, pendingCost)
-                    end
+                local format
+                if heraldryFunds and pendingCost <= heraldryFunds then
+                    format = ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON
                 else
-                    if heraldryFunds and pendingCost <= heraldryFunds then
-                        return zo_strformat(SI_GUILD_HERALDRY_APPLY_CHANGES, pendingCost)
-                    else
-                        return zo_strformat(SI_GUILD_HERALDRY_APPLY_CHANGES_NOT_ENOUGH, pendingCost)
-                    end
+                    format = ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON
+                end
+
+                if IsCreatingHeraldryForFirstTime() then
+                    return zo_strformat(SI_GUILD_HERALDRY_PURCHASE_HERALDRY, ZO_Currency_FormatKeyboard(CURT_MONEY, pendingCost, format))
+                else
+                    return zo_strformat(SI_GUILD_HERALDRY_APPLY_CHANGES, ZO_Currency_FormatKeyboard(CURT_MONEY, pendingCost, format))
                 end
             end,
 

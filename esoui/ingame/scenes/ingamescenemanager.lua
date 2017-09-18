@@ -466,8 +466,8 @@ function ZO_IngameSceneManager:HideTopLevels()
 end
 
 function ZO_IngameSceneManager:OnToggleGameMenuBinding()
-    if SYSTEMS:IsShowing("dyeing") then
-        SYSTEMS:GetObject("dyeing"):AttemptExit()
+    if SYSTEMS:IsShowing("restyle") then
+        SYSTEMS:GetObject("restyle"):AttemptExit()
         return
     end
 

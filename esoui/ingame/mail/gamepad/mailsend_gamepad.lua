@@ -433,7 +433,7 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
 end
 
 local function UpdatePlayerGold(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_MAIL_HEADER_MONEY_OPTIONS_GAMEPAD)
+    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_MAIL_HEADER_MONEY_OPTIONS_GAMEPAD)
     return true
 end
 
@@ -464,6 +464,7 @@ end
 
 local function InventorySetupFunction(entryData)
     entryData.isMailAttached = IsItemAttached(entryData.bagId, entryData.slotIndex)
+    entryData:SetIgnoreTraitInformation(true)
 end
 
 local function ItemFilterFunction(entryData)
@@ -539,7 +540,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
 
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL), nil, nil, function() self.mailView.subjectEdit.edit:TakeFocus() end)
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_BODY_LABEL), nil, nil, function() self.mailView.bodyEdit.edit:TakeFocus() end)
-    self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCarriedCurrencyAmount(CURT_MONEY)) end)
+    self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)) end)
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), nil, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
 
 	self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox) 

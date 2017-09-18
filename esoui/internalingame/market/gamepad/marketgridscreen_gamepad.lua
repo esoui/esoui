@@ -71,7 +71,7 @@ do
     }
 
     -- Used to map x/y movement to sound direction for sounds: TOPLEFT, TOP, TOPRIGHT // LEFT, MIDDLE, RIGHT // BOTTOMLEFT, BOTTOM, BOTTOMRIGHT
-    local DIR_SOUND_MAP = 
+    local DIR_SOUND_MAP_COL_ROW = 
     {
         [-1 ] = { [-1 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS, [ 0 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS, [ 1 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS },
         [ 0 ] = { [-1 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS, [ 0 ] = nil,                                [ 1 ] = FOCUS_MOVEMENT_TYPES.MOVE_NEXT     },
@@ -107,7 +107,7 @@ do
                     local selectedData = self.data[newIndex]
                     if selectedData then
                         self:SetFocusByIndex(newIndex)
-                        self.onPlaySoundFunction(DIR_SOUND_MAP[dy][dx])
+                        self.onPlaySoundFunction(DIR_SOUND_MAP_COL_ROW[dy][dx])
                     end
                 end
             end
@@ -536,6 +536,12 @@ function ZO_GamepadMarket_GridScreen:RefreshHeader()
     end
 end
 
+function ZO_GamepadMarket_GridScreen:RefreshTabBarVisible()
+    if self.isInitialized then
+        self.header.tabBar:RefreshVisible()
+    end
+end
+
 function ZO_GamepadMarket_GridScreen:BeginPreview()
     self.previewIndex = self.selectedMarketProduct:GetPreviewIndex()
     self.isPreviewing = true
@@ -699,24 +705,9 @@ function ZO_GamepadMarket_GridScreen:UpdatePreviousAndNewlySelectedProducts(prev
     end
 end
 
-function ZO_GamepadMarket_GridScreen:ScrollToPosition(scrollPosition, scrollInstantly)
-    if self.control:IsHidden() or scrollInstantly then -- Play animation instantly if the market control is hidden
-        ZO_Scroll_ScrollAbsoluteInstantly(self.contentContainer, scrollPosition)
-    else
-        ZO_Scroll_ScrollAbsolute(self.contentContainer, scrollPosition) -- Animate to scroll position
-    end
-
-    self:UpdateScrollbarAlpha()
-end
-
 function ZO_GamepadMarket_GridScreen:ScrollToGridEntry(entryData, scrollInstantly)
-    local scrollPosition = entryData.gridY == 1 and 0 or (entryData.centerScrollHeight - self.scrollToCenterOffsetY)
-    self:ScrollToPosition(scrollPosition, scrollInstantly)
-end
-
-function ZO_GamepadMarket_GridScreen:ScrollToGridScrollYPosition()
-    local scrollPosition = (self.gridScrollYPosition - 1) * (self.itemHeight + self.itemPadding)
-    self:ScrollToPosition(scrollPosition)
+    ZO_Scroll_ScrollControlIntoCentralView(self.contentContainer, entryData.control, scrollInstantly)
+    self:UpdateScrollbarAlpha()
 end
 
 do

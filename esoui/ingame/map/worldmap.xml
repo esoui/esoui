@@ -235,7 +235,7 @@
                 </Control>
 
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3">
-                    <Anchor point="TOP"/>
+                    <Anchor point="BOTTOM"/>
                 </Label>
 
                 <Scroll name="$(parent)Scroll" mouseEnabled="true">

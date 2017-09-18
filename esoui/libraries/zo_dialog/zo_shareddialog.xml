@@ -4,7 +4,7 @@
             <DimensionConstraints minY="35" maxY="35" />
             <ResizeToFitPadding width="10"/>
             <OnInitialized>
-                ZO_DialogButton_OnInitialized(self)
+                ZO_SharedDialogButton_OnInitialized(self)
             </OnInitialized>
         </Control>
 

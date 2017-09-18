@@ -7,10 +7,10 @@ end
 function ZO_SmithingExtraction:Initialize(control, owner, refinementOnly)
     local slotContainer = control:GetNamedChild("SlotContainer")
     self.control = control
-	ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), slotContainer:GetNamedChild("ExtractLabel"), owner, refinementOnly)
+    ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), slotContainer:GetNamedChild("ExtractLabel"), owner, refinementOnly)
 
-	self.inventory = ZO_SmithingExtractionInventory:New(self, self.control:GetNamedChild("Inventory"), refinementOnly)
-	self:InitExtractionSlot("smithing")
+    self.inventory = ZO_SmithingExtractionInventory:New(self, self.control:GetNamedChild("Inventory"), refinementOnly)
+    self:InitExtractionSlot("smithing")
 end
 
 function ZO_SmithingExtraction:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
@@ -38,20 +38,27 @@ function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnl
     ZO_CraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
-    self.noItemsLabel = control:GetNamedChild("NoItemsLabel")
-
-    self:ShowStatusHeader()
 
     if refinementOnly then
         self:SetFilters{
             self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS, GetString(SI_SMITHING_EXTRACTION_RAW_MATERIALS_TAB), "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_disabled.dds"),
         }
+
+        self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true }, true)
+
+        self.sortOrder = ZO_SORT_ORDER_UP
+        self.sortKey = "name"
     else
         self:SetFilters{
             self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanSmithingApparelPatternsBeCraftedHere),
             self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanSmithingWeaponPatternsBeCraftedHere),
         }
+
+        self.sortOrder = ZO_SORT_ORDER_UP
+        self.sortKey = "traitInformationSortOrder"
     end
+
+    self.sortHeaders:SelectHeaderByKey(self.sortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, not ZO_SortHeaderGroup.FORCE_RESELECT, self.sortOrder)
 end
 
 function ZO_SmithingExtractionInventory:AddListDataTypes()
@@ -81,11 +88,11 @@ function ZO_SmithingExtractionInventory:ChangeFilter(filterData)
     self.filterType = filterData.descriptor
 
     if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR then
-        self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_ARMOR))
+        self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_ARMOR))
     elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS then
-        self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_WEAPONS))
+        self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_WEAPONS))
     elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-        self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_MATERIALS))
+        self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_MATERIALS))
     end
 
     self.owner:OnFilterChanged()
@@ -105,7 +112,7 @@ function ZO_SmithingExtractionInventory:Refresh(data)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 
-    self.noItemsLabel:SetHidden(#data > 0)
+    self:SetNoItemLabelHidden(#data > 0)
 end
 
 function ZO_SmithingExtractionInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

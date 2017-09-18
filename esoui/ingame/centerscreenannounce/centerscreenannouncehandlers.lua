@@ -476,20 +476,6 @@ CSH[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
     return messageParams
 end
 
-CSH[EVENT_LORE_BOOK_LEARNED] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, isMaxRank)
-    if guildReputationIndex == 0 or isMaxRank then
-        -- We only want to fire this event if a player is not part of the guild or if they've reached max level in the guild.
-        -- Otherwise, the _SKILL_EXPERIENCE version of this event will send a center screen message instead.
-        local hidden = select(5, GetLoreCollectionInfo(categoryIndex, collectionIndex))
-        if not hidden then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
-            messageParams:SetText(GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED))
-            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_BOOK_LEARNED)
-            return messageParams
-        end
-    end
-end
-
 CSH[EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
     if guildReputationIndex > 0 then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
@@ -549,35 +535,41 @@ local function CreatePvPMessageParams(sound, description, CSAType, lifespan)
     return messageParams
 end
 
+local function CreateAvAMessageParams(sound, description, CSAType, lifespan)
+    local messageParams = CreatePvPMessageParams(sound, description, CSAType, lifespan)
+    messageParams:MarkIsAvAEvent()
+    return messageParams
+end
+
 CSH[EVENT_ARTIFACT_CONTROL_STATE] = function(artifactName, keepId, characterName, playerAlliance, controlEvent, controlState, campaignId, displayName)
     local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or characterName
     local description, soundId = GetAvAArtifactEventDescription(artifactName, keepId, nameToShow, playerAlliance, controlEvent, campaignId)
-    return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
+    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
 end
 
 CSH[EVENT_KEEP_GATE_STATE_CHANGED] = function(keepId, open)
     local description, soundId = GetGateStateChangedDescription(keepId, open)
-    return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_KEEP_GATE_CHANGED)
+    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_KEEP_GATE_CHANGED)
 end
 
 CSH[EVENT_CORONATE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
     local description, soundId = GetCoronateEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
-    return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR, 5000)
+    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR, 5000)
 end
 
 CSH[EVENT_DEPOSE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
     local description, soundId = GetDeposeEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
-    return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR, 5000)
+    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR, 5000)
 end
 
 CSH[EVENT_IMPERIAL_CITY_ACCESS_GAINED_NOTIFICATION] = function(campaignId, alliance)
     local description, soundId = GetImperialCityAccessGainedEventDescription(campaignId, alliance)
-    return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_GAINED)
+    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_GAINED)
 end
 
 CSH[EVENT_IMPERIAL_CITY_ACCESS_LOST_NOTIFICATION] = function(campaignId, alliance)
     local description, soundId = GetImperialCityAccessLostEventDescription(campaignId, alliance)
-    return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_LOST)
+    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_LOST)
 end
 
 CSH[EVENT_REVENGE_KILL] = function(killedCharacterName, killedDisplayName)
@@ -585,7 +577,7 @@ CSH[EVENT_REVENGE_KILL] = function(killedCharacterName, killedDisplayName)
         local killedName = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(killedDisplayName) or killedCharacterName
         local description = zo_strformat(SI_REVENGE_KILL, killedName)
         local soundId = nil
-        return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_REVENGE_KILL)
+        return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_REVENGE_KILL)
     end
 end
 
@@ -599,7 +591,7 @@ CSH[EVENT_AVENGE_KILL] = function(avengedCharacterName, killedCharacterName, ave
         end
         local description = zo_strformat(SI_AVENGE_KILL, avengedName, killedName)
         local soundId = nil
-        return CreatePvPMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_AVENGE_KILL)
+        return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_AVENGE_KILL)
     end
 end
 
@@ -624,6 +616,22 @@ CSH[EVENT_CAPTURE_AREA_STATE_CHANGED] = function(objectiveKeepId, objectiveId, b
             end
             return CreatePvPMessageParams(soundId, text, CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         end
+    end
+end
+
+CSH[EVENT_CAPTURE_AREA_SPAWNED] = function(objectiveKeepId, objectiveId, battlegroundContext, pinType, hasMoved)
+    if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL)  then
+        local text, soundId
+        --150% because the icon textures contain a good bit of empty space
+        local captureAreaIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
+        if hasMoved then
+            text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_MOVED, captureAreaIcon)
+            soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_MOVED
+        else
+            text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_SPAWNED, captureAreaIcon)
+            soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_SPAWNED
+        end
+        return CreatePvPMessageParams(soundId, text, CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
     end
 end
 
@@ -846,8 +854,8 @@ do
         [RAID_POINT_REASON_SOLO_ARENA_COMPLETE]     = { icon = "EsoUI/Art/Trials/trialPoints_veryHigh.dds", soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_VERY_HIGH },
     }
 
-    CSH[EVENT_RAID_TRIAL_SCORE_UPDATE] = function(scoreType, scoreAmount, totalScore)
-        local reasonAssets = TRIAL_SCORE_REASON_TO_ASSETS[scoreType]
+    CSH[EVENT_RAID_TRIAL_SCORE_UPDATE] = function(scoreUpdateReason, scoreAmount, totalScore)
+        local reasonAssets = TRIAL_SCORE_REASON_TO_ASSETS[scoreUpdateReason]
         if reasonAssets then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, reasonAssets.soundId)
             messageParams:SetText(zo_strformat(SI_TRIAL_SCORE_UPDATED_LARGE, reasonAssets.icon, scoreAmount))

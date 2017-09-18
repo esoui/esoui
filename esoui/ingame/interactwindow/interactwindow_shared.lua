@@ -197,7 +197,7 @@ end
 
 do
     local function UpdatePlayerGold(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
         return true
     end
     function ZO_SharedInteraction:HandleChatterOptionClicked(label)
@@ -226,7 +226,7 @@ do
                         },
                         {
                             titleParams = { COST_OPTION_TO_PROMPT_TITLE[label.optionType] },
-                            mainTextParams = {COST_OPTION_TO_PROMPT[label.optionType], label.gold, ZO_Currency_GetPlatformFormattedGoldIcon()}
+                            mainTextParams = {COST_OPTION_TO_PROMPT[label.optionType], label.gold, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY)}
                         }
                     )
                 --otherwise just do it
@@ -291,7 +291,6 @@ end
 
 function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore)
     optionType = optionType or CHATTER_START_TALK
-
     local chatterData = {
         optionIndex = optionIndex,
         optionType = optionType,
@@ -324,10 +323,11 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             local suppressCostSuffix = (optionType == CHATTER_TALK_CHOICE_PAY_BOUNTY)
 
             if(optionalArg > 0 and not suppressCostSuffix) then
-                chatterData.optionText = zo_strformat(SI_INTERACT_OPTION_COST, optionText, chatterData.gold, self:GetInteractGoldIcon())
+                local formattedGoldIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY) 
+                chatterData.optionText = zo_strformat(SI_INTERACT_OPTION_COST, optionText, chatterData.gold, formattedGoldIcon)
             end
 
-            if(GetCarriedCurrencyAmount(CURT_MONEY) < optionalArg) then
+            if(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < optionalArg) then
                 chatterData.optionUsable = false
             end
         elseif(optionType == CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED 
@@ -491,8 +491,9 @@ local REWARD_CREATORS =
             g_numItemRewardsForQuest = g_numItemRewardsForQuest + 1
         end,
     [REWARD_TYPE_INSPIRATION] =
-        function(control, name, amount, currencyOptions)
-            SetupCurrencyReward(control, UI_ONLY_CURRENCY_INSPIRATION, amount, currencyOptions)
+        function(control, name, amount, icon)
+            local MEETS_USAGE_REQUIREMENTS = true
+            SetupBasicReward(control, name, amount, icon, MEETS_USAGE_REQUIREMENTS)
         end,
     [REWARD_TYPE_ALLIANCE_POINTS] =
         function(control, name, amount, currencyOptions)
@@ -524,7 +525,6 @@ local currencyRewards =
 {
     [REWARD_TYPE_MONEY] = true,
     [REWARD_TYPE_ALLIANCE_POINTS] = true,
-    [REWARD_TYPE_INSPIRATION] = true,
     [REWARD_TYPE_TELVAR_STONES] = true,
 	[REWARD_TYPE_WRIT_VOUCHERS] = true,
 }
@@ -547,7 +547,7 @@ end
 
 function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
     local currencyType = currencyRewardToCurrencyType[rewardType]
-    if currencyType and (GetCarriedCurrencyAmount(currencyType) + rewardAmount >= MAX_PLAYER_CURRENCY) then
+    if currencyType and (GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) + rewardAmount >= MAX_PLAYER_CURRENCY) then
         return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetString("SI_CURRENCYTYPE", currencyType))
     end        
 end
@@ -556,7 +556,7 @@ function ZO_SharedInteraction:GetRewardCreateFunc(rewardType)
     return REWARD_CREATORS[rewardType]
 end
 
-function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
+function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
     local data = {}
     local numRewards = GetJournalQuestNumRewards(journalQuestIndex)
     for i = 1, numRewards do
@@ -580,6 +580,12 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex)
                 local skillType, skillLineIndex = GetJournalQuestRewardSkillLine(journalQuestIndex, i)
                 local down, up, over, announce = ZO_Skills_GetIconsForSkillType(skillType)
                 rewardData.icon = announce
+            elseif rewardType == REWARD_TYPE_INSPIRATION then
+                if isGamepad then
+                    rewardData.icon = "EsoUI/Art/currency/gamepad/gp_inspiration.dds"
+                else
+                    rewardData.icon = "EsoUI/Art/currency/currency_inspiration.dds"
+                end
             end
 
             table.insert(data, rewardData)

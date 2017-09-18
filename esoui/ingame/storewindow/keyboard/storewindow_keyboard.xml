@@ -1,5 +1,21 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_StoreEntrySlot" inherits="ZO_PlayerInventorySlot" virtual="true">
+            <OnMouseUp>
+                if upInside then
+                    ZO_Store_OnEntryClicked(self, button)
+                end
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_Store_OnEntryMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Store_OnEntryMouseExit(self)
+            </OnMouseExit>
+        </Control>
+        
         <TopLevelControl name="ZO_StorePanelTabContainer" resizeToFitDescendents="true" hidden="true">
             <Anchor point="TOP" offsetY="12"/>
         </TopLevelControl>
@@ -54,32 +70,7 @@
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
                 <!-- Sort Headers -->
-                <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
-                    <Controls>
-                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
-                            <Dimensions x="290" y="20" />
-                            <Anchor point="LEFT" offsetX="73" />
-                            <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
-                            </OnInitialized>
-                        </Control>
-                        <Control name="$(parent)StatValue" inherits="ZO_SortHeader">
-                            <!-- This header changes name depending on what filter is active (currently power/armor values) -->
-                            <Dimensions x="103" y="20" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="4" />
-                            <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_POWER, TEXT_ALIGN_RIGHT, "statValue")
-                            </OnInitialized>
-                        </Control>
-                        <Control name="$(parent)Price" inherits="ZO_SortHeader">
-                            <Dimensions x="70" y="20" />
-                            <Anchor point="RIGHT" offsetX="-22" />
-                            <OnInitialized>
-                                ZO_PlayerInventory_InitSortHeader(self, SI_STORE_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "stackBuyPrice")
-                            </OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
 
                 <!-- Item Lists -->
                 <Control name="$(parent)List" inherits="ZO_InventoryList">

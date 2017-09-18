@@ -348,9 +348,9 @@ function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
             currentSceneName = currentScene:GetName()
         end
     end
-    local existingButtonOrEtheralDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
-    if existingButtonOrEtheralDescriptor then
-        local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtheralDescriptor)
+    local existingButtonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
+    if existingButtonOrEtherealDescriptor then
+        local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtherealDescriptor)
         local existingSceneName = ""
         local existingDescriptorName = ""
         if existingDescriptor then

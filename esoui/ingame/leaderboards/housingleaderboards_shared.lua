@@ -58,7 +58,7 @@ do
 
             for voteCategory = 0, numVoteCategories - 1 do
                 local houseEventName = GetHomeShowLeaderboardVoteCategoryName(voteCategory)
-                for houseCategory = HOUSE_CATEGORY_TYPE_MIN_VALUE, HOUSE_CATEGORY_TYPE_MAX_VALUE do
+                for houseCategory = HOUSE_CATEGORY_TYPE_ITERATION_BEGIN, HOUSE_CATEGORY_TYPE_ITERATION_END do
                     local houseCategoryDisplayName = houseCategory == HOUSE_CATEGORY_TYPE_NONE and GetString(SI_HOUSING_LEADERBOARDS_ALL_HOMES) or GetString("SI_HOUSECATEGORYTYPE", houseCategory)
                     local homeShowName = zo_strformat(SI_HOUSING_LEADERBOARDS_HOME_SHOW_NAME_AND_CATEGORY, houseEventName, houseCategoryDisplayName)
                     local categoryData = 

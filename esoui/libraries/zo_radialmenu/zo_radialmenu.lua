@@ -302,6 +302,7 @@ do
             entryControl.endY = math.cos(centerAngle + halfSliceSize)
 
             entryControl.entry = entry
+            entry.control = entryControl
         end
     end
 end
@@ -435,4 +436,8 @@ end
 
 function ZO_RadialMenu:IsShown()
     return not self.control:IsControlHidden()
+end
+
+function ZO_RadialMenu:GetEntries()
+    return self.entries
 end

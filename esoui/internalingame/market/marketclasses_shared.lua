@@ -73,7 +73,6 @@ function ZO_MarketProductBase:New(...)
     return marketProduct
 end
 
-local DEFAULT_CURRENCY_ICON_SIZE = 32
 function ZO_MarketProductBase:Initialize(control, owner)
     self.owner = owner
     self.marketProductId = 0
@@ -114,6 +113,22 @@ end
 
 function ZO_MarketProductBase:SetId(marketProductId)
     self.marketProductId = marketProductId
+end
+
+function ZO_MarketProductBase:GetName()
+    return self.name
+end
+
+function ZO_MarketProductBase:SetName(name)
+    self.name = name
+end
+
+function ZO_MarketProductBase:GetIsFeatured()
+    return self.isFeatured
+end
+
+function ZO_MarketProductBase:SetIsFeatured(isFeatured)
+    self.isFeatured = isFeatured
 end
 
 function ZO_MarketProductBase:GetMarketProductInfo()
@@ -215,6 +230,22 @@ function ZO_MarketProductBase:HasSubscriptionUnlockedAttachments()
     return DoesMarketProductHaveSubscriptionUnlockedAttachments(self.marketProductId)
 end
 
+function ZO_MarketProductBase:AreAllCollectiblesUnlocked()
+    local allCollectiblesOwned = false
+    local productType = self:GetProductType()
+    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+        local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
+        if not isPlaceholder then
+            allCollectiblesOwned = owned
+        end
+    elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
+        -- Show bundles that have all their collectibles unlocked as collected
+        allCollectiblesOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
+    end
+
+    return allCollectiblesOwned
+end
+
 function ZO_MarketProductBase:GetBackgroundSaturation(isPurchased)
     return isPurchased and ZO_MARKET_PRODUCT_PURCHASED_DESATURATION or ZO_MARKET_PRODUCT_NOT_PURCHASED_DESATURATION
 end
@@ -244,6 +275,7 @@ do
     local FOCUSED = true
     local INHERIT_ICON_COLOR = true
     local CURRENCY_ICON_SIZE = "100%"
+    local PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE = 2
     function ZO_MarketProductBase:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
         local hideCallouts = true
         local isFree = cost == 0 or costAfterDiscount == 0
@@ -256,8 +288,42 @@ do
 
         -- setup the callouts for new, on sale, and LTO
         if showCallouts then
-            -- house colelctibles and promos don't show onSale
+            -- house collectibles and promos don't show onSale
             local onSale = discountPercent > 0 and not (isHouseCollectible or isPromo)
+
+            local hasHouseOnSale = false
+            local houseMinDiscountPercent = nil
+            local houseMaxDiscountPercent = nil
+            if isHouseCollectible then
+                local productId = self:GetId()
+                local marketProductHouseId = GetMarketProductHouseId(productId)
+                local numHouseTemplates = GetNumHouseTemplatesForHouse(marketProductHouseId)
+                for index = 1, numHouseTemplates do
+                    local houseTemplateId = GetHouseTemplateIdByIndexForHouse(marketProductHouseId, index)
+                    local marketProductListings = { GetActiveMarketProductListingsForHouseTemplate(houseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE) }
+
+                    --There could be multiple listings per template, one for each currency type.
+                    for i = 1, #marketProductListings, PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE do
+                        local houseTemplateMarketProductId = marketProductListings[i]
+                        local presentationIndex = marketProductListings[i + 1]
+
+                        local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(houseTemplateMarketProductId, presentationIndex)
+                        if hasDiscount then
+                            hasHouseOnSale = true
+
+                            if not houseMinDiscountPercent or discountPercent < houseMinDiscountPercent then
+                                houseMinDiscountPercent = discountPercent
+                            end
+
+                            if not houseMaxDiscountPercent or discountPercent > houseMaxDiscountPercent then
+                                houseMaxDiscountPercent = discountPercent
+                            end
+                        else
+                            houseMinDiscountPercent = 0
+                        end
+                    end
+                end
+            end
 
             local calloutUpdateHandler
             -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
@@ -265,9 +331,14 @@ do
                 hideCallouts = false
                 self:UpdateRemainingTimeCalloutText()
                 calloutUpdateHandler = function() self:UpdateRemainingTimeCalloutText() end
-            elseif onSale then
+            elseif onSale or hasHouseOnSale then
                 hideCallouts = false
-                self.textCallout:SetText(zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent))
+                if onSale then
+                    self.textCallout:SetText(zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent))
+                elseif hasHouseOnSale then
+                    -- for now, we'll just show a generic SALE tag, but in the future we may want to show the exact percents
+                    self.textCallout:SetText(zo_strformat(SI_MARKET_TILE_CALLOUT_SALE))
+                end
                 calloutUpdateHandler = nil
                 self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
             elseif isNew then
@@ -279,7 +350,7 @@ do
 
             self.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
 
-            self.onSale = onSale
+            self.onSale = onSale or hasHouseOnSale
             self.isNew = isNew
         end
 
@@ -287,16 +358,18 @@ do
 
         -- layout the price labels
         if canBePurchased then
+            local hidePricingInfo = isFree or hasHouseOnSale
             -- setup the cost
-            if self.onSale and not isFree then
+            if self.onSale and not hidePricingInfo then
                 self.previousCost:SetText(ZO_CommaDelimitNumber(cost))
             end
 
-            if not isFree then
+            if not hidePricingInfo then
                 self.previousCost:SetHidden(not self.onSale)
                 self.previousCostStrikethrough:SetHidden(not self.onSale)
+
                 local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-                local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
+                local currencyString = string.format("%s %s", ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
                 self.cost:SetText(currencyString)
             else
                 self.previousCost:SetHidden(true)
@@ -305,8 +378,8 @@ do
                 ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
             end
 
-            self.purchaseLabelControl:SetHidden(not isFree)
-            self.cost:SetHidden(isFree)
+            self.purchaseLabelControl:SetHidden(not hidePricingInfo)
+            self.cost:SetHidden(hidePricingInfo)
         else
             if isPromo then
                 self.purchaseLabelControl:SetText("")
@@ -399,10 +472,12 @@ function ZO_MarketProductBase:Show(marketProductId, presentationIndex)
     local name, description, icon, isNew, isFeatured = self:GetMarketProductInfo()
     local background = self:GetBackground()
 
-    self.name = name
+    self:SetName(name)
     self:SetTitle(name)
 
-    self:PerformLayout(description, icon, background, isNew, isFeatured)
+    self:SetIsFeatured(isFeatured)
+
+    self:PerformLayout(background)
 
     local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = self:GetMarketProductPricingByPresentation()
     self:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
@@ -484,7 +559,7 @@ function ZO_MarketProductBase:Purchase()
     -- to be overridden
 end
 
-function ZO_MarketProductBase:PerformLayout(name, description, icon, background, isNew, isFeatured)
+function ZO_MarketProductBase:PerformLayout(background)
     -- to be overridden
 end
 

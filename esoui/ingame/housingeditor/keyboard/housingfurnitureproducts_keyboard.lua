@@ -37,6 +37,16 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeKeybindStrip()
     }
 end
 
+function ZO_HousingFurnitureProducts_Keyboard:InitializeThemeSelector()
+    self.purchaseThemeDropdown = self.contents:GetNamedChild("Dropdown")
+
+    local function OnThemeChanged(comboBox, entryText, entry)
+        SHARED_FURNITURE:SetPurchaseFurnitureTheme(entry.furnitureTheme)
+    end
+
+    ZO_HousingSettingsTheme_SetupDropdown(self.purchaseThemeDropdown, OnThemeChanged)
+end
+
 function ZO_HousingFurnitureProducts_Keyboard:OnSearchTextChanged(editBox)
     ZO_HousingFurnitureList.OnSearchTextChanged(self, editBox)
     SHARED_FURNITURE:SetMarketProductTextFilter(editBox:GetText())

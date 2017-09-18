@@ -18,7 +18,7 @@ end
 
 local function GetEntryColors(mailData)
     local hasCOD = (mailData.codAmount > 0)
-    local hasEnoughMoney = (mailData.codAmount <= GetCarriedCurrencyAmount(CURT_MONEY))
+    local hasEnoughMoney = (mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
     if not hasEnoughMoney then
         return ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD, ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD
     end
@@ -195,7 +195,7 @@ local function GetInventoryString()
 end
 
 local function UpdatePlayerGold(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_MAIL_HEADER_MONEY_OPTIONS_GAMEPAD)
+    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_MAIL_HEADER_MONEY_OPTIONS_GAMEPAD)
     return true
 end
 
@@ -238,7 +238,7 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
     end
     local function CanTakeAttachments()
         local mailData = self:GetActiveMailData()
-        local hasEnoughCOD = mailData and mailData.codAmount <= GetCarriedCurrencyAmount(CURT_MONEY)
+        local hasEnoughCOD = mailData and mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
 
         return IsReadInfoReady() and (self:GetActiveMailHasAttachedItems() or self:GetActiveMailHasAttachedGold()) and hasEnoughCOD
     end

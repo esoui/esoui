@@ -318,6 +318,8 @@ SOUNDS = {
     BATTLEGROUND_CAPTURE_AREA_CAPTURED_OTHER_TEAM = "BG_CA_AreaCaptured_OtherTeam",
     BATTLEGROUND_CAPTURE_METER_CONTESTING = "BG_CM_ContestingArea",
     BATTLEGROUND_CAPTURE_METER_CAPTURING = "BG_CM_CapturingArea",
+    BATTLEGROUND_CAPTURE_AREA_SPAWNED = "BG_CA_AreaCaptured_Spawned",
+    BATTLEGROUND_CAPTURE_AREA_MOVED = "BG_CA_AreaCaptured_Moved",
 
     -- Battleground kill sounds
     BATTLEGROUND_KILL_KILLING_BLOW = "BG_Kill_KillingBlow",
@@ -429,6 +431,9 @@ SOUNDS = {
     TABLET_PAGE_TURN                = "Tablet_PageTurn",
     TABLET_OPEN                     = "Tablet_Open",
     TABLET_CLOSE                    = "Tablet_Close",
+    BOOK_METAL_PAGE_TURN            = "Book_Metal_PageTurn",
+    BOOK_METAL_OPEN                 = "Book_Metal_Open",
+    BOOK_METAL_CLOSE                = "Book_Metal_Close",
     CADWELL_BLADE_SELECTED          = "Cadwell_BladeSelected",
     CADWELL_ITEM_SELECTED           = "Cadwell_ItemSelected",
 

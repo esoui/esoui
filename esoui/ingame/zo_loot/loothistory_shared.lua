@@ -1,11 +1,13 @@
 LOOT_ENTRY_TYPE_EXPERIENCE = 1
-LOOT_ENTRY_TYPE_CROWN_GEMS = 2
-LOOT_ENTRY_TYPE_MONEY = 3
-LOOT_ENTRY_TYPE_ITEM = 4
-LOOT_ENTRY_TYPE_COLLECTIBLE = 5
-LOOT_ENTRY_TYPE_MEDAL = 6
-LOOT_ENTRY_TYPE_SCORE = 7
-LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 8
+LOOT_ENTRY_TYPE_CURRENCY = 2
+LOOT_ENTRY_TYPE_ITEM = 3
+LOOT_ENTRY_TYPE_COLLECTIBLE = 4
+LOOT_ENTRY_TYPE_MEDAL = 5
+LOOT_ENTRY_TYPE_SCORE = 6
+LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 7
+
+LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
+LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
 
 --
 --[[ ZO_LootHistory_Shared ]]--
@@ -31,6 +33,13 @@ function ZO_LootHistory_Shared:Initialize(control)
 end
 
 do
+    local function SetupEntryText(control, data)
+        local text = data.text
+        if type(text) == "function" then
+            text = text(data)
+        end
+        control.label:SetText(text)
+    end
 
     local function SetupIconOverlayText(control, data)
         local overlayText = ZO_LootHistory_Shared.GetIconOverlayTextFromData(data)
@@ -41,7 +50,7 @@ do
     end
 
     local function LootSetupFunction(control, data)
-        control.label:SetText(data.text)
+        SetupEntryText(control, data)
         control.label:SetColor(data.color:UnpackRGBA())
 
         control.icon:SetTexture(data.icon)
@@ -73,8 +82,8 @@ do
             return false
         end
 
-        if data1EntryType == LOOT_ENTRY_TYPE_MONEY then
-            return data1.moneyType == data2.moneyType
+        if data1EntryType == LOOT_ENTRY_TYPE_CURRENCY then
+            return data1.currencyType == data2.currencyType
         elseif data1EntryType == LOOT_ENTRY_TYPE_ITEM then
             return data1.itemId == data2.itemId and data1.quality == data2.quality and data1.isStolen == data2.isStolen
         elseif data1EntryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
@@ -99,7 +108,9 @@ do
         if currentEntryData.entryType ~= LOOT_ENTRY_TYPE_MEDAL and currentEntryData.entryType ~= LOOT_ENTRY_TYPE_SCORE then
             currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
             if control and control.iconOverlayText then
+                SetupEntryText(control, currentEntryData)
                 SetupIconOverlayText(control, currentEntryData)
+
                 ZO_CraftingResults_Base_PlayPulse(control.iconOverlayText)
             end
         end
@@ -177,28 +188,34 @@ end
 -- event handlers
 
 do
-    local MONEY_TEXT = {
-        [CURT_MONEY] = GetString(SI_CURRENCY_GOLD),
-        [CURT_ALLIANCE_POINTS] = GetString(SI_CURRENCY_ALLIANCE_POINTS),
-        [CURT_TELVAR_STONES] = GetString(SI_CURRENCY_TELVAR_STONES),
-        [CURT_WRIT_VOUCHERS] = GetString(SI_CURRENCY_WRIT_VOUCHERS),
-    }
+    local FORMAT_EXTRA_OPTIONS =
+        {
+            showCap = true,
+        }
+    local IS_UPPER = false
 
-    local MONEY_ICONS = {
-        [CURT_MONEY] = LOOT_MONEY_ICON,
-        [CURT_ALLIANCE_POINTS] = LOOT_ALLIANCE_POINT_ICON,
-        [CURT_TELVAR_STONES] = LOOT_TELVAR_STONE_ICON,
-        [CURT_WRIT_VOUCHERS] = LOOT_WRIT_VOUCHER_ICON,
-    }
+    function ZO_LootHistory_Shared:AddCurrencyEntry(currencyAdded, currencyType, currencyLocation)
+        local icon = IsInGamepadPreferredMode() and GetCurrencyLootGamepadIcon(currencyType) or GetCurrencyLootKeyboardIcon(currencyType)
 
-    function ZO_LootHistory_Shared:AddMoneyEntry(moneyAdded, moneyType)
+        function GetCurrencyString(lootData)
+            local currencyAdded = lootData.stackCount
+            local formattedCurrencyString = GetCurrencyName(currencyType, IsCountSingularForm(currencyAdded), IS_UPPER)
+            if IsCurrencyCapped(currencyType, currencyLocation) then
+                FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
+                local currencyAmount = GetCurrencyAmount(currencyType, currencyLocation)
+                formattedCurrencyString = string.format("%s %s", formattedCurrencyString, ZO_Currency_FormatPlatform(currencyType, currencyAmount, ZO_CURRENCY_FORMAT_PARENTHETICAL_AMOUNT, FORMAT_EXTRA_OPTIONS))
+            end
+
+            return formattedCurrencyString
+        end
+
         local lootData = {
-                            text = MONEY_TEXT[moneyType],
-                            icon = MONEY_ICONS[moneyType],
-                            stackCount = moneyAdded,
+                            text = GetCurrencyString,
+                            icon = icon,
+                            stackCount = currencyAdded,
                             color = ZO_SELECTED_TEXT,
-                            moneyType = moneyType,
-                            entryType = LOOT_ENTRY_TYPE_MONEY,
+                            currencyType = currencyType,
+                            entryType = LOOT_ENTRY_TYPE_CURRENCY,
                             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
                             showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
                         }
@@ -215,21 +232,6 @@ function ZO_LootHistory_Shared:AddXpEntry(xpAdded)
                         stackCount = xpAdded,
                         color = ZO_SELECTED_TEXT,
                         entryType = LOOT_ENTRY_TYPE_EXPERIENCE,
-                        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                    }
-    local lootEntry = self:CreateLootEntry(lootData)
-    lootEntry.isPersistent = true
-    self:InsertOrQueue(lootEntry)
-end
-
-function ZO_LootHistory_Shared:AddGemEntry(gemsAdded)
-    local lootData = {
-                        text = GetString(SI_LOOT_HISTORY_CROWN_GEMS_GAIN),
-                        icon = LOOT_GEMS_ICON,
-                        stackCount = gemsAdded,
-                        color = ZO_SELECTED_TEXT,
-                        entryType = LOOT_ENTRY_TYPE_CROWN_GEMS,
                         iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
                         showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
                     }
@@ -364,40 +366,10 @@ function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
     end
 end
 
-function ZO_LootHistory_Shared:OnGoldUpdate(newGold, oldGold, reason)
-    -- pickpocket is handled by OnGoldPickpocket
-    if reason ~= CURRENCY_CHANGE_REASON_PICKPOCKET and reason ~= CURRENCY_CHANGE_REASON_PLAYER_INIT then
-        local goldAdded = newGold - oldGold
-        if goldAdded > 0 then
-            self:AddMoneyEntry(goldAdded, CURT_MONEY)
-        end
-    end
-end
-
-function ZO_LootHistory_Shared:OnGoldPickpocket(goldAmount)
-    self:AddMoneyEntry(goldAmount, CURT_MONEY)
-end
-
-function ZO_LootHistory_Shared:OnAlliancePointUpdate(currentAlliancePoints, playSound, difference)
-    if difference > 0 then
-        self:AddMoneyEntry(difference, CURT_ALLIANCE_POINTS)
-    end
-end
-
-function ZO_LootHistory_Shared:OnTelvarStoneUpdate(newTelvarStones, oldTelvarStones, reason)
-    if reason ~= CURRENCY_CHANGE_REASON_PLAYER_INIT then
-        local tvStonesAdded = newTelvarStones - oldTelvarStones
-        if tvStonesAdded > 0 then
-            self:AddMoneyEntry(tvStonesAdded, CURT_TELVAR_STONES)
-        end
-    end
-end
-
-function ZO_LootHistory_Shared:OnWritVoucherUpdate(newWritVouchers, oldWritVouchers, reason)
-    if reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_QUESTREWARD then
-        local writVouchersAdded = newWritVouchers - oldWritVouchers
-        if writVouchersAdded > 0 then
-            self:AddMoneyEntry(writVouchersAdded, CURT_WRIT_VOUCHERS)
+function ZO_LootHistory_Shared:OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason)
+    if ShouldShowCurrencyInLootHistory(currencyType) then
+        if (currencyLocation == CURRENCY_LOCATION_CHARACTER or currencyLocation == CURRENCY_LOCATION_ACCOUNT) and reason ~= CURRENCY_CHANGE_REASON_PLAYER_INIT and newAmount > oldAmount then
+            self:AddCurrencyEntry(newAmount - oldAmount, currencyType, currencyLocation)
         end
     end
 end
@@ -405,12 +377,6 @@ end
 function ZO_LootHistory_Shared:OnExperienceGainUpdate(reason, level, previousExperience, currentExperience)
     local difference = currentExperience - previousExperience
     self:AddXpEntry(difference)
-end
-
-function ZO_LootHistory_Shared:OnCrownGemUpdate(totalGems, gemDifference)
-    if gemDifference > 0 then
-        self:AddGemEntry(gemDifference)
-    end
 end
 
 function ZO_LootHistory_Shared:OnMedalAwarded(medalId, name, icon, value)
@@ -448,7 +414,11 @@ do
 end
 
 function ZO_LootHistory_Shared.ShouldShowStackCountStringFromData(data)
-    return data.stackCount > 1
+    if data.entryType == LOOT_ENTRY_TYPE_CURRENCY then
+        return data.stackCount > 0
+    else
+        return data.stackCount > 1
+    end
 end
 
 function ZO_LootHistory_Shared.GetMedalValueStringFromData(data)

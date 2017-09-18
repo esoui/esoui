@@ -1,4 +1,6 @@
-ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING = 20
+local MAX_ITEM_REWARDS = 3
+ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_X = 20
+ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_Y = 10
 
 ------------------
 --Initialization--
@@ -56,19 +58,19 @@ function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(reward
     self.rewardsHeader = rewardsSection:GetNamedChild("Header")
     local rewardsEntries = rewardsSection:GetNamedChild("Entries")
     self.rewardEntryPaddingControl = rewardsEntries:GetNamedChild("Padding")
-    local itemRewardControl = rewardsEntries:GetNamedChild("ItemReward")
-    local xpRewardControl = rewardsEntries:GetNamedChild("XPReward")
+    self.itemRewardControls = {}
+    for i = 1, MAX_ITEM_REWARDS do
+        local itemRewardControl = CreateControlFromVirtual("$(parent)ItemReward" .. i, rewardsEntries, "ZO_ActivityFinderTemplateRewardTemplate_Shared")
+        ApplyTemplateToControl(itemRewardControl, rewardsTemplate)
+        table.insert(self.itemRewardControls, itemRewardControl)
+    end
 
-    ApplyTemplateToControl(itemRewardControl, rewardsTemplate)
-    ApplyTemplateToControl(xpRewardControl, rewardsTemplate)
-    self.itemRewardLabel = itemRewardControl:GetNamedChild("Text")
-    self.itemRewardIcon = itemRewardControl:GetNamedChild("Icon")
+    local xpRewardControl = rewardsEntries:GetNamedChild("XPReward")
     self.xpRewardLabel = xpRewardControl:GetNamedChild("Text")
-    self.xpRewardIcon = xpRewardControl:GetNamedChild("Icon")
-    self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_RANDOM_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(0))) --TODO: Implement XP reward hook
-    self.itemRewardControl = itemRewardControl
+    ApplyTemplateToControl(xpRewardControl, rewardsTemplate)
     self.xpRewardControl = xpRewardControl
 
+    self.rewardsSection = rewardsSection
     self.singularSection = panel
 end
 
@@ -93,46 +95,86 @@ function ZO_ActivityFinderTemplate_Shared:OnCooldownsUpdate()
 end
 
 do
-    local ITEM_REWARD_COLOR_MAP =
-    {
-        [LFG_ITEM_REWARD_TYPE_STANDARD] = GetItemQualityColor(ITEM_QUALITY_MAGIC),
-        [LFG_ITEM_REWARD_TYPE_DAILY] = GetItemQualityColor(ITEM_QUALITY_ARCANE),
-    }
-
     local DAILY_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_DAILY_REWARD_HEADER)
     local STANDARD_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_STANDARD_REWARD_HEADER)
+
+    local g_previousControl = nil
+    local g_nextControlOnSameLine = false
+
+    local function AnchorRewardControl(rewardControl)
+        rewardControl:ClearAnchors()
+        if g_previousControl then
+            if g_nextControlOnSameLine then
+                rewardControl:SetAnchor(LEFT, g_previousControl, RIGHT, ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_X, 0)
+            else
+                rewardControl:SetAnchor(TOPLEFT, g_previousControl, BOTTOMLEFT, 0, ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_Y)
+            end
+        else
+            rewardControl:SetAnchor(TOPLEFT)
+        end
+
+        g_nextControlOnSameLine = not g_nextControlOnSameLine
+        if g_nextControlOnSameLine then
+            g_previousControl = rewardControl
+        end
+    end
+
+    local g_rewardControlsToAnchor = {}
 
     function ZO_ActivityFinderTemplate_Shared:RefreshRewards(location)
         local currentSelectionIsRandom = location:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.RANDOM
         local activityType = location:GetActivityType()
-        local hideItemReward = true
-        local hideXPReward = true
+        local hideRewards = true
         if currentSelectionIsRandom then
-            local itemRewardType, xpReward = GetLFGActivityRewardData(activityType)
-            if itemRewardType ~= LFG_ITEM_REWARD_TYPE_NONE then
-                self.itemRewardLabel:SetText(GetString("SI_LFGITEMREWARDTYPE", itemRewardType))
-                self.itemRewardLabel:SetColor(ITEM_REWARD_COLOR_MAP[itemRewardType]:UnpackRGBA())
-                hideItemReward = false
+            local rewardUIDataId, xpReward = GetLFGActivityRewardData(activityType)
+            ZO_ClearNumericallyIndexedTable(g_rewardControlsToAnchor)
+
+            local numShownItemRewardNodes = 0
+            if rewardUIDataId ~= 0 then
+                numShownItemRewardNodes = GetNumLFGActivityRewardUINodes(rewardUIDataId)
+
+                assert(numShownItemRewardNodes <= MAX_ITEM_REWARDS) --If we've allowed for more nodes in the def, we haven't accounted for it in the UI
+
+                for nodeIndex = 1, numShownItemRewardNodes do
+                    local displayName, icon, textColorRed, textColorBlue, textColorGreen = GetLFGActivityRewardUINodeInfo(rewardUIDataId, nodeIndex)
+
+                    local itemRewardControl = self.itemRewardControls[nodeIndex]
+                    itemRewardControl.icon:SetTexture(icon)
+                    itemRewardControl.text:SetText(displayName)
+                    itemRewardControl.text:SetColor(textColorRed, textColorBlue, textColorGreen)
+                    itemRewardControl:SetHidden(false)
+                    table.insert(g_rewardControlsToAnchor, itemRewardControl)
+                    hideRewards = false
+                end
+            end
+
+            for nodeIndex = numShownItemRewardNodes + 1, MAX_ITEM_REWARDS do
+                self.itemRewardControls[nodeIndex]:SetHidden(true)
             end
 
             if xpReward > 0 then
                 self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_RANDOM_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(xpReward)))
-                hideXPReward = false
+                self.xpRewardControl:SetHidden(false)
+                local xpIndex = #g_rewardControlsToAnchor > 0 and 2 or 1 -- Design always wants XP to be the second thing in the left-to right/top to bottom grid (unless it's the only thing)
+                table.insert(g_rewardControlsToAnchor, xpIndex, self.xpRewardControl)
+                hideRewards = false
+            else
+                self.xpRewardControl:SetHidden(true)
+            end
+            
+            g_previousControl = nil
+            g_nextControlOnSameLine = false
+            for _, control in ipairs(g_rewardControlsToAnchor) do
+                AnchorRewardControl(control)
             end
         end
 
-        self.itemRewardLabel:SetHidden(hideItemReward)
-        self.itemRewardIcon:SetHidden(hideItemReward)
-        self.rewardEntryPaddingControl:SetWidth(hideItemReward and 0 or ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING)
-        self.xpRewardLabel:SetHidden(hideXPReward)
-        self.xpRewardIcon:SetHidden(hideXPReward)
-        if hideItemReward and hideXpReward then
-            self.rewardsHeader:SetHidden(true)
+        if hideRewards then
+            self.rewardsSection:SetHidden(true)
         else
             self.rewardsHeader:SetText(IsEligibleForDailyActivityReward() and DAILY_HEADER or STANDARD_HEADER)
-            self.rewardsHeader:SetHidden(false)
+            self.rewardsSection:SetHidden(false)
         end
-        self.rewardsHeader:SetHidden(hideItemReward and hideXPReward)
     end
 end
 

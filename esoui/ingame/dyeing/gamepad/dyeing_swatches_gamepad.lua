@@ -278,7 +278,6 @@ function ZO_Dyeing_Swatches_Gamepad:RefreshDyeLayout_Internal()
 
     local selectedDyeId = self:GetSelectedDyeId()
     local previousRowIndex = self.selectedDyeRow
-
     self.swatchesByPosition, self.positionByDyeId, self.unlockedDyeIds = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
 
     local selectedRowCol = self.positionByDyeId[selectedDyeId]

@@ -9,8 +9,6 @@ end
 function ZO_Smithing:Initialize(control)
     ZO_Smithing_Common.Initialize(self, control)
 
-    self.mainSceneName = SMITHING_SCENE_NAME
-
     local REFINEMENT_ONLY = true
     self.refinementPanel = ZO_SmithingExtraction:New(self.control:GetNamedChild("RefinementPanel"), self, REFINEMENT_ONLY)
     self.creationPanel = ZO_SmithingCreation:New(self.control:GetNamedChild("CreationPanel"), self)

@@ -40,16 +40,6 @@
                 </Cooldown>
             </Controls>
         </TopLevelControl>
-
-        <Control name="ZO_PlayerToPlayerPromptKeybind" inherits="ZO_KeybindButton" virtual="true">
-            <OnEffectivelyShown>
-                ZO_PlayerToPlayer_OnKeybindEffectivelyShown(self)
-            </OnEffectivelyShown>
-            
-            <OnEffectivelyHidden>
-                ZO_PlayerToPlayer_OnKeybindEffectivelyHidden(self)
-            </OnEffectivelyHidden>
-        </Control>
         
         <TopLevelControl name="ZO_PlayerToPlayerArea" hidden="true">
             <AnchorFill />
@@ -82,10 +72,10 @@
                                 </Label>
                                 
                                 <!-- Prompt Response -->
-                                <Control name="$(parent)PromptKeybindButton1" inherits="ZO_PlayerToPlayerPromptKeybind">
+                                <Control name="$(parent)PromptKeybindButton1" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT"/>
                                 </Control>
-                                <Control name="$(parent)PromptKeybindButton2" inherits="ZO_PlayerToPlayerPromptKeybind">
+                                <Control name="$(parent)PromptKeybindButton2" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)PromptKeybindButton1" relativePoint="TOPRIGHT" offsetX="40"/>
                                 </Control>
                                 

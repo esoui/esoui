@@ -26,7 +26,6 @@ end
 function ZO_Smithing_Gamepad:Initialize(control)
     ZO_Smithing_Common.Initialize(self, control)
 
-    self.mainSceneName = GAMEPAD_SMITHING_ROOT_SCENE_NAME
     self.skillInfoBar = ZO_GamepadSmithingTopLevelSkillInfo
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(self.skillInfoBar)
     local function MakeScene(name, mode)
@@ -62,11 +61,11 @@ function ZO_Smithing_Gamepad:Initialize(control)
     }
 
     local REFINEMENT_ONLY = true
-    local maskControl = self.control:GetNamedChild("Mask")
-    self.refinementPanel = ZO_GamepadSmithingExtraction:New(maskControl:GetNamedChild("Refinement"), self.control:GetNamedChild("Refinement"), self, REFINEMENT_ONLY, GAMEPAD_SMITHING_REFINE_SCENE)
-    self.creationPanel = ZO_GamepadSmithingCreation:New(maskControl:GetNamedChild("Creation"), self.control:GetNamedChild("Creation"), self, GAMEPAD_SMITHING_CREATION_SCENE)
-    self.improvementPanel = ZO_GamepadSmithingImprovement:New(maskControl:GetNamedChild("Improvement"), self.control:GetNamedChild("Improvement"), self, GAMEPAD_SMITHING_IMPROVEMENT_SCENE)
-    self.deconstructionPanel = ZO_GamepadSmithingExtraction:New(maskControl:GetNamedChild("Deconstruction"), self.control:GetNamedChild("Deconstruction"), self, not REFINEMENT_ONLY, GAMEPAD_SMITHING_DECONSTRUCT_SCENE)
+    local maskControl = control:GetNamedChild("Mask")
+    self.refinementPanel = ZO_GamepadSmithingExtraction:New(maskControl:GetNamedChild("Refinement"), control:GetNamedChild("Refinement"), self, REFINEMENT_ONLY, GAMEPAD_SMITHING_REFINE_SCENE)
+    self.creationPanel = ZO_GamepadSmithingCreation:New(maskControl:GetNamedChild("Creation"), control:GetNamedChild("Creation"), self, GAMEPAD_SMITHING_CREATION_SCENE)
+    self.improvementPanel = ZO_GamepadSmithingImprovement:New(maskControl:GetNamedChild("Improvement"), control:GetNamedChild("Improvement"), self, GAMEPAD_SMITHING_IMPROVEMENT_SCENE)
+    self.deconstructionPanel = ZO_GamepadSmithingExtraction:New(maskControl:GetNamedChild("Deconstruction"), control:GetNamedChild("Deconstruction"), self, not REFINEMENT_ONLY, GAMEPAD_SMITHING_DECONSTRUCT_SCENE)
     self.researchPanel = ZO_GamepadSmithingResearch:New(maskControl:GetNamedChild("Research"), self, GAMEPAD_SMITHING_RESEARCH_SCENE)
 
     --Whenever we leave a specific mode scene (either through back or pressing start) reset to the root mode
@@ -80,6 +79,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
     self:InitializeModeList()
     self:InitializeKeybindStripDescriptors()
 
+    -- We need to initialize with a tabbar because some modes will make use of it
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     GAMEPAD_SMITHING_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
@@ -165,7 +165,7 @@ end
 function ZO_Smithing_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
-        -- Select mode.
+        -- Select mode
         {
             keybind = "UI_SHORTCUT_PRIMARY",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -173,7 +173,7 @@ function ZO_Smithing_Gamepad:InitializeKeybindStripDescriptors()
             name = function()
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
-        
+
             callback = function()
                 local targetData = self.modeList:GetTargetData()
                 self:SetMode(targetData.mode)
@@ -197,10 +197,10 @@ function ZO_Smithing_Gamepad:AddModeEntry(entry)
 end
 
 function ZO_Smithing_Gamepad:InitializeModeList()
-    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("Mask"):GetNamedChild("Container"):GetNamedChild("List"))
+    self.modeList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("MaskContainerList"))
     self.modeList:SetAlignToScreenCenter(true)
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    
+
     self.refinementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_REFINMENT, SMITHING_MODE_REFINMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_refine.dds")
     self.creationModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
     self.deconstructionModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_deconstruct.dds")
@@ -215,7 +215,7 @@ function ZO_Smithing_Gamepad:RefreshModeList(craftingType)
     self:AddModeEntry(self.deconstructionModeEntry)
     self:AddModeEntry(self.improvementModeEntry)
     self:AddModeEntry(self.researchModeEntry)
-    
+
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(craftingType)
     local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
     local recipeModeEntry = self:CreateModeEntry(recipeCraftingSystemNameStringId, SMITHING_MODE_RECIPES, GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem))
@@ -240,12 +240,12 @@ function ZO_Smithing_Gamepad:SetMode(mode)
 end
 
 function ZO_Smithing_Gamepad:SetEnableSkillBar(enable)
-	if enable then
-		local craftingType = GetCraftingInteractionType()
-		ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.skillInfoBar, craftingType)
-	else
-		ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.skillInfoBar)
-	end
+    if enable then
+        local craftingType = GetCraftingInteractionType()
+        ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.skillInfoBar, craftingType)
+    else
+        ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.skillInfoBar)
+    end
 end
 
 function ZO_Smithing_Gamepad_Initialize(control)

@@ -54,18 +54,10 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="BOTTOMLEFT" offsetY="50" />
                             
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42">
-                                    <Anchor point="TOPLEFT" />
-                                </Label>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" />
 
                                 <Control name="$(parent)Entries" override="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    
-                                    <Controls>
-                                        <Control name="$(parent)ItemReward" override="true">
-                                            <Anchor point="TOPLEFT" />
-                                        </Control>
-                                    </Controls>
                                 </Control>
                             </Controls>
                         </Control>

@@ -190,7 +190,7 @@ do
         end
 
         local allDefaultAccessSettings = HOUSE_SETTINGS_MANAGER:GetAllDefaultAccessSettings()
-        for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_MIN_VALUE, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_MAX_VALUE do
+        for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_BEGIN, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_END do
             local entry = comboBox:CreateItemEntry(allDefaultAccessSettings[i], OnPresetSelected)
             entry.defaultAccess = i
             comboBox:AddItem(entry)

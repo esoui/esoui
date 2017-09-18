@@ -148,11 +148,10 @@ function ZO_TradingHouseManager:InitializeScene()
     local function SceneStateChange(oldState, newState)
         if newState == SCENE_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            PLAYER_INVENTORY:SetTradingHouseModeEnabled(true)
         elseif newState == SCENE_HIDING then
             SetPendingItemPost(BAG_BACKPACK, 0, 0)
             ClearMenu()
-            PLAYER_INVENTORY:SetTradingHouseModeEnabled(false)
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
         elseif newState == SCENE_HIDDEN then
             self:ClearSearchResults()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -395,15 +394,15 @@ function ZO_TradingHouseManager:InitializeSearchNavigationBar(control)
 
     local moneyControl = self.m_nagivationBar:GetNamedChild("Money")
     local function UpdateMoney()
-        self.m_playerMoney[CURT_MONEY] = GetCarriedCurrencyAmount(CURT_MONEY)
-        ZO_CurrencyControl_SetSimpleCurrency(moneyControl, CURT_MONEY, self.m_playerMoney[CURT_MONEY], ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
+        self.m_playerMoney[CURT_MONEY] = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+        ZO_CurrencyControl_SetSimpleCurrency(moneyControl, CURT_MONEY, self.m_playerMoney[CURT_MONEY], ZO_KEYBOARD_CURRENCY_OPTIONS)
     end
 
     moneyControl:RegisterForEvent(EVENT_MONEY_UPDATE, UpdateMoney)
     UpdateMoney()
 
     local function UpdateAlliancePoints()
-        self.m_playerMoney[CURT_ALLIANCE_POINTS] = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
+        self.m_playerMoney[CURT_ALLIANCE_POINTS] = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
     end
 
     moneyControl:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, UpdateAlliancePoints)
@@ -487,7 +486,6 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
     local function SetupBaseSearchResultRow(rowControl, result)
         self.m_searchResultsControlsList[#self.m_searchResultsControlsList+1] = rowControl
         self.m_searchResultsInfoList[#self.m_searchResultsInfoList+1] = result
-
         local slotIndex = result.slotIndex
 
         local nameControl = GetControl(rowControl, "Name")
@@ -500,6 +498,19 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
 
         local sellPriceControl = GetControl(rowControl, "SellPrice")
         ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, result.currencyType, result.purchasePrice, ITEM_RESULT_CURRENCY_OPTIONS, nil, self.m_playerMoney[result.currencyType] < result.purchasePrice)
+
+        local traitInformationControl = GetControl(rowControl, "TraitInfo")
+        traitInformationControl:ClearIcons()
+
+        if not result.isGuildSpecificItem then
+            local itemLink = GetTradingHouseSearchResultItemLink(slotIndex)
+            local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
+        
+            if traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
+                traitInformationControl:AddIcon(GetPlatformTraitInformationIcon(traitInformation))
+                traitInformationControl:Show()
+            end
+        end
 
         local resultControl = GetControl(rowControl, "Button")
 
@@ -650,7 +661,7 @@ function ZO_TradingHouseManager:SetPendingPostPrice(sellPrice)
         ZO_CurrencyControl_SetSimpleCurrency(self.m_invoiceProfit, CURT_MONEY, profit, INVOICE_CURRENCY_OPTIONS)
 
         -- verify the user has enough cash
-        if (GetCarriedCurrencyAmount(CURT_MONEY) - listingFee) >= 0 then
+        if (GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) - listingFee) >= 0 then
             self.m_pendingSaleIsValid = true
         else
             self.m_pendingSaleIsValid = false
@@ -1006,7 +1017,7 @@ function ZO_TradingHouseManager:UpdateForGuildChange()
 end
 
 -- Utility to show a confirmation for some kind of trading house item (listing or search result)
-local function SetupTradingHouseItemDialog(dialogControl, itemInfoFn, slotIndex, slotType, costLabelStringFunction)
+local function SetupTradingHouseItemDialog(dialogControl, itemInfoFn, slotIndex, slotType, costLabelStringId)
     -- Item data is set up on the dialog control before the dialog is shown
     local icon, itemName, quality, stackCount, _, _, purchasePrice, currencyType = itemInfoFn(slotIndex)
 
@@ -1019,24 +1030,11 @@ local function SetupTradingHouseItemDialog(dialogControl, itemInfoFn, slotIndex,
     ZO_Inventory_BindSlot(itemControl, slotType, slotIndex)
     ZO_Inventory_SetupSlot(itemControl, stackCount, icon)
 
-    costLabelStringId = costLabelStringFunction(currencyType)
     local costControl = dialogControl:GetNamedChild("Cost")
     costControl:SetHidden(costLabelStringId == nil)
     if costLabelStringId then
-        costControl:SetText(zo_strformat(costLabelStringId, ZO_CurrencyControl_FormatCurrency(purchasePrice)))
+        costControl:SetText(zo_strformat(costLabelStringId, ZO_Currency_FormatKeyboard(currencyType, purchasePrice, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON)))
     end
-end
-
-local function GetPurchaseConfirmationTextString(currencyType)
-    if currencyType == CURT_ALLIANCE_POINTS then
-        return SI_TRADING_HOUSE_PURCHASE_ITEM_AMOUNT_ALLIANCE_POINTS
-    else
-        return SI_TRADING_HOUSE_PURCHASE_ITEM_AMOUNT
-    end
-end
-
-local function GetSellConfirmationAmountTextString(currencyType)
-    return nil
 end
 
 -- Confirm Item Purchase Dialog
@@ -1044,7 +1042,7 @@ local function PurchaseItemDialogInitialize(dialogControl, tradingHouseManager)
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_TRADING_HOUSE_PURCHASE",
     {
         customControl = dialogControl,
-        setup = function(self) SetupTradingHouseItemDialog(self, GetTradingHouseSearchResultItemInfo, self.purchaseIndex, SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT, GetPurchaseConfirmationTextString) end,
+        setup = function(self) SetupTradingHouseItemDialog(self, GetTradingHouseSearchResultItemInfo, self.purchaseIndex, SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT, SI_TRADING_HOUSE_PURCHASE_ITEM_AMOUNT) end,
         title =
         {
             text = SI_TRADING_HOUSE_PURCHASE_ITEM_DIALOG_TITLE,
@@ -1087,7 +1085,7 @@ local function PurchaseGuildSpecificItemDialogInitialize(dialogControl, tradingH
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_TRADING_HOUSE_GUILD_SPECIFIC_PURCHASE",
     {
         customControl = dialogControl,
-        setup = function(self) SetupTradingHouseItemDialog(self, GetGuildSpecificItemInfo, self.guildSpecificItemIndex, SLOT_TYPE_GUILD_SPECIFIC_ITEM, GetPurchaseConfirmationTextString) end,
+        setup = function(self) SetupTradingHouseItemDialog(self, GetGuildSpecificItemInfo, self.guildSpecificItemIndex, SLOT_TYPE_GUILD_SPECIFIC_ITEM, SI_TRADING_HOUSE_PURCHASE_ITEM_AMOUNT) end,
         title =
         {
             text = SI_TRADING_HOUSE_PURCHASE_ITEM_DIALOG_TITLE,
@@ -1143,7 +1141,7 @@ local function CancelListingDialogInitialize(dialogControl, tradingHouseManager)
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_TRADING_HOUSE_CANCEL_LISTING",
     {
         customControl = dialogControl,
-        setup = function(self) SetupTradingHouseItemDialog(self, GetTradingHouseListingItemInfo, self.listingIndex, SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING, GetSellConfirmationAmountTextString) end,
+        setup = function(self) SetupTradingHouseItemDialog(self, GetTradingHouseListingItemInfo, self.listingIndex, SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING) end,
         title =
         {
             text = SI_TRADING_HOUSE_CANCEL_LISTING_DIALOG_TITLE,
@@ -1313,6 +1311,34 @@ end
 function ZO_TradingHouse_OnSearchResultMouseExit(searchResultSlot)
     ZO_InventorySlot_OnMouseExit(searchResultSlot)
     WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+end
+
+function ZO_TradingHouse_SearchResult_TraitInfo_OnMouseEnter(control)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, false)
+
+    local slotData = control:GetParent().dataEntry.data
+    if slotData.isGuildSpecificItem then
+        return
+    end
+
+    local slotIndex = slotData.slotIndex
+    local itemLink = GetTradingHouseSearchResultItemLink(slotIndex)
+    local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
+
+    if traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
+        local itemTrait = GetItemLinkTraitInfo(itemLink)
+        local traitName = GetString("SI_ITEMTRAITTYPE", itemTrait)
+        local traitInformationString = GetString("SI_ITEMTRAITINFORMATION", traitInformation)
+        InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
+        InformationTooltip:AddLine(zo_strformat(SI_INVENTORY_TRAIT_STATUS_TOOLTIP, traitName, ZO_SELECTED_TEXT:Colorize(traitInformationString)), "", ZO_NORMAL_TEXT:UnpackRGB())
+    end
+end
+
+function ZO_TradingHouse_SearchResult_TraitInfo_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, true)
 end
 
 function ZO_TradingHouse_OnInitialized(self)

@@ -19,15 +19,25 @@ STORE_INTERACTION =
 -- Shared object
 ZO_SharedStoreManager = ZO_Object:Subclass()
 
+function ZO_SharedStoreManager:New(...)
+    local obj = ZO_Object.New(self)
+    obj:Initialize(...)
+    return obj
+end
+
+function ZO_SharedStoreManager:Initialize(control)
+    self.control = control
+end
+
 function ZO_SharedStoreManager:InitializeStore()
     self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers = GetStoreCurrencyTypes()
 end
 
 function ZO_SharedStoreManager:RefreshCurrency()
-    self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-    self.currentAP = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
-    self.currentTelvarStones = GetCarriedCurrencyAmount(CURT_TELVAR_STONES)
-    self.currentWritVouchers = GetCarriedCurrencyAmount(CURT_WRIT_VOUCHERS)
+    self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+    self.currentAP = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+    self.currentTelvarStones = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
+    self.currentWritVouchers = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
 end
 
 -- Shared global functions

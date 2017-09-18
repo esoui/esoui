@@ -17,16 +17,25 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
     control.owner = self
 
     self.nextRequestNewestTime = 0
-    control:SetHandler("OnUpdate",
-        function(control, time)
-            if time > self.nextRequestNewestTime then
+
+    self.updateFunction = function(control, time)
+            local forceUpdate = not time
+            time = time or GetFrameTimeSeconds()
+            if (self.categoryList and time > self.nextRequestNewestTime) then
                 self.nextRequestNewestTime = time + REQUEST_NEWEST_TIME
                 local targetData = self.categoryList:GetTargetData()
                 if targetData and targetData.categoryId and self.guildId then
-                    self:RequestNewest()
+                    if forceUpdate then 
+                        self:PopulateActivityList()
+                    else
+                        self:RequestNewest()
+                    end
                 end
             end
-        end) 
+        end
+
+    control:SetHandler("OnUpdate", self.updateFunction) 
+    control:RegisterForEvent(EVENT_GUILD_HISTORY_REFRESHED, function() self:updateFunction() end)
 
     self.startIndex = 1
     self.requestCount = 0
@@ -35,6 +44,7 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
     self.atEndOfList = true
     self.initialized = false
     self.guildEvents = {}
+    self.selectFirstIndexOnPage = false
 
     self.tooltipHeaderData = {
         titleText = GetString(SI_GAMEPAD_GUILD_HISTORY_GUILD_EVENT_TITLE),
@@ -48,26 +58,36 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
 
     GUILD_HISTORY_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            if not self.initialized then
-                self.initialized = true
-                self:InitializeActivityList()
-                self:InitializeKeybindStripDescriptors()
-            end
-
-            self:InitializeEvents()
-            self:PopulateCategories()
-            self.categoryList:SetSelectedIndex(1)
-            self:RequestNewest()
-            self:SelectCategoryList()
+            self:InitializeGuildHistory()
         elseif newState == SCENE_HIDING then
-            self:UninitializeEvents()
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            self.keybindStripDescriptor = nil
-            GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:TakeFocus()
-            self.categoryList:Deactivate()
-            self.activityList:Deactivate()
+            self:UninitializeGuildHistory()
         end
     end)
+end
+
+function ZO_GuildHistory_Gamepad:InitializeGuildHistory()
+    if not self.initialized then
+        self.initialized = true
+        self:InitializeActivityList()
+        self:InitializeKeybindStripDescriptors()
+    end
+
+    self.requestCount = 0
+    self:HideLoading()
+    self:InitializeEvents()
+    self:PopulateCategories()
+    self.categoryList:SetSelectedIndex(1)
+    self:RequestNewest()
+    self:SelectCategoryList()
+end
+
+function ZO_GuildHistory_Gamepad:UninitializeGuildHistory()
+    self:UninitializeEvents()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self.keybindStripDescriptor = nil
+    GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:TakeFocus()
+    self.categoryList:Deactivate()
+    self.activityList:Deactivate()
 end
 
 function ZO_GuildHistory_Gamepad:OnTargetChanged(list, selectedData, oldSelectedData)
@@ -77,8 +97,16 @@ function ZO_GuildHistory_Gamepad:OnTargetChanged(list, selectedData, oldSelected
     self:RequestNewest()
 end
 
+function ZO_GuildHistory_Gamepad:CanPageLeft()
+    return not (self.startIndex <= 1)
+end
+
+function ZO_GuildHistory_Gamepad:CanPageRight()
+    return not self.atEndOfList
+end
+
 function ZO_GuildHistory_Gamepad:NextPage()
-    if self.atEndOfList then
+    if not self:CanPageRight() then
         return
     end
     self.activityList:SetFocusToMatchingEntry(self.activityListItems[1])
@@ -87,19 +115,21 @@ function ZO_GuildHistory_Gamepad:NextPage()
 end
 
 function ZO_GuildHistory_Gamepad:PreviousPage()
-    if self.startIndex <= 1 then
+    if not self:CanPageLeft() then
         return
     end
     self.startIndex = self.startIndex - self.itemsPerPage
     if self.startIndex < 1 then
         self.startIndex = 1
     end
-    self.activityList:SetFocusToMatchingEntry(self.activityListItems[#self.activityListItems])
+    local selectItemIndex = self.selectFirstIndexOnPage and 1 or #self.activityListItems
+    self.activityList:SetFocusToMatchingEntry(self.activityListItems[selectItemIndex])
     if self.startIndex < self.itemsPerPage then
         self:RequestNewest()
     else
         self:PopulateActivityList()
     end
+    self.selectFirstIndexOnPage = false
 end
 
 local function CreateActivityItem(parent, previous, index)
@@ -196,25 +226,37 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.categoryKeybindStripDescriptor, self.categoryList)
 
     -- The keybind descriptor for when focus is on the activity log list.
-    self.logKeybindStripDescriptor = {}
+    self.logKeybindStripDescriptor = {
+        {
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+            ethereal = true,
+            sound = SOUNDS.GAMEPAD_PAGE_BACK,
+            enabled = function()
+                return self:CanPageLeft()
+            end,
+            callback = function()
+                -- The shown page shows the items in self.activityList.data starting from the 2nd to the 2nd to last index.
+                -- By selecting the first index a transition to the previous page will be initiated, this transition will ultimately call PreviousPage() when it calls the activate function on this entry 
+                -- The member variable selectFirstIndexOnPage is set to jump to the first item in the list on the previous page, otherwise PreviousPage() will select the last be default 
+                self.selectFirstIndexOnPage = true
+                self.activityList:SetFocusByIndex(1)
+            end,
+        },
+        {
+            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            ethereal = true,
+            sound = SOUNDS.GAMEPAD_PAGE_FORWARD,
+            enabled = function()
+                return self:CanPageRight()
+            end,
+            callback = function()
+                -- The shown page shows the items in self.activityList.data starting from the 2nd to the 2nd to last index.
+                -- By selecting the last index a transition to the next page will be initiated, this transition will ultimately call NextPage() when it calls the activate function on this entry
+                self.activityList:SetFocusByIndex(#self.activityList.data)
+            end,
+        }
+    }
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.logKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:SelectCategoryList() end)
-
-    self.logKeybindStripDescriptor[#self.logKeybindStripDescriptor + 1] = {
-        keybind = "UI_SHORTCUT_LEFT_TRIGGER",
-        ethereal = true,
-        sound = SOUNDS.GAMEPAD_PAGE_BACK,
-        callback = function()
-            self:PreviousPage()
-        end,
-    }
-    self.logKeybindStripDescriptor[#self.logKeybindStripDescriptor + 1] = {
-        keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
-        ethereal = true,
-        sound = SOUNDS.GAMEPAD_PAGE_FORWARD,
-        callback = function()
-            self:NextPage()
-        end,
-    }
 end
 
 function ZO_GuildHistory_Gamepad:RefreshKeybinds()
@@ -414,6 +456,7 @@ function ZO_GuildHistory_Gamepad:PopulateActivityList()
             self:PopulateActivityList()
             self.activityList:SetFocusToMatchingEntry(self.activityListItems[self.displayedItems])
             self.atEndOfList = true
+            self:RefreshKeybinds()
             self:UpdateLogTriggerButtons()
             return
         end
@@ -473,14 +516,13 @@ function ZO_GuildHistory_Gamepad:RefreshFooter()
         currPageNum = 1
     end
 
-    local enablePrevious = currPageNum > 1
-    self.footer.previousButton:SetEnabled(enablePrevious)
-
-    local enableNext = not self.atEndOfList
-    self.footer.nextButton:SetEnabled(enableNext)
-
     local pageNumberText = zo_strformat(SI_GAMEPAD_PAGED_LIST_PAGE_NUMBER, currPageNum)
     self.footer.pageNumberLabel:SetText(pageNumberText)
+
+    local enablePrevious = self:CanPageLeft()
+    local enableNext = self:CanPageRight()
+    self.footer.previousButton:SetEnabled(enablePrevious)
+    self.footer.nextButton:SetEnabled(enableNext)
 
     self.footer.control:SetHidden((not enablePrevious) and (not enableNext))
 end

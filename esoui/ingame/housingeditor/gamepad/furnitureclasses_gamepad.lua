@@ -52,7 +52,7 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
         local statusIndicator = control.statusIndicator
         if statusIndicator then
             if data.isFromCrownStore and not data.furnitureObject.marketProductId then
-                statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(UI_ONLY_CURRENCY_CROWNS))
+                statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS))
             end
 
             statusIndicator:Show()

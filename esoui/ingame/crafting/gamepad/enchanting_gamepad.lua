@@ -435,13 +435,13 @@ function ZO_GamepadEnchanting:SetEnchantingMode(enchantingMode)
 
         if enchantingMode == ENCHANTING_MODE_CREATION then
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
-            self.inventory.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_RUNES))
+            self.inventory:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
 
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ENCHANTING_CREATE_TOOLTIP_GLOW)
 
             TriggerTutorial(TUTORIAL_TRIGGER_ENCHANTING_CREATION_OPENED)
         elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
-            self.inventory.noRunesLabel:SetText(GetString(SI_ENCHANTING_NO_GLYPHS))
+            self.inventory:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_GLYPHS))
 
             TriggerTutorial(TUTORIAL_TRIGGER_ENCHANTING_EXTRACTION_OPENED)
         end
@@ -567,7 +567,6 @@ end
 function ZO_GamepadEnchantingInventory:Initialize(owner, control, ...)
     local inventory = ZO_GamepadCraftingInventory.Initialize(self, control, ...)
     self.owner = owner
-    self.noRunesLabel = control.noItemsLabel
     self.filterType = NO_FILTER
     self.runeSlots = self.owner.runeSlots
 end
@@ -620,11 +619,6 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
     end
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(IsEnchantingItem, DoesEnchantingItemPassFilter, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
-    if self.owner:GetEnchantingMode() == ENCHANTING_MODE_NONE then
-        self.noRunesLabel:SetHidden(true)
-    else
-        self.noRunesLabel:SetHidden(#data > 0)
-    end
 
     if titleString then
         ZO_GamepadCraftingUtils_SetupGenericHeader(self.owner, titleString)

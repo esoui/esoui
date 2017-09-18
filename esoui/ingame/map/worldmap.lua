@@ -266,6 +266,10 @@ local function GetQuestPinTexture(pin)
     return pin:GetQuestIcon()
 end
 
+local function GetGroupPinTexture(pin)
+    return pin:GetGroupIcon()
+end
+
 local function GetPinLocationData(pinLocationData)
     if pinLocationData then
         return pinLocationData.x, pinLocationData.y, pinLocationData.mapIndex
@@ -412,8 +416,8 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_PING]                                         = { level = 162, minSize = 32, texture = "EsoUI/Art/MapPins/MapPing.dds", isAnimated = true },
     [MAP_PIN_TYPE_RALLY_POINT]                                  = { level = 161, minSize = 100, texture = "EsoUI/Art/MapPins/MapRallyPoint.dds", isAnimated = true },
     [MAP_PIN_TYPE_PLAYER_WAYPOINT]                              = { level = 160, minSize = 32, texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" },
-    [MAP_PIN_TYPE_GROUP_LEADER]                                 = { level = 151, size = 32, texture = "EsoUI/Art/Compass/groupLeader.dds" },
-    [MAP_PIN_TYPE_GROUP]                                        = { level = 150, size = 32, texture = "EsoUI/Art/MapPins/UI-WorldMapGroupPip.dds" },
+    [MAP_PIN_TYPE_GROUP_LEADER]                                 = { level = 151, size = 32, texture = GetGroupPinTexture },
+    [MAP_PIN_TYPE_GROUP]                                        = { level = 150, size = 32, texture = GetGroupPinTexture },
     [MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION]                     = { level = 145, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
     [MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION]            = { level = 145, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
     [MAP_PIN_TYPE_ASSISTED_QUEST_ENDING]                        = { level = 145, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
@@ -453,29 +457,45 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_PIT_DAEMONS]               = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_pin_green.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_STORM_LORDS]               = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_pin_purple.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_NEUTRAL]                   = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_pin_neutral.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_FIRE_DRAKES]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_orange.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_PIT_DAEMONS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_green.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_STORM_LORDS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_purple.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_NEUTRAL]                 = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_neutral.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_FIRE_DRAKES]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_orange.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_PIT_DAEMONS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_green.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_STORM_LORDS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_purple.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_NEUTRAL]                 = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_neutral.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_FIRE_DRAKES]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_orange.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_PIT_DAEMONS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_green.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_STORM_LORDS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_purple.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_NEUTRAL]                 = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_neutral.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_FIRE_DRAKES]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_orange.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_PIT_DAEMONS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_green.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS]             = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_purple.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_NEUTRAL]                 = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_neutral.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_FIRE_DRAKES]        = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_orange.dds", insetX = 13, insetY = 7},
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_PIT_DAEMONS]        = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_green.dds", insetX = 13, insetY = 7},
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_STORM_LORDS]        = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_purple.dds", insetX = 13, insetY = 7},
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_NEUTRAL]            = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_neutral.dds", insetX = 13, insetY = 7},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_FIRE_DRAKES]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_orange.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_PIT_DAEMONS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_green.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_STORM_LORDS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_purple.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_NEUTRAL]           = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_A_pin_neutral.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_FIRE_DRAKES]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_orange.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_PIT_DAEMONS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_green.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_STORM_LORDS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_purple.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_NEUTRAL]           = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_B_pin_neutral.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_FIRE_DRAKES]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_orange.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_PIT_DAEMONS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_green.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_STORM_LORDS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_purple.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_NEUTRAL]           = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_C_pin_neutral.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_FIRE_DRAKES]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_orange.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_green.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS]       = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_purple.dds", insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_NEUTRAL]           = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_multiCapturePoint_D_pin_neutral.dds", insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_FIRE_DRAKES]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_orange_A.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_PIT_DAEMONS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_green_A.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_STORM_LORDS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_purple_A.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_NEUTRAL]          = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_neutral_A.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_FIRE_DRAKES]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_orange_B.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_PIT_DAEMONS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_green_B.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_STORM_LORDS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_purple_B.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_NEUTRAL]          = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_neutral_B.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_FIRE_DRAKES]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_orange_C.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_PIT_DAEMONS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_green_C.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_STORM_LORDS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_purple_C.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_NEUTRAL]          = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_neutral_C.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_FIRE_DRAKES]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_orange_D.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_PIT_DAEMONS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_green_D.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_STORM_LORDS]      = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_purple_D.dds", insetX = 13, insetY = 7},
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_NEUTRAL]          = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_neutral_D.dds", insetX = 13, insetY = 7},
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA]                      = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_halo.dds", tint = GetObjectiveAuraPinTint, insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_AURA]               = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_halo.dds", tint = GetObjectiveAuraPinTint, insetX = 15, insetY = 11},
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_AURA]                = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_halo.dds", tint = GetObjectiveAuraPinTint, insetX = 15, insetY = 11},
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA]                      = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_halo.dds", tint = GetObjectiveAuraPinTint, insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_FIRE_DRAKES]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_orange.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_PIT_DAEMONS]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_green.dds", insetX = 15, insetY = 11},
     [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_STORM_LORDS]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_purple.dds", insetX = 15, insetY = 11},
@@ -642,26 +662,42 @@ ZO_MapPin.OBJECTIVE_PIN_TYPES =
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_PIT_DAEMONS] = true,
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_STORM_LORDS] = true,
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_NEUTRAL] = true,
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_FIRE_DRAKES] = true,
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_PIT_DAEMONS] = true,
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_STORM_LORDS] = true,
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_NEUTRAL] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_FIRE_DRAKES] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_PIT_DAEMONS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_STORM_LORDS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_NEUTRAL] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_FIRE_DRAKES] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_PIT_DAEMONS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_STORM_LORDS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_NEUTRAL] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_FIRE_DRAKES] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_PIT_DAEMONS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_STORM_LORDS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_NEUTRAL] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_FIRE_DRAKES] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_NEUTRAL] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_FIRE_DRAKES] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_PIT_DAEMONS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_STORM_LORDS] = true,
+    [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_NEUTRAL] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_FIRE_DRAKES] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_PIT_DAEMONS] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_STORM_LORDS] = true,
@@ -672,7 +708,7 @@ ZO_MapPin.OBJECTIVE_PIN_TYPES =
     [MAP_PIN_TYPE_BGPIN_MURDERBALL_STORM_LORDS] = true,
     [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_AURA] = true,
-    [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_AURA] = true,
+    [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_NEUTRAL_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_FIRE_DRAKES_AURA] = true,
     [MAP_PIN_TYPE_BGPIN_FLAG_PIT_DAEMONS_AURA] = true,
@@ -942,7 +978,7 @@ function InformationTooltipMixin:AppendWayshrineTooltip(pin)
             local cost = GetRecallCost(nodeIndex)
             local currency = GetRecallCurrency(nodeIndex)
             if cost > 0 then
-                if cost <= GetCarriedCurrencyAmount(currency) then
+                if cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER) then
                     INFORMATION_TOOLTIP:AddMoney(INFORMATION_TOOLTIP, cost, SI_TOOLTIP_RECALL_COST, CURRENCY_HAS_ENOUGH)
                 else
                     INFORMATION_TOOLTIP:AddMoney(INFORMATION_TOOLTIP, cost, SI_TOOLTIP_RECALL_COST, CURRENCY_NOT_ENOUGH)
@@ -1226,26 +1262,42 @@ do
         [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_PIT_DAEMONS]               =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_STORM_LORDS]               =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_NEUTRAL]                   =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_FIRE_DRAKES]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_PIT_DAEMONS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_STORM_LORDS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_NEUTRAL]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_FIRE_DRAKES]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_PIT_DAEMONS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_STORM_LORDS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_B_NEUTRAL]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_FIRE_DRAKES]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_PIT_DAEMONS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_STORM_LORDS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_C_NEUTRAL]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_FIRE_DRAKES]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_PIT_DAEMONS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS]             =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_NEUTRAL]                 =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_FIRE_DRAKES]        =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_PIT_DAEMONS]        =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_STORM_LORDS]        =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_NEUTRAL]            =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_FIRE_DRAKES]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_PIT_DAEMONS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_STORM_LORDS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_NEUTRAL]           =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_FIRE_DRAKES]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_PIT_DAEMONS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_STORM_LORDS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_B_NEUTRAL]           =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_FIRE_DRAKES]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_PIT_DAEMONS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_STORM_LORDS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_C_NEUTRAL]           =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_FIRE_DRAKES]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS]       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
-        [MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_NEUTRAL]           =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_FIRE_DRAKES]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_PIT_DAEMONS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_STORM_LORDS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_A_NEUTRAL]          =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_FIRE_DRAKES]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_PIT_DAEMONS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_STORM_LORDS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_B_NEUTRAL]          =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_FIRE_DRAKES]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_PIT_DAEMONS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_STORM_LORDS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_C_NEUTRAL]          =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_FIRE_DRAKES]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_PIT_DAEMONS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_STORM_LORDS]      =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
+        [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_NEUTRAL]          =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_FLAG_FIRE_DRAKES]                       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_FLAG_PIT_DAEMONS]                       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
         [MAP_PIN_TYPE_BGPIN_FLAG_STORM_LORDS]                       =   SHARED_TOOLTIP_CREATORS.BG_OBJECTIVE,
@@ -2025,6 +2077,7 @@ local WAYSHRINE_LMB =
                 if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
                     ZO_ShowChapterUpgradePlatformDialog()
                 else
+                    local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, GetCollectibleName(collectibleId))
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
@@ -2722,6 +2775,28 @@ do
     end
 end
 
+do
+    local groupPinTextures =
+    {
+        [MAP_PIN_TYPE_GROUP_LEADER]                                 = "EsoUI/Art/Compass/groupLeader.dds",
+        [MAP_PIN_TYPE_GROUP]                                        = "EsoUI/Art/MapPins/UI-WorldMapGroupPip.dds",
+    }
+
+    local breadcrumbGroupPinTextures =
+    {
+        [MAP_PIN_TYPE_GROUP_LEADER]                                 = "EsoUI/Art/Compass/groupLeader_door.dds",
+        [MAP_PIN_TYPE_GROUP]                                        = "EsoUI/Art/Compass/groupMember_door.dds",
+    }
+
+    function ZO_MapPin:GetGroupIcon()
+        if(self.m_PinTag.isBreadcrumb) then
+            return breadcrumbGroupPinTextures[self:GetPinType()]
+        else
+            return groupPinTextures[self:GetPinType()]
+        end
+    end
+end
+
 function ZO_MapPin:GetPOIIndex()
     if(self:IsPOI()) then
         return self.m_PinTag[2]
@@ -2797,7 +2872,11 @@ end
 
 function ZO_MapPin:GetUnitTag()
     if self:IsUnit() or self:IsMapPing() then
-        return self.m_PinTag
+        if self:IsUnit() and not (type(self.m_PinTag) == "string") then
+            return self.m_PinTag.groupTag
+        else
+            return self.m_PinTag
+        end
     end
 
     -- An invalid UnitTag that isn't nil, in case something actually decides to pass a nil
@@ -2901,7 +2980,7 @@ function ZO_MapPin:GetFastTravelCost()
                     -- Costs money.
                     local travelCost = GetRecallCost(nodeIndex)
                     local travelCurrency = GetRecallCurrency(nodeIndex)
-                    return travelCost, (travelCost <= GetCarriedCurrencyAmount(travelCurrency))
+                    return travelCost, (travelCost <= GetCurrencyAmount(travelCurrency, CURRENCY_LOCATION_CHARACTER))
                 else
                     -- Must wait for recall cool-down.
                     return 0, false
@@ -5591,7 +5670,14 @@ function ZO_WorldMap_RefreshGroupPins()
             local groupTag = ZO_Group_GetUnitTagForGroupIndex(i)
             if DoesUnitExist(groupTag) and IsUnitOnline(groupTag) and not AreUnitsEqual("player", groupTag) then
                 local isLeader = IsUnitGroupLeader(groupTag)
-                local groupPin = g_mapPinManager:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, groupTag)
+                local tagData = groupTag
+                if IsUnitWorldMapPositionBreadcrumbed(groupTag) then
+                    tagData = {
+                        groupTag = groupTag,
+                        isBreadcrumb = true
+                    }
+                end
+                local groupPin = g_mapPinManager:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, tagData)
                 if groupPin then
                     g_activeGroupPins[groupTag] = groupPin
                     local x, y = GetMapPlayerPosition(groupTag)
@@ -5670,7 +5756,22 @@ function ZO_WorldMap_GetMapTitle()
     local titleText
     local mapName = GetMapName()
     local dungeonDifficulty = ZO_WorldMap_GetMapDungeonDifficulty()
-    if dungeonDifficulty == DUNGEON_DIFFICULTY_NONE then
+    local isInAvAMap = IsPresentlyShowingKeeps()
+    if isInAvAMap then
+        local campaignId
+        if IsPlayerInAvAWorld() then
+            campaignId = GetCurrentCampaignId()
+        else
+            campaignId = GetAssignedCampaignId()
+        end
+
+        if campaignId == 0 then
+            titleText = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP, mapName)
+        else
+            local campaignName = GetCampaignName(campaignId)
+            titleText = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP_WITH_CAMPAIGN_NAME, mapName, campaignName)
+        end
+    elseif dungeonDifficulty == DUNGEON_DIFFICULTY_NONE then
         titleText = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP, mapName)
     else
         titleText = zo_strformat(SI_WINDOW_TITLE_WORLD_MAP_WITH_DUNGEON_DIFFICULTY, mapName, GetString("SI_DUNGEONDIFFICULTY", dungeonDifficulty))
@@ -6994,6 +7095,7 @@ do
                     ZO_WorldMapMouseoverName.owner = ""
                     UpdateMovingPins()
                     ZO_WorldMap_UpdateMap()
+                    g_mapRefresh:RefreshAll("group")
                     g_mapPanAndZoom:OnWorldMapChanged(wasNavigateIn)
                     g_keybindStrips.mouseover:MarkDirty()
                     g_keybindStrips.PC:MarkDirty()

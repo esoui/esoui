@@ -2,7 +2,6 @@
 ; DebugUtils are loaded first so that they can be used in every AddOn
 ## DependsOn: ZO_Libraries
 
-EsoUI\Common\Globals\CommonConstants.lua
 EsoUI\Common\Globals\CommonTextures.lua
 
 EsoUI\Common\GamepadGrid\GamepadGrid.lua
@@ -82,3 +81,7 @@ EsoUI\Common\Tooltip\CommonTooltips.lua
 
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml
+
+EsoUI\Common\MarketTemplates\MarketTemplates_Shared.xml
+EsoUI\Common\MarketTemplates\Keyboard\MarketTemplates_Keyboard.xml
+EsoUI\Common\MarketTemplates\Gamepad\MarketTemplates_Gamepad.xml

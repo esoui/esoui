@@ -103,7 +103,8 @@ do
                         CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                     end
                 else
-                    text = zo_strformat(SI_BATTLEGROUND_STATE_STARTING, self:GetFormattedTimer())
+                    local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", GetBattlegroundGameType(GetCurrentBattlegroundId()))
+                    text = zo_strformat(SI_BATTLEGROUND_STATE_STARTING, gameTypeString, self:GetFormattedTimer())
                 end
             end
         elseif battlegroundState == BATTLEGROUND_STATE_RUNNING then

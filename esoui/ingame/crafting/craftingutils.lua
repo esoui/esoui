@@ -261,10 +261,10 @@ end
 --[[ Global Utils ]]--
 function ZO_CraftingUtils_GetCostToCraftString(cost)
     if cost > 0 then
-        if GetCarriedCurrencyAmount(CURT_MONEY) >= cost then
-            return zo_strformat(SI_CRAFTING_PERFORM_CRAFT, ZO_CurrencyControl_FormatCurrency(cost))
+        if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
+            return zo_strformat(SI_CRAFTING_PERFORM_CRAFT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
         end
-        return zo_strformat(SI_CRAFTING_PERFORM_CRAFT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)))
+        return zo_strformat(SI_CRAFTING_PERFORM_CRAFT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
     end
 
     return GetString(SI_CRAFTING_PERFORM_FREE_CRAFT)
@@ -337,31 +337,13 @@ function ZO_CraftingUtils_ConnectTreeToCraftingProcess(tree)
 end
 
 function ZO_CraftingUtils_IsTraitAppliedToWeapons(traitType)
-    return traitType == ITEM_TRAIT_TYPE_WEAPON_POWERED
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_CHARGED
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_PRECISE
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_INFUSED
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_DEFENDING
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_TRAINING
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_SHARPENED
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_DECISIVE
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_INTRICATE
-        or traitType == ITEM_TRAIT_TYPE_WEAPON_ORNATE
-		or traitType == ITEM_TRAIT_TYPE_WEAPON_NIRNHONED
+    local traitCategory = GetItemTraitTypeCategory(traitType)
+    return traitCategory == ITEM_TRAIT_TYPE_CATEGORY_WEAPON
 end
 
 function ZO_CraftingUtils_IsTraitAppliedToArmor(traitType)
-    return traitType == ITEM_TRAIT_TYPE_ARMOR_STURDY
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_REINFORCED
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_TRAINING
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_INFUSED
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_DIVINES
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_ORNATE
-        or traitType == ITEM_TRAIT_TYPE_ARMOR_INTRICATE
-		or traitType == ITEM_TRAIT_TYPE_ARMOR_NIRNHONED
+    local traitCategory = GetItemTraitTypeCategory(traitType)
+    return traitCategory == ITEM_TRAIT_TYPE_CATEGORY_ARMOR
 end
 
 do

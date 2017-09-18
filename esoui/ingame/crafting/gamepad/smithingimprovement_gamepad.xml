@@ -162,13 +162,6 @@
                         ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadSmithingImprovement_TooltipScreenResizeHandler)
                     </OnInitialized>
                 </Control>
-
-                <Control name="$(parent)Tooltip" hidden="true" inherits="ZO_CraftingTooltip_Gamepad">
-                    <Anchor point="CENTER" relativeTo="$(parent)QualityBridge" />
-                    <OnInitialized>
-                        ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadSmithingImprovement_TooltipScreenResizeHandler)
-                    </OnInitialized>
-                </Control>
             </Controls>
         </Control>
     </Controls>

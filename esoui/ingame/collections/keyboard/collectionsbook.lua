@@ -50,11 +50,10 @@ function Collectible:Initialize(collectibleId)
     self.cooldownStartTime = 0
 
     if collectibleId then
-        local name, description, icon, lockedIcon, unlocked, purchasable, isActive, categoryType = self:GetCollectibleInfo()
+        local name, description, icon, deprecatedLockedIcon, unlocked, purchasable, isActive, categoryType = self:GetCollectibleInfo()
 
         self.name = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, name)
-        self.unlockedIcon = icon
-        self.lockedIcon = lockedIcon
+        self.icon = icon
         self.unlocked = unlocked
         self.purchasable = purchasable
         self.active = isActive
@@ -87,20 +86,32 @@ function Collectible:Show(control)
         self.maxIconHeight = control.icon:GetHeight()
 
         control.title:SetText(self.name)
-        local effectiveIcon = self.unlocked and self.unlockedIcon or self.lockedIcon
-        control.icon:SetTexture(effectiveIcon)
+
+        local isUnlocked = self.unlocked
+        local iconControl = control.icon
+        iconControl:SetTexture(self.icon)
+        
+        self.isBlocked = IsCollectibleBlocked(self.collectibleId)
+        local desaturation = (not isUnlocked or self.isBlocked) and 1 or 0
+        iconControl:SetDesaturation(desaturation)
+        control.highlight:SetDesaturation(desaturation)
+
+        local textureSampleProcessingWeightTable = isUnlocked and ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE or ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE
+        for type, weight in pairs(textureSampleProcessingWeightTable) do
+            iconControl:SetTextureSampleProcessingWeight(type, weight)
+        end
+
         ApplyTextColorToLabel(control.title, self.unlocked, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
 
-        control.cooldownIcon:SetTexture(effectiveIcon)
-        control.cooldownIconDesaturated:SetTexture(effectiveIcon)
+        control.cooldownIcon:SetTexture(self.icon)
+        control.cooldownIconDesaturated:SetTexture(self.icon)
         control.cooldownIconDesaturated:SetDesaturation(1)
         control.cooldownTime:SetText("")
 
         control.title:SetHidden(false)
-        control.icon:SetHidden(false)
+        iconControl:SetHidden(false)
 
         self:RefreshVisualLayer()
-        self:SetBlockedState(IsCollectibleBlocked(self.collectibleId))
 
         if self:IsCurrentMouseTarget() then
             self:ShowKeybinds()
@@ -413,13 +424,6 @@ function Collectible:UpdateCooldownEffect()
     end
 end
 
-function Collectible:SetBlockedState(isBlocked)
-    local desaturation = isBlocked and 1 or 0
-    self.control.icon:SetDesaturation(desaturation)
-    self.control.highlight:SetDesaturation(desaturation)
-    self.isBlocked = isBlocked
-end
-
 
 --[[ Collection ]]--
 --------------------
@@ -444,8 +448,6 @@ do
         ZO_SortFilterList.Initialize(self, control)
         ZO_JournalProgressBook_Common.Initialize(self, control)
 
-        self.searchString = ""
-        self.searchResults = {}
         self.blankCollectibleObject = Collectible:New() --Used to blank out tile controls with no collectibleId
         self.collectibleObjectList = {}
 
@@ -455,12 +457,14 @@ do
 
         self.control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
 
-        local collectionsBookScene = ZO_Scene:New("collectionsBook", SCENE_MANAGER)
-        collectionsBookScene:RegisterCallback("StateChange",
+        self.scene = ZO_Scene:New("collectionsBook", SCENE_MANAGER)
+        self.scene:RegisterCallback("StateChange",
             function(oldState, newState)
                 if newState == SCENE_SHOWING then
                     ZO_Scroll_ResetToTop(self.list)
                     self:UpdateCollectionVisualLayer()
+                    COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
+                    COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
                 end
             end)
 
@@ -473,7 +477,7 @@ end
 function CollectionsBook:InitializeControls()
     ZO_JournalProgressBook_Common.InitializeControls(self)
 
-    self.contentSearch = self.contents:GetNamedChild("Search")
+    self.contentSearchEditBox = self.contents:GetNamedChild("SearchBox")
     self.scrollbar = self.list:GetNamedChild("ScrollBar")
     self.noMatches = self.contents:GetNamedChild("NoMatchMessage")
 end
@@ -481,38 +485,20 @@ end
 function CollectionsBook:InitializeEvents()
     ZO_JournalProgressBook_Common.InitializeEvents(self)
 
-    local function UpdateSearchResults()
-        ZO_ClearTable(self.searchResults)
-
-        local numResults = GetNumCollectiblesSearchResults()
-        for i = 1, numResults do
-            local categoryIndex, subcategoryIndex, collectibleIndex = GetCollectiblesSearchResult(i)
-            if self:IsStandardCategory(categoryIndex) then
-                if not self.searchResults[categoryIndex] then
-                    self.searchResults[categoryIndex] = {}
-                end
-                local effectiveSubCategory = subcategoryIndex or "root"
-                if not self.searchResults[categoryIndex][effectiveSubCategory] then
-                    self.searchResults[categoryIndex][effectiveSubCategory] = {}
-                end
-
-                self.searchResults[categoryIndex][effectiveSubCategory][collectibleIndex] = true
+    local function OnUpdateSearchResults()
+        if self.scene:IsShowing() then
+            self:UpdateCollection()
+            local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
+            if searchResults and NonContiguousCount(searchResults) > 0 then
+                local data = self.categoryTree:GetSelectedData()
+                self:UpdateCategoryLabels(data, DONT_RETAIN_SCROLL_POSITION)
             end
         end
     end
 
-    local function OnSearchResultsReady()
-        UpdateSearchResults()
-        self:UpdateCollection()
-        if NonContiguousCount(self.searchResults) > 0 then
-            local data = self.categoryTree:GetSelectedData()
-            self:UpdateCategoryLabels(data, DONT_RETAIN_SCROLL_POSITION)
-        end
-    end
-
-    self.control:RegisterForEvent(EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, OnSearchResultsReady)
     self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function() self:UpdateCollectionVisualLayer() end)
 
+    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("UpdateSearchResults", OnUpdateSearchResults)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectiblesUpdated", function() self:OnCollectionUpdated() end)
@@ -536,9 +522,9 @@ function CollectionsBook:InitializeEvents()
 end
 
 function CollectionsBook:InitializeCategoryTemplates()
-    self.parentCategoryTemplate = "ZO_CollectibleIconHeader"
-    self.childlessCategoryTemplate = "ZO_CollectibleChildlessCategory"
-    self.subCategoryTemplate = "ZO_CollectibleSubCategory"
+    self.parentCategoryTemplate = "ZO_StatusIconHeader"
+    self.childlessCategoryTemplate = "ZO_StatusIconChildlessHeader"
+    self.subCategoryTemplate = "ZO_TreeStatusLabelSubCategory"
 end
 
 function CollectionsBook:InitializeChildIndentAndSpacing()
@@ -614,12 +600,13 @@ function CollectionsBook:BuildCategories()
         end
     end
 
-    if not self:HasValidSearchString() then
-        for categoryIndex = 1, self:GetNumCategories() do
+    local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
+    if searchResults then
+        for categoryIndex, data in pairs(searchResults) do
             AddCategoryByCategoryIndex(categoryIndex)
         end
     else
-        for categoryIndex, data in pairs(self.searchResults) do
+        for categoryIndex = 1, self:GetNumCategories() do
             AddCategoryByCategoryIndex(categoryIndex)
         end
     end
@@ -630,28 +617,29 @@ end
 
 function CollectionsBook:AddTopLevelCategory(categoryIndex, name, numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
     local parent
-    if not self:HasValidSearchString() then
+    local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
+    if not searchResults then
         parent = ZO_JournalProgressBook_Common.AddTopLevelCategory(self, categoryIndex, name, numSubCategories, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
     else
         --Special search layout
         local tree = self.categoryTree
         local lookup = self.nodeLookupData
 
-        local hasChildren = NonContiguousCount(self.searchResults[categoryIndex]) > 1 or self.searchResults[categoryIndex]["root"] == nil
+        local hasChildren = NonContiguousCount(searchResults[categoryIndex]) > 1 or searchResults[categoryIndex][ZO_COLLECTIONS_SEARCH_ROOT] == nil
         local nodeTemplate = hasChildren and self.parentCategoryTemplate or self.childlessCategoryTemplate
 
         parent = self:AddCategory(lookup, tree, nodeTemplate, nil, categoryIndex, name, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon)
 
         --We only want to add a general subcategory if we have any subcategories and we have any collectibles in the main category
         --Otherwise we'd have an emtpy general category, or only a general subcategory which can just be a childless instead
-        if(hasChildren and self.searchResults[categoryIndex]["root"]) then
+        if(hasChildren and searchResults[categoryIndex][ZO_COLLECTIONS_SEARCH_ROOT]) then
             local isFakedSubcategory = true
             local isSummary = false
             self:AddCategory(lookup, tree, self.subCategoryTemplate, parent, categoryIndex, GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL), hidesUnearned, normalIcon, pressedIcon, mouseoverIcon, isSummary, isFakedSubcategory)
         end
         
-        for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
-            if subcategoryIndex ~= "root" then
+        for subcategoryIndex, data in pairs(searchResults[categoryIndex]) do
+            if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
                 local subCategoryName, subCategoryEntries, _, _, hidesUnearned = self:GetSubCategoryInfo(categoryIndex, subcategoryIndex)
                 self:AddCategory(lookup, tree, self.subCategoryTemplate, parent, subcategoryIndex, zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY, subCategoryName), nil, normalIcon, pressedIcon, mouseoverIcon)
             end
@@ -746,11 +734,12 @@ end
 
 function CollectionsBook:GetCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
     if index >= 1 then
-        if self:HasValidSearchString() then
+        local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
+        if searchResults then
             local inSearchResults = false
-            local categoryResults = self.searchResults[categoryIndex]
+            local categoryResults = searchResults[categoryIndex]
             if categoryResults then
-                local effectiveSubcategoryIndex = subCategoryIndex or "root"
+                local effectiveSubcategoryIndex = subCategoryIndex or ZO_COLLECTIONS_SEARCH_ROOT
                 local subcategoryResults = categoryResults[effectiveSubcategoryIndex]
                 if subcategoryResults and subcategoryResults[index] then
                     inSearchResults = true
@@ -856,7 +845,8 @@ end
 
 function CollectionsBook:UpdateCollection()
     self:BuildCategories()
-    local foundNoMatches = self:HasValidSearchString() and NonContiguousCount(self.searchResults) == 0
+    local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
+    local foundNoMatches = searchResults and NonContiguousCount(searchResults) == 0
     self.categoryInset:SetHidden(foundNoMatches)
     self.noMatches:SetHidden(not foundNoMatches)
     self.list:SetHidden(foundNoMatches)
@@ -920,17 +910,6 @@ function CollectionsBook:UpdateCollectionVisualLayer()
     self:UpdateAllCategoryStatusIcons()
 end
 
---[[Search]]--
---------------
-function CollectionsBook:SearchStart(searchString)
-    self.searchString = searchString
-    StartCollectibleSearch(searchString)
-end
-
-function CollectionsBook:HasValidSearchString()
-    return zo_strlen(self.searchString) > 1
-end
-
 function CollectionsBook:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
     return NOTIFICATIONS_PROVIDER:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
 end
@@ -955,10 +934,5 @@ end
 
 function ZO_CollectionsBook_OnSearchTextChanged(editBox)
     ZO_EditDefaultText_OnTextChanged(editBox)
-    COLLECTIONS_BOOK:SearchStart(editBox:GetText())
-end
-
-function ZO_CollectionsBook_OnSearchEnterKeyPressed(editBox)
-    COLLECTIONS_BOOK:SearchStart(editBox:GetText())
-    editBox:LoseFocus()
+    COLLECTIONS_BOOK_SINGLETON:SetSearchString(editBox:GetText())
 end

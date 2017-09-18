@@ -26,11 +26,29 @@ function ZO_CraftingResults_Base:Initialize(control, showInGamepadPreferredModeO
 
     control:RegisterForEvent(EVENT_CRAFT_STARTED, function(eventCode, ...) self:OnCraftStarted(...) end)
     control:AddFilterForEvent(EVENT_CRAFT_STARTED, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
     control:RegisterForEvent(EVENT_CRAFT_COMPLETED, function(eventCode, ...) self:OnCraftCompleted(...) end)
     control:AddFilterForEvent(EVENT_CRAFT_COMPLETED, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
 
+    control:RegisterForEvent(EVENT_RETRAIT_STARTED, function(eventCode, ...) self:OnRetraitStarted(...) end)
+    control:AddFilterForEvent(EVENT_RETRAIT_STARTED, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
+    control:RegisterForEvent(EVENT_RETRAIT_RESPONSE, function(eventCode, ...) self:OnRetraitCompleted(...) end)
+    control:AddFilterForEvent(EVENT_RETRAIT_RESPONSE, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
     self.enchantSoundPlayer = ZO_QueuedSoundPlayer:New()
     self.enchantSoundPlayer:SetFinishedAllSoundsCallback(function() self:OnAllEnchantSoundsFinished() end)
+
+    -- Create a pool of CraftingResultTooltipAnimation_Base to be applied to controls that are
+    -- not the "primary" crafting tooltip (self.tooltipControl), but are being displayed alongside of it
+    -- This allows us to have additional controls animate in-sync with the crafting tooltip
+    local function CreateAnimationTimeline()
+        return ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingResultTooltipAnimation_Base")
+    end
+    local function ResetTimeline(timeline)
+        --nothing to do
+    end
+    self.secondaryTooltipAnimationPool = ZO_ObjectPool:New(CreateAnimationTimeline, ResetTimeline)
 end
 
 function ZO_CraftingResults_Base:SetCraftingTooltip(tooltipControl)
@@ -46,6 +64,7 @@ function ZO_CraftingResults_Base:SetCraftingTooltip(tooltipControl)
 
     if not tooltipControl then
         self:FadeAll()
+        self:ClearSecondaryTooltipAnimationControls()
     end
 end
 
@@ -106,6 +125,20 @@ function ZO_CraftingResults_Base:ForceStop()
     end
 end
 
+-- Add a control that we want to have animate alongside the main crafting tooltip (self.tooltipControl)
+-- These will not play the full set of animations, but will have the same alpha animations
+function ZO_CraftingResults_Base:AddSecondaryTooltipAnimationControl(control)
+    if control then
+        local animation, key = self.secondaryTooltipAnimationPool:AcquireObject()
+        animation:GetAnimation(1):SetAnimatedControl(control)
+        animation:GetAnimation(2):SetAnimatedControl(control)
+    end
+end
+
+function ZO_CraftingResults_Base:ClearSecondaryTooltipAnimationControls()
+    self.secondaryTooltipAnimationPool:ReleaseAllObjects()
+end
+
 local function DoesCraftingTypeHaveSlotAnimations(craftingType)
     if craftingType == CRAFTING_TYPE_PROVISIONING then
         return false
@@ -123,17 +156,17 @@ local function DoesCraftingTypeHaveSlotAnimations(craftingType)
     end
 end
 
-function ZO_CraftingResults_Base:OnCraftStarted(craftingType)
+function ZO_CraftingResults_Base:StartCraftProcess(playStopTooltipAnimation)
     self.tooltipAnimationCompleted = false
     self.craftingProcessCompleted = false
 
     --The result of DoesCraftingTypeHaveSlotAnimations for smithing depends on having an active smithing object. There is no such object if the smithing UI
     --is closed. This means that the result of the function can change between OnCraftStarted and OnCraftEnded if the smithing UI is closed during a crafting
     --operation. So store the results off here and don't call it later on.
-    self.playStopTooltipAnimation = DoesCraftingTypeHaveSlotAnimations(craftingType)
-    self.playStartTooltipAnimation = not self.playStopTooltipAnimation
+    self.playStopTooltipAnimation = playStopTooltipAnimation
+    self.playStartTooltipAnimation = not playStopTooltipAnimation
 
-    if (ZO_Enchanting_IsInCreationMode()) then
+    if ZO_Enchanting_IsInCreationMode() then
         local potencySound, potencyLength, essenceSound, essenceLength, aspectSound, aspectLength = ZO_Enchanting_GetVisibleEnchanting():GetLastRunestoneSoundParams()
 
         self.enchantSoundPlayer:PlaySound(potencySound, potencyLength)
@@ -146,6 +179,16 @@ function ZO_CraftingResults_Base:OnCraftStarted(craftingType)
     if self.playStartTooltipAnimation then
         self:PlayTooltipAnimation()
     end
+end
+
+function ZO_CraftingResults_Base:OnCraftStarted(craftingType)
+    local playStopTooltipAnimation = DoesCraftingTypeHaveSlotAnimations(craftingType)
+    self:StartCraftProcess(playStopTooltipAnimation)
+end
+
+function ZO_CraftingResults_Base:OnRetraitStarted()
+    local playStopTooltipAnimation = true
+    self:StartCraftProcess(playStopTooltipAnimation)
 end
 
 function ZO_CraftingResults_Base:PlayTooltipAnimation(failure)
@@ -165,23 +208,38 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(failure)
         self.tooltipBurst2:SetHidden(failure)
 
         self.resultTooltipAnimation:PlayFromStart()
-        PlaySound(failure and self.tooltipAnimationFailureSound or self.tooltipAnimationSuccessSound)
+
+        local secondaryTooltipAnimations = self.secondaryTooltipAnimationPool:GetActiveObjects()
+        for _, animation in pairs(secondaryTooltipAnimations) do
+            animation:PlayFromStart()
+        end
     else
         self:OnTooltipAnimationStopped()
     end
+    PlaySound(failure and self.tooltipAnimationFailureSound or self.tooltipAnimationSuccessSound)
 end
 
-function ZO_CraftingResults_Base:OnCraftCompleted(craftingType)
-    if not self.enchantSoundPlayer:IsPlaying() and not self.craftingProcessCompleted then
+function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed)
+    if not (self.enchantSoundPlayer:IsPlaying() or self.craftingProcessCompleted) then
         self.craftingProcessCompleted = true
 
         if self.playStopTooltipAnimation then
-			local numItemsGained = GetNumLastCraftingResultItemsAndPenalty()
-            self:PlayTooltipAnimation(numItemsGained == 0)
+            self:PlayTooltipAnimation(craftFailed)
         else
             self:CheckCraftProcessCompleted()
         end
     end
+end
+
+function ZO_CraftingResults_Base:OnCraftCompleted(craftingType)
+    local numItemsGained = GetNumLastCraftingResultItemsAndPenalty()
+    local craftFailed = numItemsGained == 0
+    self:CompleteCraftProcess(craftFailed)
+end
+
+function ZO_CraftingResults_Base:OnRetraitCompleted(result)
+    local craftFailed = result ~= RETRAIT_RESPONSE_SUCCESS
+    self:CompleteCraftProcess(craftFailed)
 end
 
 function ZO_CraftingResults_Base:OnAllEnchantSoundsFinished()
@@ -247,48 +305,47 @@ local function DidLastCraftGainBooster(numItemsGained)
 end
 
 function ZO_CraftingResults_Base:SetForceCenterResultsText(forceCenterResultsText)
-	g_forceCenterResultsText = forceCenterResultsText
+    g_forceCenterResultsText = forceCenterResultsText
 end
 
 function ZO_CraftingResults_Base:ModifyAnchor(control, newAnchor)
-	local _, point, relTo, relPoint, offsX, offsY = control:GetAnchor(0)
-	self.savedCraftingAnchor = {point, relTo, relPoint, offsX, offsY}
-	control:ClearAnchors()
-	newAnchor:Set(control)
+    local _, point, relTo, relPoint, offsX, offsY = control:GetAnchor(0)
+    self.savedCraftingAnchor = {point, relTo, relPoint, offsX, offsY}
+    control:ClearAnchors()
+    newAnchor:Set(control)
 end
 
 function ZO_CraftingResults_Base:RestoreAnchor(control)
-	control:ClearAnchors()
-	local restoredAnchor = ZO_Anchor:New(unpack(self.savedCraftingAnchor))
-	restoredAnchor:Set(control)
+    control:ClearAnchors()
+    local restoredAnchor = ZO_Anchor:New(unpack(self.savedCraftingAnchor))
+    restoredAnchor:Set(control)
 end
 
 function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
     if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted then
-        local numItemsGained, penaltyApplied = GetNumLastCraftingResultItemsAndPenalty()
-	    local smithingObject = ZO_Smithing_GetActiveObject()
-        local isImproving = smithingObject and smithingObject:IsImproving()
-
         if GetNumLastCraftingResultLearnedTraits() > 0 then
             self:DisplayDiscoveredTraits()
         end
 
-		if penaltyApplied then
-			TriggerTutorial(TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY)
-		end
+        local numItemsGained, penaltyApplied = GetNumLastCraftingResultItemsAndPenalty()
+
+        if penaltyApplied then
+            TriggerTutorial(TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY)
+        end
 
         if numItemsGained == 0 then
+            local smithingObject = ZO_Smithing_GetActiveObject()
             if SYSTEMS:IsShowing("alchemy") then
                 ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
-            elseif isImproving then
+            elseif smithingObject and smithingObject:IsImproving() then
                 ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_SMITHING_IMPROVEMENT_FAILED)
             elseif smithingObject and smithingObject:IsExtracting() then
-				local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo()
-				if penaltyApplied then
-					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
-				else
-					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
-				end
+                local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo()
+                if penaltyApplied then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+                else
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
+                end
             elseif ZO_Enchanting_IsSceneShowing() then
                 if not ZO_Enchanting_IsInCreationMode() then
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
@@ -297,7 +354,6 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
                 end
             end
         else
-            local gainedBooster = DidLastCraftGainBooster(numItemsGained)
             local shouldDisplayMessages = self:ShouldDisplayMessages()
             for i = 1, numItemsGained do
                 local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, quality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
@@ -315,6 +371,7 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
                         quality = quality,
                         itemSoundCategory = itemSoundCategory,
                         itemInstanceId = itemInstanceId,
+                        itemLink = GetLastCraftingResultItemLink(i),
                     }
 
                     self:DisplayCraftingResult(itemInfo)
@@ -325,13 +382,14 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
                 end
             end
 
+            local gainedBooster = DidLastCraftGainBooster(numItemsGained)
             if gainedBooster then
                 PlaySound(GetBoosterFoundSoundForCraftingType())
             end
 
             if penaltyApplied then
-				ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
-			end
+                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+            end
         end
 
         local totalInspiration = GetLastCraftingResultTotalInspiration()
@@ -348,9 +406,29 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
 end
 
 function ZO_CraftingResults_Base:IsCraftInProgress()
-    return self.craftingProcessCompleted == false or not self.tooltipAnimationCompleted == false
+    return self.craftingProcessCompleted == false or self.tooltipAnimationCompleted == true
 end
 
 function ZO_CraftingResults_Base:HasEntries()
     return false
+end
+
+function ZO_CraftingResults_Base:IsActive()
+    assert(false, "You must override the IsActive function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:DisplayDiscoveredTraits()
+    assert(false, "You must override the DisplayDiscoveredTraits function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:DisplayTranslatedRunes()
+    assert(false, "You must override the DisplayTranslatedRunes function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:ShouldDisplayMessages()
+    assert(false, "You must override the ShouldDisplayMessages function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:FadeAll()
+    assert(false, "You must override the FadeAll function when inheriting from ZO_CraftingResults_Base")
 end

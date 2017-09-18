@@ -35,7 +35,7 @@ end
 function ZO_Stable_Manager:Initialize(control)
     self:RegisterForEvents()
     self.trainingCost = GetTrainingCost()
-    self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
+    self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
     self:UpdateStats()
 end
 
@@ -63,7 +63,7 @@ function ZO_Stable_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_Stable_Manager", EVENT_MOUNT_INFO_UPDATED, UpdateStats)
 
     local function UpdateMoney()
-        self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
+        self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
         self:FireCallbacks("StableMoneyUpdate")
     end
     EVENT_MANAGER:RegisterForEvent("ZO_Stable_Manager", EVENT_MONEY_UPDATE, UpdateMoney)

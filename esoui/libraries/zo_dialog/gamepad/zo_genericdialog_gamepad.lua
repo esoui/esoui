@@ -382,6 +382,8 @@ function ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningTex
         if dialog.warningTextControl and warningText then
             dialog.warningTextControl:SetText(warningText)
             dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+        elseif dialog.warningTextControl then
+            dialog.warningTextControl:SetText("")
         end
 
         if not ZO_GenericGamepadDialog_RefreshHeaderData(dialog, dialog.data) and headerData then
@@ -485,10 +487,10 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
 
     local container = dialog:GetNamedChild("Container")
     if container then
-    dialog.scrollChild = container:GetNamedChild("ScrollChild")
-    dialog.scrollIndicator = container:GetNamedChild("ScrollIndicator")
-    dialog.mainTextControl = dialog.scrollChild:GetNamedChild("MainText")
-    dialog.warningTextControl = dialog.scrollChild:GetNamedChild("WarningText")
+        dialog.scrollChild = container:GetNamedChild("ScrollChild")
+        dialog.scrollIndicator = container:GetNamedChild("ScrollIndicator")
+        dialog.mainTextControl = dialog.scrollChild:GetNamedChild("MainText")
+        dialog.warningTextControl = dialog.scrollChild:GetNamedChild("WarningText")
     end
 end
 

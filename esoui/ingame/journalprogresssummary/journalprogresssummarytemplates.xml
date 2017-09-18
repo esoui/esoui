@@ -35,12 +35,6 @@
             </Controls>
         </StatusBar>
 
-        <Label name="ZO_JournalSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" >
-            <OnMouseUp>
-                ZO_TreeEntry_OnMouseUp(self, upInside)
-            </OnMouseUp>
-        </Label>
-
         <Control name="ZO_JournalProgressBook" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" virtual="true">
             <Controls>
                 <Control name="$(parent)Contents">

@@ -15,9 +15,6 @@ local DISABLED_PLAYER_OPTION_COLOR = ZO_ERROR_COLOR
 local DISABLED_UNUSABLE_PLAYER_OPTION_COLOR = ZO_DISABLED_TEXT
 local HIGHLIGHT_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
 
-local INTERACT_GOLD_ICON = zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 16, 16)
-
-
 --Keyboard Interaction
 ---------------------
 
@@ -248,7 +245,8 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local moneyAnchorControl = ZO_InteractWindowRewardAreaHeader
     local moneyControls = {}
 
-    local rewardData = self:GetRewardData(journalQuestIndex)
+    local IS_KEYBOARD = false
+    local rewardData = self:GetRewardData(journalQuestIndex, IS_KEYBOARD)
     local numRewards = #rewardData
     local confirmError
     for i, reward in ipairs(rewardData) do
@@ -303,10 +301,6 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     ZO_InteractWindowRewardArea:SetHeight(rewardWindowHeight)
 
     return confirmError
-end
-
-function ZO_Interaction:GetInteractGoldIcon()
-    return INTERACT_GOLD_ICON
 end
 
 function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)

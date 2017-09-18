@@ -87,10 +87,8 @@
             <Controls>
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
-                <Control name="$(parent)TabsDivider" inherits="ZO_InventoryFilterDivider" />
-
                 <Label name="$(parent)NumResearching" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TabsDivider" offsetX="80" offsetY="12" />
+                    <Anchor point="TOPLEFT" offsetX="35" offsetY="18" />
                 </Label>
 
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds">
@@ -99,11 +97,12 @@
                 </Texture>
                 
                 <Control name="$(parent)ResearchLineList" inherits="ZO_SmithingHorizontalListTemplate">
-                    <Anchor point="TOP" relativeTo="$(parent)TabsDivider" relativePoint="BOTTOM" offsetY="40"/>
+                    <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
+                    <Dimensions y="155"/>
                 </Control>
 
                 <Control name="$(parent)TimerBar">
-                    <Dimensions x="270" y="20" />
+                    <Dimensions x="270" y="24" />
                     <Anchor point="BOTTOM" relativeTo="$(parent)ResearchLineList" offsetY="-8"/>
 
                     <Controls>
@@ -125,17 +124,17 @@
                 </Control>
 
                 <Control name="$(parent)ContainerDivider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOP" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOM" />
-                </Control>
-                
-                <Control name="$(parent)TraitContainer">
-                    <Dimensions x="576" y="700" />
-                    <Anchor point="TOP" relativeTo="$(parent)ContainerDivider" relativePoint="BOTTOM" offsetX="37" offsetY="25" />
+                    <Anchor point="TOP" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOM" offsetY="5"/>
                 </Control>
 
                 <Label name="$(parent)ResearchProgressLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_SMITHING_RESEARCH_PROGRESS_HEADER">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TraitContainer" relativePoint="TOPLEFT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerDivider" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="8" />
                 </Label>
+                
+                <Control name="$(parent)TraitContainer">
+                    <Dimensions x="576" y="700" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResearchProgressLabel" relativePoint="BOTTOMLEFT" offsetY="8" />
+                </Control>
 
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />

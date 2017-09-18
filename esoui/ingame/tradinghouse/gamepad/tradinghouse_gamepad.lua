@@ -34,7 +34,7 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     ZO_GamepadGenericHeader_Initialize(self.m_header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     local function UpdateGold(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
 		return true
     end
 

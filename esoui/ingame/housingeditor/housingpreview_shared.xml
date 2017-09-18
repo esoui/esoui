@@ -1,22 +1,39 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_HousingPreviewDialog_PurchaseOptionSection" hidden="true" virtual="true">
-            
             <Controls>
-                <Button name="$(parent)Button">
+                <Control name="$(parent)Button">
                     <Anchor point="TOP" />
-                </Button>
-                
-                <Label name="$(parent)CurrencyNameLabel" modifyTextType="UPPERCASE">
-                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM"  offsetY="5"/>
+                    <Controls>
+                        <Label name="$(parent)Price" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="CENTER" />
+                        </Label>
+
+                        <Label name="$(parent)PreviousPrice" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" hidden="true">
+                            <Anchor point="CENTER" />
+                            <Controls>
+                                <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY">
+                                    <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
+                                    <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
+                                    <OnInitialized>
+                                        self:SetHeight(2.5)
+                                    </OnInitialized>
+                                </Texture>
+                            </Controls>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)ErrorLabel" text="SI_HOUSE_TEMPLATE_UNMET_REQUIREMENTS_TEXT" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" modifyTextType="UPPERCASE" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="15" />
                 </Label>
 
-                <Label name="$(parent)ErrorLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                    <Anchor point="TOP" relativeTo="$(parent)CurrencyNameLabel" />
+                <Label name="$(parent)TextCallout" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="15" />
                 </Label>
             </Controls>
         </Control>
-        
+
         <TopLevelControl name="ZO_HousingPreviewDialog_Shared" virtual="true">
             <Controls>
                 <Texture name="$(parent)HouseImage" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
@@ -83,26 +100,14 @@
                     <Controls>
                         <Control name="$(parent)Gold" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">
                             <Anchor point="TOPLEFT" />
-                            
-                            <Controls>
-                                <Label name="$(parent)CurrencyNameLabel" override="true" text="SI_CURRENCY_GOLD" />
-                            </Controls>
                         </Control>
 
                         <Control name="$(parent)Crowns" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Gold" relativePoint="TOPRIGHT" />
-                            
-                            <Controls>
-                                <Label name="$(parent)CurrencyNameLabel" override="true" text="SI_CURRENCY_CROWN" />
-                            </Controls>
                         </Control>
 
                         <Control name="$(parent)CrownGems" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Crowns" relativePoint="TOPRIGHT" />
-
-                            <Controls>
-                                <Label name="$(parent)CurrencyNameLabel" override="true" text="SI_CURRENCY_CROWN_GEM" />
-                            </Controls>
                         </Control>
                     </Controls>
                 </Control>

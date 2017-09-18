@@ -26,7 +26,11 @@
             <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
         </Label>
 
-        <Control name="ZO_DialogButton" inherits="ZO_SharedDialogButton" virtual="true">
+        <Control name="ZO_DialogButton" inherits="ZO_SharedDialogButton ZO_KeybindButton_ChromaBehavior" virtual="true">
+            <OnInitialized>
+                ZO_DialogButton_OnInitialized(self)
+            </OnInitialized>
+            
             <Controls>
                 <Label name="$(parent)NameLabel" inherits="ZO_DialogButtonColoredNameLabel" />
                 <Label name="$(parent)KeyLabel" inherits="ZO_DialogButtonKeyLabel" />

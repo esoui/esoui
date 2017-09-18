@@ -34,6 +34,9 @@ function ZO_HelpManager:Initialize(control)
     self.helpImage:SetParent(self.detailsScrollChild)
     self.helpBody2:SetParent(self.detailsScrollChild)
 
+    self.noMatchMessage:SetParent(self.detailsScrollChild)
+    self.noMatchMessage:SetAnchor(TOPLEFT, nil, TOPLEFT, 10, 0)
+
     self:InitializeTree()
 
     local function UpdateHelp()

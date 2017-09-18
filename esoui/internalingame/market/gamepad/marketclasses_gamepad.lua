@@ -83,25 +83,24 @@ function ZO_GamepadMarketProductBundleAttachment:GetTemplate()
     return ZO_GAMEPAD_MARKET_PRODUCT_BUNDLE_ATTACHMENT_TEMPLATE
 end
 
+function ZO_GamepadMarketProductBundleAttachment:GetPurchaseState()
+    local parentMarketProductId = self.bundle:GetId()
+    local parentPurchaseState = GetMarketProductPurchaseState(self.parentMarketProductId)
+    if parentPurchaseState == MARKET_PRODUCT_PURCHASE_STATE_PURCHASED then
+        return parentPurchaseState
+    end
+
+    return ZO_GamepadMarketProduct.GetPurchaseState(self)
+end
+
 function ZO_GamepadMarketProductBundleAttachment:Show(...)
     ZO_GamepadMarketProduct.Show(self, ...)
 
-    -- we want to show collectibles that we currently own as collected in the bundle viewer
-    local productType = self:GetProductType()
-    local collectibleOwned = false
-    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-        local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
-        if not isPlaceholder then
-            collectibleOwned = owned
-        end
-    elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
-        -- Show bundles that have all their collectibles unlocked as collected
-        collectibleOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
-    end
+    local allCollectiblesOwned = self:AreAllCollectiblesUnlocked()
 
-    self.purchaseLabelControl:SetHidden(not collectibleOwned)
+    self.purchaseLabelControl:SetHidden(not allCollectiblesOwned)
 
-    if collectibleOwned then
+    if allCollectiblesOwned then
         self.purchaseLabelControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     end
 
@@ -116,7 +115,7 @@ function ZO_GamepadMarketProductBundleAttachment:SetBundle(bundle)
 end
 
 function ZO_GamepadMarketProductBundleAttachment:IsPurchaseLocked()
-     return self.bundle:IsPurchaseLocked()
+     return self.bundle:IsPurchaseLocked() or ZO_GamepadMarketProduct.IsPurchaseLocked(self)
 end
 
 function ZO_GamepadMarketProductBundleAttachment:Reset()

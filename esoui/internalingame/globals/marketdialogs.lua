@@ -102,7 +102,7 @@ ESO_Dialogs["MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION"] =
     {
         text =  function(dialog)
                     local endTimeString = GetMarketProductEndTimeString(dialog.data.marketProductId)
-                    local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(UI_ONLY_CURRENCY_CROWNS, CURRENCY_ICON_SIZE)
+                    local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, CURRENCY_ICON_SIZE)
                     return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
                 end,
     },

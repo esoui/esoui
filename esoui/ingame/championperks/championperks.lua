@@ -238,11 +238,12 @@ function ChampionPerks:SetupCustomConfirmDialog()
         },
         setup = function(dialog)
             if SCENE_MANAGER:IsCurrentSceneGamepad() then
-                gamepadData.data1.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetCarriedCurrencyAmount(CURT_MONEY)) , ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
-                gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), ZO_GAMEPAD_GOLD_ICON_FORMAT_24)
+                local gamepadGoldIconMarkup =  ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
+                gamepadData.data1.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)), gamepadGoldIconMarkup)
+                gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), gamepadGoldIconMarkup)
                 dialog.setupFunc(dialog, gamepadData)
             else
-                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY,  GetCarriedCurrencyAmount(CURT_MONEY))
+                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY,  GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
                 ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("RespecCost"), CURT_MONEY,  GetChampionRespecCost())
             end
         end,
@@ -436,10 +437,10 @@ function ChampionPerks:InitializeSharedKeybindStripDescriptors()
             name = function()
                 if self:IsRespecNeeded() then
                     local cost = GetChampionRespecCost()
-                    if GetCarriedCurrencyAmount(CURT_MONEY) < cost then
+                    if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < cost then
                         cost = ZO_ERROR_COLOR:Colorize(cost)
                     end
-                    return zo_strformat(SI_CHAMPION_CONFIRM_SPEND_RESPEC_ACTION, cost, ZO_Currency_GetPlatformFormattedGoldIcon())
+                    return zo_strformat(SI_CHAMPION_CONFIRM_SPEND_RESPEC_ACTION, cost, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY))
                 else
                     return GetString(SI_CHAMPION_CONFIRM_SPEND_POINTS_ACTION)
                 end
@@ -456,7 +457,7 @@ function ChampionPerks:InitializeSharedKeybindStripDescriptors()
                 end
 
                 if self:IsRespecNeeded() then
-                    return GetCarriedCurrencyAmount(CURT_MONEY) >= GetChampionRespecCost()
+                    return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= GetChampionRespecCost()
                 else
                     return true
                 end
@@ -1371,7 +1372,7 @@ function ChampionPerks:ToggleRespecMode()
     if isInRespecMode and self:HasUnsavedChanges() then
         self:ShowDialog("CHAMPION_CONFIRM_CANCEL_RESPEC")
     elseif not isInRespecMode then
-        self:ShowDialog("CHAMPION_CONFIRM_ENTER_RESPEC", nil, { mainTextParams = { GetChampionRespecCost(), ZO_Currency_GetPlatformFormattedGoldIcon() } })
+        self:ShowDialog("CHAMPION_CONFIRM_ENTER_RESPEC", nil, { mainTextParams = { GetChampionRespecCost(), ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY) } })
     else
         self:SetInRespecMode(not isInRespecMode)
     end

@@ -32,17 +32,23 @@ function ZO_LootInventory_Gamepad:SetupList(list)
     self.itemList = list
 end
 
-function ZO_LootInventory_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
+do
+    local FORCE_FULL_DURABILITY = true
+    local NOT_EQUIPPED = false
+    local NO_CREATOR_NAME = nil
+    local NO_PREVIEW_VALUE = nil
+    function ZO_LootInventory_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
 
-    if selectedData then
-        if not selectedData.currencyType then 
-            local itemLink = GetLootItemLink(selectedData.lootId)
-            GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount)
+        if selectedData then
+            if not selectedData.currencyType then 
+                local itemLink = GetLootItemLink(selectedData.lootId)
+                GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_LEFT_TOOLTIP, itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, selectedData.stackCount, EQUIP_SLOT_NONE)
+            end
+
+            self:UpdateButtonTextOnSelection(selectedData)
         end
-
-        self:UpdateButtonTextOnSelection(selectedData)
     end
 end
 

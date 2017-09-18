@@ -172,7 +172,7 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
 
             enabled = function()
                 local targetData = self.questList:GetTargetData()
-                return targetData and targetData.questInfo and targetData.questInfo.questIndex and not targetData.isAssisted
+                return targetData ~= nil and targetData.questInfo ~= nil and targetData.questInfo.questIndex ~= nil and not targetData.isAssisted
             end
         },
     }

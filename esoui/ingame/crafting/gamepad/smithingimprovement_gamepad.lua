@@ -40,7 +40,6 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
     -- called before initialize on purpose, as functions called from it need these
     self.mode = ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
-    self.tooltip = floatingControl:GetNamedChild("Tooltip")
     self.sourceTooltip = floatingControl:GetNamedChild("SourceTooltip")
     self.qualityBridge = floatingControl:GetNamedChild("QualityBridge")
     self.resultTooltip = floatingControl:GetNamedChild("ResultTooltip")
@@ -61,15 +60,10 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
-            self.tooltip.tip:ClearLines()
-            self.tooltip.tip:LayoutBagItem(selectedData.bagId, selectedData.slotIndex)
-            self.tooltip.icon:SetTexture(selectedData.pressedIcon)
-            self.tooltip:SetHidden(false)
-
-            -- purposely not showing this one yet...
             self.sourceTooltip.tip:ClearLines()
             self.sourceTooltip.tip:LayoutBagItem(selectedData.bagId, selectedData.slotIndex)
             self.sourceTooltip.icon:SetTexture(selectedData.pressedIcon)
+            self.sourceTooltip:SetHidden(false)
 
             self:Refresh()
 
@@ -78,7 +72,6 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self.selectedItem = selectedData
 
             if not self:HasSelections() then
-                self.sourceTooltip:SetHidden(true)
                 self.resultTooltip:SetHidden(true)
                 self.slotContainer:SetHidden(true)
                 self:EnableQualityBridge(false)
@@ -95,9 +88,15 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
+
+            GAMEPAD_CRAFTING_RESULTS:ClearSecondaryTooltipAnimationControls()
+            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.sourceTooltip)
+            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.qualityBridge)
         else
-            self.tooltip.tip:ClearLines()
-            self.tooltip:SetHidden(true)
+            self.sourceTooltip.tip:ClearLines()
+            self.sourceTooltip:SetHidden(true)
+
+            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
 
             self:ClearBoosterRowHighlight()
 
@@ -151,8 +150,6 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             KEYBIND_STRIP:RestoreDefaultExit()
             self:SetInventoryActive(false)
 
-            self.tooltip.tip:ClearLines()
-            self.tooltip:SetHidden(true)
             self.sourceTooltip.tip:ClearLines()
             self.sourceTooltip:SetHidden(true)
             self.resultTooltip.tip:ClearLines()
@@ -195,9 +192,9 @@ function ZO_GamepadSmithingImprovement:ChangeMode(mode)
     self.inventory.filterType = mode
 
     if self.mode == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
-        self.inventory.noItemsLabel:SetText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
+        self.inventory:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
     elseif self.mode == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
-        self.inventory.noItemsLabel:SetText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
+        self.inventory:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
     end
 
     self.inventory:HandleDirtyEvent()
@@ -264,6 +261,10 @@ end
 function ZO_GamepadSmithingImprovement:InitializeInventory()
     self.inventoryControl = self.panelControl:GetNamedChild("Inventory")
     self.inventory = ZO_GamepadImprovementInventory:New(self, self.inventoryControl, SLOT_TYPE_CRAFTING_COMPONENT)
+
+    self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
+        data:SetIgnoreTraitInformation(true)
+    end)
 end
 
 function ZO_GamepadSmithingImprovement:IsCurrentSelected()
@@ -275,15 +276,6 @@ function ZO_GamepadSmithingImprovement:IsCurrentSelected()
 end
 
 function ZO_GamepadSmithingImprovement:UpdateSelection()
-    local bagId, slotIndex = self.improvementSlot:GetBagAndSlot()
-    for _, data in pairs(self.inventory.list.dataList) do
-        if data.bagId == bagId and data.slotIndex == slotIndex then
-            data.isEquippedInCurrentCategory = true
-        else
-            data.isEquippedInCurrentCategory = false
-        end
-    end
-
     if self.selectedItem then
         self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
     else
@@ -302,8 +294,11 @@ function ZO_GamepadSmithingImprovement:AddItemToCraft(bagId, slotIndex)
     self:UpdateSelection()
 
     if self.selectedItem then
-        self.tooltip:SetHidden(true)
-        self.sourceTooltip:SetHidden(false)
+        self.sourceTooltip.scrollTooltip:ResetToTop()
+        self.sourceTooltip:ClearAnchors()
+        local offsetX = 21
+        self.sourceTooltip:SetAnchor(RIGHT, self.qualityBridge, LEFT, offsetX)
+
         self.slotContainer:SetHidden(false)
 
         -- I need the functionality of a crafting slot, but don't want to see these things (essentially an invisible crafting slot)
@@ -328,13 +323,16 @@ function ZO_GamepadSmithingImprovement:RemoveItemFromCraft()
     self:SetImprovementSlotItem(nil)
     self:UpdateSelection()
 
-    self.tooltip:SetHidden(false)
-    self.sourceTooltip:SetHidden(true)
+    self.sourceTooltip:SetHidden(false)
+    self.sourceTooltip.scrollTooltip:ResetToTop()
+    self.sourceTooltip:ClearAnchors()
+    self.sourceTooltip:SetAnchor(CENTER, self.qualityBridge, CENTER)
+
     self.slotContainer:SetHidden(true)
 
     if not self.selectedItem then
-        self.tooltip.tip:ClearLines()
-        self.tooltip:SetHidden(true)
+        self.sourceTooltip.tip:ClearLines()
+        self.sourceTooltip:SetHidden(true)
     end
 
     self:SetInventoryActive(true)
@@ -493,10 +491,6 @@ function ZO_GamepadSmithingImprovement:OnSlotChanged()
     self.inventory:HandleVisibleDirtyEvent()
 end
 
-function ZO_GamepadSmithingImprovement:Improve()
-    self:SharedImprove()
-end
-
 function ZO_GamepadSmithingImprovement:HighlightBoosterRow(rowToHighlight)
     for _, row in ipairs(self.rows) do
         if row ~= rowToHighlight then
@@ -622,9 +616,14 @@ function ZO_GamepadImprovementInventory:Initialize(owner, control, ...)
     ZO_GamepadCraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
-    self.noItemsLabel = control.noItemsLabel
     self.filterType = ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
     self:SetCustomSort(function(bagId, slotIndex) return bagId end) -- sort equipped items (BAG_WORN) to the top of the list
+    self:SetCustomBestItemCategoryNameFunction(function(slotData)
+                                                    slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTYPE", slotData.itemType))
+                                                    if slotData.bagId == BAG_WORN then
+                                                        slotData.bestItemCategoryName = zo_strformat(GetString(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM), slotData.bestItemCategoryName)
+                                                    end
+                                               end)
 end
 
 function ZO_GamepadImprovementInventory:GetCurrentFilterType()
@@ -635,8 +634,6 @@ function ZO_GamepadImprovementInventory:Refresh(data)
     local USE_WORN_BAG = true
     local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
     self.owner:OnInventoryUpdate(validItems)
-
-    self.noItemsLabel:SetHidden(#data > 0)
 
     self.owner.spinner:GetControl():SetHidden(#data < 1 or not self.owner:HasSelections())
 end

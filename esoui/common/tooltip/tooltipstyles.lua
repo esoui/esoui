@@ -1323,13 +1323,35 @@ ZO_TOOLTIP_STYLES =
     },
 
     --Gamepad Currency Tooltip
-    currenciesSection =
+    currencyMainSection =
+    {
+        widthPercent = 100,
+        childSpacing = 45,
+    },
+    currencyLocationSection =
+    {
+        widthPercent = 100,
+        childSpacing = 15,
+    },
+    currencyLocationTitle =
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_27)",
+        uppercase = true,
+    },
+    currencyLocationCurrenciesSection =
+    {
+        widthPercent = 100,
+        childSpacing = 5
+    },
+    bankCurrencyMainSection =
     {
         customSpacing = 47,
         widthPercent = 100,
         childSpacing = 25,
     },
-    currencySection =
+    bankCurrencySection =
     {
         widthPercent = 100,
     },

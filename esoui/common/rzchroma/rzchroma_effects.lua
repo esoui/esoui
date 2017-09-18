@@ -1,5 +1,14 @@
 ZO_CHROMA_UNDERLAY_ALPHA = .5
+ZO_CHROMA_ACTIVE_KEY_COLOR = ZO_ColorDef:New(1, 1, 1, 1)
+
 local FALLBACK_CANVAS_COLOR = ZO_ColorDef:New(0.773, 0.761, 0.62, ZO_CHROMA_UNDERLAY_ALPHA)
+local FALLBACK_KEYBIND_VISUAL_DATA = 
+{
+    animationTimerData = ZO_CHROMA_ANIMATION_TIMER_DATA.KEYBIND_PROMPT_PULSATE,
+    color = ZO_CHROMA_ACTIVE_KEY_COLOR,
+    blendMode = CHROMA_BLEND_MODE_NORMAL,
+    level = ZO_CHROMA_EFFECT_DRAW_LEVEL.ACTIVE_KEY_UI,
+}
 
 ZO_RzChroma_Effects = ZO_Object:Subclass()
 
@@ -39,7 +48,7 @@ function ZO_RzChroma_Effects:Initialize()
     ChromaDeleteAllCustomEffectIds()
 
     self.allianceEffects = self:CreateAllianceEffects(GetAllianceColor)
-    self.battlegroundAllianceEffects = self:CreateAllianceEffects(GetBattlegroundAllianceColor)    
+    self.battlegroundAllianceEffects = self:CreateAllianceEffects(GetBattlegroundAllianceColor)
 
     self.keybindActionVisualData = { }
     self.keybindActionEffects = { }
@@ -83,8 +92,8 @@ function ZO_RzChroma_Effects:SetAlliance(alliance, inBattleground)
     end
 end
 
-function ZO_RzChroma_Effects:SetVisualDataForKeybindAction(actionName, animationTimerData, color, blendMode)
-    self.keybindActionVisualData[actionName] = { animationTimerData = animationTimerData, color = color, blendMode = blendMode }
+function ZO_RzChroma_Effects:SetVisualDataForKeybindAction(actionName, animationTimerData, color, blendMode, level)
+    self.keybindActionVisualData[actionName] = { animationTimerData = animationTimerData, color = color, blendMode = blendMode, level = level }
 end
 
 function ZO_RzChroma_Effects:AddKeybindActionEffect(actionName)
@@ -92,14 +101,12 @@ function ZO_RzChroma_Effects:AddKeybindActionEffect(actionName)
 
     local row, column = ZO_ChromaGetCustomEffectCoordinatesForAction(actionName)
     if row and column then
-        local visualData = self.keybindActionVisualData[actionName]
-        if visualData then
-            local effect = ZO_ChromaCStyleCustomSingleColorFadingEffect:New(CHROMA_DEVICE_TYPE_KEYBOARD, ZO_CHROMA_EFFECT_DRAW_LEVEL.ACTIVE_KEY, CHROMA_CUSTOM_EFFECT_GRID_STYLE_STATIC, visualData.animationTimerData, visualData.color, visualData.blendMode)
-            effect:SetCellActive(row, column, true)
-            effect:SetDeleteEffectCallback(function() self:RemoveKeybindActionEffect(actionName) end)
-            self.keybindActionEffects[actionName] = effect
-            ZO_RZCHROMA_MANAGER:AddEffect(effect)
-        end
+        local visualData = self.keybindActionVisualData[actionName] or FALLBACK_KEYBIND_VISUAL_DATA
+        local effect = ZO_ChromaCStyleCustomSingleColorFadingEffect:New(CHROMA_DEVICE_TYPE_KEYBOARD, visualData.level, CHROMA_CUSTOM_EFFECT_GRID_STYLE_STATIC, visualData.animationTimerData, visualData.color, visualData.blendMode)
+        effect:SetCellActive(row, column, true)
+        effect:SetDeleteEffectCallback(function() self:RemoveKeybindActionEffect(actionName) end)
+        self.keybindActionEffects[actionName] = effect
+        ZO_RZCHROMA_MANAGER:AddEffect(effect)
     end
 end
 

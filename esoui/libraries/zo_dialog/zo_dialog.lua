@@ -1208,13 +1208,13 @@ function ZO_Dialogs_ButtonKeybindReleased(keybind)
     end
 end
 
-function ZO_DialogButton_OnInitialized(self)
+function ZO_SharedDialogButton_OnInitialized(self)
     ZO_KeybindButtonTemplate_OnInitialized(self)
     self:SetCallback(HandleCallback)
 end
 
 function ZO_CustomDialogButton_OnInitialized(self)
-    ZO_DialogButton_OnInitialized(self)
+    ZO_SharedDialogButton_OnInitialized(self)
 
     local parent = self:GetParent()
     local maxButtonIndex
@@ -1241,6 +1241,11 @@ function ZO_CustomDialogButton_OnInitialized(self)
     else
         self.customButtonIndex = 1
     end
+end
+
+function ZO_DialogButton_OnInitialized(self)
+    ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+    self:SetCallback(HandleCallback)
 end
 
 function ZO_TwoButtonDialogEditBox_OnTextChanged(control)

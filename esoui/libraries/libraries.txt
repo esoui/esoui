@@ -7,6 +7,8 @@ EsoUI\Libraries\Globals\SoundIds.lua
 EsoUI\Libraries\Globals\Time.lua
 EsoUI\Libraries\Globals\DebugUtils.lua
 
+EsoUI\Libraries\Globals\CommonConstants.lua
+
 EsoUI\Libraries\Utility\BaseObject.lua
 EsoUI\Libraries\Utility\ZO_CallbackObject.lua
 EsoUI\Libraries\Utility\ZO_Anchor.lua
@@ -196,6 +198,11 @@ EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.xml
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.lua
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadPassiveFocus.lua
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadPassiveFocus.xml
+
+EsoUI\Libraries\ZO_ParametricGridList\ZO_GridScrollList.lua
+EsoUI\Libraries\ZO_ParametricGridList\Keyboard\ZO_GridScrollList_Keyboard.xml
+EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_GridScrollList_Gamepad.lua
+EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_GridScrollList_Gamepad.xml
 
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.lua
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.xml

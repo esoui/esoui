@@ -243,3 +243,92 @@ function ZO_KeybindButtonTemplate_Setup(self, keybind, callbackFunction, text)
     self:SetText(text)
     self:SetCallback(callbackFunction)
 end
+
+ZO_ChromaKeybindButtonMixin = {}
+
+function ZO_ChromaKeybindButtonMixin:SetChromaEnabled(enabled)
+    if self.chromaEnabled ~= enabled then
+        self.chromaEnabled = enabled
+        self:UpdateChromaEffect()
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:AddChromaEffect()
+    if ZO_RZCHROMA_EFFECTS and self:AreChromaEffectsEnabled() then
+        local keybindAction = self:GetKeyboardKeybind()
+        if keybindAction then
+            ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect(keybindAction)
+        end
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:RemoveChromaEffect()
+    if ZO_RZCHROMA_EFFECTS then
+        local keybindAction = self:GetKeyboardKeybind()
+        if keybindAction then
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect(keybindAction)
+        end
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:UpdateChromaEffect()
+    if ZO_RZCHROMA_EFFECTS and not self:IsHidden() then
+        local keybindAction = self:GetKeyboardKeybind()
+        if keybindAction then
+            if self:AreChromaEffectsEnabled() then
+                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect(keybindAction)
+            else
+                ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect(keybindAction)
+            end
+        end
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode)
+    local previousKeybind = self:GetKeyboardKeybind()
+    local refreshKeybind = keybind ~= previousKeybind and not self:IsHidden()
+
+    if refreshKeybind then
+        self:RemoveChromaEffect()
+    end
+
+    ZO_KeybindButtonMixin.SetKeybind(self, keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode)
+
+    if refreshKeybind then
+        self:AddChromaEffect()
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:UpdateEnabledState()
+    ZO_KeybindButtonMixin.UpdateEnabledState(self)
+    self:UpdateChromaEffect()
+end
+
+function ZO_ChromaKeybindButtonMixin:AreChromaEffectsEnabled()
+    return self.chromaEnabled and self:IsEnabled()
+end
+
+function ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+    ZO_KeybindButtonTemplate_OnInitialized(self)
+    zo_mixin(self, ZO_ChromaKeybindButtonMixin)
+    self:SetChromaEnabled(true)
+end
+
+function ZO_ChromaKeybindButtonTemplate_Setup(self, keybind, callbackFunction, text)
+    ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+    self:SetKeybind(keybind)
+    self:SetText(text)
+    self:SetCallback(callbackFunction)
+end
+
+function ZO_KeybindButton_ChromaBehavior_OnEffectivelyShown(self)
+    if self.AddChromaEffect then
+        self:AddChromaEffect()
+    end
+end
+
+function ZO_KeybindButton_ChromaBehavior_OnEffectivelyHidden(self)
+    if self.RemoveChromaEffect then
+        self:RemoveChromaEffect()
+    end
+end

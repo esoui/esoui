@@ -10,6 +10,7 @@
         <TopLevelControl name="ZO_SharedMediumLeftPanelBackground" inherits="ZO_MediumLeftPanelBG" hidden="true" layer="BACKGROUND" level="1"/>
         <TopLevelControl name="ZO_SharedMediumShortRightPanelBackground" inherits="ZO_MediumShortRightPanelBG" hidden="true" layer="BACKGROUND" level="1"/>
         <TopLevelControl name="ZO_SharedMediumShortLeftPanelBackground" inherits="ZO_MediumShortLeftPanelBG" hidden="true" layer="BACKGROUND" level="1"/>
+        <TopLevelControl name="ZO_SharedMediumTallLeftPanelBackground" inherits="ZO_MediumTallLeftPanelBG" hidden="true" layer="BACKGROUND" level="1"/>
         <TopLevelControl name="ZO_SharedWideRightPanelBackground" inherits="ZO_WideRightPanelBG" hidden="true" layer="BACKGROUND" level="1"/>
         <TopLevelControl name="ZO_SharedWideLeftPanelBackground" inherits="ZO_WideLeftPanelBG" hidden="true" layer="BACKGROUND" level="1"/>
         <TopLevelControl name="ZO_SharedRightBackground" inherits="ZO_RightFootPrintBackground" hidden="true" layer="BACKGROUND" level="1"/>

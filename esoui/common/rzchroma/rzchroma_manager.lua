@@ -96,7 +96,7 @@ function ZO_RzChroma_Manager:RemoveEffect(effect)
 end
 
 function ZO_RzChroma_Manager:MarkAllDirty()
-    for deviceType = CHROMA_DEVICE_TYPE_MIN_VALUE, CHROMA_DEVICE_TYPE_MAX_VALUE do
+    for deviceType = CHROMA_DEVICE_TYPE_ITERATION_BEGIN, CHROMA_DEVICE_TYPE_ITERATION_END do
         self:MarkDirty(deviceType)
     end
 end

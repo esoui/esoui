@@ -44,21 +44,6 @@
             </Controls>
         </Button>
 
-        <Control name="ZO_AlchemyInventorySolventRow" inherits="ZO_CraftingInventoryRowBase" virtual="true">
-            <Dimensions x="392" y="72" />
-
-            <Controls>
-                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="270" />
-                    <Anchor point="TOPLEFT" offsetX="97" offsetY="20" />
-                </Label>
-                <Label name="$(parent)Level" maxLineCount="1" font="ZoFontGameShadow">
-                    <Dimensions x="350" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
-                </Label>
-            </Controls>
-        </Control>
-
         <Label name="ZO_AlchemyIconTraitLabel" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" virtual="true">
             <Dimensions x="170" y="20" />
             <OnInitialized>
@@ -105,7 +90,28 @@
             </Controls>
         </Label>
 
-        <Control name="ZO_AlchemyInventoryReagentRow" inherits="ZO_CraftingInventoryRowBase" virtual="true">
+        <Control name="ZO_AlchemyInventorySolventRow" inherits="ZO_CraftingInventoryComponentRow" virtual="true">
+            <Dimensions x="392" y="72" />
+
+            <Controls>
+                <Button name="$(parent)Button" override="true">
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="70" offsetY="36" />
+                </Button>
+
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="TOPLEFT" offsetX="110" offsetY="20" />
+                </Label>
+
+                <Label name="$(parent)SellPrice" hidden="true" override="true" />
+
+                <Label name="$(parent)Level" maxLineCount="1" font="ZoFontGameShadow">
+                    <Dimensions x="350" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_AlchemyInventoryReagentRow" inherits="ZO_CraftingInventoryComponentRow" virtual="true">
             <Dimensions x="392" y="108" />
             
             <OnInitialized>
@@ -120,19 +126,24 @@
             </OnInitialized>
             
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="270" />
-                    <Anchor point="TOPLEFT" offsetX="93" offsetY="20" />
+                <Button name="$(parent)Button" override="true">
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="70" offsetY="46" />
+                </Button>
+
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="TOPLEFT" offsetX="110" offsetY="15" />
                 </Label>
+                
+                <Label name="$(parent)SellPrice" hidden="true" override="true" />
 
                 <Label name="$(parent)Trait1" inherits="ZO_AlchemyIconTraitLabel" >
-                    <Anchor point="TOPLEFT" offsetX="110" offsetY="44" />
+                    <Anchor point="TOPLEFT" offsetX="150" offsetY="43" />
                 </Label>
                 <Label name="$(parent)Trait2" inherits="ZO_AlchemyIconTraitLabel" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Trait1" relativePoint="BOTTOMLEFT" offsetY="10" />
                 </Label>
                 <Label name="$(parent)Trait3" inherits="ZO_AlchemyIconTraitLabel" >
-                    <Anchor point="TOPLEFT" offsetX="330" offsetY="44" />
+                    <Anchor point="TOPLEFT" offsetX="370" offsetY="43" />
                 </Label>
                 <Label name="$(parent)Trait4" inherits="ZO_AlchemyIconTraitLabel" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Trait3" relativePoint="BOTTOMLEFT" offsetY="10" />
@@ -202,12 +213,8 @@
                         <Button name="$(parent)SolventSlot" inherits="ZO_AlchemySlotContainerSolventSlot" />
                     </Controls>
                 </Control>
-                
-                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
-                    <Controls>
-                        <Label name="$(parent)NoSolventOrReagentsLabel" inherits="ZO_CraftingInventoryNoItemLabel" />
-                    </Controls>
-                </Control>
+
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
 
                 <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip">
                     <Anchor point="BOTTOM" offsetY="-335" />

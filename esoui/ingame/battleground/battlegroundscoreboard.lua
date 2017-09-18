@@ -81,7 +81,7 @@ function Battleground_Scoreboard_Fragment:Initialize(control)
     self.alliancePanels = {}
     self.playerEntryData = {}
 
-    for i = BATTLEGROUND_ALLIANCE_FIRE_DRAKES, BATTLEGROUND_ALLIANCE_STORM_LORDS do
+    for i = BATTLEGROUND_ALLIANCE_ITERATION_BEGIN, BATTLEGROUND_ALLIANCE_ITERATION_END do
         local alliancePanelControl = CreateControlFromVirtual("$(parent)AlliancePanel", control, "ZO_Battleground_Scoreboard_Alliance_Panel", i)
         local alliancePanel = Battleground_Scoreboard_Alliance_Panel:New(alliancePanelControl, i)
         self.alliancePanels[i] = alliancePanel
@@ -159,7 +159,7 @@ function Battleground_Scoreboard_Fragment:ApplyPlatformStyle(style)
     ApplyTemplateToControl(self.headers, style.headers)
     self.gamepadBackground:SetHidden(not style.useGamepadBackground)
     self.keyboardBackground:SetHidden(not style.useKeyboardBackground)
-    for i = BATTLEGROUND_ALLIANCE_FIRE_DRAKES, BATTLEGROUND_ALLIANCE_STORM_LORDS do
+    for i = BATTLEGROUND_ALLIANCE_ITERATION_BEGIN, BATTLEGROUND_ALLIANCE_ITERATION_END do
         self.alliancePanels[i]:ApplyPlatformStyle(style)
     end
     self:UpdateAll()

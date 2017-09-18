@@ -312,7 +312,49 @@ local READER_MEDIA = {
         OpenSound = SOUNDS.TABLET_OPEN,
         CloseSound = SOUNDS.TABLET_CLOSE,
         TurnPageSound = SOUNDS.TABLET_PAGE_TURN,
-    }
+    },
+    [BOOK_MEDIUM_METAL] = {
+        NumPages = 2,
+        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_dwemerBook.dds",
+
+        keyboardFonts = {
+                            TitleFont = "ZoFontBookMetalTitle",
+                            BodyFont = "ZoFontBookMetal",
+                        },
+        gamepadFonts = {
+                            TitleFont = "ZoFontGamepadBookMetalTitle",
+                            BodyFont = "ZoFontGamepadBookMetal",
+                        },
+
+        LeftPageXOffset = 95,
+        RightPageXOffset = -80,
+        FontStyleColor = ZO_ColorDef:New(1, 1, 1, .4),
+
+        OpenSound = SOUNDS.BOOK_METAL_OPEN,
+        CloseSound = SOUNDS.BOOK_METAL_CLOSE,
+        TurnPageSound = SOUNDS.BOOK_METAL_PAGE_TURN,
+    },
+    [BOOK_MEDIUM_METAL_TABLET] = {
+        NumPages = 1,
+        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_dwemerPage.dds",
+
+        keyboardFonts = {
+                            TitleFont = "ZoFontBookMetalTitle",
+                            BodyFont = "ZoFontBookMetal",
+                        },
+        gamepadFonts = {
+                            TitleFont = "ZoFontGamepadBookMetalTitle",
+                            BodyFont = "ZoFontGamepadBookMetal",
+                        },
+
+        PageWidth = 520,
+        PageHeight = 725,
+        FontStyleColor = ZO_ColorDef:New(1, 1, 1, .4),
+
+        OpenSound = SOUNDS.BOOK_METAL_OPEN,
+        CloseSound = SOUNDS.BOOK_METAL_CLOSE,
+        TurnPageSound = SOUNDS.BOOK_METAL_PAGE_TURN,
+    },
 }
 
 function LoreReader:ApplyMedium(medium, isGamepad)

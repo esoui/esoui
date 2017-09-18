@@ -40,10 +40,18 @@ function ZO_ApplyEnchant_Gamepad:OnSelectionChanged(list, selectedData, oldSelec
     end
 end
 
-function ZO_ApplyEnchant_Gamepad:OnTargetChanged(list, targetData, oldTargetData, reachedTarget, targetSelectedIndex)
-    if targetData then
-        GAMEPAD_TOOLTIPS:LayoutPendingEnchantedItem(GAMEPAD_LEFT_TOOLTIP, self.itemBag, self.itemIndex, targetData.bag, targetData.index)
-        GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, self.itemBag, self.itemIndex, ZO_ENCHANT_DIFF_REMOVE)
+do
+    local EXTRA_TOOLTIP_DATA =
+    {
+        enchantDiffMode = ZO_ENCHANT_DIFF_REMOVE,
+    }
+    local DONT_SHOW_COMBINED_COUNT = false
+    function ZO_ApplyEnchant_Gamepad:OnTargetChanged(list, targetData, oldTargetData, reachedTarget, targetSelectedIndex)
+        if targetData then
+            GAMEPAD_TOOLTIPS:LayoutPendingEnchantedItem(GAMEPAD_LEFT_TOOLTIP, self.itemBag, self.itemIndex, targetData.bag, targetData.index)
+            
+            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, self.itemBag, self.itemIndex, DONT_SHOW_COMBINED_COUNT, EXTRA_TOOLTIP_DATA)
+        end
     end
 end
 
@@ -56,7 +64,7 @@ function ZO_ApplyEnchant_Gamepad:InitializeDefaultTooltip(tooltip)
     GAMEPAD_TOOLTIPS:ClearTooltip(tooltip)
 
     if self.itemBag and self.itemIndex then
-        GAMEPAD_TOOLTIPS:LayoutBagItem(tooltip, self.itemBag, self.itemIndex, ZO_ENCHANT_DIFF_NONE)
+        GAMEPAD_TOOLTIPS:LayoutBagItem(tooltip, self.itemBag, self.itemIndex)
 
         if self.itemBag == BAG_WORN then
             ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltip, self.itemIndex)

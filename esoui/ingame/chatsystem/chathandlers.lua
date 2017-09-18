@@ -24,18 +24,6 @@ local function GetCustomerServiceIcon(isCustomerServiceAccount)
 end
 
 local ChatEventFormatters = {
-    [EVENT_SERVER_SHUTDOWN_INFO] = function(action, timeRemaining)
-        if action == SERVER_SHUTDOWN_CANCELED then
-            return GetString(SI_CHAT_SHUTDOWN_CANCEL)
-        elseif action == SERVER_SHUTDOWN_START then
-            return zo_strformat(SI_CHAT_SHUTDOWN_START, FormatShutdownTime(timeRemaining))
-        elseif action == SERVER_SHUTDOWN_RESCHEDULED then
-            return zo_strformat(SI_CHAT_SHUTDOWN_RESCHEDULE, FormatShutdownTime(timeRemaining))
-        elseif action == SERVER_SHUTDOWN_UPDATE then
-            return FormatShutdownTime(timeRemaining)
-        end
-    end,
-
     [EVENT_CHAT_MESSAGE_CHANNEL] = function(messageType, fromName, text, isFromCustomerService, fromDisplayName)
         local channelInfo = ChannelInfo[messageType]
 

@@ -27,6 +27,6 @@ function ZO_MarketCurrency_Shared:OnCrownsUpdated(currentCurrency, difference)
     -- To be overridden
 end
 
-function ZO_MarketCurrency_Shared:OnCrownGemsUpdated(currentCurrency, difference)
+function ZO_MarketCurrency_Shared:OnCrownGemsUpdated(currentCurrency, difference, reason)
     -- To be overridden
 end

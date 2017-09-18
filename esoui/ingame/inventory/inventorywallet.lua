@@ -1,5 +1,6 @@
 local DATA_TYPE_CURRENCY_ITEM = 1
 local LIST_ENTRY_HEIGHT = 52
+local CURRENCY_LOCATION_ALL = CURRENCY_LOCATION_MAX_VALUE + 1
 
 -------------------
 --InventoryWallet Manager
@@ -31,6 +32,8 @@ function InventoryWalletManager:Initialize(container)
         self:ApplySort()
     end
 
+    self:InitializeFilterBar()
+
     self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaders:AddHeadersFromContainer()
     self.sortHeaders:SelectHeaderByKey("name")
@@ -40,7 +43,7 @@ function InventoryWalletManager:Initialize(container)
 
     WALLET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InventoryWallet)
     WALLET_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                            if newState == SCENE_FRAGMENT_SHOWING then
                                                                 self:UpdateList()
                                                                 self:UpdateFreeSlots()
 																self:RefreshCurrency()
@@ -49,42 +52,76 @@ function InventoryWalletManager:Initialize(container)
 
 end
 
---Adding a new currency entry here should handle all updating unless GetCarriedCurrencyAmount does not accept that type like Crowns
-ZO_CURRENCY_INFO_TABLE =
-{
-    [CURT_MONEY] = { name = GetString(SI_CURRENCY_GOLD), event = EVENT_MONEY_UPDATE },
-    [CURT_ALLIANCE_POINTS] = { name = GetString(SI_CURRENCY_ALLIANCE_POINTS), event = EVENT_ALLIANCE_POINT_UPDATE, },
-    [CURT_TELVAR_STONES] = { name = GetString(SI_CURRENCY_TELVAR_STONES), event = EVENT_TELVAR_STONE_UPDATE }, 
-	[CURT_WRIT_VOUCHERS] = { name = GetString(SI_CURRENCY_WRIT_VOUCHERS), event = EVENT_WRIT_VOUCHER_UPDATE }, 
-}
+function InventoryWalletManager:AddFilterBarButton(currencyLocation, normal, pressed, highlight)
+    local button =
+    {
+        descriptor = currencyLocation,
+        normal = normal,
+        pressed = pressed, 
+        highlight = highlight, 
+        callback = function()
+            self:OnFilterSelected(currencyLocation)
+        end,
+        tooltipText = self:GetCurrencyLocationName(currencyLocation),
+    }
+    ZO_MenuBar_AddButton(self.filterBarControl, button)
+end
+
+function InventoryWalletManager:InitializeFilterBar()
+    self.filterBarControl = self.container:GetNamedChild("Tabs")
+    self.filterBarLabel = self.filterBarControl:GetNamedChild("Active")
+    self:AddFilterBarButton(CURRENCY_LOCATION_ACCOUNT, "EsoUI/Art/Inventory/inventory_currencyTab_accountWide_up.dds", "EsoUI/Art/Inventory/inventory_currencyTab_accountWide_down.dds", "EsoUI/Art/Inventory/inventory_currencyTab_accountWide_over.dds")
+    self:AddFilterBarButton(CURRENCY_LOCATION_CHARACTER, "EsoUI/Art/Inventory/inventory_currencyTab_onCharacter_up.dds", "EsoUI/Art/Inventory/inventory_currencyTab_onCharacter_down.dds", "EsoUI/Art/Inventory/inventory_currencyTab_onCharacter_over.dds")
+    self:AddFilterBarButton(CURRENCY_LOCATION_ALL, "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds")
+    local SKIP_ANIMATION = true
+    ZO_MenuBar_SelectDescriptor(self.filterBarControl, CURRENCY_LOCATION_ALL, SKIP_ANIMATION)
+end
+
+function InventoryWalletManager:GetCurrencyLocationName(currencyLocation)
+    return currencyLocation == CURRENCY_LOCATION_ALL and GetString(SI_INVENTORY_WALLET_ALL_FILTER) or GetString("SI_CURRENCYLOCATION", currencyLocation)
+end
+
+function InventoryWalletManager:OnFilterSelected(currencyLocation)
+    if self.currencyLocationFilter ~= currencyLocation then
+        self.currencyLocationFilter = currencyLocation
+        self.filterBarLabel:SetText(self:GetCurrencyLocationName(currencyLocation))
+        self:UpdateList()
+    end
+end
 
 function InventoryWalletManager:RegisterEvents()
-
-    local function OnCurrencyUpdated(eventCode, newMoney, oldMoney, reason)
+    local function RefreshCurrencies()
         if not self.container:IsHidden() then
             self:RefreshCurrency()
             self:UpdateList()
         end
     end
 
+    ZO_InventoryWallet:RegisterForEvent(EVENT_CURRENCY_UPDATE, RefreshCurrencies)
+    ZO_InventoryWallet:RegisterForEvent(EVENT_CURRENCY_CAPS_CHANGED, RefreshCurrencies)
+
     local function UpdateFreeSlots()
          self:UpdateFreeSlots()
-    end
-
-    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
-        ZO_InventoryWallet:RegisterForEvent(info.event, OnCurrencyUpdated)
     end
 
     ZO_InventoryWallet:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, UpdateFreeSlots)
     ZO_InventoryWallet:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, UpdateFreeSlots)
 end
 
-function InventoryWalletManager:SetUpEntry(control, data)
-    local nameControl = GetControl(control, "Name")
-    nameControl:SetText(data.name)
+do
+    local FORMAT_EXTRA_OPTIONS =
+    {
+        showCap = true,
+    }
 
-    local amountControl = GetControl(control, "Amount")
-    ZO_CurrencyControl_SetSimpleCurrency(amountControl, data.currencyType, data.amount, ITEM_SLOT_CURRENCY_OPTIONS)
+    function InventoryWalletManager:SetUpEntry(control, data)
+        local nameControl = GetControl(control, "Name")
+        nameControl:SetText(data.name)
+
+        local amountControl = GetControl(control, "Amount")
+        FORMAT_EXTRA_OPTIONS.currencyLocation = GetCurrencyPlayerStoredLocation(data.currencyType)
+        amountControl:SetText(ZO_Currency_FormatKeyboard(data.currencyType, data.amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS))
+    end
 end
 
 local sortKeys =
@@ -111,7 +148,7 @@ function InventoryWalletManager:ApplySort()
 end
 
 function InventoryWalletManager:RefreshCurrency()
-    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CURRENCY_STANDARD_TOOLTIP_OPTIONS)
+    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_KEYBOARD_CURRENCY_OPTIONS)
 end
 
 function InventoryWalletManager:UpdateFreeSlots()
@@ -128,24 +165,26 @@ function InventoryWalletManager:UpdateList()
     ZO_ScrollList_Clear(self.list)
     ZO_ScrollList_ResetToTop(self.list)
 
-    for type, info in pairs(ZO_CURRENCY_INFO_TABLE) do
-        self:CreateAndAddCurrencyEntry(scrollData, type)
+    local IS_PLURAL = false
+    local IS_UPPER = false
+    for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
+        if IsCurrencyValid(currencyType) then
+            local currencyPlayerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
+            if self.currencyLocationFilter == CURRENCY_LOCATION_ALL or currencyPlayerStoredLocation == self.currencyLocationFilter then
+                local entryData =
+                {
+                    name = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER),
+                    currencyType = currencyType,
+                    amount = GetCurrencyAmount(currencyType, currencyPlayerStoredLocation)
+                }
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_CURRENCY_ITEM, entryData))
+            end
+        end
     end
 
     self:ApplySort()
 
     self.sortHeadersControl:SetHidden(#scrollData == 0)
-end
-
-function InventoryWalletManager:CreateAndAddCurrencyEntry(scrollData, currencyType)
-    local entryData =
-    {
-        name = ZO_CURRENCY_INFO_TABLE[currencyType].name,
-        currencyType = currencyType,
-        amount = GetCarriedCurrencyAmount(currencyType)
-    }
-
-    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_CURRENCY_ITEM, entryData))
 end
 
 function ZO_InventoryWallet_OnInitialize(control)

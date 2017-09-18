@@ -54,6 +54,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
 
     self:InitializeInfoPanel()
     self:InitializeHousingPanel()
+    self:InitializeGridListPanel()
     self:InitializeActionsDialog()
     self:InitializeRenameCollectibleDialog()
 
@@ -110,6 +111,19 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     housingPanel.hintLabel = scrollContainer:GetNamedChild("Hint")
     
     self.housingPanelControl = housingPanel
+end
+
+function ZO_GamepadCollectionsBook:InitializeGridListPanel()
+    local gridListPanel = self.control:GetNamedChild("GridListPanel")
+    self.gridListPanelControl = gridListPanel
+    self.gridListPanelList = ZO_GridScrollList_Gamepad:New(gridListPanel)
+
+    local HEADER_HEIGHT = 45
+    local HIDE_CALLBACK = nil
+    local RESET_CONTROL_FUNC = nil
+    self.gridListPanelList:SetGridEntryTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD, ZO_DefaultGridEntrySetup, HIDE_CALLBACK, RESET_CONTROL_FUNC, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
+    self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
+    self.gridListPanelList:SetLineBreakAmount(ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
 end
 
 function ZO_GamepadCollectionsBook:SetupList(list)
@@ -274,10 +288,10 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                         return true
                     end
                     if entryData.data.useable then
-                        local remaining = GetCollectibleCooldownAndDuration(entryData.data.collectibleId)
+                        local remainingMs = GetCollectibleCooldownAndDuration(entryData.data.collectibleId)
                         if entryData.data.active then
                             return true
-                        elseif remaining > 0 then
+                        elseif remainingMs > 0 then
                             return false, GetString(SI_COLLECTIONS_COOLDOWN_ERROR)
                         elseif entryData.data.blocked then
                             return false, GetString(SI_COLLECTIONS_BLOCKED_ERROR)
@@ -430,8 +444,11 @@ function ZO_GamepadCollectionsBook:ShowList(list, dontUpdateTitle)
 
     self.currentList = list
     if list then
+        local listObject = list.list
         KEYBIND_STRIP:AddKeybindButtonGroup(self.currentList.keybind)
-        self:SetCurrentList(list.list)
+        self:SetCurrentList(listObject)
+        local targetData = listObject:GetTargetData()
+        self:RefreshRightPanel(targetData)
     end
 
     if not dontUpdateTitle then
@@ -441,7 +458,6 @@ function ZO_GamepadCollectionsBook:ShowList(list, dontUpdateTitle)
 
     if self.currentList == self.collectionList then
         local targetData = self.collectionList.list:GetTargetData()
-        self:RefreshTooltip(targetData)
         self.notificationIdToClear = targetData.data.notificationId
         if self.notificationIdToClear or targetData.data.isNew then
             self.clearNewStatusOnSelectionChanged = true
@@ -480,9 +496,8 @@ function ZO_GamepadCollectionsBook:HideCurrentList()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentList.keybind)
 
     self:DisableCurrentList()
-    self.currentList = nil
 
-    self:RefreshTooltip(nil)
+    self.currentList = nil
 end
 
 function ZO_GamepadCollectionsBook:OnCollectionUpdated()
@@ -662,8 +677,6 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryIndex, subcategor
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(collectionListInfo.keybind)
 
-    self:RefreshTooltip(collectionList:GetTargetData())
-
     self.currentCategoryIndex = categoryIndex
     self.currentSubcategoryIndex = subcategoryIndex
 
@@ -679,14 +692,13 @@ function ZO_GamepadCollectionsBook:UpdateCollectionListVisualLayer()
         data.visualLayerHidden = visualLayerHidden
         data.highestPriorityVisualLayerThatIsShowing = highestPriorityVisualLayerThatIsShowing
     end
-    self:RefreshTooltip(self.collectionList.list:GetTargetData())
+    self:RefreshRightPanel(self.collectionList.list:GetTargetData())
 end
 
 function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCategoryIndex, collectibleIndex)
     local collectibleId = GetCollectibleId(categoryIndex, subCategoryIndex, collectibleIndex)
-    local name, description, iconFile, lockedIconFile, unlocked, purchasable, active, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
+    local name, description, iconFile, deprecatedLockedIconFile, unlocked, purchasable, active, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
     local unlockState = GetCollectibleUnlockStateById(collectibleId)
-    iconFile = unlocked and iconFile or lockedIconFile
     local backgroundFile = GetCollectibleGamepadBackgroundImage(collectibleId)
     local useable = IsCollectibleUsable(collectibleId)
     local collectibleBlocked = IsCollectibleBlocked(collectibleId)
@@ -764,15 +776,22 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(categoryIndex, subCatego
 
     entryData:InitializeCollectibleVisualData(entryData.data)
 
-    if collectibleBlocked then
+    if not unlocked or collectibleBlocked then
         entryData:SetIconDesaturation(1)
     else
         entryData:SetIconDesaturation(0)
     end
 
-    local remainingMS, durationMS = GetCollectibleCooldownAndDuration(entryData.data.collectibleId)
-    if remainingMS > 0 and durationMS > 0 then
-        entryData:SetCooldown(remainingMS, durationMS)
+    if unlocked then
+        entryData:SetIconSampleProcessingWeightTable(ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
+    else
+        entryData:SetIconSampleProcessingWeightTable(ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
+    end
+
+    local remainingMs, durationMs = GetCollectibleCooldownAndDuration(entryData.data.collectibleId)
+    if remainingMs > 0 and durationMs > 0 then
+        entryData:SetCooldown(remainingMs, durationMs)
+        entryData.refreshWhenFinished = true
     end
 
     return entryData
@@ -793,7 +812,6 @@ end
 
 function ZO_GamepadCollectionsBook:OnSelectionChanged(list, selectedData, oldSelectedData)
     if self.currentList == self.collectionList then
-        self:RefreshTooltip(selectedData)
         self.notificationIdToClear = nil
         self.clearNewStatusCallId = nil
 
@@ -819,6 +837,8 @@ function ZO_GamepadCollectionsBook:OnSelectionChanged(list, selectedData, oldSel
             end
         end
     end
+    
+    self:RefreshRightPanel(selectedData)
 
     if self.currentList then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentList.keybind)
@@ -831,18 +851,31 @@ function ZO_GamepadCollectionsBook:TrySetClearNewFlag(callId)
     end
 end
 
-function ZO_GamepadCollectionsBook:RefreshTooltip(entryData)
-    if entryData and entryData.data then
-        local collectibleData = entryData.data
-        if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            self:RefreshDLCTooltip(collectibleData)
-        elseif collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
-            self:RefreshHousingTooltip(collectibleData)
+function ZO_GamepadCollectionsBook:RefreshRightPanel(entryData)
+    if self.currentList == self.collectionList then
+        if entryData and entryData.data then
+            local collectibleData = entryData.data
+            if collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                self:RefreshDLCTooltip(collectibleData)
+            elseif collectibleData.categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                self:RefreshHousingTooltip(collectibleData)
+            else
+                self:RefreshStandardTooltip(collectibleData, entryData)
+            end
         else
-            self:RefreshStandardTooltip(collectibleData, entryData)
+            SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         end
     else
-        SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+        local categoryIndex
+        local subcategoryIndex
+        if entryData and entryData.data then
+            categoryIndex = entryData.data.categoryIndex
+            subcategoryIndex = entryData.data.subcategoryIndex
+        end
+        self:UpdateGridPanelVisibility(categoryIndex, subcategoryIndex)
         SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
         SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
@@ -937,6 +970,39 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
 
     SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
     SCENE_MANAGER:AddFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
+end
+
+function ZO_GamepadCollectionsBook:UpdateGridPanelVisibility(categoryIndex, subcategoryIndex)
+    SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+    SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_GRID_LIST_PANEL_FRAGMENT)
+end
+
+function ZO_GamepadCollectionsBook:RefreshGridListPanel(categoryIndex, subcategoryIndex)
+    if self.savedGridListCategoryIndex == categoryIndex and self.savedGridListSubcategoryIndex == subcategoryIndex then
+        return
+    end
+    
+    self.savedGridListCategoryIndex = categoryIndex
+    self.savedGridListSubcategoryIndex = subcategoryIndex
+    local gridListPanelList = self.gridListPanelList
+    gridListPanelList:ClearGridList()
+    local numCollectiblesToAdd
+
+    if subcategoryIndex then
+        local subCategoryName, numCollectibles = GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex)
+        numCollectiblesToAdd = numCollectibles
+    else
+        local categoryName, numSubCategories, numTopLevelCollectibles = GetCollectibleCategoryInfo(categoryIndex)
+        numCollectiblesToAdd = numTopLevelCollectibles
+    end
+
+    for collectibleIndex = 1, numCollectiblesToAdd do
+        local entryData = self:BuildCollectibleData(categoryIndex, subcategoryIndex, collectibleIndex)
+        gridListPanelList:AddEntry(entryData)
+    end
+
+
+    gridListPanelList:CommitGridList()
 end
 
 function ZO_GamepadCollectionsBook:BrowseToCollectible(collectibleId, categoryIndex, subcategoryIndex)
@@ -1211,8 +1277,8 @@ end
 function ZO_GamepadCollectionsBook:OnUpdateCooldowns()
     for i, entryData in ipairs(self.updateList) do
         local collectibleData = entryData.data
-        local _, durationMs = GetCollectibleCooldownAndDuration(collectibleData.collectibleId)
-        if durationMs ~= entryData:GetCooldownDurationMs() then
+        local remainingMs = GetCollectibleCooldownAndDuration(collectibleData.collectibleId)
+        if remainingMs ~= entryData:GetCooldownTimeRemainingMs() or (remainingMs <= 0 and entryData.refreshWhenFinished) then
             self:OnCollectibleUpdated(collectibleData.collectibleId)
             return
         end
@@ -1223,7 +1289,7 @@ function ZO_GamepadCollectionsBook:UpdateActiveCollectibleCooldownTimer()
     if not self.control:IsHidden() and self.currentList == self.collectionList and self.collectionList then
         local entryData = self.currentList.list:GetTargetData()
         if entryData and entryData:IsOnCooldown() then
-            self:RefreshTooltip(entryData)
+            self:RefreshRightPanel(entryData)
         end
     end
 end

@@ -117,15 +117,14 @@ function Market_Singleton:InitializePlatformErrors()
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_XBL then
         consoleStoreName = GetString(SI_GAMEPAD_MARKET_XBOX_STORE)
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_STEAM then
-        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)))
+        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
     else -- _ZOS and _DMM
-        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT))
+        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT))
     end
 
     if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
-        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL, ZO_PrefixIconNameFormatter("crowns", GetString(SI_CURRENCY_CROWN)), consoleStoreName)
+        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), consoleStoreName)
     end
-
 end
 
 function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId, presentationIndex)
@@ -470,31 +469,48 @@ do
     end
 end
 
-function ZO_Market_Shared.GetCrownCrateContentsProductInfo(marketProductId)
-    local marketProducts = {}
+do
+    local addedMarketProductsMapping = {}
+    function ZO_Market_Shared.GetCrownCrateContentsProductInfo(marketProductId)
+        ZO_ClearTable(addedMarketProductsMapping)
+        local marketProducts = {}
 
-    local crateId = GetMarketProductCrownCrateId(marketProductId)
+        local crateId = GetMarketProductCrownCrateId(marketProductId)
 
-    local numTiers = GetNumCrownCrateTiers(crateId)
-    for tierIndex = 1, numTiers do
-        local tierId = GetCrownCrateTierId(crateId, tierIndex)
-        local tierOrdering = GetCrownCrateTierOrdering(tierId)
-        local numProducts = GetNumMarketProductsInCrownCrateTier(tierId)
-        for productIndex = 1, numProducts do
-            local productId = GetMarketProductIdFromCrownCrateTier(tierId, productIndex)
-            local productInfo =
-                {
-                    productId = productId,
-                    name = GetMarketProductDisplayName(productId),
-                    stackCount = GetMarketProductStackCount(productId),
-                    tierId = tierId,
-                    tierOrdering = tierOrdering,
-                }
-            table.insert(marketProducts, productInfo)
+        local crateTierIds = { GetCrownCrateTierIds(crateId) }
+        for tierIndex, tierId in ipairs(crateTierIds) do
+            local tierOrdering = GetCrownCrateTierOrdering(tierId)
+            local tierDisplayName = GetCrownCrateTierDisplayName(tierId)
+            local tierDisplayNameColor = nil
+            if tierDisplayName == "" then
+                tierDisplayName = nil
+            else
+                -- color only matters if we have a header to show
+                tierDisplayNameColor = ZO_ColorDef:New(GetCrownCrateTierDisplayNameColor(tierId))
+            end
+            local numProducts = GetNumMarketProductsInCrownCrateTier(tierId)
+            for productIndex = 1, numProducts do
+                local productId = GetMarketProductIdFromCrownCrateTier(tierId, productIndex)
+                if not addedMarketProductsMapping[productId] then
+                    local productInfo =
+                        {
+                            productId = productId,
+                            name = GetMarketProductDisplayName(productId),
+                            stackCount = GetMarketProductStackCount(productId),
+                            quality = GetMarketProductQuality(productId),
+                            tierId = tierId,
+                            tierOrdering = tierOrdering,
+                            headerName = tierDisplayName,
+                            headerColor = tierDisplayNameColor,
+                        }
+                    table.insert(marketProducts, productInfo)
+                    addedMarketProductsMapping[productId] = true
+                end
+            end
         end
-    end
 
-    return marketProducts
+        return marketProducts
+    end
 end
 
 function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId)
@@ -508,7 +524,6 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
             local productType = GetMarketProductType(childMarketProductId)
             local isBundle = productType == MARKET_PRODUCT_TYPE_BUNDLE
             local isValidForPlayer = true
-            local quality = GetMarketProductQuality(childMarketProductId)
             if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
                 local collectibleId = GetMarketProductCollectibleId(childMarketProductId)
                 isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
@@ -520,7 +535,7 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
                             stackCount = GetMarketProductStackCount(childMarketProductId),
                             isBundle = isBundle,
                             isValidForPlayer = isValidForPlayer,
-                            quality = quality,
+                            quality = GetMarketProductQuality(childMarketProductId),
                         }
             table.insert(marketProducts, productInfo)
         end
@@ -817,6 +832,33 @@ function ZO_Market_Shared:UpdateFreeTrialProduct()
     end
 
     self.shouldShowFreeTrial = not IsESOPlusSubscriber() and self.hasFreeTrialProduct
+end
+
+do
+    local freeTrialColor = GetItemQualityColor(ITEM_QUALITY_LEGENDARY)
+    local function UpdateEsoPlusFreeTrialStatusText(productId)
+        local remainingTime = GetMarketProductTimeLeftInSeconds(productId)
+        local formattedRemainingTime = ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+        local statusText = zo_strformat(SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_FREE_TRIAL, formattedRemainingTime)
+        return freeTrialColor:Colorize(statusText)
+    end
+
+    function ZO_Market_Shared:GetEsoPlusStatusText()
+        local statusText
+        local generateTextFunction
+        if  IsOnESOPlusFreeTrial() then
+            generateTextFunction = function() return UpdateEsoPlusFreeTrialStatusText(self.freeTrialMarketProductId) end
+            statusText = generateTextFunction()
+        elseif IsESOPlusSubscriber() then
+            statusText = SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_ACTIVE
+            generateTextFunction = nil
+        else
+            statusText = SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_NOT_ACTIVE
+            generateTextFunction = nil
+        end
+
+        return statusText, generateTextFunction
+    end
 end
 
 function ZO_Market_Shared.GetMarketProductPreviewType(marketProduct)

@@ -435,6 +435,34 @@ do
     end
 end
 
+do
+    local ITEM_TRAIT_INFORMATION_KEYBOARD_ICON_PATHS =
+    {
+        [ITEM_TRAIT_INFORMATION_ORNATE] = "EsoUI/Art/Inventory/inventory_trait_ornate_icon.dds",
+        [ITEM_TRAIT_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/inventory_trait_intricate_icon.dds",
+        [ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/inventory_trait_not_researched_icon.dds",
+        [ITEM_TRAIT_INFORMATION_RETRAITED] = "EsoUI/Art/Inventory/inventory_trait_retrait_icon.dds",
+    }
+
+    local ITEM_TRAIT_INFORMATION_GAMEPAD_ICON_PATHS =
+    {
+        [ITEM_TRAIT_INFORMATION_ORNATE] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_ornate_icon.dds",
+        [ITEM_TRAIT_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_intricate_icon.dds",
+        [ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_not_researched_icon.dds",
+        [ITEM_TRAIT_INFORMATION_RETRAITED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_retrait_icon.dds",
+    }
+
+    function GetPlatformTraitInformationIcon(itemTraitInformation)
+        if itemTraitInformation then
+            if IsInGamepadPreferredMode() then
+                return ITEM_TRAIT_INFORMATION_GAMEPAD_ICON_PATHS[itemTraitInformation]
+            else
+                return ITEM_TRAIT_INFORMATION_KEYBOARD_ICON_PATHS[itemTraitInformation]
+            end
+        end
+    end
+end
+
 -- Misc --
 ZO_NO_TEXTURE_FILE = "/esoui/art/icons/icon_missing.dds"
 ZO_KEYBOARD_NEW_ICON = "EsoUI/Art/Miscellaneous/new_icon.dds"
@@ -446,14 +474,3 @@ ZO_TIMER_ICON_64 = "EsoUI/Art/Miscellaneous/timer_64.dds"
 ZO_KEYBOARD_LOCKED_ICON = "EsoUI/Art/Miscellaneous/status_locked.dds"
 ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
 ZO_KEYBOARD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/inventory_icon_equipped.dds"
-
--- Gamepad Currency Textures --
-ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE = "EsoUI/Art/currency/gamepad/gp_gold.dds"
-ZO_GAMEPAD_CURRENCY_ICON_ALLIANCE_POINTS_TEXTURE = "EsoUI/Art/currency/gamepad/gp_alliancePoints.dds"
-ZO_GAMEPAD_CURRENCY_ICON_TELVAR_STONES_TEXTURE = "EsoUI/Art/currency/gamepad/gp_telvar.dds"
-ZO_GAMEPAD_CURRENCY_ICON_WRIT_VOUCHER_TEXTURE = "EsoUI/Art/currency/gamepad/gp_writvoucher.dds"
-ZO_GAMEPAD_CURRENCY_ICON_INSPIRATION_POINTS_TEXTURE = "EsoUI/Art/currency/gamepad/gp_inspiration.dds" 
-ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE = "EsoUI/Art/currency/gamepad/gp_crowns.dds"
-ZO_GAMEPAD_CURRENCY_ICON_CROWN_GEMS_TEXTURE = "EsoUI/Art/currency/gamepad/gp_crown_gems.dds"
-
-ZO_GAMEPAD_GOLD_ICON_FORMAT_24 = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 24, 24)

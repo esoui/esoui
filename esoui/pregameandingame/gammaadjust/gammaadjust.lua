@@ -130,8 +130,8 @@ do
         self.subText:SetFont(style.subFont)
         ApplyTemplateToControl(self.confirmGamma, style.confirmTemplate)
         ApplyTemplateToControl(self.declineGamma, style.declineTemplate)
-        ZO_DialogButton_OnInitialized(self.confirmGamma)
-        ZO_DialogButton_OnInitialized(self.declineGamma)
+        ZO_SharedDialogButton_OnInitialized(self.confirmGamma)
+        ZO_SharedDialogButton_OnInitialized(self.declineGamma)
         ZO_SelectableLabel_SetNormalColor(self.confirmGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
         ZO_SelectableLabel_SetNormalColor(self.declineGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
 

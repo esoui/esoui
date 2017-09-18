@@ -32,7 +32,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
         self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
             local SHOW_COMBINED_COUNT = true
-            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex, nil, SHOW_COMBINED_COUNT)
+            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex, SHOW_COMBINED_COUNT)
         else
             GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
         end
@@ -223,7 +223,7 @@ function ZO_GamepadSmithingExtraction:AddItemToCraft(bagId, slotIndex)
     if bagId and slotIndex then
         self.tooltip.tip:ClearLines()
         local SHOW_COMBINED_COUNT = true
-        self.tooltip.tip:LayoutBagItem(bagId, slotIndex, nil, SHOW_COMBINED_COUNT)
+        self.tooltip.tip:LayoutBagItem(bagId, slotIndex, SHOW_COMBINED_COUNT)
         self.tooltip.icon:SetTexture(GetItemInfo(bagId, slotIndex))
         self.tooltip:SetHidden(false)
 
@@ -358,13 +358,30 @@ end
 function ZO_GamepadExtractionInventory:Initialize(owner, control, refinementOnly, ...)
     local inventory = ZO_GamepadCraftingInventory.Initialize(self, control, ...)
     self.owner = owner
-    self.noItemsLabel = control.noItemsLabel
 
     if refinementOnly then
         self.filterType = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
     else
         self.filterType = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS
     end
+
+    self:SetCustomSort(function(bagId, slotIndex)
+                            local traitInformation = GetItemTraitInformation(bagId, slotIndex)
+                            return ZO_GetItemTraitInformation_SortOrder(traitInformation)
+                       end)
+
+    self:SetCustomBestItemCategoryNameFunction(function(slotData, data)
+                                                    if slotData.traitInformation then
+                                                        if slotData.traitInformation == ITEM_TRAIT_INFORMATION_ORNATE then
+                                                            local traitType = GetItemTrait(slotData.bagId, slotData.slotIndex)
+                                                            slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITTYPE", traitType))
+                                                        elseif slotData.traitInformation == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED or slotData.traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
+                                                            slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITINFORMATION", slotData.traitInformation))
+                                                        else
+                                                            slotData.bestItemCategoryName = nil -- design does not want anything to be said about inspiration/no trait items
+                                                        end
+                                                    end
+                                               end)
 end
 
 function ZO_GamepadExtractionInventory:Refresh(data)
@@ -376,15 +393,14 @@ function ZO_GamepadExtractionInventory:Refresh(data)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 
-    -- handle no items in a filter cases / show text to the user
-    self.noItemsLabel:SetHidden(#data > 0)
-    if #data < 1 then
+    -- if we don't have any items to show, make sure out NoItemLabel is updated
+    if #data == 0 then
         if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR then
-            self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_ARMOR))
+            self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_ARMOR))
         elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS then
-            self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_WEAPONS))
+            self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_WEAPONS))
         elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-            self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_MATERIALS))
+            self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_MATERIALS))
         end
     end
 end
