@@ -191,21 +191,33 @@ function ZO_CraftingResults_Base:OnRetraitStarted()
     self:StartCraftProcess(playStopTooltipAnimation)
 end
 
-function ZO_CraftingResults_Base:PlayTooltipAnimation(failure)
+function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalResult)
     if self.tooltipControl and not self.tooltipControl:IsHidden() then
         self:ForceStop()
 
-        self.tooltipGlow:SetEdgeTexture(failure and "EsoUI/Art/Crafting/crafting_toolTip_glow_edge_red64.dds" or "EsoUI/Art/Crafting/crafting_toolTip_glow_edge_blue64.dds", 512, 64)
-        if failure then
+        local edgeTexture = "EsoUI/Art/Crafting/crafting_toolTip_glow_edge_blue64.dds"
+        local burstTexture = "EsoUI/Art/Crafting/burst_blue.dds"
+        if isFailure then
+            edgeTexture = "EsoUI/Art/Crafting/crafting_toolTip_glow_edge_red64.dds"
+            -- no burst texture for failue since we hide the bursts
+        elseif isExceptionalResult then
+            edgeTexture = "EsoUI/Art/Crafting/crafting_toolTip_glow_edge_gold64.dds"
+            burstTexture = "EsoUI/Art/Crafting/burst_gold.dds"
+        end
+
+        self.tooltipGlow:SetEdgeTexture(edgeTexture, 512, 64)
+        if isFailure then
             self.resultTooltipAnimation:GetAnimation(3):SetDuration(200)
             self.resultTooltipAnimation:GetAnimation(3):SetAlphaValues(.25, 1)
         else
             self.resultTooltipAnimation:GetAnimation(3):SetDuration(500)
             self.resultTooltipAnimation:GetAnimation(3):SetAlphaValues(0, 1)
+            self.tooltipBurst1:SetTexture(burstTexture)
+            self.tooltipBurst2:SetTexture(burstTexture)
         end
 
-        self.tooltipBurst1:SetHidden(failure)
-        self.tooltipBurst2:SetHidden(failure)
+        self.tooltipBurst1:SetHidden(isFailure)
+        self.tooltipBurst2:SetHidden(isFailure)
 
         self.resultTooltipAnimation:PlayFromStart()
 
@@ -216,15 +228,15 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(failure)
     else
         self:OnTooltipAnimationStopped()
     end
-    PlaySound(failure and self.tooltipAnimationFailureSound or self.tooltipAnimationSuccessSound)
+    PlaySound(isFailure and self.tooltipAnimationFailureSound or self.tooltipAnimationSuccessSound)
 end
 
-function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed)
+function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptionalResult)
     if not (self.enchantSoundPlayer:IsPlaying() or self.craftingProcessCompleted) then
         self.craftingProcessCompleted = true
 
         if self.playStopTooltipAnimation then
-            self:PlayTooltipAnimation(craftFailed)
+            self:PlayTooltipAnimation(craftFailed, isExceptionalResult)
         else
             self:CheckCraftProcessCompleted()
         end
@@ -239,7 +251,8 @@ end
 
 function ZO_CraftingResults_Base:OnRetraitCompleted(result)
     local craftFailed = result ~= RETRAIT_RESPONSE_SUCCESS
-    self:CompleteCraftProcess(craftFailed)
+    local EXCEPTIONAL_RESULT = true
+    self:CompleteCraftProcess(craftFailed, EXCEPTIONAL_RESULT)
 end
 
 function ZO_CraftingResults_Base:OnAllEnchantSoundsFinished()

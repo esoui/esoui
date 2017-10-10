@@ -57,8 +57,10 @@ end
 LoadingScreen_Base = {}
 
 function LoadingScreen_Base:Log(text)
-    if WriteToInterfaceLog then
-        WriteToInterfaceLog(self:GetSystemName().." - "..text)
+    local gamepadMode = IsInGamepadPreferredMode()
+    if gamepadMode and self == GamepadLoadingScreen or
+    not gamepadMode and self == LoadingScreen then         
+        WriteToInterfaceLog(text)
     end
 end
 
@@ -90,11 +92,23 @@ function LoadingScreen_Base:Initialize()
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_RESUME_FROM_SUSPEND, function(...) self:OnResumeFromSuspend(...) end)
 
     local function OnSubsystemLoadComplete(eventCode, system)
-        self:Log(string.format("Load Screen - System %d Complete", system))
-        if GetNumTotalSubsystemsToLoad() == GetNumLoadedSubsystems() and not IsWaitingForTeleport() then
-            --If the last systems we were waiting on all finish in the same frame we could call Hide several times
-            self:Log("Load Screen - Systems Loaded and No Teleport")
-            self:Hide()
+        self:Log(string.format("Load Screen - %s Complete", GetLoadingSystemName(system)))
+        if GetNumTotalSubsystemsToLoad() == GetNumLoadedSubsystems() then
+            if not IsWaitingForTeleport() then
+                --If the last systems we were waiting on all finish in the same frame we could call Hide several times
+                self:Log("Load Screen - Systems Loaded And Not Waiting For Teleport")
+                self:Hide()
+            else
+                self:Log("Load Screen - Systems Loaded But Waiting For Teleport")
+            end
+        else
+            local remainingText = "Load Screen - Waiting On: "
+            for i = 1, GetNumTotalSubsystemsToLoad() do
+                if not IsSystemLoaded(i) then
+                    remainingText = remainingText .. GetLoadingSystemName(i) .. ", "
+                end
+            end
+            self:Log(remainingText)
         end
     end
 

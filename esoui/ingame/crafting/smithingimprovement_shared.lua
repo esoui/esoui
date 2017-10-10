@@ -159,6 +159,8 @@ function ZO_SharedSmithingImprovement:RefreshImprovementChance()
         local numBoostersToApply = self:GetNumBoostersToApply()
         local chance = GetSmithingImprovementChance(itemToImproveBagId, itemToImproveSlotIndex, numBoostersToApply, craftingType)
 
+        chance = zo_roundToNearest(chance, .1)
+
         self.improvementChanceLabel:SetText(zo_strformat(SI_SMITHING_IMPROVE_CHANCE_FORMAT, chance))
 
         local row = self:GetBoosterRowForQuality(self.currentQuality)

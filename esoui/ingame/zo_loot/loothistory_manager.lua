@@ -56,10 +56,10 @@ do
             end
         end
 
-        local function OnBattlegroundScoreboardUpdated(...)
+        local function OnBattlegroundStateChanged(oldState, newState)
             if CanAddLootEntry() then
-                if GetCurrentBattlegroundState() == BATTLEGROUND_STATE_POSTGAME then
-                    SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnBattlegroundScoreboardUpdated(...)
+                if newState == BATTLEGROUND_STATE_POSTGAME then
+                    SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnBattlegroundEnteredPostGame()
                 end
             end
         end
@@ -106,7 +106,7 @@ do
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_QUEST_TOOL_UPDATED, function(eventId, ...) OnQuestToolUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(eventId, ...) OnNewCollectibleReceived(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MEDAL_AWARDED, function(eventId, ...) OnMedalAwarded(...) end)
-        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_SCOREBOARD_UPDATED, function(eventId, ...) OnBattlegroundScoreboardUpdated(...) end)
+        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_STATE_CHANGED, function(eventId, ...) OnBattlegroundStateChanged(...) end)
         -- TODO: wait for icons to be made before allowing skill experience from guilds to come through loot history
     end
 end

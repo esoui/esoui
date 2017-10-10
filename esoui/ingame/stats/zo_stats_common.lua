@@ -235,7 +235,7 @@ do
         end
 
         --add bonus icon if at the highest level
-        if self.equipmentBonus.value == EQUIPMENT_BONUS_END then
+        if self.equipmentBonus.value == EQUIPMENT_BONUS_MAX_VALUE then
             local equipmentBonusIconControl = self.equipmentBonus.iconPool:AcquireObject()
             equipmentBonusIconControl:SetTexture(EQUIPMENT_BONUS_GOLD_TEXTURE)
             equipmentBonusIconControl:SetAnchor(BOTTOMLEFT, lastIcon, BOTTOMRIGHT, 4, 0)

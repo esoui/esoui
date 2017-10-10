@@ -45,7 +45,8 @@ end
 
 function ZO_LootHistory_Keyboard:CanShowItemsInHistory()
     local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    return currentSceneName == "inventory" or currentSceneName == "interact" or currentSceneName == "crownCrateKeyboard" or LOOT_WINDOW.returnScene == "inventory"
+    return currentSceneName == "inventory" or currentSceneName == "interact" or currentSceneName == "crownCrateKeyboard" 
+           or currentSceneName == "trade" or LOOT_WINDOW.returnScene == "inventory"
 end
 
 function ZO_LootHistory_Keyboard:GetCraftBagIcon()

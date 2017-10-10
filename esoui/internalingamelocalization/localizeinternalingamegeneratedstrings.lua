@@ -2351,7 +2351,7 @@ EsoStrings =
     "You already have that collectible.", -- SI_STOREFAILURE24
     "You need more Writ Vouchers to buy that.", -- SI_STOREFAILURE25
     "You need more Chaos Creatia to buy that.", -- SI_STOREFAILURE26
-    "You need more Style Stones to buy that.", -- SI_STOREFAILURE27
+    "",
     "<<1>> has declined your resurrection request.", -- SI_RESURRECTRESULT0
     "<<1>> is already considering a resurrection request.", -- SI_RESURRECTRESULT1
     "You can not resurrect <<1>>. You are already attempting to resurrect someone else with a soul gem.", -- SI_RESURRECTRESULT2
@@ -5488,7 +5488,6 @@ SI_STOREFAILURE23 = 2326
 SI_STOREFAILURE24 = 2327 
 SI_STOREFAILURE25 = 2328 
 SI_STOREFAILURE26 = 2329 
-SI_STOREFAILURE27 = 2330 
 SI_RESURRECTRESULT0 = 2331 
 SI_RESURRECTRESULT1 = 2332 
 SI_RESURRECTRESULT2 = 2333 

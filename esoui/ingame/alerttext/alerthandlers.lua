@@ -896,6 +896,10 @@ local AlertHandlers = {
             end
         end
     end,
+
+    [EVENT_LOCKPICK_FAILED] = function(result)
+        return ALERT, GetString(SI_ALERT_LOCKPICK_FAILED)
+    end,
 }
 
 function ZO_AlertText_GetHandlers()

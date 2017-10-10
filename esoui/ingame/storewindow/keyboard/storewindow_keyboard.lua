@@ -107,6 +107,9 @@ function ZO_StoreManager:Initialize(control)
 
     self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaders:AddHeadersFromContainer()
+    -- We are using shared sort headers from the inventory, but store sorts its entries by value
+    -- differently, so we need to swap out the sort key
+    self.sortHeaders:ReplaceKey("stackSellPrice", "stackBuyPrice")
     self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
 
     self.tabs = GetControl(control, "Tabs")

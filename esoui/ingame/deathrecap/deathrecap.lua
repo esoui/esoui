@@ -92,8 +92,7 @@ function DeathRecap:Initialize(control)
     self.control:SetHandler("OnEffectivelyShown", function() self:OnEffectivelyShown() end)
     self.control:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
 
-    self:ApplyStyle() -- Setup initial visual style based on current mode.
-    self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
+    ZO_PlatformStyle:New(function() self:ApplyStyle() end)
 
     local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X = 793
     local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y = 366
@@ -158,10 +157,8 @@ end
 
 function DeathRecap:InitializeTelvarStoneLossLabel()
     self.telvarStoneLossControl = self.scrollControl:GetNamedChild("TelvarStoneLoss")
-    self.telvarStoneLossTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapTelvarStoneLoss")
-    ApplyTemplateToControl(self.telvarStoneLossControl, self.telvarStoneLossTemplate)
-
-    self.telvarStoneLossValueControl = self.telvarStoneLossControl:GetNamedChild("Value");
+    self.telvarStoneLossValueControl = self.telvarStoneLossControl:GetNamedChild("Value")
+    self.telvarStoneLossIconControl = self.telvarStoneLossControl:GetNamedChild("Icon")
 
     self.telvarLossTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_DeathRecapTelvarLossAnimation", self.telvarStoneLossControl)
 end
@@ -513,10 +510,11 @@ function DeathRecap:ApplyStyle()
     self.hintTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapHint")
     self.telvarStoneLossTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapTelvarStoneLoss")
     ApplyTemplateToControl(self.telvarStoneLossControl, ZO_GetPlatformTemplate("ZO_DeathRecapTelvarStoneLoss"))
+    self.telvarStoneLossIconControl:SetTexture(ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES))
 
     if self.isPlayerDead then
         self:SetupDeathRecap()
-        if (not self.control:IsHidden()) then
+        if not self.control:IsHidden() then
             if IsInGamepadPreferredMode() then
                 DIRECTIONAL_INPUT:Activate(self, self.control)
             else
@@ -524,10 +522,6 @@ function DeathRecap:ApplyStyle()
             end
         end
     end
-end
-
-function DeathRecap:OnGamepadPreferredModeChanged()
-    self:ApplyStyle()
 end
 
 function DeathRecap:UpdateDirectionalInput()

@@ -281,7 +281,9 @@ function ZO_RetraitStation_Retrait_Gamepad:ShowItemActions()
     self:RemoveKeybinds()
 
     local function OnActionsFinishedCallback()
-        self:AddKeybinds()
+        if self:IsShowing() then
+            self:AddKeybinds()
+        end
     end
 
     local dialogData = 
@@ -470,7 +472,8 @@ do
             self.resultTooltip.icon:SetTexture(itemData.pressedIcon)
 
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
-            GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
+            -- there's no chance of failure on the craft, so we'll fill out the fail sound with a sound that already exists instead of making a new one
+            GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.RETRAITING_RETRAIT_TOOLTIP_GLOW_SUCCESS, SOUNDS.BLACKSMITH_IMPROVE_TOOLTIP_GLOW_FAIL)
 
             GAMEPAD_CRAFTING_RESULTS:ClearSecondaryTooltipAnimationControls()
             GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.sourceTooltip)

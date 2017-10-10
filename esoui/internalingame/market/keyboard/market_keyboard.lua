@@ -671,7 +671,7 @@ function Market:InitializeCategories()
     local function TreeHeaderSetup_Child(node, control, data, open, userRequested)
         BaseTreeHeaderSetup(node, control, data, open)
 
-        if open and userRequested then
+        if open and userRequested and not self.refreshingCategoryView then
             self.categoryTree:SelectFirstChild(node)
         end
     end
@@ -1552,11 +1552,12 @@ function Market:RefreshProducts()
 end
 
 function Market:RefreshCategoryTree()
-    local selectedNode = self.categoryTree:GetSelectedNode()
+    -- We want to refresh the category tree in order to update the new
+    -- state on the categories, however we don't want to reset the view
+    -- so when we call RefreshVisible we need to make sure not to reselect any nodes
+    self.refreshingCategoryView = true
     self.categoryTree:RefreshVisible()
-    if selectedNode then
-        self.categoryTree:SelectNode(selectedNode)
-    end
+    self.refreshingCategoryView = false
 end
 
 function Market:RestoreActionLayerForTutorial()

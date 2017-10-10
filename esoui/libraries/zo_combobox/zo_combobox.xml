@@ -33,6 +33,7 @@
         </Control>
 
         <Control name="ZO_ScrollableComboBoxItem" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT" />
             <OnMouseEnter>
                 ZO_ScrollableComboBox_Entry_OnMouseEnter(self)
             </OnMouseEnter>
@@ -60,7 +61,7 @@
             </OnInitialized>
             
             <Controls>
-                <Control name="$(parent)Dropdown" hidden="true" resizeToFitDescendents="true">
+                <Control name="$(parent)Dropdown" hidden="true">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
                     

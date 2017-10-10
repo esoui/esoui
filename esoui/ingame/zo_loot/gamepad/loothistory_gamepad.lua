@@ -46,7 +46,8 @@ end
 function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
     local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
     return currentSceneName == "gamepadInteract" or currentSceneName == "gamepad_inventory_root" 
-           or currentSceneName == "crownCrateGamepad" or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
+           or currentSceneName == "crownCrateGamepad" or currentSceneName == "gamepadTrade" 
+           or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
 end
 
 function ZO_LootHistory_Gamepad:GetCraftBagIcon()

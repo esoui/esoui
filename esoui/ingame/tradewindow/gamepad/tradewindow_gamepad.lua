@@ -144,6 +144,7 @@ do
                                                 self:InventorySelectionChanged(selectedData) 
                                             end, InventorySetupFunction)
         self.inventoryList:SetItemFilterFunction(ItemFilter)
+        self.inventoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
     end
 end
 

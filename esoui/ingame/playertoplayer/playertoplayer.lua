@@ -356,7 +356,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnCampaignQueueLeft(_, campaignId, group)
         --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
         self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId)
-	end
+    end
 
     local function OnScriptedWorldEventInvite(eventCode, eventId, eventName, inviterName, questName)
         PlaySound(SOUNDS.SCRIPTED_WORLD_EVENT_INVITED)
@@ -650,12 +650,12 @@ function ZO_PlayerToPlayer:ShowRadialNotificationMenu(data)
 
     if data.deferDecisionCallback then
         local deferDecisionText = data.deferDecisionText or GetString(SI_GAMEPAD_NOTIFICATIONS_DEFER_OPTION)
-	    menu:AddEntry( deferDecisionText, 
-					    "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
-					    "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
-					    function()
-						    NotificationDeferred(data)
-					    end)
+        menu:AddEntry( deferDecisionText, 
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
+                        function()
+                            NotificationDeferred(data)
+                        end)
     end
     
     local acceptText = data.acceptText or GetString(SI_GAMEPAD_NOTIFICATIONS_ACCEPT_OPTION)
@@ -1018,13 +1018,13 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
 
             local finalText
             if(ZO_Death_DoesReviveCostRaidLife()) then
-                finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)           
+                finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)
             else
                 finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup)
             end
 
-            self.actionKeybindButton:SetText(finalText) 
-        end        
+            self.actionKeybindButton:SetText(finalText)
+        end
 
         return true
     end
@@ -1120,7 +1120,6 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
                     incomingEntry.expirationCallback()
                 end
             end
-    
 
             if incomingEntry.dialogName then
                 self:ShowResponseActionKeybind(self:GetKeyboardStringFromInteractionType(incomingEntry.incomingType))
@@ -1191,7 +1190,7 @@ function ZO_PlayerToPlayer:OnUpdate()
             hideTargetLabel = false
         elseif not self.isInteracting and (self.showingNotificationMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then
             hideSelf = false
-            hideTargetLabel = false
+            hideTargetLabel = self.showingNotificationMenu
         elseif not self.isInteracting and isReticleTargetInteractable and self:TryShowingStandardInteractLabel() then
             hideSelf = not self:ShouldShowPromptAfterDelay()
             hideTargetLabel = hideSelf
@@ -1204,8 +1203,8 @@ function ZO_PlayerToPlayer:OnUpdate()
         end
 
         self:SetHidden(hideSelf)
-		self.targetLabel:SetHidden(hideTargetLabel)
-		
+        self.targetLabel:SetHidden(hideTargetLabel)
+
         self.promptKeybindButton1:SetHidden(not self.shouldShowNotificationKeybindLayer)
         self.promptKeybindButton2:SetHidden(not self.shouldShowNotificationKeybindLayer)
 

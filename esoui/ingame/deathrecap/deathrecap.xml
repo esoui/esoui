@@ -281,9 +281,6 @@
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGameBold" />
                 <Label name="$(parent)Value" font="ZoFontAnnounceLarge" />
-                <Texture name="$(parent)Icon" tier="MEDIUM" textureFile="EsoUI/Art/currency/currency_telvar_32.dds" excludeFromResizeToFitExtents="true">
-                    <Dimensions x="32" y="32" />
-                </Texture>
             </Controls>
         </Control>
 
@@ -339,12 +336,6 @@
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepad27" />
                 <Label name="$(parent)Value" font="ZoFontGamepad42" />
-                <Texture name="$(parent)Icon" tier="MEDIUM" excludeFromResizeToFitExtents="true">
-                    <Dimensions x="32" y="32" />
-                    <OnInitialized>
-                        self:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_TELVAR_STONES))
-                    </OnInitialized>
-                </Texture>
             </Controls>
         </Control>
 

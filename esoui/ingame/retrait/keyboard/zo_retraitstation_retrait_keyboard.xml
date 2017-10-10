@@ -85,8 +85,16 @@
                             </Controls>
                         </Button>
 
-                        <Button name="$(parent)RetraitCostSlot" inherits="ZO_CraftingSlot" mouseEnabled="false">
+                        <Button name="$(parent)RetraitCostSlot" inherits="ZO_CraftingSlot">
                             <Anchor point="TOP" relativeTo="$(parent)CostLabel" relativePoint="BOTTOM" offsetY="20" />
+
+                            <OnMouseEnter>
+                                ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseExit(self)
+                            </OnMouseExit>
                         </Button>
 
                         <Label name="$(parent)AwaitingLabel" font="ZoFontWinH4" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">

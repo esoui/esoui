@@ -3700,13 +3700,21 @@ ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
     },
     mainText =
     {
-        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM,
+        text =  function(dialog)
+                    local data = dialog.data
+                    if IsItemBound(data.bagId, data.slotIndex) then
+                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM
+                    else
+                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_AND_BIND_DIALOG_CONFIRM
+                    end
+                end,
     },
     buttons =
     {
         [1] =
         {
             text = SI_DIALOG_ACCEPT,
+            clickSound = SOUNDS.RETRAITING_START_RETRAIT,
             callback = function(dialog)
                 local data = dialog.data
                 RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
@@ -3728,7 +3736,14 @@ ESO_Dialogs["CONFIRM_RETRAIT_LOCKED_ITEM"] =
     },
     mainText =
     {
-        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM,
+        text =  function(dialog)
+                    local data = dialog.data
+                    if IsItemBound(data.bagId, data.slotIndex) then
+                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM
+                    else
+                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_AND_BIND_DIALOG_LOCKED_ITEM_CONFIRM
+                    end
+                end,
     },
     editBox =
     {
@@ -3740,6 +3755,7 @@ ESO_Dialogs["CONFIRM_RETRAIT_LOCKED_ITEM"] =
         {
             requiresTextInput = true,
             text = SI_DIALOG_ACCEPT,
+            clickSound = SOUNDS.RETRAITING_START_RETRAIT,
             callback = function(dialog)
                 local data = dialog.data
                 RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
@@ -3765,7 +3781,14 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
     },
     mainText =
     {
-        text = SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM,
+        text =  function(dialog)
+                    local data = dialog.data
+                    if IsItemBound(data.bagId, data.slotIndex) then
+                        return SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM
+                    else
+                        return SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_AND_BIND_DIALOG_LOCKED_ITEM_CONFIRM
+                    end
+                end,
     },
     buttons =
     {
@@ -3773,6 +3796,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
         {
             onShowCooldown = 2000,
             text = SI_DIALOG_ACCEPT,
+            clickSound = SOUNDS.RETRAITING_START_RETRAIT,
             callback = function(dialog)
                 local data = dialog.data
                 RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)

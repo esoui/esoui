@@ -3,7 +3,7 @@
         <Label name="ZO_GameCreditsDepartmentGamepad" font="ZoFontGamepadCondensed61" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" modifyTextType="UPPERCASE" virtual="true" />
         <Label name="ZO_GameCreditsSectionGamepad" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" modifyTextType="UPPERCASE" virtual="true" />
         <Label name="ZO_GameCreditsNamesGamepad" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" horizontalAlignment="CENTER" virtual="true">
-            <Dimensions x="800" />
+            <Dimensions x="720" />
         </Label>
         <Label name="ZO_GameCreditsTextBlockGamepad" inherits="ZO_GameCreditsNamesGamepad" virtual="true" />
         <Texture name="ZO_GameCreditsLogoGamepad" layer="CONTROLS" pixelRoundingEnabled="false" resizeToFitFile="true" virtual="true" />
@@ -21,8 +21,9 @@
 
             <Controls>
                 <Scroll name="$(parent)Scroll">
-                    <AnchorFill />
                     <FadeGradient x1="0" y1="1" size1="300" x2="0" y2="-1" size2="300" />
+                    <Anchor point="TOPLEFT" offsetX="20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
                 </Scroll>
                 
                 <Control name="$(parent)Background" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template">

@@ -68,7 +68,8 @@ function ZO_RetraitStation_Retrait_Keyboard:SetHidden(hidden)
     self.control:SetHidden(hidden)
     if not hidden then
         CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
-        CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
+        -- there's no chance of failure on the craft, so we'll fill out the fail sound with a sound that already exists instead of making a new one
+        CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.RETRAITING_RETRAIT_TOOLTIP_GLOW_SUCCESS, SOUNDS.BLACKSMITH_IMPROVE_TOOLTIP_GLOW_FAIL)
         if self.dirty then
             self:Refresh()
         end
@@ -144,12 +145,14 @@ function ZO_RetraitStation_Retrait_Keyboard:OnSlotChanged()
         local meetsUsageRequirements = retraitCost <= GetCurrencyAmount(retraitCurrency, retraitCurrencyLocation)
         local currencyIcon = ZO_Currency_GetKeyboardCurrencyIcon(retraitCurrency)
         ZO_ItemSlot_SetupSlot(self.retraitCostSlot, retraitCost, currencyIcon, meetsUsageRequirements)
+        self.retraitCostSlot.currencyType = retraitCurrency
 
         -- create the tooltip string for what research is required for this item now,
         -- so we don't have to create it every time we mouse over an unknown trait
         local bag, slot = self.retraitSlot:GetBagAndSlot()
         self:UpdateRequireResearchTooltipString(bag, slot)
     else
+        self.retraitCostSlot.currencyType = CURT_NONE
         self.requiredResearchTooltipString = nil
     end
 
@@ -314,7 +317,8 @@ function ZO_RetraitStation_Retrait_Keyboard:OnTraitSelectionChanged(previouslySe
     if hasSelectedData then
         self.selectedTrait = selectedData.trait
         CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
-        CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
+        -- there's no chance of failure on the craft, so we'll fill out the fail sound with a sound that already exists instead of making a new one
+        CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.RETRAITING_RETRAIT_TOOLTIP_GLOW_SUCCESS, SOUNDS.BLACKSMITH_IMPROVE_TOOLTIP_GLOW_FAIL)
     else
         self.selectedTrait = nil
     end
@@ -483,10 +487,10 @@ function ZO_RetraitStationRetraitSlot:SetItem(bagId, slotIndex)
     if not self.control:IsHidden() then
         if self:HasItem() then
             if oldItemInstanceId ~= self:GetItemId() then
-                PlaySound(SOUNDS.SMITHING_ITEM_TO_IMPROVE_PLACED)
+                PlaySound(SOUNDS.RETRAITING_ITEM_TO_RETRAIT_PLACED)
             end
         elseif hadItem then
-            PlaySound(SOUNDS.SMITHING_ITEM_TO_IMPROVE_REMOVED)
+            PlaySound(SOUNDS.RETRAITING_ITEM_TO_RETRAIT_REMOVED)
         end
     end
 
@@ -528,4 +532,20 @@ end
 
 function ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseUp(control, button, upInside)
     ZO_RETRAIT_STATION_KEYBOARD:GetRetraitObject():OnTraitRowMouseUp(control, button, upInside)
+end
+
+function ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseEnter(control)
+    if control.currencyType ~= CURT_NONE then
+        local offsetX = 0
+        local offsetY = -5
+        InitializeTooltip(InformationTooltip, control, BOTTOM, offsetX, offsetY)
+        local DEFAULT_FONT = ""
+        local r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
+        local currencyName = ZO_Currency_GetAmountLabel(control.currencyType)
+        InformationTooltip:AddLine(currencyName, DEFAULT_FONT, r, g, b)
+    end
+end
+
+function ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end

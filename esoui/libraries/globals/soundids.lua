@@ -718,6 +718,13 @@ SOUNDS = {
     CRAFTING_GAINED_INSPIRATION             = "Crafting_Gained_Inspiration",
     CRAFTING_CREATE_SLOT_ANIMATED           = "Crafting_Create_Slot_Animated",
 
+    -- Retraiting
+    RETRAITING_ITEM_TO_RETRAIT_PLACED       = "Retraiting_Item_To_Retrait_Placed",
+    RETRAITING_ITEM_TO_RETRAIT_REMOVED      = "Retraiting_Item_To_Retrait_Removed",
+
+    RETRAITING_RETRAIT_TOOLTIP_GLOW_SUCCESS = "Retraiting_Retrait_Tooltip_Glow_Success",
+    RETRAITING_START_RETRAIT                = "Retraiting_Start_Retrait",
+
     --Customer Service
     AGENT_CHAT_ACTIVE                       = "Agent_Chat_Active",
 

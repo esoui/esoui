@@ -383,7 +383,7 @@ function ZO_LootHistory_Shared:OnMedalAwarded(medalId, name, icon, value)
     self:AddMedalEntry(medalId, name, icon, value)
 end
 
-function ZO_LootHistory_Shared:OnBattlegroundScoreboardUpdated()
+function ZO_LootHistory_Shared:OnBattlegroundEnteredPostGame()
     local playerIndex = GetScoreboardPlayerEntryIndex()
     self:AddScoreEntry(GetScoreboardEntryScoreByType(playerIndex, SCORE_TRACKER_TYPE_SCORE))
 end
