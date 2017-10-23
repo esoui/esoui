@@ -1016,7 +1016,7 @@ EsoStrings =
     "http://www.elderscrollsonline.com", -- SI_APPROVEDURLTYPE0
     "https://account.elderscrollsonline.com", -- SI_APPROVEDURLTYPE1
     "https://account.elderscrollsonline.com/store?utm_source=ESO%20in-game%20Crown%20Store&utm_campaign=Buy%20Crowns&utm_content=In-Game%20Buy%20Crowns", -- SI_APPROVEDURLTYPE2
-    "https://account.elderscrollsonline.com/store/product/eso_plus", -- SI_APPROVEDURLTYPE3
+    "https://account.elderscrollsonline.com/store/product/eso_plus?utm_source=ESO%20In-Game&utm_campaign=ESO%20Plus", -- SI_APPROVEDURLTYPE3
     "https://help.elderscrollsonline.com", -- SI_APPROVEDURLTYPE4
     "http://forums.elderscrollsonline.com", -- SI_APPROVEDURLTYPE5
     "https://help.elderscrollsonline.com/app/answers/detail/a_id/39609 ", -- SI_APPROVEDURLTYPE7
@@ -7243,6 +7243,7 @@ SafeAddVersion(SI_EMOTECATEGORY3, 1)
 SafeAddVersion(SI_EMOTECATEGORY4, 1)
 SafeAddVersion(SI_EMOTECATEGORY8, 1)
 SafeAddVersion(SI_APPROVEDURLTYPE2, 1)
+SafeAddVersion(SI_APPROVEDURLTYPE3, 1)
 SafeAddVersion(SI_APPROVEDURLTYPESTEAM2, 1)
 SafeAddVersion(SI_CUSTOMERSERVICEASKFORHELPCATEGORIES2, 1)
 SafeAddVersion(SI_CUSTOMERSERVICEQUESTASSISTANCECATEGORIES1, 1)

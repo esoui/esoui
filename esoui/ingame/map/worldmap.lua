@@ -4888,6 +4888,7 @@ function GamepadMap:UpdateDirectionalInput()
     if(IsInGamepadPreferredMode()) then
         self:SetZoomIn(GetGamepadRightTriggerMagnitude())
         self:SetZoomOut(GetGamepadLeftTriggerMagnitude())
+        local wantsToZoom = self.zoomDelta ~= 0
 
         --Only show the center reticle if we have input to move
         local isInputAvailable = DIRECTIONAL_INPUT:IsAvailable(ZO_DI_LEFT_STICK) or DIRECTIONAL_INPUT:IsAvailable(ZO_DI_DPAD)
@@ -4897,7 +4898,7 @@ function GamepadMap:UpdateDirectionalInput()
         local motionX, motionY = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
         g_dragging = (motionX ~= 0 or motionY ~= 0)
 
-        if(g_dragging or zooming) then
+        if g_dragging or wantsToZoom then
             g_stickyPin:ClearStickyPin(g_mapPanAndZoom)
         end
 
@@ -4910,18 +4911,17 @@ function GamepadMap:UpdateDirectionalInput()
         local dx = -motionX * self.GAMEPAD_MAP_MOVE_SCALE * normalizedFrameDelta
         local dy = motionY * self.GAMEPAD_MAP_MOVE_SCALE * normalizedFrameDelta
 
-        local wantsToZoom = self.zoomDelta ~= 0
         local performedZoom = false
         local navigateInAt = self.navigateInAt
         local navigateOutAt = self.navigateOutAt
         self.navigateInAt = nil
         self.navigateOutAt = nil
 
-        if(wantsToZoom) then
+        if wantsToZoom then
             performedZoom = self:TryZoom(normalizedFrameDelta, dx, dy, navigateInAt, navigateOutAt)
         end
 
-        if(g_dragging and not performedZoom) then
+        if g_dragging and not performedZoom then
             g_mapPanAndZoom:AddCurrentOffsetDelta(dx, dy)
         end
 
@@ -6227,11 +6227,27 @@ function ZO_WorldMap_ShowQuestOnMap(questIndex)
     --first try to set the map to one of the quest's step pins
     local result = SET_MAP_RESULT_FAILED
     for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
-        --Loop through the conditions, if there are any
-        for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
-            result = SetMapToQuestCondition(questIndex, stepIndex, conditionIndex)
-            if result ~= SET_MAP_RESULT_FAILED then
-                break
+        --Loop through the conditions, if there are any. Prefer non-completed conditions to completed ones.
+        local requireNotCompleted = true
+        local conditionsExhausted = false
+        while result == SET_MAP_RESULT_FAILED and not conditionsExhausted do 
+            for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
+                local tryCondition = true
+                if requireNotCompleted then
+                    local complete = select(4, GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex))
+                    tryCondition = not complete
+                end
+                if tryCondition then
+                    result = SetMapToQuestCondition(questIndex, stepIndex, conditionIndex)
+                    if result ~= SET_MAP_RESULT_FAILED then
+                        break
+                    end
+                end
+            end
+            if requireNotCompleted then
+                requireNotCompleted = false
+            else
+                conditionsExhausted = true
             end
         end
 
