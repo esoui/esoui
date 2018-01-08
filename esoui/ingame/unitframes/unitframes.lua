@@ -1044,7 +1044,7 @@ function UnitFrame:RefreshControls()
             self:UpdateRank()
             self:UpdateAssignment()
             self:UpdateDifficulty()
-            self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(unitTag))
+            self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(self.unitTag))
         end
     end
 end
@@ -1089,10 +1089,14 @@ function UnitFrame:DoAlphaUpdate(isNearby, isOnline, isLeader)
     -- Don't fade out just the frame, because that needs to appear correctly (along with BG, etc...)
     -- Just make the status bars and any text on the frame fade out.
     local color
-    if IsInGamepadPreferredMode() then
-        color = (self.unitTag == "reticleover" and ZO_SELECTED_TEXT) or (not isLeader and isNearby and ZO_HIGHLIGHT_TEXT) or ZO_NORMAL_TEXT
+    if self.unitTag == "reticleover" then
+        color = ZO_SELECTED_TEXT
     else
-        color = (self.unitTag == "reticleover" and ZO_SELECTED_TEXT) or (not isLeader and ZO_HIGHLIGHT_TEXT) or ZO_NORMAL_TEXT
+        if isLeader then
+            color = ZO_HIGHLIGHT_TEXT
+        else
+            color = ZO_NORMAL_TEXT
+        end
     end
 
     local alphaValue = isNearby and FULL_ALPHA_VALUE or FADED_ALPHA_VALUE

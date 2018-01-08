@@ -276,7 +276,7 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
                 end
             end,
 
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
+            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
         },
 
         -- Options (filtering)

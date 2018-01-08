@@ -8,8 +8,6 @@ ZO_HOUSING_BOOK_IMAGE_TEXTURE_COORD_RIGHT = BACKGROUND_IMAGE_CONTENT_WIDTH / BAC
 ZO_HOUSING_BOOK_IMAGE_TEXTURE_COORD_BOTTOM = BACKGROUND_IMAGE_CONTENT_HEIGHT / BACKGROUND_IMAGE_FILE_HEIGHT
 ZO_HOUSING_BOOK_IMAGE_HEIGHT = (INFO_PANEL_WIDTH / BACKGROUND_IMAGE_CONTENT_WIDTH) * BACKGROUND_IMAGE_CONTENT_HEIGHT
 
-local NOTIFICATIONS_PROVIDER = NOTIFICATIONS:GetCollectionsProvider()
-
 --Housing Book
 
 local HousingBook_Keyboard = ZO_SpecializedCollectionsBook_Keyboard:Subclass()
@@ -46,12 +44,12 @@ function HousingBook_Keyboard:OnPrimaryResidenceSet(houseId)
     self:RefreshList()
 end
 
-function HousingBook_Keyboard:SortCollectibleData(collectibleData)
+function HousingBook_Keyboard:SortCollectibleData(collectiblesData)
     local primaryHouseId = GetHousingPrimaryHouse()
-    table.sort(collectibleData, function(entry1, entry2)
+    table.sort(collectiblesData, function(entry1, entry2)
         if primaryHouseId ~= 0 then
-            local houseId1 = GetCollectibleReferenceId(entry1.collectibleId)
-            local houseId2 = GetCollectibleReferenceId(entry2.collectibleId)
+            local houseId1 = entry1:GetReferenceId()
+            local houseId2 = entry2:GetReferenceId()
 
             if primaryHouseId == houseId1 then
                 return true
@@ -60,68 +58,59 @@ function HousingBook_Keyboard:SortCollectibleData(collectibleData)
             end
         end
 
-        if entry1.sortOrder ~= entry2.sortOrder then
-            return entry1.sortOrder < entry2.sortOrder
+        if entry1:GetSortOrder() ~= entry2:GetSortOrder() then
+            return entry1:GetSortOrder() < entry2:GetSortOrder()
         else
-            return entry1.name < entry2.name
+            return entry1:GetName() < entry2:GetName()
         end
     end)
 end
 
-function HousingBook_Keyboard:SetupAdditionalCollectibleData(data)
-    local houseFoundInZoneId = GetHouseFoundInZoneId(data.referenceId)
-    data.location = GetZoneNameById(houseFoundInZoneId)
-    data.houseCategoryType = GetHouseCategoryType(data.referenceId)
-    data.isPrimaryResidence = IsPrimaryHouse(data.referenceId)
-
-    if data.hint == "" then
-        data.hint = GetString(SI_HOUSING_BOOK_AVAILABLE_FOR_PURCHASE)
-    end
-end
-
 function HousingBook_Keyboard:RefreshDetails()
     ZO_SpecializedCollectionsBook_Keyboard.RefreshDetails(self)
-    local data = self.navigationTree:GetSelectedData()
+    local collectibleData = self.navigationTree:GetSelectedData()
 
-    if data then
-        local hasNickname = data.nickname ~= ""
+    if collectibleData then
+        local nickname = collectibleData:GetFormattedNickname()
+        local hasNickname = nickname ~= ""
         if hasNickname then
-            self.nicknameLabel:SetText(ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, data.nickname))
+            self.nicknameLabel:SetText(nickname)
         end
         self.nicknameLabel:SetHidden(not hasNickname)
         
-        self.locationLabel:SetText(zo_strformat(SI_HOUSING_BOOK_LOCATION_FORMATTER, data.location))
-        self.houseTypeLabel:SetText(zo_strformat(SI_HOUSING_BOOK_HOUSE_TYPE_FORMATTER, GetString("SI_HOUSECATEGORYTYPE", data.houseCategoryType)))
-        if data.unlocked then
-            local isPrimaryResidence = data.isPrimaryResidence and GetString(SI_YES) or GetString(SI_NO)
+        local isUnlocked = collectibleData:IsUnlocked()
+        self.locationLabel:SetText(zo_strformat(SI_HOUSING_BOOK_LOCATION_FORMATTER, collectibleData:GetHouseLocation()))
+        self.houseTypeLabel:SetText(zo_strformat(SI_HOUSING_BOOK_HOUSE_TYPE_FORMATTER, GetString("SI_HOUSECATEGORYTYPE", collectibleData:GetHouseCategoryType())))
+        if isUnlocked then
+            local isPrimaryResidence = collectibleData:IsPrimaryResidence() and GetString(SI_YES) or GetString(SI_NO)
             self.primaryResidenceLabel:SetText(zo_strformat(SI_HOUSING_BOOK_PRIMARY_RESIDENCE_FORMATTER, isPrimaryResidence))
             
             self.primaryResidenceLabel:SetHidden(false)
             self.hintLabel:SetHidden(true)
         else
-            self.hintLabel:SetText(data.hint)
+            self.hintLabel:SetText(collectibleData:GetHint())
             
             self.hintLabel:SetHidden(false)
             self.primaryResidenceLabel:SetHidden(true)
         end
 
-        self.travelToHouseButton:SetHidden(not data.unlocked)
-        self.changeNicknameButton:SetHidden(not data.unlocked)
-        self.previewHouseButton:SetHidden(data.unlocked)
+        self.travelToHouseButton:SetHidden(not isUnlocked)
+        self.changeNicknameButton:SetHidden(not isUnlocked)
+        self.previewHouseButton:SetHidden(isUnlocked)
     end
 end
 
 function HousingBook_Keyboard:RenameCurrentHouse()
-    local data = self.navigationTree:GetSelectedData()
-    if data then
-        ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = data.collectibleId })
+    local collectibleData = self.navigationTree:GetSelectedData()
+    if collectibleData then
+        ZO_CollectionsBook.ShowRenameDialog(collectibleData:GetId())
     end
 end
 
 function HousingBook_Keyboard:RequestJumpToCurrentHouse()
-    local data = self.navigationTree:GetSelectedData()
-    if data then
-        RequestJumpToHouse(data.referenceId)
+    local collectibleData = self.navigationTree:GetSelectedData()
+    if collectibleData then
+        RequestJumpToHouse(collectibleData:GetReferenceId())
     end
 end
 

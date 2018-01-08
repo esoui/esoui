@@ -368,7 +368,7 @@ end
 
 function ZO_SceneGraphNode:SetControlUseRotation(control, useRotation)
     local index = self:GetControlIndex(control)
-    if self.controlAnchorPoint[index] ~= anchorPoint then
+    if self.controlUseRotation[index] ~= useRotation then
         self.controlUseRotation[index] = useRotation
         self:SetDirty(true)
     end

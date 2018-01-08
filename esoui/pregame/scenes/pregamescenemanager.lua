@@ -1,10 +1,9 @@
-ZO_REMOTE_SCENE_CHANGE_ORIGIN = REMOTE_SCENE_STATE_CHANGE_ORIGIN_PREGAME
+ZO_REMOTE_SCENE_CHANGE_ORIGIN = SCENE_MANAGER_MESSAGE_ORIGIN_PREGAME
 
-local ZO_PregameSceneManager = ZO_SceneManager:Subclass()
+local ZO_PregameSceneManager = ZO_SceneManager_Leader:Subclass()
 
-function ZO_PregameSceneManager:New()
-    local manager = ZO_SceneManager.New(self)
-    return manager
+function ZO_PregameSceneManager:New(...)
+    return ZO_SceneManager_Leader.New(self, ...)
 end
 
 function ZO_PregameSceneManager:OnScenesLoaded()

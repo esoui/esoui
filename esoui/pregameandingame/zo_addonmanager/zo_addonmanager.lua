@@ -418,7 +418,6 @@ function ZO_AddOnManager:BuildMasterList()
             addOnDescription = description,
             addOnEnabled = enabled,
             addOnState = state,
-            addOnSortName = addOnSortName,
             isOutOfDate = isOutOfDate
         }
 

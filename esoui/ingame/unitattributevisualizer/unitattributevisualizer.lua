@@ -104,26 +104,41 @@ function ZO_UnitAttributeVisualizer:GetUnitTag()
     return self.unitTag
 end
 
-function ZO_UnitAttributeVisualizer:OnUnitAttributeVisualAdded(unitTag, visualType, stat, attribute, powerType, value, maxValue)
+function ZO_UnitAttributeVisualizer:OnUnitAttributeVisualAdded(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
     for module in pairs(self.visualModules) do
         if module:IsUnitVisualRelevant(visualType, stat, attribute, powerType) then
-            module:OnUnitAttributeVisualAdded(visualType, stat, attribute, powerType, value, maxValue)
+            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType)
+            --if we have no UAV info for this type then we can add it 
+            if mostRecentUpdate == nil then
+                module:OnUnitAttributeVisualAdded(visualType, stat, attribute, powerType, value, maxValue)
+                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, sequenceId)
+            end
         end
     end
 end
 
-function ZO_UnitAttributeVisualizer:OnUnitAttributeVisualUpdated(unitTag, visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue)
+function ZO_UnitAttributeVisualizer:OnUnitAttributeVisualUpdated(unitTag, visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue, sequenceId)
     for module in pairs(self.visualModules) do
         if module:IsUnitVisualRelevant(visualType, stat, attribute, powerType) then
-            module:OnUnitAttributeVisualUpdated(visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue)
+            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType)
+            --make sure that we haven't already got the new state info that comes with this event as part of the UAV initializing on EVENT_PLAYER_ACTIVATED
+            if mostRecentUpdate ~= nil and sequenceId > mostRecentUpdate then
+                module:OnUnitAttributeVisualUpdated(visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue)
+                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, sequenceId)
+            end
         end
     end
 end
 
-function ZO_UnitAttributeVisualizer:OnUnitAttributeVisualRemoved(unitTag, visualType, stat, attribute, powerType, value, maxValue)
+function ZO_UnitAttributeVisualizer:OnUnitAttributeVisualRemoved(unitTag, visualType, stat, attribute, powerType, value, maxValue, sequenceId)
     for module in pairs(self.visualModules) do
         if module:IsUnitVisualRelevant(visualType, stat, attribute, powerType) then
-            module:OnUnitAttributeVisualRemoved(visualType, stat, attribute, powerType, value, maxValue)
+            local mostRecentUpdate = module:GetMostRecentUpdate(visualType, stat, attribute, powerType)
+            --make sure that we haven't already got the new state info that comes with this event as part of the UAV initializing on EVENT_PLAYER_ACTIVATED
+            if mostRecentUpdate ~= nil and sequenceId > mostRecentUpdate then
+                module:OnUnitAttributeVisualRemoved(visualType, stat, attribute, powerType, value, maxValue)
+                module:SetMostRecentUpdate(visualType, stat, attribute, powerType, nil)
+            end
         end
     end
 end

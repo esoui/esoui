@@ -43,12 +43,12 @@ function ZO_MarketCurrency_Gamepad:Hide()
 end
 
 function ZO_MarketCurrency_Gamepad:OnCrownsUpdated(currentCurrency, difference)
-    self.crownAmountControl:SetText(ZO_CommaDelimitNumber(currentCurrency))
+    self.crownAmountControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCurrency)))
     self:FireCallbacks("OnCurrencyUpdated")
 end
 
 function ZO_MarketCurrency_Gamepad:OnCrownGemsUpdated(currentCurrency, difference, reason)
-    self.gemAmountControl:SetText(ZO_CommaDelimitNumber(currentCurrency))
+    self.gemAmountControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCurrency)))
     self:FireCallbacks("OnCurrencyUpdated")
 end
 

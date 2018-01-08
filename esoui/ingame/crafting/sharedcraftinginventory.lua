@@ -110,7 +110,7 @@ function ZO_SharedCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(pr
     return nil
 end
 
-assert(7 == BAG_MAX_VALUE) -- if you add a new bag, check to see if you need to add it to crafting inventories
+assert(17 == BAG_MAX_VALUE) -- if you add a new bag, check to see if you need to add it to crafting inventories
 
 ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN = 
 {

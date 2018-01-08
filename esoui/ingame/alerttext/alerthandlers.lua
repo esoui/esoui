@@ -80,6 +80,7 @@ ZO_GroupElectionDescriptorToRequestAlertText =
     [ZO_GROUP_ELECTION_DESCRIPTORS.NONE] = GetString(SI_GROUP_ELECTION_REQUESTED),
     [ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK] = GetString(SI_GROUP_ELECTION_READY_CHECK_REQUESTED),
 }
+
 --Return format is
 --  Category - The alert category to send the alert to
 --  Message - The message to alert
@@ -130,7 +131,7 @@ local AlertHandlers = {
     [EVENT_UI_ERROR] = function(stringId)
         return ERROR, GetString(stringId), SOUNDS.GENERAL_ALERT_ERROR
     end,
-    
+
     [EVENT_ITEM_ON_COOLDOWN] = function()
         return ERROR, GetString(SI_ITEM_FORMAT_STR_ON_COOLDOWN), SOUNDS.ITEM_ON_COOLDOWN
     end,
@@ -262,22 +263,6 @@ local AlertHandlers = {
         return ERROR, zo_strformat(SI_LORE_LIBRARY_ALREADY_KNOW_BOOK, bookTitle)
     end,
 
-    [EVENT_INTERACTABLE_LOCKED] = function(interactableName)
-        return ERROR, zo_strformat(SI_LOCKPICK_NO_KEY_AND_NO_LOCK_PICKS, interactableName), SOUNDS.LOCKPICKING_NO_LOCKPICKS
-    end,
-
-    [EVENT_INTERACTABLE_IMPOSSIBLE_TO_PICK] = function(interactableName)
-        return ERROR, zo_strformat(SI_LOCKPICK_IMPOSSIBLE_LOCK, interactableName), SOUNDS.LOCKPICKING_NO_LOCKPICKS
-    end,
-
-    [EVENT_MISSING_LURE] = function()
-        return ERROR, GetString(SI_MISSING_LURE_OR_BAIT), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_CANNOT_FISH_WHILE_SWIMMING] = function()
-        return ERROR, GetString(SI_CANNOT_FISH_WHILE_SWIMMING), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         if(response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED) then
             if(ShouldShowGroupErrorInAlert(response)) then
@@ -376,10 +361,6 @@ local AlertHandlers = {
         if showAlert then
             return ALERT, zo_strformat(SI_GROUP_NOTIFICATION_GROUP_LEADER_CHANGED, leaderNameToShow), SOUNDS.GROUP_PROMOTE
         end
-    end,
-
-    [EVENT_GROUPING_TOOLS_LFG_JOINED] = function(locationName)
-        return ALERT, zo_strformat(SI_GROUPING_TOOLS_ALERT_LFG_JOINED, locationName), nil
     end,
 
     [EVENT_ACTIVITY_QUEUE_RESULT] = function(result)
@@ -514,16 +495,6 @@ local AlertHandlers = {
         return ALERT, zo_strformat(SI_NEW_RECIPE_LEARNED, name), SOUNDS.RECIPE_LEARNED
     end,
 
-    [EVENT_PLAYER_ACTIVATED] = function()
-        if DoesCurrentZoneAllowScalingByLevel() and IsUnitGrouped("player") then
-            local isChampionBattleLeveled = IsUnitChampionBattleLeveled("player")
-            if isChampionBattleLeveled then
-                local level = GetUnitChampionBattleLevel("player")
-                return ALERT, zo_strformat(SI_ENTERED_SCALED_ZONE, level)
-            end
-        end
-    end,
-
     [EVENT_ZONE_CHANGED] = function(zoneName, subzoneName)
          if(subzoneName ~= "") then
             return ALERT, zo_strformat(SI_ALERTTEXT_LOCATION_FORMAT, subzoneName)
@@ -646,12 +617,6 @@ local AlertHandlers = {
         return ALERT, zo_strformat(SI_JUSTICE_PICKPOCKET_FAILED), SOUNDS.JUSTICE_PICKPOCKET_FAILED
     end,
 
-    [EVENT_LOOT_RECEIVED] = function(receivedBy, itemName, quantity, itemSound, lootType, receivedBySelf, isPickpocketLoot)
-        if(receivedBySelf and isPickpocketLoot) then
-             return ALERT, zo_strformat(SI_JUSTICE_ITEM_PICKPOCKETED, GetItemLinkName(itemName), quantity)
-        end
-    end,
-
     [EVENT_DYE_STAMP_USE_FAIL] = function(reason)
         if reason ~= DYE_STAMP_USE_RESULT_NONE then
             return ALERT, GetString("SI_DYESTAMPUSERESULT", reason)
@@ -664,26 +629,6 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_PICKPOCKET_TOO_FAR] = function()
-        return ERROR, GetString(SI_PICKPOCKET_TOO_FAR), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_PICKPOCKET_OUT_OF_POSITION] = function()
-        return ERROR, GetString(SI_PICKPOCKET_OUT_OF_POSITION), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_PICKPOCKET_ON_COOLDOWN] = function()
-        return ERROR, GetString(SI_PICKPOCKET_ON_COOLDOWN), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_PICKPOCKET_SUSPICIOUS] = function()
-        return ERROR, GetString(SI_PICKPOCKET_SUSPICIOUS), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_JUSTICE_NPC_SHUNNING] = function()
-        return ERROR, GetString(SI_JUSTICE_NPC_SHUNNING), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
     [EVENT_TRIAL_FEATURE_RESTRICTED] = function(restrictionType)
         if TrialEventMappings[restrictionType] then
             return ERROR, GetString("SI_TRIALACCOUNTRESTRICTIONTYPE", restrictionType)
@@ -691,9 +636,8 @@ local AlertHandlers = {
     end,
 
     [EVENT_STUCK_ERROR_ON_COOLDOWN] = function()
-        local cooldownText = ZO_FormatTime(GetStuckCooldown(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
         local cooldownRemainingText = ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-        return ERROR, zo_strformat(SI_STUCK_ERROR_ON_COOLDOWN, cooldownText, cooldownRemainingText)
+        return ERROR, zo_strformat(SI_STUCK_ERROR_ON_COOLDOWN, cooldownRemainingText)
     end,
 
     [EVENT_STUCK_ERROR_ALREADY_IN_PROGRESS] = function()
@@ -900,7 +844,44 @@ local AlertHandlers = {
     [EVENT_LOCKPICK_FAILED] = function(result)
         return ALERT, GetString(SI_ALERT_LOCKPICK_FAILED)
     end,
+
+    [EVENT_OUTFIT_RENAME_RESPONSE] = function(result, outfitIndex)
+        if not (result == SET_OUTFIT_NAME_RESULT_SUCCESS or result == SET_OUTFIT_NAME_RESULT_NO_CHANGE) then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_SETOUTFITNAMERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_OUTFIT_CHANGE_RESPONSE] = function(result)
+        if result ~= APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_APPLYOUTFITCHANGESRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_OUTFIT_EQUIP_RESPONSE] = function(result)
+        if result ~= EQUIP_OUTFIT_RESULT_SUCCESS then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_EQUIPOUTFITRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_CLAIM_LEVEL_UP_REWARD_RESULT] = function(result)
+        if result ~= LEVEL_UP_REWARD_CLAIM_RESULT_SUCCESS then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_CLAIMLEVELUPREWARDRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end
 }
+
+ZO_ClientInteractResultSpecificSound =
+{
+    [CLIENT_INTERACT_RESULT_LOCK_TOO_DIFFICULT] = SOUNDS.LOCKPICKING_NO_LOCKPICKS,
+    [CLIENT_INTERACT_RESULT_NO_LOCKPICKS] = SOUNDS.LOCKPICKING_NO_LOCKPICKS,
+}
+
+AlertHandlers[EVENT_CLIENT_INTERACT_RESULT] = function(result, interactTargetName)
+    local formatString = GetString("SI_CLIENTINTERACTRESULT", result)
+    if formatString ~= "" then
+        return ERROR, zo_strformat(formatString, interactTargetName), ZO_ClientInteractResultSpecificSound[result] or SOUNDS.GENERAL_ALERT_ERROR
+    end
+end
 
 function ZO_AlertText_GetHandlers()
     return AlertHandlers

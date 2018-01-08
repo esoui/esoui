@@ -81,13 +81,12 @@ end
 function ZO_HouseInformation_Shared:UpdateHouseInformation()
     local currentHouseId = GetCurrentZoneHouseId()
     local houseCollectibleId = GetCollectibleIdForHouse(currentHouseId)
-    
-    local houseName = zo_strformat(SI_HOUSE_INFORMATION_NAME_FORMAT, GetCollectibleName(houseCollectibleId))
-    local houseLocation = zo_strformat(SI_HOUSE_INFORMATION_LOCATION_FORMAT, GetZoneNameById(GetHouseFoundInZoneId(currentHouseId)))
+    local houseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(houseCollectibleId)
+
     local isPrimaryHouse = IsPrimaryHouse(currentHouseId)
 
-    self.nameRow.valueLabel:SetText(houseName)
-    self.locationRow.valueLabel:SetText(houseLocation)
+    self.nameRow.valueLabel:SetText(houseCollectibleData:GetFormattedName())
+    self.locationRow.valueLabel:SetText(houseCollectibleData:GetFormattedHouseLocation())
     self.primaryResidenceRow.valueLabel:SetText(isPrimaryHouse and GetString(SI_YES) or GetString(SI_NO))
 end
 

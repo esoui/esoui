@@ -1,0 +1,26 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PointerBox_KeyboardShow">
+            <Animations>
+                <AlphaAnimation startAlpha="0" endAlpha="1" duration="ZO_POINTER_BOX_ANIMATION_DURATION_MS"/>
+                <TranslateAnimation duration="ZO_POINTER_BOX_ANIMATION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_PointerBox_KeyboardControl" virtual="true" mouseEnabled="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Miscellaneous/Keyboard/toolTipHintArrow.dds">
+                    <Dimensions x="ZO_POINTER_BOX_ARROW_SIZE" y="ZO_POINTER_BOX_ARROW_SIZE"/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

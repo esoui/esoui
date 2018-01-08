@@ -412,12 +412,6 @@ function ZO_QuestJournal_Gamepad:RefreshQuestCount()
     self:Update()
 end
 
-local function UpdateListAnchors(control, attachedTo)
-    control:ClearAnchors()
-    control:SetAnchor(TOPLEFT, attachedTo, BOTTOMLEFT, 50, yOffset)
-    control:SetAnchor(TOPRIGHT, attachedTo, BOTTOMRIGHT, 0, 21)
-end
-
 function ZO_QuestJournal_Gamepad:RefreshDetails()
     if not SCENE_MANAGER:IsShowing(self.sceneName) then
         self.listDirty = true
@@ -479,7 +473,9 @@ function ZO_QuestJournal_Gamepad:RefreshDetails()
             ZO_ClearNumericallyIndexedTable(questStrings)
 
             local anchorToControl = self.optionalStepTextLabel:IsControlHidden() and self.conditionTextBulletList.control or self.optionalStepTextBulletList.control
-            UpdateListAnchors(self.hintTextLabel, anchorToControl, 0)
+            self.hintTextLabel:ClearAnchors()
+            self.hintTextLabel:SetAnchor(TOPLEFT, anchorToControl, BOTTOMLEFT, 50, 21)
+            self.hintTextLabel:SetAnchor(TOPRIGHT, anchorToControl, BOTTOMRIGHT, 0, 21)
 
             self:BuildTextForStepVisibility(questIndex, QUEST_STEP_VISIBILITY_HINT)
             if self.hintTextLabel then

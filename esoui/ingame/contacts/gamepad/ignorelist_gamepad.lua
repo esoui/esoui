@@ -16,6 +16,9 @@ function IgnoreList_Gamepad:Initialize(control)
 
     GAMEPAD_IGNORED_LIST_SCENE = ZO_Scene:New("gamepad_ignored", SCENE_MANAGER)
     GAMEPAD_IGNORED_LIST_SCENE:AddFragment(self:GetListFragment())
+
+    local SCROLL_PADDING_HEIGHT = 100 
+    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
 end
 
 function IgnoreList_Gamepad:GetAddKeybind()

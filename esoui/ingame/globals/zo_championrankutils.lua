@@ -28,6 +28,19 @@ function GetChampionIconMarkupString(iconSize)
     end
 end
 
+function GetChampionIconMarkupStringInheritColor(iconSize)
+    if iconSize then
+        local championIcon
+        if IsInGamepadPreferredMode() then
+            championIcon = GetGamepadChampionPointsIcon()
+        else
+            championIcon = GetChampionPointsIconSmall()
+        end
+
+        return zo_iconFormatInheritColor(championIcon, iconSize, iconSize)
+    end
+end
+
 function GetLevelOrChampionPointsString(level, championPoints, iconSize)
     local iconString = ""
     

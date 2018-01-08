@@ -56,6 +56,8 @@ function ZO_HousingPreviewDialog_Shared:Initialize(control, dialogName)
     ZO_Dialogs_RegisterCustomDialog(self.dialogName, self.dialogInfo)
 
     self:RegisterForCallbacks()
+
+	self.control:RegisterForEvent(EVENT_PENDING_INTERACTION_CANCELLED, function() if not self.control:IsHidden() then self:ReleaseDialog() end end)
 end
 
 function ZO_HousingPreviewDialog_Shared:InitializeTemplateComboBox()

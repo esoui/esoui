@@ -192,16 +192,9 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_TOGGLE_INFO),
-            keybind = "UI_SHORTCUT_INPUT_RIGHT",
+            keybind = "UI_SHORTCUT_LEFT_STICK",
             callback = ToggleFurnitureRightInfoState,
             visible = ToggleViewKeybindEnabled,
-        },
-
-        {
-            ethereal = true,
-            keybind = "UI_SHORTCUT_INPUT_LEFT",
-            callback = ToggleFurnitureRightInfoState,
-            enabled = ToggleViewKeybindEnabled,
         },
     }
 
@@ -317,10 +310,6 @@ function ZO_HousingFurnitureList_Gamepad:SwitchActiveList(list)
 end
 
 do
-    local NO_CATEGORY_NAME = nil
-    local NO_NICKNAME = nil
-    local IS_PURCHASEABLE = true
-    local BLANK_HINT = ""
     local HIDE_VISUAL_LAYER_INFO = false
     local NO_COOLDOWN = nil
     local HIDE_BLOCK_REASON = false
@@ -336,10 +325,8 @@ do
                     elseif furnitureObject.marketProductId then
                         GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, furnitureObject.marketProductId)
                     elseif furnitureObject.collectibleId then
-                        local collectibleId = furnitureObject.collectibleId
-                        local name, description, _, _, _, purchasable, _, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
-                        local nickname = GetCollectibleNickname(collectibleId)
-                        GAMEPAD_TOOLTIPS:LayoutCollectible(GAMEPAD_RIGHT_TOOLTIP, collectibleId, NO_COLLECTION_NAME, name, nickname, purchaseable, description, hint, isPlaceholder, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+                        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(furnitureObject.collectibleId)
+                        GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_RIGHT_TOOLTIP, collectibleData, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
                     elseif furnitureObject.retrievableFurnitureId then
                         local itemLink, collectibleLink = GetPlacedFurnitureLink(furnitureObject.retrievableFurnitureId)
                         if itemLink ~= "" then
@@ -557,6 +544,8 @@ function ZO_HousingSettingsList_Gamepad:Initialize(userGroup, control, owner, da
     ZO_ScrollList_AddDataType(self.list, dataType, "ZO_HousingPermissionsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
     self:SetEmptyText(GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_NO_ENTRIES))
     self:SetupSort(ZO_HOUSING_SETTINGS_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_DOWN)
+    local SCROLL_PADDING_HEIGHT = 100 
+    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
 end
 
 function ZO_HousingSettingsList_Gamepad:InitializeKeybinds()

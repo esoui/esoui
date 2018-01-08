@@ -59,10 +59,12 @@ function LoreReader:Initialize(control)
 
     local function OnPCSceneStateChange(oldState, newState)
         if(newState == SCENE_SHOWING) then
+            KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.PCKeybindStripDescriptor)
             self.keybindStripDescriptor = self.PCKeybindStripDescriptor
         elseif(newState == SCENE_HIDDEN) then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.PCKeybindStripDescriptor)
+            KEYBIND_STRIP:RestoreDefaultExit()
         end
     end
 
@@ -98,6 +100,16 @@ function LoreReader:InitializeKeybindStripDescriptors()
             callback = function() end,
             customKeybindControl = customKeybindControl,
             visible = function() return self.maxPages > 1 end,
+        },
+
+        -- The keyboard exit should just close this scene (so if it was pushed on the scene stack it will go back, such as going back to the lore library)
+        {
+            name = GetString(SI_EXIT_BUTTON),
+            keybind = "UI_SHORTCUT_EXIT",
+            order = -10000,
+            callback = function()
+                SCENE_MANAGER:HideCurrentScene()
+            end,
         },
     }
 

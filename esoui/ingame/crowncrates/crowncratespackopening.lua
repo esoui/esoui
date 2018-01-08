@@ -210,6 +210,7 @@ function ZO_CrownCratesCard:Initialize(control, owner)
     self.owner = owner
     
     self.rewardTextureControl = self:CreateTextureControl(ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_REWARD)
+    self.rewardTextureControl:SetTextureReleaseOption(RELEASE_TEXTURE_AT_ZERO_REFERENCES)
     --SetCollectibleActiveAreaOverlay will be on this level, set in XML--
     self.cardTextureControl = self:CreateTextureControl(ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_FRAME)
     self.cardGlowTextureControl = self:CreateTextureControl(ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_GLOW)
@@ -1024,7 +1025,7 @@ function ZO_CrownCratesCard:ShowInfo()
 end
 
 function ZO_CrownCratesCard:HideInfo()
-    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_SHOW_INFO)
+    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_CARD_SHOW_INFO)
 
     --Name
     local animationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_CARD_HIDE_INFO, self.nameAreaControl)
@@ -1131,11 +1132,9 @@ do
 
     function ZO_CrownCratesCard:CanActivateCollectible()
         if self.rewardProductType == MARKET_PRODUCT_TYPE_COLLECTIBLE and not self:IsGemified() then
-            local collectibleId = self.rewardReferenceDataId
-            if IsCollectibleUsable(collectibleId) and IsCollectibleValidForPlayer(collectibleId) and not IsCollectibleBlocked(collectibleId) then
-                local isActive, categoryType = select(7, GetCollectibleInfo(collectibleId))
-
-                return not (isActive or DISALLOWED_EQUIPPABLE_COLLECTIBLE_TYPES[categoryType])
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.rewardReferenceDataId)
+            if collectibleData:IsUsable() and collectibleData:IsValidForPlayer() and not collectibleData:IsBlocked() then
+                return not (collectibleData:IsActive() or DISALLOWED_EQUIPPABLE_COLLECTIBLE_TYPES[collectibleData:GetCategoryType()])
             end
         end
         return false
@@ -1360,9 +1359,8 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
         end
     end
 
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", RefreshActivateCollectibleBindingKeybindings)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", RefreshActivateCollectibleBindingKeybindings)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectiblesUpdated", RefreshActivateCollectibleBindingKeybindings)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshActivateCollectibleBindingKeybindings)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshActivateCollectibleBindingKeybindings)
 end
 
 function ZO_CrownCratesPackOpening:RefreshKeybindings()

@@ -207,7 +207,7 @@ function ZO_JournalProgressBook_Common:UpdateStatusBar(statusBar, category, earn
                 statusBar.progress:SetHidden(true)
             end
         else
-            statusBar.progress:SetText(zo_strformat(SI_JOURNAL_PROGRESS_POINTS, earned, total))
+            statusBar.progress:SetText(zo_strformat(SI_JOURNAL_PROGRESS_BAR_PROGRESS, ZO_CommaDelimitNumber(earned), ZO_CommaDelimitNumber(total)))
         end
     else
         statusBar.progress:SetHidden(true)

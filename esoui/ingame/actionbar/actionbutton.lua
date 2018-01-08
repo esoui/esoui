@@ -331,10 +331,23 @@ function ActionButton:UpdateUsable()
         usable = true
     end
 
-    if usable ~= self.usable or isGamepad ~= self.isGamepad then
+    local slotId = self:GetSlot()
+    local slotType = GetSlotType(slotId)
+    local stackEmpty = false
+    if slotType == ACTION_TYPE_ITEM then
+        local stackCount = GetSlotItemCount(slotId)
+        if stackCount <= 0 then
+            stackEmpty = true
+            usable = false
+        end
+    end
+
+    if usable ~= self.usable or isGamepad ~= self.isGamepad or stackEmpty ~= self.stackEmpty then
         self.usable = usable
         self.isGamepad = isGamepad
-        local useDesaturation = isShowingCooldown and not self.useFailure
+        self.stackEmpty = stackEmpty
+
+        local useDesaturation = isShowingCooldown and not self.useFailure or self.stackEmpty
         ZO_ActionSlot_SetUnusable(self.icon, not usable, useDesaturation)
     end
 end

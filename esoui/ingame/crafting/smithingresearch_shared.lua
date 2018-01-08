@@ -326,7 +326,7 @@ function ZO_SharedSmithingResearch:OnResearchRowDeactivate(row)
 end
 
 function ZO_SharedSmithingResearch:IsResearchable()
-    return self.activeRow and self.activeRow.researchable and self:CanResearchCurrentTraitLine()
+    return (self.activeRow ~= nil) and self.activeRow.researchable and self:CanResearchCurrentTraitLine()
 end
 
 function ZO_SharedSmithingResearch:IsResearching()

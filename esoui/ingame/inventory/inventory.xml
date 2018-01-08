@@ -238,6 +238,51 @@
                 <Control name="$(parent)DepositWithdraw" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
+        
+        <!-- House Bank -->
+
+        <TopLevelControl name="ZO_HouseBankMenu" inherits="ZO_SceneMenu" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550"/>
+        </TopLevelControl>
+
+
+        <TopLevelControl name="ZO_HouseBank" hidden="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <Controls>
+                <!-- Currently not part of the design -->
+                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
+                    <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
+                </EditBox>
+
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
+
+                <!-- Item Lists -->
+                <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Controls>
+                        <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
+                            <OnInitialized>
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_BANK, 70)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
 
         <!-- Guild Bank -->
         

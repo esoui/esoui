@@ -59,8 +59,8 @@ end
 function ZO_SharedFurnitureManager:RegisterForEvents()
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function(bagId) self:OnFullInventoryUpdate(bagId) end)
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", function(...) self:OnSingleSlotInventoryUpdate(...) end)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("FullCollectionsInventoryUpdate", function() self:OnFullCollectionUpdate() end)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("SingleCollectionsInventoryUpdate", function(collectibleId) self:OnSingleCollectibleUpdate(collectibleId) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnFullCollectionUpdate() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(collectibleId) self:OnSingleCollectibleUpdate(collectibleId) end)
 
     local function ApplyFurnitureCommand(categoryTreeData, furnitureCommand)
         if furnitureCommand.command == FURNITURE_COMMAND_REMOVE then
@@ -221,6 +221,13 @@ function ZO_SharedFurnitureManager:OnFurnitureRemovedFromHouse(furnitureId, coll
     if collectibleId ~= 0 then
         self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId] = ZO_PlaceableFurnitureCollectible:New(collectibleId)
         self:RequestApplyPlaceableTextFilterToData()
+
+        --If we removed a house bank, tell the player that they need to re-place it to get those items
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_HOUSE_BANK then
+            local NO_SOUND = nil
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, NO_SOUND, zo_strformat(SI_HOUSING_FURNITURE_PUT_AWAY_HOUSE_BANK_WARNING, collectibleData:GetName()))
+        end
     end
 
     --if an item just remove, the inventory update will handle the placeable list changes
@@ -266,14 +273,14 @@ function ZO_SharedFurnitureManager:OnFullCollectionUpdate()
 end
 
 function ZO_SharedFurnitureManager:OnSingleCollectibleUpdate(collectibleId)
-    local collectibleData = COLLECTIONS_INVENTORY_SINGLETON:GetSingleCollectibleData(collectibleId, IsCollectibleCategoryPlaceableFurniture)
-    if collectibleData then
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData and collectibleData:IsPlaceableFurniture() then
         if self:CreateOrUpdateCollectibleDataEntry(collectibleId) then
             self:RequestApplyPlaceableTextFilterToData()
         end
     else
         --something made the collectible no longer valid
-        placeableCollectible = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId]
+        local placeableCollectible = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId]
         if placeableCollectible and self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, placeableCollectible) then
             self.refreshGroups:RefreshSingle("UpdatePlacementFurniture", { target=placeableCollectible, command=FURNITURE_COMMAND_REMOVE })
         end
@@ -392,9 +399,9 @@ function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleCache()
     local collectibleCache = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]
     ZO_ClearTable(collectibleCache)
     
-    local filteredDataTable = COLLECTIONS_INVENTORY_SINGLETON:GetCollectionsData(IsCollectibleCategoryPlaceableFurniture)
+    local filteredDataTable = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsPlaceableFurniture)
     for _, collectibleData in pairs(filteredDataTable) do
-        self:CreateOrUpdateCollectibleDataEntry(collectibleData.collectibleId)
+        self:CreateOrUpdateCollectibleDataEntry(collectibleData:GetId())
     end
     self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
     self:RequestApplyPlaceableTextFilterToData()

@@ -85,29 +85,29 @@ end
 -- Currently used by STOLEN_ITEM_TARGETED, OWNED_LOCK_VIEWED, and LIVESTOCK_TARGETED
 local TUTORIAL_HOVER_TIME_SECONDS = 0.75
 
-function ZO_Reticle:HandleDelayedTutorial(tutorialType, currentFrameTimeSeconds)
-    if not self.delayedTutorialType then
-        if tutorialType ~= TUTORIAL_TYPE_NONE then
+function ZO_Reticle:HandleDelayedTutorial(tutorialTrigger, currentFrameTimeSeconds)
+    if not self.delayedTutorialTrigger then
+        if tutorialTrigger ~= TUTORIAL_TRIGGER_NONE then
             -- We've reticled over something, from nothing
-            self.delayedTutorialType = tutorialType
+            self.delayedTutorialTrigger = tutorialTrigger
             self.delayedTutorialTimestampSeconds = currentFrameTimeSeconds        
         end
     else
-        if self.delayedTutorialType ~= tutorialType then
-            if tutorialType == TUTORIAL_TYPE_NONE then
+        if self.delayedTutorialTrigger ~= tutorialTrigger then
+            if tutorialTrigger == TUTORIAL_TRIGGER_NONE then
                 -- We've reticled over nothing, from something 
-                self.delayedTutorialType = nil
+                self.delayedTutorialTrigger = nil
                 self.delayedTutorialTimestampSeconds = nil
             else
                 -- We've reticled over something, from something else
-                self.delayedTutorialType = tutorialType
+                self.delayedTutorialTrigger = tutorialTrigger
                 self.delayedTutorialTimestampSeconds = currentFrameTimeSeconds        
             end
         end
     end
 
-    if self.delayedTutorialTimestampSeconds and self.delayedTutorialType and currentFrameTimeSeconds - self.delayedTutorialTimestampSeconds >= TUTORIAL_HOVER_TIME_SECONDS then
-        TriggerTutorial(self.delayedTutorialType)
+    if self.delayedTutorialTimestampSeconds and self.delayedTutorialTrigger and currentFrameTimeSeconds - self.delayedTutorialTimestampSeconds >= TUTORIAL_HOVER_TIME_SECONDS then
+        TriggerTutorial(self.delayedTutorialTrigger)
     end
 end
 
@@ -142,7 +142,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 interactKeybindButtonColor = ZO_ERROR_COLOR
             end
 
-            if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
+            if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_BANK then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET, action))
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_EMPTY then
                 self.interactKeybindButton:SetText(zo_strformat(SI_FORMAT_BULLET_TEXT, GetString(SI_GAME_CAMERA_ACTION_EMPTY)))
@@ -211,12 +211,27 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 self.interactKeybindButton:SetText(zo_strformat(SI_EXIT_HIDEYHOLE))
             end
             
-            local interactContextString = interactableName;
-            if(additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE) then
+            local interactContextString = interactableName
+            if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE then
                 local instanceType = context
                 if instanceType ~= INSTANCE_DISPLAY_TYPE_NONE then 
                     local instanceTypeString = zo_iconTextFormat(GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
                     interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
+                end
+            elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_BANK then
+                --Don't attempt to add the collectible nickname to the prompt if it isn't our house bank
+                if IsOwnerOfCurrentHouse() then
+                    local bankBag = context
+                    local collectibleId = GetCollectibleForHouseBankBag(bankBag)
+                    if collectibleId ~= 0 then
+					    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+					    if collectibleData then
+						    local nickname = collectibleData:GetNickname()
+						    if nickname ~= "" then
+							    interactContextString = zo_strformat(SI_RETICLE_HOUSE_BANK_WITH_NICKNAME_FORMAT, interactableName, nickname)
+						    end
+					    end
+                    end
                 end
             end
             self.interactContext:SetText(interactContextString)

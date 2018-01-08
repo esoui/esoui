@@ -76,9 +76,11 @@ function ZO_GamepadQuickslot:ResetActiveIcon()
     local slotIcon
 
     if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
-        local _, _, icon, _, unlocked = GetCollectibleInfo(self.collectibleToSlotId)
-        slotIcon = icon
-        slotEnabled = unlocked
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.collectibleToSlotId)
+        if collectibleData then
+            slotIcon = collectibleData:GetIcon()
+            slotEnabled = collectibleData:IsUnlocked()
+        end
     elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
         local icon, stack, _, meetsUsageRequirements = GetItemInfo(self.itemToSlotId, self.itemToSlotIndex)
         slotIcon = icon

@@ -20,6 +20,7 @@ local g_keybindStrips = {}
 local g_mapRefresh
 local g_gamepadMode = false
 local g_interactKeybindForceHidden = false
+local g_inSpecialMode = false
 
 --- The list of locals was at the absolute size limit of what Lua can handle
 --- (any more and it was erroring with "too many registers" and "too complex".)
@@ -315,7 +316,9 @@ end
 ZO_PinBlobManager = ZO_ObjectPool:Subclass()
 
 function ZO_PinBlobManager:New(blobContainer)
-    local blobFactory = function(pool) return ZO_ObjectPool_CreateNamedControl("ZO_QuestPinBlob", "ZO_PinBlob", pool, blobContainer) end
+    local blobFactory = function(pool)
+        return ZO_ObjectPool_CreateNamedControl("ZO_QuestPinBlob", "ZO_PinBlob", pool, blobContainer)
+    end
     return ZO_ObjectPool.New(self, blobFactory, ZO_ObjectPool_DefaultResetControl)
 end
 
@@ -931,8 +934,9 @@ function ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin)
         return GetString(SI_TOOLTIP_POI_LINKED_CHAPTER_COLLECTIBLE_LOCKED)
     else
         local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-        local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-        return zo_strformat(SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED, collectibleName, categoryName)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        local categoryData = collectibleData:GetCategoryData()
+        return zo_strformat(SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED, collectibleData:GetName(), categoryData:GetName())
     end
 end
 
@@ -1781,7 +1785,7 @@ local function UpdateMouseOverPins()
                                         elseif usedTooltip == ZO_MAP_TOOLTIP_MODE.IMPERIAL_CITY then
                                             IMPERIAL_CITY_TOOLTIP:SetHidden(false)
                                         else
-                                            InitializeTooltip(GetTooltip(usedTooltip), control)
+                                            InitializeTooltip(GetTooltip(usedTooltip), pin:GetControl())
                                         end
                                     end
                                 end
@@ -2078,7 +2082,8 @@ local WAYSHRINE_LMB =
                     ZO_ShowChapterUpgradePlatformDialog()
                 else
                     local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, GetCollectibleName(collectibleId))
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
             else
@@ -2126,7 +2131,8 @@ local WAYSHRINE_LMB =
                     ZO_ShowChapterUpgradePlatformDialog()
                 else
                     local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, GetCollectibleName(collectibleId))
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
             else
@@ -2927,7 +2933,8 @@ end
 function ZO_MapPin:GetLinkedCollectibleType()
     if self:IsPOI() or self:IsFastTravelWayShrine() then
         local collectibleId = GetFastTravelNodeLinkedCollectibleId(self:GetFastTravelNodeIndex())
-        return GetCollectibleCategoryType(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        return collectibleData:GetCategoryType()
     end
     return COLLECTIBLE_CATEGORY_TYPE_DLC
 end
@@ -3269,24 +3276,10 @@ function ZO_MapPin:DistanceToSq(x, y)
 end
 
 function ZO_MapPin:UpdateAreaPinTexture()
-    local pinDiameter = self.radius * 2 * CONSTANTS.MAP_HEIGHT
-    local lastPinBlobTexture = self.pinBlobTexture
-    if(pinDiameter > 48) then
-        if(self:IsAssisted()) then
-            self.pinBlobTexture = "EsoUI/Art/MapPins/map_assistedAreaPin.dds"
-        else
-            self.pinBlobTexture = "EsoUI/Art/MapPins/map_areaPin.dds"
-        end
+    if self:IsAssisted() then
+        self.pinBlob:SetColor(1,1,1,1)
     else
-        if(self:IsAssisted()) then
-            self.pinBlobTexture = "EsoUI/Art/MapPins/map_assistedAreaPin_32.dds"
-        else
-            self.pinBlobTexture = "EsoUI/Art/MapPins/map_areaPin_32.dds"
-        end
-    end
-
-    if(lastPinBlobTexture ~= self.pinBlobTexture) then
-        self.pinBlob:SetTexture(self.pinBlobTexture)
+        self.pinBlob:SetColor(0.5, 0.8, 0.8, 1.0)
     end
 end
 
@@ -5359,7 +5352,8 @@ function ZO_WorldMap_RefreshImperialCity(bgContext)
         local hasAccess = DoesAllianceHaveImperialCityAccess(g_campaignId, GetUnitAlliance("player"))
         local icPinType = hasAccess and MAP_PIN_TYPE_IMPERIAL_CITY_OPEN or MAP_PIN_TYPE_IMPERIAL_CITY_CLOSED
         local collectibleId = GetImperialCityCollectibleId()
-        local linkedCollectibleIsLocked = not IsCollectibleUnlocked(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        local linkedCollectibleIsLocked = collectibleData:IsLocked()
         for _, coords in ipairs(CONSTANTS.IC_PIN_POSITIONS) do
             local tag = ZO_MapPin.CreateImperialCityPinTag(bgContext, linkedCollectibleIsLocked)
             g_mapPinManager:CreatePin(icPinType, tag, coords[1], coords[2])
@@ -7118,10 +7112,6 @@ do
                     g_keybindStrips.gamepad:MarkDirty()
                     g_dataRegistration:Refresh()
                     TryTriggeringTutorials()
-                end)
-
-                CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", function()
-                    KEYBIND_STRIP:UpdateKeybindButtonGroup(g_keybindStripDescriptor)
                 end)
             end
         end

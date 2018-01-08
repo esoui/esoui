@@ -113,7 +113,8 @@ do
 
     local function SetupScoreTypeRow(entryIndex, scoreType, rowValueLabel)
         local score = GetScoreboardEntryScoreByType(entryIndex, scoreType)
-        rowValueLabel:SetText(ZO_AbbreviateNumber(score, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
+        rowValueLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(score, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
     end
 
     function ZO_BattlegroundMatchInfo_Shared:SetupForScoreboardEntry(entryIndex)

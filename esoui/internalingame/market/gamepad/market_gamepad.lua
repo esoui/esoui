@@ -5,7 +5,6 @@ ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME = "gamepad_market_locked"
 ZO_GAMEPAD_MARKET_PRE_SCENE_NAME = "gamepad_market_pre_scene"
 ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME = "gamepad_market_content_list"
 
-local DEFAULT_AMOUNT_CROWNS = 0
 local FIRST_CATEGORY_INDEX = 1
 local GAMEPAD_MARKET_LABELED_GROUP_LABEL_TEMPLATE = "ZO_GamepadMarket_GroupLabel"
 
@@ -20,6 +19,8 @@ local MARKET_BUY_CROWNS_BUTTON =
     keybind = "UI_SHORTCUT_TERTIARY",
     callback = function() ZO_GAMEPAD_MARKET:OnShowBuyCrownsDialogInternal() end
 }
+
+local g_activeMarketScreen = nil
 
 --
 --[[ Gamepad Market ]]--
@@ -136,7 +137,7 @@ function GamepadMarket:OnEndInteraction()
     self:ClearPreviewVars()
     self.header.tabBar:Clear()
     g_activeMarketScreen = nil
-    
+
     ZO_Market_Shared.OnEndInteraction(self)
     KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_STANDARD_STYLE)
 end
@@ -266,7 +267,6 @@ function GamepadMarket:InitializeKeybindDescriptors()
             visible =   function()
                             local marketProduct = self.selectedMarketProduct
                             if marketProduct ~= nil then
-                                local previewType = self.GetMarketProductPreviewType(marketProduct)
                                 return not self.selectedMarketProduct:IsBlank()
                             end
                             return false
@@ -542,7 +542,6 @@ do
             if newState == SCENE_FRAGMENT_HIDDEN then
                 self:ReleasePreviousCategoryProducts() -- Wait to release products until the after the animation has finished
             elseif newState == SCENE_FRAGMENT_SHOWN and not self.isLockedForCategoryRefresh then
-                local categoryControl = categoryData.control
                 -- Re-anchoring after animation to enable scrolling of the category control
                 self:AnchorCurrentCategoryControlToScrollChild()
             end
@@ -842,7 +841,7 @@ function GamepadMarket:DisplayEsoPlusOffer()
     local statusLabel = control:GetNamedChild("MembershipInfoStatus")
     statusLabel:SetText(GetString(statusText))
     if generateTextFunction then
-        statusLabel:SetHandler("OnUpdate", function(control) control:SetText(generateTextFunction()) end)
+        statusLabel:SetHandler("OnUpdate", function(labelControl) labelControl:SetText(generateTextFunction()) end)
     else
         statusLabel:SetHandler("OnUpdate", nil)
     end
@@ -997,10 +996,10 @@ function GamepadMarket:RequestShowCategory(categoryIndex)
     self.queuedCategoryIndex = categoryIndex
 end
 
-function GamepadMarket:ShowBundleContents(bundle)
+function GamepadMarket:ShowBundleContents(bundleMarketProduct)
     self:Deactivate()
     self.isLockedForCategoryRefresh = true
-    ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS:SetBundle(bundle)
+    ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS:SetBundle(bundleMarketProduct:GetId(), bundleMarketProduct:GetPresentationIndex())
     SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME)
 end
 
@@ -1214,14 +1213,6 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
             end
         end
 
-        GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE:GetSceneGroup():RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_GROUP_SHOWING then
-                self:OnInitialInteraction()
-            elseif newState == SCENE_GROUP_HIDDEN then
-                self:OnEndInteraction()
-            end
-        end)
-
         self.keybindStripDescriptors =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -1229,12 +1220,12 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                 name = GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_PRIMARY",
                 visible = function()
-                    return self.bundle ~= nil and not self.bundle:IsPurchaseLocked()
+                    return GetMarketProductPurchaseState(self.marketProductId) == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
                 end,
                 enabled = function() return not self:HasQueuedTutorial() end,
                 callback = function()
                     self.prePurchaseSelectedIndex = self.focusList:GetSelectedIndex()
-                    ZO_GAMEPAD_MARKET:PurchaseMarketProductInternal(self.bundle:GetId(), self.bundle:GetPresentationIndex(), RefreshOnPurchase, QueueTutorial)
+                    ZO_GAMEPAD_MARKET:PurchaseMarketProductInternal(self.marketProductId, self.presentationIndex, RefreshOnPurchase, QueueTutorial)
                 end,
             },
             {
@@ -1242,7 +1233,7 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                 name =  GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_SECONDARY",
                 visible = function()
-                    return self.selectedMarketProduct ~= nil and self.bundle ~= nil and self.selectedMarketProduct:HasPreview() and IsCharacterPreviewingAvailable()
+                    return self.selectedMarketProduct ~= nil and self.selectedMarketProduct:HasPreview() and IsCharacterPreviewingAvailable()
                 end,
                 callback = function() self:BeginPreview() end
             },
@@ -1254,25 +1245,27 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
     end
 end
 
-function GamepadMarketBundleContents:SetBundle(bundle)
-    self.bundle = bundle
-    self.headerData.titleText = bundle.title:GetText()
+function GamepadMarketBundleContents:SetBundle(marketProductId, presentationIndex)
+    self.marketProductId = marketProductId
+    self.presentationIndex = presentationIndex
+    self.headerData.titleText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductDisplayName(marketProductId))
+    self.prePurchaseSelectedIndex = nil
 end
 
-function GamepadMarketBundleContents:LayoutBundleProducts(bundle)
+function GamepadMarketBundleContents:LayoutBundleProducts()
     self:ClearProducts()
     self:PrepareGridForBuild(ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCTS_PER_ROW, ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN, ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH, ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT, ZO_GAMEPAD_MARKET_PRODUCT_PADDING)
 
-    local numChildren = bundle:GetNumChildren()
+    local numChildren = GetMarketProductNumChildren(self.marketProductId)
 
     if numChildren > 0 then
         local childTiles = {}
         for childIndex = 1, numChildren do
-            local childMarketProductId = bundle:GetChildMarketProductId(childIndex)
+            local childMarketProductId = GetMarketProductChildId(self.marketProductId, childIndex)
             local displayName = GetMarketProductDisplayName(childMarketProductId)
 
             local marketProduct = self.marketBundleAttachmentPool:AcquireObject()
-            marketProduct:SetBundle(bundle)
+            marketProduct:SetBundleMarketProductId(self.marketProductId)
             marketProduct:Show(childMarketProductId)
             table.insert(childTiles, {displayName = displayName, marketProduct = marketProduct})
         end
@@ -1294,7 +1287,8 @@ end
 
 function GamepadMarketBundleContents:OnShowing()
     ZO_GamepadMarket_GridScreen.OnShowing(self)
-    self:LayoutBundleProducts(self.bundle)
+    self:ClearPreviewVars()
+    self:LayoutBundleProducts()
     self.titleControl:SetText(self.headerData.titleText)
     self:SelectAfterPreview()
     self:AddKeybinds()
@@ -1333,15 +1327,6 @@ function GamepadMarketBundleContents:OnSelectionChanged(selectedData)
 
     self:UpdatePreviousAndNewlySelectedProducts(previouslySelectedMarketProduct, self.selectedMarketProduct)
     self:RefreshKeybinds()
-end
-
-function GamepadMarketBundleContents:OnInitialInteraction()
-    self:ClearPreviewVars()
-end
-
-function GamepadMarketBundleContents:OnEndInteraction()
-    self:ClearPreviewVars()
-    self.prePurchaseSelectedIndex = nil
 end
 
 function GamepadMarketBundleContents:ReleaseAllProducts()
@@ -1421,7 +1406,6 @@ function GamepadMarketProductListScene:InitializeKeybindStripDescriptors()
             enabled =   function()
                             local targetData = self.list:GetTargetData()
                             if targetData then
-                                local productId = targetData.marketProductId
                                 return targetData.hasPreview and IsCharacterPreviewingAvailable()
                             end
                             return false
@@ -1616,7 +1600,7 @@ function GamepadMarketProductListScene:BeginPreview()
     end
 
     GAMEPAD_MARKET_PREVIEW_SCENE:RegisterCallback("StateChange", self.PreviewSceneOnStateChange)
-    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)    
+    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)
 end
 
 function GamepadMarketProductListScene:HasMultiplePreviewProducts()

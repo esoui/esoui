@@ -173,7 +173,7 @@
             <Controls>
                 <Texture name="$(parent)Alert" tier="HIGH" pixelRoundingEnabled="false" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" hidden="true">
                     <Dimensions x="32" y="32" />
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="16" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="12" />
                 </Texture>
 
                 <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_44.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

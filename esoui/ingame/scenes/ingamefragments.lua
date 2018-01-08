@@ -126,6 +126,29 @@ function ZO_CharacterFramingBlur:Hide()
     ZO_NormalizedPointFragment.Hide(self)
 end
 
+-----------------------------
+--Character Framing Look At Distance
+-----------------------------
+
+ZO_CharacterFramingLookAtDistance = ZO_SceneFragment:Subclass()
+
+function ZO_CharacterFramingLookAtDistance:New(lookAtDistanceFactor)
+    local fragment = ZO_SceneFragment.New(self)
+    fragment:SetHideOnSceneHidden(true)
+    fragment.lookAtDistanceFactor = lookAtDistanceFactor
+    return fragment
+end
+
+function ZO_CharacterFramingLookAtDistance:Show()
+    SetFrameLocalPlayerLookAtDistanceFactor(self.lookAtDistanceFactor)
+    self:OnShown()
+end
+
+function ZO_CharacterFramingLookAtDistance:Hide()
+    SetFrameLocalPlayerLookAtDistanceFactor(nil)
+    self:OnHidden()
+end
+
 do
     local function CalculateStandardRightPanelFramingTarget()
         local x = zo_lerp(0, ZO_SharedRightBackground:GetLeft(), .5)
@@ -211,6 +234,9 @@ do
     end
     FRAME_TARGET_GAMEPAD_RIGHT_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadRightFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_GAMEPAD_RIGHT_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadRightFramingTarget)
+    
+    local LOOK_AT_DISTANCE_FACTOR_FAR_RIGHT_FRAMING_TARGET = 1.9
+    FRAME_TARGET_DISTANCE_GAMEPAD_FAR_FRAGMENT = ZO_CharacterFramingLookAtDistance:New(LOOK_AT_DISTANCE_FACTOR_FAR_RIGHT_FRAMING_TARGET)
 
     local function CalculateOffscreenFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
@@ -595,12 +621,12 @@ function ZO_ItemPreviewFragment:New()
 end
 
 function ZO_ItemPreviewFragment:Show()
-    BeginPreviewMode()
+    EnablePreviewMode()
     self:OnShown()
 end
 
 function ZO_ItemPreviewFragment:Hide()
-    EndPreviewMode()
+    DisablePreviewMode()
     self:OnHidden()
 end
 
@@ -749,6 +775,7 @@ MEDIUM_SHORT_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumSh
 MEDIUM_TALL_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedMediumTallLeftPanelBackground)
 WIDE_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideRightPanelBackground)
 WIDE_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideLeftPanelBackground)
+WIDE_TALL_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideTallLeftPanelBackground)
 TREE_UNDERLAY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedTreeUnderlay)
 TOP_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TopBar)
 
@@ -761,7 +788,6 @@ MAIL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_MAIL)
 
 GAMEPAD_TRADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Trade_Gamepad)
 LOCKPICK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LockpickPanel)
-SKILLS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Skills)
 CHARACTER_WINDOW_STATS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CharacterWindowStats)
 CHARACTER_WINDOW_FRAGMENT = ZO_CharacterWindowFragment:New(ZO_Character, false)
 READ_ONLY_CHARACTER_WINDOW_FRAGMENT = ZO_CharacterWindowFragment:New(ZO_Character, true)
@@ -775,11 +801,12 @@ PLAYER_PROGRESS_BAR_GAMEPAD_HIDE_NAME_LOCATION_FRAGMENT:SetHideOnSceneHidden(tru
 PLAYER_PROGRESS_BAR_GAMEPAD_NAME_LOCATION_ANCHOR_FRAGMENT = ZO_GamepadPlayerProgressBarNameLocationAnchor_Initialize(GAMEPAD_PLAYER_PROGRESS_BAR_NAME_LOCATION, PLAYER_PROGRESS_BAR)
 
 QUEST_JOURNAL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuestJournal)
-COLLECTIONS_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CollectionsBook)
+COLLECTIONS_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CollectionsBook_TopLevel)
 LORE_LIBRARY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LoreLibrary)
 LORE_READER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LoreReader)
 TREASURE_MAP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TreasureMap)
 BANK_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_PlayerBankMenu)
+HOUSE_BANK_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HouseBankMenu)
 GUILD_BANK_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildBankMenu)
 INTERACT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InteractWindow)
 GAMEPAD_INTERACT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InteractWindow_Gamepad)
@@ -832,7 +859,6 @@ ENCHANTING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_EnchantingTopLevel)
 SMITHING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SmithingTopLevel)
 
 SKILLS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_SKILLS)
-STATS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StatsPanel)
 
 COLLECTIONS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_COLLECTIONS_MENU_ROOT_TITLE)
 JOURNAL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_QUEST_JOURNAL_MENU_JOURNAL)
@@ -849,65 +875,6 @@ PLAYER_MENU_FRAGMENT:SetHideOnSceneHidden(true)
 local ALWAYS_ANIMATE = true
 
 OPTIONS_MENU_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadOptionsTopLevelInfoPanel)
-
--- Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
-    
-GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
-ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_1_INSTANT_BACKGROUND_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
-GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_Background)
-ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_1_2_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_Background)
-ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_2_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_4_Background)
-ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_Background, ALWAYS_ANIMATE)
-ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_4_Background, ALWAYS_ANIMATE)
-GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
-
-GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
-    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    paddingRight = 0,
-    dynamicFramingConsumedWidth = 1150,
-    dynamicFramingConsumedHeight = 400,
-    forcePreparePreview = false,
-    previewBufferMS = 300
-})
-
-FURNITURE_BROWSER_GAMEPAD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
-    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    dynamicFramingConsumedWidth = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    dynamicFramingConsumedHeight = 400,
-    forcePreparePreview = false,
-    previewInEmptyWorld = true,
-    previewBufferMS = 300
-})
-
--- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
-
-GAMEPAD_PROVISIONER_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadProvisionerTopLevel)
-GAMEPAD_PROVISIONER_FRAGMENT:SetHideOnSceneHidden(true)
-GAMEPAD_PROVISIONER_RECIPELIST_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadProvisionerTopLevelContainerRecipe)
-GAMEPAD_PROVISIONER_OPTIONS_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadProvisionerTopLevelContainerOptions)
-
-GAMEPAD_VENDOR_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_StoreWindow_Gamepad)
-GAMEPAD_FENCE_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_FenceWindow_Gamepad)
-
-GAMEPAD_BANKING_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadBankingTopLevel)
-
-GAMEPAD_GUILD_BANK_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GuildBankTopLevel_Gamepad)
-GAMEPAD_GUILD_BANK_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_GUILD_BANK_WITHDRAW_DEPOSIT_GOLD_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GuildBankWithdrawDepositGoldTopLevel_Gamepad)
-GAMEPAD_GUILD_BANK_ERROR_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GuildBankErrorTopLevel_Gamepad)
-
-GAMEPAD_GUILD_KIOSK_PURCHASE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_GuildKiosk_Purchase)
-GAMEPAD_GUILD_KIOSK_BID_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_GuildKiosk_Bid)
-
-GAMEPAD_TRADING_HOUSE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_TradingHouse_Gamepad)
-GAMEPAD_TRADING_HOUSE_CREATE_LISTING_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_TradingHouse_CreateListing_Gamepad)
 
 --Sounds
 INVENTORY_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.BACKPACK_WINDOW_OPEN, SOUNDS.BACKPACK_WINDOW_CLOSE)

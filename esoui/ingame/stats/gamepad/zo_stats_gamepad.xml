@@ -79,6 +79,7 @@
                     <Dimensions x="180"/>
                 </Label>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
             </Controls>
         </Control>
         
@@ -112,6 +113,26 @@
                 ZO_GamepadStats_OnInitialize(self)
             </OnInitialized>   
             <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header">
+                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25" />
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+                
                 <Control name="$(parent)RightPane" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
                     <Controls>
                         <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />

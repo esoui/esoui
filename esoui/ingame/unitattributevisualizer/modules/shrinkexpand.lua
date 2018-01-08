@@ -10,9 +10,9 @@ function ZO_UnitVisualizer_ShrinkExpandModule:Initialize(normalWidth, expandedWi
     self.shrunkWidth = shrunkWidth
 end
 
-local function GetInitialStatValue(unitTag, stat, attribute, powerType)
-    return (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_INCREASED_MAX_POWER, stat, attribute, powerType) or 0)
-         + (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_DECREASED_MAX_POWER, stat, attribute, powerType) or 0)
+function ZO_UnitVisualizer_ShrinkExpandModule:GetInitialStatValue(stat, attribute, powerType)
+    return self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_INCREASED_MAX_POWER, stat, attribute, powerType)
+        + self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_DECREASED_MAX_POWER, stat, attribute, powerType)
 end
 
 function ZO_UnitVisualizer_ShrinkExpandModule:CreateAnimation(control, stat)
@@ -46,12 +46,12 @@ function ZO_UnitVisualizer_ShrinkExpandModule:CreateInfoTable(control, oldBarInf
     if control then
         local oldInfo = oldBarInfo and oldBarInfo[stat]
         if oldInfo then
-            oldInfo.value = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power)
+            oldInfo.value = self:GetInitialStatValue(stat, attribute, power)
             return oldInfo
         end
 
         local animation = self:CreateAnimation(control, stat)
-        return { value = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power), animation = animation, state = ATTRIBUTE_BAR_STATE_NORMAL }
+        return { value = self:GetInitialStatValue(stat, attribute, power), animation = animation, state = ATTRIBUTE_BAR_STATE_NORMAL }
     end
     return nil
 end

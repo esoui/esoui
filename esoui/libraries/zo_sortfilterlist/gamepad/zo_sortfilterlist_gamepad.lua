@@ -8,16 +8,17 @@ function ZO_SortFilterList_Gamepad:New(...)
 end
 
 function ZO_SortFilterList_Gamepad:Initialize(...)
-    ZO_SortFilterListBase.Initialize(self)
-    self:InitializeSortFilterList(...)
+    ZO_SortFilterList.Initialize(self, ...)
+    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
+    self.isActive = false
 end
 
-function ZO_SortFilterList_Gamepad:InitializeSortFilterList(control, magnitudeQueryFunction, scrollListAsBlock)
+function ZO_SortFilterList_Gamepad:InitializeSortFilterList(control)
     ZO_SortFilterList.InitializeSortFilterList(self, control)
+    ZO_ScrollList_EnableSelection(self.list, "ZO_GamepadInteractiveSortFilterDefaultHighlight", function(oldData, newData) self:EntrySelectionCallback(oldData, newData) end)
+end
 
-    self.scrollListAsBlock = scrollListAsBlock
-
-    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL, nil, magnitudeQueryFunction)
+function ZO_SortFilterList_Gamepad:EntrySelectionCallback(oldData, newData)
 end
 
 function ZO_SortFilterList_Gamepad:SetDirectionalInputEnabled(enabled)
@@ -31,25 +32,31 @@ function ZO_SortFilterList_Gamepad:SetDirectionalInputEnabled(enabled)
     end
 end
 
-function ZO_SortFilterList_Gamepad:UpdateDirectionalInput()
-    local result = self.movementController:CheckMovement()
-    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
-        if self.scrollListAsBlock then
-            self:MoveNextAsBlock()
-        else
-            self:MoveNext()
-        end
-    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-        if self.scrollListAsBlock then
-            self:MovePreviousAsBlock()
-        else
-            self:MovePrevious()
-        end
+function ZO_SortFilterList_Gamepad:IsActivated()
+    return self.isActive
+end
+
+function ZO_SortFilterList_Gamepad:Activate()
+    if not self.isActive then
+        self.isActive = true
+
+        self:SetDirectionalInputEnabled(true)
+        ZO_ScrollList_AutoSelectData(self.list)
+    end
+end
+
+function ZO_SortFilterList_Gamepad:Deactivate()
+    if self.isActive then
+        self:SetDirectionalInputEnabled(false)
+        ZO_ScrollList_SelectData(self.list, nil)
+
+        self.isActive = false
     end
 end
 
 function ZO_SortFilterList_Gamepad:MovePrevious()
     if not ZO_ScrollList_AtTopOfList(self.list) then
+        PlaySound(SOUNDS.GAMEPAD_MENU_UP)
         ZO_ScrollList_SelectPreviousData(self.list)
         self:RefreshVisible()
         self:UpdateKeybinds()
@@ -58,37 +65,19 @@ end
 
 function ZO_SortFilterList_Gamepad:MoveNext()
     if not ZO_ScrollList_AtBottomOfList(self.list) then
+        PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
         ZO_ScrollList_SelectNextData(self.list)
         self:RefreshVisible()
         self:UpdateKeybinds()
     end
 end
 
-function ZO_SortFilterList_Gamepad:MovePreviousAsBlock()
-    if ZO_ScrollList_CanScrollUp(self.list) then
-        local atTop, topData = ZO_ScrollList_AtTopOfVisible(self.list)
-
-        if atTop then
-            ZO_ScrollList_SelectPreviousData(self.list)
-        else
-            ZO_ScrollList_SelectDataAndScrollIntoView(self.list, topData)
-        end
-
-        self:RefreshVisible()
-    end
-end
-
-function ZO_SortFilterList_Gamepad:MoveNextAsBlock()
-    if ZO_ScrollList_CanScrollDown(self.list) then
-        local atBottom, bottomData = ZO_ScrollList_AtBottomOfVisible(self.list)
-
-        if atBottom then
-            ZO_ScrollList_SelectNextData(self.list)
-        else
-            ZO_ScrollList_SelectDataAndScrollIntoView(self.list, bottomData)
-        end
-
-        self:RefreshVisible()
+function ZO_SortFilterList_Gamepad:UpdateDirectionalInput()
+    local result = self.movementController:CheckMovement()
+    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+        self:MoveNext()
+    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+        self:MovePrevious()
     end
 end
 

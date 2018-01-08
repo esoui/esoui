@@ -310,6 +310,7 @@ function ZO_HUDInfamyMeter:AnimateMeter(progress)
 end
 
 function ZO_HUDInfamyMeter:SetBarValue(bar, percentFilled)
+    local NO_LEADING_EDGE = false
     bar:StartFixedCooldown(percentFilled, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, NO_LEADING_EDGE) -- CD_TIME_TYPE_TIME_REMAINING causes clockwise scroll
 end
 

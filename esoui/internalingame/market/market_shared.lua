@@ -192,9 +192,6 @@ function ZO_Market_Shared:New(...)
 end
 
 function ZO_Market_Shared:Initialize()
-    -- clean up any preview that may have been left over
-    self:EndCurrentPreview()
-
     -- Special buckets to contain MarketProducts in lieu of a Category/Subcategory
     -- If you add a new bucket, make sure to update all the places that used them
     -- such as GamepadMarket:GetCurrentCategoryMarketProductInfoById or Market:GetMarketProductInfo
@@ -589,7 +586,7 @@ do
                 transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT),
                 GoToUseProductLocation = function()
                     if HousingEditorCreateFurnitureForPlacementFromMarketProduct(marketProductId) then
-                        ShowRemoteBaseScene()
+                        SCENE_MANAGER:RequestShowLeaderBaseScene()
                     end
                 end,
             }
@@ -606,14 +603,14 @@ do
                     transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT),
                     GoToUseProductLocation = function()
                         RequestJumpToHouse(marketProductHouseId)
-                        ShowRemoteBaseScene()
+                        SCENE_MANAGER:RequestShowLeaderBaseScene()
                     end,
                 }
 
                 return houseInfo
             elseif marketProductType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
                 local instantUnlockType = GetMarketProductInstantUnlockType(marketProductId)
-                if instantUnlockType == MARKET_INSTANT_UNLOCK_ESO_PLUS then
+                if instantUnlockType == INSTANT_UNLOCK_ESO_PLUS then
                     return ESO_PLUS
                 end
             end

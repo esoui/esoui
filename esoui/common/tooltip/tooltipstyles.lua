@@ -54,6 +54,12 @@ ZO_TOOLTIP_STYLES =
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
         fontColorField = POWERTYPE_STAMINA,
     },
+    statValuePairHealthValue =
+    {
+        fontSize = "$(GP_42)",
+        fontColorType = INTERFACE_COLOR_TYPE_POWER,
+        fontColorField = POWERTYPE_HEALTH,
+    },
     championRequirements =
     {
         fontSize = "$(GP_42)",
@@ -239,7 +245,6 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         childSpacing = 1,
         fontSize = "$(GP_27)",
-        height = 92,
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
@@ -269,7 +274,6 @@ ZO_TOOLTIP_STYLES =
         layoutSecondaryDirection = "up",
         widthPercent = 100,
         childSpacing = 15,
-        customSpacing = -4,
         fontSize = "$(GP_27)",
         height = 32,
         fontColorField = GENERAL_COLOR_WHITE,
@@ -407,15 +411,22 @@ ZO_TOOLTIP_STYLES =
         childSpacing = 3,
         customSpacing = 20,
     },
-    abilityUpgradeSection =
+    abilityHeaderSection =
     {
         customSpacing = 7,
         childSpacing = 10,
         widthPercent = 100,
         fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        height = 96,
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "up",
-        height = 64,
+    },
+    abilityHeader =
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        uppercase = true,
+        fontSize = "$(GP_27)",
+        widthPercent = 100,
     },
     abilityUpgrade =
     {
@@ -1056,6 +1067,16 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_WHITE,
     },
 
+    collectionsEquipmentStyle =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
+    collectionsPolymorphOverrideWarningStyle =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
     -- Gamepad Crown Store Market
     instantUnlockIneligibilitySection =
     {
@@ -1383,6 +1404,37 @@ ZO_TOOLTIP_STYLES =
     {
         fontSize = "$(GP_42)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
+    },
+}
+
+ZO_GAMEPAD_DYEING_TOOLTIP_STYLES =
+{
+    tooltip =
+    {
+        width = 768,
+        paddingLeft = 0,
+        paddingRight = 0,
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontColorType = INTERFACE_COLOR_TYPE_GAMEPAD_TOOLTIP,
+        fontColorField = GENERAL_COLOR_GREY,
+        fontStyle = "soft-shadow-thick",
+    },
+    title =
+    {
+        fontSize = "$(GP_42)",
+        customSpacing = 8,
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_WHITE,
+        widthPercent = 100,
+        horizontalAlignment = TEXT_ALIGN_CENTER
+    },
+    body =
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        paddingTop = 10,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        horizontalAlignment = TEXT_ALIGN_CENTER
     },
 }
 

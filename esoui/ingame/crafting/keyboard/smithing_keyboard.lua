@@ -83,7 +83,56 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
-        -- Clear selections / Cancel Research
+        -- Perform craft/extract/improve
+        {
+            name = function()
+                if self.mode == SMITHING_MODE_CREATION then
+                    local cost = GetCostToCraftSmithingItem(self.creationPanel:GetAllCraftingParameters())
+                    return ZO_CraftingUtils_GetCostToCraftString(cost)
+                elseif self.mode == SMITHING_MODE_REFINMENT then
+                    return GetString(SI_SMITHING_REFINE)
+                elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
+                    return GetString(SI_SMITHING_DECONSTRUCT)
+                elseif self.mode == SMITHING_MODE_IMPROVEMENT then
+                    return GetString(SI_SMITHING_IMPROVE)
+                elseif self.mode == SMITHING_MODE_RESEARCH then
+                    return GetString(SI_ITEM_ACTION_RESEARCH)
+                end
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+        
+            callback = function()
+                if self.mode == SMITHING_MODE_REFINMENT then
+                    self.refinementPanel:Extract()
+                elseif self.mode == SMITHING_MODE_CREATION then
+                    self.creationPanel:Create()
+                elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
+                    self.deconstructionPanel:Extract()
+                elseif self.mode == SMITHING_MODE_IMPROVEMENT then
+                    self.improvementPanel:Improve()
+                elseif self.mode == SMITHING_MODE_RESEARCH then
+                    self.researchPanel:Research()
+                end
+            end,
+
+            enabled = function()
+                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                    if self.mode == SMITHING_MODE_REFINMENT then
+                        return self.refinementPanel:IsExtractable()
+                    elseif self.mode == SMITHING_MODE_CREATION then
+                        return self.creationPanel:IsCraftable()
+                    elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
+                        return self.deconstructionPanel:IsExtractable()
+                    elseif self.mode == SMITHING_MODE_IMPROVEMENT then
+                        return self.improvementPanel:IsImprovable()
+                    elseif self.mode == SMITHING_MODE_RESEARCH then
+                        return self.researchPanel:IsResearchable()
+                    end
+                end
+            end,
+        },
+
+                -- Clear selections / Cancel Research
         {
             name = function()
                 if self.mode == SMITHING_MODE_RESEARCH then
@@ -118,55 +167,6 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                     elseif self.mode == SMITHING_MODE_RESEARCH then
                         return self.researchPanel:CanCancelResearch()
                     end 
-                end
-            end,
-        },
-
-        -- Perform craft/extract/improve
-        {
-            name = function()
-                if self.mode == SMITHING_MODE_CREATION then
-                    local cost = GetCostToCraftSmithingItem(self.creationPanel:GetAllCraftingParameters())
-                    return ZO_CraftingUtils_GetCostToCraftString(cost)
-                elseif self.mode == SMITHING_MODE_REFINMENT then
-                    return GetString(SI_SMITHING_REFINE)
-                elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                    return GetString(SI_SMITHING_DECONSTRUCT)
-                elseif self.mode == SMITHING_MODE_IMPROVEMENT then
-                    return GetString(SI_SMITHING_IMPROVE)
-                elseif self.mode == SMITHING_MODE_RESEARCH then
-                    return GetString(SI_ITEM_ACTION_RESEARCH)
-                end
-            end,
-            keybind = "UI_SHORTCUT_SECONDARY",
-        
-            callback = function()
-                if self.mode == SMITHING_MODE_REFINMENT then
-                    self.refinementPanel:Extract()
-                elseif self.mode == SMITHING_MODE_CREATION then
-                    self.creationPanel:Create()
-                elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                    self.deconstructionPanel:Extract()
-                elseif self.mode == SMITHING_MODE_IMPROVEMENT then
-                    self.improvementPanel:Improve()
-                elseif self.mode == SMITHING_MODE_RESEARCH then
-                    self.researchPanel:Research()
-                end
-            end,
-
-            visible = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    if self.mode == SMITHING_MODE_REFINMENT then
-                        return self.refinementPanel:IsExtractable()
-                    elseif self.mode == SMITHING_MODE_CREATION then
-                        return self.creationPanel:IsCraftable()
-                    elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                        return self.deconstructionPanel:IsExtractable()
-                    elseif self.mode == SMITHING_MODE_IMPROVEMENT then
-                        return self.improvementPanel:IsImprovable()
-                    elseif self.mode == SMITHING_MODE_RESEARCH then
-                        return self.researchPanel:IsResearchable()
-                    end
                 end
             end,
         },

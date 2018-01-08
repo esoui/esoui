@@ -62,7 +62,7 @@
                 
                 <Backdrop name="$(parent)BG" inherits="ZO_CenterlessBackdrop" level="0"/>
                 
-                <Texture name="$(parent)Icon" level="3" hidden="true">
+                <Texture name="$(parent)Icon" level="3" hidden="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
                     <Dimensions x="52" y="52"/>
                 </Texture>
@@ -122,53 +122,50 @@
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_CollectionsBook" inherits="ZO_JournalProgressBook" hidden="true">
+        <TopLevelControl name="ZO_CollectionsBook_TopLevel" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_CollectionsBook_OnInitialize(self)
             </OnInitialized>
             
             <Controls>
-                <Control name="$(parent)Contents" override="true">
+                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                    <Dimensions x="353" />
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                </Control>
+
+                <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                    <Dimensions x="240"/>
                     <Controls>
-                        <Control name="$(parent)Categories" override="true">
-                            <Dimensions x="353" />
-                            <Anchor point="TOPLEFT" offsetX="-28" offsetY="72" />
-                            <Anchor point="BOTTOMLEFT" offsetX="-28" />
-                        </Control>
-                        
-                        <Control name="$(parent)ContentList" override="true" hidden="true" />
-
-                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                            <Anchor point="TOPLEFT" offsetX="9" offsetY="28" />
-                            <Dimensions x="240"/>
-                            <Controls>
-                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                                    <OnInitialized>
-                                        ZO_EditDefaultText_Initialize(self, GetString(SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT))
-                                    </OnInitialized>
-                                    <OnTextChanged>
-                                        ZO_CollectionsBook_OnSearchTextChanged(self)
-                                    </OnTextChanged>
-                                </EditBox>
-                            </Controls>
-                        </Backdrop>
-                        
-                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
-                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
-                        </Label>
-
-                        <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_COLLECTIONS_BOOK_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
-                            <Anchor point="TOP" relativeTo="$(parent)ContentList" relativePoint="TOP" />
-                        </Label>
-
-                        <Control name="$(parent)SummaryInset" override="true" hidden="true" />
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT))
+                            </OnInitialized>
+                            <OnTextChanged>
+                                ZO_CollectionsBook_OnSearchTextChanged(self)
+                            </OnTextChanged>
+                        </EditBox>
                     </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                </Label>
+
+                <Control name="$(parent)Filter" inherits="ZO_ComboBox">
+                    <Dimensions x="222" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="25" />
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-17" />
                 </Control>
                 
-                <Control name="$(parent)List" inherits="ZO_ScrollList" hidden="false">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContentsContentList" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ContentsContentList" />
-                </Control>
+                <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_COLLECTIONS_BOOK_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)List" />
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>   

@@ -38,9 +38,8 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     local function OnPrimaryResidenceClicked(button)
         if self.currentHouse ~= self.primaryResidence then
             local collectibleId = GetCollectibleIdForHouse(self.currentHouse)
-            local name = GetCollectibleName(collectibleId)
-            local nickname = GetCollectibleNickname(collectibleId)
-            ZO_Dialogs_ShowDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { name, nickname} })
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            ZO_Dialogs_ShowDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()} })
         end
     end
 

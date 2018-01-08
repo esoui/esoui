@@ -109,6 +109,7 @@
                         </Control>
 
                         <Button name="$(parent)PreviewButton" override="true" inherits="ZO_DefaultButton">
+                            <Dimensions x="250"/>
                             <OnClicked>
                                 ZO_HousingPreviewDialog_Keyboard_PreviewButton_OnClicked(self, button)
                             </OnClicked>
@@ -116,7 +117,16 @@
                     </Controls>
                 </Control>
 
+                <Button name="$(parent)GoToEntrance" text="SI_HOUSING_EDITOR_SAFE_LOC" inherits="ZO_DefaultButton">
+                    <Dimensions x="250"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TemplatePreviewButton" relativePoint="TOPLEFT" offsetY="-10"/>
+                    <OnClicked>
+                        HousingEditorJumpToSafeLocation()
+                    </OnClicked>
+                </Button>
+
                 <Control name="$(parent)PurchaseOptions" override="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="50" />
                     <Controls>
                         <Control name="$(parent)Gold" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" />
 
@@ -124,6 +134,11 @@
 
                         <Control name="$(parent)CrownGems" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" />
                     </Controls>
+                </Control>
+
+                <Control name="$(parent)BottomPadding">
+                    <Anchor point="TOP" relativeTo="$(parent)PurchaseOptions" relativePoint="BOTTOM" />
+                    <Dimensions y="40" />
                 </Control>
             </Controls>
         </TopLevelControl>

@@ -194,7 +194,7 @@ function ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, 
 
     iconMarkup = zo_iconFormat(iconMarkup, iconSize, iconSize)
 
-    return zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, formattedCurrency, iconMarkup)
+    return string.format("%s %s", formattedCurrency, iconMarkup)
 end
 
 function ZO_CurrencyTemplate_OnMouseEnter(control)
@@ -307,6 +307,7 @@ function ZO_CurrencyControl_SetCurrency(self, options)
 
             local iconMarkup = zo_iconFormat(isGamepad and currencyStaticInfo.gamepadTexture or currencyStaticInfo.keyboardTexture, iconSize, iconSize)
             local formattedAmount = ZO_CurrencyControl_FormatCurrency(currencyData.amount, options.useShortFormat, currencyData.obfuscateAmount)
+            formattedAmount = zo_strformat(SI_NUMBER_FORMAT, formattedAmount)
 
             if not currencyData.obfuscateAmount and currencyData.currencyCapAmount then
                 local formattedCap = ZO_CurrencyControl_FormatCurrency(currencyData.currencyCapAmount, options.useShortFormat)
@@ -500,4 +501,29 @@ end
 
 function ZO_Currency_GetAmountLabel(currencyType)
     return g_currenciesData[currencyType].amountLabel
+end
+
+function ZO_Currency_TryShowThresholdDialog(storeItemIndex, quantity, itemData)
+    local playerGold = GetCurrencyAmount(CURT_MONEY, GetCurrencyPlayerStoredLocation(CURT_MONEY))
+    local playerCurrency1 = GetCurrencyAmount(itemData.currencyType1, GetCurrencyPlayerStoredLocation(itemData.currencyType1))
+    local playerCurrency2 = GetCurrencyAmount(itemData.currencyType2, GetCurrencyPlayerStoredLocation(itemData.currencyType2))
+    local costGold = quantity * itemData.price
+    local costCurrency1 = quantity * itemData.currencyQuantity1
+    local costCurrency2 = quantity * itemData.currencyQuantity2
+    local confirmGold = DoesCurrencyAmountMeetConfirmationThreshold(CURT_MONEY, costGold)
+    local confirmCurrency1 = DoesCurrencyAmountMeetConfirmationThreshold(itemData.currencyType1, costCurrency1)
+    local confirmCurrency2 = DoesCurrencyAmountMeetConfirmationThreshold(itemData.currencyType2, costCurrency2)
+    if itemData.meetsRequirementsToBuy and ((confirmGold and playerGold >= costGold) or (confirmCurrency1 and playerCurrency1 >= costCurrency1) or (confirmCurrency2 and playerCurrency2 >= costCurrency2)) then
+        local itemLink = GetStoreItemLink(storeItemIndex)
+        local params = {
+            quantity,
+            itemLink,
+            costGold > 0 and ZO_Currency_FormatKeyboard(CURT_MONEY, costGold, ZO_CURRENCY_FORMAT_AMOUNT_ICON) or "",
+            costCurrency1 > 0 and ZO_Currency_FormatKeyboard(itemData.currencyType1, costCurrency1, ZO_CURRENCY_FORMAT_AMOUNT_ICON) or "",
+            costCurrency2 > 0 and ZO_Currency_FormatKeyboard(itemData.currencyType2, costCurrency2, ZO_CURRENCY_FORMAT_AMOUNT_ICON) or ""
+        }
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_PURCHASE", { buyIndex = storeItemIndex, quantity = quantity }, {mainTextParams = params})
+        return true
+    end
+    return false
 end

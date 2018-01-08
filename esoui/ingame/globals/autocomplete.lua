@@ -185,16 +185,16 @@ do
         maxResults = maxResults or 10
         if maxResults == 0 then return end
 
-        startIndex = startingIndex or 1
+        startingIndex = startingIndex or 1
         scoringText = zo_strlower(scoringText)
         local trimmedTextToScore = scoringText:sub(startingIndex, 20)
 
         local results = {}
         ZO_ClearNumericallyIndexedTable(scores)
 
-        local minScore = POOR_MATCH_RATIO * (zo_min(#scoringText, 10 + startIndex) - startIndex - POOR_MATCH_MIN)
+        local minScore = POOR_MATCH_RATIO * (zo_min(#scoringText, 10 + startingIndex) - startingIndex - POOR_MATCH_MIN)
         for lowerSource, source in pairs(stringsToScore) do
-            local score = ComputeScore(lowerSource, scoringText, startIndex, trimmedTextToScore)
+            local score = ComputeScore(lowerSource, scoringText, startingIndex, trimmedTextToScore)
             if noMinScore or (score <= minScore) then
                 local _, insertPosition = zo_binarysearch(score, results, BinaryInsertComparer)
                 table.insert(results, insertPosition, source)

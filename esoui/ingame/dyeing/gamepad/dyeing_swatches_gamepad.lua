@@ -35,7 +35,6 @@ function ZO_Dyeing_Swatches_Gamepad:Initialize(owner, control, sharedHighlight, 
     self.selectedDyeCol = 1
     self.swatchesByPosition = {}
     self.positionByDyeId = {}
-    self.unlockedDyeIds = {}
 
     self.verticalMovementController = verticalController or ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
     self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
@@ -231,10 +230,6 @@ function ZO_Dyeing_Swatches_Gamepad:SwitchToDyeingWithDyeId(dyeId)
     end
 end
 
-function ZO_Dyeing_Swatches_Gamepad:DoesDyeIdExistInPlayerDyes(dyeId)
-    return self.positionByDyeId[dyeId] ~= nil
-end
-
 function ZO_Dyeing_Swatches_Gamepad:GetSelectedDyeId()
     local selectedSwatch = self:GetSelectedSwatch()
     if not selectedSwatch then
@@ -254,17 +249,6 @@ function ZO_Dyeing_Swatches_Gamepad:GetSelectedSwatch()
     return selectedRow[self.selectedDyeCol]
 end
 
-function ZO_Dyeing_Swatches_Gamepad:GetNumUnlockedDyes()
-    return #self.unlockedDyeIds
-end
-
-function ZO_Dyeing_Swatches_Gamepad:GetRandomUnlockedDyeId()
-    if #self.unlockedDyeIds > 0 then
-        return self.unlockedDyeIds[zo_random(1, #self.unlockedDyeIds)]
-    end
-    return nil
-end
-
 function ZO_Dyeing_Swatches_Gamepad:RefreshDyeLayout()
     if self.control:IsHidden() then
         self.dirty = true
@@ -278,7 +262,7 @@ function ZO_Dyeing_Swatches_Gamepad:RefreshDyeLayout_Internal()
 
     local selectedDyeId = self:GetSelectedDyeId()
     local previousRowIndex = self.selectedDyeRow
-    self.swatchesByPosition, self.positionByDyeId, self.unlockedDyeIds = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
+    self.swatchesByPosition, self.positionByDyeId = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS_GAMEPAD, self.control)
 
     local selectedRowCol = self.positionByDyeId[selectedDyeId]
     if selectedRowCol then

@@ -10,41 +10,23 @@ local skillTypeToSound =
     [SKILL_TYPE_TRADESKILL] = SOUNDS.SKILL_TYPE_TRADESKILL,
 }
 
-local ALERT_TEXTURES =
-{
-    [ZO_SKILLS_MORPH_STATE] = {normal = "EsoUI/Art/Progression/morph_up.dds", mouseDown = "EsoUI/Art/Progression/morph_down.dds", mouseover = "EsoUI/Art/Progression/morph_over.dds"},
-    [ZO_SKILLS_PURCHASE_STATE] = {normal = "EsoUI/Art/Progression/addPoints_up.dds", mouseDown = "EsoUI/Art/Progression/addPoints_down.dds", mouseover = "EsoUI/Art/Progression/addPoints_over.dds"},
-}
-
 -- Skill Manager
 --------------------
 
 local SKILL_ABILITY_DATA = 1
 local SKILL_HEADER_DATA = 2
 
-ZO_SkillsManager = ZO_Object:Subclass()
-
-local function SetAbilityButtonTextures(button, passive)
-    if passive then
-        button:SetNormalTexture("EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds")
-        button:SetPressedTexture("EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds")
-        button:SetMouseOverTexture(nil)
-        button:SetDisabledTexture("EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds")
-    else
-        button:SetNormalTexture("EsoUI/Art/ActionBar/abilityFrame64_up.dds")
-        button:SetPressedTexture("EsoUI/Art/ActionBar/abilityFrame64_down.dds")
-        button:SetMouseOverTexture("EsoUI/Art/ActionBar/actionBar_mouseOver.dds")
-        button:SetDisabledTexture("EsoUI/Art/ActionBar/abilityFrame64_up.dds")
-    end
-end
+ZO_SkillsManager = ZO_CallbackObject:Subclass()
 
 function ZO_SkillsManager:New(...)
-    local manager = ZO_Object.New(self)
+    local manager = ZO_CallbackObject.New(self)
     manager:Initialize(...)
     return manager
 end
 
 function ZO_SkillsManager:Initialize(container)
+    SKILLS_FRAGMENT = ZO_FadeSceneFragment:New(container)
+
     self.displayedAbilityProgressions = {}
 
     self.container = container
@@ -52,9 +34,15 @@ function ZO_SkillsManager:Initialize(container)
     self.skyShards = 0
     self.availablePointsLabel = GetControl(container, "AvailablePoints")
     self.skyShardsLabel = GetControl(container, "SkyShards")
+    self.abilityList = GetControl(container, "AbilityList")
+    self.advisedOverlayControl = container:GetNamedChild("SkillLineAdvisedOverlay")
+    self.skillLineUnlockTitleControl = self.advisedOverlayControl:GetNamedChild("SkillLineUnlockTitle")
+    self.skillLineUnlockTextControl = self.advisedOverlayControl:GetNamedChild("SkillLineUnlockText")
+    self.showAdvisorInAdvancedMode = false
 
     self.navigationContainer = GetControl(container, "NavigationContainer")
     self.navigationTree = ZO_Tree:New(self.navigationContainer:GetNamedChild("ScrollChild"), 74, -10, 300)
+    self.skillTypeToNode = {}
 
     local function TreeHeaderSetup(node, control, skillType, open)
         control.skillType = skillType
@@ -79,12 +67,12 @@ function ZO_SkillsManager:Initialize(container)
     self.navigationTree:AddTemplate("ZO_SkillIconHeader", TreeHeaderSetup, nil, nil, nil, 0)
 
     local function TreeEntrySetup(node, control, data, open)
-        local name = GetSkillLineInfo(data.skillType, data.skillLineIndex)
+        local name, _, _, _, advised = GetSkillLineInfo(data.skillType, data.skillLineIndex)
         control:SetText(zo_strformat(SI_SKILLS_TREE_NAME_FORMAT, name))
 
         control.statusIcon:ClearIcons()
 
-        if NEW_SKILL_CALLOUTS:IsSkillLineNew(data.skillType, data.skillLineIndex) then
+        if NEW_SKILL_CALLOUTS:IsSkillLineNew(data.skillType, data.skillLineIndex) or advised then
             control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
 
@@ -112,18 +100,17 @@ function ZO_SkillsManager:Initialize(container)
 
     self.skillInfo = GetControl(container, "SkillInfo")
 
-    self.abilityList = GetControl(container, "AbilityList")
     ZO_ScrollList_Initialize(self.abilityList)
-    ZO_ScrollList_AddDataType(self.abilityList, SKILL_ABILITY_DATA, "ZO_Skills_Ability", 70, function(control, data) self:SetupAbilityEntry(control, data) end)
+    ZO_ScrollList_AddDataType(self.abilityList, SKILL_ABILITY_DATA, "ZO_Skills_Ability", 70, function(control, data) self:SetupAbilityEntry(control, data, ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE) end)
     ZO_ScrollList_AddDataType(self.abilityList, SKILL_HEADER_DATA, "ZO_Skills_AbilityTypeHeader", 32, function(control, data) self:SetupHeaderEntry(control, data) end)
     ZO_ScrollList_AddResizeOnScreenResize(self.abilityList)
 
     self.warning = GetControl(container, "Warning")
 
     -- initialize dialogs
-    self:InitializeMorphDialog()
-    self:InitializeConfirmDialog()
-    self:InitializeUpgradeDialog()
+    ZO_Skills_InitializeKeyboardMorphDialog()
+    ZO_Skills_InitializeKeyboardConfirmDialog()
+    ZO_Skills_InitializeKeyboardUpgradeDialog()
 
     -- event registration
     local function Refresh()
@@ -160,6 +147,13 @@ function ZO_SkillsManager:Initialize(container)
     container:RegisterForEvent(EVENT_PLAYER_ACTIVATED, Refresh)
     container:RegisterForEvent(EVENT_ABILITY_PROGRESSION_RANK_UPDATE, OnAbilityProgressionUpdate)
     container:RegisterForEvent(EVENT_ABILITY_PROGRESSION_XP_UPDATE, OnAbilityProgressionUpdate)
+    container:RegisterForEvent(EVENT_SKILL_BUILD_SELECTION_UPDATED, function(eventId, ...) 
+        self.showAdvisorInAdvancedMode = false
+        self:UpdateSkillsAdvisorVisibility() 
+    end)
+    container:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, function()
+        TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK)
+    end)
 
     -- callbacks
     local function OnNewStatusChanged()
@@ -169,307 +163,315 @@ function ZO_SkillsManager:Initialize(container)
 
     NEW_SKILL_CALLOUTS:RegisterCallback("OnSkillLineNewStatusChanged", OnNewStatusChanged)
     NEW_SKILL_CALLOUTS:RegisterCallback("OnAbilityUpdatedStatusChanged", OnNewStatusChanged)
+
+    do
+    --Weapon Swap Tutorial Setup
+        local tutorialAnchor = ZO_Anchor:New(RIGHT, ZO_ActionBar1WeaponSwap, LEFT, -10, 0)
+        TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK, self.container, SKILLS_FRAGMENT, tutorialAnchor)
+    end
+
+    self:InitializeKeybindDescriptors()
 end
 
-function ZO_SkillsManager:InitializeMorphDialog()
-    local dialogControl = GetControl("ZO_SkillsMorphDialog")
-    dialogControl.desc = GetControl(dialogControl, "Description")
+function ZO_SkillsManager:UpdateSkillsAdvisorVisibility()
+    if not IsInGamepadPreferredMode() then
+        if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode then
+            SCENE_MANAGER:RemoveFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:AddFragment(FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:AddFragment(SKILLS_ADVISOR_FRAGMENT)
+        else
+            SCENE_MANAGER:RemoveFragment(SKILLS_ADVISOR_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+        end
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
 
-    dialogControl.baseAbility = GetControl(dialogControl, "BaseAbility")
-    dialogControl.baseAbility.icon = GetControl(dialogControl.baseAbility, "Icon")
+function ZO_SkillsManager:IsSkillsAdvisorShown()
+    return not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode
+end 
 
-    dialogControl.morphAbility1 = GetControl(dialogControl, "MorphAbility1")
-    dialogControl.morphAbility1.icon = GetControl(dialogControl.morphAbility1, "Icon")
-    dialogControl.morphAbility1.selectedCallout = GetControl(dialogControl.morphAbility1, "SelectedCallout")
-    dialogControl.morphAbility1.morph = 1
-    dialogControl.morphAbility1.rank = 1
+function ZO_SkillsManager:InitializeKeybindDescriptors()
+    self.keybindStripDescriptor =
+    {
+		alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
-    dialogControl.morphAbility2 = GetControl(dialogControl, "MorphAbility2")
-    dialogControl.morphAbility2.icon = GetControl(dialogControl.morphAbility2, "Icon")
-    dialogControl.morphAbility2.selectedCallout = GetControl(dialogControl.morphAbility2, "SelectedCallout")
-    dialogControl.morphAbility2.morph = 2
-    dialogControl.morphAbility2.rank = 1
+		{
+			name = function()
+                if self.showAdvisorInAdvancedMode then
+                    return GetString(SI_CLOSE_SKILLS_ADVISOR_KEYBIND)
+                else
+                    return GetString(SI_OPEN_SKILLS_ADVISOR_KEYBIND)
+                end
+            end,
 
-    dialogControl.confirmButton = GetControl(dialogControl, "Confirm")
+			keybind = "UI_SHORTCUT_QUATERNARY",
 
-    local function SetupMorphAbilityConfirmDialog(dialog, abilityControl)
-        if abilityControl.ability.atMorph then
-            local ability = abilityControl.ability
-            local slot = abilityControl.ability.slot
+			callback = function()
+                self.showAdvisorInAdvancedMode = not self.showAdvisorInAdvancedMode
+                self:UpdateSkillsAdvisorVisibility()
+			end,
 
-            dialog.desc:SetText(zo_strformat(SI_SKILLS_SELECT_MORPH, ability.name))
+			visible = function()
+				return ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected()
+			end
+		},
+    }
+end
 
-            local baseAbility = dialog.baseAbility
-            baseAbility.skillType = abilityControl.skillType
-            baseAbility.lineIndex = abilityControl.lineIndex
-            baseAbility.index = abilityControl.index
-            baseAbility.icon:SetTexture(slot.iconFile)
+function ZO_SkillsManager:StopSelectedSkillBuildSkillAnimations()
+    if self.selectedSkillBuildIconTimeline and self.selectedSkillBuildIconTimeline:IsPlaying() then
+        self.selectedSkillBuildIconTimeline:Stop()
+    end
 
-            local morphAbility1 = dialog.morphAbility1
-            local _, morph1Icon = GetAbilityProgressionAbilityInfo(ability.progressionIndex, morphAbility1.morph, morphAbility1.rank)
-            morphAbility1.progressionIndex = ability.progressionIndex
-            morphAbility1.icon:SetTexture(morph1Icon)
-            morphAbility1.selectedCallout:SetHidden(true)
-            ZO_ActionSlot_SetUnusable(morphAbility1.icon, false)
+    if self.selectedSkillBuildIconLoopTimeline and self.selectedSkillBuildIconLoopTimeline:IsPlaying() then
+        self.selectedSkillBuildIconLoopTimeline:Stop()
+    end
 
-            local morphAbility2 = dialog.morphAbility2
-            local _, morph2Icon = GetAbilityProgressionAbilityInfo(ability.progressionIndex, morphAbility2.morph, morphAbility2.rank)
-            morphAbility2.progressionIndex = ability.progressionIndex
-            morphAbility2.icon:SetTexture(morph2Icon)
-            morphAbility2.selectedCallout:SetHidden(true)
-            ZO_ActionSlot_SetUnusable(morphAbility2.icon, false)
+    if self.selectedSkillBuildAlertTimeline and self.selectedSkillBuildAlertTimeline:IsPlaying() then
+        self.selectedSkillBuildAlertTimeline:Stop()
+    end
 
-            dialog.confirmButton:SetState(BSTATE_DISABLED)
+    if self.selectedSkillBuildAlertLoopTimeline and self.selectedSkillBuildAlertLoopTimeline:IsPlaying() then
+        self.selectedSkillBuildAlertLoopTimeline:Stop()
+    end
+end
 
-            dialog.chosenMorphProgressionIndex = nil
-            dialog.chosenMorph = nil
+function ZO_SkillsManager:PlaySelectedSkillBuildSkillAnimations(abilityControl)
+    if abilityControl then
+        -- If animation if currently playing then stop it before starting new animation
+        self:StopSelectedSkillBuildSkillAnimations()
+
+        if not self.selectedSkillBuildIconTimeline then 
+            self.selectedSkillBuildIconTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("SkillBuildSelectionIconAnim")
+        end
+
+        if not self.selectedSkillBuildIconLoopTimeline then 
+            self.selectedSkillBuildIconLoopTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("SkillBuildSelectionIconLoopAnim")
+        end
+
+        local abilitySlotControl = abilityControl:GetNamedChild("Slot")
+        local abilitySlotAnimTexture = abilitySlotControl:GetNamedChild("SelectedSkillBuildIconAnim")
+        local iconAnimationObject = self.selectedSkillBuildIconTimeline:GetFirstAnimation()
+        local iconAnimationLoopObject = self.selectedSkillBuildIconLoopTimeline:GetFirstAnimation()
+        local skillsObject = self
+        local textureFile = ""
+        local loopTextureFile = ""
+
+        if abilityControl.passive then
+            if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, abilityControl.skillBuildMorphChoice, abilityControl.skillBuildRankIndex) then
+                textureFile = "EsoUI/Art/SkillsAdvisor/animation_circle_1024x64_FLASH.dds"
+                loopTextureFile = "EsoUI/Art/SkillsAdvisor/animation_circle_4096x64.dds"
+            else
+                textureFile = "EsoUI/Art/SkillsAdvisor/animation_circleSingle_1024x64_FLASH.dds"
+                loopTextureFile = "EsoUI/Art/SkillsAdvisor/animation_circleSingle_4096x64.dds"
+            end
+        else
+            if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, abilityControl.skillBuildMorphChoice, abilityControl.skillBuildRankIndex) then
+                textureFile = "EsoUI/Art/SkillsAdvisor/animation_square_1024x64_FLASH.dds"
+                loopTextureFile = "EsoUI/Art/SkillsAdvisor/animation_square_4096x64.dds"
+            else
+                textureFile = "EsoUI/Art/SkillsAdvisor/animation_squareSingle_1024x64_FLASH.dds"
+                loopTextureFile = "EsoUI/Art/SkillsAdvisor/animation_squareSingle_4096x64.dds"
+            end
+        end
+        iconAnimationObject:SetAnimatedControl(abilitySlotAnimTexture)
+        iconAnimationLoopObject:SetAnimatedControl(abilitySlotAnimTexture)
+
+        local function OnStopIcon(timeline, completedPlaying)
+            abilitySlotAnimTexture:SetTexture(loopTextureFile)
+            if completedPlaying then 
+                skillsObject.selectedSkillBuildIconLoopTimeline:PlayFromStart()
+            else
+                abilitySlotAnimTexture:SetHidden(true)
+            end
+        end
+        self.selectedSkillBuildIconTimeline:SetHandler("OnStop", OnStopIcon)
+
+        local function OnLoopStopIcon()
+            abilitySlotAnimTexture:SetHidden(true)
+        end
+        self.selectedSkillBuildIconLoopTimeline:SetHandler("OnStop", OnLoopStopIcon)
+
+        abilitySlotAnimTexture:SetTexture(textureFile)
+        abilitySlotAnimTexture:SetHidden(false)
+        self.selectedSkillBuildIconTimeline:PlayFromStart()
+
+        -- Alert Animation Setup
+        if abilityControl.alert.iconStatus ~= ZO_SKILL_ABILITY_ALERT_ICON_NONE then
+            if not self.selectedSkillBuildAlertTimeline then 
+                self.selectedSkillBuildAlertTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("SkillBuildSelectionAlertAnim")
+            end
+
+            if not self.selectedSkillBuildAlertLoopTimeline then 
+                self.selectedSkillBuildAlertLoopTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("SkillBuildSelectionAlertLoopAnim")
+            end
+
+            local alertAnimationObject = self.selectedSkillBuildAlertTimeline:GetFirstAnimation()
+            local alertAnimationLoopObject = self.selectedSkillBuildAlertLoopTimeline:GetFirstAnimation()
+            local abilityAlertAnimTexture = abilityControl:GetNamedChild("SelectedSkillBuildAlertAnim")
+            local showAlertAnimation = true
+            local alertTexture = ""
+            local alertTextureLoop = ""
+            if abilityControl.alert.iconStatus == ZO_SKILL_ABILITY_ALERT_ICON_ADD then
+                alertTexture = "EsoUI/Art/SkillsAdvisor/animation_add_1024x64_FLASH.dds"
+                alertTextureLoop = "EsoUI/Art/SkillsAdvisor/animation_add_4096x64.dds"
+            elseif abilityControl.alert.iconStatus == ZO_SKILL_ABILITY_ALERT_ICON_MORPH then
+                alertTexture = "EsoUI/Art/SkillsAdvisor/animation_morph_1024x64_FLASH.dds"
+                alertTextureLoop = "EsoUI/Art/SkillsAdvisor/animation_morph_4096x64.dds"
+            else
+                showAlertAnimation = false
+            end
+            alertAnimationObject:SetAnimatedControl(abilityAlertAnimTexture)
+            alertAnimationLoopObject:SetAnimatedControl(abilityAlertAnimTexture)
+                
+            local function OnStopAlert(timeline, completedPlaying)
+                abilityAlertAnimTexture:SetTexture(alertTextureLoop)
+                if completedPlaying then
+                    skillsObject.selectedSkillBuildAlertLoopTimeline:PlayFromStart()
+                else
+                    abilityAlertAnimTexture:SetHidden(true)
+                end
+            end
+            self.selectedSkillBuildAlertTimeline:SetHandler("OnStop", OnStopAlert)
+
+            local function OnLoopStopAlert()
+                abilityAlertAnimTexture:SetHidden(true)
+            end
+            self.selectedSkillBuildAlertLoopTimeline:SetHandler("OnStop", OnLoopStopAlert)
+
+            if showAlertAnimation then
+                abilityAlertAnimTexture:SetTexture(alertTexture)
+                abilityAlertAnimTexture:SetHidden(false)
+                self.selectedSkillBuildAlertTimeline:PlayFromStart()
+            end
+        end
+    end
+end
+
+function ZO_SkillsManager:OnSkillLineSet(skillType, skillIndex, abilityIndex)
+    -- Set navigationTree to category containing skill and refresh abilityList
+    local selectedData = self.navigationTree:GetSelectedData()
+    if skillType ~= selectedData.skillType or skillIndex ~= selectedData.skillLineIndex then
+        if self.skillTypeToNode[skillType] and self.skillTypeToNode[skillType][skillIndex] then
+            self:StopSelectedSkillBuildSkillAnimations()
+            self.navigationTree:SelectNode(self.skillTypeToNode[skillType][skillIndex])
+        else
+            -- SkillLine is not known or yet advised
+            self.selectAbilityData = 
+            {
+                skillType = skillType,
+                skillIndex = skillIndex,
+                abilityIndex = abilityIndex,
+            }
+            local ADVISE_SKILL_LINE = true
+            SetAdviseSkillLine(skillType, skillIndex, ADVISE_SKILL_LINE)
+            return
         end
     end
 
-    ZO_Dialogs_RegisterCustomDialog("MORPH_ABILITY_CONFIRM",
-    {
-        customControl = dialogControl,
-        setup = SetupMorphAbilityConfirmDialog,
-        title =
-        {
-            text = SI_SKILLS_MORPH_ABILITY,
-        },
-        buttons =
-        {
-            [1] =
-            {
-                control = GetControl(dialogControl, "Confirm"),
-                text =  SI_SKILLS_MORPH_CONFIRM,
-                callback =  function(dialog)
-                                if dialog.chosenMorphProgressionIndex and dialog.chosenMorph then
-                                    ZO_Skills_MorphAbility(dialog.chosenMorphProgressionIndex, dialog.chosenMorph)
-                                end
-                            end,
-            },
-        
-            [2] =
-            {
-                control =   GetControl(dialogControl, "Cancel"),
-                text =      SI_CANCEL,
-            }
-        }
-    })
-
-    self.morphDialog = dialogControl
+    self:ScrollToSkillLineAbility(skillType, skillIndex, abilityIndex)
 end
 
-function ZO_SkillsManager:InitializeConfirmDialog()
-    local confirmDialogControl = GetControl("ZO_SkillsConfirmDialog")
-    confirmDialogControl.abilityName = GetControl(confirmDialogControl, "AbilityName")
-    confirmDialogControl.ability = GetControl(confirmDialogControl, "Ability")
-    confirmDialogControl.ability.icon = GetControl(confirmDialogControl.ability, "Icon")
-
-    local function SetupPurchaseAbilityConfirmDialog(dialog, abilityControl)
-        local ability = abilityControl.ability
-        local slot = abilityControl.ability.slot
-        local dialogAbility = dialog.ability
-
-        SetAbilityButtonTextures(dialogAbility, ability.passive)
-
-        dialog.abilityName:SetText(ability.plainName)
-
-        dialogAbility.skillType = abilityControl.skillType
-        dialogAbility.lineIndex = abilityControl.lineIndex
-        dialogAbility.index = abilityControl.index
-        dialogAbility.icon:SetTexture(slot.iconFile)
-
-        dialog.chosenSkillType = abilityControl.skillType
-        dialog.chosenLineIndex = abilityControl.lineIndex
-        dialog.chosenAbilityIndex = abilityControl.index
+function ZO_SkillsManager:ScrollToSkillLineAbility(skillType, skillIndex, abilityIndex)
+    -- Get DataIndex of set ability in abilityList and scroll that index into view
+    local dataIndex = nil
+    local dataValue = nil
+    for index, data in ipairs(self.abilityList.data) do
+        if data.data.skillType == skillType and data.data.lineIndex == skillIndex and data.data.abilityIndex == abilityIndex then
+            dataIndex = index
+            dataValue = data.data
+            break
+        end
     end
 
-    ZO_Dialogs_RegisterCustomDialog("PURCHASE_ABILITY_CONFIRM",
-    {
-        customControl = confirmDialogControl,
-        setup = SetupPurchaseAbilityConfirmDialog,
-        title =
-        {
-            text = SI_SKILLS_CONFIRM_PURCHASE_ABILITY,
-        },
-        buttons =
-        {
-            [1] =
-            {
-                control =   GetControl(confirmDialogControl, "Confirm"),
-                text =      SI_SKILLS_UNLOCK_CONFIRM,
-                callback =  function(dialog)
-                                if dialog.chosenSkillType and dialog.chosenLineIndex and dialog.chosenAbilityIndex then
-                                    ZO_Skills_PurchaseAbility(dialog.chosenSkillType, dialog.chosenLineIndex, dialog.chosenAbilityIndex)
-                                end
-                            end,
-            },
-        
-            [2] =
-            {
-                control =   GetControl(confirmDialogControl, "Cancel"),
-                text =      SI_CANCEL,
-            }
-        }
-    })
-
-    self.confirmDialog = confirmDialogControl
-end
-
-function ZO_SkillsManager:InitializeUpgradeDialog()
-    local upgradeDialogControl = GetControl("ZO_SkillsUpgradeDialog")
-    upgradeDialogControl.desc = GetControl(upgradeDialogControl, "Description")
-
-    upgradeDialogControl.baseAbility = GetControl(upgradeDialogControl, "BaseAbility")
-    upgradeDialogControl.baseAbility.icon = GetControl(upgradeDialogControl.baseAbility, "Icon")
-
-    upgradeDialogControl.upgradeAbility = GetControl(upgradeDialogControl, "UpgradeAbility")
-    upgradeDialogControl.upgradeAbility.icon = GetControl(upgradeDialogControl.upgradeAbility, "Icon")
-
-    local function SetupUpgradeAbilityDialog(dialog, abilityControl)
-        local ability = abilityControl.ability
-        local slot = abilityControl.ability.slot
-
-        dialog.desc:SetText(zo_strformat(SI_SKILLS_UPGRADE_DESCRIPTION, ability.plainName))
-
-        local baseAbility = dialog.baseAbility
-        local upgradeAbility = dialog.upgradeAbility
-
-        SetAbilityButtonTextures(baseAbility, ability.passive)
-        SetAbilityButtonTextures(upgradeAbility, ability.passive)
-
-        baseAbility.skillType = abilityControl.skillType
-        baseAbility.lineIndex = abilityControl.lineIndex
-        baseAbility.index = abilityControl.index
-        baseAbility.icon:SetTexture(slot.iconFile)
-
-        local _, upgradeIcon = GetSkillAbilityNextUpgradeInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index)
-        upgradeAbility.skillType = abilityControl.skillType
-        upgradeAbility.lineIndex = abilityControl.lineIndex
-        upgradeAbility.index = abilityControl.index
-        upgradeAbility.icon:SetTexture(upgradeIcon)
-
-        dialog.chosenSkillType = abilityControl.skillType
-        dialog.chosenLineIndex = abilityControl.lineIndex
-        dialog.chosenAbilityIndex = abilityControl.index
+    local function PlaySkillBuildAnimation(successfulAnimateInView)
+        if successfulAnimateInView then
+            -- Play Glow Animation on selected skill
+            local abilityControl = ZO_ScrollList_GetDataControl(self.abilityList, dataValue)
+            self:PlaySelectedSkillBuildSkillAnimations(abilityControl)
+            self:FireCallbacks("OnReadyToHandleClickAction")
+        end
     end
 
-    ZO_Dialogs_RegisterCustomDialog("UPGRADE_ABILITY_CONFIRM",
-    {
-        customControl = upgradeDialogControl,
-        setup = SetupUpgradeAbilityDialog,
-        title =
-        {
-            text = SI_SKILLS_UPGRADE_ABILITY,
-        },
-        buttons =
-        {
-            [1] =
-            {
-                control = GetControl(upgradeDialogControl, "Confirm"),
-                text =  SI_SKILLS_UPGRADE_CONFIRM,
-                callback =  function(dialog)
-                                if dialog.chosenSkillType and dialog.chosenLineIndex and dialog.chosenAbilityIndex then
-                                    ZO_Skills_UpgradeAbility(dialog.chosenSkillType, dialog.chosenLineIndex, dialog.chosenAbilityIndex)
-                                end
-                            end,
-            },
-            [2] =
-            {
-                control =   GetControl(upgradeDialogControl, "Cancel"),
-                text =      SI_CANCEL,
-            }
-        }
-    })
+    if dataIndex then
+        ZO_ScrollList_ScrollDataToCenter(self.abilityList, dataIndex, PlaySkillBuildAnimation)
+    end
 
-    self.upgradeDialog = upgradeDialogControl
+    self:RefreshSkillLineDisplay(skillType, skillIndex)
 end
 
-function ZO_SkillsManager:SetupAbilityEntry(ability, data)
-    SetAbilityButtonTextures(ability.slot, data.passive)
+function ZO_SkillsManager:SetupAbilityEntry(ability, data, displayView)
+    if not displayView then
+        displayView = ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE
+    end
 
     ability.name = data.name
     ability.plainName = data.plainName
     ability.nameLabel:SetText(data.name)
+    ability.skillType = data.skillType
+    ability.lineIndex = data.lineIndex
+    ability.index = data.abilityIndex
+    ability.skillBuildRankIndex = data.skillBuildRankIndex
+    ability.skillBuildMorphChoice = data.skillBuildMorphChoice
+
     ability.alert.skillType = data.skillType
     ability.alert.lineIndex = data.lineIndex
     ability.alert.index = data.abilityIndex
+    ability.alert.iconStatus = ZO_SKILL_ABILITY_ALERT_ICON_NONE
     ability.purchased = data.purchased
     ability.passive = data.passive
     ability.ultimate = data.ultimate
     local isTheSame = ability.progressionIndex == data.progressionIndex
     ability.progressionIndex = data.progressionIndex
+    ability.upgradeAvailable = data.nextUpgradeEarnedRank and data.lineRank >= data.nextUpgradeEarnedRank
+    ability.atMorph = nil
+    ability.morph = nil
 
     local slot = ability.slot
 
     slot.skillType = data.skillType
     slot.lineIndex = data.lineIndex
     slot.index = data.abilityIndex
+    slot.abilityId = data.abilityId
+    slot.skillBuildRankIndex = data.skillBuildRankIndex
+    slot.skillBuildMorphChoice = data.skillBuildMorphChoice
     slot.icon:SetTexture(data.icon)
     slot.iconFile = data.icon
+
+    ZO_Skills_SetKeyboardAbilityButtonTextures(ability.slot, data.passive)
 
     ability:ClearAnchors()
 
     if data.progressionIndex then
-        ability.xpBar:SetHidden(false)
-
         local lastXP, nextXP, currentXP, atMorph = GetAbilityProgressionXPInfo(data.progressionIndex)
         local _, morph, rank = GetAbilityProgressionInfo(data.progressionIndex)
-        local wasAbilityRespecced = ability.morph and ability.morph > morph or false
-
-        ZO_SkillInfoXPBar_SetValue(ability.xpBar, rank, lastXP, nextXP, currentXP, not isTheSame or wasAbilityRespecced)
         ability.atMorph = atMorph
         ability.morph = morph
-        ability.nameLabel:SetAnchor(LEFT, ability.slot, RIGHT, 10, -10)
+
+        if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
+            ability.xpBar:SetHidden(false)
+            local wasAbilityRespecced = ability.morph and ability.morph > morph or false
+            ZO_SkillInfoXPBar_SetValue(ability.xpBar, rank, lastXP, nextXP, currentXP, not isTheSame or wasAbilityRespecced)
+        else
+            ZO_SkillInfoXPBar_SetValue(ability.xpBar, nil, 0, 1, 0, FORCE_INIT_SMOOTH_STATUS_BAR)
+        end
     else
         ability.xpBar:SetHidden(true)
-        ZO_SkillInfoXPBar_SetValue(ability.xpBar, nil, 0, 1, 0, FORCE_INIT_SMOOTH_STATUS_BAR)
-        ability.atMorph = false
+    end
+
+    if displayView == ZO_SKILL_ABILITY_DISPLAY_VIEW then
+        ability.xpBar:SetHidden(true)
         ability.nameLabel:SetAnchor(LEFT, ability.slot, RIGHT, 10, 0)
-    end
-
-    ability.upgradeAvailable = data.nextUpgradeEarnedRank and data.lineRank >= data.nextUpgradeEarnedRank
-    
-    if ability.purchased then
-        slot:SetEnabled(true)
-
-        ZO_ActionSlot_SetUnusable(slot.icon, false)
-
-        ability.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
-
-        if ability.atMorph and self.availablePoints > 0 then
-            ability.alert:SetHidden(false)
-            ability.lock:SetHidden(true)
-            ZO_Skills_SetAlertButtonTextures(ability.alert, ALERT_TEXTURES[ZO_SKILLS_MORPH_STATE])
-        elseif ability.upgradeAvailable and self.availablePoints > 0 then
-            ability.alert:SetHidden(false)
-            ability.lock:SetHidden(true)
-            ZO_Skills_SetAlertButtonTextures(ability.alert, ALERT_TEXTURES[ZO_SKILLS_PURCHASE_STATE])
-        else
-            ability.alert:SetHidden(true)
-            ability.lock:SetHidden(true)
-        end
+        ability.slot:SetMouseOverTexture(nil)
     else
-        slot:SetEnabled(false)
-        ZO_ActionSlot_SetUnusable(slot.icon, true)
-
-        if data.lineRank >= data.earnedRank then
-            ability.nameLabel:SetColor(UNPURCHASED_COLOR:UnpackRGBA())
-
-            ability.lock:SetHidden(true)
-
-            if self.availablePoints > 0 then
-                ability.alert:SetHidden(false)
-                ZO_Skills_SetAlertButtonTextures(ability.alert, ALERT_TEXTURES[ZO_SKILLS_PURCHASE_STATE])
-            else
-                ability.alert:SetHidden(true)
-            end
-        else
-            ability.nameLabel:SetColor(LOCKED_COLOR:UnpackRGBA())
-
-            ability.alert:SetHidden(true)
-            ability.lock:SetHidden(false)
-        end
+        local offsetY = data.progressionIndex and -10 or 0
+        ability.nameLabel:SetAnchor(LEFT, ability.slot, RIGHT, 10, offsetY)
     end
+
+    local morphControl = ability:GetNamedChild("Morph")
+    ZO_Skills_SetUpAbilityEntry(data.skillType, data.lineIndex, data.abilityIndex, data.skillBuildMorphChoice, data.skillBuildRankIndex, slot.icon, ability.nameLabel, ability.alert, ability.lock, morphControl, displayView, ZO_SKILLS_KEYBOARD)
 end
 
 function ZO_SkillsManager:SetupHeaderEntry(header, data)
@@ -497,14 +499,20 @@ function ZO_SkillsManager:RefreshSkillInfo()
     local skillType = self:GetSelectedSkillType()
     local skillIndex = self:GetSelectedSkillLineIndex()
 
-    local lineName, lineRank = GetSkillLineInfo(skillType, skillIndex)
+    local lineName, lineRank, _, _, advised = GetSkillLineInfo(skillType, skillIndex)
     local lastXP, nextXP, currentXP = GetSkillLineXPInfo(skillType, skillIndex)
 
     self.skillInfo.name:SetText(zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, lineName))
     local isTheSame = self.skillInfo.xpBar:GetControl().skillType == skillType and self.skillInfo.xpBar:GetControl().skillIndex == skillIndex
     self.skillInfo.xpBar:GetControl().skillType = skillType
     self.skillInfo.xpBar:GetControl().skillIndex = skillIndex
-    ZO_SkillInfoXPBar_SetValue(self.skillInfo.xpBar, lineRank, lastXP, nextXP, currentXP, not isTheSame)
+    if advised then
+        local RANK_NOT_SHOWN = 1
+        local CURRENT_XP_NOT_SHOWN = 0  
+        ZO_SkillInfoXPBar_SetValue(self.skillInfo.xpBar, RANK_NOT_SHOWN, lastXP, nextXP, CURRENT_XP_NOT_SHOWN, not isTheSame)
+    else
+        ZO_SkillInfoXPBar_SetValue(self.skillInfo.xpBar, lineRank, lastXP, nextXP, currentXP, not isTheSame)
+    end
 
     self.availablePoints = GetAvailableSkillPoints()
     self.availablePointsLabel:SetText(zo_strformat(SI_SKILLS_POINTS_TO_SPEND, self.availablePoints))
@@ -518,6 +526,8 @@ function ZO_SkillsManager:RefreshSkillInfo()
 end
 
 function ZO_SkillsManager:RefreshList()
+    self:StopSelectedSkillBuildSkillAnimations()
+
     if self.container:IsHidden() then
         self.dirty = true
         return
@@ -590,6 +600,22 @@ function ZO_SkillsManager:RefreshList()
     end
 
     ZO_ScrollList_Commit(self.abilityList)
+
+    self:RefreshSkillLineDisplay(skillType, skillIndex)
+end
+
+function ZO_SkillsManager:RefreshSkillLineDisplay(skillType, skillIndex)
+    local name, _, discovered, _, advised, unlockText = GetSkillLineInfo(skillType, skillIndex)
+    if not discovered and advised then
+        self:StopSelectedSkillBuildSkillAnimations()
+        self.skillLineUnlockTitleControl:SetText(zo_strformat(SI_SKILLS_ADVISOR_SKILL_NOT_DISCOVERED_NAME, name))
+        self.skillLineUnlockTextControl:SetText(zo_strformat(SI_SKILLS_ADVISOR_SKILL_NOT_DISCOVERED_DESCRIPTION, unlockText))
+        self.advisedOverlayControl:SetHidden(false)
+        self.abilityList:SetAlpha(0.1)
+    else
+        self.advisedOverlayControl:SetHidden(true)
+        self.abilityList:SetAlpha(1)
+    end 
 end
 
 function ZO_SkillsManager:GetSelectedSkillType()
@@ -620,16 +646,22 @@ function ZO_SkillsManager:Refresh()
     end
 
     self.navigationTree:Reset()
+    self.skillTypeToNode = {}
     for skillType = 1, GetNumSkillTypes() do
         local numSkillLines = GetNumSkillLines(skillType)
         local parent
         for skillLineIndex = 1, numSkillLines do
-            local _, _, discovered = GetSkillLineInfo(skillType, skillLineIndex)
-            if discovered then
+            local _, _, discovered, _, advised = GetSkillLineInfo(skillType, skillLineIndex)
+            if discovered or advised then
                 if not parent then
                     parent = self.navigationTree:AddNode("ZO_SkillIconHeader", skillType, nil, skillTypeToSound[skillType])
                 end
-                self.navigationTree:AddNode("ZO_SkillsNavigationEntry", { skillType = skillType, skillLineIndex = skillLineIndex }, parent, SOUNDS.SKILL_LINE_SELECT)
+                local node = self.navigationTree:AddNode("ZO_SkillsNavigationEntry", { skillType = skillType, skillLineIndex = skillLineIndex }, parent, SOUNDS.SKILL_LINE_SELECT)
+            
+                if not self.skillTypeToNode[skillType] then
+                    self.skillTypeToNode[skillType] = {}
+                end
+                self.skillTypeToNode[skillType][skillLineIndex] = node
             end
         end
     end
@@ -638,12 +670,37 @@ function ZO_SkillsManager:Refresh()
 
     self:RefreshSkillInfo()
     self:RefreshList()
+
+    if self.selectAbilityData ~= nil then
+        self.navigationTree:SelectNode(self.skillTypeToNode[self.selectAbilityData.skillType][self.selectAbilityData.skillIndex])
+        self:ScrollToSkillLineAbility(self.selectAbilityData.skillType, self.selectAbilityData.skillIndex, self.selectAbilityData.abilityIndex)
+        self.selectAbilityData = nil
+    end
 end
 
 function ZO_SkillsManager:OnShown()
+    if self:IsSkillsAdvisorShown() then
+        SCENE_MANAGER:AddFragment(FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT)
+    else
+        SCENE_MANAGER:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+    end
+    SCENE_MANAGER:AddFragment(FRAME_PLAYER_FRAGMENT)
+
     if self.dirty then
         self:Refresh()
     end
+    self:UpdateSkillsAdvisorVisibility()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    
+    local level = GetUnitLevel("player")
+    if level >= GetWeaponSwapUnlockedLevel() then
+        TriggerTutorial(TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK)
+    end
+end
+
+function ZO_SkillsManager:OnHidden()
+    self:StopSelectedSkillBuildSkillAnimations()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 local function SetMorphButtonTextures(button, chosen)
@@ -658,24 +715,29 @@ end
 
 function ZO_SkillsManager:ChooseMorph(morphSlot)
     if morphSlot then
-        self.morphDialog.chosenMorphProgressionIndex = morphSlot.progressionIndex
-        self.morphDialog.chosenMorph = morphSlot.morph
+        local dialogControl = ZO_SkillsMorphDialog
+        dialogControl.chosenMorphProgressionIndex = morphSlot.progressionIndex
+        dialogControl.chosenMorph = morphSlot.morph
 
-        if morphSlot == self.morphDialog.morphAbility1 then
-            SetMorphButtonTextures(self.morphDialog.morphAbility1, true)
-            SetMorphButtonTextures(self.morphDialog.morphAbility2, false)
+        if morphSlot == dialogControl.morphAbility1 then
+            SetMorphButtonTextures(dialogControl.morphAbility1, true)
+            SetMorphButtonTextures(dialogControl.morphAbility2, false)
         else
-            SetMorphButtonTextures(self.morphDialog.morphAbility1, false)
-            SetMorphButtonTextures(self.morphDialog.morphAbility2, true)
+            SetMorphButtonTextures(dialogControl.morphAbility1, false)
+            SetMorphButtonTextures(dialogControl.morphAbility2, true)
         end
 
-        self.morphDialog.confirmButton:SetState(BSTATE_NORMAL)
+        dialogControl.confirmButton:SetState(BSTATE_NORMAL)
     end
 end
 
 function ZO_Skills_AbilitySlot_OnMouseEnter(control)
+    SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
+
     InitializeTooltip(SkillTooltip, control, TOPLEFT, 5, -5, TOPRIGHT)
-    SkillTooltip:SetSkillAbility(control.skillType, control.lineIndex, control.index)
+
+    local isBadMorph = control.ability and control.ability.alert and control.ability.alert.iconStatus == ZO_SKILL_ABILITY_ALERT_ICON_BAD_MORPH
+    SkillTooltip:SetSkillAbility(control.skillType, control.lineIndex, control.index, isBadMorph)
 end
 
 function ZO_Skills_AbilitySlot_OnMouseExit()
@@ -740,6 +802,8 @@ function ZO_Skills_AbilitySlot_OnClick(control)
 end
 
 function ZO_Skills_AbilityAlert_OnClicked(control)
+    SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
+
     if not control.ability.purchased then
         ZO_Dialogs_ShowDialog("PURCHASE_ABILITY_CONFIRM", control)
     elseif control.ability.atMorph then
@@ -751,7 +815,7 @@ end
 
 function ZO_Skills_MorphAbilitySlot_OnMouseEnter(control)
     InitializeTooltip(SkillTooltip, control, TOPLEFT, 5, -5, TOPRIGHT)
-    SkillTooltip:SetProgressionAbility(control.progressionIndex, control.morph, control.rank)
+    SkillTooltip:SetProgressionAbility(control.progressionIndex, control.morph, control.rank, control.showAdvice, control.advised)
 end
 
 function ZO_Skills_MorphAbilitySlot_OnClicked(control)
@@ -759,6 +823,7 @@ function ZO_Skills_MorphAbilitySlot_OnClicked(control)
 end
 
 function ZO_SkillInfoXPBar_OnMouseEnter(control)
+    SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
     InitializeTooltip(SkillTooltip, control, TOPLEFT, 15, 5, BOTTOMLEFT)
     SkillTooltip:SetSkillLine(control.skillType, control.skillIndex)
 end
@@ -767,8 +832,12 @@ function ZO_SkillInfoXPBar_OnMouseExit(control)
     ClearTooltip(SkillTooltip)
 end
 
-function ZO_Skills_OnShown(self)
+function ZO_Skills_OnEffectivelyShown(self)
     SKILLS_WINDOW:OnShown()
+end
+
+function ZO_Skills_OnEffectivelyHidden(self)
+    SKILLS_WINDOW:OnHidden()
 end
 
 function ZO_Skills_Initialize(control)

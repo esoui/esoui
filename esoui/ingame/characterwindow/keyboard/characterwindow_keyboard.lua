@@ -108,7 +108,8 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
     if slotId == EQUIP_SLOT_POISON or slotId == EQUIP_SLOT_BACKUP_POISON then
         slotControl.stackCount = select(2, GetItemInfo(BAG_WORN, slotId))
         if (slotControl.stackCount > 1) then
-            stackCountLabel:SetText(ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES))
+            local USE_LOWERCASE_NUMBER_SUFFIXES = false
+            stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)))
         else
             stackCountLabel:SetText("")
         end

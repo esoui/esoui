@@ -22,7 +22,7 @@ function ZO_DyeStamp_Confirmation_Base:Initialize(control, scene)
 end
 
 function ZO_DyeStamp_Confirmation_Base:PreviewDyeStamp()
-    if not IsInPreviewMode() then
+    if not GetPreviewModeEnabled() then
         self.waitingForPreviewBegin = true
         return false
     end

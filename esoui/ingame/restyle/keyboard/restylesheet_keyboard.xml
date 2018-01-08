@@ -1,21 +1,34 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_RestyleSlotsSheet_ItemSlot_Keyboard" inherits="ZO_ItemSlot_Shared" mouseOverBlendMode="ADD" virtual="true" />
-
         <Control name="ZO_RestyleSlotsSheet_Slot_Keyboard" virtual="true">
-            <Dimensions x="134" y="64" />
+            <Dimensions x="ZO_RESTYLE_SLOT_WIDTH" y="ZO_RESTYLE_SLOT_HEIGHT" />
 
             <Controls>
-                <Button name="$(parent)ItemSlot" inherits="ZO_RestyleSlotsSheet_ItemSlot_Keyboard" >
-                    <Dimensions x="64" y="64" />
+                <Texture name="$(parent)ItemSlot" level="ZO_RESTYLE_TEXTURE_LEVEL_ICON" mouseEnabled="true">
+                    <Dimensions x="ZO_RESTYLE_SLOT_ICON_WIDTH" y="ZO_RESTYLE_SLOT_HEIGHT" />
                     <Anchor point="LEFT" />
-
-                    <Textures mouseOver="" pressedMouseOver="" />
-                </Button>
+                </Texture>
 
                 <Control name="$(parent)Dyes" inherits="ZO_DyeingSwatchSlotDyes">
+                    <Dimensions y="ZO_RESTYLE_SLOT_HEIGHT" />
                     <Anchor point="RIGHT" />
                 </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RestyleOutfitStyleSlotsSheet_Slot_Keyboard" inherits="ZO_RestyleSlotsSheet_Slot_Keyboard" virtual="true">
+            <Controls>
+                <Button name="$(parent)ItemSlot" override="true">
+                    <Controls>
+                        <Texture name="$(parent)EquippedGlow" textureFile="EsoUI/Art/Restyle/Keyboard/outfitSlot_selectedBackground.dds" layer="BACKGROUND" level="ZO_RESTYLE_TEXTURE_LEVEL_EQUIPPED" hidden="true">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Texture name="$(parent)DragCallout" textureFile="EsoUI/Art/Restyle/Keyboard/outfitSlot_dragSlot.dds" layer="BACKGROUND" level="ZO_RESTYLE_TEXTURE_LEVEL_DRAG_CALLOUT" hidden="true">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Button>
             </Controls>
         </Control>
         
@@ -27,7 +40,7 @@
                 </Label>
 
                 <Control name="$(parent)Slots" >
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetY="-10"/>
                 </Control>
 
@@ -42,24 +55,54 @@
             <AnchorFill />
             
             <Controls>
-                <Control name="$(parent)TitleDivider" inherits="ZO_LeftPanel_HorizontalDivider">
-                    <Anchor point="TOPLEFT" offsetY="42" />
-                    <Anchor point="TOPRIGHT" offsetY="42" />
+                <Control name="$(parent)Primary" inherits="ZO_RestyleSlotsSheet_Container">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-27" />
                 </Control>
-                
-                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" />
+
+                <Control name="$(parent)Secondary" inherits="ZO_RestyleSlotsSheet_Container" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Primary" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-27" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RestyleEquipmentSlotsSheet_Keyboard" inherits="ZO_RestyleSlotsSheet_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Primary" override="true">
+                    <Dimensions y="335" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+
+                    <Controls>
+                        <Label name="$(parent)Header" override="true" text="SI_RESTYLE_SHEET_EQUIPMENT_APPAREL" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Secondary" override="true" hidden="false">
+                    <Controls>
+                        <Button name="$(parent)WeaponSwap" inherits="ZO_WeaponSwapLeft">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" offsetY="10" />
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RestyleOutfitStylesSlotsSheet_Keyboard" inherits="ZO_RestyleEquipmentSlotsSheet_Keyboard" virtual="true">
+            <Controls>
+                <Control name="$(parent)Secondary" override="true">
+                    <Controls>
+                        <Label name="$(parent)NoWeaponsLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" text="SI_OUTFIT_STYLE_SHEET_NO_WEAPONS_WARNING" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Slots" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Slots" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Cost" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Secondary" relativePoint="BOTTOMRIGHT" />
                 </Label>
-
-                <Control name="$(parent)PrimaryContainer" inherits="ZO_RestyleSlotsSheet_Container">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleDivider" relativePoint="BOTTOMLEFT" offsetY="17" />
-                    <Anchor point="BOTTOMRIGHT" offsetY="-17" />
-                </Control>
-
-                <Control name="$(parent)SecondaryContainer" inherits="ZO_RestyleSlotsSheet_Container" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryContainer" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetY="-17" />
-                </Control>
             </Controls>
         </Control>
     </Controls>

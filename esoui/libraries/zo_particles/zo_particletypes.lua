@@ -1,16 +1,10 @@
 --Bent Arc Particle
 
-ZO_BentArcParticle = ZO_SceneGraphParticle:Subclass()
-
-function ZO_BentArcParticle:New(...)
-    return ZO_SceneGraphParticle.New(self, ...)
-end
-
 local cos = math.cos
 local sin = math.sin
 local lerp = zo_lerp
 
-function ZO_BentArcParticle:OnUpdate(timeS)
+function ZO_BentArcParticle_OnUpdate(self, timeS)
     ZO_Particle.OnUpdate(self, timeS)
 
     local parameters = self.parameters
@@ -49,5 +43,24 @@ function ZO_BentArcParticle:OnUpdate(timeS)
     local y = magnitude * sin(ElevationRadians)
     local x = h * cos(AzimuthRadians)
 
-    self:SetPosition(x, y, z)
+    --X is right, Y is up, Z is toward the screen
+    return x, y, z
+end
+
+ZO_BentArcParticle_SceneGraph = ZO_SceneGraphParticle:Subclass()
+function ZO_BentArcParticle_SceneGraph:OnUpdate(timeS)
+    self:SetPosition(ZO_BentArcParticle_OnUpdate(self, timeS))
+end
+function ZO_BentArcParticle_SceneGraph:New(...)
+    return ZO_SceneGraphParticle.New(self, ...)
+end
+
+ZO_BentArcParticle_Control =  ZO_ControlParticle:Subclass()
+function ZO_BentArcParticle_Control:OnUpdate(timeS)
+    local x, y, z = ZO_BentArcParticle_OnUpdate(self, timeS)
+    --Control particles expect that Y is down
+    self:SetPosition(x, -y, z)
+end
+function ZO_BentArcParticle_Control:New(...)
+    return ZO_ControlParticle.New(self, ...)
 end

@@ -95,63 +95,96 @@ function ZO_CampaignBrowser_Gamepad:UpdateLists()
     self:RefreshScreenHeader()
 end
 
+function ZO_CampaignBrowser_Gamepad:GetCampaignQueryType(campaignId)
+    if campaignId == GetAssignedCampaignId() then
+        return BGQUERY_ASSIGNED_CAMPAIGN
+    else
+        return BGQUERY_LOCAL
+    end
+end
+
+function ZO_CampaignBrowser_Gamepad:HasCampaignInformation(campaignId)
+    return campaignId == GetAssignedCampaignId() or campaignId == GetCurrentCampaignId()
+end
+
 function ZO_CampaignBrowser_Gamepad:UpdateContent(updateFromTimer)
     local hideContent = true
     local hideScoring = true
     local hideEmperor = true
     local hideBonuses = true
+    local hideNoInformationWarning = true
 
     local targetData = self:GetTargetData()
-    if(targetData ~= nil) then
-        if(targetData.displayContentType == CONTENT_TYPES.CAMPAIGN) then
+    if targetData ~= nil then
+        local displayContentType = targetData.displayContentType
+        local requiresCampaignInformation = false
+        local hasCampaignInformation = false
+        local queryType
+        if displayContentType == CONTENT_TYPES.SCORING or
+            displayContentType == CONTENT_TYPES.EMPERORSHIP or
+            displayContentType == CONTENT_TYPES.BONUSES then
+                requiresCampaignInformation = true
+                queryType = self:GetCampaignQueryType(targetData.id)
+                hasCampaignInformation = self:HasCampaignInformation(targetData.id)
+        end
+
+        local showNoInformationWarning = requiresCampaignInformation and not hasCampaignInformation
+        hideNoInformationWarning = not showNoInformationWarning
+        if showNoInformationWarning then
+            SCENE_MANAGER:AddFragment(GAMEPAD_AVA_NO_INFORMATION_WARNING)
+        end
+
+        if displayContentType == CONTENT_TYPES.CAMPAIGN then
             if not updateFromTimer then
                 SCENE_MANAGER:AddFragment(GAMEPAD_AVA_CAMPAIGN_INFO_FRAGMENT)
             end
             self:RefreshCampaignInfoContent()
             hideContent = false
-        elseif(targetData.displayContentType == CONTENT_TYPES.SCORING) then
-            if not updateFromTimer then
-                CAMPAIGN_SCORING_GAMEPAD:SetCampaignAndQueryType(targetData.id, queryType)
-                SCENE_MANAGER:AddFragment(CAMPAIGN_SCORING_GAMEPAD_FRAGMENT)
-            end
-            hideScoring = false 
-        elseif(targetData.displayContentType == CONTENT_TYPES.EMPERORSHIP) then
-            if not updateFromTimer then
-                local queryType = BGQUERY_LOCAL
-                if(targetData.id == GetAssignedCampaignId()) then
-                    queryType = BGQUERY_ASSIGNED_CAMPAIGN
+        else
+            if hasCampaignInformation then
+                if displayContentType == CONTENT_TYPES.SCORING then
+                    if not updateFromTimer then
+                        CAMPAIGN_SCORING_GAMEPAD:SetCampaignAndQueryType(targetData.id, queryType)
+                        SCENE_MANAGER:AddFragment(CAMPAIGN_SCORING_GAMEPAD_FRAGMENT)
+                    end
+                    hideScoring = false
+                elseif displayContentType == CONTENT_TYPES.EMPERORSHIP then
+                    if not updateFromTimer then
+                        CAMPAIGN_EMPEROR_GAMEPAD:SetCampaignAndQueryType(targetData.id, queryType)
+                        SCENE_MANAGER:AddFragment(CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT)
+                    end
+                    hideEmperor = false
+                elseif displayContentType == CONTENT_TYPES.BONUSES then
+                    if not updateFromTimer then
+                        CAMPAIGN_BONUSES_GAMEPAD:SetCampaignAndQueryType(targetData.id, queryType)
+                        SCENE_MANAGER:AddFragment(CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT)
+                    end
+                    hideBonuses = false
                 end
-                CAMPAIGN_EMPEROR_GAMEPAD:SetCampaignAndQueryType(targetData.id, queryType)
-                SCENE_MANAGER:AddFragment(CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT)
             end
-            hideEmperor = false 
-        elseif(targetData.displayContentType == CONTENT_TYPES.BONUSES) then
-            if not updateFromTimer then
-                CAMPAIGN_BONUSES_GAMEPAD:SetCampaignAndQueryType(targetData.id, queryType)
-                SCENE_MANAGER:AddFragment(CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT)
-            end
-            hideBonuses = false
         end
     end
-
-    if(hideContent) then
+    
+    if hideNoInformationWarning then
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_AVA_NO_INFORMATION_WARNING)
+    end
+    if hideContent then
         SCENE_MANAGER:RemoveFragment(GAMEPAD_AVA_CAMPAIGN_INFO_FRAGMENT)
     end
-    if(hideScoring) then
+    if hideScoring then
         SCENE_MANAGER:RemoveFragment(CAMPAIGN_SCORING_GAMEPAD_FRAGMENT)
     end
-    if(hideEmperor) then
+    if hideEmperor then
         SCENE_MANAGER:RemoveFragment(CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT)
     end
-    if(hideBonuses) then
+    if hideBonuses then
         SCENE_MANAGER:RemoveFragment(CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT)
     end
 
-
-    local hideAll = hideScoring and hideContent and hideEmperor and hideBonuses
-    if(hideAll) then
-        self.contentHeader:SetHidden(true)
+    local hideBackgroundAndHeader = hideScoring and hideContent and hideEmperor and hideBonuses and hideNoInformationWarning
+    if hideBackgroundAndHeader then
         GAMEPAD_AVA_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+        self.contentHeader:SetHidden(true)
     else
         GAMEPAD_AVA_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         self.contentHeader:SetHidden(false)
@@ -249,8 +282,8 @@ end
 -------------------
 
 function ZO_CampaignBrowser_Gamepad:PerformDeferredInitialization()
-    if self.deferredInitialied then return end
-    self.deferredInitialied = true
+    if self.deferredInitialized then return end
+    self.deferredInitialized = true
 
     self:InitLastStates()
 
@@ -336,119 +369,109 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
     local selectedData = self:GetTargetData()
     local headerData = self.contentHeaderData
     
-    if(selectedData and not self.contentHeader:IsHidden()) then
+    if selectedData and not self.contentHeader:IsHidden() then
         -- Title
-        if(selectedData.contentHeaderTitle) then
+        if selectedData.contentHeaderTitle then
             headerData.titleText = selectedData.contentHeaderTitle
         else
             headerData.titleText = selectedData.text
         end
 
-        
+        headerData.data1HeaderText = nil
+        headerData.data1Text = nil
+        headerData.data2HeaderText = nil
+        headerData.data2Text = nil
+        headerData.data3HeaderText = nil
+        headerData.data3Text = nil
+        headerData.data4HeaderText = nil
+        headerData.data4Text = nil
+
+        local hasCampaignInformation = self:HasCampaignInformation(selectedData.id)
         if selectedData.entryType == ENTRY_TYPES.SCORING then
-            -- Data 1
-            headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_NEXT_SCORING_EVALUATION)
-            headerData.data1Text = function(control)
-                                    ZO_CampaignScoring_TimeUpdate(control, GetSecondsUntilCampaignScoreReevaluation)
-                                    return true
+            if hasCampaignInformation then            
+                -- Data 1
+                headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_NEXT_SCORING_EVALUATION)
+                headerData.data1Text = function(control)
+                                        ZO_CampaignScoring_TimeUpdate(control, GetSecondsUntilCampaignScoreReevaluation)
+                                        return true
+                end
+
+                -- Data 2
+                headerData.data2HeaderText, headerData.data2Text = GetCampaignEndsHeaderText(selectedData)
             end
-
-            -- Data 2
-            headerData.data2HeaderText, headerData.data2Text = GetCampaignEndsHeaderText(selectedData)
-
-            -- Data 3
-            headerData.data3HeaderText = nil
-            headerData.data3Text = nil
-
-            -- Data 4
-            headerData.data4HeaderText = nil
-            headerData.data4Text = nil
         elseif selectedData.entryType == ENTRY_TYPES.BONUSES then
-            -- Data 1
-            headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER)
-            headerData.data1Text = function(control)
-                                        local _, _, numHomeHeld, numTotalHome = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
-                                        return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER_INFO), numHomeHeld, numTotalHome)
-            end
+            if hasCampaignInformation then
+                -- Data 1
+                headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER)
+                headerData.data1Text = function(control)
+                                            local _, _, numHomeHeld, numTotalHome = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
+                                            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_HOME_KEEPS_HEADER_INFO), numHomeHeld, numTotalHome)
+                end
 
-            -- Data 2
-            headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_ENEMY_KEEPS_HEADER)
-            headerData.data2Text = function(control)
-                                        local _, enemyKeepsHeld = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
-                                        return enemyKeepsHeld
-            end
+                -- Data 2
+                headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_ENEMY_KEEPS_HEADER)
+                headerData.data2Text = function(control)
+                                            local _, enemyKeepsHeld = GetAvAKeepScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"))
+                                            return enemyKeepsHeld
+                end
 
-            -- Data 3
-            headerData.data3HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_DEFENSIVE_SCROLLS_HEADER)
-            headerData.data3Text = function(control)
-                                        local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
-                                        return enemyScrollsHeld
-            end
+                -- Data 3
+                headerData.data3HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_DEFENSIVE_SCROLLS_HEADER)
+                headerData.data3Text = function(control)
+                                            local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
+                                            return enemyScrollsHeld
+                end
 
-            -- Data 4
-            headerData.data4HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_OFFENSIVE_SCROLLS_HEADER)
-            headerData.data4Text = function(control)
-                                        local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
-                                        return enemyScrollsHeld
+                -- Data 4
+                headerData.data4HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BONUSES_OFFENSIVE_SCROLLS_HEADER)
+                headerData.data4Text = function(control)
+                                            local _, enemyScrollsHeld = GetAvAArtifactScore(CAMPAIGN_BONUSES_GAMEPAD.campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
+                                            return enemyScrollsHeld
+                end
             end
-
         elseif selectedData.entryType == ENTRY_TYPES.EMPERORSHIP then
-            -- Data 1
-            headerData.data1HeaderText = GetString(SI_CAMPAIGN_EMPEROR_NAME_HEADER)
-            headerData.data1Text = function(control)
-                                        if(DoesCampaignHaveEmperor(selectedData.id)) then
-                                            local alliance, characterName, displayName = GetCampaignEmperorInfo(selectedData.id)
-                                            local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
-                                            return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_HEADER_NAME), GetAllianceSymbolIcon(alliance), userFacingName)
-                                        else
-                                            return GetString(SI_CAMPAIGN_NO_EMPEROR)
-                                        end
+            if hasCampaignInformation then
+                -- Data 1
+                headerData.data1HeaderText = GetString(SI_CAMPAIGN_EMPEROR_NAME_HEADER)
+                headerData.data1Text = function(control)
+                                            if(DoesCampaignHaveEmperor(selectedData.id)) then
+                                                local alliance, characterName, displayName = GetCampaignEmperorInfo(selectedData.id)
+                                                local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
+                                                return zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_HEADER_NAME), GetAllianceSymbolIcon(alliance), userFacingName)
+                                            else
+                                                return GetString(SI_CAMPAIGN_NO_EMPEROR)
+                                            end
+                end
+
+                -- Data 2
+                headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_REIGN_DURATION_HEADER)
+                headerData.data2Text = function(control)
+                                            local duration = GetCampaignEmperorReignDuration(selectedData.id)
+                                            return ZO_FormatTime(duration, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+                end
             end
-
-            -- Data 2
-            headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_REIGN_DURATION_HEADER)
-            headerData.data2Text = function(control)
-                                        local duration = GetCampaignEmperorReignDuration(selectedData.id)
-                                        return ZO_FormatTime(duration, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-            end
-
-            -- Data 3
-            headerData.data3HeaderText = nil
-            headerData.data3Text = nil
-
-            -- Data 4
-            headerData.data4HeaderText = nil
-            headerData.data4Text = nil
         else
-            -- Data 1
-            headerData.data1HeaderText = nil
-            headerData.data1Text = nil
-
             if(selectedData.numGroupMembers) then
                 headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_TOOLTIP_GROUP_MEMBERS)
                 headerData.data1Text = zo_strformat(SI_GAMEPAD_CAMPAIGN_BROWSER_PEOPLE_AMOUNT, selectedData.numGroupMembers)
             end
 
             -- Data 2
-            headerData.data2HeaderText = nil
-            headerData.data2Text = nil
-
             if(selectedData.numFriends) then
                 headerData.data2HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_TOOLTIP_FRIENDS)
                 headerData.data2Text = zo_strformat(SI_GAMEPAD_CAMPAIGN_BROWSER_PEOPLE_AMOUNT, selectedData.numFriends)
             end
 
             -- Data 3
-            headerData.data3HeaderText = nil
-            headerData.data3Text = nil
-
             if(selectedData.numGuildMembers) then
                 headerData.data3HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_TOOLTIP_GUILD_MEMBERS)
                 headerData.data3Text = zo_strformat(SI_GAMEPAD_CAMPAIGN_BROWSER_PEOPLE_AMOUNT, selectedData.numGuildMembers)
             end
 
-            -- Data 4
-            headerData.data4HeaderText, headerData.data4Text = GetCampaignEndsHeaderText(selectedData)
+            if hasCampaignInformation then
+                -- Data 4
+                headerData.data4HeaderText, headerData.data4Text = GetCampaignEndsHeaderText(selectedData)
+            end
         end
 
         ZO_GamepadGenericHeader_Refresh(self.contentHeader, headerData)
@@ -502,9 +525,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     elseif(selectedData.entryType == ENTRY_TYPES.SET_HOME and self:CanHome(selectedData)) then
                         return true
                     elseif(selectedData.entryType == ENTRY_TYPES.BONUSES) then
-                        if self.currentMode == CAMPAIGN_BROWSER_MODES.CAMPAIGNS then
-                            return true
-                        end
+                        return self.currentMode == CAMPAIGN_BROWSER_MODES.CAMPAIGNS and self:HasCampaignInformation(selectedData.id)
                     elseif(selectedData.entryType == ENTRY_TYPES.ABANDON_CAMPAIGN) then
                         return true
                     end

@@ -72,6 +72,23 @@
           <!--NOTE: Instantiators of this radio button can choose to make a custom OnClicked handler -->
         </Button>
 
+        <Button name="ZO_LabeledRadioButton" inherits="ZO_RadioButton" virtual="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame" mouseEnabled="true">
+                    <OnMouseUp>
+                        local parent = self:GetParent()
+                        parent:GetHandler("OnClicked")(parent, button)
+                    </OnMouseUp>
+                    
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Button>
+
         <Button name="ZO_CloseButton" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" virtual="true">
             <Dimensions x="20" y="20" />
             <Anchor point="TOPRIGHT" offsetX="-5" offsetY="6" />

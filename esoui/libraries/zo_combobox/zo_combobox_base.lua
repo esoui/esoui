@@ -95,6 +95,14 @@ function ZO_ComboBox_Base:SetHighlightedColor(color, colorG, colorB, colorA)
     self.m_highlightColor = ZO_ColorDef:New(color, colorG, colorB, colorA)
 end
 
+function ZO_ComboBox_Base:SetSelectedItemTextColor(selected)
+    if selected then
+        self.m_selectedItemText:SetColor(self.m_highlightColor:UnpackRGB())
+    else
+        self.m_selectedItemText:SetColor(self.m_normalColor:UnpackRGB())
+    end
+end
+
 function ZO_ComboBox_Base:SetSortsItems(sortsItems)
     self.m_sortsItems = sortsItems
 end
@@ -205,7 +213,7 @@ function ZO_ComboBox_Base:ItemSelectedClickHelper(item, ignoreCallback)
         if not selectionChanged and oldItem and item then
             selectionChanged = item.name ~= oldItem.name
         end
-        item.callback(self, item.name, item, selectionChanged)
+        item.callback(self, item.name, item, selectionChanged, oldItem)
     end
 end
 

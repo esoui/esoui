@@ -23,6 +23,8 @@ function ZO_CraftingInventory:Initialize(control, slotType, noDragging, connectI
     self.sortOrder = ZO_SORT_ORDER_UP
     self.sortKey = "name"
 
+    self.noDragging = noDragging
+
     if not noDragging then
         local function HandleCursorPickup(eventCode, cursorType, ...)
             if cursorType == MOUSE_CONTENT_INVENTORY_ITEM and not control:IsHidden() then
@@ -101,7 +103,7 @@ function ZO_CraftingInventory:GetDefaultTemplateSetupFunction()
         ZO_UpdateStatusControlIcons(rowControl, data)
         ZO_UpdateTraitInformationControlIcon(rowControl, data)
 
-        if noDragging then
+        if self.noDragging then
             rowControl:SetHandler("OnDragStart", nil)
             rowControl:SetHandler("OnReceiveDrag", nil)
         end

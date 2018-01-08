@@ -21,8 +21,7 @@ function ZO_CampaignBonusesGamepad:Initialize(control)
 		self:UpdateToolTip()
 	end)
 
-    local ALWAYS_ANIMATE = true
-    CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control, ALWAYS_ANIMATE)
+    CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                                     if(newState == SCENE_FRAGMENT_SHOWN) then
                                                                         self:RegisterForEvents()
@@ -120,7 +119,7 @@ local function GetNumHomeKeepsHeld(campaignId)
     return numHomeKeepsHeld
 end
 
-function ZO_CampaignBonusEntryTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+function ZO_CampaignBonusEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     control.typeIcon:SetTexture(data.typeIconGamepad)
 
     local showCheckmark = data.active

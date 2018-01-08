@@ -30,7 +30,12 @@ function ZO_ItemPreviewOptionsFragment:Show()
     if options.previewInEmptyWorld ~= nil then
         itemPreviewObject:SetPreviewInEmptyWorld(options.previewInEmptyWorld)
     end
-
+    if options.maintainsPreviewCollection ~= nil then
+        itemPreviewObject:SetMaintainsPreviewCollection(options.maintainsPreviewCollection)
+    end
+    if itemPreviewObject:GetFragment():IsShowing() then
+        itemPreviewObject:RefreshState()
+    end
     self:OnShown()
 end
 
@@ -116,7 +121,7 @@ function ZO_ItemPreviewType_FurnitureMarketProduct:Apply(variationIndex)
     PreviewFurnitureMarketProduct(self.marketProductId, variationIndex)
 end
 
---Inventory Item As Furniture
+-- Inventory Item As Furniture
 
 ZO_ItemPreviewType_InventoryItemAsFurniture = ZO_ItemPreviewType:Subclass()
 
@@ -135,10 +140,19 @@ function ZO_ItemPreviewType_InventoryItemAsFurniture:HasStaticParameters(bag, sl
 end
 
 function ZO_ItemPreviewType_InventoryItemAsFurniture:Apply(variationIndex)
-    PreviewInventoryItemAsFurniture(self.bag, self.slot)
+    PreviewInventoryItemAsFurniture(self.bag, self.slot, variationIndex)
 end
 
---Collectible As Furniture
+function ZO_ItemPreviewType_InventoryItemAsFurniture:GetNumVariations()
+    return GetNumInventoryItemAsFurniturePreviewVariations(self.bag, self.slot)
+end
+
+function ZO_ItemPreviewType_InventoryItemAsFurniture:GetVariationName(variationIndex)
+    return GetInventoryItemAsFurniturePreviewVariationDisplayName(self.bag, self.slot, variationIndex)
+end
+
+
+-- Collectible As Furniture
 
 ZO_ItemPreviewType_CollectibleAsFurniture = ZO_ItemPreviewType:Subclass()
 
@@ -155,10 +169,18 @@ function ZO_ItemPreviewType_CollectibleAsFurniture:HasStaticParameters(collectib
 end
 
 function ZO_ItemPreviewType_CollectibleAsFurniture:Apply(variationIndex)
-    PreviewCollectibleAsFurniture(self.collectibleId)
+    PreviewCollectibleAsFurniture(self.collectibleId, variationIndex)
 end
 
---Placed Furniture
+function ZO_ItemPreviewType_CollectibleAsFurniture:GetNumVariations()
+    return GetNumCollectibleAsFurniturePreviewVariations(self.collectibleId)
+end
+
+function ZO_ItemPreviewType_CollectibleAsFurniture:GetVariationName(variationIndex)
+    return GetCollectibleAsFurniturePreviewVariationDisplayName(self.collectibleId, variationIndex)
+end
+
+-- Placed Furniture
 
 ZO_ItemPreviewType_PlacedFurniture = ZO_ItemPreviewType:Subclass()
 
@@ -175,10 +197,18 @@ function ZO_ItemPreviewType_PlacedFurniture:HasStaticParameters(furnitureId)
 end
 
 function ZO_ItemPreviewType_PlacedFurniture:Apply(variationIndex)
-    PreviewPlacedFurniture(self.furnitureId)
+    PreviewPlacedFurniture(self.furnitureId, variationIndex)
 end
 
---Provisioner Item as Furniture
+function ZO_ItemPreviewType_PlacedFurniture:GetNumVariations()
+    return GetNumPlacedFurniturePreviewVariations(self.furnitureId)
+end
+
+function ZO_ItemPreviewType_PlacedFurniture:GetVariationName(variationIndex)
+    return GetPlacedFurniturePreviewVariationDisplayName(self.furnitureId, variationIndex)
+end
+
+-- Provisioner Item as Furniture
 
 ZO_ItemPreviewType_ProvisionerItemAsFurniture = ZO_ItemPreviewType:Subclass()
 
@@ -197,7 +227,15 @@ function ZO_ItemPreviewType_ProvisionerItemAsFurniture:HasStaticParameters(recip
 end
 
 function ZO_ItemPreviewType_ProvisionerItemAsFurniture:Apply(variationIndex)
-    PreviewProvisionerItemAsFurniture(self.recipeListIndex, self.recipeIndex)
+    PreviewProvisionerItemAsFurniture(self.recipeListIndex, self.recipeIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetNumVariations()
+    return GetNumProvisionerItemAsFurniturePreviewVariations(self.recipeListIndex, self.recipeIndex)
+end
+
+function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetVariationName(variationIndex)
+    return GetProvisionerItemAsFurniturePreviewVariationDisplayName(self.recipeListIndex, self.recipeIndex, variationIndex)
 end
 
 --Trading House Furniture
@@ -217,10 +255,18 @@ function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:HasStaticParamet
 end
 
 function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:Apply(variationIndex)
-    PreviewTradingHouseSearchResultItemAsFurniture(self.tradingHouseIndex)
+    PreviewTradingHouseSearchResultItemAsFurniture(self.tradingHouseIndex, variationIndex)
 end
 
---Trading House Furniture
+function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:GetNumVariations()
+    return GetNumTradingHouseSearchResultItemAsFurniturePreviewVariations(self.tradingHouseIndex)
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:GetVariationName(variationIndex)
+    return GetTradingHouseSearchResultItemAsFurniturePreviewVariationDisplayName(self.tradingHouseIndex, variationIndex)
+end
+
+-- Store Furniture
 
 ZO_ItemPreviewType_StoreEntryAsFurniture = ZO_ItemPreviewType:Subclass()
 
@@ -237,7 +283,42 @@ function ZO_ItemPreviewType_StoreEntryAsFurniture:HasStaticParameters(storeEntry
 end
 
 function ZO_ItemPreviewType_StoreEntryAsFurniture:Apply(variationIndex)
-    PreviewStoreEntryAsFurniture(self.storeEntryIndex)
+    PreviewStoreEntryAsFurniture(self.storeEntryIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_StoreEntryAsFurniture:GetNumVariations()
+    return GetNumStoreEntryAsFurniturePreviewVariations(self.storeEntryIndex)
+end
+
+function ZO_ItemPreviewType_StoreEntryAsFurniture:GetVariationName(variationIndex)
+    return GetStoreEntryAsFurniturePreviewVariationDisplayName(self.storeEntryIndex, variationIndex)
+end
+
+--Outfit
+
+ZO_ItemPreviewType_Outfit = ZO_ItemPreviewType:Subclass()
+
+function ZO_ItemPreviewType_Outfit:SetStaticParameters(previewCollectionId, outfitIndex)
+    self.previewCollectionId, self.outfitIndex = previewCollectionId, outfitIndex
+end
+
+function ZO_ItemPreviewType_Outfit:ResetStaticParameters()
+    self.previewCollectionId = 0
+    self.outfitIndex = 0
+end
+
+function ZO_ItemPreviewType_Outfit:HasStaticParameters(previewCollectionId, outfitIndex)
+    return self.previewCollectionId == previewCollectionId and self.outfitIndex == outfitIndex
+end
+
+function ZO_ItemPreviewType_Outfit:Apply()
+    if self.outfitIndex then
+        SetPreviewingOutfitIndexInPreviewCollection(self.previewCollectionId, self.outfitIndex)
+    else
+        SetPreviewingUnequippedOutfitInPreviewCollection(self.previewCollectionId)
+    end
+
+    RefreshPreviewCollectionShown()
 end
 
 --
@@ -252,6 +333,7 @@ ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE = 5
 ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT = 6
 ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE = 7
 ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE = 8
+ZO_ITEM_PREVIEW_OUTFIT = 9
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
@@ -284,16 +366,27 @@ function ZO_ItemPreview_Shared:Initialize(control)
         [ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT] = ZO_ItemPreviewType_FurnitureMarketProduct:New(),
         [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE] = ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:New(),
         [ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE] = ZO_ItemPreviewType_StoreEntryAsFurniture:New(),
+        [ZO_ITEM_PREVIEW_OUTFIT] = ZO_ItemPreviewType_Outfit:New(),
     }
 
     self.forcePreparePreview = true
     self:SetHorizontalPaddings(0, 0)
     self:SetDynamicFramingConsumedSpace(0, 0)
     self:SetPreviewInEmptyWorld(false)
+    self.maintainsPreviewCollection = false
+    self.previewCollectionId = 0
 
     self.OnScreenResized = function()
         self:RefreshDynamicFramingOpening()
     end
+
+    local function SetupPreviewOnReady()
+        if self.waitingForPreviewBegin then
+            self:SetupPreview()
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_ITEM_PREVIEW_READY, SetupPreviewOnReady)
 end
 
 function ZO_ItemPreview_Shared:GetPreviewTypeObject(previewType)
@@ -313,15 +406,48 @@ end
 do
     local PREVIEW_UPDATE_INTERVAL_MS = 100
     function ZO_ItemPreview_Shared:OnPreviewShowing()
+        -- We should always EnablePreview followed by a DisablePreview, but if we show a fragment
+        -- before it has become hidden, we will need to make sure we don't reinitialize things
+        -- below. It is especially bad to call EnablePreviewMode multiple times because that
+        -- increments a counter, but we will only decrement once.
+        if self.enabledPreview then
+            return
+        end
+        self.enabledPreview = true
+
         -- for the first preview we won't put a restriction on when we can preview the next one
         -- previewing a product automatically sets this to false so manually set it to true
         self:SetCanChangePreview(true)
 
-        BeginPreviewMode(self.forcePreparePreview)
-        self:RefreshDynamicFramingOpening()
-        self:RefreshPreviewInEmptyWorld()
-        EVENT_MANAGER:RegisterForUpdate("ZO_ItemPreview_Shared", PREVIEW_UPDATE_INTERVAL_MS, function(...) self:OnUpdate(...) end)
-        EVENT_MANAGER:RegisterForEvent("ZO_ItemPreview_Shared", EVENT_SCREEN_RESIZED, self.OnScreenResized)
+        EnablePreviewMode(self.forcePreparePreview)
+
+        if self.maintainsPreviewCollection then
+            self.previewCollectionId = AddPreviewCollection()
+        end
+
+        if not GetPreviewModeEnabled() then
+            self.waitingForPreviewBegin = true
+            return
+        end
+
+        self:SetupPreview()
+    end
+end
+
+function ZO_ItemPreview_Shared:SetupPreview()
+    if self.maintainsPreviewCollection then
+        SetPreviewCollectionShown(self.previewCollectionId, true)
+    end
+
+    self:RefreshDynamicFramingOpening()
+    self:RefreshPreviewInEmptyWorld()
+    EVENT_MANAGER:RegisterForUpdate("ZO_ItemPreview_Shared", PREVIEW_UPDATE_INTERVAL_MS, function(...) self:OnUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_ItemPreview_Shared", EVENT_SCREEN_RESIZED, self.OnScreenResized)
+    self.waitingForPreviewBegin = false
+
+    if self.queuedPreviewData then
+        self:SharedPreviewSetup(self.queuedPreviewData.previewType, unpack(self.queuedPreviewData.data))
+        self.queuedPreviewData = nil
     end
 end
 
@@ -347,18 +473,26 @@ function ZO_ItemPreview_Shared:OnPreviewHidden()
     self:EndCurrentPreview()
 
     SetInteractionUsingInteractCamera(true)
-    ClearPreviewInEmptyWorld()
    
-    EndPreviewMode()
+   if self.maintainsPreviewCollection then
+        RemovePreviewCollection(self.previewCollectionId)
+        self.previewCollectionId = 0
+   end
+
+    DisablePreviewMode()
+    self.enabledPreview = false
 
     self.forcePreparePreview = true
     self:SetHorizontalPaddings(0, 0)
     self.previewBufferMS = nil
     self:SetDynamicFramingConsumedSpace(0, 0)
     self:SetPreviewInEmptyWorld(false)
+    self.maintainsPreviewCollection = false
+    self.waitingForPreviewBegin = false
+    self.queuedPreviewData = nil
 end
 
-function ZO_ItemPreview_Shared:EndCurrentPreview()
+function ZO_ItemPreview_Shared:ResetCurrentPreviewObject()
     if self.currentPreviewTypeObject then
         self.currentPreviewTypeObject:ResetStaticParameters()
     end
@@ -369,8 +503,29 @@ function ZO_ItemPreview_Shared:EndCurrentPreview()
     self.numPreviewVariations = 0
     self.previewVariationIndex = 0
     self:SetVariationControlsHidden(true)
+end
+
+function ZO_ItemPreview_Shared:EndCurrentPreview()
+    self:ResetCurrentPreviewObject()
 
     EndCurrentItemPreview()
+end
+
+function ZO_ItemPreview_Shared:RefreshState()
+    self:EndCurrentPreview()
+
+    if self.previewCollectionId ~= 0 then
+        RemovePreviewCollection(self.previewCollectionId)
+        self.previewCollectionId = 0
+    end
+
+    if self.maintainsPreviewCollection then
+        self.previewCollectionId = AddPreviewCollection()
+        SetPreviewCollectionShown(self.previewCollectionId, true)
+    end
+
+    self:RefreshDynamicFramingOpening()
+    self:RefreshPreviewInEmptyWorld()
 end
 
 function ZO_ItemPreview_Shared:GetFragment()
@@ -378,6 +533,19 @@ function ZO_ItemPreview_Shared:GetFragment()
 end
 
 function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
+    if self.waitingForPreviewBegin then
+        self.queuedPreviewData = 
+        {
+            previewType = previewType,
+            data = { ... }
+        }
+        return
+    end
+
+    if not GetPreviewModeEnabled() then
+        return
+    end
+
     if self:IsCurrentlyPreviewing(previewType, ...) then
         return
     end
@@ -444,6 +612,25 @@ end
 
 function ZO_ItemPreview_Shared:PreviewStoreEntryAsFurniture(storeEntryIndex)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE, storeEntryIndex)
+end
+
+function ZO_ItemPreview_Shared:PreviewOutfit(outfitIndex)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, self.previewCollectionId, outfitIndex)
+end
+
+do
+    local UNEQUIPPED_OUTFIT_INDEX = nil
+
+    function ZO_ItemPreview_Shared:PreviewUnequipOutfit()
+        self:SharedPreviewSetup(ZO_ITEM_PREVIEW_OUTFIT, self.previewCollectionId, UNEQUIPPED_OUTFIT_INDEX)
+    end
+end
+
+function ZO_ItemPreview_Shared:ResetOutfitPreview()
+    if self.currentPreviewType == ZO_ITEM_PREVIEW_OUTFIT then
+        self:ResetCurrentPreviewObject()
+        ClearPreviewingOutfitIndexInPreviewCollection(self.previewCollectionId)
+    end
 end
 
 function ZO_ItemPreview_Shared:ApplyOrBuffer()
@@ -528,6 +715,14 @@ function ZO_ItemPreview_Shared:SetPreviewInEmptyWorld(previewInEmptyWorld)
     self:RefreshPreviewInEmptyWorld()
 end
 
+function ZO_ItemPreview_Shared:SetMaintainsPreviewCollection(maintainsPreviewCollection)
+    self.maintainsPreviewCollection = maintainsPreviewCollection
+end
+
+function ZO_ItemPreview_Shared:GetPreviewCollectionId()
+    return self.previewCollectionId
+end
+
 do
     local EMPTY_WORLD_PREVIEW_SUN_AZIMUTH_RADIANS = math.rad(135)
     local EMPTY_WORLD_PREVIEW_SUN_ELEVATION_RADIANS = math.rad(45)
@@ -535,8 +730,6 @@ do
     function ZO_ItemPreview_Shared:RefreshPreviewInEmptyWorld()
         if self.previewInEmptyWorld then
             SetPreviewInEmptyWorld(EMPTY_WORLD_PREVIEW_SUN_AZIMUTH_RADIANS, EMPTY_WORLD_PREVIEW_SUN_ELEVATION_RADIANS)
-        else
-            ClearPreviewInEmptyWorld()
         end
     end
 end

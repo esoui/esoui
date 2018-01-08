@@ -68,9 +68,6 @@ function LoadingScreen_Base:Initialize()
     self.seenZones = {}
     self.currentRotation = 0
     self.lastUpdate = GetFrameTimeMilliseconds()
-    self.timeShowingTipMS = 0
-    self.pendingLoadingTips = {}
-    self.hasShownFirstTip = false
     self.animations = nil
 
     local zoneInfoContainer = self:GetNamedChild("ZoneInfoContainer")
@@ -132,15 +129,15 @@ function LoadingScreen_Base:SizeLoadingTexture()
 end
 
 function LoadingScreen_Base:OnAreaLoadStarted(evt, worldId, instanceNum, zoneName, zoneDescription, loadingTexture, instanceDisplayType)
-    self:Log("Load Screen - OnAreaLoadStarted")
+    self:Log(string.format("Load Screen - OnAreaLoadStarted - (%d) %s", worldId, zoneName == "" and "Unknown Zone" or zoneName))
     self:UpdateBattlegroundId(instanceDisplayType)
-    self:QueueShow(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+    self:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
 end
 
 function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, instanceDisplayType)
-    self:Log("Load Screen - OnPrepareForJump")
+    self:Log(string.format("Load Screen - OnPrepareForJump - %s", zoneName == "" and "Unknown Zone" or zoneName))
     self:UpdateBattlegroundId(instanceDisplayType)
-    self:QueueShow(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
+    self:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
 end
 
 function LoadingScreen_Base:HideLoadingScreen()
@@ -148,22 +145,8 @@ function LoadingScreen_Base:HideLoadingScreen()
 end
 
 function LoadingScreen_Base:OnResumeFromSuspend(evt)
-    self:QueueShow("", "", "", INSTANCE_DISPLAY_TYPE_NONE)
-end
-
-function LoadingScreen_Base:QueueShow(...)
-    self:Log("Load Screen - Queue Show")
-    if self:IsPreferredScreen() then
-        if not self.hasShownFirstTip then
-            self:Log("Load Screen - Queue Show - Show")
-            self.hasShownFirstTip = true
-            self.lastUpdate = GetFrameTimeMilliseconds()
-            self:Show(...)
-        else
-            self:Log("Load Screen - Queue Show - Added to Pending")
-            table.insert(self.pendingLoadingTips, {...})
-        end
-    end
+    self:Log("Load Screen - OnResumeFromSuspend")
+    self:Show("", "", "", INSTANCE_DISPLAY_TYPE_NONE)
 end
 
 local BATTLEGROUND_TEAM_TEXTURES =
@@ -181,103 +164,128 @@ local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
 }
 
 function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
-    self:Log("Load Screen - Show")
+    if self:IsPreferredScreen() then
+        self:Log("Load Screen - Show")
+        self.lastUpdate = GetFrameTimeMilliseconds()
 
-    --First configure the visuals
-    self:SizeLoadingTexture()
+        local wasAppGuiHidden = GetGuiHidden("app")
 
-    local isDefaultTexture = "" == loadingTexture
-    if isDefaultTexture then
-        loadingTexture = GetRandomLoadingScreenTexture()
-    end
+        --First configure the visuals
+        self:SizeLoadingTexture()
 
-    self.art:SetTexture(loadingTexture)
-
-    self.zoneName:SetHidden(isDefaultTexture)
-    self.zoneDescription:SetHidden(isDefaultTexture)
-    if self.descriptionBg then
-        self.descriptionBg:SetHidden(isDefaultTexture)
-    end
-
-    local showInstanceDisplayType = instanceDisplayType ~= INSTANCE_DISPLAY_TYPE_NONE and instanceDisplayType ~= INSTANCE_DISPLAY_TYPE_BATTLEGROUND
-    self.instanceTypeIcon:SetHidden(not showInstanceDisplayType)
-    self.instanceType:SetHidden(not showInstanceDisplayType)
-
-    if not isDefaultTexture then
-        if self.battlegroundId ~= 0 then
-            local gameType = GetBattlegroundGameType(self.battlegroundId)
-            local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", gameType)
-            local battlegroundDescription = GetBattlegroundDescription(self.battlegroundId)
-
-            self.zoneName:SetText(LocalizeString("<<C:1>>", gameTypeString))
-            self:SetZoneDescription(LocalizeString("<<1>>", battlegroundDescription))
-
-            local activityAlliance = GetLatestActivityAlliance()
-            if activityAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
-                local r, g, b, a = GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, activityAlliance)
-                local battlegroundTeamName = ZO_ColorizeString(r, g, b, GetString("SI_BATTLEGROUNDALLIANCE", activityAlliance))
-
-                local teamIcon
-                if IsInGamepadPreferredMode() then
-                    teamIcon = GAMEPAD_BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
-                else
-                    teamIcon = BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
-                end
-
-                self.instanceType:SetText(LocalizeString("<<1>>", battlegroundTeamName))
-                self.instanceType:SetHidden(false)
-                self.instanceTypeIcon:SetTexture(teamIcon)
-                self.instanceTypeIcon:SetHidden(false)
+        local isDefaultTexture = "" == loadingTexture
+        if isDefaultTexture then
+            if not self.randomLoadingTexture then
+                self.randomLoadingTexture = GetRandomLoadingScreenTexture()
             end
-        else
-            if showInstanceDisplayType then
-                self.instanceTypeIcon:SetTexture(GetInstanceDisplayTypeIcon(instanceDisplayType))
-                self.instanceType:SetText(GetString("SI_INSTANCEDISPLAYTYPE", instanceDisplayType))
-            end
+            loadingTexture = self.randomLoadingTexture
+        end
 
-            self.zoneName:SetText(LocalizeString("<<C:1>>", zoneName))
+        self.art:SetTexture(loadingTexture)
 
-            if self.seenZones[zoneName] and math.random() <= LOADING_TIP_PERCENTAGE then
-                local tip = GetLoadingTip()
-                if tip ~= "" then
-                    self:SetZoneDescription(tip)
-                else
-                    self:SetZoneDescription(LocalizeString("<<1>>", zoneDescription))
+        self.zoneName:SetHidden(isDefaultTexture)
+        self.zoneDescription:SetHidden(isDefaultTexture)
+        if self.descriptionBg then
+            self.descriptionBg:SetHidden(isDefaultTexture)
+        end
+
+        local showInstanceDisplayType = instanceDisplayType ~= INSTANCE_DISPLAY_TYPE_NONE and instanceDisplayType ~= INSTANCE_DISPLAY_TYPE_BATTLEGROUND
+        self.instanceTypeIcon:SetHidden(not showInstanceDisplayType)
+        self.instanceType:SetHidden(not showInstanceDisplayType)
+
+        if not isDefaultTexture then
+            if self.battlegroundId ~= 0 then
+                local gameType = GetBattlegroundGameType(self.battlegroundId)
+                local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", gameType)
+                local battlegroundDescription = GetBattlegroundDescription(self.battlegroundId)
+
+                self.zoneName:SetText(LocalizeString("<<C:1>>", gameTypeString))
+                self:SetZoneDescription(LocalizeString("<<1>>", battlegroundDescription))
+
+                local activityAlliance = GetLatestActivityAlliance()
+                if activityAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
+                    local r, g, b, a = GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, activityAlliance)
+                    local battlegroundTeamName = ZO_ColorizeString(r, g, b, GetString("SI_BATTLEGROUNDALLIANCE", activityAlliance))
+
+                    local teamIcon
+                    if IsInGamepadPreferredMode() then
+                        teamIcon = GAMEPAD_BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
+                    else
+                        teamIcon = BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
+                    end
+
+                    self.instanceType:SetText(LocalizeString("<<1>>", battlegroundTeamName))
+                    self.instanceType:SetHidden(false)
+                    self.instanceTypeIcon:SetTexture(teamIcon)
+                    self.instanceTypeIcon:SetHidden(false)
                 end
             else
-                self:SetZoneDescription(LocalizeString("<<1>>", zoneDescription))
+                if showInstanceDisplayType then
+                    self.instanceTypeIcon:SetTexture(GetInstanceDisplayTypeIcon(instanceDisplayType))
+                    self.instanceType:SetText(GetString("SI_INSTANCEDISPLAYTYPE", instanceDisplayType))
+                end
+
+                self.zoneName:SetText(LocalizeString("<<C:1>>", zoneName))
+
+                --Only do this random roll once when the load screen is first brought up, not everytime the info changes
+                if wasAppGuiHidden then
+                    self.preferTipOverZoneDescriptionIfZoneHasBeenSeen = math.random() <= LOADING_TIP_PERCENTAGE
+                end
+
+                --Only update this on a new zone
+                if self.lastZoneName ~= zoneName then
+                    local showTipInsteadOfZoneDescription
+                    if self.seenZones[zoneName] then
+                        showTipInsteadOfZoneDescription = self.preferTipOverZoneDescriptionIfZoneHasBeenSeen
+                    else
+                        showTipInsteadOfZoneDescription = false
+                    end
+                    self.lastZoneName = zoneName
+                    self.seenZones[zoneName] = true
+
+                    if showTipInsteadOfZoneDescription then
+                        if not self.tip then
+                            self.tip = GetLoadingTip()
+                        end
+
+                        if self.tip ~= "" then
+                            self:SetZoneDescription(self.tip)
+                        else
+                            self:SetZoneDescription(LocalizeString("<<1>>", zoneDescription))
+                        end
+                    else
+                        self:SetZoneDescription(LocalizeString("<<1>>", zoneDescription))
+                    end
+                end
             end
-
-            self.seenZones[zoneName] = true
         end
+
+        --Then if we are presently hiding the UI then stop that and reset it to the start. This will trigger the actions on the
+        --animation finishing causing it to hide the load screen and remove the keybinds so this needs to be done before we show
+        --the load screen and add the keybinds
+        if self.animations:IsPlaying() then
+            self.animations:PlayInstantlyToStart()
+        end
+
+        --Here we begin showing the load screen.
+
+        --First show the whole GUI, this needs to be done immediately to show anything
+        SetGuiHidden("app", false)
+        --also show the loadscreen top level
+        self:SetHidden(false)
+        --also show the solid black texture that blocks out the world
+        self.bgTexture:SetHidden(false)
+        --also add the keybinds
+        if not IsActionLayerActiveByNameApp("LoadingScreen") then
+            PushActionLayerByNameApp("LoadingScreen")
+        end
+        --also fade in the spinner
+        self.spinnerFadeAnimation:PlayForward()
+
+        --For the main animation that brings in the art (as well as some other things) we are waiting until the texture is loaded in memory. This
+        --is checked continuously in update
+        self.loadScreenTextureLoaded = false
     end
-
-    --Then if we are presently hiding the UI then stop that and reset it to the start. This will trigger the actions on the
-    --animation finishing causing it to hide the load screen and remove the keybinds so this needs to be done before we show
-    --the load screen and add the keybinds
-    if self.animations:IsPlaying() then
-        self.animations:PlayInstantlyToStart()
-    end
-
-    --Here we begin showing the load screen.
-
-    --First show the whole GUI, this needs to be done immediately to show anything
-    SetGuiHidden("app", false)
-    --also show the loadscreen top level
-    self:SetHidden(false)
-    --also show the solid black texture that blocks out the world
-    self.bgTexture:SetHidden(false)
-    --also add the keybinds
-    if not IsActionLayerActiveByNameApp("LoadingScreen") then
-        PushActionLayerByNameApp("LoadingScreen")
-    end
-    --also fade in the spinner
-    self.spinnerFadeAnimation:PlayForward()
-    self.timeShowingTipMS = 0
-
-    --For the main animation that brings in the art (as well as some other things) we are waiting until the texture is loaded in memory. This
-    --is checked continuously in update
-    self.loadScreenTextureLoaded = false
 end
 
 function LoadingScreen_Base:Hide()
@@ -296,23 +304,16 @@ function LoadingScreen_Base:Hide()
     self.bgTexture:SetHidden(true)
     self.animations:PlayBackward()
     self.spinnerFadeAnimation:PlayBackward()
-
-    if #self.pendingLoadingTips > 0 then
-        -- App doesn't load libraries, so we don't have ZO_ClearTable, and it seems like a huge waste to bring it all over for this one call
-        for index in pairs(self.pendingLoadingTips) do
-            self.pendingLoadingTips[index] = nil
-        end
-    end
-    self.hasShownFirstTip = false
+    
     self:ClearBattlegroundId()
-end
 
-function LoadingScreen_Base:UpdateLoadingTip(delta)
-    self.timeShowingTipMS = self.timeShowingTipMS + delta
-    if #self.pendingLoadingTips > 0 and self.timeShowingTipMS > MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS then
-        local oldestPendingTip = table.remove(self.pendingLoadingTips, 1)
-        self:Show(unpack(oldestPendingTip))
-    end
+    --State for controlling the description or loading tip decision
+    self.preferTipOverZoneDescriptionIfZoneHasBeenSeen = nil
+    self.tip = nil
+    self.lastZoneName = nil
+
+    --State for controlling the load screen texture when it isn't set by a def
+    self.randomLoadingTexture = nil
 end
 
 function LoadingScreen_Base:Update()
@@ -337,8 +338,6 @@ function LoadingScreen_Base:Update()
         self.currentRotation = (self.currentRotation + numFramesToIncrease * ROTATION_PER_FRAME) % MAX_ROTATION
 
         self.spinner:SetTextureRotation(self.currentRotation)
-
-        self:UpdateLoadingTip(delta)
     end
 end
 

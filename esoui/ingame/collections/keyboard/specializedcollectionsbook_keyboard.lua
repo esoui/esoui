@@ -1,5 +1,3 @@
-local NOTIFICATIONS_PROVIDER = NOTIFICATIONS:GetCollectionsProvider()
-
 ZO_SpecializedCollectionsBook_Keyboard = ZO_Object:Subclass()
 
 function ZO_SpecializedCollectionsBook_Keyboard:New(...)
@@ -13,7 +11,11 @@ function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, .
     self.control = control
 
     self.sceneName = sceneName
-    self.collectibleCategoryTypes = { ... }
+
+    self.collectibleCategoryTypes = {}
+    for i = 1, select("#", ...) do
+        self.collectibleCategoryTypes[select(i, ...)] = true
+    end
     
     self:InitializeControls()
     self:InitializeNavigationList()
@@ -39,11 +41,6 @@ function ZO_SpecializedCollectionsBook_Keyboard:InitializeControls()
     self.descriptionLabel = scrollSection:GetNamedChild("Description")
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:DoesCollectibleHaveAlert(data)
-    --Override for additional checks if a collectible has been updated
-    return IsCollectibleNew(data.collectibleId)
-end
-
 function ZO_SpecializedCollectionsBook_Keyboard:InitializeNavigationList()
     self.navigationTree = ZO_Tree:New(self.navigationList:GetNamedChild("ScrollChild"), 60, -10, 300)
 
@@ -67,34 +64,33 @@ function ZO_SpecializedCollectionsBook_Keyboard:InitializeNavigationList()
     self.navigationTree:AddTemplate("ZO_SpecializedCollection_Book_NavigationHeader_Keyboard", TreeHeaderSetup, nil, nil, nil, 0)
 
     local function TreeEntrySetup(node, control, data, open)
-        control:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
+        control:SetText(data:GetFormattedName())
         control:SetSelected(node:IsSelected())
 
         control.statusIcon = control:GetNamedChild("StatusIcon")
-        data.notificationId = NOTIFICATIONS_PROVIDER:GetNotificationIdForCollectible(data.collectibleId)
-        local isNew = data.notificationId or self:DoesCollectibleHaveAlert(data)
-        control.statusIcon:SetHidden(not isNew)
+        control.statusIcon:SetHidden(not data:IsNew())
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
 
          if selected then
-            self.selectedId = data.collectibleId
+            self.selectedId = data:GetId()
             if not reselectingDuringRebuild then
                 self:RefreshDetails()
             end
 
-            if data.notificationId then
-                RemoveCollectibleNotification(data.notificationId)
+            local notificationId = data:GetNotificationId()
+            if notificationId then
+                RemoveCollectibleNotification(notificationId)
             end
 
-            ClearCollectibleNewStatus(data.collectibleId)
+            ClearCollectibleNewStatus(data:GetId())
         end
     end
 
     local function TreeEntryEquality(left, right)
-        return left.name == right.name
+        return left:GetName() == right:GetName()
     end
 
     self.navigationTree:AddTemplate("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
@@ -114,11 +110,10 @@ function ZO_SpecializedCollectionsBook_Keyboard:RefreshListIfDirty()
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:InitializeEvents()
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectiblesUpdated", function() self:OnCollectionUpdated() end)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectionNotificationRemoved", function(...) self:OnCollectionNotificationRemoved(...) end)
-    COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnCollectibleNewStatusRemoved", function(...) self:OnCollectibleNewStatusRemoved(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:GetSelectedData()
@@ -144,10 +139,10 @@ end
 
 do
     local function DefaultSort(entry1, entry2)
-        if entry1.sortOrder ~= entry2.sortOrder then
-            return entry1.sortOrder < entry2.sortOrder
+        if entry1:GetSortOrder() ~= entry2:GetSortOrder() then
+            return entry1:GetSortOrder() < entry2:GetSortOrder()
         else
-            return entry1.name < entry2.name
+            return entry1:GetName() < entry2:GetName()
         end
     end
 
@@ -156,39 +151,13 @@ do
     end
 end
 
+
 function ZO_SpecializedCollectionsBook_Keyboard:GetRelevantCollectibles()
-    local collectiblesData = {}
-
-    for _, collectibleCategoryType in ipairs(self.collectibleCategoryTypes) do
-        for i = 1, GetTotalCollectiblesByCategoryType(collectibleCategoryType) do
-            local collectibleId = GetCollectibleIdFromType(collectibleCategoryType, i)
-            local name, description, _, _, unlocked, purchasable, active, _, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
-            if not isPlaceholder then
-                if hint and hint ~= "" then
-                    hint = ZO_CachedStrFormat(ZO_CACHED_STR_FORMAT_NO_FORMATTER, hint)
-                end
-
-                local data =
-                {
-                    collectibleId = collectibleId,
-                    name = name,
-                    description = description,
-                    background = GetCollectibleKeyboardBackgroundImage(collectibleId),
-                    unlockState = GetCollectibleUnlockStateById(collectibleId),
-                    active = active,
-                    purchasable = purchasable,
-                    unlocked = unlocked,
-                    hint = hint,
-                    nickname = GetCollectibleNickname(collectibleId),
-                    referenceId = GetCollectibleReferenceId(collectibleId),
-                    sortOrder = GetCollectibleSortOrder(collectibleId),
-                }
-
-                self:SetupAdditionalCollectibleData(data)
-                table.insert(collectiblesData, data)
-            end
-        end
+    local function IsRelevantCategoryType(collectibleData)
+        return self.collectibleCategoryTypes[collectibleData:GetCategoryType()]
     end
+
+    local collectiblesData = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(ZO_CollectibleData.IsShownInCollection, IsRelevantCategoryType)
 
     self:SortCollectibleData(collectiblesData)
 
@@ -213,7 +182,7 @@ function ZO_SpecializedCollectionsBook_Keyboard:GetCategorizedLists()
     }
 
     for _, data in ipairs(collectiblesData) do
-        if data.unlocked then
+        if data:IsUnlocked() then
             table.insert(unlockedList, data)
         else
             table.insert(lockedList, data)
@@ -239,12 +208,12 @@ function ZO_SpecializedCollectionsBook_Keyboard:RefreshList()
 
             for _, collectibleData in ipairs(categorizedList.collectibles) do
                 local node = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", collectibleData, headerNode, SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED)
-                self.collectibleIdToTreeNode[collectibleData.collectibleId] = node
+                self.collectibleIdToTreeNode[collectibleData:GetId()] = node
                 if not firstNode then
                     firstNode = node
                 end
 
-                if self.selectedId and self.selectedId == collectibleData.collectibleId then
+                if self.selectedId and self.selectedId == collectibleData:GetId() then
                     selectedNode = node
                 end
             end
@@ -264,9 +233,9 @@ function ZO_SpecializedCollectionsBook_Keyboard:RefreshDetails()
     local data = self.navigationTree:GetSelectedData()
 
     if data then
-        self.imageControl:SetTexture(data.background)
-        self.nameLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, data.name))
-        self.descriptionLabel:SetText(data.description)
+        self.imageControl:SetTexture(data:GetKeyboardBackgroundImage())
+        self.nameLabel:SetText(data:GetFormattedName())
+        self.descriptionLabel:SetText(data:GetDescription())
     end
 end
 
@@ -283,16 +252,10 @@ function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleUpdated(collectible
         if node then
             local data = node:GetData()
 
-            local wasActive = data.active
-            data.active = select(7, GetCollectibleInfo(collectibleId))
-            data.nickname = GetCollectibleNickname(collectibleId)
-            local unlockState = GetCollectibleUnlockStateById(collectibleId)
-            if data.unlockState ~= unlockState then
+            if data:IsLocked() then
                 self:RefreshList()
             else
-                if data.active ~= wasActive then
-                    node:RefreshControl()
-                end
+                node:RefreshControl()
                 self:RefreshDetails()
             end
         end
@@ -310,11 +273,11 @@ function ZO_SpecializedCollectionsBook_Keyboard:UpdateCollectibleTreeEntry(colle
     end
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:OnCollectionNotificationRemoved(notificationId, collectibleId)
+function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleNotificationRemoved(notificationId, collectibleId)
     self:UpdateCollectibleTreeEntry(collectibleId)
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleNewStatusRemoved(collectibleId)
+function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleNewStatusCleared(collectibleId)
     self:UpdateCollectibleTreeEntry(collectibleId)
 end
 

@@ -250,7 +250,7 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
                 self:Create()
             end,
 
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
+            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
         },
 
         -- Clear selections

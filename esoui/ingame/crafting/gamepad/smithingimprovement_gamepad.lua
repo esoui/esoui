@@ -415,7 +415,7 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
         
             callback = function() self:ConfirmImprove() end,
 
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() and self:CanImprove() end,
+            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() and self:CanImprove() end,
         },
 
         -- Item Options
@@ -618,10 +618,24 @@ function ZO_GamepadImprovementInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
     self:SetCustomSort(function(bagId, slotIndex) return bagId end) -- sort equipped items (BAG_WORN) to the top of the list
-    self:SetCustomBestItemCategoryNameFunction(function(slotData)
-                                                    slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTYPE", slotData.itemType))
-                                                    if slotData.bagId == BAG_WORN then
-                                                        slotData.bestItemCategoryName = zo_strformat(GetString(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM), slotData.bestItemCategoryName)
+    self:SetCustomBestItemCategoryNameFunction(function(slotData)                                                
+                                                    local entryName
+                                                    if slotData.itemType == ITEMTYPE_WEAPON then
+                                                        local weaponType = GetItemWeaponType(slotData.bagId, slotData.slotIndex)
+                                                        if weaponType == WEAPONTYPE_SHIELD then
+                                                            entryName = GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+                                                        else
+                                                            entryName = GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS)
+                                                        end
+                                                    elseif slotData.itemType == ITEMTYPE_ARMOR then
+                                                        entryName = GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+                                                    end
+
+                                                    if slotData.bagId == BAG_WORN then                                                        
+                                                        slotData.bestItemCategoryName = zo_strformat(GetString(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM), entryName)
+                                                    else
+                                                        --Use the category name that it is in (weapon or apparel)
+                                                        slotData.bestItemCategoryName = entryName
                                                     end
                                                end)
 end

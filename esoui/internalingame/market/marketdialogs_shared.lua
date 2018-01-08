@@ -48,7 +48,7 @@ ESO_Dialogs["CROWN_STORE_PREVIEW_HOUSE"] =
             callback =  function(dialog)
                             local houseId = GetMarketProductHouseId(dialog.data.marketProductId)
                             RequestJumpToHouse(houseId)
-                            ShowRemoteBaseScene()
+                            SCENE_MANAGER:RequestShowLeaderBaseScene()
                         end,
             keybind = "DIALOG_PRIMARY",
         },

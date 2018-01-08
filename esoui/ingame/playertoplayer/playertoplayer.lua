@@ -13,6 +13,7 @@ local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 10
 local INTERACT_TYPE_GROUP_ELECTION = 11
 local INTERACT_TYPE_DUEL_INVITE = 12
 local INTERACT_TYPE_LFG_READY_CHECK = 13
+local INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS = 14
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
@@ -409,6 +410,25 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveScriptedWorldEventFromIncomingQueue(eventId)
     end
 
+    local function OnLevelUpRewardUpdated()
+        local pendingRewardLevel = GetPendingLevelUpRewardLevel()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS)
+
+        if pendingRewardLevel then
+            local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS, nil, nil, zo_strformat(SI_LEVEL_UP_REWARDS_AVAILABLE_NOTIFICATION, pendingRewardLevel),
+            function()
+                if IsInGamepadPreferredMode() then
+                    SCENE_MANAGER:Show("LevelUpRewardsClaimGamepad")
+                else
+                    SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CHARACTER)
+                end
+            end)
+            data.dontRemoveOnAccept = true
+            data.acceptText = GetString(SI_LEVEL_UP_REWARDS_OPEN_CLAIM_SCREEN_TEXT)
+            data.declineText = GetString(SI_LEVEL_UP_REWARDS_DISMISS_NOTIFICATION)
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_GROUP_INVITE_RECEIVED, OnGroupInviteReceived)
@@ -432,6 +452,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
+    self.control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, OnLevelUpRewardUpdated)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
@@ -515,7 +536,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnPlayerActivated()
         local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
-        if duelState == DUEL_STATE_CONSIDERING then
+        if duelState == DUEL_STATE_INVITE_CONSIDERING then
             OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName)
         end
 
@@ -564,6 +585,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
         if HasPendingGroupElectionVote() then
             OnGroupElectionNotificationAdded()
+        end
+
+        if HasPendingLevelUpReward() then
+            OnLevelUpRewardUpdated()
         end
     end
 
@@ -620,7 +645,9 @@ local function NotificationDeferred(data)
 end
 
 local function NotificationAccepted(data)
-    data.pendingResponse = false
+    if not data.dontRemoveOnAccept then
+        data.pendingResponse = false
+    end
     if data.acceptCallback then
         data.acceptCallback()
         if data.uniqueSounds then
@@ -633,7 +660,9 @@ local function NotificationAccepted(data)
 end
 
 local function NotificationDeclined(data)
-    data.pendingResponse = false
+    if not data.dontRemoveOnDecline then
+        data.pendingResponse = false
+    end
     if data.declineCallback then
         data.declineCallback()
         if data.uniqueSounds then
@@ -865,10 +894,16 @@ function ZO_PlayerToPlayer:TryDisplayingIncomingRequests()
             self:StopInteraction()
             return true
         elseif ShouldUseRadialNotificationMenu(incomingEntryToRespondTo) then
-            LockCameraRotation(true)
-            RETICLE:RequestHidden(true)
-            self.targetLabel:SetHidden(true)
-            self:ShowRadialNotificationMenu(incomingEntryToRespondTo)
+            --if there is only one option just accept it instead of showing a radial with one option
+            if not incomingEntryToRespondTo.declineCallback and not incomingEntryToRespondTo.deferDecisionCallback then
+                NotificationAccepted(incomingEntryToRespondTo)
+            else
+                LockCameraRotation(true)
+                RETICLE:RequestHidden(true)
+                self.targetLabel:SetHidden(true)
+                self:ShowRadialNotificationMenu(incomingEntryToRespondTo)
+            end
+
             return true
         end
     end
@@ -939,7 +974,9 @@ end
 function ZO_PlayerToPlayer:Accept(incomingEntry)
     local index = self:GetIndexFromIncomingQueue(incomingEntry)
     if index then
-        self:RemoveEntryFromIncomingQueueTable(index)
+        if not incomingEntry.dontRemoveOnAccept then
+            self:RemoveEntryFromIncomingQueueTable(index)
+        end
         NotificationAccepted(incomingEntry)
     else
         self:OnPromptAccepted()
@@ -949,7 +986,9 @@ end
 function ZO_PlayerToPlayer:Decline(incomingEntry)
     local index = self:GetIndexFromIncomingQueue(incomingEntry)
     if index then
-        self:RemoveEntryFromIncomingQueueTable(index)
+        if not incomingEntry.dontRemoveOnDecline then
+            self:RemoveEntryFromIncomingQueueTable(index)
+        end
         NotificationDeclined(incomingEntry)
     else
         self:OnPromptDeclined()
@@ -958,15 +997,21 @@ end
 
 --With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
-    if(self.responding and #self.incomingQueue > 0) then
-        local incomingEntryToRespondTo = self:RemoveEntryFromIncomingQueueTable(1)
+    if self.responding and #self.incomingQueue > 0 then
+        local incomingEntryToRespondTo = self.incomingQueue[1]
+        if not incomingEntryToRespondTo.dontRemoveOnAccept then
+            self:RemoveEntryFromIncomingQueueTable(1)
+        end
         NotificationAccepted(incomingEntryToRespondTo)
     end
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
-    if(self.responding and #self.incomingQueue > 0) then
-        local incomingEntryToRespondTo = self:RemoveEntryFromIncomingQueueTable(1)
+    if self.responding and #self.incomingQueue > 0 then
+        local incomingEntryToRespondTo = self.incomingQueue[1]
+        if not incomingEntryToRespondTo.dontRemoveOnDecline then
+            self:RemoveEntryFromIncomingQueueTable(1)
+        end
         NotificationDeclined(incomingEntryToRespondTo)
     end
 end
@@ -1128,10 +1173,16 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
                     self:ShowResponseActionKeybind(self:GetGamepadStringFromInteractionType(incomingEntry.incomingType))
                 end
             else
-                local acceptText = incomingEntry.acceptText or GetString(SI_DIALOG_ACCEPT)
-                local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
-                self.promptKeybindButton1:SetText(acceptText)
-                self.promptKeybindButton2:SetText(declineText)
+                if incomingEntry.acceptCallback then
+                    local acceptText = incomingEntry.acceptText or GetString(SI_DIALOG_ACCEPT)
+                    self.promptKeybindButton1:SetText(acceptText)
+                    self.promptKeybindButton1:SetHidden(false)
+                end
+                if incomingEntry.declineCallback then
+                    local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
+                    self.promptKeybindButton2:SetText(declineText)
+                    self.promptKeybindButton2:SetHidden(false)
+                end
                 self.shouldShowNotificationKeybindLayer = true
             end
 
@@ -1176,6 +1227,8 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.actionKeybindButton:SetHidden(true)
         self.actionKeybindButton:SetEnabled(true)
         self.additionalInfo:SetHidden(true)
+        self.promptKeybindButton1:SetHidden(true)
+        self.promptKeybindButton2:SetHidden(true)
 
         if (not self.isInteracting) or (not IsConsoleUI()) then
             self.gamerID:SetHidden(true)
@@ -1204,9 +1257,6 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         self:SetHidden(hideSelf)
         self.targetLabel:SetHidden(hideTargetLabel)
-
-        self.promptKeybindButton1:SetHidden(not self.shouldShowNotificationKeybindLayer)
-        self.promptKeybindButton2:SetHidden(not self.shouldShowNotificationKeybindLayer)
 
         local isNotificationLayerShown = IsActionLayerActiveByName(notificationsKeybindLayerName)
 

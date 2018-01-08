@@ -132,7 +132,7 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
     slotControl.stackCount = stackCount
     local stackCountLabel = GetControl(slotControl, "StackCount")
     if stackCount > 1 or slotControl.alwaysShowStackCount then
-        stackCountLabel:SetText(ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
     else
         stackCountLabel:SetText("")
     end
@@ -380,8 +380,8 @@ local function CanUseSecondaryActionOnSlot(inventorySlot)
            and not (ZO_Store_IsShopping and ZO_Store_IsShopping())
            and not IsSendingMail() 
            and not (TRADE_WINDOW and TRADE_WINDOW:IsTrading())
-           and not PLAYER_INVENTORY:IsBanking()
-           and not PLAYER_INVENTORY:IsGuildBanking()
+           and not IsBankOpen()
+           and not IsGuildBankOpen()
 end
 
 local function CanUseItemQuestItem(inventorySlot)
@@ -405,8 +405,8 @@ local function TryUseQuestItem(inventorySlot, buttonId)
     end
 end
 
-function ZO_InventorySlot_CanSplitItemStack(inventorySlot)
-    if(PLAYER_INVENTORY:DoesBagHaveEmptySlot(inventorySlot.bagId)) then
+function ZO_InventorySlot_CanSplitItemStack(inventorySlot)    
+    if FindFirstEmptySlotInBag(inventorySlot.bagId) ~= nil then
         return ZO_InventorySlot_GetStackCount(inventorySlot) > 1
     end
 end
@@ -710,7 +710,7 @@ local function PlaceInventoryItemInStorage(targetInventorySlot)
 end
 
 local function TryBankItem(inventorySlot)
-    if(PLAYER_INVENTORY:IsBanking()) then
+    if IsBankOpen() then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         if(bag == BAG_BANK or bag == BAG_SUBSCRIBER_BANK) then
             --Withdraw
@@ -1091,8 +1091,18 @@ end
 
 local function BuyItemFromStore(inventorySlot)
     local storeItemId = inventorySlot.index
-    BuyStoreItem(storeItemId, 1)
 
+    local itemData = {
+        currencyType1 = inventorySlot.specialCurrencyType1,
+        currencyType2 = inventorySlot.specialCurrencyType2,
+        price = inventorySlot.moneyCost,
+        currencyQuantity1 = inventorySlot.specialCurrencyQuantity1,
+        currencyQuantity2 = inventorySlot.specialCurrencyQuantity2,
+        meetsRequirementsToBuy = inventorySlot.meetsRequirements
+    }
+    if not ZO_Currency_TryShowThresholdDialog(storeItemId, inventorySlot.stackCount, itemData) then
+        BuyStoreItem(storeItemId, 1)
+    end
     return true
 end
 
@@ -1493,8 +1503,9 @@ local renameActions =
 {
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(slot, slotActions)
                                                 local collectibleId = slot.collectibleId
-                                                if IsCollectibleRenameable(collectibleId) then
-                                                    slotActions:AddSlotAction(SI_COLLECTIBLE_ACTION_RENAME, function() ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId }) end, "keybind1")
+                                                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                                                if collectibleData and collectibleData:IsRenameable() then
+                                                    slotActions:AddSlotAction(SI_COLLECTIBLE_ACTION_RENAME, ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId), "keybind1")
                                                 end
                                             end
 }
@@ -1518,13 +1529,13 @@ local actionHandlers =
                         end,
 
     ["bank_deposit"]=   function(inventorySlot, slotActions)
-                            if(PLAYER_INVENTORY:IsBanking()) then
+                            if IsBankOpen() then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_DEPOSIT, function() TryBankItem(inventorySlot) end, "primary")
                             end
                         end,
 
     ["bank_withdraw"] = function(inventorySlot, slotActions)
-                            if(PLAYER_INVENTORY:IsBanking()) then
+                            if IsBankOpen() then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function() TryBankItem(inventorySlot) end, "primary")
                             end
                         end,

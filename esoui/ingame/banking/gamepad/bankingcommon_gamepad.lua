@@ -343,7 +343,11 @@ function ZO_BankingCommon_Gamepad:RefreshHeaderData()
         headerData.data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_FUNDS_LABEL)
         headerData.data2Text = function(...) return self:SetCurrentCarriedAmount(...) end
     else
-        headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_CAPACITY_LABEL)
+        if GetBankingBag() == BAG_BANK then
+            headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_CAPACITY_LABEL)
+        else
+            headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_HOUSE_BANK_CAPACITY_LABEL)
+        end
         headerData.data1Text = function(...) return self:SetBankCapacityHeaderText(...) end
 
         headerData.data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_CAPACITY_LABEL)

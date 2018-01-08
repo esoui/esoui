@@ -40,6 +40,9 @@ function ZO_SharedInventoryManager:Initialize()
             -- of bank contents to the Craft Bag on joining a region
             self:RefreshInventory(BAG_BANK)
             self:RefreshInventory(BAG_SUBSCRIBER_BANK)
+            for bag = BAG_HOUSE_BANK_ONE, BAG_HOUSE_BANK_TEN do
+                self:RefreshInventory(bag)
+            end
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -482,6 +485,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
         slot.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, slot.rawName)
     end
     slot.requiredLevel = GetItemRequiredLevel(bagId, slotIndex)
+    slot.requiredChampionPoints = GetItemRequiredChampionPoints(bagId, slotIndex)
 
     if not wasSameItemInSlotBefore then
         slot.itemType, slot.specializedItemType = GetItemType(bagId, slotIndex)
@@ -572,20 +576,20 @@ function ZO_SharedInventoryManager:PerformSingleUpdateOnQuestCache(questIndex)
         -- First update all the tools for the quest...
         for toolIndex = 1, GetQuestToolCount(questIndex) do
             local icon, stack, _, name, questItemId = GetQuestToolInfo(questIndex, toolIndex)
-            self:CreateQuestData(icon, stack, questIndex, toolIndex, QUEST_MAIN_STEP_INDEX, nil, name, questItemId, SEARCH_TYPE_QUEST_TOOL)
+            self:CreateQuestData(icon, stack, questIndex, toolIndex, QUEST_MAIN_STEP_INDEX, nil, name, questItemId)
         end
 
         -- Then update all the collectable items...
         for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(questIndex) do
             for conditionIndex = 1, GetJournalQuestNumConditions(questIndex, stepIndex) do
                 local icon, stack, name, questItemId = GetQuestItemInfo(questIndex, stepIndex, conditionIndex)
-                self:CreateQuestData(icon, stack, questIndex, nil, stepIndex, conditionIndex, name, questItemId, SEARCH_TYPE_QUEST_ITEM)
+                self:CreateQuestData(icon, stack, questIndex, nil, stepIndex, conditionIndex, name, questItemId)
             end
         end
     end
 end
 
-function ZO_SharedInventoryManager:CreateQuestData(iconFile, stackCount, questIndex, toolIndex, stepIndex, conditionIndex, name, questItemId, searchType)
+function ZO_SharedInventoryManager:CreateQuestData(iconFile, stackCount, questIndex, toolIndex, stepIndex, conditionIndex, name, questItemId)
     if(stackCount > 0) then
         local questCache = self.questCache
 

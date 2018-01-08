@@ -27,6 +27,10 @@ function ZO_ParticleSystem:Initialize(particleClass)
     self:SetParticlesPerSecond(0)
 end
 
+function ZO_ParticleSystem:SetDuration(durationS)
+    self.durationS = durationS
+end
+
 function ZO_ParticleSystem:SetParticlesPerSecond(particlesPerSecond)
     self.particlesPerSecond = particlesPerSecond
     if particlesPerSecond > 0 then
@@ -96,18 +100,25 @@ function ZO_ParticleSystem:SetParticleParameter(...)
 end
 
 function ZO_ParticleSystem:Start()
-    PARTICLE_SYSTEM_MANAGER:AddParticleSystem(self)
-    self.startTimeS = GetGameTimeMilliseconds() / 1000
-    self.lastUpdateS = self.startTimeS
-    self.unusedDeltaS = 0
-    self.running = true
+    if not self.running then
+        PARTICLE_SYSTEM_MANAGER:AddParticleSystem(self)
+        self.startTimeS = GetGameTimeMilliseconds() / 1000
+        self.lastUpdateS = self.startTimeS
+        self.unusedDeltaS = 0
+        self.running = true
+        self.finishing = false
+    else
+        self.finishing = false
+    end
 end
 
 function ZO_ParticleSystem:SpawnParticles(numParticlesToSpawn)
     if self.running then
         for particleIndex = 1, numParticlesToSpawn do
             local particle, key = self.particlePool:AcquireObject()
+            particle:ResetParameters()
             particle:SetKey(key)
+
             for parameterNames, valueGenerator in pairs(self.parameters) do
                 local valueGeneratorIsObject = type(valueGenerator) == "table" and valueGenerator.GetValue ~= nil
                 if valueGeneratorIsObject then
@@ -137,60 +148,75 @@ do
     function ZO_ParticleSystem:OnUpdate(timeS)
         local deltaS = timeS - self.lastUpdateS
         
-        if self.burstNumParticles then
-            if self.burstActive then
-                if timeS > self.burstStopTimeS then
-                    self.burstActive = false
-                    self.burstNumSpawned = nil
-                    self:SetParticlesPerSecond(0)
-                end
-            else
-                local begin = false
-                if deltaS < 1 then
-                    local timeInCycleS = timeS % self.burstCycleDurationS
-                    local lastTimeInCycleS = self.lastUpdateS % self.burstCycleDurationS
-                    if timeInCycleS > lastTimeInCycleS then
-                        if lastTimeInCycleS <= self.burstPhaseS and timeInCycleS >= self.burstPhaseS then
-                            begin = true
+        local durationS = self.durationS
+        if durationS then
+            if timeS - self.startTimeS > durationS then
+                self:Finish()
+            end
+        end
+
+        if self.finishing then
+            if not next(self.particlePool:GetActiveObjects()) then
+                self:Stop()
+            end
+        else
+            --Spawn New Particles
+            if self.burstNumParticles then
+                if self.burstActive then
+                    if timeS > self.burstStopTimeS then
+                        self.burstActive = false
+                        self.burstNumSpawned = nil
+                        self:SetParticlesPerSecond(0)
+                    end
+                else
+                    local begin = false
+                    if deltaS < 1 then
+                        local timeInCycleS = timeS % self.burstCycleDurationS
+                        local lastTimeInCycleS = self.lastUpdateS % self.burstCycleDurationS
+                        if timeInCycleS > lastTimeInCycleS then
+                            if lastTimeInCycleS <= self.burstPhaseS and timeInCycleS >= self.burstPhaseS then
+                                begin = true
+                            end
+                        else
+                            if lastTimeInCycleS <= (self.burstPhaseS + self.burstCycleDurationS) and timeInCycleS > self.burstPhaseS then
+                                begin = true
+                            end
                         end
-                    else
-                        if lastTimeInCycleS <= (self.burstPhaseS + self.burstCycleDurationS) and timeInCycleS > self.burstPhaseS then
-                            begin = true
-                        end
+                    end
+
+                    if begin then
+                        self.burstActive = true
+                        self.burstStartTimeS = timeS
+                        self.burstStopTimeS = timeS + self.burstDurationS
+                        self.burstNumSpawned = 0
                     end
                 end
 
-                if begin then
-                    self.burstActive = true
-                    self.burstStartTimeS = timeS
-                    self.burstStopTimeS = timeS + self.burstDurationS
-                    self.burstNumSpawned = 0
+                if self.burstActive then
+                    local progress = (timeS - self.burstStartTimeS) / self.burstDurationS
+                    if self.burstEasingFunction then
+                        progress = self.burstEasingFunction(progress)
+                    end
+                    local numParticlesThatShouldBeSpawned = zo_round(progress * self.burstNumParticles)
+                    local numParticlesToSpawn = numParticlesThatShouldBeSpawned - self.burstNumSpawned
+                    self.burstNumSpawned = numParticlesThatShouldBeSpawned
+                    numParticlesToSpawn = zo_min(numParticlesToSpawn, MAX_PARTICLES_TO_SPAWN_PER_FRAME)
+                    self:SpawnParticles(numParticlesToSpawn)
                 end
             end
 
-            if self.burstActive then
-                local progress = (timeS - self.burstStartTimeS) / self.burstDurationS
-                if self.burstEasingFunction then
-                    progress = self.burstEasingFunction(progress)
-                end
-                local numParticlesThatShouldBeSpawned = zo_round(progress * self.burstNumParticles)
-                local numParticlesToSpawn = numParticlesThatShouldBeSpawned - self.burstNumSpawned
-                self.burstNumSpawned = numParticlesThatShouldBeSpawned
-                numParticlesToSpawn = zo_min(numParticlesToSpawn, MAX_PARTICLES_TO_SPAWN_PER_FRAME)
-                self:SpawnParticles(numParticlesToSpawn)
+            if self.particlesPerSecond > 0 then
+                local numParticlesToSpawn = (deltaS + self.unusedDeltaS) / self.secondsBetweenParticles
+                local numFullParticlesToSpawn = zo_floor(numParticlesToSpawn)
+                --Any "partial" particles that are left over we store off as unused delta time and then add that into the next update.
+                self.unusedDeltaS = (deltaS + self.unusedDeltaS) - numFullParticlesToSpawn * self.secondsBetweenParticles
+                numFullParticlesToSpawn = zo_min(numFullParticlesToSpawn, MAX_PARTICLES_TO_SPAWN_PER_FRAME)
+
+                self:SpawnParticles(numFullParticlesToSpawn)
             end
         end
 
-        if self.particlesPerSecond > 0 then
-            local numParticlesToSpawn = (deltaS + self.unusedDeltaS) / self.secondsBetweenParticles
-            local numFullParticlesToSpawn = zo_floor(numParticlesToSpawn)
-            --Any "partial" particles that are left over we store off as unused delta time and then add that into the next update.
-            self.unusedDeltaS = (deltaS + self.unusedDeltaS) - numFullParticlesToSpawn * self.secondsBetweenParticles
-            numFullParticlesToSpawn = zo_min(numFullParticlesToSpawn, MAX_PARTICLES_TO_SPAWN_PER_FRAME)
-
-            self:SpawnParticles(numFullParticlesToSpawn)
-        end
-
+        --Update Particles
         for _, particle in pairs(self.particlePool:GetActiveObjects()) do
             if particle:IsDone(timeS) then
                 table.insert(g_removeParticles, particle)
@@ -199,6 +225,7 @@ do
             end
         end
 
+        --Remove Dead Particles
         if #g_removeParticles then
             for _, particle in ipairs(g_removeParticles) do
                 self.particlePool:ReleaseObject(particle:GetKey())
@@ -210,10 +237,21 @@ do
     end
 end
 
+--Stop and kill all particles
 function ZO_ParticleSystem:Stop()
-    PARTICLE_SYSTEM_MANAGER:RemoveParticleSystem(self)
-    self.particlePool:ReleaseAllObjects()
-    self.running = false
+    if self.running then
+        PARTICLE_SYSTEM_MANAGER:RemoveParticleSystem(self)
+        self.particlePool:ReleaseAllObjects()
+        self.running = false
+        self.finishing = false
+    end
+end
+
+--Stop making new particles but let existing particles finish
+function ZO_ParticleSystem:Finish()
+    if self.running then
+        self.finishing = true
+    end
 end
 
 --Scene Graph Particle System
@@ -234,6 +272,10 @@ function ZO_SceneGraphParticleSystem:StartParticle(particle)
     ZO_ParticleSystem.StartParticle(self, particle)
 end
 
+--Control Particle System
+
+ZO_ControlParticleSystem = ZO_ParticleSystem
+
 --Particle System Manager
 
 ZO_ParticleSystemManager = ZO_Object:Subclass()
@@ -245,7 +287,7 @@ function ZO_ParticleSystemManager:New(...)
 end
 
 function ZO_ParticleSystemManager:Initialize()
-    self.texturePool = ZO_ControlPool:New("ZO_ParticleTexture", GuiRoot)
+    self.texturePool = ZO_ControlPool:New("ZO_ParticleTexture", nil, "ZO_ParticleTexture")
     self.activeParticleSystems = {}
     EVENT_MANAGER:RegisterForUpdate("ZO_ParticleSystemManager", 0, function(timeMS) self:OnUpdate(timeMS / 1000) end)
 end
@@ -263,7 +305,7 @@ end
 function ZO_ParticleSystemManager:RemoveParticleSystem(particleSystem)
     for i, searchParticleSystem in ipairs(self.activeParticleSystems) do
         if searchParticleSystem == particleSystem then
-            self.activeParticleSystems[i] = nil
+            table.remove(self.activeParticleSystems, i)
             break
         end
     end

@@ -132,9 +132,15 @@ EsoUI\Libraries\ZO_KeybindStrip\ZO_KeybindStrip.lua
 
 EsoUI\Libraries\ZO_Scene\ZO_SceneFragment.lua
 EsoUI\Libraries\ZO_Scene\ZO_Scene.lua
-EsoUI\Libraries\ZO_Scene\ZO_SceneManager.lua
+EsoUI\Libraries\ZO_Scene\ZO_SceneManager_Base.lua
+EsoUI\Libraries\ZO_Scene\ZO_SceneManager_Leader.lua
+EsoUI\Libraries\ZO_Scene\ZO_SceneManager_Follower.lua
 EsoUI\Libraries\ZO_Scene\ZO_SceneGroup.lua
 EsoUI\Libraries\ZO_Scene\ZO_SceneFragmentTemplates.lua
+
+EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.lua
+EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.xml
+EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadMultiFocusAreaManager.lua
 
 EsoUI\Libraries\ZO_RadialMenu\ZO_RadialMenu.lua
 EsoUI\Libraries\ZO_RadialMenu\ZO_RadialMenuController.lua
@@ -152,6 +158,7 @@ EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_SortFilterList_Gamepad.lua
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_SortFilterList_Gamepad.xml
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_InteractiveSortFilterList_Gamepad.lua
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_InteractiveSortFilterList_Gamepad.xml
+EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_NoSelectionSortFilterList_Gamepad.lua
 
 EsoUI\Libraries\ZO_PagedList\ZO_PagedList.lua
 EsoUI\Libraries\ZO_PagedList\ZO_PagedList.xml
@@ -194,15 +201,12 @@ EsoUI\Libraries\ZO_RecentMessages\ZO_RecentMessages.lua
 
 EsoUI\Libraries\ZO_HiddenReasons\ZO_HiddenReasons.lua
 
-EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.xml
-EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.lua
-EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadPassiveFocus.lua
-EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadPassiveFocus.xml
-
 EsoUI\Libraries\ZO_ParametricGridList\ZO_GridScrollList.lua
 EsoUI\Libraries\ZO_ParametricGridList\Keyboard\ZO_GridScrollList_Keyboard.xml
 EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_GridScrollList_Gamepad.lua
 EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_GridScrollList_Gamepad.xml
+EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_SearchableGridScrollList_Gamepad.lua
+EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_SearchableGridScrollList_Gamepad.xml
 
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.lua
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.xml
@@ -235,3 +239,9 @@ EsoUI\Libraries\ZO_PlatformStyle\ZO_PlatformStyle.lua
 EsoUI\Libraries\ZO_ButtonTabBar\Gamepad\ZO_GamepadButtonTabBar.lua
 
 EsoUI\Libraries\ZO_StateMachine\ZO_StateMachine.lua
+
+EsoUI\Libraries\ZO_PointerBox\Keyboard\ZO_PointerBox_Keyboard.lua
+EsoUI\Libraries\ZO_PointerBox\Keyboard\ZO_PointerBox_Keyboard.xml
+
+EsoUI\Libraries\ZO_TextureLayerRevealAnimation\ZO_TextureLayerRevealAnimation.lua
+EsoUI\Libraries\ZO_TextureLayerRevealAnimation\ZO_TextureLayerRevealAnimation.xml

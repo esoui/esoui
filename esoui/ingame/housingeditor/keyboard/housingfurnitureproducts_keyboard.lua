@@ -93,7 +93,7 @@ do
         rowControl.textCallout:ClearAnchors()
 
         if onSale then
-            rowControl.previousCost:SetText(ZO_CommaDelimitNumber(cost))
+            rowControl.previousCost:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost)))
             rowControl.textCallout:SetAnchor(RIGHT, rowControl.previousCost, LEFT, -10)
         else
             rowControl.textCallout:SetAnchor(RIGHT, rowControl.cost, LEFT, -10)
@@ -101,8 +101,7 @@ do
 
         rowControl.previousCost:SetHidden(not onSale)
 
-        local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE)
-        local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(ZO_Currency_MarketCurrencyToUICurrency(currencyType), costAfterDiscount, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
         rowControl.cost:SetText(currencyString)
 
         local textCalloutBackgroundColor

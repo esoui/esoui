@@ -8,19 +8,19 @@ function ZO_UnitVisualizer_UnwaveringModule:Initialize(layoutData)
     self.layoutData = layoutData
 end
 
-local function GetInitialStatValue(unitTag, stat, attribute, powerType)
-    return GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_UNWAVERING_POWER, stat, attribute, powerType) or 0
+function ZO_UnitVisualizer_UnwaveringModule:GetInitialStatValue(stat, attribute, powerType)
+    return self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_UNWAVERING_POWER, stat, attribute, powerType)
 end
 
 function ZO_UnitVisualizer_UnwaveringModule:CreateInfoTable(control, oldBarInfo, stat, attribute, power)
     if control then
         local oldInfo = oldBarInfo and oldBarInfo[attribute]
         if oldInfo then
-            oldInfo.value = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power)
+            oldInfo.value = self:GetInitialStatValue(stat, attribute, power)
             return oldInfo
         end
 
-        return { value = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power), lastValue = 0 }
+        return { value = self:GetInitialStatValue(stat, attribute, power), lastValue = 0 }
     end
     return nil
 end

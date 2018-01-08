@@ -52,9 +52,6 @@
                             <Controls>
                                 <Control name="$(parent)CrownStore" inherits="ZO_KeybindButton">
                                     <Anchor point="TOPLEFT"/>
-                                    <Controls>
-                                        <Label name="$(parent)NameLabel" text="SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE" override="true"/>
-                                    </Controls>
                                 </Control>
                                 <Control name="$(parent)Close" inherits="ZO_KeybindButton">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)CrownStore" relativePoint="TOPRIGHT"/>

@@ -266,17 +266,6 @@ local ZO_OptionsPanel_Gameplay_ControlData =
     --In world
     [SETTING_TYPE_IN_WORLD] =
     {
-        --Options_Gameplay_HideHelm
-        [IN_WORLD_UI_SETTING_HIDE_HELM] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_IN_WORLD,
-            panel = SETTING_PANEL_GAMEPLAY,
-            settingId = IN_WORLD_UI_SETTING_HIDE_HELM,
-            text = SI_INTERFACE_OPTIONS_HIDE_HELM,
-            tooltipText = SI_INTERFACE_OPTIONS_HIDE_HELM_TOOLTIP,
-        },
-
         --Options_Gameplay_HideMountStaminaUpgrade
         [IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE] =
         {

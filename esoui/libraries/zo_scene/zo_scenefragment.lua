@@ -138,46 +138,53 @@ function ZO_SceneFragment:ShouldBeHidden(customHideParam)
     end
 end
 
-function ZO_SceneFragment:Refresh(customShowParam, customHideParam)
-    if(self.sceneManager) then
+function ZO_SceneFragment:ComputeIfFragmentShouldShow()
+    if self.sceneManager then
         local currentScene = self.sceneManager:GetCurrentScene()
         local nextScene = self.sceneManager:GetNextScene()
-        if(currentScene and currentScene:HasFragment(self)) then
-            if(self.conditional == nil or self.conditional()) then
+        if currentScene and currentScene:HasFragment(self) then
+            if self.conditional == nil or self.conditional() then
                 local currentSceneState = currentScene:GetState()
-                if(nextScene) then
-                    if(currentSceneState == SCENE_HIDING) then
-                        if(nextScene:HasFragment(self)) then
-                            if(self.forceRefresh) then
-                                self:ShouldBeHidden(customHideParam)
-                            elseif(self:HasDependencies()) then
+                if nextScene then
+                    if currentSceneState == SCENE_HIDING then
+                        if nextScene:HasFragment(self) then
+                            if self.forceRefresh then
+                                return false
+                            elseif self:HasDependencies() then
                                 for dependencyFragmnent in pairs(self.dependencies) do
                                     local currentHasDependency = currentScene:HasFragment(dependencyFragmnent)
                                     local nextHasDependency = nextScene:HasFragment(dependencyFragmnent)
-                                    if(currentHasDependency ~= nextHasDependency) then
-                                        self:ShouldBeHidden(customHideParam)
-                                        return
+                                    if currentHasDependency ~= nextHasDependency then
+                                        return false
                                     end
                                 end
-                                self:ShouldBeShown(customShowParam)
+                                return true
                             else
-                                self:ShouldBeShown(customShowParam)
+                                return true
                             end
                         else
-                            self:ShouldBeHidden(customHideParam)
+                            return false
                         end
                     end
                 else
-                    if(currentSceneState == SCENE_SHOWING or currentSceneState == SCENE_SHOWN) then
-                        self:ShouldBeShown(customShowParam)
+                    if currentSceneState == SCENE_SHOWING or currentSceneState == SCENE_SHOWN then
+                        return true
                     end
                 end
             else
-                self:ShouldBeHidden(customHideParam)
+                return false
             end
         else
-            self:ShouldBeHidden(customHideParam)
+            return false
         end
+    end
+
+    return false
+end
+
+function ZO_SceneFragment:Refresh(customShowParam, customHideParam)
+    if self:ComputeIfFragmentShouldShow() then
+        self:ShouldBeShown(customShowParam)
     else
         self:ShouldBeHidden(customHideParam)
     end

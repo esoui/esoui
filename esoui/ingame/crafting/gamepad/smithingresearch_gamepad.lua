@@ -179,7 +179,7 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
                 self:Research()
             end,
 
-            visible = function()
+            enabled = function()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                     return self:IsResearchable()
                 end

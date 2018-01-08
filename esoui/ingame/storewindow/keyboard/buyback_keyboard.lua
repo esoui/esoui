@@ -176,7 +176,7 @@ function BuyBack:SetupBuyBackSlot(control, data)
     -- Set info about what slot this is, on the top level slot control
     ZO_InventorySlot_SetType(slotControl, SLOT_TYPE_STORE_BUYBACK)
     slotControl.index = data.slotIndex
-    slotControl.moneyCost = stackBuyPrice
+    slotControl.moneyCost = data.stackBuyPrice
 
     ZO_InventorySlot_SetType(control, SLOT_TYPE_STORE_BUYBACK)
     control.index = data.slotIndex

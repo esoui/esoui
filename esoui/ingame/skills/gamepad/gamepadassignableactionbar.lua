@@ -187,3 +187,7 @@ function ZO_AssignableActionBar:GetSelectedSlotId()
         return selectedButton:GetSlotId()
     end
 end
+
+function ZO_AssignableActionBar:IsActive()
+    return self.active
+end

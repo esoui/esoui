@@ -190,7 +190,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                         elseif(playerAlliance ~= alliance) then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_WRONG_OWNER), KEEP_TOOLTIP_NOT_ACCESSIBLE)
-                        elseif(showUnderAttackLine) then
+                        elseif(GetKeepUnderAttack(keepId, bgContext)) then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_UNDER_ATTACK), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                             showUnderAttackLine = false
                         elseif GetKeepUnderAttack(startingKeep, battlegroundContext) then
@@ -422,8 +422,9 @@ local function GetImperialCityStrings(campaignId, isLockedByLinkedCollectible)
     local lockedText
     if isLockedByLinkedCollectible then
         local collectibleId = GetImperialCityCollectibleId()
-        local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-        lockedText = zo_strformat(SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED, collectibleName, categoryName)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        local categoryData = collectibleData:GetCategoryData()
+        lockedText = zo_strformat(SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED, collectibleData:GetName(), categoryData:GetName())
     end
 
     return name, ruleText, lockedText
@@ -437,6 +438,8 @@ local function LayoutImperialCityTooltip(self, battlegroundContext, isLockedByLi
 
     local campaignId = GetPreferredCampaign()
     local name, ruleText, lockedText = GetImperialCityStrings(campaignId, isLockedByLinkedCollectible)
+    local campaignRulesetId = GetCampaignRulesetId(campaignId)
+    local accessType = GetCampaignRulesetImperialAccessRule(campaignRulesetId)
 
     --Name--
     local nameControl = GetControl(self, "Name")

@@ -361,7 +361,7 @@ do
             local hidePricingInfo = isFree or hasHouseOnSale
             -- setup the cost
             if self.onSale and not hidePricingInfo then
-                self.previousCost:SetText(ZO_CommaDelimitNumber(cost))
+                self.previousCost:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost)))
             end
 
             if not hidePricingInfo then
@@ -369,7 +369,7 @@ do
                 self.previousCostStrikethrough:SetHidden(not self.onSale)
 
                 local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-                local currencyString = string.format("%s %s", ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
+                local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(costAfterDiscount)), currencyIcon)
                 self.cost:SetText(currencyString)
             else
                 self.previousCost:SetHidden(true)
@@ -502,6 +502,7 @@ function ZO_MarketProductBase:Reset()
     self.marketProductId = 0
     self.onSale = false
     self.isNew = false
+    self.background:SetTexture("")
 end
 
 function ZO_MarketProductBase:Refresh()

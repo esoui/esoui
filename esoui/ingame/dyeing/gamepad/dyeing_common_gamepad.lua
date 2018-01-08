@@ -1,133 +1,54 @@
 ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X = 3
 ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y = 4
 
-function ZO_Dyeing_Gamepad_Highlight(control, dyeControl)
+function ZO_Dyeing_Gamepad_Highlight(control, dyeControl, offsetX, offsetY)
     local sharedHighlight = control.highlight
+    offsetX = offsetX or ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X
+    offsetY = offsetY or ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y
 
     local selected = false
     if dyeControl then
         sharedHighlight:ClearAnchors()
         sharedHighlight:SetParent(dyeControl)
-        sharedHighlight:SetAnchor(TOPLEFT, dyeControl, TOPLEFT, -ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X, -ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y)
-        sharedHighlight:SetAnchor(BOTTOMRIGHT, dyeControl, BOTTOMRIGHT, ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X, ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y)
+        sharedHighlight:SetAnchor(TOPLEFT, dyeControl, TOPLEFT, -offsetX, -offsetY)
+        sharedHighlight:SetAnchor(BOTTOMRIGHT, dyeControl, BOTTOMRIGHT, offsetX, offsetY)
         selected = true
     end
 
     sharedHighlight:SetHidden(not selected)
 end
 
--- A base radial menu with some customized behavior for the gamepad dyeing screen.
-ZO_Dyeing_RadialMenu_Gamepad = ZO_RadialMenu:Subclass()
-local DEFAULT_ROTATION_ANGLE = (2 * math.pi) * (3 / 5)
-local FOCUS_ENTRY_SCALE = 1.3
-
-function ZO_Dyeing_RadialMenu_Gamepad:New(control, template, sharedHighlight)
-    local DISABLE_MOUSE = false
-    local SELECT_IN_CENTER = true
-    local DEFAULT_ANIMATION_TEMPLATE = nil
-    local DEFAULT_ENTRY_ANIMATION_TEMPLATE = nil
-    local DEFAULT_ACTION_LAYER_NAME = nil
-    return ZO_RadialMenu.New(self, sharedHighlight, control, template, DEFAULT_ANIMATION_TEMPLATE, DEFAULT_ENTRY_ANIMATION_TEMPLATE, DEFAULT_ACTION_LAYER_NAME, {ZO_DI_LEFT_STICK}, DISABLE_MOUSE, SELECT_IN_CENTER)
+function ZO_Dyeing_Gamepad_SavedSet_Highlight(control, savedSetControl)
+    ZO_Dyeing_Gamepad_Highlight(control, savedSetControl, ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X * 3, ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y * 2)
 end
 
-function ZO_Dyeing_RadialMenu_Gamepad:Initialize(sharedHighlight, ...)
-    ZO_RadialMenu.Initialize(self, ...)
-
-    self.swatchInterpolator = ZO_SimpleControlScaleInterpolator:New(1.0, FOCUS_ENTRY_SCALE)
-    self:ResetToDefaultPositon()
-    self.currentlyActive = false
-    self.isAllFocused = false
-    self.previousSelectedControl = nil
-    self:SetCustomControlSetUpFunction(function(control, data) data.setupFunc(control, data) end)
-    self:SetActivateOnShow(false)
-    self.sharedHighlight = sharedHighlight
-    -- NOTE: This does not call self:SetOnSelectionChangedCallback as we want to bypass the custom behaviour.
-    ZO_RadialMenu.SetOnSelectionChangedCallback(self, function(...) self:OnSelectionChanged(...) end)
-end
-
-function ZO_Dyeing_RadialMenu_Gamepad:ResetToDefaultPositon()
-    local outerRadius = zo_max(self.control:GetDimensions()) * .5
-    self.oldSelectionX = math.sin(DEFAULT_ROTATION_ANGLE) * outerRadius
-    self.oldSelectionY = math.cos(DEFAULT_ROTATION_ANGLE) * outerRadius
-end
-
-function ZO_Dyeing_RadialMenu_Gamepad:FocusAll()
-    if not self.isAllFocused then
-        for _, entry in ipairs(self:GetEntries()) do
-            if entry.control.shouldHighlight then
-                self.swatchInterpolator:ScaleUp(entry.control)
-            end
-        end
-        self.isAllFocused = true
+function ZO_Dyeing_Gamepad_SwatchSlot_Highlight_All(control)
+    for _, highlight in ipairs(control.dyeHighlightControls) do
+        highlight:SetHidden(false)
     end
 end
 
-function ZO_Dyeing_RadialMenu_Gamepad:DefocusAll()
-    if self.isAllFocused then
-        for _, entry in ipairs(self:GetEntries()) do
-            self.swatchInterpolator:ScaleDown(entry.control)
-        end
-        self.isAllFocused = false
+function ZO_Dyeing_Gamepad_SwatchSlot_Highlight_Only(control, dyeChannel)
+    for channel, highlight in ipairs(control.dyeHighlightControls) do
+        highlight:SetHidden(channel ~= dyeChannel)
     end
 end
 
-function ZO_Dyeing_RadialMenu_Gamepad:HighlightAll(dyeChannel)
-    for _, entry in ipairs(self:GetEntries()) do
-        ZO_Dyeing_Gamepad_Highlight(entry.control, entry.control.dyeControls[dyeChannel])
+function ZO_Dyeing_Gamepad_SwatchSlot_Reset_Highlight(control)
+    for _, highlight in ipairs(control.dyeHighlightControls) do
+        highlight:SetHidden(true)
     end
 end
 
-function ZO_Dyeing_RadialMenu_Gamepad:OnSelectionChanged(entry)
-    if self.previousSelectedControl ~= self.selectedControl then
-        if self.previousSelectedControl then
-            self.swatchInterpolator:ScaleDown(self.previousSelectedControl)
-        end
-        self.previousSelectedControl = self.selectedControl
-        if self.selectedControl then
-            self.swatchInterpolator:ScaleUp(self.selectedControl)
-            if self.sharedHighlight then
-                self.sharedHighlight:ClearAnchors()
-                self.sharedHighlight:SetAnchor(CENTER, self.selectedControl, CENTER, 0, 0)
-                self.sharedHighlight:SetHidden(false)
-            end
-        elseif self.sharedHighlight then
-            self.sharedHighlight:SetHidden(true)
-        end
-    end
+-- XML functions --
 
-    if self.externalOnSelectionChangedCallback then
-        self.externalOnSelectionChangedCallback(entry)
-    end
-end
+function ZO_SwatchSlotDyes_WithHighlight_Gamepad_OnInitialize(control)
+    ZO_SwatchSlotDyes_OnInitialize(control)
 
-function ZO_Dyeing_RadialMenu_Gamepad:SetOnSelectionChangedCallback(callback)
-    self.externalOnSelectionChangedCallback = callback
-end
-
-local SUPPRESS_SOUND = true
-
-function ZO_Dyeing_RadialMenu_Gamepad:Activate(...)
-    ZO_RadialMenu.Activate(self, ...)
-    if not self.currentlyActive then
-        self.virtualMouseX = self.oldSelectionX
-        self.virtualMouseY = self.oldSelectionY
-        self.selectIfCentered = true
-        self:UpdateSelectedEntryFromVirtualMousePosition(SUPPRESS_SOUND)
-        self.currentlyActive = true
-    end
-end
-
-function ZO_Dyeing_RadialMenu_Gamepad:Deactivate(...)
-    if self.currentlyActive then
-        self.oldSelectionX = self.virtualMouseX
-        self.oldSelectionY = self.virtualMouseY
-        self.selectIfCentered = false
-        self.currentlyActive = false
-    end
-    ZO_RadialMenu.Deactivate(self, ...)
-end
-
-function ZO_Dyeing_RadialMenu_Gamepad:Show(...)
-    ZO_RadialMenu.Show(self, ...)
-    self:Populate()
+    control.dyeHighlightControls =
+    {
+        control:GetNamedChild("PrimaryHighlight"),
+        control:GetNamedChild("SecondaryHighlight"),
+        control:GetNamedChild("AccentHighlight"),
+    }
 end

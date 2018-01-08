@@ -31,14 +31,12 @@ do
     local CURRENCY_ICON_SIZE = "100%"
 
     function ZO_MarketCurrency_Keyboard:OnCrownsUpdated(currentCurrency, difference)
-        local crownsIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWNS), CURRENCY_ICON_SIZE)
-        local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(currentCurrency), crownsIcon)
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_CROWNS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
         self.crownsCurrencyLabel:SetText(currencyString)
     end
 
     function ZO_MarketCurrency_Keyboard:OnCrownGemsUpdated(currentCurrency, difference, reason)
-        local gemsIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), CURRENCY_ICON_SIZE)
-        local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(currentCurrency), gemsIcon)
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_CROWN_GEMS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
         self.gemsCurrencyLabel:SetText(currencyString)
     end
 end

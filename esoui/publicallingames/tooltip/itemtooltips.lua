@@ -30,40 +30,41 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     if not text1 then
         return
     end
-    
+
     local unique = IsItemLinkUnique(itemLink)
     local uniqueEquipped = IsItemLinkUniqueEquipped(itemLink)
-    local formatSuffix
+
     if unique then
-        formatSuffix = "_UNIQUE"
+        section:AddLine(GetString(SI_ITEM_FORMAT_STR_UNIQUE))
     elseif uniqueEquipped then
-        formatSuffix = "_UNIQUE_EQUIPPED"
-    else
-        formatSuffix = ""
+        section:AddLine(GetString(SI_ITEM_FORMAT_STR_UNIQUE_EQUIPPED))
     end
 
     local lineText
+    local itemStyle = GetItemLinkItemStyle(itemLink)
+    local showInTooltip = GetItemLinkShowItemStyleInTooltip(itemLink)
     if itemType == ITEMTYPE_ARMOR then
         local armorType = GetItemLinkArmorType(itemLink)
         if text2 and armorType ~= ARMORTYPE_NONE then
-            local format = _G["SI_ITEM_FORMAT_STR_TEXT1_ARMOR2"..formatSuffix]
-            lineText = zo_strformat(format, text1, text2)
-        else
-            lineText = zo_strformat(SI_ITEM_FORMAT_STR_BROAD_TYPE, text1)
+            if showInTooltip and itemStyle > 0 then
+                lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE, text1, text2, GetItemStyleName(itemStyle))
+            else
+                lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, text1, text2)
+            end
         end
-    else
-        if text2 then
-            local format = _G["SI_ITEM_FORMAT_STR_TEXT1_TEXT2"..formatSuffix]
-            lineText = zo_strformat(format, text1, text2)
+    elseif text2 then
+        if showInTooltip and itemStyle > 0 then
+            lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2_ITEMSTYLE, text1, text2, GetItemStyleName(itemStyle))
         else
-            local format = _G["SI_ITEM_FORMAT_STR_TEXT1"..formatSuffix]
-            lineText = zo_strformat(format, text1)
+            lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1_TEXT2, text1, text2)
         end
     end
 
-    if lineText then
-        section:AddLine(lineText)
+    if not lineText then
+        lineText = zo_strformat(SI_ITEM_FORMAT_STR_TEXT1, text1)
     end
+    
+    section:AddLine(lineText)
 end
 
 function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
@@ -98,7 +99,7 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString("SI_EQUIPTYPE", equipType), GetString("SI_ARMORTYPE", armorType))
         elseif weaponType ~= WEAPONTYPE_NONE then
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString("SI_WEAPONTYPE", weaponType), GetString("SI_EQUIPTYPE", equipType))
-        elseif itemType == ITEMTYPE_POISON then
+        elseif itemType == ITEMTYPE_POISON or itemType == ITEMTYPE_DISGUISE then
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText)
         end
     elseif(itemType == ITEMTYPE_LURE and IsItemLinkConsumable(itemLink)) then
@@ -1348,7 +1349,6 @@ function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, showCombinedCount, extraData
     local showPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
     local equipped = bagId == BAG_WORN
     local equipSlot = equipped and slotIndex or EQUIP_SLOT_NONE
-    local showCraftBagCount = ZO_ITEM_TOOLTIP_SHOW_CRAFTBAG_BODY_COUNT
     local stackCount = ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT
     if showCombinedCount then
         stackCount = ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT
@@ -1358,8 +1358,6 @@ function ZO_Tooltip:LayoutBagItem(bagId, slotIndex, showCombinedCount, extraData
         elseif bagId == BAG_BACKPACK then
             stackCount = ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT
         elseif bagId == BAG_VIRTUAL then
-            showBankCount = ZO_ITEM_TOOLTIP_HIDE_BANK_BODY_COUNT
-            showCraftBagCount = ZO_ITEM_TOOLTIP_HIDE_CRAFTBAG_BODY_COUNT
             stackCount = ZO_ITEM_TOOLTIP_CRAFTBAG_TITLE_COUNT
         elseif equipped then
             if slotIndex == EQUIP_SLOT_POISON or slotIndex == EQUIP_SLOT_BACKUP_POISON then
@@ -1448,6 +1446,13 @@ function ZO_Tooltip:LayoutImprovedSmithingItem(itemToImproveBagId, itemToImprove
         end
 
         self:LayoutItem(itemLink, NOT_EQUIPPED)
+    end
+
+    --Add line for tradeable loss
+    if IsItemBoPAndTradeable(itemToImproveBagId, itemToImproveSlotIndex) then
+        local section = self:AcquireSection(self:GetStyle("bodySection"))
+        section:AddLine(GetString(SI_SMITHING_IMPROVEMENT_TRADE_BOP_WILL_BECOME_UNTRADEABLE), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        self:AddSection(section)
     end
 end
 
@@ -1549,7 +1554,7 @@ do
                 local amount = GetCurrencyAmount(currencyType, currencyLocation)
                 FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
                 local valueString = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS)
-                statValuePair:SetValue(valueString, self:GetStyle("currencyStatValuePairValue"))
+                statValuePair:SetValue(zo_strformat(SI_NUMBER_FORMAT, valueString), self:GetStyle("currencyStatValuePairValue"))
                 locationCurrenciesSection:AddStatValuePair(statValuePair)
             end 
         end
@@ -1603,7 +1608,8 @@ function ZO_Tooltip:LayoutGuildStoreSearchResult(itemLink, customOrBagStackCount
 
     if sellerName then
         local sellerNameSection = self:AcquireSection(self:GetStyle("bodySection"))
-        sellerNameSection:AddLine(zo_strformat(SI_TRADING_HOUSE_SEARCH_RESULT_SELLER_FORMATTER, sellerName), self:GetStyle("bodyDescription"))
+        local userFacingSellerName = ZO_FormatUserFacingCharacterOrDisplayName(sellerName)
+        sellerNameSection:AddLine(zo_strformat(SI_TRADING_HOUSE_SEARCH_RESULT_SELLER_FORMATTER, userFacingSellerName), self:GetStyle("bodyDescription"))
         self:AddSection(sellerNameSection)
     end
 end

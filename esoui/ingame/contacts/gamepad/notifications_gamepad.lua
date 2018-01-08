@@ -303,15 +303,13 @@ end
 local ZO_GamepadCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
 
 function ZO_GamepadCollectionsUpdateProvider:New(notificationManager)
-    local provider = ZO_CollectionsUpdateProvider.New(self, notificationManager)
-    return provider
+    return ZO_CollectionsUpdateProvider.New(self, notificationManager)
 end
 
 function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
-    
-    local data = entryData.data
-    GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(data.collectibleId, data.categoryIndex, data.subcategoryIndex)
+
+    GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
 end
 
 function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
@@ -324,8 +322,8 @@ function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryNam
     end
 end
 
-function ZO_GamepadCollectionsUpdateProvider:ShowMoreInfo(data)
-    local helpCategoryIndex, helpIndex = GetCollectibleHelpIndices(data.data.collectibleId)
+function ZO_GamepadCollectionsUpdateProvider:ShowMoreInfo(entryData)
+    local helpCategoryIndex, helpIndex = GetCollectibleHelpIndices(entryData.data:GetId())
     if helpCategoryIndex ~= nil then
         HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
     end
@@ -441,9 +439,6 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
 
     self.eventNamespace = EVENT_NAMESPACE
 
-    local collectionsProvider = ZO_GamepadCollectionsUpdateProvider:New(self)
-    self.collectionsProvider = collectionsProvider
-
     self.providers =
     {
         ZO_GamepadFriendRequestProvider:New(self),
@@ -459,7 +454,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadPledgeOfMaraProvider:New(self),
         ZO_GamepadAgentChatRequestProvider:New(self),
         ZO_GamepadLeaderboardRaidProvider:New(self),
-        collectionsProvider,
+        ZO_GamepadCollectionsUpdateProvider:New(self),
         ZO_GamepadLFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_GamepadDuelInviteProvider:New(self),

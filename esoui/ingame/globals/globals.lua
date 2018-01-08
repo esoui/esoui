@@ -41,7 +41,7 @@ local function OnCombatStateChanged(eventCode, inCombat)
 end
 
 local function OnZoneCollectibleRequirementFailed(eventId, collectibleId)
-    local collectibleName = GetCollectibleName(collectibleId)
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     local storeTextId
     local platform = GetUIPlatform()
     if platform == UI_PLATFORM_PC then
@@ -51,9 +51,10 @@ local function OnZoneCollectibleRequirementFailed(eventId, collectibleId)
     else
         storeTextId = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_STORE_XBOX
     end
-    if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
         ZO_Dialogs_ShowPlatformDialog("ZONE_CHAPTER_COLLECTIBLE_REQUIREMENT_FAILED")
     else
+        local collectibleName = collectibleData:GetName()
         ZO_Dialogs_ShowPlatformDialog("ZONE_DLC_COLLECTIBLE_REQUIREMENT_FAILED", { collectibleName = collectibleName }, {mainTextParams = {collectibleName, GetString(storeTextId) }})
     end
 end
@@ -133,6 +134,7 @@ function ZO_FormatResourceBarCurrentAndMax(current, maximum)
 		end
 	end
 	
+    local USE_LOWERCASE_NUMBER_SUFFIXES = false
 	local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
 	if setting == RESOURCE_NUMBERS_SETTING_NUMBER_ONLY then
 		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))

@@ -251,7 +251,7 @@ function DeathRecap:SetupAttacks()
         
         iconControl:SetTexture(attackInfo.attackIcon)
         attackNameControl:SetText(zo_strformat(SI_DEATH_RECAP_ATTACK_NAME, attackInfo.attackName))
-        damageControl:SetText(ZO_CommaDelimitNumber(attackInfo.attackDamage))
+        damageControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(attackInfo.attackDamage)))
             
         iconControl:SetAlpha(startAlpha)
         attackControl:GetNamedChild("Text"):SetAlpha(startAlpha)
@@ -262,7 +262,7 @@ function DeathRecap:SetupAttacks()
             local numAttackHitsKillIcon = numAttackHitsContainer:GetNamedChild("KillIcon")
             numAttackHitsContainer:SetAlpha(startAlpha)
             numAttackHitsContainer:SetHidden(false)
-            numAttackHitsCountLabel:SetText(ZO_CommaDelimitNumber(attackInfo.numAttackHits))
+            numAttackHitsCountLabel:SetText(attackInfo.numAttackHits)
             if attackInfo.wasKillingBlow then
                 numAttackHitsHitIcon:SetHidden(true)
                 numAttackHitsKillIcon:SetHidden(false)

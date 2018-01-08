@@ -187,15 +187,13 @@ end
 local ZO_KeyboardCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
 
 function ZO_KeyboardCollectionsUpdateProvider:New(notificationManager)
-    local provider = ZO_CollectionsUpdateProvider.New(self, notificationManager)
-    return provider
+    return ZO_CollectionsUpdateProvider.New(self, notificationManager)
 end
 
 function ZO_KeyboardCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
-    local data = entryData.data
-    COLLECTIONS_BOOK:BrowseToCollectible(data.collectibleId, data.categoryIndex, data.subcategoryIndex)
+    COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
 end
 
 function ZO_KeyboardCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
@@ -208,7 +206,7 @@ function ZO_KeyboardCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryNa
 end
 
 function ZO_KeyboardCollectionsUpdateProvider:ShowMoreInfo(entryData)
-    local helpCategoryIndex, helpIndex = GetCollectibleHelpIndices(entryData.data.collectibleId)
+    local helpCategoryIndex, helpIndex = GetCollectibleHelpIndices(entryData.data:GetId())
     if helpCategoryIndex ~= nil then
         HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
     end
@@ -259,9 +257,6 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
 
     self.eventNamespace = EVENT_NAMESPACE
 
-    local collectionsProvider = ZO_KeyboardCollectionsUpdateProvider:New(self)
-    self.collectionsProvider = collectionsProvider
-
     self.providers =
     {
         ZO_KeyboardFriendRequestProvider:New(self),
@@ -277,7 +272,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_PledgeOfMaraProvider:New(self),
         ZO_KeyboardAgentChatRequestProvider:New(self),
         ZO_KeyboardLeaderboardRaidProvider:New(self),
-        collectionsProvider,
+        ZO_KeyboardCollectionsUpdateProvider:New(self),
         ZO_LFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_DuelInviteProvider:New(self),

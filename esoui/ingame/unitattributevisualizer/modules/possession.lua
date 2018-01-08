@@ -84,13 +84,13 @@ do
     end
 end
 
-local function GetInitialStatValue(unitTag, stat, attribute, powerType)
-    return (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_POSSESSION, stat, attribute, powerType) or 0)
+function ZO_UnitVisualizer_PossessionModule:GetInitialStatValue(stat, attribute, powerType)
+    return self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_POSSESSION, stat, attribute, powerType)
 end
 
 function ZO_UnitVisualizer_PossessionModule:CreateInfoTable(control, stat, attribute, power, playPossessionAnimation)
     if control then
-        local value = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power)
+        local value = self:GetInitialStatValue(stat, attribute, power)
         return { value = value, lastValue = value, playPossessionAnimation = playPossessionAnimation, barSizeState = ATTRIBUTE_BAR_STATE_NORMAL }
     end
     return nil
@@ -118,7 +118,7 @@ function ZO_UnitVisualizer_PossessionModule:InitializeBarValues()
             [ATTRIBUTE_HEALTH] = self:CreateInfoTable(healthBarControl, STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH, self.PlayPossessionAnimation),
         }
     else
-        self.barInfo[ATTRIBUTE_HEALTH].value = GetInitialStatValue(self:GetUnitTag(), STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
+        self.barInfo[ATTRIBUTE_HEALTH].value = self:GetInitialStatValue(STAT_MITIGATION, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
     end
 
     for attribute, bar in pairs(self.barControls) do

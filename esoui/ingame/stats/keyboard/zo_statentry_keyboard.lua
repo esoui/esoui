@@ -40,7 +40,7 @@ function ZO_StatEntry_Keyboard:GetPendingStatBonuses()
 end
 
 function ZO_StatEntry_Keyboard:GetValue()
-    return GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS, STAT_SOFT_CAP_OPTION_APPLY_SOFT_CAP)
+    return GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS)
 end
 
 function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
@@ -50,7 +50,7 @@ function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
         return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value))
     else
-        return tostring(value)
+        return zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(value))
     end
 end
 
@@ -93,7 +93,7 @@ function ZO_StatEntry_Keyboard:UpdateStatComparisonValue()
             icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
         end
 
-        comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
+        local comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
         comparisonValueString = color:Colorize(comparisonValueString)
         self.control.comparisonValue:SetText(comparisonValueString)  
     end

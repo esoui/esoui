@@ -38,7 +38,7 @@
                     <Anchor point="TOP" relativeTo="$(parent)PatternList" relativePoint="BOTTOM" />
                     <Controls>
                         <Control name="$(parent)Spinner" mouseEnabled="true">
-                            <Dimensions x="110" y="36" />
+                            <Dimensions y="36" />
                             <Anchor point="BOTTOM" offsetY="2" />
                             <Controls>
                                 <Button name="$(parent)Decrease">
@@ -59,7 +59,7 @@
                                               disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
                                 </Button>
 
-                                <Label name="$(parent)Display" font="ZoFontHeader4" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                                <Label name="$(parent)Display" font="ZoFontHeader2" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                                     <Anchor point="TOPLEFT" offsetX="34" />
                                     <Anchor point="BOTTOMRIGHT" offsetX="-34" />
                                 </Label>

@@ -256,8 +256,8 @@ function ZO_StoreManager:Initialize(control)
     control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
     control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
     control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
-    control:RegisterForEvent(EVENT_COLLECTION_UPDATED, RefreshStoreWindow)
-    control:RegisterForEvent(EVENT_COLLECTIBLE_UPDATED, RefreshStoreWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshStoreWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshStoreWindow)
 
     local function OnItemRepaired(bagId, slotIndex)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -583,6 +583,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     slotControl.specialCurrencyType2 = data.currencyType2
     slotControl.isCollectible = data.filterData[1] == ITEMFILTERTYPE_COLLECTIBLE
     slotControl.isUnique = data.isUnique
+    slotControl.meetsRequirements = data.meetsRequirementsToBuy
 
     ZO_InventorySlot_SetType(control, SLOT_TYPE_STORE_BUY)
     control.index = slotIndex
@@ -643,11 +644,14 @@ function ZO_StoreManager:OpenBuyMultiple(entryIndex)
 end
 
 function ZO_StoreManager:BuyMultiplePurchase()
-    local storeItemId = self.multipleDialog.index
+    local storeItemIndex = self.multipleDialog.index
 
     local quantity = self.buyMultipleSpinner:GetValue()
     if quantity ~= 0 then
-        BuyStoreItem(storeItemId, quantity)
+        local itemData = self.items[storeItemIndex]
+        if not ZO_Currency_TryShowThresholdDialog(storeItemIndex, quantity, itemData) then
+            BuyStoreItem(storeItemIndex, quantity)
+        end
     end
 end
 

@@ -131,10 +131,10 @@ function GuildSelector:InitializeGuilds()
 
     if(numGuilds == 0) then
         self.comboBox:SetSelectedItemText(CREATE_WINDOW_TITLE)
-        self.OnGuildChanged(nil, CREATE_WINDOW_TITLE, entry)
+        self.OnGuildChanged(self.comboBox, CREATE_WINDOW_TITLE, entry)
     else
         self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
-        self.OnGuildChanged(nil, selectedEntryText, selectedEntry)
+        self.OnGuildChanged(self.comboBox, selectedEntry.selectedText, selectedEntry)
     end
 end
 

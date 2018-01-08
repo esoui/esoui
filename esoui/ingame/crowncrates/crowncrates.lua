@@ -407,7 +407,7 @@ function ZO_CrownCrates:GetCrateSpecificCardParticlePool(crownCrateId, crownCrat
         local function Factory(pool)
             local positionX, positionY, positionZ = 0, 0, 0
             local particleId = CreateCrownCrateSpecificParticleEffect(crownCrateId, crownCrateParticleEffects, positionX, positionY, positionZ)
-            return ZO_Particle:New(particleId)
+            return ZO_WorldParticle:New(particleId)
         end
 
         local function Reset(particle, pool)
@@ -429,7 +429,7 @@ function ZO_CrownCrates:GetTierSpecificCardParticlePool(crownCrateTierId, crownC
         local function Factory(pool)
             local positionX, positionY, positionZ = 0, 0, 0
             local particleId = CreateCrownCrateTierSpecificParticleEffect(crownCrateTierId, crownCrateTierParticleEffects, positionX, positionY, positionZ)
-            return ZO_Particle:New(particleId)
+            return ZO_WorldParticle:New(particleId)
         end
 
         local function Reset(particle, pool)
@@ -546,7 +546,7 @@ function ZO_CrownCrates.ComputeSlotCenterUIPositionY(slotHeightUI, slotHeightOff
 end
 
 function ZO_CrownCrates:UpdateGemsLabel(amount)
-    self.crownGemsAvailableQuantity.gemsLabel:SetText(ZO_CommaDelimitNumber(amount))
+    self.crownGemsAvailableQuantity.gemsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(amount)))
 end
 
 function ZO_CrownCrates:UpdateCrownGemsQuantity()

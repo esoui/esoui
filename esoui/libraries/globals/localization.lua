@@ -96,6 +96,12 @@ do
 
         return cachedString
     end
+
+    function ZO_ResetCachedStrFormat(formatter)
+        if g_cachedStringsByFormatter[formatter] then
+            g_cachedStringsByFormatter[formatter] = nil
+        end
+    end
 end
 
 function zo_strtrim(str)
@@ -104,9 +110,9 @@ function zo_strtrim(str)
 end
 
 do
-    local DIGIT_GROUP_REPLACER = GetString(SI_DIGIT_GROUP_SEPARATOR)
+    -- Use the English thousands and decimal marks. The grammar library will convert them to the current language.
+    local DIGIT_GROUP_REPLACER = ","
     local DIGIT_GROUP_REPLACER_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
-    local DIGIT_GROUP_DECIMAL_REPLACER = GetString(SI_DIGIT_GROUP_DECIMAL_SEPARATOR)
     
     function ZO_CommaDelimitNumber(amount)
         if amount < DIGIT_GROUP_REPLACER_THRESHOLD then
@@ -118,10 +124,6 @@ do
 
     function ZO_LocalizeDecimalNumber(amount)
         local amountString = tostring(amount)
-
-        if "." ~= DIGIT_GROUP_DECIMAL_REPLACER then
-            amountString = zo_strgsub(amountString, "%.", DIGIT_GROUP_DECIMAL_REPLACER)
-        end
 
         if amount >= DIGIT_GROUP_REPLACER_THRESHOLD then
             -- We have a number like 10000.5, so localize the non-decimal digit group separators (e.g., 10000 becomes 10,000)

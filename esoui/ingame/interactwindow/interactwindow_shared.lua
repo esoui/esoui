@@ -226,7 +226,7 @@ do
                         },
                         {
                             titleParams = { COST_OPTION_TO_PROMPT_TITLE[label.optionType] },
-                            mainTextParams = {COST_OPTION_TO_PROMPT[label.optionType], label.gold, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY)}
+                            mainTextParams = { COST_OPTION_TO_PROMPT[label.optionType], ZO_Currency_FormatPlatform(CURT_MONEY, label.gold, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON) }
                         }
                     )
                 --otherwise just do it
@@ -322,14 +322,22 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             --Determine rules for suppressing the cost suffix
             local suppressCostSuffix = (optionType == CHATTER_TALK_CHOICE_PAY_BOUNTY)
 
-            if(optionalArg > 0 and not suppressCostSuffix) then
-                local formattedGoldIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY) 
-                chatterData.optionText = zo_strformat(SI_INTERACT_OPTION_COST, optionText, chatterData.gold, formattedGoldIcon)
+            if optionalArg > 0 then
+                if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < optionalArg then
+                    chatterData.optionUsable = false
+                end
+
+                if not suppressCostSuffix then
+                    local currencyText
+                    if chatterData.optionUsable then
+                        currencyText = ZO_Currency_FormatPlatform(CURT_MONEY, chatterData.gold, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON)
+                    else
+                        currencyText = ZO_Currency_FormatPlatform(CURT_MONEY, chatterData.gold, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON)
+                    end
+                    chatterData.optionText = zo_strformat(SI_INTERACT_OPTION_COST, optionText, currencyText)
+                end
             end
 
-            if(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < optionalArg) then
-                chatterData.optionUsable = false
-            end
         elseif(optionType == CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED 
             or optionType == CHATTER_TALK_CHOICE_PERSUADE_DISABLED
             or optionType == CHATTER_TALK_CHOICE_CLEMENCY_DISABLED
@@ -387,8 +395,8 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
     
     if IsInteractingWithMyAssistant() then
-        local assistantName = GetCollectibleName(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
-        farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, assistantName)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT))
+        farewell = zo_strformat(SI_INTERACT_OPTION_DISMISS_ASSISTANT, collectibleData:GetName())
         optionCount = optionCount + 1
         self:PopulateChatterOption(optionCount, function() self:CloseChatterAndDismissAssistant() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
     end

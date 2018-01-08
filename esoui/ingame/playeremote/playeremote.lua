@@ -10,9 +10,8 @@ function ZO_PlayerEmoteManager:Initialize()
 	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_PERSONALITY_CHANGED, function() self:BuildEmoteList() end)
 	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:BuildEmoteList() end)
     EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_ADD_ON_LOADED, function(_, addOnName) self:OnAddOnLoaded(addOnName) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_COLLECTION_UPDATED, function() self:OnCollectionUpdated() end)
-    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_COLLECTIBLES_UPDATED, function() self:OnCollectiblesUpdated() end)
-    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_COLLECTIBLE_UPDATED, function(_, ...) self:OnCollectibleUpdated(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
 
     self.emoteList = {}
     self.emoteCategories = {}
@@ -33,14 +32,9 @@ function ZO_PlayerEmoteManager:OnCollectionUpdated()
     self:RefreshEmoteSlashCommands()
 end
 
-function ZO_PlayerEmoteManager:OnCollectiblesUpdated()
-    self:BuildEmoteList()
-    self:RefreshEmoteSlashCommands()
-end
-
 function ZO_PlayerEmoteManager:OnCollectibleUpdated(collectibleId)
-    local categoryType = GetCollectibleCategoryType(collectibleId)
-    if categoryType == COLLECTIBLE_CATEGORY_TYPE_EMOTE then
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
         self:BuildEmoteList()
         self:RefreshEmoteSlashCommands()
     end
@@ -67,7 +61,8 @@ function ZO_PlayerEmoteManager:RefreshEmoteSlashCommands()
         local lockedByCollectibleId = GetEmoteCollectibleId(emoteIndex)
         local slashName = GetEmoteSlashNameByIndex(emoteIndex)
         if lockedByCollectibleId then
-            local add = IsCollectibleUnlocked(lockedByCollectibleId)
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedByCollectibleId)
+            local add = collectibleData and collectibleData:IsUnlocked()
             self:AddOrRemoveEmoteSlashCommand(emoteIndex, add, zo_strsplit(" ", slashName))
         else
             local ADD = true
@@ -108,9 +103,10 @@ function ZO_PlayerEmoteManager:BuildEmoteList()
     ZO_ClearTable(self.emoteCategories)
     ZO_ClearNumericallyIndexedTable(self.emoteCategoryTypes)
 
-	for emoteIndex = 1, GetNumEmotes() do
+    for emoteIndex = 1, GetNumEmotes() do
         local lockedByCollectibleId = GetEmoteCollectibleId(emoteIndex)
-        if not lockedByCollectibleId or IsCollectibleUnlocked(lockedByCollectibleId) then
+        local collectibleData  = lockedByCollectibleId and ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedByCollectibleId)
+        if not collectibleData or collectibleData:IsUnlocked() then
             local emoteSlashName, emoteCategory, emoteId, displayName, showInGamepadUI = GetEmoteInfo(emoteIndex)
             if emoteSlashName ~= "" then
                 if not self.emoteCategories[emoteCategory] then
@@ -118,29 +114,29 @@ function ZO_PlayerEmoteManager:BuildEmoteList()
                     table.insert(self.emoteCategoryTypes, emoteCategory)
                 end
 
-       		    local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
+                local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
                 self.emoteList[emoteId] =   {
                                                 emoteCategory = emoteCategory,
                                                 emoteId = emoteId,
                                                 emoteIndex = emoteIndex,
                                                 displayName = displayName,
-											    emoteSlashName = emoteSlashName,
+                                                emoteSlashName = emoteSlashName,
                                                 showInGamepadUI = showInGamepadUI,
-											    isOverriddenByPersonality = isOverriddenByPersonality,
+                                                isOverriddenByPersonality = isOverriddenByPersonality,
                                             }
 
                 table.insert(self.emoteCategories[emoteCategory], emoteId)
 
-			    if isOverriddenByPersonality then
-				    if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
-					    self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
-					    table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
-				    end
+                if isOverriddenByPersonality then
+                    if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
+                        self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
+                        table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
+                    end
 
-				    table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
-			    end
+                    table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
+                end
 
-                if lockedByCollectibleId then
+                if collectibleData then
                     if not self.emoteCategories[EMOTE_CATEGORY_COLLECTED] then
                         self.emoteCategories[EMOTE_CATEGORY_COLLECTED] = {}
                         table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_COLLECTED)
@@ -150,7 +146,7 @@ function ZO_PlayerEmoteManager:BuildEmoteList()
                 end
             end
         end
-	end
+    end
 
     local emoteSortFunction
     if IsInGamepadPreferredMode() then

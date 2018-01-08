@@ -59,7 +59,7 @@ function ZO_KeybindStrip_OnInitialized(control)
         keybind = "UI_SHORTCUT_EXIT",
         order = -10000,
         callback = function()
-            SCENE_MANAGER:ShowBaseScene()
+            SCENE_MANAGER:RequestShowLeaderBaseScene()
         end,
     }
 
@@ -69,7 +69,7 @@ function ZO_KeybindStrip_OnInitialized(control)
         order = -10000,
         ethereal = true,
         callback = function()
-            SCENE_MANAGER:ShowBaseScene()
+            SCENE_MANAGER:RequestShowLeaderBaseScene()
         end,
     }
 

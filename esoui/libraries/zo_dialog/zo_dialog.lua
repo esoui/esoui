@@ -276,7 +276,7 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
     if isGamepadDialog then
         local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
         mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
-        warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningTextParams)
+        local warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningTextParams)
         ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText)
     else
         textControl = dialog:GetNamedChild("Text")
@@ -448,7 +448,6 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     --Title
 
     local titleControl = dialog:GetNamedChild("Title")
-    local divider = dialog:GetNamedChild("Divider")
     local title = dialogInfo.title
 
     if not textParams then
@@ -607,6 +606,10 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 ZO_EditDefaultText_Disable(editControl)
             end
 
+            if textParams.initialEditText then
+                editControl:SetText(textParams.initialEditText)
+            end
+
             if editBoxInfo.autoComplete then
                 if editControl.autoComplete then
                     editControl.autoComplete:SetEnabled(true)
@@ -637,6 +640,10 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             
             if(editBoxInfo.matchingString) then
                 dialog.requiredTextFields:SetMatchingString(editBoxInfo.matchingString)
+            end
+
+            if editBoxInfo.selectAll then
+                editControl:SelectAll()
             end
 
             controlAbove = editControl
@@ -734,8 +741,6 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
     -- Append the keybind state index to the dialog so that it knows where its keybinds sit on the keybind stack
     dialog.keybindStateIndex = KEYBIND_STRIP:GetTopKeybindStateIndex()
-
-    g_hasFocusEdit = nil
 
     dialog.name = name
     dialog:BringWindowToTop()
@@ -907,8 +912,8 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
 
     dialog.name = nil
 
-    for _, displayedDialog in ipairs(displayedDialogs) do
-        if(displayedDialog.name == name) then
+    for i, displayedDialog in ipairs(displayedDialogs) do
+        if displayedDialog.name == name then
             table.remove(displayedDialogs, i)
             break
         end
@@ -1084,33 +1089,32 @@ end
 
 -- Update the currency control underneath a button
 function ZO_Dialogs_UpdateButtonCost(dialog, buttonNumber, cost)
-    if(dialog)
-    then
+    if dialog then
         local buttonCostsShown = 0
         for i = 1,NUM_DIALOG_BUTTONS do
-            if(dialog.buttonCostKeys[i]) then
+            if dialog.buttonCostKeys[i] then
                 buttonCostsShown = buttonCostsShown + 1
             end
         end
 
-        if(cost) then
+        if cost then
             local textControl = dialog:GetNamedChild("ButtonExtraText"..buttonNumber)
             local buttonControl = dialog:GetNamedChild("Button"..buttonNumber)
-            
+
             local currencyControl
             local key = dialog.buttonCostKeys[buttonNumber]
-            if(key) then
+            if key then
                 currencyControl = g_currencyPool:AcquireObject(key)
             else
                 local newCurrencyControl, newCurrencyKey = g_currencyPool:AcquireObject()
                 newCurrencyControl:SetParent(dialog)
                 dialog.buttonCostKeys[buttonNumber] = newCurrencyKey
                 currencyControl = newCurrencyControl
-            end    
-            
+            end
+
             ZO_CurrencyControl_SetSimpleCurrency(currencyControl, CURT_MONEY, cost, nil, CURRENCY_DONT_SHOW_ALL)
             local visibleCurrencyWidth = currencyControl:GetWidth()
-            if(textControl:IsHidden()) then
+            if textControl:IsHidden() then
                 currencyControl:SetAnchor(TOPLEFT, buttonControl, BOTTOM, -visibleCurrencyWidth / 2, 5)
             else
                 currencyControl:SetAnchor(TOPLEFT, textControl, BOTTOM, -visibleCurrencyWidth / 2, 5)
@@ -1119,8 +1123,8 @@ function ZO_Dialogs_UpdateButtonCost(dialog, buttonNumber, cost)
             currencyControl:SetHidden(false)
         else
             local key = dialog.buttonCostKeys[buttonNumber]
-            if(key) then
-                self:ReleaseObject(key)
+            if key then
+                g_currencyPool:ReleaseObject(key)
                 dialog.buttonCostKeys[buttonNumber] = nil
             end
         end
@@ -1133,7 +1137,7 @@ function ZO_Dialogs_IsShowing(name)
             return true
         end
     end
-    
+
     return false
 end
 
@@ -1148,21 +1152,21 @@ end
 
 function ZO_Dialogs_CloseKeybindPressed()
     local dialog = GetDisplayedDialog()
-    if(dialog) then
+    if dialog then
         if not dialog.info.mustChoose then
             if not ZO_Dialogs_ReleaseDialog(dialog.name, not RELEASED_FROM_BUTTON_PRESS) then
                 dialog:SetHidden(true)
             end
-            if(dialog.info.hideSound) then
+            if dialog.info.hideSound then
                 PlaySound(dialog.info.hideSound)
             else
                 if not dialog.isGamepad then
                     PlaySound(SOUNDS.DIALOG_HIDE)
                 end
             end
-            
-            if(dialog.isGamepad) then
-                ShowRemoteBaseScene()
+
+            if dialog.isGamepad then
+                SCENE_MANAGER:RequestShowLeaderBaseScene()
             end
         end
     end

@@ -162,8 +162,8 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, MarkDataDirty)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_COLLECTION_UPDATED, MarkDataDirty)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_COLLECTIBLE_UPDATED, MarkDataDirty)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", MarkDataDirty)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", MarkDataDirty)
 
     --We should clear selections when switching filters, but we won't necessarily clear them when closing scenes
     --However, we can't ensure that gamepad and keyboard will stay on the same filter, so we'll clear selections when switching between modes
@@ -181,7 +181,6 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         end
     end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_UPDATE, UpdateGroupStatus)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_GROUP_MEMBER_ROLES_CHANGED, MarkDataDirty)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_LEADER_UPDATE, UpdateGroupStatus)
     EVENT_MANAGER:RegisterForUpdate("ActivityFinderRoot_Manager", 0, function() self:OnUpdate() end)
 end
@@ -284,14 +283,20 @@ function ActivityFinderRoot_Manager:GetGroupStatus()
     return self.playerIsGrouped, self.playerIsLeader, self.groupSize
 end
 
+local RANDOM_LOCK_REASON_PRIORITY =
+{
+    SELF_LEVEL = 10,
+    GROUP_LEVEL = 20,
+    NOT_LEADER = 30,
+}
+
 function ActivityFinderRoot_Manager:UpdateLocationData()
     --Determine lock status for each location
     local inAGroup = IsUnitGrouped("player")
     local isLeader = IsUnitGroupLeader("player")
+    -- UI will only check local player roles.  Client and server will validate group member roles.
+    -- This prevents group members disabling the leaders selections while they're trying to set up an activity and group member roles are being changed
     local isRoleDataValid = IsPreferredRoleSelected()
-    if inAGroup then
-        isRoleDataValid = DoAllGroupMembersHavePreferredRole()
-    end
 
     ZO_ClearTable(self.randomActivityTypeLockReasons)
 
@@ -306,7 +311,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
         local isPlayerInAvAWorld = IsPlayerInAvAWorld()
         local activityAvailableFromAvAWorld = isActivityAvA or isActivityBattleground
         local anyEligible = false
-        local anyLockReason = nil
+        local anyLockReasonData = {}
         local CONCISE_COOLDOWN_TEXT = false
 
         for index, location in ipairs(locationsByActivity) do
@@ -334,11 +339,12 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                 location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
             elseif location:IsLockedByCollectible() then
                 local collectibleId = location:GetFirstLockingCollectible()
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
                 local lockReasonText
-                if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
                     lockReasonText = GetString(SI_LFG_LOCK_REASON_CHAPTER_NOT_UNLOCKED)
                 else
-                    lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_DLC_NOT_UNLOCKED, GetCollectibleName(collectibleId))
+                    lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_DLC_NOT_UNLOCKED, collectibleData:GetName())
                 end
                 location:SetLockReasonText(lockReasonText)
                 location:SetCountsForAverageRoleTime(false)
@@ -353,11 +359,14 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     local levelMin, levelMax = location:GetLevelRange()
                     local championPointsMin, championPointsMax = location:GetChampionPointsRange()
                     location:SetLockReasonText(GetLevelOrChampionPointsRequirementText(levelMin, levelMax, championPointsMin, championPointsMax))
+                    location:SetRandomLockReasonPriority(RANDOM_LOCK_REASON_PRIORITY.SELF_LEVEL)
                     location:SetCountsForAverageRoleTime(false)
                 elseif isGroupRelevant and not location:DoesGroupMeetLevelRequirements() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
+                    location:SetRandomLockReasonPriority(RANDOM_LOCK_REASON_PRIORITY.GROUP_LEVEL)
                 elseif isGroupRelevant and not isLeader then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_NOT_LEADER)
+                    location:SetRandomLockReasonPriority(RANDOM_LOCK_REASON_PRIORITY.NOT_LEADER)
                 else
                     location:SetLocked(false)
                     location:SetLockReasonText("")
@@ -365,8 +374,14 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                 end
             end
 
-            if location:GetLockReasonText() ~= "" then
-                anyLockReason = location:GetLockReasonText()
+            if location:IsLocked() then
+                -- ESO-538378: We do this because when there are more than one reason why random is unavailable, the broadest reason is usually the most accurate to show
+                local locationPriority = location:GetRandomLockReasonPriority()
+                local locationHasHigherPriority = locationPriority and (not anyLockReasonData.priority or anyLockReasonData.priority < locationPriority)
+                if not anyLockReasonData.text or locationHasHigherPriority then
+                    anyLockReasonData.text = location:GetLockReasonText()
+                    anyLockReasonData.priority = locationPriority
+                end
                 self:SetLocationSelected(location, false)
             end
         end
@@ -374,7 +389,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
         if anyEligible then
             self.randomActivityTypeLockReasons[activityType] = nil
         else
-            self.randomActivityTypeLockReasons[activityType] = anyLockReason
+            self.randomActivityTypeLockReasons[activityType] = anyLockReasonData.text
         end
     end
 

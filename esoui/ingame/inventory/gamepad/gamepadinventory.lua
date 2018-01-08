@@ -877,15 +877,7 @@ function ZO_GamepadInventory:RefreshCategoryList()
             local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
             if headersUsed[visualCategory] == nil then
                 self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
-
-                if IsEquipSlotVisualCategoryHidden(visualCategory) then
-                    local hiddenText = ZO_SELECTED_TEXT:Colorize(GetString(SI_HIDDEN_GENERAL))
-
-                    local headerText = zo_strformat(GetString(SI_GAMEPAD_HEADER_VISUAL_LAYER_CONJOINMENT), GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory), hiddenText)
-                    data:SetHeader(headerText)
-                else
-                    data:SetHeader(GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
-                end
+                data:SetHeader(GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
 
                 headersUsed[visualCategory] = true
             --No Header Needed

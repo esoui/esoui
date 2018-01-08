@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader" virtual="true">
+            <OnInitialized>
+                ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" verticalAlignment="BOTTOM" >
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryText" virtual="true">
+            <OnInitialized>
+                ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" maxLineCount="2" >
+                    <Dimensions x="390" />
+                    <Anchor point="TOPLEFT" offsetX="30" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SkillsAdvisorSuggestions_Gamepad_AbilityEntryTemplate" inherits="ZO_GamepadAbilityEntryTemplate" resizeToFitDescendents="false" virtual="true" >
+            <Dimensions y="60" />
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad42",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad27",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Label"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" override="true" >
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                </Label>
+                <Texture name="$(parent)Alert" override="true">
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="19" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SkillsAdvisorSuggestions_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true" tier="MEDIUM" level="1">
+            <OnInitialized>
+                ZO_SkillsAdvisorSuggestions_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_SKILLS_ADVISOR_TITLE" >
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="60"/>
+                </Label>
+                <Control name="$(parent)SkillsAdvisor_Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" offsetX="-20" offsetY="100" />
+                </Control>
+                <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsAdvisor_Divider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-15" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,12 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GridScrollListEmptyRow_Gamepad" inherits="ZO_SortFilterListEmptyRow" virtual="true">
-            <Controls>
-                <Label name="$(parent)Message" override="true" font="ZoFontGamepadCondensed42" />
-            </Controls>
-        </Control>
-		
-		<Control name="ZO_GridScrollList_Gamepad" virtual="true">
+        <Control name="ZO_GridScrollList_Gamepad" virtual="true">
             <Controls>
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" >
                     <Controls>
@@ -18,7 +12,12 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_GridScrollList_Entry_Header_Template_Gamepad" font="ZoFontGamepad34" maxLineCount="1"  wrapMode="ELLIPSIS" virtual="true" />
+        <Label name="ZO_GridScrollList_Entry_Header_Template_Gamepad" font="ZoFontGamepad27" modifyTextType="UPPERCASE" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Backdrop name="ZO_GridScrollList_Highlight_Gamepad" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight"  virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
+            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+        </Backdrop>
 
         <Control name="ZO_GridScrollList_Entry_Template_Gamepad" mouseEnabled="true" virtual="true">
             <Dimensions x="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD" y="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD" />

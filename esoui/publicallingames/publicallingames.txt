@@ -28,7 +28,9 @@ EsoUI\PublicAllIngames\Tooltip\ChampionTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\CharacterTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\HousingTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\MarketTooltips.lua
+EsoUI\PublicAllIngames\Tooltip\RewardTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\Console\VoiceChatTooltips.lua
+EsoUI\PublicAllIngames\Tooltip\SkillBuildTooltips.lua
 
 EsoUI\PublicAllIngames\ItemPreview\ItemPreview_Shared.lua
 EsoUI\PublicAllIngames\ItemPreview\Keyboard\ItemPreview_Keyboard.lua

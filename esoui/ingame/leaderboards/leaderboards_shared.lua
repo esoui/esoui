@@ -67,9 +67,8 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
         --Get and setup Leaderboard Type specific data
         if self.leaderboardRankType == LEADERBOARD_TYPE_HOUSE then
             rank, playerDisplayName, houseCollectibleId, points = self.infoFunction(dataTable.index, self.subType)
-             
-            local houseName = GetCollectibleInfo(houseCollectibleId)
-            dataTable.houseName = houseName
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(houseCollectibleId)
+            dataTable.houseName = collectibleData:GetName()
         elseif self.leaderboardRankType == LEADERBOARD_TYPE_BATTLEGROUND then
             rank, playerDisplayName, characterName, points = self.infoFunction(dataTable.index, self.subType)
             dataTable.characterName = characterName

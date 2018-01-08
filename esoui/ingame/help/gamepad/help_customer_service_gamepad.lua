@@ -247,7 +247,7 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         control.highlight:SetHidden(not selected)
     end
 
-    local function SetupDropdownListEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+    local function SetupDropdownListEntry(control, data, selected, selectedDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
         control.dropdown:SetSortsItems(false)
 

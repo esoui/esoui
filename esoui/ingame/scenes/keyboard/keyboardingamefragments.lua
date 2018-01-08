@@ -1,6 +1,5 @@
 TRADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Trade)
 GROUP_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMenu_Keyboard)
-RESTYLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_RestyleTopLevel_Keyboard)
 ACHIEVEMENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Achievements)
 CADWELLS_ALMANAC_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Cadwell)
 STABLES_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StableWindowMenu)
@@ -48,3 +47,31 @@ RIGHT_PANEL_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptions
     dynamicFramingConsumedHeight = 300,
     previewInEmptyWorld = true,
 })
+
+RESTYLE_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 350,
+    paddingRight = 950,
+    dynamicFramingConsumedWidth = 1350,
+    dynamicFramingConsumedHeight = 300,
+    forcePreparePreview = false,
+    maintainsPreviewCollection = true,
+})
+
+STATS_OUTFIT_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = 680,
+    dynamicFramingConsumedWidth = 1250,
+    dynamicFramingConsumedHeight = 300,
+    forcePreparePreview = false,
+    maintainsPreviewCollection = true,
+})
+
+do
+    local function CalculateSkillsRightPanelFramingTarget()
+        local percentX = SKILLS_WINDOW:IsSkillsAdvisorShown() and .65 or .5
+        local x = zo_lerp(0, ZO_SharedRightBackground:GetLeft(), percentX)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
+        return x, y
+    end
+    FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateSkillsRightPanelFramingTarget, SetFrameLocalPlayerTarget)
+end

@@ -104,7 +104,7 @@
                         <Button name="$(parent)SetNow" inherits="ZO_RadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)CooldownWarning" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="15"/>
                             <OnClicked>
-                                ZO_SelectHomeCampaignDialogSetNow_OnClicked(control)
+                                ZO_SelectHomeCampaignDialogSetNow_OnClicked(self)
                             </OnClicked>
                         </Button>
                         <Label name="$(parent)SetNowLabel" font="ZoFontGame" text="SI_SELECT_HOME_CAMPAIGN_NOW">
@@ -113,7 +113,7 @@
                         <Button name="$(parent)SetOnEnd" inherits="ZO_RadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SetNow" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <OnClicked>
-                                ZO_SelectHomeCampaignDialogSetOnEnd_OnClicked(control)
+                                ZO_SelectHomeCampaignDialogSetOnEnd_OnClicked(self)
                             </OnClicked>
                         </Button>
                         <Label name="$(parent)SetOnEndLabel" font="ZoFontGame" text="SI_SELECT_HOME_CAMPAIGN_ON_END">
@@ -199,7 +199,7 @@
                         <Button name="$(parent)UseAlliancePointsButton" inherits="ZO_RadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Query" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="15"/>
                             <OnClicked>
-                                ZO_AbandonHomeCampaignDialogUseAlliancePoints_OnClicked(control)
+                                ZO_AbandonHomeCampaignDialogUseAlliancePoints_OnClicked(self)
                             </OnClicked>
                         </Button>
                         <Label name="$(parent)UseAlliancePointsLabel" font="ZoFontGame" text="SI_ABANDON_HOME_CAMPAIGN_USE_ALLIANCE_POINTS">
@@ -208,7 +208,7 @@
                         <Button name="$(parent)UseGoldButton" inherits="ZO_RadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)UseAlliancePointsButton" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <OnClicked>
-                                ZO_AbandonHomeCampaignDialogUseGold_OnClicked(control)
+                                ZO_AbandonHomeCampaignDialogUseGold_OnClicked(self)
                             </OnClicked>
                         </Button>
                         <Label name="$(parent)UseGoldLabel" font="ZoFontGame" text="SI_ABANDON_HOME_CAMPAIGN_USE_GOLD">

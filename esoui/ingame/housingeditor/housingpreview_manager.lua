@@ -20,9 +20,9 @@ function ZO_HousingPreview_Manager:RegisterForEvents()
         local zoneHouseId = GetCurrentZoneHouseId()
         if zoneHouseId > 0 then
             local collectibleId = GetCollectibleIdForHouse(zoneHouseId)
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
             local displayInfo = self.displayInfo
-            local houseName = GetCollectibleName(collectibleId)
-            displayInfo.houseName = zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, houseName)
+            displayInfo.houseName = collectibleData:GetFormattedName()
             local foundInZoneId = GetHouseFoundInZoneId(zoneHouseId)
             displayInfo.houseFoundInLocation = GetZoneNameById(foundInZoneId)
             local houseCategory = GetHouseCategoryType(zoneHouseId)

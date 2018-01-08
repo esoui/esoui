@@ -303,7 +303,7 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
         
             callback = function() self:ConfirmRefineOrDestroy() end,
 
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasEnoughToRefine() and self:HasSelections() end,
+            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasEnoughToRefine() and self:HasSelections() end,
         },
 
         -- Item Options
@@ -378,7 +378,8 @@ function ZO_GamepadExtractionInventory:Initialize(owner, control, refinementOnly
                                                         elseif slotData.traitInformation == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED or slotData.traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
                                                             slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITINFORMATION", slotData.traitInformation))
                                                         else
-                                                            slotData.bestItemCategoryName = nil -- design does not want anything to be said about inspiration/no trait items
+                                                            --If it is not ornate or trait related then use no header. We take advantage of the fact that empty string sorts to the top to order this.
+                                                            slotData.bestItemCategoryName = ""
                                                         end
                                                     end
                                                end)

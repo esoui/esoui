@@ -350,8 +350,6 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
             local smithingObject = ZO_Smithing_GetActiveObject()
             if SYSTEMS:IsShowing("alchemy") then
                 ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
-            elseif smithingObject and smithingObject:IsImproving() then
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_SMITHING_IMPROVEMENT_FAILED)
             elseif smithingObject and smithingObject:IsExtracting() then
                 local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo()
                 if penaltyApplied then

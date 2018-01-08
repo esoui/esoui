@@ -197,7 +197,7 @@ do
     function ZO_LootHistory_Shared:AddCurrencyEntry(currencyAdded, currencyType, currencyLocation)
         local icon = IsInGamepadPreferredMode() and GetCurrencyLootGamepadIcon(currencyType) or GetCurrencyLootKeyboardIcon(currencyType)
 
-        function GetCurrencyString(lootData)
+        local function GetCurrencyString(lootData)
             local currencyAdded = lootData.stackCount
             local formattedCurrencyString = GetCurrencyName(currencyType, IsCountSingularForm(currencyAdded), IS_UPPER)
             if IsCurrencyCapped(currencyType, currencyLocation) then
@@ -347,12 +347,12 @@ end
 
 function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
     if not self.hidden or self:CanShowItemsInHistory() then
-        local name, _, icon = GetCollectibleInfo(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 
         local QUALITY_NORMAL = 1
         local lootData = {
-                            text = zo_strformat(SI_TOOLTIP_ITEM_NAME, name),
-                            icon = icon,
+                            text = collectibleData:GetFormattedName(),
+                            icon = collectibleData:GetIcon(),
                             stackCount = 1,
                             color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, QUALITY_NORMAL)),
                             collectibleId = collectibleId,
@@ -405,11 +405,11 @@ end
 do
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
     function ZO_LootHistory_Shared.GetStackCountStringFromData(data)
-        return ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+        return zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     end
 
     function ZO_LootHistory_Shared.GetValueStringFromData(data)
-        return ZO_AbbreviateNumber(data.value, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+        return zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(data.value, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     end
 end
 

@@ -24,13 +24,11 @@ function ZO_Restyle_Gamepad:Initialize(control)
 
     SYSTEMS:RegisterGamepadRootScene("restyle", GAMEPAD_RESTYLE_ROOT_SCENE)
 
-    self.dyeingPanel = ZO_Dyeing_Slots_Panel_Gamepad:New(self.control:GetNamedChild("DyePanel"), self)
-
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     self.headerData =
     {  
-        titleText = GetString(SI_GAMEPAD_DYEING_ROOT_TITLE)
+        titleText = GetString(SI_RESTYLE_STATION_MENU_ROOT_TITLE)
     }
 
     GAMEPAD_RESTYLE_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
@@ -100,8 +98,8 @@ function ZO_Restyle_Gamepad:InitializeModeList()
     )
 
     self.modeList:Clear()
-    AddEntry(SI_DYEING_DYE_EQUIPMENT_TAB, RESTYLE_MODE_EQUIPMENT, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_EQUIPMENTDye.dds", "gamepad_dyeing")
-    AddEntry(SI_DYEING_DYE_COLLECTIBLE_TAB, RESTYLE_MODE_COLLECTIBLE, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_costumeDye.dds", "gamepad_dyeing")
+    AddEntry(SI_DYEING_DYE_EQUIPMENT_TAB, RESTYLE_MODE_EQUIPMENT, "EsoUI/Art/Restyle/Gamepad/gp_dyes_tabIcon_outfitStyleDye.dds", "gamepad_restyle_station")
+    AddEntry(SI_DYEING_DYE_COLLECTIBLE_TAB, RESTYLE_MODE_COLLECTIBLE, "EsoUI/Art/Dye/Gamepad/dye_tabIcon_costumeDye.dds", "gamepad_restyle_station")
     self.modeList:Commit()
 end
 
@@ -119,6 +117,8 @@ function ZO_Restyle_Gamepad:UpdateOptionLeftTooltip(restyleMode)
             descriptionTwo = GetString(SI_DYEING_COLLECTIBLE_TAB_DESCRIPTION_LOCKED)
         end
         GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_COLLECTIBLE_TAB), descriptionOne, descriptionTwo)
+    elseif restyleMode == RESTYLE_MODE_OUTFIT then
+        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_DYEING_DYE_OUTFIT_STYLES_TAB), GetString(SI_GAMEPAD_RESTYLE_OUTFITS_DESCRIPTION))
     end
 end
 
@@ -136,8 +136,15 @@ function ZO_Restyle_Gamepad:InitializeKeybindStripDescriptorsRoot()
         
             callback = function()
                 local targetData = self.modeList:GetTargetData()
-                self:SetMode(targetData.mode)
-                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptorRoot)
+                local targetMode = targetData.mode
+                if targetMode == RESTYLE_MODE_EQUIPMENT then
+                    local outfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+                    if outfitIndex then
+                        targetMode = RESTYLE_MODE_OUTFIT
+                    end
+                end
+                self:SetMode(targetMode)
+                ZO_RESTYLE_STATION_GAMEPAD:Update()
                 SCENE_MANAGER:Push(targetData.sceneName)
             end,
             visible = function()
@@ -158,21 +165,17 @@ function ZO_Restyle_Gamepad:CancelExit()
     MAIN_MENU_MANAGER:CancelBlockingSceneNextScene()
 end
 
-function ZO_Restyle_Gamepad:ExitWithoutSave()
-    SCENE_MANAGER:HideCurrentScene()
-end
-
 function ZO_Restyle_Gamepad:UndoPendingChanges()
     InitializePendingDyes()
     PlaySound(SOUNDS.DYEING_UNDO_CHANGES)
 end
 
-function ZO_Restyle_Gamepad:AttemptExit()
-    self:ExitWithoutSave()
+function ZO_Restyle_Gamepad:ConfirmCommitSelection()
+    ZO_RESTYLE_STATION_GAMEPAD:CompleteDyeChanges()
 end
 
-function ZO_Restyle_Gamepad:ConfirmCommitSelection()
-    self.dyeingPanel:ConfirmCommitSelection()
+function ZO_Restyle_Gamepad:AttemptExit()
+    SCENE_MANAGER:HideCurrentScene()
 end
 
 function ZO_Restyle_Gamepad_OnInitialized(control)

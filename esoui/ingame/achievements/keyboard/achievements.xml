@@ -44,7 +44,7 @@
             <Dimensions x="550" y="88" />
             
             <Controls>
-                <Control name="$(parent)Highlight" inherits="ZO_ListEntryHighlight" />
+                <Control name="$(parent)Highlight" inherits="ZO_ListEntryHighlight"/>
 
                 <Label name="$(parent)Points" font="ZoFontCallout3" horizontalAlignment="CENTER">
                     <Dimensions x="70" />
@@ -156,7 +156,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_AchievementDyeSwatch" virtual="true" mouseEnabled="true">
+        <Control name="ZO_AchievementDyeSwatch" virtual="true">
             <Dimensions x="370" y="27"/>
             <OnInitialized>
                 self.label = self:GetNamedChild("Label")

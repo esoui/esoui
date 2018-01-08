@@ -146,7 +146,7 @@ do
     local HIDE_SAME_SPEAKER_NAME_TIME_WINDOW_SECONDS = 5
     function ZO_SubtitleManager:OnShowSubtitle(messageType, speaker, message)
         self.previousSubtitle = self.currentSubtitle or self.previousSubtitle
-        subtitle = ZO_Subtitle:New(messageType, speaker, message)
+        local subtitle = ZO_Subtitle:New(messageType, speaker, message)
 
         local showSpeakerName = true
         local currentTime = GetFrameTimeSeconds()

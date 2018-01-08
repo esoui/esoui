@@ -148,7 +148,7 @@ function LavaBurst:InitializeSparksParticleSystem()
     local AlphaEasing = ZO_GenerateCubicBezierEase(0.75, 0.25, 0.75, 0.25)
     local ColorEasing = ZO_GenerateCubicBezierEase(.71,.51,.63,.89)
 
-    local sparksParticleSystem = ZO_SceneGraphParticleSystem:New(ZO_BentArcParticle, self.node)
+    local sparksParticleSystem = ZO_SceneGraphParticleSystem:New(ZO_BentArcParticle_SceneGraph, self.node)
     sparksParticleSystem:SetParentControl(self.sceneGraph:GetCanvasControl())
     sparksParticleSystem:SetBurstEasing(BurstEasing)
     sparksParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)

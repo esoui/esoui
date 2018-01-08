@@ -7,7 +7,7 @@ ZO_TRADING_HOUSE_SYSTEM_NAME = "tradingHouse"
 ZO_TRADING_HOUSE_INTERACTION =
 {
     type = "TradingHouse",
-    End = function() self:CloseTradingHouse() end,
+    End = function() SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse() end,
     interactTypes = { INTERACTION_TRADINGHOUSE },
 }
 

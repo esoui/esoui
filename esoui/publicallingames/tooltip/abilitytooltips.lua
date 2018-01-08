@@ -104,6 +104,8 @@ do
                 costPair:SetValue(costString, self:GetStyle("statValuePairMagickaValue"))
             elseif(mechanic == POWERTYPE_STAMINA) then
                 costPair:SetValue(costString, self:GetStyle("statValuePairStaminaValue"))
+            elseif(mechanic == POWERTYPE_HEALTH) then
+                costPair:SetValue(costString, self:GetStyle("statValuePairHealthValue"))
             else
                 costPair:SetValue(costString, self:GetStyle("statValuePairValue"))
             end
@@ -142,13 +144,15 @@ function ZO_Tooltip:AddAbilityDescription(abilityId, pendingChampionPoints)
     else
         description = GetChampionAbilityDescription(abilityId, pendingChampionPoints)
     end
-    if(descriptionHeader ~= "" or description ~= "") then
+    if descriptionHeader ~= "" or description ~= "" then
         local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
-        if(descriptionHeader ~= "") then
-            descriptionSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_DESCRIPTION_HEADER, descriptionHeader), self:GetStyle("bodyHeader"))
+        if descriptionHeader ~= "" then
+            --descriptionHeader has already been run through grammar
+            descriptionSection:AddLine(descriptionHeader, self:GetStyle("bodyHeader"))
         end
-        if(description ~= "") then
-            descriptionSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_DESCRIPTION, description), self:GetStyle("bodyDescription"))
+        if description ~= "" then
+            --description has already been run through grammar
+            descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
         end
         self:AddSection(descriptionSection)
     end
@@ -182,8 +186,28 @@ end
 
 --Layout Functions
 
-function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects)
-    if(DoesAbilityExist(abilityId)) then
+function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects, headerSection)
+    if DoesAbilityExist(abilityId) then
+        --Specialized ability tooltips may want to add their own things to the header section. If they do they'll make the header section and pass it in. If they don't pass it in we make
+        --one for the standard ability header.
+        if not headerSection then
+            headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+        end
+
+        --If this is a morph, add what it morphed from to the header section
+        local skillType, skillIndex, abilityIndex, morph, rank = GetSpecificSkillAbilityKeysByAbilityId(abilityId)
+        if skillType ~= SKILL_TYPE_NONE then
+            --0 means the base ability. The morphs are 1 and 2.
+            if morph > 0 then
+                local progressionName = GetProgressionSkillProgressionName(skillType, skillIndex, abilityIndex)
+                if progressionName ~= "" then
+                    headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, progressionName), self:GetStyle("abilityHeader"))
+                end
+            end
+        end
+
+        self:AddSectionEvenIfEmpty(headerSection)
+
         local hasProgression, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph = GetAbilityProgressionXPInfoFromAbilityId(abilityId)
 
         self:AddAbilityName(abilityId, hideRank, overrideRank)
@@ -200,46 +224,78 @@ function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingCham
     end
 end
 
-function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityIndex, showNextUpgrade, hideRank, overrideRank, showPurchaseInfo)    
-    local abilityId = GetSkillAbilityId(skillType, skillLineIndex, abilityIndex, false)     
+function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityIndex, showNextUpgrade, hideRank, overrideRank, showPurchaseInfo, abilityId, hidePointsAndAdvisedInfo)    
+    if not abilityId then 
+        local DONT_GET_NEXT_UPGRADE = false
+        abilityId = GetSkillAbilityId(skillType, skillLineIndex, abilityIndex, DONT_GET_NEXT_UPGRADE)   
+    end  
 
-    local upgradeSection = self:AcquireSection(self:GetStyle("abilityUpgradeSection"))
-    if(showPurchaseInfo) then
+    local headerSection
+    if showPurchaseInfo then
+        headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+        
         --Purchase Information
         local hasProgression, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph = GetAbilityProgressionXPInfoFromAbilityId(abilityId)
         local name, icon, earnedRank, passive, ultimate, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-        if(purchased and hasProgression and atMorph) then
-            if(GetAvailableSkillPoints() == 0) then
-                upgradeSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("failed"), self:GetStyle("abilityUpgrade"))
+        if not hidePointsAndAdvisedInfo and purchased and hasProgression and atMorph then
+            if GetAvailableSkillPoints() == 0 then
+                headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
             else
-                upgradeSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("succeeded"), self:GetStyle("abilityUpgrade"))
+                headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
             end
-        elseif(not purchased) then
+        elseif not purchased then
             local skillLineName, skillLineRank = GetSkillLineInfo(skillType, skillLineIndex)
             if(skillLineRank < earnedRank) then
-                upgradeSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, earnedRank), self:GetStyle("failed"), self:GetStyle("abilityUpgrade"))
-            elseif(GetAvailableSkillPoints() == 0) then
-                upgradeSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("failed"), self:GetStyle("abilityUpgrade"))
-            else
-                upgradeSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("succeeded"), self:GetStyle("abilityUpgrade"))
+                headerSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, earnedRank), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+            elseif not hidePointsAndAdvisedInfo then
+                if GetAvailableSkillPoints() == 0 then
+                    headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                else
+                    headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                end
             end
-        elseif(passive) then
+        elseif passive then
             local currentUpgradeLevel, maxUpgradeLevel = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
             if(currentUpgradeLevel and maxUpgradeLevel and currentUpgradeLevel < maxUpgradeLevel) then
                 local skillLineName, skillLineRank = GetSkillLineInfo(skillType, skillLineIndex)
                 local _, _, nextUpgradeEarnedRank = GetSkillAbilityNextUpgradeInfo(skillType, skillLineIndex, abilityIndex)
                 if(skillLineRank < nextUpgradeEarnedRank) then
-                    upgradeSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_UNLOCK_INFO, skillLineName, nextUpgradeEarnedRank), self:GetStyle("failed"), self:GetStyle("abilityUpgrade"))
-                elseif(GetAvailableSkillPoints() == 0) then
-                    upgradeSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("failed"), self:GetStyle("abilityUpgrade"))
+                    headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_UNLOCK_INFO, skillLineName, nextUpgradeEarnedRank), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                elseif not hidePointsAndAdvisedInfo then 
+                    if GetAvailableSkillPoints() == 0 then
+                        headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                    else
+                        headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                    end
+                end
+            end
+        end
+        
+        -- Show Skill Advisor info
+        if not hidePointsAndAdvisedInfo then
+            local NO_MORPH = 0
+            if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, NO_MORPH) then
+                local _, morph, rank = GetAbilityProgressionInfo(progressionIndex)
+                if morph > 0 then
+                    local morphIndexInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
+                    local morphSiblingInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsSiblingMorphInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
+                    if morphIndexInSelectedSkillBuild ~= morphSiblingInSelectedSkillBuild then
+                        if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph) then
+                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_ADVISED), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                        else
+                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED_SUGGESTION), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                        end
+                    end
                 else
-                    upgradeSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("succeeded"), self:GetStyle("abilityUpgrade"))
+                    headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
                 end
             end
         end
     end
-    self:AddSectionEvenIfEmpty(upgradeSection)
-    self:LayoutAbility(abilityId, hideRank, overrideRank)
+
+
+    self:LayoutAbility(abilityId, hideRank, overrideRank, nil, nil, headerSection)
 
     --For gamepad skills tips, when you ask for showNextUpgrade we show you the regular one with the description of the new one in green
     --This mostly affects passive abilities since active ones have morphs with their own style tooltip.
@@ -253,23 +309,44 @@ function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityInd
     end
 end
 
-function ZO_Tooltip:LayoutAbilityMorph(progressionIndex, morphIndex)
+function ZO_Tooltip:LayoutAbilityMorph(progressionIndex, morphIndex, skillType, skillLineIndex, abilityIndex)
     local RANK = 1
     local abilityId = GetAbilityProgressionAbilityId(progressionIndex, morphIndex, RANK)
-    local upgradeSection = self:AcquireSection(self:GetStyle("abilityUpgradeSection"))
-    self:AddSectionEvenIfEmpty(upgradeSection)
+    local headerSection
+    
+    -- Show Skill Advisor info
+    local NO_MORPH = 0
+    if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, NO_MORPH) then
+        headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+        if morphIndex > 0 then
+            local morphIndexInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morphIndex)
+            local morphSiblingInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsSiblingMorphInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morphIndex)
+            if morphIndexInSelectedSkillBuild ~= morphSiblingInSelectedSkillBuild then
+                if morphIndexInSelectedSkillBuild then
+                    headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_ADVISED), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                else
+                    headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                end
+            elseif morphIndexInSelectedSkillBuild then
+                headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+            end
+        else
+            headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+        end
+        self:AddSection(headerSection)
+    end    
+    
+
     local ADD_NEW_EFFECTS = true
     local HIDE_RANK = nil
     local CHAMPION_POINTS = nil
-    self:LayoutAbility(abilityId, HIDE_RANK, RANK, CHAMPION_POINTS, ADD_NEW_EFFECTS)
+    self:LayoutAbility(abilityId, HIDE_RANK, RANK, CHAMPION_POINTS, ADD_NEW_EFFECTS, headerSection)
     self:AddAbilityUpgrades(GetAbilityUpgradeLines(abilityId))
 end
 
 function ZO_Tooltip:LayoutActionBarAbility(slotId)
     local slotType = GetSlotType(slotId)
     if slotType == ACTION_TYPE_ABILITY then
-        local upgradeSection = self:AcquireSection(self:GetStyle("abilityUpgradeSection"))
-        self:AddSectionEvenIfEmpty(upgradeSection)
         self:LayoutAbility(GetSlotBoundId(slotId))
     end
 end
@@ -302,7 +379,8 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
             local nextPointDescription = GetChampionAbilityDescription(abilityId, pendingPoints + 1)
             if nextPointDescription ~= "" then
                 upgradeSection:AddLine(GetString(SI_CHAMPION_TOOLTIP_NEXT_POINT), self:GetStyle("abilityUpgrade"), self:GetStyle("bodyHeader"))
-                upgradeSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_DESCRIPTION, nextPointDescription), self:GetStyle("abilityUpgrade"), self:GetStyle("bodyDescription"))
+                --nextPointDescription has already been run through grammar
+                upgradeSection:AddLine(nextPointDescription, self:GetStyle("abilityUpgrade"), self:GetStyle("bodyDescription"))
                 self:AddSection(upgradeSection)
             end
 

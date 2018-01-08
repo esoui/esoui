@@ -111,7 +111,7 @@
 
                 <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PlayerRow" relativePoint="BOTTOMLEFT" offsetY="20"/>
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Dimensions x="768" y="375"/>
                 </Control>
 
                 <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" resizeToFitFile="true" hidden="true"/>

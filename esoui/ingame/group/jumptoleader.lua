@@ -31,11 +31,13 @@ do
                     elseif result == JUMP_TO_PLAYER_RESULT_ZONE_COLLECTIBLE_LOCKED then
                         local zoneIndex = GetUnitZoneIndex(groupLeaderUnitTag)
                         local collectibleId = GetCollectibleIdForZone(zoneIndex)
-                        if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                        if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
                             ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_CHAPTER_COLLECTIBLE_LOCKED_PROMPT", nil, { mainTextParams = { groupLeaderZoneName } })
                         else
-                            local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-                            ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_DLC_COLLECTIBLE_LOCKED_PROMPT", { collectibleName = collectibleName }, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryName } })
+                            local collectibleName = collectibleData:GetName()
+                            local categoryData = collectibleData:GetCategoryData()
+                            ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_DLC_COLLECTIBLE_LOCKED_PROMPT", { collectibleName = collectibleName }, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryData:GetName() } })
                         end
                     end
                 end

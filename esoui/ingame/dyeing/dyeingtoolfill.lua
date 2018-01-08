@@ -19,7 +19,7 @@ function ZO_DyeingToolFill:GetHighlightRules(dyeableSlot, dyeChannel)
 end
 
 function ZO_DyeingToolFill:OnLeftClicked(restyleSlotData, dyeChannel)
-    local slots = ZO_Dyeing_GetSlotsForMode(restyleSlotData:GetRestyleMode())
+    local slots = ZO_Dyeing_GetSlotsForRestyleSet(restyleSlotData:GetRestyleMode(), restyleSlotData:GetRestyleSetIndex())
     for i, dyeableSlotData in ipairs(slots) do
         dyeableSlotData:SetPendingDyes(zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), dyeableSlotData:GetPendingDyes()))
     end

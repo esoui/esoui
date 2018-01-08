@@ -46,7 +46,7 @@ function ZO_MapHouses_Gamepad:RefreshHouseList()
             headerText = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED)
             firstUnlocked = false
         elseif not houseEntry.unlocked and firstLocked then
-            headerText = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_LOCKED)
+            headerText = GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED)
             firstLocked = false
         end
 

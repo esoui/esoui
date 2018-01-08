@@ -8,14 +8,13 @@ function ZO_UnitVisualizer_PowerShieldModule:Initialize(layoutData)
     self.layoutData = layoutData
 end
 
-local function GetInitialStatValue(unitTag, stat, attribute, powerType)
-    local value, maxValue =  GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_POWER_SHIELDING, stat, attribute, powerType)
-    return value or 0, maxValue or 0
+function ZO_UnitVisualizer_PowerShieldModule:GetInitialStatValue(stat, attribute, powerType)
+    return self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_POWER_SHIELDING, stat, attribute, powerType)
 end
 
 function ZO_UnitVisualizer_PowerShieldModule:CreateInfoTable(control, oldBarInfo, stat, attribute, power)
     if control then
-        local value, maxValue = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power)
+        local value, maxValue = self:GetInitialStatValue(stat, attribute, power)
         local oldInfo = oldBarInfo and oldBarInfo[attribute]
 
         if oldInfo then

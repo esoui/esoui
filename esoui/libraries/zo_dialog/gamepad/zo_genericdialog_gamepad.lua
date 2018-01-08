@@ -10,6 +10,8 @@ GAMEPAD_DIALOGS = {
 
 local GAMEPAD_DIALOG_SHOWING = false
 
+local DEFAULT_WARNING_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED))
+
 ----------------------
 -- Helper Functions --
 ----------------------
@@ -339,6 +341,10 @@ local function OnDialogHidden(dialog)
         dialog.info.OnHiddenCallback(dialog)
     end
 
+    if dialog.warningTextControl then
+        dialog.warningTextControl:SetColor(DEFAULT_WARNING_COLOR:UnpackRGBA())
+    end
+
     local releasedFromButton = dialog.releasedFromButton
     dialog.releasedFromButton = nil
 
@@ -494,6 +500,12 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
     end
 end
 
+function ZO_GenericGamepadDialog_SetDialogWarningColor(dialog, warningColor)
+    if dialog.warningTextControl then
+        dialog.warningTextControl:SetColor(warningColor:UnpackRGBA())
+    end
+end
+
 function ZO_GenericGamepadDialog_Show(dialog)
     ZO_GenericGamepadDialog_SetupDirectionalInput(dialog)
 
@@ -601,7 +613,7 @@ do
         local dialogOnSelectionChangedCallback = dialog.info.parametricListOnSelectionChangedCallback
         if dialogOnSelectionChangedCallback then
             onSelectionChangedCallback =    function(...)
-                                                dialogOnSelectionChangedCallback(...)
+                                                dialogOnSelectionChangedCallback(dialog, ...)
                                                 DefaultOnSelectionChangedCallback()
                                             end
         else

@@ -43,7 +43,6 @@ end
 function ZO_TimerBar:SetTimeFormatParameters(timeFormatStyle, timePrecision)
     self.timeFormatStyle = timeFormatStyle
     self.timePrecision = timePrecision
-    d(timeFormatStyle, timePrecision)
 end
 
 function ZO_TimerBar:SetFades(fades, duration)

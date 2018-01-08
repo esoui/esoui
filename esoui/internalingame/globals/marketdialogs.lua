@@ -1,5 +1,3 @@
-local CURRENCY_ICON_SIZE = 24
-
 local function LogPurchaseClose(dialog)
     if dialog.data then
         if not dialog.data.dontLogClose then
@@ -102,7 +100,7 @@ ESO_Dialogs["MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION"] =
     {
         text =  function(dialog)
                     local endTimeString = GetMarketProductEndTimeString(dialog.data.marketProductId)
-                    local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, CURRENCY_ICON_SIZE)
+                    local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, 24)
                     return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
                 end,
     },
@@ -157,21 +155,21 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     stackCountControl:SetText(stackSize)
     stackCountControl:SetHidden(stackSize < 2)
 
-    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
+    local marketCurrencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
 
     local finalCost = cost
     if hasDiscount then
         finalCost = costAfterDiscount
     end
 
-    local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE)
+    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
 
     local costLabel = dialog:GetNamedChild("CostContainerItemCostAmount")
-    local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(finalCost), currencyIcon)
+    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, finalCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
     costLabel:SetText(currencyString)
 
     local currentBalance = dialog:GetNamedChild("BalanceContainerCurrentBalanceAmount")
-    currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(GetPlayerMarketCurrency(currencyType)), currencyIcon)
+    currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON))
     currentBalance:SetText(currencyString)
 end
 

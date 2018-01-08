@@ -60,9 +60,7 @@ local function ProcessData(control, textData, anchorToBaselineControl, anchorToB
 
     if type(textData) == "function" then
         textData = textData(control)
-    end
-
-    if type(textData) == "string" or type(textData) == "number" then
+    elseif type(textData) == "string" or type(textData) == "number" then
         control:SetText(textData)
     else
         control:SetText("")

@@ -219,8 +219,8 @@ function ZO_QuickslotManager:New(container)
                                                                 manager.quickSlotState = false
                                                             end
                                                         end)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("FullCollectionsInventoryUpdate", RefreshQuickslotWindow)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("SingleCollectionsInventoryUpdate", RefreshQuickslotWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshQuickslotWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshQuickslotWindow)
 
     return manager
 end
@@ -442,8 +442,8 @@ function ZO_QuickslotManager:UpdateList()
     elseif currentFilterType == ITEMFILTERTYPE_QUICKSLOT then
         self:AppendItemData(scrollData)
     elseif currentFilterType == ITEMFILTERTYPE_COLLECTIBLE then
-        local collectibleCategoryIndex = self.currentFilter.extraInfo
-        self:AppendCollectiblesData(scrollData, collectibleCategoryIndex)
+        local collectibleCategoryData = self.currentFilter.extraInfo
+        self:AppendCollectiblesData(scrollData, collectibleCategoryData)
     end
 
     self:ApplySort()
@@ -482,30 +482,17 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
     end
 end
 
-function ZO_QuickslotManager:AppendCollectiblesData(scrollData, topLevelCategoryIndex)
-    local data
-    if topLevelCategoryIndex then
-        data = COLLECTIONS_BOOK_SINGLETON.GetCollectibleIdsFromTopLevelCategory(topLevelCategoryIndex, IsCollectibleCategoryUsable, IsCollectibleCategorySlottable)
+function ZO_QuickslotManager:AppendCollectiblesData(scrollData, collectibleCategoryData)
+    local dataObjects
+    if collectibleCategoryData then
+        local categoryIndex = collectibleCategoryData:GetCategoryIndicies()
+        dataObjects = collectibleCategoryData:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable)
     else
-        data = COLLECTIONS_INVENTORY_SINGLETON:GetQuickslotData()
+        dataObjects = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable)
     end
 
-    for i, collectibleData in ipairs(data) do
-        if type(collectibleData) == "number" then
-            local collectibleId = collectibleData
-            local name, _, iconFile, _, unlocked, _, isActive, categoryType = GetCollectibleInfo(collectibleId)
-            local newCollectibleData =
-            {
-                name = name,
-			    nickname = GetCollectibleNickname(collectibleId),
-                iconFile = iconFile,
-                collectibleId = collectibleId,
-                categoryType = categoryType,
-            }
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, newCollectibleData))
-        else
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, collectibleData))
-        end
+    for i, collectibleData in ipairs(dataObjects) do
+        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, collectibleData))
     end
 end
 
@@ -541,18 +528,18 @@ function ZO_QuickslotManager:SetUpQuickSlot(control, data)
 end
 
 function ZO_QuickslotManager:SetUpCollectionSlot(control, data)
-    control:GetNamedChild("Name"):SetText(COLLECTIONS_INVENTORY_SINGLETON:GetCollectibleInventoryDisplayName(data))
-    control:GetNamedChild("ActiveIcon"):SetHidden(not data.active)
+    control:GetNamedChild("Name"):SetText(data:GetNameWithNickname())
+    control:GetNamedChild("ActiveIcon"):SetHidden(not data:IsActive())
 
     local slot = GetControl(control, "Button")
-    slot.collectibleId = data.collectibleId
-    slot.active = data.active
-    slot.categoryType = data.categoryType
+    slot.collectibleId = data:GetId()
+    slot.active = data:IsActive()
+    slot.categoryType = data:GetCategoryType()
     slot.inCooldown = false
     slot.cooldown = GetControl(slot, "Cooldown")
-    slot.cooldown:SetTexture(iconFile)
+    slot.cooldown:SetTexture(data:GetIcon())
     ZO_InventorySlot_SetType(slot, SLOT_TYPE_COLLECTIONS_INVENTORY)
-    ZO_ItemSlot_SetupSlotBase(slot, 1, data.iconFile)
+    ZO_ItemSlot_SetupSlotBase(slot, 1, data:GetIcon())
 end
 
 function ZO_QuickslotManager:UpdateFreeSlots()
@@ -565,11 +552,11 @@ function ZO_QuickslotManager:UpdateFreeSlots()
 end
 
 function ZO_QuickslotManager:InsertCollectibleCategories()
-    for i = 1, GetNumCollectibleCategories() do
-        if DoesCollectibleCategoryContainSlottableCollectibles(i) then
-            local name = GetCollectibleCategoryInfo(i)
-            local normalIcon, pressedIcon, mouseoverIcon = GetCollectibleCategoryKeyboardIcons(i)
-            local data = self:CreateNewTabFilterData(ITEMFILTERTYPE_COLLECTIBLE, name, normalIcon, pressedIcon, mouseoverIcon, i)
+    for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator() do
+        if DoesCollectibleCategoryContainSlottableCollectibles(categoryIndex) then
+            local name = categoryData:GetName()
+            local normalIcon, pressedIcon, mouseoverIcon = categoryData:GetKeyboardIcons()
+            local data = self:CreateNewTabFilterData(ITEMFILTERTYPE_COLLECTIBLE, name, normalIcon, pressedIcon, mouseoverIcon, categoryData)
             table.insert(self.quickslotFilters, data)
         end
     end

@@ -1,5 +1,5 @@
 <GuiXml>
     <Controls>
-        <Texture name="ZO_ParticleTexture" virtual="true" pixelRoundingEnabled="false"/>
+        <Texture name="ZO_ParticleTexture" virtual="true" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true"/>
     </Controls>
 </GuiXml>

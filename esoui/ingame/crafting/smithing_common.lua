@@ -220,7 +220,6 @@ end
 
 function ZO_SmithingHorizontalListTemplate_OnInitialized(control)
     control.listControl = control:GetNamedChild("List")
-    control.highlightTexture = control:GetNamedChild("Highlight")
     control.titleLabel = control:GetNamedChild("Title")
     control.selectedLabel = control:GetNamedChild("SelectedLabel")
     control.extraInfoLabel = control:GetNamedChild("ExtraInfoLabel")

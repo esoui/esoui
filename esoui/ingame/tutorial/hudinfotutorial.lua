@@ -87,7 +87,7 @@ function ZO_HudInfoTutorial:RemoveTutorial(tutorialIndex)
         self.currentlyDisplayedTutorialTimeLeft = nil
         self.tutorialAnimation:PlayForward()
     else
-        self:RemoveFromQueue(self.queue, queuedTutorialIndex)
+        self:RemoveFromQueue(self.queue, tutorialIndex)
     end
 end
 

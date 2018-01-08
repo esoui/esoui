@@ -593,7 +593,10 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
     end
 
     local isOptionalStep = (stepIndex > 1)
-    local style = visibility == QUEST_STEP_VISIBILITY_HINT and HINT_STYLE or DEFAULT_STYLE
+    local style
+    if visibility == QUEST_STEP_VISIBILITY_HINT then
+        style = HINT_STYLE
+    end
     
     -- Don't display endings of optional quest lines
     if(isOptionalStep) then
@@ -689,7 +692,7 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
 
                 if visibility == QUEST_STEP_VISIBILITY_HINT then
                     questCondition:SetText(zo_strformat(SI_QUEST_HINT_STEP_FORMAT, conditionText))
-                elseif conditionsAreOR then
+                elseif stepType == QUEST_STEP_TYPE_OR then
                     questCondition:SetText(zo_strformat(SI_QUEST_OR_CONDITION_FORMAT, conditionText))
                 else
                     questCondition:SetText(conditionText)

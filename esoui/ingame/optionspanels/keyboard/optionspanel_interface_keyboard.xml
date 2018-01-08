@@ -32,25 +32,25 @@
             </OnInitialized>
         </Control>
 
+        <Control name="Options_Interface_QuestBestowerIndicators" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="UI_Settings_ShowQuestTracker" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
         <Control name="Options_Interface_CompassQuestGivers" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="UI_Settings_ShowQuestTracker" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <Dimensions x="490" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_QuestBestowerIndicators" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_COMPASS_QUEST_GIVERS)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
-
-            <Controls>
-                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Checkbox" relativePoint="LEFT" offsetX="-5" />
-                    <OnInitialized>
-                        self.data = { tooltipText = SI_INTERFACE_OPTIONS_COMPASS_QUEST_GIVERS_RESTRICTION }
-                    </OnInitialized>
-                </Texture>
-            </Controls>
         </Control>
 
         <Control name="Options_Interface_CompassActiveQuests" inherits="ZO_Options_Dropdown">
-            <Anchor point="TOPLEFT" relativeTo="Options_Interface_CompassQuestGivers" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Interface_CompassQuestGivers" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="10" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_INTERFACE, SETTING_TYPE_UI, UI_SETTING_COMPASS_ACTIVE_QUESTS)
                 ZO_OptionsWindow_InitializeControl(self)

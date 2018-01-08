@@ -343,7 +343,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         UpdateDifficultyIcon(comboBox.icon, entry.isVeteran, comboBox.normalIcon, comboBox.veteranIcon)        
     end
 
-    local function SetupDungeonDifficultyEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
+    local function SetupDungeonDifficultyEntry(control, data, selected, selectedDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
         local isVeteran = ZO_GetEffectiveDungeonDifficulty() == DUNGEON_DIFFICULTY_VETERAN

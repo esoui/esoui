@@ -249,7 +249,7 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIc
             if stackCountLabel then
                 local stackCount = data.stackCount
                 if stackCount and stackCount > 1 then
-                    stackCountLabel:SetText(ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+                    stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
                 else
                     stackCountLabel:SetText("")
                 end
@@ -343,7 +343,7 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(ACHIEVEMENT_EARNED_TEXTURE)
         end
 
-        if data.canLevel and data.canLevel() then
+        if data:CanLevel() then
             statusIndicator:AddIcon(CAN_LEVEL_TEXTURE)
         end
 

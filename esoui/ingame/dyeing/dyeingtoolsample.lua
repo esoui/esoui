@@ -21,15 +21,14 @@ end
 function ZO_DyeingToolSample:OnLeftClicked(restyleSlotData, dyeChannel)
     local dyeId = select(dyeChannel, restyleSlotData:GetPendingDyes())
     if dyeId > INVALID_DYE_ID then
-        local _, known = GetDyeInfoById(dyeId)
-        local isPlayerDye = self.owner:DoesDyeIdExistInPlayerDyes(dyeId)
-        if known and isPlayerDye then
+        local playerDyeInfo = ZO_DYEING_MANAGER:GetPlayerDyeInfoById(dyeId)
+        if playerDyeInfo and playerDyeInfo.known then
             local SUPPRESS_SOUNDS = true
             self.owner:SwitchToDyeingWithDyeId(dyeId, SUPPRESS_SOUNDS)
             PlaySound(SOUNDS.DYEING_TOOL_SAMPLE_USED)
-        elseif not isPlayerDye then
+        elseif not playerDyeInfo then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, SI_DYEING_CANNOT_SAMPLE_NON_PLAYER_DYE)
-        elseif not known then
+        else
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, SI_DYEING_CANNOT_SAMPLE_LOCKED_DYE)
         end
     else

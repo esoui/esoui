@@ -512,6 +512,9 @@ SOUNDS = {
     SKILL_XP_DARK_FISSURE_CLOSED    = "SkillXP_DarkFissureClosed",
     SKILL_XP_BOSS_KILLED            = "SkillXP_BossKilled",
 
+    --Skills Advisor Sounds
+    SKILLS_ADVISOR_SELECT           = "SkillsAdvisor_Select",
+
     --Stats Sounds
     STATS_PURCHASE                  = "Stats_Purchase",
     GAMEPAD_STATS_SINGLE_PURCHASE   = "Console_Stats_Single_Purchase",
@@ -771,6 +774,31 @@ SOUNDS = {
 
     DYEING_ACCEPT_BINDING                   = "Dyeing_Accept_Binding",
 
+    -- Outfits
+    OUTFIT_CHANGES_APPLIED                  = "Outfit_Changes_Applied",
+    OUTFIT_GO_TO_STYLE                      = "Outfitting_GoToStyle",
+    OUTFIT_REMOVE_STYLE                     = "Outfitting_RemoveStyle",
+    OUTFIT_GAMEPAD_MENU_ENTER               = "Outfitting_Console_MenuEnter",
+    OUTFIT_GAMEPAD_MENU_EXIT                = "Outfitting_Console_MenuExit",
+    OUTFIT_GAMEPAD_UNDO_CHANGES             = "Outfitting_Console_UndoChanges",
+
+    OUTFIT_EQUIPPED_HIDE                    = "Outfitting_ArmorAdd_Hide",
+    OUTFIT_ARMOR_TYPE_LIGHT                 = "Outfitting_ArmorAdd_Light",
+    OUTFIT_ARMOR_TYPE_MEDIUM                = "Outfitting_ArmorAdd_Medium",
+    OUTFIT_ARMOR_TYPE_HEAVY                 = "Outfitting_ArmorAdd_Heavy",
+    OUTFIT_ARMOR_TYPE_UNDAUNTED             = "Outfitting_ArmorAdd_Undaunted",
+    OUTFIT_ARMOR_TYPE_CLOTHING              = "Outfitting_ArmorAdd_Clothing",
+    OUTFIT_ARMOR_TYPE_SIGNATURE             = "Outfitting_ArmorAdd_Signature",
+
+    OUTFIT_WEAPON_TYPE_AXE                  = "Outfitting_WeaponAdd_Axe",
+    OUTFIT_WEAPON_TYPE_MACE                 = "Outfitting_WeaponAdd_Mace",
+    OUTFIT_WEAPON_TYPE_SWORD                = "Outfitting_WeaponAdd_Sword",
+    OUTFIT_WEAPON_TYPE_DAGGER               = "Outfitting_WeaponAdd_Dagger",
+    OUTFIT_WEAPON_TYPE_BOW                  = "Outfitting_WeaponAdd_Bow",
+    OUTFIT_WEAPON_TYPE_STAFF                = "Outfitting_WeaponAdd_Staff",
+    OUTFIT_WEAPON_TYPE_SHIELD               = "Outfitting_WeaponAdd_Shield",
+    OUTFIT_WEAPON_TYPE_RUNE                 = "Outfitting_WeaponAdd_Rune",
+
     --Keybind Disabled
     KEYBIND_BUTTON_DISABLED                 = "Keybind_Button_Disabled",
 
@@ -879,4 +907,10 @@ SOUNDS = {
 
     -- CSA Countdown
     COUNTDOWN_TICK                          = "Countdown_Tick",
+
+    --Level Up Reward
+    LEVEL_UP_REWARD_FANFARE                 = "LevelUpReward_Fanfare",
+    LEVEL_UP_REWARD_SECTION_APPEAR          = "LevelUpReward_SectionAppear",
+    LEVEL_UP_REWARD_CLAIM_APPEAR            = "LevelUpReward_ClaimAppear",
+    LEVEL_UP_REWARD_CLAIM                   = "LevelUpReward_Claim",
 }

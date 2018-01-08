@@ -311,13 +311,24 @@ end
 
 function ZO_Spinner:UpdateDisplay()
     if self.display then
-        self.display:SetText(self.value)
+        local valueText
+        if self.valueFormatFunction then
+            valueText = self.valueFormatFunction(self.value)
+        else
+            valueText = self.value
+        end
+        self.display:SetText(valueText)
         if self.softMax and self.value > self.softMax then
             self.display:SetColor(self.errorColor:UnpackRGBA())
         else
             self.display:SetColor(self.normalColor:UnpackRGBA())
         end
     end
+end
+
+function ZO_Spinner:SetValueFormatFunction(valueFormatFunction)
+    self.valueFormatFunction = valueFormatFunction
+    self:UpdateDisplay()
 end
 
 function ZO_Spinner:ModifyValue(change)

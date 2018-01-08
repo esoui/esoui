@@ -229,6 +229,14 @@ function ZO_ActivityFinderLocation_Base:GetLockReasonTextOverride()
     return self.lockReasonTextOverride
 end
 
+function ZO_ActivityFinderLocation_Base:SetRandomLockReasonPriority(priority)
+    self.randomLockReasonPriority = priority
+end
+
+function ZO_ActivityFinderLocation_Base:GetRandomLockReasonPriority()
+    return self.randomLockReasonPriority
+end
+
 function ZO_ActivityFinderLocation_Base:SetCountsForAverageRoleTime(countsForAverageRoleTime)
     self.countsForAverageRoleTime = countsForAverageRoleTime
 end
@@ -288,7 +296,11 @@ function ZO_ActivityFinderLocation_Specific:DoesGroupMeetLevelRequirements()
 end
 
 function ZO_ActivityFinderLocation_Specific:IsLockedByCollectible()
-    return self.requiredCollectible ~= 0 and not IsCollectibleUnlocked(self.requiredCollectible)
+    if self.requiredCollectible ~= 0 then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.requiredCollectible)
+        return not collectibleData or collectibleData:IsLocked()
+    end
+    return false
 end
 
 function ZO_ActivityFinderLocation_Specific:GetFirstLockingCollectible()
@@ -404,7 +416,8 @@ end
 
 function ZO_ActivityFinderLocation_Set:IsLockedByCollectible()
     for _, collectibleId in ipairs(self.requiredCollectibles) do
-        if IsCollectibleUnlocked(collectibleId) then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and collectibleData:IsUnlocked() then
             -- Any unlocked collectible is enough to queue with a set
             return false
         end
@@ -414,7 +427,8 @@ end
 
 function ZO_ActivityFinderLocation_Set:GetFirstLockingCollectible()
     for _, collectibleId in ipairs(self.requiredCollectibles) do
-        if not IsCollectibleUnlocked(collectibleId) then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if not collectibleData or collectibleData:IsLocked() then
             return collectibleId
         end
     end

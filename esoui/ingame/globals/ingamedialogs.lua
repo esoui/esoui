@@ -264,6 +264,11 @@ ESO_Dialogs["PAY_FOR_CONVERSATION"] =
 
 ESO_Dialogs["CONFIRM_PURCHASE"] = 
 {
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
     title =
     {
         text = SI_PROMPT_TITLE_CONFIRM_PURCHASE,
@@ -278,7 +283,7 @@ ESO_Dialogs["CONFIRM_PURCHASE"] =
         {
             text = SI_DIALOG_CONFIRM,
             callback = function(dialog)
-                BuyStoreItem(dialog.data.buyIndex, 1)
+                BuyStoreItem(dialog.data.buyIndex, dialog.data.quantity or 1)
             end,
         },
         [2] = 
@@ -849,7 +854,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
         local wayshrineName = select(2, GetFastTravelNodeInfo(destination))
         local wayshrineNameChanged = not dialog.wayshrineName or dialog.wayshrineName ~= wayshrineName
         local onCooldown = GetRecallCooldown() > 0
-        onCooldownChanged = dialog.onCooldown ~= onCooldown
+        local onCooldownChanged = dialog.onCooldown ~= onCooldown
 
         if wayshrineNameChanged or onCooldownChanged then
             -- Name has changed, update it.
@@ -1951,37 +1956,6 @@ ESO_Dialogs["CONFIRM_APPLY_DYE"] =
     }
 }
 
-ESO_Dialogs["EXIT_DYE_UI_BIND"] =
-{
-    title =
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_BIND_CONFIRM_TITLE
-    },
-    mainText = 
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_BIND_CONFIRM_BODY,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
-            end
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmExit(false)
-            end
-        },
-    },
-    noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("restyle"):CancelExit()
-    end,
-}
-
 ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
 {
     canQueue = true,
@@ -2003,171 +1977,11 @@ ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
         {
             text = SI_YES,
             callback = function(dialog)
-                SYSTEMS:GetObject("restyle").dyeingPanel:ExitWithoutSave()
+                ZO_RESTYLE_STATION_GAMEPAD:ExitWithoutSave()
             end
         },
         {
             text = SI_NO,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):CancelExit()
-            end
-        },
-    },
-    noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("restyle"):CancelExit()
-    end,
-}
-
-
-ESO_Dialogs["EXIT_DYE_UI_TO_ACHIEVEMENT_BIND"] =
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_BIND_CONFIRM_TITLE
-    },
-    mainText = 
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_BIND_CONFIRM_BODY,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
-            end
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):CancelExitToAchievements()
-            end
-        }  
-    },
-    noChoiceCallback = function(dialog)
-        SYSTEMS:GetObject("restyle"):CancelExit()
-    end,
-}
-
-ESO_Dialogs["EXIT_DYE_UI"] =
-{
-    title =
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_CONFIRM_TITLE
-    },
-    mainText = 
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_CONFIRM_BODY,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
-            end
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmExit(false)
-            end
-        },
-    }
-}
-
-ESO_Dialogs["EXIT_DYE_UI_TO_ACHIEVEMENT"] =
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_CONFIRM_TITLE
-    },
-    mainText = 
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_CONFIRM_BODY,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmExit(true)
-            end
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):CancelExitToAchievements()
-            end
-        }  
-    }
-}
-
-ESO_Dialogs["SWTICH_DYE_MODE"] =
-{
-    title =
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_CONFIRM_TITLE
-    },
-    mainText = 
-    {
-        text = SI_DYEING_SWITCH_WITH_CHANGES_CONFIRM_BODY
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(true)
-            end
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(false)
-            end
-        },
-    }
-}
-
-ESO_Dialogs["SWTICH_DYE_MODE_BIND"] =
-{
-    title =
-    {
-        text = SI_DYEING_EXIT_WITH_CHANGES_BIND_CONFIRM_TITLE
-    },
-    mainText = 
-    {
-        text = SI_DYEING_SWITCH_WITH_CHANGES_BIND_CONFIRM_BODY
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(true)
-            end
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-            callback = function(dialog)
-                SYSTEMS:GetObject("restyle"):ConfirmSwitchMode(false)
-            end
         },
     },
     noChoiceCallback = function(dialog)
@@ -2560,6 +2374,7 @@ ESO_Dialogs["COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"] =
         specialCharacters = {'\'', '-', ' '},
         validatesText = true,
         validator = IsValidCollectibleName,
+        selectAll = true,
     },
     buttons =
     {
@@ -3807,4 +3622,183 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
             text = SI_DIALOG_CANCEL,
         },
     },
+}
+
+ESO_Dialogs["CONFIRM_REVERT_RESTYLE_CHANGES"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_RESTYLE_REVERT_CHANGES_TITLE
+    },
+    mainText = 
+    {
+        text = SI_RESTYLE_REVERT_CHANGES_DESCRIPTION
+    },
+    mustChoose = true,
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.confirmCallback()
+            end
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
+                if dialog.data.declineCallback then
+                    dialog.data.declineCallback()
+                end
+            end
+        },
+    }
+}
+
+ESO_Dialogs["CONFIRM_APPLY_OUTFIT_STYLE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_OUTFIT_CONFIRM_COMMIT_TITLE,
+    },
+    mainText =
+    {
+        text = SI_OUTFIT_CONFIRM_COMMIT_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            onShowCooldown = 2000,
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                -- This dialog is only used when there is
+                -- no cost involved with confirming an outfit change
+                local USE_ITEMIZED_CURRENCY = false
+                dialog.data.outfitManipulator:SendOutfitChangeRequest(USE_ITEMIZED_CURRENCY)
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_REVERT_OUTFIT_ON_CHANGE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_OUTFIT_REVERT_ON_CHANGE_TITLE
+    },
+    mainText = 
+    {
+        text = SI_OUTFIT_REVERT_ON_CHANGE_DESCRIPTION
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.confirmCallback()
+            end
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
+                if dialog.data.declineCallback then
+                    dialog.data.declineCallback()
+                end
+            end
+        },
+    }
+}
+
+ESO_Dialogs["CONFIRM_REVERT_OUTFIT_CHANGES"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_OUTFIT_REVERT_PENDING_CHANGES_TITLE
+    },
+    mainText = 
+    {
+        text = SI_OUTFIT_REVERT_PENDING_CHANGES_DESCRIPTION
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.confirmCallback()
+            end
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
+                if dialog.data.declineCallback then
+                    dialog.data.declineCallback()
+                end
+            end
+        },
+    }
+}
+
+ESO_Dialogs["RENAME_OUFIT"] =
+{
+    title =
+    {
+        text = SI_OUTFIT_RENAME_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_OUTFIT_RENAME_DESCRIPTION,
+    },
+    editBox =
+    {
+        defaultText = "",
+        maxInputCharacters = OUTFIT_NAME_MAX_LENGTH,
+        textType = TEXT_TYPE_ALL,
+        selectAll = true,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            requiresTextInput = true,
+            text = SI_OK,
+            callback = function(dialog)
+                local inputText = ZO_Dialogs_GetEditBoxText(dialog)
+                if inputText and inputText ~= "" then
+                    local outfitIndex = dialog.data.outfitIndex
+                    local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+                    outfitManipulator:SetOutfitName(inputText)
+                end
+            end
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
 }

@@ -898,10 +898,17 @@ function ChampionPerks:ApplyCenterInfoStyle(constants)
     self.radialSelectorNode:SetControlPosition(self.radialSelectorTexture, 0, constants.RADIAL_SELECTOR_Y, CONSTELLATIONS_DEPTH)
 end
 
+function ChampionPerks:RefreshInactiveAlertMessage()
+    local active, activeReason = AreChampionPointsActive()
+    if not active then
+        self.inactiveAlert.messageLabel:SetText(GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason))
+    end
+end
+
 function ChampionPerks:ApplyInactiveAlertStyle(constants, control)
     control.messageLabel:SetFont(constants.INACTIVE_ALERT_FONT)
     control.messageLabel:SetModifyTextType(constants.INACTIVE_ALERT_MODIFY_TEXT_TYPE)
-    control.messageLabel:SetText(GetString(SI_CHAMPION_NO_ABILITIES_INACTIVE_ALERT))
+    self:RefreshInactiveAlertMessage()
     control:ClearAnchors()
     control:SetAnchor(TOPLEFT, nil, TOPLEFT, constants.INACTIVE_ALERT_OFFSETX, constants.INACTIVE_ALERT_OFFSETY)
 end
@@ -1034,7 +1041,7 @@ local MOUSEOVER_SOUNDS = {
 
 function ChampionPerks:RefreshCursorAndPlayMouseover()
     local newCursor = MOUSE_CURSOR_DO_NOT_CARE
-    local attributeType = ATTRIBUTE_TYPE_NONE
+    local attributeType = ATTRIBUTE_NONE
     if self.zoomedInMouseoverState == ZOOMED_IN_MOUSEOVER_STATE_LEFT then
         newCursor = MOUSE_CURSOR_NEXT_LEFT
         if self.leftOfChosenConstellation then
@@ -1747,10 +1754,12 @@ function ChampionPerks:SetState(state)
 
         if state == STATE_ZOOMED_OUT then
             self.centerAlphaInterpolator:SetTargetBase(1)
-            local active, activeReason = AreChampionPointsActive()
+            local active = AreChampionPointsActive()
             if not active then
                 self.inactiveAlert.messageLabel:SetHidden(false)
-                self.inactiveAlert.messageLabel:SetText(GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason))
+                self:RefreshInactiveAlertMessage()
+            else
+                self.inactiveAlert.messageLabel:SetHidden(true)
             end
         else
             self.centerAlphaInterpolator:SetCurrentValue(0)

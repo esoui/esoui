@@ -160,8 +160,9 @@ function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
     self:InitializeStyleList(scrollListControl, traitUnknownFont, notEnoughInInventoryFont, listSlotTemplate)
     self:InitializePatternList(scrollListControl, listSlotTemplate)
 
-    local HIDE_SPINNER_WHEN_RANK_REQUIREMENT_NOT_MET = true
-    self:InitializeMaterialList(scrollListControl, ZO_Spinner_Gamepad, HIDE_SPINNER_WHEN_RANK_REQUIREMENT_NOT_MET, listSlotTemplate)
+    local CHAMPION_POINT_RANGE_INHERITS_COLOR = true
+    local DONT_COLOR_MATERIAL_NAME_WHITE = false
+    self:InitializeMaterialList(scrollListControl, ZO_Spinner_Gamepad, listSlotTemplate, CHAMPION_POINT_RANGE_INHERITS_COLOR, DONT_COLOR_MATERIAL_NAME_WHITE)
 
     self:InitializeKeybindStripDescriptors()
 
@@ -321,7 +322,7 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
             end
         end,
 
-        visible = function()
+        enabled = function()
             if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                 return self:IsCraftable()
             end

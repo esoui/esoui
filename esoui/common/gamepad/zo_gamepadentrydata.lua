@@ -1,23 +1,8 @@
 --[[ Gamepad Visual Data Object ]]--
-ZO_GamepadEntryData = {}
-
-ZO_GamepadEntryData.metaTable =
-{
-    __index = function(tbl, key)
-        local value = ZO_GamepadEntryData[key]
-        if value == nil then
-            local dataSource = rawget(tbl, "dataSource")
-            if dataSource then
-                value = dataSource[key]
-            end
-        end
-        return value
-    end,
-}
+ZO_GamepadEntryData = ZO_DataSourceObject:Subclass()
 
 function ZO_GamepadEntryData:New(...)
-    local entryData = {}
-    setmetatable(entryData, self.metaTable)
+    local entryData = ZO_DataSourceObject.New(self)
     entryData:Initialize(...)
     return entryData
 end
@@ -69,13 +54,6 @@ function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, sta
     else
        self:SetNameColors(ZO_NORMAL_TEXT)
     end
-end
-
-function ZO_GamepadEntryData:InitializeCollectibleVisualData(itemData)
-    self.uniqueId = itemData.uniqueId
-    self:SetDataSource(itemData)
-    self:AddIcon(itemData.icon)
-    self.cooldownIcon = itemData.icon or itemData.iconFile
 end
 
 function ZO_GamepadEntryData:AddSubLabels(subLabels)
@@ -168,10 +146,6 @@ end
 
 function ZO_GamepadEntryData:SetMaxIconAlpha(alpha)
     self.maxIconAlpha = alpha
-end
-
-function ZO_GamepadEntryData:SetDataSource(source)
-    self.dataSource = source
 end
 
 function ZO_GamepadEntryData:SetIgnoreTraitInformation(ignoreTraitInformation)
@@ -398,4 +372,24 @@ end
 
 function ZO_GamepadEntryData:SetStackCount(stackCount)
     self.stackCount = stackCount
+end
+
+function ZO_GamepadEntryData:SetCooldownIcon(icon)
+    self.cooldownIcon = icon
+end
+
+function ZO_GamepadEntryData:SetCanLevel(canLevel)
+    self.canLevel = canLevel
+end
+
+function ZO_GamepadEntryData:CanLevel()
+    if self.canLevel then
+        if type(self.canLevel) == "function" then
+            return self.canLevel()
+        else
+            return self.canLevel
+        end
+    else
+        return false
+    end
 end

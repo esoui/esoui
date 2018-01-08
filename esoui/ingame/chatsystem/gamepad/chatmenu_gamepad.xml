@@ -40,7 +40,7 @@
                             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" offsetY="-30" />
                             
                             <Controls>
-                                <Control name="$(parent)Channel" inherits="ZO_GamepadPassiveFocusDropdown">
+                                <Control name="$(parent)Channel" inherits="ZO_GamepadFocusDropdown">
                                     <Dimensions y="60" />
                                     <Anchor point="BOTTOMLEFT" />
 
@@ -62,7 +62,7 @@
                                     </Controls>
                                 </Control>
 
-                                <Control name="$(parent)Text" inherits="ZO_GamepadPassiveFocusEditBox">
+                                <Control name="$(parent)Text" inherits="ZO_GamepadFocusEditBox">
                                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Channel" relativePoint="BOTTOMRIGHT" offsetX="15" />
                                     <Anchor point="TOPRIGHT" />
 

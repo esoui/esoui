@@ -112,7 +112,7 @@ do
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
             isNewCallback =
                 function()
-                    return GAMEPAD_COLLECTIONS_BOOK and GAMEPAD_COLLECTIONS_BOOK:HasAnyNewCollectibles()
+                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()
                 end,
         },
         [MENU_MAIN_ENTRIES.INVENTORY] =
@@ -132,7 +132,7 @@ do
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
             canLevel =
                 function()
-                    return GetAttributeUnspentPoints() > 0
+                    return HasPendingLevelUpReward() or GetAttributeUnspentPoints() > 0
                 end
         },
         [MENU_MAIN_ENTRIES.SKILLS] =
@@ -504,7 +504,7 @@ do
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
     
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
-        local currencyString = ZO_CommaDelimitNumber(GetPlayerCrowns())
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(GetPlayerCrowns()))
         remainingCrownsLabel:SetText(currencyString)
     end
     

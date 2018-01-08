@@ -32,7 +32,7 @@ end
 function ZO_SortHeaderGroup:AddHeader(header)
     -- Header containers may have other elements like backgrounds/textures.  
     -- Only add controls that have a sort key on them.
-    if(header.key) then
+    if header.key then
         header.sortHeaderGroup = self
         table.insert(self.sortHeaders, header)
     end
@@ -67,8 +67,8 @@ local sortArrowAlignments =
 
 local function UpdateArrowTexture(arrow, sortOrder)
     arrow:SetHidden(false)
-        
-    if(sortOrder == ZO_SORT_ORDER_UP) then
+
+    if sortOrder == ZO_SORT_ORDER_UP then
         arrow:SetTexture(SORT_ARROW_UP)
     else
         arrow:SetTexture(SORT_ARROW_DOWN)
@@ -81,7 +81,7 @@ local function UpdateTextOrderingTextures(header, arrow, sortOrder)
     local nameControl = GetControl(header, "Name")
     local textWidth = nameControl:GetTextDimensions()
     local alignmentFn = sortArrowAlignments[nameControl:GetHorizontalAlignment()]
-    if(alignmentFn) then
+    if alignmentFn then
         arrow:ClearAnchors()
         alignmentFn(arrow, nameControl, textWidth)
     end
@@ -90,7 +90,7 @@ end
 local function UpdateIconOrderingTextures(header, arrow, sortOrder)
     arrow:SetHidden(true)
 
-    if(sortOrder == ZO_SORT_ORDER_UP) then
+    if sortOrder == ZO_SORT_ORDER_UP then
         header:GetNamedChild("Icon"):SetTexture(header.sortUpIcon)
     else
         header:GetNamedChild("Icon"):SetTexture(header.sortDownIcon)
@@ -107,7 +107,7 @@ local function ResetIconOrderingTexture(header)
     header:GetNamedChild("Icon"):SetTexture(header.icon)
 end
 
-function ZO_SortHeaderGroup:SelectHeader(header)  
+function ZO_SortHeaderGroup:SelectHeader(header)
     header.selected = true
     self.selectedSortHeader = header
 
@@ -129,9 +129,9 @@ end
 
 function ZO_SortHeaderGroup:DeselectHeader()
     local oldSelectedHeader = self.selectedSortHeader
-    if(oldSelectedHeader) then
-        if(oldSelectedHeader.isIconHeader) then
-            if(not oldSelectedHeader.usesArrow) then
+    if oldSelectedHeader then
+        if oldSelectedHeader.isIconHeader then
+            if not oldSelectedHeader.usesArrow then
                 ResetIconOrderingTexture(oldSelectedHeader)
             end
         else
@@ -164,8 +164,8 @@ function ZO_SortHeaderGroup:OnHeaderClicked(header, suppressCallbacks, forceRese
         end
 
         self:SelectHeader(header)
-    
-        if(not suppressCallbacks) then
+
+        if not suppressCallbacks then
             self:FireCallbacks(self.HEADER_CLICKED, header.key, self.sortDirection)
         end
     end
@@ -173,7 +173,7 @@ end
 
 function ZO_SortHeaderGroup:HeaderForKey(key)
     for _, header in ipairs(self.sortHeaders) do
-        if(header.key == key) then
+        if header.key == key then
             return header
         end
     end
@@ -181,14 +181,14 @@ end
 
 function ZO_SortHeaderGroup:SelectHeaderByKey(key, suppressCallbacks, forceReselect, forceSortDirection)
     local header = self:HeaderForKey(key)
-    if(header) then
+    if header then
         self:OnHeaderClicked(header, suppressCallbacks, forceReselect, forceSortDirection)
     end
 end
 
 function ZO_SortHeaderGroup:SetHeaderHiddenForKey(key, hidden)
     local header = self:HeaderForKey(key)
-    if(header) then
+    if header then
         header:SetHidden(hidden)
     end
 end
@@ -217,7 +217,7 @@ function ZO_SortHeaderGroup:SelectAndResetSortForKey(key)
         local DONT_SUPPRESS_CALLBACKS = false
         local FORCE_RESELECT = true
         self:SelectHeaderByKey(key, DONT_SUPPRESS_CALLBACKS, FORCE_RESELECT)
-    end 
+    end
 end
 
 -- Sets the headers in keyList to whatever the value of "hidden" is, sets the rest to "not hidden"
@@ -231,7 +231,7 @@ end
 
 function ZO_SortHeaderGroup:SetHeaderNameForKey(key, name)
     local header = self:HeaderForKey(key)
-    if(header) then
+    if header then
         header:GetNamedChild("Name"):SetText(name)
     end
 end
@@ -239,7 +239,7 @@ end
 function ZO_SortHeader_Initialize(control, name, key, initialDirection, alignment, font, highlightTemplate)
     local nameControl = GetControl(control, "Name")
 
-    if(font) then
+    if font then
         nameControl:SetFont(font)
     end
 
@@ -289,24 +289,24 @@ end
 local function UpdateMouseoverState(group, control, isGroupEnabled)
     local mouseIsOver = control.mouseIsOver
 
-    if(control.isIconHeader) then
+    if control.isIconHeader then
         control:GetNamedChild("Mouseover"):SetHidden(not mouseIsOver)
     else
         local color = group.disabledColor
 
-        if(isGroupEnabled) then
-            if(mouseIsOver) then
+        if isGroupEnabled then
+            if mouseIsOver then
                 color = group.highlightColor
             else
                 color = control.selected and group.highlightColor or group.normalColor
             end
         end
-                
+
         control:GetNamedChild("Name"):SetColor(color:UnpackRGBA())
     end
 
-    if(control.tooltipText) then
-        if(mouseIsOver) then
+    if control.tooltipText then
+        if mouseIsOver then
             InitializeTooltip(InformationTooltip, control, control.tooltipPoint, control.tooltipOffsetX, control.tooltipOffsetY)
             SetTooltipText(InformationTooltip, control.tooltipText)
         else
@@ -326,7 +326,7 @@ function ZO_SortHeader_OnMouseExit(control)
 end
 
 function ZO_SortHeader_OnMouseUp(control, upInside)
-    if(upInside and control.sortHeaderGroup) then
+    if upInside and control.sortHeaderGroup then
         control.sortHeaderGroup:OnHeaderClicked(control)
     end
 end
@@ -362,16 +362,16 @@ end
 local function HighlightControl(self, control)
     local highlightTemplate = control.highlightTemplate or self.highlightTemplate
     PlayAnimationOnControl(control, highlightTemplate, "HighlightAnimation")
-    
-    if(self.highlightCallback) then
+
+    if self.highlightCallback then
         self.highlightCallback(control, true)
-    end   
+    end
 end
 
 local function UnhighlightControl(self, control) 
     RemoveAnimationOnControl(control, "HighlightAnimation")
 
-    if(self.highlightCallback) then
+    if self.highlightCallback then
         self.highlightCallback(control, false)
     end
 end
@@ -403,23 +403,26 @@ function ZO_SortHeaderGroup:SetDirectionalInputEnabled(enabled)
 end
 
 function ZO_SortHeaderGroup:UpdateDirectionalInput()
-    local result = self.movementController:CheckMovement()
-    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
-        self:MoveNext()
-    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-        self:MovePrevious()
+    -- No need to check the directional input (and consume it so no one else can use it)
+    -- if we don't have multiple headers to switch between
+    if #self.sortHeaders > 1 then
+        local result = self.movementController:CheckMovement()
+        if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+            self:MoveNext()
+        elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+            self:MovePrevious()
+        end
     end
 end
 
 function ZO_SortHeaderGroup:SetSelectedIndex(selectedIndex)
-   
     if self.selectedIndex then
         local previousSelectedControl = self.sortHeaders[self.selectedIndex]
         UnhighlightControl(self, previousSelectedControl)
     end
 
-    if not selectedIndex then 
-        return 
+    if not selectedIndex then
+        return
     end
 
     if #self.sortHeaders <= 0 then

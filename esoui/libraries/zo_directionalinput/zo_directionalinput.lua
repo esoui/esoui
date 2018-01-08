@@ -291,5 +291,14 @@ function DirectionalInput:GetYFromInputDevice(inputDevice)
     return INPUT_DEVICE_QUERY_Y[inputDevice](self)
 end
 
+function DirectionalInput:IsListening(object)
+    for i, inputObject in ipairs(self.inputObjects) do
+        if inputObject == object then
+            return true
+        end
+    end
+    return false
+end
+
 DIRECTIONAL_INPUT = DirectionalInput:New()
 CLIENT_INPUT = ClientInput:New()

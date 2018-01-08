@@ -83,3 +83,43 @@ function C:Initialize()
     self:InitializeB()
 end
 ]]--
+
+function ZO_GenerateDataSourceMetaTableIndexFunction(template)
+    return function(tbl, key)
+        local value = template[key]
+        if value == nil then
+            local dataSource = rawget(tbl, "dataSource")
+            if dataSource then
+                value = dataSource[key]
+            end
+        end
+        return value
+    end
+end
+
+ZO_DataSourceObject = {}
+
+function ZO_DataSourceObject:New(template)
+    template = template or self
+
+    local newObject = setmetatable({}, template.instanceMetaTable)
+
+    local mt = getmetatable(newObject)
+    mt.__index = ZO_GenerateDataSourceMetaTableIndexFunction(template)
+
+    return newObject
+end
+
+function ZO_DataSourceObject:GetDataSource()
+    return self.dataSource
+end
+
+function ZO_DataSourceObject:SetDataSource(dataSource)
+    self.dataSource = dataSource
+end
+
+function ZO_DataSourceObject:Subclass()
+    local newTemplate = setmetatable({}, {__index = self})
+    newTemplate.instanceMetaTable = {__index = ZO_GenerateDataSourceMetaTableIndexFunction(newTemplate) }
+    return newTemplate
+end

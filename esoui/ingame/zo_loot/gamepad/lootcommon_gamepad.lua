@@ -148,6 +148,7 @@ end
 function ZO_Loot_Gamepad_Base:UpdateListAddLootCurrency(currencyType, currencyAmount, isCurrencyStolen)
     if currencyAmount > 0 then
         local currencyIcon = GetCurrencyLootGamepadIcon(currencyType)
+        local IS_UPPER = false
         local currencyEntry = ZO_GamepadEntryData:New(GetCurrencyName(currencyType, IsCountSingularForm(currencyAmount), IS_UPPER), currencyIcon)
         currencyEntry.currencyType = currencyType
         currencyEntry.currencyAmount = currencyAmount

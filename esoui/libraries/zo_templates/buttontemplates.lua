@@ -188,7 +188,7 @@ function ZO_CheckButtonLabel_ColorText(label, over)
 end
 
 function ZO_CheckButtonLabel_SetTextColor(button, r, g, b)
-    label = button:GetNamedChild("Label")
+    local label = button:GetNamedChild("Label")
     label:SetColor(r, g, b)
 end
 

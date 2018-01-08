@@ -509,6 +509,10 @@ function MenuBar:GetSelectedDescriptor()
     return self.m_clickedButton and self.m_clickedButton:GetDescriptor()
 end
 
+function MenuBar:GetLastSelectedDescriptor()
+    return self.m_lastClickedButton and self.m_lastClickedButton:GetDescriptor()
+end
+
 function MenuBar:SetClickedButton(buttonObject, skipAnimation)
     if(self.m_clickedButton) then
         self.m_clickedButton:SetLocked(false)
@@ -653,12 +657,12 @@ function ZO_MenuBar_AddButton(self, buttonData)
     return self.m_object:AddButton(buttonData)
 end
 
-function ZO_MenuBar_GenerateButtonTabData(self, name, mode, normal, pressed, highlight, disabled, customTooltipFunction, alwaysShowTooltip, playerDrivenCallback)
+function ZO_MenuBar_GenerateButtonTabData(name, descriptor, normal, pressed, highlight, disabled, customTooltipFunction, alwaysShowTooltip, playerDrivenCallback)
     return {
         activeTabText = name,
         categoryName = name,
 
-        descriptor = mode,
+        descriptor = descriptor,
         normal = normal,
         pressed = pressed,
         highlight = highlight,
@@ -667,7 +671,7 @@ function ZO_MenuBar_GenerateButtonTabData(self, name, mode, normal, pressed, hig
         alwaysShowTooltip = alwaysShowTooltip ~= false,
         callback = function(tabData, playerDriven) 
                         if playerDriven then 
-                            playerDrivenCallback(tabData, mode) 
+                            playerDrivenCallback(tabData) 
                         end 
                     end,
     }
@@ -703,6 +707,10 @@ end
 
 function ZO_MenuBar_GetSelectedDescriptor(self)
     return self.m_object:GetSelectedDescriptor()
+end
+
+function ZO_MenuBar_GetLastSelectedDescriptor(self)
+    return self.m_object:GetLastSelectedDescriptor()
 end
 
 function ZO_MenuBar_ClearSelection(self)

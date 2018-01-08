@@ -43,7 +43,7 @@ function ZO_ShouldShowAchievement(filterType, id)
 end
 
 function ZO_GetAchievementIds(categoryIndex, subCategoryIndex, numAchievements)
-    result = {}
+    local result = {}
     for i = 1, numAchievements do
         table.insert(result, GetAchievementId(categoryIndex, subCategoryIndex, i))
     end

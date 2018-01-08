@@ -1,4 +1,4 @@
-ZO_ChatMenu_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_SocialOptionsDialogGamepad)
+ZO_ChatMenu_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_SocialOptionsDialogGamepad, ZO_GamepadMultiFocusArea_Manager)
 
 ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE = 200
 ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER = .7
@@ -21,6 +21,7 @@ function ZO_ChatMenu_Gamepad:Initialize(control)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, CHAT_MENU_GAMEPAD_SCENE)
     ZO_SocialOptionsDialogGamepad.Initialize(self)
+    ZO_GamepadMultiFocusArea_Manager.Initialize(self)
 
     self:InitializeFragment()
     self:InitializeControls()
@@ -178,7 +179,7 @@ function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
         DIRECTIONAL_INPUT:Deactivate(self)
     end
 
-    self.textInputAreaFocalArea = ZO_GamepadPassiveFocus:New(self, TextInputAreaActivateCallback, TextInputAreaDeactivateCallback)
+    self.textInputAreaFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, TextInputAreaActivateCallback, TextInputAreaDeactivateCallback)
 
     local function EnableChatDirectionalInputLater()
         if self.chatEntryPanelFocalArea:IsFocused() then
@@ -202,11 +203,11 @@ function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
         self.list:SetSoundEnabled(false)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     end
-    self.chatEntryPanelFocalArea =  ZO_GamepadPassiveFocus:New(self, ChatEntryPanelActivateCallback, ChatEntryPanelDeactivateCallback)
+    self.chatEntryPanelFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, ChatEntryPanelActivateCallback, ChatEntryPanelDeactivateCallback)
 
     local NO_PREVIOUS, NO_NEXT
-    self.chatEntryPanelFocalArea:SetupSiblings(NO_PREVIOUS, self.textInputAreaFocalArea)
-    self.textInputAreaFocalArea:SetupSiblings(self.chatEntryPanelFocalArea, NO_NEXT)
+    self:AddNextFocusArea(self.chatEntryPanelFocalArea)
+    self:AddNextFocusArea(self.textInputAreaFocalArea)
 end
 
 function ZO_ChatMenu_Gamepad:RegisterForEvents()
@@ -407,10 +408,7 @@ function ZO_ChatMenu_Gamepad:UpdateDirectionalInput()
     if self.list:GetNumEntries() > 0 then
         local result = self.textInputVerticalMovementController:CheckMovement()
         if result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            local newFocus = self.textInputAreaFocalArea:MovePrevious()
-            if newFocus then
-                self.currentFocalArea = newFocus
-            end
+            self.textInputAreaFocalArea:HandleMovePrevious()
         end
     end
 end

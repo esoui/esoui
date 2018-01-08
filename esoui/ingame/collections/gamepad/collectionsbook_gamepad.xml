@@ -1,5 +1,11 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_GamepadCollectibleEntryTemplate" inherits="ZO_GamepadItemEntryTemplate" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES"/>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_GamepadCollections_Panel" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" virtual="true" >
             <Controls>
                 <Texture name="$(parent)Background" alpha=".64" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
@@ -50,6 +56,20 @@
                 </Control>
             </Controls>
         </Control>
+
+        <Control name="ZO_Collections_Outfit_GridEntry_Template_Gamepad" inherits="ZO_OutfitStyle_GridEntry_Template_Gamepad" virtual="true">
+            <OnInitialized>
+                self.borderBackground = self:GetNamedChild("BorderedBackground")
+                self.statusMultiIcon = self:GetNamedChild("Status")
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="ZO_RESTYLE_TEXTURE_LEVEL_STATUS" mouseEnabled="false">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                </Texture>
+            </Controls>
+        </Control>
         
         <TopLevelControl name="ZO_GamepadCollections" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
@@ -57,6 +77,26 @@
             </OnInitialized>
 
             <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header">
+                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25" />
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
                 <Control name="$(parent)DLCPanel" inherits="ZO_GamepadCollections_Panel" >
                     <Controls>
                         <Control name="$(parent)Container" override="true" >

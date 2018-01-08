@@ -47,8 +47,6 @@ do
         self.isSearching = status == ACTIVITY_FINDER_STATUS_QUEUED
 
         local footerData = self.footerData
-        footerData.data3ShowLoading = isSearching
-
         if self.isSearching then
             footerData.data1HeaderText = ACTUAL_HEADER_TEXT
             self:Update()

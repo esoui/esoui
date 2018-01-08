@@ -155,10 +155,6 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkN
     return true
 end
 
-function ZO_SharedProvisioner:CanPreviewRecipe(recipeData)
-    return recipeData ~= nil and recipeData.specialIngredientType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING
-end
-
 function ZO_SharedProvisioner:PreviewRecipe(recipeData)
     if self:CanPreviewRecipe(recipeData) then
         SYSTEMS:GetObject("itemPreview"):PreviewProvisionerItemAsFurniture(recipeData.recipeListIndex, recipeData.recipeIndex)

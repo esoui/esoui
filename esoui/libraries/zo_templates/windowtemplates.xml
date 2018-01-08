@@ -423,15 +423,15 @@
         </Control>
 
         <Control name="ZO_MediumTallLeftPanelBG" allowBringToTop="false" virtual="true">
-            <Dimensions x="366" y="750" />
-            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="20"/>
+            <Dimensions x="366" y="600" />
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-55"/>
             <Controls>
                 <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
-                    <Dimensions x="64" y="1024" />
+                    <Dimensions x="64" y="845" />
                     <Anchor point="TOPRIGHT" offsetX="65" offsetY="-75" />
                 </Texture>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
-                    <Dimensions x="1024" y="1024" />
+                    <Dimensions x="1024" y="845" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Right" relativePoint="TOPLEFT" />
                 </Texture>
             </Controls>
@@ -444,7 +444,22 @@
         <Control name="ZO_WideLeftPanelBG" inherits="ZO_ThinLeftPanelBG" virtual="true">
             <Dimensions x="535" y="500" />
         </Control>
-        
+
+        <Control name="ZO_WideTallLeftPanelBG" allowBringToTop="false" virtual="true">
+            <Dimensions x="535" y="750" />
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="20"/>
+            <Controls>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
+                    <Dimensions x="64" y="1024" />
+                    <Anchor point="TOPRIGHT" offsetX="65" offsetY="-75" />
+                </Texture>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <Dimensions x="1024" y="1024" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Right" relativePoint="TOPLEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
         <Control name="ZO_PanelBackground" tier="LOW" layer="BACKGROUND" virtual="true">
             <AnchorFill/>
             <Controls>

@@ -43,21 +43,21 @@ end
 
 function ZO_AttributeItem_Gamepad:RefreshDataText()
     local value = GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS)
-    if(self.statType == STAT_CRITICAL_STRIKE or self.statType == STAT_SPELL_CRITICAL) then
+    local text
+
+    if self.statType == STAT_CRITICAL_STRIKE or self.statType == STAT_SPELL_CRITICAL then
         value = GetCriticalStrikeChance(value)
-    end
-    if self.value ~= value then
-        self.value = value
-
-        local text = nil
+        text = zo_strformat(SI_STAT_VALUE_PERCENT, value)
+    else
+        local formattedValue = ZO_CommaDelimitNumber(value)
         if self.formatString ~= nil then
-            text = zo_strformat(self.formatString, value)
+            text = zo_strformat(self.formatString, formattedValue)
         else
-            text = tostring(value)
+            text = zo_strformat(SI_NUMBER_FORMAT, formattedValue)
         end
-
-        self.data:SetText(text)
     end
+
+    self.data:SetText(text)
 end
 
 function ZO_AttributeItem_Gamepad:RefreshBonusText()
@@ -169,23 +169,15 @@ end
 
 local GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME = "GAMEPAD_STATS_COMMIT_POINTS"
 
-local GAMEPAD_STATS_DISPLAY_MODE = {
+local GAMEPAD_STATS_DISPLAY_MODE = 
+{
     CHARACTER = 1,
     ATTRIBUTES = 2,
     EFFECTS = 3,
     TITLE = 4,
-}
-
-local GAMEPAD_ATTRIBUTE_ICONS = {
-    [ATTRIBUTE_HEALTH] = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_healthIcon.dds",
-    [ATTRIBUTE_STAMINA] = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_staminaIcon.dds",
-    [ATTRIBUTE_MAGICKA] = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_magickaIcon.dds",
-}
-
-local GAMEPAD_ATTRIBUTE_ORDERING = {
-    ATTRIBUTE_MAGICKA,
-    ATTRIBUTE_HEALTH,
-    ATTRIBUTE_STAMINA,
+    OUTFIT = 5,
+    LEVEL_UP_REWARDS = 6,
+    UPCOMING_LEVEL_UP_REWARDS = 7,
 }
 
 ZO_GamepadStats = ZO_Object.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
@@ -198,88 +190,111 @@ end
 
 function ZO_GamepadStats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW)
+    self:SetListsUseTriggerKeybinds(true)
 
-    if not self.initialized then
-        self.initialized = true
+    self.mainList = self:GetMainList()
 
-        self.control = control
-        self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.TITLE
+    self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.TITLE
 
-        --Only allow the window to update once every quarter second so if buffs are updating like crazy we're not tanking the frame rate
-        self:SetUpdateCooldown(250)
+    --Only allow the window to update once every quarter second so if buffs are updating like crazy we're not tanking the frame rate
+    self:SetUpdateCooldown(250)
 
-        GAMEPAD_STATS_ROOT_SCENE = ZO_Scene:New("gamepad_stats_root", SCENE_MANAGER)
-        GAMEPAD_STATS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_SHOWING then
-                self:PerformDeferredInitializationRoot()
+    GAMEPAD_STATS_ROOT_SCENE = ZO_Scene:New("gamepad_stats_root", SCENE_MANAGER)
+    GAMEPAD_STATS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:PerformDeferredInitializationRoot()
 
-                self:TryResetScreenState()
-                
-                self:RefreshEquipmentBonus()
+            self:TryResetScreenState()
 
-                self:ActivateMainList()             
-                
-                local function OnUpdate(_, unitTag)
-                    if unitTag == "player" then 
-                        self:Update()
-                    end
-                end
+            self:RefreshEquipmentBonus()
+            self:RegisterForEvents()
 
-                local function OnRefresh()
-                    self:Update()
-                end
+            self:Update()
 
-                self.control:RegisterForEvent(EVENT_STATS_UPDATED, OnUpdate)
-                self.control:RegisterForEvent(EVENT_LEVEL_UPDATE, OnUpdate)
-                self.control:RegisterForEvent(EVENT_EFFECT_CHANGED, OnRefresh)
-                self.control:AddFilterForEvent(EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
-                self.control:RegisterForEvent(EVENT_EFFECTS_FULL_UPDATE, OnRefresh)
-                self.control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, OnRefresh)
-                self.control:RegisterForEvent(EVENT_TITLE_UPDATE, OnUpdate)
-                self.control:RegisterForEvent(EVENT_PLAYER_TITLES_UPDATE, OnRefresh)
-                self.control:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, OnRefresh)
-                self.control:RegisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED, OnRefresh)
-                self.control:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, OnRefresh)
-                self.control:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, OnRefresh)
-                STABLE_MANAGER:RegisterCallback("StableMountInfoUpdated", OnRefresh)
+            TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
+            if GetAttributeUnspentPoints() > 0 then
+                TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED_AND_ATTRIBUTE_POINTS_UNSPENT)
+            end
+        elseif newState == SCENE_HIDDEN then
+            self:DeactivateMainList()
 
-                self:Update()
-
-                TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
-                if GetAttributeUnspentPoints() > 0 then
-                    TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED_AND_ATTRIBUTE_POINTS_UNSPENT)
-                end
-            elseif newState == SCENE_HIDDEN then
-                self:DeactivateMainList()         
-    
-                if(self.currentTitleDropdown ~= nil) then
-                    self.currentTitleDropdown:Deactivate(true)
-                end
-
-                if self.attributeTooltips then
-                    self.attributeTooltips:Deactivate()
-                end
-
-                self.control:UnregisterForEvent(EVENT_STATS_UPDATED)
-                self.control:UnregisterForEvent(EVENT_LEVEL_UPDATE)
-                self.control:UnregisterForEvent(EVENT_EFFECT_CHANGED)
-                self.control:UnregisterForEvent(EVENT_EFFECTS_FULL_UPDATE)
-                self.control:UnregisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED)
-                self.control:UnregisterForEvent(EVENT_TITLE_UPDATE)
-                self.control:UnregisterForEvent(EVENT_PLAYER_TITLES_UPDATE)
-                self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED)
-                self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED)
-                STABLE_MANAGER:UnregisterCallback("StableMountInfoUpdated", OnRefresh)
+            if self.currentTitleDropdown ~= nil then
+                self.currentTitleDropdown:Deactivate(true)
             end
 
-            ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
-        end)
+            if self.attributeTooltips then
+                self.attributeTooltips:Deactivate()
+            end
+
+            self:UnregisterForEvents()
+        end
+
+        ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
+    end)
+
+    GAMEPAD_STATS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
+    GAMEPAD_STATS_FRAGMENT:SetHideOnSceneHidden(true)
+
+    GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(control:GetNamedChild("RightPane"))
+end
+
+do
+    local function OnUpdate()
+        GAMEPAD_STATS:Update()
+    end
+
+    function ZO_GamepadStats:RegisterForEvents()
+        self.control:RegisterForEvent(EVENT_STATS_UPDATED, OnUpdate)
+        self.control:AddFilterForEvent(EVENT_STATS_UPDATED, REGISTER_FILTER_UNIT_TAG, "player")
+        self.control:RegisterForEvent(EVENT_LEVEL_UPDATE, OnUpdate)
+        self.control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+        self.control:RegisterForEvent(EVENT_EFFECT_CHANGED, OnUpdate)
+        self.control:AddFilterForEvent(EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
+        self.control:RegisterForEvent(EVENT_EFFECTS_FULL_UPDATE, OnUpdate)
+        self.control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, OnUpdate)
+        self.control:RegisterForEvent(EVENT_TITLE_UPDATE, OnUpdate)
+        self.control:AddFilterForEvent(EVENT_TITLE_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+        self.control:RegisterForEvent(EVENT_PLAYER_TITLES_UPDATE, OnUpdate)
+        self.control:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, OnUpdate)
+        self.control:RegisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED, OnUpdate)
+        self.control:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, OnUpdate)
+        self.control:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, OnUpdate)
+        STABLE_MANAGER:RegisterCallback("StableMountInfoUpdated", OnUpdate)
+        ZO_LEVEL_UP_REWARDS_MANAGER:RegisterCallback("OnLevelUpRewardsUpdated", OnUpdate)
+    end
+
+    function ZO_GamepadStats:UnregisterForEvents()
+        self.control:UnregisterForEvent(EVENT_STATS_UPDATED)
+        self.control:UnregisterForEvent(EVENT_LEVEL_UPDATE)
+        self.control:UnregisterForEvent(EVENT_EFFECT_CHANGED)
+        self.control:UnregisterForEvent(EVENT_EFFECTS_FULL_UPDATE)
+        self.control:UnregisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED)
+        self.control:UnregisterForEvent(EVENT_TITLE_UPDATE)
+        self.control:UnregisterForEvent(EVENT_PLAYER_TITLES_UPDATE)
+        self.control:UnregisterForEvent(EVENT_CHAMPION_POINT_GAINED)
+        self.control:UnregisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED)
+        self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED)
+        self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED)
+        STABLE_MANAGER:UnregisterCallback("StableMountInfoUpdated", OnUpdate)
+        ZO_LEVEL_UP_REWARDS_MANAGER:UnregisterCallback("OnLevelUpRewardsUpdated", OnUpdate)
     end
 end
 
+function ZO_GamepadStats:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+
+    if self.outfitSelectorHeaderFocus:IsActive() then
+        self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+        self.mainList:Deactivate()
+    end
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
 function ZO_GamepadStats:ActivateMainList()
-    if(not self.mainList:IsActive()) then
+    if not self.mainList:IsActive() then
         self.mainList:Activate()
 
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -287,7 +302,7 @@ function ZO_GamepadStats:ActivateMainList()
 end
 
 function ZO_GamepadStats:DeactivateMainList()
-    if(self.mainList:IsActive()) then
+    if self.mainList:IsActive() then
 
         self.mainList:Deactivate()
 
@@ -301,19 +316,27 @@ function ZO_GamepadStats:DeactivateMainList()
 end
 
 function ZO_GamepadStats:ActivateTitleDropdown()
-    if(self.currentTitleDropdown ~= nil) then
+    if self.currentTitleDropdown ~= nil then
         self:DeactivateMainList()
 
         self.currentTitleDropdown:Activate()
 
         local currentTitleIndex = GetCurrentTitleIndex()
-        if(currentTitleIndex) then
+        if currentTitleIndex then
             currentTitleIndex = currentTitleIndex + 1
         else
             currentTitleIndex = 1
         end
         self.currentTitleDropdown:SetHighlightedItem(currentTitleIndex)
     end
+end
+
+function ZO_GamepadStats:ShowOutfitSelector()
+    SCENE_MANAGER:Push("gamepad_outfits_selection")
+end
+
+function ZO_GamepadStats:ShowLevelUpRewards()
+    ZO_GAMEPAD_CLAIM_LEVEL_UP_REWARDS:Show()
 end
 
 function ZO_GamepadStats:OnTitleDropdownDeactivated()
@@ -359,9 +382,14 @@ function ZO_GamepadStats:TryResetScreenState()
 end
 
 function ZO_GamepadStats:PerformDeferredInitializationRoot()
-    if self.deferredInitialied then return end
-    self.deferredInitialied = true
+    if self.deferredInitialized then return end
+    self.deferredInitialized = true
     
+    self.outfitSelectorControl = self.header:GetNamedChild("OutfitSelector")
+    self.outfitSelectorNameLabel = self.outfitSelectorControl:GetNamedChild("OutfitName")
+    self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorNameLabel)
+    self:SetupHeaderFocus(self.outfitSelectorHeaderFocus)
+
     self.infoPanel = self.control:GetNamedChild("RightPane"):GetNamedChild("InfoPanel")
 
     self:InitializeCharacterPanel()
@@ -370,6 +398,7 @@ function ZO_GamepadStats:PerformDeferredInitializationRoot()
 
     self:InitializeHeader()
     self:InitializeCommitPointsDialog()
+    self:InitializeMainListEntries()
 end
 
 function ZO_GamepadStats:InitializeKeybindStripDescriptors()
@@ -379,7 +408,9 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
         -- Select / Commit Points
         {
             name = function()
-                if(self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE) then
+                if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return GetString(SI_GAMEPAD_SELECT_OPTION)
                 else
                     return GetString(SI_STAT_GAMEPAD_COMMIT_POINTS)
@@ -387,15 +418,21 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function()
-                if(self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE) then
+                if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return true
                 else
-                    return self:GetNumPointsAdded() > 0 
+                    return self:GetNumPointsAdded() > 0
                 end
             end,
-            callback = function() 
-                if(self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE) then
+            callback = function()
+                if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT then
+                    self:ShowOutfitSelector()
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE then
                     self:ActivateTitleDropdown()
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
+                    self:ShowLevelUpRewards()
                 else
                     ZO_Dialogs_ShowGamepadDialog(GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME)
                 end
@@ -414,7 +451,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             visible = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
                     local selectedData = self.mainList:GetTargetData()
-                    if(selectedData ~= nil and selectedData.buffSlot ~= nil) then
+                    if selectedData ~= nil and selectedData.buffSlot ~= nil then
                         return selectedData.canClickOff
                     end
                     return false
@@ -433,8 +470,6 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
         },
     }
 
-    
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.mainList)
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
@@ -471,6 +506,7 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     local isAttributesHidden = true
     local isCharacterHidden = true
     local isEffectsHidden = true
+    local showUpcomingRewards = false
 
     if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.CHARACTER then
         isCharacterHidden = false
@@ -480,10 +516,13 @@ function ZO_GamepadStats:UpdateScreenVisibility()
             isEffectsHidden = false
             self:RefreshCharacterEffects()
         end
-    else
+    elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
+            or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE then
         --Title and attributes both display attributes, by design
         isAttributesHidden = false
         self:RefreshAttributesPanel()
+    elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.UPCOMING_LEVEL_UP_REWARDS then
+        showUpcomingRewards = true
     end
 
     self.characterStatsPanel:SetHidden(isCharacterHidden)
@@ -491,21 +530,27 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     self.equipmentBonus:SetHidden(isAttributesHidden)
     self.characterEffects:SetHidden(isEffectsHidden)
 
-    local hideQuadrant2Background = isAttributesHidden and isCharacterHidden and isEffectsHidden
-    if(hideQuadrant2Background) then
+    local hideQuadrant2_3Background = isAttributesHidden and isCharacterHidden and isEffectsHidden
+    if hideQuadrant2_3Background then
         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         GAMEPAD_STATS_ROOT_SCENE:RemoveFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
     else
         GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         GAMEPAD_STATS_ROOT_SCENE:AddFragment(GAMEPAD_STATS_CHARACTER_INFO_PANEL_FRAGMENT)
     end
+
+    if showUpcomingRewards then
+        ZO_GAMEPAD_UPCOMING_LEVEL_UP_REWARDS:Show()
+    else
+        ZO_GAMEPAD_UPCOMING_LEVEL_UP_REWARDS:Hide()
+end
 end
 
 function ZO_GamepadStats:RefreshConfirmScreen()
     self:RefreshCommitPointsConfirmList()
 
     self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
-    
+
     self:UpdateScreenVisibility()
 end
 
@@ -513,13 +558,15 @@ function ZO_GamepadStats:PerformUpdate()
     self:UpdateSpendablePoints()
 
     self:RefreshMainList()
-    
+
     local selectedData = self.mainList:GetTargetData()
-    if(selectedData.displayMode ~= nil) then
+    if selectedData.displayMode ~= nil then
         self.displayMode = selectedData.displayMode
     end
 
     self:UpdateScreenVisibility()
+
+    self.dirty = false
 end
 
 function ZO_GamepadStats:OnSetAvailablePoints()
@@ -584,12 +631,22 @@ function ZO_GamepadStats:InitializeHeader()
     local contentContainer = rightPane:GetNamedChild("HeaderContainer")
     self.contentHeader = contentContainer:GetNamedChild("Header")
 
-    ZO_GamepadGenericHeader_Initialize(self.contentHeader, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DATA_PAIRS_TOGETHER)
+    ZO_GamepadGenericHeader_Initialize(self.contentHeader, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER)
     self.contentHeaderData = {}
 end
 
 function ZO_GamepadStats:RefreshHeader()
     self.headerData.data1Text = tostring(self:GetAvailablePoints())
+
+    local currentlyEquippedOutfitIndex = ZO_OUTFITS_SELECTOR_GAMEPAD:GetCurrentOutfitIndex()
+    if currentlyEquippedOutfitIndex then
+        local currentOutfit = ZO_OUTFIT_MANAGER:GetOutfitManipulator(currentlyEquippedOutfitIndex)
+        self.outfitSelectorNameLabel:SetText(currentOutfit:GetOutfitName())
+    else
+        self.outfitSelectorNameLabel:SetText(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
+    end
+
+    self.outfitSelectorHeaderFocus:Update()
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
@@ -611,27 +668,31 @@ end
 ---------------
 
 do
-    local function SetupEffectAttributeRow(control, data, ...)
-        ZO_SharedGamepadEntry_OnSetup(control, data, ...)
-        local frameControl = control:GetNamedChild("Frame")
-        hasIcon = data:GetNumIcons() > 0
-        frameControl:SetHidden(not hasIcon)
-    end
+    local GAMEPAD_ATTRIBUTE_ICONS =
+    {
+        [ATTRIBUTE_HEALTH] = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_healthIcon.dds",
+        [ATTRIBUTE_STAMINA] = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_staminaIcon.dds",
+        [ATTRIBUTE_MAGICKA] = "/esoui/art/characterwindow/Gamepad/gp_characterSheet_magickaIcon.dds",
+    }
 
-    function ZO_GamepadStats:SetupList(list)
-        self.mainList = list
+    local GAMEPAD_ATTRIBUTE_ORDERING =
+    {
+        ATTRIBUTE_MAGICKA,
+        ATTRIBUTE_HEALTH,
+        ATTRIBUTE_STAMINA,
+    }
 
-        self.mainList:AddDataTemplate("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-        self.mainList:AddDataTemplateWithHeader("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    function ZO_GamepadStats:InitializeMainListEntries()
+        -- Claim Rewards Entry
+        -- entry that lets you go to the claim rewards scene
+        self.claimRewardsEntry = ZO_GamepadEntryData:New(GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_ENTRY_NAME))
+        self.claimRewardsEntry:SetCanLevel(true)
+        self.claimRewardsEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS
 
-        self.mainList:AddDataTemplate("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-        self.mainList:AddDataTemplateWithHeader("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-
-        self.mainList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_GamepadStatCharacterRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-        self.mainList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_GamepadStatCharacterRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-
-        self.mainList:AddDataTemplate("ZO_GamepadEffectAttributeRow", SetupEffectAttributeRow, ZO_GamepadMenuEntryTemplateParametricListFunction)
-        self.mainList:AddDataTemplateWithHeader("ZO_GamepadEffectAttributeRow", SetupEffectAttributeRow, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+        -- Upcoming Rewards Entry
+        -- entry that shows the upcoming rewards when selected
+        self.upcomingRewardsEntry = ZO_GamepadEntryData:New(GetString(SI_LEVEL_UP_REWARDS_UPCOMING_REWARDS_HEADER))
+        self.upcomingRewardsEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.UPCOMING_LEVEL_UP_REWARDS
 
         --Title Entry
         self.titleEntry = ZO_GamepadEntryData:New("")
@@ -640,20 +701,24 @@ do
         self.titleEntry:SetHeader(GetString(SI_STATS_TITLE))
 
         --Character Entry
-        self.characterEntry = ZO_GamepadEntryData:New("")
+        self.characterEntry = ZO_GamepadEntryData:New(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION))
         self.characterEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.CHARACTER
-        self.characterEntry.statsObject = self
         self.characterEntry:SetHeader(GetString(SI_STATS_CHARACTER))
+
+        local function CanSpendAttributePoints()
+            return GetAttributeUnspentPoints() > 0
+        end
 
         --Attribute Entries
         self.attributeEntries = {}
         for index, attributeType in ipairs(GAMEPAD_ATTRIBUTE_ORDERING) do
             local icon = GAMEPAD_ATTRIBUTE_ICONS[attributeType]
             local data = ZO_GamepadEntryData:New(GetString("SI_ATTRIBUTES", attributeType), icon)
+            data:SetCanLevel(CanSpendAttributePoints)
             data.screen = self
             data.attributeType = attributeType
             data.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
-        
+
             if index == 1 then
                 data:SetHeader(GetString(SI_STATS_ATTRIBUTES))
             end
@@ -662,12 +727,47 @@ do
     end
 end
 
-function ZO_GamepadStats:OnSelectionChanged(list, selectedData, oldSelectedData)
-	self.displayMode = selectedData.displayMode
-    if not oldSelectedData or selectedData.displayMode ~= oldSelectedData.displayMode or selectedData.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
-        self:UpdateScreenVisibility()
+do
+    local function SetupEffectAttributeRow(control, data, ...)
+        ZO_SharedGamepadEntry_OnSetup(control, data, ...)
+        local frameControl = control:GetNamedChild("Frame")
+        local hasIcon = data:GetNumIcons() > 0
+        frameControl:SetHidden(not hasIcon)
     end
 
+    function ZO_GamepadStats:SetupList(list)
+        list:AddDataTemplate("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+
+        list:AddDataTemplate("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+
+        list:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+
+        list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+
+        list:AddDataTemplate("ZO_GamepadEffectAttributeRow", SetupEffectAttributeRow, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadEffectAttributeRow", SetupEffectAttributeRow, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    end
+end
+
+function ZO_GamepadStats:OnSelectionChanged(list, selectedData, oldSelectedData)
+    self.displayMode = selectedData.displayMode
+
+    self:UpdateScreenVisibility()
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadStats:OnEnterHeader()
+    self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadStats:OnLeaveHeader()
+    local targetData = self.mainList:GetTargetData()
+    self.displayMode = targetData.displayMode
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -684,10 +784,17 @@ do
 
         self.mainList:Clear()
 
+        --Level Up Reward
+        if HasPendingLevelUpReward() then
+            self.mainList:AddEntry("ZO_GamepadNewMenuEntryTemplate", self.claimRewardsEntry)
+        elseif HasUpcomingLevelUpReward() then
+            self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", self.upcomingRewardsEntry)
+        end
+
         --Title
         self.mainList:AddEntryWithHeader("ZO_GamepadStatTitleRow", self.titleEntry)
-    
-        -- Attributes    
+
+        -- Attributes
         for index, attributeEntry in ipairs(self.attributeEntries) do
             if index == 1 then
                 self.mainList:AddEntryWithHeader("ZO_GamepadStatAttributeRow", attributeEntry)
@@ -812,7 +919,7 @@ function ZO_GamepadStats:RefreshCharacterEffects()
         local buffSlot, abilityId
         contentTitle, contentStartTime, contentEndTime, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", selectedData.buffIndex)
 
-        if(DoesAbilityExist(abilityId)) then
+        if DoesAbilityExist(abilityId) then
             contentDescription = GetAbilityEffectDescription(buffSlot)
         end
     end
@@ -1084,6 +1191,7 @@ function ZO_GamepadStats:RefreshCharacterPanel()
         local percentageXP = zo_floor(currentXP / totalXP * 100)
         self.experienceProgress:SetText(zo_strformat(SI_EXPERIENCE_CURRENT_MAX_PERCENT, ZO_CommaDelimitNumber(currentXP), ZO_CommaDelimitNumber(totalXP), percentageXP))
     end
+    local BAR_NO_WRAP = true
     self.experienceBar:SetValue(currentLevel, currentXP, totalXP, BAR_NO_WRAP)
 
     self.enlightenmentText:SetHidden(hideEnlightenment)
@@ -1143,23 +1251,14 @@ function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringReb
     data.statsObject:UpdateTitleDropdownTitles(control.dropdown)
 
     control.dropdown:SetDeactivatedCallback(data.statsObject.OnTitleDropdownDeactivated, data.statsObject)
-end
-
--------------------------------------
--- Description Title Attribute Row --
--------------------------------------
-
-function ZO_GamepadStatCharacterRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-
-    control:GetNamedChild("Label"):SetText(GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_DESCRIPTION))
+    control.dropdown:SetSelectedItemTextColor(selected)
 end
 
 ------------------------
 -- Stat Attribute Row --
 ------------------------
 
-function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
+function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDuringRebuild, enabled, active)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
     local availablePoints = GetAttributeUnspentPoints()
@@ -1171,21 +1270,21 @@ function ZO_GamepadStatAttributeRow_Setup(control, data, selected, selectedDurin
     control.attributeType = data.attributeType
 
     local function SetAttributeText(points, addedPoints)
-        if(addedPoints > 0) then
+        if addedPoints > 0 then
             control.pointLimitedSpinner.pointsSpinner:SetNormalColor(STAT_HIGHER_COLOR)
         else
             control.pointLimitedSpinner.pointsSpinner:SetNormalColor(ZO_SELECTED_TEXT)
         end
     end
 
-    local onValueChangedCallback = function(points, addedPoints)
+    local function onValueChangedCallback(points, addedPoints)
         data.screen:SetAddedPoints(control.attributeType, addedPoints)
         SetAttributeText(points, addedPoints)
     end
 
     local addedPoints = data.screen:GetAddedPoints(data.attributeType)
 
-    if(control.pointLimitedSpinner == nil) then
+    if control.pointLimitedSpinner == nil then
         control.pointLimitedSpinner = ZO_AttributeSpinner_Gamepad:New(control, control.attributeType, data.screen, onValueChangedCallback)
         control.pointLimitedSpinner:ResetAddedPoints()
     else

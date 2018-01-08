@@ -80,7 +80,8 @@
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
                 <Label name="$(parent)Value" inherits="ZO_StatsRowValue"/>
-                <Texture name="$(parent)Icon" resizeToFitFile="true">
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5" />
                 </Texture>
             </Controls>
@@ -369,6 +370,10 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TitleSection" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-7"/>
                 </Control>
+
+                <Label name="$(parent)AttributesPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" text="SI_STATS_SPEND_ATTRIBUTE_POINTS_MESSAGE" horizontalAlignment="CENTER" >
+                    <Dimensions x="290"/>
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

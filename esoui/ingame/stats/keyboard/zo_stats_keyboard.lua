@@ -18,6 +18,9 @@ end
 
 --Stats
 
+local SHOW_HIDE_INSTANT = 1
+local SHOW_HIDE_ANIMATED = 2
+
 ZO_Stats = ZO_Stats_Common:Subclass()
 
 function ZO_Stats:New(...)
@@ -30,16 +33,30 @@ function ZO_Stats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
     self.control = control
 
-    control:SetHandler("OnEffectivelyShown", function() self:OnShown() end)
+    STATS_SCENE = ZO_Scene:New("stats", SCENE_MANAGER)
+    STATS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    STATS_SCENE:AddFragment(STATS_FRAGMENT)
+
+    STATS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:OnShowing()
+        elseif newState == SCENE_HIDING then
+            self:OnHiding()
+        elseif newState == SCENE_HIDDEN then
+            self:OnHidden()
+        end
+    end)
 end
 
-function ZO_Stats:OnShown()
+function ZO_Stats:OnShowing()
     if not self.initialized then
         self.initialized = true
 
-        self.scrollChild = self.control:GetNamedChild("PaneScrollChild")
+        self.scroll = self.control:GetNamedChild("Pane")
+        self.scrollChild = self.scroll:GetNamedChild("ScrollChild")
         self.attributeControls = {}
-        self.statEntries = {}        
+        self.statEntries = {}
+        self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
 
         self:SetUpTitleSection()
 
@@ -56,14 +73,52 @@ function ZO_Stats:OnShown()
 
         self.control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, function() self:UpdateSpendablePoints() end)
         self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:RefreshTitleSection() end)
+
+        local function UpdateLevelUpRewards()
+            self:UpdateLevelUpRewards()
+        end
+
+        ZO_LEVEL_UP_REWARDS_MANAGER:RegisterCallback("OnLevelUpRewardsUpdated", UpdateLevelUpRewards)
+
+        self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
     end
 
     self:UpdateSpendablePoints()
     self:RefreshEquipmentBonus()
 
+    self:UpdateLevelUpRewards()
+
     TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
     if GetAttributeUnspentPoints() > 0 then
         TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED_AND_ATTRIBUTE_POINTS_UNSPENT)
+    end
+
+    ZO_ScrollList_ResetToTop(self.scroll)
+end
+
+function ZO_Stats:OnHiding()
+    if self.attributesPointerBox then
+        self.isAttributesHeaderTitleInScrollBounds = nil
+    end
+
+    if self.pendingEquipOutfitIndex ~= ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex() then
+        if self.pendingEquipOutfitIndex then
+            ZO_OUTFIT_MANAGER:EquipOutfit(self.pendingEquipOutfitIndex)
+        else
+            UnequipOutfit()
+        end
+    end
+end
+
+function ZO_Stats:OnHidden()
+    ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
+end
+
+function ZO_Stats:OnUpdate()
+    local attributesHeaderTitleInView = ZO_Scroll_IsControlFullyInView(self.scroll, self.attributesHeaderTitle)
+    if attributesHeaderTitleInView ~= self.isAttributesHeaderTitleInScrollBounds then
+        self.isAttributesHeaderTitleInScrollBounds = attributesHeaderTitleInView
+        self:UpdateSpendAttributePointsTip(SHOW_HIDE_INSTANT)
     end
 end
 
@@ -75,12 +130,26 @@ function ZO_Stats:InitializeKeybindButtons()
         {
             name = GetString(SI_STATS_COMMIT_ATTRIBUTES_BUTTON),
             keybind = "UI_SHORTCUT_PRIMARY",
-            visible = function() 
+            visible = function()
                             return self:GetAddedPoints() > 0
                        end,
             callback = function()
                             self:PurchaseAttributes()
                         end,
+        },
+         -- Level Up Help
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_LEVEL_UP_REWARDS_HELP_KEYBIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            visible = function()
+                local helpCategoryIndex, helpIndex = GetLevelUpHelpIndicesForLevel(ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel())
+                return helpCategoryIndex ~= nil
+            end,
+            callback = function()
+                local helpCategoryIndex, helpIndex = GetLevelUpHelpIndicesForLevel(ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel())
+                HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+            end,
         },
     }
 
@@ -117,7 +186,7 @@ function ZO_Stats:SetUpTitleSection()
     self.equipmentBonus = titleSectionControl:GetNamedChild("EquipmentBonus")
     local equipmentBonusIcons = self.equipmentBonus:GetNamedChild("Icons")
     self.equipmentBonus.iconPool = ZO_ControlPool:New("ZO_StatsEquipmentBonusIcon", equipmentBonusIcons)
-    self.equipmentBonus.value = EQUIPMENT_SCORE_LOW
+    self.equipmentBonus.value = EQUIPMENT_BONUS_LOW
     self.equipmentBonus.lowestEquipSlot = EQUIP_SLOT_NONE
 
     self:RefreshTitleSection()
@@ -158,18 +227,39 @@ end
 function ZO_Stats:CreateBackgroundSection()
     self:AddHeader(SI_STATS_BACKGROUND)
 
-    local dropdownRow = self:AddDropdownRow(GetString(SI_STATS_TITLE))
-    dropdownRow.dropdown:SetSortsItems(false)
+    -- Titles --
+
+    local titleDropdownRow = self:AddDropdownRow(GetString(SI_STATS_TITLE))
+    titleDropdownRow.dropdown:SetSortsItems(false)
 
     local function UpdateSelectedTitle()
-        self:UpdateTitleDropdownSelection(dropdownRow.dropdown)
+        self:UpdateTitleDropdownSelection(titleDropdownRow.dropdown)
     end
 
     local function UpdateTitles()
-        self:UpdateTitleDropdownTitles(dropdownRow.dropdown)
+        self:UpdateTitleDropdownTitles(titleDropdownRow.dropdown)
     end
 
     UpdateTitles()
+
+    -- Outfits --
+
+    local outfitDropdownRow = self:AddDropdownRow(GetString(SI_OUTFIT_SELECTOR_TITLE))
+    local outfitDropdown = outfitDropdownRow.dropdown
+    outfitDropdown:SetSortsItems(false)
+
+    local function UpdateEquippedOutfit()
+        self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        self:UpdateOutfitDropdownSelection(outfitDropdown)
+    end
+
+    local function UpdateOutfits()
+        self:UpdateOutfitDropdownOutfits(outfitDropdown)
+    end
+
+    UpdateOutfits()
+
+    -- Alliance Ranks --
 
     local iconRow = self:AddIconRow(GetString(SI_STATS_ALLIANCE_RANK))
     
@@ -188,11 +278,17 @@ function ZO_Stats:CreateBackgroundSection()
 
     UpdateRank()
 
+    -- Bounty --
+
     local bountyRow = self:AddBountyRow(GetString(SI_STATS_BOUNTY_LABEL))
 
-    self.control:RegisterForEvent(EVENT_TITLE_UPDATE, function(_, unitTag) if(unitTag == "player") then UpdateSelectedTitle() end end)
+    self.control:RegisterForEvent(EVENT_TITLE_UPDATE, UpdateSelectedTitle)
+    self.control:AddFilterForEvent(EVENT_TITLE_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
     self.control:RegisterForEvent(EVENT_PLAYER_TITLES_UPDATE, UpdateTitles)
-    self.control:RegisterForEvent(EVENT_RANK_POINT_UPDATE, function(eventCode, unitTag) if unitTag == "player" then UpdateRank() end end)
+    self.control:RegisterForEvent(EVENT_RANK_POINT_UPDATE, UpdateRank)
+    self.control:AddFilterForEvent(EVENT_RANK_POINT_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfits", UpdateOutfits)
 end
 
 function ZO_Stats:CreateAttributesSection()
@@ -231,27 +327,28 @@ end
 
 function ZO_Stats:UpdateSpendablePoints()
     self:UpdateAttributesHeader()
+    self:UpdateSpendAttributePointsTip(SHOW_HIDE_ANIMATED)
 
     local totalSpendablePoints = self:GetTotalSpendablePoints()
 
     self:ResetAllAttributes()
-    for i = 1, #self.attributeControls do
-        self.attributeControls[i].pointLimitedSpinner:RefreshPoints()
-        self.attributeControls[i].pointLimitedSpinner:SetButtonsHidden(totalSpendablePoints == 0)
-        self.attributeControls[i].increaseHighlight:SetHidden(totalSpendablePoints == 0)
+    for i, attributeControl in ipairs(self.attributeControls) do
+        attributeControl.pointLimitedSpinner:RefreshPoints()
+        attributeControl.pointLimitedSpinner:SetButtonsHidden(totalSpendablePoints == 0)
+        attributeControl.increaseHighlight:SetHidden(totalSpendablePoints == 0)
     end
 end
 
 function ZO_Stats:UpdateAttributesHeader()
     local totalSpendablePoints = self:GetTotalSpendablePoints()
 
-    if(self.attributesHeaderTitle ~= nil and totalSpendablePoints ~= nil) then
+    if self.attributesHeaderTitle ~= nil and totalSpendablePoints ~= nil then
         local shouldAnimate = totalSpendablePoints > 0
         local attributesHeaderTitle = self.attributesHeaderTitle
         local attributesHeaderTitleTimeline = self.attributesHeaderTitleTimeline
         local isAnimating = attributesHeaderTitleTimeline:IsPlaying()
-        if(shouldAnimate ~= isAnimating) then
-            if(shouldAnimate) then
+        if shouldAnimate ~= isAnimating then
+            if shouldAnimate then
                 attributesHeaderTitle.textIndex = 1
                 attributesHeaderTitle:SetText(attributesHeaderTitle.text[1])
                 attributesHeaderTitleTimeline:PlayFromStart()
@@ -264,10 +361,32 @@ function ZO_Stats:UpdateAttributesHeader()
     end
 end
 
+function ZO_Stats:UpdateSpendAttributePointsTip(showHideMethod)
+    local skipAnimation = showHideMethod == SHOW_HIDE_INSTANT
+    local totalSpendablePoints = self:GetTotalSpendablePoints()
+    if self.attributesHeaderTitle ~= nil and totalSpendablePoints ~= nil and STATS_SCENE:IsShowing() then
+        if totalSpendablePoints > 0 and self.isAttributesHeaderTitleInScrollBounds then
+            if not self.attributesPointerBox then
+                self.attributesPointerBox = POINTER_BOXES:Acquire()
+                self.attributesPointerBox:SetContentsControl(self.control:GetNamedChild("AttributesPointerBoxContents"))
+                self.attributesPointerBox:SetParent(self.control)
+                self.attributesPointerBox:SetHideWithFragment(STATS_FRAGMENT)
+                self.attributesPointerBox:SetCloseable(false)
+                self.attributesPointerBox:SetAnchor(RIGHT, self.attributesHeaderTitle, LEFT, -10, 0)
+                self.attributesPointerBox:Commit()
+            end
+            self.attributesPointerBox:Show(skipAnimation)
+        else
+            if self.attributesPointerBox then
+                self.attributesPointerBox:Hide(skipAnimation)
+            end
+        end
+    end
+end
+
 function ZO_Stats:ResetAllAttributes()
-    for i = 1, #self.attributeControls do
-        local attributeControl = self.attributeControls[i]
-        attributeControl.pointLimitedSpinner:ResetAddedPoints()        
+    for i, attributeControl in ipairs(self.attributeControls) do
+        attributeControl.pointLimitedSpinner:ResetAddedPoints()
         self:UpdatePendingStatBonuses(attributeControl.statType, 0)
     end
     
@@ -276,8 +395,8 @@ end
 
 function ZO_Stats:GetAddedPoints()
     local points = 0
-    for i = 1, #self.attributeControls do
-        points = points + self.attributeControls[i].pointLimitedSpinner.addedPoints
+    for i, attributeControl in ipairs(self.attributeControls) do
+        points = points + attributeControl.pointLimitedSpinner.addedPoints
     end
     return points
 end
@@ -286,7 +405,7 @@ function ZO_Stats:PurchaseAttributes()
     PlaySound(SOUNDS.STATS_PURCHASE)
     PurchaseAttributes(self.attributeControls[ATTRIBUTE_HEALTH].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_MAGICKA].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_STAMINA].pointLimitedSpinner.addedPoints)
     zo_callLater(function()
-        if(SCENE_MANAGER:IsShowing("stats") and self:GetTotalSpendablePoints() == 0) then
+        if SCENE_MANAGER:IsShowing("stats") and self:GetTotalSpendablePoints() == 0 then
             MAIN_MENU_KEYBOARD:ShowScene("skills")
         end
     end, 1000)
@@ -301,8 +420,7 @@ end
 function ZO_Stats:SetSpinnersEnabled(enabled)
     local totalSpendablePoints = self:GetTotalSpendablePoints()
 
-    for i = 1, #self.attributeControls do
-        local attributeControl = self.attributeControls[i]
+    for i, attributeControl in ipairs(self.attributeControls) do
         attributeControl.pointLimitedSpinner:SetEnabled(enabled)
         attributeControl.increaseHighlight:SetHidden(true)
     end
@@ -320,8 +438,8 @@ function ZO_Stats:SetUpAttributeControl(attributeControl, statType, attributeTyp
     attributeControl.name:SetText(GetString("SI_ATTRIBUTES", attributeType))
     attributeControl.statType = statType
     attributeControl.attributeType = attributeType
-    attributeControl.powerType = powerType    
-    attributeControl.bar:SetTexture(BAR_TEXTURES[powerType])    
+    attributeControl.powerType = powerType
+    attributeControl.bar:SetTexture(BAR_TEXTURES[powerType])
 
     attributeControl.spinner:SetHandler("OnMouseEnter", function() self:RefreshSpinnerMaxes() end)
 
@@ -329,9 +447,9 @@ function ZO_Stats:SetUpAttributeControl(attributeControl, statType, attributeTyp
 end
 
 function ZO_Stats:RefreshSpinnerMaxes()
-    for i = 1, #self.attributeControls do
-        self.attributeControls[i].pointLimitedSpinner:RefreshSpinnerMax()
-        self.attributeControls[i].increaseHighlight:SetHidden(true)
+    for i, attributeControl in ipairs(self.attributeControls) do
+        attributeControl.pointLimitedSpinner:RefreshSpinnerMax()
+        attributeControl.increaseHighlight:SetHidden(true)
     end
 end
 
@@ -346,7 +464,7 @@ function ZO_Stats:UpdatePendingStatBonuses(statType, pendingBonus)
     local statEntry = self.statEntries[statType]
     if statEntry then
         self:SetPendingStatBonuses(statType, pendingBonus)
-        statEntry:UpdateStatValue()        
+        statEntry:UpdateStatValue()
     end
 end
 
@@ -405,7 +523,7 @@ function ZO_Stats:CreateActiveEffectsSection()
 end
 
 function ZO_Stats:AddDivider()
-    if(self.lastControl == nil) then
+    if self.lastControl == nil then
         self:SetNextControlPadding(2)
     else
         self:SetNextControlPadding(15)
@@ -492,7 +610,7 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
     local function UpdateEffects()
         if not container:IsHidden() then
             effectsRowPool:ReleaseAllObjects()
-            
+
             local effectsRows = {}
 
             --Artificial effects--
@@ -535,7 +653,7 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
             table.sort(effectsRows, EffectsRowComparator)
             local prevRow
             for i, effectsRow in ipairs(effectsRows) do
-                if(prevRow) then
+                if prevRow then
                     effectsRow:SetAnchor(TOPLEFT, prevRow, BOTTOMLEFT)
                 else
                     effectsRow:SetAnchor(TOPLEFT, nil, TOPLEFT, 5, 0)
@@ -549,17 +667,39 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
     end
 
     local function OnEffectChanged(eventCode, changeType, buffSlot, buffName, unitTag)
-        if unitTag == "player" then
-            UpdateEffects()
-        end
+        UpdateEffects()
     end
 
     container:RegisterForEvent(EVENT_EFFECT_CHANGED, OnEffectChanged)
+    container:AddFilterForEvent(EVENT_EFFECT_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
     container:RegisterForEvent(EVENT_EFFECTS_FULL_UPDATE, UpdateEffects)
     container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, UpdateEffects)
     container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, UpdateEffects)
     container:SetHandler("OnEffectivelyShown", UpdateEffects)
 end
+
+function ZO_Stats:UpdateLevelUpRewards()
+    if STATS_SCENE:IsShowing() then
+        if HasPendingLevelUpReward() then
+            ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS:Hide()
+            ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Show()
+        elseif HasUpcomingLevelUpReward() then
+            local wasClaimShowing = ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:IsShowing()
+            ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
+            local fadeInUpcomingContents = wasClaimShowing
+            ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS:Show(fadeInUpcomingContents)
+        else
+            ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
+            ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS:Hide()
+        end
+
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindButtons)
+    end
+end
+
+--
+--[[ XML Handlers ]]--
+--
 
 function ZO_Stats_Initialize(control)
     STATS = ZO_Stats:New(control)

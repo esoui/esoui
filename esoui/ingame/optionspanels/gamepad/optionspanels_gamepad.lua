@@ -20,6 +20,11 @@ local interfaceSettingsHUD = {
     {
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
+    },
+    {
+        panel = SETTING_PANEL_INTERFACE,
+        system = SETTING_TYPE_UI,
         settingId = UI_SETTING_COMPASS_QUEST_GIVERS,
     },
     {
@@ -194,13 +199,8 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_HIDE_HELM,
-            header = SI_GAMEPLAY_OPTIONS_ITEMS,
-        },
-        {
-            panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE,
+	        header = SI_GAMEPLAY_OPTIONS_ITEMS,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -544,11 +544,6 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_NAMEPLATES,
             system = SETTING_TYPE_NAMEPLATES,
             settingId = NAMEPLATE_TYPE_FOLLOWER_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_NAMEPLATES,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
         },
         {
             panel = SETTING_PANEL_NAMEPLATES,

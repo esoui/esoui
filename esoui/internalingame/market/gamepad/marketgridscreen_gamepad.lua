@@ -4,9 +4,7 @@ ZO_GAMEPAD_MARKET_PAGE_NO_DIRECTION = 3 -- No movement, only fading
 ZO_GAMEPAD_MARKET_GRID_INITIAL_X_OFFSET = 22
 ZO_GAMEPAD_MARKET_GRID_INITIAL_Y_OFFSET = 62
 
-local SCROLL_BOTTOM_PADDING = 50
 local NUM_VISIBLE_ROWS = 2
-local MIN_SCROLL_POSITION = 0
 local MIN_SCROLL_VALUE = 0
 local MAX_SCROLL_VALUE = 100
 
@@ -18,7 +16,6 @@ ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN = 2
 ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN_MINUS_ONE = ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN - 1
 
 local INDIVIDUAL_PRODUCT_HALF_HEIGHT = ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT / 2
-local HIGHLIGHT_BOUNDARY_PADDING = 10
 
 local FOCUS_MOVEMENT_TYPES = 
 {
@@ -268,7 +265,7 @@ do
         local buttonIcon = CreateControl(name, parent, CT_BUTTON)
         buttonIcon:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(keycode))
         buttonIcon:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        buttonIcon:SetAnchor(anchor, control, anchor)
+        buttonIcon:SetAnchor(anchor, parent, anchor)
         buttonIcon:SetHidden(true) -- hidden by default
         return buttonIcon
     end
@@ -462,7 +459,7 @@ function ZO_GamepadMarket_GridScreen:AddEntry(marketProduct, control)
     self.focusList:AddEntry(focusData)
     self.itemsPerColumn = row + 1
 
-    if marketProduct:HasPreview() then
+    if CanPreviewMarketProduct(marketProduct:GetId()) then
         table.insert(self.previewProducts, marketProduct)
         marketProduct:SetPreviewIndex(#self.previewProducts)
     end
@@ -485,8 +482,6 @@ function ZO_GamepadMarket_GridScreen:FinishRowWithBlankTiles()
 end
 
 do
-    local USE_FADE_GRADIENT = true
-    local UPDATE_THUMB = true
     local SLIDER_MIN_VALUE = 0
     function ZO_GamepadMarket_GridScreen:FinishBuild()
         self.focusList:SetFocusToFirstEntry()

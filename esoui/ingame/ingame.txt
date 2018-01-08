@@ -41,6 +41,8 @@ EsoUI\Ingame\PlayerProgressBar\Gamepad\ZO_PlayerProgressBar_Gamepad.xml
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.lua
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.xml
 
+EsoUI\Ingame\Collections\CollectibleDataManager.lua
+
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
@@ -178,11 +180,8 @@ EsoUI\Ingame\JournalProgressSummary\JournalProgressSummaryTemplates.lua
 EsoUI\Ingame\JournalProgressSummary\JournalProgressSummaryTemplates.xml
 
 EsoUI\Ingame\Collections\CollectionsBook_Manager.lua
-EsoUI\Ingame\Collections\CollectionsInventorySingleton.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.xml
-EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
-EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
 EsoUI\Ingame\Collections\Keyboard\SpecializedCollectionsBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\SpecializedCollectionsBook_Keyboard.xml
 EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.lua
@@ -472,6 +471,9 @@ EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.xml
 
 EsoUI\Ingame\Restyle\Restyle_Manager.lua
 EsoUI\Ingame\Restyle\Restyle_Shared.lua
+EsoUI\Ingame\Restyle\Restyle_Shared.xml
+
+EsoUI\Ingame\Outfits\Outfit_Manager.lua
 
 EsoUI\Ingame\Dyeing\DyeingToolBase.lua
 EsoUI\Ingame\Dyeing\DyeingToolDye.lua
@@ -490,8 +492,6 @@ EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Swatches_Gamepad.lua
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
 EsoUI\Ingame\Dyeing\DyeStamp_Confirmation_Shared.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.xml
@@ -500,10 +500,30 @@ EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.xml
 
 EsoUI\Ingame\Restyle\Keyboard\RestyleSheet_Keyboard.lua
 EsoUI\Ingame\Restyle\Keyboard\RestyleSheet_Keyboard.xml
-EsoUI\Ingame\Restyle\Keyboard\Restyle_Keyboard.lua
-EsoUI\Ingame\Restyle\Keyboard\Restyle_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheetWindow_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheetWindow_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\RestyleCommon_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleCommon_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\RestyleStation_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleStation_Keyboard.xml
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Outfit_Selector_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Helper_Panel_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Outfit_Slots_Panel_Gamepad.lua
+EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
+EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Staging_Equipment_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
+
+EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
+EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
+
+EsoUI\Ingame\Outfits\Keyboard\OutfitStylesPanel_Keyboard.lua
+EsoUI\Ingame\Outfits\Keyboard\OutfitStylesPanel_Keyboard.xml
+
+EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.xml
 
 EsoUI\Ingame\Achievements\Achievements_Shared.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.lua
@@ -527,6 +547,20 @@ EsoUI\Ingame\LoreLibrary\Gamepad\Library_Gamepad.xml
 
 EsoUI\Ingame\ScriptedWorldEvents\ScriptedWorldEvents.lua
 
+EsoUI\Ingame\Tutorial\TutorialTriggerHandlers.lua
+EsoUI\Ingame\Tutorial\TutorialHandlerBase.lua
+EsoUI\Ingame\Tutorial\BriefHudTutorial.lua
+EsoUI\Ingame\Tutorial\BriefHudTutorial.xml
+EsoUI\Ingame\Tutorial\HudInfoTutorial.lua
+EsoUI\Ingame\Tutorial\HudInfoTutorial.xml
+EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.lua
+EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.xml
+EsoUI\Ingame\Tutorial\Keyboard\PointerBoxTutorial.lua
+EsoUI\Ingame\Tutorial\Keyboard\PointerBoxTutorial.xml
+EsoUI\Ingame\Tutorial\Tutorial.lua
+EsoUI\Ingame\Tutorial\Tutorial.xml
+
+EsoUI\Ingame\SkillsAdvisor\SkillsAdvisor_Manager.lua
 EsoUI\Ingame\Skills\SharedSkills.lua
 EsoUI\Ingame\Skills\SharedSkills.xml
 EsoUI\Ingame\Skills\NewSkillCalloutManager.lua
@@ -560,17 +594,6 @@ EsoUI\Ingame\ActiveCombatTips\ActiveCombatTips.xml
 
 EsoUI\Ingame\QuestToolMonitor\QuestToolMonitor.lua
 EsoUI\Ingame\QuestToolMonitor\QuestToolMonitor.xml
-
-EsoUI\Ingame\Tutorial\TutorialTriggerHandlers.lua
-EsoUI\Ingame\Tutorial\TutorialHandlerBase.lua
-EsoUI\Ingame\Tutorial\BriefHudTutorial.lua
-EsoUI\Ingame\Tutorial\BriefHudTutorial.xml
-EsoUI\Ingame\Tutorial\HudInfoTutorial.lua
-EsoUI\Ingame\Tutorial\HudInfoTutorial.xml
-EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.lua
-EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.xml
-EsoUI\Ingame\Tutorial\Tutorial.lua
-EsoUI\Ingame\Tutorial\Tutorial.xml
 
 EsoUI\InGame\TrialAccount\TrialAccount.lua
 EsoUI\InGame\TrialAccount\TrialAccount.xml
@@ -1080,6 +1103,37 @@ EsoUI\Ingame\Battleground\Gamepad\BattlegroundMedalInfo_Gamepad.xml
 EsoUI\Ingame\Cutscene\Cutscene.lua
 EsoUI\Ingame\Cutscene\Cutscene.xml
 
+EsoUI\Ingame\LevelUpRewards\LevelUpRewards_Manager.lua
+EsoUI\Ingame\LevelUpRewards\LevelUpRewards_Base.lua
+EsoUI\Ingame\LevelUpRewards\LevelUpRewards_Base.xml
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewards_Keyboard.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewards_Keyboard.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewards_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewards_Gamepad.xml
+EsoUI\Ingame\LevelUpRewards\LevelUpRewardsClaim_Base.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsClaim_Keyboard.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsClaim_Keyboard.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsClaim_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsClaim_Gamepad.xml
+EsoUI\Ingame\LevelUpRewards\LevelUpRewardsUpcoming_Base.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsUpcoming_Keyboard.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsUpcoming_Keyboard.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsUpcoming_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsUpcoming_Gamepad.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsPostClaim_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsPostClaim_Gamepad.xml
+
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Keyboard.lua
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Keyboard.xml
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_BuildSelection_Keyboard.lua
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_BuildSelection_Keyboard.xml
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Suggestions_Keyboard.lua
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Suggestions_Keyboard.xml
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_BuildSelection_Gamepad.lua
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_BuildSelection_Gamepad.xml
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_Suggestions_Gamepad.lua
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_Suggestions_Gamepad.xml
+
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.lua
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.xml
@@ -1091,6 +1145,7 @@ EsoUI\Ingame\Scenes\Console\ConsoleIngameFragments.lua
 EsoUI\Ingame\Scenes\Gamepad\IngameFragments_Gamepad.lua
 
 EsoUI\Ingame\Scenes\IngameFragmentGroups.lua
+EsoUI\Ingame\Scenes\Keyboard\KeyboardIngameFragmentGroups.lua
 EsoUI\Ingame\Scenes\HUDScene.lua
 
 EsoUI\Ingame\Scenes\IngameScenes.lua

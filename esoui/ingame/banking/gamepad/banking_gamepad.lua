@@ -24,39 +24,46 @@ function ZO_GamepadBankInventoryList:Initialize(...)
 end
 
 function ZO_GamepadBankInventoryList:RefreshList()
-    if self.control:IsHidden() then
-        self.isDirty = true
-        return
-    end
-    self.isDirty = false
+    --Getting the slot data can trigger a full inventory update callback which will try to refresh the list in the middle of refreshing the list which duplicates the entries. isRebuildingList protects against this.
+    if not self.isRebuildingList then
+        if self.control:IsHidden() then
+            self.isDirty = true
+            return
+        end
+        self.isDirty = false
+        self.isRebuildingList = true
 
-    self.list:Clear()
+        self.list:Clear()
 
-    self.list:AddEntry("ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
-
-    for i, bagId in ipairs(self.inventoryTypes) do
-        self.dataByBagAndSlotIndex[bagId] = {}
-    end
-
-    local slots = self:GenerateSlotTable()
-    local currentBestCategoryName = nil
-    for i, itemData in ipairs(slots) do
-        local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
-        self:SetupItemEntry(entry, itemData)
-
-        if itemData.bestGamepadItemCategoryName ~= currentBestCategoryName then
-            currentBestCategoryName = itemData.bestGamepadItemCategoryName
-            entry:SetHeader(currentBestCategoryName)
-
-            self.list:AddEntryWithHeader(self.template, entry)
-        else
-            self.list:AddEntry(self.template, entry)
+        if DoesBankHoldCurrency(GetBankingBag()) then
+            self.list:AddEntry("ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
         end
 
-        self.dataByBagAndSlotIndex[itemData.bagId][itemData.slotIndex] = entry
-    end
+        for i, bagId in ipairs(self.inventoryTypes) do
+            self.dataByBagAndSlotIndex[bagId] = {}
+        end
 
-    self.list:Commit()
+        local slots = self:GenerateSlotTable()
+        local currentBestCategoryName = nil
+        for i, itemData in ipairs(slots) do
+            local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
+            self:SetupItemEntry(entry, itemData)
+
+            if itemData.bestGamepadItemCategoryName ~= currentBestCategoryName then
+                currentBestCategoryName = itemData.bestGamepadItemCategoryName
+                entry:SetHeader(currentBestCategoryName)
+                self.list:AddEntryWithHeader(self.template, entry)
+            else
+                self.list:AddEntry(self.template, entry)
+            end
+
+            self.dataByBagAndSlotIndex[itemData.bagId][itemData.slotIndex] = entry
+        end
+
+        self.list:Commit()
+        GAMEPAD_BANKING:UpdateKeybinds()
+        self.isRebuildingList = false
+    end
 end
 
 -----------------------
@@ -71,30 +78,49 @@ function ZO_GamepadBanking:New(...)
     return ZO_BankingCommon_Gamepad.New(self, ...)
 end
 
-local function OnCloseBank()
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Hide(GAMEPAD_BANKING_SCENE_NAME)
-    end
-end
-
-local function OnOpenBank()
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Show(GAMEPAD_BANKING_SCENE_NAME)
-    end
-end
-
 function ZO_GamepadBanking:Initialize(control)
     GAMEPAD_BANKING_SCENE = ZO_InteractScene:New(GAMEPAD_BANKING_SCENE_NAME, SCENE_MANAGER, BANKING_INTERACTION)
     ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_BANKING_SCENE)
     self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT)
 
-    self:ClearBankedBags()
-    self:AddBankedBag(BAG_BANK)
-    self:AddBankedBag(BAG_SUBSCRIBER_BANK)
     self:SetCarriedBag(BAG_BACKPACK)
 
-    self.control:RegisterForEvent(EVENT_OPEN_BANK, OnOpenBank)
-    self.control:RegisterForEvent(EVENT_CLOSE_BANK, OnCloseBank)
+    self.control:RegisterForEvent(EVENT_OPEN_BANK, function(_, ...) self:OnOpenBank(...) end)
+    self.control:RegisterForEvent(EVENT_CLOSE_BANK, function() self:OnCloseBank() end)
+end
+
+function ZO_GamepadBanking:OnOpenBank(bankBag)
+    if IsInGamepadPreferredMode() then
+        self:ClearBankedBags()
+        if bankBag == BAG_BANK then
+            self:AddBankedBag(BAG_BANK)
+            self:AddBankedBag(BAG_SUBSCRIBER_BANK)
+        else
+            self:AddBankedBag(bankBag)
+        end
+
+        --If we have already initialized then we've built the withdraw list already and need to update its backing bags.
+        --If we haven't initialized we will build the withdraw list after this and it will pickup the new banked bags.
+        if self.initialized then
+            self.withdrawList:SetInventoryTypes(self.bankedBags)
+        end
+
+        SCENE_MANAGER:Show(GAMEPAD_BANKING_SCENE_NAME)
+    end
+end
+
+function ZO_GamepadBanking:OnCloseBank()
+    if IsInGamepadPreferredMode() then
+        SCENE_MANAGER:Hide(GAMEPAD_BANKING_SCENE_NAME)
+    end
+end
+
+function ZO_GamepadBanking:OnCollectibleUpdated(collectibleId, justUnlocked)
+    if IsBankOpen() and IsHouseBankBag(GetBankingBag()) then
+        if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE_BANK then
+            self:RefreshWithdrawNoItemText()
+        end
+    end
 end
 
 function ZO_GamepadBanking:AddKeybinds()
@@ -110,12 +136,45 @@ end
 function ZO_GamepadBanking:OnDeferredInitialization()
     self.spinner = self.control:GetNamedChild("SpinnerContainer")
     self.spinner:InitializeSpinner()
+    self.control:RegisterForEvent(EVENT_COLLECTIBLE_UPDATED, function(_, ...) self:OnCollectibleUpdated(...) end)
 end
 
 function ZO_GamepadBanking:OnSceneShowing()
-    TriggerTutorial(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED)
-    if IsESOPlusSubscriber() then
-        TriggerTutorial(TUTORIAL_TRIGGER_BANK_OPENED_AS_SUBSCRIBER)
+    local bankingBag = GetBankingBag()
+    if bankingBag == BAG_BANK then
+        TriggerTutorial(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED)
+        if IsESOPlusSubscriber() then
+            TriggerTutorial(TUTORIAL_TRIGGER_BANK_OPENED_AS_SUBSCRIBER)
+        end
+    else
+        TriggerTutorial(TUTORIAL_TRIGGER_HOME_STORAGE_OPENED)
+    end
+    self:RefreshWithdrawNoItemText()
+end
+
+function ZO_GamepadBanking:RefreshWithdrawNoItemText()
+    local bankingBag = GetBankingBag()
+    if bankingBag == BAG_BANK then
+        if IsESOPlusSubscriber() then
+            TriggerTutorial(TUTORIAL_TRIGGER_BANK_OPENED_AS_SUBSCRIBER)
+        end
+        self.withdrawList:SetNoItemText(GetString(SI_BANK_EMPTY))
+    else
+        local interactName = GetUnitName("interact")
+        local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
+        local nickname
+        if collectibleId ~= 0 then
+        	local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+			if collectibleData then
+				nickname = collectibleData:GetNickname()
+            end
+        end
+
+        if nickname and nickname ~= "" then
+            self.withdrawList:SetNoItemText(zo_strformat(SI_BANK_HOME_STORAGE_EMPTY_WITH_NICKNAME, interactName, nickname))
+        else
+            self.withdrawList:SetNoItemText(zo_strformat(SI_BANK_HOME_STORAGE_EMPTY, interactName))
+        end
     end
 end
 
@@ -135,6 +194,7 @@ function ZO_GamepadBanking:InitializeLists()
     local SETUP_LIST_LOCALLY = true
     local NO_ON_SELECTED_DATA_CHANGED_CALLBACK = nil
     local withdrawList = self:AddList("withdraw", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_WITHDRAW, self.bankedBags, SLOT_TYPE_BANK_ITEM, NO_ON_SELECTED_DATA_CHANGED_CALLBACK, OnWithdrawEntryDataCreatedCallback, nil, nil, nil, nil, ItemSetupTemplate)
+
     self:SetWithdrawList(withdrawList)
     local withdrawListFragment = self:GetListFragment("withdraw")
     withdrawListFragment:RegisterCallback("StateChange", function(oldState, newState)
@@ -146,6 +206,7 @@ function ZO_GamepadBanking:InitializeLists()
     end)
 
     local depositList = self:AddList("deposit", SETUP_LIST_LOCALLY, ZO_GamepadBankInventoryList, BANKING_GAMEPAD_MODE_DEPOSIT, self.carriedBag, SLOT_TYPE_ITEM, NO_ON_SELECTED_DATA_CHANGED_CALLBACK, OnDepositEntryDataCreatedCallback, nil, nil, nil, nil, ItemSetupTemplate)
+    depositList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
     depositList:SetItemFilterFunction(function(slot) return not slot.stolen end)
     self:SetDepositList(depositList)
     local depositListFragment = self:GetListFragment("deposit")
@@ -305,7 +366,7 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
                 return zo_strformat(SI_BANK_UPGRADE_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
             end,
             visible = function()
-                return IsBankUpgradeAvailable()
+                return IsBankUpgradeAvailable() and GetBankingBag() == BAG_BANK
             end,
             enabled = function()
                 return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= GetNextBankUpgradePrice()
@@ -316,6 +377,23 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
                 else
                     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.mainKeybindStripDescriptor)
                     DisplayBankUpgrade()
+                end
+            end
+        },
+        {
+            name = GetString(SI_COLLECTIBLE_ACTION_RENAME),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible = function()
+                return IsHouseBankBag(GetBankingBag())
+            end,
+            callback = function()
+                local collectibleId = GetCollectibleForHouseBankBag(GetBankingBag())
+                if collectibleId ~= 0 then
+	                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+	                if collectibleData then
+		                local nickname = collectibleData:GetNickname()
+                        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId, name = nickname })
+                    end
                 end
             end
         },
@@ -412,13 +490,14 @@ function ZO_GamepadBanking:CreateEventTable()
         local alertString
         local amount
         local IS_GAMEPAD = true
+        local DONT_USE_SHORT_FORMAT = false
 
         if reason == CURRENCY_CHANGE_REASON_BANK_DEPOSIT then
             amount = oldCurrency - currentCurrency
-            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_DEPOSITED, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, currencyType, IS_GAMEPAD))
+            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_DEPOSITED, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, DONT_USE_SHORT_FORMAT, currencyType, IS_GAMEPAD))
         elseif reason == CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL then
             amount = currentCurrency - oldCurrency
-            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_WITHDRAWN, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, currencyType, IS_GAMEPAD)) 
+            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_WITHDRAWN, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, DONT_USE_SHORT_FORMAT, currencyType, IS_GAMEPAD)) 
         end
        
         if alertString then

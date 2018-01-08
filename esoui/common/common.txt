@@ -32,12 +32,14 @@ EsoUI\Common\Gamepad\GenericFooters\GenericFooters.xml
 
 EsoUI\Common\Gamepad\GenericDialogs\GenericDialogs.xml
 
+EsoUI\Common\ZO_EntryData\ZO_GridSquareEntryData_Shared.lua
 EsoUI\Common\Gamepad\ZO_GamepadEntryData.lua
 
 EsoUI\Common\Gamepad\ZO_GamepadGrid.lua
 
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.lua
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.xml
+EsoUI\Common\Gamepad\ZO_GamepadMultiFocusParametricScrollListScreen.lua
 
 EsoUI\Common\Gamepad\ZO_GamepadIconSelector.lua
 EsoUI\Common\Gamepad\ZO_GamepadIconSelector.xml

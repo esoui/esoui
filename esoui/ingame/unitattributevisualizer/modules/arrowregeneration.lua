@@ -34,9 +34,9 @@ function ZO_UnitVisualizer_ArrowRegenerationModule:Initialize()
     self.arrowPool = ZO_ObjectPool:New(CreateArrow, ResetArrow)
 end
 
-local function GetInitialStatValue(unitTag, stat, attribute, powerType)
-    return (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, stat, attribute, powerType) or 0)
-         + (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, stat, attribute, powerType) or 0)
+function ZO_UnitVisualizer_ArrowRegenerationModule:GetInitialStatValue(stat, attribute, powerType)
+    return self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER, stat, attribute, powerType)
+         + self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER, stat, attribute, powerType)
 end
 
 function ZO_UnitVisualizer_ArrowRegenerationModule:OnAdded(healthBarControl, magickaBarControl, staminaBarControl)
@@ -65,9 +65,9 @@ function ZO_UnitVisualizer_ArrowRegenerationModule:InitializeBarValues()
 
     self.barInfo =
     {
-        [STAT_HEALTH_REGEN_COMBAT] = healthBarControl and { value = GetInitialStatValue(self:GetUnitTag(), STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH), arrowsRemaining = 0, tickDelay = 1 } or nil,
-        [STAT_MAGICKA_REGEN_COMBAT] = magickaBarControl and { value = GetInitialStatValue(self:GetUnitTag(), STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, POWERTYPE_MAGICKA), arrowsRemaining = 0, tickDelay = 0 } or nil,
-        [STAT_STAMINA_REGEN_COMBAT] = staminaBarControl and { value = GetInitialStatValue(self:GetUnitTag(), STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, POWERTYPE_STAMINA), arrowsRemaining = 0, tickDelay = 0 } or nil,
+        [STAT_HEALTH_REGEN_COMBAT] = healthBarControl and { value = self:GetInitialStatValue(STAT_HEALTH_REGEN_COMBAT, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH), arrowsRemaining = 0, tickDelay = 1 } or nil,
+        [STAT_MAGICKA_REGEN_COMBAT] = magickaBarControl and { value = self:GetInitialStatValue(STAT_MAGICKA_REGEN_COMBAT, ATTRIBUTE_MAGICKA, POWERTYPE_MAGICKA), arrowsRemaining = 0, tickDelay = 0 } or nil,
+        [STAT_STAMINA_REGEN_COMBAT] = staminaBarControl and { value = self:GetInitialStatValue(STAT_STAMINA_REGEN_COMBAT, ATTRIBUTE_STAMINA, POWERTYPE_STAMINA), arrowsRemaining = 0, tickDelay = 0 } or nil,
     }
 end
 

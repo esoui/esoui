@@ -55,7 +55,7 @@ function ZO_MultiIconAnimation_SetAlpha(animation, alpha)
 end
 
 function ZO_MultiIconAnimation_OnStop(timeline)
-    if(timeline:GetProgress() == 1) then
+    if timeline:GetProgress() == 1 then
         timeline.object:OnAnimationComplete()
     end
 end
@@ -64,24 +64,35 @@ do
     local MULTI_ICON_TIMER
     
     local function Show(self)
-        if(self:IsHidden() and self.iconTextures and #self.iconTextures > 0) then
-            self:SetHidden(false)            
+        if self:IsHidden() and self.iconTextures and #self.iconTextures > 0 then
+            self:SetHidden(false)
         end
     end
 
     local function Hide(self)
-        self:SetHidden(true)        
+        self:SetHidden(true)
     end
 
     local function ClearIcons(self)
-        if(self.iconTextures) then
+        if self.iconTextures then
             Hide(self)
             ZO_ClearNumericallyIndexedTable(self.iconTextures)
         end
     end
 
+    local function HasIcon(self, iconTexture)
+        if self.iconTextures then
+            for _, existingIconTexture in ipairs(self.iconTextures) do
+                if existingIconTexture == iconTexture then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+
     local function AddIcon(self, iconTexture)
-        if(not self.iconTextures) then
+        if not self.iconTextures then
             self.iconTextures = {}
         end
         table.insert(self.iconTextures, iconTexture)
@@ -92,8 +103,8 @@ do
     end
 
     function ZO_MultiIcon_OnShow(self)
-        if(self.iconTextures) then
-            if(#self.iconTextures > 1) then
+        if self.iconTextures then
+            if #self.iconTextures > 1 then
                 MULTI_ICON_TIMER:AddMultiIcon(self)
             else
                 self:SetTexture(self.iconTextures[1])
@@ -103,8 +114,8 @@ do
     end
 
     function ZO_MultiIcon_OnHide(self)
-        if(self.iconTextures) then
-            if(#self.iconTextures > 1) then
+        if self.iconTextures then
+            if #self.iconTextures > 1 then
                 MULTI_ICON_TIMER:RemoveMultiIcon(self)
             end
         end
@@ -117,6 +128,7 @@ do
 
         self.ClearIcons = ClearIcons
         self.AddIcon = AddIcon
+        self.HasIcon = HasIcon
         self.Show = Show
         self.Hide = Hide
         self.SetMaxAlpha = SetMaxAlpha

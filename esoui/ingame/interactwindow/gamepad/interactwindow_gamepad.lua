@@ -257,19 +257,10 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
             itemData.name = ZO_QuestReward_GetSkillLineEarnedText(itemData.name)
         elseif itemData.rewardType == REWARD_TYPE_AUTO_ITEM and itemData.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
             itemData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
-            local name, description = GetCollectibleInfo(itemData.itemId)
-            itemData.collectibleData = 
-            {
-                id = itemData.itemId,
-                name = name,
-                nickname = GetCollectibleNickname(itemData.itemId),
-                description = description,
-                unlockState = GetCollectibleUnlockStateById(itemData.itemId),
-            }
         end
 
         local entry = ZO_GamepadEntryData:New(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, itemData.name))
-        if itemData.rewardType == REWARD_TYPE_AUTO_ITEM then
+        if itemData.rewardType == REWARD_TYPE_AUTO_ITEM and itemData.itemType == REWARD_ITEM_TYPE_ITEM then
             entry:InitializeInventoryVisualData(itemData)
         else
             entry:SetFontScaleOnSelection(false)

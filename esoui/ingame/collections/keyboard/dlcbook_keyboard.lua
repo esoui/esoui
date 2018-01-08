@@ -29,22 +29,24 @@ end
 --Interaction--
 ---------------
 
-function DLCBook_Keyboard:SetupAdditionalCollectibleData(data)
-    data.categoryIndex, data.subcategoryIndex = GetCategoryInfoFromCollectibleId(data.collectibleId)
-    data.unlockedViaSubscription = DoesESOPlusUnlockCollectible(data.collectibleId)
-    data.requiresEntitlement = DoesCollectibleRequireEntitlement(data.collectibleId)
-end
-
 do
     local function StorySort(entry1, entry2)
-        if entry1.categoryIndex ~= entry2.categoryIndex then
-            return entry1.categoryIndex < entry2.categoryIndex
-        elseif entry1.subcategoryIndex ~= entry2.subcategoryIndex then
-            return entry1.subcategoryIndex < entry2.subcategoryIndex
-        elseif entry1.sortOrder ~= entry2.sortOrder then
-            return entry1.sortOrder < entry2.sortOrder
+        local category1Data = entry1:GetCategoryData()
+        local category2Data = entry2:GetCategoryData()
+
+        if category1Data ~= category2Data then
+            local categoryIndex1, subcategoryIndex1 = category1Data:GetCategoryIndicies()
+            local categoryIndex2, subcategoryIndex2 = category2Data:GetCategoryIndicies()
+
+            if categoryIndex1 ~= categoryIndex2 then
+                return categoryIndex1 < categoryIndex2
+            else
+                return subcategoryIndex1 < subcategoryIndex2
+            end
+        elseif entry1:GetSortOrder() ~= entry2:GetSortOrder() then
+            return entry1:GetSortOrder() < entry2:GetSortOrder()
         else
-            return entry1.name < entry2.name
+            return entry1:GetName() < entry2:GetName()
         end
     end
 
@@ -59,27 +61,24 @@ function DLCBook_Keyboard:GetCategorizedLists()
     local categoryMapping = {}
 
     local lists = {}
-    local currentCategoryIndex
-    local currentSubcategoryIndex
+    local currentCategoryData
     local currentList
 
     --We presorted by category above to make this part easier
     for _, data in ipairs(collectiblesData) do
         -- Everything should be put into a subcategory, since we don't handle categories and subcategories elegantly in this scene
-        if data.categoryIndex and data.subcategoryIndex then
-            if currentCategoryIndex ~= data.categoryIndex or currentSubcategoryIndex ~= data.subcategoryIndex then
-                currentCategoryIndex = data.categoryIndex
-                currentSubcategoryIndex = data.subcategoryIndex
-                currentList = {}
-                table.insert(lists, 
-                { 
-                    name = GetCollectibleSubCategoryInfo(currentCategoryIndex, currentSubcategoryIndex),
-                    collectibles = currentList,
-                })
-            end
-
-            table.insert(currentList, data)
+        local categoryData = data:GetCategoryData()
+        if currentCategoryData ~= categoryData then
+            currentCategoryData = categoryData
+            currentList = {}
+            table.insert(lists, 
+            { 
+                name = categoryData:GetName(),
+                collectibles = currentList,
+            })
         end
+
+        table.insert(currentList, data)
     end
 
     return lists
@@ -88,29 +87,32 @@ end
 function DLCBook_Keyboard:RefreshDetails()
     ZO_SpecializedCollectionsBook_Keyboard.RefreshDetails(self)
 
-    local data = self.navigationTree:GetSelectedData()
+    local collectibleData = self.navigationTree:GetSelectedData()
 
-    if data then
-        self.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", data.unlockState))
+    if collectibleData then
+        self.unlockStatusControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
 
-        local questAcceptLabelStringId = data.active and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
-        local questName = GetCollectibleQuestPreviewInfo(data.collectibleId)
+        local isLocked = collectibleData:IsLocked()
+        local isActive = collectibleData:IsActive()
+        local isNotOwned = not collectibleData:IsOwned()
+
+        local questAcceptLabelStringId = isActive and SI_DLC_BOOK_QUEST_STATUS_ACCEPTED or SI_DLC_BOOK_QUEST_STATUS_NOT_ACCEPTED
+        local questName = collectibleData:GetQuestName()
         self.questStatusControl:SetText(zo_strformat(SI_DLC_BOOK_QUEST_STATUS, questName, GetString(questAcceptLabelStringId)))
 
-        local showsQuest = not (data.active or data.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED)
+        local showsQuest = not (isActive or isLocked)
         local questAvailableControl = self.questAvailableControl
         local questDescriptionControl = self.questDescriptionControl
-        local canUnlockOnStore = data.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED and data.purchasable
-        local canUnlockWithSubscription = not IsESOPlusSubscriber() and data.unlockedViaSubscription
-        local canUpgrade = data.unlockState ~= COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED and data.requiresEntitlement
+        local canUnlockOnStore = isNotOwned and collectibleData:IsPurchasable()
+        local canUnlockWithSubscription = not IsESOPlusSubscriber() and collectibleData:IsUnlockedViaSubscription()
+        local canUpgrade = isNotOwned and collectibleData:RequiresEntitlement()
         if showsQuest then
             questAvailableControl:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
             questAvailableControl:SetHidden(false)
             
-            local questDescription = select(2, GetCollectibleQuestPreviewInfo(data.collectibleId))
-            questDescriptionControl:SetText(questDescription)
+            questDescriptionControl:SetText(collectibleData:GetQuestDescription())
             questDescriptionControl:SetHidden(false)
-        elseif data.unlockState == COLLECTIBLE_UNLOCK_STATE_LOCKED then
+        elseif isLocked then
             if canUnlockOnStore or canUnlockWithSubscription or canUpgrade then
                 local acquireText = canUpgrade and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
                 questAvailableControl:SetText(acquireText)
@@ -124,9 +126,9 @@ function DLCBook_Keyboard:RefreshDetails()
             questDescriptionControl:SetHidden(true)
         end
 
-        local questAcceptButtonStringId = data.active and SI_DLC_BOOK_ACTION_QUEST_ACCEPTED or SI_DLC_BOOK_ACTION_ACCEPT_QUEST
+        local questAcceptButtonStringId = isActive and SI_DLC_BOOK_ACTION_QUEST_ACCEPTED or SI_DLC_BOOK_ACTION_ACCEPT_QUEST
         self.questAcceptButton:SetText(GetString(questAcceptButtonStringId))
-        self.questAcceptButton:SetEnabled(data.unlockState ~= COLLECTIBLE_UNLOCK_STATE_LOCKED and not data.active)
+        self.questAcceptButton:SetEnabled(not (isLocked or isActive))
         self.unlockPermanentlyButton:SetHidden(not canUnlockOnStore)
         self.subscribeButton:SetHidden(not canUnlockWithSubscription)
         self.chapterUpgrade:SetHidden(not canUpgrade)
@@ -134,13 +136,13 @@ function DLCBook_Keyboard:RefreshDetails()
 end
 
 function DLCBook_Keyboard:UseSelectedDLC()
-    local data = self.navigationTree:GetSelectedData()
-    UseCollectible(data.collectibleId)
+    local collectibleData = self.navigationTree:GetSelectedData()
+    UseCollectible(collectibleData:GetId())
 end
 
 function DLCBook_Keyboard:SearchSelectedDLCInStore()
-    local data = self.navigationTree:GetSelectedData()
-    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, data.name)
+    local collectibleData = self.navigationTree:GetSelectedData()
+    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
 end
 

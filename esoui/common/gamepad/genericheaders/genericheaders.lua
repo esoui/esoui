@@ -61,11 +61,13 @@ ZO_GAMEPAD_HEADER_CONTROLS =
     DATA4           = 13,
     DATA4HEADER     = 14,
     MESSAGE         = 15,
+    SUBTITLE        = 16,
 }
 
 -- Alias the control names to make the code less verbose and more readable.
 local TABBAR            = ZO_GAMEPAD_HEADER_CONTROLS.TABBAR
 local TITLE             = ZO_GAMEPAD_HEADER_CONTROLS.TITLE
+local SUBTITLE          = ZO_GAMEPAD_HEADER_CONTROLS.SUBTITLE
 local CENTER_BASELINE   = ZO_GAMEPAD_HEADER_CONTROLS.CENTER_BASELINE
 local TITLE_BASELINE    = ZO_GAMEPAD_HEADER_CONTROLS.TITLE_BASELINE
 local DIVIDER_SIMPLE    = ZO_GAMEPAD_HEADER_CONTROLS.DIVIDER_SIMPLE
@@ -251,6 +253,7 @@ function ZO_GamepadGenericHeader_Initialize(control, createTabBar, layout)
     {
         [TABBAR]            = control:GetNamedChild("TabBar"),
         [TITLE]             = control:GetNamedChild("TitleContainer"):GetNamedChild("Title"),
+        [SUBTITLE]          = control:GetNamedChild("TitleContainer"):GetNamedChild("SubTitle"),
         [CENTER_BASELINE]   = control:GetNamedChild("CenterAnchor"),
         [TITLE_BASELINE]    = control:GetNamedChild("TitleContainer"),
         [DIVIDER_SIMPLE]    = control:GetNamedChild("DividerSimple"),
@@ -276,7 +279,7 @@ function ZO_GamepadGenericHeader_Initialize(control, createTabBar, layout)
         dividerSimpleControl:SetHidden(true)
 
         control.tabBar = ZO_GamepadTabBarScrollList:New(tabBarControl, dividerPippedControl:GetNamedChild("LeftIcon"), dividerPippedControl:GetNamedChild("RightIcon"))
-        control.tabBar:AddDataTemplate("ZO_GamepadTabBarTemplate", TabBar_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
+        control.tabBar:AddDataTemplate("ZO_GamepadTabBarTemplate", TabBar_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     end
 
     ZO_GamepadGenericHeader_SetDataLayout(control, layout or DEFAULT_LAYOUT)
@@ -483,6 +486,7 @@ function ZO_GamepadGenericHeader_RefreshData(control, data)
     local controls = control.controls
 
     ProcessData(controls[TITLE], data.titleText)
+    ProcessData(controls[SUBTITLE], data.subtitleText)
     SetAlignment(controls[TITLE], data.titleTextAlignment, IsScreenHeader(control.controls) and TEXT_ALIGN_CENTER or TEXT_ALIGN_LEFT)
 
     g_refreshResults[DATA1HEADER]   = ProcessData(controls[DATA1HEADER], data.data1HeaderText)

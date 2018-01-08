@@ -1,5 +1,6 @@
 ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_WIDTH = ZO_GAMEPAD_QUADRANT_2_3_WIDTH
 ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_HEIGHT = (ZO_GAMEPAD_HOUSING_PREVIEW_IMAGE_TEXTURE_WIDTH / ZO_HOUSING_PREVIEW_IMAGE_CANVAS_WIDTH) * ZO_HOUSING_PREVIEW_IMAGE_CANVAS_HEIGHT
+ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT = 58
 
 local HousingPreviewDialog_Gamepad = ZO_HousingPreviewDialog_Shared:Subclass()
 
@@ -126,7 +127,11 @@ function HousingPreviewDialog_Gamepad:OnFilterChanged(entryData)
         purchaseOptionsFocusSwitcher:AddEntry(self.crownGemsPurchaseOptionControl.focusData)
     end
 
-    self.templateComboBoxControl:SetHeight(self.templateComboBox:GetHeight())
+    -- if we are adding additional lines of text our combo box control may not be tall enough to fit it
+    -- we we will have to adjust the height manually, but don't make it any shorter than our default height
+    local comboBoxHeight = self.templateComboBox:GetHeight()
+    local desiredComboBoxHeight = comboBoxHeight > ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT and comboBoxHeight or ZO_GAMEPAD_HOUSING_PREVIEW_COMBO_BOX_HEIGHT
+    self.templateComboBoxControl:SetHeight(desiredComboBoxHeight)
 end
 
 function HousingPreviewDialog_Gamepad:OnPurchaseSelectionChanged(selectionData)
@@ -152,32 +157,39 @@ function HousingPreviewDialog_Gamepad:BuildDialogInfo()
     self.dialogInfo.blockDialogReleaseOnPress = true
     self.dialogInfo.buttons =
     {
-        [1] =
         {
-            keybind =    "DIALOG_PRIMARY",
+            keybind = "DIALOG_PRIMARY",
             text = SI_GAMEPAD_SELECT_OPTION,
             clickSound = SOUNDS.DIALOG_ACCEPT,
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
             callback =  function(dialog)
-                            if self.purchaseOptionsFocusSwitcher:IsActive() then
-                                self:SelectFocusedPurchaseOption()
-                            else
-                                local data = self.templateContainerFocusSwitcher:GetFocusItem()
-                                if data then
-                                    data.callback()
-                                end
-                            end
-                        end,
+                if self.purchaseOptionsFocusSwitcher:IsActive() then
+                    self:SelectFocusedPurchaseOption()
+                else
+                    local data = self.templateContainerFocusSwitcher:GetFocusItem()
+                    if data then
+                        data.callback()
+                    end
+                end
+            end,
         },
-        [2] =
         {
-            keybind =    "DIALOG_NEGATIVE",
+            keybind = "DIALOG_NEGATIVE",
             text = SI_GAMEPAD_BACK_OPTION,
             clickSound = SOUNDS.DIALOG_DECLINE,
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            callback =  function(dialog)
-                            self:ReleaseDialog()
-                        end,
+            callback = function(dialog)
+                self:ReleaseDialog()
+            end,
+        },
+        {
+            keybind = "DIALOG_SECONDARY",
+            text = SI_HOUSING_EDITOR_SAFE_LOC,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            callback = function(dialog)
+                HousingEditorJumpToSafeLocation()
+            end,
         },
     }
 end

@@ -145,7 +145,7 @@ end
 local function GetGoldString(amount)
     local color = GetContrastTextColor()
     local formattedGoldIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY)
-    return zo_strformat(SI_GUILD_EVENT_GOLD_FOMART, color:Colorize(ZO_CurrencyControl_FormatCurrency(amount)), formattedGoldIcon)
+    return zo_strformat(SI_GUILD_EVENT_GOLD_FORMAT, color:Colorize(ZO_CurrencyControl_FormatCurrency(amount)), formattedGoldIcon)
 end
 
 local function IsInvalidParam(param)

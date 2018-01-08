@@ -113,6 +113,11 @@
             <Insets left="4" top="4" right="-4" bottom="-4" />
         </Backdrop>
 
+        <Backdrop name="ZO_GamepadBlueOutlineHighlight" edgeColor="58a7a7" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Insets left="4" top="4" right="-4" bottom="-4" />
+        </Backdrop>
+
         <Backdrop name="ZO_GamepadNormalOutlineThin" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
             <Insets left="2" top="2" right="-2" bottom="-2" />
@@ -132,7 +137,12 @@
             <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
             <Insets left="2" top="2" right="-2" bottom="-2" />
         </Backdrop>
-        
+
+        <Backdrop name="ZO_GamepadWhiteOutlineThick" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thick.dds" edgeFileWidth="32" edgeFileHeight="8"/>
+            <Insets left="4" top="4" right="-4" bottom="-4" />
+        </Backdrop>
+
         <Backdrop name="ZO_GamepadWhiteSelectorHighlight" centerColor="00000000" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
             <Insets left="4" top="4" right="-4" bottom="-4" />

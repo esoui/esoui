@@ -315,7 +315,7 @@ end
 
 function Compass:TryPlayingAnimationOnSinglePoi(zoneIndex, poiIndex, pinType)
     local animation, key = self.poiAnimationPool:AcquireObject()
-    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP, CT_COMPASS, pinType, zoneIndex - 1, poiIndex - 1) then
+    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP_ONLY, CT_COMPASS, pinType, zoneIndex - 1, poiIndex - 1) then
         self.poiAnimationPool:ReleaseObject(key)
     else
         animation.key = key
@@ -331,7 +331,7 @@ local IGNORE_BREADCRUMBS = true
 function Compass:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, pinType)
     local animation, key = self.areaAnimationPool:AcquireObject()
     self.currentlyAnimatingAreaPinType = pinType
-    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP, CT_COMPASS, pinType, journalIndex - 1, stepIndex - 1, conditionIndex - 1, nil, IGNORE_BREADCRUMBS) then
+    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP_ONLY, CT_COMPASS, pinType, journalIndex - 1, stepIndex - 1, conditionIndex - 1, nil, IGNORE_BREADCRUMBS) then
         self.areaAnimationPool:ReleaseObject(key)
         self.currentlyAnimatingAreaPinType = nil
         return false

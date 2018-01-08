@@ -617,7 +617,7 @@ do
             AdjustAnchors(control, parent, 0)
             self:MoveEntriesOrLines(parent.activeLines, PRESERVE_FADE)
 
-            fadeInDelayFactor = .25
+            local fadeInDelayFactor = .25
             self:UpdateFadeInDelay(control, fadeInDelayFactor)
             self:UpdateFadeOutDelayAndPlayFromOffset(control, START_AT_BEGINNING)
         end

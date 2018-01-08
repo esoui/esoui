@@ -73,6 +73,7 @@ local ENTRY_ID = 1
 local LAST_ENTRY_ID = 2
 local SCROLLABLE_ENTRY_TEMPLATE = "ZO_ScrollableComboBoxItem"
 ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT = 25
+ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y = 5
 
 ZO_ScrollableComboBox = ZO_ComboBox:Subclass()
 
@@ -175,7 +176,7 @@ function ZO_ScrollableComboBox:AddMenuItems()
     local maxHeight = self.m_height
     -- get the height of all the entries we are going to show
     -- the last entry uses a separate entry template that does not include the spacing in its height
-    local allItemsHeight = self:GetEntryTemplateHeightWithSpacing() * (numItems - 1) + ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT
+    local allItemsHeight = self:GetEntryTemplateHeightWithSpacing() * (numItems - 1) + ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT + (ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y * 2)
 
     local desiredHeight = maxHeight
     if allItemsHeight < desiredHeight then

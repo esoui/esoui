@@ -894,8 +894,9 @@ ZO_CollectionsUpdateProvider = ZO_NotificationProvider:Subclass()
 function ZO_CollectionsUpdateProvider:New(notificationManager)
     local provider = ZO_NotificationProvider.New(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
-    provider:RegisterUpdateEvent(EVENT_COLLECTIBLE_NOTIFICATION_REMOVED)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_REMOVED) end)
 
     provider:BuildNotificationList()
     
@@ -916,44 +917,29 @@ function ZO_CollectionsUpdateProvider:BuildNotificationList()
 end
 
 function ZO_CollectionsUpdateProvider:CreateCollectibleNotificationData(notificationId, collectibleId)
-    if not IsCollectiblePlaceholder(collectibleId) then
-        local collectibleName = GetCollectibleName(collectibleId)
-        local categoryIndex, subcategoryIndex = GetCategoryInfoFromCollectibleId(collectibleId)
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 
-        local categoryName = GetCollectibleCategoryInfo(categoryIndex)
-        local subcategoryName = subcategoryIndex and GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex) or nil
-
-        return {
-            notificationId = notificationId,
-            collectibleId = collectibleId,
-            collectibleName = collectibleName,
-
-            categoryIndex = categoryIndex,
-            categoryName = categoryName,
-
-            subcategoryIndex = subcategoryIndex,
-            subcategoryName = subcategoryName,
-        }
+    if not collectibleData:IsPlaceholder() then
+        return collectibleData
     end
 end
 
 function ZO_CollectionsUpdateProvider:AddCollectibleNotification(data)
-    local collectibleName = data.collectibleName
-    local categoryName = data.categoryName
-    local subcategoryName = data.subcategoryName
-    local displayedCategoryName = subcategoryName and subcategoryName or categoryName
+    local categoryData = data:GetCategoryData()
 
     --use a formatter for when there's more information?
-    local hasMoreInfo = GetCollectibleHelpIndices(data.collectibleId) ~= nil
-    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(displayedCategoryName), ZO_SELECTED_TEXT:Colorize(collectibleName))
+    local hasMoreInfo = GetCollectibleHelpIndices(data:GetId()) ~= nil
+    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(categoryData:GetName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
     self:AddNotification(message, data, hasMoreInfo)
 end
 
 function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo)
+    local categoryData = data:GetCategoryData()
+
     local newListEntry = {
         dataType = NOTIFICATIONS_COLLECTIBLE_DATA,
         notificationType = NOTIFICATION_TYPE_COLLECTIONS,
-        shortDisplayText = data.subcategoryIndex and data.subcategoryName or data.categoryName,
+        shortDisplayText = categoryData:GetName(),
 
         message = message,
         data = data,
@@ -968,43 +954,12 @@ function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo
 end
 
 function ZO_CollectionsUpdateProvider:Accept(entryData)
-    --this function should be overriden to open the right scene.  We don't clear the notification here
+    RemoveCollectibleNotification(entryData.data:GetNotificationId())
+    --this function should be overriden to open the right scene
 end
 
 function ZO_CollectionsUpdateProvider:Decline(entryData)
-    RemoveCollectibleNotification(entryData.data.notificationId)
-end
-
-function ZO_CollectionsUpdateProvider:GetNotificationIdForCollectible(collectibleId)
-    for _, entry in ipairs(self.list) do
-        if entry.data.collectibleId == collectibleId then
-            return entry.data.notificationId
-        end
-    end
-    return nil
-end
-
-function ZO_CollectionsUpdateProvider:HasAnyNotifications(optionalCategoryIndexFilter, optionalSubcategoryIndexFilter)
-    for _, entry in ipairs(self.list) do
-        if optionalCategoryIndexFilter then
-            local entryData = entry.data
-            if optionalCategoryIndexFilter == entryData.categoryIndex then
-                if optionalSubcategoryIndexFilter then
-                    --When there are subcategories, we generate a fake subcategory that covers everything not in an explicit subcategory
-                    --ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX is how we know we're asking about the general subcategory and not the entire category
-                    local isFakedGeneralSubcategoryCategory = optionalSubcategoryIndexFilter == ZO_JOURNAL_PROGRESS_FAKED_SUBCATEGORY_INDEX and entryData.subcategoryIndex == nil
-                    if optionalSubcategoryIndexFilter == entryData.subcategoryIndex or isFakedGeneralSubcategoryCategory then
-                        return true
-                    end
-                else
-                    return true
-                end
-            end
-        else
-            return true
-        end
-    end
-    return false
+    RemoveCollectibleNotification(entryData.data:GetNotificationId())
 end
 
 --LFG Update Provider
@@ -1427,14 +1382,6 @@ end
 
 function ZO_NotificationManager:GetNumNotifications()
     return self.totalNumNotifications
-end
-
-function ZO_NotificationManager:GetNumCollectionsNotifications()
-    return self.collectionsProvider:GetNumNotifications()
-end
-
-function ZO_NotificationManager:GetCollectionsProvider()
-    return self.collectionsProvider
 end
 
 function ZO_NotificationManager:SuppressNotificationsByEvent(eventId)

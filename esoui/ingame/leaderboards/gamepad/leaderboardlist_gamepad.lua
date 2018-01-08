@@ -64,6 +64,9 @@ function LeaderboardList_Gamepad:Initialize(control)
     ZO_ScrollList_AddDataType(self.list, ZO_LEADERBOARD_PLAYER_DATA, LEADERBOARD_LIST_TEMPLATE, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupLeaderboardPlayerEntry(control, data) end)
     self:SetMasterList(LEADERBOARD_LIST_MANAGER:GetMasterList())
     self:SetupSort(LEADERBOARD_LIST_ENTRY_SORT_KEYS, "rank", ZO_SORT_ORDER_UP)
+
+    local SCROLL_PADDING_HEIGHT = 100 
+    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
 end
 
 function LeaderboardList_Gamepad:InitializeHeader()

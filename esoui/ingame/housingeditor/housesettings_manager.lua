@@ -112,9 +112,8 @@ function ZO_HouseSettings_Manager:SetupCopyPermissionsCombobox(dropdown, current
     local allHouses = COLLECTIONS_BOOK_SINGLETON:GetOwnedHouses()
     for collectibleId, houseData in pairs(allHouses) do
         if houseData.houseId ~= currentHouse then
-            local name = GetCollectibleName(collectibleId)
-            local nickname = GetCollectibleNickname(collectibleId)
-            local newEntry = dropdown:CreateItemEntry(zo_strformat(SI_COLLECTIONS_HOUSING_DISPLAY_NAME_FORMAT, name, nickname), callback)
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            local newEntry = dropdown:CreateItemEntry(zo_strformat(SI_COLLECTIONS_HOUSING_DISPLAY_NAME_FORMAT, collectibleData:GetName(), collectibleData:GetNickname()), callback)
             newEntry.houseId = houseData.houseId
             newEntry.houseIndex = currentIndex
             dropdown:AddItem(newEntry)

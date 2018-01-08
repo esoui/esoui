@@ -24,6 +24,10 @@ function ZO_Particle:SetParameter(name, value)
     self.parameters[name] = value
 end
 
+function ZO_Particle:ResetParameters()
+    ZO_ClearTable(self.parameters)
+end
+
 function ZO_Particle:Start(parentControl)
     local parameters = self.parameters
     self.textureControl = PARTICLE_SYSTEM_MANAGER:AcquireTexture()
@@ -162,9 +166,34 @@ function ZO_SceneGraphParticle:Stop()
     ZO_Particle.Stop(self)
 end
 
+--Expects that x is right and y is up
 function ZO_SceneGraphParticle:SetPosition(x, y, z)
     if z == nil then
         z = 0
     end
     self.parentNode:SetControlPosition(self.textureControl, x + self.offsetX, -(y + self.offsetY), z + self.offsetZ)
+end
+
+--Control Particle
+
+ZO_ControlParticle = ZO_Particle:Subclass()
+
+function ZO_ControlParticle:New(...)
+    return ZO_Particle.New(self, ...)
+end
+
+function ZO_ControlParticle:Start(parentControl)
+    ZO_Particle.Start(self, parentControl)
+    local parameters = self.parameters
+    self.anchorPoint = parameters["AnchorPoint"] or CENTER
+    self.anchorRelativePoint = parameters["AnchorRelativePoint"] or CENTER
+    local drawLevel = parameters["DrawLevel"] or 0
+    self.textureControl:SetDrawLevel(drawLevel)
+    local drawLayer = parameters["DrawLayer"] or DL_BACKGROUND
+    self.textureControl:SetDrawLayer(drawLayer)
+end
+
+--Expects that x is right and y is down
+function ZO_ControlParticle:SetPosition(x, y, z)
+    self.textureControl:SetAnchor(self.anchorPoint, nil, self.anchorRelativePoint, x + self.offsetX, y + self.offsetY)
 end

@@ -30,8 +30,9 @@ function ZO_SmithingCreation:Initialize(control, owner)
     self:InitializeStyleList(scrollListControl, traitUnknownFont, notEnoughInInventoryFont, listSlotTemplate)
     self:InitializePatternList(scrollListControl, listSlotTemplate)
 
-    local HIDE_SPINNER_WHEN_RANK_REQUIREMENT_NOT_MET = false
-    self:InitializeMaterialList(scrollListControl, ZO_Spinner, HIDE_SPINNER_WHEN_RANK_REQUIREMENT_NOT_MET, listSlotTemplate)
+    local CHAMPION_POINT_RANGE_DOES_NOT_INHERIT_COLOR = false
+    local COLOR_MATERIAL_NAME_WHITE = true
+    self:InitializeMaterialList(scrollListControl, ZO_Spinner, listSlotTemplate, CHAMPION_POINT_RANGE_DOES_NOT_INHERIT_COLOR, COLOR_MATERIAL_NAME_WHITE)
 
     self:InitializeFilterTypeBar()
 

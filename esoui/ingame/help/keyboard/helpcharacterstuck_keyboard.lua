@@ -6,6 +6,7 @@ end
 
 function HelpCharacterStuck_Keyboard:Initialize(control)
 	HELP_CUSTOMER_SERVICE_CHARACTER_STUCK_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
+	control:RegisterForEvent(EVENT_STUCK_COMPLETE, function() SCENE_MANAGER:Hide("helpCustomerSupport") end)
     HELP_CUSTOMER_SERVICE_CHARACTER_STUCK_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
 																if newState == SCENE_SHOWING then
 																	self:UpdateCost()

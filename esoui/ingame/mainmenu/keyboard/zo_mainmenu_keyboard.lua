@@ -34,10 +34,10 @@ local CATEGORY_LAYOUT_INFO =
                                     membershipControl:SetText(GetString(SI_ESO_PLUS_TITLE))
                                     remainingCrownsControl:SetHidden(false)
                                     local currentBalance = GetPlayerCrowns()
-                                    remainingCrownsControl:SetText(ZO_CommaDelimitNumber(currentBalance))
+                                    remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentBalance)))
                                     button:RegisterForEvent(EVENT_CROWN_UPDATE, function(currencyAmount)
                                                                                                     local currentBalance = GetPlayerCrowns()
-                                                                                                    remainingCrownsControl:SetText(ZO_CommaDelimitNumber(currentBalance))
+                                                                                                    remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentBalance)))
                                                                                                  end)
                                 end,
         onResetCallback =   function(button)
@@ -126,6 +126,11 @@ local CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MainMenu/menuBar_character_down.dds",
         disabled = "EsoUI/Art/MainMenu/menuBar_character_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_character_over.dds",
+        indicators = function()
+            if HasPendingLevelUpReward() or GetAttributeUnspentPoints() > 0 then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
     },
     [MENU_CATEGORY_SKILLS] =
     {
@@ -193,7 +198,7 @@ local CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_collections_over.dds",
 
         indicators = function()
-            if COLLECTIONS_BOOK and COLLECTIONS_BOOK:HasAnyNewCollectibles() then
+            if ZO_COLLECTIBLE_DATA_MANAGER and ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles() then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,
@@ -378,6 +383,12 @@ function MainMenu_Keyboard:Initialize(control)
     MAIN_MENU_MANAGER:RegisterCallback("OnPlayerStateUpdate", function() self:UpdateCategories() end)
     MAIN_MENU_MANAGER:RegisterCallback("OnBlockingSceneActivated", OnBlockingSceneActivated)
     MAIN_MENU_MANAGER:RegisterCallback("OnBlockingSceneCleared", OnBlockingSceneCleared)
+
+    local function UpdateCategoryBar()
+        self:RefreshCategoryBar()
+    end
+    control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, UpdateCategoryBar)
+    control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, UpdateCategoryBar)
 
     self:UpdateCategories()
 end

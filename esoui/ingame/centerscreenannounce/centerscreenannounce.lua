@@ -781,6 +781,15 @@ do
     local handlers = ZO_CenterScreenAnnounce_GetHandlers()
     local queueableHandlers = ZO_CenterScreenAnnounce_GetQueueableHandlers()
 
+    local function GetCallbackFunction(eventId)
+        local data = handlers[eventId]
+        if type(data) == "function" then
+            return data
+        else
+            return data.callbackFunction
+        end
+    end
+
     function CenterScreenAnnounce:OnCenterScreenEvent(eventId, ...)
         if handlers[eventId] then
             if queueableHandlers[eventId] then
@@ -815,7 +824,7 @@ do
                 }
                 table.insert(self.waitingQueue, data)
             else
-                self:AddMessageWithParams(handlers[eventId](...))
+                self:AddMessageWithParams(GetCallbackFunction(eventId)(...))
             end
         end
     end
@@ -865,7 +874,7 @@ do
                 if timeNow > entry.nextUpdateTimeSeconds then
                     local eventId = entry.eventId
                     table.remove(self.waitingQueue, i)
-                    self:AddMessageWithParams(handlers[eventId](unpack(entry.eventData)))
+                    self:AddMessageWithParams(GetCallbackFunction(eventId)(unpack(entry.eventData)))
                 end
             end
         end
@@ -874,8 +883,16 @@ do
 
         self.platformStyle = ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
 
-        for event in pairs(handlers) do
-            control:RegisterForEvent(event, function(eventId, ...) self:OnCenterScreenEvent(eventId, ...) end)
+        local function OnCenterScreenEvent(eventId, ...)
+            self:OnCenterScreenEvent(eventId, ...)
+        end
+
+        for event, data in pairs(handlers) do
+            if type(data) == "function" then
+                control:RegisterForEvent(event, OnCenterScreenEvent)
+            else
+                data.callbackManager:RegisterCallback(data.callbackRegistration, function(...) self:OnCenterScreenEvent(event, ...) end)
+            end
         end
 
         self:InitializeMessagePools()

@@ -9,8 +9,7 @@
                 <Control name="$(parent)Highlight" hidden="true">
                     <AnchorFill />
                     <Controls>
-                        <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineHighlight" layer="OVERLAY">
-                            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thick.dds" edgeFileWidth="32" edgeFileHeight="8"/>
+                        <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineThick" layer="OVERLAY">
                             <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
                             <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
                         </Backdrop>

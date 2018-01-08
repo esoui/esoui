@@ -135,7 +135,7 @@ function ZO_ParametricScrollList_DefaultMenuEntryWithHeaderSetup(control, data, 
     end
 end
 
-function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFunction , parametricFunction, equalityFunction, headerTemplateName, optionalHeaderSetupFunction, controlPoolPrefix)
+function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFunction , parametricFunction, equalityFunction, headerTemplateName, optionalHeaderSetupFunction, controlPoolPrefix, controlPoolResetFunction)
     local entryTemplateName = templateName
     templateName = templateName.."WithHeader"
     if not self.dataTypes[templateName] then
@@ -165,6 +165,9 @@ function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFu
 
         dataTypeInfo.pool:SetCustomResetBehavior(function(control)
                 control.headerControl:SetHidden(true)
+                if controlPoolResetFunction then
+                    controlPoolResetFunction(control)
+                end
             end)
 
         dataTypeInfo.pool:SetCustomAcquireBehavior(function(control)
@@ -404,12 +407,14 @@ end
 function ZO_ParametricScrollList:MovePrevious()
     if #self.dataList > 1 then
         local newIndex = (self.targetSelectedIndex or self.selectedIndex or 2) - 1
-        while newIndex >= 1 and  not self:CanSelect(newIndex) do
+        while newIndex >= 1 and not self:CanSelect(newIndex) do
             newIndex = newIndex - 1
         end
         if newIndex >= 1 then
             self:SetSelectedIndex(newIndex)
             return true
+        elseif newIndex == 0 then
+            self:FireCallbacks("HitBeginningOfList")
         end
     end
 
@@ -596,13 +601,13 @@ end
 
 local function FindMatchingIndex(oldSelectedData, newDataList, newTemplateList, oldTemplate, equalityFunction, oldSelectedIndex)
     for i = oldSelectedIndex, #newDataList do
-        if newTemplateList[i] == oldTemplate and equalityFunction(oldSelectedData, newDataList[i]) then
+        if equalityFunction(oldSelectedData, newDataList[i]) then
             return i
         end
     end
 
     for i = oldSelectedIndex - 1, 1, -1 do
-        if newTemplateList[i] == oldTemplate and equalityFunction(oldSelectedData, newDataList[i]) then
+        if equalityFunction(oldSelectedData, newDataList[i]) then
             return i
         end
     end
@@ -935,7 +940,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
             local prevControlOffsets = centerOffset - (self.anchorOppositeSide and centerControlDimension or 0) + preCenterPadding + centerSelectedOffset * (1 - baseOffset)
             local startOfScrollContainer = GetStartOfControl(self.mode, self.control)
             for dataIndex = newSelectedDataIndex - 1, 1, -1 do
-                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED)
+                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED, reselectingDuringRebuild)
 
                 local distanceFromCenter = newSelectedDataIndex - dataIndex
                 local preSelectedOffsetAdditionalPadding, _ = self:GetSelectedAdditionalPaddingForDataIndex(dataIndex)
@@ -964,7 +969,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
             local prevControlOffsets = centerOffset + (self.anchorOppositeSide and 0 or centerControlDimension) + postCenterPadding + centerSelectedOffset * (1 - baseOffset)
             local endOfScrollContainer = GetEndOfControl(self.mode, self.control)
             for dataIndex = newSelectedDataIndex + 1, #self.dataList do
-                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED)
+                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED, reselectingDuringRebuild)
 
                 local distanceFromCenter = newSelectedDataIndex - dataIndex
                 local _, postSelectedOffsetAdditionalPadding = self:GetSelectedAdditionalPaddingForDataIndex(dataIndex)
@@ -1078,6 +1083,18 @@ end
 
 function ZO_ParametricScrollList:GetDataForDataIndex(dataIndex)
     return self.dataList[dataIndex]
+end
+
+function ZO_ParametricScrollList:GetControlFromData(data)
+    for i = 1, #self.dataList do
+        if self.dataList[i] == data then
+            return self.dataIndexToControl[i]
+        end
+    end
+end
+
+function ZO_ParametricScrollList:GetAllVisibleControls()
+    return self.visibleControls
 end
 
 function ZO_ParametricScrollList:SetHeaderPadding(defaultPadding, selectedPadding)
@@ -1196,7 +1213,7 @@ function ZO_ParametricScrollList:ReleaseControl(control)
     pool:ReleaseObject(control.key)
 end
 
-function ZO_ParametricScrollList:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, selected)
+function ZO_ParametricScrollList:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, selected, reselectingDuringRebuild)
     local control, justCreated = self:AcquireControlAtDataIndex(dataIndex)
     local data = self:GetDataForDataIndex(dataIndex)
     if justCreated or initialUpdate or (selectedDataChanged and oldSelectedData == data) then

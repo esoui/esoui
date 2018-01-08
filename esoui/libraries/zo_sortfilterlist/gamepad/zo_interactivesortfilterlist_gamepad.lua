@@ -10,127 +10,43 @@ ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT = 80
 ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES = 1
 ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE = 1
 
---------------
---Focus Base--
---------------
-
-local GamepadInteractiveSortFilterFocus = ZO_Object:Subclass()
-
-function GamepadInteractiveSortFilterFocus:New(...)
-    local focus = ZO_Object.New(self)
-    focus:Initialize(...)
-    return focus
-end
-
-function GamepadInteractiveSortFilterFocus:Initialize(manager, activateCallback, deactivateCallback)
-    self.manager = manager
-    self.activateCallback = activateCallback
-    self.deactivateCallback = deactivateCallback
-end
-
-function GamepadInteractiveSortFilterFocus:SetupSiblings(previous, next)
-    self.previousFocus = previous
-    self.nextFocus = next
-end
-
-function GamepadInteractiveSortFilterFocus:SetKeybind(keybindDescriptor)
-    self.keybindDescriptor = keybindDescriptor
-end
-
-function GamepadInteractiveSortFilterFocus:AppendKeybind(keybind)
-    self.keybindDescriptor[#self.keybindDescriptor + 1] = keybind
-end
-
-function GamepadInteractiveSortFilterFocus:UpdateKeybinds()
-    if self.keybindDescriptor then
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindDescriptor)
-    end
-end
-
-function GamepadInteractiveSortFilterFocus:Activate()
-    if not self.active then
-        self.active = true
-
-        if self.activateCallback then
-            self.activateCallback()
-        end
-
-        if self.keybindDescriptor then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindDescriptor)
-        end
-    end
-end
-
-function GamepadInteractiveSortFilterFocus:Deactivate()
-    if self.active then
-        if self.keybindDescriptor then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindDescriptor)
-        end
-
-        if self.deactivateCallback then
-            self.deactivateCallback()
-        end
-
-        self.active = false
-    end
-end
-
-function GamepadInteractiveSortFilterFocus:HandleMovePrevious()
-    local consumed = true
-    local newFocus = nil
-    if self.previousFocus then
-        self:Deactivate()
-        self.previousFocus:Activate()
-        newFocus = self.previousFocus
-    end
-    return consumed, newFocus
-end
-
-function GamepadInteractiveSortFilterFocus:HandleMoveNext()
-    local consumed = true
-    local newFocus = nil
-    if self.nextFocus then
-        self:Deactivate()
-        self.nextFocus:Activate()
-        newFocus = self.nextFocus
-    end
-    return consumed, newFocus
-end
-
 -----------------
 --Focus Headers--
 -----------------
 
-local GamepadInteractiveSortFilterFocus_Headers = GamepadInteractiveSortFilterFocus:Subclass()
+local GamepadInteractiveSortFilterFocus_Headers = ZO_GamepadMultiFocusArea_Base:Subclass()
 
 function GamepadInteractiveSortFilterFocus_Headers:HandleMoveNext()
     local consumed = true
-    local newFocus = nil
     if self.manager:HasEntries() then
-        consumed, newFocus = GamepadInteractiveSortFilterFocus.HandleMoveNext(self)
+        consumed = ZO_GamepadMultiFocusArea_Base.HandleMoveNext(self)
     end
-    return consumed, newFocus
+    return consumed
 end
 
 --------------
 --Focus List--
 --------------
 
-local GamepadInteractiveSortFilterFocus_Panel = GamepadInteractiveSortFilterFocus:Subclass()
+local GamepadInteractiveSortFilterFocus_Panel = ZO_GamepadMultiFocusArea_Base:Subclass()
+
+function GamepadInteractiveSortFilterFocus_Panel:HandleMovement(horizontalResult, verticalResult)
+    if verticalResult == MOVEMENT_CONTROLLER_MOVE_NEXT then
+        self.manager:MoveNext()
+        return true
+    elseif verticalResult == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+        self.manager:MovePrevious()
+        return true
+    end
+    return false
+end
 
 function GamepadInteractiveSortFilterFocus_Panel:HandleMovePrevious()
     local consumed = false
-    local newFocus = nil
     if ZO_ScrollList_AtTopOfList(self.manager.list) then
-        consumed, newFocus = GamepadInteractiveSortFilterFocus.HandleMovePrevious(self)
+        consumed = ZO_GamepadMultiFocusArea_Base.HandleMovePrevious(self)
     end
-    return consumed, newFocus
-end
-
-function GamepadInteractiveSortFilterFocus_Panel:HandleMoveNext()
-    local consumed = false
-    local newFocus = nil
-    return consumed, newFocus
+    return consumed
 end
 
 --------------------
@@ -138,7 +54,7 @@ end
 --------------------
 
 --Initialization--
-ZO_GamepadInteractiveSortFilterList = ZO_SortFilterList_Gamepad:Subclass()
+ZO_GamepadInteractiveSortFilterList = ZO_Object.MultiSubclass(ZO_SortFilterList_Gamepad, ZO_GamepadMultiFocusArea_Manager)
 
 function ZO_GamepadInteractiveSortFilterList:New(...)
     return ZO_SortFilterList_Gamepad.New(self, ...)
@@ -147,13 +63,14 @@ end
 function ZO_GamepadInteractiveSortFilterList:Initialize(control)
     self.container = control:GetNamedChild("Container")
     ZO_SortFilterList_Gamepad.Initialize(self, control)
+    ZO_GamepadMultiFocusArea_Manager.Initialize(self)
 
     self.searchProcessor = ZO_StringSearch:New()
     self.searchProcessor:AddProcessor(ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES, function(stringSearch, data, searchTerm, cache) return self:ProcessNames(stringSearch, data, searchTerm, cache) end)
 
-    self:SetupFoci()
     self:InitializeHeader()
     self:InitializeFilters()
+    self:SetupFoci()
     self:InitializeKeybinds()
 
     self.listFragment = ZO_FadeSceneFragment:New(control)
@@ -172,7 +89,6 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeSortFilterList(control)
     ZO_SortFilterList_Gamepad.InitializeSortFilterList(self, self.container)
-    ZO_ScrollList_EnableSelection(self.list, "ZO_GamepadInteractiveSortFilterDefaultHighlight", function(oldData, newData) self:EntrySelectionCallback(oldData, newData) end)
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareSortEntries(listEntry1, listEntry2) end
 end
 
@@ -184,7 +100,7 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     local function FiltersDeactivateCallback()
         self.filterSwitcher:Deactivate()
     end
-    self.filtersFocalArea = GamepadInteractiveSortFilterFocus:New(self, FiltersActivateCallback, FiltersDeactivateCallback)
+    self.filtersFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, FiltersActivateCallback, FiltersDeactivateCallback)
 
     local function HeaderActivateCallback()
         if self.sortHeaderGroup then
@@ -210,9 +126,9 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     end
     self.panelFocalArea = GamepadInteractiveSortFilterFocus_Panel:New(self, PanelActivateCallback, PanelDeactivateCallback)
 
-    self.filtersFocalArea:SetupSiblings(ZO_GAMEPAD_FOCUS_NO_PREVIOUS, self.headersFocalArea)
-    self.headersFocalArea:SetupSiblings(self.filtersFocalArea, self.panelFocalArea)
-    self.panelFocalArea:SetupSiblings(self.headersFocalArea, ZO_GAMEPAD_FOCUS_NO_NEXT)
+    self:AddNextFocusArea(self.filtersFocalArea)
+    self:AddNextFocusArea(self.headersFocalArea)
+    self:AddNextFocusArea(self.panelFocalArea)
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeHeader(headerData)
@@ -368,9 +284,9 @@ function ZO_GamepadInteractiveSortFilterList:InitializeKeybinds()
         end,
     }
 
-    self.filtersFocalArea:SetKeybind(filterKeybindStripDescriptor)
-    self.headersFocalArea:SetKeybind(headerKeybindStripDescriptor)
-    self.panelFocalArea:SetKeybind(self.keybindStripDescriptor)
+    self.filtersFocalArea:SetKeybindDescriptor(filterKeybindStripDescriptor)
+    self.headersFocalArea:SetKeybindDescriptor(headerKeybindStripDescriptor)
+    self.panelFocalArea:SetKeybindDescriptor(self.keybindStripDescriptor)
 end
 
 function ZO_GamepadInteractiveSortFilterList:AddUniversalKeybind(keybind)
@@ -392,16 +308,6 @@ function ZO_GamepadInteractiveSortFilterList:SetupSort(sortKeys, initialKey, ini
 end
 
 --Events/Callbacks--
-
-function ZO_GamepadInteractiveSortFilterList:EntrySelectionCallback(oldData, newData)
-    if oldData then
-        oldData.selected = false
-    end
-    
-    if newData then
-        newData.selected = true
-    end
-end
 
 function ZO_GamepadInteractiveSortFilterList:OnShowing()
     --To be overriden
@@ -441,30 +347,9 @@ function ZO_GamepadInteractiveSortFilterList:Deactivate()
     self.isActive = false
 end
 
-function ZO_GamepadInteractiveSortFilterList:IsActivated()
-    return self.isActive
-end
-
-function ZO_GamepadInteractiveSortFilterList:MovePrevious()
-    local consumed, newFocus = self.currentFocalArea:HandleMovePrevious()
-    if consumed then
-        if newFocus then
-            self.currentFocalArea = newFocus
-        end
-    else
-        ZO_SortFilterList_Gamepad.MovePrevious(self)
-    end
-end
-
-function ZO_GamepadInteractiveSortFilterList:MoveNext()
-    local consumed, newFocus = self.currentFocalArea:HandleMoveNext()
-    if consumed then
-        if newFocus then
-            self.currentFocalArea = newFocus
-        end
-    else
-        ZO_SortFilterList_Gamepad.MoveNext(self)
-    end
+-- explicitly call the correct base class function
+function ZO_GamepadInteractiveSortFilterList:UpdateDirectionalInput()
+    ZO_GamepadMultiFocusArea_Manager.UpdateDirectionalInput(self)
 end
 
 function ZO_GamepadInteractiveSortFilterList:OnFilterDeactivated()

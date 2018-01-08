@@ -41,7 +41,6 @@ end
 
 function ZO_SharedSmithingCreation:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
     if isCraftingTypeDifferent or not self.typeFilter then
-        self.selectedMaterialCountCache = {}
         self:RefreshAvailableFilters()
     end
 end
@@ -116,10 +115,20 @@ function ZO_SharedSmithingCreation:GetSelectedMaterialIndex()
     return self.materialList:GetSelectedData() and self.materialList:GetSelectedData().materialIndex
 end
 
+function ZO_SharedSmithingCreation:GetMaterialQuantity(materialData)
+    --The list memory is where we store what combination index had last been selected on each material type. If there is no memory, we use the first index.
+    local combinationIndex = self:GetLastListSelection(self:GetMaterialListMemoryKey(materialData.materialIndex)) or 1
+    if combinationIndex <= #materialData.combinations then
+        return materialData.combinations[combinationIndex].stack
+    else
+        return 0
+    end
+end
+
 function ZO_SharedSmithingCreation:GetSelectedMaterialQuantity()
     local selectedData = self.materialList:GetSelectedData()
     if selectedData then
-        return self:GetMaterialQuantity(selectedData.patternIndex, selectedData.materialIndex) or 0
+        return self:GetMaterialQuantity(selectedData)
     end
     return 0
 end
@@ -248,16 +257,6 @@ local function SetupSharedSlot(control, slotType, listContainer, list)
     end
 end
 
-local function SetHighlightColor(highlightTexture, usable)
-    if highlightTexture then
-        if usable then
-            highlightTexture:SetColor(1, 1, 1, highlightTexture:GetAlpha())
-        else
-            highlightTexture:SetColor(1, 0, 0, highlightTexture:GetAlpha())
-        end
-    end
-end
-
 local function OnHorizonalScrollListShown(list)
     local listContainer = list:GetControl():GetParent() 
     listContainer.selectedLabel:SetHidden(false)
@@ -274,7 +273,32 @@ function ZO_SharedSmithingCreation:IsInvalidMode()
     return (type == CRAFTING_TYPE_INVALID) or (self.owner.mode ~= SMITHING_MODE_CREATION)
 end
 
-function ZO_SharedSmithingCreation:InitializePatternList(scrollListControl, listSlotTemplate)
+local MEMORY_TYPE_MATERIAL = 1
+local MEMORY_TYPE_STYLE = 2
+local MEMORY_TYPE_FIRST_MATERIAL_LEVEL = 100
+
+function ZO_SharedSmithingCreation:GetListSelectionMemory()
+    if not self.smithingSelectionMemory then
+        self.smithingSelectionMemory = {}
+    end
+    return self.smithingSelectionMemory
+end
+
+function ZO_SharedSmithingCreation:GetMaterialListMemoryKey(materialIndex)
+    return MEMORY_TYPE_FIRST_MATERIAL_LEVEL + materialIndex
+end
+
+function ZO_SharedSmithingCreation:GetLastListSelection(key)
+    local memory = self:GetListSelectionMemory()
+    return memory[key]
+end
+
+function ZO_SharedSmithingCreation:SetLastListSelection(key, data)
+    local memory = self:GetListSelectionMemory()
+    memory[key] = data
+end
+
+function ZO_SharedSmithingCreation:InitializePatternList(scrollListClass, listSlotTemplate)
     local listContainer = self.control:GetNamedChild("PatternList")
     listContainer.titleLabel:SetText(GetString(SI_SMITHING_HEADER_ITEM))
 
@@ -295,9 +319,8 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListControl, list
         end
         local isStyleKnown = IsSmithingStyleKnown(itemStyleId, patternIndex)
         local meetsTraitRequirement = data.numTraitsRequired <= data.numTraitsKnown 
-        local usable = meetsTraitRequirement and isStyleKnown
 
-        ZO_ItemSlot_SetupSlot(control, 1, icon, usable, not enabled)
+        ZO_ItemSlot_SetupSlot(control, 1, icon, meetsTraitRequirement, not enabled)
 
         if selected then
             if data.numTraitsRequired > 0 then
@@ -306,9 +329,14 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListControl, list
                 listContainer.selectedLabel:SetText(zo_strformat(SI_SMITHING_SELECTED_PATTERN_NO_TRAITS, data.patternName))
             end
 
-            SetHighlightColor(highlightTexture, usable)
+            self:SetLabelHidden(listContainer.extraInfoLabel, true)
+            if not meetsTraitRequirement then
+                self:SetLabelHidden(listContainer.extraInfoLabel, false)
+                listContainer.extraInfoLabel:SetText(zo_strformat(SI_SMITHING_SET_NOT_ENOUGH_TRAITS_ERROR, data.numTraitsRequired - data.numTraitsKnown))
+                listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            end
 
-            self.isPatternUsable = usable and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
+            self.isPatternUsable = meetsTraitRequirement and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
         end
     end
 
@@ -320,13 +348,11 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListControl, list
         self:OnHorizonalScrollListCleared(...)
     end
 
-    self.patternList = scrollListControl:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnHorizonalScrollListShown, OnHorizonalScrollListCleared)
+    self.patternList = scrollListClass:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnHorizonalScrollListShown, OnHorizonalScrollListCleared)
 	self.patternList:SetOnSelectedDataChangedCallback(function(selectedData, oldData, selectedDuringRebuild)
         self:OnSelectedPatternChanged(selectedData, selectedDuringRebuild)
     end)
 
-    local highlightTexture = listContainer.highlightTexture
-    self.patternList:SetSelectionHighlightInfo(highlightTexture, highlightTexture and highlightTexture.pulseAnimation)
     self.patternList:SetScaleExtents(MIN_SCALE, MAX_SCALE)
 
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.patternList)
@@ -345,40 +371,131 @@ end
 
 function ZO_SharedSmithingCreation:GetMaterialInformation(data)
 	local stackCount = GetCurrentSmithingMaterialItemCount(data.patternIndex, data.materialIndex)
-	local currentSelectedQuantity = self:GetMaterialQuantity(data.patternIndex, data.materialIndex)
+	local currentSelectedQuantity = self:GetMaterialQuantity(data)
 	local currentRank = GetCurrentCraftingLevel()
 	local meetsRankRequirement = currentRank >= data.rankRequirement
 	local hasAboveMin = stackCount >= data.min
-	local hasEnoughInInventory = currentSelectedQuantity <= stackCount and self.materialQuantitySpinner:GetValue() <= stackCount
+	local hasEnoughInInventory = stackCount >= currentSelectedQuantity
 	local usable = meetsRankRequirement and hasAboveMin and hasEnoughInInventory
 
 	return stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable
 end
 
-function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListControl, spinnerControl, hideSpinnerWhenRankRequirementNotMet, listSlotTemplate)
+function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinnerClass, listSlotTemplate, championPointRangeIconsInheritColor, colorMaterialNameWhite)
     local listContainer = self.control:GetNamedChild("MaterialList")
-    local highlightTexture = listContainer.highlightTexture
-    listContainer.titleLabel:SetText(GetString(SI_SMITHING_HEADER_MATERIAL))
+    
+    --Quantity Spinner
+    -------------------------
 
-    self.materialQuantitySpinner = spinnerControl:New(listContainer:GetNamedChild("Spinner"))
-    self.materialQuantitySpinner:RegisterCallback("OnValueChanged", function(value)
-        if not self.performingFullRefresh then
-            self:AdjustCurrentMaterialQuantityForAllPatterns(value)
+    local spinnerControl = listContainer:GetNamedChild("Spinner")
+
+    do
+        --Create two worst case pieces of text and then size the spinner to fit the worst of them
+        local spinnerDisplayLabel = spinnerControl:GetNamedChild("Display")
+        local maxLevelText = zo_strformat(SI_SMITHING_CREATED_LEVEL, 100)
+        local spinnerLevelTextWidthPixels = spinnerDisplayLabel:GetStringWidth(maxLevelText)
+
+        --GetStringWidth doesn't handle markup so we compute the texture markup size here and pass in empty string to the format
+        local maxCPText = zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, "",  1000)
+        local CHAMPION_TEXTURE_WIDTH_PERCENT = 100
+        local championTextureWidthPixels = spinnerDisplayLabel:GetFontHeight() * (CHAMPION_TEXTURE_WIDTH_PERCENT / 100) * GetUIGlobalScale()
+        local spinnerCPTextWidthPixels = spinnerDisplayLabel:GetStringWidth(maxCPText)
+        spinnerCPTextWidthPixels = spinnerCPTextWidthPixels + championTextureWidthPixels
+
+        local spinnerValueTextWidthPixels = zo_max(spinnerLevelTextWidthPixels, spinnerCPTextWidthPixels)
+        local spinnerValueTextWidthUI = spinnerValueTextWidthPixels / GetUIGlobalScale()
+        local spinnerIncreaseButton = spinnerControl:GetNamedChild("Increase")
+        local spinnerIncreaseButtonWidth = spinnerIncreaseButton:GetWidth()
+        local PADDING_WIDTH_UI = 10
+        local spinnerWidthUI = spinnerValueTextWidthUI + spinnerIncreaseButtonWidth * 2 + PADDING_WIDTH_UI * 2
+        spinnerControl:SetWidth(spinnerWidthUI)
+    end
+
+    self.materialQuantitySpinner = spinnerClass:New(spinnerControl)
+    self.materialQuantitySpinner:SetValue(1)
+
+    local function MaterialQuantitySpinner_OnValueChanged(value)
+        local materialData = self.materialList:GetSelectedData()
+
+		--Store the last selected combination index (level) for this material
+        self:SetLastListSelection(self:GetMaterialListMemoryKey(materialData.materialIndex), value)
+
+		local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(materialData)
+        local combination = materialData.combinations[value]
+
+        if not meetsRankRequirement then
+            listContainer.extraInfoLabel:SetText(zo_strformat(GetRankTooLowString(), materialData.rankRequirement))
+            listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        else
+            local text
+            if combination.stack > 1 then
+                if usable then
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_PLURAL, ZO_WHITE:Colorize(combination.stack), materialData.name)
+                else
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_PLURAL, combination.stack, materialData.name)
+                end
+            else
+                if usable then
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, ZO_WHITE:Colorize(combination.stack), materialData.name)
+                else
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, combination.stack, materialData.name)
+                end
+            end
+            listContainer.extraInfoLabel:SetText(text)
+
+            if usable then
+                listContainer.extraInfoLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+            else
+                listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            end
         end
 
-		local data = self.materialList:GetSelectedData()
-		local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
-
 		self.isMaterialUsable = usable and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
-		ZO_ItemSlot_SetupSlot(self.selectedMaterialControl, stackCount, data.icon, usable)
 
 		self:UpdateTooltip()
 
+		--Needs to be refreshed when the material changes and also when the selected material's combination (level) changes
+        local stackCountLabel = self.selectedMaterialControl:GetNamedChild("StackCount")
+        if usable then
+            stackCountLabel:SetColor(ZO_WHITE:UnpackRGBA())
+        else
+            stackCountLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        end
+
 		self.owner:OnSelectedPatternChanged()
 		KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+
+    self.materialQuantitySpinner:RegisterCallback("OnValueChanged", MaterialQuantitySpinner_OnValueChanged)
+
+    self.materialQuantitySpinner:SetValueFormatFunction(function(value)
+        if self.materialList then
+            local data = self.materialList:GetSelectedData()
+            if data then
+		        local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
+                local combination = data.combinations[value]
+                if combination.isChampionPoint then
+                    if meetsRankRequirement then
+                        return zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, GetChampionIconMarkupString("100%"), ZO_WHITE:Colorize(combination.createsItemOfLevel))
+                    else
+                        return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CREATED_CHAMPION_POINTS, GetChampionIconMarkupStringInheritColor("100%"), combination.createsItemOfLevel))
+                    end
+                else
+                    if meetsRankRequirement then
+                        return zo_strformat(SI_SMITHING_CREATED_LEVEL, ZO_WHITE:Colorize(combination.createsItemOfLevel))
+                    else
+                        return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CREATED_LEVEL, combination.createsItemOfLevel))
+                    end
+                end
+            end
+        end
     end)
 
     ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.materialQuantitySpinner)
+
+    --Material List
+
+    listContainer.titleLabel:SetText(GetString(SI_SMITHING_HEADER_MATERIAL))
 
     local function SetupFunction(control, data, selected, selectedDuringRebuild, enabled)
         if self:IsInvalidMode() then return end
@@ -388,47 +505,44 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListControl, spi
         control.patternIndex = data.patternIndex
         control.materialIndex = data.materialIndex
 
-        ZO_ItemSlot_SetAlwaysShowStackCount(control, true, data.min)
+   		local stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
+        ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, meetsRankRequirement, not enabled)
+        ZO_ItemSlot_SetAlwaysShowStackCount(control, true)
 
-		local stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
-
-        ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, usable, not enabled)
+		--Needs to be refreshed when the material changes and also when the selected material's combination (level) changes
+        local stackCountLabel = control:GetNamedChild("StackCount")
+        if usable then
+            stackCountLabel:SetColor(ZO_WHITE:UnpackRGBA())
+        else
+            stackCountLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        end
 
         if selected then
 			self.selectedMaterialControl = control
-
-            SetHighlightColor(highlightTexture, usable)
-
-            local function ShowHideSpinnerIfNeeded(hidden)
-                if hideSpinnerWhenRankRequirementNotMet then
-                    self.materialQuantitySpinner:GetControl():SetHidden(hidden)
-                end
-            end
-
-            if usable then
-                self:SetLabelHidden(listContainer.extraInfoLabel, true)
-                ShowHideSpinnerIfNeeded(false)
-            else
-                if not meetsRankRequirement then
-                    self:SetLabelHidden(listContainer.extraInfoLabel, false)
-                    listContainer.extraInfoLabel:SetText(zo_strformat(GetRankTooLowString(), data.rankRequirement))
-                    ShowHideSpinnerIfNeeded(true)
-                else
-                    self:SetLabelHidden(listContainer.extraInfoLabel, true)
-                    ShowHideSpinnerIfNeeded(false)
-                end
-            end
+            self:SetLastListSelection(MEMORY_TYPE_MATERIAL, data)
 
             self.isMaterialUsable = usable and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
             
-            self.materialQuantitySpinner:SetValidValuesFunction(function(startingPoint, step)
-                return GetSmithingPatternNextMaterialQuantity(data.patternIndex, data.materialIndex, startingPoint, step)
-            end)
-            self.materialQuantitySpinner:SetMinMax(data.min, data.max)
-            self.materialQuantitySpinner:SetSoftMax(stackCount)
-            self.materialQuantitySpinner:SetValue(currentSelectedQuantity)
+            self.materialQuantitySpinner:SetMinMax(1, #data.combinations)
 
-            listContainer.selectedLabel:SetText(self:GetPlatformFormattedTextString(SI_SMITHING_MATERIAL_QUANTITY, data.name, data.min, data.max))
+            local selectedLabelText
+            local materialNameText = colorMaterialNameWhite and ZO_WHITE:Colorize(data.name) or data.name
+            if data.isChampionPoint then
+                local championPointIcon = championPointRangeIconsInheritColor and GetChampionIconMarkupStringInheritColor("100%") or GetChampionIconMarkupString("100%")
+                selectedLabelText = zo_strformat(SI_SMITHING_MATERIAL_CHAMPION_POINT_RANGE, materialNameText, championPointIcon, data.minCreatesItemOfLevel, championPointIcon, data.maxCreatesItemOfLevel)
+            else
+                selectedLabelText = zo_strformat(SI_SMITHING_MATERIAL_LEVEL_RANGE, materialNameText, data.minCreatesItemOfLevel, data.maxCreatesItemOfLevel)
+            end
+            listContainer.selectedLabel:SetText(selectedLabelText)
+
+            self:SetLabelHidden(listContainer.extraInfoLabel, false)
+
+            local selectedLastCombinationIndex = self:GetLastListSelection(self:GetMaterialListMemoryKey(data.materialIndex)) or 1
+            self.materialQuantitySpinner:SetValue(selectedLastCombinationIndex)
+
+            --The spinner value changed logic and value format function both depend on the selected material as well. So we have to cause them to update whenever the selected material changes.
+            MaterialQuantitySpinner_OnValueChanged(self.materialQuantitySpinner:GetValue())
+            self.materialQuantitySpinner:UpdateDisplay()
 
             if not selectedDuringRebuild then
                 self:RefreshVisiblePatterns()
@@ -451,18 +565,15 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListControl, spi
         self.materialQuantitySpinner:GetControl():SetHidden(true)
     end
 
-    self.materialList = scrollListControl:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnMaterialHorizonalScrollListShown, OnMaterialHorizonalScrollListCleared)
+    self.materialList = scrollListClass:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnMaterialHorizonalScrollListShown, OnMaterialHorizonalScrollListCleared)
     self.materialList:SetNoItemText(GetString(SI_SMITHING_NO_MATERIALS_FOUND))
-
-    self.materialList:SetSelectionHighlightInfo(highlightTexture, highlightTexture and highlightTexture.pulseAnimation)
     self.materialList:SetScaleExtents(MIN_SCALE, MAX_SCALE)
 
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.materialList)
 end
 
-function ZO_SharedSmithingCreation:InitializeStyleList(scrollListControl, styleUnknownFont, notEnoughInInventoryFont, listSlotTemplate)
+function ZO_SharedSmithingCreation:InitializeStyleList(scrollListClass, styleUnknownFont, notEnoughInInventoryFont, listSlotTemplate)
     local listContainer = self.control:GetNamedChild("StyleList")
-    local highlightTexture = listContainer.highlightTexture
     listContainer.titleLabel:SetText(GetString(SI_SMITHING_HEADER_STYLE))
 
     local function SetupFunction(control, data, selected, selectedDuringRebuild, enabled)
@@ -477,20 +588,36 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListControl, styleU
         local hasEnoughInInventory = stackCount > 0
         local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
         local isStyleKnown = IsSmithingStyleKnown(data.itemStyleId, self:GetSelectedPatternIndex())
-        local usable = ((stackCount > 0 and not usesUniversalStyleItem) or (usesUniversalStyleItem and universalStyleItemCount > 0)) and isStyleKnown
-        ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, usable, not enabled)
+        ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, isStyleKnown, not enabled)
         local stackCountLabel = GetControl(control, "StackCount")
         stackCountLabel:SetHidden(usesUniversalStyleItem)
 
         if selected then
-            SetHighlightColor(highlightTexture, usable)
+            local hasStyleMaterial = (stackCount > 0 and not usesUniversalStyleItem) or (usesUniversalStyleItem and universalStyleItemCount > 0)
+            local usable = hasStyleMaterial and isStyleKnown
 
-            self:SetLabelHidden(listContainer.extraInfoLabel, true)
-            if not usable then
-                if not isStyleKnown then
-                    self:SetLabelHidden(listContainer.extraInfoLabel, false)
-                    listContainer.extraInfoLabel:SetText(GetString(SI_SMITHING_UNKNOWN_STYLE))
+            local extraInfoLabel = listContainer.extraInfoLabel
+            self:SetLabelHidden(extraInfoLabel, false)
+
+            if not isStyleKnown then
+                extraInfoLabel:SetText(GetString(SI_SMITHING_UNKNOWN_STYLE))
+                extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+            else
+                local text
+                local name
+                if usesUniversalStyleItem then
+                    name = GetString(SI_SMITHING_UNIVERSAL_STYLE_ITEM_NAME)
+                else
+                    name = data.name
                 end
+                if usable then
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, ZO_WHITE:Colorize("1"), name)
+                    extraInfoLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+                else
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, "1", name)
+                    extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                end
+                extraInfoLabel:SetText(text)
             end
 
             local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
@@ -510,6 +637,8 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListControl, styleU
             
             listContainer.selectedLabel:SetText(data.localizedName)
 
+            self:SetLastListSelection(MEMORY_TYPE_STYLE, data.itemStyleId)
+
             if not selectedDuringRebuild then
                 self:RefreshVisiblePatterns()
             end
@@ -524,10 +653,8 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListControl, styleU
         self:OnHorizonalScrollListCleared(...)
     end
 
-    self.styleList = scrollListControl:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnHorizonalScrollListShown, OnHorizonalScrollListCleared)
+    self.styleList = scrollListClass:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnHorizonalScrollListShown, OnHorizonalScrollListCleared)
     self.styleList:SetNoItemText(GetString(SI_SMITHING_NO_STYLE_FOUND))
-
-    self.styleList:SetSelectionHighlightInfo(highlightTexture, highlightTexture and highlightTexture.pulseAnimation)
     self.styleList:SetScaleExtents(MIN_SCALE, MAX_SCALE)
 
     self.styleList:SetOnSelectedDataChangedCallback(function(selectedData, oldData, selectedDuringRebuild)
@@ -543,11 +670,11 @@ function ZO_SharedSmithingCreation:OnStyleChanged(selectedData)
     -- no additional functionality needed at the shared level
 end
 
-function ZO_SharedSmithingCreation:InitializeTraitList(scrollListControl, traitUnknownFont, notEnoughInInventoryFont, listSlotTemplate)
+function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnknownFont, notEnoughInInventoryFont, listSlotTemplate)
     local listContainer = self.control:GetNamedChild("TraitList")
-    local highlightTexture = listContainer.highlightTexture
     listContainer.titleLabel:SetText(GetString(SI_SMITHING_HEADER_TRAIT))
-
+    listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+    
     local function SetupFunction(control, data, selected, selectedDuringRebuild, enabled)
         if self:IsInvalidMode() then return end
 
@@ -563,23 +690,36 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListControl, traitU
             local patternIndex, materialIndex, materialQty, itemStyleId = self:GetAllNonTraitCraftingParameters()
             isTraitKnown = IsSmithingTraitKnownForResult(patternIndex, materialIndex, materialQty, itemStyleId, data.traitIndex)
         end
-        local usable = data.traitType == ITEM_TRAIT_TYPE_NONE or (hasEnoughInInventory and isTraitKnown)
-
-        ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, usable, not enabled)
+        ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, isTraitKnown, not enabled)
 
         if selected then
-            SetHighlightColor(highlightTexture, usable)
-            
-            self:SetLabelHidden(listContainer.extraInfoLabel, usable or data.traitType == ITEM_TRAIT_TYPE_NONE)
+            local usable = data.traitType == ITEM_TRAIT_TYPE_NONE or (hasEnoughInInventory and isTraitKnown)
+            local extraInfoLabel = listContainer.extraInfoLabel
+
+            if data.traitType == ITEM_TRAIT_TYPE_NONE then
+                self:SetLabelHidden(extraInfoLabel, true)
+            else
+                self:SetLabelHidden(extraInfoLabel, false)
+                if not isTraitKnown then
+                    extraInfoLabel:SetText(GetString(SI_SMITHING_TRAIT_MUST_BE_RESEARCHED))
+                    extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                else
+                    local text
+                    if usable then
+                        text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, ZO_WHITE:Colorize("1"), data.name)
+                        extraInfoLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+                    else
+                        text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, "1", data.name)
+                        extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                    end
+                    extraInfoLabel:SetText(text)
+                end
+            end
+
             if usable then
                 self.isTraitUsable = USABILITY_TYPE_USABLE
             else
                 self.isTraitUsable = USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
-                if not isTraitKnown then
-                    listContainer.extraInfoLabel:SetText(GetString(SI_SMITHING_TRAIT_MUST_BE_RESEARCHED))
-                elseif not hasEnoughInInventory then
-                    self:SetLabelHidden(listContainer.extraInfoLabel, true)
-                end
             end
 
             if not data.localizedName then
@@ -606,9 +746,7 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListControl, traitU
         self:OnHorizonalScrollListCleared(...)
     end
 
-    self.traitList = scrollListControl:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnHorizonalScrollListShown, OnHorizonalScrollListCleared)
-
-    self.traitList:SetSelectionHighlightInfo(highlightTexture, highlightTexture and highlightTexture.pulseAnimation)
+    self.traitList = scrollListClass:New(listContainer.listControl, listSlotTemplate, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction, OnHorizonalScrollListShown, OnHorizonalScrollListCleared)
     self.traitList:SetScaleExtents(MIN_SCALE, MAX_SCALE)
 
     self.traitList:SetOnSelectedDataChangedCallback(function(selectedData, oldData, selectedDuringRebuild)
@@ -716,19 +854,44 @@ function ZO_SharedSmithingCreation:GenerateMaterialDataForPattern(patternIndex)
     local instanceFilter = {}
     local _, _, _, numMaterials = GetSmithingPatternInfo(patternIndex)
     for materialIndex = 1, numMaterials do
-        local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemStyle, quality, itemInstanceId, rankRequirement = GetSmithingPatternMaterialItemInfo(patternIndex, materialIndex)
+        local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemStyle, quality, itemInstanceId, rankRequirement, createsItemOfLevel, isChampionPoint = GetSmithingPatternMaterialItemInfo(patternIndex, materialIndex)
         if instanceFilter[itemInstanceId] then
             local existingData = instanceFilter[itemInstanceId]
             existingData.min = zo_min(existingData.min, stack)
-            if not self:GetMaterialQuantity(patternIndex, materialIndex) then
-                self:SetMaterialQuantity(patternIndex, materialIndex, existingData.min)
-            end
+            existingData.minCreatesItemOfLevel = zo_min(existingData.minCreatesItemOfLevel, createsItemOfLevel)
             existingData.max = zo_max(existingData.max, stack)
+            existingData.maxCreatesItemOfLevel = zo_max(existingData.maxCreatesItemOfLevel, createsItemOfLevel)
+            table.insert(existingData.combinations,
+            {
+                stack = stack,
+                createsItemOfLevel = createsItemOfLevel,
+                isChampionPoint = isChampionPoint, 
+            })
         else
-            local data = { craftingType = GetCraftingInteractionType(), patternIndex = patternIndex, materialIndex = materialIndex, name = name, icon = icon, quality = quality, rankRequirement = rankRequirement, min = stack, max = stack }
-            if not self:GetMaterialQuantity(patternIndex, materialIndex) then
-                self:SetMaterialQuantity(patternIndex, materialIndex, stack)
-            end
+            --This data format assumes that a single material does not span from normal levels into champion ranks
+            local data = 
+            {
+                craftingType = GetCraftingInteractionType(),
+                patternIndex = patternIndex,
+                materialIndex = materialIndex,
+                name = name,
+                icon = icon,
+                quality = quality,
+                rankRequirement = rankRequirement,
+                min = stack,
+                max = stack,
+                minCreatesItemOfLevel = createsItemOfLevel,
+                maxCreatesItemOfLevel = createsItemOfLevel,
+                isChampionPoint = isChampionPoint,
+                combinations =
+                {
+                    {
+                        stack = stack,
+                        createsItemOfLevel = createsItemOfLevel,
+                        isChampionPoint = isChampionPoint, 
+                    }
+                }
+            }
             instanceFilter[itemInstanceId] = data
             instanceFilter[#instanceFilter + 1] = data
         end
@@ -745,18 +908,11 @@ function ZO_SharedSmithingCreation:GenerateMaterialDataForPattern(patternIndex)
 end
 
 function ZO_SharedSmithingCreation:RefreshMaterialList(patternData)
-    local oldSelectedData = self.materialList:GetSelectedData()
-    local oldArmorType = nil
-    local newArmorType = nil
-
-    if (oldSelectedData) then
-        oldArmorType = GetSmithingPatternArmorType(oldSelectedData.patternIndex)
-    end
+    local oldSelectedMaterial = self:GetLastListSelection(MEMORY_TYPE_MATERIAL)
 
     self.materialList:Clear()
 
     if patternData then
-        newArmorType = GetSmithingPatternArmorType(patternData.patternIndex)
         patternData.materialData = patternData.materialData or self:GenerateMaterialDataForPattern(patternData.patternIndex)
 
         for itemInstanceId, data in pairs(patternData.materialData) do
@@ -766,12 +922,19 @@ function ZO_SharedSmithingCreation:RefreshMaterialList(patternData)
 
     self.materialList:Commit()
 
-    if (oldArmorType and newArmorType) and (oldArmorType ~= newArmorType) then
-        local index = self.materialList:FindIndexFromData(oldSelectedData, function(oldData, newData) return (oldData.rankRequirement == newData.rankRequirement) end)
-        if (index) then
-            self.materialList:SetSelectedIndex(index)
+    local initialListIndex = 0
+    if oldSelectedMaterial then
+        local index = self.materialList:FindIndexFromData(oldSelectedMaterial, function(oldData, newData)
+            return oldData.isChampionPoint == newData.isChampionPoint and oldData.minCreatesItemOfLevel == newData.minCreatesItemOfLevel
+        end)
+
+        if index then
+            initialListIndex = index
         end
     end
+    local ALLOW_EVEN_IF_DISABLED = true
+    local SKIP_ANIMATION = true
+    self.materialList:SetSelectedIndex(initialListIndex, ALLOW_EVEN_IF_DISABLED, SKIP_ANIMATION)
 end
 
 function ZO_SharedSmithingCreation:DoesStylePassFilter(itemStyleId, alwaysHideIfLocked)
@@ -811,6 +974,8 @@ end
 local STYLE_LIST_USI_BG_STANDARD_ALPHA = 0.35
 local STYLE_LIST_USI_BG_LOW_ALPHA = 0.21
 function ZO_SharedSmithingCreation:RefreshStyleList()
+    local lastItemStyleId = self:GetLastListSelection(MEMORY_TYPE_STYLE)
+
     self.styleList:Clear()
 
     local craftingInteractionType = GetCraftingInteractionType()
@@ -828,6 +993,20 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
     end
 
     self.styleList:Commit()
+    
+    local initialListIndex = 0
+    if lastItemStyleId then
+        local index = self.styleList:FindIndexFromData(lastItemStyleId, function(oldStyleItemId, newStyleData)
+            return oldStyleItemId == newStyleData.itemStyleId
+        end)
+
+        if index then
+            initialListIndex = index
+        end
+    end
+    local ALLOW_EVEN_IF_DISABLED = true
+    local SKIP_ANIMATION = true
+    self.styleList:SetSelectedIndex(initialListIndex, ALLOW_EVEN_IF_DISABLED, SKIP_ANIMATION)
 
     local styleListControl = self.control:GetNamedChild("StyleList")
     if self:GetIsUsingUniversalStyleItem() then
@@ -906,60 +1085,6 @@ function ZO_SharedSmithingCreation:UpdateTooltipInternal()
     else
         self.resultTooltip:SetHidden(true)
     end
-end
-
-function ZO_SharedSmithingCreation:AdjustCurrentMaterialQuantityForAllPatterns(updatedQuantity)
-    local selectedData = self.materialList:GetSelectedData()
-    if selectedData then
-        local selectedDataMaterialIndex = selectedData.materialIndex -- keep track of the material to update
-        local patternCount = #self.patternList.list
-        for patternListIndex = 1, patternCount do
-            local minQuantity = updatedQuantity
-            local maxQuantity = updatedQuantity
-
-            -- before updating the material quantity, do a safety check against the min and max for the material
-            local patternData = self.patternList.list[patternListIndex]
-            local patternIndex = patternData.patternIndex
-            local currentPatternMaterialData = patternData.materialData or self:GenerateMaterialDataForPattern(patternIndex)
-            if currentPatternMaterialData then
-                local materialCount = #currentPatternMaterialData
-                for materialListIndex = 1, materialCount do
-                    local currentMaterialData = currentPatternMaterialData[materialListIndex]
-                    if currentMaterialData.materialIndex == selectedDataMaterialIndex then
-                        minQuantity = currentMaterialData.min
-                        maxQuantity = currentMaterialData.max
-                        break
-                    end
-                end
-            end
-
-            -- safe update based on material min and max
-            if self:GetMaterialQuantity(patternIndex, selectedDataMaterialIndex) and updatedQuantity >= minQuantity and updatedQuantity <= maxQuantity then
-                --then get a valid quantity for this pattern and material closest to the updatedQuantity
-                local validQuantity = GetSmithingPatternNextMaterialQuantity(patternIndex, selectedDataMaterialIndex, updatedQuantity, 0)
-                self:SetMaterialQuantity(patternIndex, selectedDataMaterialIndex, validQuantity)
-            end
-        end
-    end
-end
-
-function ZO_SharedSmithingCreation:SetMaterialQuantity(patternIndex, materialIndex, quantity)
-    if not self.selectedMaterialCountCache then 
-		self.selectedMaterialCountCache = {}
-	end
-	
-	if not self.selectedMaterialCountCache[patternIndex] then
-        self.selectedMaterialCountCache[patternIndex] = {}
-    end
-
-    self.selectedMaterialCountCache[patternIndex][materialIndex] = quantity
-end
-
-function ZO_SharedSmithingCreation:GetMaterialQuantity(patternIndex, materialIndex)
-    if self.selectedMaterialCountCache and self.selectedMaterialCountCache[patternIndex] then
-        return self.selectedMaterialCountCache[patternIndex][materialIndex]
-    end
-	return nil
 end
 
 function ZO_SharedSmithingCreation:AreSelectionsValid()

@@ -164,7 +164,7 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 
         local function ManifestOutEventCountCallback()
             local packsOnPage = self.packChoosing:GetNumPacksToDisplayOnPage(self.packChoosing:GetCurrentPage())
-            -- If there are no packs, expect the manifest to tell us it's done immediately
+            -- If there are no packs, expect the manifest to tell us it's done immediately. This is for transitioning from 0 crates (the transparent current season one) to gemify.
             return packsOnPage > 0 and packsOnPage or 1
         end
 

@@ -34,14 +34,13 @@ do
                     local mapIndex = GetMapIndexByZoneId(foundInZoneId)
                     if mapIndex then
                         local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                        local houseName = GetCollectibleName(houseCollectibleId)
-                        local foundInZoneName = GetZoneNameById(foundInZoneId)
+                        local houseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(houseCollectibleId)
                         local houseData =
                         {
                             houseId = houseId,
-                            houseName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, houseName),
-                            foundInZoneName = ZO_CachedStrFormat(SI_ZONE_NAME, foundInZoneName),
-                            unlocked = IsCollectibleUnlocked(houseCollectibleId),
+                            houseName = houseCollectibleData:GetFormattedName(),
+                            foundInZoneName = houseCollectibleData:GetFormattedHouseLocation(),
+                            unlocked = houseCollectibleData:IsUnlocked(),
                             mapIndex = mapIndex,
                             nodeIndex = nodeIndex,
                         }

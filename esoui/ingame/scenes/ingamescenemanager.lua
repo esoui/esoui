@@ -3,39 +3,41 @@ local function IsSafeForSystemToCaptureMouseCursor()
 end
 
 TOPLEVEL_LOCKS_UI_MODE = true
-ZO_REMOTE_SCENE_CHANGE_ORIGIN = REMOTE_SCENE_STATE_CHANGE_ORIGIN_INGAME
+ZO_REMOTE_SCENE_CHANGE_ORIGIN = SCENE_MANAGER_MESSAGE_ORIGIN_INGAME
 
-local ZO_IngameSceneManager = ZO_SceneManager:Subclass()
+local ZO_IngameSceneManager = ZO_SceneManager_Leader:Subclass()
 
 function ZO_IngameSceneManager:New()
-    local manager = ZO_SceneManager.New(self)
+    return  ZO_SceneManager_Leader.New(self)
+end
 
-    manager.topLevelWindows = {}
-    manager.restoresBaseSceneOnGameMenuToggle = {}
-    manager.numTopLevelShown = 0
-    manager.initialized = false
-    manager.hudSceneName = "hud"
-    manager.hudUISceneName = "hudui"
-    manager.hudUISceneHidesAutomatically = true
-    manager.exitUIModeOnChatFocusLost = false
+function ZO_IngameSceneManager:Initialize(...)
+    ZO_SceneManager_Leader.Initialize(self, ...)
 
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_NEW_MOVEMENT_IN_UI_MODE, function() manager:OnNewMovementInUIMode() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAME_CAMERA_ACTIVATED, function() manager:OnGameCameraActivated() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAME_FOCUS_CHANGED, function(_, hasFocus) manager:OnGameFocusChanged(hasFocus) end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_ENTER_GROUND_TARGET_MODE, function() manager:OnEnterGroundTargetMode() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_PLAYER_ACTIVATED, function() manager:OnLoadingScreenDropped() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_PLAYER_DEACTIVATED, function() manager:OnLoadingScreenShown() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GLOBAL_MOUSE_UP, function() manager:OnGlobalMouseUp() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_MOUNTED_STATE_CHANGED, function() manager:OnMountStateChanged() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_DISPLAY_TUTORIAL, function(eventCode, ...) manager:OnTutorialStart(...) end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() manager:OnGamepadPreferredModeChanged() end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_REMOTE_TOP_LEVEL_CHANGE, function(eventId, ...) manager:ChangeRemoteTopLevel(...) end)
+    self.topLevelWindows = {}
+    self.restoresBaseSceneOnGameMenuToggle = {}
+    self.numTopLevelShown = 0
+    self.initialized = false
+    self.hudSceneName = "hud"
+    self.hudUISceneName = "hudui"
+    self.hudUISceneHidesAutomatically = true
+    self.exitUIModeOnChatFocusLost = false
 
-    return manager
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_NEW_MOVEMENT_IN_UI_MODE, function() self:OnNewMovementInUIMode() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAME_CAMERA_ACTIVATED, function() self:OnGameCameraActivated() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAME_FOCUS_CHANGED, function(_, hasFocus) self:OnGameFocusChanged(hasFocus) end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_ENTER_GROUND_TARGET_MODE, function() self:OnEnterGroundTargetMode() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_PLAYER_ACTIVATED, function() self:OnLoadingScreenDropped() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_PLAYER_DEACTIVATED, function() self:OnLoadingScreenShown() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GLOBAL_MOUSE_UP, function() self:OnGlobalMouseUp() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_MOUNTED_STATE_CHANGED, function() self:OnMountStateChanged() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_DISPLAY_TUTORIAL, function(eventCode, ...) self:OnTutorialStart(...) end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_REMOTE_TOP_LEVEL_CHANGE, function(eventId, ...) self:ChangeRemoteTopLevel(...) end)
 end
 
 function ZO_IngameSceneManager:IsInUIMode()
-    if(IsGameCameraActive()) then
+    if IsGameCameraActive() then
         return IsGameCameraUIModeActive()
     end
 
@@ -43,9 +45,9 @@ function ZO_IngameSceneManager:IsInUIMode()
 end
 
 function ZO_IngameSceneManager:IsLockedInUIMode()
-    if(IsGameCameraActive()) then
+    if IsGameCameraActive() then
         for topLevel, _ in pairs(self.topLevelWindows) do
-            if(topLevel.locksUIMode and not topLevel:IsControlHidden()) then
+            if topLevel.locksUIMode and not topLevel:IsControlHidden() then
                 return true
             end
         end
@@ -54,17 +56,17 @@ function ZO_IngameSceneManager:IsLockedInUIMode()
     return false
 end
 
-function ZO_IngameSceneManager:SetInUIMode(inUI)
-    if(IsGameCameraActive()) then
-        if(inUI ~= self:IsInUIMode()) then
-            if(inUI) then
+function ZO_IngameSceneManager:SetInUIMode(inUIMode)
+    if IsGameCameraActive() then
+        if inUIMode ~= self:IsInUIMode() then
+            if inUIMode then
                 SetGameCameraUIMode(true)
                 self:SetBaseScene(self.hudUISceneName)
                 ZO_RadialMenu.ForceActiveMenuClosed()
                 DIRECTIONAL_INPUT:Activate(self, GuiRoot)
                 return true
             else
-                if(not self:IsLockedInUIMode() and DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor()) then
+                if not self:IsLockedInUIMode() and DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
                     self.manuallyEnteredHUDUIMode = nil
                     EndLooting()
                     SetGameCameraUIMode(false)
@@ -89,14 +91,14 @@ end
 --UI Mode Life Cycle
 
 function ZO_IngameSceneManager:ConsiderExitingUIMode(showingHUDUI)
-    if(self.hudUISceneHidesAutomatically and self.numTopLevelShown == 0 and showingHUDUI and DoesGameHaveFocus() and not CHAT_SYSTEM:IsTextEntryOpen()) then
+    if self.hudUISceneHidesAutomatically and self.numTopLevelShown == 0 and showingHUDUI and DoesGameHaveFocus() and not CHAT_SYSTEM:IsTextEntryOpen() then
         return self:SetInUIMode(false)
     end
 end
 
 function ZO_IngameSceneManager:OnGameFocusChanged()
-    if(IsGameCameraActive() and IsPlayerActivated()) then
-        if(DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor()) then
+    if IsGameCameraActive() and IsPlayerActivated() then
+        if DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
             if self.actionRequiredTutorialThatActivatedWithoutFocus then
                 self:ClearActionRequiredTutorialBlockers()
                 self.actionRequiredTutorialThatActivatedWithoutFocus = false
@@ -104,13 +106,13 @@ function ZO_IngameSceneManager:OnGameFocusChanged()
             end
             
             local mousedOverControl = WINDOW_MANAGER:GetMouseOverControl()
-            if(not mousedOverControl or mousedOverControl == GuiRoot) then
-                if(self:IsInUIMode()) then
+            if not mousedOverControl or mousedOverControl == GuiRoot then
+                if self:IsInUIMode() then
                     self:ConsiderExitingUIMode(self:IsShowingBaseScene())
                 end
             end
         else
-            if(not self:IsInUIMode()) then
+            if not self:IsInUIMode() then
                 self:SetInUIMode(true)
                 self:ShowBaseScene()
             end
@@ -185,11 +187,11 @@ function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
 end
 
 function ZO_IngameSceneManager:SafelyAttemptToExitUIMode()
-    if(IsGameCameraActive() and IsPlayerActivated()) then
-        if(not self.manuallyEnteredHUDUIMode) then
+    if IsGameCameraActive() and IsPlayerActivated() then
+        if not self.manuallyEnteredHUDUIMode then
             local mousedOverControl = WINDOW_MANAGER:GetMouseOverControl()
-            if(not mousedOverControl or mousedOverControl == GuiRoot) then
-                if(self:IsInUIMode() and IsSafeForSystemToCaptureMouseCursor()) then
+            if not mousedOverControl or mousedOverControl == GuiRoot then
+                if self:IsInUIMode() and IsSafeForSystemToCaptureMouseCursor() then
                     self:ConsiderExitingUIMode(self:IsShowingBaseScene())
                 end
             end
@@ -198,7 +200,7 @@ function ZO_IngameSceneManager:SafelyAttemptToExitUIMode()
 end
 
 function ZO_IngameSceneManager:OnGlobalMouseUp()
-    if(not IsConsoleUI()) then
+    if not IsConsoleUI() then
         self:SafelyAttemptToExitUIMode()
     end
 end
@@ -220,6 +222,9 @@ do
         ["gamepad_inventory_root"] = true,
         ["collectionsBook"] = true,
         ["gamepadCollectionsBook"] = true,
+		["stats"] = true,
+		["outfitStylesBook"] = true,
+		["gamepad_outfits_selection"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()
@@ -237,8 +242,7 @@ do
 
     function ZO_IngameSceneManager:OnMountStateChanged()
         -- The market screen causes a dismount and blocks mounting so we need to ignore this on that screen
-        if not self:DoesCurrentSceneOverrideMountStateChange()
-	    then
+        if not self:DoesCurrentSceneOverrideMountStateChange() then
             self:SetInUIMode(false)
         end
     end
@@ -248,9 +252,9 @@ function ZO_IngameSceneManager:OnLoadingScreenDropped()
     self.hudSceneName = "hud"
     self.hudUISceneName = "hudui"
     self.hudUISceneHidesAutomatically = true
-    if(IsGameCameraActive()) then
-        if(self:IsInUIMode()) then
-            if(not self:SetInUIMode(false)) then
+    if IsGameCameraActive() then
+        if self:IsInUIMode() then
+            if not self:SetInUIMode(false) then
                 self:SetBaseScene("hudui")
                 self:ShowBaseScene()
             end
@@ -265,29 +269,29 @@ function ZO_IngameSceneManager:OnLoadingScreenDropped()
 end
 
 function ZO_IngameSceneManager:OnLoadingScreenShown()
-    if(IsGameCameraActive()) then
+    if IsGameCameraActive() then
         self:SetInUIMode(true)
     end
 end
 
 function ZO_IngameSceneManager:OnGameCameraActivated()
-    if(IsPlayerActivated()) then
-        if(self:IsShowing(self.hudSceneName) or self:IsShowingNext(self.hudSceneName)) then
+    if IsPlayerActivated() then
+        if self:IsShowing(self.hudSceneName) or self:IsShowingNext(self.hudSceneName) then
             self:SetInUIMode(false)
-        elseif(self:IsInUIMode()) then
+        elseif self:IsInUIMode() then
             self:ConsiderExitingUIMode(self:IsShowingBaseScene())
         end
 
-        if(not DoesGameHaveFocus()) then
+        if not DoesGameHaveFocus() then
             self:OnGameFocusChanged(false)
         end
     end
 end
 
 function ZO_IngameSceneManager:OnPreSceneStateChange(scene, currentState, nextState)
-    if(IsGameCameraActive()) then
-        if(nextState == SCENE_SHOWING and scene ~= self.baseScene) then
-            if(not self:IsInUIMode()) then
+    if IsGameCameraActive() then
+        if nextState == SCENE_SHOWING and scene ~= self.baseScene then
+            if not self:IsInUIMode() then
                 self:SetInUIMode(true)
             end
         end
@@ -296,10 +300,10 @@ end
 
 function ZO_IngameSceneManager:OnNextSceneRemovedFromQueue(oldNextScene, newNextScene)
     --if the old next scene was booted out, reconsider if we want to exit UI mode based on what the new next scene is
-    ZO_SceneManager.OnNextSceneRemovedFromQueue(self, oldNextScene, newNextScene)
-    if(IsGameCameraActive()) then
-        if(self.currentScene:GetState() == SCENE_HIDING and newNextScene == self.baseScene) then
-            if(self:IsInUIMode()) then
+    ZO_SceneManager_Leader.OnNextSceneRemovedFromQueue(self, oldNextScene, newNextScene)
+    if IsGameCameraActive() then
+        if self.currentScene:GetState() == SCENE_HIDING and newNextScene == self.baseScene then
+            if self:IsInUIMode() then
                 local SHOWING_HUD_UI = true
                 self:ConsiderExitingUIMode(SHOWING_HUD_UI)
             end
@@ -308,21 +312,21 @@ function ZO_IngameSceneManager:OnNextSceneRemovedFromQueue(oldNextScene, newNext
 end
 
 function ZO_IngameSceneManager:OnSceneStateChange(scene, oldState, newState)
-    if(IsGameCameraActive()) then
-        if(newState == SCENE_HIDING and self.nextScene == self.baseScene) then
-            if(self:IsInUIMode()) then
+    if IsGameCameraActive() then
+        if newState == SCENE_HIDING and self.nextScene == self.baseScene then
+            if self:IsInUIMode() then
                 local SHOWING_HUD_UI = true
                 self:ConsiderExitingUIMode(SHOWING_HUD_UI)
             end
-        elseif(newState == SCENE_SHOWING) then
-            if(IsGameCameraSiegeControlled()) then
-                if(scene:GetName() ~= self.hudSceneName and scene:GetName() ~= self.hudUISceneName) then
+        elseif newState == SCENE_SHOWING then
+            if IsGameCameraSiegeControlled() then
+                if scene:GetName() ~= self.hudSceneName and scene:GetName() ~= self.hudUISceneName then
                     ReleaseGameCameraSiegeControlled()
                 end
             end
         end
     end
-    ZO_SceneManager.OnSceneStateChange(self, scene, oldState, newState)
+    ZO_SceneManager_Leader.OnSceneStateChange(self, scene, oldState, newState)
 end
 
 function ZO_IngameSceneManager:OnNewMovementInUIMode()
@@ -370,7 +374,7 @@ function ZO_IngameSceneManager:RegisterTopLevel(topLevel, locksUIMode)
 end
 
 function ZO_IngameSceneManager:HideTopLevel(topLevel)
-    if(not topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true) then
+    if not topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true then
         topLevel:SetHidden(true)
         self.numTopLevelShown = self.numTopLevelShown - 1
         self:OnHideTopLevel()
@@ -384,7 +388,7 @@ function ZO_IngameSceneManager:OnHideTopLevel()
 end
 
 function ZO_IngameSceneManager:ShowTopLevel(topLevel)
-    if(topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true) then
+    if topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true then
         topLevel:SetHidden(false)
         self.numTopLevelShown = self.numTopLevelShown + 1
         self:OnShowTopLevel()
@@ -399,18 +403,18 @@ function ZO_IngameSceneManager:OnShowTopLevel()
 end
 
 function ZO_IngameSceneManager:ToggleTopLevel(topLevel)
-    if(topLevel:IsControlHidden()) then
+    if topLevel:IsControlHidden() then
         self:ShowTopLevel(topLevel)
     else
         self:HideTopLevel(topLevel)
     end
 end
 
-function ZO_IngameSceneManager:ChangeRemoteTopLevel(remoteChangeType, remoteChangeOrigin)
-    if remoteChangeOrigin == REMOTE_SCENE_STATE_CHANGE_ORIGIN_INTERNAL then
-        if remoteChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_SHOW then
+function ZO_IngameSceneManager:ChangeRemoteTopLevel(remoteChangeOrigin, remoteChangeType)
+    if remoteChangeOrigin ~= ZO_REMOTE_SCENE_CHANGE_ORIGIN then
+        if remoteChangeType == REMOTE_SCENE_REQUEST_TYPE_SHOW then
             self:OnShowTopLevel()
-        elseif remoteChangeType == REMOTE_SCENE_STATE_CHANGE_TYPE_HIDE then
+        elseif remoteChangeType == REMOTE_SCENE_REQUEST_TYPE_HIDE then
             self:OnHideTopLevel()
         end
     end
@@ -422,8 +426,8 @@ end
 
 --Alt Key Functions
 function ZO_IngameSceneManager:OnToggleUIModeBinding()
-    if(IsGameCameraActive()) then
-        if(self:IsInUIMode()) then
+    if IsGameCameraActive() then
+        if self:IsInUIMode() then
             self:SetInUIMode(false)
         else
             if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
@@ -444,19 +448,10 @@ function ZO_IngameSceneManager:OnToggleUIModeBinding()
 end
 
 --Escape Key Functions
-local function HideSpecialWindow(window)
-    if(not window:IsControlHidden()) then
-        window:SetHidden(true)
-        return true
-    end
-    
-    return false
-end
-
 function ZO_IngameSceneManager:HideTopLevels()
     local topLevelHidden = false
     for topLevel, _ in pairs(self.topLevelWindows) do
-        if(not topLevel:IsControlHidden()) then
+        if not topLevel:IsControlHidden() then
             self:HideTopLevel(topLevel)
             topLevelHidden = true
         end
@@ -467,7 +462,16 @@ end
 
 function ZO_IngameSceneManager:OnToggleGameMenuBinding()
     if SYSTEMS:IsShowing("restyle") then
-        SYSTEMS:GetObject("restyle"):AttemptExit()
+        local exitDestinationData =
+        {
+            showBaseScene = true,
+        }
+        SYSTEMS:GetObject("restyle"):AttemptExit(exitDestinationData)
+        return
+    end
+
+    if SYSTEMS:IsShowing("restyle_station") then
+        SYSTEMS:GetObject("restyle_station"):AttemptExit()
         return
     end
 
@@ -481,17 +485,17 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if(IsPlayerGroundTargeting()) then
+    if IsPlayerGroundTargeting() then
         CancelCast()
         return
     end
     
-    if(IsGameCameraSiegeControlled()) then
+    if IsGameCameraSiegeControlled() then
         ReleaseGameCameraSiegeControlled()
         return
     end
 
-    if(ZO_Dialogs_IsShowingDialog()) then
+    if ZO_Dialogs_IsShowingDialog() then
         ZO_Dialogs_ReleaseAllDialogs()
         return
     end
@@ -502,7 +506,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if(IsGameCameraPreferredTargetValid()) then
+    if IsGameCameraPreferredTargetValid() then
         ClearGameCameraPreferredTarget()
         return
     end
@@ -512,26 +516,26 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if(self:IsShowingBaseScene() and not self:IsInUIMode()) then
+    if self:IsShowingBaseScene() and not self:IsInUIMode() then
         local interactionType = GetInteractionType()
         --hidey holes are the first interaction type to have two parts and we don't want hitting
         --Esc to take the player out of a hideyhole.
-        if(interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_HIDEYHOLE) then
+        if interactionType ~= INTERACTION_NONE and interactionType ~= INTERACTION_HIDEYHOLE then
             EndInteraction(interactionType)
             return
         end
 
-        if(IsInteractionPending()) then
+        if IsInteractionPending() then
             EndPendingInteraction()
             return
         end
     end    
 
-    if(self:IsLockedInUIMode()) then
+    if self:IsLockedInUIMode() then
         return
     end
 
-    if(self:IsShowing(self.hudUISceneName) and not self.restoresBaseSceneOnGameMenuToggle[self.hudUISceneName]) then
+    if self:IsShowing(self.hudUISceneName) and not self.restoresBaseSceneOnGameMenuToggle[self.hudUISceneName] then
         self:RestoreHUDUIScene()
         return
     end
@@ -540,13 +544,13 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
     local topLevelHidden = self:HideTopLevels()
 
     local baseSceneShown = false
-    if(not self:IsShowingBaseScene()) then
+    if not self:IsShowingBaseScene() then
         self:ShowBaseScene()
         baseSceneShown = true
     end
 
     --System Menu Toggle
-    if(not (topLevelHidden or baseSceneShown)) then
+    if not (topLevelHidden or baseSceneShown) then
         SCENE_MANAGER:Toggle("gameMenuInGame")
     end
 end

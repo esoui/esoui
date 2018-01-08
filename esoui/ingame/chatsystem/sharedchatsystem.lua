@@ -2080,7 +2080,7 @@ function SharedChatSystem:ShowPlayerContextMenu(playerName, rawName)
 
     local localPlayerIsGrouped = IsUnitGrouped("player")
     local localPlayerIsGroupLeader = IsUnitGroupLeader("player")
-    local otherPlayerIsInPlayersGroup = not otherPlayerIsDecoratedName and IsPlayerInGroup(rawName)
+    local otherPlayerIsInPlayersGroup = IsPlayerInGroup(rawName)
 
     if IsGroupModificationAvailable() then
         if not localPlayerIsGrouped or (localPlayerIsGroupLeader and not otherPlayerIsInPlayersGroup) then

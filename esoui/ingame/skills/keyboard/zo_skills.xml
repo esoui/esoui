@@ -1,4 +1,30 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="SkillBuildSelectionIconAnim">
+            <Animations>
+                <TextureAnimation cellsWide="16" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="SkillBuildSelectionIconLoopAnim" playbackType="LOOP" loopCount="5">
+            <Animations>
+                <TextureAnimation cellsWide="64" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="SkillBuildSelectionAlertAnim">
+            <Animations>
+                <TextureAnimation cellsWide="16" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="SkillBuildSelectionAlertLoopAnim" playbackType="LOOP" loopCount="5">
+            <Animations>
+                <TextureAnimation cellsWide="64" cellsHigh="1" framerate="32"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
         <Button name="ZO_Skills_AbilitySlot" virtual="true" level="1">
             <Dimensions x="56" y="56"/>
@@ -97,12 +123,22 @@
                             <Dimensions x="32" y="32"/>
                             <Anchor point="CENTER" relativeTo="$(parent)Icon" />
                         </Texture>
+
+                        <Texture name="$(parent)SelectedSkillBuildIconAnim" inherits="ZO_ActionButton_FlipCardControl" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/SkillsAdvisor/animation_square_4096x128.dds" hidden="true" layer="CONTROLS" level="3" >
+                            <Dimensions x="56" y="56"/>
+                            <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                        </Texture>
                     </Controls>
                 </Button>
 
                 <Button name="$(parent)Alert" inherits="ZO_Skills_AbilityAlert" hidden="true">
                     <Anchor point="LEFT" relativePoint="LEFT" />
                 </Button>
+
+                <Texture name="$(parent)SelectedSkillBuildAlertAnim" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/SkillsAdvisor/animation_add_4096x128.dds" hidden="true" layer="CONTROLS" level="3" >
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alert" />
+                </Texture>
 
                 <StatusBar name="$(parent)XPBar" inherits="ZO_SkillsXPBar">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Slot" relativePoint="BOTTOMRIGHT" offsetX="10" />
@@ -137,6 +173,11 @@
 
                 <Label name="$(parent)Warning" font="ZoFontGameMedium" horizontalAlignment="CENTER" text="SI_SKILLS_IMPROVEMENT_COST"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Ability" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="20" />
+                </Label>
+
+                <Label name="$(parent)Advisement" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GREEN">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="10" />
                 </Label>
 
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
@@ -222,8 +263,12 @@
             </OnInitialized>
 
             <OnEffectivelyShown>
-                ZO_Skills_OnShown(self)
+                ZO_Skills_OnEffectivelyShown(self)
             </OnEffectivelyShown>
+
+            <OnEffectivelyHidden>
+                ZO_Skills_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
 
             <Controls>
                 <!-- Left Side -->
@@ -259,6 +304,21 @@
                     <Dimensions x="550"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMRIGHT" offsetY="5" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55" />
+                </Control>
+
+                <Control name="$(parent)SkillLineAdvisedOverlay" hidden="true" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AbilityList" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)AbilityList" relativePoint="BOTTOMRIGHT" />
+                    <Controls>
+                        <Label name="$(parent)SkillLineUnlockTitle" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Dimensions y="30" />
+                            <Anchor point="TOPLEFT" offsetX="44" offsetY="60" />
+                        </Label>
+                        <Label name="$(parent)SkillLineUnlockText" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillLineUnlockTitle" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
                 </Control>
 
                 <Label name="$(parent)Warning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">

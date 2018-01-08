@@ -1,5 +1,3 @@
-local CREDITS_SCROLL_SPEED = 75 -- UI units per second
-
 CreditsScreen_Base = ZO_Object:Subclass()
 
 function CreditsScreen_Base:New(...)
@@ -16,13 +14,7 @@ function CreditsScreen_Base:Initialize(control)
     self.numCreditsEntries = 0
     self.scrollParent = control:GetNamedChild("Scroll")
 
-    local function TimelineRelease(timeline)
-        self:ReleaseEntry(timeline.control)
-
-        timeline.key = nil
-        timeline.control = nil
-        timeline.stopCreditsRollWhenFinished = nil
-    end
+    self:ResetScrollSpeedMultiplier()
 
     control:SetHandler("OnUpdate", function(control, timeS) self:OnUpdate(timeS) end)
 end
@@ -80,11 +72,40 @@ function CreditsScreen_Base:ReleaseEntry(control)
 end
 
 do
+    local CREDITS_SCROLL_SPEED = 75 -- UI units per second
+    function CreditsScreen_Base:GetScrollSpeed()
+        return CREDITS_SCROLL_SPEED * self.scrollSpeedMultiplier
+    end
+end
+
+function CreditsScreen_Base:SetScrollSpeedMultiplier(speedMultiplier)
+    self.scrollSpeedMultiplier = speedMultiplier
+    if self.scrollSpeedMultiplier < 0 then
+        self.scrollSpeedMultiplier = 0
+    end
+end
+
+function CreditsScreen_Base:GetScrollSpeedMultiplier()
+    return self.scrollSpeedMultiplier
+end
+
+function CreditsScreen_Base:ResetScrollSpeedMultiplier()
+    self.scrollSpeedMultiplier = 1
+end
+
+do
     local finishedControls = {}
 
     function CreditsScreen_Base:OnUpdate(timeS)
         if self.running then
-            self.phase = timeS * CREDITS_SCROLL_SPEED
+            if not self.lastUpdateTimeS then
+                self.lastUpdateTimeS = timeS
+            end
+
+            local timeDifferenceS = timeS - self.lastUpdateTimeS
+            self.lastUpdateTimeS = timeS
+
+            self.phase = self.phase + timeDifferenceS * self:GetScrollSpeed()
             local phaseRung = math.floor(self.phase)
 
             ZO_ClearNumericallyIndexedTable(finishedControls)
@@ -106,13 +127,11 @@ do
                 end
             end
 
-            if self.addNextPhaseRung == nil or phaseRung >= self.addNextPhaseRung then
-                if self.currentEntryIndex < self.numCreditsEntries then
-                    self:AddNextEntry()
-                end
+            while (self.addNextPhaseRung == nil or phaseRung >= self.addNextPhaseRung) and self.currentEntryIndex <= self.numCreditsEntries do
+                self:AddNextEntry()
             end
 
-            if self.creditsReadyToEnd and #self.activeControls == 0 then
+            if self.currentEntryIndex > self.numCreditsEntries and #self.activeControls == 0 then
                 self:Exit()
             end
         end
@@ -128,7 +147,7 @@ do
     end
 
     function CreditsScreen_Base:AddNextEntry()
-        if(self.currentEntryIndex <= self.numCreditsEntries) then
+        if self.currentEntryIndex <= self.numCreditsEntries then
             local entryType, entryData, additionalData = GetGameCreditsEntry(self.currentEntryIndex)
             local controlHeight, control, onExitCallback = self:AcquireControl(entryType, entryData, additionalData)
             
@@ -145,21 +164,18 @@ do
 
             self.addNextPhaseRung = control.phaseRung + controlHeight
             self.currentEntryIndex = self.currentEntryIndex + 1
-
-            if self.currentEntryIndex > self.numCreditsEntries then
-                self.creditsReadyToEnd = true
-            end
         end
     end
 end
 
 function CreditsScreen_Base:BeginCredits()
-    if(self:IsPreferredScreen()) then
+    if self:IsPreferredScreen() then
         self.numCreditsEntries = GetNumGameCreditsEntries()
         self.currentEntryIndex = 1
         g_currentDrawLevel = 1
         self.running = true
         self.activeControls = {}
+        self.phase = 0
     end
 end
 
@@ -170,4 +186,6 @@ function CreditsScreen_Base:StopCredits()
     for _, control in ipairs(self.activeControls) do
         self:ReleaseEntry(control)
     end
+    self:ResetScrollSpeedMultiplier()
+    self.lastUpdateTimeS = nil
 end

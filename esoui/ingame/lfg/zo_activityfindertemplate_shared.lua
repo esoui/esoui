@@ -240,6 +240,9 @@ function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfoByActivity(activityTyp
                 isLevelLocked = true
             end
         end
+    else
+        -- No location data found for this activity type, so lock it down
+        isLevelLocked = true
     end
 
     return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit, highestLevelLimit, highestChampionPointLimit

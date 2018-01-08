@@ -32,7 +32,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_ScrollableComboBoxItem" mouseEnabled="true" virtual="true">
+        <Control name="ZO_ScrollableComboBoxItem" level="3" mouseEnabled="true" virtual="true">
             <Dimensions y="ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT" />
             <OnMouseEnter>
                 ZO_ScrollableComboBox_Entry_OnMouseEnter(self)
@@ -55,13 +55,13 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true" tier="HIGH">
+        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true" tier="MEDIUM">
             <OnInitialized>
                 ZO_ScrollableComboBox:New(self)
             </OnInitialized>
             
             <Controls>
-                <Control name="$(parent)Dropdown" hidden="true">
+                <Control name="$(parent)Dropdown" mouseEnabled="true" tier="HIGH" hidden="true">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
                     
@@ -71,7 +71,8 @@
                         </Backdrop>
 
                         <Control name="$(parent)Scroll" inherits="ZO_ScrollList">
-                            <AnchorFill />
+                            <Anchor point="TOPLEFT" offsetY="ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y" />
                         </Control>
                     </Controls>
                 </Control>

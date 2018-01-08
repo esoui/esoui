@@ -128,6 +128,18 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK,
             tooltipText = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK_TOOLTIP,
         },
+        --Options_Interface_QuestBestowerIndicators
+        [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS,
+            tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS_TOOLTIP,
+            events = {[true] = "Bestowers_On", [false] = "Bestowers_Off",},
+            gamepadHasEnabledDependencies = true,
+        },
         --UI_Settings_ShowQuestTracker
         [UI_SETTING_COMPASS_QUEST_GIVERS] =
         {

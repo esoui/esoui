@@ -506,7 +506,7 @@ function ZO_CrownCratesPack:ShowInfo()
 end
 
 function ZO_CrownCratesPack:HideInfo()
-    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_SHOW_INFO)
+    self:StopAllAnimationsOfType(ZO_CROWN_CRATES_ANIMATION_PACK_SHOW_INFO)
     local animationTimeline = self:AcquireAndApplyAnimationTimeline(ZO_CROWN_CRATES_ANIMATION_PACK_HIDE_INFO, self.infoControl)
     local alphaAnimation = animationTimeline:GetAnimation(1)
     alphaAnimation:SetAlphaValues(self.infoControl:GetAlpha(), 0)
@@ -1139,7 +1139,7 @@ function ZO_CrownCratesPackChoosing:GetNumPacksToDisplayOnPage(page)
         if page > 0 and page < self.numPages then
             return ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE
         elseif page == self.numPages then
-            return zo_mod(#self.crateIds, ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE)
+            return zo_mod(#self.crateIds - 1, ZO_CROWN_CRATES_PACK_CHOOSING_PACKS_PER_PAGE) + 1
         end
     end
     return 0

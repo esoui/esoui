@@ -141,7 +141,8 @@ function ZO_PlaceableFurnitureItem:RefreshInfo(bagId, slotIndex)
     self.slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
 
     local stackCount = self:GetStackCount()
-    self.formattedStackCount = ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+    local USE_LOWERCASE_NUMBER_SUFFIXES = false
+    self.formattedStackCount = zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
 end
 
 function ZO_PlaceableFurnitureItem:Preview()
@@ -241,11 +242,11 @@ end
 function ZO_PlaceableFurnitureCollectible:RefreshInfo(collectibleId)
     self.collectibleId = collectibleId
 
-    local collData = COLLECTIONS_INVENTORY_SINGLETON:GetSingleCollectibleData(collectibleId, IsCollectibleCategoryPlaceableFurniture)
-    if collData then
-        self.rawName = collData.name
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData and collectibleData:IsPlaceableFurniture() then
+        self.rawName = collectibleData:GetName()
         self.formattedName = nil
-        self.icon = collData.iconFile
+        self.icon = collectibleData:GetIcon()
 
         self.furnitureDataId = GetCollectibleFurnitureDataId(collectibleId)
         local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)

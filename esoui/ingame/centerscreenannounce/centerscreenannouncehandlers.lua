@@ -448,6 +448,7 @@ CSH[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoint
     if oldPartialPoints ~= newPartialPoints then
         messageParams:SetSound(SOUNDS.SKYSHARD_GAINED)
         local largeText = GetString(SI_SKYSHARD_GAINED)
+        -- if the new partial points is 0 that means we got enough partials to get a full skill point
         if newPartialPoints == 0 then
             if newPoints <= oldPoints then
                 return
@@ -468,12 +469,15 @@ CSH[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoint
 end
 
 CSH[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
-    local lineName = GetSkillLineInfo(skillType, lineIndex)
-    local discoverIcon = zo_iconFormat(select(4, ZO_Skills_GetIconsForSkillType(skillType)), 32, 32)
-    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
-    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_LINE_ADDED)
-    messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, discoverIcon, lineName))
-    return messageParams
+    local lineName, _, discovered = GetSkillLineInfo(skillType, lineIndex)
+    if discovered then
+        local discoverIcon = zo_iconFormat(select(4, ZO_Skills_GetIconsForSkillType(skillType)), 32, 32)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_LINE_ADDED)
+        messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, discoverIcon, lineName))
+        return messageParams
+    end
+    return nil
 end
 
 CSH[EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
@@ -806,36 +810,44 @@ end
 do
     local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
 
-    CSH[EVENT_COLLECTIBLE_UPDATED] = function(collectibleId, justUnlocked)
-        if not justUnlocked then
-            return
-        end
-        local collectibleName, _, iconFile = GetCollectibleInfo(collectibleId)
-        local isPlaceholder = IsCollectiblePlaceholder(collectibleId)
-        if not isPlaceholder then
-            local categoryIndex, subcategoryIndex = GetCategoryInfoFromCollectibleId(collectibleId)
+    CSH[EVENT_COLLECTIBLE_UPDATED] = 
+    {
+        callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
+        callbackRegistration = "OnCollectibleUpdated",
+        callbackFunction = function(collectibleId, justUnlocked)
+            if justUnlocked then
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 
-            local categoryName = GetCollectibleCategoryInfo(categoryIndex)
-            local subcategoryName = subcategoryIndex and GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex) or nil
+                if not collectibleData:IsPlaceholder() then
+                    local collectibleName = collectibleData:GetName()
+                    local icon = collectibleData:GetIcon()
+                    local categoryData = collectibleData:GetCategoryData()
+                    local categoryName = categoryData:GetName()
 
-            local displayedCategory = subcategoryName and subcategoryName or categoryName
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                    messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName))
+                    messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                    return messageParams
+                end
+            end
+        end,
+    }
+end
+
+CSH[EVENT_COLLECTIBLES_UPDATED] =
+{
+    callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
+    callbackRegistration = "OnCollectionUpdated",
+    callbackFunction = function(numJustUnlocked)
+        if numJustUnlocked > 0 then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
-            messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, displayedCategory))
-            messageParams:SetIconData(iconFile, COLLECTIBLE_EMERGENCY_BACKGROUND)
-            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+            messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, numJustUnlocked))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
             return messageParams
         end
-    end
-end
-
-CSH[EVENT_COLLECTIBLES_UPDATED] = function(numJustUnlocked)
-    if numJustUnlocked > 0 then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
-        messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, numJustUnlocked))
-        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
-        return messageParams
-    end
-end
+    end,
+}
 
 do
     local TRIAL_SCORE_REASON_TO_ASSETS =
@@ -1047,6 +1059,19 @@ CSH[EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED] = function(hasFreeTrial)
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ESO_PLUS_SUBSCRIPTION_CHANGED)
     messageParams:SetText(text)
     return messageParams
+end
+
+CSH[EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, outfitIndex)
+    if result == APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
+        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+        if outfitManipulator then
+            local outfitName = outfitManipulator:GetOutfitName()
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OUTFIT_CHANGES_APPLIED)
+            messageParams:SetText(zo_strformat(GetString("SI_APPLYOUTFITCHANGESRESULT", result), outfitName))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OUTFIT_CHANGES_APPLIED)
+            return messageParams
+        end
+    end
 end
 
 function ZO_CenterScreenAnnounce_GetHandlers()

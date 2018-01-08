@@ -33,22 +33,18 @@ local HEADER_LABEL = 2
 
 local FORCE_HIDE_PROGRESS_TEXT = true
 
+ZO_ACHIEVEMENT_DISABLED_COLOR = ZO_ColorDef:New(0.6, 0.6, 0.6)
+ZO_ACHIEVEMENT_DISABLED_DESATURATION = 0.5
+
 local function GetTextColor(enabled, normalColor, disabledColor)
     if enabled then
         return (normalColor or ZO_NORMAL_TEXT):UnpackRGBA()
     end
-    return (disabledColor or ZO_DISABLED_TEXT):UnpackRGBA()
+    return (disabledColor or ZO_ACHIEVEMENT_DISABLED_COLOR):UnpackRGBA()
 end
 
 local function ApplyTextColorToLabel(label, ...)
     label:SetColor(GetTextColor(...))
-end
-
-local function ApplyColorToAchievementIcon(base, color)
-    local r, g, b, a = color:UnpackRGBA()
-
-    base.icon:SetColor(r, g, b, a)
-    base.icon:GetNamedChild("EmergencyBG"):SetColor(r, g, b, a)
 end
 
 local function GetLastCompletedAchievementInLine(achievementId)
@@ -142,9 +138,21 @@ function Achievement:Show(achievementId)
     self.points:SetHidden(points == ACHIEVEMENT_POINT_LEGENDARY_DEED)
     self.points:SetText(tostring(points))
 
-    ApplyTextColorToLabel(self.points, completed, ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
-    ApplyTextColorToLabel(self.title, completed, ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
-    ApplyTextColorToLabel(self.description, completed, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
+    ApplyTextColorToLabel(self.points, completed, ZO_SELECTED_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
+    ApplyTextColorToLabel(self.title, completed, ZO_SELECTED_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
+    ApplyTextColorToLabel(self.description, completed, ZO_NORMAL_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
+
+    if self.highlight then
+        local highlightColor
+        if completed then
+            highlightColor = ZO_DEFAULT_ENABLED_COLOR
+        else
+            highlightColor = ZO_ACHIEVEMENT_DISABLED_COLOR
+        end
+        self.highlight:GetNamedChild("Top"):SetColor(highlightColor:UnpackRGBA())
+        self.highlight:GetNamedChild("Middle"):SetColor(highlightColor:UnpackRGBA())
+        self.highlight:GetNamedChild("Bottom"):SetColor(highlightColor:UnpackRGBA())
+    end
     
     self.completed = completed
     self.isExpandable = self:IsExpandable()
@@ -152,11 +160,10 @@ function Achievement:Show(achievementId)
     if completed then
         self.date:SetHidden(false)
         self.date:SetText(date)
-
-        ApplyColorToAchievementIcon(self, ZO_DEFAULT_ENABLED_COLOR)
+        self.icon:SetDesaturation(0)
     else
         self.date:SetHidden(true)
-        ApplyColorToAchievementIcon(self, ZO_DEFAULT_DISABLED_COLOR)
+        self.icon:SetDesaturation(ZO_ACHIEVEMENT_DISABLED_DESATURATION)
     end
     
     -- Date strings might overlap the description, so apply dimension constraints after setting the completion date
@@ -307,7 +314,7 @@ function Achievement:AddProgressBar(description, numCompleted, numRequired, show
     bar.key = key
 
     bar.label:SetText(showBarDescription and zo_strformat(SI_ACHIEVEMENT_CRITERION_FORMAT, description) or "")
-    ApplyTextColorToLabel(bar.label, numCompleted == numRequired, ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
+    ApplyTextColorToLabel(bar.label, numCompleted == numRequired, ZO_SELECTED_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
 
     local numCompletedAsString = ZO_CommaDelimitNumber(numCompleted)
     local numRequiredAsString = ZO_CommaDelimitNumber(numRequired)
@@ -327,7 +334,7 @@ function Achievement:AddCheckBox(description, checked)
     local check, key = self.checkPool:AcquireObject()
     check.key = key
     
-    ApplyTextColorToLabel(check.label, checked, ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
+    ApplyTextColorToLabel(check.label, checked, ZO_SELECTED_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
     check.label:SetText(zo_strformat(SI_ACHIEVEMENT_CRITERION_FORMAT, description))
     check:SetParent(self.control)
     check:SetAlpha(checked and 1 or 0)
@@ -364,7 +371,7 @@ function Achievement:GetPooledLabel(labelType, completed)
         label:SetDimensions(0, ACHIEVEMENT_REWARD_LABEL_HEIGHT)
     end
 
-    ApplyTextColorToLabel(label, completed, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
+    ApplyTextColorToLabel(label, completed, ZO_NORMAL_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
 
     label.prefix = nil
     label.isHeader = labelType == HEADER_LABEL
@@ -400,7 +407,7 @@ function Achievement:AddDyeReward(dyeId, completed)
     dyeSwatch:SetParent(self.control)
     
     dyeSwatch.label:SetText(zo_strformat(SI_DYEING_SWATCH_TOOLTIP_TITLE, dyeName))
-    ApplyTextColorToLabel(dyeSwatch.label, completed, ZO_NORMAL_TEXT, ZO_DISABLED_TEXT)
+    ApplyTextColorToLabel(dyeSwatch.label, completed, ZO_NORMAL_TEXT, ZO_ACHIEVEMENT_DISABLED_COLOR)
     
     self.dyeSwatches[#self.dyeSwatches + 1] = dyeSwatch
 end
@@ -408,11 +415,12 @@ end
 function Achievement:AddCollectibleReward(collectibleId, completed)
     local collectibleNameLabel = self:GetPooledLabel(nil, completed)
 
-    local collectibleName, _, _, _, _, _, _, categoryType = GetCollectibleInfo(collectibleId)
-    collectibleNameLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName))
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+
+    collectibleNameLabel:SetText(collectibleData:GetFormattedName())
 
     local collectiblePrefixLabel = self:GetPooledLabel(PREFIX_LABEL, completed)
-    collectiblePrefixLabel:SetText(zo_strformat(SI_ACHIEVEMENTS_COLLECTIBLE_CATEGORY, GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType)))
+    collectiblePrefixLabel:SetText(zo_strformat(SI_ACHIEVEMENTS_COLLECTIBLE_CATEGORY, collectibleData:GetCategoryTypeDisplayName()))
     collectibleNameLabel.prefix = collectiblePrefixLabel
 end
 
@@ -438,11 +446,11 @@ do
         lineThumb.owner = owner
 
         if(completed) then
-            ApplyColorToAchievementIcon(lineThumb, ZO_DEFAULT_ENABLED_COLOR)
+            lineThumb.icon:SetDesaturation(0)
             lineThumb.label:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
         else
-            ApplyColorToAchievementIcon(lineThumb, ZO_DEFAULT_DISABLED_COLOR)
-            lineThumb.label:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+            lineThumb.icon:SetDesaturation(ZO_ACHIEVEMENT_DISABLED_DESATURATION)
+            lineThumb.label:SetColor(ZO_ACHIEVEMENT_DISABLED_COLOR:UnpackRGBA())
         end
         
         lineThumb:SetHidden(false)
@@ -841,6 +849,14 @@ function PopupAchievement:Show(id, progress, timestamp)
         self:RefreshExpandedView()
     end
 end
+
+function PopupAchievement:HasTangibleReward()
+    local hasReward = GetAchievementNumRewards(self.achievementId) > 1
+    local hasCompleted = self.completed
+
+    return hasReward, hasCompleted
+end
+
 
 function PopupAchievement:Hide()
     self.parentControl:SetHidden(true)

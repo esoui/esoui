@@ -9,7 +9,6 @@ function ZO_ItemPreview_Gamepad:Initialize(control)
 
     control.owner = self
     self.control = control
-    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
 
     local function CreateButtonIcon(name, parent, keycode)
         local buttonIcon = CreateControl(name, parent, CT_BUTTON)
@@ -46,7 +45,7 @@ function ZO_ItemPreview_Gamepad:Apply()
     self:FireCallbacks("RefreshActions")
 end
 
-function ZO_ItemPreview_Gamepad:UpdateDirectionalInput()
+function ZO_ItemPreview_Gamepad:UpdateDirectionalInput(deltaS)
     if self.currentPreviewTypeObject and self.numPreviewVariations > 1 and self.canChangePreview then
         local result = self.movementController:CheckMovement()
         if result == MOVEMENT_CONTROLLER_MOVE_NEXT then

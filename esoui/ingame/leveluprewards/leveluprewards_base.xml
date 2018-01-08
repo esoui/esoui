@@ -1,0 +1,62 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LevelUpRewardsArtTile" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_LevelUpRewardsArtTile_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Frame">
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Top" color="444444">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                            <Dimensions y="4"/>
+                        </Texture>
+                        <Texture name="$(parent)Bottom" color="444444">
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Dimensions y="4"/>
+                        </Texture>
+                        <Texture name="$(parent)Left" color="444444">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Dimensions x="4"/>
+                        </Texture>
+                        <Texture name="$(parent)Right" color="444444">
+                            <Anchor point="TOPRIGHT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Dimensions x="4"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Scroll name="$(parent)Mask" inherits="ZO_PixelUnitsControl">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" offsetX="2" offsetY="2"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Frame" offsetX="-2" offsetY="-2"/>
+                    <Controls>
+                        <Texture name="$(grandparent)Art">
+                            <AnchorFill/>
+                            <TextureCoords left="0" right="ZO_LEVEL_UP_REWARDS_ART_RIGHT_TEXTURE_COORD" top="0" bottom="ZO_LEVEL_UP_REWARDS_ART_BOTTOM_TEXTURE_COORD"/>
+                        </Texture>
+                    </Controls>
+                </Scroll>
+
+                <Label name="$(parent)Title" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Art" offsetY="-5" offsetX="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_LevelUpRewardsArtTileAndRewards" inherits="ZO_LevelUpRewardsArtTile" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_LevelUpRewardsArtTileAndRewards_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Rewards" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" relativePoint="BOTTOMLEFT" offsetY="ZO_LEVEL_UP_REWARDS_ART_REWARDS_SPACING"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

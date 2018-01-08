@@ -157,10 +157,10 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
 
     --Collectible
     if hasRewardCollectible then
-        local collectibleName, _, _, _, _, _, _, categoryType = GetCollectibleInfo(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
         local rewardsEntrySection = rewardsSection:AcquireSection(self:GetStyle("achievementRewardsEntrySection"))
-        rewardsEntrySection:AddLine(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType)), self:GetStyle("achievementRewardsTitle"))
-        rewardsEntrySection:AddLine(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName), self:GetStyle("achievementRewardsName"))
+        rewardsEntrySection:AddLine(ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleData:GetCategoryTypeDisplayName()), self:GetStyle("achievementRewardsTitle"))
+        rewardsEntrySection:AddLine(collectibleData:GetFormattedName(), self:GetStyle("achievementRewardsName"))
 
         rewardsSection:AddSection(rewardsEntrySection)
     end

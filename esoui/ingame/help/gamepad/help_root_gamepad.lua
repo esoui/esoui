@@ -152,7 +152,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
                 elseif IsActiveWorldBattleground() then
                     text = GetString(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_IN_BATTLEGROUND)
                 else
-                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT, cost, goldIcon, primaryButtonIcon)
                 end
 
                 return text

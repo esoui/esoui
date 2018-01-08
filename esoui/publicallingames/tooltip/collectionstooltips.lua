@@ -1,14 +1,23 @@
+local DEPRECATED_COLLECTION_NAME = nil
+
 do
-    local NO_COLLECTION_NAME = nil
+    function ZO_Tooltip:LayoutCollectibleFromData(collectibleData, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+        if collectibleData then
+            self:LayoutCollectible(collectibleData:GetId(), DEPRECATED_COLLECTION_NAME, collectibleData:GetName(), collectibleData:GetNickname(), collectibleData:IsPurchasable(), collectibleData:GetDescription(), collectibleData:GetHint(), collectibleData:IsPlaceholder(), collectibleData:GetCategoryType(), showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+        end
+    end
+end
+
+do
     local HIDE_VISUAL_LAYER_INFO = false
     local NO_COOLDOWN = nil
     local HIDE_BLOCK_REASON = false
+
     function ZO_Tooltip:LayoutCollectibleFromLink(collectibleLink)
         local collectibleId = GetCollectibleIdFromLink(collectibleLink)
         if collectibleId then
-            local name, description, _, _, _, purchasable, _, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
-            local nickname = GetCollectibleNickname(collectibleId)
-            self:LayoutCollectible(collectibleId, NO_COLLECTION_NAME, name, nickname, purchaseable, description, hint, isPlaceholder, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            self:LayoutCollectibleFromData(collectibleData, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
         end
     end
 end
@@ -18,19 +27,27 @@ do
     local COOLDOWN_TEXT = GetString(SI_GAMEPAD_TOOLTIP_COOLDOWN_HEADER)
     local QUALITY_NORMAL = nil
 
-    function ZO_Tooltip:LayoutCollectible(collectibleId, collectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, isPlaceholder, categoryType, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+    function ZO_Tooltip:LayoutCollectible(collectibleId, deprecatedCollectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, isPlaceholder, categoryType, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+        local isActive = false
+
         if not isPlaceholder then
+            isActive = IsCollectibleActive(collectibleId)
+
             --things added to the collection top section stack downward
             local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
 
             topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
             local unlockState = GetCollectibleUnlockStateById(collectibleId)
             topSection:AddLine(GetString("SI_COLLECTIBLEUNLOCKSTATE", unlockState))
-
+            
             if showVisualLayerInfo then
-                local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
-                if visualLayerHidden then
-                    topSection:AddLine(ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
+                local isOutfitStylePresentInEffectivelyEquippedOutfit = categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE and IsCollectiblePresentInEffectivelyEquippedOutfit(collectibleId)
+
+                if isActive or isOutfitStylePresentInEffectivelyEquippedOutfit then
+                    local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
+                    if visualLayerHidden then
+                        topSection:AddLine(ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
+                    end
                 end
             end
 
@@ -91,6 +108,35 @@ do
             if emoteIndex then
                 local displayName = select(4, GetEmoteInfo(emoteIndex))
                 bodySection:AddLine(zo_strformat(SI_COLLECTIBLE_TOOLTIP_EMOTE_DISPLAY_NAME_FORMATTER, displayName), descriptionStyle, self:GetStyle("collectionsEmoteGranted"))
+            end
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+            local outfitStyleId = GetCollectibleReferenceId(collectibleId)
+            local numMaterials = GetNumOutfitStyleItemMaterials(outfitStyleId)
+            if numMaterials > 1 then
+                local materialsNames = {}
+                for i = 1, numMaterials do
+                    local materialName = GetOutfitStyleItemMaterialName(outfitStyleId, i)
+                    table.insert(materialsNames, materialName)
+                end
+
+                local formattedMaterialNames = table.concat(materialsNames, GetString(SI_LIST_COMMA_SEPARATOR))
+                local materialString = zo_strformat(SI_TOOLTIP_OUTFIT_STYLE_AVAILABLE_IN, formattedMaterialNames)
+
+                bodySection:AddLine(materialString, descriptionStyle, self:GetStyle("collectionsEquipmentStyle"))
+            end
+
+            local applyCost, isFree = GetOutfitStyleCost(outfitStyleId)
+            if isFree then
+                applyCost = 0
+            end
+            local applyCostString = ZO_Currency_FormatGamepad(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            local statValuePair = bodySection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            statValuePair:SetStat(GetString(SI_TOOLTIP_COLLECTIBLE_OUTFIT_STYLE_APPLICATION_COST_GAMEPAD), self:GetStyle("statValuePairStat"))
+            statValuePair:SetValue(applyCostString, descriptionStyle, self:GetStyle("currencyStatValuePairValue"))
+            bodySection:AddStatValuePair(statValuePair)
+        elseif  categoryType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH then
+            if isActive and showVisualLayerInfo then
+                bodySection:AddLine(GetString(SI_POLYMORPH_CAN_HIDE_WARNING), descriptionStyle, self:GetStyle("collectionsPolymorphOverrideWarningStyle"))
             end
         end
 

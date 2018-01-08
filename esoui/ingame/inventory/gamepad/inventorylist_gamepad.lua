@@ -1,10 +1,10 @@
 local DEFAULT_TEMPLATE = "ZO_GamepadItemSubEntryTemplate"
 local DEFAULT_HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
 
-ZO_GamepadInventoryList = ZO_Object:Subclass()
+ZO_GamepadInventoryList = ZO_CallbackObject:Subclass()
 
 function ZO_GamepadInventoryList:New(...)
-    local object = ZO_Object.New(self)
+    local object = ZO_CallbackObject.New(self)
     object:Initialize(...)
     return object
 end
@@ -53,7 +53,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
 
     self.list = ZO_GamepadVerticalParametricScrollList:New(self.control)
     self.list:AddDataTemplate(self.template, templateSetupFunction or VendorEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.list:AddDataTemplateWithHeader(self.template, templateSetupFunction or VendorEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, DEFAULT_HEADER_TEMPLATE, MenuEntryHeaderTemplateSetup)
+    self.list:AddDataTemplateWithHeader(self.template, templateSetupFunction or VendorEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, DEFAULT_HEADER_TEMPLATE)
 
     -- generate the trigger keybinds so we can add/remove them later when necessary
     self.triggerKeybinds = {}
@@ -123,6 +123,29 @@ end
 function ZO_GamepadInventoryList:ClearInventoryTypes()
     self.inventoryTypes = {}
     self:RefreshList()
+end
+
+function ZO_GamepadInventoryList:SetInventoryTypes(inventoryTypes)
+    local newInventoryTypes
+    if type(inventoryTypes) == "table" then
+        newInventoryTypes = inventoryTypes
+    else
+        newInventoryTypes = { inventoryTypes }
+    end
+
+    if newInventoryTypes then
+        local sameBags = true
+        for i, newBag in ipairs(newInventoryTypes) do
+             if self.inventoryTypes[i] ~= newBag then
+                sameBags = false
+                break
+             end
+        end
+        if not sameBags then
+            self.inventoryTypes = newInventoryTypes
+            self:RefreshList()
+        end
+    end
 end
 
 function ZO_GamepadInventoryList:AddInventoryType(inventoryType)

@@ -339,22 +339,6 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_FOLLOWER_INDICATORS_TOOLTIP,
         },
     },
-    --UI
-    [SETTING_TYPE_UI] =
-    {
-        --Options_Nameplates_QuestBestowers
-        [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-            panel = SETTING_PANEL_NAMEPLATES,
-            text = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS,
-            tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS_TOOLTIP,
-            events = {[true] = "Bestowers_On", [false] = "Bestowers_Off",},
-            gamepadHasEnabledDependencies = true,
-        },
-    },
     --InWorld
     [SETTING_TYPE_IN_WORLD] =
     {

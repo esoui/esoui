@@ -182,6 +182,10 @@
                             <Anchor point="BOTTOMLEFT" />
                             <Anchor point="BOTTOMRIGHT" />
                         </Label>
+                        <Label name="$(parent)SubTitle" inherits="ZO_GamepadHeaderLabelTextTemplate" horizontalAlignment="CENTER" excludeFromResizeToFitExtents="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-10" />
+                        </Label>
                     </Controls>
                 </Control>
 

@@ -62,10 +62,6 @@
                 <Up>StopBlock()</Up>
             </Action>
 
-            <Action name="PADLOCK_TARGET">
-                <Down>ToggleGameCameraPadlockTarget()</Down>
-            </Action>
-            
             <Action name="SPECIAL_MOVE_SPRINT">
                 <Down>OnSpecialMoveKeyDown(SPECIAL_MOVE_INDEX_SPRINT)</Down>
                 <Up>OnSpecialMoveKeyUp(SPECIAL_MOVE_INDEX_SPRINT)</Up>
@@ -717,7 +713,18 @@
             <Action name="INTERCEPT_SPECIAL_MOVE_CROUCH" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_CROUCH">
                 <Down>return true</Down>
             </Action>
+            
+            <Action name="INTERCEPT_SPECIAL_WEAPON_SWAP" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_WEAPON_SWAP">
+                <Down>return true</Down>
+            </Action>
 
+            <Action name="INTERCEPT_SPECIAL_WEAPON_SWAP_TO_SET_1" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_WEAPON_SWAP_TO_SET_1">
+                <Down>return true</Down>
+            </Action>
+
+            <Action name="INTERCEPT_SPECIAL_WEAPON_SWAP_TO_SET_2" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_WEAPON_SWAP_TO_SET_2">
+                <Down>return true</Down>
+            </Action>
         </Category>
     </Layer>
     <!-- Not player facing -->

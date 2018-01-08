@@ -137,6 +137,16 @@ function ZO_MarketAnnouncement_Base:UpdateLabels(productData)
         local formattedDescription = zo_strformat(SI_MARKET_TEXT_FORMATTER, description)
         self:SetProductDescription(formattedDescription)
         self:UpdatePositionLabel(productData.index)
+
+        local keybindStringId
+        local marketProductId = marketProduct:GetId()
+        local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
+        if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
+            keybindStringId = SI_MARKET_VIEW_IN_COLLECTIONS_KEYBIND_LABEL
+        else
+            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
+        end
+        self.crownStoreButton:SetText(GetString(keybindStringId))
     end
 end
 
@@ -231,7 +241,12 @@ function ZO_MarketAnnouncement_Base:OnMarketAnnouncementViewCrownStoreKeybind()
     local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
 
     local targetMarketProductId = marketProductId
-    if openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then
+    if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
+        -- special case logic to go to collections instead of opening the Crown Store
+        local chapterCollectibleId = GetCurrentChapterCollectibleId()
+        RequestShowCollectible(chapterCollectibleId)
+        return
+    elseif openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then
         targetMarketProductId = GetMarketProductOpenMarketBehaviorNavigateToOtherProductId(marketProductId)
     end
 
