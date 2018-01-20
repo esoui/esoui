@@ -265,8 +265,16 @@ function ZO_RestyleCommon_Keyboard:InitializeSearch()
         else
             COLLECTIONS_BOOK_SINGLETON:UnregisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
         end
+
+        if restyleCategoryData:AllowsDyeing() then
+            ZO_DYEING_MANAGER:SetSearchString(self.contentSearchEditBox:GetText())
+            ZO_DYEING_MANAGER:RegisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
+        else
+            ZO_DYEING_MANAGER:UnregisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
+        end
     else
         COLLECTIONS_BOOK_SINGLETON:UnregisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
+        ZO_DYEING_MANAGER:UnregisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
     end
 end
 
@@ -362,44 +370,19 @@ do
 
         local function IsValidCategoryData(categoryData)
             if categoryData:IsSpecializedCategory(specializedCollectibleCategory) then
-                local numValidSubCategories = 0
-                if searchResults then
-                    local categoryIndex = categoryData:GetCategoryIndicies()
-                    local categorySearchResults = searchResults[categoryIndex]
-                    if categorySearchResults then
-                        numValidSubCategories = NonContiguousCount(categorySearchResults)
-                        if categorySearchResults[ZO_COLLECTIONS_SEARCH_ROOT] then
-                            numValidSubCategories = numValidSubCategories - 1
-                        end
-
-                        -- only show the weapon category if it contains equipped weapons
-                        if weaponsCategoryIndex == categoryIndex then
-                            if (mainHandSubcategoryIndex and categorySearchResults[mainHandSubcategoryIndex])
-                                or (offHandSubcategoryIndex and categorySearchResults[offHandSubcategoryIndex]) then
-                                return true
-                            else
-                                return false
-                            end
-                        end
-                    end
-                    return categorySearchResults and categorySearchResults
-                else
-                    numValidSubCategories = categoryData:GetNumSubcategories()
-                end
-
-                return numValidSubCategories > 0 --No support for non-subcategorized collectibles in restyle
+                return categoryData:GetNumSubcategories() > 0 --No support for non-subcategorized collectibles in restyle
             end
             return false
         end
 
-        local categoeryDataNodes = {}
+        local categoryDataNodes = {}
         for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator(IsValidCategoryData) do
             local enabled = restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() and (not categoryEnabledCallback or categoryEnabledCallback(categoryData))
             local categoryNode = AddCategory(categoryIndex, enabled)
-            categoeryDataNodes[categoryData] = categoryNode
+            categoryDataNodes[categoryData] = categoryNode
         end
 
-        return categoeryDataNodes
+        return categoryDataNodes
     end
 
     local DYE_REFERENCE_DATA = { isDyesCategory = true }
@@ -440,7 +423,7 @@ function ZO_RestyleCommon_Keyboard:AddSlotCollectibleCategories()
             end
         end
 
-        local categoeryDataNodes = self:AddCollectibleParentCategories(CategoryEnabledCallback)
+        local categoryDataNodes = self:AddCollectibleParentCategories(CategoryEnabledCallback)
 
         if restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
             for outfitSlot = OUTFIT_SLOT_ITERATION_BEGIN, OUTFIT_SLOT_ITERATION_END do
@@ -450,15 +433,12 @@ function ZO_RestyleCommon_Keyboard:AddSlotCollectibleCategories()
                     local subcategoryId = GetOutfitSlotDataCollectibleCategoryId(outfitSlot)
                     local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(subcategoryId)
                     local categoryData = subcategoryData and subcategoryData:GetParentData()
-                    local categoryNode = categoryData and categoeryDataNodes[categoryData]
+                    local categoryNode = categoryData and categoryDataNodes[categoryData]
                     if categoryNode then
-                        local categoryIndex, subcategoryIndex = subcategoryData:GetCategoryIndicies()
-                        if not searchResults or searchResults[categoryIndex][subcategoryIndex] ~= nil then
-                            local restyleSlotData = self.restyleSlotDataMetaPool:AcquireObject()
-                            restyleSlotData:SetRestyleMode(RESTYLE_MODE_OUTFIT)
-                            restyleSlotData:SetRestyleSlotType(outfitSlot)
-                            AddSubcategory(restyleSlotData, categoryNode)
-                        end
+                        local restyleSlotData = self.restyleSlotDataMetaPool:AcquireObject()
+                        restyleSlotData:SetRestyleMode(RESTYLE_MODE_OUTFIT)
+                        restyleSlotData:SetRestyleSlotType(outfitSlot)
+                        AddSubcategory(restyleSlotData, categoryNode)
                     end
                 end
             end
@@ -477,22 +457,13 @@ function ZO_RestyleCommon_Keyboard:AddAllSpecializedCollectibleCategories()
         end
     end
 
-    local categoeryDataNodes = self:AddCollectibleParentCategories()
+    local categoryDataNodes = self:AddCollectibleParentCategories()
     local restyleCategoryData = self:GetRestyleCategoryData()
     if restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
         local searchResults = COLLECTIONS_BOOK_SINGLETON:GetSearchResults()
 
-        local function IsValidSubcategoryData(subcategoryData)
-            if searchResults then
-                local categoryIndex, subcategoryIndex = subcategoryData:GetCategoryIndicies()
-                return searchResults[categoryIndex][subcategoryIndex] ~= nil
-            else
-                return true
-            end
-        end
-
-        for categoryData, categoryNode in pairs(categoeryDataNodes) do
-            for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator(IsValidSubcategoryData) do
+        for categoryData, categoryNode in pairs(categoryDataNodes) do
+            for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator() do
                 local categoryIndex = categoryData:GetCategoryIndicies()
                 AddSubcategory(categoryIndex, subcategoryIndex, categoryNode)
             end
@@ -555,6 +526,10 @@ function ZO_RestyleCommon_Keyboard:OnSearchTextChanged()
         local editText = self.contentSearchEditBox:GetText()
         if restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
             COLLECTIONS_BOOK_SINGLETON:SetSearchString(editText)
+        end
+
+        if restyleCategoryData:AllowsDyeing() then
+            ZO_DYEING_MANAGER:SetSearchString(editText)
         end
     end
 end

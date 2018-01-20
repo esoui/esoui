@@ -29,3 +29,7 @@ end
 function ZO_DyeingToolDye:GetCursorType()
     return MOUSE_CURSOR_PAINT
 end
+
+function ZO_DyeingToolDye:GetToolActionString()
+    return SI_DYEING_TOOL_DYE_TOOLTIP
+end

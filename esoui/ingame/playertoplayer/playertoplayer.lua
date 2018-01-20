@@ -15,6 +15,14 @@ local INTERACT_TYPE_DUEL_INVITE = 12
 local INTERACT_TYPE_LFG_READY_CHECK = 13
 local INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS = 14
 
+local TIMED_PROMPTS =
+{
+    [INTERACT_TYPE_LFG_READY_CHECK] = true,
+    [INTERACT_TYPE_CAMPAIGN_QUEUE] = true,
+    [INTERACT_TYPE_WORLD_EVENT_INVITE] = true,
+    [INTERACT_TYPE_GROUP_ELECTION] = true,
+}
+
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
 local function ShouldUseRadialNotificationMenu(data)
@@ -710,12 +718,33 @@ function ZO_PlayerToPlayer:ShowRadialNotificationMenu(data)
     self.showingNotificationMenu = true
 end
 
--- inviter name is the decorated name that is choosen based on player preferences
--- where display and character name are descrete strings that are used to determine the creator of the entry
-function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel, displayName, characterName)
-    local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true, displayName = displayName, characterName = characterName}
-    zo_binaryinsert(data, incomingType, self.incomingQueue)
-    return data
+do
+    local function IncomingEntryComparator(leftData, rightData)
+        -- leftData is the entry we're trying to add, rightData is the iterated existing entry to compare against
+        local isAddingTimedPrompt = TIMED_PROMPTS[leftData.incomingType]
+        local isComparingTimedPrompt = TIMED_PROMPTS[rightData.incomingType]
+        if isAddingTimedPrompt ~= isComparingTimedPrompt then
+            if isAddingTimedPrompt then
+                return -1 -- Time prompts trump non-timed prompts, move to front of queue
+            else
+                return 1 -- Non-timed prompt, move to after all timed prompts
+            end
+        else
+            if isAddingTimedPrompt then
+                return -1 -- Timed prompts are last in first out, most recent should go to the front of the queue
+            else
+                return 1 -- Non-timed prompts are first in first out, most recent should go to the end of the queue
+            end
+        end
+    end
+    
+    -- inviter name is the decorated name that is choosen based on player preferences
+    -- where display and character name are descrete strings that are used to determine the creator of the entry
+    function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel, displayName, characterName)
+        local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true, displayName = displayName, characterName = characterName}
+        zo_binaryinsert(data, data, self.incomingQueue, IncomingEntryComparator)
+        return data
+    end
 end
 
 function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback)
@@ -1176,12 +1205,12 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
                 if incomingEntry.acceptCallback then
                     local acceptText = incomingEntry.acceptText or GetString(SI_DIALOG_ACCEPT)
                     self.promptKeybindButton1:SetText(acceptText)
-                    self.promptKeybindButton1:SetHidden(false)
+                    self.promptKeybindButton1.shouldHide = false
                 end
                 if incomingEntry.declineCallback then
                     local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
                     self.promptKeybindButton2:SetText(declineText)
-                    self.promptKeybindButton2:SetHidden(false)
+                    self.promptKeybindButton2.shouldHide = false
                 end
                 self.shouldShowNotificationKeybindLayer = true
             end
@@ -1227,8 +1256,8 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.actionKeybindButton:SetHidden(true)
         self.actionKeybindButton:SetEnabled(true)
         self.additionalInfo:SetHidden(true)
-        self.promptKeybindButton1:SetHidden(true)
-        self.promptKeybindButton2:SetHidden(true)
+        self.promptKeybindButton1.shouldHide = true
+        self.promptKeybindButton2.shouldHide = true
 
         if (not self.isInteracting) or (not IsConsoleUI()) then
             self.gamerID:SetHidden(true)
@@ -1254,9 +1283,13 @@ function ZO_PlayerToPlayer:OnUpdate()
             hideSelf = true
             hideTargetLabel = true
         end
-
+        
+        -- These must be called after we've determined what state they should be in
+        -- Because if we simply hide and re-show them, the Chroma behavior will not function correctly
         self:SetHidden(hideSelf)
         self.targetLabel:SetHidden(hideTargetLabel)
+        self.promptKeybindButton1:SetHidden(self.promptKeybindButton1.shouldHide)
+        self.promptKeybindButton2:SetHidden(self.promptKeybindButton2.shouldHide)
 
         local isNotificationLayerShown = IsActionLayerActiveByName(notificationsKeybindLayerName)
 

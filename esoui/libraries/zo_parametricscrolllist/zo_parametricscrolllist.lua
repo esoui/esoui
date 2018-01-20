@@ -61,7 +61,7 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.headerDefaultPadding = 0
     self.headerSelectedPadding = 0
 
-    self.defaultSelectedIndex = 0
+    self.defaultSelectedIndex = 1
 
     self.fixedCenterOffset = 0
 
@@ -238,7 +238,7 @@ function ZO_ParametricScrollList:SetDrawScrollArrows(drawScrollArrows)
 end
 
 function ZO_ParametricScrollList:SetAnchorOppositeSide(anchorOppositeSide)
-    self.anchorOppositeSide = true
+    self.anchorOppositeSide = anchorOppositeSide
 end
 
 function ZO_ParametricScrollList:UpdateScrollArrows()
@@ -599,14 +599,14 @@ function ZO_ParametricScrollList:Clear()
     end
 end
 
-local function FindMatchingIndex(oldSelectedData, newDataList, newTemplateList, oldTemplate, equalityFunction, oldSelectedIndex)
+local function FindMatchingIndex(oldSelectedData, newDataList, equalityFunction, oldSelectedIndex)
     for i = oldSelectedIndex, #newDataList do
         if equalityFunction(oldSelectedData, newDataList[i]) then
             return i
         end
     end
 
-    for i = oldSelectedIndex - 1, 1, -1 do
+    for i = zo_min(oldSelectedIndex - 1, #newDataList), 1, -1 do
         if equalityFunction(oldSelectedData, newDataList[i]) then
             return i
         end
@@ -660,7 +660,7 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
 
 			if oldSelectedDataTemplate then
 				local equalityFunction = self.dataTypes[oldSelectedDataTemplate].equalityFunction
-				matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, self.templateList, oldSelectedDataTemplate, equalityFunction, matchingIndex)
+				matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, equalityFunction, matchingIndex)
             
 				if (matchingIndex > dataListSize) then
 					matchingIndex = dataListSize

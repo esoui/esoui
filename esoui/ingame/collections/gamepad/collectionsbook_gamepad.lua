@@ -3,6 +3,7 @@ ZO_GAMEPAD_COLLECTIONS_PANEL_TEXTURE_COORD_RIGHT = ZO_GAMEPAD_QUADRANT_2_3_CONTE
 
 local GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME = "GAMEPAD_COLLECTIONS_ACTIONS_DIALOG"
 local GAMEPAD_COLLECTIONS_RENAME_COLLECTIBLE_DIALOG_NAME = "GAMEPAD_COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE"
+local VISIBLE_ICON = "EsoUI/Art/Inventory/inventory_icon_visible.dds"
 
 local TIME_NEW_PERSISTS_WHILE_SELECTED_MS = 200
 
@@ -115,6 +116,31 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     self.housingPanelControl = housingPanel
 end
 
+function ZO_GamepadCollectionsBook:RefreshGridEntryMultiIcon(control, data)
+    local statusControl = control.statusMultiIcon
+    if statusControl == nil then
+        return
+    end
+    statusControl:ClearIcons()
+    if data.isEmptyCell then
+        return
+    end
+
+    local showMultiIcon = false
+    if self:IsPreviewingOutfitStyle(data) then
+        statusControl:AddIcon(VISIBLE_ICON)
+        showMultiIcon = true
+    end
+    if data:IsNew() then
+        statusControl:AddIcon(ZO_GAMEPAD_NEW_ICON_32)
+        showMultiIcon = true
+    end
+
+    if showMultiIcon then
+        statusControl:Show()
+    end
+end
+
 function ZO_GamepadCollectionsBook:InitializeGridListPanel()
     local gridListPanel = self.control:GetNamedChild("GridListPanel")
     self.gridListPanelControl = gridListPanel
@@ -129,14 +155,7 @@ function ZO_GamepadCollectionsBook:InitializeGridListPanel()
             control:SetAlpha(1)
         end
 
-        local statusControl = control.statusMultiIcon
-        statusControl:ClearIcons()
-
-        if not data.isEmptyCell and data:IsNew() then
-            statusControl:AddIcon(ZO_GAMEPAD_NEW_ICON_32)
-            statusControl:Show()
-        end
-
+        self:RefreshGridEntryMultiIcon(control, data)
         -- TODO: find a way to share this with the generic get border function
         control.borderBackground:SetEdgeTexture("EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds", ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_WIDTH, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_HEIGHT)
     end
@@ -144,12 +163,10 @@ function ZO_GamepadCollectionsBook:InitializeGridListPanel()
     local HIDE_CALLBACK = nil
     local RESET_CONTROL_FUNC = nil
     local SPACING_X = 6
-    local SCROLL_PADDING_HEIGHT = 100
     self.gridListPanelList:SetGridEntryTemplate("ZO_Collections_Outfit_GridEntry_Template_Gamepad", ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, OutfitStyleGridEntrySetup, HIDE_CALLBACK, RESET_CONTROL_FUNC, SPACING_X, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetLineBreakAmount(ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
-    self.gridListPanelList:SetScrollPaddingHeight(SCROLL_PADDING_HEIGHT)
 end
 
 function ZO_GamepadCollectionsBook:SetupList(list)
@@ -168,8 +185,9 @@ function ZO_GamepadCollectionsBook:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function CollectibleEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        data:SetNew(data:IsNew()) -- Setting entryData new to collectibleData's new using metatables
-        data:SetEnabled(not data:IsBlocked())
+        local collectibleData = data.dataSource
+        data:SetNew(collectibleData:IsNew())
+        data:SetEnabled(not collectibleData:IsBlocked())
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
@@ -280,7 +298,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.subcategoryKeybindStripDescriptor)
     end
 
-    local showLockedOption = ZO_RESTYLE_STATION_GAMEPAD:CreateOptionActionDataShowLocked(RefreshGridList)
+    local showLockedOption = ZO_RESTYLE_STATION_GAMEPAD:CreateOptionActionDataOutfitStylesShowLocked(RefreshGridList)
 
     -- Subcategory Keybind
     self.subcategoryKeybindStripDescriptor =
@@ -932,7 +950,6 @@ end
 
 function ZO_GamepadCollectionsBook:RefreshStandardTooltip(collectibleData)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP, true)
-    GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_LEFT_TOOLTIP, true)
 
     local timeRemainingS = collectibleData:GetCooldownTimeRemainingMs() / 1000
     local SHOW_VISUAL_LAYER_INFO = true
@@ -1049,10 +1066,12 @@ do
         end
         RefreshPreviewCollectionShown()
         ZO_ClearTable(self.currentSlotPreviews)
+        self.gridListPanelList:RefreshGridList()
     end
 
     function ZO_GamepadCollectionsBook:TogglePreviewSelectedOutfitStyle()
         local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
+        local itemMaterialIndex = ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX
 
         if previewCollectionId ~= 0 then
             local currentlySelectedCollectibleData = self.gridListPanelList:GetSelectedData()
@@ -1070,17 +1089,23 @@ do
                         if slotManipulator then
                             primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
                         end
+                    else
+                        local equipSlot = GetEquipSlotForOutfitSlot(preferredOutfitSlot)
+                        if CanEquippedItemBeShownInOutfitSlot(equipSlot, preferredOutfitSlot) then
+                            primaryDye, secondaryDye, accentDye = GetPendingSlotDyes(RESTYLE_MODE_EQUIPMENT, ZO_RESTYLE_DEFAULT_SET_INDEX, equipSlot)
+                        end
                     end
+
                     local collectibleId = currentlySelectedCollectibleData:GetId()
-                    local materialIndex = ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX
                     self.currentSlotPreviews[preferredOutfitSlot] = 
                     {
                         collectibleId = collectibleId,
                         itemMaterialIndex = itemMaterialIndex,
                     }
 
-                    AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, preferredOutfitSlot, collectibleId, materialIndex, primaryDye, secondaryDye, accentDye, REFRESH_IMMEDIATELY)
+                    AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, preferredOutfitSlot, collectibleId, itemMaterialIndex, primaryDye, secondaryDye, accentDye, REFRESH_IMMEDIATELY)
                 end
+                self.gridListPanelList:RefreshGridList()
             end
         end
 
@@ -1115,7 +1140,9 @@ function ZO_GamepadCollectionsBook:OnGridListSelectedDataChanged(previousData, n
         if previousData.notificationId then
             RemoveCollectibleNotification(previousData.notificationId)
         end
-        self.gridListPanelList:RefreshGridListEntryData(previousData, function(control, data, list) control.statusMultiIcon:ClearIcons() end)
+        self.gridListPanelList:RefreshGridListEntryData(previousData, function(control, data, list)
+            self:RefreshGridEntryMultiIcon(control, data)
+        end)
     end
 
     if newData and not newData.isEmptyCell then
@@ -1144,7 +1171,7 @@ function ZO_GamepadCollectionsBook:RefreshGridListPanel(categoryData)
     gridListPanelList:ClearGridList()
 
     local tempTable = {}
-    local showLocked = ZO_RESTYLE_STATION_GAMEPAD:GetShowLocked()
+    local showLocked = ZO_OUTFIT_MANAGER:GetShowLocked()
 
     local function FilterCollectible(collectibleData)
         if not showLocked and collectibleData:IsLocked() then
@@ -1154,13 +1181,33 @@ function ZO_GamepadCollectionsBook:RefreshGridListPanel(categoryData)
         return ZO_CollectibleData.IsShownInCollection(collectibleData)
     end
 
-    for collectibleIndex, collectibleData in categoryData:CollectibleIterator(FilterCollectible) do
-        local entryData = ZO_GridSquareEntryData_Shared:New(collectibleData)
+    local function InsertEntryIntoTable(tempTable, data)
+        local entryData = ZO_GridSquareEntryData_Shared:New(data)
         ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
         table.insert(tempTable, entryData)
     end
 
-    table.sort(tempTable, ZO_OutfitStyleCollectiblesGridSort)
+    local dataByWeaponAndArmorType = categoryData:GetCollectibleDataBySpecializedSort()
+    local NO_WEAPON_OR_ARMOR_TYPE = 0
+
+    -- make sure to add the hide option first
+    if dataByWeaponAndArmorType[NO_WEAPON_OR_ARMOR_TYPE] then
+        local gearTypeNone = dataByWeaponAndArmorType[NO_WEAPON_OR_ARMOR_TYPE]:GetCollectibles()
+        for _, collectibleData in ipairs(gearTypeNone) do
+            InsertEntryIntoTable(tempTable, collectibleData)
+        end
+    end
+
+    for type, weaponOrArmorSortedCollectibles in pairs(dataByWeaponAndArmorType) do
+        if type > NO_WEAPON_OR_ARMOR_TYPE then
+            local weaponOrArmorData = weaponOrArmorSortedCollectibles:GetCollectibles()
+            for _, collectibleData in ipairs(weaponOrArmorData) do
+                if FilterCollectible(collectibleData) then
+                    InsertEntryIntoTable(tempTable, collectibleData)
+                end
+            end
+        end
+    end
 
     for _, entryData in ipairs(tempTable) do
         gridListPanelList:AddEntry(entryData)
@@ -1427,7 +1474,7 @@ end
 function ZO_GamepadCollectionsBook:InitializeOutfitSelector()
     self.outfitSelectorControl = self.header:GetNamedChild("OutfitSelector")
     self.outfitSelectorNameLabel = self.outfitSelectorControl:GetNamedChild("OutfitName")
-    self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorNameLabel)
+    self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorControl)
     self:SetupHeaderFocus(self.outfitSelectorHeaderFocus)
 end
 

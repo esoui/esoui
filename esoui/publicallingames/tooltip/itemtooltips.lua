@@ -1550,7 +1550,7 @@ do
                 
                 --Currency Count
                 local statValuePair = locationCurrenciesSection:AcquireStatValuePair(self:GetStyle("currencyStatValuePair"))
-                statValuePair:SetStat(GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER), self:GetStyle("currencyStatValuePairStat"))
+                statValuePair:SetStat(zo_strformat(SI_GAMEPAD_INVENTORY_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)), self:GetStyle("currencyStatValuePairStat"))
                 local amount = GetCurrencyAmount(currencyType, currencyLocation)
                 FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
                 local valueString = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS)

@@ -12,7 +12,7 @@ function ZO_GamepadEntryData:Initialize(text, icon, selectedIcon, highlight, isN
     self.numIcons = 0
     self:AddIcon(icon, selectedIcon)
     self.highlight = highlight
-    self.brandNew = isNew
+    self:SetNew(isNew)
     self.fontScaleOnSelection = true
     self.alphaChangeOnSelection = false
     self.enabled = true
@@ -126,6 +126,14 @@ end
 
 function ZO_GamepadEntryData:SetNew(isNew)
     self.brandNew = isNew
+end
+
+function ZO_GamepadEntryData:IsNew()
+    if type(self.brandNew) == "function" then
+        return self.brandNew(self)
+    else
+        return self.brandNew
+    end
 end
 
 function ZO_GamepadEntryData:SetText(text)

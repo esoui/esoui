@@ -1,4 +1,4 @@
-ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS = 78
+ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS = 87
 ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_WIDTH = 128
 ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_HEIGHT = 16
 
@@ -34,12 +34,15 @@ function ZO_Outfit_Slots_Panel_Gamepad:Initialize(control)
     self:InitializeItemMaterialDialog()
 
     control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
+
+    ZO_OUTFIT_MANAGER:RegisterCallback("ShowLockedChanged", function() self:RebuildList() end)
 end
 
 function ZO_Outfit_Slots_Panel_Gamepad:Activate()
     ZO_Restyle_Station_Helper_Panel_Gamepad.Activate(self)
     self:ActivateCurrentFocus()
     DIRECTIONAL_INPUT:Activate(self, self.control)
+    self:RefreshTooltip(self.gridListPanelList:GetSelectedData())
 end
 
 function ZO_Outfit_Slots_Panel_Gamepad:Deactivate()
@@ -198,12 +201,10 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeGridListPanel()
 
     local HIDE_CALLBACK = nil
     local SPACING_X = 6
-    local SCROLL_PADDING_HEIGHT = 100
     self.gridListPanelList:SetGridEntryTemplate("ZO_OutfitStyle_GridEntry_Template_Gamepad", ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, OutfitStyleGridEntrySetup, HIDE_CALLBACK, OutfitStyleGridEntryReset, SPACING_X, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetLineBreakAmount(ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
-    self.gridListPanelList:SetScrollPaddingHeight(SCROLL_PADDING_HEIGHT)
 end
 
 function ZO_Outfit_Slots_Panel_Gamepad:InitializeSearchBar()
@@ -263,7 +264,8 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeMultiFocusArea()
     self:AddNextFocusArea(self.searchArea)
     self:AddNextFocusArea(self.gridArea)
 
-    self:SetNewFocusArea(self.gridArea)
+    local DONT_ACTIVATE_FOCUS_AREA = false
+    self:SelectFocusArea(self.gridArea, DONT_ACTIVATE_FOCUS_AREA)
 end
 
 function ZO_Outfit_Slots_Panel_Gamepad:InitializeItemMaterialDialog()
@@ -372,7 +374,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
             return false
         end
 
-        if not ZO_RESTYLE_STATION_GAMEPAD:GetShowLocked() and collectibleData:IsLocked() then
+        if not ZO_OUTFIT_MANAGER:GetShowLocked() and collectibleData:IsLocked() then
             return false
         end
 
@@ -394,34 +396,11 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
         return true
     end
 
-    if searchResults then
-        local foundCollectibles
-        for categoryIndex, categorySearchResults in pairs(searchResults) do
-            for subcategoryIndex, subcategorySearchResults in pairs(categorySearchResults) do
-                local categoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
-                if categoryData:GetId() == categoryId then
-                    relevantSearchResults = searchResults[categoryIndex][subcategoryIndex]
-                    foundCollectibles = categoryData:GetAllCollectibleDataObjects(FilterCollectible)
-                end
-            end
-        end
-
-        if foundCollectibles then
-            for _, collectibleData in ipairs(foundCollectibles) do
-                local collectibleEntryData = ZO_GridSquareEntryData_Shared:New(collectibleData)
-                ZO_UpdateCollectibleEntryDataIconVisuals(collectibleEntryData)
-                FindSelectedData(collectibleEntryData)
-                table.insert(tempTable, collectibleEntryData)
-            end
-        end
-    else
-        local categoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(categoryId)
-        for collectibleIndex, collectibleData in categoryData:CollectibleIterator(FilterCollectible) do
-            local collectibleEntryData = ZO_GridSquareEntryData_Shared:New(collectibleData)
-            ZO_UpdateCollectibleEntryDataIconVisuals(collectibleEntryData)
-            FindSelectedData(collectibleEntryData)
-            table.insert(tempTable, collectibleEntryData)
-        end
+    local function InsertEntryIntoTable(tempTable, data)
+        local collectibleEntryData = ZO_GridSquareEntryData_Shared:New(data)
+        ZO_UpdateCollectibleEntryDataIconVisuals(collectibleEntryData)
+        FindSelectedData(collectibleEntryData)
+        table.insert(tempTable, collectibleEntryData)
     end
 
     -- Clear
@@ -431,7 +410,34 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
     entryData.gridHeaderName = ""
     table.insert(tempTable, entryData)
 
-    table.sort(tempTable, ZO_OutfitStyleCollectiblesGridSort)
+    local categoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(categoryId)
+
+    if searchResults then
+        local categoryIndex, subcategoryIndex = categoryData:GetCategoryIndicies()
+        relevantSearchResults = searchResults[categoryIndex][subcategoryIndex]
+    end
+
+    local dataByWeaponAndArmorType = categoryData:GetCollectibleDataBySpecializedSort()
+    local NO_WEAPON_OR_ARMOR_TYPE = 0
+
+    -- make sure to add the hide option first
+    if dataByWeaponAndArmorType[NO_WEAPON_OR_ARMOR_TYPE] then
+        local gearTypeNone = dataByWeaponAndArmorType[NO_WEAPON_OR_ARMOR_TYPE]:GetCollectibles()
+        for _, collectibleData in ipairs(gearTypeNone) do
+            InsertEntryIntoTable(tempTable, collectibleData)
+        end
+    end
+
+    for type, weaponOrArmorSortedCollectibles in pairs(dataByWeaponAndArmorType) do
+        if type > NO_WEAPON_OR_ARMOR_TYPE then
+            local weaponOrArmorData = weaponOrArmorSortedCollectibles:GetCollectibles()
+            for _, collectibleData in ipairs(weaponOrArmorData) do
+                if FilterCollectible(collectibleData) then
+                    InsertEntryIntoTable(tempTable, collectibleData)
+                end
+            end
+        end
+    end
 
     for i, entry in ipairs(tempTable) do
         gridListPanelList:AddEntry(entry)
@@ -440,7 +446,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
     gridListPanelList:CommitGridList()
 
     if selectedData then
-        gridListPanelList:ScrollDataToCenter(selectedData.dataEntry)
+        gridListPanelList:ScrollDataToCenter(selectedData)
     end
 end
 
@@ -517,23 +523,30 @@ function ZO_Outfit_Slots_Panel_Gamepad:HandleSearchSelectAction()
     self.searchEdit:TakeFocus()
 end
 
+function ZO_Outfit_Slots_Panel_Gamepad:RefreshTooltip(selectedData)
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_QUAD1_TOOLTIP)
+    if selectedData then
+        if selectedData.clearAction then
+            local preferredOutfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(selectedData)
+            GAMEPAD_TOOLTIPS:LayoutClearOutfitSlot(GAMEPAD_QUAD1_TOOLTIP, preferredOutfitSlot)
+        elseif not selectedData.isEmptyCell then
+            local SHOW_VISUAL_LAYER_INFO = true
+            local SHOW_BLOCK_REASON = true
+            local TIME_REMAINING_S = nil
+            GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_QUAD1_TOOLTIP, selectedData, SHOW_VISUAL_LAYER_INFO, TIME_REMAINING_S, SHOW_BLOCK_REASON)
+        end
+    end
+end
+
 do
     local NEXT_OUTFIT_PREVIEW_TIME_S = .25
 
     function ZO_Outfit_Slots_Panel_Gamepad:OnGridListSelectedDataChanged(previousData, newData)
-        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_QUAD1_TOOLTIP)
-        if newData then
-            if newData.clearAction then
-                GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_QUAD1_TOOLTIP, GetString(SI_OUTFIT_CLEAR_OPTION_TITLE), GetString(SI_OUTFIT_CLEAR_OPTION_DESCRIPTION))
-            elseif not newData.isEmptyCell then
-                local SHOW_VISUAL_LAYER_INFO = true
-                local SHOW_BLOCK_REASON = true
-                local TIME_REMAINING_S = nil
-
-
-                GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_QUAD1_TOOLTIP, newData, SHOW_VISUAL_LAYER_INFO, TIME_REMAINING_S, SHOW_BLOCK_REASON)
+        if self:IsActive() then
+            self:RefreshTooltip(newData)
+            if newData then
+                self.nextPreviewTimeS = GetFrameTimeSeconds() + NEXT_OUTFIT_PREVIEW_TIME_S
             end
-            self.nextPreviewTimeS = GetFrameTimeSeconds() + NEXT_OUTFIT_PREVIEW_TIME_S
         end
     end
 end

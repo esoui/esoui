@@ -72,7 +72,7 @@ function ZO_OutfitStylesBook_Keyboard:UnregisterForEvents()
     ZO_RestyleCommon_Keyboard.UnregisterForEvents(self)
 
     ZO_OUTFIT_STYLES_PANEL_KEYBOARD:UnregisterCallback("PreviewSlotsChanged", self.updateKeybindCallback)
-    ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("ModeSelectorDropdownChanged", self.onModeDropdownChangedCallback)
+    ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:UnregisterCallback("ModeSelectorDropdownChanged", self.onModeDropdownChangedCallback)
 end
 
 function ZO_OutfitStylesBook_Keyboard:InitializeModeData()

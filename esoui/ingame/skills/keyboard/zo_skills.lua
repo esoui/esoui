@@ -605,8 +605,8 @@ function ZO_SkillsManager:RefreshList()
 end
 
 function ZO_SkillsManager:RefreshSkillLineDisplay(skillType, skillIndex)
-    local name, _, discovered, _, advised, unlockText = GetSkillLineInfo(skillType, skillIndex)
-    if not discovered and advised then
+    local name, _, available, _, advised, unlockText = GetSkillLineInfo(skillType, skillIndex)
+    if not available and advised then
         self:StopSelectedSkillBuildSkillAnimations()
         self.skillLineUnlockTitleControl:SetText(zo_strformat(SI_SKILLS_ADVISOR_SKILL_NOT_DISCOVERED_NAME, name))
         self.skillLineUnlockTextControl:SetText(zo_strformat(SI_SKILLS_ADVISOR_SKILL_NOT_DISCOVERED_DESCRIPTION, unlockText))
@@ -651,8 +651,8 @@ function ZO_SkillsManager:Refresh()
         local numSkillLines = GetNumSkillLines(skillType)
         local parent
         for skillLineIndex = 1, numSkillLines do
-            local _, _, discovered, _, advised = GetSkillLineInfo(skillType, skillLineIndex)
-            if discovered or advised then
+            local _, _, available, _, advised = GetSkillLineInfo(skillType, skillLineIndex)
+            if available or advised then
                 if not parent then
                     parent = self.navigationTree:AddNode("ZO_SkillIconHeader", skillType, nil, skillTypeToSound[skillType])
                 end

@@ -22,7 +22,7 @@ GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragme
 GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = ZO_GAMEPAD_QUADRANT_2_RIGHT_OFFSET,
     paddingRight = 0,
-    dynamicFramingConsumedWidth = (1920 - ZO_GAMEPAD_QUADRANT_2_RIGHT_OFFSET),
+    dynamicFramingConsumedWidth = (ZO_GAMEPAD_UI_REFERENCE_WIDTH - ZO_GAMEPAD_QUADRANT_2_RIGHT_OFFSET),
     dynamicFramingConsumedHeight = 400,
     forcePreparePreview = false,
     previewBufferMS = 300,
@@ -35,6 +35,13 @@ GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptions
     dynamicFramingConsumedHeight = 400,
     forcePreparePreview = false,
     previewBufferMS = 300
+})
+
+GAMEPAD_RIGHT_TOOLTIP_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = 700,
+    dynamicFramingConsumedHeight = 400,
 })
 
 GAMEPAD_COLLECTIONS_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({

@@ -146,7 +146,7 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     mainText =
     {
         text = function()
-            if ShouldOpenURLTypeInOverlay(APPROVED_URL_ESO_CHAPTER_UPGRADE) then
+            if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                 return SI_OPEN_CHAPTER_UPGRADE_STEAM
             else
                 return zo_strformat(SI_OPEN_CHAPTER_UPGRADE, ZO_GetPlatformStoreName())
@@ -160,7 +160,7 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
         {
             text = SI_DIALOG_LOG_OUT_UPGRADE,
             callback = function(dialog)
-                            OpenURLByType(APPROVED_URL_ESO_CHAPTER_UPGRADE)
+                            OpenChapterUpgradeURL(GetCurrentChapterUpgradeId(), dialog.data.isCollectorsEdition)
                             ZO_Disconnect()
                         end,
         },
@@ -199,7 +199,7 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE_CONSOLE"] =
         {
             text = SI_DIALOG_LOG_OUT_UPGRADE,
             callback = function(dialog)
-                            ShowConsoleESOChapterUpgradeUI()
+                            ShowConsoleESOChapterUpgradeUI(GetCurrentChapterUpgradeId(), dialog.data.isCollectorsEdition)
                             ZO_Disconnect()
                         end,
         },
@@ -210,6 +210,104 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE_CONSOLE"] =
         },
     },
 }
+
+function ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition)
+    local data = { isCollectorsEdition = isCollectorsEdition, }
+    if IsConsoleUI() then
+        ZO_Dialogs_ShowGamepadDialog("CHAPTER_UPGRADE_STORE_CONSOLE", data)
+    else
+        ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
+    end
+end
+
+ESO_Dialogs["CHAPTER_PREPURCHASE_STORE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    canQueue = true,
+
+    title =
+    {
+        text = SI_CHAPTER_PREPURCHASE_DIALOG_TITLE
+    },
+
+    mainText =
+    {
+        text = function()
+            if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
+                return SI_CONFIRM_OPEN_STEAM_STORE
+            else
+                return zo_strformat(SI_OPEN_CHAPTER_PREPURCHASE, ZO_GetPlatformStoreName())
+            end
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_URL_DIALOG_OPEN,
+            callback = function(dialog)
+                OpenChapterUpgradeURL(dialog.data.chapterId, dialog.data.isCollectorsEdition)
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CHAPTER_PREPURCHASE_STORE_CONSOLE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    canQueue = true,
+
+    title =
+    {
+        text = SI_CHAPTER_PREPURCHASE_DIALOG_TITLE
+    },
+
+    mainText =
+    {
+        text = function()
+            return zo_strformat(SI_OPEN_CHAPTER_PREPURCHASE_CONSOLE, ZO_GetPlatformStoreName())
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_URL_DIALOG_OPEN,
+            callback = function(dialog)
+                ShowConsoleESOChapterUpgradeUI(dialog.data.chapterId, dialog.data.isCollectorsEdition)
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+function ZO_ShowChapterPrepurchasePlatformDialog(chapterId, isCollectorsEdition)
+    local data = { chapterId = chapterId, isCollectorsEdition = isCollectorsEdition, }
+    if IsConsoleUI() then
+        ZO_Dialogs_ShowGamepadDialog("CHAPTER_PREPURCHASE_STORE_CONSOLE", data)
+    else
+        ZO_Dialogs_ShowPlatformDialog("CHAPTER_PREPURCHASE_STORE", data)
+    end
+end
 
 ESO_Dialogs["SHOW_REDEEM_CODE"] = 
 {

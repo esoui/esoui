@@ -133,6 +133,13 @@ function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
         end
         self.dialogPane:SetHeight(paneHeight)
 
+        --The scroll thumb is updated when the scroll extents change (either as a result of the scroll child or scroll control changing size). Usually this is enough to capture any
+        --updates that would be needed because the scroll control changed height (which the scroll thumb depends on to size itself as well) because changing the scroll control height
+        --usually causes an extents change. However, it can happen that we change the scroll and scroll child height but the extents is unchanged (e.g. 450,400 -> 350,300). Because of how
+        --this dialog sizes the scroll child and scroll control this is a likely case. Optimally the scroll pane would update the scroll bar whenever anything that impacts the scroll bar
+        --changed, and not just the extents, but that additional cost is not justified to fix such a rare bug. That is why we do a scroll bar update manually here.
+        ZO_Scroll_UpdateScrollBar(self.dialogPane)
+        
         ZO_Scroll_ResetToTop(self.dialogPane)    
         ZO_Dialogs_ShowDialog("UI_TUTORIAL", { tutorialIndex = tutorialIndex, owner = self })
     end

@@ -1058,25 +1058,6 @@ ESO_Dialogs["GROUP_INVITE"] =
     }
 }
 
-ESO_Dialogs["GUILD_BANK_ERROR"] =
-{
-    title =
-    {
-        text = "<<1>>",
-    },
-    mainText = 
-    {
-        text = "<<1>>",
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_OK,
-        }
-    },
-}
-
 ESO_Dialogs["GUILD_RANK_SAVE_CHANGES"] =
 {
     title =
@@ -1628,32 +1609,22 @@ do
     }
 end
 
-ESO_Dialogs["CONFIRM_CONVERT_STYLE"] =
+ESO_Dialogs["CONVERT_STYLE_MOVED"] =
 {
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
     title =
     {
-        text = SI_CONVERT_ITEM_STYLE_TITLE,
+        text = SI_ITEM_ACTION_CONVERT_STYLE_MOVED_TITLE,
     },
-    mainText =
+    mainText = 
     {
-        text = SI_CONVERT_ITEM_STYLE_BODY,
+        text = SI_ITEM_ACTION_CONVERT_STYLE_MOVED_DESCRIPTION,
     },
     buttons =
     {
+        [1] =
         {
-            text = SI_CONVERT_ITEM_STYLE_BUTTON,
-            callback = function(dialog)
-                ConvertItemStyle(dialog.data.bagId, dialog.data.slotIndex, dialog.data.style)
-            end,
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-        },
+            text = SI_OK,
+        }
     },
 }
 
@@ -3406,6 +3377,7 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
     buttons =
     {
         {
+            onShowCooldown = 2000,
             keybind = "DIALOG_TERTIARY",
             gamepadPreferredKeybind = "DIALOG_PRIMARY",
             text = function(dialog)
@@ -3417,6 +3389,7 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             end,
         },
         {
+            onShowCooldown = 2000,
             keybind = "DIALOG_RESET",
             gamepadPreferredKeybind = "DIALOG_NEGATIVE",
             text = function(dialog)

@@ -35,5 +35,19 @@
                 <Texture name="$(parent)Middle" override="true" textureFile="EsoUI/Art/Miscellaneous/listItem_selectedHighlight.dds" level="1"/>
             </Controls>
         </Control>
+
+        <Control name="ZO_ListEntry_BackdropAndHighlight_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                </Texture>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

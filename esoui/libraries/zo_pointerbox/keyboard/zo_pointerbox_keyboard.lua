@@ -159,6 +159,7 @@ end
 
 function ZO_PointerBox_Keyboard:RefreshAnchor()
     if self.contentsControl and self.point then
+        self.contentsControl:ClearAnchors()
         if self.point == LEFT or self.point == RIGHT then
             local boxCenterY = self.control:GetHeight() * 0.5
             local contentsCenterY = self.contentsControl:GetHeight() * 0.5 + self.padding

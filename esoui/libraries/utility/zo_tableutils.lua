@@ -183,6 +183,18 @@ function ZO_DeepTableCopy(source, dest)
     return dest
 end
 
+-- The dest table is mutable and will take in the values of all subsequent tables.  It must be initialized.
+function ZO_CombineNumericallyIndexedTables(dest, ...)
+    local counter = #dest
+    for sourceTableIndex = 1, select("#", ...) do
+        local sourceTable = select(sourceTableIndex, ...)
+        for _, data in ipairs(sourceTable) do
+            counter = counter + 1
+            dest[counter] = data
+        end
+    end
+end
+
 function ZO_IsElementInNumericallyIndexedTable(table, element)
     for index, value in ipairs(table) do
         if value == element then

@@ -8,6 +8,7 @@ local STATE_CHANGE_DURATION = 250
 local MIN_SCROLL_VALUE = 0
 local MAX_SCROLL_VALUE = 100
 local MAX_FADE_VALUE = 64
+local DEFAULT_Y_DISTANCE_FROM_EDGE_WHERE_SELECTION_CAUSES_SCROLL = 150
 
 local NO_SELECTED_DATA = nil
 local NO_DATA_CONTROL = nil
@@ -565,7 +566,7 @@ function ZO_ScrollList_Initialize(self)
     self.dataTypes = {}
     self.data = {}
     self.offset = 0
-    self.scrollPaddingHeight = 0
+    self.yDistanceFromEdgeWhereSelectionCausesScroll = DEFAULT_Y_DISTANCE_FROM_EDGE_WHERE_SELECTION_CAUSES_SCROLL
     self.activeControls = {}
     self.visibleData = {}
     self.categories = {}
@@ -603,8 +604,8 @@ function ZO_ScrollList_Initialize(self)
     ZO_ScrollList_Commit(self)
 end
 
-function ZO_ScrollList_SetScrollPaddingHeight(self, scrollPaddingHeight)
-    self.scrollPaddingHeight = scrollPaddingHeight
+function ZO_ScrollList_SetYDistanceFromEdgeWhereSelectionCausesScroll(self, yDistanceFromEdgeWhereSelectionCausesScroll)
+    self.yDistanceFromEdgeWhereSelectionCausesScroll = yDistanceFromEdgeWhereSelectionCausesScroll
 end
 
 function ZO_ScrollList_SetHeight(self, height)
@@ -1285,14 +1286,6 @@ function ZO_ScrollList_GetDataIndex(self, data)
     return nil
 end
 
-function ZO_ScrollList_SetDataIndex(self, dataIndex)
-    self.selectedDataIndex = dataIndex
-end
-
-function ZO_ScrollList_SetLastSelectedDataIndex(self, dataIndex)
-    self.lastSelectedDataIndex = dataIndex
-end
-
 function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild, animateInstantly)
     if AreSelectionsEnabled(self) and self.selectedData ~= data then
         if reselectingDuringRebuild == nil then
@@ -1321,15 +1314,15 @@ function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild,
         local previouslySelectedData = self.selectedData
         if self.selectedData then
             self.selectedData = nil
-            ZO_ScrollList_SetDataIndex(self, nil)
+            self.selectedDataIndex = nil
             if self.selectedControl then
                 UnselectControl(self, self.selectedControl, animateInstantly)
             end
         end
         
         if data ~= nil then
-            ZO_ScrollList_SetDataIndex(self, dataIndex)
-            ZO_ScrollList_SetLastSelectedDataIndex(self, dataIndex)
+            self.selectedDataIndex = dataIndex
+            self.lastSelectedDataIndex = dataIndex
             self.selectedData = data
 
             if not control then
@@ -1511,8 +1504,8 @@ function ZO_ScrollList_ScrollDataIntoView(self, dataIndex, onScrollCompleteCallb
     local controlTop, controlBottom = GetDataControlPositions(self, data, dataIndex)
 
     local scrollAnimationOffset = CalculateScrollAnimationOffset(self)
-    local calculatedControlTop = controlTop - self.scrollPaddingHeight - scrollAnimationOffset
-    local calculatedControlBottom = controlBottom + self.scrollPaddingHeight - scrollAnimationOffset
+    local calculatedControlTop = controlTop - self.yDistanceFromEdgeWhereSelectionCausesScroll - scrollAnimationOffset
+    local calculatedControlBottom = controlBottom + self.yDistanceFromEdgeWhereSelectionCausesScroll - scrollAnimationOffset
 
     if calculatedControlTop < scrollTop then
         ZO_ScrollList_ScrollRelative(self, calculatedControlTop - scrollTop, onScrollCompleteCallback, animateInstantly)
@@ -1678,6 +1671,18 @@ end
 
 function ZO_ScrollList_AutoSelectData(self, animateInstantly)
     AutoSelect(self, animateInstantly)
+end
+
+--When the list in inactive, you can't get selected data.  Auto select is a mechanic of lists that will reselect the last thing that was selected
+-- Assuming it wasn't reset, or manually set to something else.  If another party needs to know what data would be selected if the list were active, this is how
+function ZO_ScrollList_GetAutoSelectData(self)
+    if #self.data > 0 then
+        local recalledIndex = self.selectedDataIndex or self.lastSelectedDataIndex
+        if recalledIndex and CanSelectData(self, recalledIndex) then
+            return self.data[recalledIndex].data
+        end
+    end
+    return nil
 end
 
 function ZO_ScrollList_ResetAutoSelectIndex(self)
@@ -2156,7 +2161,7 @@ function ZO_ScrollList_AtTopOfList(self)
         if self.selectedDataIndex then
             local selectedData = self.data[self.selectedDataIndex]
             local checkIndex = self.selectedDataIndex - 1
-            while checkIndex > 1 do
+            while checkIndex >= 1 do
                 local checkData = self.data[checkIndex]
                 if self.mode ~= SCROLL_LIST_OPERATIONS or checkData.top < selectedData.top then
                     if CanSelectData(self, checkIndex) then

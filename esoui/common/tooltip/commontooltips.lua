@@ -24,13 +24,16 @@ function ZO_Tooltip:LayoutCurrency(currencyType, amount)
         self:AddSection(topSection)
 
         -- Name
-        local IS_PLURAL = false
         local IS_UPPER = false
-        local displayName = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
+        local displayName
         if amount and amount > 1 then
-            displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, displayName, amount)
+            local IS_PLURAL = false
+            local currencyName = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
+            displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, currencyName, amount)
         else
-            displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
+            local IS_SINGULAR = true
+            local currencyName = GetCurrencyName(currencyType, IS_SINGULAR, IS_UPPER)
+            displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, currencyName)
         end
         self:AddLine(displayName, self:GetStyle("title"))
 

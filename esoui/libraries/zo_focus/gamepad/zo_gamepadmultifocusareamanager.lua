@@ -94,9 +94,7 @@ function ZO_GamepadMultiFocusArea_Base:HandleMovePrevious()
 	local consumed = false
     local selectableFocus = self.manager:GetPreviousSelectableFocusArea(self)
     if selectableFocus then
-        self:Deactivate()
-        selectableFocus:Activate()
-        self.manager:SetNewFocusArea(selectableFocus)
+        self.manager:SelectFocusArea(selectableFocus)
         consumed = true
     end
     return consumed
@@ -106,9 +104,7 @@ function ZO_GamepadMultiFocusArea_Base:HandleMoveNext()
 	local consumed = false
     local selectableFocus = self.manager:GetNextSelectableFocusArea(self)
     if selectableFocus then
-        self:Deactivate()
-        selectableFocus:Activate()
-        self.manager:SetNewFocusArea(selectableFocus)
+        self.manager:SelectFocusArea(selectableFocus)
         consumed = true
     end
     return consumed
@@ -168,9 +164,19 @@ function ZO_GamepadMultiFocusArea_Manager:GetNextSelectableFocusArea(startFocusA
     return nil
 end
 
-function ZO_GamepadMultiFocusArea_Manager:SetNewFocusArea(focusArea)
+function ZO_GamepadMultiFocusArea_Manager:SelectFocusArea(focusArea)
     if self.currentFocalArea ~= focusArea then
+        local hasActiveFocus = self:HasActiveFocus()
+        if self.currentFocalArea and hasActiveFocus then
+            self.currentFocalArea:Deactivate()
+        end
+
         self.currentFocalArea = focusArea
+
+        if focusArea and hasActiveFocus then
+            focusArea:Activate()
+        end
+
         self:OnFocusChanged()
     end
 end

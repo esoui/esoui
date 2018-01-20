@@ -116,15 +116,6 @@ GetItemLinkRecipeRankRequirement = function(itemLink)
     return 0
 end
 
---Items can now be converted to more styles than just imperial
-CanConvertItemStyleToImperial = function(itemToBagId, itemToSlotIndex)
-    return CanConvertItemStyle(itemToBagId, itemToSlotIndex, GetImperialStyleId())
-end
-
-ConvertItemStyleToImperial = function(itemToBagId, itemToSlotIndex)
-    ConvertItemStyle(itemToBagId, itemToSlotIndex, GetImperialStyleId())
-end
-
 --renamed this type
 COLLECTIBLE_CATEGORY_TYPE_TROPHY = COLLECTIBLE_CATEGORY_TYPE_MEMENTO
 

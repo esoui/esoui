@@ -491,7 +491,6 @@ EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.xml
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Swatches_Gamepad.lua
 EsoUI\Ingame\Dyeing\DyeStamp_Confirmation_Shared.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.xml
@@ -524,6 +523,9 @@ EsoUI\Ingame\Outfits\Keyboard\OutfitStylesPanel_Keyboard.xml
 
 EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.xml
+
+EsoUI\Ingame\Collections\Gamepad\ChapterUpgrade_Gamepad.lua
+EsoUI\Ingame\Collections\Gamepad\ChapterUpgrade_Gamepad.xml
 
 EsoUI\Ingame\Achievements\Achievements_Shared.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.lua

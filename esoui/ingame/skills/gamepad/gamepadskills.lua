@@ -33,8 +33,6 @@ function ZO_GamepadSkills:Initialize(control)
     GAMEPAD_SKILLS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
         if newState == SCENE_SHOWING then
-            GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_LEFT_TOOLTIP, true)
-            GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
 
             self:SetMode(ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE)
             self:RefreshHeader(GetString(SI_MAIN_MENU_SKILLS))
@@ -288,7 +286,7 @@ function ZO_GamepadSkills:SelectSkillLineFromAdvisor()
         local data = self.categoryList:GetDataForDataIndex(targetIndex)
         self.categoryList:SetSelectedIndexWithoutAnimation(targetIndex)
         
-        if data.discovered then
+        if data.available then
             -- Since the ability we want to select won't be available until after the lineFilterList is refreshed,
             -- store ability we want to select as a member var and use it to select the abilty after list is ready
             self.selectSkillLineAbility = selectedData.dataSource.abilityIndex
@@ -570,12 +568,14 @@ end
 function ZO_GamepadSkills:OnEnterHeader()
     self:ActivateAssignableActionBarFromList()
     self:UpdateKeybinds()
+    PlaySound(SOUNDS.GAMEPAD_MENU_UP)
 end
 
 function ZO_GamepadSkills:OnLeaveHeader()
     self.assignableActionBar:SetSelectedButton(nil)
     self.assignableActionBar:Deactivate()
     self:UpdateKeybinds()
+    PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
 end
 
 function ZO_GamepadSkills:UpdateKeybinds()
@@ -827,8 +827,8 @@ function ZO_GamepadSkills:RefreshCategoryList()
         local numSkillLines = GetNumSkillLines(skillType)
         local isHeader = true
         for skillLineIndex = 1, numSkillLines do
-            local name, _ , discovered, _, advised = GetSkillLineInfo(skillType, skillLineIndex)
-            if discovered or advised then
+            local name, _ , available, _, advised = GetSkillLineInfo(skillType, skillLineIndex)
+            if available or advised then
                 local function IsSkillLineNew()
                     local CHECK_ABILITIES_IN_SKILL_LINE = true
                     return NEW_SKILL_CALLOUTS:IsSkillLineNew(skillType, skillLineIndex, CHECK_ABILITIES_IN_SKILL_LINE)
@@ -838,7 +838,7 @@ function ZO_GamepadSkills:RefreshCategoryList()
                 data:SetNew(IsSkillLineNew)
                 data.skillType = skillType
                 data.skillLineIndex = skillLineIndex
-                data.discovered = discovered
+                data.available = available
                 data.advised = advised   
 
                 if isHeader then
@@ -1075,6 +1075,16 @@ do
             mainText = 
             {
                 text = GetString(SI_GAMEPAD_SKILLS_UPGRADE_CONFIRM),
+            },
+            warning = 
+            {
+                text = function(dialog)
+                    if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(dialog.data.skillType, dialog.data.skillLineIndex, dialog.data.abilityIndex) then
+                        ZO_GenericGamepadDialog_SetDialogWarningColor(dialog, ZO_SKILLS_ADVISOR_ADVISED_COLOR)
+                        return GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED)
+                    end
+                    return ""
+                end
             },
             buttons =
             {
@@ -1427,8 +1437,8 @@ function ZO_GamepadSkills:RefreshSelectedTooltip()
                 SCENE_MANAGER:AddFragment(SKILLS_ADVISOR_SUGGESTIONS_GAMEPAD_FRAGMENT)
             end
         elseif selectedData then 
-            local name, _, discovered, _, advised, unlockText = GetSkillLineInfo(selectedData.skillType, selectedData.skillLineIndex)
-            if discovered then
+            local name, _, available, _, advised, unlockText = GetSkillLineInfo(selectedData.skillType, selectedData.skillLineIndex)
+            if available then
                 self:RefreshLineFilterList(true) --refresh previewList version
                 SCENE_MANAGER:AddFragment(GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT)
             elseif advised then

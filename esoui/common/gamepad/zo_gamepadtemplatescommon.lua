@@ -312,14 +312,7 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(ITEM_IS_HIDDEN_TEXTURE)
         end
 
-        local isItemNew
-        if type(data.brandNew) == "function" then
-            isItemNew = data.brandNew()
-        else
-            isItemNew = data.brandNew
-        end
-
-        if isItemNew and data.enabled then
+        if data:IsNew() and data.enabled then
             statusIndicator:AddIcon(ZO_GAMEPAD_NEW_ICON_32)
         end
 

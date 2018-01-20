@@ -146,9 +146,3 @@ function ZO_FormatResourceBarCurrentAndMax(current, maximum)
 
 	return returnValue
 end
-
--- This allows us to make a the same function in InGame and Pregame while changing exactly what it calls,
--- so shared code doesn't need to know which state its in
-function ZO_Disconnect()
-    Disconnect()
-end

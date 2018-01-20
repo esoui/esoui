@@ -21,9 +21,6 @@ function FriendsList_Gamepad:Initialize(control)
 
     GAMEPAD_FRIENDS_LIST_SCENE = ZO_Scene:New("gamepad_friends", SCENE_MANAGER)
     GAMEPAD_FRIENDS_LIST_SCENE:AddFragment(self:GetListFragment())
-
-    local SCROLL_PADDING_HEIGHT = 100 
-    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
 end
 
 function FriendsList_Gamepad:GetAddKeybind()

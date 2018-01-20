@@ -100,6 +100,9 @@ function ZO_CollectibleData:SetOutfitStyleData()
         self.visualArmorType = self.isArmorStyle and GetOutfitStyleVisualArmorType(referenceId) or nil
         self.weaponModelType = self.isWeaponStyle and GetOutfitStyleWeaponModelType(referenceId) or nil
         self.outfitStyleCost = GetOutfitStyleCost(referenceId)
+        self.outfitStyleItemStyleId = GetOutfitStyleItemStyleId(referenceId)
+        self.outfitStyleItemStyleName = GetItemStyleName(self.outfitStyleItemStyleId)
+        self.outfitStyleGearType = self:IsArmorStyle() and self:GetVisualArmorType() or self:GetWeaponModelType()
         self.outfitStyleFreeConversionCollectible = GetOutfitStyleFreeConversionCollectibleId(referenceId)
     else
         self.isArmorStyle = nil
@@ -107,6 +110,9 @@ function ZO_CollectibleData:SetOutfitStyleData()
         self.visualArmorType = nil
         self.weaponModelType = nil
         self.outfitStyleCost = nil
+        self.outfitStyleItemStyleId = nil
+        self.outfitStyleItemStyleName = nil
+        self.outfitStyleGearType = nil
         self.outfitStyleFreeConversionCollectible = nil
     end
 end
@@ -126,6 +132,7 @@ end
 
 function ZO_CollectibleData:Refresh()
     local collectibleId = self.collectibleId
+    local previousUnlockState = self.unlockState
     self.isActive = IsCollectibleActive(collectibleId)
     self.nickname = GetCollectibleNickname(collectibleId)
     self.unlockState = GetCollectibleUnlockStateById(collectibleId)
@@ -133,6 +140,11 @@ function ZO_CollectibleData:Refresh()
     self.isRenameable = IsCollectibleRenameable(collectibleId)
     self.isSlottable = IsCollectibleSlottable(collectibleId)
     self.cachedDisplayName = nil
+
+    local categoryData = self:GetCategoryData()
+    if categoryData then
+        categoryData:UpdateSpecializedSortOrderOnCollectibleUpdate(self, previousUnlockState ~= self.unlockState)
+    end
 end
 
 function ZO_CollectibleData:GetCategoryData()
@@ -325,6 +337,18 @@ function ZO_CollectibleData:GetWeaponModelType()
     return self.weaponModelType
 end
 
+function ZO_CollectibleData:GetOutfitGearType()
+    return self.outfitStyleGearType
+end
+
+function ZO_CollectibleData:GetOutfitStyleItemStyleId()
+    return self.outfitStyleItemStyleId
+end
+
+function ZO_CollectibleData:GetOutfitStyleItemStyleName()
+    return self.outfitStyleItemStyleName
+end
+
 function ZO_CollectibleData:GetOutfitStyleCost()
     if self:IsOutfitStyle() then
         if self.outfitStyleCost ~= 0 and self.outfitStyleFreeConversionCollectible then
@@ -423,6 +447,203 @@ do
         elseif self.weaponModelType then
             return WEAPON_VISUAL_TO_SOUND_ID[self.weaponModelType]
         end
+    end
+end
+
+-----------------------------------
+-- Specialized Sorted Collectibles
+-----------------------------------
+
+ZO_SpecializedSortedCollectibles = ZO_Object:Subclass()
+
+function ZO_SpecializedSortedCollectibles:New(...)
+    local object = ZO_Object:New(self)
+    object:Initialize(...)
+    return object
+end
+
+function ZO_SpecializedSortedCollectibles:Initialize()
+    self.dirty = false
+    self.sortedCollectibles = {}
+end
+
+function ZO_SpecializedSortedCollectibles:GetCollectibles()
+    if self.dirty then
+        self:RefreshSort()
+    end
+
+    return self.sortedCollectibles
+end
+
+function ZO_SpecializedSortedCollectibles:InsertCollectible(collectibleData)
+    assert(false) -- override in derived classes
+end
+
+function ZO_SpecializedSortedCollectibles:OnInsertFinished()
+    assert(false) -- override in derived classes
+end
+
+function ZO_SpecializedSortedCollectibles:OnCollectibleUpdated(collectibleData, lockStatusChanged)
+    assert(false) -- override in derived classes
+end
+
+function ZO_SpecializedSortedCollectibles:RefreshSort()
+    assert(false) -- override in derived classes
+end
+
+-------------------------------------------------------
+-- Specialized Sorted Collectibles Outfit Style Types
+-------------------------------------------------------
+
+ZO_SpecializedSortedOutfitStyleTypes = ZO_SpecializedSortedCollectibles:Subclass()
+
+function ZO_SpecializedSortedOutfitStyleTypes:New(...)
+    return ZO_SpecializedSortedCollectibles.New(self, ...)
+end
+
+function ZO_SpecializedSortedOutfitStyleTypes:Initialize()
+    ZO_SpecializedSortedCollectibles.Initialize(self)
+
+    self.itemStyleNameLookupTable = {}
+end
+
+function ZO_SpecializedSortedOutfitStyleTypes:InsertCollectible(collectibleData)
+    local type = collectibleData:GetOutfitGearType()
+    if type then
+        local styles = self.sortedCollectibles[type] 
+        if not styles then
+            styles = ZO_SpecializedSortedOutfitStyles:New(self)
+            self.sortedCollectibles[type] = styles
+        end
+
+        local itemStyleId = collectibleData:GetOutfitStyleItemStyleId()
+        if not self.itemStyleNameLookupTable[itemStyleId] then
+            self.itemStyleNameLookupTable[itemStyleId] =
+            {
+                name = collectibleData:GetOutfitStyleItemStyleName(),
+                id = itemStyleId
+            }
+        end
+
+        styles:InsertCollectible(collectibleData)
+        self.dirty = true
+    end
+end
+
+function ZO_SpecializedSortedOutfitStyleTypes:OnCollectibleUpdated(collectibleData, lockStatusChanged)
+    if lockStatusChanged then
+        local type = collectibleData:GetOutfitGearType()
+        if type and self.sortedCollectibles[type] then
+            self.sortedCollectibles[type]:OnCollectibleUpdated(collectibleData, lockStatusChanged)
+            self.dirty = true
+        end
+    end
+end
+
+function ZO_SpecializedSortedOutfitStyleTypes:RefreshSort()
+    if self.dirty then
+        for weaponOrArmorType, collectibleDataForType in pairs(self.sortedCollectibles) do
+            collectibleDataForType:RefreshSort()
+        end
+
+        self.dirty = false
+    end
+end
+
+function ZO_SpecializedSortedOutfitStyleTypes:OnInsertFinished()
+    local tempTable = {}
+    for _, styleNameData in pairs(self.itemStyleNameLookupTable) do
+        table.insert(tempTable, styleNameData)
+    end
+
+    table.sort(tempTable, function(left, right)
+        return left.name < right.name
+    end)
+    
+    for position, styleNameData in ipairs(tempTable) do
+        self.itemStyleNameLookupTable[styleNameData.id] = position
+    end
+
+    for weaponOrArmorType, collectibleDataForType in pairs(self.sortedCollectibles) do
+        collectibleDataForType:OnInsertFinished()
+    end
+
+    self:RefreshSort()
+end
+
+--------------------------------------------------
+-- Specialized Sorted Collectibles Outfit Styles
+--------------------------------------------------
+
+ZO_SpecializedSortedOutfitStyles = ZO_SpecializedSortedCollectibles:Subclass()
+
+function ZO_SpecializedSortedOutfitStyles:New(...)
+    return ZO_SpecializedSortedCollectibles.New(self, ...)
+end
+
+function ZO_SpecializedSortedOutfitStyles:Initialize(owner)
+    ZO_SpecializedSortedCollectibles.Initialize(self)
+    self.owner = owner
+
+    self.outfitStyleNameLookupTable = {}
+end
+
+
+function ZO_SpecializedSortedOutfitStyles:InsertCollectible(collectibleData)
+    table.insert(self.sortedCollectibles, collectibleData)
+
+    local collectibleId = collectibleData:GetId()
+    if not self.outfitStyleNameLookupTable[collectibleId] then
+        self.outfitStyleNameLookupTable[collectibleId] =
+        {
+            name = collectibleData:GetName(),
+            id = collectibleId
+        }
+    end
+
+    self.dirty = true
+end
+
+function ZO_SpecializedSortedOutfitStyles:OnCollectibleUpdated(collectibleData, lockStatusChanged)
+    if lockStatusChanged then
+        self.dirty = true
+    end
+end
+
+function ZO_SpecializedSortedOutfitStyles:RefreshSort()
+    if self.dirty then
+        local itemStyleNameLookupTable = self.owner.itemStyleNameLookupTable
+        local outfitStyleNameLookupTable = self.outfitStyleNameLookupTable
+        table.sort(self.sortedCollectibles, function(left, right) 
+            if left:IsUnlocked() ~= right:IsUnlocked() then
+                return left:IsUnlocked()
+            elseif left:GetOutfitStyleItemStyleId() ~= right:GetOutfitStyleItemStyleId() then
+                return itemStyleNameLookupTable[left:GetOutfitStyleItemStyleId()] < itemStyleNameLookupTable[right:GetOutfitStyleItemStyleId()]
+            elseif left:GetSortOrder() ~= right:GetSortOrder() then
+                return left:GetSortOrder() < right:GetSortOrder()
+            else
+                return outfitStyleNameLookupTable[left:GetId()] < outfitStyleNameLookupTable[right:GetId()]
+            end
+        end)
+    end
+
+    self.dirty = false
+end
+
+function ZO_SpecializedSortedOutfitStyles:OnInsertFinished()
+    local tempTable = {}
+    for _, outfitStyleNameData in pairs(self.outfitStyleNameLookupTable) do
+        table.insert(tempTable, outfitStyleNameData)
+    end
+
+    table.sort(tempTable, function(left, right)
+        return left.name < right.name
+    end)
+
+    self.outfitStyleNameLookupTable = {}
+    
+    for position, outfitStyleNameData in ipairs(tempTable) do
+        self.outfitStyleNameLookupTable[outfitStyleNameData.id] = position
     end
 end
 
@@ -528,14 +749,30 @@ function ZO_CollectibleCategoryData:BuildData(categoryIndex, subcategoryIndex)
     end
 
     self.categorySpecialization = GetCollectibleCategorySpecialization(categoryIndex)
+    self.specializedSortedCollectibles = self:CreateSpecializedSortedCollectiblesTable()
 
     for collectibleIndex = 1, self.numCollectibles do
         local collectibleData = self.collectibleObjectPool:AcquireObject()
         collectibleData:BuildData(self, collectibleIndex)
         table.insert(self.orderedCollectibles, collectibleData)
+        if self.specializedSortedCollectibles then
+            self.specializedSortedCollectibles:InsertCollectible(collectibleData)
+        end
+    end
+
+    if self.specializedSortedCollectibles then
+        self.specializedSortedCollectibles:OnInsertFinished()
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:MapCategoryData(self)
+end
+
+function ZO_CollectibleCategoryData:CreateSpecializedSortedCollectiblesTable()
+    if self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES then
+        return ZO_SpecializedSortedOutfitStyleTypes:New()
+    end
+
+    return nil
 end
 
 function ZO_CollectibleCategoryData:GetName()
@@ -596,6 +833,20 @@ end
 
 function ZO_CollectibleCategoryData:GetCollectibleDataByIndex(collectibleIndex)
     return self.orderedCollectibles[collectibleIndex]
+end
+
+function ZO_CollectibleCategoryData:GetCollectibleDataBySpecializedSort()
+    if self.specializedSortedCollectibles then
+        return self.specializedSortedCollectibles:GetCollectibles()
+    end
+
+    return nil
+end
+
+function ZO_CollectibleCategoryData:UpdateSpecializedSortOrderOnCollectibleUpdate(collectibleData, lockStatusChanged)
+    if self.specializedSortedCollectibles then
+        self.specializedSortedCollectibles:OnCollectibleUpdated(collectibleData, lockStatusChanged)
+    end
 end
 
 function ZO_CollectibleCategoryData:CollectibleIterator(...)  -- ... Are filter functions that take collectibleData as a param

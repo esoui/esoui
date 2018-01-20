@@ -680,6 +680,8 @@ function ZO_InventoryManager:Initialize(control)
                 self:UpdateList(INVENTORY_QUEST_ITEM, UPDATE_EVEN_IF_HIDDEN)
             end
             self:RefreshMoney()
+            self:UpdateFreeSlots(INVENTORY_BACKPACK)
+
             self:UpdateApparelSection()
             --Reseting the comparison stats here since its too later when the window is already hidden.
             ZO_CharacterWindowStats_HideComparisonValues()
@@ -1818,6 +1820,7 @@ function ZO_InventoryManager:AddQuestItem(questItem, searchType)
     if not inventory.slots[questIndex] then
         inventory.slots[questIndex] = {}
     end
+    questItem.slotIndex = questIndex
     table.insert(inventory.slots[questIndex], questItem)
 
     local index = #inventory.slots[questIndex]
@@ -2099,6 +2102,8 @@ function ZO_InventoryManager:CreateBankScene()
     BANK_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                         if newState == SCENE_SHOWING then
                                                             self:RefreshMoney()
+                                                            self:UpdateFreeSlots(INVENTORY_BANK)
+
                                                             if self.isListDirty[INVENTORY_BANK] then
                                                                 local UPDATE_EVEN_IF_HIDDEN = true
                                                                 self:UpdateList(INVENTORY_BANK, UPDATE_EVEN_IF_HIDDEN)
@@ -2182,8 +2187,6 @@ function ZO_InventoryManager:CreateBankScene()
     bankScene:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_SHOWING then
                                                         self:RefreshAllInventorySlots(INVENTORY_BANK)
-                                                        self:UpdateFreeSlots(INVENTORY_BANK)
-                                                        self:UpdateFreeSlots(INVENTORY_BACKPACK)
                                                         bankFragmentBar:SelectFragment(SI_BANK_WITHDRAW)
 
                                                         TriggerTutorial(TUTORIAL_TRIGGER_ACCOUNT_BANK_OPENED)
@@ -2257,6 +2260,7 @@ function ZO_InventoryManager:CreateHouseBankScene()
                                                                 self:UpdateList(INVENTORY_HOUSE_BANK, UPDATE_EVEN_IF_HIDDEN)
                                                             end
                                                             self:RefreshMoney()
+                                                            self:UpdateFreeSlots(INVENTORY_HOUSE_BANK)
                                                         end
                                                     end)
 

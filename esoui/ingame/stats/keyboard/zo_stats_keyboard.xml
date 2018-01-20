@@ -277,7 +277,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_StatsActiveEffectRow" mouseEnabled="true" virtual="true">
+        <Control name="ZO_StatsActiveEffectRow" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
             <Dimensions x="607" y="40" />
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
@@ -295,16 +295,6 @@
                 ZO_StatsActiveEffect_OnMouseUp(self, button, upInside)
             </OnMouseUp>
             <Controls>
-                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
-                </Texture>
-
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
-                </Texture>
-
                 <Texture name="$(parent)Icon">
                     <Dimensions x="40" y="40" />
                     <Anchor point="LEFT" />

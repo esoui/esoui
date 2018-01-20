@@ -333,13 +333,16 @@ do
     local function LayoutBasicTooltip(tooltip, control, title, body)
         InitializeTooltip(tooltip, control, LEFT, 0, 0, RIGHT)
 
-        local r, g, b = ZO_SELECTED_TEXT:UnpackRGB()
-        ItemTooltip:AddLine(title, "ZoFontWinH2", r, g, b)
+        tooltip:AddVerticalPadding(5)
 
-        ZO_Tooltip_AddDivider(ItemTooltip)
+        local r, g, b = ZO_SELECTED_TEXT:UnpackRGB()
+        local FULL_WIDTH = true
+        tooltip:AddLine(title, "ZoFontWinH2", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_UPPERCASE, TEXT_ALIGN_CENTER, FULL_WIDTH)
+
+        ZO_Tooltip_AddDivider(tooltip)
 
         r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
-        ItemTooltip:AddLine(body, "ZoFontGameMedium", r, g, b)
+        tooltip:AddLine(body, "ZoFontGameMedium", r, g, b)
     end
 
     function ZO_LevelUpRewards_RewardRow_OnMouseEnter(control)
@@ -351,7 +354,6 @@ do
                 InitializeTooltip(ItemTooltip, control, LEFT, 0, 0, RIGHT)
                 ItemTooltip:SetRewardEntry(rewardId, entryIndex)
                 if controlData.rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    ItemTooltip:HideComparativeTooltips()
                     ItemTooltip:ShowComparativeTooltips()
                     ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
                     ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
@@ -371,6 +373,7 @@ end
 
 function ZO_LevelUpRewards_RewardRow_OnMouseExit(control)
     ClearTooltip(ItemTooltip)
+    ItemTooltip:HideComparativeTooltips()
 end
 
 function ZO_LevelUpRewards_ChoiceRewardRow_OnMouseEnter(control)

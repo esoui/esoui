@@ -549,7 +549,26 @@ local AlertHandlers = {
     end,
 
     [EVENT_BANK_IS_FULL] = function()
-        return ERROR, GetString(SI_INVENTORY_ERROR_BANK_FULL), SOUNDS.GENERAL_ALERT_ERROR
+        local bankingBag = GetBankingBag()
+        if IsHouseBankBag(bankingBag) then
+            local interactName = GetUnitName("interact")
+            local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
+            local nickname
+            if collectibleId ~= 0 then
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                if collectibleData then
+                    nickname = collectibleData:GetNickname()
+                end
+            end
+
+            if nickname and nickname ~= "" then
+                return ERROR, zo_strformat(SI_BANK_HOME_STORAGE_FULL_WITH_NICKNAME, interactName, nickname), SOUNDS.GENERAL_ALERT_ERROR
+            else
+                return ERROR, zo_strformat(SI_BANK_HOME_STORAGE_FULL, interactName), SOUNDS.GENERAL_ALERT_ERROR
+            end
+        else
+            return ERROR, GetString(SI_INVENTORY_ERROR_BANK_FULL), SOUNDS.GENERAL_ALERT_ERROR
+        end
     end,
 
     [EVENT_QUEST_LOG_IS_FULL] = function()

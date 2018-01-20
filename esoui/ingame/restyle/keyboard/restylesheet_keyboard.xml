@@ -4,10 +4,16 @@
             <Dimensions x="ZO_RESTYLE_SLOT_WIDTH" y="ZO_RESTYLE_SLOT_HEIGHT" />
 
             <Controls>
-                <Texture name="$(parent)ItemSlot" level="ZO_RESTYLE_TEXTURE_LEVEL_ICON" mouseEnabled="true">
-                    <Dimensions x="ZO_RESTYLE_SLOT_ICON_WIDTH" y="ZO_RESTYLE_SLOT_HEIGHT" />
+                <Control name="$(parent)ItemSlot" mouseEnabled="true">
+                    <Dimensions x="ZO_RESTYLE_SLOT_ICON_WIDTH" y="ZO_RESTYLE_SLOT_ICON_HEIGHT" />
                     <Anchor point="LEFT" />
-                </Texture>
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="ZO_RESTYLE_TEXTURE_LEVEL_ICON">
+                            <Dimensions x="ZO_RESTYLE_SLOT_ICON_INNER_WIDTH" y="ZO_RESTYLE_SLOT_ICON_INNER_HEIGHT" />
+                            <Anchor point="CENTER" />
+                        </Texture>
+                    </Controls>
+                </Control>
 
                 <Control name="$(parent)Dyes" inherits="ZO_DyeingSwatchSlotDyes">
                     <Dimensions y="ZO_RESTYLE_SLOT_HEIGHT" />

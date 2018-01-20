@@ -314,7 +314,7 @@ function LevelUpRewardsManager:GetPlatformAttributePointIcon()
     if IsInGamepadPreferredMode() then
         return "EsoUI/Art/LevelUpRewards/gamepad/levelup_gp_attribute_32.dds"
     else
-        return "EsoUI/Art/LevelUpRewards/levelup_kb_attribute_32.dds"
+        return "EsoUI/Art/LevelUpRewards/levelup_attribute_64.dds"
     end
 end
 
@@ -322,7 +322,7 @@ function LevelUpRewardsManager:GetPlatformSkillPointIcon()
     if IsInGamepadPreferredMode() then
         return "EsoUI/Art/LevelUpRewards/gamepad/levelup_gp_skillpt_32.dds"
     else
-        return "EsoUI/Art/LevelUpRewards/levelup_kb_skillpt_32.dds"
+        return "EsoUI/Art/LevelUpRewards/levelup_skillpt_64.dds"
     end
 end
 

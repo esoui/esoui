@@ -37,10 +37,10 @@ function ZO_DyeingToolSample:OnLeftClicked(restyleSlotData, dyeChannel)
 end
 
 function ZO_DyeingToolSample:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
-    local dyeIndex = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
-    if dyeIndex then
+    local dyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
+    if dyeId > INVALID_DYE_ID then
         local SUPPRESS_SOUNDS = true
-        self.owner:SwitchToDyeingWithDyeId(dyeIndex, SUPPRESS_SOUNDS)
+        self.owner:SwitchToDyeingWithDyeId(dyeId, SUPPRESS_SOUNDS)
         PlaySound(SOUNDS.DYEING_TOOL_SAMPLE_USED)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.GENERAL_ALERT_ERROR, SI_DYEING_CANNOT_SAMPLE)
@@ -49,4 +49,8 @@ end
 
 function ZO_DyeingToolSample:GetCursorType()
     return MOUSE_CURSOR_SAMPLE
+end
+
+function ZO_DyeingToolSample:GetToolActionString()
+    return SI_DYEING_TOOL_SAMPLE_TOOLTIP
 end

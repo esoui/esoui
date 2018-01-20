@@ -316,13 +316,18 @@ function SkillsAdvisor_Singleton:RefreshVisibleAbilityLists()
     end
 end
 
+function SkillsAdvisor_Singleton:IsPassiveRankPurchased(control)
+    local data = control and control.ability and control.ability.dataEntry and control.ability.dataEntry.data
+    return data and data.purchased and data.passive and data.rankIndex >= data.skillBuildRankIndex
+end
+
 function SkillsAdvisor_Singleton:IsPurchaseable(skillType, skillLineIndex, abilityIndex)
-    local _, lineRank = GetSkillLineInfo(skillType, skillLineIndex)
+    local _, lineRank, available = GetSkillLineInfo(skillType, skillLineIndex)
     local name, _, earnedRank, _, _, purchased = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
 
     if purchased then 
         return ZO_SKILLS_ABILITY_PURCHASED
-    elseif lineRank >= earnedRank then
+    elseif available and lineRank >= earnedRank then
         return ZO_SKILLS_ABILITY_PURCHASEABLE
     else
         return ZO_SKILLS_ABILITY_NOT_PURCHASEABLE

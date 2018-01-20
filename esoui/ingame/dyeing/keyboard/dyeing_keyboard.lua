@@ -69,20 +69,10 @@ function ZO_Dyeing_Keyboard:Initialize(control)
     end
 
     ZO_DYEING_MANAGER:RegisterCallback("UpdateDyeData", UpdateDyeLayout)
-    ZO_DYEING_MANAGER:RegisterForDyeListUpdates(UpdateDyeLayout)
+    ZO_DYEING_MANAGER:RegisterCallback("UpdateDyeLists", UpdateDyeLayout)
     ZO_DYEING_MANAGER:RegisterCallback("UpdateSearchResults", UpdateDyeLayout)
+    ZO_DYEING_MANAGER:RegisterCallback("OptionsInfoAvailable", function() self:UpdateOptionControls() end)
 
-    local function OnAddOnLoaded(event, name)
-        if name == "ZO_Ingame" then
-            self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "Dyeing", ZO_DYEING_SAVED_VARIABLES_DEFAULTS)
-
-            self:UpdateOptionControls()
-
-            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
-        end
-    end
-
-    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     self:DirtyDyeLayout()
 end
 
@@ -257,10 +247,7 @@ function ZO_Dyeing_Keyboard:InitializeSortsAndFilters()
     local sortByControl = self.control:GetNamedChild("SortBy")
 
     local function OnFilterChanged(checkButton, isChecked)
-        if self.savedVars.showLocked ~= isChecked then
-            self.savedVars.showLocked = isChecked
-            ZO_DYEING_MANAGER:UpdateAllDyeLists()
-        end
+        ZO_DYEING_MANAGER:SetShowLocked(isChecked)
     end
 
     ZO_CheckButton_SetToggleFunction(self.showLockedCheckBox, OnFilterChanged)
@@ -268,10 +255,7 @@ function ZO_Dyeing_Keyboard:InitializeSortsAndFilters()
     ZO_CheckButton_SetLabelWrapMode(self.showLockedCheckBox, TEXT_WRAP_MODE_ELLIPSIS, sortByControl:GetLeft() - self.showLockedCheckBox:GetRight() - 10)
 
     local function SetSortStyle(_, _, entry)
-        if entry.sortStyleType ~= self.savedVars.sortStyle then
-            self.savedVars.sortStyle = entry.sortStyleType
-            ZO_DYEING_MANAGER:UpdateAllDyeLists()
-        end
+        ZO_DYEING_MANAGER:SetSortStyle(entry.sortStyleType)
     end
 
     self.sortDropDown = ZO_ComboBox_ObjectFromContainer(sortByControl)
@@ -289,8 +273,8 @@ function ZO_Dyeing_Keyboard:InitializeSortsAndFilters()
 end
 
 function ZO_Dyeing_Keyboard:UpdateOptionControls()
-    self.sortDropDown:SelectItem(self.savedVars.sortStyle == ZO_DYEING_SORT_STYLE_RARITY and self.sortByRarityEntry or self.sortByHueEntry)
-    ZO_CheckButton_SetCheckState(self.showLockedCheckBox, self.savedVars.showLocked)
+    self.sortDropDown:SelectItem(ZO_DYEING_MANAGER:GetSortStyle() == ZO_DYEING_SORT_STYLE_RARITY and self.sortByRarityEntry or self.sortByHueEntry)
+    ZO_CheckButton_SetCheckState(self.showLockedCheckBox, ZO_DYEING_MANAGER:GetShowLocked())
 end
 
 function ZO_Dyeing_Keyboard:DirtyDyeLayout()
@@ -466,7 +450,7 @@ do
     function ZO_Dyeing_Keyboard:LayoutDyes()
         self.dyeLayoutDirty = false
 
-        local _, _, dyeIdToSwatch = ZO_Dyeing_LayoutSwatches(self.savedVars.showLocked, self.savedVars.sortStyle, self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS, self.pane, USE_SEARCH_RESULTS)
+        local _, _, dyeIdToSwatch = ZO_Dyeing_LayoutSwatches(ZO_DYEING_MANAGER:GetShowLocked(), ZO_DYEING_MANAGER:GetSortStyle(), self.swatchPool, self.headerPool, SWATCHES_LAYOUT_OPTIONS, self.pane, USE_SEARCH_RESULTS)
         self.dyeIdToSwatch = dyeIdToSwatch
 
         local anyDyesToSwatch = (next(dyeIdToSwatch) ~= nil)

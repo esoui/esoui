@@ -85,5 +85,7 @@ EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml
 
 EsoUI\Common\MarketTemplates\MarketTemplates_Shared.xml
+EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.lua
+EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.xml
 EsoUI\Common\MarketTemplates\Keyboard\MarketTemplates_Keyboard.xml
 EsoUI\Common\MarketTemplates\Gamepad\MarketTemplates_Gamepad.xml

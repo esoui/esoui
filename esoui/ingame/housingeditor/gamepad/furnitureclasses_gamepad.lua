@@ -544,8 +544,6 @@ function ZO_HousingSettingsList_Gamepad:Initialize(userGroup, control, owner, da
     ZO_ScrollList_AddDataType(self.list, dataType, "ZO_HousingPermissionsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
     self:SetEmptyText(GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_NO_ENTRIES))
     self:SetupSort(ZO_HOUSING_SETTINGS_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_DOWN)
-    local SCROLL_PADDING_HEIGHT = 100 
-    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
 end
 
 function ZO_HousingSettingsList_Gamepad:InitializeKeybinds()

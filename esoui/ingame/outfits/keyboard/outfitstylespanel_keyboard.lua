@@ -1,6 +1,7 @@
 ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD = 67
 ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_ICON_DIMENSIONS_KEYBOARD = 52
 ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD = 5
+local VISIBLE_ICON = "EsoUI/Art/Inventory/inventory_icon_visible.dds"
 
 local RETAIN_SCROLL_POSITION = true
 
@@ -31,14 +32,7 @@ function ZO_OutfitStylesPanel_Keyboard:Initialize(control)
 
     self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
 
-    local function OnAddOnLoaded(event, name)
-        if name == "ZO_Ingame" then
-            self:SetupSavedVars()
-            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
-        end
-    end
-
-    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+    ZO_OUTFIT_MANAGER:RegisterCallback("OptionsInfoAvailable", function() ZO_CheckButton_SetCheckState(self.showLockedCheckBox, ZO_OUTFIT_MANAGER:GetShowLocked()) end)
 
     KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(control)
     KEYBOARD_OUTFIT_STYLES_PANEL_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
@@ -56,13 +50,6 @@ function ZO_OutfitStylesPanel_Keyboard:Initialize(control)
     self:RegisterEvents()
 end
 
-function ZO_OutfitStylesPanel_Keyboard:SetupSavedVars()
-    local defaults = { showLockedStyles = true }
-    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "OutfitSlots", defaults)
-
-    ZO_CheckButton_SetCheckState(self.showLockedCheckBox, self.savedVars.showLockedStyles)
-end
-
 function ZO_OutfitStylesPanel_Keyboard:InitializeProgressBar()
     self.progressBar = self.control:GetNamedChild("ProgressStatusBar")
     ZO_StatusBar_SetGradientColor(self.progressBar, ZO_XP_BAR_GRADIENT_COLORS)
@@ -74,8 +61,7 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeSortsAndFilters()
     self.typeFilterControl = self.control:GetNamedChild("TypeFilter")
 
     local function UpdateShowLockedAndRefresh(button, checked)
-        self.savedVars.showLockedStyles = checked
-        self:RefreshVisible()
+        ZO_OUTFIT_MANAGER:SetShowLocked(checked)
     end
 
     ZO_CheckButton_SetToggleFunction(self.showLockedCheckBox, UpdateShowLockedAndRefresh)
@@ -90,6 +76,11 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeSortsAndFilters()
     end
 
     self.allTypesFilterEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_ALL_TYPES_FILTER), RefreshVisible)
+
+    ZO_OUTFIT_MANAGER:RegisterCallback("ShowLockedChanged", function()
+        ZO_CheckButton_SetCheckState(self.showLockedCheckBox, ZO_OUTFIT_MANAGER:GetShowLocked())
+        RefreshVisible()
+    end)
 end
 
 function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
@@ -111,7 +102,7 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
             control:SetAlpha(1)
         end
 
-        control.statusMultiIcon:ClearIcons()
+        self:RefreshGridEntryMultiIcon(control, data)
 
         if not data.isEmptyCell then
             control.highlight:SetDesaturation(data.iconDesaturation)
@@ -133,11 +124,6 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
             if isPending then
                 local isLocked = not data.clearAction and data:IsLocked()
                 ZO_Restyle_ApplyPendingLoopAnimationToControl(control, self.pendingLoopAnimationPool, PENDING_ANIMATION_INSET, isLocked)
-            end
-
-            if not data.clearAction and data:IsNew() then
-                control.statusMultiIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
-                control.statusMultiIcon:Show()
             end
         end
     end
@@ -161,14 +147,7 @@ function ZO_OutfitStylesPanel_Keyboard:RegisterEvents()
     end
 
     local function RefreshMultiIcon(control, data, selected)
-        if not data.isEmptyCell then
-            control.statusMultiIcon:ClearIcons()
-
-            if not data.clearAction and data:IsNew() then
-                control.statusMultiIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
-                control.statusMultiIcon:Show()
-            end
-        end
+        self:RefreshGridEntryMultiIcon(control, data)
     end
 
     local function OnCollectibleNewStatusCleared(collectibleId)
@@ -233,6 +212,7 @@ do
         RefreshPreviewCollectionShown()
         ZO_ClearTable(self.currentSlotPreviews)
         self:FireCallbacks("PreviewSlotsChanged")
+        self.gridListPanelList:RefreshGridList()
     end
 end
 
@@ -318,6 +298,31 @@ do
     end
 end
 
+function ZO_OutfitStylesPanel_Keyboard:RefreshGridEntryMultiIcon(control, data)
+    local statusControl = control.statusMultiIcon
+    if not statusControl then
+        return
+    end
+    statusControl:ClearIcons()
+    if data.isEmptyCell then
+        return
+    end
+
+    local showMultiIcon = false
+    if self:IsPreviewingOutfitStyle(data) then
+        statusControl:AddIcon(VISIBLE_ICON)
+        showMultiIcon = true
+    end
+    if not data.clearAction and data:IsNew() then
+        statusControl:AddIcon(ZO_KEYBOARD_NEW_ICON)
+        showMultiIcon = true
+    end
+
+    if showMultiIcon then
+        statusControl:Show()
+    end
+end
+
 function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
     if not self.fragment:IsShowing() then
         self.isDirty = true
@@ -328,7 +333,6 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
     gridListPanelList:ClearGridList(retainScrollPosition)
     self.entryDataObjectPool:ReleaseAllObjects()
     self.pendingLoopAnimationPool:ReleaseAllObjects()
-    local collectiblesData = nil
 
     if self.collectibleCategoryData then
         if self.restyleSlotData then
@@ -337,7 +341,7 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
             self.restyleSlotData:SetRestyleSetIndex(currentSetIndex)
         end
 
-        local showLocked = self.savedVars.showLockedStyles
+        local showLocked = ZO_OUTFIT_MANAGER:GetShowLocked()
         local typeFilterEntry = self.typeFilterDropDown:GetSelectedItemData()
         local filterVisualArmorType = typeFilterEntry and typeFilterEntry.visualArmorType
         local filterWeaponModelType = typeFilterEntry and typeFilterEntry.weaponModelType
@@ -388,19 +392,19 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
             return true
         end
 
-        collectiblesData = self.collectibleCategoryData:GetAllCollectibleDataObjects(FilterCollectible)
+        local dataByWeaponAndArmorType = self.collectibleCategoryData:GetCollectibleDataBySpecializedSort()
 
         if ZO_RestyleCanApplyChanges() and self.restyleSlotData then
             -- Clear
             local clearEntryData = ZO_GridSquareEntryData_Shared:New()
             clearEntryData.clearAction = true
+            clearEntryData.preferredOutfitSlot = self.restyleSlotData:GetRestyleSlotType()
             clearEntryData.iconFile = self.restyleSlotData:GetClearIcon()
             clearEntryData.gridHeaderName = ""
-            table.insert(collectiblesData, clearEntryData)
+            gridListPanelList:AddEntry(clearEntryData)
         end
 
-        table.sort(collectiblesData, ZO_OutfitStyleCollectiblesGridSort)
-        for _, collectibleData in ipairs(collectiblesData) do
+        local function InsertEntryIntoTable(collectibleData)
             local entryData = self.entryDataObjectPool:AcquireObject()
             entryData:SetDataSource(collectibleData)
             if not collectibleData.clearAction then
@@ -408,12 +412,32 @@ function ZO_OutfitStylesPanel_Keyboard:RefreshVisible(retainScrollPosition)
             end
             gridListPanelList:AddEntry(entryData)
         end
+
+        local NO_WEAPON_OR_ARMOR_TYPE = 0
+        -- make sure to add the hide option first
+        if dataByWeaponAndArmorType[NO_WEAPON_OR_ARMOR_TYPE] then
+            local gearTypeNone = dataByWeaponAndArmorType[NO_WEAPON_OR_ARMOR_TYPE]:GetCollectibles()
+            for _, collectibleData in ipairs(gearTypeNone) do
+                InsertEntryIntoTable(collectibleData)
+            end
+        end
+
+        for type, weaponOrArmorSortedCollectibles in pairs(dataByWeaponAndArmorType) do
+            if type > NO_WEAPON_OR_ARMOR_TYPE then
+                local weaponOrArmorData = weaponOrArmorSortedCollectibles:GetCollectibles()
+                for _, collectibleData in ipairs(weaponOrArmorData) do
+                    if FilterCollectible(collectibleData) then
+                        InsertEntryIntoTable(collectibleData)
+                    end
+                end
+            end
+        end
     end
 
 
     gridListPanelList:CommitGridList()
 
-    self.noStylesLabel:SetHidden(collectiblesData and #collectiblesData > 0)
+    self.noStylesLabel:SetHidden(gridListPanelList:HasEntries())
 
     self.isDirty = false
 end
@@ -464,6 +488,7 @@ function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData,
             ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, preferredOutfitSlot, REFRESH_IMMEDIATELY)
             self.currentSlotPreviews[preferredOutfitSlot] = nil
             self:FireCallbacks("PreviewSlotsChanged")
+            self.gridListPanelList:RefreshGridList()
             return
         end
 
@@ -489,6 +514,7 @@ function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData,
             itemMaterialIndex = itemMaterialIndex,
         }
         self:FireCallbacks("PreviewSlotsChanged")
+        self.gridListPanelList:RefreshGridList()
     end
 end
 
@@ -579,6 +605,12 @@ do
         end
 
         control.highlightAnimation:PlayForward()
+
+        if not control.iconAnimation then
+            control.iconAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_OutfitStyle_GridEntry_IconAnimation", control.icon)
+        end
+
+        control.iconAnimation:PlayForward()
         
         local collectibleData = control.dataEntry.data
         if not collectibleData.isEmptyCell then
@@ -588,10 +620,20 @@ do
                 ItemTooltip:AddLine(GetString(SI_OUTFIT_CLEAR_OPTION_TITLE), "ZoFontWinH2", ZO_SELECTED_TEXT:UnpackRGB())
                 ZO_Tooltip_AddDivider(ItemTooltip)
                 ItemTooltip:AddLine(GetString(SI_OUTFIT_CLEAR_OPTION_DESCRIPTION), "ZoFontGameMedium", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+
+                local preferredOutfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
+                local applyCost = GetOutfitSlotClearCost(preferredOutfitSlot)
+
+                local formattedApplyCost = zo_strformat(SI_TOOLTIP_COLLECTIBLE_OUTFIT_STYLE_APPLICATION_COST_KEYBOARD_NO_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+                ItemTooltip:AddLine(formattedApplyCost, "ZoFontWinH4", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
             else
                 ItemTooltip:SetCollectible(collectibleData.collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
             end
             self.mouseOverEntryData = control.dataEntry
+        end
+
+        if not ZO_RestyleCanApplyChanges() and collectibleData and not collectibleData.isEmptyCell then
+            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
         end
 
         self:FireCallbacks("MouseTargetChanged")
@@ -600,6 +642,7 @@ end
 
 function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryMouseExit(control)
     control.highlightAnimation:PlayBackward()
+    control.iconAnimation:PlayBackward()
     ClearTooltip(ItemTooltip)
     self.mouseOverEntryData = nil
 
@@ -615,6 +658,8 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryMouseExit(control)
         end
     end
 
+    WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+
     self:FireCallbacks("MouseTargetChanged")
 end
 
@@ -625,7 +670,7 @@ end
 function ZO_OutfitStylesPanel_Keyboard:ScrollToCollectibleData(scrollToCollectibleData)
     local entry = self:GetEntryByCollectibleData(scrollToCollectibleData)
     if entry then
-        self.gridListPanelList:ScrollDataToCenter(entry.dataEntry)
+        self.gridListPanelList:ScrollDataToCenter(entry)
     end
 end
 

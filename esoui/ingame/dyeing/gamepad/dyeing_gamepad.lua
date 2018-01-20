@@ -29,7 +29,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:Initialize(control, owner)
         end
     end
 
-    ZO_DYEING_MANAGER:RegisterForDyeListUpdates(UpdateUnlockedDyes)
+    ZO_DYEING_MANAGER:RegisterCallback("UpdateDyeLists", UpdateUnlockedDyes)
     ZO_DYEING_MANAGER:RegisterCallback("UpdateDyeData", UpdateUnlockedDyes)
 
     GAMEPAD_DYEING_SLOTS_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -156,11 +156,11 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeTools()
         ZO_ObjectPool_DefaultResetControl(control)
     end
 
-    local function CreateDyeToolEntryData(tool, tooltipTitle, tooltipDescription, icon)
+    local function CreateDyeToolEntryData(tool, tooltipDescription, icon)
         local toolData = ZO_GridSquareEntryData_Shared:New()
         toolData.tool = tool
         toolData.icon = icon
-        toolData.tooltipTitle = GetString(tooltipTitle)
+        toolData.tooltipTitle = GetString(tool:GetToolActionString())
         toolData.tooltipDescription = GetString(tooltipDescription)
         return toolData
     end
@@ -173,11 +173,11 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeTools()
     self.dyeToolsGridList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnDyeToolsGridSelectedDataChanged(previousData, newData) end)
     self.dyeToolsGridList:SetDimsOnDeactivate(true)
 
-    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.dyeTool, SI_DYEING_TOOL_DYE_TOOLTIP, SI_GAMEPAD_DYEING_TOOL_DYE_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_paint_down.dds"))
-    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.fillTool, SI_DYEING_TOOL_DYE_ALL_TOOLTIP, SI_GAMEPAD_DYEING_TOOL_DYE_ALL_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_fill_down.dds"))
-    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.eraseTool, SI_DYEING_TOOL_ERASE_TOOLTIP, SI_GAMEPAD_DYEING_TOOL_ERASE_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_erase_down.dds"))
-    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.sampleTool, SI_DYEING_TOOL_SAMPLE_TOOLTIP, SI_GAMEPAD_DYEING_TOOL_COPY_COLOR_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_sample_down.dds"))
-    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.setFillTool, SI_DYEING_TOOL_SET_FILL, SI_GAMEPAD_DYEING_TOOL_SET_FILL_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_setFill_down.dds"))
+    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.dyeTool, SI_GAMEPAD_DYEING_TOOL_DYE_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_paint_down.dds"))
+    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.fillTool, SI_GAMEPAD_DYEING_TOOL_DYE_ALL_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_fill_down.dds"))
+    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.eraseTool, SI_GAMEPAD_DYEING_TOOL_ERASE_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_erase_down.dds"))
+    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.sampleTool, SI_GAMEPAD_DYEING_TOOL_COPY_COLOR_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_sample_down.dds"))
+    self.dyeToolsGridList:AddEntry(CreateDyeToolEntryData(self.setFillTool, SI_GAMEPAD_DYEING_TOOL_SET_FILL_DESCRIPTION, "EsoUI/Art/Dye/Gamepad/gp_dyes_toolIcon_setFill_down.dds"))
 
     self.dyeToolsGridList:CommitGridList()
 
@@ -203,14 +203,12 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeDyesGrid()
     local DYE_SWATCH_DIMENSIONS = 43
     local HIDE_CALLBACK = nil
     local SPACING_XY = 0
-    local SCROLL_PADDING_HEIGHT = 150
     local CENTER_ENTRIES = true
     -- the values sent for control dimensions are the scaled up size so that when the control is scaled up, they do not click with the scroll mask
     self.dyeGridList:SetGridEntryTemplate("ZO_DyeingSwatch_Gamepad", DYE_SWATCH_DIMENSIONS, DYE_SWATCH_DIMENSIONS, DyeSwatchGridEntrySetup, HIDE_CALLBACK, DyeSwatchGridEntryReset, SPACING_XY, SPACING_XY, CENTER_ENTRIES)
     self.dyeGridList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.dyeGridList:SetLineBreakAmount(DYE_SWATCH_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD * 2)
     self.dyeGridList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnDyesGridSelectedDataChanged(previousData, newData) end)
-    self.dyeGridList:SetScrollPaddingHeight(SCROLL_PADDING_HEIGHT)
     self.dyeGridList:SetDimsOnDeactivate(true)
 end
 
@@ -242,7 +240,8 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeMultiFocusArea()
     self:AddNextFocusArea(self.toolsArea)
     self:AddNextFocusArea(self.gridArea)
 
-    self:SetNewFocusArea(self.gridArea)
+    local DONT_ACTIVATE_FOCUS_AREA = false
+    self:SelectFocusArea(self.gridArea, DONT_ACTIVATE_FOCUS_AREA)
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:OnDyesGridSelectedDataChanged(previousData, newData)
@@ -275,8 +274,8 @@ do
         local dyeGridList = self.dyeGridList
         dyeGridList:ClearGridList()
     
-        local sortStyle = ZO_RESTYLE_STATION_GAMEPAD:GetDyeSortStyle()
-        local showLocked = ZO_RESTYLE_STATION_GAMEPAD:GetShowLocked()
+        local sortStyle = ZO_DYEING_MANAGER:GetSortStyle()
+        local showLocked = ZO_DYEING_MANAGER:GetShowLocked()
         local tempTable = {}
 
         local dyesBySortStyleCategory = (sortStyle == ZO_DYEING_SORT_STYLE_RARITY) and ZO_DYEING_MANAGER:GetPlayerDyesByRarity() or ZO_DYEING_MANAGER:GetPlayerDyesByHueCategory()
@@ -397,6 +396,10 @@ function ZO_Dyeing_Slots_Panel_Gamepad:SwitchToTool(newTool)
 
     self.dyeToolsGridList:RefreshGridList()
 
+    if newTool:HasSwatchSelection() then
+        self:SelectFocusArea(self.gridArea)
+    end
+
     self:FireCallbacks("ToolSelected")
 end
 
@@ -422,10 +425,12 @@ end
 function ZO_Dyeing_Slots_Panel_Gamepad:SwitchToDyeingWithDyeId(dyeId)
     self:SwitchToTool(self.dyeTool)
     self.selectedDye = dyeId
-    self:SetNewFocusArea(self.gridArea)
-    local dyeData = self:GetDataForDyeId(dyeId)
+    local DONT_ACTIVATE_FOCUS_AREA = false
+    self:SelectFocusArea(self.gridArea, DONT_ACTIVATE_FOCUS_AREA)
+    local dyeDataEntry = self:GetDataEntryForDyeId(dyeId)
+    local dyeData = dyeDataEntry.data
     self.dyeGridList:ScrollDataToCenter(dyeData)
-    self:LayoutDyeTooltip(dyeData.data)
+    self:LayoutDyeTooltip(dyeData)
     self:FireCallbacks("DyeSelected")
 end
 
@@ -452,11 +457,11 @@ function ZO_Dyeing_Slots_Panel_Gamepad:GetDataForTool(tool)
     return nil
 end
 
-function ZO_Dyeing_Slots_Panel_Gamepad:GetDataForDyeId(dyeId)
-    local allDyeData = self.dyeGridList:GetData()
-    for _, dyeData in ipairs(allDyeData) do
-        if dyeData.data.dyeId == dyeId then
-            return dyeData
+function ZO_Dyeing_Slots_Panel_Gamepad:GetDataEntryForDyeId(dyeId)
+    local allDyeEntryData = self.dyeGridList:GetData()
+    for _, dyeEntryData in ipairs(allDyeEntryData) do
+        if dyeEntryData.data.dyeId == dyeId then
+            return dyeEntryData
         end
     end
 

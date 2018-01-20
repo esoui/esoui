@@ -43,18 +43,9 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
         self.weaponSwapDisabled = disabled
     end
 
-    local function OnAddOnLoaded(event, name)
-        if name == "ZO_Ingame" then
-            self.dyeingSavedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "Dyeing", ZO_DYEING_SAVED_VARIABLES_DEFAULTS)
-
-            control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
-        end
-    end
-
     ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnOutfitPendingDataChanged)
     control:RegisterForEvent(EVENT_CURRENCY_UPDATE, function(eventId, ...) self:OnCurrencyChanged(...) end)
     control:RegisterForEvent(EVENT_WEAPON_PAIR_LOCK_CHANGED, OnWeaponPairLockedChanged)
-    control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 	
 	control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
 end
@@ -331,7 +322,14 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Select
         {
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                        if self.actionMode == ACTION_DYES then
+                            local activeTool = self.dyeingPanel:GetActiveDyeTool()
+                            return GetString(activeTool:GetToolActionString())
+                        else
+                            return GetString(SI_GAMEPAD_SELECT_OPTION)
+                        end
+                  end,
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function() return not (self.actionMode == ACTION_STYLES and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT) end,
             callback = function()
@@ -387,7 +385,18 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Select
         {
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                        if self.actionMode == ACTION_DYES then
+                            if self:ShouldShowSelectedDyeSet() then
+                                return GetString(SI_GAMEPAD_DYEING_USE_SAVED_SET)
+                            else
+                                local activeTool = self.dyeingPanel:GetActiveDyeTool()
+                                return GetString(activeTool:GetToolActionString())
+                            end
+                        else
+                            return GetString(SI_GAMEPAD_SELECT_OPTION)
+                        end
+                  end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                             self:HandleSelectSavedSetAction()
@@ -790,8 +799,7 @@ function ZO_Restyle_Station_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
     dropdown:ClearItems()
 
     local function SelectNewSort(style)
-        self.dyeingSavedVars.sortStyle = style
-        self.dyeingPanel:RebuildList()
+        ZO_DYEING_MANAGER:SetSortStyle(style)
     end
 
     dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_RARITY), function() SelectNewSort(ZO_DYEING_SORT_STYLE_RARITY) end), ZO_COMBOBOX_SUPRESS_UPDATE)
@@ -799,7 +807,7 @@ function ZO_Restyle_Station_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
 
     dropdown:UpdateItems()
 
-    local currentSortingStyle = self.dyeingSavedVars.sortStyle
+    local currentSortingStyle = ZO_DYEING_MANAGER:GetSortStyle()
     if currentSortingStyle == ZO_DYEING_SORT_STYLE_RARITY then
         dropdown:SetSelectedItemText(GetString(SI_DYEING_SORT_BY_RARITY))
     elseif currentSortingStyle == ZO_DYEING_SORT_STYLE_HUE then
@@ -808,14 +816,14 @@ function ZO_Restyle_Station_Gamepad:UpdateDyeSortingDropdownOptions(dropdown)
 end
 
 
-function ZO_Restyle_Station_Gamepad:CreateOptionActionDataShowLocked(optionalCallback)
+function ZO_Restyle_Station_Gamepad:CreateOptionActionDataDyeingShowLocked(optionalCallback)
     return
     {
         template = "ZO_CheckBoxTemplate_Gamepad",
         text = GetString(SI_RESTYLE_SHOW_LOCKED),
         setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
             ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, reselectingDuringRebuild, enabled, active)
-            if self.dyeingSavedVars.showLocked then
+            if ZO_DYEING_MANAGER:GetShowLocked() then
                 ZO_CheckButton_SetChecked(control.checkBox)
             else
                 ZO_CheckButton_SetUnchecked(control.checkBox)
@@ -824,7 +832,31 @@ function ZO_Restyle_Station_Gamepad:CreateOptionActionDataShowLocked(optionalCal
         callback = function(dialog)
             local targetControl = dialog.entryList:GetTargetControl()
             ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
-            self:SetShowLocked(ZO_GamepadCheckBoxTemplate_IsChecked(targetControl))
+            ZO_DYEING_MANAGER:SetShowLocked(ZO_GamepadCheckBoxTemplate_IsChecked(targetControl))
+            if optionalCallback then
+                optionalCallback(dialog)
+            end
+        end,
+    }
+end
+
+function ZO_Restyle_Station_Gamepad:CreateOptionActionDataOutfitStylesShowLocked(optionalCallback)
+    return
+    {
+        template = "ZO_CheckBoxTemplate_Gamepad",
+        text = GetString(SI_RESTYLE_SHOW_LOCKED),
+        setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+            ZO_GamepadCheckBoxTemplate_Setup(control, data, selected, reselectingDuringRebuild, enabled, active)
+            if ZO_OUTFIT_MANAGER:GetShowLocked() then
+                ZO_CheckButton_SetChecked(control.checkBox)
+            else
+                ZO_CheckButton_SetUnchecked(control.checkBox)
+            end
+        end,
+        callback = function(dialog)
+            local targetControl = dialog.entryList:GetTargetControl()
+            ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
+            ZO_OUTFIT_MANAGER:SetShowLocked(ZO_GamepadCheckBoxTemplate_IsChecked(targetControl))
             if optionalCallback then
                 optionalCallback(dialog)
             end
@@ -837,13 +869,13 @@ function ZO_Restyle_Station_Gamepad:CreateOptionsDialogActions()
 
     if self.actionMode == ACTION_STYLES then
         -- Show Locked Styles
-        table.insert(actionsTable, self:CreateOptionActionDataShowLocked())
+        table.insert(actionsTable, self:CreateOptionActionDataOutfitStylesShowLocked())
     elseif self.actionMode == ACTION_DYES then
         -- Dye Sorting Options
         table.insert(actionsTable, self:CreateOptionActionDataDyeSortingDropdown())
 
         -- Show Locked Dyes
-        table.insert(actionsTable, self:CreateOptionActionDataShowLocked())
+        table.insert(actionsTable, self:CreateOptionActionDataDyeingShowLocked())
     end
     local numBaseActions = #actionsTable
 
@@ -913,7 +945,6 @@ function ZO_Restyle_Station_Gamepad:PerformUpdate()
         local foundBackupWeapons = false
         local mainHandOutfitSlot, offHandOutfitSlot, backupMainHandOutfitSlot, backupOffHandOutfitSlot = GetOutfitSlotsForEquippedWeapons()
         for outfitSlotIndex = OUTFIT_SLOT_ITERATION_BEGIN, OUTFIT_SLOT_ITERATION_END do
-            local outfitSlotRestyleMode = GetOutfitSlotDataRestyleMode(outfitSlotIndex)
             local isArmor = ZO_OUTFIT_MANAGER:IsOutfitSlotArmor(outfitSlotIndex)
             local isEquippedWeapon = not isArmor and (mainHandOutfitSlot == outfitSlotIndex
                                      or offHandOutfitSlot == outfitSlotIndex
@@ -926,7 +957,7 @@ function ZO_Restyle_Station_Gamepad:PerformUpdate()
                 local isWeaponSlotMain = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotMain(outfitSlotIndex)
                 local isWeaponSlotBackup = ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotBackup(outfitSlotIndex)
 
-                local name = GetString("SI_OUTFITSLOT", outfitSlotIndex)
+                local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_OUTFITSLOT", outfitSlotIndex))
                 
                 local icon = slotManipulator:GetSlotAppropriateIcon()
 
@@ -1261,6 +1292,7 @@ end
 
 function ZO_Restyle_Station_Gamepad:OnDyeSelected()
     self:DeactivateCurrentSelection()
+    self:UpdateActiveFocusKeybinds()
 end
 
 function ZO_Restyle_Station_Gamepad:OnSavedSetSlotChanged(dyeSetIndex)
@@ -1324,24 +1356,6 @@ function ZO_Restyle_Station_Gamepad:OnCurrencyChanged(currencyType, currencyLoca
         else
             self.dirty = true
         end
-    end
-end
-
-function ZO_Restyle_Station_Gamepad:GetDyeSortStyle()
-    return self.dyeingSavedVars.sortStyle
-end
-
-function ZO_Restyle_Station_Gamepad:GetShowLocked()
-    return self.dyeingSavedVars.showLocked
-end
-
-function ZO_Restyle_Station_Gamepad:SetShowLocked(canSeeLocked)
-    local previousValue = self.dyeingSavedVars.showLocked
-    self.dyeingSavedVars.showLocked = canSeeLocked
-
-    if previousValue ~= canSeeLocked and GAMEPAD_RESTYLE_STATION_SCENE:IsShowing() then
-        self.dyeingPanel:RebuildList()
-        self.outfitsPanel:RebuildList()
     end
 end
 

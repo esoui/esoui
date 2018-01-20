@@ -49,11 +49,10 @@ function ZO_AttributeItem_Gamepad:RefreshDataText()
         value = GetCriticalStrikeChance(value)
         text = zo_strformat(SI_STAT_VALUE_PERCENT, value)
     else
-        local formattedValue = ZO_CommaDelimitNumber(value)
         if self.formatString ~= nil then
-            text = zo_strformat(self.formatString, formattedValue)
+            text = zo_strformat(self.formatString, value)
         else
-            text = zo_strformat(SI_NUMBER_FORMAT, formattedValue)
+            text = value
         end
     end
 
@@ -387,7 +386,7 @@ function ZO_GamepadStats:PerformDeferredInitializationRoot()
     
     self.outfitSelectorControl = self.header:GetNamedChild("OutfitSelector")
     self.outfitSelectorNameLabel = self.outfitSelectorControl:GetNamedChild("OutfitName")
-    self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorNameLabel)
+    self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorControl)
     self:SetupHeaderFocus(self.outfitSelectorHeaderFocus)
 
     self.infoPanel = self.control:GetNamedChild("RightPane"):GetNamedChild("InfoPanel")

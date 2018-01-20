@@ -42,3 +42,7 @@ end
 function ZO_DyeingToolFill:GetCursorType()
     return MOUSE_CURSOR_FILL
 end
+
+function ZO_DyeingToolFill:GetToolActionString()
+    return SI_DYEING_TOOL_DYE_ALL_TOOLTIP
+end

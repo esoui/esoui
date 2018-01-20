@@ -54,7 +54,8 @@ function ChapterUpgrade_Gamepad:Initialize(control)
 end
 
 function ChapterUpgrade_Gamepad:UpgradeButtonClicked()
-    ZO_Dialogs_ShowGamepadDialog("CHAPTER_UPGRADE_STORE_CONSOLE")
+    local IS_STANDARD_EDITION = false
+    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION)
 end
 
 function ChapterUpgrade_Gamepad:EnterCodeButtonClicked()

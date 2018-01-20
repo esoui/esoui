@@ -390,8 +390,8 @@ CSH[EVENT_SKILL_RANK_UPDATE] = function(skillType, lineIndex, rank)
     -- crafting skill updates get deferred if they're increased while crafting animations are in progress
     -- ZO_Skills_TieSkillInfoHeaderToCraftingSkill handles triggering the deferred center screen announce in that case
     if skillType ~= SKILL_TYPE_RACIAL and (skillType ~= SKILL_TYPE_TRADESKILL or not ZO_CraftingUtils_IsPerformingCraftProcess()) then
-        local lineName, _, discovered = GetSkillLineInfo(skillType, lineIndex)
-        if discovered then
+        local lineName, _, available = GetSkillLineInfo(skillType, lineIndex)
+        if available then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
             messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, rank))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
@@ -469,8 +469,8 @@ CSH[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoint
 end
 
 CSH[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
-    local lineName, _, discovered = GetSkillLineInfo(skillType, lineIndex)
-    if discovered then
+    local lineName, _, available = GetSkillLineInfo(skillType, lineIndex)
+    if available then
         local discoverIcon = zo_iconFormat(select(4, ZO_Skills_GetIconsForSkillType(skillType)), 32, 32)
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_LINE_ADDED)

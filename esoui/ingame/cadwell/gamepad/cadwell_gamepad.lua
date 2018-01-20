@@ -141,7 +141,6 @@ function ZO_CadwellManager_Gamepad:RefreshEntryHeaderDescriptionAndObjectives()
 
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     GAMEPAD_TOOLTIPS:LayoutCadwells(GAMEPAD_RIGHT_TOOLTIP, progressionLevel, zoneIndex)
-    GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
 end
 
 function ZO_Cadwell_Gamepad_OnInitialize(control)

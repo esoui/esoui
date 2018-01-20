@@ -138,11 +138,12 @@ function ZO_MarketAnnouncement_Base:UpdateLabels(productData)
         self:SetProductDescription(formattedDescription)
         self:UpdatePositionLabel(productData.index)
 
+        self.crownStoreButton:SetText(GetString(SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE))
         local keybindStringId
         local marketProductId = marketProduct:GetId()
         local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
         if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-            keybindStringId = SI_MARKET_VIEW_IN_COLLECTIONS_KEYBIND_LABEL
+            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CHAPTER_UPGRADE
         else
             keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
         end
@@ -240,17 +241,16 @@ function ZO_MarketAnnouncement_Base:OnMarketAnnouncementViewCrownStoreKeybind()
     local marketProductId = targetData.marketProduct:GetId()
     local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
 
-    local targetMarketProductId = marketProductId
-    if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-        -- special case logic to go to collections instead of opening the Crown Store
-        local chapterCollectibleId = GetCurrentChapterCollectibleId()
-        RequestShowCollectible(chapterCollectibleId)
-        return
-    elseif openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then
-        targetMarketProductId = GetMarketProductOpenMarketBehaviorNavigateToOtherProductId(marketProductId)
+    local additionalData = GetMarketProductOpenMarketBehaviorReferenceData(marketProductId)
+    if openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_PRODUCT then
+        additionalData = marketProductId
     end
 
-    SYSTEMS:GetObject(ZO_MARKET_NAME):RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, targetMarketProductId)
+    if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE and IsInGamepadPreferredMode() then
+        RequestShowChapterUpgrade(additionalData)
+    else
+        SYSTEMS:GetObject(ZO_MARKET_NAME):RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, additionalData)
+    end
 end
 
 -- Functions to be overridden

@@ -325,6 +325,66 @@ function ZO_Stats:CreateAttributesSection()
     self:AddStatRow(STAT_CRITICAL_RESISTANCE)
 end
 
+do
+    local IGNORE_CALLBACK = true
+    local UNEQUIP_OUTFIT = nil
+
+    function ZO_Stats:UpdateOutfitDropdownSelection(dropdown)
+        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        local itemEntries = dropdown:GetItems()
+        for i, entry in ipairs(itemEntries) do
+            if equippedOutfitIndex == entry.outfitIndex then
+                dropdown:SelectItem(entry, IGNORE_CALLBACK)
+                break
+            end
+        end
+    end
+
+    function ZO_Stats_Common:UpdateOutfitDropdownOutfits(dropdown)
+        dropdown:ClearItems()
+
+        local function OnUnequipOutfitSelected()
+            self.pendingEquipOutfitIndex = UNEQUIP_OUTFIT
+            ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit()
+        end
+    
+        local function OnOutfitEntrySelected(_, _, entry)
+            self.pendingEquipOutfitIndex = entry.outfitIndex
+            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(entry.outfitIndex)
+        end
+
+        local function OnUnlockNewOutfitsSelected(comboBox, name, entry, selectionChanged, oldEntry)
+            dropdown:SelectItem(oldEntry)
+            ShowMarketAndSearch(GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), MARKET_OPEN_OPERATION_UNLOCK_NEW_OUTFIT)
+        end
+
+        local unequippedOutfitEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_NO_OUTFIT_EQUIP_ENTRY), OnUnequipOutfitSelected)
+        dropdown:AddItem(unequippedOutfitEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+
+        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex()
+        local defaultEntry = unequippedOutfitEntry
+
+        local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits()
+        for outfitIndex = 1, numOutfits do
+            local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+            local entry = ZO_ComboBox:CreateItemEntry(outfitManipulator:GetOutfitName(), OnOutfitEntrySelected)
+            entry.outfitIndex = outfitIndex
+            dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            if equippedOutfitIndex == outfitIndex then
+                defaultEntry = entry
+            end
+        end
+
+        if numOutfits < MAX_OUTFIT_UNLOCKS then
+            dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_PURCHASE_MORE_ENTRY), OnUnlockNewOutfitsSelected), ZO_COMBOBOX_SUPRESS_UPDATE)
+        end
+
+        dropdown:UpdateItems()
+        dropdown:SelectItem(defaultEntry)
+    end
+end
+
+
 function ZO_Stats:UpdateSpendablePoints()
     self:UpdateAttributesHeader()
     self:UpdateSpendAttributePointsTip(SHOW_HIDE_ANIMATED)

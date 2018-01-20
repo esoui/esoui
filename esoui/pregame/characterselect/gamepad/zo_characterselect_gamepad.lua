@@ -677,8 +677,9 @@ local function CreateList(self)
     
     local slot = 1
 
-    if not HasCurrentChapter() then
-        local chapterCollectibleId = GetCurrentChapterCollectibleId()
+    local chapterUpgradeId = GetCurrentChapterUpgradeId()
+    if chapterUpgradeId ~= 0 and not IsChapterOwned(chapterUpgradeId) then
+        local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
         local data = 
         {
             index = slot,

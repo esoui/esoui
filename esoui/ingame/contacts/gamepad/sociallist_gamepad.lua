@@ -45,7 +45,6 @@ function ZO_GamepadSocialListPanel:RefreshTooltip()
 
     if data and (zo_strlen(data.characterName) > 0) then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
         self:LayoutTooltip(GAMEPAD_TOOLTIPS, GAMEPAD_RIGHT_TOOLTIP, data)
         GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
     else

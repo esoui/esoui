@@ -87,6 +87,19 @@ function ZO_OutfitSlotManipulator:IsDyeChangePending()
     return self.restyleSlotData and self.restyleSlotData:AreTherePendingDyeChanges()
 end
 
+function ZO_OutfitSlotManipulator:GetNumPendingDyeChanges()
+    local count = 0
+    if self.restyleSlotData then
+        local changedChannels = self.restyleSlotData:GetDyeChannelChangedStates()
+        for i, hasPendingChange in ipairs(changedChannels) do
+            if hasPendingChange then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
 function ZO_OutfitSlotManipulator:IsAnyChangePending()
     return self:IsDyeChangePending() or self:IsSlotDataChangePending()
 end
@@ -129,7 +142,7 @@ end
 
 function ZO_OutfitSlotManipulator:GetPendingChangeCost()
     if self:IsAnyChangePending() then
-        return GetApplyCostForIndividualOutfitSlot(self.owner:GetOutfitIndex(), self.outfitSlotIndex, self.pendingCollectibleId, self:IsDyeChangePending())
+        return GetApplyCostForIndividualOutfitSlot(self.owner:GetOutfitIndex(), self.outfitSlotIndex, self.pendingCollectibleId, self:GetNumPendingDyeChanges())
     else
         return 0
     end
@@ -325,7 +338,7 @@ function ZO_OutfitManipulator:GetTotalSlotCostsForPendingChanges()
         if outfitSlotManipulator:IsAnyChangePending() then
             table.insert(pendingData, outfitSlotIndex)
             table.insert(pendingData, outfitSlotManipulator:GetPendingCollectibleId())
-            table.insert(pendingData, outfitSlotManipulator:IsDyeChangePending())
+            table.insert(pendingData, outfitSlotManipulator:GetNumPendingDyeChanges())
         end
     end
 
@@ -355,7 +368,8 @@ do
         if not self:IsMarkedForPreservation() then
             local hasChanged = false
             for _, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
-                hasChanged = hasChanged or outfitSlotManipulator:ClearPendingChanges(SUPPRESS_FIRE_CALLBACKS)
+                local slotCleared = outfitSlotManipulator:ClearPendingChanges(SUPPRESS_FIRE_CALLBACKS)
+                hasChanged = hasChanged or slotCleared
             end
 
             if hasChanged then
@@ -577,6 +591,16 @@ function Outfit_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFITS_INITIALIZED, function() self:RefreshOutfits() end)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_CHANGE_RESPONSE, OnOutfitChangeRespone)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_RENAME_RESPONSE, OnOutfitRenameResponse)
+
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            local DEFAULTS = { showLockedStyles = true }
+            self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "OutfitSlots", DEFAULTS)
+            EVENT_MANAGER:UnregisterForEvent("OutfitManager", EVENT_ADD_ON_LOADED)
+            self:FireCallbacks("OptionsInfoAvailable")
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 end
 
 function Outfit_Manager:RefreshOutfitSlotData(outfitIndex)
@@ -756,6 +780,17 @@ function Outfit_Manager:GetPreferredOutfitSlotForStyle(collectibleData)
         end
     end
     return nil
+end
+
+function Outfit_Manager:GetShowLocked()
+    return self.savedVars.showLockedStyles
+end
+
+function Outfit_Manager:SetShowLocked(showLocked)
+    if showLocked ~= self.savedVars.showLockedStyles then
+        self.savedVars.showLockedStyles = showLocked
+        self:FireCallbacks("ShowLockedChanged")
+    end
 end
 
 ZO_OUTFIT_MANAGER = Outfit_Manager:New()

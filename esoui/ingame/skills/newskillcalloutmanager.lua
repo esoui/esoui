@@ -81,7 +81,7 @@ function ZO_NewSkillCalloutManager:UpdateSkillLine(skillType, skillLineIndex)
 
     if abilityList == nil then  -- add new skill line to list
         self:AddSkillLineToList(skillType, skillLineIndex)
-    else                        --mark unlocked abilities new
+    else                        -- mark unlocked abilities new
         for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do  
             self:UpdateAbility(skillType, skillLineIndex, abilityIndex)
         end
@@ -89,8 +89,8 @@ function ZO_NewSkillCalloutManager:UpdateSkillLine(skillType, skillLineIndex)
 end
 
 function ZO_NewSkillCalloutManager:AddSkillLineToList(skillType, skillLineIndex)
-    local skillLineName, currentSkillRank, discovered = GetSkillLineInfo(skillType, skillLineIndex)
-    if not discovered then
+    local skillLineName, currentSkillRank, available = GetSkillLineInfo(skillType, skillLineIndex)
+    if not available then
         return
     end
 

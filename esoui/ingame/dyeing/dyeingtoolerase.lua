@@ -33,3 +33,7 @@ end
 function ZO_DyeingToolErase:GetCursorType()
     return MOUSE_CURSOR_ERASE
 end
+
+function ZO_DyeingToolErase:GetToolActionString()
+    return SI_DYEING_TOOL_ERASE_TOOLTIP
+end

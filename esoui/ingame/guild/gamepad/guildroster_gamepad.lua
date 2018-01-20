@@ -56,9 +56,6 @@ function ZO_GamepadGuildRosterManager:PerformDeferredInitialization()
 
         self:AddUniversalKeybind(keybind)
     end
-
-    local SCROLL_PADDING_HEIGHT = 100 
-    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
 end
 
 function ZO_GamepadGuildRosterManager:GetAddKeybind()

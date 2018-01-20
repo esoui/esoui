@@ -19,9 +19,6 @@ function SkillsAdvisorSuggestions_Gamepad:Initialize(control)
     ZO_ScrollList_SetTypeSelectable(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, false)
     ZO_ScrollList_SetTypeSelectable(self.list, SKILLS_ADVISOR_SUGGESTIONS_TEXT, false)
 
-    local SCROLL_PADDING_HEIGHT = 100
-    ZO_ScrollList_SetScrollPaddingHeight(self.list, SCROLL_PADDING_HEIGHT)
-
     SKILLS_ADVISOR_SUGGESTIONS_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
     SKILLS_ADVISOR_SUGGESTIONS_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                                     if newState == SCENE_FRAGMENT_SHOWING then
@@ -128,7 +125,7 @@ function SkillsAdvisorSuggestions_Gamepad:UpdateTooltip()
     if self.isActive then
         local selectedData = ZO_ScrollList_GetSelectedData(self.list)
         if selectedData and not selectedData.isHeader then
-            local rankIndex = GetSkillLineAbilityRank(selectedData.dataSource.abilityId, selectedData.dataSource.skillType, selectedData.dataSource.lineIndex, selectedData.dataSource.abilityIndex, selectedData.dataSource.skillBuildMorphChoice)
+            local rankIndex = GetSkillLineProgressionAbilityRankIndex(selectedData.dataSource.abilityId, selectedData.dataSource.skillType, selectedData.dataSource.lineIndex, selectedData.dataSource.abilityIndex, selectedData.dataSource.skillBuildMorphChoice)
             local hideNextUpgrade = false
             local showRank = false
             local showPurchaseInfo = true

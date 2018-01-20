@@ -89,3 +89,7 @@ end
 function ZO_DyeingToolBase:GetCursorType()
     return MOUSE_CURSOR_DO_NOT_CARE
 end
+
+function ZO_DyeingToolBase:GetToolActionString()
+    assert(false) -- must be overridden in derived classes
+end

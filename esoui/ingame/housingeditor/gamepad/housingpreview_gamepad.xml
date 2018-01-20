@@ -33,7 +33,6 @@
                 <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad" font="ZoFontGamepad34">
                     <Controls>
                         <Control name="$(parent)Background" override="true">
-                            <Dimensions y="64"/>
                             <Controls>
                                 <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
                                 <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />

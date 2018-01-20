@@ -22,6 +22,10 @@
                 <Label name="$(parent)OutfitName" font="ZoFontGamepad34" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
                     <Anchor point="CENTER" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="25" />
                 </Label>
+                <Texture name="$(parent)OpenDropdown" textureFile="EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="LEFT" relativeTo="$(parent)OutfitName" relativePoint="RIGHT" offsetX="10" offsetY="4"/>
+                </Texture>
             </Controls>
         </Control>
 

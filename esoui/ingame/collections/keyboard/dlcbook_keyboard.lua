@@ -170,7 +170,7 @@ function ZO_DLCBook_Keyboard_OnSubscribeClicked(control)
 end
 
 function ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(control)
-    ZO_Dialogs_ShowDialog("CHAPTER_UPGRADE_STORE")
+    ZO_ShowChapterUpgradePlatformDialog()
 end
 
 function ZO_DLCBook_Keyboard_OnInitialize(control)

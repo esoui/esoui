@@ -69,7 +69,6 @@ do
     function ZO_Loot_Gamepad_Base:ShowTooltip(selectedData)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
-        GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
 
         if selectedData.isQuest then
             GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_RIGHT_TOOLTIP, GetLootQuestItemId(selectedData.lootId))

@@ -242,8 +242,7 @@ do
 
         local availablePoints = GetAvailableSkillPoints()
         local _, lineRank = GetSkillLineInfo(skillType, skillLineIndex)
-        local name, _, earnedRank, passive, _, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-        local atMorph = progressionIndex and select(4, GetAbilityProgressionXPInfo(progressionIndex))
+        local name, _, earnedRank, _, _, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
         local morph = nil
         if progressionIndex then
             name, morph = GetAbilityProgressionInfo(progressionIndex)
@@ -328,6 +327,7 @@ do
 end
 
 function ZO_Skills_SetKeyboardAbilityButtonTextures(button, passive)
+    local advisedBorder = button:GetNamedChild("AdvisedBorder")
     if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(button.skillType, button.lineIndex, button.index, button.skillBuildMorphChoice, button.skillBuildRankIndex) then
         if passive then
             button:SetNormalTexture("EsoUI/Art/SkillsAdvisor/circle_passiveAbilityFrame_doubleframe.dds")
@@ -340,6 +340,13 @@ function ZO_Skills_SetKeyboardAbilityButtonTextures(button, passive)
             button:SetMouseOverTexture("EsoUI/Art/ActionBar/actionBar_mouseOver.dds")
             button:SetDisabledTexture("EsoUI/Art/SkillsAdvisor/square_abilityFrame64_doubleFrame.dds")
         end
+
+        if passive then
+            advisedBorder:SetTexture("EsoUI/Art/SkillsAdvisor/circle_passiveAbilityFrame_doubleframeCorners.dds")
+        else
+            advisedBorder:SetTexture("EsoUI/Art/SkillsAdvisor/square_abilityFrame64_doubleFrameCorners.dds")
+        end 
+        advisedBorder:SetHidden(false)
     else
         if passive then
             button:SetNormalTexture("EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds")
@@ -351,6 +358,10 @@ function ZO_Skills_SetKeyboardAbilityButtonTextures(button, passive)
             button:SetPressedTexture("EsoUI/Art/ActionBar/abilityFrame64_down.dds")
             button:SetMouseOverTexture("EsoUI/Art/ActionBar/actionBar_mouseOver.dds")
             button:SetDisabledTexture("EsoUI/Art/ActionBar/abilityFrame64_up.dds")
+        end
+
+        if advisedBorder then
+            advisedBorder:SetHidden(true)
         end
     end
 end
@@ -366,6 +377,7 @@ function ZO_Skills_InitializeKeyboardMorphDialog()
     dialogControl.morphAbility1.icon = GetControl(dialogControl.morphAbility1, "Icon")
     dialogControl.morphAbility1.selectedCallout = GetControl(dialogControl.morphAbility1, "SelectedCallout")
     dialogControl.morphAbility1.morph = 1
+    --Hardcoded to one because we don't know how much xp the morph has until we own it
     dialogControl.morphAbility1.rank = 1
     dialogControl.morphAbility1.advised = false
 
@@ -373,6 +385,7 @@ function ZO_Skills_InitializeKeyboardMorphDialog()
     dialogControl.morphAbility2.icon = GetControl(dialogControl.morphAbility2, "Icon")
     dialogControl.morphAbility2.selectedCallout = GetControl(dialogControl.morphAbility2, "SelectedCallout")
     dialogControl.morphAbility2.morph = 2
+    --Hardcoded to one because we don't know how much xp the morph has until we own it
     dialogControl.morphAbility2.rank = 1
     dialogControl.morphAbility2.advised = false
 
@@ -387,9 +400,10 @@ function ZO_Skills_InitializeKeyboardMorphDialog()
             local name = ability.name
             local icon = slot.iconFile
 
-            -- Dialog called from the ability to morph to
+            -- The dialog was shown from the skill advisor list which has what we morph to. This dialog needs the unmorphed version.
             if ability.skillBuildMorphChoice and ability.skillBuildMorphChoice > 0 then
-                local abilityId = GetSpecificSkillAbilityInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, 0)
+                local UNMORPHED = 0
+                local abilityId = GetSpecificSkillAbilityInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, UNMORPHED)
                 name = GetAbilityName(abilityId)
                 icon = GetAbilityIcon(abilityId)
             end
@@ -496,13 +510,19 @@ function ZO_Skills_InitializeKeyboardConfirmDialog()
 
         dialog.abilityName:SetText(ability.plainName)
 
-        local _, upgradeIcon, earnedRank = GetSkillAbilityNextUpgradeInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index)
-        local rankIndex = GetSkillHighestRankIndexAvailableAtSkillLineRank(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, earnedRank)
+        --Active abilities don't care about rank index for skill builds. Passives do.
+        dialogAbility.skillBuildRankIndex = 1
+        if ability.passive then
+            local _, _, skillUnlockedAtSkillLineRank = GetSkillAbilityNextUpgradeInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index)
+            --skillUnlockedAtSkillLineRank will only be filled out if we own the ability. If we don't own it we stick with rank index 1.
+            if skillUnlockedAtSkillLineRank then
+                dialogAbility.skillBuildRankIndex = GetUpgradeSkillHighestRankIndexAvailableAtSkillLineRank(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, skillUnlockedAtSkillLineRank)
+            end
+        end
 
         dialogAbility.skillType = abilityControl.skillType
         dialogAbility.lineIndex = abilityControl.lineIndex
         dialogAbility.index = abilityControl.index
-        dialogAbility.skillBuildRankIndex = ZO_Skills_GetValidatedRankIndex(rankIndex)
         dialogAbility.icon:SetTexture(slot.iconFile)
         ZO_Skills_SetKeyboardAbilityButtonTextures(dialogAbility, ability.passive) 
 
@@ -553,15 +573,19 @@ end
 
 function  ZO_Skills_InitializeKeyboardUpgradeDialog()
     local upgradeDialogControl = GetControl("ZO_SkillsUpgradeDialog")
-    upgradeDialogControl.desc = GetControl(upgradeDialogControl, "Description")
+    upgradeDialogControl.desc = upgradeDialogControl:GetNamedChild("Description")
 
-    upgradeDialogControl.baseAbility = GetControl(upgradeDialogControl, "BaseAbility")
-    upgradeDialogControl.baseAbility.icon = GetControl(upgradeDialogControl.baseAbility, "Icon")
+    upgradeDialogControl.baseAbility = upgradeDialogControl:GetNamedChild("BaseAbility")
+    upgradeDialogControl.baseAbility.icon = upgradeDialogControl.baseAbility:GetNamedChild("Icon")
 
-    upgradeDialogControl.upgradeAbility = GetControl(upgradeDialogControl, "UpgradeAbility")
-    upgradeDialogControl.upgradeAbility.icon = GetControl(upgradeDialogControl.upgradeAbility, "Icon")
+    upgradeDialogControl.upgradeAbility = upgradeDialogControl:GetNamedChild("UpgradeAbility")
+    upgradeDialogControl.upgradeAbility.icon = upgradeDialogControl.upgradeAbility:GetNamedChild("Icon")
+
+    upgradeDialogControl.advisement = upgradeDialogControl:GetNamedChild("Advisement")
 
     local function SetupUpgradeAbilityDialog(dialog, abilityControl)
+        --Only passives upgrade
+
         local ability = abilityControl.ability
         local slot = abilityControl.ability.slot
 
@@ -579,18 +603,33 @@ function  ZO_Skills_InitializeKeyboardUpgradeDialog()
         baseAbility.icon:SetTexture(slot.iconFile)
         ZO_Skills_SetKeyboardAbilityButtonTextures(baseAbility, true) 
 
-        local _, upgradeIcon, earnedRank = GetSkillAbilityNextUpgradeInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index)
-        local rankIndex = GetSkillHighestRankIndexAvailableAtSkillLineRank(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, earnedRank)
+        local _, upgradeIcon, skillUnlockedAtSkillLineRank = GetSkillAbilityNextUpgradeInfo(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index)
+        --skillUnlockedAtSkillLineRank will only be filled out if we own the ability. If we don't own it we stick with rank index 1.
+        if skillUnlockedAtSkillLineRank then
+            upgradeAbility.skillBuildRankIndex = GetUpgradeSkillHighestRankIndexAvailableAtSkillLineRank(abilityControl.skillType, abilityControl.lineIndex, abilityControl.index, skillUnlockedAtSkillLineRank)
+        else
+            upgradeAbility.skillBuildRankIndex = 1
+        end
+
         upgradeAbility.skillType = abilityControl.skillType
         upgradeAbility.lineIndex = abilityControl.lineIndex
         upgradeAbility.index = abilityControl.index
-        upgradeAbility.skillBuildRankIndex = rankIndex or 1
         upgradeAbility.icon:SetTexture(upgradeIcon)
         ZO_Skills_SetKeyboardAbilityButtonTextures(upgradeAbility, true) 
 
         dialog.chosenSkillType = abilityControl.skillType
         dialog.chosenLineIndex = abilityControl.lineIndex
         dialog.chosenAbilityIndex = abilityControl.index
+
+        if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() then
+            if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(upgradeAbility.skillType, upgradeAbility.lineIndex, upgradeAbility.index) then
+                dialog.advisement:SetText(GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED))
+                dialog.advisement:SetColor(ZO_SKILLS_ADVISOR_ADVISED_COLOR:UnpackRGBA())
+                dialog.advisement:SetHidden(false)
+            else
+                dialog.advisement:SetHidden(true)
+            end   
+        end
     end
 
     ZO_Dialogs_RegisterCustomDialog("UPGRADE_ABILITY_CONFIRM",

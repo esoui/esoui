@@ -175,6 +175,11 @@
                         </Button>
                     </Controls>
                 </Control>
+
+                <Control name="$(parent)ChapterUpgrade" inherits="ZO_ChapterUpgrade_KeyboardTemplate" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-15"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
+                </Control>
             </Controls>
         </Control>
 
@@ -203,7 +208,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_MarketListEntry" mouseEnabled="true" virtual="true">
+        <Control name="ZO_MarketListEntry" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
             <Dimensions x="509" y="ZO_MARKET_LIST_ENTRY_HEIGHT" />
 
              <OnInitialized>
@@ -215,16 +220,6 @@
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
-                </Texture>
-                
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
-                </Texture>
-
                 <Texture name="$(parent)Icon">
                     <Dimensions x="40" y="40" />
                     <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26" />

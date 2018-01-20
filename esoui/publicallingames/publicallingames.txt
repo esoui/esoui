@@ -1,6 +1,7 @@
 ; Script Files shared between Ingame and InternalIngame
 ## DependsOn: ZO_Common
 
+EsoUI\PublicAllIngames\Globals\Globals.lua
 EsoUI\PublicAllIngames\Globals\SharedTextures.lua
 EsoUI\PublicAllIngames\Currency\Keyboard\CurrencyOptionsTable_Keyboard.lua
 EsoUI\PublicAllIngames\Currency\Gamepad\CurrencyOptionsTable_Gamepad.lua
@@ -45,3 +46,5 @@ EsoUI\PublicAllIngames\MarketCurrency\Gamepad\MarketCurrency_Gamepad.lua
 EsoUI\PublicAllIngames\MarketCurrency\Gamepad\MarketCurrency_Gamepad.xml
 
 EsoUI\PublicAllIngames\TrialAccount\TrialAccount_IngameShared.lua
+
+EsoUI\PublicAllIngames\Collections\ChapterUpgrade_Manager.lua

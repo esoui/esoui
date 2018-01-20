@@ -40,3 +40,7 @@ end
 function ZO_DyeingToolSetFill:GetCursorType()
     return MOUSE_CURSOR_FILL_MULTIPLE
 end
+
+function ZO_DyeingToolSetFill:GetToolActionString()
+    return SI_DYEING_TOOL_SET_FILL
+end

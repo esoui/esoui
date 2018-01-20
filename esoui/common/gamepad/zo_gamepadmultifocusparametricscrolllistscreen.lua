@@ -62,7 +62,7 @@ function ZO_Gamepad_MultiFocus_ParametricList_Screen:InitializeMultiFocusArea()
 end
 
 function ZO_Gamepad_MultiFocus_ParametricList_Screen:ResetFocusArea()
-    self:SetNewFocusArea(self.parametricListArea)
+    self:SelectFocusArea(self.parametricListArea)
 end
 
 function ZO_Gamepad_MultiFocus_ParametricList_Screen:OnListAreaActivate()

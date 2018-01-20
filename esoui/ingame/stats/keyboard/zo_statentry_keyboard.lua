@@ -50,7 +50,7 @@ function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
         return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value))
     else
-        return zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(value))
+        return value
     end
 end
 

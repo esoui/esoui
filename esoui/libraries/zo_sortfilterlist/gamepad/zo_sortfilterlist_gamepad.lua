@@ -57,8 +57,10 @@ end
 function ZO_SortFilterList_Gamepad:MovePrevious()
     if not ZO_ScrollList_AtTopOfList(self.list) then
         PlaySound(SOUNDS.GAMEPAD_MENU_UP)
+        local oldData = ZO_ScrollList_GetSelectedData(self.list)
         ZO_ScrollList_SelectPreviousData(self.list)
-        self:RefreshVisible()
+        local newData = ZO_ScrollList_GetSelectedData(self.list)
+        self:OnSelectionChanged(oldData, newData)
         self:UpdateKeybinds()
     end
 end
@@ -66,8 +68,10 @@ end
 function ZO_SortFilterList_Gamepad:MoveNext()
     if not ZO_ScrollList_AtBottomOfList(self.list) then
         PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
+        local oldData = ZO_ScrollList_GetSelectedData(self.list)
         ZO_ScrollList_SelectNextData(self.list)
-        self:RefreshVisible()
+        local newData = ZO_ScrollList_GetSelectedData(self.list)
+        self:OnSelectionChanged(oldData, newData)
         self:UpdateKeybinds()
     end
 end

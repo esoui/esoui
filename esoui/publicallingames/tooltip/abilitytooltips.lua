@@ -186,7 +186,7 @@ end
 
 --Layout Functions
 
-function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects, headerSection)
+function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects, headerSection, isSkillAbility)
     if DoesAbilityExist(abilityId) then
         --Specialized ability tooltips may want to add their own things to the header section. If they do they'll make the header section and pass it in. If they don't pass it in we make
         --one for the standard ability header.
@@ -195,10 +195,10 @@ function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingCham
         end
 
         --If this is a morph, add what it morphed from to the header section
-        local skillType, skillIndex, abilityIndex, morph, rank = GetSpecificSkillAbilityKeysByAbilityId(abilityId)
-        if skillType ~= SKILL_TYPE_NONE then
+        local skillType, skillIndex, abilityIndex, morphChoice, rankIndex = GetSpecificSkillAbilityKeysByAbilityId(abilityId)
+        if not isSkillAbility and skillType ~= SKILL_TYPE_NONE then
             --0 means the base ability. The morphs are 1 and 2.
-            if morph > 0 then
+            if morphChoice > 0 then
                 local progressionName = GetProgressionSkillProgressionName(skillType, skillIndex, abilityIndex)
                 if progressionName ~= "" then
                     headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, progressionName), self:GetStyle("abilityHeader"))
@@ -224,7 +224,7 @@ function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingCham
     end
 end
 
-function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityIndex, showNextUpgrade, hideRank, overrideRank, showPurchaseInfo, abilityId, hidePointsAndAdvisedInfo)    
+function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityIndex, showNextUpgrade, hideRank, overrideRank, showPurchaseInfo, abilityId, hidePointsAndAdvisedInfo)
     if not abilityId then 
         local DONT_GET_NEXT_UPGRADE = false
         abilityId = GetSkillAbilityId(skillType, skillLineIndex, abilityIndex, DONT_GET_NEXT_UPGRADE)   
@@ -340,7 +340,8 @@ function ZO_Tooltip:LayoutAbilityMorph(progressionIndex, morphIndex, skillType, 
     local ADD_NEW_EFFECTS = true
     local HIDE_RANK = nil
     local CHAMPION_POINTS = nil
-    self:LayoutAbility(abilityId, HIDE_RANK, RANK, CHAMPION_POINTS, ADD_NEW_EFFECTS, headerSection)
+    local IS_SKILL_ABILITY = true
+    self:LayoutAbility(abilityId, HIDE_RANK, RANK, CHAMPION_POINTS, ADD_NEW_EFFECTS, headerSection, IS_SKILL_ABILITY)
     self:AddAbilityUpgrades(GetAbilityUpgradeLines(abilityId))
 end
 

@@ -1,3 +1,16 @@
+do
+    local ORIGIN_COLOR =
+    {
+        [SCENE_MANAGER_MESSAGE_ORIGIN_PREGAME] = ZO_ColorDef:New(1, 0.6, 0.6),
+        [SCENE_MANAGER_MESSAGE_ORIGIN_INGAME] = ZO_ColorDef:New(0.6, 1, 0.6),
+        [SCENE_MANAGER_MESSAGE_ORIGIN_INTERNAL] = ZO_ColorDef:New(0.6, 0.6, 1),
+    }
+
+    function ZO_Scene_GetOriginColor()
+        return ORIGIN_COLOR[ZO_REMOTE_SCENE_CHANGE_ORIGIN]
+    end
+end
+
 -----------------------
 --Scene Stack Fragments
 -----------------------
@@ -61,7 +74,7 @@ end
 --Scene
 ----------
 
-local g_loggingEnabled = true
+local g_loggingEnabled = false
 
 ZO_Scene = ZO_CallbackObject:Subclass()
 
@@ -225,6 +238,10 @@ end
 
 function ZO_Scene:IsShowing()
     return self.state == SCENE_SHOWN or self.state == SCENE_SHOWING
+end
+
+function ZO_Scene:IsHiding()
+    return self.state == SCENE_HIDING or self.state == SCENE_HIDDEN
 end
 
 function ZO_Scene:HasFragmentWithCategory(category)
@@ -419,7 +436,7 @@ end
 
 function ZO_Scene:Log(message)
     if WriteToInterfaceLog and g_loggingEnabled then
-        WriteToInterfaceLog(string.format("%s - %s - %s", GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN), self.name, message))
+        WriteToInterfaceLog(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), self.name, message))
     end
 end
 

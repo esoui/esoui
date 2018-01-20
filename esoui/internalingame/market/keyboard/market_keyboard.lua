@@ -41,52 +41,49 @@ function MarketContentFragment:OnStateChange(oldState, newState)
     end
 end
 
-do
-    local CURRENCY_ICON_SIZE = "100%"
-    function MarketContentFragment:ShowMarketProductContents(marketProduct)
-        self.marketProductPool:ReleaseAllObjects()
-        self.marketProductBundlePool:ReleaseAllObjects()
-        ZO_Scroll_ResetToTop(self.productList)
-        ZO_ClearNumericallyIndexedTable(self.marketProducts)
+function MarketContentFragment:ShowMarketProductContents(marketProduct)
+    self.marketProductPool:ReleaseAllObjects()
+    self.marketProductBundlePool:ReleaseAllObjects()
+    ZO_Scroll_ResetToTop(self.productList)
+    ZO_ClearNumericallyIndexedTable(self.marketProducts)
 
-        self.marketProduct = marketProduct
+    self.marketProduct = marketProduct
 
-        self.contentHeader:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, marketProduct:GetMarketProductDisplayName()))
+    self.contentHeader:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, marketProduct:GetMarketProductDisplayName()))
 
-        local marketCurrencyType, cost, hasDiscount, costAfterDiscount, discountPercent = marketProduct:GetMarketProductPricingByPresentation()
-        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), costAfterDiscount, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
-        self.cost:SetText(currencyString)
+    local marketCurrencyType, cost, hasDiscount, costAfterDiscount, discountPercent = marketProduct:GetMarketProductPricingByPresentation()
+    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), costAfterDiscount, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    self.cost:SetText(currencyString)
 
-        local numChildren = marketProduct:GetNumChildren()
-        if numChildren > 0 then
-            local parentMarketProductId = marketProduct:GetId()
-            for childIndex = 1, numChildren do
-                local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
+    local numChildren = marketProduct:GetNumChildren()
+    if numChildren > 0 then
+        local parentMarketProductId = marketProduct:GetId()
+        for childIndex = 1, numChildren do
+            local childMarketProductId = marketProduct:GetChildMarketProductId(childIndex)
 
-                local isBundle = GetMarketProductType(childMarketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
+            local isBundle = GetMarketProductType(childMarketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
 
-                local pool = isBundle and self.marketProductBundlePool or self.marketProductPool
-                local childMarketProduct = pool:AcquireObject()
-                childMarketProduct:ShowAsChild(childMarketProductId, parentMarketProductId)
-                childMarketProduct:SetParent(self.productListScrollChild)
+            local pool = isBundle and self.marketProductBundlePool or self.marketProductPool
+            local childMarketProduct = pool:AcquireObject()
+            childMarketProduct:ShowAsChild(childMarketProductId, parentMarketProductId)
+            childMarketProduct:SetParent(self.productListScrollChild)
 
-                local productInfo = {
-                                product = childMarketProduct,
-                                control = childMarketProduct:GetControl(),
-                                name = childMarketProduct:GetMarketProductDisplayName(),
-                                isBundle = isBundle,
-                                stackCount = childMarketProduct:GetStackCount(),
-                            }
-                table.insert(self.marketProducts, productInfo)
-            end
-
-            table.sort(self.marketProducts, function(entry1, entry2)
-                return MARKET:CompareMarketProducts(entry1, entry2)
-            end)
+            local productInfo = {
+                            product = childMarketProduct,
+                            control = childMarketProduct:GetControl(),
+                            name = childMarketProduct:GetMarketProductDisplayName(),
+                            isBundle = isBundle,
+                            stackCount = childMarketProduct:GetStackCount(),
+                        }
+            table.insert(self.marketProducts, productInfo)
         end
 
-        MARKET.LayoutProductGrid(self.marketProducts)
+        table.sort(self.marketProducts, function(entry1, entry2)
+            return MARKET:CompareMarketProducts(entry1, entry2)
+        end)
     end
+
+    MARKET.LayoutProductGrid(self.marketProducts)
 end
 
 function MarketContentFragment:RefreshProducts()
@@ -274,16 +271,14 @@ function MarketListFragment:ShowMarketProducts(marketProducts)
         end
 
         local productId = productInfo.productId
-        local name, description, icon, isNew, isFeatured = GetMarketProductInfo(productId)
-        local stackCount = productInfo.stackCount
         local quality = productInfo.quality or ITEM_QUALITY_NORMAL
 
         local rowData =
             {
                 productId = productId,
-                name = name,
-                icon = icon,
-                stackCount = stackCount,
+                name = GetMarketProductDisplayName(productId),
+                icon = GetMarketProductIcon(productId),
+                stackCount = productInfo.stackCount,
                 quality = quality,
             }
         table.insert(self.scrollData, ZO_ScrollList_CreateDataEntry(MARKET_LIST_ENTRY_MARKET_PRODUCT, rowData))
@@ -438,7 +433,9 @@ function Market:Initialize(control)
     self.subscriptionFreeTrialButton = subscriptionControl:GetNamedChild("FreeTrialButton")
 
     self.subscriptionBenefitLinePool = ZO_ControlPool:New("ZO_Market_SubscriptionBenefitLine", control)
-
+    
+    self:InitializeChapterUpgrade()
+    
     self.nextPreviewChangeTime = 0
 
     self.control:SetHandler("OnUpdate", function(control, currentTime) self:OnUpdate(currentTime) end)
@@ -468,6 +465,44 @@ function Market:Initialize(control)
     ZO_Market_Shared.Initialize(self)
 
     MARKET_CURRENCY_KEYBOARD:SetBuyCrownsCallback(function() self:OnShowBuyCrownsDialog() end)
+end
+
+function Market:InitializeChapterUpgrade()
+    local chapterUpgradePage = self.contentsControl:GetNamedChild("ChapterUpgrade")
+    self.chapterUpgradePaneObject = ZO_ChapterUpgradePane_Keyboard:New(chapterUpgradePage:GetNamedChild("ScrollScrollChildPane"), self)
+    self.chapterUpgradeButtonContainer = chapterUpgradePage:GetNamedChild("UpgradeButtons")
+    self.chapterUpgradePurchasedButton = chapterUpgradePage:GetNamedChild("PurchasedButton")
+    local standardButton = self.chapterUpgradeButtonContainer:GetNamedChild("Standard")
+    local collectorsButton = self.chapterUpgradeButtonContainer:GetNamedChild("Collectors")
+
+    local function OnUpgradeButtonClicked(isCollectorsEdition)
+        local chapterUpgradeData = self.chapterUpgradePaneObject:GetChapterUpgradeData()
+        if chapterUpgradeData then
+            if chapterUpgradeData:IsPreRelease() then
+                ZO_ShowChapterPrepurchasePlatformDialog(chapterUpgradeData:GetChapterUpgradeId(), isCollectorsEdition)
+            else
+                ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition)
+            end
+        end
+    end
+
+    standardButton:SetHandler("OnClicked", function()
+        local IS_STANDARD_EDITION = false
+        OnUpgradeButtonClicked(IS_STANDARD_EDITION)
+    end)
+
+    collectorsButton:SetHandler("OnClicked", function()
+        local IS_COLLECTORS_EDITION = true
+        OnUpgradeButtonClicked(IS_COLLECTORS_EDITION)
+    end)
+
+    self.chapterUpgradePage = chapterUpgradePage
+end
+
+function Market:OnInitialInteraction()
+    ZO_Market_Shared.OnInitialInteraction(self)
+
+    ZO_CHAPTER_UPGRADE_MANAGER:RequestPrepurchaseData()
 end
 
 function Market:GetLabeledGroupLabelTemplate()
@@ -511,7 +546,7 @@ function Market:InitializeKeybindDescriptors()
         -- "Preview" Keybind
         {
             name =      function()
-                            if self.productListFragment:IsShowing() then
+                            if self.productListFragment:IsShowing() or not self.chapterUpgradePage:IsHidden() then
                                 return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
                             else
                                 local previewType = self.GetMarketProductPreviewType(self.selectedMarketProduct)
@@ -526,6 +561,8 @@ function Market:InitializeKeybindDescriptors()
             visible =   function()
                             if self.productListFragment:IsShowing() then
                                 return self.productListFragment:IsReadyToPreview()
+                            elseif not self.chapterUpgradePage:IsHidden() then
+                                return self.chapterUpgradePaneObject:IsReadyToPreview()
                             else
                                 local marketProduct = self.selectedMarketProduct
                                 if marketProduct ~= nil then
@@ -538,6 +575,8 @@ function Market:InitializeKeybindDescriptors()
             callback =  function()
                             if self.productListFragment:IsShowing() then
                                 self:PreviewMarketProduct(self.productListFragment:GetSelectedProductId())
+                            elseif not self.chapterUpgradePage:IsHidden() then
+                                self:PreviewMarketProduct(self.chapterUpgradePaneObject:GetSelectedProductId())
                             else
                                 local marketProduct = self.selectedMarketProduct
 
@@ -556,7 +595,7 @@ function Market:InitializeKeybindDescriptors()
                             end
                         end,
             enabled =   function()
-                            local previewType = self.GetMarketProductPreviewType(marketProduct)
+                            local previewType = self.GetMarketProductPreviewType(self.selectedMarketProduct)
                             if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
                                 return ITEM_PREVIEW_KEYBOARD:CanChangePreview()
                             else
@@ -706,7 +745,6 @@ function Market:InitializeCategories()
         BaseTreeHeaderIconSetup(control, data, selected)
     end
 
-    local DEFAULT_NOT_SELECTED = false
     local SUBCATEGORY_GEM_TEXTURE = ZO_Currency_GetKeyboardCurrencyIcon(CURT_CROWN_GEMS)
     local function TreeEntrySetup(node, control, data, open)
         control:SetText(data.name)
@@ -808,6 +846,7 @@ function Market:BuildCategories()
             self:AddTopLevelCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX, GetString(SI_MARKET_FEATURED_CATEGORY), 0, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_FEATURED, function() return HasNewFeaturedMarketProducts() end)
         end
 
+        --Special ESO Plus blade
         local showNewOnEsoPlusCategoryFunction = function()
             local showNewOnEsoPlusCategory = false
             self:UpdateFreeTrialProduct()
@@ -823,6 +862,33 @@ function Market:BuildCategories()
         local pressedIcon = "esoui/art/treeicons/store_indexIcon_ESOPlus_down.dds"
         local mouseoverIcon = "esoui/art/treeicons/store_indexIcon_ESOPlus_over.dds"
         self:AddTopLevelCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX, GetString(SI_MARKET_ESO_PLUS_CATEGORY), 0, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_ESO_PLUS, showNewOnEsoPlusCategoryFunction)
+
+        --Special Chapters blade
+        
+        local numChapters = ZO_CHAPTER_UPGRADE_MANAGER:GetNumChapterUpgrades()
+        if numChapters > 0 then
+            -- "New" is contingent on the prepurchase option, if it exists
+            local prepurchaseChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetPrepurchaseChapterUpgradeData()
+
+            local function IsPrepurchaseNew()
+                return prepurchaseChapterUpgradeData and prepurchaseChapterUpgradeData:IsNew()
+            end
+
+            normalIcon = "esoui/art/treeicons/store_indexIcon_Chapters_up.dds"
+            pressedIcon = "esoui/art/treeicons/store_indexIcon_Chapters_down.dds"
+            mouseoverIcon = "esoui/art/treeicons/store_indexIcon_Chapters_over.dds"
+            local USES_CUSTOM_SUBCATEGORIES = true
+            local chaptersNode = self:AddTopLevelCategory(ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX, GetString(SI_MAIN_MENU_CHAPTERS), numChapters, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE, IsPrepurchaseNew, USES_CUSTOM_SUBCATEGORIES)
+
+            if prepurchaseChapterUpgradeData then
+                self:AddCustomSubCategory(chaptersNode, prepurchaseChapterUpgradeData:GetChapterUpgradeId(), prepurchaseChapterUpgradeData:GetName(), ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE, IsPrepurchaseNew)
+            end
+
+            local currentChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetCurrentChapterUpgradeData()
+            if currentChapterUpgradeData then
+                self:AddCustomSubCategory(chaptersNode, currentChapterUpgradeData:GetChapterUpgradeId(), currentChapterUpgradeData:GetName(), ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE)
+            end
+        end
 
         for i = 1, GetNumMarketProductCategories(MARKET_DISPLAY_GROUP_CROWN_STORE) do
             local name, numSubCategories, numMarketProducts, normalIcon, pressedIcon, mouseoverIcon = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, i)
@@ -1023,7 +1089,7 @@ do
         local node = tree:AddNode(nodeTemplate, entryData, parent, soundId)
         entryData.node = node
 
-        finalCategoryIndex = isFakedSubcategory and "root" or categoryIndex
+        local finalCategoryIndex = isFakedSubcategory and "root" or categoryIndex
         AddNodeLookup(lookup, node, parent, finalCategoryIndex)
         return node
     end
@@ -1031,7 +1097,8 @@ do
     local REAL_SUBCATEGORY = false
     local FAKE_SUBCATEGORY = true
     local HIDE_GEM_ICON = false
-    function Market:AddTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, categoryType, containsNewProductsFunction)
+    local NO_ICON = nil
+    function Market:AddTopLevelCategory(categoryIndex, name, numSubCategories, normalIcon, pressedIcon, mouseoverIcon, categoryType, containsNewProductsFunction, usesCustomSubcategories)
         local tree = self.categoryTree
         local lookup = self.nodeLookupData
 
@@ -1053,35 +1120,41 @@ do
 
         local parent = AddCategory(lookup, tree, nodeTemplate, nil, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType, REAL_SUBCATEGORY, HIDE_GEM_ICON, containsNewProductsFunction)
 
-        if hasSearchResults then
-            if searchResultsWithChildren and self.searchResults[categoryIndex]["root"] then
-                local categoryName = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
-                local categoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex) end
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, categoryHasNewProductsFunction)
-            end
-
-            for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
-                if subcategoryIndex ~= "root" then
-                    local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
-                    local subcategoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex) end
-                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, subcategoryHasNewProductsFunction)
+        if not usesCustomSubcategories then
+            if hasSearchResults then
+                if searchResultsWithChildren and self.searchResults[categoryIndex]["root"] then
+                    local categoryName = GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex)
+                    local categoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex) end
+                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, categoryHasNewProductsFunction)
                 end
-            end
-        elseif hasChildren then
-            local numMarketProducts = select(3, GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex))
-            if numMarketProducts > 0 then
-                local categoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex) end
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, categoryHasNewProductsFunction)
-            end
 
-            for i = 1, numSubCategories do
-                local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, i)
-                local subcategoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, i) end
-                AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, i, subCategoryName, normalIcon, pressedIcon, mouseoverIcon, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, subcategoryHasNewProductsFunction)
+                for subcategoryIndex, data in pairs(self.searchResults[categoryIndex]) do
+                    if subcategoryIndex ~= "root" then
+                        local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
+                        local subcategoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex) end
+                        AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, subcategoryIndex, subCategoryName, NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, subcategoryHasNewProductsFunction)
+                    end
+                end
+            elseif hasChildren then
+                local numMarketProducts = select(3, GetMarketProductCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex))
+                if numMarketProducts > 0 then
+                    local categoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex) end
+                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, categoryIndex, GetString(SI_MARKET_GENERAL_SUBCATEGORY), NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, FAKE_SUBCATEGORY, HIDE_GEM_ICON, categoryHasNewProductsFunction)
+                end
+
+                for i = 1, numSubCategories do
+                    local subCategoryName, _, showGemIcon = GetMarketProductSubCategoryInfo(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, i)
+                    local subcategoryHasNewProductsFunction = function() return MarketProductCategoryContainsNewMarketProducts(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, i) end
+                    AddCategory(lookup, tree, "ZO_MarketSubCategory", parent, i, subCategoryName, NO_ICON, NO_ICON, NO_ICON, ZO_MARKET_CATEGORY_TYPE_NONE, REAL_SUBCATEGORY, showGemIcon, subcategoryHasNewProductsFunction)
+                end
             end
         end
 
         return parent
+    end
+
+    function Market:AddCustomSubCategory(parent, subcategoryIndex, name, categoryType, containsNewProductsFunction)
+        AddCategory(self.nodeLookupData, self.categoryTree, "ZO_MarketSubCategory", parent, subcategoryIndex, name, NO_ICON, NO_ICON, NO_ICON, categoryType, REAL_SUBCATEGORY, HIDE_GEM_ICON, containsNewProductsFunction)
     end
 end
 
@@ -1190,6 +1263,7 @@ function Market:DisplayEsoPlusOffer()
     self.subscriptionBenefitLinePool:ReleaseAllObjects()
 
     self.subscriptionPage:SetHidden(false)
+    self.chapterUpgradePage:SetHidden(true)
     self.categoryFilter:SetHidden(true)
     self.categoryFilterLabel:SetHidden(true)
 
@@ -1253,11 +1327,28 @@ function Market:DisplayEsoPlusOffer()
     ZO_Scroll_OnExtentsChanged(self.subscriptionPage)
 end
 
+function Market:DisplayChapterUpgrade(data)
+    self:ClearMarketProducts()
+
+    self.subscriptionPage:SetHidden(true)
+    self.chapterUpgradePage:SetHidden(false)
+    self.categoryFilter:SetHidden(true)
+    self.categoryFilterLabel:SetHidden(true)
+
+    local chapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetChapterUpgradeDataById(data.categoryIndex)
+    self.chapterUpgradePaneObject:SetChapterUpgradeData(chapterUpgradeData)
+
+    local isOwned = chapterUpgradeData:IsOwned()
+    self.chapterUpgradeButtonContainer:SetHidden(isOwned)
+    self.chapterUpgradePurchasedButton:SetHidden(not isOwned)
+end
+
 local NO_LABELED_GROUP_HEADER = nil
 function Market:LayoutMarketProducts(marketProductPresentations, disableLTOGrouping)
     self:ClearMarketProducts()
 
     self.subscriptionPage:SetHidden(true)
+    self.chapterUpgradePage:SetHidden(true)
     self.categoryFilter:SetHidden(false)
     self.categoryFilterLabel:SetHidden(false)
 
@@ -1438,12 +1529,13 @@ function Market:OnShowBuyCrownsDialog()
     ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_CROWNS_URL_TYPE, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
 end
 
-function Market:RequestShowCategory(categoryIndex)
+function Market:RequestShowCategory(categoryIndex, subcategoryIndex)
     self.queuedCategoryIndex = categoryIndex
+    self.queuedSubcategoryIndex = subcategoryIndex
 end
 
 function Market:SelectCategory(categoryIndex, subcategoryIndex)
-    local targetNode = self:GetCategoryData(categoryIndex, NO_SUBCATEGORY)
+    local targetNode = self:GetCategoryData(categoryIndex, subcategoryIndex)
     if targetNode then
         if self.categoryTree:GetSelectedNode() ~= targetNode then
             self.categoryTree:SelectNode(targetNode)
@@ -1462,6 +1554,8 @@ function Market:RefreshActions()
 
     if self.productListFragment:IsShowing() then
         readyToPreview = self.productListFragment:IsReadyToPreview()
+    elseif not self.chapterUpgradePage:IsHidden() then
+        readyToPreview = self.chapterUpgradePaneObject:IsReadyToPreview()
     else
         readyToPreview = self:IsReadyToPreview()
     end
@@ -1484,7 +1578,7 @@ do
             end
         else
             self.showLoadingText = false
-            loadingStartTime = nil
+            self.loadingStartTime = nil
         end
     end
 end
@@ -1510,8 +1604,9 @@ function Market:OnShown()
     end
 
     if self.queuedCategoryIndex then
-        self:SelectCategory(self.queuedCategoryIndex, NO_SUBCATEGORY)
+        self:SelectCategory(self.queuedCategoryIndex, self.queuedSubcategoryIndex)
         self.queuedCategoryIndex = nil
+        self.queuedSubcategoryIndex = nil
     end
 end
 

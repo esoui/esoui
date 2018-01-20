@@ -25,7 +25,7 @@ do
 
         control.restyleSlotData = restyleSlotData
 
-        control:SetTexture(icon)
+        control.iconTexture:SetTexture(icon)
     end
 end
 
@@ -168,27 +168,6 @@ do
         pendingLoopAnimation:PlayFromStart()
         pendingLoopAnimation.owner = control
         control.pendingLoopAnimationKey = key
-    end
-end
-
-function ZO_OutfitStyleCollectiblesGridSort(left, right)
-    if left.clearAction then
-        return true
-    elseif right.clearAction then
-        return false
-    end
-
-    local leftType = left:IsArmorStyle() and left:GetVisualArmorType() or left:GetWeaponModelType()
-    local rightType = right:IsArmorStyle() and right:GetVisualArmorType() or right:GetWeaponModelType()
-
-    if leftType ~= rightType then
-        return leftType < rightType
-    elseif left:IsUnlocked() ~= right:IsUnlocked() then
-        return left:IsUnlocked()
-    elseif left:GetSortOrder() ~= right:GetSortOrder() then
-        return left:GetSortOrder() < right:GetSortOrder()
-    else
-        return left:GetName() < right:GetName()
     end
 end
 

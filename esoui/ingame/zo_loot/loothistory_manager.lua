@@ -99,6 +99,13 @@ do
             end
         end
 
+        local function OnSkillExperienceUpdated(...)
+            if CanAddLootEntry() then
+                SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnSkillExperienceUpdated(...)
+            end
+        end
+
+
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_LOOT_RECEIVED, function(eventId, ...) OnLootReceived(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CURRENCY_UPDATE, function(eventId, ...) OnCurrencyUpdate(...) end)
@@ -107,7 +114,7 @@ do
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MEDAL_AWARDED, function(eventId, ...) OnMedalAwarded(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_STATE_CHANGED, function(eventId, ...) OnBattlegroundStateChanged(...) end)
         ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function(...) OnNewCollectibleReceived(...) end)
-        -- TODO: wait for icons to be made before allowing skill experience from guilds to come through loot history
+        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_SKILL_XP_UPDATE, function(eventId, ...) OnSkillExperienceUpdated(...) end)
     end
 end
 

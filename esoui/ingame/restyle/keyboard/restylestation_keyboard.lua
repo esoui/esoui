@@ -127,6 +127,7 @@ function ZO_RestyleStation_Keyboard:RegisterForEvents()
 
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("SheetChanged", self.onSheetChangedCallback)
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("DyeSlotClicked", self.onDyeSlotClickedCallback)
+    ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:RegisterCallback("ModeSelectorDropdownChanged", self.updateKeybindCallback)
 end
 
 function ZO_RestyleStation_Keyboard:UnregisterForEvents()
@@ -134,6 +135,7 @@ function ZO_RestyleStation_Keyboard:UnregisterForEvents()
 
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:UnregisterCallback("SheetChanged", self.onSheetChangedCallback)
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:UnregisterCallback("DyeSlotClicked", self.onDyeSlotClickedCallback)
+    ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:UnregisterCallback("ModeSelectorDropdownChanged", self.updateKeybindCallback)
 end
 
 function ZO_RestyleStation_Keyboard:AddKeybinds()

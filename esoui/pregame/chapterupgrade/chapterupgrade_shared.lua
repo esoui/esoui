@@ -59,7 +59,7 @@ end
 
 function ZO_ChapterUpgrade_Shared:PerformDeferredInitialize()
     if not self.initialized then
-        local backgroundTexture, registrationSummary, codeEntryInstructions, digitalUpgradeInstructions, chapterSummaryHeader, chapterSummary = GetCurrentChapterRegistrationInfo()
+        local backgroundTexture, registrationSummary, chapterSummaryHeader, chapterSummary = GetCurrentChapterRegistrationInfo()
         local logoTexture = GetCurrentChapterLargeLogoFileIndex()
         self.backgroundImage:SetTexture(backgroundTexture)
         self:ResizeBackground()
@@ -100,7 +100,8 @@ function ZO_ChapterUpgrade_Shared:ShowContinueDialog()
 end
 
 function ZO_ChapterUpgrade_ShouldShow()
-    if HasCurrentChapter() then
+    local currentChapterId = GetCurrentChapterUpgradeId()
+    if currentChapterId == 0 or IsChapterOwned(currentChapterId) then
         return false
     end
 

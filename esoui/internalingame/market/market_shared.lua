@@ -4,9 +4,11 @@ ZO_MARKET_DISPLAY_LOADING_DELAY_MS = 500
 ZO_MARKET_CATEGORY_TYPE_NONE = "none"
 ZO_MARKET_CATEGORY_TYPE_FEATURED = "featured"
 ZO_MARKET_CATEGORY_TYPE_ESO_PLUS = "esoPlus"
+ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE = "chapterUpgrade"
 
 ZO_MARKET_FEATURED_CATEGORY_INDEX = 0
 ZO_MARKET_ESO_PLUS_CATEGORY_INDEX = -1
+ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX = -2
 
 ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE = 0
 ZO_MARKET_PREVIEW_TYPE_BUNDLE = 1
@@ -91,17 +93,30 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnEsoPlusSubscriptionStatusChanged()
     end
 
+    local function OnChapterUpgradeDataUpdated()
+        -- keyboard market won't exist on consoles, but only the keyboard market actually cares about chapter data
+        local keyboardMarket = SYSTEMS:GetKeyboardObject(ZO_MARKET_NAME)
+        if keyboardMarket then
+            if keyboardMarket.marketScene:IsShowing() then
+                keyboardMarket:BuildCategories()
+            else
+                keyboardMarket:FlagMarketCategoriesForRefresh()
+            end
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, OnMarketCollectibleUpdated)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, OnMarketCollectibleUpdated)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, OnMarketCollectiblesUpdated)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, OnShowMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_BUY_CROWNS_DIALOG, OnShowBuyCrownsDialog)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, OnEsoPlusSubscriptionStatusChanged)
+    ZO_CHAPTER_UPGRADE_MANAGER:RegisterCallback("ChapterUpgradeDataUpdated", OnChapterUpgradeDataUpdated)
 end
 
 function Market_Singleton:RequestOpenMarket()
@@ -314,9 +329,19 @@ function ZO_Market_Shared:OnRequestPurchaseMarketProduct(marketProductId, presen
     self:PurchaseMarketProduct(marketProductId, presentationIndex)
 end
 
+function ZO_Market_Shared:OnShowFeaturedCategory()
+    SCENE_MANAGER:Show("show_market")
+    self:RequestShowCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX)
+end
+
 function ZO_Market_Shared:OnShowEsoPlusPage()
     SCENE_MANAGER:Show("show_market")
     self:RequestShowCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX)
+end
+
+function ZO_Market_Shared:OnShowChapterUpgrade(chapterUpgradeId)
+    SCENE_MANAGER:Show("show_market")
+    self:RequestShowCategory(ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX, chapterUpgradeId) -- the subcategory id for the chapter is the chapterUpdradeId
 end
 
 function ZO_Market_Shared:OnEsoPlusSubscriptionStatusChanged()
@@ -327,15 +352,16 @@ function ZO_Market_Shared:OnShowBuyCrownsDialog()
     -- To be overridden
 end
 
-function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, targetMarketProductId)
+function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, additionalData)
     SetOpenMarketSource(openSource)
     if openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_PRODUCT or openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then
-        self:OnShowMarketProduct(targetMarketProductId)
+        self:OnShowMarketProduct(additionalData)
     elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_FEATURED_CATEGORY then
-        SCENE_MANAGER:Show("show_market")
-        self:RequestShowCategory(ZO_MARKET_FEATURED_CATEGORY_INDEX)
+        self:OnShowFeaturedCategory()
     elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY then
         self:OnShowEsoPlusPage()
+    elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
+        self:OnShowChapterUpgrade(additionalData)
     end
 end
 
@@ -381,6 +407,8 @@ function ZO_Market_Shared:OnCategorySelected(data)
         self:BuildFeaturedMarketProductList()
     elseif data.type == ZO_MARKET_CATEGORY_TYPE_ESO_PLUS then
         self:DisplayEsoPlusOffer()
+    elseif data.type == ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE then
+        self:DisplayChapterUpgrade(data)
     else
         self:BuildMarketProductList(data)
     end
@@ -949,6 +977,9 @@ end
 function ZO_Market_Shared:DisplayEsoPlusOffer()
 end
 
+function ZO_Market_Shared:DisplayChapterUpgrade(data)
+end
+
 function ZO_Market_Shared:GetCategoryData(targetId)
 end
 
@@ -987,7 +1018,7 @@ function ZO_Market_Shared:RequestShowMarketProduct(id)
     assert(false)
 end
 
-function ZO_Market_Shared:RequestShowCategory(categoryIndex)
+function ZO_Market_Shared:RequestShowCategory(categoryIndex, subcategoryIndex)
     assert(false)
 end
 

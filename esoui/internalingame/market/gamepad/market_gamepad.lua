@@ -992,8 +992,9 @@ do
     end
 end
 
-function GamepadMarket:RequestShowCategory(categoryIndex)
+function GamepadMarket:RequestShowCategory(categoryIndex, subcategoryIndex)
     self.queuedCategoryIndex = categoryIndex
+    -- subcategories are displayed as part of the parent category, so for now we'll just show the whole category
 end
 
 function GamepadMarket:ShowBundleContents(bundleMarketProduct)

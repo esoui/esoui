@@ -7,7 +7,9 @@ function ZO_Outfit_Selector_Header_Focus_Gamepad:New(...)
 end
 
 function ZO_Outfit_Selector_Header_Focus_Gamepad:Initialize(control)
-    self.label = control
+    self.control = control
+    self.label = control:GetNamedChild("OutfitName")
+    self.dropdownChevron = control:GetNamedChild("OpenDropdown")
     self.active = false
 end
 

@@ -9,6 +9,12 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_OutfitStyle_GridEntry_IconAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.2"/>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
     
     <Controls>
@@ -19,6 +25,7 @@
                 self.highlight = self:GetNamedChild("Highlight")
                 self.equippedGlow = self:GetNamedChild("EquippedGlow")
                 self.statusMultiIcon = self:GetNamedChild("Status")
+                self.icon = self:GetNamedChild("Icon")
             </OnInitialized>
             
             <OnMouseEnter>

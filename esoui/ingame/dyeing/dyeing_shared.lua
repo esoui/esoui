@@ -80,12 +80,6 @@ ZO_DYEING_FRAME_INDEX = 2
 ZO_DYEING_MUNGE_INDEX = 3
 ZO_DYEING_LOCK_INDEX = 4
 
-ZO_DYEING_SAVED_VARIABLES_DEFAULTS =
-{
-    showLocked = true,
-    sortStyle = ZO_DYEING_SORT_STYLE_RARITY,
-}
-
 -- Interaction Mode Setup
 ZO_DYEING_STATION_INTERACTION =
 {
@@ -659,6 +653,21 @@ function Dyeing_Manager:Initialize()
     
     EVENT_MANAGER:RegisterForEvent("Dyeing_Manager", EVENT_UNLOCKED_DYES_UPDATED, function() self:UpdateDyeData() end)
     EVENT_MANAGER:RegisterForEvent("Dyeing_Manager", EVENT_DYES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
+
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            local DEFAULTS =
+            {
+                showLocked = true,
+                sortStyle = ZO_DYEING_SORT_STYLE_RARITY,
+            }
+            self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "Dyeing", DEFAULTS)
+            EVENT_MANAGER:UnregisterForEvent("Dyeing_Manager", EVENT_ADD_ON_LOADED)
+            self:FireCallbacks("OptionsInfoAvailable")
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("Dyeing_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
     self:UpdateDyeData()
 end
 
@@ -800,12 +809,26 @@ function Dyeing_Manager:GetSearchResults()
     return nil
 end
 
-function Dyeing_Manager:RegisterForDyeListUpdates(callback)
-    self:RegisterCallback("UpdateDyeLists", callback)
+function Dyeing_Manager:GetShowLocked()
+    return self.savedVars.showLocked
 end
 
-function Dyeing_Manager:UpdateAllDyeLists()
-    self:FireCallbacks("UpdateDyeLists")
+function Dyeing_Manager:SetShowLocked(showLocked)
+    if self.savedVars.showLocked ~= showLocked then
+        self.savedVars.showLocked = showLocked
+        self:FireCallbacks("UpdateDyeLists")
+    end
+end
+
+function Dyeing_Manager:GetSortStyle()
+    return self.savedVars.sortStyle
+end
+
+function Dyeing_Manager:SetSortStyle(sortStyle)
+    if self.savedVars.sortStyle ~= sortStyle then
+        self.savedVars.sortStyle = sortStyle
+        self:FireCallbacks("UpdateDyeLists")
+    end
 end
 
 ZO_DYEING_MANAGER = Dyeing_Manager:New()

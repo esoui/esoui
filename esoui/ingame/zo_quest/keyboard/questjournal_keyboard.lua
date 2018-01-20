@@ -280,6 +280,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
 
     local firstNode
     local lastNode
+    local assistedNode
     for i = 1, #quests do
         local questInfo = quests[i]
         local parent = categoryNodes[questInfo.categoryName]
@@ -295,10 +296,14 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
             questNode.nextNode = firstNode
         end
 
+        if assistedNode == nil and GetTrackedIsAssisted(TRACK_TYPE_QUEST, questInfo.questIndex) then
+            assistedNode = questNode
+        end
+
         lastNode = questNode
     end
 
-    self.navigationTree:Commit()
+    self.navigationTree:Commit(assistedNode)
 
     self:RefreshDetails()
 

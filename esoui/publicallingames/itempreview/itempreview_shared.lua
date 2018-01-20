@@ -802,5 +802,13 @@ function ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
         return IsItemLinkFurnitureRecipe(itemLink)
     end
 
+	local collectibleId = GetCollectibleIdFromLink(itemLink)
+	if collectibleId and collectibleId > 0 then
+		local furnitureDataId = GetCollectibleFurnitureDataId(collectibleId)
+		if furnitureDataId > 0 then
+			return true
+		end
+	end
+
     return false
 end

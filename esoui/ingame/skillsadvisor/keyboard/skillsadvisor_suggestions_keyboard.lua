@@ -82,9 +82,9 @@ function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupAbilityEntry(ability, data)
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard:OnReadyToHandleClickAction()
-    local control = self.lastClickedControl	
+    local control = self.lastClickedControl
 
-    if control and control.ability then
+    if control and control.ability and not ZO_SKILLS_ADVISOR_SINGLETON:IsPassiveRankPurchased(control) then
         local availablePoints = GetAvailableSkillPoints()
         local ability = control.ability
         local skillType = ability.skillType

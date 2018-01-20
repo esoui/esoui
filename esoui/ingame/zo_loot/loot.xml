@@ -35,7 +35,7 @@
     </Animations>
     
     <Controls>
-        <Control name="ZO_LootItemSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+        <Control name="ZO_LootItemSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="250" y="52" />
             
             <OnMouseEnter>
@@ -53,16 +53,6 @@
             </OnMouseDoubleClick>
 
             <Controls>
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
-                </Texture>
-
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
-                </Texture>
-
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" mouseEnabled="false">
                     <Dimensions x="40" y="40" />
                     <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />

@@ -6,7 +6,7 @@
             </OnMouseUp>
         </Label>
 
-        <Control name="ZO_PlayerFurnitureSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+        <Control name="ZO_PlayerFurnitureSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="509" y="ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT" />
             <OnInitialized>
                 ZO_HousingFurnitureTemplates_Keyboard_OnInitialized(self)
@@ -29,16 +29,6 @@
             </OnMouseExit>
 
             <Controls>
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
-                </Texture>
-
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
-                </Texture>
-
                 <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon" hidden="true">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="TOPLEFT" offsetX="0" offsetY="10" />

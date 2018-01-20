@@ -165,14 +165,6 @@ function CollectionsBook_Singleton:MarkHouseCollectiblePermissionLoadDialogShown
     end
 end
 
-function ZO_ShowChapterUpgradePlatformDialog()
-    if IsConsoleUI() then
-        ZO_Dialogs_ShowGamepadDialog("CHAPTER_UPGRADE_STORE_CONSOLE")
-    else
-        ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE")
-    end
-end
-
 function ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
     local locked = entryData:IsLocked()
     if locked or entryData:IsBlocked() then

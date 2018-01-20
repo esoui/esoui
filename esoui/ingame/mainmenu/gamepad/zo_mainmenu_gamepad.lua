@@ -4,21 +4,26 @@ local CATEGORY_TO_ENTRY_DATA = {}
 do
     local MENU_MAIN_ENTRIES =
     {
-        MARKET          = 1,
-        CROWN_CRATES     = 2,
-        NOTIFICATIONS   = 3,
-        COLLECTIONS     = 4,
-        INVENTORY       = 5,
-        CHARACTER       = 6,
-        SKILLS          = 7,
-        CHAMPION        = 8,
-        CAMPAIGN        = 9,
-        JOURNAL         = 10,
-        SOCIAL          = 11,
-        ACTIVITY_FINDER = 12,
-        HELP            = 13,
-        OPTIONS         = 14,
-        LOG_OUT         = 15,
+        CROWN_STORE     = 1,
+        NOTIFICATIONS   = 2,
+        COLLECTIONS     = 3,
+        INVENTORY       = 4,
+        CHARACTER       = 5,
+        SKILLS          = 6,
+        CHAMPION        = 7,
+        CAMPAIGN        = 8,
+        JOURNAL         = 9,
+        SOCIAL          = 10,
+        ACTIVITY_FINDER = 11,
+        HELP            = 12,
+        OPTIONS         = 13,
+        LOG_OUT         = 14,
+    }
+    local MENU_CROWN_STORE_ENTRIES =
+    {
+        CROWN_STORE     = 1,
+        CROWN_CRATES    = 2,
+        CHAPTERS        = 3,
     }
     local MENU_JOURNAL_ENTRIES =
     {
@@ -64,46 +69,62 @@ do
                     end
                 end,
         },
-        [MENU_MAIN_ENTRIES.MARKET] =
+        [MENU_MAIN_ENTRIES.CROWN_STORE] =
         {
-            scene = "gamepad_market_pre_scene",
-            additionalScenes =
-                {
-                    "gamepad_market",
-                    "gamepad_market_preview",
-                    "gamepad_market_bundle_contents",
-                    "gamepad_market_purchase",
-                    "gamepad_market_locked",
-                },
             customTemplate = "ZO_GamepadMenuCrownStoreEntryTemplate",
-            name = GetString(SI_GAMEPAD_MAIN_MENU_MARKET_ENTRY),
+            name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_CATEGORY),
             icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
             header = GetString(SI_ESO_PLUS_TITLE),
             postPadding = 70,
-            showHeader = function() return IsESOPlusSubscriber() end
-        },
-        [MENU_MAIN_ENTRIES.CROWN_CRATES] =
-        {
-            scene = "crownCrateGamepad",
-            name = GetString(SI_MAIN_MENU_CROWN_CRATES),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_crownCrates.dds",
+            showHeader = function() return IsESOPlusSubscriber() end,
             isNewCallback =
-                function()
-                    return GetNextOwnedCrownCrateId() ~= nil
+                function(entryData)
+                    for entryIndex, entry in ipairs(entryData.subMenu) do
+                        if entry:IsNew() then
+                            return true
+                        end
+                    end
+                    return false
                 end,
-            disableWhenDead = true,
-            disableWhenReviving = true,
-            disableWhenSwimming = true,
-            disableWhenWerewolf = true,
-            isNewCallback =
-                function()
-                    return GetNumOwnedCrownCrateTypes() > 0
-                end,
-            isVisibleCallback = function()
-                --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
-                --Crown crates will properly refresh again when it closes its scene
-                return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
-            end,
+            subMenu =
+            {
+                [MENU_CROWN_STORE_ENTRIES.CROWN_STORE] =
+                {
+                    scene = "gamepad_market_pre_scene",
+                    sceneGroup = "gamepad_market_scenegroup",
+                    name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_ENTRY),
+                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
+                },
+                [MENU_CROWN_STORE_ENTRIES.CROWN_CRATES] =
+                {
+                    scene = "crownCrateGamepad",
+                    name = GetString(SI_MAIN_MENU_CROWN_CRATES),
+                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_crownCrates.dds",
+                    disableWhenDead = true,
+                    disableWhenReviving = true,
+                    disableWhenSwimming = true,
+                    disableWhenWerewolf = true,
+                    isNewCallback =
+                        function()
+                            return GetNumOwnedCrownCrateTypes() > 0
+                        end,
+                    isVisibleCallback = function()
+                        --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
+                        --Crown crates will properly refresh again when it closes its scene
+                        return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
+                    end,
+                },
+                [MENU_CROWN_STORE_ENTRIES.CHAPTERS] =
+                {
+                    scene = "chapterUpgradeGamepad",
+                    sceneGroup = "gamepad_chapterUpgrade_scenegroup",
+                    name = GetString(SI_MAIN_MENU_CHAPTERS),
+                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_chapters.dds",
+                    isVisibleCallback = function()
+                        return ZO_CHAPTER_UPGRADE_MANAGER:GetNumChapterUpgrades() > 0
+                    end,
+                },
+            },
         },
         [MENU_MAIN_ENTRIES.COLLECTIONS] =
         {
@@ -345,8 +366,8 @@ do
     CATEGORY_TO_ENTRY_DATA =
     {
         [MENU_CATEGORY_NOTIFICATIONS]   = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.NOTIFICATIONS],
-        [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.MARKET],
-        [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_CRATES],
+        [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_STORE],
+        [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_CRATES],
         [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS],
         [MENU_CATEGORY_INVENTORY]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.INVENTORY],
         [MENU_CATEGORY_CHARACTER]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHARACTER],
@@ -486,39 +507,45 @@ do
             end
         end
     end
-    
+
     local function EntryWithSubMenuSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    
+
         local color = data:GetNameColor(selected)
         if type(color) == "function" then
             color = color(data)
         end
         control:GetNamedChild("Arrow"):SetColor(color:UnpackRGBA())
     end
-    
+
     local function CrownStoreEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    
+
         local balanceLabel = control:GetNamedChild("Balance")
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
-    
+
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
         local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(GetPlayerCrowns()))
         remainingCrownsLabel:SetText(currencyString)
+
+        local color = data:GetNameColor(selected)
+        if type(color) == "function" then
+            color = color(data)
+        end
+        control:GetNamedChild("Arrow"):SetColor(color:UnpackRGBA())
     end
-    
+
     function ZO_MainMenuManager_Gamepad:SetupList(list)
         list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    
+
         list:AddDataTemplate("ZO_GamepadMenuEntryTemplateWithArrow", EntryWithSubMenuSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateWithArrow", EntryWithSubMenuSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    
+
         list:AddDataTemplate("ZO_GamepadNewAnimatingMenuEntryTemplate", AnimatingLabelEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    
-        list:AddDataTemplateWithHeader("ZO_GamepadMenuCrownStoreEntryTemplate", CrownStoreEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadCrownStoreMenuEntryHeaderTemplate")
+
         list:AddDataTemplate("ZO_GamepadMenuCrownStoreEntryTemplate", CrownStoreEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadMenuCrownStoreEntryTemplate", CrownStoreEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadCrownStoreMenuEntryHeaderTemplate")
     end
 end
 
@@ -657,64 +684,81 @@ function ZO_MainMenuManager_Gamepad:Exit()
     SCENE_MANAGER:Hide("mainMenuGamepad")
 end
 
-local function AddEntryToList(list, entry)
-    local entryData = entry.data
+do
+    local DEFAULT_MENU_ENTRY_SCENE_NAME = "gamepad_inventory_root"
 
-    if not entryData.isVisibleCallback or entryData.isVisibleCallback() then
-        local customTemplate = entryData.customTemplate
-        local postPadding = entryData.postPadding or 0
-        local entryTemplate = customTemplate and customTemplate or "ZO_GamepadNewMenuEntryTemplate"
+    local function AddEntryToList(list, entry)
+        local entryData = entry.data
+
+        if not entryData.isVisibleCallback or entryData.isVisibleCallback() then
+            local customTemplate = entryData.customTemplate
+            local postPadding = entryData.postPadding or 0
+            local entryTemplate = customTemplate and customTemplate or "ZO_GamepadNewMenuEntryTemplate"
        
-        local showHeader = entryData.showHeader
-        local useHeader = entry.header
-        if type(showHeader) == "function" then
-            useHeader = showHeader()
-        elseif type(showHeader) == "boolean" then
-            useHeader = showHeader
-        end
+            local showHeader = entryData.showHeader
+            local useHeader = entry.header
+            if type(showHeader) == "function" then
+                useHeader = showHeader()
+            elseif type(showHeader) == "boolean" then
+                useHeader = showHeader
+            end
 
-        local name = entryData.name
-        if type(name) == "function" then
-            entry:SetText(name())
-        end
+            local name = entryData.name
+            if type(name) == "function" then
+                entry:SetText(name())
+            end
 
-        if useHeader then
-            list:AddEntryWithHeader(entryTemplate, entry, 0, postPadding)
+            if useHeader then
+                list:AddEntryWithHeader(entryTemplate, entry, 0, postPadding)
+            else
+                list:AddEntry(entryTemplate, entry, 0, postPadding)
+            end
+
+            return true
+        end
+        return false
+    end
+
+    function ZO_MainMenuManager_Gamepad:RefreshMainList()
+        self.mainList:Clear()
+
+        -- if we haven't yet initialized, set the default selection
+        -- we only need to default the first time the Player Menu is shown
+        -- so as soon as we init, we don't need to update this any more
+        if self.initialized then
+            for _, entry in ipairs(MENU_ENTRIES) do
+                AddEntryToList(self.mainList, entry)
+            end
         else
-            list:AddEntry(entryTemplate, entry, 0, postPadding)
+            --The entry we want to start on may not be at the top, and its index can be variable since entries are contextually visible
+            local currentMenuIndex = 0
+            local defaultEntryIndex = 1
+            for _, entry in ipairs(MENU_ENTRIES) do
+                if AddEntryToList(self.mainList, entry) then
+                    currentMenuIndex = currentMenuIndex + 1
+                    if entry.data.scene == DEFAULT_MENU_ENTRY_SCENE_NAME then
+                        defaultEntryIndex = currentMenuIndex
+                    end
+                end
+            end
+
+            self.mainList:SetDefaultSelectedIndex(defaultEntryIndex)
         end
-    end
-end
 
-function ZO_MainMenuManager_Gamepad:RefreshMainList()
-    self.mainList:Clear()
-
-    for _, entry in ipairs(MENU_ENTRIES) do
-        AddEntryToList(self.mainList, entry)
+        self.mainList:Commit()
     end
 
-    -- if we haven't yet initialized, set the default selection to be the inventory
-    -- we only need to default to inventory the first time the Player Menu is shown
-    -- so as soon as we init, we don't need to update this any more
-    if not self.initialized then
-        -- notifications will appear at the top of the list if there are any available
-        local INVENTORY_LIST_INDEX = GAMEPAD_NOTIFICATIONS:GetNumNotifications() == 0 and 4 or 5 -- 4 and 5 correspond to collections and inventory, respectively 
-        self.mainList:SetDefaultSelectedIndex(INVENTORY_LIST_INDEX)
-    end
+    function ZO_MainMenuManager_Gamepad:RefreshSubList(mainListEntry)
+        self.subList:Clear()
 
-    self.mainList:Commit()
-end
-
-function ZO_MainMenuManager_Gamepad:RefreshSubList(mainListEntry)
-    self.subList:Clear()
-
-    if mainListEntry and mainListEntry.subMenu then
-        for _, entry in ipairs(mainListEntry.subMenu) do
-            AddEntryToList(self.subList, entry)
+        if mainListEntry and mainListEntry.subMenu then
+            for _, entry in ipairs(mainListEntry.subMenu) do
+                AddEntryToList(self.subList, entry)
+            end
         end
-    end
 
-    self.subList:Commit()
+        self.subList:Commit()
+    end
 end
 
 function ZO_MainMenuManager_Gamepad:IsShowing()
@@ -736,6 +780,12 @@ function ZO_MainMenuManager_Gamepad:OnNumNotificationsChanged(numNotifications)
 end
 
 function ZO_MainMenuManager_Gamepad:IsEntrySceneShowing(entryData)
+    if entryData.sceneGroup then
+        if SCENE_MANAGER:IsSceneGroupShowing(entryData.sceneGroup) then
+            return true
+        end
+    end
+
     if entryData.additionalScenes then
         for _, scene in ipairs(entryData.additionalScenes) do
             if SCENE_MANAGER:IsShowing(scene) then

@@ -293,11 +293,12 @@ function ZO_CharacterSelect_Initialize(self)
             ZO_CharacterSelectExtraCharacterSlots:SetHidden(true)
             ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 31)
         end
-        
-        if HasCurrentChapter() then
+
+        local chapterUpgradeId = GetCurrentChapterUpgradeId()
+        if chapterUpgradeId == 0 or IsChapterOwned(chapterUpgradeId) then
             ZO_CharacterSelectChapterUpgrade:SetHidden(true)
         else
-            local chapterCollectibleId = GetCurrentChapterCollectibleId()
+            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
             ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleDisplayName(chapterCollectibleId)))
             ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())
 

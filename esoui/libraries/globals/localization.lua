@@ -112,6 +112,7 @@ end
 do
     -- Use the English thousands and decimal marks. The grammar library will convert them to the current language.
     local DIGIT_GROUP_REPLACER = ","
+    local DIGIT_GROUP_DECIMAL_REPLACER = "."
     local DIGIT_GROUP_REPLACER_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
     
     function ZO_CommaDelimitNumber(amount)

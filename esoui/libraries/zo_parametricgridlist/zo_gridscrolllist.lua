@@ -31,8 +31,8 @@ function ZO_GridScrollList:SetLineBreakAmount(lineBreakAmount)
     self.lineBreakAmount = lineBreakAmount
 end
 
-function ZO_GridScrollList:SetScrollPaddingHeight(scrollPaddingHeight)
-    ZO_ScrollList_SetScrollPaddingHeight(self.list, scrollPaddingHeight)
+function ZO_GridScrollList:SetYDistanceFromEdgeWhereSelectionCausesScroll(yDistanceFromEdgeWhereSelectionCausesScroll)
+    ZO_ScrollList_SetYDistanceFromEdgeWhereSelectionCausesScroll(self.list, yDistanceFromEdgeWhereSelectionCausesScroll)
 end
 
 function ZO_GridScrollList:SetHeaderTemplate(templateName, height, setupFunc, onHideFunc, resetControlFunc)
@@ -101,7 +101,6 @@ end
 function ZO_GridScrollList:ClearGridList(retainScrollPosition)
     ZO_ScrollList_Clear(self.list)
     self.currentHeaderName = nil
-    ZO_ScrollList_SetDataIndex(self.list, nil)
     if not retainScrollPosition then
         ZO_Scroll_ResetToTop(self.list)
     end
@@ -124,8 +123,8 @@ do
     local ANIMATE_INSTANTLY = true
 
     function ZO_GridScrollList:ScrollDataToCenter(data)
-        local dataIndex = ZO_ScrollList_GetDataIndex(self.list, data)
-        ZO_ScrollList_SetDataIndex(self.list, dataIndex)
+        local dataIndex = ZO_ScrollList_GetDataIndex(self.list, data.dataEntry)
+        ZO_ScrollList_SelectData(self.list, data)
         ZO_ScrollList_ScrollDataToCenter(self.list, dataIndex, ON_STOP_CALLBACK, ANIMATE_INSTANTLY)
     end
 end

@@ -50,6 +50,10 @@ function ZO_Restyle_Station_Helper_Panel_Gamepad:Deactivate()
     self.isActive = false
 end
 
+function ZO_Restyle_Station_Helper_Panel_Gamepad:IsActive()
+    return self.isActive
+end
+
 function ZO_Restyle_Station_Helper_Panel_Gamepad:OnShowing()
     -- override in derived classes
 end

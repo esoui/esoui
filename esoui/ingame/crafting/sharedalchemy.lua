@@ -422,6 +422,7 @@ function ZO_SharedAlchemy:IsCraftable()
             end
         end
     end
+    return false
 end
 
 function ZO_SharedAlchemy:Create()

@@ -18,7 +18,12 @@ end
 
 ZO_RESTYLE_SLOT_WIDTH = 136
 ZO_RESTYLE_SLOT_HEIGHT = 63
-ZO_RESTYLE_SLOT_ICON_WIDTH = 63
+
+ZO_RESTYLE_SLOT_ICON_WIDTH  = 63
+ZO_RESTYLE_SLOT_ICON_HEIGHT = ZO_RESTYLE_SLOT_ICON_WIDTH
+
+ZO_RESTYLE_SLOT_ICON_INNER_WIDTH = ZO_RESTYLE_SLOT_ICON_WIDTH - 8
+ZO_RESTYLE_SLOT_ICON_INNER_HEIGHT = ZO_RESTYLE_SLOT_ICON_INNER_WIDTH
 
 do
     local GRID_PADDING_X = 30
@@ -42,6 +47,7 @@ do
         itemSlotControl:SetHandler("OnMouseExit", function()
             self:OnIconMouseExit()
         end)
+        itemSlotControl.iconTexture = itemSlotControl:GetNamedChild("Icon")
 
         self.control = control
         self.itemSlotControl = itemSlotControl
@@ -738,7 +744,7 @@ do
 
             control.restyleSlotData = restyleSlotData
 
-            control:SetTexture(icon)
+            control.iconTexture:SetTexture(icon)
 
             local pendingCollectibleId = slotManipulator:GetPendingCollectibleId()
             local shownCollectibleIsNotCurrentlyEquipped = pendingCollectibleId == 0 or pendingCollectibleId ~= slotManipulator:GetCurrentCollectibleId()
@@ -827,7 +833,6 @@ function ZO_RestyleOutfitSlotsSheet:SetOutfitManipulator(newManipulator)
         self.currentOutfitManipulator = newManipulator
         
         self:SetRestyleSetIndex(newManipulator:GetOutfitIndex())
-        ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(newManipulator)
     end
 end
 
