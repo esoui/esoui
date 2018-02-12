@@ -61,7 +61,3 @@ end
 function ZO_Restyle_Station_Helper_Panel_Gamepad:OnHide()
     self:Deactivate()
 end
-
-function ZO_Restyle_Station_Helper_Panel_Gamepad:IsActive()
-    return self.isActive
-end

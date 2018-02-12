@@ -1,3 +1,5 @@
+local g_remoteSceneSequenceNumber = 0
+
 ZO_SceneManager_Leader = ZO_SceneManager_Base:Subclass()
 
 function ZO_SceneManager_Leader:New(...)
@@ -13,7 +15,14 @@ function ZO_SceneManager_Leader:Initialize(...)
     EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_REMOTE_SCENE_REQUEST, function(eventId, ...) self:OnRemoteSceneRequest(...) end)
 end
 
-function ZO_SceneManager_Base:OnRemoteSceneRequest(messageOrigin, requestType, sceneName)
+-- sequence number
+
+function ZO_SceneManager_Leader:GetNextSequenceNumber()
+    g_remoteSceneSequenceNumber = g_remoteSceneSequenceNumber + 1
+    return g_remoteSceneSequenceNumber
+end
+
+function ZO_SceneManager_Leader:OnRemoteSceneRequest(messageOrigin, requestType, sceneName)
     if messageOrigin ~= ZO_REMOTE_SCENE_CHANGE_ORIGIN then
         if requestType == REMOTE_SCENE_REQUEST_TYPE_SHOW_BASE_SCENE then
             self:ShowBaseScene(sceneName)
@@ -121,7 +130,7 @@ function ZO_SceneManager_Leader:CreateStackFromScratch(...)
     end
 end
 
--- base scene, next scene, and current scene overrides
+-- next scene overrides
 
 function ZO_SceneManager_Leader:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
     ZO_SceneManager_Base.SetNextScene(self, nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
@@ -129,16 +138,6 @@ function ZO_SceneManager_Leader:SetNextScene(nextScene, push, nextSceneClearsSce
     self.nextScenePushed = push
     self.nextSceneClearsSceneStack = nextSceneClearsSceneStack
     self.numScenesNextScenePops = numScenesNextScenePops
-
-    local sceneName = self.nextScene and self.nextScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER
-    SendRemoteSceneSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_SET_NEXT_SCENE, sceneName)
-end
-
-function ZO_SceneManager_Leader:SetCurrentScene(currentScene)
-    ZO_SceneManager_Base.SetCurrentScene(self, currentScene)
-
-    local sceneName = self.currentScene and self.currentScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER
-    SendRemoteSceneSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_SET_CURRENT_SCENE, sceneName)
 end
 
 -- scene logic
@@ -211,6 +210,13 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
                         local oldNextScene = self.nextScene
                         self:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
                         currentScene:RefreshFragments()
+
+                        local CURRENT_SCENE_IGNORED = ""
+                        local NO_SEQUENCE_NUMBER = 0
+                        local FRAGMENT_COMPLETE_STATE_IGNORED = false
+                        local nextSceneName = self.nextScene and self.nextScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER                        
+                        SendLeaderToFollowerSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_CHANGE_NEXT_SCENE, CURRENT_SCENE_IGNORED, nextSceneName, NO_SEQUENCE_NUMBER, FRAGMENT_COMPLETE_STATE_IGNORED)
+                        
                         self:OnNextSceneRemovedFromQueue(oldNextScene, nextScene)
                     end
                 else
@@ -219,14 +225,18 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
                 end
             else
                 if currentScene:GetState() == SCENE_HIDING then
+                    local oldNextScene = self.nextScene
                     self:ClearNextScene()
                     self:ShowScene(currentScene)
+                    if oldNextScene then
+                        self:OnNextSceneRemovedFromQueue(oldNextScene, self.nextScene)
+                    end
                 end
             end
         else
             --otherwise, start showing this scene
             self.previousScene = self.currentScene
-            self.currentScene = nextScene
+            self:SetCurrentScene(nextScene)
             self:ShowScene(self.currentScene)
         end
     end
@@ -239,13 +249,37 @@ function ZO_SceneManager_Leader:Hide(sceneName)
 end
 
 function ZO_SceneManager_Leader:ShowScene(scene)
-    ZO_SceneManager_Base.ShowScene(self, scene)
-    SendRemoteSceneSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_SHOW_SCENE, scene:GetName())
+    ZO_SceneManager_Base.ShowScene(self, scene, self:GetNextSequenceNumber())
 end
 
 function ZO_SceneManager_Leader:HideScene(scene)
-    ZO_SceneManager_Base.HideScene(self, scene)
-    SendRemoteSceneSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_HIDE_SCENE, scene:GetName())
+    ZO_SceneManager_Base.HideScene(self, scene, self:GetNextSequenceNumber())
+end
+
+function ZO_SceneManager_Leader:SyncFollower()
+    local currentScene = self:GetCurrentScene()
+    local syncType = currentScene:IsShowing() and REMOTE_SCENE_SYNC_TYPE_SHOW_SCENE or REMOTE_SCENE_SYNC_TYPE_HIDE_SCENE
+    local currentSceneName = currentScene:GetName()
+    local sequenceNumber = 0
+    local currentSceneTransitionComplete = true
+    if currentScene:IsRemoteScene() then
+        sequenceNumber = currentScene:GetSequenceNumber()
+        if currentScene:GetState() == SCENE_SHOWING or currentScene:GetState() == SCENE_HIDING then
+            currentSceneTransitionComplete = currentScene:AreFragmentsDoneTransitioning()
+        end
+    end
+    local nextSceneName = self.nextScene and self.nextScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER
+    SendLeaderToFollowerSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, syncType, currentSceneName, nextSceneName, sequenceNumber, currentSceneTransitionComplete)
+end
+
+function ZO_SceneManager_Leader:OnSceneStateChange(scene, oldState, newState)
+    if scene == self:GetCurrentScene() then
+        if newState == SCENE_HIDING or newState == SCENE_SHOWING then
+            self:SyncFollower()
+        end
+    end
+
+    ZO_SceneManager_Base.OnSceneStateChange(self, scene, oldState, newState)
 end
 
 -- override of ZO_SceneManager_Base:OnSceneStateHidden
@@ -300,6 +334,10 @@ function ZO_SceneManager_Leader:OnSceneStateHidden(scene)
         self:ClearNextScene()
         self:ShowScene(self:GetCurrentScene(), push)
     end
+end
+
+function ZO_SceneManager_Leader:SendFragmentCompleteMessage()
+    self:SyncFollower()
 end
 
 function ZO_SceneManager_Leader:RequestShowLeaderBaseScene()

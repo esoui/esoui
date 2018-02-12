@@ -278,6 +278,14 @@ function ZO_SharedFurnitureManager:OnSingleCollectibleUpdate(collectibleId)
         if self:CreateOrUpdateCollectibleDataEntry(collectibleId) then
             self:RequestApplyPlaceableTextFilterToData()
         end
+        --Update retrievable furniture that is backed by a collectible (nickname)
+        for _, furnitureData in pairs(self.retrievableFurniture) do
+            if furnitureData:GetCollectibleId() == collectibleId then
+                furnitureData:RefreshInfo(furnitureData:GetRetrievableFurnitureId())
+                self:FireCallbacks("RetrievableFurnitureChanged")
+                break
+            end
+        end
     else
         --something made the collectible no longer valid
         local placeableCollectible = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId]

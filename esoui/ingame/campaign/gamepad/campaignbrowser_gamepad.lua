@@ -302,6 +302,8 @@ function ZO_CampaignBrowser_Gamepad:PerformDeferredInitialization()
     self.campaignList = self:GetMainList()
 
     self:InitializeHeader()
+    EVENT_MANAGER:RegisterForEvent("ZO_CampaignBrowser_Gamepad", EVENT_PLAYER_DEAD, function() self:Update() end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CampaignBrowser_Gamepad", EVENT_PLAYER_ALIVE, function() self:Update() end)
 end
 
 function ZO_CampaignBrowser_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)

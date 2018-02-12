@@ -21,7 +21,9 @@ end
 function ZO_DyeingToolFill:OnLeftClicked(restyleSlotData, dyeChannel)
     local slots = ZO_Dyeing_GetSlotsForRestyleSet(restyleSlotData:GetRestyleMode(), restyleSlotData:GetRestyleSetIndex())
     for i, dyeableSlotData in ipairs(slots) do
-        dyeableSlotData:SetPendingDyes(zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), dyeableSlotData:GetPendingDyes()))
+        if not dyeableSlotData:ShouldBeHidden() then
+            dyeableSlotData:SetPendingDyes(zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), dyeableSlotData:GetPendingDyes()))
+        end
     end
 
     self.owner:OnPendingDyesChanged(nil)

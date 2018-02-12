@@ -21,8 +21,6 @@ do
 
     local NO_CATEGORY_NAME = nil
     local NO_NICKNAME = nil
-    local IS_PURCHASABLE = true
-    local BLANK_HINT = ""
     local HIDE_VISUAL_LAYER_INFO = false
     local NO_COOLDOWN = nil
     local HIDE_BLOCK_REASON = false
@@ -31,8 +29,8 @@ do
         local productType = GetMarketProductType(productId)
         -- For some market product types we can just use other tooltip layouts
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-            local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(productId)
-            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASABLE, description, BLANK_HINT, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            local collectibleId, _, name, type, description, owned, isPlaceholder, isPurchasable, hint = GetMarketProductCollectibleInfo(productId)
+            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, isPurchasable, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
             return
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             local itemLink = GetMarketProductItemLink(productId)

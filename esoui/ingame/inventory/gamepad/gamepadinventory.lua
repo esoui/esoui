@@ -1128,7 +1128,7 @@ function ZO_GamepadInventory:InitializeCraftBagList()
     local SETUP_LIST_LOCALLY = true
     local DONT_USE_TRIGGERS = false -- the parametric list screen will take care of the triggers
     self.craftBagList = self:AddList("CraftBag", SETUP_LIST_LOCALLY, ZO_GamepadInventoryList, BAG_VIRTUAL, SLOT_TYPE_CRAFT_BAG_ITEM, OnSelectedDataCallback, nil, nil, nil, DONT_USE_TRIGGERS)
-    self.craftBagList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_CRAFT_BAG_EMPTY))
+    self.craftBagList:SetNoItemText(GetString(SI_INVENTORY_ERROR_CRAFT_BAG_EMPTY))
 end
 
 function ZO_GamepadInventory:RefreshCraftBagList()

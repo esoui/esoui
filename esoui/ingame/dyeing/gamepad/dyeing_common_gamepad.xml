@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Backdrop name="ZO_DyeingHighlight_Gamepad" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" hidden="true" virtual="true"/>
-        <Backdrop name="ZO_DyeingChangedHighlight_Gamepad" inherits="ZO_GamepadBlueOutlineHighlight" tier="HIGH" layer="OVERLAY" hidden="true" virtual="true"/>
+        <Texture name="ZO_DyeingChangedHighlight_Gamepad" textureFile="EsoUI/Art/Dye/Gamepad/gp_dye_triangleFrame.dds" tier="HIGH" layer="OVERLAY" level="1" hidden="true" virtual="true"/>
 
         <Control name="ZO_DyeingSlotSwatch_Gamepad" virtual="true">
             <OnInitialized>

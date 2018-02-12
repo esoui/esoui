@@ -361,21 +361,21 @@ function ZO_Dyeing_Keyboard:CancelExit()
 end
 
 function ZO_Dyeing_Keyboard:SwitchToDyeingWithDyeId(dyeId, suppressSounds)
-    local swatchObject = self.dyeIdToSwatch[dyeId]
-    if swatchObject then -- super edge case check (most likely only an internal issue) for having a non-player dye in your saved sets
-        self.suppressSounds = suppressSounds
+    self.suppressSounds = suppressSounds
 
-        local toolChanged = false
-        if not self.activeTool:HasSwatchSelection() then
-            ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
-            toolChanged = true
-        end
-        self:SetSelectedDyeId(dyeId, nil, toolChanged)
-
-        ZO_Scroll_ScrollControlIntoCentralView(self.pane, swatchObject.control)
-
-        self.suppressSounds = false
+    local toolChanged = false
+    if not self.activeTool:HasSwatchSelection() then
+        ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
+        toolChanged = true
     end
+    self:SetSelectedDyeId(dyeId, nil, toolChanged)
+
+    local swatchObject = self.dyeIdToSwatch[dyeId]
+    if swatchObject then
+        ZO_Scroll_ScrollControlIntoCentralView(self.pane, swatchObject.control)
+    end
+
+    self.suppressSounds = false
 end
 
 function ZO_Dyeing_Keyboard:SetSelectedDyeId(dyeId, becauseOfRebuild, becauseToolChange)

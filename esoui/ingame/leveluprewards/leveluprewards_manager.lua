@@ -296,9 +296,10 @@ function LevelUpRewardsManager:GetAdditionalUnlocksForLevel(level, rewardInfoTab
     local numAdditionalUnlocks = GetNumAdditionalLevelUpUnlocks(level)
 
     for index = 1, numAdditionalUnlocks do
+        local formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetAdditionalLevelUpUnlockDisplayName(level, index))
         local unlockInfo =
         {
-            formattedName = GetAdditionalLevelUpUnlockDisplayName(level, index),
+            formattedName = formattedDisplayName,
             gamepadIcon = GetAdditionalLevelUpUnlockGamepadIcon(level, index),
             keyboardIcon = GetAdditionalLevelUpUnlockKeyboardIcon(level, index),
             description = GetAdditionalLevelUpUnlockDescription(level, index),

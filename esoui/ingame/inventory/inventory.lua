@@ -1762,11 +1762,14 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_BACKPACK].filterBar, selectedTab)
 
     local hideBankInfo = layoutData.hideBankInfo
+    local hideCurrencyInfo = layoutData.hideCurrencyInfo
 
-    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(hideBankInfo)
+    ZO_PlayerInventoryInfoBarMoney:SetHidden(hideCurrencyInfo)
+    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(hideBankInfo or hideCurrencyInfo)
     ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(hideBankInfo)
 
-    ZO_CraftBagInfoBarAltMoney:SetHidden(hideBankInfo)
+    ZO_CraftBagInfoBarMoney:SetHidden(hideCurrencyInfo)
+    ZO_CraftBagInfoBarAltMoney:SetHidden(hideBankInfo or hideCurrencyInfo)
     ZO_CraftBagInfoBarAltFreeSlots:SetHidden(hideBankInfo)
 
     local useSearchBar = layoutData.useSearchBar
@@ -2259,7 +2262,6 @@ function ZO_InventoryManager:CreateHouseBankScene()
                                                                 local UPDATE_EVEN_IF_HIDDEN = true
                                                                 self:UpdateList(INVENTORY_HOUSE_BANK, UPDATE_EVEN_IF_HIDDEN)
                                                             end
-                                                            self:RefreshMoney()
                                                             self:UpdateFreeSlots(INVENTORY_HOUSE_BANK)
                                                         end
                                                     end)
@@ -2323,7 +2325,7 @@ function ZO_InventoryManager:CreateHouseBankScene()
     local depositButtonData = CreateButtonData("EsoUI/Art/Bank/bank_tabIcon_deposit_up.dds",
                                                 "EsoUI/Art/Bank/bank_tabIcon_deposit_down.dds", 
                                                 "EsoUI/Art/Bank/bank_tabIcon_deposit_over.dds")
-    houseBankFragmentBar:Add(SI_BANK_DEPOSIT, { INVENTORY_FRAGMENT, BACKPACK_BANK_LAYOUT_FRAGMENT }, depositButtonData, self.houseBankDepositTabKeybindButtonGroup)
+    houseBankFragmentBar:Add(SI_BANK_DEPOSIT, { INVENTORY_FRAGMENT, BACKPACK_HOUSE_BANK_LAYOUT_FRAGMENT }, depositButtonData, self.houseBankDepositTabKeybindButtonGroup)
     
     local houseBankScene = ZO_InteractScene:New("houseBank", SCENE_MANAGER, BANKING_INTERACTION)
     houseBankScene:RegisterCallback("StateChange",   function(oldState, newState)

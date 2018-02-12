@@ -655,10 +655,18 @@ function ZO_ActionLayerFragment:Initialize(actionLayerName)
     ZO_HideableSceneFragment.Initialize(self)
     self.actionLayerName = actionLayerName
 
-    --ZO_ActionLayerFragments should always refresh so that in the case where a new scene
-    --is shown with a different combination of layers, the intended stack order for the layers
-    --won't be broken by leaving the previous ones pushed.
-    self:SetForceRefresh(true)
+    self:RegisterCallback("Refreshed", function(oldState, newState, asAResultOfSceneStateChange, refreshedForScene)
+        --If the fragments were refreshed and we were already showing then re-push this action layer so it falls into order. For example, if layers A and B are in the current and next scene,
+        --but the next scene has layer C that comes before the 2 shared layers we will need to re-push them after layer C is added so they are on the top of the stack instead of the bottom.
+        --We only do it for already shown fragments on the scene showing because fragments that went from hidden or showing to shown already added from the Show() function and we don't want to
+        --constantly be readding these because there is code that adds action layers manually after the scene starts showing that would be pushed to the bottom if we readded.
+        if asAResultOfSceneStateChange then
+            if refreshedForScene:GetState() == SCENE_SHOWING and oldState == SCENE_FRAGMENT_SHOWN and newState == SCENE_FRAGMENT_SHOWN then
+                RemoveActionLayerByName(self.actionLayerName)
+                PushActionLayerByName(self.actionLayerName)
+            end
+        end
+    end)
 end
 
 function ZO_ActionLayerFragment:Show()

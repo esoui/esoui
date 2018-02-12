@@ -259,6 +259,10 @@ function ZO_Stats:CreateBackgroundSection()
 
     UpdateOutfits()
 
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfits", UpdateOutfits)
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfitName", UpdateOutfits)
+    
     -- Alliance Ranks --
 
     local iconRow = self:AddIconRow(GetString(SI_STATS_ALLIANCE_RANK))
@@ -287,8 +291,6 @@ function ZO_Stats:CreateBackgroundSection()
     self.control:RegisterForEvent(EVENT_PLAYER_TITLES_UPDATE, UpdateTitles)
     self.control:RegisterForEvent(EVENT_RANK_POINT_UPDATE, UpdateRank)
     self.control:AddFilterForEvent(EVENT_RANK_POINT_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
-    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfits", UpdateOutfits)
 end
 
 function ZO_Stats:CreateAttributesSection()

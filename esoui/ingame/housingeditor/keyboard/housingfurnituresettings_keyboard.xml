@@ -369,11 +369,16 @@
                 ZO_CopyHousingPermissionsDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
+                <Label name="$(parent)Title" override="true">
+                    <Dimensions x="560" />
+                </Label>
+
                 <Label name="$(parent)HousesHeader" inherits="ZO_DialogContentAnchors" text="SI_DIALOG_COPY_HOUSING_PERMISSION_HEADER" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
 
                 <Control name="$(parent)HousesComboBox" inherits="ZO_ScrollableComboBox">
-                    <Dimensions x="350" y="36"/>
+                    <Dimensions y="36"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)HousesHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HousesHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
                     <Controls>
                         <!-- we need to exclude the dropdown from resize to fit otherwise the whole dialog will expand to include the dropdown -->
                         <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true"/>

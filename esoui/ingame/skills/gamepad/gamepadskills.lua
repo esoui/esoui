@@ -41,7 +41,24 @@ function ZO_GamepadSkills:Initialize(control)
             self:RefreshPointsDisplay()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)
 
+            if self.returnToAdvisor then
+                local previousSceneName = SCENE_MANAGER:GetPreviousSceneName()
+                if previousSceneName == "gamepad_skills_line_filter" then
+                    -- first entry is always the skills advisor
+                    self.categoryList:SetSelectedIndexWithoutAnimation(1)
+                    self:DeactivateCurrentList()
+                    ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:Activate()
+                end
+                self.returnToAdvisor = false
+            end
+
             TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_SKILLS_OPENED)
+            
+            local level = GetUnitLevel("player")
+            if level >= GetSkillBuildTutorialLevel() then
+                TriggerTutorial(TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION)
+            end
+            
             if self.showAttributeDialog then
                 --Defer dialog call in case we're entering the scene from the base scene. This is to
                 --ensure the dialog's keybind layer is added after the other layers, and not before.
@@ -280,6 +297,8 @@ end
 function ZO_GamepadSkills:SelectSkillLineFromAdvisor()
     local selectedData = ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:GetSelectedData()
 
+    self.returnToAdvisor = true
+
     -- Set the category index to the category where clicked skill ability can be found 
     local targetIndex = self:GetCurrentTargetIndex(selectedData.dataSource.skillType, selectedData.dataSource.lineIndex)
     if targetIndex then 
@@ -290,6 +309,9 @@ function ZO_GamepadSkills:SelectSkillLineFromAdvisor()
             -- Since the ability we want to select won't be available until after the lineFilterList is refreshed,
             -- store ability we want to select as a member var and use it to select the abilty after list is ready
             self.selectSkillLineAbility = selectedData.dataSource.abilityIndex
+
+            -- Prevent input while transitioning from skills advisor to selected skill ability in skill line
+            self:DisableCurrentList()
 
             -- Open the skill line filter view
             SCENE_MANAGER:Push("gamepad_skills_line_filter")
@@ -1442,7 +1464,7 @@ function ZO_GamepadSkills:RefreshSelectedTooltip()
                 self:RefreshLineFilterList(true) --refresh previewList version
                 SCENE_MANAGER:AddFragment(GAMEPAD_SKILLS_LINE_PREVIEW_FRAGMENT)
             elseif advised then
-                GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, name, unlockText)
+                GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, name), unlockText)
             end
         end
     elseif self.mode == ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE then

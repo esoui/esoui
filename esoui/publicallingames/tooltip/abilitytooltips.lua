@@ -280,11 +280,8 @@ function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityInd
                     local morphIndexInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
                     local morphSiblingInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsSiblingMorphInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
                     if morphIndexInSelectedSkillBuild ~= morphSiblingInSelectedSkillBuild then
-                        if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph) then
-                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_ADVISED), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-                        else
-                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED_SUGGESTION), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                        if not ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph) then
+                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED_SUGGESTION), self:GetStyle("bodyHeader"), self:GetStyle("abilityHeader"))
                         end
                     end
                 else

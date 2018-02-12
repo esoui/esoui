@@ -78,7 +78,7 @@ local function OnSuccess()
 end
 
 local function OnLoggedIn()
-    RequestWorldList()
+    PregameStateManager_RequestWorldListForLogin()
 end
 
 local function OnWorldListReceived()

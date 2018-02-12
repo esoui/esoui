@@ -40,6 +40,9 @@ function CampaignBrowser:New(control)
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_UNIT_DESTROYED, function(_, unitTag) manager:OnUnitUpdated(unitTag) end)
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_GROUP_MEMBER_CONNECTED_STATUS, function() manager:RefreshVisible() end)
     EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_LEADER_UPDATE, function() manager:OnGroupLeaderUpdate() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_PLAYER_DEAD, function() manager:OnPlayerDead() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_PLAYER_ALIVE, function() manager:OnPlayerAlive() end)
+
 
     CAMPAIGN_BROWSER_SCENE = ZO_Scene:New("campaignBrowser", SCENE_MANAGER)
     manager:InitializeKeybindDescriptors()
@@ -626,6 +629,14 @@ function CampaignBrowser:OnUnitUpdated(unitTag)
 end
 
 function CampaignBrowser:OnGroupLeaderUpdate()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function CampaignBrowser:OnPlayerDead()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function CampaignBrowser:OnPlayerAlive()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 

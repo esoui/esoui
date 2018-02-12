@@ -53,6 +53,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:Deactivate()
 end
 
 function ZO_Outfit_Slots_Panel_Gamepad:OnShowing()
+    COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.searchEdit:GetText())
     COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES)
     COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHideWhenLocked(true)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("UpdateSearchResults", self.onUpdateCollectionsSearchResultsCallback)
@@ -414,7 +415,11 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
 
     if searchResults then
         local categoryIndex, subcategoryIndex = categoryData:GetCategoryIndicies()
-        relevantSearchResults = searchResults[categoryIndex][subcategoryIndex]
+        if searchResults[categoryIndex] and searchResults[categoryIndex][subcategoryIndex] then
+            relevantSearchResults = searchResults[categoryIndex][subcategoryIndex]
+        else
+            relevantSearchResults = {}
+        end
     end
 
     local dataByWeaponAndArmorType = categoryData:GetCollectibleDataBySpecializedSort()

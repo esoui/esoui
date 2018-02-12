@@ -23,7 +23,7 @@ function ZO_CollectibleData:Initialize()
 end
 
 function ZO_CollectibleData:Reset()
-    self.cachedDisplayName = nil
+    self.cachedNameWithNickname = nil
 end
 
 do
@@ -139,7 +139,7 @@ function ZO_CollectibleData:Refresh()
     self.isNew = IsCollectibleNew(collectibleId)
     self.isRenameable = IsCollectibleRenameable(collectibleId)
     self.isSlottable = IsCollectibleSlottable(collectibleId)
-    self.cachedDisplayName = nil
+    self.cachedNameWithNickname = nil
 
     local categoryData = self:GetCategoryData()
     if categoryData then
@@ -168,17 +168,25 @@ function ZO_CollectibleData:GetFormattedName()
 end
 
 function ZO_CollectibleData:GetNameWithNickname()
-    if not self.cachedDisplayName then
-
+    if not self.cachedNameWithNickname then
         local nickname = self.nickname
         if nickname and nickname ~= "" then
-            self.cachedDisplayName = zo_strformat(SI_COLLECTIONS_INVENTORY_DISPLAY_NAME_FORMAT, self.name, nickname)
+            self.cachedNameWithNickname = zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_FORMATTER, self.name, nickname)
         else
-            self.cachedDisplayName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self.name)
+            self.cachedNameWithNickname = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self.name)
         end
     end
 
-    return self.cachedDisplayName
+    return self.cachedNameWithNickname
+end
+
+function ZO_CollectibleData:GetRawNameWithNickname()
+    local nickname = self.nickname
+    if nickname and nickname ~= "" then
+        return zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_RAW, self.name, nickname)
+    else
+        return self.name
+    end
 end
 
 function ZO_CollectibleData:GetDescription()

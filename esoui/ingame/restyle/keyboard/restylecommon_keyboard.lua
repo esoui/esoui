@@ -345,29 +345,6 @@ do
             end
         end
 
-        local mainHandSlot, offHandSlot = GetOutfitSlotsForCurrentlyHeldWeapons()
-        local weaponsCategoryIndex
-        local mainHandSubcategoryIndex
-        local offHandSubcategoryIndex
-
-        if mainHandSlot then
-            local subcategoryId = GetOutfitSlotDataCollectibleCategoryId(mainHandSlot)
-            local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(subcategoryId)
-            weaponsCategoryIndex, mainHandSubcategoryIndex = subcategoryData:GetCategoryIndicies()
-        end
-
-        if offHandSlot then
-            local subcategoryId = GetOutfitSlotDataCollectibleCategoryId(offHandSlot)
-            local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(subcategoryId)
-            weaponsCategoryIndex, offHandSubcategoryIndex = subcategoryData:GetCategoryIndicies()
-        end
-
-        if not (mainHandSlot or offHandSlot) then
-            local weaponCategoryId = GetOutfitSlotDataCollectibleCategoryId(OUTFIT_SLOT_WEAPON_MAIN_HAND)
-            local weaponSubcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(weaponCategoryId)
-            weaponsCategoryIndex = weaponSubcategoryData:GetCategoryIndicies()
-        end
-
         local function IsValidCategoryData(categoryData)
             if categoryData:IsSpecializedCategory(specializedCollectibleCategory) then
                 return categoryData:GetNumSubcategories() > 0 --No support for non-subcategorized collectibles in restyle
@@ -412,7 +389,7 @@ function ZO_RestyleCommon_Keyboard:AddSlotCollectibleCategories()
         local CategoryEnabledCallback = nil
 
         if not ZO_OUTFIT_MANAGER:HasWeaponsCurrentlyHeldToOverride() then
-            -- If now weapon is equipped, show the weapons category, but disable it
+            -- If no weapon is equipped, show the weapons category, but disable it
             local weaponCategoryId = GetOutfitSlotDataCollectibleCategoryId(OUTFIT_SLOT_WEAPON_MAIN_HAND)
             local weaponSubcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataById(weaponCategoryId)
             local weaponCategoryData = weaponSubcategoryData and weaponSubcategoryData:GetParentData()
@@ -450,7 +427,7 @@ function ZO_RestyleCommon_Keyboard:AddAllSpecializedCollectibleCategories()
     local function AddSubcategory(categoryIndex, subcategoryIndex, parentNode)
         local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
         if subcategoryData then
-            local subcategoryName = subcategoryData:GetName()
+            local subcategoryName = subcategoryData:GetFormattedName()
             local node = self:AddCategory("ZO_TreeStatusLabelSubCategory", parentNode, subcategoryName, subcategoryData)
             self.collectibleCategoryNodeLookup[subcategoryData:GetId()] = node
             table.insert(self.collectibleCategoryNodes, node)

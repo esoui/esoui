@@ -152,6 +152,32 @@ end
 function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
     local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
 
+    local function UpdateSelectedName(name)
+        if self.selectedName ~= name or not self.noViolations then
+            self.selectedName = name
+            self.nameViolations = { IsValidOutfitName(self.selectedName) }
+            self.noViolations = #self.nameViolations == 0
+            
+            if not self.noViolations then
+                local HIDE_UNVIOLATED_RULES = true
+                local violationString = ZO_ValidNameInstructions_GetViolationString(self.selectedName, self.nameViolations, HIDE_UNVIOLATED_RULES)
+            
+                local headerData = 
+                {
+                    titleText = GetString(SI_INVALID_NAME_DIALOG_TITLE),
+                    messageText = violationString,
+                    messageTextAlignment = TEXT_ALIGN_LEFT,
+                }
+                GAMEPAD_TOOLTIPS:ShowGenericHeader(GAMEPAD_LEFT_DIALOG_TOOLTIP, headerData)
+                ZO_GenericGamepadDialog_ShowTooltip(parametricDialog)
+            else
+                ZO_GenericGamepadDialog_HideTooltip(parametricDialog)
+            end
+        end
+
+        KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+    end
+
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_RENAME_OUFIT",
     {
         canQueue = true,
@@ -180,22 +206,21 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
                 templateData = 
                 {
                     nameField = true,
+                    textChangedCallback = function(control)
+                        local inputText = control:GetText()
+                        UpdateSelectedName(inputText)
+                    end,
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         local dialog = data.dialog
-                        control.editBoxControl.textChangedCallback = function(control)
-                                                                         dialog.nameText = control:GetText()
-                                                                         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
-                                                                     end
+                        control.editBoxControl.textChangedCallback = data.textChangedCallback
                         control.editBoxControl:SetMaxInputChars(OUTFIT_NAME_MAX_LENGTH)
-                        ZO_EditDefaultText_Initialize(control.editBoxControl, "")
                         data.control = control
 
                         if parametricDialog.data then
                             control.editBoxControl:SetText(parametricDialog.data.name)
+                        else
+                            ZO_EditDefaultText_Initialize(control.editBoxControl, "")
                         end
-                    end,
-                    validInput = function()
-                        return 
                     end,
                 },
                 
@@ -218,12 +243,12 @@ function ZO_Outfit_Selector_Gamepad:InitializeRenameDialog()
                 callback =  function(dialog)
                                 local outfitIndex = dialog.data.outfitIndex
                                 local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
-                                outfitManipulator:SetOutfitName(dialog.nameText)
+                                outfitManipulator:SetOutfitName(self.selectedName)
                                 ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RENAME_OUFIT")
                             end,
-                enabled = function(control)
-                              return control.dialog.nameText ~= ""
-                          end,
+                visible = function()
+                    return self.noViolations
+                end,
                 clickSound = SOUNDS.DIALOG_ACCEPT,
             },
 

@@ -98,6 +98,16 @@ function ZO_FurnitureDataBase:PassesTheme(theme)
     return theme == FURNITURE_THEME_TYPE_ALL or self.theme == theme
 end
 
+function ZO_FurnitureDataBase:GetRawNameFromCollectibleData(collectibleData)
+    local categoryType = collectibleData:GetCategoryType()
+    --Only house banks include the nickname
+    if categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE_BANK then
+        return collectibleData:GetRawNameWithNickname()
+    else
+        return collectibleData:GetName()
+    end
+end
+
 function ZO_FurnitureDataBase:RefreshInfo(...)
     assert(false)  --must be overridden
 end
@@ -244,7 +254,7 @@ function ZO_PlaceableFurnitureCollectible:RefreshInfo(collectibleId)
 
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     if collectibleData and collectibleData:IsPlaceableFurniture() then
-        self.rawName = collectibleData:GetName()
+        self.rawName = self:GetRawNameFromCollectibleData(collectibleData)
         self.formattedName = nil
         self.icon = collectibleData:GetIcon()
 
@@ -291,29 +301,47 @@ function ZO_RetrievableFurniture:Initialize(...)
 end
 
 function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
-    if self.retrievableFurnitureId == retrievableFurnitureId then
-        return
+    local rawName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(retrievableFurnitureId)
+
+    --Only update these on id change. 
+    if retrievableFurnitureId ~= self.retrievableFurnitureId then
+        self.retrievableFurnitureId = retrievableFurnitureId
+        self.icon = icon
+        self.furnitureDataId = furnitureDataId
+        self.quality = GetPlacedHousingFurnitureQuality(retrievableFurnitureId)
+    
+        local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(furnitureDataId)
+        self.categoryId = categoryId
+        self.subcategoryId = subcategoryId
+        self.theme = furnitureTheme
+
+        local playerWorldX, playerWorldY, playerWorldZ = GetPlayerWorldPositionInHouse()
+        self:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, GetPlayerCameraHeading())
     end
 
-    local rawName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(retrievableFurnitureId)
-    self.retrievableFurnitureId = retrievableFurnitureId
+    --Refresh the name which depends on the collectible nickname.
+    self.collectibleId = nil    
+    local itemLink, collectibleLink = GetPlacedFurnitureLink(retrievableFurnitureId)
+    if collectibleLink ~= "" then
+        local collectibleId = GetCollectibleIdFromLink(collectibleLink)
+        if collectibleId then
+            self.collectibleId = collectibleId
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            if collectibleData then
+                rawName = self:GetRawNameFromCollectibleData(collectibleData)
+            end
+        end
+    end
     self.rawName = rawName
     self.formattedName = nil
-    self.icon = icon
-    self.furnitureDataId = furnitureDataId
-    self.quality = GetPlacedHousingFurnitureQuality(retrievableFurnitureId)
-    
-    local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(furnitureDataId)
-    self.categoryId = categoryId
-    self.subcategoryId = subcategoryId
-    self.theme = furnitureTheme
-
-    local playerWorldX, playerWorldY, playerWorldZ = GetPlayerWorldPositionInHouse()
-    self:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, GetPlayerCameraHeading())
 end
 
 function ZO_RetrievableFurniture:GetFurnitureId()
     return self.retrievableFurnitureId
+end
+
+function ZO_RetrievableFurniture:GetCollectibleId()
+    return self.collectibleId
 end
 
 function ZO_RetrievableFurniture:GetRetrievableFurnitureId()

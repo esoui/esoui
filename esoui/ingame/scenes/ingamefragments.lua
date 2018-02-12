@@ -158,6 +158,14 @@ do
     FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStandardRightPanelFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStandardRightPanelFramingTarget)
 
+    local function CalculateStandardRightPanelMediumLeftPanelFramingTarget()
+        local x = zo_lerp(ZO_SharedMediumLeftPanelBackground:GetRight(), ZO_SharedRightBackground:GetLeft(), .45)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
+        return x, y
+    end
+    FRAME_TARGET_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStandardRightPanelMediumLeftPanelFramingTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStandardRightPanelMediumLeftPanelFramingTarget)
+
     local function CalculateFurnitureBrowserFramingTarget()
         local x = zo_lerp(0, ZO_SharedRightBackground:GetLeft(), .45)
         local screenWidth, screenHeight = GuiRoot:GetDimensions()

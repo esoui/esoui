@@ -20,6 +20,10 @@ local previousState = nil
 
 local loadingUpdates = false
 
+-- We don't want to show the video or the chapter upsell when we're logging out, only when we're logging in
+local shouldTryToPlayChapterOpeningCinematic = false
+local shouldTryToShowChapterInterstitial = false
+
 function Pregame_ShowScene(sceneName)
     SCENE_MANAGER:Show(sceneName)
     ZO_Dialogs_ReleaseAllDialogsExcept("HANDLE_ERROR", "HANDLE_ERROR_WITH_HELP")
@@ -241,6 +245,10 @@ local PregameStates =
     ["ChapterUpgradeInterstitial"] =
     {
         ShouldAdvance = function()
+            if not shouldTryToShowChapterInterstitial then
+                return true
+            end
+
             return not ZO_ChapterUpgrade_ShouldShow()
         end,
 
@@ -536,15 +544,22 @@ local function OnCharacterListReceived(eventCode, characterCount, maxCharacters,
     ZO_PREGAME_CHARACTER_LIST_RECEIVED = true
     ZO_PREGAME_CHARACTER_COUNT = characterCount
 
-    local highestUnlockedChapter = GetHighestUnlockedChapter()
-    local highestSeenOpening = tonumber(GetCVar("HighestChapterOpeningCinematicSeen"))
+    local isPlayingVideo = false
 
-    if highestUnlockedChapter > highestSeenOpening then
-        SetCVar("HighestChapterOpeningCinematicSeen", highestUnlockedChapter)
-        ZO_SavePlayerConsoleProfile()
-        -- Play intro movie
-        PregameStateManager_SetState("PlayChapterOpeningCinematic")
-    else
+    if shouldTryToPlayChapterOpeningCinematic then
+        local highestUnlockedChapter = GetHighestUnlockedChapter()
+        local highestSeenOpening = tonumber(GetCVar("HighestChapterOpeningCinematicSeen"))
+
+        if highestUnlockedChapter > highestSeenOpening then
+            SetCVar("HighestChapterOpeningCinematicSeen", highestUnlockedChapter)
+            ZO_SavePlayerConsoleProfile()
+            -- Play intro movie
+            PregameStateManager_SetState("PlayChapterOpeningCinematic")
+            isPlayingVideo = true
+        end
+    end
+
+    if not isPlayingVideo then
         -- Go to character create/select as necessary after we have our data
         -- If we are already at CharacterSelect when we get the character list, then we don't need to move
         -- This could happen when we rename or delete a character
@@ -675,6 +690,12 @@ end
 
 function PregameStateManager_ClearError()
     ZO_PREGAME_HAD_GLOBAL_ERROR = false
+end
+
+function PregameStateManager_RequestWorldListForLogin()
+    shouldTryToPlayChapterOpeningCinematic = true
+    shouldTryToShowChapterInterstitial = true
+    RequestWorldList()
 end
 
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_LIST_RECEIVED, OnCharacterListReceived)

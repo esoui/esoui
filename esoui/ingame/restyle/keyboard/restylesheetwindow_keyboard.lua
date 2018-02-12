@@ -40,10 +40,10 @@ function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
             ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfitName", OnRefreshOutfitName)
             ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
         elseif newState == SCENE_FRAGMENT_HIDING then
-            self:OnHiding()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
             ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshOutfitName", OnRefreshOutfitName)
             ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
+            self:OnHiding()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:OnHidden()
         end
     end)
@@ -97,7 +97,13 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
     end)
 
     local function OnPurchaseAdditionalOutfitsEntry(_, _, entry, selectionChanged, oldEntry)
-        ShowMarketAndSearch(GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS), MARKET_OPEN_OPERATION_UNLOCK_NEW_OUTFIT)
+        local exitDestinationData =
+        {
+            crownStoreSearch = GetString(SI_CROWN_STORE_SEARCH_ADDITIONAL_OUTFITS),
+            crownStoreOpenOperation = MARKET_OPEN_OPERATION_UNLOCK_NEW_OUTFIT,
+        }
+        ZO_RESTYLE_STATION_KEYBOARD:AttemptExit(exitDestinationData)
+        self.modeSelectorDropdown:SelectItem(oldEntry, true)
     end
 
     self.purchaseAdditionalOutfitsEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_OUTFIT_PURCHASE_MORE_ENTRY), OnPurchaseAdditionalOutfitsEntry)
@@ -313,6 +319,7 @@ function ZO_RestyleSheetWindow_Keyboard:DisplaySheet(newSheet)
             local interactType = GetInteractionType()
             self.pendingEquipOutfitManipulator:SetMarkedForPreservation(false)
             if interactType == INTERACTION_DYE_STATION then
+                self.pendingEquipOutfitManipulator:RestorePreservedDyeData()
                 self.pendingEquipOutfitManipulator:UpdatePreviews()
             else
                 self.pendingEquipOutfitManipulator:ClearPendingChanges(true)

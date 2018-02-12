@@ -13,7 +13,7 @@ function ZO_SceneManager_Base:Initialize()
     self.sceneGroups = {}
     self.callWhen = {}
 
-    EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_REMOTE_SCENE_FINISHED_FRAGMENT_TRANSITION, function(eventId, ...) self:OnRemoteSceneFinishedFragmentTransition(...) end)
+    EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_FOLLOWER_SCENE_FINISHED_FRAGMENT_TRANSITION, function(eventId, ...) self:OnRemoteSceneFinishedFragmentTransition(...) end)
 end
 
 -- scenes
@@ -154,12 +154,18 @@ end
 
 -- Scene logic
 
-function ZO_SceneManager_Base:ShowScene(scene)
+function ZO_SceneManager_Base:ShowScene(scene, sequenceNumber)
+    if scene:IsRemoteScene() then
+        scene:SetSequenceNumber(sequenceNumber)
+    end
     scene:SetState(SCENE_SHOWING)
     scene:DetermineIfTransitionIsComplete()
 end
 
-function ZO_SceneManager_Base:HideScene(scene)
+function ZO_SceneManager_Base:HideScene(scene, sequenceNumber)
+    if scene:IsRemoteScene() then
+        scene:SetSequenceNumber(sequenceNumber)
+    end
     scene:SetState(SCENE_HIDING)
     scene:DetermineIfTransitionIsComplete()
 end
@@ -250,10 +256,10 @@ function ZO_SceneManager_Base:OnSceneStateShown(scene)
     end
 end
 
-function ZO_SceneManager_Base:OnRemoteSceneFinishedFragmentTransition(sceneChangeOrigin, sceneName)
+function ZO_SceneManager_Base:OnRemoteSceneFinishedFragmentTransition(sceneChangeOrigin, sceneName, sequenceNumber)
     local scene = self:GetScene(sceneName)
     if scene and scene:IsRemoteScene() and (sceneChangeOrigin ~= ZO_REMOTE_SCENE_CHANGE_ORIGIN) then
-        scene:OnRemoteSceneFinishedFragmentTransition()
+        scene:OnRemoteSceneFinishedFragmentTransition(sequenceNumber)
     end
 end
 
@@ -284,6 +290,10 @@ function ZO_SceneManager_Base:Hide(sceneName)
 end
 
 function ZO_SceneManager_Base:RequestShowLeaderBaseScene()
+    assert(false) -- This function should be overridden
+end
+
+function ZO_SceneManager_Base:SendFragmentCompleteMessage()
     assert(false) -- This function should be overridden
 end
 

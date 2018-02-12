@@ -551,15 +551,7 @@ local AlertHandlers = {
     [EVENT_BANK_IS_FULL] = function()
         local bankingBag = GetBankingBag()
         if IsHouseBankBag(bankingBag) then
-            local interactName = GetUnitName("interact")
-            local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
-            local nickname
-            if collectibleId ~= 0 then
-                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                if collectibleData then
-                    nickname = collectibleData:GetNickname()
-                end
-            end
+            local interactName, nickname = SHARED_INVENTORY:GetHouseBankingBagName(bankingBag)
 
             if nickname and nickname ~= "" then
                 return ERROR, zo_strformat(SI_BANK_HOME_STORAGE_FULL_WITH_NICKNAME, interactName, nickname), SOUNDS.GENERAL_ALERT_ERROR
@@ -568,6 +560,21 @@ local AlertHandlers = {
             end
         else
             return ERROR, GetString(SI_INVENTORY_ERROR_BANK_FULL), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_BANK_DEPOSIT_NOT_ALLOWED] = function()
+        local bankingBag = GetBankingBag()
+        if IsHouseBankBag(bankingBag) then
+            local interactName, nickname = SHARED_INVENTORY:GetHouseBankingBagName(bankingBag)
+
+            if nickname and nickname ~= "" then
+                return ERROR, zo_strformat(SI_INVENTORY_ERROR_HOME_STORAGE_DEPOSIT_NOT_ALLOWED_WITH_NICKNAME, interactName, nickname), SOUNDS.GENERAL_ALERT_ERROR
+            else
+                return ERROR, zo_strformat(SI_INVENTORY_ERROR_HOME_STORAGE_DEPOSIT_NOT_ALLOWED, interactName), SOUNDS.GENERAL_ALERT_ERROR
+            end
+        else
+            return ERROR, GetString(SI_INVENTORY_ERROR_BANK_DEPOSIT_NOT_ALLOWED), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 

@@ -199,8 +199,13 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
+            header = SI_GAMEPLAY_OPTIONS_ITEMS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE,
-	        header = SI_GAMEPLAY_OPTIONS_ITEMS,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,

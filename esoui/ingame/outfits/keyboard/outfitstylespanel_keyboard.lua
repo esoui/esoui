@@ -134,6 +134,14 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
         if control.pendingLoopAnimationKey then
             self.pendingLoopAnimationPool:ReleaseObject(control.pendingLoopAnimationKey)
         end
+
+        if control.highlightAnimation then
+            control.highlightAnimation:PlayInstantlyToStart()
+		end
+
+        if control.iconAnimation then
+            control.iconAnimation:PlayInstantlyToStart()
+        end
     end
 
     self.gridListPanelList:SetGridEntryTemplate("ZO_OutfitStyle_GridEntry_Template_Keyboard", ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD, OutfitStyleGridEntrySetup, HIDE_CALLBACK, OutfitStyleGridEntryReset, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD)
@@ -172,7 +180,8 @@ function ZO_OutfitStylesPanel_Keyboard:RegisterEvents()
 
     local function OnOutfitPendingDataChanegd(outfitIndex)
         if self.currentOutfitManipulator and self.currentOutfitManipulator:GetOutfitIndex() == outfitIndex then
-            self:RefreshVisible(RETAIN_SCROLL_POSITION)
+            self.pendingLoopAnimationPool:ReleaseAllObjects()
+            self.gridListPanelList:RefreshGridList()
         end
     end
 
@@ -645,7 +654,6 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryMouseExit(control)
     control.iconAnimation:PlayBackward()
     ClearTooltip(ItemTooltip)
     self.mouseOverEntryData = nil
-
     --The exit can fire after the control has already been cleaned out of the entry list, meaning it won't have data anymore
     local collectibleData = control.dataEntry and control.dataEntry.data
     if collectibleData and collectibleData.dataSource and not collectibleData.isEmptyCell and not collectibleData.clearAction then

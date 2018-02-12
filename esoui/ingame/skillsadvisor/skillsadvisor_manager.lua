@@ -27,23 +27,23 @@ function SkillsAdvisor_Singleton:Initialize()
     self.skillBuilds = {}
 
     -- Data changed events
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_ABILITY_PROGRESSION_RESULT, function(eventId, ...) self:LoadSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED, function(eventId, ...) self:LoadSkillBuildData(...) end)
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_ABILITY_PROGRESSION_RESULT, function(eventId, ...) self:UpdateSkillBuildData(...) end)
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED, function(eventId, ...) self:UpdateSkillBuildData(...) end)
     EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_BUILD_SELECTION_UPDATED, function(eventId, ...) self:OnBuildSelectionUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_FORCE_RESPEC, function(eventId, ...) self:LoadSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_RANK_UPDATE, function(eventId, ...) self:LoadSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILLS_FULL_UPDATE, function(eventId, ...) self:LoadSkillBuildData(...) end)   
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_ABILITY_LIST_CHANGED, function(eventId, ...) self:LoadSkillBuildData(...) end)
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_FORCE_RESPEC, function(eventId, ...) self:UpdateSkillBuildData(...) end)
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_RANK_UPDATE, function(eventId, ...) self:UpdateSkillBuildData(...) end)
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILLS_FULL_UPDATE, function(eventId, ...) self:UpdateSkillBuildData(...) end)   
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_ABILITY_LIST_CHANGED, function(eventId, ...) self:UpdateSkillBuildData(...) end)
     
     -- Visuals changed event
     --  SKILL_POINTS_CHANGED
     --  SKILL_LINE_ADDED
     --  SKILL_XP_UPDATE
 
-    self:LoadSkillBuildData()
+    self:UpdateSkillBuildData()
 end
 
-function SkillsAdvisor_Singleton:LoadSkillBuildData() 
+function SkillsAdvisor_Singleton:UpdateSkillBuildData() 
     self.numAvailableSkillBuilds = GetNumAvailableSkillBuilds()
     self.selectedSkillBuildId = GetSkillBuildId()
     self.selectedSkillBuildIndex = nil
@@ -53,29 +53,33 @@ function SkillsAdvisor_Singleton:LoadSkillBuildData()
         self.selectedSkillBuildId = nil
     end
 
-    self.selectedSkillBuildAbilityCount = GetNumSkillBuildAbilities(self.selectedSkillBuildId)
-
     for skillBuildIndex = 1, self.numAvailableSkillBuilds do
         local skillBuildId = GetAvailableSkillBuildIdByIndex(skillBuildIndex)
-        local name, description, isTank, isHealer, isDPS = GetSkillBuildInfo(skillBuildId)
-        self.skillBuilds[skillBuildIndex] = 
-        {
-            id = skillBuildId,
-            index = skillBuildIndex,
-            name = zo_strformat(SI_SKILLS_ADVISOR_SKILL_BUILD_NAME, name),
-            description = zo_strformat(SI_SKILLS_ADVISOR_SKILL_BUILD_DESCRIPTION, description),
-            isTank = isTank,
-            isHealer = isHealer,
-            isDPS = isDPS,
-            skillAbilities = {},
-        }
+        local oldSkillBuild = self.skillBuilds[skillBuildIndex]
+        -- Builds don't change, so we only need to load when IDs are different
+        if oldSkillBuild == nil or oldSkillBuild.id ~= skillBuildId then
+            local name, description, isTank, isHealer, isDPS = GetSkillBuildInfo(skillBuildId)
+            self.skillBuilds[skillBuildIndex] = 
+            {
+                id = skillBuildId,
+                index = skillBuildIndex,
+                name = zo_strformat(SI_SKILLS_ADVISOR_SKILL_BUILD_NAME, name),
+                description = zo_strformat(SI_SKILLS_ADVISOR_SKILL_BUILD_DESCRIPTION, description),
+                isTank = isTank,
+                isHealer = isHealer,
+                isDPS = isDPS,
+                skillAbilities = {},
+            }
+        end
+
         if skillBuildId == self.selectedSkillBuildId then
             self.selectedSkillBuildIndex = skillBuildIndex
         end
     end
 
     self.numSkillBuildIndicies = self.numAvailableSkillBuilds + 1
-    table.insert(self.skillBuilds, {
+    self.skillBuilds[self.numSkillBuildIndicies] =
+    {
         index = self.numSkillBuildIndicies,
         name = GetString(SI_SKILLS_ADVISOR_ADVANCED_PLAYER_NAME),
         description = GetString(SI_SKILLS_ADVISOR_ADVANCED_PLAYER_DESCRIPTION),
@@ -83,12 +87,22 @@ function SkillsAdvisor_Singleton:LoadSkillBuildData()
         isHealer = false,
         isDPS = false,
         skillAbilities = {},
-    } )
+    }
+
+    -- Remove remaining stale entries, if any
+    for i = self.numSkillBuildIndicies + 1, #self.skillBuilds do
+        self.skillBuilds[i] = nil
+    end
     
     -- Only get SkillBuild Data for currently selected SkillBuild
+    self.selectedSkillBuildAbilityCount = GetNumSkillBuildAbilities(self.selectedSkillBuildId)
     if self.selectedSkillBuildIndex ~= nil then
+        local selectedSkillAbilities = self.skillBuilds[self.selectedSkillBuildIndex].skillAbilities
         for skillBuildAbilityIndex = 1, self.selectedSkillBuildAbilityCount do
-            self.skillBuilds[self.selectedSkillBuildIndex].skillAbilities[skillBuildAbilityIndex] = self:SetupAbilityData(self.selectedSkillBuildId, skillBuildAbilityIndex)
+            if not selectedSkillAbilities[skillBuildAbilityIndex] then
+                selectedSkillAbilities[skillBuildAbilityIndex] = {}
+            end
+            self:FillInAbilityData(selectedSkillAbilities[skillBuildAbilityIndex], self.selectedSkillBuildId, skillBuildAbilityIndex)
         end
     end
 
@@ -98,14 +112,12 @@ function SkillsAdvisor_Singleton:LoadSkillBuildData()
 end
 
 -- This function for retrieving data may be changed depending on what data we will actually need.
-function SkillsAdvisor_Singleton:SetupAbilityData(skillBuildId, skillBuildAbilityIndex)
+function SkillsAdvisor_Singleton:FillInAbilityData(abilityData, skillBuildId, skillBuildAbilityIndex)
     local skillType, lineIndex, abilityIndex, isActive, skillBuildMorphChoice, skillBuildRankIndex = GetSkillBuildEntryInfo(skillBuildId, skillBuildAbilityIndex)
     local _, _, earnedRank, _, ultimate, purchased, progressionIndex, rankIndex = GetSkillAbilityInfo(skillType, lineIndex, abilityIndex)
     local _, lineRank = GetSkillLineInfo(skillType, lineIndex)
     local abilityId, rankNeeded = GetSpecificSkillAbilityInfo(skillType, lineIndex, abilityIndex, skillBuildMorphChoice, skillBuildRankIndex)
     local _, _, nextUpgradeEarnedRank = GetSkillAbilityNextUpgradeInfo(skillType, lineIndex, abilityIndex)
-    local name = GetAbilityName(abilityId)
-    local icon = GetAbilityIcon(abilityId)
     local currentMorphChoice
     local atMorph = false
     if progressionIndex then
@@ -113,31 +125,33 @@ function SkillsAdvisor_Singleton:SetupAbilityData(skillBuildId, skillBuildAbilit
         atMorph = select(4, GetAbilityProgressionXPInfo(progressionIndex))
     end
 
-    local abilityData = 
-    {
-        abilityId = abilityId,
-        skillType = skillType,
-        lineIndex = lineIndex,
-        abilityIndex = abilityIndex,
-        name = isActive and zo_strformat(SI_ABILITY_NAME, name) or zo_strformat(SI_ABILITY_NAME_AND_RANK, name, skillBuildRankIndex),
-        plainName = zo_strformat(SI_ABILITY_NAME, name),
-        icon = icon,
-        earnedRank = earnedRank,
-        nextUpgradeEarnedRank = nextUpgradeEarnedRank,
-        rankIndex = rankIndex,
-        passive = not isActive,
-        ultimate = ultimate,
-        purchased = purchased, 
-        progressionIndex = progressionIndex,
-        lineRank = lineRank,
-        atMorph = atMorph,
-        morph = currentMorphChoice,
-        skillBuildMorphChoice = skillBuildMorphChoice,
-        skillBuildRankIndex = skillBuildRankIndex; 
-        rankNeeded = rankNeeded
-    }
+    -- This data is expensive to get, and won't change when the ID is the same.
+    if abilityData.abilityId ~= abilityId then
+        local rawName = GetAbilityName(abilityId)
+        local icon = GetAbilityIcon(abilityId)
 
-    return abilityData
+        local plainName = zo_strformat(SI_ABILITY_NAME, rawName)
+        abilityData.name = isActive and plainName or zo_strformat(SI_ABILITY_NAME_AND_RANK, rawName, skillBuildRankIndex)
+        abilityData.plainName = plainName
+        abilityData.icon = icon
+    end
+    abilityData.abilityId = abilityId
+    abilityData.skillType = skillType
+    abilityData.lineIndex = lineIndex
+    abilityData.abilityIndex = abilityIndex
+    abilityData.earnedRank = earnedRank
+    abilityData.nextUpgradeEarnedRank = nextUpgradeEarnedRank
+    abilityData.rankIndex = rankIndex
+    abilityData.passive = not isActive
+    abilityData.ultimate = ultimate
+    abilityData.purchased = purchased
+    abilityData.progressionIndex = progressionIndex
+    abilityData.lineRank = lineRank
+    abilityData.atMorph = atMorph
+    abilityData.morph = currentMorphChoice
+    abilityData.skillBuildMorphChoice = skillBuildMorphChoice
+    abilityData.skillBuildRankIndex = skillBuildRankIndex
+    abilityData.rankNeeded = rankNeeded
 end
 
 do 
@@ -153,7 +167,7 @@ do
 end
 
 function SkillsAdvisor_Singleton:OnDataUpdated()
-    self:LoadSkillBuildData()
+    self:UpdateSkillBuildData()
 end
 
 function SkillsAdvisor_Singleton:OnRequestSelectSkillLine()

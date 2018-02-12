@@ -329,7 +329,7 @@ function ZO_Dialogs_ShowGamepadDialog(name, data, textParams)
     elseif dialog.gamepadInfo and dialog.gamepadInfo.allowShowOnNextScene and SCENE_MANAGER:GetNextScene() and not dialog.gamepadInfo.nextSceneCallback then
         --Only one of this type of dialog can be registered for the next scene at a time, first come first serve
         dialog.gamepadInfo.nextSceneCallback = function(scene, oldState, newState)
-            if newState == SCENE_SHOWING or newState == SCENE_SHOWN then
+            if newState == SCENE_SHOWN then
                 SCENE_MANAGER:UnregisterCallback("SceneStateChanged", dialog.gamepadInfo.nextSceneCallback)
                 ZO_Dialogs_ShowGamepadDialog(name, data, textParams)
                 dialog.gamepadInfo.nextSceneCallback = nil

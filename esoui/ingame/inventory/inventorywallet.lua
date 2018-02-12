@@ -116,7 +116,7 @@ do
 
     function InventoryWalletManager:SetUpEntry(control, data)
         local nameControl = GetControl(control, "Name")
-        nameControl:SetText(data.name)
+        nameControl:SetText(zo_strformat(SI_INVENTORY_CURRENCY_NAME_FORMAT, data.name))
 
         local amountControl = GetControl(control, "Amount")
         FORMAT_EXTRA_OPTIONS.currencyLocation = GetCurrencyPlayerStoredLocation(data.currencyType)

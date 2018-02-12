@@ -36,9 +36,11 @@ function ZO_CampaignBrowser_Shared:CanQueue(data)
     if data then
         if not IsActiveWorldBattleground() and GetCurrentCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id) then
             if GetAssignedCampaignId() == data.id or GetGuestCampaignId() == data.id or data.numGroupMembers > 0 then
-                canQueueIndividual = not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
-                if not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_GROUP) then
-                    if IsUnitGrouped("player") and IsUnitGroupLeader("player") and not IsInLFGGroup() then
+                canQueueIndividual = not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL) 
+                if canQueueIndividual and IsPlayerInAvAWorld() and IsUnitDead("player") then
+                    canQueueIndividual = false
+                elseif not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_GROUP) then
+                    if IsUnitGrouped("player") and IsUnitGroupLeader("player") and not IsInLFGGroup() and not IsGroupCrossAlliance() then
                         canQueueGroup = true
                     end
                 end

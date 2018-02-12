@@ -125,7 +125,7 @@ function SkillsAdvisorSuggestions_Gamepad:UpdateTooltip()
     if self.isActive then
         local selectedData = ZO_ScrollList_GetSelectedData(self.list)
         if selectedData and not selectedData.isHeader then
-            local rankIndex = GetSkillLineProgressionAbilityRankIndex(selectedData.dataSource.abilityId, selectedData.dataSource.skillType, selectedData.dataSource.lineIndex, selectedData.dataSource.abilityIndex, selectedData.dataSource.skillBuildMorphChoice)
+            local rankIndex = GetSkillLineProgressionAbilityRankIndex(selectedData.dataSource.skillType, selectedData.dataSource.lineIndex, selectedData.dataSource.abilityIndex, selectedData.dataSource.skillBuildMorphChoice)
             local hideNextUpgrade = false
             local showRank = false
             local showPurchaseInfo = true
@@ -204,6 +204,10 @@ end
 function SkillsAdvisorSuggestions_Gamepad:GetSelectedAbilityData()
     return self.selectAbilityData
 end
+
+-----------------------------
+-- XML Functions
+-----------------------------
 
 function ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader_OnInitialized(control)
     control.label = control:GetNamedChild("Label")

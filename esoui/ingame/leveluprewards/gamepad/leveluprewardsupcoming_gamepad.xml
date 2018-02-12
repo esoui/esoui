@@ -14,8 +14,9 @@
                     <Anchor point="LEFT" offsetX="10" />
                 </Texture>
 
-                <Label name="$(parent)Name" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                <Label name="$(parent)Name" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT"/>
                 </Label>
             </Controls>
         </Control>

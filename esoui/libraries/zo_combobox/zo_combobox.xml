@@ -51,6 +51,7 @@
             <Controls>
                 <Label name="$(parent)Label" wrapMode="ELLIPSIS" maxLineCount="1">
                     <Anchor point="LEFT" offsetX="8" />
+                    <Anchor point="RIGHT" offsetX="-8" />
                 </Label>
             </Controls>
         </Control>

@@ -307,19 +307,17 @@ do
 					
 					alertControl:SetHidden(platform == ZO_SKILLS_GAMEPAD)
 				else
-					local NO_MORPH = 0
+                    local NO_MORPH = 0
                     alertControl.iconStatus = ZO_SKILL_ABILITY_ALERT_ICON_NONE
                     if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, NO_MORPH) then
                         if morph and morph > 0 then
                             local morphInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
                             local morphSiblingInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsSiblingMorphInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
-                            if not morphInSelectedSkillBuild and morphSiblingInSelectedSkillBuild then 
-                                ZO_Skills_SetAlertButtonTextures(alertControl, ALERT_TEXTURES[ZO_SKILLS_NOT_ADVISED_MORPH_STATE]) 
+                            if not morphInSelectedSkillBuild and morphSiblingInSelectedSkillBuild then
                                 alertControl.iconStatus = ZO_SKILL_ABILITY_ALERT_ICON_BAD_MORPH
                             end
                         end
                     end
-					alertControl:SetHidden(alertControl.iconStatus ~= ZO_SKILL_ABILITY_ALERT_ICON_BAD_MORPH)
 				end
 			end
         end

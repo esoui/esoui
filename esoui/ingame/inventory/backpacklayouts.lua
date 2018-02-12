@@ -15,6 +15,7 @@ local DEFAULT_BACKPACK_LAYOUT_DATA =
     sortByHeaderWidth = 576,
     sortByNameWidth = 241,
     hideBankInfo = true,
+    hideCurrencyInfo = false,
 }
 
 function ZO_BackpackLayoutFragment:New(...)
@@ -34,6 +35,10 @@ function ZO_BackpackLayoutFragment:Initialize(layoutData)
     else
         self.layoutData = DEFAULT_BACKPACK_LAYOUT_DATA
     end
+end
+
+function ZO_BackpackLayoutFragment:SetLayoutValue(key, value)
+    self.layoutData[key] = value
 end
 
 function ZO_BackpackLayoutFragment:Show()
@@ -68,6 +73,9 @@ BACKPACK_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         end,
         hideBankInfo = false,
     })
+
+BACKPACK_HOUSE_BANK_LAYOUT_FRAGMENT = ZO_DeepTableCopy(BACKPACK_BANK_LAYOUT_FRAGMENT)
+BACKPACK_HOUSE_BANK_LAYOUT_FRAGMENT:SetLayoutValue("hideCurrencyInfo", true)
 
 BACKPACK_GUILD_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
     {

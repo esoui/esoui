@@ -24,8 +24,8 @@ function ZO_Dyeing_Slots_Panel_Gamepad:Initialize(control, owner)
     self:InitializeMultiFocusArea()
 
     local function UpdateUnlockedDyes()
-        if self:IsActive() then
-            self:UpdateUnlockedDyes()
+        if GAMEPAD_RESTYLE_STATION_SCENE:IsShowing() then
+            self:UpdateDyesGrid()
         end
     end
 
@@ -313,10 +313,6 @@ end
 function ZO_Dyeing_Slots_Panel_Gamepad:RebuildList()
     self:UpdateDyesGrid()
     self:UpdateActiveFocusKeybinds()
-end
-
-function ZO_Dyeing_Slots_Panel_Gamepad:UpdateUnlockedDyes()
-    self:UpdateDyesGrid()
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:UpdateToolTip()

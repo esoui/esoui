@@ -544,7 +544,7 @@ function ZO_GamepadBanking:CanTransferSelectedFunds()
                     if GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) == GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER) then
                         return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL) -- "Your inventory is full"
                     elseif GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) == 0 then
-                        return false, GetString(SI_INVENTORY_ERROR_NO_BANK_FUNDS) -- "No bank funds"
+                        return false, GetString(SI_GAMEPAD_INVENTORY_ERROR_NO_BANK_FUNDS) -- "No bank funds"
                     end
                 end
             elseif self:IsInDepositMode() then
@@ -554,7 +554,7 @@ function ZO_GamepadBanking:CanTransferSelectedFunds()
                     if GetCurrencyAmount(currencyType, CURRENCY_LOCATION_BANK) == GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_BANK) then
                         return false, GetString(SI_INVENTORY_ERROR_BANK_FULL) -- "Your bank is full"
                     elseif GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) == 0 then
-                        return false, GetString(SI_INVENTORY_ERROR_NO_PLAYER_FUNDS) -- "No player funds"
+                        return false, GetString(SI_GAMEPAD_INVENTORY_ERROR_NO_PLAYER_FUNDS) -- "No player funds"
                     end
                 end
             end

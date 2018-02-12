@@ -882,11 +882,12 @@ function Market:BuildCategories()
 
             if prepurchaseChapterUpgradeData then
                 self:AddCustomSubCategory(chaptersNode, prepurchaseChapterUpgradeData:GetChapterUpgradeId(), prepurchaseChapterUpgradeData:GetName(), ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE, IsPrepurchaseNew)
-            end
-
-            local currentChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetCurrentChapterUpgradeData()
-            if currentChapterUpgradeData then
-                self:AddCustomSubCategory(chaptersNode, currentChapterUpgradeData:GetChapterUpgradeId(), currentChapterUpgradeData:GetName(), ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE)
+            else
+                --TODO: Implement the full market control approach, allowing the current chapter to be controlled the same way prepurchase is
+                local currentChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetCurrentChapterUpgradeData()
+                if currentChapterUpgradeData then
+                    self:AddCustomSubCategory(chaptersNode, currentChapterUpgradeData:GetChapterUpgradeId(), currentChapterUpgradeData:GetName(), ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE)
+                end
             end
         end
 

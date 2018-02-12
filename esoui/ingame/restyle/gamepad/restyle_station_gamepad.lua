@@ -2,6 +2,8 @@ local ACTION_NONE = 0
 local ACTION_STYLES = 1
 local ACTION_DYES = 2
 
+local OUTFIT_SWATCH_SLOT_ANCHOR_PADDING = 2
+
 ZO_Restyle_Station_Gamepad = ZO_Gamepad_MultiFocus_ParametricList_Screen:Subclass()
 
 function ZO_Restyle_Station_Gamepad:New(...)
@@ -120,8 +122,9 @@ function ZO_Restyle_Station_Gamepad:OnFragmentShowing()
 
     if self.currentOutfitManipulator then
         if self.currentOutfitManipulator:IsMarkedForPreservation() then
-            self.currentOutfitManipulator:UpdatePreviews()
             self.currentOutfitManipulator:SetMarkedForPreservation(false)
+            self.currentOutfitManipulator:RestorePreservedDyeData()
+            self.currentOutfitManipulator:UpdatePreviews()
         else
             self.currentOutfitManipulator:ClearPendingChanges()
         end
@@ -572,19 +575,28 @@ end
 
 function ZO_Restyle_Station_Gamepad:InitializeChangedDyeControlPool()
     self.dyeChangedControlPool = ZO_ControlPool:New("ZO_DyeingChangedHighlight_Gamepad", GuiRoot, "DyeSlotChanged_Gamepad")
+
+    local function CustomResetFunction(control)
+        control:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
+    end
+
+    self.dyeChangedControlPool:SetCustomResetBehavior(CustomResetFunction)
 end
 
 function ZO_Restyle_Station_Gamepad:UpdateDyeSlotChangedOnControl(control, hasChanged)
     if control.dyeChangedControlKey and not hasChanged then
         self.dyeChangedControlPool:ReleaseObject(control.dyeChangedControlKey)
         control.dyeChangedControlKey = nil
+        control.dyeChangedControl = nil
     elseif not control.dyeChangedControlKey and hasChanged then
         local dyeChangedControl, key = self.dyeChangedControlPool:AcquireObject()
-        dyeChangedControl:SetAnchor(TOPLEFT, control, TOPLEFT, -ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X, -ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y)
-        dyeChangedControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X, ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y)
+        dyeChangedControl:SetAnchor(TOPLEFT, control, TOPLEFT, -OUTFIT_SWATCH_SLOT_ANCHOR_PADDING, -OUTFIT_SWATCH_SLOT_ANCHOR_PADDING)
+        dyeChangedControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, OUTFIT_SWATCH_SLOT_ANCHOR_PADDING, OUTFIT_SWATCH_SLOT_ANCHOR_PADDING)
         dyeChangedControl:SetParent(control)
         dyeChangedControl:SetHidden(false)
+        dyeChangedControl:SetColor(ZO_DYEING_OUTFIT_SWATCH_CHANGED_COLOR:UnpackRGB())
         control.dyeChangedControlKey = key
+        control.dyeChangedControl = dyeChangedControl
     end
 end
 
@@ -606,10 +618,23 @@ function ZO_Restyle_Station_Gamepad:SetupList(list)
             self:UpdateDyeSlotChangedOnControl(control.dyeControls[i], hasChanged and showSlots) -- if we are not showing Slots, hide all active dyeChangedControls
         end
 
-        local dyeChannel = self.dyeAllFocus:GetFocus()
 
-        if self:ShouldShowAllDyeFoci() and data.restyleSlotData:IsDataDyeable() and dyeChannel then
-            ZO_Dyeing_Gamepad_SwatchSlot_Highlight_Only(control, dyeChannel)
+        if data.restyleSlotData:IsDataDyeable() then
+            if self:ShouldShowAllDyeFoci() then
+                local dyeChannel = self.dyeAllFocus:GetFocus()
+                if dyeChannel then
+                    ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_Only(control, dyeChannel)
+                end
+            elseif self:ShouldShowSelectedDyeSet() then
+                if selected then
+                    ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_All(control)
+                end
+            else
+                local dyeChannel = control.dyeSelectorFocus:GetFocus()
+                if dyeChannel then
+                    ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_Only(control, dyeChannel)
+                end
+            end
         end
     end
 
@@ -640,7 +665,7 @@ function ZO_Restyle_Station_Gamepad:SetupList(list)
 
     local function ResetSlotEntry(control)
         control.dyeSelectorFocus:Deactivate()
-        ZO_Dyeing_Gamepad_SwatchSlot_Reset_Highlight(control)
+        ZO_Dyeing_Gamepad_OutfitSwatchSlot_Reset_Highlight(control)
     end
 
     local function ResetOutfitSlotEntry(control)
@@ -984,7 +1009,7 @@ function ZO_Restyle_Station_Gamepad:PerformUpdate()
         local slotsByMode = ZO_Dyeing_GetSlotsForRestyleSet(restyleMode, ZO_RESTYLE_DEFAULT_SET_INDEX)
         for _, dyeableSlotData in ipairs(slotsByMode) do
             if not dyeableSlotData:ShouldBeHidden() then
-                local name = dyeableSlotData:GetDefaultDescriptor()
+                local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, dyeableSlotData:GetDefaultDescriptor())
                 local data = ZO_GamepadEntryData:New(name, dyeableSlotData:GetIcon())
                 data.restyleIndex = dyeableSlotData:GetRestyleSlotType()
                 data.restyleSlotData = ZO_RestyleSlotData:Copy(dyeableSlotData)
@@ -1150,7 +1175,7 @@ function ZO_Restyle_Station_Gamepad:HandleSelectAction()
         local targetData = self.outfitSlotList:GetTargetData()
         local restyleSlotData = targetData.restyleSlotData
         local isChannelDyeableTable = {restyleSlotData:AreDyeChannelsDyeable()}
-        if isChannelDyeableTable[dyeChannelIndex] or self:ShouldShowAllDyeFoci() or self:ShouldShowSelectedDyeSet() then
+        if isChannelDyeableTable[dyeChannelIndex] or self:ShouldShowAllDyeFoci() or self:CanApplySelectedDyeSet() then
             activeTool:OnLeftClicked(restyleSlotData, dyeChannelIndex)
             self:GetMainList():RefreshVisible()
             self:RefreshKeybinds()
@@ -1203,11 +1228,11 @@ function ZO_Restyle_Station_Gamepad:OnSlotChanged(oldData, selectedData)
                 self:HighlightAllFociByChannel(self.dyeAllFocus:GetFocus())
             elseif self:ShouldShowSelectedDyeSet() then
                 if newControl and selectedData.restyleSlotData:IsDataDyeable() then
-                    ZO_Dyeing_Gamepad_SwatchSlot_Highlight_All(newControl)
+                    ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_All(newControl)
                 end
 
                 if oldControl and oldData.restyleSlotData:IsDataDyeable() then
-                    ZO_Dyeing_Gamepad_SwatchSlot_Reset_Highlight(oldControl)
+                    ZO_Dyeing_Gamepad_OutfitSwatchSlot_Reset_Highlight(oldControl)
                 end
             else
                 local oldIndex = 1
@@ -1233,7 +1258,7 @@ function ZO_Restyle_Station_Gamepad:OnListAreaDeactivate()
         self:DeactivateRelevantDyeFoci()
         if self:ShouldShowSelectedDyeSet() then
             local selectedControl = self.outfitSlotList:GetSelectedControl()
-            ZO_Dyeing_Gamepad_SwatchSlot_Reset_Highlight(selectedControl)
+            ZO_Dyeing_Gamepad_OutfitSwatchSlot_Reset_Highlight(selectedControl)
         end
     end
 end
@@ -1243,9 +1268,9 @@ function ZO_Restyle_Station_Gamepad:OnListAreaActivate()
         self:UpdateOutfitsPanel()
     elseif self.actionMode == ACTION_DYES then
         self:ActivateRelevantDyeFoci()
-        if self:ShouldShowSelectedDyeSet() then
+        if self:CanApplySelectedDyeSet() then
             local selectedControl = self.outfitSlotList:GetSelectedControl()
-            ZO_Dyeing_Gamepad_SwatchSlot_Highlight_All(selectedControl)
+            ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_All(selectedControl)
         end
     end
 end
@@ -1334,18 +1359,29 @@ function ZO_Restyle_Station_Gamepad:ShouldShowSelectedDyeSet()
     return activeTool:GetCursorType() == MOUSE_CURSOR_FILL_MULTIPLE and self.actionMode == ACTION_DYES
 end
 
+function ZO_Restyle_Station_Gamepad:CanApplySelectedDyeSet()
+    if not self:ShouldShowSelectedDyeSet() then
+        return false
+    end
+    local selectedControl = self.outfitSlotList:GetSelectedControl()
+    local data = self.outfitSlotList:GetDataForDataIndex(selectedControl.dataIndex)
+    local isPrimaryChannelDyeable, isSecondaryChannelDyeable, isAccentChannelDyeable = data.restyleSlotData:AreDyeChannelsDyeable()
+
+    return isPrimaryChannelDyeable or isSecondaryChannelDyeable or isAccentChannelDyeable
+end
+
 function ZO_Restyle_Station_Gamepad:HighlightAllFociByChannel(dyeChannel)
     for control, visible in pairs(self.outfitSlotList:GetAllVisibleControls()) do
         local data = self.outfitSlotList:GetDataForDataIndex(control.dataIndex)
         if data.restyleSlotData:IsDataDyeable() then
-            ZO_Dyeing_Gamepad_SwatchSlot_Highlight_Only(control, dyeChannel)
+            ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_Only(control, dyeChannel)
         end
     end
 end
 
 function ZO_Restyle_Station_Gamepad:ResetHighlightAllFoci()
     for control, visible in pairs(self.outfitSlotList:GetAllVisibleControls()) do
-        ZO_Dyeing_Gamepad_SwatchSlot_Reset_Highlight(control)
+        ZO_Dyeing_Gamepad_OutfitSwatchSlot_Reset_Highlight(control)
     end
 end
 
@@ -1656,6 +1692,7 @@ function ZO_Restyle_Station_Gamepad:InitializeConfirmationDialog()
                 keybind = "DIALOG_SECONDARY",
                 text = zo_strformat(SI_BUY_CURRENCY, GetCurrencyName(CURT_STYLE_STONES, IS_SINGULAR, IS_UPPER)),
                 callback =  function(dialog)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY")
                     self.currentOutfitManipulator:SetMarkedForPreservation(true)
                     ShowMarketAndSearch("", MARKET_OPEN_OPERATION_OUTFIT_CURRENCY)
                 end,
@@ -1706,12 +1743,12 @@ function ZO_RestyleSlot_EntryTemplate_Gamepad_OnInitialize(control)
     control.Deactivate = function(control, ...)
                 control.dyeSelectorFocus:Deactivate(...)
             end
-
+    
     local function OnSelectionChanged(entry)
         if entry then
-            ZO_Dyeing_Gamepad_SwatchSlot_Highlight_Only(control, entry.dyeChannel)
+            ZO_Dyeing_Gamepad_OutfitSwatchSlot_Highlight_Only(control, entry.dyeChannel)
         else
-            ZO_Dyeing_Gamepad_SwatchSlot_Reset_Highlight(control)
+            ZO_Dyeing_Gamepad_OutfitSwatchSlot_Reset_Highlight(control)
         end
 
         if control.onSelectionChangedCallback then

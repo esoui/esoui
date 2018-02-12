@@ -68,7 +68,7 @@ do
             {
                 index = i,
                 marketProductId = marketProductId,
-                displayName = GetMarketProductDisplayName(marketProductId),
+                displayName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, GetMarketProductDisplayName(marketProductId)),
                 icon = GetMarketProductIcon(marketProductId),
                 isStandardReward = isStandardReward,
                 isCollectorsReward = isCollectorsReward,
@@ -234,7 +234,11 @@ function ChapterUpgrade_Manager:RefreshChapterUpgradeData()
     local prepurchaseChapterId, marketProductId = self:GetPrepurchaseChapterUpgradeInfo()
     if prepurchaseChapterId ~= 0 then
         local prepurchaseChapterData = self.prepurchaseChapterData
-        if not prepurchaseChapterData then
+        if prepurchaseChapterData then
+            if prepurchaseChapterData:GetChapterUpgradeId() ~= prepurchaseChapterId then
+                prepurchaseChapterData:Initialize(prepurchaseChapterId)
+            end
+        else
             prepurchaseChapterData = ZO_ChapterUpgrade_Data:New(prepurchaseChapterId)
             self.prepurchaseChapterData = prepurchaseChapterData
         end

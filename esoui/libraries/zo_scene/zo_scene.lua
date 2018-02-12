@@ -263,18 +263,19 @@ function ZO_Scene:SetState(newState)
         local oldState = self.state
         self.sceneManager:OnPreSceneStateChange(self, oldState, newState)
         self.state = newState
-        if(self.state == SCENE_SHOWING) then
+        if self.state == SCENE_SHOWING then
             self.wasShownInGamepadPreferredMode = IsInGamepadPreferredMode()
         end
         self:FireCallbacks("StateChange", oldState, newState)
         self.sceneManager:OnSceneStateChange(self, oldState, newState)
-        if(self.state == SCENE_HIDDEN) then
+        if self.state == SCENE_HIDDEN then
             self:RemoveTemporaryFragments()
-            if(not SCENE_MANAGER:IsSceneOnStack(self.name)) then
+            if not SCENE_MANAGER:IsSceneOnStack(self.name) then
                 self:RemoveStackFragmentGroups()
             end
         end
-        self:RefreshFragments()
+        local AS_A_RESULT_OF_SCENE_STATE_CHANGE = true
+        self:RefreshFragments(AS_A_RESULT_OF_SCENE_STATE_CHANGE)
     end
 end
 
@@ -306,18 +307,20 @@ function ZO_Scene:RemoveStackFragmentGroups()
     end
 end
 
-function ZO_Scene:RefreshFragmentsHelper(...)
+function ZO_Scene:RefreshFragmentsHelper(asAResultOfSceneStateChange, ...)
+    local NO_CUSTOM_SHOW_PARAMETER = nil
+    local NO_CUSTOM_HIDE_PARAMETER = nil
     for i = 1, select("#", ...) do
         local fragment = select(i, ...)
-        fragment:Refresh()
+        fragment:Refresh(NO_CUSTOM_SHOW_PARAMETER, NO_CUSTOM_HIDE_PARAMETER, asAResultOfSceneStateChange, self)
     end
 end
 
-function ZO_Scene:RefreshFragments()
+function ZO_Scene:RefreshFragments(asAResultOfSceneStateChange)
     --wait until after we have refreshed all fragments to evaluate if we're done 
     self.allowEvaluateTransitionComplete = false
     --Protect against fragments being added or removed during iteration by unpacking onto the stack
-    self:RefreshFragmentsHelper(unpack(self.fragments))
+    self:RefreshFragmentsHelper(asAResultOfSceneStateChange, unpack(self.fragments))
     self.allowEvaluateTransitionComplete = true
     self:DetermineIfTransitionIsComplete()
 end
@@ -391,15 +394,12 @@ function ZO_Scene:DetermineIfTransitionIsComplete()
     end
 
     if self:IsTransitionComplete() then
-        NotifyRemoteSceneFinishedFragmentTransition(ZO_REMOTE_SCENE_CHANGE_ORIGIN, self.name)
-        self:Log("Local Fragments Done Transitioning")
-
-        if self.waitingOnRemoteFragmentTransition then
-            -- we are done, but some remote scene has not reported that it is also done, so don't set the state yet
-        else
-            self:SetState(nextState)
-        end
+        self:OnTransitionComplete(nextState)
     end
+end
+
+function ZO_Scene:OnTransitionComplete(nextState)
+    self:SetState(nextState)
 end
 
 function ZO_Scene:GetSceneGroup()
@@ -452,20 +452,35 @@ end
 
 function ZO_RemoteScene:Initialize(name, sceneManager)
     ZO_Scene.Initialize(self, name, sceneManager)
+
+    self.waitingOnRemoteFragmentTransition = false
+    self.fragmentsFinishedTransition = false
 end
 
 function ZO_RemoteScene:SetState(newState)
     if self.state ~= newState then
         if newState == SCENE_HIDING or newState == SCENE_SHOWING then
             self.waitingOnRemoteFragmentTransition = true
-            self:Log("Begin Waiting on Fragments")
+            self.fragmentsFinishedTransition = false
         else
             self.waitingOnRemoteFragmentTransition = false
         end
 
-        -- call parent SetState after we send out message becase it could
+        -- call parent SetState after we send out message because it could
         -- trigger another call to SetState and the events would be out of order
         ZO_Scene.SetState(self, newState)
+    end
+end
+
+function ZO_RemoteScene:OnTransitionComplete(nextState)
+    self.fragmentsFinishedTransition = true
+    self:Log("Local Fragments Done Transitioning")
+    SCENE_MANAGER:SendFragmentCompleteMessage()
+
+    -- we are done, but some remote scene might not have reported that it is also done
+    -- only set the state if both scenes have completed their transition
+    if not self.waitingOnRemoteFragmentTransition then
+        ZO_Scene.OnTransitionComplete(self, nextState)
     end
 end
 
@@ -473,12 +488,28 @@ function ZO_RemoteScene:IsRemoteScene()
     return true
 end
 
-function ZO_RemoteScene:OnRemoteSceneFinishedFragmentTransition()
+function ZO_RemoteScene:SetSequenceNumber(sequenceNumber)
+    self.sequenceNumber = sequenceNumber
+end
+
+function ZO_RemoteScene:GetSequenceNumber()
+    return self.sequenceNumber
+end
+
+function ZO_RemoteScene:AreFragmentsDoneTransitioning()
+    return self.fragmentsFinishedTransition
+end
+
+function ZO_RemoteScene:OnRemoteSceneFinishedFragmentTransition(sequenceNumber)
     if self.waitingOnRemoteFragmentTransition then
         self:Log("Was Notified Remote Fragments Complete")
-        self.waitingOnRemoteFragmentTransition = false
-        if self.allowEvaluateTransitionComplete then
-            self:DetermineIfTransitionIsComplete()
+        if self:GetSequenceNumber() == sequenceNumber then
+            self.waitingOnRemoteFragmentTransition = false
+            if self.allowEvaluateTransitionComplete then
+                self:DetermineIfTransitionIsComplete()
+            end
+        else
+            self:Log(string.format("Sequence Numbers did not match. Expected %d, got %d", self:GetSequenceNumber(), sequenceNumber))
         end
     end
 end

@@ -177,12 +177,16 @@ function ZO_SkillsManager:UpdateSkillsAdvisorVisibility()
     if not IsInGamepadPreferredMode() then
         if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode then
             SCENE_MANAGER:RemoveFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
-            SCENE_MANAGER:AddFragment(FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT)
+            SCENE_MANAGER:AddFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT)
             SCENE_MANAGER:AddFragment(SKILLS_ADVISOR_FRAGMENT)
         else
             SCENE_MANAGER:RemoveFragment(SKILLS_ADVISOR_FRAGMENT)
-            SCENE_MANAGER:RemoveFragment(FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT)
             SCENE_MANAGER:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+            SCENE_MANAGER:AddFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT)
         end
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -679,13 +683,6 @@ function ZO_SkillsManager:Refresh()
 end
 
 function ZO_SkillsManager:OnShown()
-    if self:IsSkillsAdvisorShown() then
-        SCENE_MANAGER:AddFragment(FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT)
-    else
-        SCENE_MANAGER:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
-    end
-    SCENE_MANAGER:AddFragment(FRAME_PLAYER_FRAGMENT)
-
     if self.dirty then
         self:Refresh()
     end

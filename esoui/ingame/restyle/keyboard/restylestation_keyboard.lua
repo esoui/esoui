@@ -340,17 +340,14 @@ function ZO_RestyleStation_Keyboard:AttemptExit(exitDestinationData)
     local preservePendingChanges = exitDestinationData and exitDestinationData.preservePendingChanges or false
 
     if ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:AreChangesPending() and not preservePendingChanges then
-        local currentSheet = self:GetCurrentSheet()
-        if ZO_Dyeing_AreAllItemsBound(currentSheet:GetRestyleMode(), currentSheet:GetRestyleSetIndex()) then
-            local function Confirm()
-                self:ConfirmExit()
-            end
-
-            local function Decline()
-                self.exitDestinationData = nil
-            end
-            ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_RESTYLE_CHANGES", Confirm, Decline)
+        local function Confirm()
+            self:ConfirmExit()
         end
+
+        local function Decline()
+            self.exitDestinationData = nil
+        end
+        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_RESTYLE_CHANGES", Confirm, Decline)
     else
         self:ConfirmExit()
     end

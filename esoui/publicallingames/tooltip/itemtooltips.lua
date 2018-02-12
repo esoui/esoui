@@ -133,7 +133,10 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
         boundLabel = zo_iconFormat(ZO_TRADE_BOP_ICON, 24, 24)
     else
         local bindType = GetItemLinkBindType(itemLink)
-        if IsItemLinkBound(itemLink) then
+        local isBound = IsItemLinkBound(itemLink)
+        if isBound and bindType == BIND_TYPE_ON_PICKUP_BACKPACK then
+            boundLabel = GetString(SI_ITEM_FORMAT_STR_BACKPACK_BOUND)
+        elseif isBound then
             boundLabel = GetString(SI_ITEM_FORMAT_STR_BOUND)
         elseif bindType ~= BIND_TYPE_NONE and bindType ~= BIND_TYPE_UNSET then
             boundLabel = GetString("SI_BINDTYPE", bindType)
@@ -1550,7 +1553,7 @@ do
                 
                 --Currency Count
                 local statValuePair = locationCurrenciesSection:AcquireStatValuePair(self:GetStyle("currencyStatValuePair"))
-                statValuePair:SetStat(zo_strformat(SI_GAMEPAD_INVENTORY_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)), self:GetStyle("currencyStatValuePairStat"))
+                statValuePair:SetStat(zo_strformat(SI_INVENTORY_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)), self:GetStyle("currencyStatValuePairStat"))
                 local amount = GetCurrencyAmount(currencyType, currencyLocation)
                 FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
                 local valueString = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS)

@@ -21,28 +21,6 @@ end
 
 KEYBIND_STRIP_FADE_FRAGMENT = ZO_KeybindStripFragment:New(ZO_KeybindStripControl)
 
--------------------------
---Action Layer Fragment
--------------------------
-
-ZO_ActionLayerFragment = ZO_SceneFragment:Subclass()
-
-function ZO_ActionLayerFragment:New(actionLayerName)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.actionLayerName = actionLayerName
-    return fragment
-end
-
-function ZO_ActionLayerFragment:Show()
-    PushActionLayerByName(self.actionLayerName)
-    self:OnShown()
-end
-
-function ZO_ActionLayerFragment:Hide()
-    RemoveActionLayerByName(self.actionLayerName)
-    self:OnHidden()
-end
-
 MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = 0,
     paddingRight = 950,

@@ -3752,6 +3752,9 @@ ESO_Dialogs["RENAME_OUFIT"] =
         defaultText = "",
         maxInputCharacters = OUTFIT_NAME_MAX_LENGTH,
         textType = TEXT_TYPE_ALL,
+        specialCharacters = {'\'', '-', ' '},
+        validatesText = true,
+        validator = IsValidOutfitName,
         selectAll = true,
     },
     buttons =
@@ -3760,12 +3763,17 @@ ESO_Dialogs["RENAME_OUFIT"] =
         {
             requiresTextInput = true,
             text = SI_OK,
+            noReleaseOnClick = true,
             callback = function(dialog)
                 local inputText = ZO_Dialogs_GetEditBoxText(dialog)
                 if inputText and inputText ~= "" then
-                    local outfitIndex = dialog.data.outfitIndex
-                    local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
-                    outfitManipulator:SetOutfitName(inputText)
+                    local violations = {IsValidOutfitName(inputText)}
+                    if #violations == 0 then
+                        local outfitIndex = dialog.data.outfitIndex
+                        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
+                        outfitManipulator:SetOutfitName(inputText)
+                        ZO_Dialogs_ReleaseDialog("RENAME_OUFIT")
+                    end
                 end
             end
         },

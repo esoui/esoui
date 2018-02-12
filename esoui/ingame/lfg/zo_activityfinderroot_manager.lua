@@ -44,17 +44,17 @@ local function GetLevelOrChampionPointsRequirementText(levelMin, levelMax, point
     
     if playerChampionPoints > 0 or levelMin == GetMaxLevel() then
         if playerChampionPoints < pointsMin then
-            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_CHAMPION_REQUIREMENT, pointsMin)
+            return ZO_CachedStrFormat(SI_LFG_LOCK_REASON_PLAYER_MIN_CHAMPION_REQUIREMENT, pointsMin)
         elseif playerChampionPoints > pointsMax then
-            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MAX_CHAMPION_REQUIREMENT, pointsMax)
+            return ZO_CachedStrFormat(SI_LFG_LOCK_REASON_PLAYER_MAX_CHAMPION_REQUIREMENT, pointsMax)
         end
     else
         local playerLevel = GetUnitLevel("player")
     
         if playerLevel < levelMin then
-            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MIN_LEVEL_REQUIREMENT, levelMin)
+            return ZO_CachedStrFormat(SI_LFG_LOCK_REASON_PLAYER_MIN_LEVEL_REQUIREMENT, levelMin)
         elseif playerLevel > levelMax then
-            return zo_strformat(SI_LFG_LOCK_REASON_PLAYER_MAX_LEVEL_REQUIREMENT, levelMax)
+            return ZO_CachedStrFormat(SI_LFG_LOCK_REASON_PLAYER_MAX_LEVEL_REQUIREMENT, levelMax)
         end
     end
 end
@@ -125,6 +125,13 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:MarkDataDirty()
     end
 
+    local function MarkDataDirtyFromCollectible(collectibleId)
+        local updatedCollectible = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if updatedCollectible:IsStory() then
+            self:MarkDataDirty()
+        end
+    end
+
     function UpdateGroupStatus()
         self:UpdateGroupStatus()
     end
@@ -162,7 +169,7 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, MarkDataDirty)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", MarkDataDirty)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", MarkDataDirtyFromCollectible)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", MarkDataDirty)
 
     --We should clear selections when switching filters, but we won't necessarily clear them when closing scenes

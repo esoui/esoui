@@ -470,7 +470,7 @@ function ZO_RestyleSlotsSheet:GetMousedOverDyeableSlotInfo()
 end
 
 function ZO_RestyleSlotsSheet:MarkViewDirty(restyleSlotData)
-    if ZO_RESTYLE_SHEET_WINDOW_FRAGMENT and ZO_RESTYLE_SHEET_WINDOW_FRAGMENT:IsShowing() then
+    if self.fragment:IsShowing() then
         if restyleSlotData then
             self:RefreshSlot(restyleSlotData)
         else

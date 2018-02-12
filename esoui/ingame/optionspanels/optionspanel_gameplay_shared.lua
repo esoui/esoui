@@ -266,6 +266,17 @@ local ZO_OptionsPanel_Gameplay_ControlData =
     --In world
     [SETTING_TYPE_IN_WORLD] =
     {
+        --Options_Gameplay_HidePolymorphHelm
+        [IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_IN_WORLD,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
+            text = SI_INTERFACE_OPTIONS_HIDE_POLYMORPH_HELM,
+            tooltipText = SI_INTERFACE_OPTIONS_HIDE_POLYMORPH_HELM_TOOLTIP,
+        },
+
         --Options_Gameplay_HideMountStaminaUpgrade
         [IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE] =
         {

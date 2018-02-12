@@ -360,6 +360,20 @@ function ZO_SharedInventoryManager:GetItemUniqueId(bagId, slotIndex)
     end
 end
 
+function ZO_SharedInventoryManager:GetHouseBankingBagName(bankingBag)
+    local interactName = GetUnitName("interact")
+    local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
+    local nickname
+    if collectibleId ~= 0 then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData then
+            nickname = collectibleData:GetNickname()
+        end
+    end
+
+    return interactName, nickname
+end
+
 --[[ Shared Guild Bank functions ]]--
 
 function ZO_SharedInventory_SelectAccessibleGuildBank(lastSuccessfulGuildBankId)

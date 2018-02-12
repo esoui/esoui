@@ -65,13 +65,3 @@ STATS_OUTFIT_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     forcePreparePreview = false,
     maintainsPreviewCollection = true,
 })
-
-do
-    local function CalculateSkillsRightPanelFramingTarget()
-        local percentX = SKILLS_WINDOW:IsSkillsAdvisorShown() and .65 or .5
-        local x = zo_lerp(0, ZO_SharedRightBackground:GetLeft(), percentX)
-        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
-        return x, y
-    end
-    FRAME_TARGET_SKILLS_RIGHT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateSkillsRightPanelFramingTarget, SetFrameLocalPlayerTarget)
-end

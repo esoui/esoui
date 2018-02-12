@@ -330,14 +330,9 @@ end
 
 function ZO_RestyleSlotData:ShouldBeHidden()
     local restyleSlotType = self.restyleSlotType
-    if self:IsEquipment() then
-        local restyleSlotType = self.restyleSlotType
-        local activeOffhandEquipSlot = ZO_Restyle_GetActiveOffhandEquipSlotType()
-        local isOffhand = restyleSlotType == EQUIP_SLOT_OFF_HAND or restyleSlotType == EQUIP_SLOT_BACKUP_OFF
-        return isOffhand and activeOffhandEquipSlot ~= restyleSlotType
-    elseif self:IsOutfitSlot() then
+    if self:IsOutfitSlot() then
         if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
-            return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyHeld(restyleSlotType)
+            return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType)
         end
     end
     return false

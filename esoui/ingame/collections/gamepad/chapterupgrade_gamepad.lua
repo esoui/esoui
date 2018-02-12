@@ -320,11 +320,12 @@ do
             local prepurchaseChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetPrepurchaseChapterUpgradeData()
             if prepurchaseChapterUpgradeData then
                 AddChapterUpgradeEntry(self.categoryList, prepurchaseChapterUpgradeData)
-            end
-
-            local currentChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetCurrentChapterUpgradeData()
-            if currentChapterUpgradeData then
-                AddChapterUpgradeEntry(self.categoryList, currentChapterUpgradeData)
+            else
+                --TODO: Implement the full market control approach, allowing the current chapter to be controlled the same way prepurchase is
+                local currentChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetCurrentChapterUpgradeData()
+                if currentChapterUpgradeData then
+                    AddChapterUpgradeEntry(self.categoryList, currentChapterUpgradeData)
+                end
             end
         end
         self.categoryList:Commit()

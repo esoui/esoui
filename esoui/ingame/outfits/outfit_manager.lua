@@ -186,6 +186,10 @@ function ZO_OutfitSlotManipulator:UpdatePreview(refreshImmediately)
 end
 
 function ZO_OutfitSlotManipulator:ClearPendingChanges(suppressCallbacks)
+    if self.preservedDyeData then
+        self.preservedDyeData = nil
+    end
+
     if self:IsSlotDataChangePending() then
         self.pendingCollectibleId, self.pendingItemMaterialIndex = self.currentCollectibleId, self.currentItemMaterialIndex
         self:OnPendingDataChanged(suppressCallbacks)
@@ -272,6 +276,20 @@ do
             PlayChangeOutfitSound(self.pendingCollectibleId)
             self.owner:OnSlotPendingDataChanged(self.outfitSlotIndex)
         end
+    end
+end
+
+function ZO_OutfitSlotManipulator:PreserveDyeData()
+    self.preservedDyeData =
+    {
+        self:GetPendingDyeData()
+    }
+end
+
+function ZO_OutfitSlotManipulator:RestorePreservedDyeData()
+    if self.preservedDyeData then
+        self:GetRestyleSlotData():SetPendingDyes(unpack(self.preservedDyeData))
+        self.preservedDyeData = nil
     end
 end
 
@@ -398,12 +416,9 @@ do
     function ZO_OutfitManipulator:UpdatePreviews()
         local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
         if previewCollectionId ~= 0 then
-            local mainHandSlot, offHandSlot = GetOutfitSlotsForCurrentlyHeldWeapons()
-
             for outfitSlot, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
                 if WEAPON_SLOTS[outfitSlot] then
-                    -- When updating everything, we want to see your equipped weapons
-                    if (outfitSlot == mainHandSlot or outfitSlot == offHandSlot) and outfitSlotManipulator:IsAnyChangePending() then
+                    if outfitSlotManipulator:IsAnyChangePending() then
                         outfitSlotManipulator:UpdatePreview(DONT_REFRESH_IF_SHOWN)
                     else
                         ClearOutfitSlotPreviewElementFromPreviewCollection(previewCollectionId, outfitSlot, DONT_REFRESH_IF_SHOWN)
@@ -541,7 +556,21 @@ function ZO_OutfitManipulator:SlotManipulatorIterator(...)
 end
 
 function ZO_OutfitManipulator:SetMarkedForPreservation(preservePendingChanges)
-    self.preservePendingChanges = preservePendingChanges
+    if self.preservePendingChanges ~= preservePendingChanges then
+        self.preservePendingChanges = preservePendingChanges
+
+        if preservePendingChanges then
+            for outfitSlotIndex, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+                outfitSlotManipulator:PreserveDyeData()
+            end
+        end
+    end
+end
+
+function ZO_OutfitManipulator:RestorePreservedDyeData()
+    for outfitSlotIndex, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+        outfitSlotManipulator:RestorePreservedDyeData()
+    end
 end
 
 function ZO_OutfitManipulator:IsMarkedForPreservation()
@@ -746,6 +775,14 @@ do
             local mainHandOutfitSlot, offHandOutfitSlot = GetOutfitSlotsForCurrentlyHeldWeapons()
             return outfitSlot == mainHandOutfitSlot or outfitSlot == offHandOutfitSlot
         end
+    end
+
+    function Outfit_Manager:IsWeaponOutfitSlotCurrentlyEquipped(outfitSlot)
+        local mainHandOutfitSlot, offHandOutfitSlot, backupMainHandOutfitSlot, backupOffHandOutfitSlot = GetOutfitSlotsForEquippedWeapons()
+        return outfitSlot == mainHandOutfitSlot 
+                or outfitSlot == offHandOutfitSlot
+                or outfitSlot == backupMainHandOutfitSlot
+                or outfitSlot == backupOffHandOutfitSlot
     end
 
     function Outfit_Manager:IsWeaponOutfitSlotMain(outfitSlot)
