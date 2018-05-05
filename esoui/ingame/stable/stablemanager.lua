@@ -35,9 +35,8 @@ end
 function ZO_Stable_Manager:Initialize(control)
     self:RegisterForEvents()
     self.trainingCost = GetTrainingCost()
-    self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
+    self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
     self:UpdateStats()
-    self.ridingSkillAnnoucementInfo = {}
 end
 
 function ZO_Stable_Manager:RegisterForEvents()
@@ -63,18 +62,11 @@ function ZO_Stable_Manager:RegisterForEvents()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_Stable_Manager", EVENT_MOUNT_INFO_UPDATED, UpdateStats)
 
-    local function RidingSkillImprovement(_, ...)
-        self:ProcessRidingSkillAnnouncement(...)
-    end
-    EVENT_MANAGER:RegisterForEvent("ZO_Stable_Manager", EVENT_RIDING_SKILL_IMPROVEMENT, RidingSkillImprovement)
-
     local function UpdateMoney()
-        self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
+        self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
         self:FireCallbacks("StableMoneyUpdate")
     end
     EVENT_MANAGER:RegisterForEvent("ZO_Stable_Manager", EVENT_MONEY_UPDATE, UpdateMoney)
-
-    EVENT_MANAGER:RegisterForUpdate("ZO_Stable_Manager", 100, function(...) self:OnUpdate(...) end)
 end
 
 function ZO_Stable_Manager:UpdateStats()
@@ -86,36 +78,6 @@ function ZO_Stable_Manager:UpdateStats()
         [RIDING_TRAIN_CARRYING_CAPACITY] = {inventoryBonus, maxInventoryBonus},
     }
     self.ridingSkillMaxedOut = (inventoryBonus == maxInventoryBonus) and (staminaBonus == maxStaminaBonus) and (speedBonus == maxSpeedBonus)
-end
-
-local TIMER_DURATION_MS = 2000
-function ZO_Stable_Manager:ProcessRidingSkillAnnouncement(ridingSkill, previous, current, source)
-    if source == RIDING_TRAIN_SOURCE_ITEM then
-        local currentSkillInfo = self.ridingSkillAnnoucementInfo[ridingSkill]
-        if currentSkillInfo == nil then
-            currentSkillInfo = 
-            {
-                start = previous,
-            }
-            self.ridingSkillAnnoucementInfo[ridingSkill] = currentSkillInfo
-        end
-        currentSkillInfo.timerMS = GetGameTimeMilliseconds() + TIMER_DURATION_MS
-        currentSkillInfo.stop = current
-    end
-end
-
-function ZO_Stable_Manager:ShowRidingSkillAnnouncement(ridingSkill, start, stop)
-    local skillImprovementText = zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), start, stop)
-    CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_RIDING_SKILL_IMPROVEMENT, CSA_EVENT_COMBINED_TEXT, STABLE_TRAINING_SOUNDS[ridingSkill], GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), skillImprovementText)
-end
-
-function ZO_Stable_Manager:OnUpdate(timeMS)
-    for skillType, info in pairs(self.ridingSkillAnnoucementInfo) do
-        if timeMS > info.timerMS then
-            self.ridingSkillAnnoucementInfo[skillType] = nil
-            self:ShowRidingSkillAnnouncement(skillType, info.start, info.stop)
-        end
-    end
 end
 
 function ZO_Stable_Manager:CanAffordTraining()

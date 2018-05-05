@@ -1,31 +1,3 @@
-
-
-local STAT_DESCRIPTIONS = {
-    [STAT_HEALTH_MAX] = SI_STAT_TOOLTIP_HEALTH_MAX,
-    [STAT_HEALTH_REGEN_IDLE] = SI_STAT_TOOLTIP_HEALTH_REGENERATION_IDLE,
-    [STAT_HEALTH_REGEN_COMBAT] = SI_STAT_TOOLTIP_HEALTH_REGENERATION_COMBAT,
-    [STAT_MAGICKA_MAX] = SI_STAT_TOOLTIP_MAGICKA_MAX,
-    [STAT_MAGICKA_REGEN_IDLE] = SI_STAT_TOOLTIP_MAGICKA_REGENERATION_IDLE,
-    [STAT_MAGICKA_REGEN_COMBAT] = SI_STAT_TOOLTIP_MAGICKA_REGENERATION_COMBAT,
-    [STAT_STAMINA_MAX] = SI_STAT_TOOLTIP_STAMINA_MAX,
-    [STAT_STAMINA_REGEN_IDLE] = SI_STAT_TOOLTIP_STAMINA_REGENERATION_IDLE,
-    [STAT_STAMINA_REGEN_COMBAT] = SI_STAT_TOOLTIP_STAMINA_REGENERATION_COMBAT,
-    [STAT_SPELL_POWER] = SI_STAT_TOOLTIP_SPELL_POWER,
-    [STAT_SPELL_PENETRATION] = SI_STAT_TOOLTIP_SPELL_PENETRATION,
-    [STAT_SPELL_CRITICAL] = SI_STAT_TOOLTIP_SPELL_CRITICAL,
-    [STAT_ATTACK_POWER] = SI_STAT_TOOLTIP_ATTACK_POWER,
-    [STAT_PHYSICAL_PENETRATION] = SI_STAT_TOOLTIP_PHYSICAL_PENETRATION,
-    [STAT_CRITICAL_STRIKE] = SI_STAT_TOOLTIP_CRITICAL_STRIKE,
-    [STAT_PHYSICAL_RESIST] = SI_STAT_TOOLTIP_PHYSICAL_RESIST,
-    [STAT_SPELL_RESIST] = SI_STAT_TOOLTIP_SPELL_RESIST,
-    [STAT_CRITICAL_RESISTANCE] = SI_STAT_TOOLTIP_CRITICAL_RESISTANCE,
-    [STAT_POWER] = SI_STAT_TOOLTIP_POWER,
-    [STAT_MITIGATION] = SI_STAT_TOOLTIP_MITIGATION,
-    [STAT_SPELL_MITIGATION] = SI_STAT_TOOLTIP_SPELL_MITIGATION,
-    [STAT_ARMOR_RATING] = SI_STAT_TOOLTIP_ARMOR_RATING,
-    [STAT_WEAPON_AND_SPELL_DAMAGE] = SI_STAT_TOOLTIP_WEAPON_POWER,
-}
-
 ZO_StatEntry_Keyboard = ZO_Object:Subclass()
 
 function ZO_StatEntry_Keyboard:New(...)
@@ -40,8 +12,9 @@ function ZO_StatEntry_Keyboard:Initialize(control, statType, statObject)
     self.statType = statType
     self.statObject = statObject
     self.tooltipAnchorSide = RIGHT
+    self.currentStatDelta = 0
 
-    self.control.name:SetText(GetString("SI_DERIVEDSTATS", statType))
+    self.control.name:SetText(zo_strformat(SI_STAT_NAME_FORMAT, GetString("SI_DERIVEDSTATS", statType)))
     
     local function UpdateStatValue()
         self:UpdateStatValue()
@@ -67,7 +40,7 @@ function ZO_StatEntry_Keyboard:GetPendingStatBonuses()
 end
 
 function ZO_StatEntry_Keyboard:GetValue()
-    return GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS, STAT_SOFT_CAP_OPTION_APPLY_SOFT_CAP)
+    return GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS)
 end
 
 function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
@@ -77,20 +50,19 @@ function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
     if(statType == STAT_CRITICAL_STRIKE or statType == STAT_SPELL_CRITICAL) then
         return zo_strformat(SI_STAT_VALUE_PERCENT, GetCriticalStrikeChance(value))
     else
-        return tostring(value)
+        return value
     end
 end
 
 function ZO_StatEntry_Keyboard:UpdateStatValue()
     if not self.control:IsHidden() then
         self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
-        local isBattleLeveled = self.statObject and self.statObject:IsPlayerBattleLeveled()
         local value = self:GetValue()
         local displayValue = self:GetDisplayValue()
         local pendingBonusAmount = self:GetPendingStatBonuses()
 
-        if pendingBonusAmount and pendingBonusAmount > 0 then       -- We don't show any attribute stat increases while in battle leveled zones because
-            self.control.pendingBonus:SetHidden(isBattleLeveled)    -- it doesn't make any sense based on how battle leveling now works
+        if pendingBonusAmount and pendingBonusAmount > 0 then       
+            self.control.pendingBonus:SetHidden(false)
             self.control.pendingBonus:SetText(zo_strformat(SI_STAT_PENDING_BONUS_FORMAT, pendingBonusAmount))
         else
             self.control.pendingBonus:SetHidden(true)
@@ -102,16 +74,18 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
         if statChanged then 
             valueLabel:SetText(displayValue)
         end
-        self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())       
+        self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+
+        self:UpdateStatComparisonValue()
     end
 end
 
-function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
-    if statDelta and statDelta ~= 0 then
-        local comparisonStatValue = self:GetValue() + statDelta
+function ZO_StatEntry_Keyboard:UpdateStatComparisonValue()
+    if not self.control:IsHidden() and not self.control.comparisonValue:IsHidden() and self.currentStatDelta and self.currentStatDelta ~= 0 then
+        local comparisonStatValue = self:GetValue() + self.currentStatDelta
         local color
         local icon
-        if statDelta > 0 then
+        if self.currentStatDelta > 0 then
             color = ZO_SUCCEEDED_TEXT
             icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
         else
@@ -119,17 +93,24 @@ function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
             icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
         end
 
-        comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
+        local comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
         comparisonValueString = color:Colorize(comparisonValueString)
+        self.control.comparisonValue:SetText(comparisonValueString)  
+    end
+end
 
+function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
+    if statDelta and statDelta ~= 0 then
+        self.currentStatDelta = statDelta
         self.control.value:SetHidden(true)
         self.control.comparisonValue:SetHidden(false)
-        self.control.comparisonValue:SetText(comparisonValueString)
+        self:UpdateStatComparisonValue()
     end
 end
 
 function ZO_StatEntry_Keyboard:HideComparisonValue()
     if not self.control.comparisonValue:IsHidden() then
+        self.currentStatDelta = 0
         self.control.comparisonValue:SetText("")
         self.control.comparisonValue:SetHidden(true)
         self.control.value:SetHidden(false)
@@ -140,13 +121,13 @@ function ZO_StatsEntry_OnMouseEnter(control)
     local statEntry = control.statEntry
     if statEntry then
         local statType = statEntry.statType
-        local description = STAT_DESCRIPTIONS[statType]
+        local description = ZO_STAT_TOOLTIP_DESCRIPTIONS[statType]
         if description then
             InitializeTooltip(InformationTooltip, control, statEntry.tooltipAnchorSide, -5)
 
             local value = statEntry:GetValue()
             local displayValue = statEntry:GetDisplayValue()
-            local statName = GetString("SI_DERIVEDSTATS", statType)
+            local statName = zo_strformat(SI_STAT_NAME_FORMAT, GetString("SI_DERIVEDSTATS", statType))
 
             InformationTooltip:AddLine(statName, "", ZO_NORMAL_TEXT:UnpackRGBA())
             InformationTooltip:AddLine(zo_strformat(description, displayValue))

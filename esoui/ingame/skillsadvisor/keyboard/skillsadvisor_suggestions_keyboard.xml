@@ -1,0 +1,66 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SkillsAdvisorSuggestedAbility" inherits="ZO_Skills_Ability" virtual="true" >
+            <Controls>
+                <Button name="$(parent)Slot" override="true">
+                    <Anchor point="LEFT" offsetX="50" />
+
+                    <OnMouseEnter>
+                        ZO_SkillsAdvisor_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    
+                    <!-- Disable drag from parent object -->
+                    <OnDragStart />
+                    
+                    <OnClicked>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT) then
+                            ZO_SkillsAdvisor_AbilitySlot_OnClick(self)
+                        end
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)Name" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" override="true"  wrapMode="ELLIPSIS" maxLineCount="2" >
+                    <Dimensions x="190" />
+                    <!-- Anchor set in Lua-->
+                </Label>
+
+                <Texture name="$(parent)Morph" textureFile="EsoUI/Art/SkillsAdvisor/indicator_abilityMorph.dds" tier="HIGH" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Slot" relativePoint="LEFT" offsetX="-10" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SkillsAdvisorSuggestedLabel" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" >
+                    <Anchor point="TOPLEFT" offsetY="5" /> 
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SkillsAdvisorSuggestedText" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" maxLineCount="3" >
+                    <Dimensions x="260" />
+                    <Anchor point="TOPLEFT" offsetY="5" offsetX="50" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_SkillsAdvisor_Suggestions_Keyboard_TopLevel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SkillsAdvisor_Keyboard_TopLevel" relativePoint="BOTTOMLEFT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SkillsAdvisor_Keyboard_TopLevel" />
+            
+            <OnInitialized>
+                ZO_SkillsAdvisor_Suggestions_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>                
+                <Control name="$(parent)SkillSuggestionList" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

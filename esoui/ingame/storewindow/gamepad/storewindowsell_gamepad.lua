@@ -91,7 +91,7 @@ function ZO_GamepadStoreSell:InitializeKeybindStrip()
 end
 
 function ZO_GamepadStoreSell:CanSell()
-    if GetCarriedCurrencyAmount(CURT_MONEY) ~= GetMaxCarriedCurrencyAmount(CURT_MONEY) then
+    if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) ~= GetMaxPossibleCurrency(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
         return true
     else
         return false, GetString("SI_STOREFAILURE", STORE_FAILURE_SELL_FAILED_MONEY_CAP) -- "You cannot sell items when you are at the gold cap"

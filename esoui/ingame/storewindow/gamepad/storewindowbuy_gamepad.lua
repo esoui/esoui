@@ -11,21 +11,26 @@ function ZO_GamepadStoreBuy:Initialize(scene)
         if newState == SCENE_SHOWING then
             self:RegisterEvents()
             self.list:UpdateList()
-			STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
+            STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
+            self:UpdatePreview(self.list:GetSelectedData())
         elseif newState == SCENE_HIDING then
             self:UnregisterEvents()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+            self:UpdatePreview(nil)
+            if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+                self:TogglePreviewMode()
+            end
         end
-	end)
-    
+    end)
+
     self:InitializeKeybindStrip()
     self:CreateModeData(SI_STORE_MODE_BUY, ZO_MODE_STORE_BUY, "EsoUI/Art/Vendor/vendor_tabIcon_buy_up.dds", fragment, self.keybindStripDescriptor)
 end
 
 function ZO_GamepadStoreBuy:RegisterEvents()
     local function OnCurrencyChanged()
-	    self.list:RefreshVisible()
-	end
+        self.list:RefreshVisible()
+    end
 
     local function OnInventoryFullUpdate()
         self.list:UpdateList()
@@ -61,66 +66,100 @@ end
 function ZO_GamepadStoreBuy:InitializeKeybindStrip()
     local repairAllKeybind = STORE_WINDOW_GAMEPAD:GetRepairAllKeybind()
 
-    	-- Buy screen keybind
-	self.keybindStripDescriptor = {
+        -- Buy screen keybind
+    self.keybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-		repairAllKeybind
+        repairAllKeybind,
+        {
+            name = function()
+                        if not ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+                            return GetString(SI_CRAFTING_ENTER_PREVIEW_MODE)
+                        else
+                            return GetString(SI_CRAFTING_EXIT_PREVIEW_MODE)
+                        end
+            end,
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+            callback = function()
+                self:TogglePreviewMode()
+            end,
+            visible = function()
+                -- if we are previewing something, we can end it regardless of our selection
+                local isCurrentlyPreviewing = ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled()
+                if isCurrentlyPreviewing then
+                    return true
+                end
+
+                local targetData = self.list:GetTargetData()
+                if targetData then
+                    return self:CanPreviewStoreEntry(targetData)
+                else
+                    return false
+                end
+            end,
+        },
     }
 
     ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.keybindStripDescriptor,
                                                       GAME_NAVIGATION_TYPE_BUTTON,
                                                       function() self:ConfirmBuy() end,
                                                       GetString(SI_ITEM_ACTION_BUY),
-													  nil,
+                                                      nil,
                                                       function() return self:CanBuy() end
-												    )
+                                                    )
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor,
-													GAME_NAVIGATION_TYPE_BUTTON)
+                                                    GAME_NAVIGATION_TYPE_BUTTON)
 
-	ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
 
-	self.confirmKeybindStripDescriptor = {}
+    self.confirmKeybindStripDescriptor = {}
 
-	ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor,
+    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor,
                                                       GAME_NAVIGATION_TYPE_BUTTON,
                                                       function() self:ConfirmBuy() end,
                                                       GetString(SI_ITEM_ACTION_BUY),
-													  nil,
+                                                      nil,
                                                       function() return self:CanBuy() end
-												    )
+                                                    )
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor,
-													GAME_NAVIGATION_TYPE_BUTTON,
-													function() self:UnselectBuyItem() end,
-													nil)
+                                                    GAME_NAVIGATION_TYPE_BUTTON,
+                                                    function() self:UnselectBuyItem() end,
+                                                    nil)
 end
 
 function ZO_GamepadStoreBuy:ConfirmBuy()
     local selectedData = self.list:GetTargetData()
     if self.confirmationMode then
-		local quantity = STORE_WINDOW_GAMEPAD:GetSpinnerValue()
-		if quantity > 0 then
-			BuyStoreItem(selectedData.slotIndex, quantity)
-			self:UnselectBuyItem()
-		end
-	else
-		local maxItems = GetStoreEntryMaxBuyable(selectedData.slotIndex)
-		if maxItems > 1 then
-			self:SelectBuyItem()
+        local quantity = STORE_WINDOW_GAMEPAD:GetSpinnerValue()
+        if quantity > 0 then
+            if not ZO_Currency_TryShowThresholdDialog(selectedData.slotIndex, quantity, selectedData.dataSource) then
+                BuyStoreItem(selectedData.slotIndex, quantity)
+            end
+            self:UnselectBuyItem()
+        end
+    else
+        local maxItems = GetStoreEntryMaxBuyable(selectedData.slotIndex)
+        if maxItems > 1 then
+            self:SelectBuyItem()
             STORE_WINDOW_GAMEPAD:SetupSpinner(zo_max(GetStoreEntryMaxBuyable(selectedData.slotIndex), 1), 1, selectedData.sellPrice, selectedData.currencyType1 or CURT_MONEY)
-		elseif maxItems == 1 then
-			BuyStoreItem(selectedData.slotIndex, 1)
-		end
-	end
+        elseif maxItems == 1 then
+            if not ZO_Currency_TryShowThresholdDialog(selectedData.slotIndex, maxItems, selectedData.dataSource) then
+                BuyStoreItem(selectedData.slotIndex, 1)
+            end
+        end
+    end
 end
 
 function ZO_GamepadStoreBuy:CanBuy()
-	local selectedData = self.list:GetTargetData()
+    local selectedData = self.list:GetTargetData()
     if selectedData then
         if selectedData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
             local collectibleId = GetCollectibleIdFromLink(selectedData.itemLink)
-            if IsCollectibleUnlocked(collectibleId) then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            if collectibleData:IsUnlocked() then
                 return false, GetString("SI_STOREFAILURE", STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE) -- "You already have that collectible"
             end
             return true --Always allow the purchase of collectibles, regardless of bag space
@@ -132,29 +171,59 @@ function ZO_GamepadStoreBuy:CanBuy()
 end
 
 function ZO_GamepadStoreBuy:SelectBuyItem()
-	self.confirmationMode = true
+    self.confirmationMode = true
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.confirmKeybindStripDescriptor)
-	STORE_WINDOW_GAMEPAD:SetQuantitySpinnerActive(self.confirmationMode, self.list)
+    STORE_WINDOW_GAMEPAD:SetQuantitySpinnerActive(self.confirmationMode, self.list)
 end
 
 function ZO_GamepadStoreBuy:UnselectBuyItem()
-	self.confirmationMode = false
+    self.confirmationMode = false
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.confirmKeybindStripDescriptor)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-	STORE_WINDOW_GAMEPAD:SetQuantitySpinnerActive(self.confirmationMode, self.list)
+    STORE_WINDOW_GAMEPAD:SetQuantitySpinnerActive(self.confirmationMode, self.list)
 end
 
 function ZO_GamepadStoreBuy:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
-	local price = self.confirmationMode and selected and data.sellPrice * STORE_WINDOW_GAMEPAD:GetSpinnerValue() or data.sellPrice
-	self:SetupStoreItem(control, data, selected, selectedDuringRebuild, enabled, activated, price, not ZO_STORE_FORCE_VALID_PRICE, ZO_MODE_STORE_BUY)
+    local price = self.confirmationMode and selected and data.sellPrice * STORE_WINDOW_GAMEPAD:GetSpinnerValue() or data.sellPrice
+    self:SetupStoreItem(control, data, selected, selectedDuringRebuild, enabled, activated, price, not ZO_STORE_FORCE_VALID_PRICE, ZO_MODE_STORE_BUY)
 end
 
 function ZO_GamepadStoreBuy:OnSelectedItemChanged(buyData)
     if buyData then
-	    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
+        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
         GAMEPAD_TOOLTIPS:LayoutStoreWindowItem(GAMEPAD_LEFT_TOOLTIP, buyData)
         STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
+    self:UpdatePreview(buyData)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadStoreBuy:UpdatePreview(selectedData)
+    if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+        if self:CanPreviewStoreEntry(selectedData) then
+            local storeEntryIndex = ZO_Inventory_GetSlotIndex(selectedData)
+            ITEM_PREVIEW_GAMEPAD:PreviewStoreEntryAsFurniture(storeEntryIndex)
+        else
+            ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+        end
+    end
+end
+
+function ZO_GamepadStoreBuy:TogglePreviewMode()
+    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+
+    local targetData = self.list:GetTargetData()
+    self:UpdatePreview(targetData)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadStoreBuy:CanPreviewStoreEntry(data)
+    if data then
+        local storeEntryIndex = ZO_Inventory_GetSlotIndex(data)
+        local itemLink = GetStoreItemLink(storeEntryIndex)
+        return ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
+    end
+
+    return false
 end

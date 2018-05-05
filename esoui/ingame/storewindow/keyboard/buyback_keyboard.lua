@@ -112,8 +112,8 @@ end
 
 function BuyBack:UpdateMoney()        
     if not self.control:IsControlHidden() then
-        self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, self.currentMoney, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+        self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, self.currentMoney, ZO_KEYBOARD_CURRENCY_OPTIONS)
     end
 end
 
@@ -176,7 +176,7 @@ function BuyBack:SetupBuyBackSlot(control, data)
     -- Set info about what slot this is, on the top level slot control
     ZO_InventorySlot_SetType(slotControl, SLOT_TYPE_STORE_BUYBACK)
     slotControl.index = data.slotIndex
-    slotControl.moneyCost = stackBuyPrice
+    slotControl.moneyCost = data.stackBuyPrice
 
     ZO_InventorySlot_SetType(control, SLOT_TYPE_STORE_BUYBACK)
     control.index = data.slotIndex

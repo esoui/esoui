@@ -18,38 +18,42 @@ local STORE_ITEMS = false
 
 ZO_StoreManager = ZO_SharedStoreManager:Subclass()
 
-function ZO_StoreManager:New(container)
-    local manager = ZO_Object.New(self)
+function ZO_StoreManager:New(...)
+    return ZO_SharedStoreManager.New(self, ...)
+end
+
+function ZO_StoreManager:Initialize(control)
+    ZO_SharedStoreManager.Initialize(self, control)
     
-    STORE_FRAGMENT = ZO_FadeSceneFragment:New(container)
+    STORE_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
     STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
-                                                    if(newState == SCENE_FRAGMENT_SHOWING) then
-                                                        manager:RefreshCurrency()
-                                                        manager:GetStoreItems()
-                                                        manager:UpdateList()
-                                                        manager:UpdateFreeSlots()
+                                                    if newState == SCENE_FRAGMENT_SHOWING then
+                                                        self:RefreshCurrency()
+                                                        self:GetStoreItems()
+                                                        self:UpdateList()
+                                                        self:UpdateFreeSlots()
+                                                    elseif newState == SCENE_FRAGMENT_HIDING then
+                                                        if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
+                                                            self:TogglePreviewMode()
+                                                        end
                                                     end
                                                 end)
     
-    manager.container = container
+    self:InitializeTabs()
+    self:InitializeKeybindStripDescriptors()
 
-    manager:InitializeTabs()
-    manager:InitializeKeybindStripDescriptors()
+    self.currentMoney = 0
+    self.currency1Display = GetControl(control, "InfoBarCurrency1")
+    self.currency2Display = GetControl(control, "InfoBarCurrency2")
+    self.currenyMoneyDisplay = GetControl(control, "InfoBarMoney")
+    self.freeSlotsLabel = GetControl(control, "InfoBarFreeSlots")
 
-    manager.currentMoney = 0
-    manager.currencyAlliancePointsDisplay = GetControl(container, "InfoBarAlliancePoints")
-    manager.currencyTelvarStonesDisplay = GetControl(container, "InfoBarTelvarStones")
-    manager.currenyMoneyDisplay = GetControl(container, "InfoBarMoney")
-    manager.freeSlotsLabel = GetControl(container, "InfoBarFreeSlots")
+    ZO_CurrencyControl_InitializeDisplayTypes(self.currenyMoneyDisplay, CURT_MONEY)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(manager.currencyAlliancePointsDisplay, CURT_ALLIANCE_POINTS)
-    ZO_CurrencyControl_InitializeDisplayTypes(manager.currencyTelvarStonesDisplay, CURT_TELVAR_STONES)
-    ZO_CurrencyControl_InitializeDisplayTypes(manager.currenyMoneyDisplay, CURT_MONEY)
+    self.activeTab = GetControl(control, "TabsActive")
 
-    manager.activeTab = GetControl(container, "TabsActive")
-
-    manager.multipleDialog = ZO_BuyMultipleDialog
+    self.multipleDialog = ZO_BuyMultipleDialog
     ZO_Dialogs_RegisterCustomDialog("BUY_MULTIPLE",
     {
         customControl = ZO_BuyMultipleDialog,
@@ -61,7 +65,7 @@ function ZO_StoreManager:New(container)
         {
             [1] =
             {
-                control = GetControl(manager.multipleDialog, "Purchase"),
+                control = GetControl(self.multipleDialog, "Purchase"),
                 text =  SI_DIALOG_PURCHASE,
                 callback =  function(dialog)
                                 STORE_WINDOW:BuyMultiplePurchase()
@@ -70,51 +74,54 @@ function ZO_StoreManager:New(container)
         
             [2] =
             {
-                control =   GetControl(manager.multipleDialog, "Cancel"),
+                control =   GetControl(self.multipleDialog, "Cancel"),
                 text =      SI_DIALOG_CANCEL,
             }
         }
     })
 
     local function GetBuyMultipleMaximum()
-        local entryIndex = manager.multipleDialog.index
+        local entryIndex = self.multipleDialog.index
         return zo_min(zo_max(GetStoreEntryMaxBuyable(entryIndex), 1), MAX_STORE_WINDOW_STACK_QUANTITY) -- always attempt to let one item be bought, just to show the error; ensure that the quantity can't go above 999
     end
 
     local spinnerControl = GetControl(ZO_BuyMultipleDialog, "Spinner")
-    manager.buyMultipleSpinner = ZO_Spinner:New(spinnerControl, 1, GetBuyMultipleMaximum)
-    manager.buyMultipleSpinner:RegisterCallback("OnValueChanged", function() manager:RefreshBuyMultiple() end)
+    self.buyMultipleSpinner = ZO_Spinner:New(spinnerControl, 1, GetBuyMultipleMaximum)
+    self.buyMultipleSpinner:RegisterCallback("OnValueChanged", function() self:RefreshBuyMultiple() end)
 
-    manager.list = GetControl(container, "List")
-    ZO_ScrollList_AddDataType(manager.list, DATA_TYPE_STORE_ITEM, "ZO_PlayerInventorySlot", 52, function(control, data) manager:SetUpBuySlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
+    self.list = GetControl(control, "List")
+    ZO_ScrollList_AddDataType(self.list, DATA_TYPE_STORE_ITEM, "ZO_StoreEntrySlot", 52, function(control, data) self:SetUpBuySlot(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
 
-    manager.landingArea = GetControl(manager.list, "SellToVendorArea")
+    self.landingArea = GetControl(self.list, "SellToVendorArea")
 
-    manager.sortHeaders = ZO_SortHeaderGroup:New(container:GetNamedChild("SortBy"), true)
+    self.sortHeaders = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
 
-    manager.sortOrder = ZO_SORT_ORDER_UP
-    manager.sortKey = "name"
+    self.sortOrder = ZO_SORT_ORDER_UP
+    self.sortKey = "name"
 
     local function OnSortHeaderClicked(key, order)
-        manager.sortKey = key
-        manager.sortOrder = order
-        manager:ApplySort()
+        self.sortKey = key
+        self.sortOrder = order
+        self:ApplySort()
     end
 
-    manager.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
-    manager.sortHeaders:AddHeadersFromContainer()
-    manager.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+    self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+    self.sortHeaders:AddHeadersFromContainer()
+    -- We are using shared sort headers from the inventory, but store sorts its entries by value
+    -- differently, so we need to swap out the sort key
+    self.sortHeaders:ReplaceKey("stackSellPrice", "stackBuyPrice")
+    self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
 
-    manager.tabs = GetControl(container, "Tabs")
+    self.tabs = GetControl(control, "Tabs")
 
     local typicalHiddenColumns =
     {
-        ["statValue"] = true,
+        ["statusSortOrder"] = true,
     }
 
     local gearHiddenColumns =
     {
-        -- Don't hide anything!
+        ["statusSortOrder"] = true,
     }
 
     local function CreateNewTabFilterData(filterType, normal, pressed, highlight, hiddenColumns)
@@ -133,17 +140,19 @@ function ZO_StoreManager:New(container)
             normal = normal,
             pressed = pressed,
             highlight = highlight,
-            callback = function(tabData) manager:ChangeFilter(tabData) end,
+            callback = function(tabData) self:ChangeFilter(tabData) end,
         }
 
         return tabData
     end
 
-    manager.storeFilters =
+    self.storeFilters =
     {
         CreateNewTabFilterData(ITEMFILTERTYPE_MISCELLANEOUS, "EsoUI/Art/Inventory/inventory_tabIcon_misc_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_misc_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_FURNISHING, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CRAFTING, "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CONSUMABLE, "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_JEWELRY, "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", gearHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ARMOR, "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", gearHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_WEAPONS, "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", gearHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_COLLECTIBLE, "EsoUI/Art/MainMenu/menuBar_collections_up.dds", "EsoUI/Art/MainMenu/menuBar_collections_down.dds", "EsoUI/Art/MainMenu/menuBar_collections_over.dds", typicalHiddenColumns),
@@ -160,15 +169,15 @@ function ZO_StoreManager:New(container)
         animationDuration = 180,
     }
 
-    ZO_MenuBar_SetData(manager.tabs, menuBarData)
+    ZO_MenuBar_SetData(self.tabs, menuBarData)
 
-    manager.currentFilter = ITEMFILTERTYPE_ALL
-    manager.hiddenColumns = typicalHiddenColumns
+    self.currentFilter = ITEMFILTERTYPE_ALL
+    self.hiddenColumns = typicalHiddenColumns
 
     local function ShowStoreWindow()
-		if not IsInGamepadPreferredMode() then
-			SCENE_MANAGER:Show("store")
-		end
+        if not IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Show("store")
+        end
     end
 
     local function CloseStoreWindow()
@@ -184,76 +193,82 @@ function ZO_StoreManager:New(container)
 
     local function RefreshStoreWindow()
         if not STORE_FRAGMENT:IsHidden() then
-            manager:RefreshCurrency()
+            self:RefreshCurrency()
 
-            manager:GetStoreItems()
-            manager:UpdateList()
+            self:GetStoreItems()
+            self:UpdateList()
         end
     end
 
     local function OnInventoryUpdated()
         if not STORE_FRAGMENT:IsHidden() then
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(manager.keybindStripDescriptor)
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
-            manager:UpdateFreeSlots()
+            self:UpdateFreeSlots()
+        elseif not INVENTORY_FRAGMENT:IsHidden() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+
+            self.modeBar:UpdateActiveKeybind()
         end
     end
 
     local OnBuySuccess = function(...)
-        if not container:IsControlHidden() then
+        if not control:IsControlHidden() then
             ZO_StoreManager_OnPurchased(...)
         end
     end
 
     local function HandleCursorPickup(eventCode, cursorType)
-        if(cursorType == MOUSE_CONTENT_INVENTORY_ITEM) then
-            ZO_InventoryLandingArea_SetHidden(manager.landingArea, false, SI_INVENTORY_LANDING_AREA_SELL_ITEM)
+        if cursorType == MOUSE_CONTENT_INVENTORY_ITEM then
+            ZO_InventoryLandingArea_SetHidden(self.landingArea, false, SI_INVENTORY_LANDING_AREA_SELL_ITEM)
         end
     end
 
     local function HandleCursorCleared(eventCode, oldCursorType)
-        ZO_InventoryLandingArea_SetHidden(manager.landingArea, true)
+        ZO_InventoryLandingArea_SetHidden(self.landingArea, true)
     end
 
     local storeScene = ZO_InteractScene:New("store", SCENE_MANAGER, STORE_INTERACTION)
     storeScene:RegisterCallback("StateChange",   function(oldState, newState)
-                                                    if(newState == SCENE_SHOWING) then
-                                                        manager:InitializeStore()
-                                                    elseif(newState == SCENE_HIDDEN) then
+                                                    if newState == SCENE_SHOWING then
+                                                        self:InitializeStore()
+                                                        ZO_StoreManager_InternalValidateItems(self.items, {("Window mode: %s"):format(tostring(self.windowMode))})
+                                                        PLAYER_INVENTORY:SelectAndChangeSort("traitInformationSortOrder", INVENTORY_BACKPACK, ZO_SORT_ORDER_DOWN)
+                                                    elseif newState == SCENE_HIDDEN then
                                                         ZO_InventorySlot_RemoveMouseOverKeybinds()
-                                                        KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
-                                                        manager.modeBar:Clear()
+                                                        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+                                                        self.modeBar:Clear()
 
-                                                        if(GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM) then
+                                                        PLAYER_INVENTORY:SelectAndChangeSort("statusSortOrder", INVENTORY_BACKPACK, ZO_SORT_ORDER_DOWN)
+                                                        if GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM then
                                                             ClearCursor()
                                                         end
                                                     end
                                                 end)
 
-    container:RegisterForEvent(EVENT_OPEN_STORE, ShowStoreWindow)
-    container:RegisterForEvent(EVENT_CLOSE_STORE, CloseStoreWindow)
-    container:RegisterForEvent(EVENT_MONEY_UPDATE, RefreshStoreWindow)
-    container:RegisterForEvent(EVENT_BUY_RECEIPT, OnBuySuccess)
-    container:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, RefreshStoreWindow)
-    container:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, RefreshStoreWindow)
-    container:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
-    container:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
-    container:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
-    container:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
-    container:RegisterForEvent(EVENT_COLLECTION_UPDATED, RefreshStoreWindow)
-    container:RegisterForEvent(EVENT_COLLECTIBLE_UPDATED, RefreshStoreWindow)
+    control:RegisterForEvent(EVENT_OPEN_STORE, ShowStoreWindow)
+    control:RegisterForEvent(EVENT_CLOSE_STORE, CloseStoreWindow)
+    control:RegisterForEvent(EVENT_MONEY_UPDATE, RefreshStoreWindow)
+    control:RegisterForEvent(EVENT_BUY_RECEIPT, OnBuySuccess)
+    control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, RefreshStoreWindow)
+    control:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, RefreshStoreWindow)
+    control:RegisterForEvent(EVENT_WRIT_VOUCHER_UPDATE, RefreshStoreWindow)
+    control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
+    control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
+    control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
+    control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshStoreWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshStoreWindow)
 
     local function OnItemRepaired(bagId, slotIndex)
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(manager.keybindStripDescriptor)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     SHARED_INVENTORY:RegisterCallback("ItemRepaired", OnItemRepaired)
-
-    return manager
 end
 
 function ZO_StoreManager:InitializeStore(overrideMode)
-	ZO_SharedStoreManager.InitializeStore(self)
+    ZO_SharedStoreManager.InitializeStore(self)
 
     self.windowMode = overrideMode or ZO_STORE_WINDOW_MODE_NORMAL
 
@@ -342,12 +357,11 @@ do
             -- Repair All
             {
                 name = function()
-                    local goldIcon = zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 24, 24)
                     local cost = GetRepairAllCost()
-                    if GetCarriedCurrencyAmount(CURT_MONEY) >= cost then
-                        return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_CurrencyControl_FormatCurrency(cost), goldIcon)
+                    if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
+                        return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
                     end
-                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), goldIcon)
+                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ERROR_ICON))
                 end,
                 keybind = "UI_SHORTCUT_SECONDARY",
                 visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
@@ -366,6 +380,18 @@ do
                             end,
                 callback =  function()
                                 ZO_Dialogs_ShowDialog("SELL_ALL_JUNK")
+                            end,
+            },
+
+            --End Preview
+            {
+                name = GetString(SI_CRAFTING_EXIT_PREVIEW_MODE),
+                keybind = "UI_SHORTCUT_QUATERNARY",
+                visible =   function()
+                                return ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled()
+                            end,
+                callback =  function()
+                                self:TogglePreviewMode()
                             end,
             },
         }
@@ -387,30 +413,18 @@ function ZO_StoreManager:UpdateFreeSlots()
     end
 end
 
-local filterTypeToValueColumnName =
-{
-    [ITEMFILTERTYPE_ARMOR] = SI_INVENTORY_SORT_TYPE_ARMOR,
-    [ITEMFILTERTYPE_WEAPONS] = SI_INVENTORY_SORT_TYPE_POWER,
-}
-
-function ZO_StoreManager:UpdateColumnText()
-    self.sortHeaders:SetHeaderNameForKey("statValue", GetString(filterTypeToValueColumnName[self.currentFilter]))
-end
-
 function ZO_StoreManager:ChangeFilter(filterData)
     self.currentFilter = filterData.filterType
     self.hiddenColumns = filterData.hiddenColumns
 
     self.activeTab:SetText(filterData.activeTabText)
 
-    self:UpdateColumnText()
-
     -- Manage hiding columns that show/hide depending on the current filter.  If the sort was on a column that becomes hidden
     -- then the sort needs to pick a new column.  Currently this always falls back to the name key.
-    if(self.sortHeaders) then
+    if self.sortHeaders then
         self.sortHeaders:SetHeadersHiddenFromKeyList(self.hiddenColumns, true)
 
-        if(self.hiddenColumns[self.sortKey]) then
+        if self.hiddenColumns[self.sortKey] then
             -- User wanted to sort by a column that's gone!
             -- Fallback to name.
             self.sortHeaders:SelectHeaderByKey("name")
@@ -424,10 +438,10 @@ function ZO_StoreManager:ChangeFilter(filterData)
 end
 
 function ZO_StoreManager:ShouldAddItemToList(itemData)
-    if(self.currentFilter == ITEMFILTERTYPE_ALL) then return true end
+    if self.currentFilter == ITEMFILTERTYPE_ALL then return true end
 
     for i = 1, #itemData.filterData do
-        if(itemData.filterData[i] == self.currentFilter) then
+        if itemData.filterData[i] == self.currentFilter then
             return true
         end
     end
@@ -441,7 +455,7 @@ local sortKeys =
     stackBuyPrice = { tiebreaker = "stackBuyPriceCurrency1", isNumeric = true },
     stackBuyPriceCurrency1 = { tiebreaker = "stackBuyPriceCurrency2", isNumeric = true },
     stackBuyPriceCurrency2 = { tiebreaker = "name", isNumeric = true },
-    statValue = { tiebreaker = "name", isNumeric = true },
+    traitInformationSortOrder = { tiebreaker = "name", isNumeric = true },
 }
 
 function ZO_StoreManager:SortData()
@@ -459,23 +473,45 @@ function ZO_StoreManager:ApplySort()
     ZO_ScrollList_Commit(self.list)
 end
 
+function ZO_StoreManager:SetCurrencyControl(currencyType, currencyValue, currencyOptions)
+    local control = (not self.currency1Display.isInUse and self.currency1Display) or 
+                    (not self.currency2Display.isInUse and self.currency2Display) or nil
+
+    if control then
+        ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, currencyValue, currencyOptions)
+        control:SetHidden(false)
+        control.isInUse = true
+    end
+end
+
 function ZO_StoreManager:RefreshCurrency()
-	ZO_SharedStoreManager.RefreshCurrency(self)
+    ZO_SharedStoreManager.RefreshCurrency(self)
 
     local repairAllCost = GetRepairAllCost()
-
     local gold = (self.storeUsesMoney or repairAllCost > 0) and self.currentMoney or 0
-    local alliancePoints = self.storeUsesAP and self.currentAP or 0
-    local telvarStones = self.storeUsesTelvarStones and self.currentTelvarStones or 0
-    
-    ZO_CurrencyControl_SetCurrencyData(self.currencyTelvarStonesDisplay, CURT_TELVAR_STONES, telvarStones, self.storeUsesTelvarStones)
-    ZO_CurrencyControl_SetCurrency(self.currencyTelvarStonesDisplay, ZO_KEYBOARD_CARRIED_TELVAR_OPTIONS)
-
-    ZO_CurrencyControl_SetCurrencyData(self.currencyAlliancePointsDisplay, CURT_ALLIANCE_POINTS, alliancePoints, self.storeUsesAP)
-    ZO_CurrencyControl_SetCurrency(self.currencyAlliancePointsDisplay, ZO_ALTERNATE_CURRENCY_OPTIONS)
 
     ZO_CurrencyControl_SetCurrencyData(self.currenyMoneyDisplay, CURT_MONEY, gold, self.storeUsesMoney)
-    ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CURRENCY_OPTIONS)
+
+    -- We're laying out the player alternate currency labels this way to ensure that we never display more than two labels, even if 
+    -- more than two are applicable to this store, and to ensure that they maintain a consistent priority
+    self.currency1Display:SetHidden(true)
+    self.currency1Display.isInUse = false
+
+    self.currency2Display:SetHidden(true)
+    self.currency2Display.isInUse = false
+    
+    if self.storeUsesAP then
+        self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    end
+
+    if self.storeUsesTelvarStones then
+        self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    end 
+
+    if self.storeUsesWritVouchers then
+        self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    end 
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
@@ -486,7 +522,7 @@ function ZO_StoreManager:UpdateFilters()
     --The last filter added is the farthest left, so to the player it should be "first"
     local lastFilter
     for _, data in ipairs(self.storeFilters) do
-        if (data.filterType == ITEMFILTERTYPE_ALL and self.multipleFilters) or self.usedFilterTypes[data.filterType] then
+        if (data.filterType == ITEMFILTERTYPE_ALL and self.showAllFilter) or self.usedFilterTypes[data.filterType] then
             ZO_MenuBar_AddButton(self.tabs, data)
             lastFilter = data.filterType
         end
@@ -498,8 +534,18 @@ function ZO_StoreManager:UpdateFilters()
 end
 
 function ZO_StoreManager:GetStoreItems()
-	self.items, self.usedFilterTypes = ZO_StoreManager_GetStoreItems()
-    self.multipleFilters = NonContiguousCount(self.usedFilterTypes) > 1
+    self.items, self.usedFilterTypes = ZO_StoreManager_GetStoreItems()
+
+    local numUsedStoreFilters = 0
+    for _, data in ipairs(self.storeFilters) do
+        if self.usedFilterTypes[data.filterType] then
+            numUsedStoreFilters = numUsedStoreFilters + 1
+        end
+    end
+
+    -- We only want to show the all filter if we aren't showing one specific filter
+    -- because then all and the specific filter would have the same contents
+    self.showAllFilter = numUsedStoreFilters ~= 1 
 end
 
 function ZO_StoreManager:UpdateList()
@@ -509,22 +555,12 @@ function ZO_StoreManager:UpdateList()
     for index = 1, #self.items do
         local itemData = self.items[index]
 
-        if(self:ShouldAddItemToList(itemData))
-        then
+        if self:ShouldAddItemToList(itemData) then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_STORE_ITEM, itemData)
         end
     end
 
     self:ApplySort()
-end
-
-function ZO_StoreManager:UpdateStatValueControl(control, data)
-    local statControl = GetControl(control, "StatValue")
-
-    if(statControl) then
-        local showStatColumn = not self.hiddenColumns["statValue"]
-        statControl:SetText((showStatColumn and (data.statValue ~= nil) and (data.statValue > 0)) and tostring(data.statValue) or "")
-    end
 end
 
 function ZO_StoreManager:SetUpBuySlot(control, data)
@@ -548,6 +584,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     slotControl.specialCurrencyType2 = data.currencyType2
     slotControl.isCollectible = data.filterData[1] == ITEMFILTERTYPE_COLLECTIBLE
     slotControl.isUnique = data.isUnique
+    slotControl.meetsRequirements = data.meetsRequirementsToBuy
 
     ZO_InventorySlot_SetType(control, SLOT_TYPE_STORE_BUY)
     control.index = slotIndex
@@ -574,8 +611,9 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
         nameControl:SetColor(MEET_BUY_REQS_FAIL_COLOR:UnpackRGBA())
     end
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, isLocked)
+    ZO_UpdateTraitInformationControlIcon(control, data)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES)
+    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS)
 
     local currencyType1 = data.currencyType1
     local currencyType2 = data.currencyType2
@@ -585,8 +623,6 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     ZO_CurrencyControl_SetCurrencyData(priceControl, currencyType2, data.currencyQuantity2, CURRENCY_DONT_SHOW_ALL, not self:HasEnoughCurrencyToBuyItem(currencyType2, data.stackBuyPriceCurrency2), data.slotIndex, 2)
 
     ZO_CurrencyControl_SetCurrency(priceControl, ITEM_BUY_CURRENCY_OPTIONS)
-
-    self:UpdateStatValueControl(control, data)
 end
 
 function ZO_StoreManager:HasEnoughCurrencyToBuyItem(currencyType, itemCost)
@@ -596,6 +632,8 @@ function ZO_StoreManager:HasEnoughCurrencyToBuyItem(currencyType, itemCost)
         return self.currentAP >= itemCost
     elseif currencyType == CURT_TELVAR_STONES then
         return self.currentTelvarStones >= itemCost
+    elseif currencyType == CURT_WRIT_VOUCHERS then
+        return self.currentWritVouchers >= itemCost
     end
 
     return false
@@ -608,11 +646,14 @@ function ZO_StoreManager:OpenBuyMultiple(entryIndex)
 end
 
 function ZO_StoreManager:BuyMultiplePurchase()
-    local storeItemId = self.multipleDialog.index
+    local storeItemIndex = self.multipleDialog.index
 
     local quantity = self.buyMultipleSpinner:GetValue()
     if quantity ~= 0 then
-        BuyStoreItem(storeItemId, quantity)
+        local itemData = self.items[storeItemIndex]
+        if not ZO_Currency_TryShowThresholdDialog(storeItemIndex, quantity, itemData) then
+            BuyStoreItem(storeItemIndex, quantity)
+        end
     end
 end
 
@@ -643,7 +684,7 @@ function ZO_StoreManager:RefreshBuyMultiple()
     end
     ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsRequirementsToBuy and meetsRequirementsToEquip)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES)
+    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS)
 
     local total = quantity * price
     local type1Total = quantity * currencyQuantity1
@@ -660,20 +701,76 @@ function ZO_StoreManager:GetWindowMode()
     return self.windowMode
 end
 
+function ZO_StoreManager:TogglePreviewMode()
+    ITEM_PREVIEW_KEYBOARD:ToggleInteractionCameraPreview(FRAME_TARGET_STORE_WINDOW_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, RIGHT_PANEL_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_StoreManager:PreviewStoreEntry(storeEntryIndex)
+    if not ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
+        self:TogglePreviewMode()
+    end
+
+    ITEM_PREVIEW_KEYBOARD:PreviewStoreEntryAsFurniture(storeEntryIndex)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
 -------------------
 -- Global functions
 -------------------
+
+local function GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
+    local inventorySlot, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(storeEntrySlot)
+
+    local slotType = ZO_InventorySlot_GetType(inventorySlot)
+    if slotType == SLOT_TYPE_STORE_BUY then
+        local storeEntryIndex = inventorySlot.index
+        local itemLink = GetStoreItemLink(storeEntryIndex)
+        if ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink) then
+            return storeEntryIndex
+        end
+    end
+
+    return nil
+end
 
 function ZO_BuyMultiple_OpenBuyMultiple(entryIndex)
     STORE_WINDOW:OpenBuyMultiple(entryIndex)
 end
 
-function ZO_Store_OnEntryMouseEnter(control)
-    ZO_InventorySlot_OnMouseEnter(control)
+function ZO_Store_OnEntryMouseEnter(storeEntrySlot)
+    ZO_InventorySlot_OnMouseEnter(storeEntrySlot)
+
+    local storeEntryIndex = GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
+
+    local cursor = MOUSE_CURSOR_DO_NOT_CARE
+    if storeEntryIndex ~= nil then
+        cursor = MOUSE_CURSOR_PREVIEW
+    end
+
+    WINDOW_MANAGER:SetMouseCursor(cursor)
 end
 
-function ZO_Store_OnEntryMouseExit(control)
-    ZO_InventorySlot_OnMouseExit(control)
+function ZO_Store_OnEntryMouseExit(storeEntrySlot)
+    ZO_InventorySlot_OnMouseExit(storeEntrySlot)
+    WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+end
+
+function ZO_Store_OnEntryClicked(storeEntrySlot, button)
+    
+
+    -- left button for an inventory slot click will only try and drag and drop, but that
+    -- should be handled for us by the OnReceiveDrag handler, so if we left click
+    -- we'll do our custom behavior
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        local storeEntryIndex = GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
+        if storeEntryIndex ~= nil then
+            STORE_WINDOW:PreviewStoreEntry(storeEntryIndex)
+        end
+    else
+        ZO_InventorySlot_OnSlotClicked(storeEntrySlot, button)
+    end
 end
 
 function ZO_Store_FilterButtonOnMouseEnter(self)
@@ -688,13 +785,13 @@ function ZO_Store_FilterButtonOnMouseExit(self)
 end
 
 function ZO_Store_OnMouseUp(upInside)
-    if(upInside and GetCursorContentType() ~= MOUSE_CONTENT_EMPTY) then
+    if upInside and GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
         PlaceInStoreWindow()
     end
 end
 
 function ZO_Store_OnReceiveDrag()
-    if(GetCursorContentType() ~= MOUSE_CONTENT_EMPTY) then
+    if GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
         PlaceInStoreWindow()
     end
 end

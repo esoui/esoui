@@ -82,6 +82,8 @@ function ZO_GamepadStoreListComponent:SetupEntry(control, data, selected, select
 end
 
 function ZO_GamepadStoreListComponent:SetupStoreItem(control, data, selected, selectedDuringRebuild, enabled, activated, price, forceValid, mode)
+    data:SetIgnoreTraitInformation(true)
+
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     control:SetHidden(selected and self.confirmationMode)
 
@@ -98,14 +100,18 @@ end
 
 function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mode, currencyType)
     local options = self:GetCurrencyOptions()
-    local invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(currencyType) or false
+    local invalidPrice = not forceValid and price > GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) or false
     local priceControl = control:GetNamedChild("Price")
 
-    local storeUsesAP, storeUsesTelvarStones = select(2, GetStoreCurrencyTypes())
-    if storeUsesAP and mode == ZO_MODE_STORE_BUY and currencyType == CURT_ALLIANCE_POINTS then
-        invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS) or false
-    elseif storeUsesTelvarStones and mode == ZO_MODE_STORE_BUY and currencyType == CURT_TELVAR_STONES then
-        invalidPrice = not forceValid and price > GetCarriedCurrencyAmount(CURT_TELVAR_STONES) or false
+    if mode == ZO_MODE_STORE_BUY then 
+        local storeUsesAP, storeUsesTelvarStones, storeUsesWritVouchers = select(2, GetStoreCurrencyTypes())
+        if storeUsesAP and currencyType == CURT_ALLIANCE_POINTS then
+            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER) or false
+        elseif storeUsesTelvarStones and currencyType == CURT_TELVAR_STONES then
+            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER) or false
+        elseif storeUsesWritVouchers and currencyType == CURT_WRIT_VOUCHERS then
+            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER) or false
+        end
     end
 
     ZO_CurrencyControl_SetSimpleCurrency(priceControl, currencyType, price, options, CURRENCY_SHOW_ALL, invalidPrice)

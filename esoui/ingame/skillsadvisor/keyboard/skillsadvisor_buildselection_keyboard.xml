@@ -1,0 +1,54 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SkillsAdvisor_Keyboard_SkillBuildEntry" mouseEnabled="true" virtual="true">
+            <Dimensions x="300" y="52"/>
+
+            <OnInitialized>
+                self.checkmarkControl = self:GetNamedChild("Checkmark")
+                self.textLabel = self:GetNamedChild("Text")
+            </OnInitialized>
+
+            <OnMouseUp>
+                ZO_SkillsAdvisor_BuildSelection_Keyboard_OnMouseClick(self, button, upInside)
+            </OnMouseUp>
+            
+            <OnMouseEnter>
+                ZO_SkillsAdvisor_BuildSelection_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                ZO_SkillsAdvisor_BuildSelection_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+
+           <Controls>
+               <Texture name="$(parent)Checkmark" textureFile= "EsoUI\Art\Inventory\inventory_icon_equipped.dds" tier="HIGH" hidden="true">
+                   <Anchor point="LEFT" offsetX="20" />
+                   <Dimensions x="32" y="32" />
+               </Texture>
+               
+                <Label name="$(parent)Text" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="270" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Checkmark" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SkillsAdvisor_SkillBuildSelection_Keyboard_TopLevel" hidden="true">
+            <OnInitialized>
+                ZO_SkillsAdvisor_BuildSelection_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Description" font="ZoFontGame" text="SI_SKILLS_ADVISOR_SELECT_BUILD" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="20" />
+                    <Anchor point="TOPRIGHT" offsetX="-50" />
+                </Label>
+
+                <Control name="$(parent)SkillBuildsList" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="10"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

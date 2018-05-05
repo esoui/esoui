@@ -8,21 +8,6 @@ function Stuck:Initialize(...)
     ZO_Stuck_Base.Initialize(self, ...)
 end
 
-function Stuck:ShowConfirmDialog()
-    local warn = true    
-
-    if(CanUseStuck(warn)) then
-
-        local cost = zo_min(GetRecallCost(), GetCarriedCurrencyAmount(CURT_MONEY))
-
-        if DoesCurrentZoneHaveTelvarStoneBehavior() then
-            ZO_Dialogs_ShowDialog("CONFIRM_STUCK_WITH_TELVAR_COST", nil, { mainTextParams = { cost, zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 16, 16), zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100) } } )
-        else
-            ZO_Dialogs_ShowDialog("CONFIRM_STUCK", nil, { mainTextParams = { cost, zo_iconFormat("EsoUI/Art/currency/currency_gold.dds", 16, 16) } } )
-        end
-    end
-end
-
 function Stuck:ShowFixingDialog()
     ZO_Dialogs_ShowDialog("FIXING_STUCK")
 end

@@ -3,9 +3,7 @@ GAMEPAD_STORE_SCENE_NAME = "gamepad_store"
 ZO_GamepadStoreManager = ZO_Object.MultiSubclass(ZO_SharedStoreManager, ZO_Gamepad_ParametricList_Screen)
 
 function ZO_GamepadStoreManager:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
+    return ZO_SharedStoreManager.New(self, ...)
 end
 
 local function OnOpenStore()
@@ -40,9 +38,10 @@ end
 local DONT_ACTIVATE_LIST_ON_SHOW = false
 
 function ZO_GamepadStoreManager:Initialize(control)
-    self.control = control
+    ZO_SharedStoreManager.Initialize(self, control)
+
     self.sceneName = GAMEPAD_STORE_SCENE_NAME
-    
+
     GAMEPAD_VENDOR_SCENE = ZO_InteractScene:New(self.sceneName, SCENE_MANAGER, STORE_INTERACTION)
 
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, GAMEPAD_VENDOR_SCENE)
@@ -84,7 +83,7 @@ function ZO_GamepadStoreManager:Initialize(control)
     end
 
     local OnBuyBackSuccess = function(eventId, itemName, itemQuantity, money, itemSoundCategory)
-        if(itemSoundCategory == ITEM_SOUND_CATEGORY_NONE) then
+        if itemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
             -- Fall back sound if there was no other sound to play
             PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
         else
@@ -206,17 +205,17 @@ end
 function ZO_GamepadStoreManager:InitializeKeybindStrip()
     self.repairAllKeybind = {
             name = function()
-                local goldIcon = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 24, 24)
                 local cost = GetRepairAllCost()
-                if GetCarriedCurrencyAmount(CURT_MONEY) >= cost then
-                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_CurrencyControl_FormatCurrency(cost), goldIcon)
+                local gamepadGoldIconMarkup =  ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
+                if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
+                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_CurrencyControl_FormatCurrency(cost), gamepadGoldIconMarkup)
                 end
-                return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), goldIcon)
+                return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), gamepadGoldIconMarkup)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
             visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
             enabled = function() 
-                if GetRepairAllCost() <= GetCarriedCurrencyAmount(CURT_MONEY) then
+                if GetRepairAllCost() <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
                     return true
                 else
                     return false, GetString(SI_REPAIR_ALL_CANNOT_AFFORD)
@@ -224,7 +223,7 @@ function ZO_GamepadStoreManager:InitializeKeybindStrip()
             end,
             callback = function()
                 local cost = GetRepairAllCost()
-                if cost > GetCarriedCurrencyAmount(CURT_MONEY) then
+                if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
                     self:FailedRepairMessageBox()
                 else
                     local dialogData = {
@@ -310,22 +309,27 @@ do
 
     local function UpdateGold(control)
         local mode = STORE_WINDOW_GAMEPAD:GetCurrentMode()
-        if mode == ZO_MODE_STORE_SELL and GetCarriedCurrencyAmount(CURT_MONEY) == GetMaxCarriedCurrencyAmount(CURT_MONEY) then
+        if mode == ZO_MODE_STORE_SELL and GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) == GetMaxPossibleCurrency(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             STORE_CURRENCY_LABEL_OPTIONS.color = ZO_ERROR_COLOR
         else
             STORE_CURRENCY_LABEL_OPTIONS.color = nil
         end
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), STORE_CURRENCY_LABEL_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), STORE_CURRENCY_LABEL_OPTIONS)
         return true
     end
 
     local function UpdateAlliancePoints(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
         return true
     end
 
     local function UpdateTelvarStones(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_TELVAR_STONES, GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        return true
+    end
+
+    local function UpdateWritVouchers(control)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_WRIT_VOUCHERS, GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
         return true
     end
 
@@ -356,18 +360,23 @@ do
     }
     local GOLD_HEADER_DATA =
     {
-        headerText = GetString(SI_GAMEPAD_VENDOR_GOLD),
+        headerText = ZO_Currency_GetAmountLabel(CURT_MONEY),
         text = UpdateGold
     }
     local AP_HEADER_DATA =
     {
-        headerText = GetString(SI_GAMEPAD_VENDOR_ALLIANCE_POINTS),
+        headerText = ZO_Currency_GetAmountLabel(CURT_ALLIANCE_POINTS),
         text = UpdateAlliancePoints
     }
     local TELVAR_STONE_HEADER_DATA =
     {
-        headerText = GetString(SI_CURRENCY_TELVAR_STONES),
+        headerText = ZO_Currency_GetAmountLabel(CURT_TELVAR_STONES),
         text = UpdateTelvarStones
+    }
+    local WRIT_VOUCHER_HEADER_DATA =
+    {
+        headerText = ZO_Currency_GetAmountLabel(CURT_WRIT_VOUCHERS),
+        text = UpdateWritVouchers
     }
 
     local RIDING_TRAINING_COST_HEADER_DATA =
@@ -407,41 +416,30 @@ do
             table.insert(g_pendingHeaderData, CAPACITY_HEADER_DATA)
         end
 
-        -- mirroring PC here:
-        -- Buy screen shows the appropriate currency for that screen (gold or AP)
-        -- Sell shows both, always
-        -- Repair and Buyback show gold and not AP, always
-
-        local hideGold = false
-        local hideAP = false
-        local hideTelvarStones = false
-
         if mode == ZO_MODE_STORE_BUY then
-            hideGold = not self.storeUsesMoney
-            hideAP = not self.storeUsesAP
-            hideTelvarStones = not self.storeUsesTelvarStones
-        else
-            hideAP = true
-            hideTelvarStones = true
-        end
-
-        if not isStable then
-            local cost = GetRepairAllCost()
-            if cost > 0 then
-                hideGold = false
+            if self.storeUsesMoney then
+                table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
             end
-        end
 
-        if not hideGold then
+            -- We only have space to display the first 2 alternate currencies this store uses. 
+            -- According to our design standards, no store should ever use more than gold + 2 alternate currencies anyway.
+            local MAX_ALTERNATE_CURRENCIES = 2
+            local alternateCurrenciesUsed = 0
+            if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesAP then
+                table.insert(g_pendingHeaderData, AP_HEADER_DATA)
+                alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+            end
+            if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesTelvarStones then
+                table.insert(g_pendingHeaderData, TELVAR_STONE_HEADER_DATA)
+                alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+            end
+            if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesWritVouchers then
+                table.insert(g_pendingHeaderData, WRIT_VOUCHER_HEADER_DATA)
+                alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+            end
+        else
+            -- This is for selling, fencing, and the stable
             table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
-        end
-
-        if not hideAP then
-            table.insert(g_pendingHeaderData, AP_HEADER_DATA)
-        end
-
-        if not hideTelvarStones then
-            table.insert(g_pendingHeaderData, TELVAR_STONE_HEADER_DATA)
         end
 
         if isStable then
@@ -491,7 +489,7 @@ function ZO_GamepadStoreManager:UpdateRightTooltip(list, mode)
     end
 
     local equipType = GetItemLinkEquipType(itemLink)
-    local equipSlot = ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
+    local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
 
     if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then 
         ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
@@ -540,15 +538,17 @@ end
 function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
     local currencyType = selectedData.currencyType1
     local currencyQuantity1 = selectedData.currencyQuantity1
-    if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > GetCarriedCurrencyAmount(currencyType) then
+    if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) then
         if currencyType == CURT_MONEY then
             return false, GetString(SI_NOT_ENOUGH_MONEY)
         elseif currencyType == CURT_ALLIANCE_POINTS then
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS)
         elseif currencyType == CURT_TELVAR_STONES then
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES)
+        elseif currencyType == CURT_WRIT_VOUCHERS then
+            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS)
         end
-    elseif selectedData.price > 0 and selectedData.price > GetCarriedCurrencyAmount(CURT_MONEY) then
+    elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
         return false, GetString(SI_NOT_ENOUGH_MONEY)
     elseif not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
         return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)

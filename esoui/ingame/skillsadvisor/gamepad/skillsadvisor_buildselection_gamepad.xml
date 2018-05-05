@@ -1,0 +1,22 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_SkillsAdvisorBuildSelection_Gamepad_MenuEntryTemplate" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SkillsAdvisorBuildSelection_Gamepad_MenuEntryTemplate_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)SelectedIcon" inherits="ZO_GamepadMenuEntryIconTemplate" textureFile="EsoUI/Art/Inventory/inventory_icon_equipped.dds" >
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_SkillsAdvisorBuildSelectionRoot_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_SkillsAdvisorBuildSelectionRoot_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

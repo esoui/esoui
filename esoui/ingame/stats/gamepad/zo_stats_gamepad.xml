@@ -1,5 +1,10 @@
 <GuiXml>
     <Controls>
+        <Texture name="ZO_GamepadStatsEquipmentBonusIcon" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <Anchor point="BOTTOMLEFT" />
+        </Texture>
+        
         <Label name="ZO_GamepadStatsCharacterNameTemplate" font="ZoFontGamepad42" verticalAlignment="BOTTOM" wrapMode="ELLIPSIS" virtual="true">
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT "/>
             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
@@ -28,6 +33,13 @@
                     <Anchor point="TOPRIGHT"/>
                     <Anchor point ="TOPLEFT" relativeTo="$(parent)Header" relativePoint="TOPRIGHT" offsetX="25"/>
                 </Label>
+                <Label name="$(parent)Bonus" inherits="ZO_GamepadStatsDataTemplate" hidden="true" >
+                    <Anchor point="TOPRIGHT" offsetX="-100" />
+                </Label>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Data" offsetX="10" />
+                </Backdrop>
             </Controls>
         </Control>
 
@@ -67,6 +79,7 @@
                     <Dimensions x="180"/>
                 </Label>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
             </Controls>
         </Control>
         
@@ -100,26 +113,42 @@
                 ZO_GamepadStats_OnInitialize(self)
             </OnInitialized>   
             <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header">
+                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25" />
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+                
                 <Control name="$(parent)RightPane" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
                     <Controls>
                         <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
-                        <Control name="$(parent)BattleLevelHeader" >
-                            <Anchor point="RIGHT" relativeTo="$(parent)HeaderContainerHeader" />
-                            <Dimensions x="350" y="52" />
+                        <Control name="$(parent)EquipmentBonus" resizeToFitDescendents="true" >
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)HeaderContainerHeader" offsetX="20" offsetY="-46" />
                             <Controls>
-                                <Label name="$(parent)Level" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_STAT_VALUE:STAT_VALUE_COLOR_BATTLE_LEVELED">
-                                    <Anchor point="RIGHT"/>
+                                <Label name="$(parent)Header" text="SI_STATS_EQUIPMENT_BONUS" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                                    <Anchor point="BOTTOMLEFT" />
                                 </Label>
-                                
-                                <Texture name="$(parent)LevelTypeIcon">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Level" relativePoint="LEFT"/>
-                                    <!-- The width is handled in code based on whenever or not you are Champion BattleLeveled-->
-                                    <Dimensions x="0" y="32"/>
-                                </Texture>
-                                
-                                <Label name="$(parent)ScaledLevel" text="SI_STATS_SCALED_LEVEL" inherits="ZO_GamepadStatsHeaderTemplate" >
-                                    <Anchor point="RIGHT" relativeTo="$(parent)LevelTypeIcon" relativePoint="LEFT" offsetX="-3" offsetY="3" />
-                                </Label>
+                                <Control name="$(parent)Icons" resizeToFitDescendents="true" >
+                                    <Anchor point ="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="7" offsetY="-7" />
+                                </Control>
+                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" offsetY="-10"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icons" offsetX="10" offsetY="10"/>
+                                </Backdrop>
                             </Controls>
                         </Control>
 
@@ -144,140 +173,6 @@
 
                                 <Control name="$(parent)AttributesPanel" hidden="true">
                                     <AnchorFill/>
-                                    <Controls>
-                                        <Control name="$(parent)LeftColumn">
-                                            <Dimensions x="375" />
-                                            <Anchor point="TOPLEFT" offsetY="20" />
-                                            <Controls>
-                                                <!-- Headers -->
-                                                <Label name="$(parent)MaxMagickaHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT"/>
-                                                </Label>
-
-                                                <Label name="$(parent)MaxHealthHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MaxMagickaHeader" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)MaxStaminaHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MaxHealthHeader" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)SpellPowerHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MaxStaminaHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
-                                                </Label>
-
-                                                <Label name="$(parent)SpellCriticalHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SpellPowerHeader" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)SpellResistanceHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SpellCriticalHeader" relativePoint="BOTTOMLEFT" offsetY="50"/>
-                                                </Label>
-
-                                                <Label name="$(parent)CritResistanceHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SpellResistanceHeader" relativePoint="BOTTOMLEFT"/>
-                                                </Label>
-
-                                                <!-- Values -->
-                                                <Label name="$(parent)MaxMagicka" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="2" />
-                                                </Label>
-
-                                                <Label name="$(parent)MaxMagickaBonus" hidden="true" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaxMagicka" relativePoint="TOPRIGHT"  offsetX="-100" />
-                                                </Label>
-
-                                                <Label name="$(parent)MaxHealth" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaxMagicka" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Label name="$(parent)MaxHealthBonus" hidden="true" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaxHealth" relativePoint="TOPRIGHT" offsetX="-100" />
-                                                </Label>
-
-                                                <Label name="$(parent)MaxStamina" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaxHealth" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Label name="$(parent)MaxStaminaBonus" hidden="true" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaxStamina" relativePoint="TOPRIGHT" offsetX="-100" />
-                                                </Label>
-
-                                                <Label name="$(parent)SpellPower" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MaxStamina" relativePoint="BOTTOMRIGHT" offsetY="50" />
-                                                </Label>
-
-                                                <Label name="$(parent)SpellCritical" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SpellPower" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Label name="$(parent)SpellResistance" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SpellCritical" relativePoint="BOTTOMRIGHT" offsetY="50"/>
-                                                </Label>
-
-                                                <Label name="$(parent)CritResistance" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SpellResistance" relativePoint="BOTTOMRIGHT"/>
-                                                </Label>
-                                            </Controls>
-                                        </Control>
-
-                                        <Control name="$(parent)RightColumn">
-                                            <Dimensions x="375" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LeftColumn" relativePoint="TOPRIGHT" offsetX="40" />
-
-                                            <Controls>
-                                                <!-- Headers -->
-                                                <Label name="$(parent)MagickaRecoveryHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)HealthRecoveryHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MagickaRecoveryHeader" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)StaminaRecoveryHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HealthRecoveryHeader" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)WeaponDamageHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)StaminaRecoveryHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
-                                                </Label>
-
-                                                <Label name="$(parent)WeaponCriticalHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponDamageHeader" relativePoint="BOTTOMLEFT" />
-                                                </Label>
-
-                                                <Label name="$(parent)ArmorHeader" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)WeaponCriticalHeader" relativePoint="BOTTOMLEFT" offsetY="50"/>
-                                                </Label>
-                                                
-                                                <!-- Values -->
-                                                <Label name="$(parent)MagickaRecovery" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="2" />
-                                                </Label>
-
-                                                <Label name="$(parent)HealthRecovery" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MagickaRecovery" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Label name="$(parent)StaminaRecovery" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HealthRecovery" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Label name="$(parent)WeaponDamage" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)StaminaRecovery" relativePoint="BOTTOMRIGHT" offsetY="50" />
-                                                </Label>
-
-                                                <Label name="$(parent)WeaponCritical" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)WeaponDamage" relativePoint="BOTTOMRIGHT" />
-                                                </Label>
-
-                                                <Label name="$(parent)Armor" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)WeaponCritical" relativePoint="BOTTOMRIGHT" offsetY="50" />
-                                                </Label>
-                                            </Controls>
-                                        </Control>
-                                    </Controls>
                                 </Control>
                                 
                                 <Control name="$(parent)CharacterStatsPanel" hidden="true">

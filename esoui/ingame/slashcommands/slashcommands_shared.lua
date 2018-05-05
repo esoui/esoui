@@ -70,7 +70,11 @@ function DoCommand(text)
     then
         fn(arguments or "")
     else
-        ExecuteChatCommand(text)
+		if IsInternalBuild() then
+			ExecuteChatCommand(text)
+		else
+			ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, SI_ERROR_INVALID_COMMAND)
+		end
     end
 end
 

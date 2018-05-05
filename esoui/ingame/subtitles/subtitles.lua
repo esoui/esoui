@@ -11,7 +11,11 @@ function ZO_Subtitle:New(...)
 end
 
 do
-    local CHARACTERS_PER_SECOND = 10
+    local CHARACTERS_PER_SECOND_DEFAULT = 10
+    local CHARACTERS_PER_SECOND_OVERRIDE =
+    {
+        ["jp"] = 5,
+    }
     local MIN_DISPLAY_LENGTH_SECONDS = 3
     local MAX_DISPLAY_LENGTH_SECONDS = 12
     function ZO_Subtitle:Initialize(messageType, speaker, message)
@@ -22,7 +26,9 @@ do
         self.startTimeSeconds = 0
 
         local messageLength = ZoUTF8StringLength(message)
-        self.displayLengthSeconds = zo_clamp(messageLength / CHARACTERS_PER_SECOND, MIN_DISPLAY_LENGTH_SECONDS, MAX_DISPLAY_LENGTH_SECONDS)
+        local language = GetCVar("Language.2")
+        local charactersPerSecond = CHARACTERS_PER_SECOND_OVERRIDE[language] or CHARACTERS_PER_SECOND_DEFAULT
+        self.displayLengthSeconds = zo_clamp(messageLength / charactersPerSecond, MIN_DISPLAY_LENGTH_SECONDS, MAX_DISPLAY_LENGTH_SECONDS)
     end
 end
 
@@ -93,20 +99,16 @@ end
 local KEYBOARD_STYLES = {
                             textTemplate = "ZO_Subtitles_Text_Keyboard_Template",
                             textWidth = 1200,
-                            textOffsetY = -272,
                         }
 
 local GAMEPAD_STYLES =  {
                             textTemplate = "ZO_Subtitles_Text_Gamepad_Template",
                             textWidth = 890,
-                            textOffsetY = -322,
                         }
 
 function ZO_SubtitleManager:UpdatePlatformStyles(styleTable)
     ApplyTemplateToControl(self.messageText, styleTable.textTemplate)
     self.messageText:SetWidth(styleTable.textWidth)
-    self.messageText:ClearAnchors()
-    self.messageText:SetAnchor(BOTTOM, nil, TOP, 0, styleTable.textOffsetY)
 end
 
 function ZO_SubtitleManager:InitializePlatformStyles()
@@ -144,7 +146,7 @@ do
     local HIDE_SAME_SPEAKER_NAME_TIME_WINDOW_SECONDS = 5
     function ZO_SubtitleManager:OnShowSubtitle(messageType, speaker, message)
         self.previousSubtitle = self.currentSubtitle or self.previousSubtitle
-        subtitle = ZO_Subtitle:New(messageType, speaker, message)
+        local subtitle = ZO_Subtitle:New(messageType, speaker, message)
 
         local showSpeakerName = true
         local currentTime = GetFrameTimeSeconds()

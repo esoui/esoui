@@ -69,7 +69,7 @@ end
 function ZO_GamepadStoreRepair:CanRepair()
     local selectedItem = self.list:GetTargetData()
     local cost = selectedItem.repairCost
-    if cost <= GetCarriedCurrencyAmount(CURT_MONEY) then
+    if cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
         return true
     else
         return false, GetString("SI_ITEMREPAIRREASON", ITEM_REPAIR_CANT_AFFORD_REPAIR) -- "You can't afford to repair this item"

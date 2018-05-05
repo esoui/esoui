@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SkillsAdvisor_Keyboard_TopLevel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="-20" offsetY="-15"/>
+            
+            <OnInitialized>
+                ZO_SkillsAdvisor_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)SelectionTabBar" inherits="ZO_MenuBarTemplate">
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="-10" />
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider" >
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="35" />
+                    <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" constrains="X" />
+                </Control>
+
+                <Label name="$(parent)SelectedBuild" font="ZoFontGameLargeBold" wrapMode="ELLIPSIS" maxLineCount="2">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" offsetX="30" offsetY="-5" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)SelectionTabBar" relativePoint="LEFT" constrains="X" offsetX="-15"/>
+                </Label>
+
+                <Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)SelectedBuild" relativePoint="LEFT"/>
+                    <OnMouseEnter>
+                        ZO_SkillsAdvisor_KeyboardHelp_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_SkillsAdvisor_KeyboardHelp_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                
+                <Label name="$(parent)Title" text="SI_SKILLS_ADVISOR_TITLE" font="ZoFontHeader3" modifyTextType="UPPERCASE">
+                    <Dimensions x="225" />
+                    <!-- Set anchors in lua -->
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

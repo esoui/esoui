@@ -1,5 +1,4 @@
 local STORE_ITEM_HEADER_DEFAULT_PADDING = 60
-local STORE_ITEM_HEADER_SELECTED_DEFAULT_PADDING = 0
 local STABLE_ITEM_POST_PADDING = 20
 
 local STORE_WEAPON_GROUP = 1
@@ -11,15 +10,8 @@ local STORE_SUPPLIES_GROUP = 6
 local STORE_MATERIALS_GROUP = 7
 local STORE_QUICKSLOTS_GROUP = 8
 local STORE_COLLECTIBLE_GROUP = 9
-local STORE_OTHER_GROUP = 10
-
-local groupCategoryDictionary = {
-    [STORE_WEAPON_GROUP] = GAMEPAD_ITEM_CATEGORY_WEAPONS,
-    [STORE_HEAVY_ARMOR_GROUP] = GAMEPAD_ITEM_CATEGORY_HEAVY_ARMOR,
-    [STORE_MEDIUM_ARMOR_GROUP] = GAMEPAD_ITEM_CATEGORY_MEDIUM_ARMOR,
-    [STORE_LIGHT_ARMOR_GROUP] = GAMEPAD_ITEM_CATEGORY_LIGHT_ARMOR,
-    [STORE_JEWELRY_GROUP] = GAMEPAD_ITEM_CATEGORY_JEWELRY
-}
+local STORE_QUEST_ITEMS_GROUP = 10
+local STORE_OTHER_GROUP = 11
 
 -------------------
 --Utility functions
@@ -29,6 +21,8 @@ local groupCategoryDictionary = {
 local function GetItemStoreGroup(itemData)
     if itemData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
         return STORE_COLLECTIBLE_GROUP
+    elseif itemData.entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
+        return STORE_QUEST_ITEMS_GROUP
     elseif itemData.equipType == EQUIP_TYPE_RING or itemData.equipType== EQUIP_TYPE_NECK then
         return STORE_JEWELRY_GROUP
     elseif itemData.itemType == ITEMTYPE_WEAPON or itemData.displayFilter == ITEMFILTERTYPE_WEAPONS then
@@ -63,12 +57,23 @@ local function GetBestItemCategoryDescription(itemData)
     if itemData.storeGroup == STORE_COLLECTIBLE_GROUP then
         local collectibleCategory = GetCollectibleCategoryTypeFromLink(itemData.itemLink)
         return GetString("SI_COLLECTIBLECATEGORYTYPE", collectibleCategory)
+    elseif itemData.storeGroup == STORE_QUEST_ITEMS_GROUP then
+        return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
     else
         return ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
     end
 end
 
-local defaultSortKeys =
+local function GetBestSellItemCategoryDescription(itemData)
+    local traitType = GetItemTrait(itemData.bagId, itemData.slotIndex)
+    if traitType == ITEM_TRAIT_TYPE_WEAPON_ORNATE or traitType == ITEM_TRAIT_TYPE_ARMOR_ORNATE or traitType == ITEM_TRAIT_TYPE_JEWELRY_ORNATE then
+        return GetString("SI_ITEMTRAITTYPE", traitType)
+    else
+        return GetBestItemCategoryDescription(itemData)
+    end
+end
+
+local DEFAULT_SORT_KEYS =
 {
     bestGamepadItemCategoryName = { tiebreaker = "name" },
     name = { tiebreaker = "requiredLevel" },
@@ -76,36 +81,61 @@ local defaultSortKeys =
     requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
     iconFile = { tiebreaker = "uniqueId" },
     uniqueId = { isId64 = true },
+    customSortOrder = { tiebreaker = "bestGamepadItemCategoryName", isNumeric = true },
 }
 
 local function ItemSortFunc(data1, data2)
-     return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", defaultSortKeys, ZO_SORT_ORDER_UP)
+     return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", DEFAULT_SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
-local BagSortKeys = 
+local function SellSortFunc(data1, data2)
+     return ZO_TableOrderingFunction(data1, data2, "customSortOrder", DEFAULT_SORT_KEYS, ZO_SORT_ORDER_UP)
+end
+
+local BUY_ITEMS_SORT_KEYS =
 {
-    name = { },
-    bagId = { tiebreaker = "name", isNumeric = true },
+    bestGamepadItemCategoryName = { tiebreaker = "name" },
+    name = { tiebreaker = "meetsRequirementsToBuy" },
+    meetsRequirementsToBuy = { tiebreaker = "meetsRequirementsToEquip", isNumeric = true },
+    meetsRequirementsToEquip = { tiebreaker = "icon", isNumeric = true },
+    icon = { tiebreaker = "slotIndex" },
+    slotIndex = { isId64 = true },
 }
 
-local function BagItemSortFunc(item1, item2)
-    return ZO_TableOrderingFunction(item1, item2, "bagId", BagSortKeys, ZO_SORT_ORDER_UP)
+local function BuySortFunc(data1, data2)
+     return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", BUY_ITEMS_SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
-local function GetItemFilterName(filterTable)
-    local displayFilter = ITEMFILTERTYPE_MISCELLANEOUS
-    for j,filter in ipairs(filterTable) do
-        if filter >= ITEMFILTERTYPE_WEAPONS and filter <= ITEMFILTERTYPE_MISCELLANEOUS then
-            displayFilter = filter
-            break
-        end
-    end
+local BUYBACK_ITEMS_SORT_KEYS =
+{
+    bestGamepadItemCategoryName = { tiebreaker = "name" },
+    name = { tiebreaker = "meetsRequirementsToBuy" },
+    meetsRequirementsToBuy = { tiebreaker = "meetsRequirementsToEquip", isNumeric = true },
+    meetsRequirementsToEquip = { tiebreaker = "icon", isNumeric = true },
+    icon = { tiebreaker = "slotIndex" },
+    slotIndex = { isId64 = true },
+}
 
-    return displayFilter
+local function BuybackSortFunc(data1, data2)
+     return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", BUYBACK_ITEMS_SORT_KEYS, ZO_SORT_ORDER_UP)
+end
+
+local REPAIR_ITEMS_SORT_KEYS =
+{
+    name = { tiebreaker = "repairCost" },
+    repairCost = { tiebreaker = "condition", isNumeric = true },
+    condition = { tiebreaker = "quality", isNumeric = true },
+    quality = { tiebreaker = "stackCount" },
+    stackCount = { tiebreaker = "slotIndex" },
+    slotIndex = { isId64 = true },
+}
+
+local function RepairSortFunc(data1, data2)
+     return ZO_TableOrderingFunction(data1, data2, "name", REPAIR_ITEMS_SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
 local function GetBuyItems()
-    local items, usedFilterTypes = ZO_StoreManager_GetStoreItems()
+    local items = ZO_StoreManager_GetStoreItems()
 
     --- Gamepad versions have extra data / differently named values in templates
     for i, itemData in ipairs(items) do
@@ -145,7 +175,8 @@ local function GetSellItems()
             itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
 
             itemData.storeGroup = GetItemStoreGroup(itemData)
-            itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
+            itemData.bestGamepadItemCategoryName = GetBestSellItemCategoryDescription(itemData)
+            itemData.customSortOrder = ZO_InventoryUtils_Gamepad_GetSellItemCustomSortOrder(itemData)
             table.insert(unequippedItems, itemData)
         end
     end
@@ -154,7 +185,6 @@ local function GetSellItems()
 end
 
 local function GetBuybackItems()
-    local bagId = BAG_BUYBACK
 
     local items = {}
     for entryIndex = 1, GetNumBuybackItems() do
@@ -162,6 +192,7 @@ local function GetBuybackItems()
         if(stackCount > 0) then
             local itemLink = GetBuybackItemLink(entryIndex)
             local itemType = GetItemLinkItemType(itemLink)
+            local equipType = GetItemLinkEquipType(itemLink)
             local totalPrice = price * stackCount
             local buybackData =
             {
@@ -175,10 +206,10 @@ local function GetBuybackItems()
                 meetsRequirementsToBuy = true,
                 meetsRequirementsToEquip = meetsRequirementsToEquip,
                 stackBuyPrice = totalPrice,
-                bagId = bagId,
                 itemLink = itemLink,
                 itemType = itemType,
-                filterData = { GetItemFilterTypeInfo(bagId, entryIndex) },
+                equipType = equipType,
+                filterData = { GetItemLinkFilterTypeInfo(itemLink) },
             }
             buybackData.storeGroup = GetItemStoreGroup(buybackData)
             buybackData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(buybackData)
@@ -191,19 +222,18 @@ local function GetBuybackItems()
 end
 
 local function GatherDamagedEquipmentFromBag(bagId, itemTable)
-    local slotType = SLOT_TYPE_REPAIR
     local bagSlots = GetBagSize(bagId)
     for slotIndex=0, bagSlots - 1 do
         local condition = GetItemCondition(bagId, slotIndex)
         if condition < 100 and not IsItemStolen(bagId, slotIndex) then
-            local icon, stackCount, _, _, _, _, _, quality = GetItemInfo(bagId, slotIndex)
+            local _, stackCount = GetItemInfo(bagId, slotIndex)
             if stackCount > 0 then
                 local repairCost = GetItemRepairCost(bagId, slotIndex)
                 if repairCost > 0 then
                     local damagedItem = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
                     damagedItem.condition = condition
                     damagedItem.repairCost = repairCost
-                    damagedItem.invalidPrice = repairCost > GetCarriedCurrencyAmount(CURT_MONEY)
+                    damagedItem.invalidPrice = repairCost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
                     damagedItem.isEquippedInCurrentCategory = damagedItem.bagId == BAG_WORN
                     damagedItem.storeGroup = GetItemStoreGroup(damagedItem)
                     damagedItem.bestGamepadItemCategoryName = GetBestItemCategoryDescription(damagedItem)
@@ -252,10 +282,6 @@ local function GetStolenItems(optFilterFunction, ...)
     return unequippedItems
 end
 
-local function IsStolenItemSellable(itemData)
-    return itemData.sellPrice > 0
-end
-
 local function GetStolenSellItems()
     -- can't sell stolen things from BAG_WORN so just check BACKPACK
     return GetStolenItems(IsItemStolenAndSellable, BAG_BACKPACK)
@@ -301,15 +327,14 @@ local function GetStableItems()
 end
 
 --When using the ItemSortFunc, you'll want to ensure that your updateFunc provides an itemData.bestGamepadItemCategoryName
---When using the BagItemSortFunc you'll want to ensure that your updateFunc does *NOT* provide an itemData.bestGamepadItemCategoryName
 --Typically bestGamepadItemCategoryName is acquired like so:
 --e.g.: itemData.storeGroup = GetItemStoreGroup(itemData, IS_STORE_ITEM)
 --      itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
 local MODE_TO_UPDATE_FUNC = {
-        [ZO_MODE_STORE_BUY] =          {updateFunc = GetBuyItems,           sortFunc = ItemSortFunc},
-        [ZO_MODE_STORE_BUY_BACK] =     {updateFunc = GetBuybackItems,       sortFunc = ItemSortFunc},
-        [ZO_MODE_STORE_SELL] =         {updateFunc = GetSellItems,          sortFunc = ItemSortFunc},
-        [ZO_MODE_STORE_REPAIR] =       {updateFunc = GetRepairItems,        sortFunc = ItemSortFunc},
+        [ZO_MODE_STORE_BUY] =          {updateFunc = GetBuyItems,           sortFunc = BuySortFunc},
+        [ZO_MODE_STORE_BUY_BACK] =     {updateFunc = GetBuybackItems,       sortFunc = BuybackSortFunc},
+        [ZO_MODE_STORE_SELL] =         {updateFunc = GetSellItems,          sortFunc = SellSortFunc},
+        [ZO_MODE_STORE_REPAIR] =       {updateFunc = GetRepairItems,        sortFunc = RepairSortFunc},
         [ZO_MODE_STORE_SELL_STOLEN] =  {updateFunc = GetStolenSellItems,    sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_LAUNDER] =      {updateFunc = GetLaunderItems,       sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_STABLE] =       {updateFunc = GetStableItems},
@@ -347,7 +372,10 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
         local postPadding = postPaddingOverride or (isNextEntryAHeader and STORE_ITEM_HEADER_DEFAULT_PADDING)
 
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
+        
+        --This is only used by stables        
         entry.data = itemData.data
+        
         if not itemData.ignoreStoreVisualInit then
             entry:InitializeStoreVisualData(itemData)
         end

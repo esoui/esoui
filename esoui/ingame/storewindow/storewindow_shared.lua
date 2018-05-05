@@ -19,14 +19,52 @@ STORE_INTERACTION =
 -- Shared object
 ZO_SharedStoreManager = ZO_Object:Subclass()
 
+function ZO_SharedStoreManager:New(...)
+    local obj = ZO_Object.New(self)
+    obj:Initialize(...)
+    return obj
+end
+
+function ZO_SharedStoreManager:Initialize(control)
+    self.control = control
+end
+
 function ZO_SharedStoreManager:InitializeStore()
-    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones = GetStoreCurrencyTypes()
+    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers = GetStoreCurrencyTypes()
 end
 
 function ZO_SharedStoreManager:RefreshCurrency()
-    self.currentMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-    self.currentAP = GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS)
-    self.currentTelvarStones = GetCarriedCurrencyAmount(CURT_TELVAR_STONES)
+    self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+    self.currentAP = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+    self.currentTelvarStones = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
+    self.currentWritVouchers = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
+end
+
+local INTERNAL_IMPORTANT_ITEMDATA_KEYS = { "entryType", "slotIndex", "name", "stack", "traitInformation",}
+function ZO_StoreManager_InternalValidateItems(items, optionalExtraLines)
+    for _, itemData in ipairs(items) do
+        if not itemData.traitInformation then
+            local lines = optionalExtraLines or {}
+            table.insert(lines, ("interact name: %q"):format(tostring(GetUnitName("interact"))))
+            table.insert(lines, ("Item Link: %q"):format(tostring(GetStoreItemLink(itemData.slotIndex))))
+            for _, k in ipairs(INTERNAL_IMPORTANT_ITEMDATA_KEYS) do
+                local v = itemData[k]
+                local key = type(k) == "string" and string.format("%q", k) or tostring(k)
+                local value = type(v) == "string" and string.format("%q", v) or tostring(v)
+                table.insert(lines, ("  %s: %s"):format(key, value))
+            end
+            -- these will probably be cut off by the message limit
+            table.insert(lines, "----")
+            for k, v in pairs(itemData) do
+                local key = type(k) == "string" and string.format("%q", k) or tostring(k)
+                local value = type(v) == "string" and string.format("%q", v) or tostring(v)
+                table.insert(lines, ("  %s: %s"):format(key, value))
+            end
+
+            table.insert(lines, 1, "Invalid vendor object state:")
+            internalassert(false, table.concat(lines, "\n  "))
+        end
+    end
 end
 
 -- Shared global functions
@@ -38,7 +76,9 @@ function ZO_StoreManager_GetStoreItems()
         local icon, name, stack, price, sellPrice, meetsRequirementsToBuy, meetsRequirementsToEquip, quality, questNameColor, currencyType1, currencyQuantity1,
             currencyType2, currencyQuantity2, entryType = GetStoreEntryInfo(entryIndex)
 
-        if(stack > 0) then
+        if stack > 0 then
+            local itemLink = GetStoreItemLink(entryIndex)
+            local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
             local itemData =
             {
                 entryType = entryType,
@@ -61,8 +101,14 @@ function ZO_StoreManager_GetStoreItems()
                 stackBuyPriceCurrency2 = stack * currencyQuantity2,
                 filterData = { GetStoreEntryTypeInfo(entryIndex) },
                 statValue = GetStoreEntryStatValue(entryIndex),
-                isUnique = IsItemLinkUnique(GetStoreItemLink(entryIndex)),
+                isUnique = IsItemLinkUnique(itemLink),
+                traitInformation = traitInformation,
+                traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
             }
+
+            if entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
+                itemData.questItemId = GetStoreEntryQuestItemId(entryIndex)
+            end
 
             items[#items + 1] = itemData
             for i = 1, #itemData.filterData do
@@ -71,6 +117,7 @@ function ZO_StoreManager_GetStoreItems()
         end
     end
 
+    ZO_StoreManager_InternalValidateItems(items)
     return items, usedFilterTypes
 end
 
@@ -89,6 +136,7 @@ local CURRENCY_TYPE_TO_SOUND_ID =
 {
     [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,
     [CURT_ALLIANCE_POINTS] = SOUNDS.ALLIANCE_POINT_TRANSACT,
+    [CURT_WRIT_VOUCHERS] = SOUNDS.WRIT_VOUCHER_TRANSACT,
 }
 
 local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
@@ -103,9 +151,5 @@ local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurre
 end
 
 function ZO_StoreManager_OnPurchased(eventId, entryName, entryType, entryQuantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
-    if(entryType == STORE_ENTRY_TYPE_MOUNT) then
-        PlaySound(SOUNDS.STABLE_BUY_MOUNT)
-    else
-        PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
-    end
+    PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
 end
