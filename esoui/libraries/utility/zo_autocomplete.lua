@@ -28,6 +28,17 @@ AUTO_COMPLETION_SELECTED_BY_TAB = 3
 ZO_AutoComplete = ZO_CallbackObject:Subclass()
 ZO_AutoComplete.ON_ENTRY_SELECTED = "ZO_AutoComplete_On_Entry_Selected"
 
+AUTO_COMPLETE_FLAG_ALL = -1
+AUTO_COMPLETE_FLAG_NONE = 0
+
+ZO_AutoComplete.FlagHandlers = { }
+
+function ZO_AutoComplete.AddFlag(handler)
+    table.insert(ZO_AutoComplete.FlagHandlers, handler)
+    return #ZO_AutoComplete.FlagHandlers
+end
+
+
 function ZO_AutoComplete:New(...)
     local autoComplete = ZO_CallbackObject.New(self)
     autoComplete:Initialize(...)
@@ -147,8 +158,107 @@ function ZO_AutoComplete:SetAnchorStyle(style)
     self.anchorStyle = style
 end
 
-function ZO_AutoComplete:GetAutoCompletionResults(text)
-    return GetAutoCompletion(text, self.maxResults, self.onlineOnly, self.includeFlags, self.excludeFlags)
+do
+    local ComputeStringDistance = ComputeStringDistance
+
+    local function ComputeSubStringMatchScore(source, startIndex, trimmedTextToScore)
+        local startIndex, endIndex = source:find(trimmedTextToScore, startIndex, true)
+        if startIndex then
+            return ((endIndex - startIndex) / (#source * .1)) * 10
+        end
+        return 0
+    end
+
+    function ComputeScore(source, scoringText, startIndex, trimmedTextToScore)
+        return ComputeStringDistance(source, scoringText) - ComputeSubStringMatchScore(source, startIndex, trimmedTextToScore)
+    end
+
+    local POOR_MATCH_RATIO = .75
+    local POOR_MATCH_MIN = 1
+
+    local scores = {}
+    local function BinaryInsertComparer(leftScore, _, rightIndex)
+        return leftScore - scores[rightIndex]
+    end
+
+    local zo_binarysearch = zo_binarysearch
+    function GetTopMatchesByLevenshteinSubStringScore(stringsToScore, scoringText, startingIndex, maxResults, noMinScore)
+        maxResults = maxResults or 10
+        if maxResults == 0 then return end
+
+        startingIndex = startingIndex or 1
+        scoringText = zo_strlower(scoringText)
+        local trimmedTextToScore = scoringText:sub(startingIndex, 20)
+
+        local results = {}
+        ZO_ClearNumericallyIndexedTable(scores)
+
+        local minScore = POOR_MATCH_RATIO * (zo_min(#scoringText, 10 + startingIndex) - startingIndex - POOR_MATCH_MIN)
+        for lowerSource, source in pairs(stringsToScore) do
+            local score = ComputeScore(lowerSource, scoringText, startingIndex, trimmedTextToScore)
+            if noMinScore or (score <= minScore) then
+                local _, insertPosition = zo_binarysearch(score, results, BinaryInsertComparer)
+                table.insert(results, insertPosition, source)
+                table.insert(scores, insertPosition, score)
+
+                results[maxResults + 1] = nil
+                scores[maxResults + 1] = nil
+            end
+        end
+
+        return results
+    end
+end
+
+do
+    local function TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, include)
+        local handler = ZO_AutoComplete.FlagHandlers[flag]
+        if handler then
+            handler(possibleMatches, input, onlineOnly, include)
+        end
+    end
+
+    local INCLUDE = true
+    local EXCLUDE = false
+
+    local function GenerateAutoCompletionResults(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
+        local possibleMatches = {}
+
+        if not includeFlags or includeFlags[1] == AUTO_COMPLETE_FLAG_ALL then
+            for flag in ipairs(ZO_AutoComplete.FlagHandlers) do
+                TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, INCLUDE)
+            end
+        else
+            for i, flag in ipairs(includeFlags) do
+                TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, INCLUDE)
+            end
+        end
+
+        if excludeFlags then
+            if excludeFlags[1] == AUTO_COMPLETE_FLAG_ALL then
+                return
+            end
+            for i, flag in ipairs(excludeFlags) do
+                TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, EXCLUDE)
+            end
+        end 
+
+        local results = GetTopMatchesByLevenshteinSubStringScore(possibleMatches, input, 1, maxResults, noMinScore)
+        if results then
+            return unpack(results)
+        end
+    end
+
+    function GetAutoCompletion(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
+        maxResults = maxResults or 10
+        input = input:lower()
+
+        return GenerateAutoCompletionResults(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
+    end
+
+    function ZO_AutoComplete:GetAutoCompletionResults(text)
+        return GetAutoCompletion(text, self.maxResults, self.onlineOnly, self.includeFlags, self.excludeFlags)
+    end
 end
 
 function ZO_AutoComplete:ApplyAutoCompletionResults(...)

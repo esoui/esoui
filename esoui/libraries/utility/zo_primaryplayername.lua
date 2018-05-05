@@ -56,3 +56,11 @@ function ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
     local secondaryName = ZO_GetSecondaryPlayerName(displayName, characterName)
     return zo_strformat(SI_PLAYER_PRIMARY_AND_SECONDARY_NAME_FORMAT, primaryName, secondaryName)
 end
+
+function ZO_GetPrimaryPlayerNameHeader()
+    if ZO_ShouldPreferUserId() then
+        return ZO_GetPlatformAccountLabel()
+    else
+        return GetString(SI_SOCIAL_LIST_PANEL_HEADER_CHARACTER)
+    end
+end

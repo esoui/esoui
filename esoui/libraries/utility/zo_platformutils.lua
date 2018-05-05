@@ -33,6 +33,10 @@ function ZO_GetPlatformAccountLabel()
     return GetString("SI_PLATFORMACCOUNTLABEL", GetUIPlatform())
 end
 
+function ZO_GetPlatformStoreName()
+    return GetString("SI_PLATFORMSTORELABEL", GetPlatformServiceType())
+end
+
 function ZO_GetPlatformUserFacingName(characterName, displayName)
     local userFacingName
 
@@ -51,5 +55,30 @@ end
 function ZO_SavePlayerConsoleProfile()
     if IsConsoleUI() and SavePlayerConsoleProfile ~= nil then
         SavePlayerConsoleProfile()
+    end
+end
+
+function ZO_GetInviteInstructions()
+    local instructions 
+    if IsConsoleUI() then
+        local platform = ZO_GetPlatformAccountLabel()
+        instructions = zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, platform)
+    else
+        instructions = GetString(SI_REQUEST_NAME_INSTRUCTIONS)
+    end
+    return instructions
+end
+
+function ZO_PlatformIgnorePlayer(displayName, idRequestType, ...)
+    if not IsIgnored(displayName) then
+        if not IsConsoleUI() then
+            AddIgnore(displayName)
+        else
+            if not idRequestType or idRequestType == ZO_ID_REQUEST_TYPE_DISPLAY_NAME then
+                ZO_ShowConsoleIgnoreDialog(displayName)
+            else
+                ZO_ShowConsoleIgnoreDialogFromDisplayNameOrFallback(displayName, idRequestType, ...)
+            end
+        end
     end
 end

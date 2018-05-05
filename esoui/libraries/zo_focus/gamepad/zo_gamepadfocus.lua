@@ -13,6 +13,10 @@
     }
 --]]
 
+--Layout consts--
+ZO_GAMEPAD_FOCUS_HIGHLIGHT_INSIDE_PADDING = 4
+ZO_GAMEPAD_FOCUS_HIGHLIGHT_WIDE_PADDING = ZO_GAMEPAD_FOCUS_HIGHLIGHT_INSIDE_PADDING + 5
+
 local FOCUS_MOVEMENT_TYPES = 
 {
     MOVE_NEXT = 1,
@@ -63,6 +67,16 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
 
         if self.active then
             self:SetFocusByIndex(self.savedIndex ~= 0 and self.savedIndex or 1)
+            local data = self:GetFocusItem()
+            --The entry that was already focused is no longer eligble for focus
+            if data and data.canFocus and not data.canFocus(data.control) then
+                --Try to select the next thing
+                if not self:MoveNext() then
+                    --Nothing to select forward, so move backward
+                    self:MovePrevious()
+                end
+            end
+
             if self.directionalInputEnabled then
                 DIRECTIONAL_INPUT:Activate(self, self.control)
             end
@@ -74,6 +88,10 @@ function ZO_GamepadFocus:SetActive(active, retainFocus)
             DIRECTIONAL_INPUT:Deactivate(self)
         end
     end
+end
+
+function ZO_GamepadFocus:IsActive()
+    return self.active
 end
 
 function ZO_GamepadFocus:SetFocusChangedCallback(onFocusChangedFunction)
@@ -172,7 +190,7 @@ local function EnableFocus(data, index)
     end
 end
 
-local function DisableFocus(data, index)
+local function DisableFocus(data, index, noAnimations)
     if index and #data > 0 and (index <= #data) then
         local item = data[index]
         if item.deactivate then
@@ -182,10 +200,18 @@ local function DisableFocus(data, index)
         end
 
         if item.highlightFadeAnimation then
-            item.highlightFadeAnimation:PlayBackward()
+            if noAnimations then
+                item.highlightFadeAnimation:PlayInstantlyToStart()
+            else
+                item.highlightFadeAnimation:PlayBackward()
+            end
         end
         if item.iconScaleAnimation then
-            item.iconScaleAnimation:PlayBackward()
+            if noAnimations then
+                item.iconScaleAnimation:PlayInstantlyToStart()
+            else
+                item.iconScaleAnimation:PlayBackward()
+            end
         end
 
         return true
@@ -279,7 +305,16 @@ function ZO_GamepadFocus:GetFocus(includeSavedFocus)
 end
 
 function ZO_GamepadFocus:ClearFocus()
-    self:SetFocusByIndex(nil)
+    if self.index then
+        local oldIndex = self.index
+        self.index = nil
+        local DISABLE_ANIMATIONS = true
+        DisableFocus(self.data, oldIndex, DISABLE_ANIMATIONS)
+    end
+
+    if self.onFocusChangedFunction then
+        self.onFocusChangedFunction(self:GetFocusItem())
+    end
 end
 
 local function FindPrevFocusIndex(oldIndex, focusItems)
@@ -317,11 +352,13 @@ function ZO_GamepadFocus:MovePrevious()
     if index then
         self:SetFocusByIndex(index)
         self.onPlaySoundFunction(FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS)
+        return true
     else
         if self.onLeaveFocusAtBeginningFunction then
             self.onLeaveFocusAtBeginningFunction()
         end
     end
+    return false
 end
 
 function ZO_GamepadFocus:MoveNext()
@@ -329,7 +366,9 @@ function ZO_GamepadFocus:MoveNext()
     if index then
         self:SetFocusByIndex(index)
         self.onPlaySoundFunction(FOCUS_MOVEMENT_TYPES.MOVE_NEXT)
+        return true
     end
+    return false
 end
  
 function ZO_GamepadFocus:UpdateDirectionalInput()

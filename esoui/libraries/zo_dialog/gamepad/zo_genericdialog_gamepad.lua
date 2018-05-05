@@ -5,9 +5,12 @@ GAMEPAD_DIALOGS = {
     CENTERED = 4,
     STATIC_LIST = 5,
     ITEM_SLIDER = 6,
+    CUSTOM = 7,
 }
 
 local GAMEPAD_DIALOG_SHOWING = false
+
+local DEFAULT_WARNING_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED))
 
 ----------------------
 -- Helper Functions --
@@ -34,6 +37,7 @@ function DialogKeybindStripDescriptor:Initialize()
             ZO_Dialogs_ReleaseDialogOnButtonPress(self.dialog.name)
         end
     end
+
     self.visible = function()
         if self.buttonVisible then
             if type(self.buttonVisible) == "function" then
@@ -45,18 +49,42 @@ function DialogKeybindStripDescriptor:Initialize()
             return true
         end
     end
+
+    self.enabled = function()
+        if self.buttonEnabled then
+            if type(self.buttonEnabled) == "function" then
+                return self.buttonEnabled(self.dialog)
+            else
+                return self.buttonEnabled
+            end
+        else 
+            return true
+        end 
+    end
+
+    self.name = function()
+        if self.buttonText then
+            if type(self.buttonText) == "function" then
+                return self.buttonText(self.dialog)
+            elseif type(self.buttonText) == "number" then
+                return GetString(self.buttonText)
+            else
+                return self.buttonText
+            end
+        end
+    end
     self:Reset()
 end
 
 function DialogKeybindStripDescriptor:Reset()
     self.buttonVisible = nil
     self.buttonCallback = nil
-    self.name = nil
+    self.buttonEnabled = nil
+    self.buttonText = nil
     self.dialog = nil
     self.keybind = nil
     self.sound = nil
     self.alignment = KEYBIND_STRIP_ALIGN_LEFT
-    self.enabled = nil
     self.handlesKeyUp = nil
     self.onShowCooldown = nil
     self.cooldown = nil
@@ -68,32 +96,28 @@ function DialogKeybindStripDescriptor:SetAlignment(alignment)
     end
 end
 
-function DialogKeybindStripDescriptor:SetButtonCallback(buttonCallback)
-    self.buttonCallback = buttonCallback
-end
-
--- keybinds expect text to be under 'name' and already looked up.
-function DialogKeybindStripDescriptor:SetText(text)
-    self.name = text
-    if(type(self.name) == "number") then
-        self.name = GetString(self.name)
-    end
-end
-
 function DialogKeybindStripDescriptor:SetDialog(dialog)
     self.dialog = dialog
+end
+
+function DialogKeybindStripDescriptor:SetButtonCallback(callback)
+    self.buttonCallback = callback
 end
 
 function DialogKeybindStripDescriptor:SetVisible(visible)
     self.buttonVisible = visible
 end
 
-function DialogKeybindStripDescriptor:SetEthereal(ethereal)
-    self.ethereal = ethereal
+function DialogKeybindStripDescriptor:SetEnabled(enabled)
+    self.buttonEnabled = enabled
 end
 
-function DialogKeybindStripDescriptor:SetEnabled(enabled)
-    self.enabled = enabled
+function DialogKeybindStripDescriptor:SetText(text)
+    self.buttonText = text
+end
+
+function DialogKeybindStripDescriptor:SetEthereal(ethereal)
+    self.ethereal = ethereal
 end
 
 function DialogKeybindStripDescriptor:SetHandlesKeyUp(handlesKeyUp)
@@ -151,13 +175,19 @@ local function TryRefreshKeybind(dialog, keybindDesc, buttonData, twoOrMoreButto
     if(dialog.textParams ~= nil and dialog.textParams.buttonTextOverrides ~= nil and dialog.textParams.buttonTextOverrides[index] ~= nil) then
         keybindDesc:SetText(dialog.textParams.buttonTextOverrides[index])
     else
-        keybindDesc:SetText(buttonData.text)
+        keybindDesc:SetText(buttonData.text or buttonData.name)
     end
 
     if(dialog.textParams ~= nil and dialog.textParams.buttonKeybindOverrides ~= nil and dialog.textParams.buttonKeybindOverrides[index] ~= nil) then
         keybindDesc:SetKeybind(dialog.textParams.buttonKeybindOverrides[index], index)
     else
-        keybindDesc:SetKeybind(buttonData.keybind, index)
+        local keybind
+        if IsInGamepadPreferredMode() and buttonData.gamepadPreferredKeybind then
+            keybind = buttonData.gamepadPreferredKeybind
+        else
+            keybind = buttonData.keybind
+        end
+        keybindDesc:SetKeybind(keybind, index)
     end
 
     keybindDesc:SetDialog(dialog)
@@ -181,7 +211,6 @@ local function TryShowKeybinds(dialog)
 
     local buttons = dialog.info.buttons
     local numButtons = buttons and #buttons or 0
-    local dialogType = dialog.info.gamepadInfo.dialogType
     if numButtons > 0 then
         for index, value in ipairs(buttons) do
             if(type(value) == "table") then
@@ -209,7 +238,6 @@ end
 local function TryRefreshKeybinds(dialog)
     local buttons = dialog.info.buttons
     local numButtons = buttons and #buttons or 0
-    local dialogType = dialog.info.gamepadInfo.dialogType
     if numButtons > 0 then
         for index, value in ipairs(buttons) do
             if(type(value) == "table") then
@@ -324,6 +352,10 @@ local function OnDialogHidden(dialog)
         dialog.info.OnHiddenCallback(dialog)
     end
 
+    if dialog.warningTextControl then
+        dialog.warningTextControl:SetColor(DEFAULT_WARNING_COLOR:UnpackRGBA())
+    end
+
     local releasedFromButton = dialog.releasedFromButton
     dialog.releasedFromButton = nil
 
@@ -348,27 +380,42 @@ local function OnDialogHidden(dialog)
 end
 
 -- this always gets called
-function ZO_GenericGamepadDialog_BaseSetup(dialog, title, mainText)
-    local headerData = dialog.headerData
-    ZO_ClearTable(headerData) -- make sure we are not bringing over header data from the previous setup.
-    headerData.titleText = title
-    headerData.titleTextAlignment = TEXT_ALIGN_LEFT
+function ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText)
+    if dialog.gamepadInfo and dialog.gamepadInfo.RefreshTextOverride then
+        dialog.gamepadInfo.RefreshTextOverride(dialog, title, mainText, warningText)
+    else
+        local headerData = dialog.headerData
+        if headerData then
+            ZO_ClearTable(headerData) -- make sure we are not bringing over header data from the previous setup.
+            headerData.titleText = title
+            headerData.titleTextAlignment = TEXT_ALIGN_LEFT
+        end
 
-    dialog.mainTextControl:SetText(mainText)
-    dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+        if dialog.mainTextControl then
+            dialog.mainTextControl:SetText(mainText)
+            dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+        end
 
-    if not ZO_GenericGamepadDialog_DefaultSetup(dialog, dialog.data) then
-        -- refresh the header, but only if ZO_GenericGamepadDialog_DefaultSetup didn't already
-        ZO_GamepadGenericHeader_Refresh(dialog.header, headerData)
+        if dialog.warningTextControl and warningText then
+            dialog.warningTextControl:SetText(warningText)
+            dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+        elseif dialog.warningTextControl then
+            dialog.warningTextControl:SetText("")
+        end
+
+        if not ZO_GenericGamepadDialog_RefreshHeaderData(dialog, dialog.data) and headerData then
+            -- refresh the header, but only if ZO_GenericGamepadDialog_RefreshHeaderData didn't already
+            ZO_GamepadGenericHeader_Refresh(dialog.header, headerData)
+        end
     end
 end
 
-function ZO_GenericGamepadDialog_DefaultSetup(dialog, data)
+function ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
     local headerData = dialog.headerData
 
     local needRefresh = false
 
-    if data then
+    if headerData and data then
         if data.data1 then
             headerData.data1HeaderText = data.data1.header
             headerData.data1Text = data.data1.value
@@ -402,7 +449,7 @@ function ZO_GenericGamepadDialog_DefaultSetup(dialog, data)
 end
 
 function ZO_GenericGamepadDialog_OnInitialized(dialog)
-    dialog.setupFunc = ZO_GenericGamepadDialog_DefaultSetup
+    dialog.setupFunc = ZO_GenericGamepadDialog_RefreshHeaderData
 
     -- Management
 
@@ -422,7 +469,11 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
         TryRemoveKeybinds()
 
         if ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP then -- pregame doesn't have this fragment group
-            SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
+            if dialog.info.gamepadInfo.dontEndInWorldInteractions then
+                SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_DONT_END_IN_WORLD_INTERACTIONS_FRAGMENT_GROUP)
+            else
+                SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
+            end
         end
         SCENE_MANAGER:RemoveFragment(dialog.fragment)
     end
@@ -444,15 +495,26 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
                                                         end
                                                     end)
 
+    local headerContainer = dialog:GetNamedChild("HeaderContainer")
+    if headerContainer then
     dialog.headerData = {}
     dialog.header = dialog:GetNamedChild("HeaderContainer").header
+        ZO_GamepadGenericHeader_Initialize(dialog.header)
+    end
 
     local container = dialog:GetNamedChild("Container")
-    dialog.scrollChild = container:GetNamedChild("ScrollChild")
-    dialog.scrollIndicator = container:GetNamedChild("ScrollIndicator")
-    dialog.mainTextControl = dialog.scrollChild:GetNamedChild("MainText")
+    if container then
+        dialog.scrollChild = container:GetNamedChild("ScrollChild")
+        dialog.scrollIndicator = container:GetNamedChild("ScrollIndicator")
+        dialog.mainTextControl = dialog.scrollChild:GetNamedChild("MainText")
+        dialog.warningTextControl = dialog.scrollChild:GetNamedChild("WarningText")
+    end
+end
 
-    ZO_GamepadGenericHeader_Initialize(dialog.header)
+function ZO_GenericGamepadDialog_SetDialogWarningColor(dialog, warningColor)
+    if dialog.warningTextControl then
+        dialog.warningTextControl:SetColor(warningColor:UnpackRGBA())
+    end
 end
 
 function ZO_GenericGamepadDialog_Show(dialog)
@@ -462,16 +524,22 @@ function ZO_GenericGamepadDialog_Show(dialog)
     dialog.isShowingOnBase = false
 
     if ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP then -- pregame doesn't have this fragment group
-        SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
+        if dialog.info.gamepadInfo.dontEndInWorldInteractions then
+            SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_DIALOG_DONT_END_IN_WORLD_INTERACTIONS_FRAGMENT_GROUP)
+        else
+            SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
+        end
     end
 
     if SCENE_MANAGER:IsShowingBaseScene() then
         dialog.isShowingOnBase = true
     end
 
-    dialog.scrollIndicator:ClearAnchors()
-    local offsetY = dialog.info.offsetScrollIndictorForArrow and ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW
-    ZO_Scroll_Gamepad_SetScrollIndicatorSide(dialog.scrollIndicator, dialog, RIGHT, dialog.rightStickScrollIndicatorOffsetX, offsetY)
+    if dialog.scrollIndicator then
+        dialog.scrollIndicator:ClearAnchors()
+        local offsetY = dialog.info.offsetScrollIndictorForArrow and ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW
+        ZO_Scroll_Gamepad_SetScrollIndicatorSide(dialog.scrollIndicator, dialog, RIGHT, dialog.rightStickScrollIndicatorOffsetX, offsetY)
+    end
 
     SCENE_MANAGER:AddFragment(dialog.fragment)
 
@@ -511,6 +579,7 @@ end
 -------------------------------------
 
 -- Dialog
+local GenericParametricListGamepadDialogTemplate_InitializeEntryList -- forward declare
 function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
     ZO_GenericGamepadDialog_OnInitialized(dialog)
 
@@ -522,9 +591,34 @@ function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
                                 dialog.entryList:Deactivate()
                             end
 
-    local listControl = dialog:GetNamedChild("EntryList"):GetNamedChild("List")
-    dialog.entryList = ZO_GamepadVerticalItemParametricScrollList:New(listControl)
-    dialog.entryList:SetAlignToScreenCenter(true)
+    GenericParametricListGamepadDialogTemplate_InitializeEntryList(dialog)
+end
+
+do
+    local function DefaultOnSelectionChangedCallback()
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(g_keybindGroupDesc, g_keybindState)
+    end
+
+    function ZO_GenericParametricListGamepadDialogTemplate_Setup(dialog, limitNumEntries, data)
+        if data then
+            ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
+        end
+
+        local onSelectionChangedCallback
+        local dialogOnSelectionChangedCallback = dialog.info.parametricListOnSelectionChangedCallback
+        if dialogOnSelectionChangedCallback then
+            onSelectionChangedCallback =    function(...)
+                                                dialogOnSelectionChangedCallback(dialog, ...)
+                                                DefaultOnSelectionChangedCallback()
+                                            end
+        else
+            onSelectionChangedCallback = DefaultOnSelectionChangedCallback
+        end
+
+        dialog.entryList:SetOnSelectedDataChangedCallback(onSelectionChangedCallback)
+
+        ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, limitNumEntries)
+    end
 end
 
 do
@@ -535,35 +629,26 @@ do
         data.setup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
-    local function DefaultOnSelectionChangedCallback()
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(g_keybindGroupDesc, g_keybindState)
+    function GenericParametricListGamepadDialogTemplate_InitializeEntryList(dialog)
+        local listControl = dialog:GetNamedChild("EntryList"):GetNamedChild("List")
+        dialog.entryList = ZO_GamepadVerticalItemParametricScrollList:New(listControl)
+        dialog.entryList:SetAlignToScreenCenter(true)
+        dialog.entryList:SetValidateGradient(true)
+
+        -- Custom data templates
+        dialog.entryList:AddDataTemplateWithHeader("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryFullWidthHeaderTemplate", nil, nil, nil)
+        dialog.entryList:AddDataTemplate("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, nil)
     end
+
     -- Valid fields for parametric list entries are:
-    --   visible - a bool or function which determines if we show the entry
-    --   template - the template for the gamepad entry data in the parametric list
-    --   templateData - A table of fields to add to the entry data
-    --   text - the text that will appear in the list
-    --   icon - an optional icon to show next to the entry in the parametric list
-    --   entryData - a premade ZO_GamepadEntryData in place of the one created from templateData, text, and icon
-    function ZO_GenericParametricListGamepadDialogTemplate_Setup(dialog, limitNumEntries, data)
-        if data then
-            ZO_GenericGamepadDialog_DefaultSetup(dialog, data)
-        end
-
+        --   visible - a bool or function which determines if we show the entry
+        --   template - the template for the gamepad entry data in the parametric list
+        --   templateData - A table of fields to add to the entry data
+        --   text - the text that will appear in the list
+        --   icon - an optional icon to show next to the entry in the parametric list
+        --   entryData - a premade ZO_GamepadEntryData in place of the one created from templateData, text, and icon
+    function ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, limitNumEntries)
         dialog.entryList:Clear()
-
-        local onSelectionChangedCallback
-        local dialogOnSelectionChangedCallback = dialog.info.parametricListOnSelectionChangedCallback
-        if dialogOnSelectionChangedCallback then
-            onSelectionChangedCallback =    function(...)
-                                                dialogOnSelectionChangedCallback(...)
-                                                DefaultOnSelectionChangedCallback()
-                                            end
-        else
-            onSelectionChangedCallback = DefaultOnSelectionChangedCallback
-        end
-
-        dialog.entryList:SetOnSelectedDataChangedCallback(onSelectionChangedCallback)
 
         for i, entryInfoTable in ipairs(dialog.info.parametricList) do
             if limitNumEntries == nil or i <= limitNumEntries then
@@ -574,10 +659,10 @@ do
                 if entryDataOverrides and (entryDataOverrides.visible ~= nil) then
                     visible = entryDataOverrides.visible
                     if type(visible) == "function" then
-                        visible = visible()
+                        visible = visible(dialog)
                     end
                 end
-            
+
                 if visible then
                     local entryData = entryInfoTable.entryData
                     if entryData == nil then
@@ -600,16 +685,21 @@ do
                         end
                     end
 
+                    entryData.dialog = dialog
+
                     local entryTemplate = entryInfoTable.template
+                    -- BUG: instead of letting you pick the headerTemplate/controlReset on a per-entry basis,
+                    -- the first time we see a particular entryTemplate will be the model for ALL future entries using that entryTemplate.
+                    -- to work around this you need to create a unique new entryTemplate whenever you want different behavior.
                     if not dialog.entryList:HasDataTemplate(entryTemplate) then
-                        dialog.entryList:AddDataTemplateWithHeader(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, entryInfoTable.headerTemplate or "ZO_GamepadMenuEntryHeaderTemplate", entryInfoTable.controlReset)
+                        dialog.entryList:AddDataTemplateWithHeader(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, entryInfoTable.headerTemplate or "ZO_GamepadMenuEntryHeaderTemplate", nil, nil, entryInfoTable.controlReset)
                         dialog.entryList:AddDataTemplate(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, entryInfoTable.controlReset)
                     end
-        
+
                     local headerText = entryInfoTable.header
                     if headerText ~= nil then
                         if type(headerText) == "number" then
-                            headerText = GetString(headerString)
+                            headerText = GetString(headerText)
                         end
                         entryData:SetHeader(headerText)
                         dialog.entryList:AddEntryWithHeader(entryTemplate, entryData)
@@ -642,7 +732,7 @@ function ZO_GenericCooldownGamepadDialogTemplate_Setup(dialog)
     dialog.cooldownLabelControl:SetText("")
 
     dialog.loadingControl:SetHidden(not loadingMode)
-    if(loadingMode) then
+    if loadingMode then
         local loadingString = dialog.info.loading.text
 
         if type(loadingString) == "function" then
@@ -697,6 +787,16 @@ function ZO_GenericCenteredGamepadDialogTemplate_Setup(dialog)
 end
 
 -------------------------------------
+-- Custom Centered Template --
+-------------------------------------
+
+function ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(dialog)
+    dialog.fragment = ZO_FadeSceneFragment:New(dialog)
+
+    ZO_GenericGamepadDialog_OnInitialized(dialog)
+end
+
+-------------------------------------
 -- Static List Dialog Template --
 -------------------------------------
 
@@ -722,7 +822,7 @@ end
 
 function ZO_GenericStaticListGamepadDialogTemplate_Setup(dialog, data)
     if data then
-        ZO_GenericGamepadDialog_DefaultSetup(dialog, data)
+        ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
     end
 
     dialog.entryPool:ReleaseAllObjects()
@@ -810,7 +910,7 @@ do
 
     function ZO_GenericGamepadItemSliderDialogTemplate_Setup(dialog, headerData)
         if headerData then
-            ZO_GenericGamepadDialog_DefaultSetup(dialog, headerData)
+            ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
         end
 
         local ValueChangedCallback = dialog.info.OnSliderValueChanged or DefaultOnSliderValueChanged

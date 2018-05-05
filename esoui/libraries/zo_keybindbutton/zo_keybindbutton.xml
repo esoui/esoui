@@ -20,24 +20,20 @@
 
         <Control name="ZO_KeybindButton_Keyboard_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" />
+                <Label name="$(parent)NameLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="NONE" font="ZoFontKeybindStripDescription" />
                 <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" />
             </Controls>
         </Control>
 
         <Control name="ZO_KeybindButton_Gamepad_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" font="ZoFontGamepad34" />
+                <Label name="$(parent)NameLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" font="ZoFontGamepad34" />
                 <Label name="$(parent)KeyLabel" font="ZoFontGamepad22" />
             </Controls>
         </Control>
 
         <Control name="ZO_KeybindButton" inherits="ZO_KeybindButtonBehavior" virtual="true">
             <DimensionConstraints minY="35" maxY="35" />
-
-            <OnInitialized>
-                ZO_KeybindButtonTemplate_OnInitialized(self)
-            </OnInitialized>
 
             <Controls>
                 <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
@@ -52,5 +48,21 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Control name="ZO_KeybindButton_ChromaBehavior" virtual="true">
+            <OnInitialized>
+                ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnEffectivelyShown>
+                ZO_KeybindButton_ChromaBehavior_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+
+            <OnEffectivelyHidden>
+                ZO_KeybindButton_ChromaBehavior_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
+        </Control>
+
+        <Control name="ZO_KeybindButtonChroma" inherits="ZO_KeybindButton ZO_KeybindButton_ChromaBehavior" virtual="true" />
     </Controls>
 </GuiXml>

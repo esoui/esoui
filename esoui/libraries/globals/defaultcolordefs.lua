@@ -65,6 +65,9 @@ end
 
 local NO_ALLIANCE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ALLIANCE, ALLIANCE_NONE))
 local COLORED_ALLIANCE_NAMES = {} -- will be filled out as these names are asked for
+local COLORED_BATTLEGROUND_ALLIANCE_NAMES = {} -- will be filled out as these names are asked for
+local COLORED_BATTLEGROUND_YOUR_TEAM_TEXT = {}
+local COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT = {}
 
 local ALLIANCE_COLORS =
 {
@@ -73,8 +76,19 @@ local ALLIANCE_COLORS =
     [ALLIANCE_DAGGERFALL_COVENANT] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ALLIANCE, ALLIANCE_DAGGERFALL_COVENANT)),
 }
 
+local BATTLEGROUND_ALLIANCE_COLORS =
+{
+    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, BATTLEGROUND_ALLIANCE_FIRE_DRAKES)),
+    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, BATTLEGROUND_ALLIANCE_PIT_DAEMONS)),
+    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, BATTLEGROUND_ALLIANCE_STORM_LORDS)),
+}
+
 function GetAllianceColor(alliance)
     return ALLIANCE_COLORS[alliance] or NO_ALLIANCE_COLOR
+end
+
+function GetBattlegroundAllianceColor(battlegroundAlliance)
+    return BATTLEGROUND_ALLIANCE_COLORS[battlegroundAlliance] or NO_ALLIANCE_COLOR
 end
 
 function GetColoredAllianceName(alliance)
@@ -83,6 +97,39 @@ function GetColoredAllianceName(alliance)
         local color = GetAllianceColor(alliance)
         COLORED_ALLIANCE_NAMES[alliance] = color:Colorize(GetAllianceName(alliance))
         return COLORED_ALLIANCE_NAMES[alliance]
+    end
+
+    return coloredName
+end
+
+function GetColoredBattlegroundAllianceName(battlegroundAlliance)
+    local coloredName = COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance]
+    if coloredName == nil then
+        local color = GetBattlegroundAllianceColor(battlegroundAlliance)
+        COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance] = color:Colorize(GetBattlegroundAllianceName(battlegroundAlliance))
+        return COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance]
+    end
+
+    return coloredName
+end
+
+function GetColoredBattlegroundYourTeamText(battlegroundAlliance)
+    local coloredName = COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundAlliance]
+    if coloredName == nil then
+        local color = GetBattlegroundAllianceColor(battlegroundAlliance)
+        COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundAlliance] = color:Colorize(GetString(SI_BATTLEGROUND_YOUR_TEAM))
+        return COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundAlliance]
+    end
+
+    return coloredName
+end
+
+function GetColoredBattlegroundEnemyTeamText(battlegroundAlliance)
+    local coloredName = COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundAlliance]
+    if coloredName == nil then
+        local color = GetBattlegroundAllianceColor(battlegroundAlliance)
+        COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundAlliance] = color:Colorize(GetString(SI_BATTLEGROUND_ENEMY_TEAM))
+        return COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundAlliance]
     end
 
     return coloredName
@@ -166,6 +213,13 @@ ZO_CONDITION_GRADIENT_COLORS = {
     ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_CONDITION_BAR_GRADIENT_END)),
 }
 
+ZO_BATTLEGROUND_ALLIANCE_STATUS_BAR_GRADIENTS =
+{
+    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = { ZO_ColorDef:New(0.161, 0.306, 0.047), ZO_ColorDef:New(0.345, 0.592, 0.149) },
+    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = { ZO_ColorDef:New(0.314, 0.125, 0.416), ZO_ColorDef:New(0.475, 0.286, 0.576) },
+    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = { ZO_ColorDef:New(0.451, 0.153, 0.035), ZO_ColorDef:New(0.757, 0.341, 0.176) },
+}
+
 -- Lua doesn't need entries for every status effect color, this is just a quick lookup for the commonly used ones.
 -- Don't use the table directly, use the API that checks for nil entries.
 local statusEffectColors =
@@ -210,6 +264,7 @@ ZO_TOOLTIP_INSTRUCTIONAL_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COL
 ZO_ERROR_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_ERROR))
 ZO_BLACK = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_BLACK))
 ZO_WHITE = ZO_ColorDef:New("FFFFFF")
+ZO_OFF_WHITE = ZO_ColorDef:New("C5C29E")
 
 PURCHASED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRESSION, PROGRESSION_COLOR_PURCHASED))
 PURCHASED_UNSELECTED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRESSION, PROGRESSION_COLOR_PURCHASED_UNSELECTED)) --Gamepad only dimmer white
@@ -218,8 +273,24 @@ LOCKED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRESSIO
 
 ZO_CURRENCY_HIGHLIGHT_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CURRENCY_HIGHLIGHT))
 ZO_PERSONALITY_EMOTES_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_PERSONALITY_EMOTES))
+ZO_BATTLEGROUND_WINNER_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_BATTLEGROUND_WINNER))
 
 ZO_TRADE_BOP_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_TRADE_BOP))
+
+ZO_SKILLS_ADVISOR_ADVISED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_SKILLS_ADVISOR, SKILLS_ADVISOR_COLOR_ADVISED))
+ZO_SKILLS_ADVISOR_NOT_ADVISED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_SKILLS_ADVISOR, SKILLS_ADVISOR_COLOR_NOT_ADVISED))
+
+ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE =
+{
+    [TEX_SAMPLE_PROCESSING_RGB] = 0.3,
+    [TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB] = 0.3,
+}
+
+ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE =
+{
+    [TEX_SAMPLE_PROCESSING_RGB] = 1.0,
+    [TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB] = 0.0,
+}
 
 --------------------------------------
 --Gamepad Colors
@@ -233,11 +304,17 @@ ZO_GAMEPAD_TEXT_UNSELECTED_ALPHA = 0.4
 
 ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_GAMEPAD_TERTIARY))
 
-
-
 ------------------------------------
 -- Market Colors
 ------------------------------------
 
+ZO_MARKET_DIMMED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_DIMMED))
+ZO_MARKET_SELECTED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_SELECTED))
+ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE_DIMMED)) 
+ZO_MARKET_PRODUCT_ON_SALE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE))
+ZO_MARKET_PRODUCT_NEW_DIMMED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_NEW_DIMMED))
+ZO_MARKET_PRODUCT_NEW_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_NEW))
+ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_PRODUCT_BACKGROUND_BRIGHTNESS))
+ZO_MARKET_PRODUCT_PURCHASED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_PURCHASED))
 ZO_COLOR_UNIVERSAL_ITEM = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_UNIVERSAL_ITEM))
 ZO_COLOR_UNIVERSAL_ITEM_SELECTED = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_UNIVERSAL_ITEM_SELECTED))

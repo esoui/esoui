@@ -26,10 +26,14 @@
             <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
         </Label>
 
-        <Control name="ZO_DialogButton" inherits="ZO_SharedDialogButton" virtual="true">
+        <Control name="ZO_DialogButton" inherits="ZO_SharedDialogButton ZO_KeybindButton_ChromaBehavior" virtual="true">
+            <OnInitialized>
+                ZO_DialogButton_OnInitialized(self)
+            </OnInitialized>
+            
             <Controls>
-                <Label name="$(parent)NameLabel" inherits="ZO_DialogButtonColoredNameLabel" />
-                <Label name="$(parent)KeyLabel" inherits="ZO_DialogButtonKeyLabel" />
+                <Label name="$(parent)NameLabel" override="true" inherits="ZO_DialogButtonColoredNameLabel" />
+                <Label name="$(parent)KeyLabel" override="true" inherits="ZO_DialogButtonKeyLabel" />
             </Controls>
         </Control>
         
@@ -43,18 +47,12 @@
         
         <Control name="ZO_DialogButton_Gamepad" inherits="ZO_SharedDialogButton" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" inherits="ZO_DialogButtonNameLabel_Gamepad" />
-                <Label name="$(parent)KeyLabel" inherits="ZO_DialogButtonKeyLabel_Gamepad" />
+                <Label name="$(parent)NameLabel" override="true" inherits="ZO_DialogButtonNameLabel_Gamepad" />
+                <Label name="$(parent)KeyLabel" override="true" inherits="ZO_DialogButtonKeyLabel_Gamepad" />
             </Controls>
         </Control>
 
-        <Button name="ZO_DialogRadioButton" inherits="ZO_RadioButton" virtual="true">
-            <Controls>
-                <Label name="$(parent)Label" font="ZoFontGame">
-                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5"/>
-                </Label>
-            </Controls>
-        </Button>
+        <Button name="ZO_DialogRadioButton" inherits="ZO_LabeledRadioButton" virtual="true" />
 
         <Control name="ZO_DialogContentAnchors" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="30"/>
@@ -169,6 +167,8 @@
                     </Controls>
                 </Backdrop>
 
+                <Label name="$(parent)WarningText" inherits="ZO_SmallKeyMarkupLabel" lineSpacing="0" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" />
+
                 <Control name="$(parent)RadioButtonContainer" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
                 </Control>
@@ -181,5 +181,5 @@
                 ZO_TwoButtonDialog_OnInitialized(self, 1)
             </OnInitialized>
         </TopLevelControl>
-</Controls>
+    </Controls>
 </GuiXml>

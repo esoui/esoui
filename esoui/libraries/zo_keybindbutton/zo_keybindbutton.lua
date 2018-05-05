@@ -1,7 +1,15 @@
-local ZO_KeybindButtonMixin = {}
+ZO_KeybindButtonMixin = {}
 
 function ZO_KeybindButtonMixin:GetKeybind()
     return (IsInGamepadPreferredMode() or self.alwaysPreferGamepadMode) and self.gamepadPreferredKeybind or self.keybind
+end
+
+function ZO_KeybindButtonMixin:GetKeyboardKeybind()
+    return self.keybind
+end
+
+function ZO_KeybindButtonMixin:GetGamepadKeybind()
+    return self.gamepadPreferredKeybind
 end
 
 function ZO_KeybindButtonMixin:UpdateEnabledState()
@@ -131,12 +139,52 @@ function ZO_KeybindButtonMixin:SetCallback(callback)
     self.callback = callback
 end
 
-function ZO_KeybindButtonMixin:OnClicked()
-    if(self.enabled) then
-        if(self.clickSound) then
-            PlaySound(self.clickSound)
+function ZO_KeybindButtonMixin:GetKeybindButtonDescriptorReference()
+    return self.keybindDescriptorReference
+end
+
+function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)
+    self.keybindDescriptorReference = keybindDescriptor
+
+    if keybindDescriptor.name then
+        local name = keybindDescriptor.name
+        if type(keybindDescriptor.name) == "function" then
+            name = keybindDescriptor.name()
         end
-        if(self.callback) then
+       self:SetText(name)
+    end
+    
+    if keybindDescriptor.keybind then
+        self:SetKeybind(keybindDescriptor.keybind)
+    end
+
+    if keybindDescriptor.callback then
+        self:SetCallback(keybindDescriptor.callback)
+    end
+
+    if keybindDescriptor.sound then
+        self:SetClickSound(keybindDescriptor.sound)
+    end
+
+    if keybindDescriptor.customKeyText then
+        self:SetCustomKeyText(keybindDescriptor.customKeyText)
+    end
+
+    if keybindDescriptor.customKeyIcon then
+        self:SetCustomKeyIcon(keybindDescriptor.customKeyIcon)
+    end
+end
+
+function ZO_KeybindButtonMixin:OnClicked()
+    if self.enabled then
+        if self.clickSound then
+            if type(self.clickSound) == "function" then
+                PlaySound(self.clickSound())
+            else
+                PlaySound(self.clickSound)
+            end
+        end
+        if self.callback then
             self.callback(self)
         end
     else
@@ -144,10 +192,23 @@ function ZO_KeybindButtonMixin:OnClicked()
     end
 end
 
-function ZO_KeybindButtonTemplate_OnMouseUp(self, button, upInside)
-    if(upInside and (button == MOUSE_BUTTON_INDEX_LEFT) and self.enabled) then
-        self:OnClicked()
+local g_cooldownButtons = {}
+
+-- Should only be used for Floating Keybind Buttons
+-- Otherwise use ZO_KeybindStrip:TriggerCooldown
+function ZO_KeybindButtonMixin:SetCooldown(durationMs)
+    self.cooldownDurationMs = durationMs
+    self.cooldownStartTimeMs = GetFrameTimeMilliseconds()
+
+    --Check for duplicates
+    for i, button in ipairs(g_cooldownButtons) do
+        if button == self then
+            return
+        end
     end
+
+    self.baseText = self.nameLabel:GetText()
+    table.insert(g_cooldownButtons, self)
 end
 
 local g_areKeybindsEnabled
@@ -155,13 +216,31 @@ local g_keybindButtons = {}
 local g_numDisabledReferences = 0
 local function OnUpdate()
     local shouldKeybindsBeEnabled = WINDOW_MANAGER:GetFocusControl() == nil and g_numDisabledReferences == 0
-    if(shouldKeybindsBeEnabled ~= g_areKeybindsEnabled) then
+    if shouldKeybindsBeEnabled ~= g_areKeybindsEnabled then
         g_areKeybindsEnabled = shouldKeybindsBeEnabled
         for i = 1, #g_keybindButtons do
-            if(not g_keybindButtons[i].keybindEnabledInEdit) then
-                g_keybindButtons[i]:SetKeybindEnabled(shouldKeybindsBeEnabled)
+            local currentKeybindButton = g_keybindButtons[i]
+            if not currentKeybindButton.keybindEnabledInEdit then
+                currentKeybindButton:SetKeybindEnabled(shouldKeybindsBeEnabled)
             end
         end
+    end
+
+    local currentTimeMs = GetFrameTimeMilliseconds()
+    for i = #g_cooldownButtons, 1, -1 do
+        local button = g_cooldownButtons[i]
+        local timeDifferenceMs = currentTimeMs - button.cooldownStartTimeMs
+        local shouldBeEnabled = timeDifferenceMs > button.cooldownDurationMs
+        if shouldBeEnabled then
+            button:SetText(button.baseText)
+            button.cooldownDurationMs = nil
+            button.cooldownStartTimeMs = nil
+            table.remove(g_cooldownButtons, i)
+        else
+            local secondsTillEnabled = zo_ceil((button.cooldownStartTimeMs + button.cooldownDurationMs - currentTimeMs) / 1000)
+            button:SetText(zo_strformat(SI_BINDING_NAME_COOLDOWN_FORMAT, button.baseText, secondsTillEnabled))
+        end
+        button:SetEnabled(shouldBeEnabled)
     end
 end
 EVENT_MANAGER:RegisterForUpdate("KeybindButtonUpdate", 0, OnUpdate)
@@ -174,6 +253,11 @@ function ZO_KeybindButtonTemplate_RemoveGlobalDisableReference()
     g_numDisabledReferences = g_numDisabledReferences - 1
 end
 
+function ZO_KeybindButtonTemplate_OnMouseUp(self, button, upInside)
+    if upInside and (button == MOUSE_BUTTON_INDEX_LEFT) and self.enabled then
+        self:OnClicked()
+    end
+end
 
 function ZO_KeybindButtonTemplate_OnInitialized(self)
     self.nameLabel = self:GetNamedChild("NameLabel")
@@ -198,4 +282,93 @@ function ZO_KeybindButtonTemplate_Setup(self, keybind, callbackFunction, text)
     self:SetKeybind(keybind)
     self:SetText(text)
     self:SetCallback(callbackFunction)
+end
+
+ZO_ChromaKeybindButtonMixin = {}
+
+function ZO_ChromaKeybindButtonMixin:SetChromaEnabled(enabled)
+    if self.chromaEnabled ~= enabled then
+        self.chromaEnabled = enabled
+        self:UpdateChromaEffect()
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:AddChromaEffect()
+    if ZO_RZCHROMA_EFFECTS and self:AreChromaEffectsEnabled() then
+        local keybindAction = self:GetKeyboardKeybind()
+        if keybindAction then
+            ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect(keybindAction)
+        end
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:RemoveChromaEffect()
+    if ZO_RZCHROMA_EFFECTS then
+        local keybindAction = self:GetKeyboardKeybind()
+        if keybindAction then
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect(keybindAction)
+        end
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:UpdateChromaEffect()
+    if ZO_RZCHROMA_EFFECTS and not self:IsHidden() then
+        local keybindAction = self:GetKeyboardKeybind()
+        if keybindAction then
+            if self:AreChromaEffectsEnabled() then
+                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect(keybindAction)
+            else
+                ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect(keybindAction)
+            end
+        end
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode)
+    local previousKeybind = self:GetKeyboardKeybind()
+    local refreshKeybind = keybind ~= previousKeybind and not self:IsHidden()
+
+    if refreshKeybind then
+        self:RemoveChromaEffect()
+    end
+
+    ZO_KeybindButtonMixin.SetKeybind(self, keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode)
+
+    if refreshKeybind then
+        self:AddChromaEffect()
+    end
+end
+
+function ZO_ChromaKeybindButtonMixin:UpdateEnabledState()
+    ZO_KeybindButtonMixin.UpdateEnabledState(self)
+    self:UpdateChromaEffect()
+end
+
+function ZO_ChromaKeybindButtonMixin:AreChromaEffectsEnabled()
+    return self.chromaEnabled and self:IsEnabled()
+end
+
+function ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+    ZO_KeybindButtonTemplate_OnInitialized(self)
+    zo_mixin(self, ZO_ChromaKeybindButtonMixin)
+    self:SetChromaEnabled(true)
+end
+
+function ZO_ChromaKeybindButtonTemplate_Setup(self, keybind, callbackFunction, text)
+    ZO_ChromaKeybindButtonTemplate_OnInitialized(self)
+    self:SetKeybind(keybind)
+    self:SetText(text)
+    self:SetCallback(callbackFunction)
+end
+
+function ZO_KeybindButton_ChromaBehavior_OnEffectivelyShown(self)
+    if self.AddChromaEffect then
+        self:AddChromaEffect()
+    end
+end
+
+function ZO_KeybindButton_ChromaBehavior_OnEffectivelyHidden(self)
+    if self.RemoveChromaEffect then
+        self:RemoveChromaEffect()
+    end
 end

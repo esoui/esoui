@@ -221,6 +221,8 @@ function ZO_KeybindStrip:SetBackgroundDrawOrder(tier, layer, level)
     end
 end
 
+--Returns nil if there are no keybind group states (push was not called).
+--Returns the bottom of the stack when there is no stateIndex if there are keybind group states (push was called at least once).
 function ZO_KeybindStrip:GetKeybindState(stateIndex)
     stateIndex = stateIndex or 1
     assert(stateIndex > 0)
@@ -236,6 +238,7 @@ end
 
 --- PRIVATE FUNCTIONS ---
 
+--We store the descriptor for ethereals and the button control for keybinds that actually appear on the strip
 local function GetDescriptorFromButton(buttonOrEtherealDescriptor)
     if type(buttonOrEtherealDescriptor) == "userdata" then
         return buttonOrEtherealDescriptor.keybindButtonDescriptor
@@ -256,21 +259,6 @@ local function GetValueFromRawOrFunction(keybindButtonDescriptor, key)
     end
 
     return value
-end
-
-local function AddKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
-    if not state.keybindGroups[keybindButtonGroupDescriptor] then
-        state.keybindGroups[keybindButtonGroupDescriptor] = keybindButtonGroupDescriptor
-        return true
-    end
-
-    return false
-end
-
-local function AddKeybindButtonStack(keybindButtonDescriptor, state)
-    -- Asserting here usually means that a key is already bound (typically because someone forgot to remove a keybinding).
-    assert(state.individualButtons[keybindButtonDescriptor.keybind] == nil)
-    state.individualButtons[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
 end
 
 function ZO_KeybindStrip.RemoveKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
@@ -334,68 +322,85 @@ local descriptor = {
 
 ]]--
 
-function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
-    local state = self:GetKeybindState(stateIndex)
-    if state then
-        return AddKeybindButtonStack(keybindButtonDescriptor, state)
+do
+    local function GetKeybindDescriptorDebugIdentifier(keybindButtonDescriptor)
+        return GetValueFromRawOrFunction(keybindButtonDescriptor, "name") or ""
     end
 
-    -- Asserting here usually means that a key is already bound (typically because someone forgot to remove a keybinding).
-    local currentSceneName = ""
-    if SCENE_MANAGER then
-        local currentScene = SCENE_MANAGER:GetCurrentScene()
-        if currentScene then
-            currentSceneName = currentScene:GetName()
-        end
-    end
-    local existingButtonOrEtheralDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
-    if existingButtonOrEtheralDescriptor then
-        local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtheralDescriptor)
-        local existingSceneName = ""
-        local existingDescriptorName = ""
+    function ZO_KeybindStrip:HandleDuplicateAddKeybind(existingButtonOrEtherealDescriptor, keybindButtonDescriptor, state, stateIndex, currentSceneName)
+        local existingDescriptor = GetDescriptorFromButton(existingButtonOrEtherealDescriptor)
         if existingDescriptor then
             --We tried to re-add the same exact button, just return
             if existingDescriptor == keybindButtonDescriptor then
                 return
             end
 
-            existingSceneName = existingDescriptor.addedForSceneName
-            local descriptorName = GetValueFromRawOrFunction(existingDescriptor, "name")
-            if descriptorName then
-                existingDescriptorName = descriptorName
-            end
+            local existingSceneName = existingDescriptor.addedForSceneName or ""
+            local existingDescriptorIdentifier = GetKeybindDescriptorDebugIdentifier(existingDescriptor)
+            local newDescriptorIdentifier = GetKeybindDescriptorDebugIdentifier(keybindButtonDescriptor)
+            local assertMessage = string.format("Duplicate Keybind: %s. Before: %s (%s). After: %s (%s).", keybindButtonDescriptor.keybind, existingSceneName, existingDescriptorIdentifier, currentSceneName, newDescriptorIdentifier)
+
+            -- Asserting here usually means that a key is already bound (typically because someone forgot to remove a keybinding).
+            internalassert(false, assertMessage)
+            self:RemoveKeybindButton(existingDescriptor, stateIndex)
         end
-        local newDescriptorName = GetValueFromRawOrFunction(keybindButtonDescriptor, "name") or ""
-        local context = string.format("Duplicate Keybind: %s. Before: %s (%s). After: %s (%s).", keybindButtonDescriptor.keybind, existingSceneName, existingDescriptorName, currentSceneName, newDescriptorName)
-        assert(false, context)
     end
 
-    keybindButtonDescriptor.addedForSceneName = currentSceneName
+    function ZO_KeybindStrip:AddKeybindButtonStack(keybindButtonDescriptor, state, stateIndex, currentSceneName)
+        local existingButtonOrEtherealDescriptor = state.individualButtons[keybindButtonDescriptor.keybind]
+        if existingButtonOrEtherealDescriptor then
+            self:HandleDuplicateAddKeybind(existingButtonOrEtherealDescriptor, keybindButtonDescriptor, state, stateIndex, currentSceneName)
+        end
+        state.individualButtons[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
+        keybindButtonDescriptor.addedForSceneName = currentSceneName
+    end
 
-    if keybindButtonDescriptor.ethereal then
-        self.keybinds[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
-    else
-        local button, key = self.keybindButtonPool:AcquireObject()
-        button.keybindButtonDescriptor = keybindButtonDescriptor
-        button.key = key
-
-        self.insertionId = (self.insertionId or 0) + 1
-        button.insertionOrder = self.insertionId
-
-        self.keybinds[keybindButtonDescriptor.keybind] = button
-
-        if not self.batchUpdating then
-            -- clear this out in case it was previously in a group
-            keybindButtonDescriptor.keybindButtonGroupDescriptor = nil
+    function ZO_KeybindStrip:AddKeybindButton(keybindButtonDescriptor, stateIndex)
+        local currentSceneName = ""
+        if SCENE_MANAGER then
+            local currentScene = SCENE_MANAGER:GetCurrentScene()
+            if currentScene then
+                currentSceneName = currentScene:GetName()
+            end
         end
 
-        self:AddButtonToAnchors(button)
-
-        if not self.batchUpdating then
-            self:SetUpButton(button)
-            self:UpdateAnchors()
+        local state = self:GetKeybindState(stateIndex)
+        if state then
+            return self:AddKeybindButtonStack(keybindButtonDescriptor, state, stateIndex, currentSceneName)
         end
-        return button
+
+        local existingButtonOrEtherealDescriptor = self.keybinds[keybindButtonDescriptor.keybind]
+        if existingButtonOrEtherealDescriptor then
+            self:HandleDuplicateAddKeybind(existingButtonOrEtherealDescriptor, keybindButtonDescriptor, state, stateIndex, currentSceneName)
+        end
+
+        keybindButtonDescriptor.addedForSceneName = currentSceneName
+
+        if keybindButtonDescriptor.ethereal then
+            self.keybinds[keybindButtonDescriptor.keybind] = keybindButtonDescriptor
+        else
+            local button, key = self.keybindButtonPool:AcquireObject()
+            button.keybindButtonDescriptor = keybindButtonDescriptor
+            button.key = key
+
+            self.insertionId = (self.insertionId or 0) + 1
+            button.insertionOrder = self.insertionId
+
+            self.keybinds[keybindButtonDescriptor.keybind] = button
+
+            if not self.batchUpdating then
+                -- clear this out in case it was previously in a group
+                keybindButtonDescriptor.keybindButtonGroupDescriptor = nil
+            end
+
+            self:AddButtonToAnchors(button)
+
+            if not self.batchUpdating then
+                self:SetUpButton(button)
+                self:UpdateAnchors()
+            end
+            return button
+        end
     end
 end
 
@@ -467,8 +472,28 @@ function ZO_KeybindStrip:UpdateKeybindButton(keybindButtonDescriptor, stateIndex
     end
 end
 
-function ZO_KeybindStrip:HasKeybindButton(keybindButtonDescriptor)
+local function HasKeybindButtonStack(keybindButtonDescriptor, state)
+    return state.individualButtons[keybindButtonDescriptor.keybind] ~= nil
+end
+
+function ZO_KeybindStrip:HasKeybindButton(keybindButtonDescriptor, stateIndex)
+    local state = self:GetKeybindState(stateIndex)
+    if state then
+        return HasKeybindButtonStack(keybindButtonDescriptor, state)
+    end
     return self.keybinds[keybindButtonDescriptor.keybind] ~= nil
+end
+
+local function HasKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+    return state.keybindGroups[keybindButtonGroupDescriptor] ~= nil
+end
+
+function ZO_KeybindStrip:HasKeybindButtonGroup(keybindButtonGroupDescriptor, stateIndex)
+    local state = self:GetKeybindState(stateIndex)
+    if state then
+        return HasKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+    end
+    return self.keybindGroups[keybindButtonGroupDescriptor] ~= nil
 end
 
 --[[
@@ -497,6 +522,15 @@ local keybindButtonGroup = {
 }
 
 ]]--
+
+local function AddKeybindButtonGroupStack(keybindButtonGroupDescriptor, state)
+    if not state.keybindGroups[keybindButtonGroupDescriptor] then
+        state.keybindGroups[keybindButtonGroupDescriptor] = keybindButtonGroupDescriptor
+        return true
+    end
+
+    return false
+end
 
 function ZO_KeybindStrip:AddKeybindButtonGroup(keybindButtonGroupDescriptor, stateIndex)
     local state = self:GetKeybindState(stateIndex)
@@ -581,10 +615,6 @@ function ZO_KeybindStrip:UpdateKeybindButtonGroup(keybindButtonGroupDescriptor, 
     return false
 end
 
-function ZO_KeybindStrip:HasKeybindButtonGroup(keybindButtonGroupDescriptor)
-    return self.keybindGroups[keybindButtonGroupDescriptor] ~= nil
-end
-
 function ZO_KeybindStrip:FilterSceneHiding(keybindButtonDescriptor)
     if keybindButtonDescriptor.disabledDuringSceneHiding then
         local currentScene = SCENE_MANAGER:GetCurrentScene()
@@ -607,11 +637,12 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                 enabled = false
             end
             if enabled ~= false then
+                local keybindHandled = nil
                 if self:FilterSceneHiding(keybindButtonDescriptor) then
                     if keybindButtonDescriptor.callback then
                         local sound = keybindButtonDescriptor.sound
                         ClearMenu()
-                        keybindButtonDescriptor.callback(DOWN)
+                        keybindHandled = keybindButtonDescriptor.callback(DOWN)
                         keybindButtonDescriptor.handledDown = true
 
                         if sound then
@@ -619,13 +650,16 @@ function ZO_KeybindStrip:TryHandlingKeybindDown(keybind)
                         end
                     end
                 end
-                return true
+                return keybindHandled or keybindHandled == nil --nil is considered true in this case to ensure backwards compatability
             elseif disabledAlertText then
                 if disabledAlertType == KEYBIND_STRIP_DISABLED_DIALOG then
                     ZO_Dialogs_ShowPlatformDialog("KEYBIND_STRIP_DISABLED_DIALOG", nil, {mainTextParams = {disabledAlertText}})
                 else
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, disabledAlertText)
-                    PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+                    if ZO_REMOTE_SCENE_CHANGE_ORIGIN == SCENE_MANAGER_MESSAGE_ORIGIN_INTERNAL then
+                        RequestAlert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, disabledAlertText)
+                    elseif ZO_REMOTE_SCENE_CHANGE_ORIGIN == SCENE_MANAGER_MESSAGE_ORIGIN_INGAME then
+                        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GENERAL_ALERT_ERROR, disabledAlertText)
+                    end
                 end
             end
         end
@@ -647,13 +681,14 @@ function ZO_KeybindStrip:TryHandlingKeybindUp(keybind)
             keybindButtonDescriptor.handledDown = nil
             if enabled ~= false or handledPreviousDown then
                 if keybindButtonDescriptor.handlesKeyUp or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonDescriptor.keybindButtonGroupDescriptor.handlesKeyUp then
+                    local keybindHandled = nil
                     if self:FilterSceneHiding(keybindButtonDescriptor) then
                         if keybindButtonDescriptor.callback then
                             ClearMenu()
-                            keybindButtonDescriptor.callback(UP)
+                            keybindHandled = keybindButtonDescriptor.callback(UP)
                         end
                     end
-                    return true
+                    return keybindHandled or keybindHandled == nil --nil is considered true in this case to ensure backwards compatability
                 end
             end
         end
@@ -857,8 +892,21 @@ do
             else
                 button.keyLabel:SetHidden(false)
             end
-            local keybind = keybindButtonDescriptor.keybind or keybindButtonDescriptor.keybindButtonGroupDescriptor and keybindButtonGroupDescriptor.keybindButtonGroupDescriptor.keybind
+
+            local keybind = keybindButtonDescriptor.keybind
+            local gamepadPreferredKeybind = keybindButtonDescriptor.gamepadPreferredKeybind
+            local keybindButtonGroupDescriptor = keybindButtonDescriptor.keybindButtonGroupDescriptor
             
+            if keybindButtonGroupDescriptor then
+                if not keybind then
+                    keybind = keybindButtonGroupDescriptor.keybind
+                end
+
+                if not gamepadPreferredKeybind then
+                    gamepadPreferredKeybind = keybindButtonGroupDescriptor.gamepadPreferredKeybind
+                end
+            end
+
             local buttonKeybindChanging = button:GetKeybind() ~= keybind
             local suppressUpdate = (updateOnly and isVisible == wasVisible)
             -- updateOnly is used only when we are trying to update keybinds from UpdateKeybindButton so we know that this setup is coming from an update
@@ -866,7 +914,8 @@ do
             local alwaysPreferGamepadMode = self:SetupButtonStyle(button, self.styleInfo)
 
             if not suppressUpdate or buttonKeybindChanging then
-                button:SetKeybind(keybind, nil, nil, alwaysPreferGamepadMode)
+                local DEFAULT_SHOW_UNBOUND = nil
+                button:SetKeybind(keybind, DEFAULT_SHOW_UNBOUND, gamepadPreferredKeybind, alwaysPreferGamepadMode)
             end
 
             local enabled = GetValueFromRawOrFunction(keybindButtonDescriptor, "enabled")
@@ -945,7 +994,7 @@ do
         return leftOrder < rightOrder
     end
 
-    local function UpdateAnchors(anchorTable, anchor, relativeAnchor, parent, startOffset, yOffset)
+    function ZO_KeybindStrip:UpdateAnchorsInternal(anchorTable, anchor, relativeAnchor, parent, startOffset, yOffset)
         if anchorTable and #anchorTable > 0 then
             if IsInGamepadPreferredMode() then
                 table.sort(anchorTable, GamepadSort)
@@ -959,7 +1008,11 @@ do
             local prevButton
             for i, button in ipairs(anchorTable) do
                 local isVisible = IsVisible(button.keybindButtonDescriptor)
-                button:SetHidden(not isVisible)
+                local wasVisible = not button:IsHidden()
+                if isVisible and not wasVisible then
+                    local UPDATE_ONLY = true
+                    self:SetUpButton(button, UPDATE_ONLY)
+                end
 
                 if isVisible then
                     button:SetParent(parent)
@@ -979,9 +1032,9 @@ do
 
     function ZO_KeybindStrip:UpdateAnchors()
         local yOffset = self.styleInfo and self.styleInfo.yAnchorOffset or 0
-        self.leftButtons = UpdateAnchors(self.leftButtons, LEFT, RIGHT, self.control, self.styleInfo and self.styleInfo.leftAnchorOffset or 0, yOffset)
-        self.rightButtons = UpdateAnchors(self.rightButtons, RIGHT, LEFT, self.control, self.styleInfo and self.styleInfo.rightAnchorOffset or 0, yOffset)
+        self.leftButtons = self:UpdateAnchorsInternal(self.leftButtons, LEFT, RIGHT, self.control, self.styleInfo and self.styleInfo.leftAnchorOffset or 0, yOffset)
+        self.rightButtons = self:UpdateAnchorsInternal(self.rightButtons, RIGHT, LEFT, self.control, self.styleInfo and self.styleInfo.rightAnchorOffset or 0, yOffset)
 
-        self.centerButtons = UpdateAnchors(self.centerButtons, LEFT, RIGHT, self.centerParent, self.styleInfo and self.styleInfo.centerAnchorOffset or 0, yOffset)
+        self.centerButtons = self:UpdateAnchorsInternal(self.centerButtons, LEFT, RIGHT, self.centerParent, self.styleInfo and self.styleInfo.centerAnchorOffset or 0, yOffset)
     end
 end

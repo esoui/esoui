@@ -15,12 +15,16 @@ function ZO_ComboBox:New(container)
     return comboBox
 end
 
-function ZO_ComboBox:AddMenuItems()
-    for i = 1, #self.m_sortedItems
-    do
-        -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
-        local item = self.m_sortedItems[i]
-        AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, nil, self.m_font, self.m_normalColor, self.m_highlightColor)
+do
+    --Padding is handled using SetSpacing
+    local NO_PADDING_Y = 0
+
+    function ZO_ComboBox:AddMenuItems()
+        for i = 1, #self.m_sortedItems do
+            -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
+            local item = self.m_sortedItems[i]
+            AddMenuItem(item.name, function() self:ItemSelectedClickHelper(item) end, MENU_ADD_OPTION_LABEL, self.m_font, self.m_normalColor, self.m_highlightColor, NO_PADDING_Y, self.horizontalAlignment)
+        end
     end
 end
 
@@ -68,7 +72,8 @@ local DEFAULT_TEXT_HIGHLIGHT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR
 local ENTRY_ID = 1
 local LAST_ENTRY_ID = 2
 local SCROLLABLE_ENTRY_TEMPLATE = "ZO_ScrollableComboBoxItem"
-local SCROLLABLE_ENTRY_TEMPLATE_HEIGHT = 25
+ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT = 25
+ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y = 5
 
 ZO_ScrollableComboBox = ZO_ComboBox:Subclass()
 
@@ -90,23 +95,27 @@ function ZO_ScrollableComboBox:Initialize(container)
     self:SetupScrollList()
 end
 
+function ZO_ScrollableComboBox:GetEntryTemplateHeightWithSpacing()
+    return ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT + self.m_spacing
+end
+
 local function SetupScrollableEntry(control, data, list)
     control.m_owner = data.m_owner
     control.m_data = data
     control.m_label = control:GetNamedChild("Label")
-    
-    control:SetHeight(SCROLLABLE_ENTRY_TEMPLATE_HEIGHT)
+
     control.m_label:SetText(data.name)
     control.m_label:SetFont(control.m_owner.m_font)
     control.m_label:SetColor(control.m_owner.m_normalColor:UnpackRGBA())
 end
 
 function ZO_ScrollableComboBox:SetupScrollList()
+    local entryHeight = self:GetEntryTemplateHeightWithSpacing()
     -- To support spacing like regular combo boxes, a separate template needs to be stored for the last entry.
-    ZO_ScrollList_AddDataType(self.m_scroll, ENTRY_ID, SCROLLABLE_ENTRY_TEMPLATE, SCROLLABLE_ENTRY_TEMPLATE_HEIGHT, SetupScrollableEntry)
-    ZO_ScrollList_AddDataType(self.m_scroll, LAST_ENTRY_ID, SCROLLABLE_ENTRY_TEMPLATE, SCROLLABLE_ENTRY_TEMPLATE_HEIGHT, SetupScrollableEntry)
+    ZO_ScrollList_AddDataType(self.m_scroll, ENTRY_ID, SCROLLABLE_ENTRY_TEMPLATE, entryHeight, SetupScrollableEntry)
+    ZO_ScrollList_AddDataType(self.m_scroll, LAST_ENTRY_ID, SCROLLABLE_ENTRY_TEMPLATE, entryHeight, SetupScrollableEntry)
 
-    ZO_ScrollList_EnableSelection(self.m_scroll, "ZO_TallListHighlight")
+    ZO_ScrollList_EnableSelection(self.m_scroll, "ZO_TallListSelectedHighlight")
     ZO_ScrollList_EnableHighlight(self.m_scroll, "ZO_TallListHighlight")
 end
 
@@ -129,7 +138,7 @@ end
 function ZO_ScrollableComboBox:SetSpacing(spacing)
     ZO_ComboBox.SetSpacing(self, spacing)
 
-    local newHeight = SCROLLABLE_ENTRY_TEMPLATE_HEIGHT + self.m_spacing
+    local newHeight = self:GetEntryTemplateHeightWithSpacing()
     ZO_ScrollList_UpdateDataTypeHeight(self.m_scroll, ENTRY_ID, newHeight)
 end
 
@@ -163,6 +172,19 @@ function ZO_ScrollableComboBox:AddMenuItems()
         local entry = CreateScrollableComboBoxEntry(self, item, i, i == numItems)
         table.insert(dataList, entry)
     end
+
+    local maxHeight = self.m_height
+    -- get the height of all the entries we are going to show
+    -- the last entry uses a separate entry template that does not include the spacing in its height
+    local allItemsHeight = self:GetEntryTemplateHeightWithSpacing() * (numItems - 1) + ZO_SCROLLABLE_ENTRY_TEMPLATE_HEIGHT + (ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y * 2)
+
+    local desiredHeight = maxHeight
+    if allItemsHeight < desiredHeight then
+        desiredHeight = allItemsHeight
+    end
+
+    self.m_dropdown:SetHeight(desiredHeight)
+    ZO_ScrollList_SetHeight(self.m_scroll, desiredHeight)
 
     ZO_ScrollList_Commit(self.m_scroll)
 end

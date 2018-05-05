@@ -1,21 +1,20 @@
-local POINT     = 1
-local TARGET    = 2
+local POINT = 1
+local TARGET = 2
 local REL_POINT = 3
-local OFFS_X    = 4
-local OFFS_Y    = 5
+local OFFS_X = 4
+local OFFS_Y = 5
+local CONSTRAINTS = 6
 
 ZO_Anchor = ZO_Object:Subclass ()
 
-function ZO_Anchor:New(pointOnMe, target, pointOnTarget, offsetX, offsetY)
+function ZO_Anchor:New(pointOnMe, target, pointOnTarget, offsetX, offsetY, constraints)
     local a = ZO_Object.New(self)
     
-    if(type(pointOnMe) == "table")
-    then
+    if type(pointOnMe) == "table" then
         local copy = pointOnMe.data
-        
-        a.data = { copy[POINT], copy[TARGET], copy[REL_POINT], copy[OFFS_X], copy[OFFS_Y] }
+        a.data = { copy[POINT], copy[TARGET], copy[REL_POINT], copy[OFFS_X], copy[OFFS_Y], copy[CONSTRAINTS] }
     else
-        a.data = { pointOnMe or TOPLEFT, target, pointOnTarget or a[POINT], offsetX or 0, offsetY or 0 }
+        a.data = { pointOnMe or TOPLEFT, target, pointOnTarget or a[POINT], offsetX or 0, offsetY or 0, constraints or ANCHOR_CONSTRAINS_XY }
     end
     
     return a
@@ -27,19 +26,20 @@ function ZO_Anchor:ResetToAnchor(anchorObj)
     self.data[REL_POINT] = anchorObj.data[REL_POINT] or self.data[POINT]
     self.data[OFFS_X]    = anchorObj.data[OFFS_X] or 0
     self.data[OFFS_Y]    = anchorObj.data[OFFS_Y] or 0
+    self.data[CONSTRAINTS] = anchorObj.data[CONSTRAINTS] or ANCHOR_CONSTRAINS_XY
 end
 
 function ZO_Anchor:SetFromControlAnchor(control, anchorIndex)
-    local isValid, point, relTo, relPoint, offsX, offsY = control:GetAnchor(anchorIndex)
+    local isValid, point, relTo, relPoint, offsX, offsY, constraints = control:GetAnchor(anchorIndex)
     
-    if(isValid)
-    then
+    if isValid then
         local data = self.data
         data[POINT] = point
         data[TARGET] = relTo
         data[REL_POINT] = relPoint
         data[OFFS_X] = offsX
         data[OFFS_Y] = offsY
+        data[CONSTRAINTS] = constraints
     end
 end
 
@@ -95,12 +95,20 @@ function ZO_Anchor:AddOffsets(offsetX, offsetY)
     end
 end
 
+function ZO_Anchor:GetConstraints()
+    return self.data[CONSTRAINTS]
+end
+
+function ZO_Anchor:SetConstraints(constraints)
+    self.data[CONSTRAINTS] = constraints
+end
+
 function ZO_Anchor:Set(control)
     if(control)
     then
         control:ClearAnchors()
         local data = self.data
-        control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y])
+        control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS])
     end
 end
 
@@ -108,7 +116,7 @@ function ZO_Anchor:AddToControl(control)
     if(control)
     then
         local data = self.data
-        control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y])
+        control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS])
     end
 end
 

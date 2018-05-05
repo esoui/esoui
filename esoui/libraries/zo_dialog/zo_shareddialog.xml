@@ -1,11 +1,15 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_SharedDialogButton" inherits="ZO_KeybindButtonBehavior"  virtual="true">
+        <Control name="ZO_SharedDialogButton" inherits="ZO_KeybindButtonBehavior" virtual="true">
             <DimensionConstraints minY="35" maxY="35" />
             <ResizeToFitPadding width="10"/>
             <OnInitialized>
-                ZO_DialogButton_OnInitialized(self)
+                ZO_SharedDialogButton_OnInitialized(self)
             </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameLabel"/>
+                <Label name="$(parent)KeyLabel"/>
+            </Controls>
         </Control>
 
         <Control name="ZO_SharedCustomDialogButton" excludeFromResizeToFitExtents="true" virtual="true">

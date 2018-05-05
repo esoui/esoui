@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_ComboBox_Gamepad" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_ComboBox_Gamepad" virtual="true">
             <Dimensions x="150" y="48" />
             <OnInitialized>
                 ZO_ComboBox_Gamepad:New(self)
@@ -12,7 +12,7 @@
                 </Texture>
                 
                 <Label name="$(parent)SelectedItemText" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3" constrains="X"/>
                     <Anchor point="TOPLEFT"/>
                 </Label>
             </Controls>
@@ -38,11 +38,11 @@
                 end
             </OnEffectivelyHidden>
             <Controls>
-                <Scroll name="$(parent)Scroll" tier="HIGH" layer="OVERLAY">
+                <Scroll name="$(parent)Scroll" layer="OVERLAY">
                     <AnchorFill/>
                     <FadeGradient x1="0" y1="1" size1="15" x2="0" y2="-1" size2="15" />
                 </Scroll>
-                <Backdrop name="$(parent)Background" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" tier="HIGH" layer="BACKGROUND" >
+                <Backdrop name="$(parent)Background" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <AnchorFill/>
                     <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="32" edgeFileHeight="8" />
                     <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />

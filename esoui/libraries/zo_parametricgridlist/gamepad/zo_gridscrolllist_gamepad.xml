@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GridScrollList_Gamepad" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" >
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                            <AnchorFill />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_GridScrollList_Entry_Header_Template_Gamepad" font="ZoFontGamepad27" modifyTextType="UPPERCASE" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Backdrop name="ZO_GridScrollList_Highlight_Gamepad" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight"  virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
+            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+        </Backdrop>
+
+        <Control name="ZO_GridScrollList_Entry_Template_Gamepad" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD" y="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_GAMEPAD" />
+            <Controls>
+                <Texture name="$(parent)Icon" level="1">
+                    <AnchorFill />
+                </Texture>
+
+                <Backdrop name="$(parent)BorderedBackground" centerColor="FFFFFFFF">
+                    <AnchorFill/>
+                    <Edge file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

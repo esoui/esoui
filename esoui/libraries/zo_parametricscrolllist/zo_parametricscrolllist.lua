@@ -61,7 +61,7 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.headerDefaultPadding = 0
     self.headerSelectedPadding = 0
 
-    self.defaultSelectedIndex = 0
+    self.defaultSelectedIndex = 1
 
     self.fixedCenterOffset = 0
 
@@ -69,7 +69,7 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.animationEnabled = true
     self.soundEnabled = true
     self.directionalInputEnabled = true
-    self.validateGradient = true
+    self.validateGradient = false
     self.validGradientDirty = true
     self.anchorOppositeSide = false
 
@@ -135,7 +135,7 @@ function ZO_ParametricScrollList_DefaultMenuEntryWithHeaderSetup(control, data, 
     end
 end
 
-function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFunction , parametricFunction, equalityFunction, headerTemplateName, optionalHeaderSetupFunction, controlPoolPrefix)
+function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFunction , parametricFunction, equalityFunction, headerTemplateName, optionalHeaderSetupFunction, controlPoolPrefix, controlPoolResetFunction)
     local entryTemplateName = templateName
     templateName = templateName.."WithHeader"
     if not self.dataTypes[templateName] then
@@ -165,6 +165,9 @@ function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFu
 
         dataTypeInfo.pool:SetCustomResetBehavior(function(control)
                 control.headerControl:SetHidden(true)
+                if controlPoolResetFunction then
+                    controlPoolResetFunction(control)
+                end
             end)
 
         dataTypeInfo.pool:SetCustomAcquireBehavior(function(control)
@@ -175,18 +178,37 @@ function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFu
     end
 end
 
-function ZO_ParametricScrollList:AddEntry(templateName, data, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
+function ZO_ParametricScrollList:AddEntryAtIndex(index, templateName, data, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
     if self.dataTypes[templateName] then
-        self.templateList[#self.templateList + 1] = templateName
-        self.dataList[#self.dataList + 1] = data
+        --Keep these parallel arrays in sync with RemoveEntry below
+
+        table.insert(self.templateList, index, templateName)
+        table.insert(self.dataList, index, data)
 
         -- NOTE: These are set to false if not specified as nil will cause the next entry to have an incorrect index in the field. Direct
         --  access is not recommended, use the GetSelectedAdditionalPaddingForDataIndex() or GetPaddingForDataIndex() functions instead.
-        self.prePadding[#self.prePadding + 1] = prePadding or 0
-        self.postPadding[#self.postPadding + 1] = postPadding or false
-        self.preSelectedOffsetAdditionalPadding[#self.preSelectedOffsetAdditionalPadding + 1] = preSelectedOffsetAdditionalPadding or false
-        self.postSelectedOffsetAdditionalPadding[#self.postSelectedOffsetAdditionalPadding + 1] = postSelectedOffsetAdditionalPadding or false
-        self.selectedCenterOffset[#self.selectedCenterOffset + 1] = selectedCenterOffset or 0
+        table.insert(self.prePadding, index, prePadding or 0)
+        table.insert(self.postPadding, index, postPadding or false)
+        table.insert(self.preSelectedOffsetAdditionalPadding, index, preSelectedOffsetAdditionalPadding or false)
+        table.insert(self.postSelectedOffsetAdditionalPadding, index, postSelectedOffsetAdditionalPadding or false)
+        table.insert(self.selectedCenterOffset, index, selectedCenterOffset or 0)
+    end
+end
+
+function ZO_ParametricScrollList:AddEntry(templateName, data, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
+    self:AddEntryAtIndex(#self.dataList + 1, templateName, data, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
+end
+
+function ZO_ParametricScrollList:RemoveEntry(templateName, data)
+    local dataIndex = self:GetIndexForData(templateName, data)
+    if dataIndex then
+        table.remove(self.templateList, dataIndex)
+        table.remove(self.dataList, dataIndex)
+        table.remove(self.prePadding, dataIndex)
+        table.remove(self.postPadding, dataIndex)
+        table.remove(self.preSelectedOffsetAdditionalPadding, dataIndex)
+        table.remove(self.postSelectedOffsetAdditionalPadding, dataIndex)
+        table.remove(self.selectedCenterOffset, dataIndex)
     end
 end
 
@@ -196,6 +218,18 @@ end
 
 function ZO_ParametricScrollList:GetEntryData(index)
     return self.dataList[index]
+end
+
+function ZO_ParametricScrollList:GetIndexForData(templateName, data)
+    for i = 1, #self.dataList do
+        local currentTemplateName = self.templateList[i]
+        if currentTemplateName == templateName then
+            local templateInfo = self.dataTypes[currentTemplateName]
+            if templateInfo.equalityFunction(self.dataList[i], data) then
+                return i
+            end
+        end
+    end
 end
 
 function ZO_ParametricScrollList:AddEntryWithHeader(templateName, ...)
@@ -235,7 +269,7 @@ function ZO_ParametricScrollList:SetDrawScrollArrows(drawScrollArrows)
 end
 
 function ZO_ParametricScrollList:SetAnchorOppositeSide(anchorOppositeSide)
-    self.anchorOppositeSide = true
+    self.anchorOppositeSide = anchorOppositeSide
 end
 
 function ZO_ParametricScrollList:UpdateScrollArrows()
@@ -402,23 +436,31 @@ function ZO_ParametricScrollList:CanSelect(newIndex)
 end
 
 function ZO_ParametricScrollList:MovePrevious()
-    local newIndex = (self.targetSelectedIndex or self.selectedIndex or 2) - 1
-    while (newIndex >= 1) and (self:CanSelect(newIndex) == false) do
-        newIndex = newIndex - 1
+    if #self.dataList > 1 then
+        local newIndex = (self.targetSelectedIndex or self.selectedIndex or 2) - 1
+        while newIndex >= 1 and not self:CanSelect(newIndex) do
+            newIndex = newIndex - 1
+        end
+        if newIndex >= 1 then
+            self:SetSelectedIndex(newIndex)
+            return true
+        elseif newIndex == 0 then
+            self:FireCallbacks("HitBeginningOfList")
+        end
     end
-    if (newIndex >= 1) then
-        self:SetSelectedIndex(newIndex)
-        return true
-    end
+
     return false
 end
 
 function ZO_ParametricScrollList:MoveNext()
-    local newIndex = self:GetNextSelectableIndex(self:CalculateSelectedIndexOffsetWithDrag())
-    if (newIndex <= #self.dataList) then
-        self:SetSelectedIndex(newIndex)
-        return true
+    if #self.dataList > 1 then
+        local newIndex = self:GetNextSelectableIndex(self:CalculateSelectedIndexOffsetWithDrag())
+        if newIndex <= #self.dataList then
+            self:SetSelectedIndex(newIndex)
+            return true
+        end
     end
+
     return false
 end
 
@@ -453,7 +495,7 @@ function ZO_ParametricScrollList:SetSelectedIndexWithoutAnimation(selectedIndex,
     self:EnableAnimation(true)
 end
 
-function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType)
+function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType, blockSelectionChangedCallback)
     self:SetJumping(false)
 
     if self.enabled or allowEvenIfDisabled then
@@ -461,8 +503,10 @@ function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisa
         self.targetSelectedIndex = zo_clamp(selectedIndex, 1, #self.dataList)
         local reachedTargetIndex = (self.targetSelectedIndex == self:CalculateSelectedIndexOffsetWithDrag())
 
-        self:FireCallbacks("TargetDataChanged", self, self:GetDataForDataIndex(self.targetSelectedIndex), self:GetDataForDataIndex(oldTargetSelectedIndex), reachedTargetIndex, self.targetSelectedIndex)
-        
+        if not blockSelectionChangedCallback then
+            self:FireCallbacks("TargetDataChanged", self, self:GetDataForDataIndex(self.targetSelectedIndex), self:GetDataForDataIndex(oldTargetSelectedIndex), reachedTargetIndex, self.targetSelectedIndex)
+        end
+
         if self.targetSelectedIndex and self.selectedIndex then
             local moveAmount = zo_abs(self.targetSelectedIndex - self.selectedIndex)
             if jumpType and moveAmount > 0 then
@@ -550,14 +594,30 @@ function ZO_ParametricScrollList:SetSelectedDataByRangedEval(eval, startIndex, e
     return false
 end
 
+local function ReleaseAllControls(self)
+    self.visibleControls = {}
+    self.dataIndexToControl = {}
+    self.unseenControls = {}
+    for templateName, dataTypeInfo in pairs(self.dataTypes) do
+        dataTypeInfo.pool:ReleaseAllObjects()
+    end
+end
+
+local function MoveSelectedToOldSelected(self)
+    if self.targetSelectedIndex then
+        self.oldSelectedData = self.selectedData
+        self.oldSelectedDataTemplate = self.templateList and self.templateList[self.selectedIndex]
+        self.oldSelectedIndex = self.targetSelectedIndex
+        self.selectedIndex = nil
+        self.targetSelectedIndex = nil
+        self.selectedData = nil
+    end
+end
+
 function ZO_ParametricScrollList:Clear()
+    MoveSelectedToOldSelected(self)
+
     self.lastContinousTargetOffset = nil
-    self.oldSelectedData = self.selectedData
-    self.oldSelectedDataTemplate = self.templateList and self.templateList[self.selectedIndex]
-    self.oldSelectedIndex = self.targetSelectedIndex
-    self.selectedIndex = nil
-    self.targetSelectedIndex = nil
-    self.selectedData = nil
     self:SetMoving(false)
     self.dataList = {}
     self.templateList = {}
@@ -566,35 +626,27 @@ function ZO_ParametricScrollList:Clear()
     self.preSelectedOffsetAdditionalPadding = {}
     self.postSelectedOffsetAdditionalPadding = {}
     self.selectedCenterOffset = {}
-    self.lastCenterControlSize = nil
 
-    self.visibleControls = {}
-    self.dataIndexToControl = {}
-
-    self.unseenControls = {}
+    ReleaseAllControls(self)
 
 	if self.currentCommitHistoryKey then
 		self.commitHistoryDictionary[self.currentCommitHistoryKey] = { data = self.oldSelectedData, template = self.oldSelectedDataTemplate, selectedIndex = self.oldSelectedIndex }
 	end
-
-    for templateName, dataTypeInfo in pairs(self.dataTypes) do
-        dataTypeInfo.pool:ReleaseAllObjects()
-    end
 
     if self.onClearedFunction then
         self.onClearedFunction(self)
     end
 end
 
-local function FindMatchingIndex(oldSelectedData, newDataList, newTemplateList, oldTemplate, equalityFunction, oldSelectedIndex)
+local function FindMatchingIndex(oldSelectedData, newDataList, equalityFunction, oldSelectedIndex)
     for i = oldSelectedIndex, #newDataList do
-        if newTemplateList[i] == oldTemplate and equalityFunction(oldSelectedData, newDataList[i]) then
+        if equalityFunction(oldSelectedData, newDataList[i]) then
             return i
         end
     end
 
-    for i = oldSelectedIndex - 1, 1, -1 do
-        if newTemplateList[i] == oldTemplate and equalityFunction(oldSelectedData, newDataList[i]) then
+    for i = zo_min(oldSelectedIndex - 1, #newDataList), 1, -1 do
+        if equalityFunction(oldSelectedData, newDataList[i]) then
             return i
         end
     end
@@ -612,6 +664,11 @@ function ZO_ParametricScrollList:CommitWithoutReselect()
 end
 
 function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallback)
+    self.lastContinousTargetOffset = nil
+    self:SetMoving(false)
+    MoveSelectedToOldSelected(self)
+    ReleaseAllControls(self)
+
     self.validGradientDirty = true
     local dataListSize = #self.dataList
     local hasItems = dataListSize > 0
@@ -647,7 +704,7 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
 
 			if oldSelectedDataTemplate then
 				local equalityFunction = self.dataTypes[oldSelectedDataTemplate].equalityFunction
-				matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, self.templateList, oldSelectedDataTemplate, equalityFunction, matchingIndex)
+				matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, equalityFunction, matchingIndex)
             
 				if (matchingIndex > dataListSize) then
 					matchingIndex = dataListSize
@@ -664,7 +721,8 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
 
         local ALLOW_EVEN_IF_DISABLED = true
         local FORCE_ANIMATION = true
-        self:SetSelectedIndex(matchingIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION)
+        local DEFAULT_JUMP_TYPE = nil
+        self:SetSelectedIndex(matchingIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION, DEFAULT_JUMP_TYPE, blockSelectionChangedCallback)
 
         local INITIAL_UPDATE = true
         local RESELECTING_DURING_REBUILD = true
@@ -787,8 +845,9 @@ function ZO_ParametricScrollList:OnUpdate()
     end
 end
 
+local SELECTION_LERP_RATE = 0.2
 function ZO_ParametricScrollList:CalculateNextLerpedContinousOffset(continousTargetOffset)
-    return zo_deltaNormalizedLerp(self.lastContinousTargetOffset, continousTargetOffset, .2)
+    return zo_deltaNormalizedLerp(self.lastContinousTargetOffset, continousTargetOffset, SELECTION_LERP_RATE)
 end
 
 function ZO_ParametricScrollList:GetSelectedControl()
@@ -925,7 +984,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
             local prevControlOffsets = centerOffset - (self.anchorOppositeSide and centerControlDimension or 0) + preCenterPadding + centerSelectedOffset * (1 - baseOffset)
             local startOfScrollContainer = GetStartOfControl(self.mode, self.control)
             for dataIndex = newSelectedDataIndex - 1, 1, -1 do
-                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED)
+                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED, reselectingDuringRebuild)
 
                 local distanceFromCenter = newSelectedDataIndex - dataIndex
                 local preSelectedOffsetAdditionalPadding, _ = self:GetSelectedAdditionalPaddingForDataIndex(dataIndex)
@@ -954,7 +1013,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
             local prevControlOffsets = centerOffset + (self.anchorOppositeSide and 0 or centerControlDimension) + postCenterPadding + centerSelectedOffset * (1 - baseOffset)
             local endOfScrollContainer = GetEndOfControl(self.mode, self.control)
             for dataIndex = newSelectedDataIndex + 1, #self.dataList do
-                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED)
+                local control = self:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, UNSELECTED, reselectingDuringRebuild)
 
                 local distanceFromCenter = newSelectedDataIndex - dataIndex
                 local _, postSelectedOffsetAdditionalPadding = self:GetSelectedAdditionalPaddingForDataIndex(dataIndex)
@@ -1068,6 +1127,18 @@ end
 
 function ZO_ParametricScrollList:GetDataForDataIndex(dataIndex)
     return self.dataList[dataIndex]
+end
+
+function ZO_ParametricScrollList:GetControlFromData(data)
+    for i = 1, #self.dataList do
+        if self.dataList[i] == data then
+            return self.dataIndexToControl[i]
+        end
+    end
+end
+
+function ZO_ParametricScrollList:GetAllVisibleControls()
+    return self.visibleControls
 end
 
 function ZO_ParametricScrollList:SetHeaderPadding(defaultPadding, selectedPadding)
@@ -1186,7 +1257,7 @@ function ZO_ParametricScrollList:ReleaseControl(control)
     pool:ReleaseObject(control.key)
 end
 
-function ZO_ParametricScrollList:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, selected)
+function ZO_ParametricScrollList:AcquireAndSetupControl(dataIndex, selectedDataChanged, initialUpdate, oldSelectedData, selected, reselectingDuringRebuild)
     local control, justCreated = self:AcquireControlAtDataIndex(dataIndex)
     local data = self:GetDataForDataIndex(dataIndex)
     if justCreated or initialUpdate or (selectedDataChanged and oldSelectedData == data) then
@@ -1244,57 +1315,72 @@ function ZO_ParametricScrollList:DoesTemplateHaveEditBox(dataIndex)
     return self.dataTypes[templateName].hasEditControl
 end
 
+--Set this to true if the list could have less than ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE UI units from its center control to the scroll top or bottom. Turning this on will
+--automatically size the fade gradients to not overlap the center control.
 function ZO_ParametricScrollList:SetValidateGradient(validate)
-    self.validateGradient = validate
+    if self.mode == PARAMETRIC_SCROLL_LIST_VERTICAL then
+        if validate ~= self.validateGradient then
+            self.validateGradient = validate
+            if validate then
+                self.scrollControl:SetHandler("OnRectChanged", function(scrollControl, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
+                    --if the edges of the scroll area changed we need to fix up the gradients                
+                    if (not zo_floatsAreEqual(newTop, oldTop) or not zo_floatsAreEqual(newBottom, oldBottom)) then
+                        self.validGradientDirty = true
+                        self:EnsureValidGradient()
+                    end
+                end)
+            else
+                self.scrollControl:SetHandler("OnRectChanged", nil)
+            end
+        end
+    end
 end
 
 function ZO_ParametricScrollList:EnsureValidGradient()
     if self.validateGradient and self.validGradientDirty then
-        -- control dimensions used / gradient coordinates only apply to vertical lists 
-        if self.mode == PARAMETRIC_SCROLL_LIST_VERTICAL then
-            local listStart = GetStartOfControl(self.mode, self.scrollControl)
-            local listEnd = GetEndOfControl(self.mode, self.scrollControl)
-            local listMid = listStart + (GetControlDimensionForMode(self.mode, self.scrollControl) / 2.0)
-            if self.alignToScreenCenter and self.alignToScreenCenterAnchor then
-                listMid = GetStartOfControl(self.mode, self.alignToScreenCenterAnchor)
-            end
-
-            listMid = listMid + self.fixedCenterOffset
-
-            local hasHeaders = false
-            for templateName, dataTypeInfo in pairs(self.dataTypes) do
-                if dataTypeInfo.hasHeader then
-                    hasHeaders = true
-                    break
-                end
-            end
-
-            local selectedControlBufferStart = 0
-            if hasHeaders then
-                selectedControlBufferStart = selectedControlBufferStart - self.headerSelectedPadding + DEFAULT_EXPECTED_HEADER_HEIGHT
-            end
-
-            local selectedControlBufferEnd = DEFAULT_EXPECTED_ENTRY_HEIGHT
-            if self.alignToScreenCenterExpectedEntryHalfHeight then
-                selectedControlBufferEnd = self.alignToScreenCenterExpectedEntryHalfHeight * 2.0
-            end
-
-            -- Have some small minimum effect
-            local MINIMUM_ALLOWED_FADE_GRADIENT = 32
-            local gradientMaxStart = zo_max(listMid - listStart - selectedControlBufferStart, MINIMUM_ALLOWED_FADE_GRADIENT)
-            local gradientMaxEnd = zo_max(listEnd - listMid - selectedControlBufferEnd, MINIMUM_ALLOWED_FADE_GRADIENT)
-
-            local gradientStartSize = zo_min(gradientMaxStart, ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE)
-            local gradientEndSize = zo_min(gradientMaxEnd, ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE)
-
-            local FIRST_FADE_GRADIENT = 1
-            local SECOND_FADE_GRADIENT = 2
-            local GRADIENT_TEX_CORD_0 = 0
-            local GRADIENT_TEX_CORD_1 = 1
-            local GRADIENT_TEX_CORD_NEG_1 = -1
-            self.scrollControl:SetFadeGradient(FIRST_FADE_GRADIENT, GRADIENT_TEX_CORD_0, GRADIENT_TEX_CORD_1, gradientStartSize)
-            self.scrollControl:SetFadeGradient(SECOND_FADE_GRADIENT, GRADIENT_TEX_CORD_0, GRADIENT_TEX_CORD_NEG_1, gradientEndSize)
+        local listStart = GetStartOfControl(self.mode, self.scrollControl)
+        local listEnd = GetEndOfControl(self.mode, self.scrollControl)
+        local listMid = listStart + (GetControlDimensionForMode(self.mode, self.scrollControl) / 2.0)
+        if self.alignToScreenCenter and self.alignToScreenCenterAnchor then
+            listMid = GetStartOfControl(self.mode, self.alignToScreenCenterAnchor)
         end
+
+        listMid = listMid + self.fixedCenterOffset
+
+        local hasHeaders = false
+        for templateName, dataTypeInfo in pairs(self.dataTypes) do
+            if dataTypeInfo.hasHeader then
+                hasHeaders = true
+                break
+            end
+        end
+
+        local selectedControlBufferStart = 0
+        if hasHeaders then
+            selectedControlBufferStart = selectedControlBufferStart - self.headerSelectedPadding + DEFAULT_EXPECTED_HEADER_HEIGHT
+        end
+
+        local selectedControlBufferEnd = DEFAULT_EXPECTED_ENTRY_HEIGHT
+        if self.alignToScreenCenterExpectedEntryHalfHeight then
+            selectedControlBufferEnd = self.alignToScreenCenterExpectedEntryHalfHeight * 2.0
+        end
+
+        -- Have some small minimum effect
+        local MINIMUM_ALLOWED_FADE_GRADIENT = 32
+        local gradientMaxStart = zo_max(listMid - listStart - selectedControlBufferStart, MINIMUM_ALLOWED_FADE_GRADIENT)
+        local gradientMaxEnd = zo_max(listEnd - listMid - selectedControlBufferEnd, MINIMUM_ALLOWED_FADE_GRADIENT)
+
+        local gradientStartSize = zo_min(gradientMaxStart, ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE)
+        local gradientEndSize = zo_min(gradientMaxEnd, ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE)
+
+        local FIRST_FADE_GRADIENT = 1
+        local SECOND_FADE_GRADIENT = 2
+        local GRADIENT_TEX_CORD_0 = 0
+        local GRADIENT_TEX_CORD_1 = 1
+        local GRADIENT_TEX_CORD_NEG_1 = -1
+        self.scrollControl:SetFadeGradient(FIRST_FADE_GRADIENT, GRADIENT_TEX_CORD_0, GRADIENT_TEX_CORD_1, gradientStartSize)
+        self.scrollControl:SetFadeGradient(SECOND_FADE_GRADIENT, GRADIENT_TEX_CORD_0, GRADIENT_TEX_CORD_NEG_1, gradientEndSize)
+
         self.validGradientDirty = false
     end
 end

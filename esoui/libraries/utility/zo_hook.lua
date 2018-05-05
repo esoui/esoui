@@ -39,3 +39,13 @@ function ZO_PreHookHandler(control, handlerName, hookFunction)
     end
     control:SetHandler(handlerName, newHandlerFunction)
 end
+
+--where ... are the handler args after self
+function ZO_PropagateHandler(propagateTo, handlerName, ...)
+    if propagateTo then
+        local handler = propagateTo:GetHandler(handlerName)
+        if handler then
+            handler(propagateTo, ...)
+        end
+    end
+end

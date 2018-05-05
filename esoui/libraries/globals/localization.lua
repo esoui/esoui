@@ -10,7 +10,7 @@ function zo_strformat(formatString, ...)
         if type(currentArg) == "number" then
             local str = ""
             local numFmt = "d"
-            local num, frac = math.modf(currentArg)
+            local num, frac = zo_decimalsplit(currentArg)
             
             local width = 0
             local digits = 1
@@ -49,15 +49,84 @@ function zo_strformat(formatString, ...)
     return LocalizeString(formatString, unpack(strArgs))
 end
 
+do
+    -- zo_strformat elegantly handles the case where we pass in a param as the "formatter" (e.g.: collectible descriptions).
+    -- However, in order to avoid having each string generate its own cache table, the ZO_CachedStrFormat function need to be explicitely told "I have no formatter"
+    -- so it can add all of them to one table.  This cuts down on overhead, with the downside that it loses slight parity with zo_strformat.
+    -- However, the fact that we do this whole no param thing at all is exploiting a quirk in the grammar to get around a bug in the grammar anyway so
+    -- it's a relatively rare scenario
+
+    ZO_CACHED_STR_FORMAT_NO_FORMATTER = ""
+
+    local g_onlyStoreOneByFormatter = { }
+
+    function ZO_SetCachedStrFormatterOnlyStoreOne(formatter)
+        internalassert(formatter ~= ZO_CACHED_STR_FORMAT_NO_FORMATTER)
+        g_onlyStoreOneByFormatter[formatter] = true
+    end
+
+    local g_cachedStringsByFormatter = 
+    {
+        [ZO_CACHED_STR_FORMAT_NO_FORMATTER] = {} --Used for strings that need to run through grammar without a formatter
+    }
+
+    function ZO_CachedStrFormat(formatter, ...)
+        formatter = formatter or ZO_CACHED_STR_FORMAT_NO_FORMATTER
+
+        local formatterCache = g_cachedStringsByFormatter[formatter]
+        if not formatterCache then
+            formatterCache = {}
+            g_cachedStringsByFormatter[formatter] = formatterCache
+        end
+        
+        local cachedString
+        if formatter == ZO_CACHED_STR_FORMAT_NO_FORMATTER then
+            --"No formatter" only works with 1 param
+            local rawString = ...
+            local hashKey = HashString(rawString)
+
+            cachedString = formatterCache[hashKey]
+            if not cachedString then
+                cachedString = zo_strformat(rawString)
+                formatterCache[hashKey] = cachedString
+            end
+        else
+            local concatParams = table.concat({ ... })
+            local hashKey = HashString(concatParams)
+
+            cachedString = formatterCache[hashKey]
+            if not cachedString then
+                cachedString = zo_strformat(formatter, ...)
+                if g_onlyStoreOneByFormatter[formatter] then
+                    local existingKey = next(formatterCache)
+                    if existingKey then
+                        formatterCache[existingKey] = nil
+                    end
+                end
+                formatterCache[hashKey] = cachedString
+            end
+        end
+
+        return cachedString
+    end
+
+    function ZO_ResetCachedStrFormat(formatter)
+        if g_cachedStringsByFormatter[formatter] then
+            g_cachedStringsByFormatter[formatter] = nil
+        end
+    end
+end
+
 function zo_strtrim(str)
     -- The extra parentheses are used to discard the additional return value (which is the total number of matches)
     return(zo_strgsub(str, "^%s*(.-)%s*$", "%1"))
 end
 
 do
-    local DIGIT_GROUP_REPLACER = GetString(SI_DIGIT_GROUP_SEPARATOR)
+    -- Use the English thousands and decimal marks. The grammar library will convert them to the current language.
+    local DIGIT_GROUP_REPLACER = ","
+    local DIGIT_GROUP_DECIMAL_REPLACER = "."
     local DIGIT_GROUP_REPLACER_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
-    local DIGIT_GROUP_DECIMAL_REPLACER = GetString(SI_DIGIT_GROUP_DECIMAL_SEPARATOR)
     
     function ZO_CommaDelimitNumber(amount)
         if amount < DIGIT_GROUP_REPLACER_THRESHOLD then
@@ -68,11 +137,12 @@ do
     end
 
     function ZO_LocalizeDecimalNumber(amount)
-        local amountString = tostring(amount)
-
-        if "." ~= DIGIT_GROUP_DECIMAL_REPLACER then
-            amountString = zo_strgsub(amountString, "%.", DIGIT_GROUP_DECIMAL_REPLACER)
+        -- Guards against negative 0 as a displayed numeric value
+        if amount == 0 then
+            amount = 0
         end
+
+        local amountString = tostring(amount)
 
         if amount >= DIGIT_GROUP_REPLACER_THRESHOLD then
             -- We have a number like 10000.5, so localize the non-decimal digit group separators (e.g., 10000 becomes 10,000)
@@ -90,24 +160,31 @@ end
 function ZO_GenerateCommaSeparatedList(argumentTable)
     if argumentTable ~= nil and #argumentTable > 0 then
         local numArguments = #argumentTable
-        -- start off the list with the first element in the array
-        local listString = argumentTable[1]
-        -- loop through the second through the second to last element adding commas in between
-        -- if there are only two things in the array this loop will be skipped
-        for i = 2, (numArguments - 1) do
-            listString = listString .. GetString(SI_LIST_COMMA_SEPARATOR) .. argumentTable[i]
-        end
-        -- add the last element of the array to the list
-        -- special behavior to add "and" for the last element
-        if numArguments >= 2 then
+        -- If there's only one item in the list, the string is just the first item
+        if numArguments == 1 then
+            return argumentTable[1]
+        else
+            -- loop through the first through the second to last element adding commas in between
+            -- don't add the last since we will use a different separator for it
+            local listString = table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR), 1, numArguments - 1)
+
+            -- add the last element of the array to the list using the ", and" separator
             local finalSeparator = SI_LIST_COMMA_AND_SEPARATOR
-            -- if there are only two it doesn't make sense to add ", and "
+            -- if there are only two items in the list, we want to use "and" without a comma
             if numArguments == 2 then
                 finalSeparator = SI_LIST_AND_SEPARATOR
             end
-            listString = listString .. GetString(finalSeparator) .. argumentTable[numArguments]
+            listString = string.format('%s%s%s', listString, GetString(finalSeparator), argumentTable[numArguments])
+            return listString
         end
-        return listString
+    else
+        return ""
+    end
+end
+
+function ZO_GenerateCommaSeparatedListWithoutAnd(argumentTable)
+    if argumentTable ~= nil then
+        return table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR))
     else
         return ""
     end

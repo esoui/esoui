@@ -25,6 +25,17 @@ end
 
 function ZO_Gamepad_CreateListTriggerKeybindDescriptors(list, optionalHeaderComparator)
     local leftTrigger = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = function()
+            local list = list --need a local copy so the original isn't overwritten on subsequent calls
+            if type(list) == "function" then
+                list = list()
+            end
+            local listControl = list:GetControl()
+			if listControl then
+				return listControl:GetName()
+			end
+        end,
         keybind = "UI_SHORTCUT_LEFT_TRIGGER",
         ethereal = true,
 
@@ -40,6 +51,18 @@ function ZO_Gamepad_CreateListTriggerKeybindDescriptors(list, optionalHeaderComp
     }
 
     local rightTrigger = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = function()
+            local list = list --need a local copy so the original isn't overwritten on subsequent calls
+            if type(list) == "function" then
+                list = list()
+            end
+            local listControl = list:GetControl()
+			if listControl then
+				return listControl:GetName()
+			end
+        end,
+
         keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
         ethereal = true,
 
@@ -71,6 +94,8 @@ GAME_NAVIGATION_TYPE_BOTH = 3
 function ZO_Gamepad_AddForwardNavigationKeybindDescriptors(descriptor, navigationType, callback, name, visible, enabled, sound)
     if navigationType == GAME_NAVIGATION_TYPE_STICK or navigationType == GAME_NAVIGATION_TYPE_BOTH then
         descriptor[#descriptor + 1] = {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = name or GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_INPUT_RIGHT",
             ethereal = true,
             visible = visible,
@@ -105,6 +130,8 @@ end
 function ZO_Gamepad_AddBackNavigationKeybindDescriptors(descriptor, navigationType, callback, name, sound)
     if navigationType == GAME_NAVIGATION_TYPE_STICK or navigationType == GAME_NAVIGATION_TYPE_BOTH then
         descriptor[#descriptor + 1] = {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = name or GetString(SI_GAMEPAD_BACK_OPTION),
             keybind = "UI_SHORTCUT_INPUT_LEFT",
             ethereal = true,
             sound = sound,

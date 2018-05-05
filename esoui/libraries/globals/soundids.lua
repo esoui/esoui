@@ -86,11 +86,6 @@ SOUNDS = {
     CHAT_MINIMIZED = "Chat_Min",
     CHAT_MAXIMIZED = "Chat_Max",
 
-    --Scroll Sounds
-    SCROLL_UP                       = "Scroll_Up",
-    SCROLL_DOWN                     = "Scroll_Down",
-    SCROLL_END                      = "Scroll_Down",
-
     -- Spinner Sounds
     SPINNER_UP                      = "Spinner_Up",
     SPINNER_DOWN                    = "Spinner_Down",
@@ -237,6 +232,8 @@ SOUNDS = {
     COLLECTION_COMPLETED            = "Collection_Completed",
 
     COLLECTIBLE_ON_COOLDOWN         = "Collectible_On_Cooldown",
+    COLLECTIBLE_ACTIVATED           = "Collectible_Activated",
+    COLLECTIBLE_DEACTIVATED         = "Collectible_Deactivated",
 
     --Item sounds
     ITEM_MONEY_CHANGED              = "Money_Transact",
@@ -251,6 +248,9 @@ SOUNDS = {
     TELVAR_MULTIPLIERUP             = "Telvar_MultiplierUp",
     TELVAR_MULTIPLIERMAX            = "Telvar_MultiplierMax",
     TELVAR_TRANSACT                 = "Telvar_Transact",
+
+    -- Writ voucher sounds
+    WRIT_VOUCHER_TRANSACT           = "WritVoucher_Transact",
 
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
@@ -278,7 +278,7 @@ SOUNDS = {
     --LFG sounds
     LFG_SEARCH_STARTED              = "LFG_Search_Started",
     LFG_SEARCH_FINISHED             = "LFG_Search_Finished",
-    LFG_JUMP_DUNGEON                = "LFG_Jump_Dungeon",
+    LFG_READY_CHECK                 = "LFG_Ready_Check",
     LFG_FIND_REPLACEMENT            = "LFG_Find_Replacement",
     LFG_COMPLETE_ANNOUNCEMENT       = "LFG_Complete_Announcement",
 
@@ -289,21 +289,46 @@ SOUNDS = {
     GROUP_ELECTION_RESULT_LOST      = "GroupElection_ResultLost",
 
     --Battleground sounds
-    FLAG_ASSAULTED_ALLIANCE1        = "Flag_AssaultedByAlliance1",
-    FLAG_CAPUTURED_ALLIANCE1        = "AvA_Resource_Captured_ByAldmeri",
-    FLAG_ATTACKED_ALLIANCE1         = "Flag_AttackedByAlliance1",
-    FLAG_LOST_ALLIANCE1             = "Flag_LostByAlliance1",
+    BATTLEGROUND_INACTIVITY_WARNING = "Battleground_InactivityWarning",
+    BATTLEGROUND_MEDAL_RECEIVED = "BG_MedalReceived",
+    BATTLEGROUND_NEARING_VICTORY = "BG_VictoryNear",
+    BATTLEGROUND_COUNTDOWN_FINISH = "BG_Countdown_Finish",
+    BATTLEGROUND_MATCH_WON = "BG_MatchWon",
+    BATTLEGROUND_MATCH_LOST = "BG_MatchLost",
+    BATTLEGROUND_ONE_MINUTE_WARNING = "BG_One_Minute_Warning",
 
-    FLAG_ASSAULTED_ALLIANCE2        = "Flag_AssaultedByAlliance2",
-    FLAG_CAPUTURED_ALLIANCE2        = "AvA_Resource_Captured_ByEbonheart",
-    FLAG_ATTACKED_ALLIANCE2         = "Flag_AttackedByAlliance2",
-    FLAG_LOST_ALLIANCE2             = "Flag_LostByAlliance2",
+    -- Battleground capture flag objective sounds
+    BATTLEGROUND_CAPTURE_FLAG_TAKEN_OWN_TEAM = "BG_CTF_FlagTaken_OwnTeam",
+    BATTLEGROUND_CAPTURE_FLAG_TAKEN_OTHER_TEAM = "BG_CTF_FlagTaken_OtherTeam",
+    BATTLEGROUND_CAPTURE_FLAG_DROPPED_OWN_TEAM = "BG_CTF_FlagDropped_OwnTeam",
+    BATTLEGROUND_CAPTURE_FLAG_DROPPED_OTHER_TEAM = "BG_CTF_FlagDropped_OtherTeam",
+    BATTLEGROUND_CAPTURE_FLAG_RETURNED = "BG_CTF_FlagReturned",
+    BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OTHER_TEAM = "BG_CTF_FlagCaptured",
+    BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OWN_TEAM = "BG_CTF_TeamFlagCapture",
 
-    FLAG_ASSAULTED_ALLIANCE3        = "Flag_AssaultedByAlliance3",
-    FLAG_CAPUTURED_ALLIANCE3        = "AvA_Resource_Captured_ByDaggerfall",
-    FLAG_ATTACKED_ALLIANCE3         = "Flag_AttackedByAlliance3",
-    FLAG_LOST_ALLIANCE3             = "Flag_LostByAlliance3",
+    -- Battleground murderball objective sounds
+    BATTLEGROUND_MURDERBALL_TAKEN_OWN_TEAM = "BG_MB_BallTaken_OwnTeam",
+    BATTLEGROUND_MURDERBALL_TAKEN_OTHER_TEAM = "BG_MB_BallTaken_OtherTeam",
+    BATTLEGROUND_MURDERBALL_DROPPED_OWN_TEAM = "BG_MB_BallDropped_OwnTeam",
+    BATTLEGROUND_MURDERBALL_DROPPED_OTHER_TEAM = "BG_MB_BallDropped_OtherTeam",
+    BATTLEGROUND_MURDERBALL_RETURNED = "BG_MB_BallReturned",
 
+    -- Battleground capture area sounds
+    BATTLEGROUND_CAPTURE_AREA_CAPTURED_OWN_TEAM = "BG_CA_AreaCaptured_OwnTeam",
+    BATTLEGROUND_CAPTURE_AREA_CAPTURED_OTHER_TEAM = "BG_CA_AreaCaptured_OtherTeam",
+    BATTLEGROUND_CAPTURE_METER_CONTESTING = "BG_CM_ContestingArea",
+    BATTLEGROUND_CAPTURE_METER_CAPTURING = "BG_CM_CapturingArea",
+    BATTLEGROUND_CAPTURE_AREA_SPAWNED = "BG_CA_AreaCaptured_Spawned",
+    BATTLEGROUND_CAPTURE_AREA_MOVED = "BG_CA_AreaCaptured_Moved",
+
+    -- Battleground kill sounds
+    BATTLEGROUND_KILL_KILLING_BLOW = "BG_Kill_KillingBlow",
+    BATTLEGROUND_KILL_ASSIST = "BG_Kill_Assist",
+    BATTLEGROUND_KILL_KILLED_BY_MY_TEAM = "BG_Kill_KilledByMyTeam",
+    BATTLEGROUND_KILL_STOLEN_BY_ENEMY_TEAM = "BG_Kill_StolenByEnemyTeam",
+    BATTLEGROUND_KILL_KILLED_BY_ENEMY_TEAM = "BG_Kill_KilledByEnemyTeam",
+
+    -- AVA sounds
     ELDER_SCROLL_CAPTURED_BY_ALDMERI = "ElderScroll_Captured_Aldmeri",
     ELDER_SCROLL_CAPTURED_BY_EBONHEART = "ElderScroll_Captured_Ebonheart",
     ELDER_SCROLL_CAPTURED_BY_DAGGERFALL = "ElderScroll_Captured_Daggerfall",
@@ -331,8 +356,6 @@ SOUNDS = {
     GUILD_KEEP_CLAIMED = "Guild_Keep_Claimed",
     GUILD_KEEP_RELEASED = "Guild_Keep_Released",
     GUILD_KEEP_LOST = "Guild_Keep_Lost",
-
-    MEDAL_AWARDED                   = "MedalAwarded",
 
     -- Broadcast sounds
     MESSAGE_BROADCAST               = "System_Broadcast",
@@ -408,6 +431,9 @@ SOUNDS = {
     TABLET_PAGE_TURN                = "Tablet_PageTurn",
     TABLET_OPEN                     = "Tablet_Open",
     TABLET_CLOSE                    = "Tablet_Close",
+    BOOK_METAL_PAGE_TURN            = "Book_Metal_PageTurn",
+    BOOK_METAL_OPEN                 = "Book_Metal_Open",
+    BOOK_METAL_CLOSE                = "Book_Metal_Close",
     CADWELL_BLADE_SELECTED          = "Cadwell_BladeSelected",
     CADWELL_ITEM_SELECTED           = "Cadwell_ItemSelected",
 
@@ -485,6 +511,9 @@ SOUNDS = {
     SKILL_XP_DARK_ANCHOR_CLOSED     = "SkillXP_DarkAnchorClosed",
     SKILL_XP_DARK_FISSURE_CLOSED    = "SkillXP_DarkFissureClosed",
     SKILL_XP_BOSS_KILLED            = "SkillXP_BossKilled",
+
+    --Skills Advisor Sounds
+    SKILLS_ADVISOR_SELECT           = "SkillsAdvisor_Select",
 
     --Stats Sounds
     STATS_PURCHASE                  = "Stats_Purchase",
@@ -607,6 +636,12 @@ SOUNDS = {
     UAV_POSSESSION_APPLIED_TARGET           = "Possession_Effect_Applied_Target",
     UAV_POSSESSION_REMOVED_TARGET           = "Possession_Effect_Removed_Target",
 
+    UAV_TRAUMA_ADDED                        = "Trauma_Effect_Added",
+    UAV_TRAUMA_LOST                         = "Trauma_Effect_Lost",
+
+    UAV_TRAUMA_ADDED_TARGET                 = "Trauma_Effect_Added_Target",
+    UAV_TRAUMA_LOST_TARGET                  = "Trauma_Effect_Lost_Target",
+
     -- Provisioning
     PROVISIONING_OPENED                     = "Provisioning_Opened",
     PROVISIONING_CLOSED                     = "Provisioning_Closed",
@@ -615,6 +650,7 @@ SOUNDS = {
     PROVISIONING_ENTRY_SELECTED             = "Provisioning_EntrySelected",
 
     RECIPE_LEARNED                          = "Recipe_Learned",
+    DEFAULT_RECIPE_CRAFTED                  = "Default_Recipe_Crafted",
 
     -- Enchanting
     ENCHANTING_OPENED                       = "Enchanting_Opened",
@@ -666,30 +702,43 @@ SOUNDS = {
     BLACKSMITH_CREATE_TOOLTIP_GLOW          = "Blacksmith_Create_Tooltip_Glow",
     WOODWORKER_CREATE_TOOLTIP_GLOW          = "Woodworker_Create_Tooltip_Glow",
     CLOTHIER_CREATE_TOOLTIP_GLOW            = "Clothier_Create_Tooltip_Glow",
+    JEWELRYCRAFTER_CREATE_TOOLTIP_GLOW      = "JewelryCrafter_Create_Tooltip_Glow",
 
     BLACKSMITH_IMPROVE_TOOLTIP_GLOW_SUCCESS = "Blacksmith_Improve_Tooltip_Glow_Success",
     WOODWORKER_IMPROVE_TOOLTIP_GLOW_SUCCESS = "Woodworker_Improve_Tooltip_Glow_Success",
     CLOTHIER_IMPROVE_TOOLTIP_GLOW_SUCCESS   = "Clothier_Improve_Tooltip_Glow_Success",
+    JEWELRYCRAFTER_IMPROVE_TOOLTIP_GLOW_SUCCESS = "JewelryCrafter_Improve_Tooltip_Glow_Success",
 
     BLACKSMITH_IMPROVE_TOOLTIP_GLOW_FAIL    = "Blacksmith_Improve_Tooltip_Glow_Fail",
     WOODWORKER_IMPROVE_TOOLTIP_GLOW_FAIL    = "Woodworker_Improve_Tooltip_Glow_Fail",
     CLOTHIER_IMPROVE_TOOLTIP_GLOW_FAIL      = "Clothier_Improve_Tooltip_Glow_Fail",
+    JEWELRYCRAFTER_IMPROVE_TOOLTIP_GLOW_FAIL = "JewelryCrafter_Improve_Tooltip_Glow_Fail",
 
     BLACKSMITH_EXTRACTED_BOOSTER            = "Blacksmith_Extracted_Booster",
     WOODWORKER_EXTRACTED_BOOSTER            = "Woodworker_Extracted_Booster",
     CLOTHIER_EXTRACTED_BOOSTER              = "Clothier_Extracted_Booster",
+    JEWELRYCRAFTER_EXTRACTED_BOOSTER        = "JewelryCrafter_Extracted_Booster",
 
     BLACKSMITH_FAILED_EXTRACTION            = "Blacksmith_Failed_Extraction",
     WOODWORKER_FAILED_EXTRACTION            = "Woodworker_Failed_Extraction",
     CLOTHIER_FAILED_EXTRACTION              = "Clothier_Failed_Extraction",
+    JEWELRYCRAFTER_FAILED_EXTRACTION        = "JewelryCrafter_Failed_Extraction",
 
     BLACKSMITH_EXTRACT_START_ANIM           = "Blacksmith_Extract_Start_Anim",
     WOODWORKER_EXTRACT_START_ANIM           = "Woodworker_Extract_Start_Anim",
     CLOTHIER_EXTRACT_START_ANIM             = "Clothier_Extract_Start_Anim",
+    JEWELRYCRAFTER_EXTRACT_START_ANIM       = "JewelryCrafter_Extract_Start_Anim",
 
     -- Crafting
     CRAFTING_GAINED_INSPIRATION             = "Crafting_Gained_Inspiration",
     CRAFTING_CREATE_SLOT_ANIMATED           = "Crafting_Create_Slot_Animated",
+
+    -- Retraiting
+    RETRAITING_ITEM_TO_RETRAIT_PLACED       = "Retraiting_Item_To_Retrait_Placed",
+    RETRAITING_ITEM_TO_RETRAIT_REMOVED      = "Retraiting_Item_To_Retrait_Removed",
+
+    RETRAITING_RETRAIT_TOOLTIP_GLOW_SUCCESS = "Retraiting_Retrait_Tooltip_Glow_Success",
+    RETRAITING_START_RETRAIT                = "Retraiting_Start_Retrait",
 
     --Customer Service
     AGENT_CHAT_ACTIVE                       = "Agent_Chat_Active",
@@ -736,6 +785,31 @@ SOUNDS = {
     DYEING_UNDO_CHANGES                     = "Dyeing_Undo_Changes",
 
     DYEING_ACCEPT_BINDING                   = "Dyeing_Accept_Binding",
+
+    -- Outfits
+    OUTFIT_CHANGES_APPLIED                  = "Outfit_Changes_Applied",
+    OUTFIT_GO_TO_STYLE                      = "Outfitting_GoToStyle",
+    OUTFIT_REMOVE_STYLE                     = "Outfitting_RemoveStyle",
+    OUTFIT_GAMEPAD_MENU_ENTER               = "Outfitting_Console_MenuEnter",
+    OUTFIT_GAMEPAD_MENU_EXIT                = "Outfitting_Console_MenuExit",
+    OUTFIT_GAMEPAD_UNDO_CHANGES             = "Outfitting_Console_UndoChanges",
+
+    OUTFIT_EQUIPPED_HIDE                    = "Outfitting_ArmorAdd_Hide",
+    OUTFIT_ARMOR_TYPE_LIGHT                 = "Outfitting_ArmorAdd_Light",
+    OUTFIT_ARMOR_TYPE_MEDIUM                = "Outfitting_ArmorAdd_Medium",
+    OUTFIT_ARMOR_TYPE_HEAVY                 = "Outfitting_ArmorAdd_Heavy",
+    OUTFIT_ARMOR_TYPE_UNDAUNTED             = "Outfitting_ArmorAdd_Undaunted",
+    OUTFIT_ARMOR_TYPE_CLOTHING              = "Outfitting_ArmorAdd_Clothing",
+    OUTFIT_ARMOR_TYPE_SIGNATURE             = "Outfitting_ArmorAdd_Signature",
+
+    OUTFIT_WEAPON_TYPE_AXE                  = "Outfitting_WeaponAdd_Axe",
+    OUTFIT_WEAPON_TYPE_MACE                 = "Outfitting_WeaponAdd_Mace",
+    OUTFIT_WEAPON_TYPE_SWORD                = "Outfitting_WeaponAdd_Sword",
+    OUTFIT_WEAPON_TYPE_DAGGER               = "Outfitting_WeaponAdd_Dagger",
+    OUTFIT_WEAPON_TYPE_BOW                  = "Outfitting_WeaponAdd_Bow",
+    OUTFIT_WEAPON_TYPE_STAFF                = "Outfitting_WeaponAdd_Staff",
+    OUTFIT_WEAPON_TYPE_SHIELD               = "Outfitting_WeaponAdd_Shield",
+    OUTFIT_WEAPON_TYPE_RUNE                 = "Outfitting_WeaponAdd_Rune",
 
     --Keybind Disabled
     KEYBIND_BUTTON_DISABLED                 = "Keybind_Button_Disabled",
@@ -787,6 +861,7 @@ SOUNDS = {
     MARKET_SUB_CATEGORY_SELECTED        = "Market_SubCategorySelected",
     MARKET_PURCHASE_SELECTED            = "Market_PurchaseSelected",
     MARKET_PREVIEW_SELECTED             = "Market_PreviewSelected",
+    MARKET_GIFT_SELECTED                = "Market_GiftSelected",
     MARKET_CROWNS_SPENT                 = "Market_CrownsSpent",
     MARKET_CROWN_GEMS_SPENT             = "Market_CrownGemsSpent",
 
@@ -826,4 +901,41 @@ SOUNDS = {
     CROWN_CRATES_CARD_FLIPPING              = "CrownCrates_Card_Flipping",
     CROWN_CRATES_SCENE_OPEN                 = "CrownCrates_Scene_Open",
     CROWN_CRATES_SCENE_CLOSED               = "CrownCrates_Scene_Closed",
+    CROWN_CRATES_GEM_WOBBLE                 = "CrownCrates_GemmingWobble",
+    CROWN_CRATES_GEM_ITEM                   = "CrownCrates_Gem_Item",
+
+    --Housing
+    HOUSING_EDITOR_OPEN                     = "Housing_MenuOpen",
+    HOUSING_EDITOR_CLOSED                   = "Housing_MenuClosed",
+    HOUSING_EDITOR_OPEN_BROWSER             = "Housing_OpenBrowser",
+    HOUSING_EDITOR_CLOSE_BROWSER            = "Housing_CloseBrowser",
+    HOUSING_EDITOR_PLACE_ITEM               = "Housing_PlaceItem",
+    HOUSING_EDITOR_PICKUP_ITEM              = "Housing_PickupItem",
+    HOUSING_EDITOR_RETRIEVE_ITEM            = "Housing_StoreItem",
+    HOUSING_BUY_FOR_GOLD                    = "Housing_BuyForGold",
+
+    -- ESO+ Trial
+    ESO_PLUS_TRIAL_STARTED                  = "ESOPlus_TrialStarted",
+    ESO_PLUS_TRIAL_ENDED                    = "ESOPlus_TrialEnded",
+
+    -- CSA Countdown
+    COUNTDOWN_TICK                          = "Countdown_Tick",
+
+    --Level Up Reward
+    LEVEL_UP_REWARD_FANFARE                 = "LevelUpReward_Fanfare",
+    LEVEL_UP_REWARD_SECTION_APPEAR          = "LevelUpReward_SectionAppear",
+    LEVEL_UP_REWARD_CLAIM_APPEAR            = "LevelUpReward_ClaimAppear",
+    LEVEL_UP_REWARD_CLAIM                   = "LevelUpReward_Claim",
+
+    --Daily Login Rewards
+    DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT  = "DailyLoginRewards_ClaimAnnouncement",
+	DAILY_LOGIN_REWARDS_CLAIM_FANFARE       = "DailyLoginRewards_ClaimFanfare",
+    DAILY_LOGIN_REWARDS_ACTION_CLAIM        = "DailyLoginRewards_ActionClaim",
+    DAILY_LOGIN_REWARDS_MONTH_CHANGE        = "DailyLoginRewards_MonthChange",
+
+    --Gifting
+    GIFT_INVENTORY_VIEW_FANFARE_BLAST       = "GiftInventoryView_FanfareBlast",
+    GIFT_INVENTORY_VIEW_FANFARE_SPARKS      = "GiftInventoryView_FanfareSparks",
+    GIFT_INVENTORY_VIEW_FANFARE_STARBURST   = "GiftInventoryView_FanfareStarburst",
+    GIFT_INVENTORY_ACTION_CLAIM             = "GiftInventory_ActionClaim",
 }
