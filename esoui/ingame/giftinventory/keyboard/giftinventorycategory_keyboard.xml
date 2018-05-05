@@ -1,0 +1,48 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_GiftInventoryCategory_Keyboard_NoteTexture" textureFile="EsoUI/Art/Contacts/social_note_up.dds" mouseEnabled="true" virtual="true">
+            <Dimensions x="32" y="32"/>
+            <OnMouseEnter>
+                ZO_GiftInventoryCategory_Keyboard_NoteTexture_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GiftInventoryCategory_Keyboard_NoteTexture_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+        
+        <Button name="ZO_GiftInventoryCategory_Keyboard_NoteButton" virtual="true">
+            <Textures
+                normal="EsoUI/Art/Contacts/social_note_up.dds"
+                pressed="EsoUI/Art/Contacts/social_note_down.dds"
+                mouseOver="EsoUI/Art/Contacts/social_note_over.dds"
+            />
+            <Dimensions x="32" y="32"/>
+            <OnMouseEnter>
+                ZO_GiftInventoryCategory_Keyboard_NoteButton_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GiftInventoryCategory_Keyboard_NoteButton_OnMouseExit(self)
+            </OnMouseExit>
+            <OnClicked>
+                ZO_GiftInventoryCategory_Keyboard_NoteButton_OnClicked(self)
+            </OnClicked>
+        </Button>
+
+        <Label name="ZO_GiftInventoryCategory_Keyboard_TooltipIfTruncatedLabel" wrapMode="ELLIPSIS" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_TooltipIfTruncatedLabel_OnMouseEnter(self)
+                ZO_PropagateHandler(self:GetParent(), "OnMouseEnter")
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_TooltipIfTruncatedLabel_OnMouseExit(self)
+                ZO_PropagateHandler(self:GetParent(), "OnMouseExit")
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, upInside)
+            </OnMouseUp>
+            <OnMouseDoubleClick>
+                ZO_PropagateHandler(self:GetParent(), "OnMouseDoubleClick", button)
+            </OnMouseDoubleClick>
+        </Label>
+    </Controls>
+</GuiXml>

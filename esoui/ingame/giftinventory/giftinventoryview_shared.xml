@@ -1,0 +1,39 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GiftInventoryView_OverlayGlowFadeAnimation">
+            <Animations>
+                <ScaleAnimation duration="80" startScale="1.08" endScale="1.0" />
+                <AlphaAnimation duration="230" startAlpha="0.9" endAlpha="0.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <TopLevelControl name="ZO_GiftInventoryView_Shared_TopLevel" hidden="true" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" />
+
+                <Control name="$(parent)GiftContainer" tier="MEDIUM">
+                    <Controls>
+                        <Texture name="$(parent)Icon" />
+
+                        <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="3" />
+                    </Controls>
+                </Control>
+
+                <!-- Will be a scroll, platform specific inheritance -->
+                <Control name="$(parent)NoteContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)GiftContainer" relativePoint="TOPRIGHT" />
+                </Control>
+
+                <!-- Will get parented to the container's scroll child when it exists -->
+                <Label name="$(parent)Note" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" />
+
+                <Control name="$(parent)BlastParticlesOrigin">
+                    <Anchor point="CENTER" offsetY="-50" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

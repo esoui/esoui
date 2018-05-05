@@ -21,7 +21,7 @@
         </Control>
 
         <Control name="ZO_GamepadDyeingBelowHeaderAreaAnchors" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="ZO_DyeGamepadTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="TOPLEFT" relativeTo="ZO_RestyleTopLevel_GamepadHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
         </Control>
 
@@ -84,6 +84,7 @@
                                                     <Controls>
                                                         <Control name="$(parent)List">
                                                             <!-- NOTE: Anchors are changed dynamically in code, but need to be initialized here. -->
+                                                            <Dimensions x="390" />
                                                             <AnchorFill />
                                                         </Control>
                                                     </Controls>
@@ -215,32 +216,6 @@
                 </Control>
             </Controls>
         </Control>
-
-        <TopLevelControl name="ZO_DyeGamepadTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
-            <OnInitialized>
-                ZO_Dyeing_Gamepad_OnInitialized(self)
-            </OnInitialized>
-
-            <Controls>
-                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
-
-                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                    <Controls>
-                        <Control name="$(parent)Container">
-                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
-                            <Anchor point="BOTTOMRIGHT"/>
-                            <Controls>
-                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
-                                    <AnchorFill/>
-                                </Control>
-                            </Controls>
-                        </Control>
-                    </Controls>
-                </Scroll>
-
-                <Control name="$(parent)DyeItems" inherits="ZO_DyeItems_Gamepad" hidden="true" />
-            </Controls>
-        </TopLevelControl>
         
     </Controls>
 </GuiXml>

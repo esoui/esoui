@@ -1,6 +1,7 @@
 local SWAP_SAVED_ICON = "EsoUI/Art/Dye/GamePad/Dye_set_icon.dds"
 
-ZO_Dyeing_Slots_Gamepad = ZO_Dyeing_RadialMenu_Gamepad:Subclass()
+-- XML functions --
+-------------------
 
 function ZO_DyeingSlot_Gamepad_Initialize(control)
     control.slot = control:GetNamedChild("Slot")
@@ -8,10 +9,8 @@ function ZO_DyeingSlot_Gamepad_Initialize(control)
     control.dyeControls = control.multiFocusControl.dyeControls
     control.singleFocusControl = control.dyeControls[1]
     control.highlight = control:GetNamedChild("SharedHighlight")
-    control.mode = DYE_MODE_NONE
 
     control.dyeSelector = ZO_GamepadFocus:New(control, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
-    control.dyeSelector:SetFocusChangedCallback(function(entry) ZO_Dyeing_Gamepad_Highlight(control, entry and entry.control) end)
     
     for i=1, #control.dyeControls do
         local dyeControl = control.dyeControls[i]
@@ -31,44 +30,13 @@ function ZO_DyeingSlot_Gamepad_Initialize(control)
     control.Deactivate = function(control, ...)
                 control.dyeSelector:Deactivate(...)
             end
-end
 
-function ZO_Dyeing_Slots_Gamepad:New(control, sharedHighlight)
-    local dyeableSlotMenu = ZO_Dyeing_RadialMenu_Gamepad.New(self, control, "ZO_DyeingSlot_Gamepad", sharedHighlight)
-    dyeableSlotMenu.dyeableSlotSetupFunction = function(...) dyeableSlotMenu:SetupDyeableSlot(...) end
-    return dyeableSlotMenu
-end
-
-function ZO_Dyeing_Slots_Gamepad:SetupDyeableSlot(control, data)
-    local dyeableSlot = data.dyeableSlot
-    self.controlsBySlot[dyeableSlot] = control
-    ZO_Dyeing_SetupDyeableSlotControl(control.slot, dyeableSlot)
-    ZO_Dyeing_RefreshDyeableSlotControlDyes(control, dyeableSlot)
-end
-
-function ZO_Dyeing_Slots_Gamepad:Populate()
-    self:ResetData()
-
-    local activeDyeableSlot = ZO_Dyeing_GetActiveOffhandDyeableSlot()
-    local slotsByMode = ZO_Dyeing_GetSlotsForMode(self.mode)
-    for i=1, #slotsByMode do
-        local dyeableSlotData = slotsByMode[i]
-        local dyeableSlot = dyeableSlotData.dyeableSlot
-
-        if (dyeableSlot ~= DYEABLE_SLOT_OFF_HAND and dyeableSlot ~= DYEABLE_SLOT_BACKUP_OFF) 
-            or dyeableSlot == activeDyeableSlot then
-
-            local data = {
-                    dyeableSlot = dyeableSlot,
-                    setupFunc = self.dyeableSlotSetupFunction,
-                }
-            self:AddEntry(nil, nil, nil, nil, data)
+    local function OnSelectionChanged(entry)
+        ZO_Dyeing_Gamepad_Highlight(control, entry and entry.control)
+        if control.onSelectionChangedCallback then
+            control.onSelectionChangedCallback()
         end
     end
 
-    self:Refresh()
-end
-
-function ZO_Dyeing_Slots_Gamepad:SetMode(mode)
-    self.mode = mode
+    control.dyeSelector:SetFocusChangedCallback(OnSelectionChanged)
 end

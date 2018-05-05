@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GiftInventoryReceived_Keyboard_Row" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_GIFT_INVENTORY_KEYBOARD_ROW_HEIGHT"/>
+            <OnMouseEnter>
+                ZO_GiftInventoryReceived_Keyboard_Row_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GiftInventoryReceived_Keyboard_Row_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_GiftInventoryReceived_Keyboard_Row_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnMouseDoubleClick>
+                ZO_GiftInventoryReceived_Keyboard_Row_OnMouseDoubleClick(self, button)
+            </OnMouseDoubleClick>
+            <Controls>
+                <Texture name="$(parent)New" textureFile="EsoUI/Art/Miscellaneous/new_icon.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT"/>
+                </Texture>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="40"/>
+                </Texture>
+                <Label name="$(parent)SenderName" font="ZoFontWinH4">
+                    <Dimensions x="300"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)New" relativePoint="RIGHT" offsetX="80"/>
+                </Label>
+                <Label name="$(parent)Expires" font="ZoFontWinH4" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativeTo="$(parent)SenderName" relativePoint="RIGHT" offsetX="16"/>
+                    <Anchor point="RIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_GiftInventoryReceived_Keyboard_Control" hidden="true">
+            <OnInitialized>
+                ZO_GiftInventoryReceived_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetY="32"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+                <Control name="$(parent)Headers">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ListContents" relativePoint="TOPRIGHT"/>
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Control name="$(parent)New" inherits="ZO_SortHeaderIcon">
+                            <OnInitialized>
+                                ZO_SortHeader_InitializeArrowHeader(self, "seen", ZO_SORT_ORDER_UP)
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" offsetX="8"/>
+                            <Dimensions x="16" y="32" />
+                        </Control>
+                        <Control name="$(parent)SenderName" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GIFT_INVENTORY_KEYBOARD_HEADER_SENDER), "playerName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" offsetX="112"/>
+                            <Dimensions x="300" y="32"/>
+                        </Control>
+                        <Control name="$(parent)Expires" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GIFT_INVENTORY_KEYBOARD_HEADER_EXPIRES), "expirationTimeStampS", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SenderName" relativePoint="TOPRIGHT" offsetX="16"/>
+                            <Anchor point="TOPRIGHT"/>
+                            <Dimensions y="32"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

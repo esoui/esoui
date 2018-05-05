@@ -33,26 +33,26 @@ function ZO_DyeingToolBase:GetHighlightRules(dyeSlot, dyeChannel)
     return dyeSlot, dyeChannel
 end
 
-function ZO_DyeingToolBase:OnClicked(dyeableSlot, dyeChannel, button)
+function ZO_DyeingToolBase:OnClicked(restyleSlotData, dyeChannel, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
-        self:OnLeftClicked(dyeableSlot, dyeChannel)
+        self:OnLeftClicked(restyleSlotData, dyeChannel)
     elseif button == MOUSE_BUTTON_INDEX_RIGHT then
-        self:OnRightClicked(dyeableSlot, dyeChannel)
+        self:OnRightClicked(restyleSlotData, dyeChannel)
     end
 end
 
 -- Intended to be overriden, called when a dyeable slot swatch gets left clicked
-function ZO_DyeingToolBase:OnLeftClicked(slot, dyeChannel)
+function ZO_DyeingToolBase:OnLeftClicked(restyleSlotData, dyeChannel)
 end
 
 -- Called when a slot swatch gets right clicked, could be overridden if necessary
-function ZO_DyeingToolBase:OnRightClicked(dyeableSlot, dyeChannel)
-    if select(dyeChannel, GetPendingSlotDyes(dyeableSlot)) ~= nil then
+function ZO_DyeingToolBase:OnRightClicked(restyleSlotData, dyeChannel)
+    if select(dyeChannel, restyleSlotData:GetPendingDyes()) ~= nil then
         ClearMenu()
         AddMenuItem(GetString(SI_DYEING_CLEAR_MENU),
                     function()
-                        SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, INVALID_DYE_ID, GetPendingSlotDyes(dyeableSlot)))
-                        self.owner:OnPendingDyesChanged(dyeableSlot)
+                        restyleSlotData:SetPendingDyes(zo_replaceInVarArgs(dyeChannel, INVALID_DYE_ID, restyleSlotData:GetPendingDyes()))
+                        self.owner:OnPendingDyesChanged(restyleSlotData)
                         PlaySound(SOUNDS.DYEING_TOOL_ERASE_USED)
                     end)
         ShowMenu(self)
@@ -86,6 +86,10 @@ function ZO_DyeingToolBase:OnSavedSetRightClicked(dyeSetIndex, dyeChannel)
 end
 
 -- Intended to be overriden for custom cursor over dye swatches
-function ZO_DyeingToolBase:GetCursorType(dyeableSlot, dyeChannel)
+function ZO_DyeingToolBase:GetCursorType()
     return MOUSE_CURSOR_DO_NOT_CARE
+end
+
+function ZO_DyeingToolBase:GetToolActionString()
+    assert(false) -- must be overridden in derived classes
 end

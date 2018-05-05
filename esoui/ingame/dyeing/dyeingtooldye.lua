@@ -14,9 +14,9 @@ function ZO_DyeingToolDye:Activate(fromTool, suppressSounds)
     end
 end
 
-function ZO_DyeingToolDye:OnLeftClicked(dyeableSlot, dyeChannel)
-    SetPendingSlotDyes(dyeableSlot, zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), GetPendingSlotDyes(dyeableSlot)))
-    self.owner:OnPendingDyesChanged(dyeableSlot)
+function ZO_DyeingToolDye:OnLeftClicked(restyleSlotData, dyeChannel)
+    restyleSlotData:SetPendingDyes(zo_replaceInVarArgs(dyeChannel, self.owner:GetSelectedDyeId(), restyleSlotData:GetPendingDyes()))
+    self.owner:OnPendingDyesChanged(restyleSlotData)
     PlaySound(SOUNDS.DYEING_TOOL_DYE_USED)
 end
 
@@ -26,6 +26,10 @@ function ZO_DyeingToolDye:OnSavedSetLeftClicked(dyeSetIndex, dyeChannel)
     PlaySound(SOUNDS.DYEING_TOOL_DYE_USED)
 end
 
-function ZO_DyeingToolDye:GetCursorType(dyeableSlot, dyeChannel)
+function ZO_DyeingToolDye:GetCursorType()
     return MOUSE_CURSOR_PAINT
+end
+
+function ZO_DyeingToolDye:GetToolActionString()
+    return SI_DYEING_TOOL_DYE_TOOLTIP
 end

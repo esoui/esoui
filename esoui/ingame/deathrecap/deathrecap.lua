@@ -92,40 +92,54 @@ function DeathRecap:Initialize(control)
     self.control:SetHandler("OnEffectivelyShown", function() self:OnEffectivelyShown() end)
     self.control:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
 
-    self:ApplyStyle() -- Setup initial visual style based on current mode.
-    self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
+    ZO_PlatformStyle:New(function() self:ApplyStyle() end)
 
     local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X = 793
     local DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y = 366
     ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollContainer:GetNamedChild("ScrollIndicator"), self.control, RIGHT, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_X, DEATH_RECAP_RIGHT_SCROLL_INDICATOR_OFFSET_Y, true)
 end
 
-function DeathRecap:InitializeAttackPool()
-    self.attackPool = ZO_ControlPool:New("ZO_DeathRecapAttack", self.scrollControl:GetNamedChild("Attacks"), "")
-    self.attackTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapAttack")
+do
+    function DeathRecap:InitializeAttackPool()
+        local ICON_ANIMATION_START_INDEX = 1
+        local ICON_ANIMATION_END_INDEX = 3
+        local TEXT_ANIMATION_INDEX = 4
+        local COUNT_ANIMATION_START_INDEX = 5
+        local COUNT_ANIMATION_END_INDEX = 7
+        self.attackPool = ZO_ControlPool:New("ZO_DeathRecapAttack", self.scrollControl:GetNamedChild("Attacks"), "")
+        self.attackTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapAttack")
 
-    self.attackPool:SetCustomFactoryBehavior(function(control)
-        control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_DeathRecapAttackAnimation")
-        local nestedTimeline = control.timeline:GetAnimationTimeline(1)
-        local iconTexture = control:GetNamedChild("Icon")
-        local textContainer = control:GetNamedChild("Text")
-        for i = 1, 3 do
-            local animation = nestedTimeline:GetAnimation(i)
-            animation:SetAnimatedControl(iconTexture)
-        end
-        nestedTimeline:GetAnimation(4):SetAnimatedControl(textContainer)
-    end)
+        self.attackPool:SetCustomFactoryBehavior(function(control)
+            control.timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_DeathRecapAttackAnimation")
+            local nestedTimeline = control.timeline:GetAnimationTimeline(1)
+            local iconTexture = control:GetNamedChild("Icon")
+            local textContainer = control:GetNamedChild("Text")
+            
+            for i = ICON_ANIMATION_START_INDEX, ICON_ANIMATION_END_INDEX do
+                local animation = nestedTimeline:GetAnimation(i)
+                animation:SetAnimatedControl(iconTexture)
+            end
+            nestedTimeline:GetAnimation(TEXT_ANIMATION_INDEX):SetAnimatedControl(textContainer)
+            if not nestedTimeline.isKillingBlow then
+                for i = COUNT_ANIMATION_START_INDEX, COUNT_ANIMATION_END_INDEX do
+                    local numAttackHitsContainer = control:GetNamedChild("NumAttackHits")
+                    local animation = nestedTimeline:GetAnimation(i)
+                    animation:SetAnimatedControl(numAttackHitsContainer)
+                end
+            end
+        end)
 
-    self.attackPool:SetCustomAcquireBehavior(function(control)
-        ApplyTemplateToControl(control, self.attackTemplate)
-    end)
+        self.attackPool:SetCustomAcquireBehavior(function(control)
+            ApplyTemplateToControl(control, self.attackTemplate)
+        end)
 
-    self.attackPool:SetCustomResetBehavior(function(control)
-        control.timeline:Stop()
-        local iconTexture = control:GetNamedChild("Icon")
-        iconTexture:SetScale(1)
-        ApplyTemplateToControl(control, self.attackTemplate)
-    end)
+        self.attackPool:SetCustomResetBehavior(function(control)
+            control.timeline:Stop()
+            local iconTexture = control:GetNamedChild("Icon")
+            iconTexture:SetScale(1)
+            ApplyTemplateToControl(control, self.attackTemplate)
+        end)
+    end
 end
 
 function DeathRecap:InitializeHintPool()
@@ -143,10 +157,8 @@ end
 
 function DeathRecap:InitializeTelvarStoneLossLabel()
     self.telvarStoneLossControl = self.scrollControl:GetNamedChild("TelvarStoneLoss")
-    self.telvarStoneLossTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapTelvarStoneLoss")
-    ApplyTemplateToControl(self.telvarStoneLossControl, self.telvarStoneLossTemplate)
-
-    self.telvarStoneLossValueControl = self.telvarStoneLossControl:GetNamedChild("Value");
+    self.telvarStoneLossValueControl = self.telvarStoneLossControl:GetNamedChild("Value")
+    self.telvarStoneLossIconControl = self.telvarStoneLossControl:GetNamedChild("Icon")
 
     self.telvarLossTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_DeathRecapTelvarLossAnimation", self.telvarStoneLossControl)
 end
@@ -208,7 +220,7 @@ function DeathRecap:SetupAttacks()
 
     local attacks = {}
     for i = 1, GetNumKillingAttacks() do
-        local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS = GetKillingAttackInfo(i)
+        local attackName, attackDamage, attackIcon, wasKillingBlow, castTimeAgoMS, durationMS, numAttackHits = GetKillingAttackInfo(i)
         local attackInfo = {
             index = i,
             attackName = attackName,
@@ -216,6 +228,7 @@ function DeathRecap:SetupAttacks()
             attackIcon = attackIcon,
             wasKillingBlow = wasKillingBlow,
             lastUpdateAgoMS = castTimeAgoMS - durationMS,
+            numAttackHits = numAttackHits
         }
 
         table.insert(attacks, attackInfo)
@@ -231,38 +244,71 @@ function DeathRecap:SetupAttacks()
     for i, attackInfo in ipairs(attacks) do
         local attackControl = self.attackPool:AcquireObject(i)
         local iconControl = attackControl:GetNamedChild("Icon")
-        iconControl:SetTexture(attackInfo.attackIcon)
-        local attackNameControl = attackControl:GetNamedChild("AttackName")
-        attackNameControl:SetText(zo_strformat(SI_DEATH_RECAP_ATTACK_NAME, attackInfo.attackName))
+        local attackTextControl = attackControl:GetNamedChild("AttackText")
+        local attackNameControl = attackTextControl:GetNamedChild("AttackName")
         local damageControl = attackControl:GetNamedChild("Damage")
-        damageControl:SetText(ZO_CommaDelimitNumber(attackInfo.attackDamage))
-
+        local numAttackHitsContainer = attackControl:GetNamedChild("NumAttackHits")
+        
+        iconControl:SetTexture(attackInfo.attackIcon)
+        attackNameControl:SetText(zo_strformat(SI_DEATH_RECAP_ATTACK_NAME, attackInfo.attackName))
+        damageControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(attackInfo.attackDamage)))
+            
         iconControl:SetAlpha(startAlpha)
         attackControl:GetNamedChild("Text"):SetAlpha(startAlpha)
 
-        if(attackInfo.wasKillingBlow) then
-            self.killingBlowIcon:SetAnchor(CENTER, attackControl, TOPLEFT, 32, 32)
+        if attackInfo.numAttackHits > 1 then
+            local numAttackHitsCountLabel = numAttackHitsContainer:GetNamedChild("Count")
+            local numAttackHitsHitIcon = numAttackHitsContainer:GetNamedChild("HitIcon")
+            local numAttackHitsKillIcon = numAttackHitsContainer:GetNamedChild("KillIcon")
+            numAttackHitsContainer:SetAlpha(startAlpha)
+            numAttackHitsContainer:SetHidden(false)
+            numAttackHitsCountLabel:SetText(attackInfo.numAttackHits)
+            if attackInfo.wasKillingBlow then
+                numAttackHitsHitIcon:SetHidden(true)
+                numAttackHitsKillIcon:SetHidden(false)
+                self.killingBlowIcon:SetHidden(true)
+            else
+                numAttackHitsHitIcon:SetHidden(false)
+                numAttackHitsKillIcon:SetHidden(true)
+            end
+        else
+            numAttackHitsContainer:SetHidden(true)
+            if attackInfo.wasKillingBlow then
+                self.killingBlowIcon:SetHidden(false)
+                self.killingBlowIcon:SetAnchor(CENTER, attackControl, TOPLEFT, 32, 32)
+            end
         end
 
-        local attackerNameControl = attackControl:GetNamedChild("AttackerName")
+        local attackerNameControl = attackTextControl:GetNamedChild("AttackerName")
         local frameControl
-        if(DoesKillingAttackHaveAttacker(attackInfo.index)) then
+        if DoesKillingAttackHaveAttacker(attackInfo.index) then
             local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = GetKillingAttackerInfo(attackInfo.index)
-            
-            local attackerNameLine
-            if(isPlayer) then
-                local coloredRankIconMarkup = GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
+            local battlegroundAlliance = GetKillingAttackerBattlegroundAlliance(attackInfo.index)
 
+            local attackerNameLine
+            if isPlayer then
+                
                 local nameToShow
                 if showBothPlayerNames then
                     nameToShow = ZO_GetPrimaryPlayerNameWithSecondary(attackerDisplayName, attackerRawName)
                 else
                     nameToShow = ZO_GetPrimaryPlayerName(attackerDisplayName, attackerRawName)
                 end
-                if(minionName == "") then
-                    attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME, coloredRankIconMarkup, attackerAvARank, nameToShow)
+
+                if battlegroundAlliance == BATTLEGROUND_ALLIANCE_NONE then
+                    local coloredRankIconMarkup = GetColoredAvARankIconMarkup(attackerAvARank, alliance, 32)
+                    if minionName == "" then
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME, coloredRankIconMarkup, attackerAvARank, nameToShow)
+                    else
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME_MINION, coloredRankIconMarkup, attackerAvARank, nameToShow, minionName)
+                    end
                 else
-                    attackerNameLine = zo_strformat(SI_DEATH_RECAP_RANK_ATTACKER_NAME_MINION, coloredRankIconMarkup, attackerAvARank, nameToShow, minionName)
+                    local battlegroundAllianceIconMarkup = GetBattlegroundIconMarkup(battlegroundAlliance, 32)
+                    if minionName == "" then
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_BATTLEGROUND_ALLIANCE_ATTACKER_NAME, battlegroundAllianceIconMarkup, nameToShow)
+                    else
+                        attackerNameLine = zo_strformat(SI_DEATH_RECAP_BATTLEGROUND_ALLIANCE_ATTACKER_NAME_MINION, battlegroundAllianceIconMarkup, nameToShow, minionName)
+                    end
                 end
             else
                 if(minionName == "") then
@@ -275,13 +321,9 @@ function DeathRecap:SetupAttacks()
             attackerNameControl:SetText(attackerNameLine)
             attackerNameControl:SetHidden(false) 
 
-            attackerNameControl:ClearAnchors()
-            attackerNameControl:SetAnchor(TOPRIGHT, damageControl, TOPLEFT, -10, 0)
-            attackerNameControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 155, 6)
-
             attackNameControl:ClearAnchors()
-            attackNameControl:SetAnchor(TOPRIGHT, damageControl, TOPLEFT, -10, 0)
             attackNameControl:SetAnchor(TOPLEFT, attackerNameControl, BOTTOMLEFT, 0, 2)
+            attackNameControl:SetAnchor(TOPRIGHT, attackerNameControl, BOTTOMRIGHT, 0, 2)
 
             frameControl = isBoss and iconControl:GetNamedChild("BossBorder") or iconControl:GetNamedChild("Border")
             frameControl:SetHidden(false)
@@ -289,9 +331,9 @@ function DeathRecap:SetupAttacks()
             attackerNameControl:SetHidden(true)
 
             attackNameControl:ClearAnchors()
-            attackNameControl:SetAnchor(TOPRIGHT, damageControl, TOPLEFT, -10, 0)
-            attackNameControl:SetAnchor(LEFT, nil, TOPLEFT, 155, 32)
-
+            attackNameControl:SetAnchor(TOPLEFT)
+            attackNameControl:SetAnchor(TOPRIGHT)
+            
             frameControl = iconControl:GetNamedChild("Border")
             frameControl:SetHidden(false)
         end
@@ -390,6 +432,7 @@ function DeathRecap:SetupTelvarStoneLoss()
 end
 
 function DeathRecap:SetupDeathRecap()
+    self.isPlayerDead = IsUnitDead("player")
     local numAttacks = GetNumKillingAttacks()
     if(numAttacks > 0 and IsUnitDead("player")) then
         self:SetupAttacks()
@@ -440,6 +483,7 @@ end
 --Events
 
 function DeathRecap:OnPlayerAlive()
+    self.isPlayerDead = false
     self:SetDeathRecapAvailable(false)
 end
 
@@ -466,10 +510,11 @@ function DeathRecap:ApplyStyle()
     self.hintTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapHint")
     self.telvarStoneLossTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapTelvarStoneLoss")
     ApplyTemplateToControl(self.telvarStoneLossControl, ZO_GetPlatformTemplate("ZO_DeathRecapTelvarStoneLoss"))
+    self.telvarStoneLossIconControl:SetTexture(ZO_Currency_GetPlatformCurrencyIcon(CURT_TELVAR_STONES))
 
     if self.isPlayerDead then
         self:SetupDeathRecap()
-        if (not self.control:IsHidden()) then
+        if not self.control:IsHidden() then
             if IsInGamepadPreferredMode() then
                 DIRECTIONAL_INPUT:Activate(self, self.control)
             else
@@ -477,10 +522,6 @@ function DeathRecap:ApplyStyle()
             end
         end
     end
-end
-
-function DeathRecap:OnGamepadPreferredModeChanged()
-    self:ApplyStyle()
 end
 
 function DeathRecap:UpdateDirectionalInput()

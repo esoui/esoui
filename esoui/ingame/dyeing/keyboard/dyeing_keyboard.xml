@@ -1,294 +1,130 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_Restyle_Content_Anchors" virtual="true">
+            <Dimensions x="595" y="670" />
+            <Anchor point="RIGHT" offsetX="-10" offsetY="30" />
+        </Control>
+        
         <Control name="ZO_DyeingEquipSlotDyeSwatch" virtual="true" mouseEnabled="true">
             <OnInitialized>
-                self.swatchTexture = self:GetNamedChild("SwatchTexture")
-                self.frameTexture = self:GetNamedChild("FrameTexture")
-                self.mungeTexture = self:GetNamedChild("MungeTexture")
-                self.highlightTexture = self:GetNamedChild("HighlightTexture")
+                self.swatchTexture = self:GetNamedChild("Swatch")
+                self.frameTexture = self:GetNamedChild("Frame")
+                self.highlightTexture = self:GetNamedChild("Highlight")
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)SwatchTexture" level="1">
+                <Texture name="$(parent)Swatch" level="1">
                     <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
                 </Texture>
 
-                <Texture name="$(parent)MungeTexture" inherits="ZO_RandomizedMunge" tier="MEDIUM" alpha=".4">
-                    <AnchorFill />
-                </Texture>
-
-                <Texture name="$(parent)FrameTexture" tier="HIGH">
+                <Texture name="$(parent)Frame" tier="HIGH">
                     <TextureCoords left="0.15625" right="0.84375" top="0" bottom="1"/>
                     <AnchorFill />
                 </Texture>
 
-                <Texture name="$(parent)HighlightTexture" textureFile="EsoUI/Art/Dye/dye_amorSlot_highlight.dds" tier="MEDIUM" hidden="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)Primary" />
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Dye/dye_amorSlot_highlight.dds" tier="MEDIUM" level="2" hidden="true">
+                    <Anchor point="CENTER" />
                     <Dimensions x="32" y="128" />
                 </Texture>
+                
             </Controls>
         </Control>
+        
+        <Texture name="ZO_Dyeing_SlotChanged" textureFile="EsoUI/Art/Dye/dye_amorSlot_changed.dds" tier="HIGH" hidden="true" virtual="true">
+            <Anchor point="CENTER" />
+            <Dimensions x="32" y="128" />
+        </Texture>
 
         <Control name="ZO_DyeingSwatchSlotDyes" virtual="true">
             <OnInitialized>
-                self.dyeControls = {
-                self:GetNamedChild("Primary"),
-                self:GetNamedChild("Secondary"),
-                self:GetNamedChild("Accent"),
-                }
+                ZO_SwatchSlotDyes_OnInitialize(self)
             </OnInitialized>
-            <Dimensions x="64" y="64" />
+            <Dimensions x="66" y="64" />
             <Controls>
                 <Control name="$(parent)Primary" inherits="ZO_DyeingEquipSlotDyeSwatch">
-                    <Anchor point="LEFT" />
-                    <Dimensions x="22" y="64" />
-                </Control>
-
-                <Control name="$(parent)Secondary" inherits="ZO_DyeingEquipSlotDyeSwatch">
-                    <Anchor point="LEFT" relativeTo="$(parent)Primary" relativePoint="RIGHT" />
-                    <Dimensions x="22" y="64" />
+                    <Dimensions x="22" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
                 </Control>
 
                 <Control name="$(parent)Accent" inherits="ZO_DyeingEquipSlotDyeSwatch">
-                    <Anchor point="LEFT" relativeTo="$(parent)Secondary" relativePoint="RIGHT" />
-                    <Dimensions x="22" y="64" />
+                    <Dimensions x="22" />
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
                 </Control>
+                
+                <Control name="$(parent)Secondary" inherits="ZO_DyeingEquipSlotDyeSwatch">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Primary" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Accent" relativePoint="BOTTOMLEFT" />
+                </Control>
+
             </Controls>
         </Control>
 
-        <Control name="ZO_DyeableSlot" inherits="ZO_ItemSlot_Shared" mouseOverBlendMode="ADD" virtual="true">
-            <OnMouseEnter>
-                ZO_DyeableSlot_OnMouseEnter(self)
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                ZO_DyeableSlot_OnMouseExit(self)
-            </OnMouseExit>
-        </Control>
-
-        <Control name="ZO_DyeingEquipSlot" virtual="true">
-            <Dimensions x="134" y="64" />
-
+        <TopLevelControl name="ZO_DyeingTopLevel_Keyboard" inherits="ZO_Restyle_Content_Anchors" hidden="true">
             <OnInitialized>
-                self.slot = self:GetNamedChild("Slot")
-                self.dyeControls = self:GetNamedChild("Dyes").dyeControls
+                ZO_Dyeing_Keyboard_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
-                <Button name="$(parent)Slot" inherits="ZO_DyeableSlot" >
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="LEFT" />
-
-                    <Textures mouseOver="" pressedMouseOver="" />
-                </Button>
-
-                <Control name="$(parent)Dyes" inherits="ZO_DyeingSwatchSlotDyes">
-                    <Anchor point="RIGHT" />
-                </Control>
-            </Controls>
-        </Control>
-
-
-        <TopLevelControl name="ZO_DyeingTopLevel" hidden="true">
-            <AnchorFill />
-            <OnInitialized>
-                ZO_Dyeing_OnInitialized(self)
-            </OnInitialized>
-
-            <Controls>
-                <Control name="$(parent)Tabs" inherits="ZO_LabelButtonBar">
-                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-33" offsetY="10" />
-                </Control>
-
-                <Control name="$(parent)MenuBarDivider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-10" offsetY="50" />
-                </Control>
-
                 <Control name="$(parent)SortBy" inherits="ZO_ComboBox">
                     <Dimensions x="220"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" offsetX="50" offsetY="16" />
+                    <Anchor point="TOPRIGHT" offsetY="30" />
                 </Control>
 
                 <Button name="$(parent)ShowLocked" inherits="ZO_CheckButton">
-                    <Anchor point="LEFT" relativeTo="$(parent)SortBy" relativePoint="RIGHT" offsetX="50" />
+                    <Anchor point="LEFT" constrains="X" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)SortBy" relativePoint="LEFT" constrains="Y" />
                 </Button>
 
-                <Control name="$(parent)ToolsDivider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" relativePoint="BOTTOMLEFT" offsetY="55" />
+                <Control name="$(parent)ToolsDivider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="LEFT" constrains="X"/>
                 </Control>
 
                 <Label name="$(parent)ToolsHeader" inherits="ZO_DyeingHeader" text="SI_DYEING_TOOLS_HEADER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ToolsDivider" relativePoint="BOTTOMLEFT" offsetX="50" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ToolsDivider" relativePoint="BOTTOMLEFT" />
                 </Label>
 
                 <Control name="$(parent)Tools" inherits="ZO_DefaultMenuBarWithTooltips">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ToolsHeader" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="6" />
                 </Control>
 
-                <Control name="$(parent)SavedSetsDivider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ToolsDivider" relativePoint="BOTTOMLEFT" offsetY="82" />
+                <Control name="$(parent)SavedSetsDivider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Tools" relativePoint="BOTTOMLEFT" offsetX="-15" offsetY="20" />
+                    <Anchor point="RIGHT" constrains="X"/>
                 </Control>
 
                 <Label name="$(parent)SavedSetsHeader" inherits="ZO_DyeingHeader" text="SI_DYEING_SAVED_SETS_HEADER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SavedSetsDivider" relativePoint="BOTTOMLEFT" offsetX="50" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SavedSetsDivider" relativePoint="BOTTOMLEFT" />
                 </Label>
 
-                <Control name="$(parent)PaneDivider" inherits="ZO_WideHorizontalDivider">
+                <Control name="$(parent)PaneDivider" inherits="ZO_DynamicHorizontalDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SavedSetsDivider" relativePoint="BOTTOMLEFT" offsetY="110" />
+                    <Anchor point="RIGHT" constrains="X"/>
                 </Control>
 
                 <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)PaneDivider" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="5" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-7" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PaneDivider" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
 
                     <Controls>
                         <Label name="$(parent)NoDyesLabel" font="ZoFontWinH4" horizontalAlignment="CENTER" text="SI_DYEING_NO_MATCHING_DYES">
                             <Anchor point="TOPLEFT" offsetY="25" />
                             <Anchor point="TOPRIGHT" offsetY="25" />
                         </Label>
-                    </Controls>
-                </Control>
 
-                <Control name="$(parent)RotationArea" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" offsetX="392" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-620" offsetY="-85" />
-
-                    <OnMouseEnter>
-                        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
-                    </OnMouseEnter>
-
-                    <OnMouseExit>
-                        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
-                    </OnMouseExit>
-
-                    <OnMouseDown>
-                      if(button == MOUSE_BUTTON_INDEX_LEFT) then
-                        self.isRotating = true
-                        BeginInteractCameraSpin()
-                      end
-                    </OnMouseDown>
-
-                    <OnMouseUp>
-                      if(button == MOUSE_BUTTON_INDEX_LEFT) then
-                        if self.isRotating then
-                          self.isRotating = false
-                          EndInteractCameraSpin()
-                        end
-                      end
-                    </OnMouseUp>
-
-                    <OnEffectivelyHidden>
-                        if self.isRotating then
-                            self.isRotating = false
-                            EndInteractCameraSpin()
-                        end
-                    </OnEffectivelyHidden>
-                </Control>
-
-                <Texture name="$(parent)SharedHighlight" tier="HIGH" textureFile="EsoUI/Art/Dye/dye_swatch_highlight.dds" inheritScale="false" blendMode="ADD" hidden="true" />
-
-                <Control name="$(parent)EquipmentSheet" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="32" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="-170" />
-                    <Dimensions x="400"/>
-
-                    <OnInitialized>
-                      self.slots =
-                      {
-                          [DYEABLE_SLOT_HEAD] = self:GetNamedChild("Head"),
-                          [DYEABLE_SLOT_CHEST] = self:GetNamedChild("Chest"),
-                          [DYEABLE_SLOT_SHOULDERS] = self:GetNamedChild("Shoulders"),
-                          [DYEABLE_SLOT_WAIST] = self:GetNamedChild("Waist"),
-                          [DYEABLE_SLOT_LEGS] = self:GetNamedChild("Legs"),
-                          [DYEABLE_SLOT_FEET] = self:GetNamedChild("Feet"),
-                          [DYEABLE_SLOT_HAND] = self:GetNamedChild("Hand"),
-                          [DYEABLE_SLOT_OFF_HAND] = self:GetNamedChild("Shield"),
-                          [DYEABLE_SLOT_BACKUP_OFF] = self:GetNamedChild("OffShield"),
-                      }
-                    </OnInitialized>
-
-                    <Controls>
-                        <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHARACTER_EQUIP_TITLE">
-                            <Anchor point="TOPLEFT" offsetX="24" offsetY="52" />
-                        </Label>
-
-                        <Texture name="$(parent)TitleDivider" inherits="ZO_HorizontalDivider">
-                            <Dimensions x="462" y="8" />
-                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="85" />
-                        </Texture>
-
-                        <Control name="$(parent)Head" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOPLEFT" offsetX="20" offsetY="110" />
-                        </Control>                        
-
-                        <Control name="$(parent)Shoulders" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOP" relativeTo="$(parent)Head" relativePoint="BOTTOM" offsetX="0" offsetY="30" />
-                        </Control>
-
-                        <Control name="$(parent)Hand" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOP" relativeTo="$(parent)Shoulders" relativePoint="BOTTOM" offsetY="30" />
-                        </Control>
-
-                        <Control name="$(parent)Legs" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOP" relativeTo="$(parent)Hand" relativePoint="BOTTOM" offsetY="30" />
-                        </Control>
-
-                        <Control name="$(parent)Shield" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Head" relativePoint="TOPRIGHT" offsetX="30" />
-                        </Control>
-                        <!-- Switches with Shield on show based on ActiveWeaponPair -->
-                        <Control name="$(parent)OffShield" inherits="ZO_DyeingEquipSlot" hidden="true">
-                          <Anchor point="TOPLEFT" relativeTo="$(parent)Head" relativePoint="TOPRIGHT" offsetX="30" />
-                        </Control>
-
-                        <Control name="$(parent)Chest" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOP" relativeTo="$(parent)Shield" relativePoint="BOTTOM" offsetY="30" />
-                        </Control>
-
-                        <Control name="$(parent)Waist" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOP" relativeTo="$(parent)Chest" relativePoint="BOTTOM" offsetY="30" />
-                        </Control>
-
-                        <Control name="$(parent)Feet" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOP" relativeTo="$(parent)Waist" relativePoint="BOTTOM" offsetY="30" />
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Texture name="$(parent)SharedHighlight" tier="HIGH" textureFile="EsoUI/Art/Dye/dye_swatch_highlight.dds" inheritScale="false" blendMode="ADD" hidden="true" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
                         </Control>
                     </Controls>
-                </Control>
-
-                <Control name="$(parent)CollectibleSheet" mouseEnabled="true" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="32" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetY="-170" />
-                    <Dimensions x="400"/>
-
-                    <OnInitialized>
-                        self.slots =
-                        {
-                            [DYEABLE_SLOT_HAT] = self:GetNamedChild("Head"),
-                            [DYEABLE_SLOT_COSTUME] = self:GetNamedChild("Chest"),
-                        }
-                    </OnInitialized>
-
-                    <Controls>
-                        <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_DYEING_COLLECTIBLE_SHEET_HEADER">
-                            <Anchor point="TOPLEFT" offsetX="24" offsetY="52" />
-                        </Label>
-
-                        <Texture name="$(parent)TitleDivider" inherits="ZO_HorizontalDivider">
-                            <Dimensions x="462" y="8" />
-                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="85" />
-                        </Texture>
-
-                        <Control name="$(parent)Head" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOPLEFT" offsetX="20" offsetY="110" />
-                        </Control>
-
-                        <Control name="$(parent)Chest" inherits="ZO_DyeingEquipSlot">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Head" relativePoint="TOPRIGHT" offsetX="30" />
-                        </Control>
-
-                    </Controls>
-
                 </Control>
             </Controls>
         </TopLevelControl>

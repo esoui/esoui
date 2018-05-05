@@ -1,19 +1,16 @@
 <GuiXml>
     <Controls>
         <Backdrop name="ZO_DyeingHighlight_Gamepad" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" hidden="true" virtual="true"/>
+        <Texture name="ZO_DyeingChangedHighlight_Gamepad" textureFile="EsoUI/Art/Dye/Gamepad/gp_dye_triangleFrame.dds" tier="HIGH" layer="OVERLAY" level="1" hidden="true" virtual="true"/>
 
-        <Control name="ZO_DyeingEquipSlotDyeSwatch_Gamepad" virtual="true">
+        <Control name="ZO_DyeingSlotSwatch_Gamepad" virtual="true">
             <OnInitialized>
-                self.swatchTexture = self:GetNamedChild("SwatchTexture")
-                self.background = self:GetNamedChild("Background")
-                self.invalidTexture = self:GetNamedChild("InvalidTexture")
-                self.edgeFrame = self:GetNamedChild("EdgeFrame")
+                ZO_Dyeing_Slot_Initialize(self)
             </OnInitialized>
             <Dimensions x="24" y="26"/>
             <Controls>
-                <Texture name="$(parent)SwatchTexture" level="2">
-                    <Anchor point="CENTER" />
-                    <Dimensions x="24" y="26"/>
+                <Texture name="$(parent)Swatch" level="2">
+                    <AnchorFill/>
                 </Texture>
 
                 <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH">
@@ -21,66 +18,80 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" offsetX="4" offsetY="4"/>
                 </Backdrop>     
 
-                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Dye/Gamepad/gp_EmptySwatch-Diag_4px.dds" addressMode="WRAP" alpha="0.5" level="1">
-                    <Anchor point="TOPLEFT" relativeTo="($parent)SwatchTexture" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)SwatchTexture" />
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Dye/Gamepad/gp_EmptySwatch-Diag_4px.dds" addressMode="WRAP" level="1">
+                    <Anchor point="TOPLEFT" relativeTo="($parent)Swatch" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)Swatch" />
                 </Texture>
 
-                <Texture name="$(parent)InvalidTexture" textureFile="EsoUI/Art/Dye/Gamepad/gp_Disabled_X.dds" tier="MEDIUM" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
-                    <Anchor point="TOPLEFT" relativeTo="($parent)SwatchTexture" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)SwatchTexture" />
+                <Texture name="$(parent)BadSlot" textureFile="EsoUI/Art/Dye/Gamepad/gp_Disabled_X.dds" tier="HIGH" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                    <Anchor point="TOPLEFT" relativeTo="($parent)Swatch" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="($parent)Swatch" />
                 </Texture>
             </Controls>
         </Control>
 
-        <Control name="ZO_DyeingPresetDyeSwatch_Gamepad" inherits="ZO_DyeingEquipSlotDyeSwatch_Gamepad" virtual="true">
+        <Control name="ZO_DyeingPresetDyeSwatch_Gamepad" inherits="ZO_DyeingSlotSwatch_Gamepad" virtual="true">
             <Dimensions x="22" y="68" />
             <Controls>
-                <Texture name="$(parent)SwatchTexture" level="2" override="true">
-                    <AnchorFill/>
-                </Texture>
-
                 <Backdrop name="$(parent)EdgeFrame" edgeColor="000000" centerColor="00000000" tier="HIGH" override="true">
                     <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_tooTipblack_edgeFrame_8-thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
                     <Insets left="2" top="2" right="-2" bottom="-2" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Background" offsetX="-2" offsetY="-2"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" offsetX="2" offsetY="2"/>
                 </Backdrop>
+
+                <Backdrop name="$(parent)Highlight" inherits="ZO_DyeingHighlight_Gamepad" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Swatch" offsetX="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Swatch" offsetX="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                </Backdrop>
             </Controls>
         </Control>
-
+        
         <Control name="ZO_DyeingSwatchSlotDyes_Gamepad" virtual="true">
+            <Dimensions x="90" y="26" />
             <OnInitialized>
-                self.dyeControls = {
-                    self:GetNamedChild("Primary"),
-                    self:GetNamedChild("Secondary"),
-                    self:GetNamedChild("Accent"),
-                }
+                ZO_SwatchSlotDyes_OnInitialize(self)
             </OnInitialized>
-            <Dimensions x="80" y="26" />
             <Controls>
-                <Control name="$(parent)Secondary" inherits="ZO_DyeingEquipSlotDyeSwatch_Gamepad">
+                <Control name="$(parent)Secondary" inherits="ZO_DyeingSlotSwatch_Gamepad">
                     <Anchor point="TOP" />
                 </Control>
                 
-                <Control name="$(parent)Primary" inherits="ZO_DyeingEquipSlotDyeSwatch_Gamepad">
+                <Control name="$(parent)Primary" inherits="ZO_DyeingSlotSwatch_Gamepad">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Secondary" relativePoint="TOPLEFT" offsetX="-6"/>
                 </Control>
 
-                <Control name="$(parent)Accent" inherits="ZO_DyeingEquipSlotDyeSwatch_Gamepad">
+                <Control name="$(parent)Accent" inherits="ZO_DyeingSlotSwatch_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Secondary" relativePoint="TOPRIGHT" offsetX="6"/>
                 </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_SwatchSlotDyes_WithHighlight_Gamepad" inherits="ZO_DyeingSwatchSlotDyes_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_SwatchSlotDyes_WithHighlight_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Backdrop name="$(parent)PrimaryHighlight" inherits="ZO_DyeingHighlight_Gamepad" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Primary" offsetX="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Primary" offsetX="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                </Backdrop>
+                <Backdrop name="$(parent)SecondaryHighlight" inherits="ZO_DyeingHighlight_Gamepad" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Secondary" offsetX="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Secondary" offsetX="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                </Backdrop>
+                <Backdrop name="$(parent)AccentHighlight" inherits="ZO_DyeingHighlight_Gamepad" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Accent" offsetX="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="-ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Accent" offsetX="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_X" offsetY="ZO_DYEING_HIGHLIGHT_OFFSET_GAMEPAD_Y" />
+                </Backdrop>
             </Controls>
         </Control>
 
         <Control name="ZO_DyeingSwatchPreset_Gamepad" virtual="true">
             <Dimensions x="66" y="68"/>
             <OnInitialized>
-                self.dyeControls = {
-                    self:GetNamedChild("Primary"),
-                    self:GetNamedChild("Secondary"),
-                    self:GetNamedChild("Accent"),
-                }
+                ZO_SwatchSlotDyes_OnInitialize(self)
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Secondary" inherits="ZO_DyeingPresetDyeSwatch_Gamepad">
@@ -99,42 +110,6 @@
                     <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4" />
                     <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4" />
                 </Backdrop>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_DyeingSwatchPresetListEntry_Gamepad" virtual="true">
-            <OnInitialized>
-                self.dyeControls = {
-                    self:GetNamedChild("Primary"),
-                    self:GetNamedChild("Secondary"),
-                    self:GetNamedChild("Accent"),
-                }
-                self.label = self:GetNamedChild("Label")
-            </OnInitialized>
-            <Controls>
-                <Control name="$(parent)Primary" inherits="ZO_DyeingPresetDyeSwatch_Gamepad">
-                    <Dimensions x="33" y="102" />
-                    <Anchor point="LEFT"/>
-                </Control>
-                
-                <Control name="$(parent)Secondary" inherits="ZO_DyeingPresetDyeSwatch_Gamepad">
-                    <Dimensions x="33" y="102" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Primary" relativePoint="RIGHT" />
-                </Control>
-
-                <Control name="$(parent)Accent" inherits="ZO_DyeingPresetDyeSwatch_Gamepad">
-                    <Dimensions x="33" y="102" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Secondary" relativePoint="RIGHT" />
-                </Control>
-
-                <Backdrop name="$(parent)Highlight" inherits="ZO_DyeingHighlight_Gamepad">
-                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4" />
-                </Backdrop>
-
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
-                    <Anchor point="LEFT" relativeTo="$(parent)Accent" relativePoint="RIGHT" offsetX="20" />
-                </Label>
             </Controls>
         </Control>
     </Controls>

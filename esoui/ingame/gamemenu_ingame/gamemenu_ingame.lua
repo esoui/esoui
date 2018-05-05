@@ -52,10 +52,26 @@ local function AddAddonsEntry(entryTable)
     table.insert(entryTable, data)
 end
 
+-- Login Announcements
+
+local function ShowLoginAnnouncements()
+    SCENE_MANAGER:Show("marketAnnouncement")
+    RequestMarketAnnouncement()
+end
+
+local function AddLoginAnnouncementsEntry(entryTable)
+    local data = {name = GetString(SI_MAIN_MENU_ANNOUNCEMENTS), callback = ShowLoginAnnouncements}
+    table.insert(entryTable, data)
+end
+
 -- Logout
 
 local function ShowLogoutDialog()
-    ZO_Dialogs_ShowPlatformDialog("LOG_OUT")
+    if IsInGamepadPreferredMode() then
+        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT")
+    else
+        ZO_Dialogs_ShowDialog("LOG_OUT")
+    end
 end
 
 local function AddLogoutEntry(entryTable)
@@ -82,6 +98,7 @@ local function RebuildTree(gameMenu)
     AddSettingsEntries(gameEntries)
     AddControlsEntries(gameEntries)
     AddAddonsEntry(gameEntries)
+    AddLoginAnnouncementsEntry(gameEntries)
     AddLogoutEntry(gameEntries)
     AddQuitEntry(gameEntries)
     gameMenu:SubmitLists(gameEntries)

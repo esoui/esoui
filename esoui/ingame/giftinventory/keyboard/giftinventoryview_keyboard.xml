@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GiftInventoryView_Keyboard_TopLevel" inherits="ZO_GiftInventoryView_Shared_TopLevel">
+            <ResizeToFitPadding width="20" height="40" />
+            <Anchor point="RIGHT" offsetX="-100" />
+            
+            <OnInitialized>
+                ZO_GiftInventoryView_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)TopDivider" inherits="ZO_DynamicHorizontalDoubleDivider">
+                    <Dimensions x="580" />
+                    <Anchor point="TOP" offsetY="30" />
+                </Control>
+                
+                <Backdrop name="$(parent)Background" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack" level="1" excludeFromResizeToFitExtents="true">
+                    <Controls>
+                        <Texture name="$(parent)ContentBacking" textureFile="EsoUI/Art/Miscellaneous/centerscreen_floating_backing.dds" level="2">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="20"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-20"/>
+                        </Texture>
+                    </Controls>
+                </Backdrop>
+
+                <Backdrop name="$(parent)OverlayGlow" inherits="ZO_MinorMungeBackdrop_SolidWhite" layer="OVERLAY" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" />
+                </Backdrop>
+
+                <Texture name="$(parent)HeaderFade" textureFile="EsoUI/Art/Market/Keyboard/giftClaimHeaderFade.dds" layer="OVERLAY" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" relativeTo="$(parent)TopDivider" />
+                </Texture>
+
+                <Texture name="$(parent)HeaderIcon" textureFile="EsoUI/Art/Market/Keyboard/giftClaimHeaderIcon.dds" tier="HIGH" mouseEnabled="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativeTo="$(parent)TopDivider" />
+                </Texture>
+                
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH2">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="40" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="40" />
+                </Label>
+
+                <Control name="$(parent)NoteContainer" override="true" inherits="ZO_ScrollContainer">
+                    <Dimensions y="100" />
+                    <DimensionConstraints minY="100" maxY="200" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+                
+                <Control name="$(parent)GiftContainer" override="true">
+                    <Dimensions y="210" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteContainer" relativePoint="BOTTOMRIGHT" />
+
+                    <Controls>
+                        <Backdrop name="$(parent)Frame" inherits="ZO_CenterlessBackdrop" level="0" mouseEnabled="true">
+                            <Dimensions x="250" y="180" />
+                            <Anchor point="CENTER" />
+
+                            <OnMouseEnter>
+                                ZO_GiftInventoryView_KeyboardGiftFrame_OnMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_GiftInventoryView_KeyboardGiftFrame_OnMouseExit(self)
+                            </OnMouseExit>
+                        </Backdrop>
+
+                        <Texture name="$(parent)Icon" override="true">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="CENTER" offsetY="-35" />
+                        </Texture>
+
+                        <Label name="$(parent)Name" override="true" font="ZoFontWinH3" horizontalAlignment="CENTER">
+                            <Dimensions x="220" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="35" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)BottomDivider" inherits="ZO_DynamicHorizontalDoubleDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GiftContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GiftContainer" relativePoint="BOTTOMRIGHT" />
+                </Control>
+                
+                <Label name="$(parent)Note" override="true" font="ZoFontWinH4" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
