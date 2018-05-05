@@ -38,6 +38,9 @@ function ZO_Help_Root_Gamepad:Initialize(control)
     websiteAnchor:AddToControl(websiteText)
     
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+
+    local list = self:GetMainList()
+    list:SetValidateGradient(true)
 end
 
 function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()
@@ -51,17 +54,13 @@ function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                     local targetData = self:GetMainList():GetTargetData()
-                    if targetData.text == GetString(SI_GAMEPAD_HELP_GET_ME_UNSTUCK) then
-                        local cooldownTime = GetTimeUntilStuckAvailable()
-                        if(cooldownTime > 0) then
-                            ZO_Dialogs_ShowGamepadDialog(GAMEPAD_UNSTUCK_COOLDOWN_DIALOG)
-                        else
-                            ZO_Dialogs_ShowGamepadDialog(GAMEPAD_UNSTUCK_CONFIRM_DIALOG)
-                        end
-                    elseif targetData.isDialog then
-                        ZO_Dialogs_ShowGamepadDialog(targetData.sceneName)
-                    elseif targetData.sceneName then
-                        SCENE_MANAGER:Push(targetData.sceneName)
+                    local destination = targetData.destination
+                    local destinationName = type(destination) == "function" and destination() or destination
+
+                    if targetData.isDialog then
+                        ZO_Dialogs_ShowGamepadDialog(destinationName)
+                    else
+                        SCENE_MANAGER:Push(destinationName)
                     end
                 end,
         },
@@ -144,19 +143,22 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
         mainText = 
         {
             text = function()
-                local cost = GetRecallCost()
-                local goldIcon = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 32, 32)
+                local cost = zo_min(GetRecallCost(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+                local goldIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
                 local primaryButtonIconPath = ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_BUTTON_1)
                 local primaryButtonIcon = zo_iconFormat(primaryButtonIconPath, 64, 64)
-                local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
-                local mainText = DoesCurrentZoneHaveTelvarStoneBehavior() and SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT_TELVAR or SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT
-                local playerMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-                
-                if cost > playerMoney then
-                    cost = playerMoney
+
+                local text
+                if DoesCurrentZoneHaveTelvarStoneBehavior() then
+                    local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT_TELVAR, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
+                elseif IsActiveWorldBattleground() then
+                    text = GetString(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_IN_BATTLEGROUND)
+                else
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT, cost, goldIcon, primaryButtonIcon)
                 end
 
-                return zo_strformat(mainText, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
+                return text
             end,
         },
        
@@ -164,7 +166,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
         {
             {
                 keybind = "DIALOG_PRIMARY",
-                text = SI_GAMEPAD_HELP_UNSTUCK_TELEPORT_KEYBIND_TEXT,
+                text = SI_DIALOG_ACCEPT,
                 callback = function()
                     SendPlayerStuck()
                 end,
@@ -172,7 +174,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
 
             {
                 keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_EXIT,
+                text = SI_DIALOG_CANCEL,
             },
         }
     })
@@ -319,23 +321,40 @@ function ZO_Help_Root_Gamepad:InitializeCSDisabledDialog()
     })
 end
 
-function ZO_Help_Root_Gamepad:PopulateList()
-    local function AddEntry(name, sceneName, icon, isDialog)
+do
+    local IS_DIALOG = true
+    local IS_SCENE = false
+    
+    local function AddEntry(list, name, icon, destination, isDialog)
         local data = ZO_GamepadEntryData:New(GetString(name), icon)
-        data.sceneName = sceneName
         data:SetIconTintOnSelection(true)
+        data.destination = destination
         data.isDialog = isDialog
-        self:GetMainList():AddEntry("ZO_GamepadMenuEntryTemplate", data)
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", data)
     end
 
-    self:GetMainList():Clear()
+    local function UnstuckDialogNameCallback()
+        if GetTimeUntilStuckAvailable() > 0 then
+            return GAMEPAD_UNSTUCK_COOLDOWN_DIALOG
+        else
+            return GAMEPAD_UNSTUCK_CONFIRM_DIALOG
+        end
+    end
 
-    AddEntry(SI_GAMEPAD_HELP_CUSTOMER_SERVICE, "helpCustomerServiceGamepad", "EsoUI/Art/Notifications/Gamepad/gp_notification_cs.dds")
-    AddEntry(SI_GAMEPAD_HELP_GET_ME_UNSTUCK, nil, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_unstuck.dds")
-    AddEntry(SI_HELP_TUTORIALS, "helpTutorialsCategoriesGamepad", "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tutorial.dds")
-    AddEntry(SI_GAMEPAD_HELP_LEGAL_MENU, "helpLegalDocsGamepad", "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_terms.dds")
+    function ZO_Help_Root_Gamepad:PopulateList()
+        local list = self:GetMainList()
+        list:Clear()
 
-    self:GetMainList():Commit()
+        AddEntry(list, SI_GAMEPAD_HELP_CUSTOMER_SERVICE, "EsoUI/Art/Notifications/Gamepad/gp_notification_cs.dds", "helpCustomerServiceGamepad", IS_SCENE)
+        AddEntry(list, SI_GAMEPAD_HELP_GET_ME_UNSTUCK, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_unstuck.dds", UnstuckDialogNameCallback, IS_DIALOG)
+        AddEntry(list, SI_HELP_TUTORIALS, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tutorial.dds", "helpTutorialsCategoriesGamepad", IS_SCENE)
+        AddEntry(list, SI_GAMEPAD_HELP_LEGAL_MENU, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_terms.dds", "helpLegalDocsGamepad", IS_SCENE)
+        AddEntry(list, SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_submitFeedback.dds", "helpSubmitFeedbackGamepad", IS_SCENE)
+        AddEntry(list, SI_CUSTOMER_SERVICE_QUEST_ASSISTANCE, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds", "helpQuestAssistanceGamepad", IS_SCENE)
+        AddEntry(list, SI_CUSTOMER_SERVICE_ITEM_ASSISTANCE, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_inventory.dds", "helpItemAssistanceGamepad", IS_SCENE)
+        
+        list:Commit()
+    end
 end
 
 function ZO_Help_Root_Gamepad:PerformUpdate()

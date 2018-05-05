@@ -57,9 +57,10 @@ function GroupMenu_Keyboard:InitializeCategories()
         control.text:SetText(data.name)
         control:SetSelected(selected)
 
-        local isLevelLocked = data.activityFinderObject and data.activityFinderObject:GetLevelLockInfo()
-        node:SetEnabled(not isLevelLocked)
-        ZO_IconHeader_Setup(control, selected, not isLevelLocked)
+        local isLocked = data.activityFinderObject and (data.activityFinderObject:GetLevelLockInfo() or data.activityFinderObject:GetNumLocations() == 0)
+
+        node:SetEnabled(not isLocked)
+        ZO_IconHeader_Setup(control, selected, not isLocked)
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
@@ -106,7 +107,7 @@ function GroupMenu_Keyboard:InitializeKeybindDescriptors()
 
         visible = function()
             local playerIsGrouped, playerIsLeader, groupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupStatus()
-            return not playerIsGrouped or (playerIsLeader and groupSize < GROUP_SIZE_MAX)
+            return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < GROUP_SIZE_MAX))
         end
     }
 end
@@ -139,11 +140,16 @@ do
                 elseif lowestRankLimit then
                     lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestRankLimit)
                 end
-
-                if lockedText then
-                    InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                    SetTooltipText(InformationTooltip, lockedText)
+            else
+                local numLocations = data.activityFinderObject:GetNumLocations()
+                if numLocations == 0 then
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
                 end
+            end
+
+            if lockedText then
+                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+                SetTooltipText(InformationTooltip, lockedText)
             end
         end
     end

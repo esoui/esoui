@@ -1,0 +1,12 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Help_MechanicAssistance_Gamepad_DetailsItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

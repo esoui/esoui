@@ -38,11 +38,11 @@ local GAMEPAD_GUILD_RANKS_PERMISSIONS =
     {   GUILD_PERMISSION_OFFICER_CHAT_WRITE,                    GUILD_PERMISSION_RELEASE_AVA_RESOURCE   },
     {   GUILD_PERMISSION_OFFICER_CHAT_READ,                     GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_COMMERCE) },
     {   GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_EDIT),      GUILD_PERMISSION_BANK_DEPOSIT           },
-    {   GUILD_PERMISSION_SET_MOTD,                              GUILD_PERMISSION_BANK_WITHDRAW   },
-    {   GUILD_PERMISSION_DESCRIPTION_EDIT,                      GUILD_PERMISSION_BANK_WITHDRAW_GOLD   },
-    {   GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_MEMBERS),   GUILD_PERMISSION_STORE_SELL   },
-    {   GUILD_PERMISSION_INVITE,                                GUILD_PERMISSION_GUILD_KIOSK_BID   },
-    {   GUILD_PERMISSION_NOTE_READ,                             nil           },
+    {   GUILD_PERMISSION_SET_MOTD,                              GUILD_PERMISSION_BANK_WITHDRAW          },
+    {   GUILD_PERMISSION_DESCRIPTION_EDIT,                      GUILD_PERMISSION_STORE_SELL             },
+    {   GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_MEMBERS),   GUILD_PERMISSION_BANK_WITHDRAW_GOLD     },
+    {   GUILD_PERMISSION_INVITE,                                GUILD_PERMISSION_BANK_VIEW_GOLD         },
+    {   GUILD_PERMISSION_NOTE_READ,                             GUILD_PERMISSION_GUILD_KIOSK_BID        },
     {   GUILD_PERMISSION_NOTE_EDIT,                             nil           },
     {   GUILD_PERMISSION_PROMOTE,                               nil           },
     {   GUILD_PERMISSION_DEMOTE,                                nil           },
@@ -97,23 +97,6 @@ end
 function ZO_GuildRanks_Gamepad:Initialize(control)
     InitializeColumnCount()
     local ALWAYS_ANIMATE = true
-
-    --Console has no read permission
-    if IsConsoleUI() then
-        local removed = false
-        for rowIndex, row in ipairs(GAMEPAD_GUILD_RANKS_PERMISSIONS) do
-            for columnIndex, entry in ipairs(row) do
-                if entry == GUILD_PERMISSION_OFFICER_CHAT_READ then
-                    row[columnIndex] = nil
-                    removed = true
-                    break
-                end
-            end
-            if removed then
-                break
-            end
-        end
-    end
 
     self.permissionsSummary = self.control:GetNamedChild("PermissionsSummary")
     self.permissionsSummaryScrollChild = self.permissionsSummary:GetNamedChild("ScrollChild")
@@ -865,17 +848,24 @@ end
 
 function ZO_GuildRanks_Gamepad:RefreshChangePermissions()
     local selectedPermissionControl = self:GetSelectedPermissionControl()
-    if(selectedPermissionControl ~= nil) then
+    if selectedPermissionControl ~= nil then
         local iconControl = selectedPermissionControl:GetNamedChild("Icon")
         if(iconControl ~= nil) then
             self.selectorBoxControl:SetAnchor(CENTER, iconControl, CENTER, 0, 1)
         end
         
+        local permission = selectedPermissionControl.permission
         self.selectorBoxControl.selectedRank = self.selectedRank
-        self.selectorBoxControl.selectedPermission = selectedPermissionControl.permission
+        self.selectorBoxControl.selectedPermission = permission
+
+        local permissionInfo = ZO_GuildRanks_Shared.GetToolTipInfoForPermission(permission)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+        if permissionInfo then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, permissionInfo)
+        end
     end
 
-    self:RefreshPermissionsSummary(self.selectedRank)
+    self:RefreshPermissions(self.selectedRank)
 end
 
 -----------------
@@ -950,17 +940,18 @@ function ZO_GuildRanks_Gamepad:InitializePermissionsFragment()
     end
 end
 
-function ZO_GuildRanks_Gamepad:RefreshPermissionsSummary(rank)
+function ZO_GuildRanks_Gamepad:RefreshPermissions(rank)
     local canPlayerEditPermissions = DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PERMISSION_EDIT)
     for i = 1, #self.permissionControls do
         local permissionControl = self.permissionControls[i]
-        local permissionEnabled = ZO_GuildRank_Shared.IsPermissionSet(rank, permissionControl.permission)
+        local permissionEnabled = rank:IsPermissionSet(permissionControl.permission)
+        local hasAnyRequisitePermissionsEnabled = ZO_GuildRanks_Shared.AreAnyRequisitePermissionsEnabled(permissionControl.permission, rank)
 
-        if(permissionControl.icon) then
+        if permissionControl.icon then
             permissionControl.icon:SetHidden(not permissionEnabled)
-            if(self:IsDisplayingChangePermissions() and self.selectorBoxControl.selectedPermission == permissionControl.permission) then
+            if self:IsDisplayingChangePermissions() and self.selectorBoxControl.selectedPermission == permissionControl.permission then
                 permissionControl.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-            elseif(permissionEnabled) then
+            elseif permissionEnabled and not hasAnyRequisitePermissionsEnabled then
                 permissionControl.label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
             else
                 permissionControl.label:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
@@ -1050,30 +1041,34 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
             keybind = "UI_SHORTCUT_PRIMARY",
 
             callback = function()
-                if(self:IsDisplayingOptionsList()) then
+                if self:IsDisplayingOptionsList() then
                     local selectedOptionsData = self.optionsList:GetTargetData()
-                    if(selectedOptionsData ~= nil and selectedOptionsData.callback ~= nil) then
+                    if selectedOptionsData ~= nil and selectedOptionsData.callback ~= nil then
                         selectedOptionsData.callback()
                     end
-                elseif(self:IsDisplayingRankList()) then
+                elseif self:IsDisplayingRankList() then
                     local selectedRankData = self.rankList:GetTargetData()
-                    if(selectedRankData.addRank) then
+                    if selectedRankData.addRank then
                         selectedRankData.callback()
                     else
                         PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
                         self:ActivateOptionsList(REFRESH_SCREEN)
                     end
-                elseif(self:IsDisplayingIconSelector()) then
+                elseif self:IsDisplayingIconSelector() then
                     self:SelectHighlightedIcon()
                     
                     PlaySound(SOUNDS.DIALOG_ACCEPT)
                     self:ActivateOptionsList(REFRESH_SCREEN)
-                elseif(self:IsDisplayingChangePermissions()) then
-                    if(not self.selectorBoxControl:IsHidden()) then
+                elseif self:IsDisplayingChangePermissions() then
+                    local hasAnyRequisitePermissionsEnabled = ZO_GuildRanks_Shared.AreAnyRequisitePermissionsEnabled(self.selectorBoxControl.selectedPermission, self.selectorBoxControl.selectedRank)
+
+                    if not self.selectorBoxControl:IsHidden() and not hasAnyRequisitePermissionsEnabled then
                         PlaySound(SOUNDS.DIALOG_ACCEPT)
                         local isPermissionSet = ZO_GuildRank_Shared.IsPermissionSet(self.selectorBoxControl.selectedRank, self.selectorBoxControl.selectedPermission)
                         ZO_GuildRank_Shared.SetPermission(self.selectorBoxControl.selectedRank, self.selectorBoxControl.selectedPermission, not isPermissionSet)
-                        self:RefreshPermissionsSummary(self.selectorBoxControl.selectedRank)
+                        self:RefreshPermissions(self.selectorBoxControl.selectedRank)
+                    else
+                        ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(SI_GAMEPAD_GUILD_PERMISSIONS_CANNOT_CHANGE))
                     end
                 end
             end,
@@ -1095,7 +1090,8 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
                 elseif(self:IsDisplayingIconSelector() or self:IsDisplayingChangePermissions()) then
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                     self:ActivateOptionsList(REFRESH_SCREEN)
-                    self:RefreshPermissionsSummary(self.selectedRank)
+                    self:RefreshPermissions(self.selectedRank)
+                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
                 else
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                     self:ActivateRankList(REFRESH_SCREEN)
@@ -1225,7 +1221,7 @@ function ZO_GuildRanks_Gamepad:OnTargetChanged(list, selectedData, oldSelectedDa
             self.selectedRank = nil
         elseif(selectedData.rankObject ~= nil and self.selectedRank ~= selectedData.rankObject) then
             self.selectedRank = selectedData.rankObject
-            self:RefreshPermissionsSummary(self.selectedRank)
+            self:RefreshPermissions(self.selectedRank)
             self:RefreshContent()
         end
     end

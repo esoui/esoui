@@ -1,11 +1,5 @@
 <GuiXml>
     <Controls>
-        <Texture name="ZO_GroupMenuGamepadTipIcon" virtual="true">
-            <Dimensions x="32" y="32" />
-        </Texture>
-      
-        <Label name="ZO_GroupMenuGamepadTipIconLabel" virtual="true" font="ZoFontGamepad36" modifyTextType="UPPERCASE" verticalAlignment="CENTER" />
-
         <Control name="ZO_GroupMenuGamepadDungeonDifficultyEntry" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">

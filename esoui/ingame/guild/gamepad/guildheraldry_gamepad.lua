@@ -1,5 +1,4 @@
 local CATEGORY_TEMPLATE_NAME = "ZO_GamepadMenuEntryTemplate"
-local CATEGORY_HEADER_TEMPLATE_NAME = "ZO_GamepadMenuEntryHeaderTemplate"
 local COLOR_TEMPLATE_NAME = "ZO_GuildHeraldry_SwatchEntryTemplate_Gamepad"
 local COLOR_HEADER_TEMPLATE_NAME = "ZO_GuildHeraldry_SwatchHeaderTemplate_Gamepad"
 
@@ -42,7 +41,7 @@ end
 function ZO_GuildHeraldryManager_Gamepad:Initialize(control)
     ZO_GuildHeraldryManager_Shared.Initialize(self, control, ZO_GAMEPAD_CURRENCY_OPTIONS)
 
-    self:InitializeSwatchPool("ZO_GuildHeraldry_DyeingSwatch_Gamepad")
+    self:InitializeSwatchPool("ZO_DyeingSwatch_Gamepad")
     self:InitializeStylePool("ZO_GuildHeraldry_Style_Gamepad")
 
     GUILD_HERALDRY_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
@@ -56,7 +55,6 @@ function ZO_GuildHeraldryManager_Gamepad:Initialize(control)
             self:PopulateCategories()
             self:PopulateStyleCategoryLists() -- Depends on PopulateCategories being called first.
 
-            self.categoryList:SetFirstIndexSelected()
             self:SelectMode(ZO_HERALDRY_CATEGORY_MODE)
             self:RegisterEvents()
             StartHeraldryCustomization(self.guildId)
@@ -140,10 +138,6 @@ function ZO_GuildHeraldryManager_Gamepad:UnregisterEvents()
     self.control:UnregisterForEvent(EVENT_HERALDRY_FUNDS_UPDATED)
 end
 
-function ZO_GuildHeraldryManager_Gamepad:InitializeStyleCategoryLists(scrollList, scrollListTemplate)
-    ZO_GuildHeraldryManager_Shared.InitializeStyleCategoryLists(self, scrollList, scrollListTemplate)
-end
-
 function ZO_GuildHeraldryManager_Gamepad:GetPurchaseDialogName()
     return "CONFIRM_HERALDRY_PURCHASE_GAMEPAD"
 end
@@ -196,19 +190,19 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeKeybindStripDescriptors()
             name = function()
                 local pendingCost = GetPendingHeraldryCost()
                 local heraldryFunds = GetHeraldryGuildBankedMoney()
-                local goldIcon = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 24, 24)
+                local gamepadGoldIconMarkup =  ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
 
                 if IsCreatingHeraldryForFirstTime() then
                     if heraldryFunds and pendingCost <= heraldryFunds then
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY, ZO_CurrencyControl_FormatCurrency(pendingCost), goldIcon)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY, ZO_CurrencyControl_FormatCurrency(pendingCost), gamepadGoldIconMarkup)
                     else
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), goldIcon)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_PURCHASE_HERALDRY_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), gamepadGoldIconMarkup)
                     end
                 else
                     if heraldryFunds and pendingCost <= heraldryFunds then
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES, ZO_CurrencyControl_FormatCurrency(pendingCost), goldIcon)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES, ZO_CurrencyControl_FormatCurrency(pendingCost), gamepadGoldIconMarkup)
                     else
-                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), goldIcon)
+                        return zo_strformat(SI_GAMEPAD_GUILD_HERALDRY_APPLY_CHANGES_NOT_ENOUGH, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(pendingCost)), gamepadGoldIconMarkup)
                     end
                 end
             end,
@@ -232,7 +226,8 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Custom Exit
         {
-            name = GetString(SI_EXIT_BUTTON),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Guild Heraldry Exit",
             keybind = "UI_SHORTCUT_EXIT",
             ethereal = true,
             callback =  function()
@@ -320,6 +315,8 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Switch to the top style pane.
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Select Top Style Pane",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
 
@@ -332,6 +329,8 @@ function ZO_GuildHeraldryManager_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Switch to the bottom style pane.
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Select Bottom Style Pane",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
 
@@ -446,11 +445,11 @@ end
 
 local function SetupStyleLinks(styles, stride)
     local function GetLink(row, col)
-        if  (row == 0) then
+        if row == 0 then
             return STYLE_ROW_TOP
-        elseif (col > 0) and (col <= stride) then
-            local index = ((row - 1) * stride) + col
-            if (index > 0) and (index <= #styles) then
+        elseif col > 0 and col <= stride then
+            local index = (row - 1) * stride + col
+            if index > 0 and index <= #styles then
                 return styles[index]
             end
         end
@@ -458,8 +457,6 @@ local function SetupStyleLinks(styles, stride)
 
     -- Setup style links in up to eight directions.
     local styleCount = #styles
-    local lastRow = zo_ceil(styleCount / stride)
-    local lastCol = ((styleCount - 1) % stride) + 1
     for i = 1, styleCount do
         local style = styles[i]
         local row = zo_ceil(i / stride)
@@ -480,183 +477,188 @@ local function SetupStyleLinks(styles, stride)
     end
 end
 
-function ZO_GuildHeraldryManager_Gamepad:PopulateCategories()
-    self.categoryList:Clear()
+do
+    local DONT_ALLOW_EVEN_IF_DISABLED = true
+    local NO_ANIMATION = true
 
-    local function LayoutStyles()
-        local STRIDE = 6
-        local STYLE_SIZE = ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE
-        local PADDING_X = 30
-        local PADDING_Y = 24
+    function ZO_GuildHeraldryManager_Gamepad:PopulateCategories()
+        self.categoryList:Clear()
 
-        local centerOffset = (STRIDE / 2) * STYLE_SIZE
-        centerOffset = centerOffset + (PADDING_X * 1.5)
+        local function LayoutStyles()
+            local STRIDE = 6
+            local STYLE_SIZE = ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE
+            local PADDING_X = 30
+            local PADDING_Y = 24
 
-        local INITIAL_OFFSET_X = (ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH / 2) - centerOffset
-        local INITIAL_OFFSET_Y = 58
+            local centerOffset = (STRIDE / 2) * STYLE_SIZE
+            centerOffset = centerOffset + (PADDING_X * 1.5)
 
-        local function AnchorHeraldryStyle(currentAnchor, style, index)
-            ZO_Anchor_BoxLayout(currentAnchor, style, index - 1, STRIDE, PADDING_X, PADDING_Y, STYLE_SIZE, STYLE_SIZE, INITIAL_OFFSET_X, INITIAL_OFFSET_Y)
+            local INITIAL_OFFSET_X = (ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH / 2) - centerOffset
+            local INITIAL_OFFSET_Y = 58
+
+            local function AnchorHeraldryStyle(currentAnchor, style, index)
+                ZO_Anchor_BoxLayout(currentAnchor, style, index - 1, STRIDE, PADDING_X, PADDING_Y, STYLE_SIZE, STYLE_SIZE, INITIAL_OFFSET_X, INITIAL_OFFSET_Y)
+            end
+
+            self:LayoutStyles(AnchorHeraldryStyle)
+            SetupStyleLinks(self.styleIndexToStyle, STRIDE)
         end
 
-        self:LayoutStyles(AnchorHeraldryStyle)
-        SetupStyleLinks(self.styleIndexToStyle, STRIDE)
-    end
-
-    local function LayoutColors()
-        self:LayoutColors()
-    end
-
-    local function OnLeavingColorMode(oldData, newData)
-        -- We must have changed categories, so set the highlighted color to be the same as the selected color.
-        self:HideColorHighlight(oldData, RESET_TO_SELECTED)
-    end
-
-    local function OnLeavingStyleMode(oldData, newData)
-        -- We must have changed categories, so set the highlighted style to be the same as the selected style, and reset
-        -- the submode to the top.
-        self:HideStyleHighlight(oldData, RESET_TO_SELECTED)
-        oldData.setSubMode(STYLE_SUBMODE_TOP)
-    end
-
-    local colorIcon = "EsoUI/Art/Dye/Gamepad/dye_square.dds"
-
-    local bgStyleCost, bgPrimaryColorCost, bgSecondaryColorCost, crestStyleCost, crestColorCost = GetHeraldryCustomizationCosts()
-
-    local bgStyleData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_STYLE))
-    bgStyleData:SetHeader(GetString(SI_GAMEPAD_GUILD_HERALDRY_BACKGROUND))
-    bgStyleData.mode = ZO_HERALDRY_BG_STYLE_MODE
-    bgStyleData.cost = bgStyleCost
-    bgStyleData.layout = LayoutStyles
-    bgStyleData.changed = OnLeavingStyleMode
-    bgStyleData.setSubMode = function(mode) self.bgStyleSubMode = mode end
-    bgStyleData.getSubMode = function() return self.bgStyleSubMode or STYLE_SUBMODE_TOP end
-    bgStyleData.getNum = function() return GetNumHeraldryBackgroundStyles(self.viewBackgroundCategory) end
-    bgStyleData.getInfo = function(index) return GetHeraldryBackgroundStyleInfo(self.viewBackgroundCategory, index) end
-    bgStyleData.setSelectedCategory = function(index) self.selectedBackgroundCategory = index end
-    bgStyleData.getSelectedCategory = function() return self.selectedBackgroundCategory end
-    bgStyleData.setViewCategory = function(index) self.viewBackgroundCategory = index end
-    bgStyleData.getViewCategory = function() return self.viewBackgroundCategory end
-    bgStyleData.resetToSelectedCategory = function() self.bgStyleCatList:SetSelectedDataIndex(self.selectedBackgroundCategory) end
-    bgStyleData.setSelectedStyle = function(index) self.selectedBackgroundStyle = index end
-    bgStyleData.getSelectedStyle = function() return self.selectedBackgroundStyle end
-    bgStyleData.setHighlightedStyle = function(index) self.highlightedBackgroundStyle = index end
-    bgStyleData.getHighlightedStyle = function() return self.highlightedBackgroundStyle or self.selectedBackgroundStyle end
-    bgStyleData.directionalInputCallback = function(direction) self:UpdateStyleWithDirection(direction) end
-    bgStyleData.styleHeaderName = GetString(SI_GUILD_HERALDRY_PATTERN_HEADER)
-    bgStyleData.iconUpdateFn = function() 
-        local styleIndex = bgStyleData.getSelectedStyle()
-        local _, icon = bgStyleData.getInfo(styleIndex)
-        bgStyleData:ClearIcons()
-        if (bgStyleData.getSelectedCategory() ~= nil) then
-            bgStyleData:AddIcon(icon)
+        local function LayoutColors()
+            self:LayoutColors()
         end
-    end
 
-    self.categoryList:AddEntryWithHeader(CATEGORY_TEMPLATE_NAME, bgStyleData)
-
-    local bgPrimaryColorData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_PRIMARY_COLOR))
-    bgPrimaryColorData.mode = ZO_HERALDRY_COLOR_MODE
-    bgPrimaryColorData.cost = bgPrimaryColorCost
-    bgPrimaryColorData.layout = LayoutColors
-    bgPrimaryColorData.changed = OnLeavingColorMode
-    bgPrimaryColorData.setSelectedColor = function(index) self.selectedBackgroundPrimaryColor = index end
-    bgPrimaryColorData.getSelectedColor = function() return self.selectedBackgroundPrimaryColor end
-    bgPrimaryColorData.setHighlightedColor = function(index) self.highlightedBackgroundPrimaryColor = index end
-    bgPrimaryColorData.getHighlightedColor = function() return self.highlightedBackgroundPrimaryColor or self.selectedBackgroundPrimaryColor end
-    bgPrimaryColorData.directionalInputCallback = function(direction) self:HighlightColorWithDirection(direction) end
-    bgPrimaryColorData.iconUpdateFn = function() 
-        bgPrimaryColorData:SetIconTint(nil, nil)
-        bgPrimaryColorData:ClearIcons()
-        if (bgPrimaryColorData.getSelectedColor() ~= nil) then
-            local _, _, r, g, b = GetHeraldryColorInfo(bgPrimaryColorData.getSelectedColor())
-            local newColor = ZO_ColorDef:New(r, g, b)
-            bgPrimaryColorData:SetIconTint(newColor, newColor)
-            bgPrimaryColorData:AddIcon(colorIcon)
+        local function OnLeavingColorMode(oldData, newData)
+            -- We must have changed categories, so set the highlighted color to be the same as the selected color.
+            self:HideColorHighlight(oldData, RESET_TO_SELECTED)
         end
-    end
 
-    self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, bgPrimaryColorData)
-
-    local bgSecondaryColorData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_SECONDARY_COLOR))
-    bgSecondaryColorData.mode = ZO_HERALDRY_COLOR_MODE
-    bgSecondaryColorData.cost = bgSecondaryColorCost
-    bgSecondaryColorData.layout = LayoutColors
-    bgSecondaryColorData.changed = OnLeavingColorMode
-    bgSecondaryColorData.setSelectedColor = function(index) self.selectedBackgroundSecondaryColor = index end
-    bgSecondaryColorData.getSelectedColor = function() return self.selectedBackgroundSecondaryColor end
-    bgSecondaryColorData.setHighlightedColor = function(index) self.highlightedBackgroundSecondaryColor = index end
-    bgSecondaryColorData.getHighlightedColor = function() return self.highlightedBackgroundSecondaryColor or self.selectedBackgroundSecondaryColor end
-    bgSecondaryColorData.directionalInputCallback = function(direction) self:HighlightColorWithDirection(direction) end
-    bgSecondaryColorData.iconUpdateFn = function() 
-        bgSecondaryColorData:SetIconTint(nil, nil)
-        bgSecondaryColorData:ClearIcons()
-        if (bgSecondaryColorData.getSelectedColor() ~= nil) then
-            local _, _, r, g, b = GetHeraldryColorInfo(bgSecondaryColorData.getSelectedColor())
-            local newColor = ZO_ColorDef:New(r, g, b)
-            bgSecondaryColorData:SetIconTint(newColor, newColor)
-            bgSecondaryColorData:AddIcon(colorIcon)
+        local function OnLeavingStyleMode(oldData, newData)
+            -- We must have changed categories, so set the highlighted style to be the same as the selected style, and reset
+            -- the submode to the top.
+            self:HideStyleHighlight(oldData, RESET_TO_SELECTED)
+            oldData.setSubMode(STYLE_SUBMODE_TOP)
         end
-    end
 
-    self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, bgSecondaryColorData, nil, GAMEPAD_HEADER_DEFAULT_PADDING, nil, GAMEPAD_HEADER_SELECTED_PADDING)
+        local colorIcon = "EsoUI/Art/Dye/Gamepad/dye_square.dds"
 
-    local crestStyleData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_STYLE))
-    crestStyleData:SetHeader(GetString(SI_GAMEPAD_GUILD_HERALDRY_CREST))
-    crestStyleData.mode = ZO_HERALDRY_CREST_STYLE_MODE
-    crestStyleData.cost = crestStyleCost
-    crestStyleData.layout = LayoutStyles
-    crestStyleData.changed = OnLeavingStyleMode
-    crestStyleData.setSubMode = function(mode) self.crestStyleSubMode = mode end
-    crestStyleData.getSubMode = function() return self.crestStyleSubMode or STYLE_SUBMODE_TOP end
-    crestStyleData.getNum = function() return GetNumHeraldryCrestStyles(self.viewCrestCategory) end
-    crestStyleData.getInfo = function(index) return GetHeraldryCrestStyleInfo(self.viewCrestCategory, index) end
-    crestStyleData.setSelectedCategory = function(index) self.selectedCrestCategory = index end
-    crestStyleData.getSelectedCategory = function() return self.selectedCrestCategory end
-    crestStyleData.setViewCategory = function(index) self.viewCrestCategory = index end
-    crestStyleData.getViewCategory = function() return self.viewCrestCategory end
-    crestStyleData.resetToSelectedCategory = function() self.crestStyleCatList:SetSelectedDataIndex(self.selectedCrestCategory) end
-    crestStyleData.setSelectedStyle = function(index) self.selectedCrestStyle = index end
-    crestStyleData.getSelectedStyle = function() return self.selectedCrestStyle end
-    crestStyleData.setHighlightedStyle = function(index) self.highlightedCrestStyle = index end
-    crestStyleData.getHighlightedStyle = function() return self.highlightedCrestStyle or self.selectedCrestStyle end
-    crestStyleData.directionalInputCallback = function(direction) self:UpdateStyleWithDirection(direction) end
-    crestStyleData.styleHeaderName = GetString(SI_GUILD_HERALDRY_DESIGN_HEADER)
-    crestStyleData.iconUpdateFn = function() 
-        local styleIndex = crestStyleData.getSelectedStyle()
-        local _, icon = crestStyleData.getInfo(styleIndex)
-        crestStyleData:ClearIcons()
-        if (crestStyleData.getSelectedCategory() ~= nil) then
-            crestStyleData:AddIcon(icon)
+        local bgStyleCost, bgPrimaryColorCost, bgSecondaryColorCost, crestStyleCost, crestColorCost = GetHeraldryCustomizationCosts()
+
+        local bgStyleData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_STYLE))
+        bgStyleData:SetHeader(GetString(SI_GAMEPAD_GUILD_HERALDRY_BACKGROUND))
+        bgStyleData.mode = ZO_HERALDRY_BG_STYLE_MODE
+        bgStyleData.cost = bgStyleCost
+        bgStyleData.layout = LayoutStyles
+        bgStyleData.changed = OnLeavingStyleMode
+        bgStyleData.setSubMode = function(mode) self.bgStyleSubMode = mode end
+        bgStyleData.getSubMode = function() return self.bgStyleSubMode or STYLE_SUBMODE_TOP end
+        bgStyleData.getNum = function() return GetNumHeraldryBackgroundStyles(self.viewBackgroundCategory) end
+        bgStyleData.getInfo = function(index) return GetHeraldryBackgroundStyleInfo(self.viewBackgroundCategory, index) end
+        bgStyleData.setSelectedCategory = function(index) self.selectedBackgroundCategory = index end
+        bgStyleData.getSelectedCategory = function() return self.selectedBackgroundCategory end
+        bgStyleData.setViewCategory = function(index) self.viewBackgroundCategory = index end
+        bgStyleData.getViewCategory = function() return self.viewBackgroundCategory end
+        bgStyleData.resetToSelectedCategory = function() self.bgStyleCatList:SetSelectedDataIndex(self.selectedBackgroundCategory, DONT_ALLOW_EVEN_IF_DISABLED, NO_ANIMATION) end
+        bgStyleData.setSelectedStyle = function(index) self.selectedBackgroundStyle = index end
+        bgStyleData.getSelectedStyle = function() return self.selectedBackgroundStyle end
+        bgStyleData.setHighlightedStyle = function(index) self.highlightedBackgroundStyle = index end
+        bgStyleData.getHighlightedStyle = function() return self.highlightedBackgroundStyle or self.selectedBackgroundStyle end
+        bgStyleData.directionalInputCallback = function(direction) self:UpdateStyleWithDirection(direction) end
+        bgStyleData.styleHeaderName = GetString(SI_GUILD_HERALDRY_PATTERN_HEADER)
+        bgStyleData.iconUpdateFn = function()
+            local styleIndex = bgStyleData.getSelectedStyle()
+            local _, icon = bgStyleData.getInfo(styleIndex)
+            bgStyleData:ClearIcons()
+            if bgStyleData.getSelectedCategory() ~= nil then
+                bgStyleData:AddIcon(icon)
+            end
         end
-    end
 
-    self.categoryList:AddEntryWithHeader(CATEGORY_TEMPLATE_NAME, crestStyleData, nil, nil, GAMEPAD_HEADER_SELECTED_PADDING)
+        self.categoryList:AddEntryWithHeader(CATEGORY_TEMPLATE_NAME, bgStyleData)
 
-    local crestColorData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_COLOR))
-    crestColorData.mode = ZO_HERALDRY_COLOR_MODE
-    crestColorData.cost = crestColorCost
-    crestColorData.layout = LayoutColors
-    crestColorData.changed = OnLeavingColorMode
-    crestColorData.setSelectedColor = function(index) self.selectedCrestColor = index end
-    crestColorData.getSelectedColor = function() return self.selectedCrestColor end
-    crestColorData.setHighlightedColor = function(index) self.highlightedCrestColor = index end
-    crestColorData.getHighlightedColor = function() return self.highlightedCrestColor or self.selectedCrestColor end
-    crestColorData.directionalInputCallback = function(direction) self:HighlightColorWithDirection(direction) end
-    crestColorData.iconUpdateFn = function() 
-        crestColorData:SetIconTint(nil, nil)
-        crestColorData:ClearIcons()
-        if (crestColorData.getSelectedColor() ~= nil) then
-            local _, _, r, g, b = GetHeraldryColorInfo(crestColorData.getSelectedColor())
-            local newColor = ZO_ColorDef:New(r, g, b)
-            crestColorData:SetIconTint(newColor, newColor)
-            crestColorData:AddIcon(colorIcon)
+        local bgPrimaryColorData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_PRIMARY_COLOR))
+        bgPrimaryColorData.mode = ZO_HERALDRY_COLOR_MODE
+        bgPrimaryColorData.cost = bgPrimaryColorCost
+        bgPrimaryColorData.layout = LayoutColors
+        bgPrimaryColorData.changed = OnLeavingColorMode
+        bgPrimaryColorData.setSelectedColor = function(index) self.selectedBackgroundPrimaryColor = index end
+        bgPrimaryColorData.getSelectedColor = function() return self.selectedBackgroundPrimaryColor end
+        bgPrimaryColorData.setHighlightedColor = function(index) self.highlightedBackgroundPrimaryColor = index end
+        bgPrimaryColorData.getHighlightedColor = function() return self.highlightedBackgroundPrimaryColor or self.selectedBackgroundPrimaryColor end
+        bgPrimaryColorData.directionalInputCallback = function(direction) self:HighlightColorWithDirection(direction) end
+        bgPrimaryColorData.iconUpdateFn = function() 
+            bgPrimaryColorData:SetIconTint(nil, nil)
+            bgPrimaryColorData:ClearIcons()
+            if (bgPrimaryColorData.getSelectedColor() ~= nil) then
+                local _, _, r, g, b = GetHeraldryColorInfo(bgPrimaryColorData.getSelectedColor())
+                local newColor = ZO_ColorDef:New(r, g, b)
+                bgPrimaryColorData:SetIconTint(newColor, newColor)
+                bgPrimaryColorData:AddIcon(colorIcon)
+            end
         end
+
+        self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, bgPrimaryColorData)
+
+        local bgSecondaryColorData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_SECONDARY_COLOR))
+        bgSecondaryColorData.mode = ZO_HERALDRY_COLOR_MODE
+        bgSecondaryColorData.cost = bgSecondaryColorCost
+        bgSecondaryColorData.layout = LayoutColors
+        bgSecondaryColorData.changed = OnLeavingColorMode
+        bgSecondaryColorData.setSelectedColor = function(index) self.selectedBackgroundSecondaryColor = index end
+        bgSecondaryColorData.getSelectedColor = function() return self.selectedBackgroundSecondaryColor end
+        bgSecondaryColorData.setHighlightedColor = function(index) self.highlightedBackgroundSecondaryColor = index end
+        bgSecondaryColorData.getHighlightedColor = function() return self.highlightedBackgroundSecondaryColor or self.selectedBackgroundSecondaryColor end
+        bgSecondaryColorData.directionalInputCallback = function(direction) self:HighlightColorWithDirection(direction) end
+        bgSecondaryColorData.iconUpdateFn = function() 
+            bgSecondaryColorData:SetIconTint(nil, nil)
+            bgSecondaryColorData:ClearIcons()
+            if (bgSecondaryColorData.getSelectedColor() ~= nil) then
+                local _, _, r, g, b = GetHeraldryColorInfo(bgSecondaryColorData.getSelectedColor())
+                local newColor = ZO_ColorDef:New(r, g, b)
+                bgSecondaryColorData:SetIconTint(newColor, newColor)
+                bgSecondaryColorData:AddIcon(colorIcon)
+            end
+        end
+
+        self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, bgSecondaryColorData, nil, GAMEPAD_HEADER_DEFAULT_PADDING, nil, GAMEPAD_HEADER_SELECTED_PADDING)
+
+        local crestStyleData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_STYLE))
+        crestStyleData:SetHeader(GetString(SI_GAMEPAD_GUILD_HERALDRY_CREST))
+        crestStyleData.mode = ZO_HERALDRY_CREST_STYLE_MODE
+        crestStyleData.cost = crestStyleCost
+        crestStyleData.layout = LayoutStyles
+        crestStyleData.changed = OnLeavingStyleMode
+        crestStyleData.setSubMode = function(mode) self.crestStyleSubMode = mode end
+        crestStyleData.getSubMode = function() return self.crestStyleSubMode or STYLE_SUBMODE_TOP end
+        crestStyleData.getNum = function() return GetNumHeraldryCrestStyles(self.viewCrestCategory) end
+        crestStyleData.getInfo = function(index) return GetHeraldryCrestStyleInfo(self.viewCrestCategory, index) end
+        crestStyleData.setSelectedCategory = function(index) self.selectedCrestCategory = index end
+        crestStyleData.getSelectedCategory = function() return self.selectedCrestCategory end
+        crestStyleData.setViewCategory = function(index) self.viewCrestCategory = index end
+        crestStyleData.getViewCategory = function() return self.viewCrestCategory end
+        crestStyleData.resetToSelectedCategory = function() self.crestStyleCatList:SetSelectedDataIndex(self.selectedCrestCategory, DONT_ALLOW_EVEN_IF_DISABLED, NO_ANIMATION) end
+        crestStyleData.setSelectedStyle = function(index) self.selectedCrestStyle = index end
+        crestStyleData.getSelectedStyle = function() return self.selectedCrestStyle end
+        crestStyleData.setHighlightedStyle = function(index) self.highlightedCrestStyle = index end
+        crestStyleData.getHighlightedStyle = function() return self.highlightedCrestStyle or self.selectedCrestStyle end
+        crestStyleData.directionalInputCallback = function(direction) self:UpdateStyleWithDirection(direction) end
+        crestStyleData.styleHeaderName = GetString(SI_GUILD_HERALDRY_DESIGN_HEADER)
+        crestStyleData.iconUpdateFn = function()
+            local styleIndex = crestStyleData.getSelectedStyle()
+            local _, icon = crestStyleData.getInfo(styleIndex)
+            crestStyleData:ClearIcons()
+            if crestStyleData.getSelectedCategory() ~= nil then
+                crestStyleData:AddIcon(icon)
+            end
+        end
+
+        self.categoryList:AddEntryWithHeader(CATEGORY_TEMPLATE_NAME, crestStyleData, nil, nil, GAMEPAD_HEADER_SELECTED_PADDING)
+
+        local crestColorData = ZO_GamepadEntryData:New(GetString(SI_GUILD_HERALDRY_COLOR))
+        crestColorData.mode = ZO_HERALDRY_COLOR_MODE
+        crestColorData.cost = crestColorCost
+        crestColorData.layout = LayoutColors
+        crestColorData.changed = OnLeavingColorMode
+        crestColorData.setSelectedColor = function(index) self.selectedCrestColor = index end
+        crestColorData.getSelectedColor = function() return self.selectedCrestColor end
+        crestColorData.setHighlightedColor = function(index) self.highlightedCrestColor = index end
+        crestColorData.getHighlightedColor = function() return self.highlightedCrestColor or self.selectedCrestColor end
+        crestColorData.directionalInputCallback = function(direction) self:HighlightColorWithDirection(direction) end
+        crestColorData.iconUpdateFn = function() 
+            crestColorData:SetIconTint(nil, nil)
+            crestColorData:ClearIcons()
+            if (crestColorData.getSelectedColor() ~= nil) then
+                local _, _, r, g, b = GetHeraldryColorInfo(crestColorData.getSelectedColor())
+                local newColor = ZO_ColorDef:New(r, g, b)
+                crestColorData:SetIconTint(newColor, newColor)
+                crestColorData:AddIcon(colorIcon)
+            end
+        end
+
+        self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, crestColorData)
+
+        self.categoryList:CommitWithoutReselect()
     end
-
-    self.categoryList:AddEntry(CATEGORY_TEMPLATE_NAME, crestColorData)
-
-    self.categoryList:Commit()
 end
 
 function ZO_GuildHeraldryManager_Gamepad:SetViewedStyleCategory(index)
@@ -706,7 +708,7 @@ local function GetSwatchesInRow(swatches, row, entryIndex)
     local swatchesInRow = {}
     local started = false
     for i = 1, #swatches do
-        thisRow = GetDyeSwatchRow(i)
+        local thisRow = GetDyeSwatchRow(i)
         if thisRow == row then
             started = true
             swatchesInRow[#swatchesInRow + 1] = swatches[i]
@@ -1023,7 +1025,7 @@ function ZO_GuildHeraldryManager_Gamepad:HighlightColorWithDirection(direction)
 end
 
 function ZO_GuildHeraldryManager_Gamepad:UpdateStyleWithDirection(direction)
-    if self.activeData.getSubMode(subMode) == STYLE_SUBMODE_TOP then
+    if self.activeData.getSubMode() == STYLE_SUBMODE_TOP then
         if direction == DIRECTION_DOWN or direction == DIRECTION_DOWNLEFT or direction == DIRECTION_DOWNRIGHT then
             PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
             self:SetStyleSubMode(STYLE_SUBMODE_BOTTOM)
@@ -1084,11 +1086,14 @@ end
 function ZO_GuildHeraldryManager_Gamepad:SelectStyle(...)
     ZO_GuildHeraldryManager_Shared.SelectStyle(self, ...)
     local targetCategoryData = self.categoryList:GetTargetData()
-    if self.currentMode == ZO_HERALDRY_CREST_STYLE_MODE and targetCategoryData and targetCategoryData.mode == ZO_HERALDRY_CREST_STYLE_MODE then
-        self.categoryList:RefreshVisible()
-        local style = self.styleIndexToStyle[self.activeData.getSelectedStyle()]
-        if style then
-            self:HighlightStyle(style, ZO_HERALDRY_SKIP_ANIM, self.activeData)
+    if targetCategoryData then
+        if (self.currentMode == ZO_HERALDRY_BG_STYLE_MODE and targetCategoryData.mode == ZO_HERALDRY_BG_STYLE_MODE)
+           or (self.currentMode == ZO_HERALDRY_CREST_STYLE_MODE and targetCategoryData.mode == ZO_HERALDRY_CREST_STYLE_MODE) then
+            self.categoryList:RefreshVisible()
+            local style = self.styleIndexToStyle[self.activeData.getSelectedStyle()]
+            if style then
+                self:HighlightStyle(style, ZO_HERALDRY_SKIP_ANIM, self.activeData)
+            end
         end
     end
 end

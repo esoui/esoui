@@ -138,33 +138,39 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
         local data = ZO_ScrollList_GetData(control)
         if data then
             if data.isPlayer then
-                AddMenuItem(GetString(SI_GROUP_LIST_MENU_LEAVE_GROUP), function() GroupLeave() end)
+                AddMenuItem(GetString(SI_GROUP_LIST_MENU_LEAVE_GROUP), function() ZO_Dialogs_ShowDialog("GROUP_LEAVE_DIALOG") end)
             elseif data.online then
                 if IsChatSystemAvailableForCurrentPlatform() then
                     AddMenuItem(GetString(SI_SOCIAL_LIST_PANEL_WHISPER), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.characterName) end)
                 end
+                AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGroupMember(data.characterName) end)
             end
 
-            local modicationRequiresVoting = DoesGroupModificationRequireVote()
-            if(self.playerIsLeader) then
-                if data.isPlayer then
-                    if not modicationRequiresVoting then
-                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_DISBAND_GROUP), function() ZO_Dialogs_ShowDialog("GROUP_DISBAND_DIALOG") end)
+            if IsGroupModificationAvailable() then
+                local modicationRequiresVoting = DoesGroupModificationRequireVote()
+                if self.playerIsLeader then
+                    if data.isPlayer then
+                        if not modicationRequiresVoting then
+                            AddMenuItem(GetString(SI_GROUP_LIST_MENU_DISBAND_GROUP), function() ZO_Dialogs_ShowDialog("GROUP_DISBAND_DIALOG") end)
+                        end
+                    else
+                        
+                        if not modicationRequiresVoting then
+                            AddMenuItem(GetString(SI_GROUP_LIST_MENU_KICK_FROM_GROUP), function() GroupKick(data.unitTag) end)
+                        end
                     end
-                else
-                    if data.online then
-                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function() GroupPromote(data.unitTag) end)
-                    end
-                    if not modicationRequiresVoting then
-                        AddMenuItem(GetString(SI_GROUP_LIST_MENU_KICK_FROM_GROUP), function() GroupKick(data.unitTag) end)
-                    end
+                end
+
+                --Cannot vote for yourself
+                if modicationRequiresVoting and not data.isPlayer then
+                    AddMenuItem(GetString(SI_GROUP_LIST_MENU_VOTE_KICK_FROM_GROUP), function() BeginGroupElection(GROUP_ELECTION_TYPE_KICK_MEMBER, ZO_GROUP_ELECTION_DESCRIPTORS.NONE, data.unitTag) end)
                 end
             end
 
-            --Cannot vote for yourself
-            if modicationRequiresVoting and not data.isPlayer then
-                AddMenuItem(GetString(SI_GROUP_LIST_MENU_VOTE_KICK_FROM_GROUP), function() BeginGroupElection(GROUP_ELECTION_TYPE_KICK_MEMBER, ZO_GROUP_ELECTION_DESCRIPTORS.NONE, data.unitTag) end)
+            --Per design, promoting doesn't expressly fall under the mantle of "group modification"
+            if self.playerIsLeader and not data.isPlayer and data.online then
+                AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function() GroupPromote(data.unitTag) end)
             end
 
             self:ShowMenu(control)

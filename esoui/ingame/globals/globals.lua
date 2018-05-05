@@ -10,7 +10,6 @@ local function ShowLogoutDialog(dialogName, deferralTimeMS)
         ZO_Dialogs_UpdateDialogMainText(ZO_Dialogs_FindDialog(dialogName), nil, {deferralTimeMS})
     else
         -- Show the initial dialog
-        SCENE_MANAGER:ShowBaseScene()
         if deferralTimeMS then
             ZO_Dialogs_ShowPlatformDialog(dialogName, { endTime = deferralTimeMS + GetFrameTimeMilliseconds() }, {mainTextParams = {deferralTimeMS}})
         else
@@ -42,17 +41,12 @@ local function OnCombatStateChanged(eventCode, inCombat)
 end
 
 local function OnZoneCollectibleRequirementFailed(eventId, collectibleId)
-    local collectibleName = GetCollectibleName(collectibleId)
-    local storeTextId
-    local platform = GetUIPlatform()
-    if platform == UI_PLATFORM_PC then
-        storeTextId = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_STORE_PC
-    elseif platform == UI_PLATFORM_PS4 then
-        storeTextId = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_STORE_PS4
-    else
-        storeTextId = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_STORE_XBOX
-    end
-    ZO_Dialogs_ShowPlatformDialog("ZONE_COLLECTIBLE_REQUIREMENT_FAILED", { collectibleName = collectibleName }, {mainTextParams = {collectibleName, GetString(storeTextId) }})
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    local collectibleName = collectibleData:GetName()
+    local categoryName = collectibleData:GetCategoryData():GetName()
+    local message = GetString(SI_COLLECTIBLE_LOCKED_FAILURE_CAUSED_BY_ZONE_JUMP)
+    local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE
+    ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
 end
 
 EVENT_MANAGER:RegisterForEvent("Globals", EVENT_GLOBAL_MOUSE_UP, OnGlobalMouseUp)
@@ -70,74 +64,42 @@ ITEM_SOUND_ACTION_SLOT = ITEM_SOUND_ACTION_EQUIP
 -- Gamepad action/binding script handlers
 --
 
-CHECK_MOVEMENT_BEFORE_INTERACT_OR_ACTION = false
+ZO_JUMP_OR_INTERACT_DID_NOTHING = 0
+ZO_JUMP_OR_INTERACT_DID_JUMP = 1
+ZO_JUMP_OR_INTERACT_DID_INTERACT = 2
 
-local JumpOrInteractDown, JumpOrInteractUp
-do
-    local JUMP_OR_INTERACT_DID_NOTHING = 0
-    local JUMP_OR_INTERACT_DID_JUMP = 1
-    local JUMP_OR_INTERACT_DID_INTERACT = 2
+local g_actionPerformedByJumpOrInteract = ZO_JUMP_OR_INTERACT_DID_NOTHING
 
-    local jumpPerformedByJumpOrInteract = JUMP_OR_INTERACT_DID_NOTHING
-
-    local function TryingToMove()
-        -- treat the player like they're never trying to move if we're not doing the check
-        return CHECK_MOVEMENT_BEFORE_INTERACT_OR_ACTION and IsPlayerTryingToMove()
-    end
-
-    JumpOrInteractDown = function()
-        jumpPerformedByJumpOrInteract = JUMP_OR_INTERACT_DID_NOTHING
-
-        local interactPromptVisible = RETICLE:GetInteractPromptVisible()
-        if not IsBlockActive() then  --don't allow Interactions or Jumps while blocking on Gamepad as it will trigger a roll anyway.
-            if(TryingToMove() or not (interactPromptVisible)) then
-                jumpPerformedByJumpOrInteract = JUMP_OR_INTERACT_DID_JUMP
-                JumpAscendStart()
-            else
-                jumpPerformedByJumpOrInteract = JUMP_OR_INTERACT_DID_INTERACT
-                if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end
-            end
-        end
-    end
-    
-    JumpOrInteractUp = function()
-        if(JUMP_OR_INTERACT_DID_INTERACT == jumpPerformedByJumpOrInteract) then
-            FISHING_MANAGER:StopInteraction()
-        elseif(JUMP_OR_INTERACT_DID_JUMP == jumpPerformedByJumpOrInteract) then
-            AscendStop()
-        end
-    end
+function ZO_SetJumpOrInteractDownAction(action)
+    g_actionPerformedByJumpOrInteract = action
 end
 
-function ZO_ActionHandler_JumpOrInteractDown()
-    JumpOrInteractDown()
-end
-
-function ZO_ActionHandler_JumpOrInteractUp()
-    JumpOrInteractUp()
+function ZO_GetJumpOrInteractDownAction()
+    return g_actionPerformedByJumpOrInteract
 end
 
 function ZO_FormatResourceBarCurrentAndMax(current, maximum)
-	local returnValue = ""
+local returnValue = ""
 
-	local percent = 0
-	if maximum ~= 0 then
-		percent = (current/maximum) * 100
-		if percent < 10 then
-			percent = ZO_LocalizeDecimalNumber(zo_roundToNearest(percent, .1))
-		else
-			percent = zo_round(percent)
-		end
-	end
-	
-	local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
-	if setting == RESOURCE_NUMBERS_SETTING_NUMBER_ONLY then
-		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
-	elseif setting == RESOURCE_NUMBERS_SETTING_PERCENT_ONLY then
-		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, percent)
-	elseif setting == RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT then
-		returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITH_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES), percent)
-	end
+    local percent = 0
+    if maximum ~= 0 then
+        percent = (current/maximum) * 100
+        if percent < 10 then
+            percent = ZO_LocalizeDecimalNumber(zo_roundToNearest(percent, .1))
+        else
+            percent = zo_round(percent)
+        end
+    end
 
-	return returnValue
+    local USE_LOWERCASE_NUMBER_SUFFIXES = false
+    local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
+    if setting == RESOURCE_NUMBERS_SETTING_NUMBER_ONLY then
+        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    elseif setting == RESOURCE_NUMBERS_SETTING_PERCENT_ONLY then
+        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, percent)
+    elseif setting == RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT then
+        returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITH_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES), percent)
+    end
+
+    return returnValue
 end

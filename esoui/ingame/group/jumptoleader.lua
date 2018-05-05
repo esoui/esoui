@@ -31,8 +31,12 @@ do
                     elseif result == JUMP_TO_PLAYER_RESULT_ZONE_COLLECTIBLE_LOCKED then
                         local zoneIndex = GetUnitZoneIndex(groupLeaderUnitTag)
                         local collectibleId = GetCollectibleIdForZone(zoneIndex)
-                        local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-                        ZO_Dialogs_ShowPlatformDialog("JUMP_TO_GROUP_LEADER_WORLD_COLLECTIBLE_LOCKED_PROMPT", { collectibleName = collectibleName }, { mainTextParams = { groupLeaderZoneName, collectibleName, categoryName } })
+                        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                        local collectibleName = collectibleData:GetName()
+                        local categoryName = collectibleData:GetCategoryData():GetName()
+                        local message = zo_strformat(SI_COLLECTIBLE_LOCKED_FAILURE_CAUSED_BY_JUMP_TO_GROUP_LEADER, groupLeaderZoneName)
+                        local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP
+                        ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
                     end
                 end
             end

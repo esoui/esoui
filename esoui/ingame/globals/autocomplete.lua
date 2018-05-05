@@ -1,14 +1,3 @@
-AUTO_COMPLETE_FLAG_NONE = 0
-AUTO_COMPLETE_FLAG_FRIEND = 1
-AUTO_COMPLETE_FLAG_GUILD = 2
-AUTO_COMPLETE_FLAG_RECENT = 3
-AUTO_COMPLETE_FLAG_RECENT_TARGET = 4
-AUTO_COMPLETE_FLAG_RECENT_CHAT = 5
-AUTO_COMPLETE_FLAG_ALL = 6
-
-local g_currentPlayerName
-local g_currentPlayerUserId
-
 local RecentPlayerTracker = ZO_Object:Subclass()
 
 function RecentPlayerTracker:New(...)
@@ -67,20 +56,6 @@ local g_recentInteractions -- created below from saved variables
 local g_recentTargets = RecentPlayerTracker:New(15) -- not persisted
 local g_recentChat = RecentPlayerTracker:New(30) -- not persisted
 
-local INCLUDE = true
-local EXCLUDE = false
-
-local function IncludeOrExcludeResult(results, result, include)
-    if result ~= g_currentPlayerName and result ~= g_currentPlayerUserId then
-        local lowerResult = zo_strlower(result)
-        if include then
-            results[lowerResult] = result
-        else
-            results[lowerResult] = nil
-        end
-    end
-end
-
 local function IncludeOrExcludePlayersFromRecentPlayerTracker(recentPlayerTracker, results, include)
     local isDecoratedDisplayName
     local isConsoleUI = IsConsoleUI()
@@ -91,162 +66,33 @@ local function IncludeOrExcludePlayersFromRecentPlayerTracker(recentPlayerTracke
         end
 
         if not isConsoleUI or isDecoratedDisplayName then
-            IncludeOrExcludeResult(results, name, include)
+            ZO_AutoComplete.IncludeOrExcludeResult(results, name, include)
         end
     end
 end
 
-local FlagHandlers = {
-    [AUTO_COMPLETE_FLAG_FRIEND] = function(results, input, onlineOnly, include)
-        for i=1, GetNumFriends() do
-            local displayName, _, playerStatus = GetFriendInfo(i)
-            if not onlineOnly or playerStatus ~= PLAYER_STATUS_OFFLINE then
-                --No @ symbols and no character names on console
-                IncludeOrExcludeResult(results, ZO_FormatUserFacingDisplayName(displayName), include)
+AUTO_COMPLETE_FLAG_RECENT = ZO_AutoComplete.AddFlag(function(results, input, onlineOnly, include)
+    IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentInteractions, results, include)
+end)
 
-                if not IsConsoleUI() then
-                    local hasCharacter, characterName = GetFriendCharacterInfo(i)
-                    if hasCharacter then
-                        IncludeOrExcludeResult(results, zo_strformat("<<1>>", characterName), include)
-                    end
-                end
-            end
-        end
-    end,
+AUTO_COMPLETE_FLAG_RECENT_TARGET = ZO_AutoComplete.AddFlag(function(results, input, onlineOnly, include)
+    IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentTargets, results, include)
+end)
 
-    [AUTO_COMPLETE_FLAG_GUILD] = function(results, input, onlineOnly, include)
-        for i = 1, GetNumGuilds() do
-            local guildId = GetGuildId(i)
-            local numMembers = GetNumGuildMembers(guildId)
-            for memberIndex = 1, numMembers do
-                local displayName, _, _, playerStatus = GetGuildMemberInfo(guildId, memberIndex)
-                if not onlineOnly or playerStatus ~= PLAYER_STATUS_OFFLINE then
-                    --No @ symbols and no character names on console
-                    IncludeOrExcludeResult(results, ZO_FormatUserFacingDisplayName(displayName), include)
+AUTO_COMPLETE_FLAG_RECENT_CHAT = ZO_AutoComplete.AddFlag(function(results, input, onlineOnly, include)
+    IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentChat, results, include)
+end)
 
-                    if not IsConsoleUI() then
-                        local hasCharacter, characterName = GetGuildMemberCharacterInfo()
-                        if hasCharacter then
-                            IncludeOrExcludeResult(results, zo_strformat("<<1>>", characterName), include)
-                        end
-                    end
-                end
-            end
-        end
-    end,
-
-    [AUTO_COMPLETE_FLAG_RECENT] = function(results, input, onlineOnly, include)
-        IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentInteractions, results, include)
-    end,
-
-    [AUTO_COMPLETE_FLAG_RECENT_TARGET] = function(results, input, onlineOnly, include)
-        IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentTargets, results, include)
-    end,
-
-    [AUTO_COMPLETE_FLAG_RECENT_CHAT] = function(results, input, onlineOnly, include)
-        IncludeOrExcludePlayersFromRecentPlayerTracker(g_recentChat, results, include)
-    end,
-}
-
-do
-    local ComputeStringDistance = ComputeStringDistance
-
-    local function ComputeSubStringMatchScore(source, startIndex, trimmedTextToScore)
-        local startIndex, endIndex = source:find(trimmedTextToScore, startIndex, true)
-        if startIndex then
-            return ((endIndex - startIndex) / (#source * .1)) * 10
-        end
-        return 0
+AUTO_COMPLETE_FLAG_GUILD_NAMES = ZO_AutoComplete.AddFlag(function(results, input, onlineOnly, include)
+    for i = 1, GetNumGuilds() do
+        local guildId = GetGuildId(i)
+        local guildName = GetGuildName(guildId)
+        ZO_AutoComplete.IncludeOrExcludeResult(results, zo_strformat("<<1>>", guildName), include)
     end
-
-    function ComputeScore(source, scoringText, startIndex, trimmedTextToScore)
-        return ComputeStringDistance(source, scoringText) - ComputeSubStringMatchScore(source, startIndex, trimmedTextToScore)
-    end
-
-    local POOR_MATCH_RATIO = .75
-    local POOR_MATCH_MIN = 1
-
-    local scores = {}
-    local function BinaryInsertComparer(leftScore, _, rightIndex)
-        return leftScore - scores[rightIndex]
-    end
-
-    local zo_binarysearch = zo_binarysearch
-    function GetTopMatchesByLevenshteinSubStringScore(stringsToScore, scoringText, startingIndex, maxResults, noMinScore)
-        maxResults = maxResults or 10
-        if maxResults == 0 then return end
-
-        startIndex = startingIndex or 1
-        scoringText = zo_strlower(scoringText)
-        local trimmedTextToScore = scoringText:sub(startingIndex, 20)
-
-        local results = {}
-        ZO_ClearNumericallyIndexedTable(scores)
-
-        local minScore = POOR_MATCH_RATIO * (zo_min(#scoringText, 10 + startIndex) - startIndex - POOR_MATCH_MIN)
-        for lowerSource, source in pairs(stringsToScore) do
-            local score = ComputeScore(lowerSource, scoringText, startIndex, trimmedTextToScore)
-            if noMinScore or (score <= minScore) then
-                local _, insertPosition = zo_binarysearch(score, results, BinaryInsertComparer)
-                table.insert(results, insertPosition, source)
-                table.insert(scores, insertPosition, score)
-
-                results[maxResults + 1] = nil
-                scores[maxResults + 1] = nil
-            end
-        end
-
-        return results
-    end
-end
-
-local function TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, include)
-    local handler = FlagHandlers[flag]
-    if handler then
-        handler(possibleMatches, input, onlineOnly, include)
-    end
-end
-
-local function GenerateAutoCompletionResults(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
-    local possibleMatches = {}
-
-    if not includeFlags or includeFlags[1] == AUTO_COMPLETE_FLAG_ALL then
-        for flag = 1, AUTO_COMPLETE_FLAG_ALL - 1 do
-            TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, INCLUDE)
-        end
-    else
-        for i, flag in ipairs(includeFlags) do
-            TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, INCLUDE)
-        end
-    end
-
-    if excludeFlags then
-        if excludeFlags[1] == AUTO_COMPLETE_FLAG_ALL then
-            return
-        end
-        for i, flag in ipairs(excludeFlags) do
-            TryCallFlagHandler(flag, possibleMatches, input, onlineOnly, EXCLUDE)
-        end
-    end 
-
-    local results = GetTopMatchesByLevenshteinSubStringScore(possibleMatches, input, 1, maxResults, noMinScore)
-    if results then
-        return unpack(results)
-    end
-end
-
-function GetAutoCompletion(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
-    maxResults = maxResults or 10
-    input = input:lower()
-
-    return GenerateAutoCompletionResults(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
-end
+end)
 
 local function Initialize(event, name)
     if name == "ZO_Ingame" then
-        g_currentPlayerName = GetUnitName("player")
-        g_currentPlayerUserId = GetDisplayName()
-
         local function OnChatMessage(event, messageType, name)
             if not IsDecoratedDisplayName(name) then
                 name = zo_strformat("<<1>>", name)
@@ -305,8 +151,8 @@ local function Initialize(event, name)
 
         g_recentInteractions = RecentPlayerTracker:New(45, db.RecentInteractions)
 
-        EVENT_MANAGER:UnregisterForEvent("AutoComplete", EVENT_ADD_ON_LOADED)
+        EVENT_MANAGER:UnregisterForEvent("AutoCompleteIngame", EVENT_ADD_ON_LOADED)
     end
 end
 
-EVENT_MANAGER:RegisterForEvent("AutoComplete", EVENT_ADD_ON_LOADED, Initialize)
+EVENT_MANAGER:RegisterForEvent("AutoCompleteIngame", EVENT_ADD_ON_LOADED, Initialize)

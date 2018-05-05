@@ -1,29 +1,12 @@
 <GuiXml>
     <Controls>
-        <TextureComposite name="ZO_GuildHeraldry_DyeingSwatch_Gamepad" textureFile="EsoUI/Art/Dye/Gamepad/swatch_multiTexture.dds" pixelRoundingEnabled="false" virtual="true">
-            <Dimensions x="32" y="32" />
-
-            <!-- Swatch Texture -->
-            <Surface texCoordLeft="0.03125" texCoordRight="0.21875" texCoordTop="0.03125" texCoordBottom="0.21875" insetLeft="2" insetRight="-2" insetTop="2" insetBottom="-2" />
-            <!-- Frame Texture, texture coords are set randomly -->
-            <Surface />
-            <!-- Munge Texture, texture coords are set randomly -->
-            <Surface />
-            <!-- Lock Texture -->
-            <Surface texCoordLeft="0.03125" texCoordRight="0.21875" texCoordTop="0.28125" texCoordBottom="0.46875"/>
-
-            <OnInitialized>
-                ZO_DyeingUtils_DyeingSwatchVisuals_OnInitialized(self)
-            </OnInitialized>
-        </TextureComposite>
-
         <Control name="ZO_GuildHeraldry_SwatchEntryTemplate_Gamepad" virtual="true">
             <Dimensions x="0" y="0" />
 
             <OnInitialized>
                 self.swatchesControl = self:GetNamedChild("Swatches")
             </OnInitialized>
-            
+
             <Controls>
                 <Control name="$(parent)Swatches">
                     <Anchor point="TOPLEFT" />

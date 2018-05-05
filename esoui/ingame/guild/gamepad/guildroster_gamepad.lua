@@ -174,12 +174,18 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
     end
     self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildLeaveGuildOption, SelectedIndexIsPlayerIndex)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption, ZO_SocialOptionsDialogGamepad.ShouldAddWhisperOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOptionAndIsSelectedDataLoggedIn)
 
     local function BuildTravelToGuildPlayerOption()
         return self:BuildTravelToPlayerOption(JumpToGuildMember)
     end
+
+    local function CanJumpToPlayerHouse()
+       return not self:SelectedDataIsPlayer()
+    end
+
     self:AddOptionTemplate(groupId, BuildTravelToGuildPlayerOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption, CanJumpToPlayerHouse)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, function() return not SelectedIndexIsPlayerIndex() end)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
     self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildShowGamerCardOption, IsConsoleUI)

@@ -55,10 +55,7 @@ function ZO_GuildRosterManager:Initialize()
 end
 
 function ZO_GuildRosterManager:MatchesGuild(guildId)
-    if(guildId == self.guildId) then
-        return true
-    end
-    return false
+    return (guildId == self.guildId)
 end
 
 function ZO_GuildRosterManager:SetGuildId(guildId)

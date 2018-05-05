@@ -549,6 +549,7 @@ local DEBUG_RESULT_TEXT =
     [GUILD_KIOSK_GUILD_INFO_RESULT_NO_INFO] = "No Info",
     [GUILD_KIOSK_GUILD_INFO_RESULT_NO_GUILD] = "No Guild",
     [GUILD_KIOSK_GUILD_INFO_RESULT_NO_INFO_FOR_GUILD] = "No Info For Guild",
+    [GUILD_KIOSK_GUILD_INFO_RESULT_NO_INFO_FOR_ANY_GUILD] = "No Info For Any Guild",
 }
 
 function ZO_GuildKiosk_Bid_Gamepad:OnGuildsRefreshed(guildEntry)
@@ -556,7 +557,7 @@ function ZO_GuildKiosk_Bid_Gamepad:OnGuildsRefreshed(guildEntry)
 
     local resultText = DEBUG_RESULT_TEXT[result]
     local interactType = GetInteractionType()
-    assert(guildBankedMoney ~= nil, string.format("Result [%s]. InteractType [%d]. GuildId [%d].", resultText, interactType, guildEntry.guildId))
+    assert(guildBankedMoney ~= nil, string.format("Result [%s]. InteractType [%d]. GuildId [%d]. NumGuilds [%d]", resultText, interactType, guildEntry.guildId, GetNumGuilds()))
 
     guildEntry.guildBankedMoney = guildBankedMoney
     guildEntry.existingBidAmount = existingBidAmount

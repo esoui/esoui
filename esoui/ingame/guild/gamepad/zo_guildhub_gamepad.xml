@@ -2,24 +2,6 @@
     <Controls>
         <Label name="ZO_GamepadGuildHubText" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Label name="ZO_GamepadGuildHubHighlightText" font="ZoFontGamepad34" virtual="true"/>
-        <Control name="AllianceSelectorListItemRulerTemplate" virtual="true">
-            <Anchor point="TOPLEFT" />
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75"/>
-        </Control>
-
-        <Control name="ZO_GamepadCreateGuildEntry" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 1
-                ZO_SharedGamepadEntry_SetHeightFromSubLabels(self)
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)SubLabel1" inherits="ZO_GamepadMenuEntrySubLabelTemplateMain" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
-                </Label>
-            </Controls>
-        </Control>
 
         <TopLevelControl name="ZO_GamepadGuildHubTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
